@@ -152,7 +152,7 @@ public final class Launcher {
 	 *
 	 * @throws IOException if the file cannot be launched do to an IO problem
 	 */
-	public static int launchFile(File file) throws IOException,SecurityException {
+	public static int launchFile(File file) throws IOException, SecurityException {
 		String path = file.getCanonicalPath();
 		String extCheckString = path.toLowerCase();
 
@@ -189,6 +189,36 @@ public final class Launcher {
 		return -1;		
 	}
 
+    /**
+     * Windows: Launches the Explorer and highlights the file.
+     * Mac OS X: Launches the Finder and opens the file if it is
+     *  a directory or its parent if it is a file
+     * 
+     * @param file
+     * @return true on success
+     * @throws IOException
+     */
+    public static boolean launchExplorer(File file) throws IOException, SecurityException {
+        if (CommonUtils.isWindows()) {
+            String explorePath = file.getPath(); 
+            try { 
+                explorePath = file.getCanonicalPath(); 
+            } catch(IOException ioe) { } 
+            
+            //launches explorer and highlights the file
+            Runtime.getRuntime().exec(new String[] {"explorer","/select,", explorePath });
+            return true;
+        } else if (CommonUtils.isMacOSX()) {
+            if(file.isFile()) {
+                launchFile(file.getParentFile());
+            } else {
+                launchFile(file);
+            }
+            return true;
+        }
+        return false;
+    }
+    
 	/**
 	 * Launches the given file on Windows.
 	 *
