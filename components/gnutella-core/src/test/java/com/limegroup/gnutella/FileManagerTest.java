@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -86,7 +85,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testGetParentFile() throws Exception {
         f1 = createNewTestFile(1);
         assertEquals("getParentFile doesn't work",
-            new File(FileUtils.getParentFile(f1).getCanonicalPath()),
+            new File(f1.getParentFile().getCanonicalPath()),
             new File(_sharedDir.getCanonicalPath()));
     }
     
@@ -132,7 +131,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected length of shared files", 1, files.length);
         assertEquals("files should be the same", files[0].getFile(), f1);
-        files=fman.getSharedFileDescriptors(FileUtils.getParentFile(_sharedDir));
+        files=fman.getSharedFileDescriptors(_sharedDir.getParentFile());
         assertEquals("file manager listed shared files in file's parent dir",
             0, files.length);
     }
