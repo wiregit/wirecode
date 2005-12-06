@@ -368,7 +368,7 @@ public class LimeXMLDocument implements Serializable {
      */
     public String getLicenseString() {
         if(isLicenseAvailable()) {
-            String licenseStringSuffix = getVerifyableLicenseElement(licenseType);
+            String licenseStringSuffix = getVerifiableLicenseElement(licenseType);
             if (licenseStringSuffix == null)
                 return null;
             for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
@@ -381,7 +381,7 @@ public class LimeXMLDocument implements Serializable {
         return null;
     }
     
-    private static String getVerifyableLicenseElement(int type) {
+    private static String getVerifiableLicenseElement(int type) {
         if (type == LicenseConstants.CC_LICENSE)
             return LimeXMLDocument.XML_LICENSE_ATTRIBUTE;
         if (LicenseConstants.isDRMLicense(type))
