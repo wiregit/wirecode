@@ -83,6 +83,12 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createBooleanSetting("ENABLE_SPAM_FILTER", true);
 
     /**
+     * Whether or not spam is hidden
+     */    
+    public static final BooleanSetting HIDE_SPAM =
+        FACTORY.createBooleanSetting("HIDE_SPAM", true);
+    
+    /**
 	 * Set how sensitive the spamfilter should be
 	 */    
     public static final FloatSetting FILTER_SPAM_RESULTS =
