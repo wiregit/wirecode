@@ -61,7 +61,7 @@ public class IPList {
         int logDistance = 0;
         int testMask = -1; // All bits set
         // Guaranteed to terminate since testMask will reach zero
-        while ((distance | testMask) != 0) {
+        while ((distance & testMask) != 0) {
             testMask <<= 1;
             ++logDistance;
         }
