@@ -301,8 +301,7 @@ public class IncompleteFileManager implements Serializable {
                                 + "\ndirExist: " + incDir.exists()
                                 + "\nbaseFile: " + baseFile
                                 + "\ncannFile: " + canonFile);
-            if(CommonUtils.isJava14OrLater())
-                ioe2.initCause(ioe);
+            ioe2.initCause(ioe);
             throw ioe2;
         }
     }

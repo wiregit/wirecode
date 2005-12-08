@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.7 2005-07-11 00:05:13 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.8 2005-12-08 21:12:15 rkapsi Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -13,8 +13,6 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
@@ -33,11 +31,9 @@ public class TigerTree extends MessageDigest {
     private static final int BLOCKSIZE = 1024;
     private static final int HASHSIZE = 24;
     
-    private static final boolean USE_CRYPTIX =
-        CommonUtils.isJava14OrLater() &&
-        CommonUtils.isMacOSX() && 
-        CommonUtils.isJaguarOrAbove() &&
-        !CommonUtils.isPantherOrAbove();
+    // There is a bug in Jaguar's Java 1.4 implementation. Thus
+    // use Cryptix instead which doesn't expose the bug.
+    private static final boolean USE_CRYPTIX = CommonUtils.isJaguarOrAbove();
     
     /**
      * Set up the CryptixCrypto provider if we're on 

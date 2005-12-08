@@ -233,7 +233,7 @@ public final class SettingsFactory {
 
             // some bugs were reported where the settings file's parent
             // directory was deleted.
-            File parent = FileUtils.getParentFile(SETTINGS_FILE);
+            File parent = SETTINGS_FILE.getParentFile();
             if(parent != null) {
                 parent.mkdirs();
                 FileUtils.setWriteable(parent);

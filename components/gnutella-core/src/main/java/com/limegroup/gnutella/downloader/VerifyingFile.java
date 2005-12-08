@@ -200,7 +200,7 @@ public class VerifyingFile {
             throw new IllegalStateException("cannot open for unknown size.");
         
         // Ensure that the directory this file is in exists & is writeable.
-        File parentFile = FileUtils.getParentFile(file);
+        File parentFile = file.getParentFile();
         if( parentFile != null ) {
             parentFile.mkdirs();
             FileUtils.setWriteable(parentFile);

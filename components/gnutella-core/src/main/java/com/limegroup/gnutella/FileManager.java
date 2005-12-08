@@ -1125,7 +1125,7 @@ public abstract class FileManager {
         _numFiles++;
 	
         //Register this file with its parent directory.
-        File parent = FileUtils.getParentFile(file);
+        File parent = file.getParentFile();
         Assert.that(parent != null, "Null parent to \""+file+"\"");
         
         // Check if file is a specially shared file.  If not, ensure that
@@ -1277,7 +1277,7 @@ public abstract class FileManager {
         _filesSize -= fd.getFileSize();
 
         //Remove references to this from directory listing
-        File parent = FileUtils.getParentFile(f);
+        File parent = f.getParentFile();
         IntSet siblings = (IntSet)_sharedDirectories.get(parent);
         Assert.that(siblings != null,
             "Removed file's directory \""+parent+"\" not in "+_sharedDirectories);
@@ -1381,7 +1381,7 @@ public abstract class FileManager {
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
         _needRebuild = true;
-        File parent = FileUtils.getParentFile(incompleteFile);
+        File parent = incompleteFile.getParentFile();
         dispatchFileEvent(new FileManagerEvent(this, FileManagerEvent.ADD, ifd));
     }
 
@@ -1615,7 +1615,7 @@ public abstract class FileManager {
      * Returns true if this file is in a directory that is completely shared.
      */
     public boolean isFileInCompletelySharedDirectory(File f) {
-        File dir = FileUtils.getParentFile(f);
+        File dir = f.getParentFile();
         if (dir == null) 
             return false;
 

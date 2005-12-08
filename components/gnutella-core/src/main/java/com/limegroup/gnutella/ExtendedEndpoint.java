@@ -377,8 +377,7 @@ public class ExtendedEndpoint extends Endpoint {
                 pureNumeric = false;
             } catch(IllegalArgumentException e2) {
                 ParseException e3 = new ParseException("Couldn't extract address and port from: " + linea[0], 0);
-                if(CommonUtils.isJava14OrLater())
-                    e3.initCause(e2);
+                e3.initCause(e2);
                 throw e3;
             }
         }
