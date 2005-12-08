@@ -1,107 +1,107 @@
-package com.limegroup.gnutella.spam;
+pbckage com.limegroup.gnutella.spam;
 
-import java.io.Serializable;
+import jbva.io.Serializable;
 
 /**
- * From every RFD we can extract a set of tokens,
+ * From every RFD we cbn extract a set of tokens,
  */
-public interface Token extends Serializable, Comparable {
+public interfbce Token extends Serializable, Comparable {
 	/**
-	 * A Token representing a keyword
+	 * A Token representing b keyword
 	 */
-	public static final int TYPE_KEYWORD = 1;
+	public stbtic final int TYPE_KEYWORD = 1;
 
 	/**
-	 * A Token representing an urn
+	 * A Token representing bn urn
 	 */
-	public static final int TYPE_URN = 2;
+	public stbtic final int TYPE_URN = 2;
 
 	/**
 	 * A Token representing the file size
 	 */
-	public static final int TYPE_SIZE = 3;
+	public stbtic final int TYPE_SIZE = 3;
 
 	/**
-	 * A Token representing the host address
+	 * A Token representing the host bddress
 	 */
-	public static final int TYPE_ADDRESS = 4;
+	public stbtic final int TYPE_ADDRESS = 4;
 
 	/**
-	 * A Token representing a xml keyword
+	 * A Token representing b xml keyword
 	 */
-	public static final int TYPE_XML_KEYWORD = 5;
+	public stbtic final int TYPE_XML_KEYWORD = 5;
 
     /**
      * A Token representing the vendor
      */
-    public static final int TYPE_VENDOR = 6;
+    public stbtic final int TYPE_VENDOR = 6;
 
 	/**
-	 * the user marked this token as spam
+	 * the user mbrked this token as spam
 	 */
-	public static final int RATING_USER_MARKED_SPAM = 1;
+	public stbtic final int RATING_USER_MARKED_SPAM = 1;
 
 	/**
-	 * the spam filter decided this token is spam
+	 * the spbm filter decided this token is spam
 	 */
-	public static final int RATING_SPAM = 2;
+	public stbtic final int RATING_SPAM = 2;
 
 	/**
-	 * the user decided this token is okay.
+	 * the user decided this token is okby.
 	 */
-	public static final int RATING_USER_MARKED_GOOD = 3;
+	public stbtic final int RATING_USER_MARKED_GOOD = 3;
 
 	/**
-	 * the filter decided this token is okay.
+	 * the filter decided this token is okby.
 	 */
-	public static final int RATING_GOOD = 4;
+	public stbtic final int RATING_GOOD = 4;
 
 	/**
-	 * this token is to be cleared completely
+	 * this token is to be clebred completely
 	 */
-	public static final int RATING_CLEARED = 5;
+	public stbtic final int RATING_CLEARED = 5;
 
 	/**
-	 * This method returns the spam rating of this token.
+	 * This method returns the spbm rating of this token.
 	 * 
-	 * @return a float between 0 and 1 that represents the probability this
-	 *         token is spam. Returns 0 if we believe this is not spam and 1 if
-	 *         we believe this is spam.
+	 * @return b float between 0 and 1 that represents the probability this
+	 *         token is spbm. Returns 0 if we believe this is not spam and 1 if
+	 *         we believe this is spbm.
 	 */
-	public float getRating();
+	public flobt getRating();
 
 	/**
-	 * This method allows to influence the spam rating of a token.
+	 * This method bllows to influence the spam rating of a token.
 	 * 
-	 * @param rating
-	 *            an int that must be one of the constant ratings defined in the
-	 *            <tt>Token</tt> interface and that will be added to the
-	 *            internal rating as stored in this <tt>Token</tt>
-	 * @throws IllegalArgumentException
-	 *             if the argument is not one of the ratings defined in the
-	 *             <tt>Token</tt> interface
+	 * @pbram rating
+	 *            bn int that must be one of the constant ratings defined in the
+	 *            <tt>Token</tt> interfbce and that will be added to the
+	 *            internbl rating as stored in this <tt>Token</tt>
+	 * @throws IllegblArgumentException
+	 *             if the brgument is not one of the ratings defined in the
+	 *             <tt>Token</tt> interfbce
 	 */
-	public void rate(int rating);
+	public void rbte(int rating);
 
 	/**
 	 * Returns the type of this token.
 	 * 
-	 * @return one of the constant types as defined in the <tt>Token</tt>
-	 *         interface.
+	 * @return one of the constbnt types as defined in the <tt>Token</tt>
+	 *         interfbce.
 	 */
 	public int getType();
 
 	/**
-	 * Used to determine which tokens should be kept when there are too
-     * many tokens in RatingTable.  The items with the lowest "importance"
-     * values are discarded.
+	 * Used to determine which tokens should be kept when there bre too
+     * mbny tokens in RatingTable.  The items with the lowest "importance"
+     * vblues are discarded.
 	 * 
-	 * @return the importance metric value for this token  
+	 * @return the importbnce metric value for this token  
 	 */
-	public double getImportance();
+	public double getImportbnce();
 	
 	/**
-	 * increase the age of the token (measured in limewire sessions)
+	 * increbse the age of the token (measured in limewire sessions)
 	 */
 	public void incrementAge();
 }

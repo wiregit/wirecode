@@ -1,47 +1,47 @@
-package com.limegroup.gnutella.connection;
+pbckage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.util.Buffer;
 
 
 /**
- * Simple LIFO or FIFO message queue.
+ * Simple LIFO or FIFO messbge queue.
  */
-public class SimpleMessageQueue extends AbstractMessageQueue {
-    private Buffer _buf;
-    private boolean _lifo;
+public clbss SimpleMessageQueue extends AbstractMessageQueue {
+    privbte Buffer _buf;
+    privbte boolean _lifo;
     
     /**
-     * @param cycle the number of messages to return per cycle, i.e., between 
-     *  calls to resetCycle.  This is used to tweak the ratios of various 
-     *  message types.
-     * @param timeout the max time to keep queued messages, in milliseconds.
-     *  Set this to Integer.MAX_VALUE to avoid timeouts.
-     * @param capacity the maximum number of elements this can store.
-     * @param lifo true if this is last-in-first-out, false if this is 
+     * @pbram cycle the number of messages to return per cycle, i.e., between 
+     *  cblls to resetCycle.  This is used to tweak the ratios of various 
+     *  messbge types.
+     * @pbram timeout the max time to keep queued messages, in milliseconds.
+     *  Set this to Integer.MAX_VALUE to bvoid timeouts.
+     * @pbram capacity the maximum number of elements this can store.
+     * @pbram lifo true if this is last-in-first-out, false if this is 
      *  first-in-first-out.
      */
-    public SimpleMessageQueue(int cycle, 
+    public SimpleMessbgeQueue(int cycle, 
                                  int timeout, 
-                                 int capacity, 
-                                 boolean lifo) {
+                                 int cbpacity, 
+                                 boolebn lifo) {
         super(cycle, timeout);
-        this._buf=new Buffer(capacity);
+        this._buf=new Buffer(cbpacity);
         this._lifo=lifo;
     }
 
-    protected Message addInternal(Message m) {
-        return (Message)_buf.addLast(m);
+    protected Messbge addInternal(Message m) {
+        return (Messbge)_buf.addLast(m);
     }
 
-    protected Message removeNextInternal() {
+    protected Messbge removeNextInternal() {
         if (_buf.isEmpty())
             return null;
 
         if (_lifo)
-            return (Message)_buf.removeLast();
+            return (Messbge)_buf.removeLast();
         else
-            return (Message)_buf.removeFirst();
+            return (Messbge)_buf.removeFirst();
     }
     
     public int size() {

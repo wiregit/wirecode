@@ -1,147 +1,147 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import com.limegroup.gnutella.settings.BooleanSetting;
+import com.limegroup.gnutellb.settings.BooleanSetting;
 
 /**
- * Implementation of the <tt>MessageService</tt> interface for displaying 
- * messages to the user.
+ * Implementbtion of the <tt>MessageService</tt> interface for displaying 
+ * messbges to the user.
  */
-public class MessageService {
+public clbss MessageService {
 
     /**
-     * Variable for the <tt>MessageCallback</tt> implementation to use for 
-     * displaying messages.
+     * Vbriable for the <tt>MessageCallback</tt> implementation to use for 
+     * displbying messages.
      */
-    private static MessageCallback _callback = new ShellMessageService();
+    privbte static MessageCallback _callback = new ShellMessageService();
     
     /**
-     * Private constructor to ensure that this class cannot be instantiated.
+     * Privbte constructor to ensure that this class cannot be instantiated.
      */
-    private MessageService() {}
+    privbte MessageService() {}
 
     /**
-     * Sets the class to use for making callbacks to the user.
+     * Sets the clbss to use for making callbacks to the user.
      * 
-     * @param callback the <tt>MessageCallback</tt> instance to use
+     * @pbram callback the <tt>MessageCallback</tt> instance to use
      */
-    public static void setCallback(MessageCallback callback) {
-        _callback = callback;
-    }
-    
-    /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     */
-    public static void showError(String messageKey) {
-        _callback.showError(messageKey);  
-    }
-
-    /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles if the BooleanSetting
-     * indicates to do so.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     */
-    public static void showError(String messageKey, BooleanSetting ignore) {
-        _callback.showError(messageKey, ignore);
-    }
-
-    /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles.  Also appends a second,
-     * non-locale-specific string to this message, such as a file name.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     * @param message a non-locale-specific message that will be appended as-is
-     *  to the message displayed to the user, such as a file name
-     */
-    public static void showError(String messageKey, String message) {
-        _callback.showError(messageKey, message);
-    }
-
-    /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles if the BooleanSetting
-     * indicates to do so.  Also appends a second,
-     * non-locale-specific string to this message, such as a file name.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     * @param message a non-locale-specific message that will be appended as-is
-     *  to the message displayed to the user, such as a file name
-     */
-    public static void showError(String messageKey,
-                                 String message,
-                                 BooleanSetting ignore) {
-        _callback.showError(messageKey, message, ignore);
-    }
-
-    /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     */
-    public static void showMessage(String messageKey) {
-        _callback.showMessage(messageKey);
-    }
-
-    /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles if the BooleanSetting
-     * indicates to do so.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     */
-    public static void showMessage(String messageKey, BooleanSetting ignore) {
-        _callback.showMessage(messageKey, ignore);
+    public stbtic void setCallback(MessageCallback callback) {
+        _cbllback = callback;
     }
     
     /**
-     * Default messaging class that simply displays messages in the console.
+     * Shows b locale-specific message to the user using the specified key to
+     * look up the messbge in the resource bundles.
+     * 
+     * @pbram messageKey the key for looking up the message to display in the
+     *  resource bundles
      */
-    private static final class ShellMessageService implements MessageCallback {
+    public stbtic void showError(String messageKey) {
+        _cbllback.showError(messageKey);  
+    }
+
+    /**
+     * Shows b locale-specific message to the user using the specified key to
+     * look up the messbge in the resource bundles if the BooleanSetting
+     * indicbtes to do so.
+     * 
+     * @pbram messageKey the key for looking up the message to display in the
+     *  resource bundles
+     */
+    public stbtic void showError(String messageKey, BooleanSetting ignore) {
+        _cbllback.showError(messageKey, ignore);
+    }
+
+    /**
+     * Shows b locale-specific message to the user using the specified key to
+     * look up the messbge in the resource bundles.  Also appends a second,
+     * non-locble-specific string to this message, such as a file name.
+     * 
+     * @pbram messageKey the key for looking up the message to display in the
+     *  resource bundles
+     * @pbram message a non-locale-specific message that will be appended as-is
+     *  to the messbge displayed to the user, such as a file name
+     */
+    public stbtic void showError(String messageKey, String message) {
+        _cbllback.showError(messageKey, message);
+    }
+
+    /**
+     * Shows b locale-specific message to the user using the specified key to
+     * look up the messbge in the resource bundles if the BooleanSetting
+     * indicbtes to do so.  Also appends a second,
+     * non-locble-specific string to this message, such as a file name.
+     * 
+     * @pbram messageKey the key for looking up the message to display in the
+     *  resource bundles
+     * @pbram message a non-locale-specific message that will be appended as-is
+     *  to the messbge displayed to the user, such as a file name
+     */
+    public stbtic void showError(String messageKey,
+                                 String messbge,
+                                 BoolebnSetting ignore) {
+        _cbllback.showError(messageKey, message, ignore);
+    }
+
+    /**
+     * Shows b locale-specific message to the user using the specified key to
+     * look up the messbge in the resource bundles.
+     * 
+     * @pbram messageKey the key for looking up the message to display in the
+     *  resource bundles
+     */
+    public stbtic void showMessage(String messageKey) {
+        _cbllback.showMessage(messageKey);
+    }
+
+    /**
+     * Shows b locale-specific message to the user using the specified key to
+     * look up the messbge in the resource bundles if the BooleanSetting
+     * indicbtes to do so.
+     * 
+     * @pbram messageKey the key for looking up the message to display in the
+     *  resource bundles
+     */
+    public stbtic void showMessage(String messageKey, BooleanSetting ignore) {
+        _cbllback.showMessage(messageKey, ignore);
+    }
+    
+    /**
+     * Defbult messaging class that simply displays messages in the console.
+     */
+    privbte static final class ShellMessageService implements MessageCallback {
 
         // Inherit doc comment.
-        public void showError(String messageKey) {
-            System.out.println("error key: "+messageKey);
+        public void showError(String messbgeKey) {
+            System.out.println("error key: "+messbgeKey);
         }
 
         // Inherit doc domment.        
-        public void showError(String messageKey, BooleanSetting ignore) {
-            System.out.println("error key: "+messageKey);
+        public void showError(String messbgeKey, BooleanSetting ignore) {
+            System.out.println("error key: "+messbgeKey);
         }
 
         // Inherit doc comment.
-        public void showError(String messageKey, String message) {
-            System.out.println("error key: "+messageKey+" extra message: "+
-                message);
+        public void showError(String messbgeKey, String message) {
+            System.out.println("error key: "+messbgeKey+" extra message: "+
+                messbge);
         }
 
         // Inherit doc comment.
-        public void showError(String messageKey,
-                              String message,
-                              BooleanSetting ignore) {
-            System.out.println("error key: "+messageKey+" extra message: "+
-                message);
+        public void showError(String messbgeKey,
+                              String messbge,
+                              BoolebnSetting ignore) {
+            System.out.println("error key: "+messbgeKey+" extra message: "+
+                messbge);
         }
 
         // Inherit doc comment.
-        public void showMessage(String messageKey) {
-            System.out.println("message key: "+messageKey); 
+        public void showMessbge(String messageKey) {
+            System.out.println("messbge key: "+messageKey); 
         }
 
         // Inherit doc comment.
-        public void showMessage(String messageKey, BooleanSetting ignore) {
-            System.out.println("message key: "+messageKey); 
+        public void showMessbge(String messageKey, BooleanSetting ignore) {
+            System.out.println("messbge key: "+messageKey); 
         }
         
     }

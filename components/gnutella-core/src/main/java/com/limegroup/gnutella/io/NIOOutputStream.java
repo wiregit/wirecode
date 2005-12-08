@@ -1,54 +1,54 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.nio.ByteBuffer;
+import jbva.nio.channels.SocketChannel;
 
 /**
- * Manages writing data to the network from a piped blocking OutputStream.
+ * Mbnages writing data to the network from a piped blocking OutputStream.
  *
- * This uses a BufferOutputStream that waits on a lock when no data is available.
- * The stream exposes a BufferLock that should be notified when data is available
+ * This uses b BufferOutputStream that waits on a lock when no data is available.
+ * The strebm exposes a BufferLock that should be notified when data is available
  * to be written.
  */
-class NIOOutputStream implements WriteObserver {
+clbss NIOOutputStream implements WriteObserver {
     
-    private final NIOSocket handler;
-    private final SocketChannel channel;
-    private BufferOutputStream sink;
-    private Object bufferLock;
-    private ByteBuffer buffer;
-    private boolean shutdown;
+    privbte final NIOSocket handler;
+    privbte final SocketChannel channel;
+    privbte BufferOutputStream sink;
+    privbte Object bufferLock;
+    privbte ByteBuffer buffer;
+    privbte boolean shutdown;
     
     /**
-     * Constructs a new pipe to allow SocketChannel's reading to funnel
-     * to a blocking InputStream.
+     * Constructs b new pipe to allow SocketChannel's reading to funnel
+     * to b blocking InputStream.
      */
-    NIOOutputStream(NIOSocket handler, SocketChannel channel) throws IOException {
-        this.handler = handler;
-        this.channel = channel;
+    NIOOutputStrebm(NIOSocket handler, SocketChannel channel) throws IOException {
+        this.hbndler = handler;
+        this.chbnnel = channel;
     }
     
     /**
-     * Creates the pipes, buffer & registers channels for interest.
+     * Crebtes the pipes, buffer & registers channels for interest.
      */
     synchronized void init() throws IOException {
         if(buffer != null)
-            throw new IllegalStateException("already init'd!");
+            throw new IllegblStateException("already init'd!");
             
         if(shutdown)
-            throw new IOException("already closed!");
+            throw new IOException("blready closed!");
 
-        this.buffer = NIOInputStream.getBuffer();
-        sink = new BufferOutputStream(buffer, handler, channel);
+        this.buffer = NIOInputStrebm.getBuffer();
+        sink = new BufferOutputStrebm(buffer, handler, channel);
         bufferLock = sink.getBufferLock();
     }
     
     /**
-     * Retrieves the OutputStream to write to.
+     * Retrieves the OutputStrebm to write to.
      */
-    synchronized OutputStream getOutputStream() throws IOException {
+    synchronized OutputStrebm getOutputStream() throws IOException {
         if(buffer == null)
             init();
         
@@ -56,29 +56,29 @@ class NIOOutputStream implements WriteObserver {
     }
     
     /**
-     * Notification that a write can happen on the SocketChannel.
+     * Notificbtion that a write can happen on the SocketChannel.
      */
-    public boolean handleWrite() throws IOException {// write everything we can.
+    public boolebn handleWrite() throws IOException {// write everything we can.
         synchronized(bufferLock) {
             buffer.flip();
-            while(buffer.hasRemaining() && channel.write(buffer) > 0);
+            while(buffer.hbsRemaining() && channel.write(buffer) > 0);
             if (buffer.position() > 0) {
-                if (buffer.hasRemaining()) 
-                    buffer.compact();
+                if (buffer.hbsRemaining()) 
+                    buffer.compbct();
                 else 
-                    buffer.clear();
+                    buffer.clebr();
             } else 
-                buffer.position(buffer.limit()).limit(buffer.capacity());
+                buffer.position(buffer.limit()).limit(buffer.cbpacity());
             
-            // If there's room in the buffer, we're interested in reading.
-            if(buffer.hasRemaining())
+            // If there's room in the buffer, we're interested in rebding.
+            if(buffer.hbsRemaining())
                 bufferLock.notify();
                 
-            // if we were able to write everything, we're not interested in more writing.
-            // otherwise, we are interested.
+            // if we were bble to write everything, we're not interested in more writing.
+            // otherwise, we bre interested.
             if(buffer.position() == 0) {
-                NIODispatcher.instance().interestWrite(channel, false);
-                return false;
+                NIODispbtcher.instance().interestWrite(channel, false);
+                return fblse;
             } else {
                 return true;
             }
@@ -86,8 +86,8 @@ class NIOOutputStream implements WriteObserver {
     }
     
     /**
-     * Shuts down all internal channels.
-     * The SocketChannel should be shut by NIOSocket.
+     * Shuts down bll internal channels.
+     * The SocketChbnnel should be shut by NIOSocket.
      */
     public synchronized void shutdown() {
         if(shutdown)
@@ -98,14 +98,14 @@ class NIOOutputStream implements WriteObserver {
             
         shutdown = true;
         if (buffer != null) {
-            buffer.clear();
-            NIOInputStream.CACHE.push(buffer);
+            buffer.clebr();
+            NIOInputStrebm.CACHE.push(buffer);
         }
     }
     
     /** Unused */
-    public void handleIOException(IOException iox) {
-        throw new RuntimeException("unsupported operation", iox);
+    public void hbndleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operbtion", iox);
     }
     
 }

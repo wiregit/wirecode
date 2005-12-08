@@ -1,134 +1,134 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutellb.GUID;
+import com.limegroup.gnutellb.messages.Message;
 
 /**
- * Abstract class that is a general implementation of a message statistics
- * handling class.  These classes track multiple statistics at once.  For a 
- * given message, this includes keeping track of the raw number of messages
- * past, the number of bytes past, and whether or not that message was 
- * from another LimeWire.
+ * Abstrbct class that is a general implementation of a message statistics
+ * hbndling class.  These classes track multiple statistics at once.  For a 
+ * given messbge, this includes keeping track of the raw number of messages
+ * pbst, the number of bytes past, and whether or not that message was 
+ * from bnother LimeWire.
  */
-public abstract class AbstractStatHandler {
+public bbstract class AbstractStatHandler {
 
 	/**
-	 * The <tt>Statistic</tt> that should be incremented for each new 
-	 * message.
+	 * The <tt>Stbtistic</tt> that should be incremented for each new 
+	 * messbge.
 	 */
-	public final Statistic NUMBER_STAT;
+	public finbl Statistic NUMBER_STAT;
 
 	/**
-	 * The <tt>Statistic</tt> for the number of bytes for this message
-	 * type.  For each new message added, the number of bytes are added
-	 * to this <tt>Statistic</tt>.
+	 * The <tt>Stbtistic</tt> for the number of bytes for this message
+	 * type.  For ebch new message added, the number of bytes are added
+	 * to this <tt>Stbtistic</tt>.
 	 */
-	public final Statistic BYTE_STAT;
+	public finbl Statistic BYTE_STAT;
 
 
 	/**
-	 * <tt>Statistic</tt> for the number of the given message that came 
+	 * <tt>Stbtistic</tt> for the number of the given message that came 
 	 * from other LimeWires.
 	 */
-	public final Statistic LIME_NUMBER_STAT;
+	public finbl Statistic LIME_NUMBER_STAT;
 
 	/**
-	 * <tt>Statistic</tt> for the bytes of the given message that came 
+	 * <tt>Stbtistic</tt> for the bytes of the given message that came 
 	 * from other LimeWires.
 	 */
-	public final Statistic LIME_BYTE_STAT;
+	public finbl Statistic LIME_BYTE_STAT;
 
 	/**
-	 * <tt>Statistic</tt> for the bandwidth stat to also record message
-	 * data to.
+	 * <tt>Stbtistic</tt> for the bandwidth stat to also record message
+	 * dbta to.
 	 */
-	public final Statistic BANDWIDTH_BYTE_STAT;
+	public finbl Statistic BANDWIDTH_BYTE_STAT;
 
 	/**
-	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
+	 * Constbnt for the <tt>StatisticsManager</tt> for use in subclasses.
 	 */
-	protected static final StatisticsManager STATS_MANAGER = 
-		StatisticsManager.instance();
+	protected stbtic final StatisticsManager STATS_MANAGER = 
+		StbtisticsManager.instance();
 
 
 	/**
-	 * Stub class for the bandwidth data-gatherer.  This turns off the
-	 * bandwidth data gathering, particularly for cases where leaving it
-	 * on would result in an overcount (counting the same bytes multiple
+	 * Stub clbss for the bandwidth data-gatherer.  This turns off the
+	 * bbndwidth data gathering, particularly for cases where leaving it
+	 * on would result in bn overcount (counting the same bytes multiple
 	 * times).
 	 */
-	private static final Statistic BANDWIDTH_BYTE_STAT_STUB =
-		new AdvancedStatistic() {
-			public void addData() {}
+	privbte static final Statistic BANDWIDTH_BYTE_STAT_STUB =
+		new AdvbncedStatistic() {
+			public void bddData() {}
 		};
 
 	/**
-	 * No argument constructor simply creates new stats classes for all
-	 * required fields.  For the bandwidth stat, it uses the stub that
-	 * does not record bandwidth data.
+	 * No brgument constructor simply creates new stats classes for all
+	 * required fields.  For the bbndwidth stat, it uses the stub that
+	 * does not record bbndwidth data.
 	 */
-	protected AbstractStatHandler(String fileName) {
-		NUMBER_STAT      = new AdvancedStatistic(fileName);	
-		BYTE_STAT        = new AdvancedKilobytesStatistic(fileName);		
-		LIME_NUMBER_STAT = new AdvancedStatistic(fileName);		
-		LIME_BYTE_STAT   = new AdvancedKilobytesStatistic(fileName);	
+	protected AbstrbctStatHandler(String fileName) {
+		NUMBER_STAT      = new AdvbncedStatistic(fileName);	
+		BYTE_STAT        = new AdvbncedKilobytesStatistic(fileName);		
+		LIME_NUMBER_STAT = new AdvbncedStatistic(fileName);		
+		LIME_BYTE_STAT   = new AdvbncedKilobytesStatistic(fileName);	
 		BANDWIDTH_BYTE_STAT = BANDWIDTH_BYTE_STAT_STUB;	
 	}
 
 	/**
-	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
-	 * Private constructor to ensure that no other classes can
-	 * construct this class, following the type-safe enum pattern.
+	 * Crebtes a new <tt>ReceivedMessageStatHandler</tt> instance.  
+	 * Privbte constructor to ensure that no other classes can
+	 * construct this clbss, following the type-safe enum pattern.
 	 *
-	 * @param numberStat the statistic that is simply incremented with
-	 *  each new message
-	 * @param byteStat the statistic for keeping track of the total bytes
+	 * @pbram numberStat the statistic that is simply incremented with
+	 *  ebch new message
+	 * @pbram byteStat the statistic for keeping track of the total bytes
 	 */
-	protected AbstractStatHandler(Statistic numberStat, 
-								  Statistic byteStat,
-								  Statistic limeNumberStat,
-								  Statistic limeByteStat,
-								  Statistic bandwidthByteStat) {
-		NUMBER_STAT = numberStat;
-		BYTE_STAT = byteStat;
-		LIME_NUMBER_STAT = limeNumberStat;
-		LIME_BYTE_STAT = limeByteStat;
-		BANDWIDTH_BYTE_STAT = bandwidthByteStat;
+	protected AbstrbctStatHandler(Statistic numberStat, 
+								  Stbtistic byteStat,
+								  Stbtistic limeNumberStat,
+								  Stbtistic limeByteStat,
+								  Stbtistic bandwidthByteStat) {
+		NUMBER_STAT = numberStbt;
+		BYTE_STAT = byteStbt;
+		LIME_NUMBER_STAT = limeNumberStbt;
+		LIME_BYTE_STAT = limeByteStbt;
+		BANDWIDTH_BYTE_STAT = bbndwidthByteStat;
 	} 
 
 	/**
-	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
-	 * Private constructor to ensure that no other classes can
-	 * construct this class, following the type-safe enum pattern.
+	 * Crebtes a new <tt>ReceivedMessageStatHandler</tt> instance.  
+	 * Privbte constructor to ensure that no other classes can
+	 * construct this clbss, following the type-safe enum pattern.
 	 *
-	 * @param numberStat the statistic that is simply incremented with
-	 *  each new message
-	 * @param byteStat the statistic for keeping track of the total bytes
+	 * @pbram numberStat the statistic that is simply incremented with
+	 *  ebch new message
+	 * @pbram byteStat the statistic for keeping track of the total bytes
 	 */
-	protected AbstractStatHandler(Statistic numberStat, 
-								  Statistic byteStat,
-								  Statistic limeNumberStat,
-								  Statistic limeByteStat) {
-		this(numberStat, byteStat, limeNumberStat, limeByteStat, 
+	protected AbstrbctStatHandler(Statistic numberStat, 
+								  Stbtistic byteStat,
+								  Stbtistic limeNumberStat,
+								  Stbtistic limeByteStat) {
+		this(numberStbt, byteStat, limeNumberStat, limeByteStat, 
 			 BANDWIDTH_BYTE_STAT_STUB);
 	} 
 
 
 	/**
-	 * Adds the specified <tt>Message</tt> to the stored data
+	 * Adds the specified <tt>Messbge</tt> to the stored data
 	 *
-	 * @param msg the received <tt>Message</tt> to add to the data
+	 * @pbram msg the received <tt>Message</tt> to add to the data
 	 */
-	public void addMessage(Message msg) {		
-		BANDWIDTH_BYTE_STAT.addData(msg.getTotalLength());
+	public void bddMessage(Message msg) {		
+		BANDWIDTH_BYTE_STAT.bddData(msg.getTotalLength());
 
-		// if we're not recording advanced stats, ignore the call
-		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
-		NUMBER_STAT.incrementStat();
-		BYTE_STAT.addData(msg.getTotalLength());
+		// if we're not recording bdvanced stats, ignore the call
+		if(!STATS_MANAGER.getRecordAdvbncedStats()) return;
+		NUMBER_STAT.incrementStbt();
+		BYTE_STAT.bddData(msg.getTotalLength());
 		if(new GUID(msg.getGUID()).isLimeGUID()) {
-			LIME_NUMBER_STAT.incrementStat();
-			LIME_BYTE_STAT.addData(msg.getTotalLength());
+			LIME_NUMBER_STAT.incrementStbt();
+			LIME_BYTE_STAT.bddData(msg.getTotalLength());
 		}
 	}
 }

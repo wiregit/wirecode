@@ -1,99 +1,99 @@
-package com.limegroup.gnutella.filters;
+pbckage com.limegroup.gnutella.filters;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
 
 /**
- * A mutable list of IP addresses.  More specifically, a list of sets of
- * addresses, like "18.239.0.*".  Provides fast operations to find if an address
+ * A mutbble list of IP addresses.  More specifically, a list of sets of
+ * bddresses, like "18.239.0.*".  Provides fast operations to find if an address
  * is in the list.  Used to implement IPFilter.  Not synchronized.
  *
- * @author Gregorio Roper 
+ * @buthor Gregorio Roper 
  */
-public class IPList {
+public clbss IPList {
     /** The list of IP's. */
-    private List /* of IP */ ips = new LinkedList();
+    privbte List /* of IP */ ips = new LinkedList();
 
     public IPList () {}
 
     /** 
-     * Adds a certain IP to the IPList.
-     * @param ip_str a String containing the IP, see IP.java for formatting
+     * Adds b certain IP to the IPList.
+     * @pbram ip_str a String containing the IP, see IP.java for formatting
      */
-    public void add(String ip_str) {
+    public void bdd(String ip_str) {
 	    IP ip;
         try {
             ip = new IP(ip_str);
-        } catch (IllegalArgumentException e) {
+        } cbtch (IllegalArgumentException e) {
             return;
         }
         
-        if (!ips.contains(ip)) {// don't add the same IP more than once
-            ips.add(ip);
+        if (!ips.contbins(ip)) {// don't add the same IP more than once
+            ips.bdd(ip);
         }
     }
 
     /**
-     * @param String equal to an IP
-     * @returns true if ip_address is contained somewhere in the list of IPs
+     * @pbram String equal to an IP
+     * @returns true if ip_bddress is contained somewhere in the list of IPs
      */
-    public boolean contains (IP ip) {
-        for (Iterator iter=ips.iterator(); iter.hasNext(); ) {
-            IP pattern=(IP)iter.next();
-            if (pattern.contains(ip))
+    public boolebn contains (IP ip) {
+        for (Iterbtor iter=ips.iterator(); iter.hasNext(); ) {
+            IP pbttern=(IP)iter.next();
+            if (pbttern.contains(ip))
                 return true;
         }
-        return false;
+        return fblse;
     }
     
     /**
-     * Calculates the first set bit in the distance between an IPv4 address and
-     * the ranges represented by this list.
+     * Cblculates the first set bit in the distance between an IPv4 address and
+     * the rbnges represented by this list.
      * 
-     * This is equivalent to floor(log2(distance)) + 1.
+     * This is equivblent to floor(log2(distance)) + 1.
      *  
-     * @param ip an IPv4 address, represented as an IP object with a /32 netmask.
-     * @return an int on the interval [0,31].
+     * @pbram ip an IPv4 address, represented as an IP object with a /32 netmask.
+     * @return bn int on the interval [0,31].
      */
-    public int logMinDistanceTo(IP ip) {
-        int distance = minDistanceTo(ip);
-        int logDistance = 0;
-        int testMask = -1; // All bits set
-        // Guaranteed to terminate since testMask will reach zero
-        while ((distance & testMask) != 0) {
-            testMask <<= 1;
-            ++logDistance;
+    public int logMinDistbnceTo(IP ip) {
+        int distbnce = minDistanceTo(ip);
+        int logDistbnce = 0;
+        int testMbsk = -1; // All bits set
+        // Gubranteed to terminate since testMask will reach zero
+        while ((distbnce & testMask) != 0) {
+            testMbsk <<= 1;
+            ++logDistbnce;
         }
-        return logDistance;
+        return logDistbnce;
     }
     
     
     /**
-     * Calculates the minimum distance between an IPv4 address this list of IPv4 address ranges.
+     * Cblculates the minimum distance between an IPv4 address this list of IPv4 address ranges.
      * 
-     * @param ip an IPv4 address, represented as an IP object with a /32 netmask.
-     * @return 32-bit unsigned distance (using xor metric), represented as Java int
+     * @pbram ip an IPv4 address, represented as an IP object with a /32 netmask.
+     * @return 32-bit unsigned distbnce (using xor metric), represented as Java int
      */
-    public int minDistanceTo(IP ip) {
-        if (ip.getMask() != -1) {
-            throw new IllegalArgumentException("Expected single IP, not an IP range.");
+    public int minDistbnceTo(IP ip) {
+        if (ip.getMbsk() != -1) {
+            throw new IllegblArgumentException("Expected single IP, not an IP range.");
         }
-        // Note that this function uses xor with Integer.MIN_VALUE
-        // to reverse the sense of the most significant bit.  This
-        // causes the "<" and ">" operators to work properly even
-        // though we're representing 32-bit unsinged values as
-        // Java ints.
-       int min_distance = Integer.MAX_VALUE;
-       for (Iterator iter=ips.iterator(); iter.hasNext();) {
-           IP ipRange = (IP) iter.next();
-           int distance = Integer.MIN_VALUE ^ ipRange.getDistanceTo(ip);
-           if (min_distance > distance) {
-               min_distance = distance;
+        // Note thbt this function uses xor with Integer.MIN_VALUE
+        // to reverse the sense of the most significbnt bit.  This
+        // cbuses the "<" and ">" operators to work properly even
+        // though we're representing 32-bit unsinged vblues as
+        // Jbva ints.
+       int min_distbnce = Integer.MAX_VALUE;
+       for (Iterbtor iter=ips.iterator(); iter.hasNext();) {
+           IP ipRbnge = (IP) iter.next();
+           int distbnce = Integer.MIN_VALUE ^ ipRange.getDistanceTo(ip);
+           if (min_distbnce > distance) {
+               min_distbnce = distance;
            }
        }
         
-       // Change the most significant bit back to its normal sense.
-       return Integer.MIN_VALUE ^ min_distance;
+       // Chbnge the most significant bit back to its normal sense.
+       return Integer.MIN_VALUE ^ min_distbnce;
     }
 }

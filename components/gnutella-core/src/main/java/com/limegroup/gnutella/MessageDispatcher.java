@@ -1,82 +1,82 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.net.InetSocketAddress;
+import jbva.net.InetSocketAddress;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.util.ProcessingQueue;
 
 /**
- * Dispatches messages to the MessageRouter.
+ * Dispbtches messages to the MessageRouter.
  */
-class MessageDispatcher {
+clbss MessageDispatcher {
     
-    private static final MessageDispatcher INSTANCE = new MessageDispatcher();
-    private MessageDispatcher() {}
-    public static MessageDispatcher instance() { return INSTANCE; }
+    privbte static final MessageDispatcher INSTANCE = new MessageDispatcher();
+    privbte MessageDispatcher() {}
+    public stbtic MessageDispatcher instance() { return INSTANCE; }
     
-    private final ProcessingQueue DISPATCH = new ProcessingQueue("MessageDispatch");
+    privbte final ProcessingQueue DISPATCH = new ProcessingQueue("MessageDispatch");
     
     /**
-     * Dispatches a UDP message.
+     * Dispbtches a UDP message.
      */
-    public void dispatchUDP(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new UDPDispatch(m, addr));
+    public void dispbtchUDP(Message m, InetSocketAddress addr) {
+        DISPATCH.bdd(new UDPDispatch(m, addr));
     }
     
     /**
-     * Dispatches a Multicast message.
+     * Dispbtches a Multicast message.
      */
-    public void dispatchMulticast(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new MulticastDispatch(m, addr));
+    public void dispbtchMulticast(Message m, InetSocketAddress addr) {
+        DISPATCH.bdd(new MulticastDispatch(m, addr));
     }
     
     /**
-     * Dispatches a TCP message.
+     * Dispbtches a TCP message.
      */
-    public void dispatchTCP(Message m, ManagedConnection conn) {
-        DISPATCH.add(new TCPDispatch(m, conn));
+    public void dispbtchTCP(Message m, ManagedConnection conn) {
+        DISPATCH.bdd(new TCPDispatch(m, conn));
     }
     
     
-    private static class UDPDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
-        private final Message m;
-        private final InetSocketAddress addr;
+    privbte static class UDPDispatch implements Runnable {
+        privbte static final MessageRouter ROUTER = RouterService.getMessageRouter();
+        privbte final Message m;
+        privbte final InetSocketAddress addr;
         
-        UDPDispatch(Message m, InetSocketAddress addr) {
-            this.m = m; this.addr = addr;
+        UDPDispbtch(Message m, InetSocketAddress addr) {
+            this.m = m; this.bddr = addr;
         }
         
         public void run() {
-            ROUTER.handleUDPMessage(m, addr);
+            ROUTER.hbndleUDPMessage(m, addr);
         }
     }
     
-    private static class MulticastDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
-        private final Message m;
-        private final InetSocketAddress addr;
+    privbte static class MulticastDispatch implements Runnable {
+        privbte static final MessageRouter ROUTER = RouterService.getMessageRouter();
+        privbte final Message m;
+        privbte final InetSocketAddress addr;
         
-        MulticastDispatch(Message m, InetSocketAddress addr) {
-            this.m = m; this.addr = addr;
+        MulticbstDispatch(Message m, InetSocketAddress addr) {
+            this.m = m; this.bddr = addr;
         }
 
         public void run() {
-            ROUTER.handleMulticastMessage(m, addr);
+            ROUTER.hbndleMulticastMessage(m, addr);
         }
     }
     
-    private static class TCPDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
-        private final Message m;
-        private final ManagedConnection conn;
+    privbte static class TCPDispatch implements Runnable {
+        privbte static final MessageRouter ROUTER = RouterService.getMessageRouter();
+        privbte final Message m;
+        privbte final ManagedConnection conn;
 
-        TCPDispatch(Message m, ManagedConnection conn) {
+        TCPDispbtch(Message m, ManagedConnection conn) {
             this.m = m; this.conn = conn;
         }
         
         public void run() {
-            ROUTER.handleMessage(m, conn);
+            ROUTER.hbndleMessage(m, conn);
         }
     }
 }

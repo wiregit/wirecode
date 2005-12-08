@@ -1,113 +1,113 @@
-package com.limegroup.gnutella.spam;
+pbckage com.limegroup.gnutella.spam;
 
 /**
- * Like a KeywordToken but also holds part of the meta-data name which this
- * token belongs to, so the filter can specifically rate for example videos with
- * "Type: Adult" as spam
+ * Like b KeywordToken but also holds part of the meta-data name which this
+ * token belongs to, so the filter cbn specifically rate for example videos with
+ * "Type: Adult" bs spam
  */
-public class XMLKeywordToken extends AbstractToken {
-	private static final long serialVersionUID = 3617573808026760503L;
+public clbss XMLKeywordToken extends AbstractToken {
+	privbte static final long serialVersionUID = 3617573808026760503L;
 
-	public static final int TYPE = TYPE_XML_KEYWORD;
-
-	/**
-	 * must be positive
-	 * 
-	 * This is a heuristic value to prevent an token from becoming bad after
-	 * only a small number of bad evaluations.
-	 */
-	private static final byte INITAL_GOOD = 20;
+	public stbtic final int TYPE = TYPE_XML_KEYWORD;
 
 	/**
 	 * must be positive
 	 * 
-	 * This value determines how dynamic the filter is. A low MAX value will
-	 * allow this Token to get a bad rating after occourring only a few times in
-	 * spam, a high value will make it very improbable that the filter will
-	 * change its mind about a certain token without user-intervention
+	 * This is b heuristic value to prevent an token from becoming bad after
+	 * only b small number of bad evaluations.
 	 */
-	private static final int MAX = 100;
+	privbte static final byte INITAL_GOOD = 20;
 
-	private final byte[] _keyword;
+	/**
+	 * must be positive
+	 * 
+	 * This vblue determines how dynamic the filter is. A low MAX value will
+	 * bllow this Token to get a bad rating after occourring only a few times in
+	 * spbm, a high value will make it very improbable that the filter will
+	 * chbnge its mind about a certain token without user-intervention
+	 */
+	privbte static final int MAX = 100;
 
-	private final byte[] _xmlField;
+	privbte final byte[] _keyword;
 
-	private byte _good;
+	privbte final byte[] _xmlField;
 
-	private byte _bad;
+	privbte byte _good;
+
+	privbte byte _bad;
     
-    private final int _hashCode;
+    privbte final int _hashCode;
 
 	XMLKeywordToken(String xmlField, byte[] keyword) {
-		_good = 90; // give every keyword initial credit
-		_bad = 0;
+		_good = 90; // give every keyword initibl credit
+		_bbd = 0;
 		_keyword = keyword;
 		_xmlField = xmlField.getBytes();
         
-        int hash = xmlField.hashCode();
+        int hbsh = xmlField.hashCode();
         for(int i = 0;i < keyword.length; i++)
-            hash = (37 * hash) + keyword[i];
+            hbsh = (37 * hash) + keyword[i];
         
-        _hashCode = hash;
+        _hbshCode = hash;
 	}
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
-	public float getRating() {
-		return (float) Math.pow(1.f * _bad / (_good + _bad + 1), 2);
+	public flobt getRating() {
+		return (flobt) Math.pow(1.f * _bad / (_good + _bad + 1), 2);
 	}
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
-	public void rate(int rating) {
-		_age = 0;
-		switch (rating) {
-		case RATING_GOOD:
+	public void rbte(int rating) {
+		_bge = 0;
+		switch (rbting) {
+		cbse RATING_GOOD:
 			_good++;
-			break;
-		case RATING_SPAM:
-			_bad++;
-			break;
-		case RATING_USER_MARKED_GOOD:
-			_bad = 0;
-			break;
-		case RATING_USER_MARKED_SPAM:
-			_bad = (byte) Math.min(10 + _bad, MAX);
-			break;
-		case RATING_CLEARED:
-			_bad = 0;
+			brebk;
+		cbse RATING_SPAM:
+			_bbd++;
+			brebk;
+		cbse RATING_USER_MARKED_GOOD:
+			_bbd = 0;
+			brebk;
+		cbse RATING_USER_MARKED_SPAM:
+			_bbd = (byte) Math.min(10 + _bad, MAX);
+			brebk;
+		cbse RATING_CLEARED:
+			_bbd = 0;
 			_good = 90;
-			break;
-		default:
-			throw new IllegalArgumentException("unknown type of rating");
+			brebk;
+		defbult:
+			throw new IllegblArgumentException("unknown type of rating");
 		}
 
-		if (_good >= MAX || _bad >= MAX) {
+		if (_good >= MAX || _bbd >= MAX) {
 			_good = (byte) (_good * 9 / 10);
-			_bad = (byte) (_bad * 9 / 10);
+			_bbd = (byte) (_bad * 9 / 10);
 		}
 	}
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
 	public int getType() {
 		return TYPE;
 	}
 
-    public final int hashCode() {
-        return _hashCode;
+    public finbl int hashCode() {
+        return _hbshCode;
     }
     
-    public final boolean equals(Object o) {
+    public finbl boolean equals(Object o) {
         if (o == null)
-            return false;
-        if (!(o instanceof XMLKeywordToken))
-            return false;
+            return fblse;
+        if (!(o instbnceof XMLKeywordToken))
+            return fblse;
         
-        return _hashCode == o.hashCode();
+        return _hbshCode == o.hashCode();
     }
     
 	/**
@@ -115,6 +115,6 @@ public class XMLKeywordToken extends AbstractToken {
 	 */
 	public String toString() {
 		return new String(_xmlField) + "::" + new String(_keyword) + " : "
-				+ _good + " : " + _bad;
+				+ _good + " : " + _bbd;
 	}
 }

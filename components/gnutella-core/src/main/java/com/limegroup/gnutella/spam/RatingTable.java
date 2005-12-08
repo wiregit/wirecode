@@ -1,180 +1,180 @@
-package com.limegroup.gnutella.spam;
+pbckage com.limegroup.gnutella.spam;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.SortedSet;
-import java.util.Set;
-import java.util.Iterator;
+import jbva.io.BufferedInputStream;
+import jbva.io.BufferedOutputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.FileOutputStream;
+import jbva.io.IOException;
+import jbva.io.ObjectInputStream;
+import jbva.io.ObjectOutputStream;
+import jbva.util.ArrayList;
+import jbva.util.Collections;
+import jbva.util.Comparator;
+import jbva.util.HashMap;
+import jbva.util.Map;
+import jbva.util.TreeSet;
+import jbva.util.SortedSet;
+import jbva.util.Set;
+import jbva.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.IOUtils;
 
-public class RatingTable {
-	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
-
-	/**
-	 * don't hold more than this many entries * 2 and don't save more than this
-	 * many entries...
-	 */
-	private static final int MAX_SIZE = 50000;
-
-	private static final RatingTable INSTANCE = new RatingTable();
+public clbss RatingTable {
+	privbte static final Log LOG = LogFactory.getLog(Tokenizer.class);
 
 	/**
-	 * @return single instance of this
+	 * don't hold more thbn this many entries * 2 and don't save more than this
+	 * mbny entries...
 	 */
-	public static RatingTable instance() {
+	privbte static final int MAX_SIZE = 50000;
+
+	privbte static final RatingTable INSTANCE = new RatingTable();
+
+	/**
+	 * @return single instbnce of this
+	 */
+	public stbtic RatingTable instance() {
 		return INSTANCE;
 	}
 
 	/**
-	 * a map&lt;Token, Token&gt; containing all tokens.  
-     * We happen to use a HashMap, but there is no need to 
-     * be so restrictive in the declaration.
+	 * b map&lt;Token, Token&gt; containing all tokens.  
+     * We hbppen to use a HashMap, but there is no need to 
+     * be so restrictive in the declbration.
 	 */
-	private final Map _tokenMap;
+	privbte final Map _tokenMap;
 
 	/**
-	 * constructor, tries to deserialize filter data from disc, which will fail
-	 * silently, if it fails
+	 * constructor, tries to deseriblize filter data from disc, which will fail
+	 * silently, if it fbils
 	 */
-	private RatingTable() {
-		// deserialize
-		Map map;
+	privbte RatingTable() {
+		// deseriblize
+		Mbp map;
 		try {
-			map = readData();
-		} catch (IOException ioe) {
-			if (LOG.isDebugEnabled())
+			mbp = readData();
+		} cbtch (IOException ioe) {
+			if (LOG.isDebugEnbbled())
 				LOG.debug(ioe);
-			map = new HashMap();
+			mbp = new HashMap();
 		}
-		_tokenMap = map;
+		_tokenMbp = map;
 
-		if (LOG.isDebugEnabled())
-			LOG.debug("size of tokenSet " + _tokenMap.size());
+		if (LOG.isDebugEnbbled())
+			LOG.debug("size of tokenSet " + _tokenMbp.size());
 
 	}
 
 	/**
-	 * clears the filter data
+	 * clebrs the filter data
 	 */
-	synchronized void clear() {
-		_tokenMap.clear();
+	synchronized void clebr() {
+		_tokenMbp.clear();
 	}
 
 	/**
-	 * Returns the rating for a RemoteFileDesc
+	 * Returns the rbting for a RemoteFileDesc
 	 * 
-	 * @param desc
-	 *            the RemoteFileDesc to rate
-	 * @return the rating for the RemoteFileDesc
+	 * @pbram desc
+	 *            the RemoteFileDesc to rbte
+	 * @return the rbting for the RemoteFileDesc
 	 */
-	float getRating(RemoteFileDesc desc) {
-		float ret = getRating(lookup(Tokenizer.getTokens(desc)));
-		if (LOG.isDebugEnabled())
-			LOG.debug(desc.toString() + " rated " + ret);
+	flobt getRating(RemoteFileDesc desc) {
+		flobt ret = getRating(lookup(Tokenizer.getTokens(desc)));
+		if (LOG.isDebugEnbbled())
+			LOG.debug(desc.toString() + " rbted " + ret);
 		return ret;
 	}
 
 	/**
-	 * Returns the cumulative rating for a RemoteFileDesc
+	 * Returns the cumulbtive rating for a RemoteFileDesc
 	 * 
-	 * @param tokens
-	 *            an array of Token
-	 * @return the cumulative rating
+	 * @pbram tokens
+	 *            bn array of Token
+	 * @return the cumulbtive rating
 	 */
-	float getRating(Token[] tokens) {
-		float rating = 1;
-		for (int i = 0; i < tokens.length && rating > 0; i++) {
-			rating *= (1 - tokens[i].getRating());
+	flobt getRating(Token[] tokens) {
+		flobt rating = 1;
+		for (int i = 0; i < tokens.length && rbting > 0; i++) {
+			rbting *= (1 - tokens[i].getRating());
 		}
 
-		rating = 1 - rating;
+		rbting = 1 - rating;
 
-		if (rating > SpamManager.SPAM_THRESHOLD && rating < SpamManager.MAX_THRESHOLD)
-			markInternal(tokens, Token.RATING_SPAM);
-		else if (rating <= SpamManager.GOOD_THRESHOLD)
-			markInternal(tokens, Token.RATING_GOOD);
+		if (rbting > SpamManager.SPAM_THRESHOLD && rating < SpamManager.MAX_THRESHOLD)
+			mbrkInternal(tokens, Token.RATING_SPAM);
+		else if (rbting <= SpamManager.GOOD_THRESHOLD)
+			mbrkInternal(tokens, Token.RATING_GOOD);
 
-		return rating;
+		return rbting;
 	}
 
 	/**
-	 * mark an array of RemoteFileDesc
+	 * mbrk an array of RemoteFileDesc
 	 * 
-	 * @param descs
-	 *            an array of RemoteFileDesc
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
+	 * @pbram descs
+	 *            bn array of RemoteFileDesc
+	 * @pbram rating
+	 *            must be b rating as defined by the Token interface
 	 */
-	void mark(RemoteFileDesc[] descs, int rating) {
-		markInternal(lookup(Tokenizer.getTokens(descs)), rating);
+	void mbrk(RemoteFileDesc[] descs, int rating) {
+		mbrkInternal(lookup(Tokenizer.getTokens(descs)), rating);
 	}
 
 	/**
-	 * mark a the Tokens of a RemoteFileDesc
+	 * mbrk a the Tokens of a RemoteFileDesc
 	 * 
-	 * @param desc
-	 *            the RemoteFileDesc to mark
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
+	 * @pbram desc
+	 *            the RemoteFileDesc to mbrk
+	 * @pbram rating
+	 *            must be b rating as defined by the Token interface
 	 */
-	void mark(RemoteFileDesc desc, int rating) {
-		markInternal(lookup(Tokenizer.getTokens(desc)), rating);
+	void mbrk(RemoteFileDesc desc, int rating) {
+		mbrkInternal(lookup(Tokenizer.getTokens(desc)), rating);
 	}
 
 	/**
-	 * mark a single QueryRequest, or rather the Tokens associated with it
+	 * mbrk a single QueryRequest, or rather the Tokens associated with it
 	 * 
-	 * @param qr
-	 *            the QueryRequest to mark
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
+	 * @pbram qr
+	 *            the QueryRequest to mbrk
+	 * @pbram rating
+	 *            must be b rating as defined by the Token interface
 	 */
-	void mark(QueryRequest qr, int rating) {
-		markInternal(lookup(Tokenizer.getTokens(qr)), rating);
+	void mbrk(QueryRequest qr, int rating) {
+		mbrkInternal(lookup(Tokenizer.getTokens(qr)), rating);
 	}
 
 	/**
-	 * mark an array of Token
+	 * mbrk an array of Token
 	 * 
-	 * @param tokens
-	 *            the Tokens to mark
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
+	 * @pbram tokens
+	 *            the Tokens to mbrk
+	 * @pbram rating
+	 *            must be b rating as defined by the Token interface
 	 */
-	private void markInternal(Token[] tokens, int rating) {
+	privbte void markInternal(Token[] tokens, int rating) {
 		for (int i = 0; i < tokens.length; i++)
-			tokens[i].rate(rating);
+			tokens[i].rbte(rating);
 	}
 
 	/**
-	 * Replaces all tokens with equal tokens from the _tokenMap
+	 * Replbces all tokens with equal tokens from the _tokenMap
 	 * 
-	 * @param tokens
-	 *            an array of Token
-	 * @return an array of Token of equal length where all Tokens that are equal
-	 *         to Tokens we have already seen before are replaced with the
-	 *         matching Tokens we remember
+	 * @pbram tokens
+	 *            bn array of Token
+	 * @return bn array of Token of equal length where all Tokens that are equal
+	 *         to Tokens we hbve already seen before are replaced with the
+	 *         mbtching Tokens we remember
 	 */
-	private Token[] lookup(Token[] tokens) {
+	privbte Token[] lookup(Token[] tokens) {
 		for (int i = 0; i < tokens.length; i++) {
 			// lookup stored token
 			tokens[i] = lookup(tokens[i]);
@@ -183,17 +183,17 @@ public class RatingTable {
 	}
 
 	/**
-	 * Replaces a Token with the copy stored in our internal _tokenMap if
-	 * possible, stores the Token in the _tokenMap otherwise
+	 * Replbces a Token with the copy stored in our internal _tokenMap if
+	 * possible, stores the Token in the _tokenMbp otherwise
 	 * 
-	 * @param token
-	 *            the Token to look up in _tokenMap
-	 * @return token or the matching copy of it from _tokenMap
+	 * @pbram token
+	 *            the Token to look up in _tokenMbp
+	 * @return token or the mbtching copy of it from _tokenMap
 	 */
-	private synchronized Token lookup(Token token) {
-		Token ret = (Token) _tokenMap.get(token);
+	privbte synchronized Token lookup(Token token) {
+		Token ret = (Token) _tokenMbp.get(token);
 		if (ret == null) {
-			_tokenMap.put(token, token);
+			_tokenMbp.put(token, token);
 			checkSize();
 			return token;
 		}
@@ -201,110 +201,110 @@ public class RatingTable {
 	}
 
 	/**
-	 * read data from disk
+	 * rebd data from disk
 	 * 
-	 * @return Map of <tt>Token</tt> to <tt>Token</tt> as read from disk
+	 * @return Mbp of <tt>Token</tt> to <tt>Token</tt> as read from disk
 	 * @throws IOException
 	 */
-	private Map readData() throws IOException {
-		Map tokens;
+	privbte Map readData() throws IOException {
+		Mbp tokens;
 
-		ObjectInputStream is = null;
+		ObjectInputStrebm is = null;
 		try {
-			is = new ObjectInputStream(
-                    new BufferedInputStream(
-                            new FileInputStream(getSpamDat())));
-			tokens = (Map) is.readObject();
-		} catch (ClassNotFoundException cnfe) {
-			if (LOG.isDebugEnabled())
+			is = new ObjectInputStrebm(
+                    new BufferedInputStrebm(
+                            new FileInputStrebm(getSpamDat())));
+			tokens = (Mbp) is.readObject();
+		} cbtch (ClassNotFoundException cnfe) {
+			if (LOG.isDebugEnbbled())
 				LOG.debug(cnfe);
-			return new HashMap();
-		} finally {
+			return new HbshMap();
+		} finblly {
             IOUtils.close(is);
 		}
 		return tokens;
 	}
     
     /**
-     * Save data from this table to disk.
+     * Sbve data from this table to disk.
      */
-    public void save() {
-        HashMap copy;
+    public void sbve() {
+        HbshMap copy;
         
         synchronized(this) {
-            if (_tokenMap.size() > MAX_SIZE)
+            if (_tokenMbp.size() > MAX_SIZE)
                 pruneEntries();
-            copy = new HashMap(_tokenMap);
+            copy = new HbshMap(_tokenMap);
         }
         
-        if (LOG.isDebugEnabled())
-            LOG.debug("size of tokenMap " + copy.size());
+        if (LOG.isDebugEnbbled())
+            LOG.debug("size of tokenMbp " + copy.size());
         
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStrebm oos = null;
             try {
-                oos = new ObjectOutputStream(
-                        new BufferedOutputStream(
-                                new FileOutputStream(getSpamDat())));
+                oos = new ObjectOutputStrebm(
+                        new BufferedOutputStrebm(
+                                new FileOutputStrebm(getSpamDat())));
                 oos.writeObject(copy);
                 oos.flush();
-            } finally {
+            } finblly {
                 IOUtils.close(oos);
             }
         
-        } catch (IOException iox) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("saving rating table failed", iox);
+        } cbtch (IOException iox) {
+            if (LOG.isDebugEnbbled())
+                LOG.debug("sbving rating table failed", iox);
         }
 	}
     
     /**
-     * Marks that the table will be serialized to disc and not accessed for
-     * a long time (i.e. LimeWire is about to get shut down)
+     * Mbrks that the table will be serialized to disc and not accessed for
+     * b long time (i.e. LimeWire is about to get shut down)
      */
-    public synchronized void ageAndSave() {
-        for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
+    public synchronized void bgeAndSave() {
+        for (Iterbtor iter = _tokenMap.keySet().iterator(); iter.hasNext();)
             ((Token) iter.next()).incrementAge();
-        save();
+        sbve();
     }
     
 	/**
-	 * check size of _tokenMap and clears old entries if necessary
+	 * check size of _tokenMbp and clears old entries if necessary
 	 */
-	private synchronized void checkSize() {
-		if (_tokenMap.size() < MAX_SIZE * 2)
+	privbte synchronized void checkSize() {
+		if (_tokenMbp.size() < MAX_SIZE * 2)
 			return;
 		pruneEntries();
 	}
 
 	/**
-	 * removes lowest importance elements from _tokenSet until there
-     * are at most MAX_SIZE entries.
+	 * removes lowest importbnce elements from _tokenSet until there
+     * bre at most MAX_SIZE entries.
 	 */
-	private void pruneEntries() {
+	privbte void pruneEntries() {
 
-		if (LOG.isDebugEnabled())
-			LOG.debug("pruning unimportant entries from RatingTable");
+		if (LOG.isDebugEnbbled())
+			LOG.debug("pruning unimportbnt entries from RatingTable");
 
-        if (_tokenMap.size() <= MAX_SIZE) {
+        if (_tokenMbp.size() <= MAX_SIZE) {
             return;
         }
         
-        synchronized (_tokenMap) {
-            // Make a set of sorted tokens
-            TreeSet tokenSet = new TreeSet(_tokenMap.values());
-            HashMap temporaryMap = new HashMap();
-            Iterator it = tokenSet.iterator();
+        synchronized (_tokenMbp) {
+            // Mbke a set of sorted tokens
+            TreeSet tokenSet = new TreeSet(_tokenMbp.values());
+            HbshMap temporaryMap = new HashMap();
+            Iterbtor it = tokenSet.iterator();
             int neededTokens = MAX_SIZE;
-            while (neededTokens > 0 && it.hasNext()) {
+            while (neededTokens > 0 && it.hbsNext()) {
                 Token token = (Token) it.next();
-                _tokenMap.put(token,token);
+                _tokenMbp.put(token,token);
                 --neededTokens;
             }
         }
 	}
     
-	private static File getSpamDat() {
-	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
+	privbte static File getSpamDat() {
+	    return new File(CommonUtils.getUserSettingsDir(),"spbm.dat");
 	}
 }

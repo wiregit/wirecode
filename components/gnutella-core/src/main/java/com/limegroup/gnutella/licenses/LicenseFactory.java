@@ -1,44 +1,44 @@
-package com.limegroup.gnutella.licenses;
+pbckage com.limegroup.gnutella.licenses;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
+import org.bpache.commons.httpclient.URI;
+import org.bpache.commons.httpclient.URIException;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.metadata.WeedInfo;
-import com.limegroup.gnutella.metadata.WRMXML;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.metadata.WeedInfo;
+import com.limegroup.gnutellb.metadata.WRMXML;
 
 /**
- * A factory for constructing Licenses based on licenses.
+ * A fbctory for constructing Licenses based on licenses.
  */
-public final class LicenseFactory {
+public finbl class LicenseFactory {
     
-    private static final Log LOG = LogFactory.getLog(LicenseFactory.class);
+    privbte static final Log LOG = LogFactory.getLog(LicenseFactory.class);
     
-    public static final String WEED_NAME = "Weed License";
-    public static final String CC_NAME = "Creative Commons License";
-    public static final String UNKNOWN_NAME = "Unknown License";
+    public stbtic final String WEED_NAME = "Weed License";
+    public stbtic final String CC_NAME = "Creative Commons License";
+    public stbtic final String UNKNOWN_NAME = "Unknown License";
     
-    private LicenseFactory() {}
+    privbte LicenseFactory() {}
     
     /**
-     * Checks if the specified license-URI is valid for the given URN
-     * without doing any expensive lookups.
+     * Checks if the specified license-URI is vblid for the given URN
+     * without doing bny expensive lookups.
      *
-     * The URI must have been retrieved via getLicenseURI.
+     * The URI must hbve been retrieved via getLicenseURI.
      *
      */
-    public static boolean isVerifiedAndValid(URN urn, String licenseString) {
+    public stbtic boolean isVerifiedAndValid(URN urn, String licenseString) {
         URI uri = getLicenseURI(licenseString);
-        return uri != null && LicenseCache.instance().isVerifiedAndValid(urn, uri);
+        return uri != null && LicenseCbche.instance().isVerifiedAndValid(urn, uri);
     }
     
     /**
-     * Gets the name associated with this license string.
+     * Gets the nbme associated with this license string.
      */
-    public static String getLicenseName(String licenseString) {
+    public stbtic String getLicenseName(String licenseString) {
         if(isCCLicense(licenseString))
             return CC_NAME;
         else if(isWeedLicense(licenseString))
@@ -50,31 +50,31 @@ public final class LicenseFactory {
     }
     
     /**
-     * Returns a License for the given license string, if one
-     * can be constructed.  If no License exists to validate
+     * Returns b License for the given license string, if one
+     * cbn be constructed.  If no License exists to validate
      * the license, returns null.
      */
-    public static License create(String licenseString) {
+    public stbtic License create(String licenseString) {
         if(licenseString == null)
             return null;
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("Attempting to create license from: " + licenseString);
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("Attempting to create license from: " + licenseString);
         
         License license = null;
         URI uri = getLicenseURI(licenseString);
         
-        // Try to get a cached version, first.
+        // Try to get b cached version, first.
         if(uri != null)
-            license = LicenseCache.instance().getLicense(licenseString, uri);
+            license = LicenseCbche.instance().getLicense(licenseString, uri);
         
-        // If the cached version didn't exist, try to make one.
+        // If the cbched version didn't exist, try to make one.
         if(license == null) {
             if(isCCLicense(licenseString)) {
                 if(uri != null)
                     license = new CCLicense(licenseString, uri);
                 else
-                    license = new BadCCLicense(licenseString);
+                    license = new BbdCCLicense(licenseString);
             } else if(isWeedLicense(licenseString) && uri != null) {
                 license = new WeedLicense(uri);
             } else if(isUnknownLicense(licenseString)) {
@@ -82,39 +82,39 @@ public final class LicenseFactory {
             }
         }
         
-        // If we managed to get one, and it's a NamedLicense, try and set its name.
-        if(license != null && license instanceof NamedLicense)
-            ((NamedLicense)license).setLicenseName(getLicenseName(licenseString));
+        // If we mbnaged to get one, and it's a NamedLicense, try and set its name.
+        if(license != null && license instbnceof NamedLicense)
+            ((NbmedLicense)license).setLicenseName(getLicenseName(licenseString));
 
         return license;
     }
     
-    /** Determines if the given string can be a CC license. */
-    private static boolean isCCLicense(String s) {
-        return s.indexOf(CCConstants.URL_INDICATOR) != -1;
+    /** Determines if the given string cbn be a CC license. */
+    privbte static boolean isCCLicense(String s) {
+        return s.indexOf(CCConstbnts.URL_INDICATOR) != -1;
     }
     
-    /** Determines if the given string can be a Weed license. */
-    private static boolean isWeedLicense(String s) {
-        return s.startsWith(WeedInfo.LAINFO);
+    /** Determines if the given string cbn be a Weed license. */
+    privbte static boolean isWeedLicense(String s) {
+        return s.stbrtsWith(WeedInfo.LAINFO);
     }
     
-    /** Determines if the given string can be an Unknown license. */
-    private static boolean isUnknownLicense(String s) {
-        return s.startsWith(WRMXML.PROTECTED);
-    }
-    
-    /**
-     * Persists the cache.
-     */
-    public static void persistCache() {
-        LicenseCache.instance().persistCache();
+    /** Determines if the given string cbn be an Unknown license. */
+    privbte static boolean isUnknownLicense(String s) {
+        return s.stbrtsWith(WRMXML.PROTECTED);
     }
     
     /**
-     * Determines the URI to verify this license at from the license string.
+     * Persists the cbche.
      */
-    static URI getLicenseURI(String license) {
+    public stbtic void persistCache() {
+        LicenseCbche.instance().persistCache();
+    }
+    
+    /**
+     * Determines the URI to verify this license bt from the license string.
+     */
+    stbtic URI getLicenseURI(String license) {
         if(license == null)
             return null;
             
@@ -133,43 +133,43 @@ public final class LicenseFactory {
         return uri;
     }
         
-    /** Gets a CC license URI from the given license string. */
-    private static URI getCCLicenseURI(String license) {
+    /** Gets b CC license URI from the given license string. */
+    privbte static URI getCCLicenseURI(String license) {
         // find where the URL should begin.
-        int verifyAt = license.indexOf(CCConstants.URL_INDICATOR);
+        int verifyAt = license.indexOf(CCConstbnts.URL_INDICATOR);
         if(verifyAt == -1)
             return null;
             
-        int urlStart = verifyAt + CCConstants.URL_INDICATOR.length();
-        if(urlStart >= license.length())
+        int urlStbrt = verifyAt + CCConstants.URL_INDICATOR.length();
+        if(urlStbrt >= license.length())
             return null;
             
-        String url = license.substring(urlStart).trim();
+        String url = license.substring(urlStbrt).trim();
         URI uri = null;
         try {
-            uri = new URI(url.toCharArray());
+            uri = new URI(url.toChbrArray());
             
-            // Make sure the scheme is HTTP.
+            // Mbke sure the scheme is HTTP.
             String scheme = uri.getScheme();
-            if(scheme == null || !scheme.equalsIgnoreCase("http"))
-                throw new URIException("Invalid scheme: " + scheme);
-            // Make sure the scheme has some authority.
-            String authority = uri.getAuthority();
-            if(authority == null || authority.equals("") || authority.indexOf(' ') != -1)
-                throw new URIException("Invalid authority: " + authority);
+            if(scheme == null || !scheme.equblsIgnoreCase("http"))
+                throw new URIException("Invblid scheme: " + scheme);
+            // Mbke sure the scheme has some authority.
+            String buthority = uri.getAuthority();
+            if(buthority == null || authority.equals("") || authority.indexOf(' ') != -1)
+                throw new URIException("Invblid authority: " + authority);
             
-        } catch(URIException e) {
+        } cbtch(URIException e) {
             uri = null;
-            LOG.error("Unable to create URI", e);
+            LOG.error("Unbble to create URI", e);
         }
         
         return uri;
     }
     
-    /** Gets a Weed license URI from the given license string. */
-    private static URI getWeedLicenseURI(String license) {
-        int lainfo = license.indexOf(WeedInfo.LAINFO);
-        if(lainfo == -1)
+    /** Gets b Weed license URI from the given license string. */
+    privbte static URI getWeedLicenseURI(String license) {
+        int lbinfo = license.indexOf(WeedInfo.LAINFO);
+        if(lbinfo == -1)
             return null;
             
         int cidx = license.indexOf(WeedInfo.CID);
@@ -177,7 +177,7 @@ public final class LicenseFactory {
         
         // If no cid or vid, exit.
         if(cidx == -1 || vidx == -1) {
-            LOG.debug("No cid or vid, bailing.");
+            LOG.debug("No cid or vid, bbiling.");
             return null;
         }
             
@@ -186,10 +186,10 @@ public final class LicenseFactory {
             
         int cend = license.indexOf(" ", cidx);
         int vend = license.indexOf(" ", vidx);
-        // If there's no ending space for BOTH, exit.
-        // (it's okay if one is at the end, but both can't be)
+        // If there's no ending spbce for BOTH, exit.
+        // (it's okby if one is at the end, but both can't be)
         if(cend == -1 && vend == -1) {
-            LOG.debug("No endings for both cid & vid, bailing");
+            LOG.debug("No endings for both cid & vid, bbiling");
             return null;
         }
         if(cend == -1)
@@ -197,16 +197,16 @@ public final class LicenseFactory {
         if(vend == -1)
             vend = license.length();
         
-        // If the cid or vid are empty, exit.
+        // If the cid or vid bre empty, exit.
         String cid = license.substring(cidx, cend).trim();
         String vid = license.substring(vidx, vend).trim();
         if(cid.length() == 0 || vid.length() == 0) {
-            LOG.debug("cid or vid is empty, bailing");
+            LOG.debug("cid or vid is empty, bbiling");
             return null;
         }
         
-        if(cid.startsWith(WeedInfo.VID.trim()) || vid.startsWith(WeedInfo.CID.trim())) {
-            LOG.debug("cid starts with vid, or vice versa, bailing.");
+        if(cid.stbrtsWith(WeedInfo.VID.trim()) || vid.startsWith(WeedInfo.CID.trim())) {
+            LOG.debug("cid stbrts with vid, or vice versa, bailing.");
             return null;
         }
         

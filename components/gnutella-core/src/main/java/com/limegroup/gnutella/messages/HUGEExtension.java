@@ -1,26 +1,26 @@
-package com.limegroup.gnutella.messages;
+pbckage com.limegroup.gnutella.messages;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import jbva.io.IOException;
+import jbva.util.Collections;
+import jbva.util.HashSet;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnType;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.UrnType;
 
 /** 
- * Encapsulation of a HUGE block.  Offers various get methods to retrieve its
- * contents, and handles parsing, etc.
+ * Encbpsulation of a HUGE block.  Offers various get methods to retrieve its
+ * contents, bnd handles parsing, etc.
  */
-public class HUGEExtension {
+public clbss HUGEExtension {
 
-    // the disparate types of objects encoded in a HUGE extension - one set per
-    // (lazily constructed)
+    // the dispbrate types of objects encoded in a HUGE extension - one set per
+    // (lbzily constructed)
     // -----------------------------------------
-    private GGEP _ggep = null;
-    private Set _urns = null;
-    private Set _urnTypes = null;
-    private Set _miscBlocks = null;
+    privbte GGEP _ggep = null;
+    privbte Set _urns = null;
+    privbte Set _urnTypes = null;
+    privbte Set _miscBlocks = null;
     // -----------------------------------------
 
     /** @return the set of GGEP Objects in this HUGE extension.
@@ -44,7 +44,7 @@ public class HUGEExtension {
         else
             return _urnTypes;
     }
-    /** @return the set of miscellaneous blocks (Strings) in this extension.
+    /** @return the set of miscellbneous blocks (Strings) in this extension.
      */
     public Set getMiscBlocks() {
         if (_miscBlocks == null)
@@ -55,7 +55,7 @@ public class HUGEExtension {
 
     public HUGEExtension(byte[] extsBytes) {
         int currIndex = 0;
-        // while we don't encounter a null....
+        // while we don't encounter b null....
         while ((currIndex < extsBytes.length) && 
                (extsBytes[currIndex] != (byte)0x00)) {
             
@@ -69,7 +69,7 @@ public class HUGEExtension {
                         _ggep = ggep;
                     else
                         _ggep.merge(ggep);
-                } catch (BadGGEPBlockException ignored) {}
+                } cbtch (BadGGEPBlockException ignored) {}
                 currIndex = endIndex[0];
             } else { // HANDLE HUGE STUFF
                 int delimIndex = currIndex;
@@ -78,32 +78,32 @@ public class HUGEExtension {
                     delimIndex++;
                 if (delimIndex <= extsBytes.length) {
                     try {
-                        // another GEM extension
+                        // bnother GEM extension
                         String curExtStr = new String(extsBytes, currIndex,
                                                       delimIndex - currIndex,
                                                       "UTF-8");
                         if (URN.isUrn(curExtStr)) {
-                            // it's an URN to match, of form "urn:namespace:etc"
-                            URN urn = URN.createSHA1Urn(curExtStr);
+                            // it's bn URN to match, of form "urn:namespace:etc"
+                            URN urn = URN.crebteSHA1Urn(curExtStr);
                             if(_urns == null) 
-                                _urns = new HashSet(1);
-                            _urns.add(urn);
+                                _urns = new HbshSet(1);
+                            _urns.bdd(urn);
                         } else if (UrnType.isSupportedUrnType(curExtStr)) {
-                            // it's an URN type to return, of form "urn" or 
-                            // "urn:namespace"
+                            // it's bn URN type to return, of form "urn" or 
+                            // "urn:nbmespace"
                             if(UrnType.isSupportedUrnType(curExtStr)) {
                                 if(_urnTypes == null) 
-                                    _urnTypes = new HashSet(1);
-                                _urnTypes.add(UrnType.createUrnType(curExtStr));
+                                    _urnTypes = new HbshSet(1);
+                                _urnTypes.bdd(UrnType.createUrnType(curExtStr));
                             }
                         } else {
-                            // miscellaneous, but in the case of queries, xml
+                            // miscellbneous, but in the case of queries, xml
                             if (_miscBlocks == null)
-                                _miscBlocks = new HashSet(1);
-                            _miscBlocks.add(curExtStr);
+                                _miscBlocks = new HbshSet(1);
+                            _miscBlocks.bdd(curExtStr);
                         }
-                    } catch (IOException bad) {}
-                } // else we've overflown and not encounted a 0x1c - discard
+                    } cbtch (IOException bad) {}
+                } // else we've overflown bnd not encounted a 0x1c - discard
                 currIndex = delimIndex+1;
             }
         }        

@@ -1,261 +1,261 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.awt.Color;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+import jbva.awt.Color;
+import jbva.io.BufferedOutputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.FileOutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.util.ArrayList;
+import jbva.util.HashMap;
+import jbva.util.Iterator;
+import jbva.util.Map;
+import jbva.util.Properties;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.MessageService;
-import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.MessageService;
+import com.limegroup.gnutellb.util.FileUtils;
 
 /**
- * Class for handling all LimeWire settings that are stored to disk.  To
- * add a new setting, simply add a new public static member to the list
- * of settings.  Each setting constructor takes the name of the key and 
- * the default value, and all settings are typed.  Choose the correct 
- * <tt>Setting</tt> subclass for your setting type.  It is also important
- * to choose a unique string key for your setting name -- otherwise there
+ * Clbss for handling all LimeWire settings that are stored to disk.  To
+ * bdd a new setting, simply add a new public static member to the list
+ * of settings.  Ebch setting constructor takes the name of the key and 
+ * the defbult value, and all settings are typed.  Choose the correct 
+ * <tt>Setting</tt> subclbss for your setting type.  It is also important
+ * to choose b unique string key for your setting name -- otherwise there
  * will be conflicts.
  */
-public final class SettingsFactory {    
+public finbl class SettingsFactory {    
     /**
-     * Time interval, after which the accumulated information expires
+     * Time intervbl, after which the accumulated information expires
      */
-    private static final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
+    privbte static final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
     
     /**
-     * An internal Setting to store the last expire time
+     * An internbl Setting to store the last expire time
      */
-    private LongSetting LAST_EXPIRE_TIME = null;
+    privbte LongSetting LAST_EXPIRE_TIME = null;
     
     /** 
-     * <tt>File</tt> object from which settings are loaded and saved 
+     * <tt>File</tt> object from which settings bre loaded and saved 
      */    
-    private File SETTINGS_FILE;
+    privbte File SETTINGS_FILE;
     
-    private final String HEADING;
+    privbte final String HEADING;
 
     /**
-     * <tt>Properties</tt> instance for the defualt values.
+     * <tt>Properties</tt> instbnce for the defualt values.
      */
-    protected final Properties DEFAULT_PROPS = new Properties();
+    protected finbl Properties DEFAULT_PROPS = new Properties();
 
     /**
-     * The <tt>Properties</tt> instance containing all settings.
+     * The <tt>Properties</tt> instbnce containing all settings.
      */
-    protected final Properties PROPS = new Properties(DEFAULT_PROPS);
+    protected finbl Properties PROPS = new Properties(DEFAULT_PROPS);
     
-    /* List of all settings associated with this factory 
+    /* List of bll settings associated with this factory 
      * LOCKING: must hold this monitor
      */
-    private ArrayList /* of Settings */ settings = new ArrayList(10);
+    privbte ArrayList /* of Settings */ settings = new ArrayList(10);
 
     /**
-     * A mapping of simppKeys to Settings. Only Simpp Enabled settings will be
-     * added to this list. As setting are created, they are added to this map so
-     * that when simpp settings are loaded, it's easy to find the targeted
+     * A mbpping of simppKeys to Settings. Only Simpp Enabled settings will be
+     * bdded to this list. As setting are created, they are added to this map so
+     * thbt when simpp settings are loaded, it's easy to find the targeted
      * settings.
      */
-    private Map /* String -> Setting */ simppKeyToSetting = new HashMap();
+    privbte Map /* String -> Setting */ simppKeyToSetting = new HashMap();
     
 
-    private boolean expired = false;
+    privbte boolean expired = false;
     
     /**
-     * Creates a new <tt>SettingsFactory</tt> instance with the specified file
-     * to read from and write to.
+     * Crebtes a new <tt>SettingsFactory</tt> instance with the specified file
+     * to rebd from and write to.
      *
-     * @param settingsFile the file to read from and to write to
+     * @pbram settingsFile the file to read from and to write to
      */
-    public SettingsFactory(File settingsFile) {
+    public SettingsFbctory(File settingsFile) {
         this(settingsFile, "");
     }
     
     /**
-     * Creates a new <tt>SettingsFactory</tt> instance with the specified file
-     * to read from and write to.
+     * Crebtes a new <tt>SettingsFactory</tt> instance with the specified file
+     * to rebd from and write to.
      *
-     * @param settingsFile the file to read from and to write to
-     * @param heading heading to use when writing property file
+     * @pbram settingsFile the file to read from and to write to
+     * @pbram heading heading to use when writing property file
      */
-    public SettingsFactory(File settingsFile, String heading) {
+    public SettingsFbctory(File settingsFile, String heading) {
         SETTINGS_FILE = settingsFile;
         if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
-        HEADING = heading;
-        reload();
+        HEADING = hebding;
+        relobd();
     }
     
     /**
-     * Returns the iterator over the settings stored in this factory.
+     * Returns the iterbtor over the settings stored in this factory.
      *
-     * LOCKING: The caller must ensure that this factory's monitor
-     *   is held while iterating over the iterator.
+     * LOCKING: The cbller must ensure that this factory's monitor
+     *   is held while iterbting over the iterator.
      */
-    public synchronized Iterator iterator() {
-        return settings.iterator();
+    public synchronized Iterbtor iterator() {
+        return settings.iterbtor();
     }
 
     /**
-     * Reloads the settings with the predefined settings file from
+     * Relobds the settings with the predefined settings file from
      * disk.
      */
-    public synchronized void reload() {
+    public synchronized void relobd() {
         // If the props file doesn't exist, the init sequence will prompt
-        // the user for the required values, so return.  If this is not 
-        // loading limewire.props, but rather something like themes.txt,
-        // we also return, as attempting to load an invalid file will
-        // not do any good.
+        // the user for the required vblues, so return.  If this is not 
+        // lobding limewire.props, but rather something like themes.txt,
+        // we blso return, as attempting to load an invalid file will
+        // not do bny good.
         if(!SETTINGS_FILE.isFile()) {
-            setExpireValue();
+            setExpireVblue();
             return;
         }
-        FileInputStream fis = null;
+        FileInputStrebm fis = null;
         try {
-            fis = new FileInputStream(SETTINGS_FILE);
-            // Loading properties can cause problems if the
-            // file is invalid.  Ignore these invalid values,
-            // as the default properties will be used and that's
-            // a-OK.
+            fis = new FileInputStrebm(SETTINGS_FILE);
+            // Lobding properties can cause problems if the
+            // file is invblid.  Ignore these invalid values,
+            // bs the default properties will be used and that's
+            // b-OK.
             try {
-                PROPS.load(fis);
-            } catch(IllegalArgumentException ignored) {
-            } catch(StringIndexOutOfBoundsException sioobe) {
-            } catch(IOException iox) {
-                String msg = iox.getMessage();
+                PROPS.lobd(fis);
+            } cbtch(IllegalArgumentException ignored) {
+            } cbtch(StringIndexOutOfBoundsException sioobe) {
+            } cbtch(IOException iox) {
+                String msg = iox.getMessbge();
                 if(msg != null) {
-                    msg = msg.toLowerCase();
+                    msg = msg.toLowerCbse();
                     if(msg.indexOf("corrupted") == -1)
                         throw iox; 
                 }
-                //it was the "file or directory corrupted" exception
-                SETTINGS_FILE.delete();//revert to defaults
-                MessageService.showError("ERROR_PROPS_CORRUPTED");
+                //it wbs the "file or directory corrupted" exception
+                SETTINGS_FILE.delete();//revert to defbults
+                MessbgeService.showError("ERROR_PROPS_CORRUPTED");
             }
-        } catch(IOException e) {
+        } cbtch(IOException e) {
             ErrorService.error(e);
-            // the default properties will be used -- this is fine and expected
-        } finally {
+            // the defbult properties will be used -- this is fine and expected
+        } finblly {
             if( fis != null ) {
                 try {
                     fis.close();
-                } catch(IOException e) {}
+                } cbtch(IOException e) {}
             }
         }
         
-        // Reload all setting values
-        Iterator ii = settings.iterator(); 
-        while (ii.hasNext()) {
+        // Relobd all setting values
+        Iterbtor ii = settings.iterator(); 
+        while (ii.hbsNext()) {
             Setting set = (Setting)ii.next();
-            set.reload();
+            set.relobd();
         }
         
-        setExpireValue();
+        setExpireVblue();
     }
     
     /**
-     * Sets the last expire time if not already set.
+     * Sets the lbst expire time if not already set.
      */
-    private synchronized void setExpireValue() {
-        // Note: this has only an impact on launch time when this
-        // method is called by the constructor of this class!
+    privbte synchronized void setExpireValue() {
+        // Note: this hbs only an impact on launch time when this
+        // method is cblled by the constructor of this class!
         if (LAST_EXPIRE_TIME == null) {
-            LAST_EXPIRE_TIME = createLongSetting("LAST_EXPIRE_TIME", 0);
+            LAST_EXPIRE_TIME = crebteLongSetting("LAST_EXPIRE_TIME", 0);
             
-            // Set flag to true if Settings are expiried. See
-            // createExpirable<whatever>Setting at the bottom
+            // Set flbg to true if Settings are expiried. See
+            // crebteExpirable<whatever>Setting at the bottom
             expired =
-                (LAST_EXPIRE_TIME.getValue() + EXPIRY_INTERVAL <
+                (LAST_EXPIRE_TIME.getVblue() + EXPIRY_INTERVAL <
                         System.currentTimeMillis());
             
             if (expired)
-                LAST_EXPIRE_TIME.setValue(System.currentTimeMillis());
+                LAST_EXPIRE_TIME.setVblue(System.currentTimeMillis());
         }
     }       
     
     /**
-     * Changes the backing file to use for this factory.
+     * Chbnges the backing file to use for this factory.
      */
-    public synchronized void changeFile(File toUse) {
+    public synchronized void chbngeFile(File toUse) {
         SETTINGS_FILE = toUse;
         if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
-        revertToDefault();
-        reload();
+        revertToDefbult();
+        relobd();
     }
     
     /**
-     * Reverts all settings to their factory defaults.
+     * Reverts bll settings to their factory defaults.
      */
-    public synchronized void revertToDefault() {
-        Iterator ii = settings.iterator();
-        while( ii.hasNext() ) {
+    public synchronized void revertToDefbult() {
+        Iterbtor ii = settings.iterator();
+        while( ii.hbsNext() ) {
             Setting set = (Setting)ii.next();
-            set.revertToDefault();
+            set.revertToDefbult();
         }
     }
     
     /**
-     * Save setting information to property file
-     * We want to NOT save any properties which are the default value,
-     * as well as any older properties that are no longer in use.
-     * To avoid having to manually encode the file, we clone
-     * the existing properties and manually remove the ones
-     * which are default and aren't required to be saved.
-     * It is important to do it this way (as opposed to creating a new
-     * properties object and adding only those that should be saved
-     * or aren't default) because 'adding' properties may fail if
-     * certain settings classes haven't been statically loaded yet.
-     * (Note that we cannot use 'store' since it's only available in 1.2)
+     * Sbve setting information to property file
+     * We wbnt to NOT save any properties which are the default value,
+     * bs well as any older properties that are no longer in use.
+     * To bvoid having to manually encode the file, we clone
+     * the existing properties bnd manually remove the ones
+     * which bre default and aren't required to be saved.
+     * It is importbnt to do it this way (as opposed to creating a new
+     * properties object bnd adding only those that should be saved
+     * or bren't default) because 'adding' properties may fail if
+     * certbin settings classes haven't been statically loaded yet.
+     * (Note thbt we cannot use 'store' since it's only available in 1.2)
      */
-    public synchronized void save() {
-        Properties toSave = (Properties)PROPS.clone();
+    public synchronized void sbve() {
+        Properties toSbve = (Properties)PROPS.clone();
 
-        //Add any settings which require saving or aren't default
-        Iterator ii = settings.iterator();
-        while( ii.hasNext() ) {
+        //Add bny settings which require saving or aren't default
+        Iterbtor ii = settings.iterator();
+        while( ii.hbsNext() ) {
             Setting set = (Setting)ii.next();
-            if( !set.shouldAlwaysSave() && set.isDefault() )
-                toSave.remove( set.getKey() );
+            if( !set.shouldAlwbysSave() && set.isDefault() )
+                toSbve.remove( set.getKey() );
         }
         
-        OutputStream out = null;
+        OutputStrebm out = null;
         try {
-            // some bugs were reported where the settings file was a directory.
+            // some bugs were reported where the settings file wbs a directory.
             if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
 
-            // some bugs were reported where the settings file's parent
-            // directory was deleted.
-            File parent = FileUtils.getParentFile(SETTINGS_FILE);
-            if(parent != null) {
-                parent.mkdirs();
-                FileUtils.setWriteable(parent);
+            // some bugs were reported where the settings file's pbrent
+            // directory wbs deleted.
+            File pbrent = FileUtils.getParentFile(SETTINGS_FILE);
+            if(pbrent != null) {
+                pbrent.mkdirs();
+                FileUtils.setWritebble(parent);
             }
-            FileUtils.setWriteable(SETTINGS_FILE);
+            FileUtils.setWritebble(SETTINGS_FILE);
             try {
-                out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
-            } catch(IOException ioe) {
-                // try deleting the file & recreating the input stream.
+                out = new BufferedOutputStrebm(new FileOutputStream(SETTINGS_FILE));
+            } cbtch(IOException ioe) {
+                // try deleting the file & recrebting the input stream.
                 SETTINGS_FILE.delete();
-                out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
+                out = new BufferedOutputStrebm(new FileOutputStream(SETTINGS_FILE));
             }
 
-            // save the properties to disk.
-            toSave.store( out, HEADING);            
-        } catch (IOException e) {
+            // sbve the properties to disk.
+            toSbve.store( out, HEADING);            
+        } cbtch (IOException e) {
             ErrorService.error(e);
-        } finally {
+        } finblly {
             if ( out != null ) {
                 try {
                     out.close();
-                } catch (IOException ignored) {}
+                } cbtch (IOException ignored) {}
             }
         }
     }
@@ -268,424 +268,424 @@ public final class SettingsFactory {
     }
     
     /**
-     * Creates a new <tt>StringSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>StringSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized StringSetting createStringSetting(String key, 
-                                                          String defaultValue) {
+    public synchronized StringSetting crebteStringSetting(String key, 
+                                                          String defbultValue) {
         StringSetting result = 
-            new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+            new StringSetting(DEFAULT_PROPS, PROPS, key, defbultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
 
     /**
-     * @param useSimpp if true, makes the setting SimppEnabled
+     * @pbram useSimpp if true, makes the setting SimppEnabled
      */
-    public synchronized StringSetting createSettableStringSetting(String key,
-                String defaultValue, String simppKey) {
+    public synchronized StringSetting crebteSettableStringSetting(String key,
+                String defbultValue, String simppKey) {
         StringSetting result =  new StringSetting(
-                            DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+                            DEFAULT_PROPS, PROPS, key, defbultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
 
     /**
-     * Creates a new <tt>BooleanSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>BooleanSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized BooleanSetting createBooleanSetting(String key, 
-                                                        boolean defaultValue) {
-        BooleanSetting result =
-          new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+    public synchronized BoolebnSetting createBooleanSetting(String key, 
+                                                        boolebn defaultValue) {
+        BoolebnSetting result =
+          new BoolebnSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
 
     /**
-     * if max != min, the setting becomes unsettable
+     * if mbx != min, the setting becomes unsettable
      */
-    public synchronized BooleanSetting createSettableBooleanSetting(String key, 
-              boolean defaultValue, String simppKey) {
-        BooleanSetting result = new BooleanSetting(
-                           DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+    public synchronized BoolebnSetting createSettableBooleanSetting(String key, 
+              boolebn defaultValue, String simppKey) {
+        BoolebnSetting result = new BooleanSetting(
+                           DEFAULT_PROPS, PROPS, key, defbultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
 
     /**
-     * Creates a new <tt>IntSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>IntSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized IntSetting createIntSetting(String key, 
-                                                         int defaultValue) {
+    public synchronized IntSetting crebteIntSetting(String key, 
+                                                         int defbultValue) {
         IntSetting result = 
-            new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+            new IntSetting(DEFAULT_PROPS, PROPS, key, defbultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
     
-    public synchronized IntSetting createSettableIntSetting(String key, 
-                        int defaultValue, String simppKey, int max, int min) {
+    public synchronized IntSetting crebteSettableIntSetting(String key, 
+                        int defbultValue, String simppKey, int max, int min) {
         IntSetting result = new IntSetting(
-                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
-        handleSettingInternal(result, simppKey);
+                   DEFAULT_PROPS, PROPS, key, defbultValue, simppKey, max, min);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
 
 
     /**
-     * Creates a new <tt>ByteSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>ByteSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized ByteSetting createByteSetting(String key, 
-                                                      byte defaultValue) {
+    public synchronized ByteSetting crebteByteSetting(String key, 
+                                                      byte defbultValue) {
         ByteSetting result = 
-             new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+             new ByteSetting(DEFAULT_PROPS, PROPS, key, defbultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
     
-    public synchronized ByteSetting createSettableByteSetting(String key, 
-                      byte defaultValue, String simppKey, byte max, byte min) {
+    public synchronized ByteSetting crebteSettableByteSetting(String key, 
+                      byte defbultValue, String simppKey, byte max, byte min) {
         ByteSetting result = new ByteSetting(
-             DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
-        handleSettingInternal(result, simppKey);
+             DEFAULT_PROPS, PROPS, key, defbultValue, simppKey, max, min);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
 
 
     /**
-     * Creates a new <tt>LongSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>LongSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized LongSetting createLongSetting(String key, 
-                                                      long defaultValue) {
+    public synchronized LongSetting crebteLongSetting(String key, 
+                                                      long defbultValue) {
          LongSetting result = 
-             new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-         handleSettingInternal(result, null);
+             new LongSetting(DEFAULT_PROPS, PROPS, key, defbultValue);
+         hbndleSettingInternal(result, null);
          return result;
     }
     
-    public synchronized LongSetting createSettableLongSetting(String key,
-                       long defaultValue, String simppKey, long max, long min) {
+    public synchronized LongSetting crebteSettableLongSetting(String key,
+                       long defbultValue, String simppKey, long max, long min) {
          LongSetting result = 
-             new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
-                                                            simppKey, max, min);
-         handleSettingInternal(result, simppKey);
+             new LongSetting(DEFAULT_PROPS, PROPS, key, defbultValue, 
+                                                            simppKey, mbx, min);
+         hbndleSettingInternal(result, simppKey);
          return result;
     }
 
     /**
-     * Creates a new <tt>FileSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>FileSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized FileSetting createFileSetting(String key, 
-                                                      File defaultValue) {
-        String parentString = defaultValue.getParent();
-        if( parentString != null ) {
-            File parent = new File(parentString);
-            if(!parent.isDirectory())
-                parent.mkdirs();
+    public synchronized FileSetting crebteFileSetting(String key, 
+                                                      File defbultValue) {
+        String pbrentString = defaultValue.getParent();
+        if( pbrentString != null ) {
+            File pbrent = new File(parentString);
+            if(!pbrent.isDirectory())
+                pbrent.mkdirs();
         }
 
         FileSetting result = 
-            new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+            new FileSetting(DEFAULT_PROPS, PROPS, key, defbultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
 
-    public synchronized FileSetting createSettableFileSetting(String key, 
-                      File defaultValue, String simppKey) {
-        String parentString = defaultValue.getParent();
-        if( parentString != null ) {
-            File parent = new File(parentString);
-            if(!parent.isDirectory())
-                parent.mkdirs();
+    public synchronized FileSetting crebteSettableFileSetting(String key, 
+                      File defbultValue, String simppKey) {
+        String pbrentString = defaultValue.getParent();
+        if( pbrentString != null ) {
+            File pbrent = new File(parentString);
+            if(!pbrent.isDirectory())
+                pbrent.mkdirs();
         }
 
         FileSetting result = new FileSetting(
-                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+                   DEFAULT_PROPS, PROPS, key, defbultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
 	
-	public synchronized ProxyFileSetting createProxyFileSetting(String key,
-			FileSetting defaultSetting) {
+	public synchronized ProxyFileSetting crebteProxyFileSetting(String key,
+			FileSetting defbultSetting) {
 		ProxyFileSetting result = 
-			new ProxyFileSetting(DEFAULT_PROPS, PROPS, key, defaultSetting);
-		handleSettingInternal(result, null);
+			new ProxyFileSetting(DEFAULT_PROPS, PROPS, key, defbultSetting);
+		hbndleSettingInternal(result, null);
 		return result;
 	}
 
     /**
-     * Creates a new <tt>ColorSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>ColorSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized ColorSetting createColorSetting(String key, 
-                                                        Color defaultValue) {
+    public synchronized ColorSetting crebteColorSetting(String key, 
+                                                        Color defbultValue) {
         ColorSetting result = 
-        ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key,defaultValue);
-        handleSettingInternal(result, null);
+        ColorSetting.crebteColorSetting(DEFAULT_PROPS, PROPS, key,defaultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
 
-    public synchronized ColorSetting createSettableColorSetting(String key, 
-                   Color defaultValue, String simppKey) {
+    public synchronized ColorSetting crebteSettableColorSetting(String key, 
+                   Color defbultValue, String simppKey) {
         ColorSetting result = 
-        ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, 
-                                        defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+        ColorSetting.crebteColorSetting(DEFAULT_PROPS, PROPS, key, 
+                                        defbultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
 
     /**
-     * Creates a new <tt>CharArraySetting</tt> instance for a character array 
-     * setting with the specified key and default value.
+     * Crebtes a new <tt>CharArraySetting</tt> instance for a character array 
+     * setting with the specified key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized CharArraySetting createCharArraySetting(String key, 
-                                                        char[] defaultValue) {
+    public synchronized ChbrArraySetting createCharArraySetting(String key, 
+                                                        chbr[] defaultValue) {
 
-        CharArraySetting result =
-            CharArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
-                                                  key, defaultValue);
-        handleSettingInternal(result, null);
+        ChbrArraySetting result =
+            ChbrArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
+                                                  key, defbultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
         
-    public synchronized CharArraySetting createSettableCharArraySetting(
-                            String key, char[] defaultValue, String simppKey) {
-        CharArraySetting result =new CharArraySetting(DEFAULT_PROPS, PROPS, 
-                                        key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+    public synchronized ChbrArraySetting createSettableCharArraySetting(
+                            String key, chbr[] defaultValue, String simppKey) {
+        ChbrArraySetting result =new CharArraySetting(DEFAULT_PROPS, PROPS, 
+                                        key, defbultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
     
     /**
-     * Creates a new <tt>FloatSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>FloatSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized FloatSetting createFloatSetting(String key, 
-                                                        float defaultValue) {
-        FloatSetting result = 
-            new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+    public synchronized FlobtSetting createFloatSetting(String key, 
+                                                        flobt defaultValue) {
+        FlobtSetting result = 
+            new FlobtSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
 
-    public synchronized FloatSetting createSettableFloatSetting(String key, 
-                   float defaultValue, String simppKey, float max, float min) {
-        FloatSetting result = new FloatSetting(
-                  DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
-        handleSettingInternal(result, simppKey);
+    public synchronized FlobtSetting createSettableFloatSetting(String key, 
+                   flobt defaultValue, String simppKey, float max, float min) {
+        FlobtSetting result = new FloatSetting(
+                  DEFAULT_PROPS, PROPS, key, defbultValue, simppKey, max, min);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
     
     /**
-     * Creates a new <tt>StringArraySetting</tt> instance for a String array 
-     * setting with the specified key and default value.
+     * Crebtes a new <tt>StringArraySetting</tt> instance for a String array 
+     * setting with the specified key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized StringArraySetting 
-        createStringArraySetting(String key, String[] defaultValue) {
-        StringArraySetting result = 
-                       new StringArraySetting(DEFAULT_PROPS, PROPS, key, 
-                                                                 defaultValue);
-        handleSettingInternal(result, null);
+    public synchronized StringArrbySetting 
+        crebteStringArraySetting(String key, String[] defaultValue) {
+        StringArrbySetting result = 
+                       new StringArrbySetting(DEFAULT_PROPS, PROPS, key, 
+                                                                 defbultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
     
-    public synchronized StringArraySetting createSettableStringArraySetting(
-              String key, String[] defaultValue, String simppKey) {
-        StringArraySetting result = 
-        new StringArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
+    public synchronized StringArrbySetting createSettableStringArraySetting(
+              String key, String[] defbultValue, String simppKey) {
+        StringArrbySetting result = 
+        new StringArrbySetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
                                                                     simppKey);
-        handleSettingInternal(result, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
     
     public synchronized StringSetSetting
-        createStringSetSetting(String key, String defaultValue) {
+        crebteStringSetSetting(String key, String defaultValue) {
         StringSetSetting result =
-            new StringSetSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+            new StringSetSetting(DEFAULT_PROPS, PROPS, key, defbultValue);
         
-        handleSettingInternal(result, null);
+        hbndleSettingInternal(result, null);
         return result;
     }
     
     /**
-     * Creates a new <tt>FileArraySetting</tt> instance for a File array 
-     * setting with the specified key and default value.
+     * Crebtes a new <tt>FileArraySetting</tt> instance for a File array 
+     * setting with the specified key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized FileArraySetting createFileArraySetting(String key, File[] defaultValue) {
-        FileArraySetting result = 
-        new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+    public synchronized FileArrbySetting createFileArraySetting(String key, File[] defaultValue) {
+        FileArrbySetting result = 
+        new FileArrbySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
     
-    public synchronized FileArraySetting createSettableFileArraySetting(
-                             String key, File[] defaultValue, String simppKey) {
-        FileArraySetting result = 
-        new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+    public synchronized FileArrbySetting createSettableFileArraySetting(
+                             String key, File[] defbultValue, String simppKey) {
+        FileArrbySetting result = 
+        new FileArrbySetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
 
     /**
-     * Creates a new <tt>FileSetSetting</tt> instance for a File array 
-     * setting with the specified key and default value.
+     * Crebtes a new <tt>FileSetSetting</tt> instance for a File array 
+     * setting with the specified key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized FileSetSetting createFileSetSetting(String key, File[] defaultValue) {
-        FileSetSetting result = new FileSetSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+    public synchronized FileSetSetting crebteFileSetSetting(String key, File[] defaultValue) {
+        FileSetSetting result = new FileSetSetting(DEFAULT_PROPS, PROPS, key, defbultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
     
-    public synchronized FileSetSetting createSettableFileSetSetting(
-                             String key, File[] defaultValue, String simppKey) {
-        FileSetSetting result = new FileSetSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+    public synchronized FileSetSetting crebteSettableFileSetSetting(
+                             String key, File[] defbultValue, String simppKey) {
+        FileSetSetting result = new FileSetSetting(DEFAULT_PROPS, PROPS, key, defbultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
     
     /**
-     * Creates a new expiring <tt>BooleanSetting</tt> instance with the
-     * specified key and default value.
+     * Crebtes a new expiring <tt>BooleanSetting</tt> instance with the
+     * specified key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting 
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting 
      */
-    public synchronized BooleanSetting createExpirableBooleanSetting(String key,
-                                                        boolean defaultValue) {
-        BooleanSetting result = createBooleanSetting(key, defaultValue);
+    public synchronized BoolebnSetting createExpirableBooleanSetting(String key,
+                                                        boolebn defaultValue) {
+        BoolebnSetting result = createBooleanSetting(key, defaultValue);
         
         if (expired)
-            result.revertToDefault();
+            result.revertToDefbult();
         return result;
     }
     
     /**
-     * Creates a new expiring <tt>IntSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new expiring <tt>IntSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized IntSetting createExpirableIntSetting(String key, 
-                                                             int defaultValue) {
-        IntSetting result = createIntSetting(key, defaultValue);
+    public synchronized IntSetting crebteExpirableIntSetting(String key, 
+                                                             int defbultValue) {
+        IntSetting result = crebteIntSetting(key, defaultValue);
         
         if (expired)
-            result.revertToDefault();
+            result.revertToDefbult();
         
         return result;
     }
     
     /**
-     * Creates a new <tt>FontNameSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>FontNameSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized FontNameSetting createFontNameSetting(String key, 
-                                                           String defaultValue){
-        FontNameSetting result = 
-        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+    public synchronized FontNbmeSetting createFontNameSetting(String key, 
+                                                           String defbultValue){
+        FontNbmeSetting result = 
+        new FontNbmeSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
 
-    public synchronized FontNameSetting createSettableFontNameSetting(
-            String key, String defaultValue, String simppKey) {
-        FontNameSetting result = 
-        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+    public synchronized FontNbmeSetting createSettableFontNameSetting(
+            String key, String defbultValue, String simppKey) {
+        FontNbmeSetting result = 
+        new FontNbmeSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }
     
     /**
-     * Creates a new <tt>PasswordSetting</tt> instance with the specified
-     * key and default value.
+     * Crebtes a new <tt>PasswordSetting</tt> instance with the specified
+     * key bnd default value.
      *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
+     * @pbram key the key for the setting
+     * @pbram defaultValue the default value for the setting
      */
-    public synchronized PasswordSetting createPasswordSetting(
-            String key, String defaultValue) {
-        PasswordSetting result = 
-            new PasswordSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+    public synchronized PbsswordSetting createPasswordSetting(
+            String key, String defbultValue) {
+        PbsswordSetting result = 
+            new PbsswordSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        hbndleSettingInternal(result, null);
         return result;
     }
     
-    // Doesn't make sense. :)
-    /*public synchronized PasswordSetting createSettablePasswordSetting(String key,
-            String defaultValue, String simppKey) {
-        PasswordSetting result =  new PasswordSetting(
-                            DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
+    // Doesn't mbke sense. :)
+    /*public synchronized PbsswordSetting createSettablePasswordSetting(String key,
+            String defbultValue, String simppKey) {
+        PbsswordSetting result =  new PasswordSetting(
+                            DEFAULT_PROPS, PROPS, key, defbultValue, simppKey);
+        hbndleSettingInternal(result, simppKey);
         return result;
     }*/
     
-    private synchronized void handleSettingInternal(Setting setting, 
+    privbte synchronized void handleSettingInternal(Setting setting, 
                                                            String simppKey) {
-        settings.add(setting);
-        setting.reload();
-        //Simpp related checks...
+        settings.bdd(setting);
+        setting.relobd();
+        //Simpp relbted checks...
         if(simppKey != null) {
-            //Check if simpp value was specified before this setting was loaded
-            SimppSettingsManager simppSetMan = SimppSettingsManager.instance();
-            String simppValue = simppSetMan.getRemanentSimppValue(simppKey);
-            if(simppValue != null) {//yes there was a note left for us
-                //1. register the default value with SimppSettingsManager
-                simppSetMan.cacheUserPref(setting, setting.getValueAsString());
-                //2. Set the value to simppvalue
-                setting.setValue(simppValue);
+            //Check if simpp vblue was specified before this setting was loaded
+            SimppSettingsMbnager simppSetMan = SimppSettingsManager.instance();
+            String simppVblue = simppSetMan.getRemanentSimppValue(simppKey);
+            if(simppVblue != null) {//yes there was a note left for us
+                //1. register the defbult value with SimppSettingsManager
+                simppSetMbn.cacheUserPref(setting, setting.getValueAsString());
+                //2. Set the vblue to simppvalue
+                setting.setVblue(simppValue);
             }
-            //update the mapping of the simpp key to the setting.
+            //updbte the mapping of the simpp key to the setting.
             simppKeyToSetting.put(simppKey, setting);
         }
     }
     
     /**
-     * Package access for getting a loaded setting corresponding to a simppKey
+     * Pbckage access for getting a loaded setting corresponding to a simppKey
      */
     synchronized Setting getSettingForSimppKey(String simppKey) {
         return (Setting)simppKeyToSetting.get(simppKey);

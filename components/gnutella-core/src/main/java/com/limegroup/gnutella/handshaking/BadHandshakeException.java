@@ -1,14 +1,14 @@
-package com.limegroup.gnutella.handshaking;
+pbckage com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
-public class BadHandshakeException extends IOException
+public clbss BadHandshakeException extends IOException
 {
     
-    public BadHandshakeException(IOException originalCause)
+    public BbdHandshakeException(IOException originalCause)
     {
         super();
-        initCause(originalCause);
+        initCbuse(originalCause);
     }
 }
 

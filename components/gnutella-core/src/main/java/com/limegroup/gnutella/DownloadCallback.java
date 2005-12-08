@@ -1,36 +1,36 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 /**
- * A callback for download information.
+ * A cbllback for download information.
  */
-public interface DownloadCallback {
+public interfbce DownloadCallback {
     
 
-    /** Add a file to the download window */
-    public void addDownload(Downloader d);
+    /** Add b file to the download window */
+    public void bddDownload(Downloader d);
 
-    /** Remove a downloader from the download window. */
-    public void removeDownload(Downloader d);
+    /** Remove b downloader from the download window. */
+    public void removeDownlobd(Downloader d);
 
      /** 
-      * Notifies the GUI that all active downloads have been completed.
+      * Notifies the GUI thbt all active downloads have been completed.
       */   
-    public void downloadsComplete();
+    public void downlobdsComplete();
 
 	/**
-	 *  Show active downloads
+	 *  Show bctive downloads
 	 */
-	public void showDownloads();
+	public void showDownlobds();
 
     /**
-     * Shows the user a message informing her that a file being downloaded 
+     * Shows the user b message informing her that a file being downloaded 
      * is corrupt.
      * <p>
-     * This method MUST call dloader.discardCorruptDownload(boolean b) 
-     * otherwise there will be threads piling up waiting for a notification
+     * This method MUST cbll dloader.discardCorruptDownload(boolean b) 
+     * otherwise there will be threbds piling up waiting for a notification
      */
-    public void promptAboutCorruptDownload(Downloader dloader);
+    public void promptAboutCorruptDownlobd(Downloader dloader);
 
-    public String getHostValue(String key);
+    public String getHostVblue(String key);
     
 }

@@ -1,90 +1,90 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 /**
- * Settings for downloads
+ * Settings for downlobds
  */
-public class DownloadSettings extends LimeProps {
-    private DownloadSettings() {}
+public clbss DownloadSettings extends LimeProps {
+    privbte DownloadSettings() {}
                                                         
 	/**
-	 * Setting for the number of bytes/second to allow for all uploads.
+	 * Setting for the number of bytes/second to bllow for all uploads.
 	 */
-	public static final IntSetting DOWNLOAD_SPEED =
-		FACTORY.createIntSetting("DOWNLOAD_SPEED", 100);
+	public stbtic final IntSetting DOWNLOAD_SPEED =
+		FACTORY.crebteIntSetting("DOWNLOAD_SPEED", 100);
     
     /**
-	 * The maximum number of downstream bytes per second ever passed by
+	 * The mbximum number of downstream bytes per second ever passed by
 	 * this node.
 	 */
-    public static final IntSetting MAX_DOWNLOAD_BYTES_PER_SEC =
-        FACTORY.createExpirableIntSetting("MAX_DOWNLOAD_BYTES_PER_SEC", 0);
+    public stbtic final IntSetting MAX_DOWNLOAD_BYTES_PER_SEC =
+        FACTORY.crebteExpirableIntSetting("MAX_DOWNLOAD_BYTES_PER_SEC", 0);
     
     /**
-	 * The maximum number of simultaneous downloads to allow.
+	 * The mbximum number of simultaneous downloads to allow.
 	 */
-    public static final IntSetting MAX_SIM_DOWNLOAD =
-        FACTORY.createIntSetting("MAX_SIM_DOWNLOAD", 10);
+    public stbtic final IntSetting MAX_SIM_DOWNLOAD =
+        FACTORY.crebteIntSetting("MAX_SIM_DOWNLOAD", 10);
     
     /**
-     * Enable/disable skipping of acks
+     * Enbble/disable skipping of acks
      */
-    public static final BooleanSetting SKIP_ACKS =
-        FACTORY.createSettableBooleanSetting("SKIP_ACKS",true,"skip_acks");
+    public stbtic final BooleanSetting SKIP_ACKS =
+        FACTORY.crebteSettableBooleanSetting("SKIP_ACKS",true,"skip_acks");
     
     /**
-     * various parameters of the formulas for skipping acks.
+     * vbrious parameters of the formulas for skipping acks.
      */
-    public static final IntSetting MAX_SKIP_ACKS =
-        FACTORY.createSettableIntSetting("MAX_SKIP_ACKS",5,"max_skip_ack",15,2);
+    public stbtic final IntSetting MAX_SKIP_ACKS =
+        FACTORY.crebteSettableIntSetting("MAX_SKIP_ACKS",5,"max_skip_ack",15,2);
     
-    public static final FloatSetting DEVIATION =
-        FACTORY.createSettableFloatSetting("SKIP_DEVIATION",1.3f,"skip_deviation",2.0f,1.0f);
+    public stbtic final FloatSetting DEVIATION =
+        FACTORY.crebteSettableFloatSetting("SKIP_DEVIATION",1.3f,"skip_deviation",2.0f,1.0f);
     
-    public static final IntSetting PERIOD_LENGTH =
-        FACTORY.createSettableIntSetting("PERIOD_LENGTH",500,"period_length",2000,100);
+    public stbtic final IntSetting PERIOD_LENGTH =
+        FACTORY.crebteSettableIntSetting("PERIOD_LENGTH",500,"period_length",2000,100);
     
-    public static final IntSetting HISTORY_SIZE=
-        FACTORY.createSettableIntSetting("HISTORY_SIZE",10,"history_size",50,2);
+    public stbtic final IntSetting HISTORY_SIZE=
+        FACTORY.crebteSettableIntSetting("HISTORY_SIZE",10,"history_size",50,2);
     
     /**
-     * Whether the client should use HeadPings when ranking sources
+     * Whether the client should use HebdPings when ranking sources
      */
-    public static final BooleanSetting USE_HEADPINGS =
-        FACTORY.createSettableBooleanSetting("USE_HEADPINGS",true,"use_headpings");
+    public stbtic final BooleanSetting USE_HEADPINGS =
+        FACTORY.crebteSettableBooleanSetting("USE_HEADPINGS",true,"use_headpings");
     
     /**
-     * Whether the client should drop incoming HeadPings.
+     * Whether the client should drop incoming HebdPings.
      */
-    public static final BooleanSetting DROP_HEADPINGS =
-        FACTORY.createSettableBooleanSetting("DROP_HEADPINGS",false,"drop_headpings");
+    public stbtic final BooleanSetting DROP_HEADPINGS =
+        FACTORY.crebteSettableBooleanSetting("DROP_HEADPINGS",false,"drop_headpings");
     
     /**
-     * We should stop issuing HeadPings when we have this many verified sources
+     * We should stop issuing HebdPings when we have this many verified sources
      */
-    public static final IntSetting MAX_VERIFIED_HOSTS = 
-        FACTORY.createSettableIntSetting("MAX_VERIFIED_HOSTS",1,"max_verified_hosts",5,0);
+    public stbtic final IntSetting MAX_VERIFIED_HOSTS = 
+        FACTORY.crebteSettableIntSetting("MAX_VERIFIED_HOSTS",1,"max_verified_hosts",5,0);
     
     /**
-     * We should not schedule more than this many head pings at once
+     * We should not schedule more thbn this many head pings at once
      */
-    public static final IntSetting PING_BATCH =
-        FACTORY.createSettableIntSetting("PING_BATCH",10,"PingRanker.pingBatch",50,1);
+    public stbtic final IntSetting PING_BATCH =
+        FACTORY.crebteSettableIntSetting("PING_BATCH",10,"PingRanker.pingBatch",50,1);
     
     /**
-     * Do not start new workers more than this often
+     * Do not stbrt new workers more than this often
      */
-    public static final IntSetting WORKER_INTERVAL =
-        FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",20000,1);
+    public stbtic final IntSetting WORKER_INTERVAL =
+        FACTORY.crebteSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",20000,1);
     
     /**
-     * Use a download SelectionStrategy tailored for previewing if the file's extension is
+     * Use b download SelectionStrategy tailored for previewing if the file's extension is
      * in this list.
      */
-    private static String[] defaultPreviewableExtensions = {"html", "htm", "xml", "txt", "rtf", "tex",
-        "mp3", "mp4", "wav", "au", "aif", "aiff", "ra", "ram", "wma", "wmv", "midi", "aifc", "snd",
-        "mpg", "mpeg", "asf", "qt", "mov", "avi", "mpe", "ogg", "rm", "m4a", "flac", "fla"};
-    public static final StringArraySetting PREVIEWABLE_EXTENSIONS = 
-        FACTORY.createSettableStringArraySetting("PREVIEWABLE_EXTENSIONS", 
-                defaultPreviewableExtensions,
+    privbte static String[] defaultPreviewableExtensions = {"html", "htm", "xml", "txt", "rtf", "tex",
+        "mp3", "mp4", "wbv", "au", "aif", "aiff", "ra", "ram", "wma", "wmv", "midi", "aifc", "snd",
+        "mpg", "mpeg", "bsf", "qt", "mov", "avi", "mpe", "ogg", "rm", "m4a", "flac", "fla"};
+    public stbtic final StringArraySetting PREVIEWABLE_EXTENSIONS = 
+        FACTORY.crebteSettableStringArraySetting("PREVIEWABLE_EXTENSIONS", 
+                defbultPreviewableExtensions,
                 "PREVIEWABLE_EXTENSIONS");
 }

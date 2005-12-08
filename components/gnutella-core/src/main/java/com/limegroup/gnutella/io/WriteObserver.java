@@ -1,20 +1,20 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
 /**
  * Allows write events to be received.
  *
- * If the events are being received because of a SelectableChannel,
- * interest in events can be turned off by using:
- *  NIODispatcher.instance().interestWrite(channel, false);
+ * If the events bre being received because of a SelectableChannel,
+ * interest in events cbn be turned off by using:
+ *  NIODispbtcher.instance().interestWrite(channel, false);
  */
-public interface WriteObserver extends IOErrorObserver {
+public interfbce WriteObserver extends IOErrorObserver {
 
     /**
-     * Notification that a write can be performed.
+     * Notificbtion that a write can be performed.
      *
-     * If there is still data to be written, this returns true.
-     * Otherwise this returns false.
+     * If there is still dbta to be written, this returns true.
+     * Otherwise this returns fblse.
      */
-    boolean handleWrite() throws java.io.IOException;
+    boolebn handleWrite() throws java.io.IOException;
     
 }

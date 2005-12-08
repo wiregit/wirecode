@@ -1,69 +1,69 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.util.Properties;
+import jbva.util.Properties;
 
 /**
- * Class for a setting that's an array of chars.
+ * Clbss for a setting that's an array of chars.
  */
-public final class CharArraySetting extends Setting {
+public finbl class CharArraySetting extends Setting {
     
     /**
-     * Cached value.
+     * Cbched value.
      */
-    private char[] value;
+    privbte char[] value;
 
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
-	 * key and defualt value.
+	 * Crebtes a new <tt>SettingBool</tt> instance with the specified
+	 * key bnd defualt value.
 	 *
-     * @param defaultProps the default properties
-     * @param props the set properties
-	 * @param key the constant key to use for the setting
-	 * @param defaultValue the default value to use for the setting
+     * @pbram defaultProps the default properties
+     * @pbram props the set properties
+	 * @pbram key the constant key to use for the setting
+	 * @pbram defaultValue the default value to use for the setting
 	 */
-    static CharArraySetting 
-        createCharArraySetting(Properties defaultProps, Properties props, 
-                               String key, char[] defaultValue) {
-        return new CharArraySetting(defaultProps, props, key, 
-                                           new String(defaultValue));
+    stbtic CharArraySetting 
+        crebteCharArraySetting(Properties defaultProps, Properties props, 
+                               String key, chbr[] defaultValue) {
+        return new ChbrArraySetting(defaultProps, props, key, 
+                                           new String(defbultValue));
     }
 
-	CharArraySetting(Properties defaultProps, Properties props, String key, 
-                                                          String defaultValue) {
-		super(defaultProps, props, key, defaultValue, null);
+	ChbrArraySetting(Properties defaultProps, Properties props, String key, 
+                                                          String defbultValue) {
+		super(defbultProps, props, key, defaultValue, null);
 	}
      
-	CharArraySetting(Properties defaultProps, Properties props, String key, 
-                 char[] defaultValue, String simppKey) {
-		super(defaultProps, props, key, new String(defaultValue), simppKey);
+	ChbrArraySetting(Properties defaultProps, Properties props, String key, 
+                 chbr[] defaultValue, String simppKey) {
+		super(defbultProps, props, key, new String(defaultValue), simppKey);
 	}
 
    
 	/**
-	 * Accessor for the value of this setting.
+	 * Accessor for the vblue of this setting.
 	 * 
-	 * @return the value of this setting
+	 * @return the vblue of this setting
 	 */
-	public char[] getValue() {
-		return value;
+	public chbr[] getValue() {
+		return vblue;
 	}
 
 	/**
-	 * Mutator for this setting.
+	 * Mutbtor for this setting.
 	 *
-	 * @param value the value to store
+	 * @pbram value the value to store
 	 */
-	public void setValue(char[] value) {
-		super.setValue(new String(value));
+	public void setVblue(char[] value) {
+		super.setVblue(new String(value));
 	}
      
     /**
-     * Load value from property string value
-     * @param sValue property string value
+     * Lobd value from property string value
+     * @pbram sValue property string value
      */
-    protected void loadValue(String sValue) {
-        value = sValue.trim().toCharArray();
+    protected void lobdValue(String sValue) {
+        vblue = sValue.trim().toCharArray();
     }
 
 }

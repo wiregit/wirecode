@@ -1,104 +1,104 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * This class contains a type-safe enumeration of statistics for HTTP
- * requests.  Each statistic maintains its own history, all messages 
- * received over a specific number of time intervals.
+ * This clbss contains a type-safe enumeration of statistics for HTTP
+ * requests.  Ebch statistic maintains its own history, all messages 
+ * received over b specific number of time intervals.
  */
-public class HTTPStat extends AdvancedStatistic {
+public clbss HTTPStat extends AdvancedStatistic {
 
 	/**
-	 * Make the constructor private so that only this class can construct
-	 * an <tt>HTTPStat</tt> instances.
+	 * Mbke the constructor private so that only this class can construct
+	 * bn <tt>HTTPStat</tt> instances.
 	 */
-	private HTTPStat() {}
+	privbte HTTPStat() {}
 
 	/**
-	 * Specialized class for increment the number of HTTP requests
-	 * received.  In addition to increment the actual stat,
-	 * this increments the total number of HTTP Requests.
+	 * Speciblized class for increment the number of HTTP requests
+	 * received.  In bddition to increment the actual stat,
+	 * this increments the totbl number of HTTP Requests.
 	 */
-	private static class HTTPRequestStat extends HTTPStat {
-		public void incrementStat() {
-			super.incrementStat();
-			HTTP_REQUESTS.incrementStat();
+	privbte static class HTTPRequestStat extends HTTPStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+			HTTP_REQUESTS.incrementStbt();
 		}
 	}
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP requests of any type that have
-	 * been made in this session.
+	 * <tt>Stbtistic</tt> for all HTTP requests of any type that have
+	 * been mbde in this session.
 	 */
-	public static final Statistic HTTP_REQUESTS =
-		new HTTPStat();
+	public stbtic final Statistic HTTP_REQUESTS =
+		new HTTPStbt();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP HEAD requests that have
-	 * been made in this session.
+	 * <tt>Stbtistic</tt> for all HTTP HEAD requests that have
+	 * been mbde in this session.
 	 */
-	public static final Statistic HEAD_REQUESTS =
-		new HTTPRequestStat();
+	public stbtic final Statistic HEAD_REQUESTS =
+		new HTTPRequestStbt();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP GET requests that have
-	 * been made in this session.
+	 * <tt>Stbtistic</tt> for all HTTP GET requests that have
+	 * been mbde in this session.
 	 */
-	public static final Statistic GET_REQUESTS =
-		new HTTPRequestStat();
+	public stbtic final Statistic GET_REQUESTS =
+		new HTTPRequestStbt();
 		
     /**
-     * <tt>Statistic</tt> for all HTTP GIV requests that have been made
+     * <tt>Stbtistic</tt> for all HTTP GIV requests that have been made
      * in this session.
      */
-    public static final Statistic GIV_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic GIV_REQUESTS =
+        new HTTPRequestStbt();
         
     /**
-     * <tt>Statistic</tt> for all Gnutella requests that have been made
+     * <tt>Stbtistic</tt> for all Gnutella requests that have been made
      * in this session.
      */
-    public static final Statistic GNUTELLA_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic GNUTELLA_REQUESTS =
+        new HTTPRequestStbt();
         
     /**
-     * <tt>Statistic</tt> for all LimeWire requests that have been made
+     * <tt>Stbtistic</tt> for all LimeWire requests that have been made
      * in this session.
      */
-    public static final Statistic GNUTELLA_LIMEWIRE_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic GNUTELLA_LIMEWIRE_REQUESTS =
+        new HTTPRequestStbt();
         
     /**
-     * <tt>Statistic</tt> for all Chat requests that have been made
+     * <tt>Stbtistic</tt> for all Chat requests that have been made
      * in this session.
      */
-    public static final Statistic CHAT_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic CHAT_REQUESTS =
+        new HTTPRequestStbt();
         
     /**
-     * <tt>Statistic</tt> for all Magnet requests that have been made
+     * <tt>Stbtistic</tt> for all Magnet requests that have been made
      * in this session.
      */
-    public static final Statistic MAGNET_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic MAGNET_REQUESTS =
+        new HTTPRequestStbt();
         
     /**
-     * <tt>Statistic</tt> for all Unknown requests that have been made
+     * <tt>Stbtistic</tt> for all Unknown requests that have been made
      * in this session.
      */
-    public static final Statistic UNKNOWN_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic UNKNOWN_REQUESTS =
+        new HTTPRequestStbt();
         
     /**
-     * <tt>Statistic</tt> for all Banned requests that have been made
+     * <tt>Stbtistic</tt> for all Banned requests that have been made
      * in this session.
      */
-    public static final Statistic BANNED_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic BANNED_REQUESTS =
+        new HTTPRequestStbt();
         
     /**
-     * <tt>Statistic</tt> for all closed requests that have been made
+     * <tt>Stbtistic</tt> for all closed requests that have been made
      * in this session.
      */
-    public static final Statistic CLOSED_REQUESTS =
-        new HTTPRequestStat();
+    public stbtic final Statistic CLOSED_REQUESTS =
+        new HTTPRequestStbt();
 }

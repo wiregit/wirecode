@@ -1,68 +1,68 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.io.IOException;
+import jbva.nio.ByteBuffer;
+import jbva.nio.channels.SocketChannel;
+import jbva.io.IOException;
 
 /**
- * Adapter that forwards InterestWriteChannel.interest(..)
- * calls on to NIODispatcher, as well as forwarding handleWrite
- * events to the last party that was interested.  All WritableByteChannel
- * calls are delegated to the SocketChannel.
+ * Adbpter that forwards InterestWriteChannel.interest(..)
+ * cblls on to NIODispatcher, as well as forwarding handleWrite
+ * events to the lbst party that was interested.  All WritableByteChannel
+ * cblls are delegated to the SocketChannel.
  */
-class SocketInterestWriteAdapater implements InterestWriteChannel {
+clbss SocketInterestWriteAdapater implements InterestWriteChannel {
     
-    /** the last party that was interested.  null if none. */
-    private volatile WriteObserver interested;
-    /** the SocketChannel this is proxying. */
-    private SocketChannel channel;
+    /** the lbst party that was interested.  null if none. */
+    privbte volatile WriteObserver interested;
+    /** the SocketChbnnel this is proxying. */
+    privbte SocketChannel channel;
     /** whether or not we're shutdown. */
-    private boolean shutdown = false;
+    privbte boolean shutdown = false;
     
-    /** Constructs a new SocketInterestWriteAdapater */
-    SocketInterestWriteAdapater(SocketChannel channel) {
-        this.channel = channel;
+    /** Constructs b new SocketInterestWriteAdapater */
+    SocketInterestWriteAdbpater(SocketChannel channel) {
+        this.chbnnel = channel;
     }
     
-    /** Writes the buffer to the underlying SocketChannel, returning the amount written. */
+    /** Writes the buffer to the underlying SocketChbnnel, returning the amount written. */
     public int write(ByteBuffer buffer) throws IOException {
-        return channel.write(buffer);
+        return chbnnel.write(buffer);
     }
     
-    /** Closes the SocketChannel */
+    /** Closes the SocketChbnnel */
     public void close() throws IOException {
-        channel.close();
+        chbnnel.close();
     }
     
-    /** Determines if the SocketChannel is open */
-    public boolean isOpen() {
-        return channel.isOpen();
+    /** Determines if the SocketChbnnel is open */
+    public boolebn isOpen() {
+        return chbnnel.isOpen();
     }
     
     /**
-     * Marks the given observer as either interested or not interested in receiving
+     * Mbrks the given observer as either interested or not interested in receiving
      * write events from the socket.
      */
-    public synchronized void interest(WriteObserver observer, boolean on) {
+    public synchronized void interest(WriteObserver observer, boolebn on) {
         if(!shutdown) {
             interested = on ? observer : null;
-            NIODispatcher.instance().interestWrite(channel, on);
+            NIODispbtcher.instance().interestWrite(channel, on);
         }
     }
     
     /**
-     * Forwards the write event to the last observer who was interested.
+     * Forwbrds the write event to the last observer who was interested.
      */
-    public boolean handleWrite() throws IOException {
-        WriteObserver chain = interested;
-        if(chain != null) 
-            return chain.handleWrite();
+    public boolebn handleWrite() throws IOException {
+        WriteObserver chbin = interested;
+        if(chbin != null) 
+            return chbin.handleWrite();
         else
-            return false;
+            return fblse;
     }
     
     /**
-     * Shuts down the next link if the chain, if there is any.
+     * Shuts down the next link if the chbin, if there is any.
      */
     public void shutdown() {
         synchronized(this) {
@@ -71,14 +71,14 @@ class SocketInterestWriteAdapater implements InterestWriteChannel {
             shutdown = true;
         }
 
-        Shutdownable chain = interested;
-        if(chain != null)
-            chain.shutdown();
+        Shutdownbble chain = interested;
+        if(chbin != null)
+            chbin.shutdown();
         interested = null;
     }
     
     /** Unused, Unsupported. */
-    public void handleIOException(IOException x) {
+    public void hbndleIOException(IOException x) {
         throw new RuntimeException("unsupported", x);
     }
 }

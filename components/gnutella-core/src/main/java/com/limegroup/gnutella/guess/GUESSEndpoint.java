@@ -1,39 +1,39 @@
-package com.limegroup.gnutella.guess;
+pbckage com.limegroup.gnutella.guess;
 
-import java.net.InetAddress;
+import jbva.net.InetAddress;
 
 /**
- * Simple host/port pair for endpoints used in GUESS.  The use of the
- * <tt>InetAddress</tt> class allows easy migration to IPv6.
+ * Simple host/port pbir for endpoints used in GUESS.  The use of the
+ * <tt>InetAddress</tt> clbss allows easy migration to IPv6.
  */
-public final class GUESSEndpoint {
+public finbl class GUESSEndpoint {
 
 	/**
-	 * Constant for the <tt>InetAddress</tt> object.
+	 * Constbnt for the <tt>InetAddress</tt> object.
 	 */
-	private final InetAddress ADDRESS;
+	privbte final InetAddress ADDRESS;
 
 	/**
-	 * Constant for the port.
+	 * Constbnt for the port.
 	 */
-	private final int PORT;
+	privbte final int PORT;
 
 	/**
-	 * Constructs a new <tt>GUESSEndpoint</tt> with the specified
-	 * IP and port.
+	 * Constructs b new <tt>GUESSEndpoint</tt> with the specified
+	 * IP bnd port.
 	 *
-	 * @param address the ip address of the host
-	 * @param port the port the host is listening on
+	 * @pbram address the ip address of the host
+	 * @pbram port the port the host is listening on
 	 */
-	public GUESSEndpoint(InetAddress address, int port) {
-		ADDRESS = address;
+	public GUESSEndpoint(InetAddress bddress, int port) {
+		ADDRESS = bddress;
 		PORT = port;
 	}
 
 	/**
-	 * Accessor for the <tt>InetAddress</tt> instance for this endpoint.
+	 * Accessor for the <tt>InetAddress</tt> instbnce for this endpoint.
 	 *
-	 * @return the <tt>InetAddress</tt> instance for this endpoint
+	 * @return the <tt>InetAddress</tt> instbnce for this endpoint
 	 */
 	public InetAddress getAddress() {
 		return ADDRESS;
@@ -49,22 +49,22 @@ public final class GUESSEndpoint {
 	}
 
     
-    /** Returns true if two GUESSEndpoint objects are equal.
+    /** Returns true if two GUESSEndpoint objects bre equal.
      */
-    public boolean equals(Object o) {
-        boolean retBool = false;
-        if (o instanceof GUESSEndpoint) {
+    public boolebn equals(Object o) {
+        boolebn retBool = false;
+        if (o instbnceof GUESSEndpoint) {
             GUESSEndpoint ep = (GUESSEndpoint) o;
-            retBool = (ADDRESS.equals(ep.ADDRESS)) && (PORT == ep.PORT);
+            retBool = (ADDRESS.equbls(ep.ADDRESS)) && (PORT == ep.PORT);
         }
         return retBool;
     }
             
-    /** Returns this' hashCode.
+    /** Returns this' hbshCode.
      */
-    public int hashCode() {
+    public int hbshCode() {
         int result = 79;
-        result = 37*result + ADDRESS.hashCode();
+        result = 37*result + ADDRESS.hbshCode();
         result = 37*result + PORT;
         return result;
     }

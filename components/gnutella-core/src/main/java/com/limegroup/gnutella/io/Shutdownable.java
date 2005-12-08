@@ -1,15 +1,15 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
 /**
- * Marks the class as being able to be shutdown.
+ * Mbrks the class as being able to be shutdown.
  *
- * This should release any resources acquired as well as propogate
- * the shutting down to any components that also need to be shutdown.
+ * This should relebse any resources acquired as well as propogate
+ * the shutting down to bny components that also need to be shutdown.
  */
-public interface Shutdownable {
+public interfbce Shutdownable {
     
     /**
-     * Releases any resources used by this component.
+     * Relebses any resources used by this component.
      *
      * No exception should ever be thrown.
      */

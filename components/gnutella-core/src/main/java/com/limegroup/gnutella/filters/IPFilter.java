@@ -1,118 +1,118 @@
-package com.limegroup.gnutella.filters;
+pbckage com.limegroup.gnutella.filters;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import jbva.net.InetAddress;
+import jbva.net.UnknownHostException;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.messages.PingReply;
+import com.limegroup.gnutellb.messages.PushRequest;
+import com.limegroup.gnutellb.messages.QueryReply;
+import com.limegroup.gnutellb.settings.FilterSettings;
 
 /**
- * Blocks messages and hosts based on IP address.  Formerly know as
- * BlackListFilter.  Immutable.  
+ * Blocks messbges and hosts based on IP address.  Formerly know as
+ * BlbckListFilter.  Immutable.  
  */
-public final class IPFilter extends SpamFilter {
+public finbl class IPFilter extends SpamFilter {
     
-    private static IPFilter _instance;
+    privbte static IPFilter _instance;
     
-    private final IPList badHosts = new IPList();
-    private final IPList goodHosts = new IPList();
+    privbte final IPList badHosts = new IPList();
+    privbte final IPList goodHosts = new IPList();
 
-    /** Constructs a new BlackListFilter containing the addresses listed
-     *  in the SettingsManager. */
-    private IPFilter(){        
-        String[] allHosts = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-        for (int i=0; i<allHosts.length; i++)
-            badHosts.add(allHosts[i]);
+    /** Constructs b new BlackListFilter containing the addresses listed
+     *  in the SettingsMbnager. */
+    privbte IPFilter(){        
+        String[] bllHosts = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        for (int i=0; i<bllHosts.length; i++)
+            bbdHosts.add(allHosts[i]);
         
-        allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
-        for (int i=0; i<allHosts.length; i++)
-            goodHosts.add(allHosts[i]);        
+        bllHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
+        for (int i=0; i<bllHosts.length; i++)
+            goodHosts.bdd(allHosts[i]);        
     }
     
     /**
-     * Returns the current active instance of IPFilter.
+     * Returns the current bctive instance of IPFilter.
      */
-    public static IPFilter instance() {
-        if( _instance == null )
-            _instance = new IPFilter();
-        return _instance;
+    public stbtic IPFilter instance() {
+        if( _instbnce == null )
+            _instbnce = new IPFilter();
+        return _instbnce;
     }
     
     /**
-     * Refresh the IPFilter's instance.
+     * Refresh the IPFilter's instbnce.
      */
-    public static void refreshIPFilter() {
-        _instance = new IPFilter();
+    public stbtic void refreshIPFilter() {
+        _instbnce = new IPFilter();
     }
 
     /**
-     * Return the badList of the instance
+     * Return the bbdList of the instance
      */
-    public IPList getBadHosts() {
-        return badHosts;
+    public IPList getBbdHosts() {
+        return bbdHosts;
     }
     
     /** 
-     * Checks if a given host is banned.  This method will be
-     * called when accepting an incoming or outgoing connection.
-     * @param host preferably an IP in the form of A.B.C.D, but if
-     *  it is a DNS name then a lookup will be performed.
-     * @return true if this host is allowed, false if it is banned
-     *  or we are unable to create correct IP addr out of it.
+     * Checks if b given host is banned.  This method will be
+     * cblled when accepting an incoming or outgoing connection.
+     * @pbram host preferably an IP in the form of A.B.C.D, but if
+     *  it is b DNS name then a lookup will be performed.
+     * @return true if this host is bllowed, false if it is banned
+     *  or we bre unable to create correct IP addr out of it.
      */
-    public boolean allow(String host) {
+    public boolebn allow(String host) {
         IP ip;
         try {
             ip = new IP(host);
-        } catch (IllegalArgumentException badHost) {
+        } cbtch (IllegalArgumentException badHost) {
             try {
-                InetAddress lookUp = InetAddress.getByName(host);
+                InetAddress lookUp = InetAddress.getByNbme(host);
                 host = lookUp.getHostAddress();
                 ip = new IP(host);
-            } catch(UnknownHostException unknownHost) {
+            } cbtch(UnknownHostException unknownHost) {
                 // could not look up this host.
-                return false;
-            } catch(IllegalArgumentException stillBadHost) {
+                return fblse;
+            } cbtch(IllegalArgumentException stillBadHost) {
                 // couldn't construct IP still.
-                return false;
+                return fblse;
             }
         }        
-        return goodHosts.contains(ip) || !badHosts.contains(ip);
+        return goodHosts.contbins(ip) || !badHosts.contains(ip);
     }
     
     /**
-     * Checks to see if a given host is banned.
-     * @param host the host's IP in byte form.
+     * Checks to see if b given host is banned.
+     * @pbram host the host's IP in byte form.
      */
-    public boolean allow(byte[] host) {
+    public boolebn allow(byte[] host) {
         IP ip;
         try {
             ip = new IP(host);
-        } catch(IllegalArgumentException badHost) {
-            return false;
+        } cbtch(IllegalArgumentException badHost) {
+            return fblse;
         }
-        return goodHosts.contains(ip) || !badHosts.contains(ip);
+        return goodHosts.contbins(ip) || !badHosts.contains(ip);
     }
 
     /** 
-     * Checks if a given Message's host is banned.
-     * @return true if this Message's host is allowed, false if it is banned
-     *  or we are unable to create correct IP addr out of it.
+     * Checks if b given Message's host is banned.
+     * @return true if this Messbge's host is allowed, false if it is banned
+     *  or we bre unable to create correct IP addr out of it.
      */
-    public boolean allow(Message m) {
-        if (m instanceof PingReply) {
+    public boolebn allow(Message m) {
+        if (m instbnceof PingReply) {
             PingReply pr = (PingReply)m;
-            return allow(pr.getAddress());
-        } else if (m instanceof QueryReply) {
+            return bllow(pr.getAddress());
+        } else if (m instbnceof QueryReply) {
             QueryReply qr = (QueryReply)m;
-            return allow(qr.getIPBytes());
-        } else if (m instanceof PushRequest) {
+            return bllow(qr.getIPBytes());
+        } else if (m instbnceof PushRequest) {
             PushRequest push=(PushRequest)m;
-            return allow(push.getIP());
-        } else // we dont want to block other kinds of messages
+            return bllow(push.getIP());
+        } else // we dont wbnt to block other kinds of messages
             return true;
     }
 }

@@ -1,118 +1,118 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 
 /**
- * Settings for searches.
+ * Settings for sebrches.
  */
-public final class SearchSettings extends LimeProps {
+public finbl class SearchSettings extends LimeProps {
     
-    private SearchSettings() {}
+    privbte SearchSettings() {}
     
     /**
-     * Constant for the characters that are banned from search
+     * Constbnt for the characters that are banned from search
      * strings.
      */
-    private static final char[] BAD_CHARS = {
+    privbte static final char[] BAD_CHARS = {
         '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', 
         ':', ';', '/', '\\', '[', ']', 
-        '\t', '\n', '\r', '\f', // these cannot be last or first 'cause they're trimmed
+        '\t', '\n', '\r', '\f', // these cbnnot be last or first 'cause they're trimmed
         '{', '}',
     };
 
 	/**
-	 * Setting for whether or not GUESS searching is enabled.
+	 * Setting for whether or not GUESS sebrching is enabled.
 	 */
-	public static final BooleanSetting GUESS_ENABLED =
-		FACTORY.createBooleanSetting("GUESS_ENABLED", true);
+	public stbtic final BooleanSetting GUESS_ENABLED =
+		FACTORY.crebteBooleanSetting("GUESS_ENABLED", true);
 
 
 	/**
-	 * Setting for whether or not OOB searching is enabled.
+	 * Setting for whether or not OOB sebrching is enabled.
 	 */
-	public static final BooleanSetting OOB_ENABLED =
-		FACTORY.createBooleanSetting("OOB_ENABLED", true);
+	public stbtic final BooleanSetting OOB_ENABLED =
+		FACTORY.crebteBooleanSetting("OOB_ENABLED", true);
 
 
     /**
      * The TTL for probe queries.
      */
-    public static final ByteSetting PROBE_TTL =
-        FACTORY.createByteSetting("PROBE_TTL", (byte)2);
+    public stbtic final ByteSetting PROBE_TTL =
+        FACTORY.crebteByteSetting("PROBE_TTL", (byte)2);
 
     /**
-     * Setting for the characters that are not allowed in search strings
+     * Setting for the chbracters that are not allowed in search strings
      */
-    public static final CharArraySetting ILLEGAL_CHARS =
-        FACTORY.createCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
+    public stbtic final CharArraySetting ILLEGAL_CHARS =
+        FACTORY.crebteCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
 
     /**
-     * Setting for the maximum number of bytes to allow in queries.
+     * Setting for the mbximum number of bytes to allow in queries.
      */
-    public static final IntSetting MAX_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_QUERY_LENGTH", 30);
+    public stbtic final IntSetting MAX_QUERY_LENGTH =
+        FACTORY.crebteIntSetting("MAX_QUERY_LENGTH", 30);
 
     /**
-     * Setting for the maximum number of bytes to allow in XML queries.
+     * Setting for the mbximum number of bytes to allow in XML queries.
      */
-    public static final IntSetting MAX_XML_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 500);
+    public stbtic final IntSetting MAX_XML_QUERY_LENGTH =
+        FACTORY.crebteIntSetting("MAX_XML_QUERY_LENGTH", 500);
     
     /**
-	 * The minimum quality (number of stars) for search results to
-	 * display.
+	 * The minimum qublity (number of stars) for search results to
+	 * displby.
 	 */
-    public static final IntSetting MINIMUM_SEARCH_QUALITY =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY", 0);
+    public stbtic final IntSetting MINIMUM_SEARCH_QUALITY =
+        FACTORY.crebteIntSetting("MINIMUM_SEARCH_QUALITY", 0);
     
     /**
-	 * The minimum speed for search results to display.
+	 * The minimum speed for sebrch results to display.
 	 */
-    public static final IntSetting MINIMUM_SEARCH_SPEED =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED", 0);
+    public stbtic final IntSetting MINIMUM_SEARCH_SPEED =
+        FACTORY.crebteIntSetting("MINIMUM_SEARCH_SPEED", 0);
     
     /**
-	 * The maximum number of simultaneous searches to allow.
+	 * The mbximum number of simultaneous searches to allow.
 	 */    
-    public static final IntSetting PARALLEL_SEARCH =
-        FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
+    public stbtic final IntSetting PARALLEL_SEARCH =
+        FACTORY.crebteIntSetting("PARALLEL_SEARCH", 5);
 	
 	/**
-	 * Whether or not to enable the spam filter.
+	 * Whether or not to enbble the spam filter.
 	 */    
-    public static final BooleanSetting ENABLE_SPAM_FILTER =
-        FACTORY.createBooleanSetting("ENABLE_SPAM_FILTER", true);
+    public stbtic final BooleanSetting ENABLE_SPAM_FILTER =
+        FACTORY.crebteBooleanSetting("ENABLE_SPAM_FILTER", true);
 
     /**
-     * Whether or not spam is hidden
+     * Whether or not spbm is hidden
      */    
-    public static final BooleanSetting HIDE_SPAM =
-        FACTORY.createBooleanSetting("HIDE_SPAM", true);
+    public stbtic final BooleanSetting HIDE_SPAM =
+        FACTORY.crebteBooleanSetting("HIDE_SPAM", true);
     
     /**
-	 * Set how sensitive the spamfilter should be
+	 * Set how sensitive the spbmfilter should be
 	 */    
-    public static final FloatSetting FILTER_SPAM_RESULTS =
-        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 1.0f);
+    public stbtic final FloatSetting FILTER_SPAM_RESULTS =
+        FACTORY.crebteFloatSetting("FILTER_SPAM_RESULTS", 1.0f);
     
 	/**
-	 * Whether or not to filter spam results
+	 * Whether or not to filter spbm results
 	 */    
-    public static final BooleanSetting MARK_SPAM_RESULTS =
-        FACTORY.createBooleanSetting("MARK_SPAM_RESULTS", true);
+    public stbtic final BooleanSetting MARK_SPAM_RESULTS =
+        FACTORY.crebteBooleanSetting("MARK_SPAM_RESULTS", true);
     
     /**
-     * The minimum spam rating at which we stop counting results for 
-     * dynamic querying.  Meant to prevent very strict user settings
-     * from making dynamic querying too agressive. 
+     * The minimum spbm rating at which we stop counting results for 
+     * dynbmic querying.  Meant to prevent very strict user settings
+     * from mbking dynamic querying too agressive. 
      */
-    public static final FloatSetting QUERY_SPAM_CUTOFF =
-        FACTORY.createSettableFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
-                "SpamManager.displayTreshold",1.0f,0.1f);
+    public stbtic final FloatSetting QUERY_SPAM_CUTOFF =
+        FACTORY.crebteSettableFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
+                "SpbmManager.displayTreshold",1.0f,0.1f);
     
 	/**
-     * Do not issue query keys more than this often
+     * Do not issue query keys more thbn this often
      */
-    public static final IntSetting QUERY_KEY_DELAY = 
-        FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,
-                "MessageRouter.QueryKeyDelay",10000,10);
+    public stbtic final IntSetting QUERY_KEY_DELAY = 
+        FACTORY.crebteSettableIntSetting("QUERY_KEY_DELAY",500,
+                "MessbgeRouter.QueryKeyDelay",10000,10);
 }

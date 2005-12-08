@@ -1,162 +1,162 @@
-package com.limegroup.gnutella.spam;
+pbckage com.limegroup.gnutella.spam;
 
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutellb.Assert;
 
-import com.limegroup.gnutella.filters.IP;
-import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutellb.filters.IP;
+import com.limegroup.gnutellb.filters.IPFilter;
 
 /**
- * This is a simple token holding a 4-byte-ip / port pair
+ * This is b simple token holding a 4-byte-ip / port pair
  */
-public class AddressToken extends AbstractToken {
-	private static final long serialVersionUID = 3257568416670824244L;
+public clbss AddressToken extends AbstractToken {
+	privbte static final long serialVersionUID = 3257568416670824244L;
 
-	private static final int TYPE = TYPE_ADDRESS;
-
-	/**
-	 * must be positive
-	 * 
-	 * This is a heuristic value to prevent an IP address from becoming bad
-	 * after only a small number of bad ratings.
-	 */
-	private static final byte INITIAL_GOOD = 20;
+	privbte static final int TYPE = TYPE_ADDRESS;
 
 	/**
 	 * must be positive
 	 * 
-	 * This value determines how dynamic the filter is. A low MAX value will
-	 * allow this Token to get a bad rating after occourring only a few times in
-	 * spam, a high value will make it very improbable that the filter will
-	 * change its mind about a certain token without user-intervention
+	 * This is b heuristic value to prevent an IP address from becoming bad
+	 * bfter only a small number of bad ratings.
 	 */
-	private static final int MAX = 50;
+	privbte static final byte INITIAL_GOOD = 20;
 
-	private final byte[] _address;
+	/**
+	 * must be positive
+	 * 
+	 * This vblue determines how dynamic the filter is. A low MAX value will
+	 * bllow this Token to get a bad rating after occourring only a few times in
+	 * spbm, a high value will make it very improbable that the filter will
+	 * chbnge its mind about a certain token without user-intervention
+	 */
+	privbte static final int MAX = 50;
 
-	private final short _port;
+	privbte final byte[] _address;
+
+	privbte final short _port;
     
-    private boolean ratingInitialized;
+    privbte boolean ratingInitialized;
 
-	private byte _good;
+	privbte byte _good;
 
-	private byte _bad;
+	privbte byte _bad;
     
-    private final int _hashCode;
+    privbte final int _hashCode;
 
-	public AddressToken(byte[] address, int port) {
-		Assert.that(address.length == 4);
-		_address = address;
+	public AddressToken(byte[] bddress, int port) {
+		Assert.thbt(address.length == 4);
+		_bddress = address;
 		_port = (short) port;
-        _hashCode = getHashCode();
-        ratingInitialized = false;
+        _hbshCode = getHashCode();
+        rbtingInitialized = false;
 	}
     
-    /* Rating initialization is costly, and many Tokens are created 
-     * simply to be replaced by existing tokens in the RatingTable,
-     * so initialize rating lazily. */
-    private synchronized void initializeRating() {
-        if (ratingInitialized) {
+    /* Rbting initialization is costly, and many Tokens are created 
+     * simply to be replbced by existing tokens in the RatingTable,
+     * so initiblize rating lazily. */
+    privbte synchronized void initializeRating() {
+        if (rbtingInitialized) {
             return;
         }
-        // this initial value is an
+        // this initibl value is an
         _good = INITIAL_GOOD;
-        IP ip = new IP(_address);
-        int logDistance = IPFilter.instance().getBadHosts().logMinDistanceTo(ip);
+        IP ip = new IP(_bddress);
+        int logDistbnce = IPFilter.instance().getBadHosts().logMinDistanceTo(ip);
         
-        // Constants 1600 and 3.3 chosen such that:
-        // Same /24 subnet as a banned IP results in a rating of 0.07
-        // Same /16 subnet as a banned IP results in a rating of 0.01
-        int bad = (int) (1600 * Math.pow(1+logDistance, -3.3));
-        while (bad > MAX) {
-            bad /= 2;
+        // Constbnts 1600 and 3.3 chosen such that:
+        // Sbme /24 subnet as a banned IP results in a rating of 0.07
+        // Sbme /16 subnet as a banned IP results in a rating of 0.01
+        int bbd = (int) (1600 * Math.pow(1+logDistance, -3.3));
+        while (bbd > MAX) {
+            bbd /= 2;
             _good /= 2;
         }
-        _bad = (byte) bad;
+        _bbd = (byte) bad;
         
-        ratingInitialized = true;
+        rbtingInitialized = true;
     }
     
-    private int getHashCode() {
-        int hashCode = TYPE;
-        hashCode = (TYPE * hashCode) + _address[0];
-        hashCode = (TYPE * hashCode) + _address[1];
-        hashCode = (TYPE * hashCode) + _address[2];
-        hashCode = (TYPE * hashCode) + _address[3];
-        hashCode = (TYPE * hashCode) + _port;
-        return hashCode;
+    privbte int getHashCode() {
+        int hbshCode = TYPE;
+        hbshCode = (TYPE * hashCode) + _address[0];
+        hbshCode = (TYPE * hashCode) + _address[1];
+        hbshCode = (TYPE * hashCode) + _address[2];
+        hbshCode = (TYPE * hashCode) + _address[3];
+        hbshCode = (TYPE * hashCode) + _port;
+        return hbshCode;
     }
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
-	public float getRating() {
-        if (!ratingInitialized) {
-            initializeRating();
+	public flobt getRating() {
+        if (!rbtingInitialized) {
+            initiblizeRating();
         }
-		return ((float) _bad )/(_good + _bad + 1);
+		return ((flobt) _bad )/(_good + _bad + 1);
 	}
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
-	public void rate(int rating) {
-        if (!ratingInitialized) {
-            initializeRating();
+	public void rbte(int rating) {
+        if (!rbtingInitialized) {
+            initiblizeRating();
         }
-		_age = 0;
-		switch (rating) {
-		case RATING_GOOD:
+		_bge = 0;
+		switch (rbting) {
+		cbse RATING_GOOD:
 			_good++;
-			break;
-		case RATING_SPAM:
-			_bad++;
-			break;
-		case RATING_USER_MARKED_GOOD:
-			_bad = 0;
-			break;
-		case RATING_USER_MARKED_SPAM:
-			_bad = (byte) Math.min(_bad + 10, MAX);
-			break;
-		case RATING_CLEARED:
-			_bad = 0;
+			brebk;
+		cbse RATING_SPAM:
+			_bbd++;
+			brebk;
+		cbse RATING_USER_MARKED_GOOD:
+			_bbd = 0;
+			brebk;
+		cbse RATING_USER_MARKED_SPAM:
+			_bbd = (byte) Math.min(_bad + 10, MAX);
+			brebk;
+		cbse RATING_CLEARED:
+			_bbd = 0;
 			_good = INITIAL_GOOD;
-			break;
-		default:
-			throw new IllegalArgumentException("unknown type of rating");
+			brebk;
+		defbult:
+			throw new IllegblArgumentException("unknown type of rating");
 		}
 
-		if (_good >= MAX || _bad >= MAX) {
+		if (_good >= MAX || _bbd >= MAX) {
 			_good = (byte) (_good * 9 / 10);
-			_bad = (byte) (_bad * 9 / 10);
+			_bbd = (byte) (_bad * 9 / 10);
 		}
 	}
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
 	public int getType() {
 		return TYPE;
 	}
 
-    public final int hashCode() {
-        return _hashCode;
+    public finbl int hashCode() {
+        return _hbshCode;
     }
     
-    public final boolean equals(Object o) {
+    public finbl boolean equals(Object o) {
         if (o == null)
-            return false;
-        if ( ! (o instanceof AddressToken))
-            return false;
+            return fblse;
+        if ( ! (o instbnceof AddressToken))
+            return fblse;
         
-        return _hashCode == o.hashCode();
+        return _hbshCode == o.hashCode();
     }
 
 	/**
 	 * overrides method from <tt>Object</tt>
 	 */
 	public String toString() {
-		return "" + (0xFF & _address[0]) + "." + (0xFF & _address[1]) + "."
-				+ (0xFF & _address[2]) + "." + (0xFF & _address[3]) + ":"
-				+ (0xFFFF & _port) + " " + _bad;
+		return "" + (0xFF & _bddress[0]) + "." + (0xFF & _address[1]) + "."
+				+ (0xFF & _bddress[2]) + "." + (0xFF & _address[3]) + ":"
+				+ (0xFFFF & _port) + " " + _bbd;
 	}
 }

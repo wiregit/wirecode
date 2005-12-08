@@ -1,79 +1,79 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
+import jbva.io.IOException;
+import jbva.nio.ByteBuffer;
+import jbva.nio.channels.Channel;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * A writer that throttles data according to a throttle.
+ * A writer thbt throttles data according to a throttle.
  *
- * To work with the Throttle, this uses an attachment (which must be the same as the
- * attachment of the SelectionKey associated with the socket this is using).
+ * To work with the Throttle, this uses bn attachment (which must be the same as the
+ * bttachment of the SelectionKey associated with the socket this is using).
  */
-public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
+public clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
     
-    private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
+    privbte static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
     
-    /** The channel to write to & interest on. */    
-    private volatile InterestWriteChannel channel;
-    /** The last observer. */
-    private volatile WriteObserver observer;
+    /** The chbnnel to write to & interest on. */    
+    privbte volatile InterestWriteChannel channel;
+    /** The lbst observer. */
+    privbte volatile WriteObserver observer;
     /** The throttle we're using. */
-    private final Throttle throttle;
-    /** The amount of data we were told we can write. */
-    private int available;    
-    /** The object that the Throttle will recognize as the SelectionKey attachments */
-    private Object attachment;
+    privbte final Throttle throttle;
+    /** The bmount of data we were told we can write. */
+    privbte int available;    
+    /** The object thbt the Throttle will recognize as the SelectionKey attachments */
+    privbte Object attachment;
     
     /**
-     * Constructs a ThrottleWriter with the given Throttle.
+     * Constructs b ThrottleWriter with the given Throttle.
      *
-     * You MUST call setWriteChannel prior to using this.
+     * You MUST cbll setWriteChannel prior to using this.
      */
     public ThrottleWriter(Throttle throttle) {
         this(throttle, null);
     }
     
     /**
-     * Constructs a new ThrottleWriter with the given throttle & channel.
+     * Constructs b new ThrottleWriter with the given throttle & channel.
      */
-    public ThrottleWriter(Throttle throttle, InterestWriteChannel channel) {
+    public ThrottleWriter(Throttle throttle, InterestWriteChbnnel channel) {
         this.throttle = throttle;
-        this.channel = channel;
+        this.chbnnel = channel;
     }
     
     /** Retreives the sink. */
-    public InterestWriteChannel getWriteChannel() {
-        return channel;
+    public InterestWriteChbnnel getWriteChannel() {
+        return chbnnel;
     }
     
     /** Sets the sink. */
-    public void setWriteChannel(InterestWriteChannel channel) {
-        this.channel = channel;
+    public void setWriteChbnnel(InterestWriteChannel channel) {
+        this.chbnnel = channel;
         throttle.interest(this);
     }
     
-    /** Sets the attachment that the Throttle will recognize for this Writer. */
-    public void setAttachment(Object att) {
-        attachment = att;
+    /** Sets the bttachment that the Throttle will recognize for this Writer. */
+    public void setAttbchment(Object att) {
+        bttachment = att;
     }
     
-    /** Gets the attachment. */
-    public Object getAttachment() {
-        return attachment;
+    /** Gets the bttachment. */
+    public Object getAttbchment() {
+        return bttachment;
     }
     
     /**
-     * Tells the Throttle that we're interested in receiving bandwidthAvailable
-     * events at some point in time.
+     * Tells the Throttle thbt we're interested in receiving bandwidthAvailable
+     * events bt some point in time.
      */
-    public void interest(WriteObserver observer, boolean status) {
-        if(status) {
+    public void interest(WriteObserver observer, boolebn status) {
+        if(stbtus) {
             this.observer = observer;
-            if(channel != null)
+            if(chbnnel != null)
                 throttle.interest(this);
         } else {
             this.observer = null;
@@ -81,107 +81,107 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     }
     
     /**
-     * Notification from the Throttle that bandwidth is available.
-     * Returns false if this no longer is open & will not be interested
-     * ever again.
+     * Notificbtion from the Throttle that bandwidth is available.
+     * Returns fblse if this no longer is open & will not be interested
+     * ever bgain.
      */
-    public boolean bandwidthAvailable() {
-        if(channel.isOpen()) {
-            channel.interest(this, true);
+    public boolebn bandwidthAvailable() {
+        if(chbnnel.isOpen()) {
+            chbnnel.interest(this, true);
             return true;
         } else {
-            return false;
+            return fblse;
         }
     }
     
     /**
-     * Writes data to the chain.
+     * Writes dbta to the chain.
      *
-     * Only writes up to 'available' amount of data.
+     * Only writes up to 'bvailable' amount of data.
      */
     public int write(ByteBuffer buffer) throws IOException {
-        InterestWriteChannel chain = channel;
-        if(chain == null)
-            throw new IllegalStateException("writing with no chain!");
+        InterestWriteChbnnel chain = channel;
+        if(chbin == null)
+            throw new IllegblStateException("writing with no chain!");
             
-        if(available == 0)
+        if(bvailable == 0)
             return 0;
 
         int priorLimit = buffer.limit();
-        if(buffer.remaining() > available)
-            buffer.limit(buffer.position() + available);
+        if(buffer.rembining() > available)
+            buffer.limit(buffer.position() + bvailable);
             
-        int totalWrote = channel.write(buffer);
+        int totblWrote = channel.write(buffer);
         
-        available -= totalWrote;
+        bvailable -= totalWrote;
         buffer.limit(priorLimit);
         
-        return totalWrote;
+        return totblWrote;
     }
     
-    /** Closes the underlying channel. */
+    /** Closes the underlying chbnnel. */
     public void close() throws IOException {
-        Channel source = channel;
+        Chbnnel source = channel;
         if(source != null)
             source.close();
     }
     
-    /** Determines if the underlying channel is open. */
-    public boolean isOpen() {
-        Channel source = channel;
-        return source != null ? source.isOpen() : false;
+    /** Determines if the underlying chbnnel is open. */
+    public boolebn isOpen() {
+        Chbnnel source = channel;
+        return source != null ? source.isOpen() : fblse;
     }
     
     /**
-     * Requests some space from the Throttle to write data.
+     * Requests some spbce from the Throttle to write data.
      *
-     * A global 'available' variable is set, and it is assumed that
-     * the interested party will try writing to us.  Our chained-write
-     * is limited to the available amount, and available is decremented.
-     * We then release the amount of space that we couldn't write.
+     * A globbl 'available' variable is set, and it is assumed that
+     * the interested pbrty will try writing to us.  Our chained-write
+     * is limited to the bvailable amount, and available is decremented.
+     * We then relebse the amount of space that we couldn't write.
      */
-    public boolean handleWrite() throws IOException {
-        InterestWriteChannel chain = channel;
-        if(chain == null)
-            throw new IllegalStateException("writing with no source.");
+    public boolebn handleWrite() throws IOException {
+        InterestWriteChbnnel chain = channel;
+        if(chbin == null)
+            throw new IllegblStateException("writing with no source.");
             
         WriteObserver interested = observer;
             
-        available = throttle.request();
-        // If nothing is available, DO NOT CHANGE INTEREST WITHOUT
-        // TRYING TO WRITE.  Otherwise, because of a bug(?) in selecting,
-        // we will not be immediately notified again that data can be
-        // written.  If we leave the interest alone then we will be
-        // notified again.
-        if(available != 0) {
+        bvailable = throttle.request();
+        // If nothing is bvailable, DO NOT CHANGE INTEREST WITHOUT
+        // TRYING TO WRITE.  Otherwise, becbuse of a bug(?) in selecting,
+        // we will not be immedibtely notified again that data can be
+        // written.  If we lebve the interest alone then we will be
+        // notified bgain.
+        if(bvailable != 0) {
             try {
-                chain.interest(this, false);
+                chbin.interest(this, false);
                 if(interested != null)
-                    interested.handleWrite();
-            } finally {
-                throttle.release(available);
+                    interested.hbndleWrite();
+            } finblly {
+                throttle.relebse(available);
             }
-            interested = observer; // re-get it, since observer may have changed interest.
+            interested = observer; // re-get it, since observer mby have changed interest.
             if(interested != null) {
                 throttle.interest(this);
                 return true;
             } else {
-                return false;
+                return fblse;
             }
         } else {
             return true;
         }
     }
     
-    /** Shuts down the last observer. */
+    /** Shuts down the lbst observer. */
     public void shutdown() {
-        Shutdownable listener = observer;
+        Shutdownbble listener = observer;
         if(listener != null)
             listener.shutdown();
     }
     
     /** Unused, Unsupported */
-    public void handleIOException(IOException x) {
+    public void hbndleIOException(IOException x) {
         throw new RuntimeException("Unsupported", x);
     }
 }

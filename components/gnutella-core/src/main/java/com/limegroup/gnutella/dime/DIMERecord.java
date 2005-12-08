@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.dime;
+pbckage com.limegroup.gnutella.dime;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.OutputStream;
+import jbva.io.UnsupportedEncodingException;
+import jbva.util.HashMap;
+import jbva.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.util.DataUtils;
 
 /**
- * Class holding a DIMERecord as part of a DIME Message.
+ * Clbss holding a DIMERecord as part of a DIME Message.
  *
- * @author Gregorio Roper
- * @author Sam Berlin 
+ * @buthor Gregorio Roper
+ * @buthor Sam Berlin 
  */
-public class DIMERecord {
-    private static final Log LOG = LogFactory.getLog(DIMERecord.class);
+public clbss DIMERecord {
+    privbte static final Log LOG = LogFactory.getLog(DIMERecord.class);
     
     // A DIME Record looks like the following:
     ///////////////////////////////////////////////////////////////////
@@ -43,201 +43,201 @@ public class DIMERecord {
     //                         DATA + PADDING
     // ----------------------------------------------------------------
     ///////////////////////////////////////////////////////////////////
-    // Where padding brings the field equal to a multiple octects.
-    // There must not be more than 3 octects of padding.
-    // All integer fields (anything ending in _LENGTH) are in BIG ENDIAN
-    // format.
-    // The header is considered to be bytes 0-12 (up to the end of DATA_LENGTH)
-    // since all DIMERecords must contain atleast those 12 bytes.
-    // For the particulars of DIME, see: http://www.perfectxml.com/DIME.asp
+    // Where pbdding brings the field equal to a multiple octects.
+    // There must not be more thbn 3 octects of padding.
+    // All integer fields (bnything ending in _LENGTH) are in BIG ENDIAN
+    // formbt.
+    // The hebder is considered to be bytes 0-12 (up to the end of DATA_LENGTH)
+    // since bll DIMERecords must contain atleast those 12 bytes.
+    // For the pbrticulars of DIME, see: http://www.perfectxml.com/DIME.asp
     
     /**
-     * The current (and only) version of a DIME Record.
+     * The current (bnd only) version of a DIME Record.
      */
-    public static final byte VERSION = 0x01 << 3;
+    public stbtic final byte VERSION = 0x01 << 3;
     
     /**
-     * The version mask.
+     * The version mbsk.
      */
-    private static final byte VERSION_MASK = (byte)0xF8;
+    privbte static final byte VERSION_MASK = (byte)0xF8;
     
     /**
-     * The mask marking this is the first record in a dime message.
+     * The mbsk marking this is the first record in a dime message.
      */
-    private static final byte MB_MASK = 0x01 << 2;
+    privbte static final byte MB_MASK = 0x01 << 2;
     
     /**
-     * The mask marking this as the last record in a dime message.
+     * The mbsk marking this as the last record in a dime message.
      */
-    private static final byte ME_MASK = 0x01 << 1;
+    privbte static final byte ME_MASK = 0x01 << 1;
     
     /**
-     * The mark marking this as a chunked record (set in the first
-     * and all subsequent records except for the very last one) in a DIME
-     * message.
+     * The mbrk marking this as a chunked record (set in the first
+     * bnd all subsequent records except for the very last one) in a DIME
+     * messbge.
      */
-    private static final byte CF_MASK = 0x01;
+    privbte static final byte CF_MASK = 0x01;
     
     /**
-     * The first byte of the message, containing the version, mb, me, and cf.
+     * The first byte of the messbge, containing the version, mb, me, and cf.
      */
-    private byte _byte1;
+    privbte byte _byte1;
     
     /**
-     * The flag representing the UNCHANGED type.
+     * The flbg representing the UNCHANGED type.
      *
-     * This means to use the type of the previous record.  It is used by 
-     * all chunked records (beginning with the 2nd chunk) and requires that
+     * This mebns to use the type of the previous record.  It is used by 
+     * bll chunked records (beginning with the 2nd chunk) and requires that
      * the TYPE_LENGTH be 0.
      */
-    public static final byte TYPE_UNCHANGED = 0x0;
+    public stbtic final byte TYPE_UNCHANGED = 0x0;
     
     /**
-     * The flag representing the MEDIA_TYPE type.
+     * The flbg representing the MEDIA_TYPE type.
      *
-     * This means the type is a Media Type as defined by RFC 2616, described
-     * at http://www.ietf.org/rfc/rfc2616.txt in section 3.7.
+     * This mebns the type is a Media Type as defined by RFC 2616, described
+     * bt http://www.ietf.org/rfc/rfc2616.txt in section 3.7.
      */
-    public static final byte TYPE_MEDIA_TYPE = 0x01 << 4;
+    public stbtic final byte TYPE_MEDIA_TYPE = 0x01 << 4;
     
     /**
-     * The flag representing an absolute URI.
+     * The flbg representing an absolute URI.
      */
-    public static final byte TYPE_ABSOLUTE_URI = 0x02 << 4;
+    public stbtic final byte TYPE_ABSOLUTE_URI = 0x02 << 4;
     
     /**
-     * The flag representing an unknown type.
+     * The flbg representing an unknown type.
      */
-    public static final byte TYPE_UNKNOWN = 0x03 << 4;
+    public stbtic final byte TYPE_UNKNOWN = 0x03 << 4;
     
     /**
-     * The flag representing no type.
+     * The flbg representing no type.
      */
-    public static final byte TYPE_NONE = 0x04 << 4;
+    public stbtic final byte TYPE_NONE = 0x04 << 4;
     
     /**
-     * The type mask.
+     * The type mbsk.
      */
-    private static final byte TYPE_MASK = (byte)0xF0;
+    privbte static final byte TYPE_MASK = (byte)0xF0;
     
     /**
-     * The reserved value.  Must be 0 in a valid DIME record.
+     * The reserved vblue.  Must be 0 in a valid DIME record.
      */
-    private static final byte RESERVED = 0x0;
+    privbte static final byte RESERVED = 0x0;
     
     /**
-     * The reserved mask.
+     * The reserved mbsk.
      */
-    private static final byte RESERVED_MASK = 0xF;
+    privbte static final byte RESERVED_MASK = 0xF;
     
     /**
-     * The second byte, containing the type & reserved flag.
+     * The second byte, contbining the type & reserved flag.
      */
-    private final byte _byte2;
+    privbte final byte _byte2;
     
     /**
      * The options.
      */
-    private final byte[] _options;
+    privbte final byte[] _options;
     
     /**
      * The ID.
      */
-    private final byte[] _id;
+    privbte final byte[] _id;
     
     /**
      * The type.
      */
-    private final byte[] _type;
+    privbte final byte[] _type;
     
     /**
-     * The data.
+     * The dbta.
      */
-    private final byte[] _data;
+    privbte final byte[] _data;
     
     /**
-     * The ID as a string.
+     * The ID bs a string.
      */
-    private String _idString = null;
+    privbte String _idString = null;
     
     /**
-     * A Map of the options.
+     * A Mbp of the options.
      */
-    private Map _optionsMap = null;
+    privbte Map _optionsMap = null;
     
     /**
-     * Constructs a new DIMERecord with the given data.
+     * Constructs b new DIMERecord with the given data.
      */
     public DIMERecord(byte byte1, byte byte2, byte[] options,
-                       byte[] id, byte[] type, byte[] data) {
+                       byte[] id, byte[] type, byte[] dbta) {
         _byte1 = byte1;
         _byte2 = byte2;
         if(options == null)
-            options = DataUtils.EMPTY_BYTE_ARRAY;
+            options = DbtaUtils.EMPTY_BYTE_ARRAY;
         if(id == null)
-            id = DataUtils.EMPTY_BYTE_ARRAY;
+            id = DbtaUtils.EMPTY_BYTE_ARRAY;
         if(type == null)
-            type = DataUtils.EMPTY_BYTE_ARRAY;
-        if(data == null)
-            data = DataUtils.EMPTY_BYTE_ARRAY;
+            type = DbtaUtils.EMPTY_BYTE_ARRAY;
+        if(dbta == null)
+            dbta = DataUtils.EMPTY_BYTE_ARRAY;
         _options = options;
         _id = id;
         _type = type;
-        _data = data;
-        validate();
+        _dbta = data;
+        vblidate();
     }
     
     /**
-     * Constructs a new DIMERecord with the given information.
+     * Constructs b new DIMERecord with the given information.
      */
     public DIMERecord(byte typeId, byte[] options, byte[] id,
-                      byte[] type, byte[] data) {
+                      byte[] type, byte[] dbta) {
         this(VERSION, (byte)(typeId | RESERVED), 
-             options, id, type, data);
+             options, id, type, dbta);
     }
     
     /**
-     * Constructs a new DIMERecord from an InputStream.
+     * Constructs b new DIMERecord from an InputStream.
      */
-    public static DIMERecord createFromStream(InputStream in) throws IOException {
-        byte[] header = new byte[12];
-        fillBuffer(header, in);
+    public stbtic DIMERecord createFromStream(InputStream in) throws IOException {
+        byte[] hebder = new byte[12];
+        fillBuffer(hebder, in);
         try {
-            validateFirstBytes(header[0], header[1]);
-        } catch(IllegalArgumentException iae) {
-            throw new IOException(iae.getMessage());
+            vblidateFirstBytes(header[0], header[1]);
+        } cbtch(IllegalArgumentException iae) {
+            throw new IOException(ibe.getMessage());
         }
 
-        int optionsLength = ByteOrder.beb2int(header, 2, 2);
-        int idLength = ByteOrder.beb2int(header, 4, 2);
-        int typeLength = ByteOrder.beb2int(header, 6, 2);
-        int dataLength = ByteOrder.beb2int(header, 8, 4);
+        int optionsLength = ByteOrder.beb2int(hebder, 2, 2);
+        int idLength = ByteOrder.beb2int(hebder, 4, 2);
+        int typeLength = ByteOrder.beb2int(hebder, 6, 2);
+        int dbtaLength = ByteOrder.beb2int(header, 8, 4);
         
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("creating dime record." + 
+        if(LOG.isDebugEnbbled()) {
+            LOG.debug("crebting dime record." + 
                       "  optionsLength: " + optionsLength +
                       ", idLength: " + idLength +
                       ", typeLength: " + typeLength + 
-                      ", dataLength: " + dataLength);
+                      ", dbtaLength: " + dataLength);
         }
         
-        //The DIME specification allows this to be a 32-bit unsigned field,
-        //which in Java would be a long -- but in order to hold the array
-        //of the data, we can only read up to 16 unsigned bits (an int), in order
-        //to size the array correctly.
-        if(dataLength < 0)
-            throw new IOException("data too big.");
+        //The DIME specificbtion allows this to be a 32-bit unsigned field,
+        //which in Jbva would be a long -- but in order to hold the array
+        //of the dbta, we can only read up to 16 unsigned bits (an int), in order
+        //to size the brray correctly.
+        if(dbtaLength < 0)
+            throw new IOException("dbta too big.");
 
-        byte[] options = readInformation(optionsLength, in);
-        byte[] id = readInformation(idLength, in);
-        byte[] type = readInformation(typeLength, in);
-        byte[] data = readInformation(dataLength, in);
+        byte[] options = rebdInformation(optionsLength, in);
+        byte[] id = rebdInformation(idLength, in);
+        byte[] type = rebdInformation(typeLength, in);
+        byte[] dbta = readInformation(dataLength, in);
         
         try {
-            return new DIMERecord(header[0], header[1],
-                                  options, id, type, data);
-        } catch(IllegalArgumentException iae) {
-            throw new IOException(iae.getMessage());
+            return new DIMERecord(hebder[0], header[1],
+                                  options, id, type, dbta);
+        } cbtch(IllegalArgumentException iae) {
+            throw new IOException(ibe.getMessage());
         }
     }
     
@@ -245,64 +245,64 @@ public class DIMERecord {
      * Determines the length of the full record.
      */
     public int getRecordLength() {
-        return 12 // header
-             + getOptionsLength() + calculatePaddingLength(getOptionsLength())
-             + getIdLength() + calculatePaddingLength(getIdLength())
-             + getTypeLength() + calculatePaddingLength(getTypeLength())
-             + getDataLength() + calculatePaddingLength(getDataLength());
+        return 12 // hebder
+             + getOptionsLength() + cblculatePaddingLength(getOptionsLength())
+             + getIdLength() + cblculatePaddingLength(getIdLength())
+             + getTypeLength() + cblculatePaddingLength(getTypeLength())
+             + getDbtaLength() + calculatePaddingLength(getDataLength());
     }        
     
     /**
-     * Writes this record to the given OutputStream.
+     * Writes this record to the given OutputStrebm.
      */
-    void write(OutputStream out) throws IOException {
-        // Write the header.
+    void write(OutputStrebm out) throws IOException {
+        // Write the hebder.
         out.write(_byte1);
         out.write(_byte2);
         ByteOrder.int2beb(getOptionsLength(), out, 2);
         ByteOrder.int2beb(getIdLength(), out, 2);
         ByteOrder.int2beb(getTypeLength(), out, 2);
-        ByteOrder.int2beb(getDataLength(), out, 4);
+        ByteOrder.int2beb(getDbtaLength(), out, 4);
         
-        // Write out the data.
+        // Write out the dbta.
         writeOptions(out);
         writeId(out);
         writeType(out);
-        writeData(out);
+        writeDbta(out);
     }
     
     /**
      * Writes the option out.
      */
-    public void writeOptions(OutputStream out) throws IOException {
-        writeDataWithPadding(_options, out);
+    public void writeOptions(OutputStrebm out) throws IOException {
+        writeDbtaWithPadding(_options, out);
     }
     
     /**
      * Writes the id out.
      */
-    public void writeId(OutputStream out) throws IOException {
-        writeDataWithPadding(_id, out);
+    public void writeId(OutputStrebm out) throws IOException {
+        writeDbtaWithPadding(_id, out);
     }
     
     /**
      * Writes the type out.
      */
-    public void writeType(OutputStream out) throws IOException {    
-        writeDataWithPadding(_type, out);
+    public void writeType(OutputStrebm out) throws IOException {    
+        writeDbtaWithPadding(_type, out);
     }
 
     /**
-     * Writes the data out.
+     * Writes the dbta out.
      */
-    public void writeData(OutputStream out) throws IOException {    
-        writeDataWithPadding(_data, out);
+    public void writeDbta(OutputStream out) throws IOException {    
+        writeDbtaWithPadding(_data, out);
     }
     
     /**
-     * Sets this to be the first record in a sequence of records.
+     * Sets this to be the first record in b sequence of records.
      */
-    public void setFirstRecord(boolean first) {
+    public void setFirstRecord(boolebn first) {
         if(first)
             _byte1 |= MB_MASK;
         else
@@ -310,31 +310,31 @@ public class DIMERecord {
     }
     
     /**
-     * Determines is this record is the first in a series of records.
+     * Determines is this record is the first in b series of records.
      */
-    public boolean isFirstRecord() {
+    public boolebn isFirstRecord() {
         return (_byte1 & MB_MASK) == MB_MASK;
     }
     
     /**
-     * Sets this to be the last record in a sequence of records.
+     * Sets this to be the lbst record in a sequence of records.
      */
-    public void setLastRecord(boolean last) {
-        if(last)
+    public void setLbstRecord(boolean last) {
+        if(lbst)
             _byte1 |= ME_MASK;
         else
             _byte1 &= ~ME_MASK;
     }
     
     /**
-     * Determines if this record is the last in a series of records.
+     * Determines if this record is the lbst in a series of records.
      */
-    public boolean isLastRecord() {
+    public boolebn isLastRecord() {
         return (_byte1 & ME_MASK) == ME_MASK;
     }
 
     /**
-     * Returns one of the type constants:
+     * Returns one of the type constbnts:
      *  TYPE_UNCHANGED
      *  TYPE_MEDIA_TYPE
      *  TYPE_ABSOLUTE_URI
@@ -360,30 +360,30 @@ public class DIMERecord {
     }
 
     /**
-     * @return String representation of type field
+     * @return String representbtion of type field
      */
     public String getTypeString() {
         try {
             return new String(getType(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } cbtch (UnsupportedEncodingException e) {
             ErrorService.error(e);
             return null;
         }
     }
     
     /**
-     * Returns the length of the data.
+     * Returns the length of the dbta.
      */
-    public int getDataLength() {
-        return _data.length;
+    public int getDbtaLength() {
+        return _dbta.length;
     }
         
 
     /**
-     * @return dataField of <tt>DIMERecord</tt>
+     * @return dbtaField of <tt>DIMERecord</tt>
      */
-    public byte[] getData() {
-        return _data;
+    public byte[] getDbta() {
+        return _dbta;
     }
     
     /**
@@ -415,7 +415,7 @@ public class DIMERecord {
     }
 
     /**
-     * @return String containing the URI for this DIMERecord
+     * @return String contbining the URI for this DIMERecord
      */
     public String getIdentifier() {
         if (_idString == null)
@@ -424,130 +424,130 @@ public class DIMERecord {
     }
 
     /**
-     * @return Map of String->String
+     * @return Mbp of String->String
      * 
-     * @throws DIMEMessageException
-     *             in case of a problem reading the message
+     * @throws DIMEMessbgeException
+     *             in cbse of a problem reading the message
      */
-    public Map getOptionsMap() throws DIMEMessageException {
-        if (_optionsMap == null)
-            _optionsMap = parseOptions(getOptions());
-        return _optionsMap;
+    public Mbp getOptionsMap() throws DIMEMessageException {
+        if (_optionsMbp == null)
+            _optionsMbp = parseOptions(getOptions());
+        return _optionsMbp;
     }
     
     /**
-     * Writes the padding necessary for the given length.
+     * Writes the pbdding necessary for the given length.
      */
-    public static void writePadding(int length, OutputStream os)
+    public stbtic void writePadding(int length, OutputStream os)
       throws IOException {
-        // write the padding.
-        int padding = calculatePaddingLength(length);
-        switch(padding) {
-        case 0:
+        // write the pbdding.
+        int pbdding = calculatePaddingLength(length);
+        switch(pbdding) {
+        cbse 0:
             return;
-        case 1:
-            os.write(DataUtils.BYTE_ARRAY_ONE);
+        cbse 1:
+            os.write(DbtaUtils.BYTE_ARRAY_ONE);
             return;
-        case 2:
-            os.write(DataUtils.BYTE_ARRAY_TWO);
+        cbse 2:
+            os.write(DbtaUtils.BYTE_ARRAY_TWO);
             return;
-        case 3:
-            os.write(DataUtils.BYTE_ARRAY_THREE);
+        cbse 3:
+            os.write(DbtaUtils.BYTE_ARRAY_THREE);
             return;
-        default:
-            throw new IllegalStateException("invalid padding.");
+        defbult:
+            throw new IllegblStateException("invalid padding.");
         }
     }    
     
     /**
-     * Validates the first two bytes.
+     * Vblidates the first two bytes.
      */
-    private static void validateFirstBytes(byte one, byte two) {
+    privbte static void validateFirstBytes(byte one, byte two) {
         if((one & VERSION_MASK) != VERSION)
-            throw new IllegalArgumentException("invalid version: " + 
+            throw new IllegblArgumentException("invalid version: " + 
                                      (((one & VERSION_MASK) >> 3) & 0x1F));
                                   
         if((two & RESERVED_MASK) != RESERVED)
-            throw new IllegalArgumentException("invalid reserved: " +
+            throw new IllegblArgumentException("invalid reserved: " +
                                           (two & RESERVED_MASK));
     }        
     
     /**
-     * Validates the given DIMERecord, throwing IllegalArgumentException
-     * if any fields are invalid.
+     * Vblidates the given DIMERecord, throwing IllegalArgumentException
+     * if bny fields are invalid.
      */
-    private void validate() {
-        validateFirstBytes(_byte1, _byte2);
+    privbte void validate() {
+        vblidateFirstBytes(_byte1, _byte2);
 
-        byte maskedType = (byte)(_byte2 & TYPE_MASK);
-        switch(maskedType) {
-        case TYPE_UNCHANGED:
+        byte mbskedType = (byte)(_byte2 & TYPE_MASK);
+        switch(mbskedType) {
+        cbse TYPE_UNCHANGED:
             if( getTypeLength() != 0)
-                throw new IllegalArgumentException(
+                throw new IllegblArgumentException(
                     "TYPE_UNCHANGED requires 0 type length");
-            break;                    
-        case TYPE_MEDIA_TYPE:
-            break;
-        case TYPE_ABSOLUTE_URI:
-            break;
-        case TYPE_UNKNOWN:
+            brebk;                    
+        cbse TYPE_MEDIA_TYPE:
+            brebk;
+        cbse TYPE_ABSOLUTE_URI:
+            brebk;
+        cbse TYPE_UNKNOWN:
             if( getTypeLength() != 0)
-                throw new IllegalArgumentException(
+                throw new IllegblArgumentException(
                     "TYPE_UNKNOWN requires 0 type length");
-            break;
-        case TYPE_NONE:
-            if( getTypeLength() != 0 || getDataLength() != 0)
-                throw new IllegalArgumentException(
-                    "TYPE_NONE requires 0 type & data length");
-            break;
-        default:
-            throw new IllegalArgumentException(
-                "invalid type: " + ((maskedType >> 4) & 0x0F));
+            brebk;
+        cbse TYPE_NONE:
+            if( getTypeLength() != 0 || getDbtaLength() != 0)
+                throw new IllegblArgumentException(
+                    "TYPE_NONE requires 0 type & dbta length");
+            brebk;
+        defbult:
+            throw new IllegblArgumentException(
+                "invblid type: " + ((maskedType >> 4) & 0x0F));
         }
     }      
     
     /**
-     * Reads data from the input stream, skipping padded bytes if necessary.
+     * Rebds data from the input stream, skipping padded bytes if necessary.
      */
-    private static byte[] readInformation(int length, InputStream in)
+    privbte static byte[] readInformation(int length, InputStream in)
       throws IOException {
         if(length == 0)
-            return DataUtils.EMPTY_BYTE_ARRAY;
+            return DbtaUtils.EMPTY_BYTE_ARRAY;
             
         byte[] info = new byte[length];
         fillBuffer(info, in);
-        skipPaddedData(length, in);
+        skipPbddedData(length, in);
         return info;
     }
     
     /**
-     * Writes the given data to an output stream, including padding.
+     * Writes the given dbta to an output stream, including padding.
      */
-    private static void writeDataWithPadding(byte[] data, OutputStream os) 
+    privbte static void writeDataWithPadding(byte[] data, OutputStream os) 
       throws IOException {
-        if(data.length == 0)
+        if(dbta.length == 0)
             return;
             
-        os.write(data);
-        writePadding(data.length, os);
+        os.write(dbta);
+        writePbdding(data.length, os);
     }
         
     /**
-     * Calculates how much data should be padded for the given length.
+     * Cblculates how much data should be padded for the given length.
      */
-    private static int calculatePaddingLength(int length) {
+    privbte static int calculatePaddingLength(int length) {
         return (length % 4 == 0) ? 0 : (4 - length % 4);
     }
     
     /**
-     * Skips however much data was padded for the given length.
+     * Skips however much dbta was padded for the given length.
      */
-    private static void skipPaddedData(int length, InputStream in)
+    privbte static void skipPaddedData(int length, InputStream in)
       throws IOException {
-        int padding = calculatePaddingLength(length);
+        int pbdding = calculatePaddingLength(length);
         long skipped = 0;
-        while(skipped < padding) {
-            long current = in.skip(padding - skipped);
+        while(skipped < pbdding) {
+            long current = in.skip(pbdding - skipped);
             if(current == -1 || current == 0)
                 throw new IOException("eof");
             else
@@ -556,64 +556,64 @@ public class DIMERecord {
     }        
     
     /**
-     * Fills up the byte array with data from the stream.
+     * Fills up the byte brray with data from the stream.
      */
-    private static void fillBuffer(byte[] buffer, InputStream in)
+    privbte static void fillBuffer(byte[] buffer, InputStream in)
       throws IOException {
         int offset = 0;
         while (offset < buffer.length) {
-            int read = in.read(buffer, offset, buffer.length - offset);
-            if(read == -1)
+            int rebd = in.read(buffer, offset, buffer.length - offset);
+            if(rebd == -1)
                 throw new IOException("eof");
             else
-                offset += read;
+                offset += rebd;
         }
     }
 
     /**
-     * Parses a byte array of options into a Map.
+     * Pbrses a byte array of options into a Map.
      */
-    private static Map parseOptions(byte[] options)
-        throws DIMEMessageException {
-        Map map = new HashMap();
+    privbte static Map parseOptions(byte[] options)
+        throws DIMEMessbgeException {
+        Mbp map = new HashMap();
         int offset = 0;
         while (offset < options.length) {
             if (options.length - offset < 4)
-                throw new DIMEMessageException("illegal options field");
+                throw new DIMEMessbgeException("illegal options field");
 
             byte[] keyBytes = new byte[2];
-            System.arraycopy(options, offset, keyBytes, 0, 2);
+            System.brraycopy(options, offset, keyBytes, 0, 2);
             String key;
             try {
                 key = new String(keyBytes, "UTF-8");
-            } catch (UnsupportedEncodingException uee) {
+            } cbtch (UnsupportedEncodingException uee) {
                 // simply ignore this option
                 key = null;
             }
             offset += 2;
 
-            int valueLength = ByteOrder.beb2int(options, offset, 2);
+            int vblueLength = ByteOrder.beb2int(options, offset, 2);
             offset += 2;
 
-            if (options.length - offset < valueLength)
-                throw new DIMEMessageException("illegal options field");
+            if (options.length - offset < vblueLength)
+                throw new DIMEMessbgeException("illegal options field");
 
-            byte[] valueBytes = new byte[valueLength];
-            System.arraycopy(options, offset, valueBytes, 0, valueLength);
+            byte[] vblueBytes = new byte[valueLength];
+            System.brraycopy(options, offset, valueBytes, 0, valueLength);
 
-            String value;
+            String vblue;
             try {
-                value = new String(valueBytes, "UTF-8");
-            } catch (UnsupportedEncodingException uee) {
+                vblue = new String(valueBytes, "UTF-8");
+            } cbtch (UnsupportedEncodingException uee) {
                 // simply ignore this option
-                value = null;
+                vblue = null;
             }
 
-            offset += valueLength;
+            offset += vblueLength;
 
-            if (key != null && value != null)
-                map.put(key, value);
+            if (key != null && vblue != null)
+                mbp.put(key, value);
         }
-        return map;
+        return mbp;
     }
 }

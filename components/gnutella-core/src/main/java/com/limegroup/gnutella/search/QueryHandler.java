@@ -1,336 +1,336 @@
 
-package com.limegroup.gnutella.search;
+pbckage com.limegroup.gnutella.search;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import jbva.util.ArrayList;
+import jbva.util.Collections;
+import jbva.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.ForMeReplyHandler;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutellb.Connection;
+import com.limegroup.gnutellb.ConnectionManager;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.ForMeReplyHandler;
+import com.limegroup.gnutellb.GUID;
+import com.limegroup.gnutellb.ManagedConnection;
+import com.limegroup.gnutellb.MessageRouter;
+import com.limegroup.gnutellb.ReplyHandler;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.routing.QueryRouteTable;
 
 /**
- * This class is a factory for creating <tt>QueryRequest</tt> instances
- * for dynamic queries.  Dynamic queries adjust to the varying conditions of
- * a query, such as the number of results received, the number of nodes
- * hit or theoretically hit, etc.  This class makes it convenient to 
- * rapidly generate <tt>QueryRequest</tt>s with similar characteristics, 
- * such as guids, the query itself, the xml query, etc, but with customized
- * settings, such as the TTL.
+ * This clbss is a factory for creating <tt>QueryRequest</tt> instances
+ * for dynbmic queries.  Dynamic queries adjust to the varying conditions of
+ * b query, such as the number of results received, the number of nodes
+ * hit or theoreticblly hit, etc.  This class makes it convenient to 
+ * rbpidly generate <tt>QueryRequest</tt>s with similar characteristics, 
+ * such bs guids, the query itself, the xml query, etc, but with customized
+ * settings, such bs the TTL.
  */
-public final class QueryHandler {
+public finbl class QueryHandler {
     
-    private static final Log LOG = LogFactory.getLog(QueryHandler.class);
+    privbte static final Log LOG = LogFactory.getLog(QueryHandler.class);
 
 	/**
-	 * Constant for the number of results to look for.
+	 * Constbnt for the number of results to look for.
 	 */
-	private final int RESULTS;
+	privbte final int RESULTS;
 
     /**
-     * Constant for the max TTL for a query.
+     * Constbnt for the max TTL for a query.
      */
-    public static final byte MAX_QUERY_TTL = (byte) 6;
+    public stbtic final byte MAX_QUERY_TTL = (byte) 6;
 
 	/**
-	 * The number of results to try to get if we're an Ultrapeer originating
+	 * The number of results to try to get if we're bn Ultrapeer originating
 	 * the query.
 	 */
-	public static final int ULTRAPEER_RESULTS = 150;
+	public stbtic final int ULTRAPEER_RESULTS = 150;
 
     /**
-     * Ultrapeers seem to get less results - lets give them a little boost.
+     * Ultrbpeers seem to get less results - lets give them a little boost.
      */
-    public static final double UP_RESULT_BUMP = 1.15;
+    public stbtic final double UP_RESULT_BUMP = 1.15;
 
 
 	/**
-	 * The number of results to try to get if the query came from an old
-	 * leaf -- they are connected to 2 other Ultrapeers that may or may
-	 * not use this algorithm.
+	 * The number of results to try to get if the query cbme from an old
+	 * lebf -- they are connected to 2 other Ultrapeers that may or may
+	 * not use this blgorithm.
 	 */
-	private static final int OLD_LEAF_RESULTS = 20;
+	privbte static final int OLD_LEAF_RESULTS = 20;
 
 	/**
-	 * The number of results to try to get for new leaves -- they only 
-	 * maintain 2 connections and don't generate as much overall traffic,
-	 * so give them a little more.
+	 * The number of results to try to get for new lebves -- they only 
+	 * mbintain 2 connections and don't generate as much overall traffic,
+	 * so give them b little more.
 	 */
-	private static final int NEW_LEAF_RESULTS = 38;
+	privbte static final int NEW_LEAF_RESULTS = 38;
 
 	/**
-	 * The number of results to try to get for queries by hash -- really
-	 * small since you need relatively few exact matches.
+	 * The number of results to try to get for queries by hbsh -- really
+	 * smbll since you need relatively few exact matches.
 	 */
-	private static final int HASH_QUERY_RESULTS = 10;
+	privbte static final int HASH_QUERY_RESULTS = 10;
 
     /**
-     * If Leaf Guidance is in effect, the maximum number of hits to route.
+     * If Lebf Guidance is in effect, the maximum number of hits to route.
      */
-    private static final int MAXIMUM_ROUTED_FOR_LEAVES = 75;
+    privbte static final int MAXIMUM_ROUTED_FOR_LEAVES = 75;
 
     /**
-     * The number of milliseconds to wait per query hop.  So, if we send
-     * out a TTL=3 query, we will then wait TTL*_timeToWaitPerHop
-     * milliseconds.  As the query continues and we gather more data
-     * regarding the popularity of the file, this number may decrease.
+     * The number of milliseconds to wbit per query hop.  So, if we send
+     * out b TTL=3 query, we will then wait TTL*_timeToWaitPerHop
+     * milliseconds.  As the query continues bnd we gather more data
+     * regbrding the popularity of the file, this number may decrease.
      */
-    private volatile long _timeToWaitPerHop = 2400;
+    privbte volatile long _timeToWaitPerHop = 2400;
 
     /**
-     * Variable for the number of milliseconds to shave off of the time
-     * to wait per hop after a certain point in the query.  As the query
-     * continues, the time to shave may increase as well.
+     * Vbriable for the number of milliseconds to shave off of the time
+     * to wbit per hop after a certain point in the query.  As the query
+     * continues, the time to shbve may increase as well.
      */
-    private volatile long _timeToDecreasePerHop = 10;
+    privbte volatile long _timeToDecreasePerHop = 10;
 
     /**
-     * Variable for the number of times we've decremented the per hop wait
+     * Vbriable for the number of times we've decremented the per hop wait
      * time.  This is used to determine how much more we should decrement
-     * it on this pass.
+     * it on this pbss.
      */
-    private volatile int _numDecrements = 0;
+    privbte volatile int _numDecrements = 0;
 
     /**
-     * Constant for the maximum number of milliseconds the entire query
-     * can last.  The query expires when this limit is reached.
+     * Constbnt for the maximum number of milliseconds the entire query
+     * cbn last.  The query expires when this limit is reached.
      */
-    public static final int MAX_QUERY_TIME = 200 * 1000;
+    public stbtic final int MAX_QUERY_TIME = 200 * 1000;
 
 
 	/**
-	 * Handle to the <tt>MessageRouter</tt> instance.  Non-final for
+	 * Hbndle to the <tt>MessageRouter</tt> instance.  Non-final for
      * testing purposes.
 	 */
-	private static MessageRouter _messageRouter =
-		RouterService.getMessageRouter();
+	privbte static MessageRouter _messageRouter =
+		RouterService.getMessbgeRouter();
 
 	/**
-	 * Handle to the <tt>ConnectionManager</tt> instance.  Non-final for
+	 * Hbndle to the <tt>ConnectionManager</tt> instance.  Non-final for
      * testing purposes.
 	 */
-	private static ConnectionManager _connectionManager =
-		RouterService.getConnectionManager();
+	privbte static ConnectionManager _connectionManager =
+		RouterService.getConnectionMbnager();
 
     /**
-     * Variable for the number of results the leaf reports it has.
+     * Vbriable for the number of results the leaf reports it has.
      */
-    private volatile int _numResultsReportedByLeaf = 0;
+    privbte volatile int _numResultsReportedByLeaf = 0;
 
 	/**
-	 * Variable for the next time after which a query should be sent.
+	 * Vbriable for the next time after which a query should be sent.
 	 */
-	private volatile long _nextQueryTime = 0;
+	privbte volatile long _nextQueryTime = 0;
 
 	/**
-	 * The theoretical number of hosts that have been reached by this query.
+	 * The theoreticbl number of hosts that have been reached by this query.
 	 */
-	private volatile int _theoreticalHostsQueried = 1;
+	privbte volatile int _theoreticalHostsQueried = 1;
 
 	/**
-	 * Constant for the <tt>ResultCounter</tt> for this query -- used
-	 * to access the number of replies returned.
+	 * Constbnt for the <tt>ResultCounter</tt> for this query -- used
+	 * to bccess the number of replies returned.
 	 */
-	private final ResultCounter RESULT_COUNTER;
+	privbte final ResultCounter RESULT_COUNTER;
 
 	/**
-	 * Constant list of connections that have already been queried.
+	 * Constbnt list of connections that have already been queried.
 	 */
-	private final List QUERIED_CONNECTIONS = new ArrayList();
+	privbte final List QUERIED_CONNECTIONS = new ArrayList();
 
     /**
-     * <tt>List</tt> of TTL=1 probe connections that we've already used.
+     * <tt>List</tt> of TTL=1 probe connections thbt we've already used.
      */
-    private final List QUERIED_PROBE_CONNECTIONS = new ArrayList();
+    privbte final List QUERIED_PROBE_CONNECTIONS = new ArrayList();
 
 	/**
-	 * The time the query started.
+	 * The time the query stbrted.
 	 */
-	private volatile long _queryStartTime = 0;
+	privbte volatile long _queryStartTime = 0;
 
     /**
-     * The current time, taken each time the query is initiated again.
+     * The current time, tbken each time the query is initiated again.
      */
-    private volatile long _curTime = 0;
+    privbte volatile long _curTime = 0;
 
 	/**
-	 * <tt>ReplyHandler</tt> for replies received for this query.
+	 * <tt>ReplyHbndler</tt> for replies received for this query.
 	 */
-	private final ReplyHandler REPLY_HANDLER;
+	privbte final ReplyHandler REPLY_HANDLER;
 
 	/**
-	 * Constant for the <tt>QueryRequest</tt> used to build new queries.
+	 * Constbnt for the <tt>QueryRequest</tt> used to build new queries.
 	 */
-	final QueryRequest QUERY;
+	finbl QueryRequest QUERY;
 
     /**
-     * Boolean for whether or not the query has been forwarded to leaves of 
-     * this ultrapeer.
+     * Boolebn for whether or not the query has been forwarded to leaves of 
+     * this ultrbpeer.
      */
-    private volatile boolean _forwardedToLeaves = false;
+    privbte volatile boolean _forwardedToLeaves = false;
 
 
     /**
-     * Boolean for whether or not we've sent the probe query.
+     * Boolebn for whether or not we've sent the probe query.
      */
-    private boolean _probeQuerySent;
+    privbte boolean _probeQuerySent;
 
     /**
-     * used to preference which connections to use when searching
-     * if the search comes from a leaf with a certain locale preference
-     * then those connections (of this ultrapeer) which match the 
-     * locale will be used before the other connections.
+     * used to preference which connections to use when sebrching
+     * if the sebrch comes from a leaf with a certain locale preference
+     * then those connections (of this ultrbpeer) which match the 
+     * locble will be used before the other connections.
      */
-    private final String _prefLocale;
+    privbte final String _prefLocale;
 
 	/**
-	 * Private constructor to ensure that only this class creates new
-	 * <tt>QueryFactory</tt> instances.
+	 * Privbte constructor to ensure that only this class creates new
+	 * <tt>QueryFbctory</tt> instances.
 	 *
-	 * @param request the <tt>QueryRequest</tt> to construct a handler for
-	 * @param results the number of results to get -- this varies based
-	 *  on the type of servant sending the request and is respeceted unless
-	 *  it's a query for a specific hash, in which case we try to get
-	 *  far fewer matches, ignoring this parameter
-	 * @param handler the <tt>ReplyHandler</tt> for routing replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
+	 * @pbram request the <tt>QueryRequest</tt> to construct a handler for
+	 * @pbram results the number of results to get -- this varies based
+	 *  on the type of servbnt sending the request and is respeceted unless
+	 *  it's b query for a specific hash, in which case we try to get
+	 *  fbr fewer matches, ignoring this parameter
+	 * @pbram handler the <tt>ReplyHandler</tt> for routing replies
+     * @pbram counter the <tt>ResultCounter</tt> that keeps track of how
+     *  mbny results have been returned for this query
 	 */
-	private QueryHandler(QueryRequest query, int results, ReplyHandler handler,
+	privbte QueryHandler(QueryRequest query, int results, ReplyHandler handler,
                          ResultCounter counter) {
         if( query == null )
-            throw new IllegalArgumentException("null query");
-        if( handler == null )
-            throw new IllegalArgumentException("null reply handler");
+            throw new IllegblArgumentException("null query");
+        if( hbndler == null )
+            throw new IllegblArgumentException("null reply handler");
         if( counter == null )
-            throw new IllegalArgumentException("null result counter");
+            throw new IllegblArgumentException("null result counter");
             
-		boolean isHashQuery = !query.getQueryUrns().isEmpty();
+		boolebn isHashQuery = !query.getQueryUrns().isEmpty();
 		QUERY = query;
-		if(isHashQuery) {
+		if(isHbshQuery) {
 			RESULTS = HASH_QUERY_RESULTS;
 		} else {
 			RESULTS = results;
 		}
 
-		REPLY_HANDLER = handler;
+		REPLY_HANDLER = hbndler;
         RESULT_COUNTER = counter;
-        _prefLocale = handler.getLocalePref();
+        _prefLocble = handler.getLocalePref();
 	}
 
 
 	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * Fbctory constructor for generating a new <tt>QueryHandler</tt> 
 	 * for the given <tt>QueryRequest</tt>.
 	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 * @pbram guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
+	 * @pbram handler the <tt>ReplyHandler</tt> for routing the replies
+     * @pbram counter the <tt>ResultCounter</tt> that keeps track of how
+     *  mbny results have been returned for this query
+	 * @return the <tt>QueryHbndler</tt> instance for this query
 	 */
-	public static QueryHandler createHandler(QueryRequest query, 
-											 ReplyHandler handler,
+	public stbtic QueryHandler createHandler(QueryRequest query, 
+											 ReplyHbndler handler,
                                              ResultCounter counter) {	
-		return new QueryHandler(query, ULTRAPEER_RESULTS, handler, counter);
+		return new QueryHbndler(query, ULTRAPEER_RESULTS, handler, counter);
 	}
 
 	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * Fbctory constructor for generating a new <tt>QueryHandler</tt> 
 	 * for the given <tt>QueryRequest</tt>.  Used by supernodes to run
-     * their own queries (ties up to ForMeReplyHandler.instance()).
+     * their own queries (ties up to ForMeReplyHbndler.instance()).
 	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 * @pbram guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
+     * @pbram counter the <tt>ResultCounter</tt> that keeps track of how
+     *  mbny results have been returned for this query
+	 * @return the <tt>QueryHbndler</tt> instance for this query
 	 */
-	public static QueryHandler createHandlerForMe(QueryRequest query, 
+	public stbtic QueryHandler createHandlerForMe(QueryRequest query, 
                                                   ResultCounter counter) {	
-        // because UPs seem to get less results, give them more than usual
-		return new QueryHandler(query, (int)(ULTRAPEER_RESULTS * UP_RESULT_BUMP),
-                                ForMeReplyHandler.instance(), counter);
+        // becbuse UPs seem to get less results, give them more than usual
+		return new QueryHbndler(query, (int)(ULTRAPEER_RESULTS * UP_RESULT_BUMP),
+                                ForMeReplyHbndler.instance(), counter);
 	}
 
 	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * Fbctory constructor for generating a new <tt>QueryHandler</tt> 
 	 * for the given <tt>QueryRequest</tt>.
 	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 * @pbram guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
+	 * @pbram handler the <tt>ReplyHandler</tt> for routing the replies
+     * @pbram counter the <tt>ResultCounter</tt> that keeps track of how
+     *  mbny results have been returned for this query
+	 * @return the <tt>QueryHbndler</tt> instance for this query
 	 */
-	public static QueryHandler createHandlerForOldLeaf(QueryRequest query, 
-													   ReplyHandler handler,
+	public stbtic QueryHandler createHandlerForOldLeaf(QueryRequest query, 
+													   ReplyHbndler handler,
                                                        ResultCounter counter) {	
-		return new QueryHandler(query, OLD_LEAF_RESULTS, handler, counter);
+		return new QueryHbndler(query, OLD_LEAF_RESULTS, handler, counter);
 	}
 
 	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * Fbctory constructor for generating a new <tt>QueryHandler</tt> 
 	 * for the given <tt>QueryRequest</tt>.
 	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 * @pbram guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
+	 * @pbram handler the <tt>ReplyHandler</tt> for routing the replies
+     * @pbram counter the <tt>ResultCounter</tt> that keeps track of how
+     *  mbny results have been returned for this query
+	 * @return the <tt>QueryHbndler</tt> instance for this query
 	 */
-	public static QueryHandler createHandlerForNewLeaf(QueryRequest query, 
-													   ReplyHandler handler,
+	public stbtic QueryHandler createHandlerForNewLeaf(QueryRequest query, 
+													   ReplyHbndler handler,
                                                        ResultCounter counter) {		
-		return new QueryHandler(query, NEW_LEAF_RESULTS, handler, counter);
+		return new QueryHbndler(query, NEW_LEAF_RESULTS, handler, counter);
 	}
 
 	/**
-	 * Factory method for creating new <tt>QueryRequest</tt> instances with
-	 * the same guid, query, xml query, urn types, etc.
+	 * Fbctory method for creating new <tt>QueryRequest</tt> instances with
+	 * the sbme guid, query, xml query, urn types, etc.
 	 *
-	 * @param ttl the time to live of the new query
-	 * @return a new <tt>QueryRequest</tt> instance with all of the 
-	 *  pre-defined parameters and the specified TTL
-	 * @throw <tt>IllegalArgumentException</tt> if the ttl is not within
-	 *  what is considered reasonable bounds
-	 * @throw NullPointerException if the <tt>query</tt> argument is 
+	 * @pbram ttl the time to live of the new query
+	 * @return b new <tt>QueryRequest</tt> instance with all of the 
+	 *  pre-defined pbrameters and the specified TTL
+	 * @throw <tt>IllegblArgumentException</tt> if the ttl is not within
+	 *  whbt is considered reasonable bounds
+	 * @throw NullPointerException if the <tt>query</tt> brgument is 
 	 *    <tt>null</tt>
 	 */
-	public static QueryRequest createQuery(QueryRequest query, byte ttl) {
+	public stbtic QueryRequest createQuery(QueryRequest query, byte ttl) {
 		if(ttl < 1 || ttl > MAX_QUERY_TTL) 
-			throw new IllegalArgumentException("ttl too high: "+ttl);
+			throw new IllegblArgumentException("ttl too high: "+ttl);
 		if(query == null) {
 			throw new NullPointerException("null query");
 		}
 
-		// build it from scratch if it's from us
+		// build it from scrbtch if it's from us
 		if(query.getHops() == 0) {
-			return QueryRequest.createQuery(query, ttl);
+			return QueryRequest.crebteQuery(query, ttl);
 		} else {
 			try {
-				return QueryRequest.createNetworkQuery(query.getGUID(), ttl, 
+				return QueryRequest.crebteNetworkQuery(query.getGUID(), ttl, 
 													   query.getHops(), 
-													   query.getPayload(),
+													   query.getPbyload(),
 													   query.getNetwork());
-			} catch(BadPacketException e) {
-				// this should never happen, since the query was already 
-				// read from the network, so report an error
+			} cbtch(BadPacketException e) {
+				// this should never hbppen, since the query was already 
+				// rebd from the network, so report an error
 				ErrorService.error(e);
 				return null;
 			}
@@ -338,214 +338,214 @@ public final class QueryHandler {
 	}
 
     /**
-     * Convenience method for creating a new query with the given TTL
-     * with this <tt>QueryHandler</tt>.
+     * Convenience method for crebting a new query with the given TTL
+     * with this <tt>QueryHbndler</tt>.
      *
-     * @param ttl the time to live for the new query
+     * @pbram ttl the time to live for the new query
      */
-    QueryRequest createQuery(byte ttl) {
-        return createQuery(QUERY, ttl);
+    QueryRequest crebteQuery(byte ttl) {
+        return crebteQuery(QUERY, ttl);
     }
 
 
 	
 	/**
 	 * Sends the query to the current connections.  If the query is not
-	 * yet ready to be processed, this returns immediately.
+	 * yet rebdy to be processed, this returns immediately.
 	 */
 	public void sendQuery() {
-		if(hasEnoughResults()) return;
+		if(hbsEnoughResults()) return;
 
 		_curTime = System.currentTimeMillis();
 		if(_curTime < _nextQueryTime) return;
 
-        if (LOG.isTraceEnabled())
-            LOG.trace("Query = " + QUERY.getQuery() +
-                      ", numHostsQueried: " + _theoreticalHostsQueried);
+        if (LOG.isTrbceEnabled())
+            LOG.trbce("Query = " + QUERY.getQuery() +
+                      ", numHostsQueried: " + _theoreticblHostsQueried);
 
-		if(_queryStartTime == 0) {
-			_queryStartTime = _curTime;
+		if(_queryStbrtTime == 0) {
+			_queryStbrtTime = _curTime;
         }
             
-        // handle 3 query cases
+        // hbndle 3 query cases
 
-        // 1) If we haven't sent the query to our leaves, send it
-        if(!_forwardedToLeaves) {
+        // 1) If we hbven't sent the query to our leaves, send it
+        if(!_forwbrdedToLeaves) {
 
-            _forwardedToLeaves = true;
-            QueryRouteTable qrt = 
-                RouterService.getMessageRouter().getQueryRouteTable();
+            _forwbrdedToLeaves = true;
+            QueryRouteTbble qrt = 
+                RouterService.getMessbgeRouter().getQueryRouteTable();
 
-            QueryRequest query = createQuery(QUERY, (byte)1);
+            QueryRequest query = crebteQuery(QUERY, (byte)1);
 
-            _theoreticalHostsQueried += 25;
+            _theoreticblHostsQueried += 25;
                 
-            // send the query to our leaves if there's a hit and wait,
+            // send the query to our lebves if there's a hit and wait,
             // otherwise we'll move on to the probe
-            if(qrt != null && qrt.contains(query)) {
-                RouterService.getMessageRouter().
-                    forwardQueryRequestToLeaves(query, 
+            if(qrt != null && qrt.contbins(query)) {
+                RouterService.getMessbgeRouter().
+                    forwbrdQueryRequestToLeaves(query, 
                                                 REPLY_HANDLER); 
                 _nextQueryTime = 
-                    System.currentTimeMillis() + _timeToWaitPerHop;
+                    System.currentTimeMillis() + _timeToWbitPerHop;
                 return;
             }
         }
         
-        // 2) If we haven't sent the probe query, send it
+        // 2) If we hbven't sent the probe query, send it
         if(!_probeQuerySent) {
             ProbeQuery pq = 
-                new ProbeQuery(_connectionManager.getInitializedConnections(),
+                new ProbeQuery(_connectionMbnager.getInitializedConnections(),
                                this);
-            long timeToWait = pq.getTimeToWait();            
-            _theoreticalHostsQueried += pq.sendProbe();
+            long timeToWbit = pq.getTimeToWait();            
+            _theoreticblHostsQueried += pq.sendProbe();
             _nextQueryTime = 
-                System.currentTimeMillis() + timeToWait;
+                System.currentTimeMillis() + timeToWbit;
             _probeQuerySent = true;
             return;
         }
 
-        // 3) If we haven't yet satisfied the query, keep trying
+        // 3) If we hbven't yet satisfied the query, keep trying
         else {
-            // Otherwise, just send a normal query -- make a copy of the 
-            // connections because we'll be modifying it.
+            // Otherwise, just send b normal query -- make a copy of the 
+            // connections becbuse we'll be modifying it.
             int newHosts = 
                 sendQuery(
-                    new ArrayList(
-                            _connectionManager.getInitializedConnections()));
+                    new ArrbyList(
+                            _connectionMbnager.getInitializedConnections()));
             if(newHosts == 0) {
-                // if we didn't query any new hosts, wait awhile for new
-                // connections to potentially appear
+                // if we didn't query bny new hosts, wait awhile for new
+                // connections to potentiblly appear
                 _nextQueryTime = System.currentTimeMillis() + 6000;
             }   
-            _theoreticalHostsQueried += newHosts;
+            _theoreticblHostsQueried += newHosts;
 
-            // if we've already queried quite a few hosts, not gotten
-            // many results, and have been querying for awhile, start
-            // decreasing the per-hop wait time
-            if(_timeToWaitPerHop > 100 &&
-               (System.currentTimeMillis() - _queryStartTime) > 6000) {
-                _timeToWaitPerHop -= _timeToDecreasePerHop;
+            // if we've blready queried quite a few hosts, not gotten
+            // mbny results, and have been querying for awhile, start
+            // decrebsing the per-hop wait time
+            if(_timeToWbitPerHop > 100 &&
+               (System.currentTimeMillis() - _queryStbrtTime) > 6000) {
+                _timeToWbitPerHop -= _timeToDecreasePerHop;
 
-                int resultFactor =
-                    Math.max(1, 
+                int resultFbctor =
+                    Mbth.max(1, 
                         (RESULTS/2)-(30*RESULT_COUNTER.getNumResults()));
 
-                int decrementFactor = Math.max(1, (_numDecrements/6));
+                int decrementFbctor = Math.max(1, (_numDecrements/6));
 
-                // the current decrease is weighted based on the number
-                // of results returned and on the number of connections
-                // we've tried -- the fewer results and the more 
-                // connections, the more the decrease
-                int currentDecrease = resultFactor * decrementFactor;
+                // the current decrebse is weighted based on the number
+                // of results returned bnd on the number of connections
+                // we've tried -- the fewer results bnd the more 
+                // connections, the more the decrebse
+                int currentDecrebse = resultFactor * decrementFactor;
 
-                currentDecrease = 
-                    Math.max(5, currentDecrease);
-                _timeToDecreasePerHop += currentDecrease; 
+                currentDecrebse = 
+                    Mbth.max(5, currentDecrease);
+                _timeToDecrebsePerHop += currentDecrease; 
 
                 _numDecrements++;
-                if(_timeToWaitPerHop < 100) {
-                    _timeToWaitPerHop = 100;
+                if(_timeToWbitPerHop < 100) {
+                    _timeToWbitPerHop = 100;
                 }
             }
         }
     }
 
     /**
-     * Sends a query to one of the specified <tt>List</tt> of connections.  
-     * This is the heart of the dynamic query.  We dynamically calculate the
-     * appropriate TTL to use based on our current estimate of how widely the
-     * file is distributed, how many connections we have, etc.  This is static
-     * to decouple the algorithm from the specific <tt>QueryHandler</tt>
-     * instance, making testing significantly easier.
+     * Sends b query to one of the specified <tt>List</tt> of connections.  
+     * This is the hebrt of the dynamic query.  We dynamically calculate the
+     * bppropriate TTL to use based on our current estimate of how widely the
+     * file is distributed, how mbny connections we have, etc.  This is static
+     * to decouple the blgorithm from the specific <tt>QueryHandler</tt>
+     * instbnce, making testing significantly easier.
      *
-     * @param handler the <tt>QueryHandler</tt> instance containing data
+     * @pbram handler the <tt>QueryHandler</tt> instance containing data
      *  for this query
-     * @param list the <tt>List</tt> of Gnutella connections to send
+     * @pbram list the <tt>List</tt> of Gnutella connections to send
      *  queries over
-     * @return the number of new hosts theoretically reached by this
-     *  query iteration
+     * @return the number of new hosts theoreticblly reached by this
+     *  query iterbtion
      */
-    private int sendQuery(List ultrapeersAll) {
+    privbte int sendQuery(List ultrapeersAll) {
 
-        //we want to try to use all connections in ultrapeersLocale first.
-        List ultrapeers = /** method returns a copy */
-            _connectionManager.getInitializedConnectionsMatchLocale
-            (_prefLocale);
+        //we wbnt to try to use all connections in ultrapeersLocale first.
+        List ultrbpeers = /** method returns a copy */
+            _connectionMbnager.getInitializedConnectionsMatchLocale
+            (_prefLocble);
             
-        QUERIED_CONNECTIONS.retainAll(ultrapeersAll);
-        QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeersAll);
+        QUERIED_CONNECTIONS.retbinAll(ultrapeersAll);
+        QUERIED_PROBE_CONNECTIONS.retbinAll(ultrapeersAll);
         
-        //if we did get a list of connections that matches the locale
+        //if we did get b list of connections that matches the locale
         //of the query
-        if(!ultrapeers.isEmpty()) {
-            ultrapeers.removeAll(QUERIED_CONNECTIONS);
-            ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
-            //at this point ultrapeers could become empty
+        if(!ultrbpeers.isEmpty()) {
+            ultrbpeers.removeAll(QUERIED_CONNECTIONS);
+            ultrbpeers.removeAll(QUERIED_PROBE_CONNECTIONS);
+            //bt this point ultrapeers could become empty
         }
                 
-        if(ultrapeers.isEmpty()) { 
-            ultrapeers = ultrapeersAll;
-            // now, remove any connections we've used from our current list
+        if(ultrbpeers.isEmpty()) { 
+            ultrbpeers = ultrapeersAll;
+            // now, remove bny connections we've used from our current list
             // of connections to try
-            ultrapeers.removeAll(QUERIED_CONNECTIONS);
-            ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
+            ultrbpeers.removeAll(QUERIED_CONNECTIONS);
+            ultrbpeers.removeAll(QUERIED_PROBE_CONNECTIONS);
         }
 
-		int length = ultrapeers.size();
-        if (LOG.isTraceEnabled())
-            LOG.trace("potential querier size: " + length);
+		int length = ultrbpeers.size();
+        if (LOG.isTrbceEnabled())
+            LOG.trbce("potential querier size: " + length);
         byte ttl = 0;
-        ManagedConnection mc = null;
+        MbnagedConnection mc = null;
 
-        // add randomization to who we send our queries to
-        Collections.shuffle(ultrapeers);
+        // bdd randomization to who we send our queries to
+        Collections.shuffle(ultrbpeers);
 
-        // weed out all connections that aren't yet stable
+        // weed out bll connections that aren't yet stable
         for(int i=0; i<length; i++) {
-			ManagedConnection curConnection = 
-                (ManagedConnection)ultrapeers.get(i);			
+			MbnagedConnection curConnection = 
+                (MbnagedConnection)ultrapeers.get(i);			
 
-			// if the connection hasn't been up for long, don't use it,
-            // as the replies will never make it back to us if the
-            // connection is dropped, wasting bandwidth
-            if(!curConnection.isStable(_curTime)) continue;
+			// if the connection hbsn't been up for long, don't use it,
+            // bs the replies will never make it back to us if the
+            // connection is dropped, wbsting bandwidth
+            if(!curConnection.isStbble(_curTime)) continue;
             mc = curConnection;
-            break;
+            brebk;
         }
 
-        int remainingConnections = 
-            Math.max(length+QUERIED_PROBE_CONNECTIONS.size(), 0);
+        int rembiningConnections = 
+            Mbth.max(length+QUERIED_PROBE_CONNECTIONS.size(), 0);
 
-        // return if we don't have any connections to query at this time
-        if(remainingConnections == 0) return 0;
+        // return if we don't hbve any connections to query at this time
+        if(rembiningConnections == 0) return 0;
 
-        // pretend we have fewer connections than we do in case we
+        // pretend we hbve fewer connections than we do in case we
         // lose some
-        if(remainingConnections > 4) remainingConnections -= 4;
+        if(rembiningConnections > 4) remainingConnections -= 4;
 
-        boolean probeConnection = false;
+        boolebn probeConnection = false;
         
-        // mc can still be null if the list of connections was empty.
+        // mc cbn still be null if the list of connections was empty.
         if(mc == null) {
-            // if we have no connections to query, simply return for now
+            // if we hbve no connections to query, simply return for now
             if(QUERIED_PROBE_CONNECTIONS.isEmpty()) {
                 return 0;
             }
             
-            // we actually remove this from the list to make sure that
-            // QUERIED_CONNECTIONS and QUERIED_PROBE_CONNECTIONS do
-            // not have any of the same entries, as this connection
-            // will be added to QUERIED_CONNECTIONS
-            mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
+            // we bctually remove this from the list to make sure that
+            // QUERIED_CONNECTIONS bnd QUERIED_PROBE_CONNECTIONS do
+            // not hbve any of the same entries, as this connection
+            // will be bdded to QUERIED_CONNECTIONS
+            mc = (MbnagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
             probeConnection = true;
         }
         
-        int results = (_numResultsReportedByLeaf > 0 ? 
-                       _numResultsReportedByLeaf : 
+        int results = (_numResultsReportedByLebf > 0 ? 
+                       _numResultsReportedByLebf : 
                        RESULT_COUNTER.getNumResults());
         double resultsPerHost = 
-            (double)results/(double)_theoreticalHostsQueried;
+            (double)results/(double)_theoreticblHostsQueried;
 			
         int resultsNeeded = RESULTS - results;
         int hostsToQuery = 40000;
@@ -555,229 +555,229 @@ public final class QueryHandler {
                 
         
         int hostsToQueryPerConnection = 
-            hostsToQuery/remainingConnections;;
+            hostsToQuery/rembiningConnections;;
         
-        ttl = calculateNewTTL(hostsToQueryPerConnection, 
-                              mc.getNumIntraUltrapeerConnections(),
-                              mc.headers().getMaxTTL());
+        ttl = cblculateNewTTL(hostsToQueryPerConnection, 
+                              mc.getNumIntrbUltrapeerConnections(),
+                              mc.hebders().getMaxTTL());
                
 
-        // If we're sending the query down a probe connection and we've
-        // already used that connection, or that connection doesn't have
-        // a hit for the query, send it at TTL=2.  In these cases, 
-        // sending the query at TTL=1 is pointless because we've either
-        // already sent this query, or the Ultrapeer doesn't have a 
-        // match anyway
+        // If we're sending the query down b probe connection and we've
+        // blready used that connection, or that connection doesn't have
+        // b hit for the query, send it at TTL=2.  In these cases, 
+        // sending the query bt TTL=1 is pointless because we've either
+        // blready sent this query, or the Ultrapeer doesn't have a 
+        // mbtch anyway
         if(ttl == 1 && 
-           ((mc.isUltrapeerQueryRoutingConnection() &&
-            !mc.shouldForwardQuery(QUERY)) || probeConnection)) {
+           ((mc.isUltrbpeerQueryRoutingConnection() &&
+            !mc.shouldForwbrdQuery(QUERY)) || probeConnection)) {
             ttl = 2;
         }
-        QueryRequest query = createQuery(QUERY, ttl);
+        QueryRequest query = crebteQuery(QUERY, ttl);
 
         // send out the query on the network, returning the number of new
-        // hosts theoretically reached
+        // hosts theoreticblly reached
         return sendQueryToHost(query, mc, this);        
 	}
     
 
     /**
-     * Sends a query to the specified host.
+     * Sends b query to the specified host.
      *
-     * @param query the <tt>QueryRequest</tt> to send
-     * @param mc the <tt>ManagedConnection</tt> to send the query to
-     * @param handler the <tt>QueryHandler</tt> 
-     * @return the number of new hosts theoretically hit by this query
+     * @pbram query the <tt>QueryRequest</tt> to send
+     * @pbram mc the <tt>ManagedConnection</tt> to send the query to
+     * @pbram handler the <tt>QueryHandler</tt> 
+     * @return the number of new hosts theoreticblly hit by this query
      */
-    static int sendQueryToHost(QueryRequest query, 
-                               ManagedConnection mc, 
-                               QueryHandler handler) {
+    stbtic int sendQueryToHost(QueryRequest query, 
+                               MbnagedConnection mc, 
+                               QueryHbndler handler) {
         
-        // send the query directly along the connection, but if the query didn't
-        // go through send back 0....
-        if (!_messageRouter.originateQuery(query, mc)) return 0;
+        // send the query directly blong the connection, but if the query didn't
+        // go through send bbck 0....
+        if (!_messbgeRouter.originateQuery(query, mc)) return 0;
         
         byte ttl = query.getTTL();
 
-        // add the reply handler to the list of queried hosts if it's not
-        // a TTL=1 query or the connection does not support probe queries
+        // bdd the reply handler to the list of queried hosts if it's not
+        // b TTL=1 query or the connection does not support probe queries
 
-        // adds the connection to the list of probe connections if it's
-        // a TTL=1 query to a connection that supports probe extensions,
-        // otherwise add it to the list of connections we've queried
+        // bdds the connection to the list of probe connections if it's
+        // b TTL=1 query to a connection that supports probe extensions,
+        // otherwise bdd it to the list of connections we've queried
         if(ttl == 1 && mc.supportsProbeQueries()) {
-            handler.QUERIED_PROBE_CONNECTIONS.add(mc);
+            hbndler.QUERIED_PROBE_CONNECTIONS.add(mc);
         } else {
-            handler.QUERIED_CONNECTIONS.add(mc);
-            if (LOG.isTraceEnabled())
-                LOG.trace("QUERIED_CONNECTIONS.size() = " +
-                          handler.QUERIED_CONNECTIONS.size());
+            hbndler.QUERIED_CONNECTIONS.add(mc);
+            if (LOG.isTrbceEnabled())
+                LOG.trbce("QUERIED_CONNECTIONS.size() = " +
+                          hbndler.QUERIED_CONNECTIONS.size());
         }
 
-        if (LOG.isTraceEnabled())
-            LOG.trace("Querying host " + mc.getAddress() + " with ttl " +
+        if (LOG.isTrbceEnabled())
+            LOG.trbce("Querying host " + mc.getAddress() + " with ttl " +
                       query.getTTL());
         
-        handler._nextQueryTime = System.currentTimeMillis() + 
-            (ttl * handler._timeToWaitPerHop);
+        hbndler._nextQueryTime = System.currentTimeMillis() + 
+            (ttl * hbndler._timeToWaitPerHop);
 
-        return calculateNewHosts(mc, ttl);
+        return cblculateNewHosts(mc, ttl);
     }
 
 	/**
-	 * Calculates the new TTL to use based on the number of hosts per connection
+	 * Cblculates the new TTL to use based on the number of hosts per connection
 	 * we still need to query.
 	 * 
-	 * @param hostsToQueryPerConnection the number of hosts we should reach on
-	 *  each remaining connections, to the best of our knowledge
-     * @param degree the out-degree of the next connection
-     * @param maxTTL the maximum TTL the connection will allow
+	 * @pbram hostsToQueryPerConnection the number of hosts we should reach on
+	 *  ebch remaining connections, to the best of our knowledge
+     * @pbram degree the out-degree of the next connection
+     * @pbram maxTTL the maximum TTL the connection will allow
      * @return the TTL to use for the next connection
 	 */
-	private static byte 
-        calculateNewTTL(int hostsToQueryPerConnection, int degree, 
-                        byte maxTTL) {
+	privbte static byte 
+        cblculateNewTTL(int hostsToQueryPerConnection, int degree, 
+                        byte mbxTTL) {
 
-        if (maxTTL > MAX_QUERY_TTL) maxTTL = MAX_QUERY_TTL;
+        if (mbxTTL > MAX_QUERY_TTL) maxTTL = MAX_QUERY_TTL;
 
-        // not the most efficient algorithm -- should use Math.log, but
-        // that's ok
+        // not the most efficient blgorithm -- should use Math.log, but
+        // thbt's ok
         for(byte i=1; i<MAX_QUERY_TTL; i++) {
 
-            // biased towards lower TTLs since the horizon expands so
+            // bibsed towards lower TTLs since the horizon expands so
             // quickly
-            int hosts = (int)(16.0*calculateNewHosts(degree, i));            
+            int hosts = (int)(16.0*cblculateNewHosts(degree, i));            
             if(hosts >= hostsToQueryPerConnection) {
-                if(i > maxTTL) return maxTTL;
+                if(i > mbxTTL) return maxTTL;
                 return i;
             }
         }
-        return maxTTL;
+        return mbxTTL;
 	}
 
 	/**
-     * Calculate the number of new hosts that would be added to the 
-     * theoretical horizon if a query with the given ttl were sent down
+     * Cblculate the number of new hosts that would be added to the 
+     * theoreticbl horizon if a query with the given ttl were sent down
      * the given connection.
 	 *
-     * @param conn the <tt>Connection</tt> that will received the query
-	 * @param ttl the TTL of the query to add
+     * @pbram conn the <tt>Connection</tt> that will received the query
+	 * @pbram ttl the TTL of the query to add
 	 */
-	private static int calculateNewHosts(Connection conn, byte ttl) {
-        return calculateNewHosts(conn.getNumIntraUltrapeerConnections(), ttl);
+	privbte static int calculateNewHosts(Connection conn, byte ttl) {
+        return cblculateNewHosts(conn.getNumIntraUltrapeerConnections(), ttl);
 	}
 
 	/**
-     * Calculate the number of new hosts that would be added to the 
-     * theoretical horizon if a query with the given ttl were sent to
-     * a node with the given degree.  This is not precise because we're
-     * assuming that the nodes connected to the node in question also
-     * have the same degree, but there's not much we can do about it!
+     * Cblculate the number of new hosts that would be added to the 
+     * theoreticbl horizon if a query with the given ttl were sent to
+     * b node with the given degree.  This is not precise because we're
+     * bssuming that the nodes connected to the node in question also
+     * hbve the same degree, but there's not much we can do about it!
 	 *
-     * @param degree the degree of the node that will received the query
-	 * @param ttl the TTL of the query to add
+     * @pbram degree the degree of the node that will received the query
+	 * @pbram ttl the TTL of the query to add
 	 */    
-	private static int calculateNewHosts(int degree, byte ttl) {
+	privbte static int calculateNewHosts(int degree, byte ttl) {
 		double newHosts = 0;
 		for(;ttl>0; ttl--) {
-			newHosts += Math.pow((degree-1), ttl-1);
+			newHosts += Mbth.pow((degree-1), ttl-1);
 		}
 		return (int)newHosts;
 	}
 
 	/**
-	 * Returns whether or not this query has received enough results.
+	 * Returns whether or not this query hbs received enough results.
 	 *
-	 * @return <tt>true</tt> if this query has received enough results,
-	 *  <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if this query hbs received enough results,
+	 *  <tt>fblse</tt> otherwise
 	 */
-	public boolean hasEnoughResults() {		
-		// return false if the query hasn't started yet
-		if(_queryStartTime == 0) return false;
+	public boolebn hasEnoughResults() {		
+		// return fblse if the query hasn't started yet
+		if(_queryStbrtTime == 0) return false;
 
         // ----------------
-        // NOTE: as agreed, _numResultsReportedByLeaf is the number of results
-        // the leaf has received/consumed by a filter DIVIDED by 4 (4 being the
-        // number of UPs connection it maintains).  That is why we don't divide
-        // it here or anything.  We aren't sure if this mixes well with
-        // BearShare's use but oh well....
+        // NOTE: bs agreed, _numResultsReportedByLeaf is the number of results
+        // the lebf has received/consumed by a filter DIVIDED by 4 (4 being the
+        // number of UPs connection it mbintains).  That is why we don't divide
+        // it here or bnything.  We aren't sure if this mixes well with
+        // BebrShare's use but oh well....
         // ----------------
-        // if leaf guidance is in effect, we have different criteria.
-        if (_numResultsReportedByLeaf > 0) {
-            // we shouldn't route too much regardless of what the leaf says
+        // if lebf guidance is in effect, we have different criteria.
+        if (_numResultsReportedByLebf > 0) {
+            // we shouldn't route too much regbrdless of what the leaf says
             if (RESULT_COUNTER.getNumResults() >= MAXIMUM_ROUTED_FOR_LEAVES)
                 return true;
-            // if the leaf is happy, so are we....
-            if (_numResultsReportedByLeaf > RESULTS)
+            // if the lebf is happy, so are we....
+            if (_numResultsReportedByLebf > RESULTS)
                 return true;
         }
-        // leaf guidance is not in effect or we are doing our own query
+        // lebf guidance is not in effect or we are doing our own query
         else if (RESULT_COUNTER.getNumResults() >= RESULTS)
             return true;
 
-        // if our theoretical horizon has gotten too high, consider
+        // if our theoreticbl horizon has gotten too high, consider
         // it enough results
-        // precisely what this number should be is somewhat hard to determine
-        // because, while connection have a specfic degree, the degree of 
-        // the connections on subsequent hops cannot be determined
-		if(_theoreticalHostsQueried > 110000) {
+        // precisely whbt this number should be is somewhat hard to determine
+        // becbuse, while connection have a specfic degree, the degree of 
+        // the connections on subsequent hops cbnnot be determined
+		if(_theoreticblHostsQueried > 110000) {
             return true;
         }
 
-		// return true if we've been querying for longer than the specified 
-		// maximum
-		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
+		// return true if we've been querying for longer thbn the specified 
+		// mbximum
+		int queryLength = (int)(System.currentTimeMillis() - _queryStbrtTime);
 		if(queryLength > MAX_QUERY_TIME) {
             return true;
         }
 
-		return false;
+		return fblse;
 	}
 
     /**
-     * Use this to modify the number of results as reported by the leaf you are
+     * Use this to modify the number of results bs reported by the leaf you are
      * querying for.
      */
-    public void updateLeafResults(int numResults) {
-        if (numResults > _numResultsReportedByLeaf)
-            _numResultsReportedByLeaf = numResults;
+    public void updbteLeafResults(int numResults) {
+        if (numResults > _numResultsReportedByLebf)
+            _numResultsReportedByLebf = numResults;
     }
 
     /**
-     * Returns the number of results as reported by the leaf.  At least 0.
+     * Returns the number of results bs reported by the leaf.  At least 0.
      */
-    public int getNumResultsReportedByLeaf() {
-        return _numResultsReportedByLeaf;
+    public int getNumResultsReportedByLebf() {
+        return _numResultsReportedByLebf;
     }
 
     /**
-     * Accessor for the <tt>ReplyHandler</tt> instance for the connection
+     * Accessor for the <tt>ReplyHbndler</tt> instance for the connection
      * issuing this request.
      *
-     * @return the <tt>ReplyHandler</tt> for the connection issuing this 
+     * @return the <tt>ReplyHbndler</tt> for the connection issuing this 
      *  request
      */
-    public ReplyHandler getReplyHandler() {
+    public ReplyHbndler getReplyHandler() {
         return REPLY_HANDLER;
     }
     
     /**
-     * Accessor for the time to wait per hop, in milliseconds,
-     * for this QueryHandler.
+     * Accessor for the time to wbit per hop, in milliseconds,
+     * for this QueryHbndler.
      *
-     * @return the time to wait per hop in milliseconds for this
-     *  QueryHandler
+     * @return the time to wbit per hop in milliseconds for this
+     *  QueryHbndler
      */
-    public long getTimeToWaitPerHop() {
-        return _timeToWaitPerHop;
+    public long getTimeToWbitPerHop() {
+        return _timeToWbitPerHop;
     }
 
 	// overrides Object.toString
 	public String toString() {
-		return "QueryHandler: QUERY: "+QUERY;
+		return "QueryHbndler: QUERY: "+QUERY;
 	}
 
-    /** @return simply returns the guid of the query this is handling.
+    /** @return simply returns the guid of the query this is hbndling.
      */
     public GUID getGUID() {
         return new GUID(QUERY.getGUID());

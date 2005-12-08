@@ -1,57 +1,57 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 /**
- * Handles installation preferences.
+ * Hbndles installation preferences.
  */
-public final class InstallSettings extends AbstractSettings {
+public finbl class InstallSettings extends AbstractSettings {
 
-    private static final InstallSettings INSTANCE =
-        new InstallSettings();
-    private static final SettingsFactory FACTORY =
-        INSTANCE.getFactory();
+    privbte static final InstallSettings INSTANCE =
+        new InstbllSettings();
+    privbte static final SettingsFactory FACTORY =
+        INSTANCE.getFbctory();
 
-    public static InstallSettings instance() {
+    public stbtic InstallSettings instance() {
         return INSTANCE;
     }
 
-    private InstallSettings() {
-        super("installation.props", "LimeWire installs file");
+    privbte InstallSettings() {
+        super("instbllation.props", "LimeWire installs file");
     }
     
     /**
-     * Whether or not the 'Choose your Save directory' question has
-     * been asked.
+     * Whether or not the 'Choose your Sbve directory' question has
+     * been bsked.
      */
-    public static final BooleanSetting SAVE_DIRECTORY =
-        FACTORY.createBooleanSetting("SAVE_DIRECTORY", false);
+    public stbtic final BooleanSetting SAVE_DIRECTORY =
+        FACTORY.crebteBooleanSetting("SAVE_DIRECTORY", false);
     
     /**
-     * Whether or not the 'Choose your speed' question has been asked.
+     * Whether or not the 'Choose your speed' question hbs been asked.
      */
-    public static final BooleanSetting SPEED =
-        FACTORY.createBooleanSetting("SPEED", false);
+    public stbtic final BooleanSetting SPEED =
+        FACTORY.crebteBooleanSetting("SPEED", false);
     
     /**
-     * Whether or not the 'Scan for files' question has been asked.
+     * Whether or not the 'Scbn for files' question has been asked.
      */
-    public static final BooleanSetting SCAN_FILES =
-        FACTORY.createBooleanSetting("SCAN_FILES", false);
+    public stbtic final BooleanSetting SCAN_FILES =
+        FACTORY.crebteBooleanSetting("SCAN_FILES", false);
         
     /**
-     * Whether or not the 'Start on startup' question has been asked.
+     * Whether or not the 'Stbrt on startup' question has been asked.
      */
-    public static final BooleanSetting START_STARTUP =
-        FACTORY.createBooleanSetting("START_STARTUP", false);
+    public stbtic final BooleanSetting START_STARTUP =
+        FACTORY.crebteBooleanSetting("START_STARTUP", false);
         
     /**
-     * Whether or not the 'Choose your language' question has been asked.
+     * Whether or not the 'Choose your lbnguage' question has been asked.
      */
-    public static final BooleanSetting LANGUAGE_CHOICE =
-        FACTORY.createBooleanSetting("LANGUAGE_CHOICE", false);
+    public stbtic final BooleanSetting LANGUAGE_CHOICE =
+        FACTORY.crebteBooleanSetting("LANGUAGE_CHOICE", false);
         
     /**
-     * Whether or not the firewall warning question has been asked.
+     * Whether or not the firewbll warning question has been asked.
      */
-    public static final BooleanSetting FIREWALL_WARNING =
-        FACTORY.createBooleanSetting("FIREWALL_WARNING", false);
+    public stbtic final BooleanSetting FIREWALL_WARNING =
+        FACTORY.crebteBooleanSetting("FIREWALL_WARNING", false);
 }

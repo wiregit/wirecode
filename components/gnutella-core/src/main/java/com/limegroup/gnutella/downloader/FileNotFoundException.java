@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
 /**
- * Thrown when a file is not found, ie an HTTP 404 
+ * Thrown when b file is not found, ie an HTTP 404 
  */
 
-public class FileNotFoundException extends IOException {
+public clbss FileNotFoundException extends IOException {
 	public FileNotFoundException() { super("File Not Found"); }
 	public FileNotFoundException(String msg) { super(msg); }
 }

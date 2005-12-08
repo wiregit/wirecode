@@ -1,56 +1,56 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 /**
- * This class handles distributing internationalized strings to the back end.
- * The method to set the callback must be called immediately to allow
- * the backend to use this service during construction time.
+ * This clbss handles distributing internationalized strings to the back end.
+ * The method to set the cbllback must be called immediately to allow
+ * the bbckend to use this service during construction time.
  */
-public final class MessageResourceService {	
+public finbl class MessageResourceService {	
 
 	/**
-	 * The <tt>MessageResourceCallback</tt> instance that callbacks are sent to.
-	 * We use the <tt>ShellMessageResourceCallback</tt> as the default in case
-	 * no other callback is set.
+	 * The <tt>MessbgeResourceCallback</tt> instance that callbacks are sent to.
+	 * We use the <tt>ShellMessbgeResourceCallback</tt> as the default in case
+	 * no other cbllback is set.
 	 */
-	private static MessageResourceCallback _callback = 
-		new ShellMessageResourceCallback();
+	privbte static MessageResourceCallback _callback = 
+		new ShellMessbgeResourceCallback();
 
 	/**
-	 * Private constructor to ensure this class cannot be instantiated.
+	 * Privbte constructor to ensure this class cannot be instantiated.
 	 */
-	private MessageResourceService() {}
+	privbte MessageResourceService() {}
 
 	/**
-	 * Sets the <tt>ErrorCallback</tt> class to use.
+	 * Sets the <tt>ErrorCbllback</tt> class to use.
 	 */
-	public static void setCallback(MessageResourceCallback callback) {
-		_callback = callback;
+	public stbtic void setCallback(MessageResourceCallback callback) {
+		_cbllback = callback;
 	}
 	
-    public static String getHTMLPageTitle() {
-        return _callback.getHTMLPageTitle();
+    public stbtic String getHTMLPageTitle() {
+        return _cbllback.getHTMLPageTitle();
     }
-    public static String getHTMLPageListingHeader() {
-        return _callback.getHTMLPageListingHeader();
+    public stbtic String getHTMLPageListingHeader() {
+        return _cbllback.getHTMLPageListingHeader();
     }
-    public static String getHTMLPageMagnetHeader() {
-        return _callback.getHTMLPageMagnetHeader();
+    public stbtic String getHTMLPageMagnetHeader() {
+        return _cbllback.getHTMLPageMagnetHeader();
     }
 
 	/**
-	 * Helper class that simply outputs English.
+	 * Helper clbss that simply outputs English.
 	 */
-	private static class ShellMessageResourceCallback 
-        implements MessageResourceCallback {
+	privbte static class ShellMessageResourceCallback 
+        implements MessbgeResourceCallback {
 
-        public String getHTMLPageTitle() {
-            return "Download Page";
+        public String getHTMLPbgeTitle() {
+            return "Downlobd Page";
         }
-        public String getHTMLPageListingHeader() {
+        public String getHTMLPbgeListingHeader() {
             return "File Listing for ";
         }
-        public String getHTMLPageMagnetHeader() {
-            return "Magnet Links for Fast Downloads (if you have LimeWire installed)";
+        public String getHTMLPbgeMagnetHeader() {
+            return "Mbgnet Links for Fast Downloads (if you have LimeWire installed)";
         }
 
 	}

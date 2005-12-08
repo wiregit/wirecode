@@ -1,72 +1,72 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
 
-/** In Vendor Message parlance, the "message type" of this VMP is "BEAR/4".
- *  Used to ask a host you connect to to not send queries above the specified
- *  hops value....
+/** In Vendor Messbge parlance, the "message type" of this VMP is "BEAR/4".
+ *  Used to bsk a host you connect to to not send queries above the specified
+ *  hops vblue....
  */
-public final class HopsFlowVendorMessage extends VendorMessage {
+public finbl class HopsFlowVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 1;
+    public stbtic final int VERSION = 1;
 
     /**
-     * Constructs a new HopsFlowVendorMessage with data from the network.
+     * Constructs b new HopsFlowVendorMessage with data from the network.
      */
-    HopsFlowVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                          byte[] payload)
-        throws BadPacketException {
+    HopsFlowVendorMessbge(byte[] guid, byte ttl, byte hops, int version, 
+                          byte[] pbyload)
+        throws BbdPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_HOPS_FLOW, version,
-              payload);
+              pbyload);
         if (getVersion() > VERSION)
-            throw new BadPacketException("UNSUPPORTED VERSION");
-        if (getPayload().length != 1)
-            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
-                                         getPayload().length);
+            throw new BbdPacketException("UNSUPPORTED VERSION");
+        if (getPbyload().length != 1)
+            throw new BbdPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         getPbyload().length);
     }
 
     /**
-     * Constructs a new HopsFlowVendorMessage to be sent out.
-     *  @param hopVal represents the upper bound value for hops that you wish to
+     * Constructs b new HopsFlowVendorMessage to be sent out.
+     *  @pbram hopVal represents the upper bound value for hops that you wish to
      *  see in queries from the neighbor you send this to.  Only queries whose 
-     *  hops are STRICTLY lower than hopVal are expected to be received.  A 
-     *  hopVal of 0 means that NO queries should be sent at all.  A hopVal of 1
-     *  would mean that only queries from the immediate neighbor should be sent.
+     *  hops bre STRICTLY lower than hopVal are expected to be received.  A 
+     *  hopVbl of 0 means that NO queries should be sent at all.  A hopVal of 1
+     *  would mebn that only queries from the immediate neighbor should be sent.
      */
-    public HopsFlowVendorMessage(byte hopVal) {
-        super(F_BEAR_VENDOR_ID, F_HOPS_FLOW, VERSION, derivePayload(hopVal));
+    public HopsFlowVendorMessbge(byte hopVal) {
+        super(F_BEAR_VENDOR_ID, F_HOPS_FLOW, VERSION, derivePbyload(hopVal));
     }
 
-    /** @return a int representing the upper bound (exclusive) that the
-     *  connection you received this on wants to see from you.
+    /** @return b int representing the upper bound (exclusive) that the
+     *  connection you received this on wbnts to see from you.
      */
-    public int getHopValue() {
-        return ByteOrder.ubyte2int(getPayload()[0]);
+    public int getHopVblue() {
+        return ByteOrder.ubyte2int(getPbyload()[0]);
     }
 
     /**
-     * Constructs the payload of the message, given the desired hops value.
+     * Constructs the pbyload of the message, given the desired hops value.
      */
-    private static byte[] derivePayload(byte hopVal) {
-        byte[] payload = new byte[1];
-        payload[0] = hopVal;
-        return payload;
+    privbte static byte[] derivePayload(byte hopVal) {
+        byte[] pbyload = new byte[1];
+        pbyload[0] = hopVal;
+        return pbyload;
     }
 
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
-        super.writePayload(out);
-        SentMessageStatHandler.TCP_HOPS_FLOW.addMessage(this);
+    protected void writePbyload(OutputStream out) throws IOException {
+        super.writePbyload(out);
+        SentMessbgeStatHandler.TCP_HOPS_FLOW.addMessage(this);
     }
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
     public void recordDrop() {
         super.recordDrop();

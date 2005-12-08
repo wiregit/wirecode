@@ -1,92 +1,92 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 
 /**
- * Simple serializable wrapper for Endpoint.
+ * Simple seriblizable wrapper for Endpoint.
  */
-public class EndpointData extends Endpoint 
-  implements Cloneable, java.io.Serializable {
+public clbss EndpointData extends Endpoint 
+  implements Clonebble, java.io.Serializable {
     
-    private long speed = 56;
+    privbte long speed = 56;
 
-    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
-        in.defaultReadObject();
+    privbte void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+        in.defbultReadObject();
         if(getAddress() == null)
-           setHostname("");
+           setHostnbme("");
     }
 
     /**
-    * serial version
+    * seribl version
     */
-    private static final long serialVersionUID = 5045818571228406227L;    
+    privbte static final long serialVersionUID = 5045818571228406227L;    
     
-    // for deserializing.
-    private EndpointData() { }
+    // for deseriblizing.
+    privbte EndpointData() { }
     
     /**
-    * Creates a new EndpointData instance from another endpoint
-    * @param endpoint from where to copy the fields
+    * Crebtes a new EndpointData instance from another endpoint
+    * @pbram endpoint from where to copy the fields
     */
-    public EndpointData(Endpoint endpoint) {   
-        //initialize the fields in the super class
+    public EndpointDbta(Endpoint endpoint) {   
+        //initiblize the fields in the super class
         super(endpoint);
     }
     
     /**
-    * Creates a new EndpointData instance
-    * @param hostname Hostname of the node this endpoint refers to
-    * @param port The port number for the host
+    * Crebtes a new EndpointData instance
+    * @pbram hostname Hostname of the node this endpoint refers to
+    * @pbram port The port number for the host
     */
-    public EndpointData(String hostname, int port) {
-        //initialize the fields in the super class
-        super(hostname,port);
+    public EndpointDbta(String hostname, int port) {
+        //initiblize the fields in the super class
+        super(hostnbme,port);
     }
     
     /**
-    * Creates a new EndpointData instance
-    * @param hostBytes IP address of the host (MSB first)
-    * @param port The port number for the host
+    * Crebtes a new EndpointData instance
+    * @pbram hostBytes IP address of the host (MSB first)
+    * @pbram port The port number for the host
     */
-    public EndpointData(byte[] hostBytes, int port) {
-        //initialize the fields in the super class
+    public EndpointDbta(byte[] hostBytes, int port) {
+        //initiblize the fields in the super class
         super(hostBytes,port);
     }
     
     /**
-    * Creates a new EndpointData instance
-    * @param hostBytes IP address of the host (MSB first)
-    * @param port The port number for the host
-    * @param speed Spped in kbps of the host
+    * Crebtes a new EndpointData instance
+    * @pbram hostBytes IP address of the host (MSB first)
+    * @pbram port The port number for the host
+    * @pbram speed Spped in kbps of the host
     */
-    public EndpointData(byte[] hostBytes, int port, long speed) {
-        //initialize the fields in the super class
+    public EndpointDbta(byte[] hostBytes, int port, long speed) {
+        //initiblize the fields in the super class
         super(hostBytes,port);
         this.speed = speed;
     }
     
     /**
-    * Creates a new EndpointData instance
-    * @param hostBytes IP address of the host (MSB first)
-    * @param port The port number for the host
-    * @param files the number of files the host has
-    * @param kbytes the size of all of the files, in kilobytes
+    * Crebtes a new EndpointData instance
+    * @pbram hostBytes IP address of the host (MSB first)
+    * @pbram port The port number for the host
+    * @pbram files the number of files the host has
+    * @pbram kbytes the size of all of the files, in kilobytes
     */
-    public EndpointData(byte[] hostBytes, int port, long files, long kbytes) {
-        //initialize the fields in the super class
+    public EndpointDbta(byte[] hostBytes, int port, long files, long kbytes) {
+        //initiblize the fields in the super class
         super(hostBytes, port, files, kbytes);
     }
     
     
     /**
-    * Creates a new EndpointData instance
-    * @param endpoint from where to copy the fields for the super class
-    * @param speed Speed of the host
-    * @param clientGUID Unique GUID for the host
+    * Crebtes a new EndpointData instance
+    * @pbram endpoint from where to copy the fields for the super class
+    * @pbram speed Speed of the host
+    * @pbram clientGUID Unique GUID for the host
     */
-    public EndpointData(Endpoint endpoint, long speed) {
-        //initialize the fields in the super class
+    public EndpointDbta(Endpoint endpoint, long speed) {
+        //initiblize the fields in the super class
         super(endpoint);
-        //set the speed and client GUID
+        //set the speed bnd client GUID
         this.setSpeed(speed);
     }
     
@@ -101,8 +101,8 @@ public class EndpointData extends Endpoint
     
     
     /**
-    * Sets the speed and clientGUID for the host this endpoint refers to
-    * @param speed Speed of the host
+    * Sets the speed bnd clientGUID for the host this endpoint refers to
+    * @pbram speed Speed of the host
     */
     public void setSpeed(long speed)
     {

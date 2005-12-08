@@ -1,38 +1,38 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 /**
  * Assertion checking. 
  */
-public class Assert {
+public clbss Assert {
     
     /**
-     * A silent assert.  Checks a boolean condition
-     * and notifies ErrorService if the error occurred,
-     * but does not throw an exception to propogate further.
+     * A silent bssert.  Checks a boolean condition
+     * bnd notifies ErrorService if the error occurred,
+     * but does not throw bn exception to propogate further.
      */
-    public static void silent(boolean ok, String msg) {
+    public stbtic void silent(boolean ok, String msg) {
         if (!ok) {
-          //  System.err.println("Assertion failed: "+msg);
-          //  Thread.dumpStack();
-			RuntimeException re = new AssertFailure(msg);
+          //  System.err.println("Assertion fbiled: "+msg);
+          //  Threbd.dumpStack();
+			RuntimeException re = new AssertFbilure(msg);
 			ErrorService.error(re);
         }
     }
     
-    public static void silent(boolean ok) {
+    public stbtic void silent(boolean ok) {
         Assert.silent(ok, "");
     }
 
-    public static void that(boolean ok, String msg) {
+    public stbtic void that(boolean ok, String msg) {
         if (!ok) {
-            //System.err.println("Assertion failed: "+msg);
-            //Thread.dumpStack();
-			RuntimeException re = new AssertFailure(msg);
+            //System.err.println("Assertion fbiled: "+msg);
+            //Threbd.dumpStack();
+			RuntimeException re = new AssertFbilure(msg);
 			throw re;
         }
     }
 
-    public static void that(boolean ok) {
-        Assert.that(ok,"");
+    public stbtic void that(boolean ok) {
+        Assert.thbt(ok,"");
     }
 }

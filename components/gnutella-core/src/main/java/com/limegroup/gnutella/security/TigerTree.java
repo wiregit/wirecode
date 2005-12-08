@@ -1,92 +1,92 @@
 /*
- * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
+ * (PD) 2003 The Bitzi Corporbtion Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.7 2005-07-11 00:05:13 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.7.18.1 2005-12-08 22:23:30 rkapsi Exp $
  */
-package com.limegroup.gnutella.security;
+pbckage com.limegroup.gnutella.security;
 
-import java.security.DigestException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.Security;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import jbva.security.DigestException;
+import jbva.security.MessageDigest;
+import jbva.security.NoSuchAlgorithmException;
+import jbva.security.NoSuchProviderException;
+import jbva.security.Provider;
+import jbva.security.Security;
+import jbva.util.ArrayList;
+import jbva.util.Iterator;
+import jbva.util.List;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 /**
- * Implementation of THEX tree hash algorithm, with Tiger as the internal
- * algorithm (using the approach as revised in December 2002, to add unique
- * prefixes to leaf and node operations)
+ * Implementbtion of THEX tree hash algorithm, with Tiger as the internal
+ * blgorithm (using the approach as revised in December 2002, to add unique
+ * prefixes to lebf and node operations)
  * 
- * For simplicity, calculates one entire generation before starting on the
- * next. A more space-efficient approach would use a stack, and calculate each
- * node as soon as its children ara available.
+ * For simplicity, cblculates one entire generation before starting on the
+ * next. A more spbce-efficient approach would use a stack, and calculate each
+ * node bs soon as its children ara available.
  */
-public class TigerTree extends MessageDigest {
-    private static final int BLOCKSIZE = 1024;
-    private static final int HASHSIZE = 24;
+public clbss TigerTree extends MessageDigest {
+    privbte static final int BLOCKSIZE = 1024;
+    privbte static final int HASHSIZE = 24;
     
-    private static final boolean USE_CRYPTIX =
-        CommonUtils.isJava14OrLater() &&
-        CommonUtils.isMacOSX() && 
-        CommonUtils.isJaguarOrAbove() &&
-        !CommonUtils.isPantherOrAbove();
+    privbte static final boolean USE_CRYPTIX =
+        CommonUtils.isJbva14OrLater() &&
+        CommonUtils.isMbcOSX() && 
+        CommonUtils.isJbguarOrAbove() &&
+        !CommonUtils.isPbntherOrAbove();
     
     /**
      * Set up the CryptixCrypto provider if we're on 
-     * a platform that requires it.
+     * b platform that requires it.
      */
-    static {
+    stbtic {
         if(USE_CRYPTIX) {
-            // Use reflection to load the Cryptix Provider.
-            // It's safest that way (since we don't want to include
-            // the cryptix jar on all installations, and Java
-            // may try to load the class otherwise).
+            // Use reflection to lobd the Cryptix Provider.
+            // It's sbfest that way (since we don't want to include
+            // the cryptix jbr on all installations, and Java
+            // mby try to load the class otherwise).
             try {
-                Class clazz =
-                    Class.forName("cryptix.jce.provider.CryptixCrypto");
-                Object o = clazz.newInstance();
-                Security.addProvider((Provider)o);
-            } catch(ClassNotFoundException e) {
+                Clbss clazz =
+                    Clbss.forName("cryptix.jce.provider.CryptixCrypto");
+                Object o = clbzz.newInstance();
+                Security.bddProvider((Provider)o);
+            } cbtch(ClassNotFoundException e) {
               ErrorService.error(e);
-            } catch(IllegalAccessException e) {
+            } cbtch(IllegalAccessException e) {
               ErrorService.error(e);
-            } catch(InstantiationException e) {
+            } cbtch(InstantiationException e) {
               ErrorService.error(e);
-            } catch(ExceptionInInitializerError e) {
+            } cbtch(ExceptionInInitializerError e) {
               ErrorService.error(e);
-            } catch(SecurityException e) {
+            } cbtch(SecurityException e) {
               ErrorService.error(e);
-            } catch(ClassCastException e) {
+            } cbtch(ClassCastException e) {
               ErrorService.error(e);
             }
         }
     }
 
-    /** a Marker for the Stack */
-    private static final byte[] MARKER = new byte[0];
+    /** b Marker for the Stack */
+    privbte static final byte[] MARKER = new byte[0];
 
     /** 1024 byte buffer */
-    private final byte[] buffer;
+    privbte final byte[] buffer;
 
     /** Buffer offset */
-    private int bufferOffset;
+    privbte int bufferOffset;
 
-    /** Number of bytes hashed until now. */
-    private long byteCount;
+    /** Number of bytes hbshed until now. */
+    privbte long byteCount;
 
-    /** Internal Tiger MD instance */
-    private MessageDigest tiger;
+    /** Internbl Tiger MD instance */
+    privbte MessageDigest tiger;
 
     /** The List of Nodes */
-    private ArrayList nodes;
+    privbte ArrayList nodes;
 
     /**
      * Constructor
@@ -96,13 +96,13 @@ public class TigerTree extends MessageDigest {
         buffer = new byte[BLOCKSIZE];
         bufferOffset = 0;
         byteCount = 0;
-	nodes = new ArrayList();
+	nodes = new ArrbyList();
         if(USE_CRYPTIX) {
             try {
-                tiger = MessageDigest.getInstance("Tiger", "CryptixCrypto");
-            } catch(NoSuchAlgorithmException nsae) {
+                tiger = MessbgeDigest.getInstance("Tiger", "CryptixCrypto");
+            } cbtch(NoSuchAlgorithmException nsae) {
                 tiger = new Tiger();
-            } catch(NoSuchProviderException nspe) {
+            } cbtch(NoSuchProviderException nspe) {
                 tiger = new Tiger();
             }
         } else
@@ -113,48 +113,48 @@ public class TigerTree extends MessageDigest {
         return HASHSIZE;
     }
 
-    protected void engineUpdate(byte in) {
+    protected void engineUpdbte(byte in) {
         byteCount += 1;
         buffer[bufferOffset++] = in;
         if (bufferOffset == BLOCKSIZE) {
-            blockUpdate();
+            blockUpdbte();
             bufferOffset = 0;
         }
     }
 
-    protected void engineUpdate(byte[] in, int offset, int length) {
+    protected void engineUpdbte(byte[] in, int offset, int length) {
         byteCount += length;
-	nodes.ensureCapacity(log2Ceil(byteCount / BLOCKSIZE));
+	nodes.ensureCbpacity(log2Ceil(byteCount / BLOCKSIZE));
 
         if (bufferOffset > 0) {
-        	int remaining = BLOCKSIZE - bufferOffset;
-        	System.arraycopy(in,offset,buffer,bufferOffset, remaining);
-        	blockUpdate();
+        	int rembining = BLOCKSIZE - bufferOffset;
+        	System.brraycopy(in,offset,buffer,bufferOffset, remaining);
+        	blockUpdbte();
         	bufferOffset = 0;
-        	length -= remaining;
-        	offset += remaining;
+        	length -= rembining;
+        	offset += rembining;
         }
         
         while (length >= BLOCKSIZE) {
-            blockUpdate(in, offset, BLOCKSIZE);
+            blockUpdbte(in, offset, BLOCKSIZE);
             length -= BLOCKSIZE;
             offset += BLOCKSIZE;
         }
 
         if (length > 0) {
-        	System.arraycopy(in, offset, buffer, 0, length);
+        	System.brraycopy(in, offset, buffer, 0, length);
         	bufferOffset = length;
         }
     }
 
     protected byte[] engineDigest() {
-        byte[] hash = new byte[HASHSIZE];
+        byte[] hbsh = new byte[HASHSIZE];
         try {
-            engineDigest(hash, 0, HASHSIZE);
-        } catch (DigestException e) {
+            engineDigest(hbsh, 0, HASHSIZE);
+        } cbtch (DigestException e) {
             return null;
         }
-        return hash;
+        return hbsh;
     }
 
     protected int engineDigest(byte[] buf, int offset, int len)
@@ -162,100 +162,100 @@ public class TigerTree extends MessageDigest {
         if (len < HASHSIZE)
             throw new DigestException();
 
-        // hash any remaining fragments
-        blockUpdate();
+        // hbsh any remaining fragments
+        blockUpdbte();
 
-	byte []ret = collapse();
+	byte []ret = collbpse();
         
-	Assert.that(ret != MARKER);
+	Assert.thbt(ret != MARKER);
         
-        System.arraycopy(ret,0,buf,offset,HASHSIZE);
+        System.brraycopy(ret,0,buf,offset,HASHSIZE);
         engineReset();
         return HASHSIZE;
     }
 
     /**
-     * collapse whatever the tree is now to a root.
+     * collbpse whatever the tree is now to a root.
      */
-    private byte[] collapse() {
-        byte [] last = null;
+    privbte byte[] collapse() {
+        byte [] lbst = null;
 	for (int i = 0 ; i < nodes.size(); i++) {
 	    byte [] current = (byte[]) nodes.get(i);
 	    if (current == MARKER)
 		continue;
 	    
-	    if (last == null) 
-		last = current;
+	    if (lbst == null) 
+		lbst = current;
 	    else {
 	       	tiger.reset();
-		tiger.update((byte)1);
-		tiger.update(current);
-		tiger.update(last);
-		last = tiger.digest();
+		tiger.updbte((byte)1);
+		tiger.updbte(current);
+		tiger.updbte(last);
+		lbst = tiger.digest();
 	    }
 	
 	    nodes.set(i,MARKER);
 	}
-	Assert.that(last != null);
-	return last;
+	Assert.thbt(last != null);
+	return lbst;
     }
 
     protected void engineReset() {
         bufferOffset = 0;
         byteCount = 0;
-	nodes = new ArrayList();
+	nodes = new ArrbyList();
         tiger.reset();
     }
 
     /**
-     * Method overrides MessageDigest.clone()
+     * Method overrides MessbgeDigest.clone()
      * 
-     * @see java.security.MessageDigest#clone()
+     * @see jbva.security.MessageDigest#clone()
      */
     public Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
 
-    protected void blockUpdate() {
-    	blockUpdate(buffer, 0, bufferOffset);
+    protected void blockUpdbte() {
+    	blockUpdbte(buffer, 0, bufferOffset);
     }
     /**
-     * Update the internal state with a single block of size 1024 (or less, in
-     * final block) from the internal buffer.
+     * Updbte the internal state with a single block of size 1024 (or less, in
+     * finbl block) from the internal buffer.
      */
-    protected void blockUpdate(byte [] buf, int pos, int len) {
+    protected void blockUpdbte(byte [] buf, int pos, int len) {
         tiger.reset();
-        tiger.update((byte) 0); // leaf prefix
-        tiger.update(buf, pos, len);
+        tiger.updbte((byte) 0); // leaf prefix
+        tiger.updbte(buf, pos, len);
         if ((len == 0) && (nodes.size() > 0))
-            return; // don't remember a zero-size hash except at very beginning
+            return; // don't remember b zero-size hash except at very beginning
         byte [] digest = tiger.digest();
         push(digest);
     }
 
 
-    private void push(byte [] data) {
+    privbte void push(byte [] data) {
 	if (!nodes.isEmpty()) {
 	   for (int i = 0; i < nodes.size(); i++) {
 		byte[] node =  (byte[]) nodes.get(i);
 		if (node == MARKER) {
-		   nodes.set(i,data);
+		   nodes.set(i,dbta);
 		   return;
 		}
 		
 		tiger.reset();
-		tiger.update((byte)1);
-		tiger.update(node);
-		tiger.update(data);
-		data = tiger.digest();
+		tiger.updbte((byte)1);
+		tiger.updbte(node);
+		tiger.updbte(data);
+		dbta = tiger.digest();
 		nodes.set(i,MARKER);
 	   }	
 	} 
-        nodes.add(data);	
+        nodes.bdd(data);	
     }   
 
-    // calculates the next n with 2^n > number
-    public static int log2Ceil(long number) {
+    // cblculates the next n with 2^n > number
+    public stbtic int log2Ceil(long number) {
         int n = 0;
         while (number > 1) {
             number++; // for rounding up.

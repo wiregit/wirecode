@@ -1,83 +1,83 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * This class contains a type-safe enumeration of all classes that
- * store statistics on routing errors.
+ * This clbss contains a type-safe enumeration of all classes that
+ * store stbtistics on routing errors.
  */
-public class RouteErrorStat extends AdvancedStatistic {
+public clbss RouteErrorStat extends AdvancedStatistic {
 	
 	/**
-	 * Constructs a new <tt>RouteErrorStat</tt> instance with 
-	 * 0 for all historical data fields.
+	 * Constructs b new <tt>RouteErrorStat</tt> instance with 
+	 * 0 for bll historical data fields.
 	 */
-	private RouteErrorStat() {}
+	privbte RouteErrorStat() {}
 
 	/**
-	 * Private class for keeping track of routing error statistics.
+	 * Privbte class for keeping track of routing error statistics.
 	 */
-  	private static class GeneralRouteErrorStat extends RouteErrorStat {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_ROUTE_ERRORS.incrementStat();
+  	privbte static class GeneralRouteErrorStat extends RouteErrorStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+			ALL_ROUTE_ERRORS.incrementStbt();
 		}
 	}
 
-    private static class QueryReplyRouteErrorStat 
-        extends GeneralRouteErrorStat {
-        public void incrementStat() {
-            super.incrementStat();
-            QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+    privbte static class QueryReplyRouteErrorStat 
+        extends GenerblRouteErrorStat {
+        public void incrementStbt() {
+            super.incrementStbt();
+            QUERY_REPLY_ROUTE_ERRORS.incrementStbt();
         }
     }
 	
 	/**
-	 * <tt>Statistic</tt> for all route errors.
+	 * <tt>Stbtistic</tt> for all route errors.
 	 */
-	public static final Statistic ALL_ROUTE_ERRORS =
-		new RouteErrorStat();
+	public stbtic final Statistic ALL_ROUTE_ERRORS =
+		new RouteErrorStbt();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pong routing errors.
+	 * <tt>Stbtistic</tt> for Gnutella pong routing errors.
 	 */
-	public static final Statistic PING_REPLY_ROUTE_ERRORS = 
-	    new GeneralRouteErrorStat();
+	public stbtic final Statistic PING_REPLY_ROUTE_ERRORS = 
+	    new GenerblRouteErrorStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query reply routing errors.
+	 * <tt>Stbtistic</tt> for Gnutella query reply routing errors.
 	 */
-	public static final Statistic QUERY_REPLY_ROUTE_ERRORS = 
-	    new GeneralRouteErrorStat();
+	public stbtic final Statistic QUERY_REPLY_ROUTE_ERRORS = 
+	    new GenerblRouteErrorStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella push routing errors.
+	 * <tt>Stbtistic</tt> for Gnutella push routing errors.
 	 */
-	public static final Statistic PUSH_REQUEST_ROUTE_ERRORS = 
-	    new GeneralRouteErrorStat();
+	public stbtic final Statistic PUSH_REQUEST_ROUTE_ERRORS = 
+	    new GenerblRouteErrorStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query reply routing errors from
-     * hard kilobyte limit.
+	 * <tt>Stbtistic</tt> for Gnutella query reply routing errors from
+     * hbrd kilobyte limit.
 	 */
-	public static final Statistic HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS = 
-	    new QueryReplyRouteErrorStat();
+	public stbtic final Statistic HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS = 
+	    new QueryReplyRouteErrorStbt();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query reply routing errors from
-     * hard kilobyte limit.
+	 * <tt>Stbtistic</tt> for Gnutella query reply routing errors from
+     * hbrd kilobyte limit.
 	 */
-	public static final Statistic HARD_LIMIT_QUERY_REPLY_TTL[] = 
-        new QueryReplyRouteErrorStat[6];
+	public stbtic final Statistic HARD_LIMIT_QUERY_REPLY_TTL[] = 
+        new QueryReplyRouteErrorStbt[6];
 
-    static {
+    stbtic {
         for (int i = 0; i < HARD_LIMIT_QUERY_REPLY_TTL.length; i++)
-            HARD_LIMIT_QUERY_REPLY_TTL[i] = new QueryReplyRouteErrorStat();
+            HARD_LIMIT_QUERY_REPLY_TTL[i] = new QueryReplyRouteErrorStbt();
     }
     
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query reply routing errors from
-     * not finding a route.
+	 * <tt>Stbtistic</tt> for Gnutella query reply routing errors from
+     * not finding b route.
 	 */
-	public static final Statistic NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS = 
-	    new QueryReplyRouteErrorStat();
+	public stbtic final Statistic NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS = 
+	    new QueryReplyRouteErrorStbt();
 }

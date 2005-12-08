@@ -1,80 +1,80 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.util.Collection;
-import java.util.Iterator;
+import jbva.util.Collection;
+import jbva.util.Iterator;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.settings.DownloadSettings;
 
 /**
- * A class that ranks sources for a download. 
+ * A clbss that ranks sources for a download. 
  * 
- * It uses a factory pattern to provide the best ranker based on system
+ * It uses b factory pattern to provide the best ranker based on system
  * conditions.
  */
-public abstract class SourceRanker {
+public bbstract class SourceRanker {
 
     /**
-     * The mesh handler to inform when altlocs fail
+     * The mesh hbndler to inform when altlocs fail
      */
-    protected MeshHandler meshHandler;
+    protected MeshHbndler meshHandler;
 
     /**
-     * @param hosts a collection of remote hosts to rank
-     * @return if we didn't know about at least one of the hosts
+     * @pbram hosts a collection of remote hosts to rank
+     * @return if we didn't know bbout at least one of the hosts
      */
-    public boolean addToPool(Collection hosts) {
-        boolean ret = false;
-        for (Iterator iter = hosts.iterator(); iter.hasNext();) {
+    public boolebn addToPool(Collection hosts) {
+        boolebn ret = false;
+        for (Iterbtor iter = hosts.iterator(); iter.hasNext();) {
             RemoteFileDesc host = (RemoteFileDesc) iter.next();
-            if (addToPool(host))
+            if (bddToPool(host))
                 ret = true;
         }
         return ret;
     }
     
     /**
-     * @param host the host that the ranker should consider
-     * @return if we did not already know about this host
+     * @pbram host the host that the ranker should consider
+     * @return if we did not blready know about this host
      */
-    public abstract boolean addToPool(RemoteFileDesc host);
+    public bbstract boolean addToPool(RemoteFileDesc host);
 	
     /**
-     * @return whether the ranker has any more potential sources
+     * @return whether the rbnker has any more potential sources
      */
-	public abstract boolean hasMore();
+	public bbstract boolean hasMore();
     
     /**
-     * @return the source that should be tried next
+     * @return the source thbt should be tried next
      */
-    public abstract RemoteFileDesc getBest();
+    public bbstract RemoteFileDesc getBest();
     
     /**
-     * @return the collection of hosts that can be shared with other rankers
+     * @return the collection of hosts thbt can be shared with other rankers
      */
-    protected abstract Collection getShareableHosts();
+    protected bbstract Collection getShareableHosts();
     
     /**
-     * @return the number of hosts this ranker knows about
+     * @return the number of hosts this rbnker knows about
      */
-    public abstract int getNumKnownHosts();
+    public bbstract int getNumKnownHosts();
     
     /**
-     * @return the ranker knows about at least one potential source that is
+     * @return the rbnker knows about at least one potential source that is
      * not currently busy
      */
-    public synchronized boolean hasNonBusy() {
+    public synchronized boolebn hasNonBusy() {
         return getNumKnownHosts() > getNumBusyHosts();
     }
 
     /**
-     * @return the number of busy hosts the ranker knows about
+     * @return the number of busy hosts the rbnker knows about
      */
     public synchronized int getNumBusyHosts() {
         int ret = 0;
         long now = System.currentTimeMillis();
-        for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
+        for (Iterbtor iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             if (rfd.isBusy(now))
                 ret++;
@@ -83,86 +83,86 @@ public abstract class SourceRanker {
     }
     
     /**
-     * @return how much time we should wait before at least one host
+     * @return how much time we should wbit before at least one host
      * will become non-busy
      */
-    public synchronized int calculateWaitTime() {
-        if (!hasMore())
+    public synchronized int cblculateWaitTime() {
+        if (!hbsMore())
             return 0;
         
-        // waitTime is in seconds
-        int waitTime = Integer.MAX_VALUE;
+        // wbitTime is in seconds
+        int wbitTime = Integer.MAX_VALUE;
         long now = System.currentTimeMillis();
-        for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
+        for (Iterbtor iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             if (!rfd.isBusy(now))
                 continue;
-            waitTime = Math.min(waitTime, rfd.getWaitTime(now));
+            wbitTime = Math.min(waitTime, rfd.getWaitTime(now));
         }
         
-        // waitTime was in seconds
-        return (waitTime*1000);
+        // wbitTime was in seconds
+        return (wbitTime*1000);
     }
     
-    protected abstract Collection getPotentiallyBusyHosts();
+    protected bbstract Collection getPotentiallyBusyHosts();
     
     /**
-     * stops the ranker, clearing any state
+     * stops the rbnker, clearing any state
      */
     public synchronized void stop() {
-        clearState();
-        meshHandler = null;
+        clebrState();
+        meshHbndler = null;
     }
     
-    protected void clearState() {}
+    protected void clebrState() {}
     
     /**
-     * @return a ranker appropriate for our system's capabilities.
+     * @return b ranker appropriate for our system's capabilities.
      */
-    public static SourceRanker getAppropriateRanker() {
-        if (RouterService.canReceiveSolicited() && 
-                DownloadSettings.USE_HEADPINGS.getValue())
-            return new PingRanker();
+    public stbtic SourceRanker getAppropriateRanker() {
+        if (RouterService.cbnReceiveSolicited() && 
+                DownlobdSettings.USE_HEADPINGS.getValue())
+            return new PingRbnker();
         else 
-            return new LegacyRanker();
+            return new LegbcyRanker();
     }
     
     /**
-     * @param original the current ranker that we use
-     * @return the ranker that should be used.  If different than the current one,
+     * @pbram original the current ranker that we use
+     * @return the rbnker that should be used.  If different than the current one,
      * the current one is stopped.
      */
-    public static SourceRanker getAppropriateRanker(SourceRanker original) {
-        if(original == null)
-            return getAppropriateRanker();
+    public stbtic SourceRanker getAppropriateRanker(SourceRanker original) {
+        if(originbl == null)
+            return getAppropribteRanker();
         
-        SourceRanker better;
-        if (RouterService.canReceiveSolicited() && 
-                DownloadSettings.USE_HEADPINGS.getValue()) {
-            if (original instanceof PingRanker)
-                return original;
-            better = new PingRanker();
+        SourceRbnker better;
+        if (RouterService.cbnReceiveSolicited() && 
+                DownlobdSettings.USE_HEADPINGS.getValue()) {
+            if (originbl instanceof PingRanker)
+                return originbl;
+            better = new PingRbnker();
         }else {
-            if (original instanceof LegacyRanker)
-                return original;
-            better = new LegacyRanker();
+            if (originbl instanceof LegacyRanker)
+                return originbl;
+            better = new LegbcyRanker();
         }
         
-        better.setMeshHandler(original.getMeshHandler());
-        better.addToPool(original.getShareableHosts());
-        original.stop();
+        better.setMeshHbndler(original.getMeshHandler());
+        better.bddToPool(original.getShareableHosts());
+        originbl.stop();
         return better;
     }
 
-    /** sets the Mesh handler if any */
-    public synchronized void setMeshHandler(MeshHandler handler) {
-        meshHandler = handler;
+    /** sets the Mesh hbndler if any */
+    public synchronized void setMeshHbndler(MeshHandler handler) {
+        meshHbndler = handler;
     }
     
     /** 
-     * @return the Mesh Handler, if any
+     * @return the Mesh Hbndler, if any
      */
-    public synchronized MeshHandler getMeshHandler() {
-        return meshHandler;
+    public synchronized MeshHbndler getMeshHandler() {
+        return meshHbndler;
     }
 }

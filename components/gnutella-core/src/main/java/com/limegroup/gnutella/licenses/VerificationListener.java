@@ -1,9 +1,9 @@
-package com.limegroup.gnutella.licenses;
+pbckage com.limegroup.gnutella.licenses;
 
 /**
- * A callback for verifying licenses.
+ * A cbllback for verifying licenses.
  */
-public interface VerificationListener {
+public interfbce VerificationListener {
     
     public void licenseVerified(License license);
     

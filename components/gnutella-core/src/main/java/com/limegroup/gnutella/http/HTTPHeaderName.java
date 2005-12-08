@@ -1,241 +1,241 @@
-package com.limegroup.gnutella.http;
+pbckage com.limegroup.gnutella.http;
 
-import java.util.Locale;
+import jbva.util.Locale;
 
 /**
- * This class defines an "enum" for HTTP header names, following the
- * typesafe enum pattern.
+ * This clbss defines an "enum" for HTTP header names, following the
+ * typesbfe enum pattern.
  */
-public class HTTPHeaderName {
+public clbss HTTPHeaderName {
 	
 	/**
-	 * Constant for the HTTP header name as a string.
+	 * Constbnt for the HTTP header name as a string.
 	 */
-	private final String NAME;
+	privbte final String NAME;
 
 	/**
-	 * Constant for the lower-case representation of the header name.
+	 * Constbnt for the lower-case representation of the header name.
 	 */
-	private final String LOWER_CASE_NAME;
+	privbte final String LOWER_CASE_NAME;
 
 	/**
-	 * Private constructor for creating the "enum" of header names.
-	 * Making the constructor private also ensures that this class
-	 * cannot be subclassed.
+	 * Privbte constructor for creating the "enum" of header names.
+	 * Mbking the constructor private also ensures that this class
+	 * cbnnot be subclassed.
 	 *
-	 * @param name the string header as it is written out to the
+	 * @pbram name the string header as it is written out to the
 	 *  network
 	 */
-	private HTTPHeaderName(final String name) {
-		NAME = name;
-		LOWER_CASE_NAME = name.toLowerCase(Locale.US);
+	privbte HTTPHeaderName(final String name) {
+		NAME = nbme;
+		LOWER_CASE_NAME = nbme.toLowerCase(Locale.US);
 	}
 
 	/**
-	 * Header for new alternate file locations, as per new spec.
+	 * Hebder for new alternate file locations, as per new spec.
 	 */
-	public static final HTTPHeaderName ALT_LOCATION = 
-		new HTTPHeaderName("X-Alt");
+	public stbtic final HTTPHeaderName ALT_LOCATION = 
+		new HTTPHebderName("X-Alt");
 
 	/**
-	 * Header for alternate locations behind firewalls.
+	 * Hebder for alternate locations behind firewalls.
 	 */
-	public static final HTTPHeaderName FALT_LOCATION =
-		new HTTPHeaderName("X-Falt");
+	public stbtic final HTTPHeaderName FALT_LOCATION =
+		new HTTPHebderName("X-Falt");
 	
 	/**
-	 * Header for bad alternate locations behind firewalls.
+	 * Hebder for bad alternate locations behind firewalls.
 	 */
-	public static final HTTPHeaderName BFALT_LOCATION =
-		new HTTPHeaderName("X-NFalt");
+	public stbtic final HTTPHeaderName BFALT_LOCATION =
+		new HTTPHebderName("X-NFalt");
 	
     /**
-     * Header that used to be used for alternate locations,
-     * as per HUGE v0.94.
+     * Hebder that used to be used for alternate locations,
+     * bs per HUGE v0.94.
      */	
-    public static final HTTPHeaderName OLD_ALT_LOCS = 
-        new HTTPHeaderName("X-Gnutella-Alternate-Location");
+    public stbtic final HTTPHeaderName OLD_ALT_LOCS = 
+        new HTTPHebderName("X-Gnutella-Alternate-Location");
 
     /**
-     * Header for failed Alternate locations to be removed from the mesh.
+     * Hebder for failed Alternate locations to be removed from the mesh.
      */
-    public static final HTTPHeaderName NALTS = 
-        new HTTPHeaderName("X-NAlt");
+    public stbtic final HTTPHeaderName NALTS = 
+        new HTTPHebderName("X-NAlt");
 
 	/**
-	 * Header for specifying the URN of the file, as per HUGE v0.94.
+	 * Hebder for specifying the URN of the file, as per HUGE v0.94.
 	 */
-	public static final HTTPHeaderName GNUTELLA_CONTENT_URN =
-		new HTTPHeaderName("X-Gnutella-Content-URN");
+	public stbtic final HTTPHeaderName GNUTELLA_CONTENT_URN =
+		new HTTPHebderName("X-Gnutella-Content-URN");
 
 	/**
-	 * Header for specifying the URN of the file, as per the
-	 * CAW spec at
-	 * http://www.open-content.net/specs/draft-jchapweske-caw-03.html .
+	 * Hebder for specifying the URN of the file, as per the
+	 * CAW spec bt
+	 * http://www.open-content.net/specs/drbft-jchapweske-caw-03.html .
 	 */
-	public static final HTTPHeaderName CONTENT_URN =
-		new HTTPHeaderName("X-Content-URN");
+	public stbtic final HTTPHeaderName CONTENT_URN =
+		new HTTPHebderName("X-Content-URN");
 
 	/**
-	 * Header for specifying the byte range of the content.
+	 * Hebder for specifying the byte range of the content.
 	 */
-	public static final HTTPHeaderName CONTENT_RANGE =
-		new HTTPHeaderName("Content-Range");
+	public stbtic final HTTPHeaderName CONTENT_RANGE =
+		new HTTPHebderName("Content-Range");
 
 	/**
-	 * Header for specifying the type of content.
+	 * Hebder for specifying the type of content.
 	 */
-	public static final HTTPHeaderName CONTENT_TYPE =
-		new HTTPHeaderName("Content-Type");
+	public stbtic final HTTPHeaderName CONTENT_TYPE =
+		new HTTPHebderName("Content-Type");
 
 	/**
-	 * Header for specifying the length of the content, in bytes.
+	 * Hebder for specifying the length of the content, in bytes.
 	 */
-	public static final HTTPHeaderName CONTENT_LENGTH =
-		new HTTPHeaderName("Content-Length");
+	public stbtic final HTTPHeaderName CONTENT_LENGTH =
+		new HTTPHebderName("Content-Length");
 		
     /**
-     * Header for specifying the type of encoding we'll accept.
+     * Hebder for specifying the type of encoding we'll accept.
      */
-    public static final HTTPHeaderName ACCEPT_ENCODING =
-        new HTTPHeaderName("Accept-Encoding");
+    public stbtic final HTTPHeaderName ACCEPT_ENCODING =
+        new HTTPHebderName("Accept-Encoding");
 
     /**
-     * Header for specifying the type of encoding we'll send.
+     * Hebder for specifying the type of encoding we'll send.
      */
-    public static final HTTPHeaderName CONTENT_ENCODING =
-        new HTTPHeaderName("Content-Encoding");
+    public stbtic final HTTPHeaderName CONTENT_ENCODING =
+        new HTTPHebderName("Content-Encoding");
 
 	/**
-	 * Response header for specifying the server name and version.
+	 * Response hebder for specifying the server name and version.
 	 */
-	public static final HTTPHeaderName SERVER =
-		new HTTPHeaderName("Server");
+	public stbtic final HTTPHeaderName SERVER =
+		new HTTPHebderName("Server");
 
     /**
-     * Custom header for upload queues.
+     * Custom hebder for upload queues.
      */
-    public static final HTTPHeaderName QUEUE_HEADER = 
-        new HTTPHeaderName("X-Queue");
+    public stbtic final HTTPHeaderName QUEUE_HEADER = 
+        new HTTPHebderName("X-Queue");
 
     /**
-     * Header for specifying whether the connection should be kept alive or
+     * Hebder for specifying whether the connection should be kept alive or
      * closed when using HTTP 1.1.
      */
-    public static final HTTPHeaderName CONNECTION =
-        new HTTPHeaderName("Connection");
+    public stbtic final HTTPHeaderName CONNECTION =
+        new HTTPHebderName("Connection");
 
 	/**
-	 * Header for specifying a THEX URI.  THEX URIs are of the form:<p>
+	 * Hebder for specifying a THEX URI.  THEX URIs are of the form:<p>
 	 *
 	 * X-Thex-URI: <URI> ; <ROOT>.<p>
 	 *
-	 * This informs the client where the full Tiger tree hash can be 
+	 * This informs the client where the full Tiger tree hbsh can be 
 	 * retrieved.
 	 */
-	public static final HTTPHeaderName THEX_URI =
-		new HTTPHeaderName("X-Thex-URI");
+	public stbtic final HTTPHeaderName THEX_URI =
+		new HTTPHebderName("X-Thex-URI");
 
     /**
-     * Constant header for the date.
+     * Constbnt header for the date.
      */
-    public static final HTTPHeaderName DATE = new HTTPHeaderName("Date");
+    public stbtic final HTTPHeaderName DATE = new HTTPHeaderName("Date");
 
 	/**
-	 * Header for the available ranges of a file currently available,
-	 * as specified in the Partial File Sharing Protocol.  This takes the
-	 * save form as the Content-Range header, as in:<p>
+	 * Hebder for the available ranges of a file currently available,
+	 * bs specified in the Partial File Sharing Protocol.  This takes the
+	 * sbve form as the Content-Range header, as in:<p>
 	 * 
-	 * X-Available-Ranges: bytes 0-10,20-30
+	 * X-Avbilable-Ranges: bytes 0-10,20-30
 	 */
-	public static final HTTPHeaderName AVAILABLE_RANGES =
-		new HTTPHeaderName("X-Available-Ranges");
+	public stbtic final HTTPHeaderName AVAILABLE_RANGES =
+		new HTTPHebderName("X-Available-Ranges");
 
     /**
-     * Header for queued downloads.
+     * Hebder for queued downloads.
      */
-    public static final HTTPHeaderName QUEUE =
-        new HTTPHeaderName("X-Queue");
+    public stbtic final HTTPHeaderName QUEUE =
+        new HTTPHebderName("X-Queue");
 
     /**
-     * Header for retry after. Useful for two things:
-     * 1) LimeWire can now be queued in gtk-gnutella's PARQ
+     * Hebder for retry after. Useful for two things:
+     * 1) LimeWire cbn now be queued in gtk-gnutella's PARQ
      * 2) It's possible to tune the number of http requests down
      *    when LimeWire is busy
      */
-    public static final HTTPHeaderName RETRY_AFTER = 
-        new HTTPHeaderName("Retry-After");
+    public stbtic final HTTPHeaderName RETRY_AFTER = 
+        new HTTPHebderName("Retry-After");
 
 
     /**
-     * Header for creation time.  Allows the creation time
-     * of the file to propagate throughout the network.
+     * Hebder for creation time.  Allows the creation time
+     * of the file to propbgate throughout the network.
      */
-    public static final HTTPHeaderName CREATION_TIME =
-        new HTTPHeaderName("X-Create-Time");
+    public stbtic final HTTPHeaderName CREATION_TIME =
+        new HTTPHebderName("X-Create-Time");
 
 	/**
-	 * Header for submitting supported features. Introduced by BearShare.
+	 * Hebder for submitting supported features. Introduced by BearShare.
 	 * 
-	 * Example: X-Features: chat/0.1, browse/1.0, queue/0.1
+	 * Exbmple: X-Features: chat/0.1, browse/1.0, queue/0.1
 	 */
-	public static final HTTPHeaderName FEATURES =
-        new HTTPHeaderName("X-Features");
+	public stbtic final HTTPHeaderName FEATURES =
+        new HTTPHebderName("X-Features");
 
 	/**
-	 * Header for updating the set of push proxies for a host.  Defined in
-	 * section 4.2 of the Push Proxy proposal, v. 0.7
+	 * Hebder for updating the set of push proxies for a host.  Defined in
+	 * section 4.2 of the Push Proxy proposbl, v. 0.7
 	 */
-	public static final HTTPHeaderName PROXIES =
-	    new HTTPHeaderName("X-Push-Proxy");
+	public stbtic final HTTPHeaderName PROXIES =
+	    new HTTPHebderName("X-Push-Proxy");
 	
     /**
-     * Header for sending your own "<ip>:
+     * Hebder for sending your own "<ip>:
      * <listening port>"
      */
-    public static final HTTPHeaderName NODE = new HTTPHeaderName("X-Node");
+    public stbtic final HTTPHeaderName NODE = new HTTPHeaderName("X-Node");
 
 	/**
-	 * Header for informing uploader about amount of already
-	 * downloaded bytes
+	 * Hebder for informing uploader about amount of already
+	 * downlobded bytes
 	 */
-	public static final HTTPHeaderName DOWNLOADED = 
-		new HTTPHeaderName("X-Downloaded");
+	public stbtic final HTTPHeaderName DOWNLOADED = 
+		new HTTPHebderName("X-Downloaded");
 		
     /**
-     * Header for the content disposition.
+     * Hebder for the content disposition.
      */
-    public static final HTTPHeaderName CONTENT_DISPOSITION =
-        new HTTPHeaderName("Content-Disposition");
+    public stbtic final HTTPHeaderName CONTENT_DISPOSITION =
+        new HTTPHebderName("Content-Disposition");
     
 	/**
-	 * Returns whether or not the start of the passed in string matches the 
-	 * string representation of this HTTP header, ignoring case.
+	 * Returns whether or not the stbrt of the passed in string matches the 
+	 * string representbtion of this HTTP header, ignoring case.
 	 *
-	 * @param str the string to check for a match
-	 * @return <tt>true</tt> if the passed in string matches the string
-	 *  representation of this HTTP header (ignoring case), otherwise
-	 *  returns <tt>false</tt>
+	 * @pbram str the string to check for a match
+	 * @return <tt>true</tt> if the pbssed in string matches the string
+	 *  representbtion of this HTTP header (ignoring case), otherwise
+	 *  returns <tt>fblse</tt>
 	 */
-	public boolean matchesStartOfString(String str) {
-		return str.toLowerCase(Locale.US).startsWith(LOWER_CASE_NAME);
+	public boolebn matchesStartOfString(String str) {
+		return str.toLowerCbse(Locale.US).startsWith(LOWER_CASE_NAME);
 	}
 
 	/**
-	 * Accessor to obtain the string representation of the header
-	 * as it should be written out to the network.
+	 * Accessor to obtbin the string representation of the header
+	 * bs it should be written out to the network.
 	 *
-	 * @return the HTTP header name as a string
+	 * @return the HTTP hebder name as a string
 	 */
-	public String httpStringValue() {
+	public String httpStringVblue() {
 		return NAME;
 	}
 
 	/**
-	 * Overrides Object.toString to give a more informative description of 
-	 * the header.
+	 * Overrides Object.toString to give b more informative description of 
+	 * the hebder.
 	 *
-	 * @return the string description of this instance
+	 * @return the string description of this instbnce
 	 */
 	public String toString() {
 		return NAME;

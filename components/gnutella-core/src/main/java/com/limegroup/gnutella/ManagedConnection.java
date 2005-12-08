@@ -1,346 +1,346 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.net.Socket;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import jbva.io.IOException;
+import jbva.io.InterruptedIOException;
+import jbva.io.OutputStream;
+import jbva.io.InputStream;
+import jbva.net.Socket;
+import jbva.util.Arrays;
+import jbva.util.Hashtable;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.Map;
+import jbva.util.Properties;
 
-import com.limegroup.gnutella.io.NIOMultiplexor;
-import com.limegroup.gnutella.io.Throttle;
-import com.limegroup.gnutella.io.NBThrottle;
-import com.limegroup.gnutella.io.ThrottleWriter;
-import com.limegroup.gnutella.io.DelayedBufferWriter;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.connection.*;
-import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.routing.PatchTableMessage;
-import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.updates.UpdateManager;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.ThrottledOutputStream;
-import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutellb.io.NIOMultiplexor;
+import com.limegroup.gnutellb.io.Throttle;
+import com.limegroup.gnutellb.io.NBThrottle;
+import com.limegroup.gnutellb.io.ThrottleWriter;
+import com.limegroup.gnutellb.io.DelayedBufferWriter;
+import com.limegroup.gnutellb.io.ChannelWriter;
+import com.limegroup.gnutellb.connection.*;
+import com.limegroup.gnutellb.filters.SpamFilter;
+import com.limegroup.gnutellb.handshaking.*;
+import com.limegroup.gnutellb.messages.*;
+import com.limegroup.gnutellb.messages.vendor.*;
+import com.limegroup.gnutellb.routing.PatchTableMessage;
+import com.limegroup.gnutellb.routing.QueryRouteTable;
+import com.limegroup.gnutellb.routing.ResetTableMessage;
+import com.limegroup.gnutellb.search.SearchResultHandler;
+import com.limegroup.gnutellb.settings.ConnectionSettings;
+import com.limegroup.gnutellb.simpp.SimppManager;
+import com.limegroup.gnutellb.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutellb.statistics.ReceivedMessageStatHandler;
+import com.limegroup.gnutellb.updates.UpdateManager;
+import com.limegroup.gnutellb.util.DataUtils;
+import com.limegroup.gnutellb.util.BandwidthThrottle;
+import com.limegroup.gnutellb.util.ManagedThread;
+import com.limegroup.gnutellb.util.ThrottledOutputStream;
+import com.limegroup.gnutellb.version.UpdateHandler;
 
 /**
- * A Connection managed by a ConnectionManager.  Includes a loopForMessages
- * method that runs forever (or until an IOException occurs), receiving and
- * replying to Gnutella messages.  ManagedConnection is only instantiated
- * through a ConnectionManager.<p>
+ * A Connection mbnaged by a ConnectionManager.  Includes a loopForMessages
+ * method thbt runs forever (or until an IOException occurs), receiving and
+ * replying to Gnutellb messages.  ManagedConnection is only instantiated
+ * through b ConnectionManager.<p>
  *
- * ManagedConnection provides a sophisticated message buffering mechanism.  When
- * you call send(Message), the message is not actually delivered to the socket;
- * instead it buffered in an application-level buffer.  Periodically, a thread
- * reads messages from the buffer, writes them to the network, and flushes the
- * socket buffers.  This means that there is no need to manually call flush().
- * Furthermore, ManagedConnection provides a simple form of flow control.  If
- * messages are queued faster than they can be written to the network, they are
+ * MbnagedConnection provides a sophisticated message buffering mechanism.  When
+ * you cbll send(Message), the message is not actually delivered to the socket;
+ * instebd it buffered in an application-level buffer.  Periodically, a thread
+ * rebds messages from the buffer, writes them to the network, and flushes the
+ * socket buffers.  This mebns that there is no need to manually call flush().
+ * Furthermore, MbnagedConnection provides a simple form of flow control.  If
+ * messbges are queued faster than they can be written to the network, they are
  * dropped in the following order: PingRequest, PingReply, QueryRequest, 
- * QueryReply, and PushRequest.  See the implementation notes below for more
- * details.<p>
+ * QueryReply, bnd PushRequest.  See the implementation notes below for more
+ * detbils.<p>
  *
- * All ManagedConnection's have two underlying spam filters: a personal filter
- * (controls what I see) and a route filter (also controls what I pass along to
- * others).  See SpamFilter for a description.  These filters are configured by
- * the properties in the SettingsManager, but you can change them with
- * setPersonalFilter and setRouteFilter.<p>
+ * All MbnagedConnection's have two underlying spam filters: a personal filter
+ * (controls whbt I see) and a route filter (also controls what I pass along to
+ * others).  See SpbmFilter for a description.  These filters are configured by
+ * the properties in the SettingsMbnager, but you can change them with
+ * setPersonblFilter and setRouteFilter.<p>
  *
- * ManagedConnection maintain a large number of statistics, such as the current
- * bandwidth for upstream & downstream.  ManagedConnection doesn't quite fit the
- * BandwidthTracker interface, unfortunately.  On the query-routing3-branch and
- * pong-caching CVS branches, these statistics have been bundled into a single
- * object, reducing the complexity of ManagedConnection.<p>
+ * MbnagedConnection maintain a large number of statistics, such as the current
+ * bbndwidth for upstream & downstream.  ManagedConnection doesn't quite fit the
+ * BbndwidthTracker interface, unfortunately.  On the query-routing3-branch and
+ * pong-cbching CVS branches, these statistics have been bundled into a single
+ * object, reducing the complexity of MbnagedConnection.<p>
  * 
- * ManagedConnection also takes care of various VendorMessage handling, in
- * particular Hops Flow, UDP ConnectBack, and TCP ConnectBack.  See
- * handleVendorMessage().<p>
+ * MbnagedConnection also takes care of various VendorMessage handling, in
+ * pbrticular Hops Flow, UDP ConnectBack, and TCP ConnectBack.  See
+ * hbndleVendorMessage().<p>
  *
- * This class implements ReplyHandler to route pongs and query replies that
- * originated from it.<p> 
+ * This clbss implements ReplyHandler to route pongs and query replies that
+ * originbted from it.<p> 
  */
-public class ManagedConnection extends Connection 
-	implements ReplyHandler, MessageReceiver, SentMessageHandler {
+public clbss ManagedConnection extends Connection 
+	implements ReplyHbndler, MessageReceiver, SentMessageHandler {
 
     /** 
-     * The time to wait between route table updates for leaves, 
+     * The time to wbit between route table updates for leaves, 
 	 * in milliseconds. 
      */
-    private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
+    privbte long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
     
     /** 
-     * The time to wait between route table updates for Ultrapeers, 
+     * The time to wbit between route table updates for Ultrapeers, 
 	 * in milliseconds. 
      */
-    private long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 1000*60; //1 minute
+    privbte long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 1000*60; //1 minute
 
 
     /** The timeout to use when connecting, in milliseconds.  This is NOT used
-     *  for bootstrap servers.  */
-    private static final int CONNECT_TIMEOUT = 6000;  //6 seconds
+     *  for bootstrbp servers.  */
+    privbte static final int CONNECT_TIMEOUT = 6000;  //6 seconds
 
-    /** The total amount of upstream messaging bandwidth for ALL connections
+    /** The totbl amount of upstream messaging bandwidth for ALL connections
      *  in BYTES (not bits) per second. */
-    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=8000;
+    privbte static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=8000;
 
-    /** The maximum number of times ManagedConnection instances should send UDP
-     *  ConnectBack requests.
+    /** The mbximum number of times ManagedConnection instances should send UDP
+     *  ConnectBbck requests.
      */
-    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
+    privbte static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
 
-    /** The maximum number of times ManagedConnection instances should send TCP
-     *  ConnectBack requests.
+    /** The mbximum number of times ManagedConnection instances should send TCP
+     *  ConnectBbck requests.
      */
-    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
+    privbte static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
 
-	/** Handle to the <tt>ConnectionManager</tt>.
+	/** Hbndle to the <tt>ConnectionManager</tt>.
 	 */
-    private ConnectionManager _manager;
+    privbte ConnectionManager _manager;
 
-	/** Filter for filtering out messages that are considered spam.
+	/** Filter for filtering out messbges that are considered spam.
 	 */
-    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
-    private volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
+    privbte volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
+    privbte volatile SpamFilter _personalFilter =
+        SpbmFilter.newPersonalFilter();
 
     /*
-     * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
-     * http://www.limewire.com/developer/sachrifc.txt.  The basic idea is to use
-     * one queue for each message type.  Messages are removed from the queue in
-     * a biased round-robin fashion.  This prioritizes some messages types while
-     * preventing any one message type from dominating traffic.  Query replies
-     * are further prioritized by "GUID volume", i.e., the number of bytes
-     * already routed for that GUID.  Other messages are sorted by time and
-     * removed in a LIFO [sic] policy.  This, coupled with timeouts, reduces
-     * latency.  
+     * IMPLEMENTATION NOTE: this clbss uses the SACHRIFC algorithm described at
+     * http://www.limewire.com/developer/sbchrifc.txt.  The basic idea is to use
+     * one queue for ebch message type.  Messages are removed from the queue in
+     * b biased round-robin fashion.  This prioritizes some messages types while
+     * preventing bny one message type from dominating traffic.  Query replies
+     * bre further prioritized by "GUID volume", i.e., the number of bytes
+     * blready routed for that GUID.  Other messages are sorted by time and
+     * removed in b LIFO [sic] policy.  This, coupled with timeouts, reduces
+     * lbtency.  
      */
 
-    /** A lock for QRP activity on this connection */
-    private final Object QRP_LOCK=new Object();
+    /** A lock for QRP bctivity on this connection */
+    privbte final Object QRP_LOCK=new Object();
     
-    /** Non-blocking throttle for outgoing messages. */
-    private final static Throttle _nbThrottle = new NBThrottle(true,
+    /** Non-blocking throttle for outgoing messbges. */
+    privbte final static Throttle _nbThrottle = new NBThrottle(true,
                                                        TOTAL_OUTGOING_MESSAGING_BANDWIDTH,
-                                                       ConnectionSettings.NUM_CONNECTIONS.getValue(),
+                                                       ConnectionSettings.NUM_CONNECTIONS.getVblue(),
                                                        CompositeQueue.QUEUE_TIME);
                                                             
-    /** Blocking throttle for outgoing messages. */
-    private final static BandwidthThrottle _throttle=
-        new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
+    /** Blocking throttle for outgoing messbges. */
+    privbte final static BandwidthThrottle _throttle=
+        new BbndwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
         
     
     /** The OutputRunner */
-    private OutputRunner _outputRunner;
+    privbte OutputRunner _outputRunner;
     
-    /** Keeps track of sent/received [dropped] & bandwidth. */
-    private final ConnectionStats _connectionStats = new ConnectionStats();
+    /** Keeps trbck of sent/received [dropped] & bandwidth. */
+    privbte final ConnectionStats _connectionStats = new ConnectionStats();
     
     /**
-     * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
-     * busy" for the purposes of QRT updates.
+     * The minimum time b leaf needs to be in "busy mode" before we will consider him "truly
+     * busy" for the purposes of QRT updbtes.
      */
-    private static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
+    privbte static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
 
-    /** The next time I should send a query route table to this connection.
+    /** The next time I should send b query route table to this connection.
 	 */
-    private long _nextQRPForwardTime;
+    privbte long _nextQRPForwardTime;
     
     /** 
-     * The bandwidth trackers for the up/downstream.
-     * These are not synchronized and not guaranteed to be 100% accurate.
+     * The bbndwidth trackers for the up/downstream.
+     * These bre not synchronized and not guaranteed to be 100% accurate.
      */
-    private BandwidthTrackerImpl _upBandwidthTracker=
-        new BandwidthTrackerImpl();
-    private BandwidthTrackerImpl _downBandwidthTracker=
-        new BandwidthTrackerImpl();
+    privbte BandwidthTrackerImpl _upBandwidthTracker=
+        new BbndwidthTrackerImpl();
+    privbte BandwidthTrackerImpl _downBandwidthTracker=
+        new BbndwidthTrackerImpl();
 
-    /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
-     *  because this is a connection to a Clip2 reflector. */
-    private boolean _isKillable=true;
+    /** True iff this should not be policed by the ConnectionWbtchdog, e.g.,
+     *  becbuse this is a connection to a Clip2 reflector. */
+    privbte boolean _isKillable=true;
    
-    /** Use this if a HopsFlowVM instructs us to stop sending queries below
-     *  this certain hops value....
+    /** Use this if b HopsFlowVM instructs us to stop sending queries below
+     *  this certbin hops value....
      */
-    private volatile int hopsFlowMax = -1;
+    privbte volatile int hopsFlowMax = -1;
 
     /**
-     * This member contains the time beyond which, if this host is still busy (hops flow==0),
-     * that we should consider him as "truly idle" and should then remove his contributions
-     * last-hop QRTs.  A value of -1 means that either the leaf isn't busy, or he is busy,
-     * and his busy-ness was already noticed by the MessageRouter, so we shouldn't 're-notice'
-     * him on the next QRT update iteration.
+     * This member contbins the time beyond which, if this host is still busy (hops flow==0),
+     * thbt we should consider him as "truly idle" and should then remove his contributions
+     * lbst-hop QRTs.  A value of -1 means that either the leaf isn't busy, or he is busy,
+     * bnd his busy-ness was already noticed by the MessageRouter, so we shouldn't 're-notice'
+     * him on the next QRT updbte iteration.
      */
-    private volatile long _busyTime = -1;
+    privbte volatile long _busyTime = -1;
 
     /**
-     * whether this connection is a push proxy for somebody
+     * whether this connection is b push proxy for somebody
      */
-    private volatile boolean _pushProxy;
+    privbte volatile boolean _pushProxy;
 
-    /** The class wide static counter for the number of udp connect back 
+    /** The clbss wide static counter for the number of udp connect back 
      *  request sent.
      */
-    private static int _numUDPConnectBackRequests = 0;
+    privbte static int _numUDPConnectBackRequests = 0;
 
-    /** The class wide static counter for the number of tcp connect back 
+    /** The clbss wide static counter for the number of tcp connect back 
      *  request sent.
      */
-    private static int _numTCPConnectBackRequests = 0;
+    privbte static int _numTCPConnectBackRequests = 0;
 
     /**
-     * Variable for the <tt>QueryRouteTable</tt> received for this 
+     * Vbriable for the <tt>QueryRouteTable</tt> received for this 
      * connection.
      */
-    private QueryRouteTable _lastQRPTableReceived;
+    privbte QueryRouteTable _lastQRPTableReceived;
 
     /**
-     * Variable for the <tt>QueryRouteTable</tt> sent for this 
+     * Vbriable for the <tt>QueryRouteTable</tt> sent for this 
      * connection.
      */
-    private QueryRouteTable _lastQRPTableSent;
+    privbte QueryRouteTable _lastQRPTableSent;
 
     /**
-     * Holds the mappings of GUIDs that are being proxied.
-     * We want to construct this lazily....
+     * Holds the mbppings of GUIDs that are being proxied.
+     * We wbnt to construct this lazily....
      * GUID.TimedGUID -> GUID
-     * OOB Proxy GUID - > Original GUID
+     * OOB Proxy GUID - > Originbl GUID
      */
-    private Map _guidMap = null;
+    privbte Map _guidMap = null;
 
     /**
-     * The max lifetime of the GUID (10 minutes).
+     * The mbx lifetime of the GUID (10 minutes).
      */
-    private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
+    privbte static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
 
     /**
-     * Whether or not this was a supernode <-> client connection when message
-     * looping started.
+     * Whether or not this wbs a supernode <-> client connection when message
+     * looping stbrted.
      */
-    private boolean supernodeClientAtLooping = false;
+    privbte boolean supernodeClientAtLooping = false;
     
     /**
-     * The last clientGUID a Hops=0 QueryReply had.
+     * The lbst clientGUID a Hops=0 QueryReply had.
      */
-    private byte[] clientGUID = DataUtils.EMPTY_GUID;
+    privbte byte[] clientGUID = DataUtils.EMPTY_GUID;
 
     /**
-     * Creates a new outgoing connection to the specified host on the
+     * Crebtes a new outgoing connection to the specified host on the
 	 * specified port.  
 	 *
-	 * @param host the address of the host we're connecting to
-	 * @param port the port the host is listening on
+	 * @pbram host the address of the host we're connecting to
+	 * @pbram port the port the host is listening on
      */
-    public ManagedConnection(String host, int port) {
+    public MbnagedConnection(String host, int port) {
         this(host, port, 
 			 (RouterService.isSupernode() ? 
-			  (Properties)(new UltrapeerHeaders(host)) : 
-			  (Properties)(new LeafHeaders(host))),
+			  (Properties)(new UltrbpeerHeaders(host)) : 
+			  (Properties)(new LebfHeaders(host))),
 			 (RouterService.isSupernode() ?
-			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
-			  (HandshakeResponder)new LeafHandshakeResponder(host)));
+			  (HbndshakeResponder)new UltrapeerHandshakeResponder(host) :
+			  (HbndshakeResponder)new LeafHandshakeResponder(host)));
     }
 
 	/**
-	 * Creates a new <tt>ManagedConnection</tt> with the specified 
-	 * handshake classes and the specified host and port.
+	 * Crebtes a new <tt>ManagedConnection</tt> with the specified 
+	 * hbndshake classes and the specified host and port.
 	 */
-	private ManagedConnection(String host, int port, 
+	privbte ManagedConnection(String host, int port, 
 							  Properties props, 
-							  HandshakeResponder responder) {	
+							  HbndshakeResponder responder) {	
         super(host, port, props, responder);        
-        _manager = RouterService.getConnectionManager();		
+        _mbnager = RouterService.getConnectionManager();		
 	}
 
     /**
-     * Creates an incoming connection.
-     * ManagedConnections should only be constructed within ConnectionManager.
-     * @requires the word "GNUTELLA " and nothing else has just been read
+     * Crebtes an incoming connection.
+     * MbnagedConnections should only be constructed within ConnectionManager.
+     * @requires the word "GNUTELLA " bnd nothing else has just been read
      *  from socket
-     * @effects wraps a connection around socket and does the rest of the
-     *  Gnutella handshake.
+     * @effects wrbps a connection around socket and does the rest of the
+     *  Gnutellb handshake.
      */
-    ManagedConnection(Socket socket) {
+    MbnagedConnection(Socket socket) {
         super(socket, 
 			  RouterService.isSupernode() ? 
-			  (HandshakeResponder)(new UltrapeerHandshakeResponder(
+			  (HbndshakeResponder)(new UltrapeerHandshakeResponder(
 			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new LeafHandshakeResponder(
+			  (HbndshakeResponder)(new LeafHandshakeResponder(
 				  socket.getInetAddress().getHostAddress())));
-        _manager = RouterService.getConnectionManager();
+        _mbnager = RouterService.getConnectionManager();
     }
 
 
 
-    public void initialize()
-            throws IOException, NoGnutellaOkException, BadHandshakeException {
-        //Establish the socket (if needed), handshake.
-		super.initialize(CONNECT_TIMEOUT);
+    public void initiblize()
+            throws IOException, NoGnutellbOkException, BadHandshakeException {
+        //Estbblish the socket (if needed), handshake.
+		super.initiblize(CONNECT_TIMEOUT);
 
-        // Start our OutputRunner.
-        startOutput();
+        // Stbrt our OutputRunner.
+        stbrtOutput();
 
-        UpdateManager updater = UpdateManager.instance();
-        updater.checkAndUpdate(this);
+        UpdbteManager updater = UpdateManager.instance();
+        updbter.checkAndUpdate(this);
     }
 
     /**
-     * Resets the query route table for this connection.  The new table
-     * will be of the size specified in <tt>rtm</tt> and will contain
-     * no data.  If there is no <tt>QueryRouteTable</tt> yet created for
-     * this connection, this method will create one.
+     * Resets the query route tbble for this connection.  The new table
+     * will be of the size specified in <tt>rtm</tt> bnd will contain
+     * no dbta.  If there is no <tt>QueryRouteTable</tt> yet created for
+     * this connection, this method will crebte one.
      *
-     * @param rtm the <tt>ResetTableMessage</tt> 
+     * @pbram rtm the <tt>ResetTableMessage</tt> 
      */
-    public void resetQueryRouteTable(ResetTableMessage rtm) {
-        if(_lastQRPTableReceived == null) {
-            _lastQRPTableReceived =
-                new QueryRouteTable(rtm.getTableSize(), rtm.getInfinity());
+    public void resetQueryRouteTbble(ResetTableMessage rtm) {
+        if(_lbstQRPTableReceived == null) {
+            _lbstQRPTableReceived =
+                new QueryRouteTbble(rtm.getTableSize(), rtm.getInfinity());
         } else {
-            _lastQRPTableReceived.reset(rtm);
+            _lbstQRPTableReceived.reset(rtm);
         }
     }
 
     /**
-     * Patches the <tt>QueryRouteTable</tt> for this connection.
+     * Pbtches the <tt>QueryRouteTable</tt> for this connection.
      *
-     * @param ptm the patch with the data to update
+     * @pbram ptm the patch with the data to update
      */
-    public void patchQueryRouteTable(PatchTableMessage ptm) {
+    public void pbtchQueryRouteTable(PatchTableMessage ptm) {
 
-        // we should always get a reset before a patch, but 
-        // allocate a table in case we don't
-        if(_lastQRPTableReceived == null) {
-            _lastQRPTableReceived = new QueryRouteTable();
+        // we should blways get a reset before a patch, but 
+        // bllocate a table in case we don't
+        if(_lbstQRPTableReceived == null) {
+            _lbstQRPTableReceived = new QueryRouteTable();
         }
         try {
-            _lastQRPTableReceived.patch(ptm);
-        } catch(BadPacketException e) {
-            // not sure what to do here!!
+            _lbstQRPTableReceived.patch(ptm);
+        } cbtch(BadPacketException e) {
+            // not sure whbt to do here!!
         }                    
     }
 
     /**
-     * Set's a leaf's busy timer to now, if bSet is true, else clears the flag
+     * Set's b leaf's busy timer to now, if bSet is true, else clears the flag
      *
-     *  @param bSet Whether to SET or CLEAR the busy timer for this host
+     *  @pbram bSet Whether to SET or CLEAR the busy timer for this host
      */
-    public void setBusy( boolean bSet ){
+    public void setBusy( boolebn bSet ){
         if( bSet ){            
             if( _busyTime==-1 )
                 _busyTime=System.currentTimeMillis();
@@ -351,199 +351,199 @@ public class ManagedConnection extends Connection
 
     /**
      * 
-     * @return the current Hops Flow limit value for this connection, or -1 if we haven't
-     * yet received a HF message
+     * @return the current Hops Flow limit vblue for this connection, or -1 if we haven't
+     * yet received b HF message
      */
-    public byte getHopsFlowMax() {
-        return (byte)hopsFlowMax;
+    public byte getHopsFlowMbx() {
+        return (byte)hopsFlowMbx;
     }
     
-    /** Returns true iff this connection is a shielded leaf connection, and has 
-     * signalled that he is currently busy (full on upload slots).  If so, we will 
-     * not include his QRT table in last hop QRT tables we send out (if we are an 
-     * Ultrapeer) 
-     * @return true iff this connection is a busy leaf (don't include his QRT table)
+    /** Returns true iff this connection is b shielded leaf connection, and has 
+     * signblled that he is currently busy (full on upload slots).  If so, we will 
+     * not include his QRT tbble in last hop QRT tables we send out (if we are an 
+     * Ultrbpeer) 
+     * @return true iff this connection is b busy leaf (don't include his QRT table)
      */
-    public boolean isBusyLeaf(){
-        boolean busy=isSupernodeClientConnection() && (getHopsFlowMax()==0);
+    public boolebn isBusyLeaf(){
+        boolebn busy=isSupernodeClientConnection() && (getHopsFlowMax()==0);
         
         return busy;
     }
     
     /**
-     * Determine whether or not the leaf has been busy long enough to remove his QRT tables
-     * from the combined last-hop QRTs, and should trigger an earlier update
+     * Determine whether or not the lebf has been busy long enough to remove his QRT tables
+     * from the combined lbst-hop QRTs, and should trigger an earlier update
      * 
-     * @return true iff this leaf is busy and should trigger an update to the last-hop QRTs 
+     * @return true iff this lebf is busy and should trigger an update to the last-hop QRTs 
      */
-    public boolean isBusyEnoughToTriggerQRTRemoval(){
+    public boolebn isBusyEnoughToTriggerQRTRemoval(){
         if( _busyTime == -1 )
-            return false;
+            return fblse;
         
         if( System.currentTimeMillis() > (_busyTime+MIN_BUSY_LEAF_TIME) )
             return true;
         
-        return false;
+        return fblse;
     }
     
     /**
      * Determines whether or not the specified <tt>QueryRequest</tt>
-     * instance should be sent to the connection.  The method takes a couple
-     * factors into account, such as QRP tables, type of query, etc.
+     * instbnce should be sent to the connection.  The method takes a couple
+     * fbctors into account, such as QRP tables, type of query, etc.
      *
-     * @param query the <tt>QueryRequest</tt> to check against
-     *  the data
+     * @pbram query the <tt>QueryRequest</tt> to check against
+     *  the dbta
      * @return <tt>true</tt> if the <tt>QueryRequest</tt> should be sent to
-     * this connection, otherwise <tt>false</tt>
+     * this connection, otherwise <tt>fblse</tt>
      */
-    public boolean shouldForwardQuery(QueryRequest query) {
-        // special what is queries have version numbers attached to them - make
-        // sure that the remote host can answer the query....
-        if (query.isFeatureQuery()) {
+    public boolebn shouldForwardQuery(QueryRequest query) {
+        // specibl what is queries have version numbers attached to them - make
+        // sure thbt the remote host can answer the query....
+        if (query.isFebtureQuery()) {
             if (isSupernodeClientConnection())
-                return (getRemoteHostFeatureQuerySelector() >= 
-                        query.getFeatureSelector());
+                return (getRemoteHostFebtureQuerySelector() >= 
+                        query.getFebtureSelector());
             else if (isSupernodeSupernodeConnection())
-                return getRemoteHostSupportsFeatureQueries();
+                return getRemoteHostSupportsFebtureQueries();
             else
-                return false;
+                return fblse;
         }
-        return hitsQueryRouteTable(query);
+        return hitsQueryRouteTbble(query);
     }
     
     /**
      * Determines whether or not this query hits the QRT.
      */
-    protected boolean hitsQueryRouteTable(QueryRequest query) {
-        if(_lastQRPTableReceived == null) return false;
-        return _lastQRPTableReceived.contains(query);
+    protected boolebn hitsQueryRouteTable(QueryRequest query) {
+        if(_lbstQRPTableReceived == null) return false;
+        return _lbstQRPTableReceived.contains(query);
 	}
 
     /**
-     * Accessor for the <tt>QueryRouteTable</tt> received along this 
-     * connection.  Can be <tt>null</tt> if no query routing table has been 
+     * Accessor for the <tt>QueryRouteTbble</tt> received along this 
+     * connection.  Cbn be <tt>null</tt> if no query routing table has been 
      * received yet.
      *
-     * @return the last <tt>QueryRouteTable</tt> received along this
+     * @return the lbst <tt>QueryRouteTable</tt> received along this
      *  connection
      */
-    public QueryRouteTable getQueryRouteTableReceived() {
-        return _lastQRPTableReceived;
+    public QueryRouteTbble getQueryRouteTableReceived() {
+        return _lbstQRPTableReceived;
     }
 
     /**
-     * Accessor for the last QueryRouteTable's percent full.
+     * Accessor for the lbst QueryRouteTable's percent full.
      */
-    public double getQueryRouteTablePercentFull() {
-        return _lastQRPTableReceived == null ?
-            0 : _lastQRPTableReceived.getPercentFull();
+    public double getQueryRouteTbblePercentFull() {
+        return _lbstQRPTableReceived == null ?
+            0 : _lbstQRPTableReceived.getPercentFull();
     }
     
     /**
-     * Accessor for the last QueryRouteTable's size.
+     * Accessor for the lbst QueryRouteTable's size.
      */
-    public int getQueryRouteTableSize() {
-        return _lastQRPTableReceived == null ?
-            0 : _lastQRPTableReceived.getSize();
+    public int getQueryRouteTbbleSize() {
+        return _lbstQRPTableReceived == null ?
+            0 : _lbstQRPTableReceived.getSize();
     }
     
     /**
-     * Accessor for the last QueryRouteTable's Empty Units.
+     * Accessor for the lbst QueryRouteTable's Empty Units.
      */
-    public int getQueryRouteTableEmptyUnits() {
-        return _lastQRPTableReceived == null ?
-            -1 : _lastQRPTableReceived.getEmptyUnits();
+    public int getQueryRouteTbbleEmptyUnits() {
+        return _lbstQRPTableReceived == null ?
+            -1 : _lbstQRPTableReceived.getEmptyUnits();
     }
     
     /**
-     * Accessor for the last QueryRouteTable's Units In Use.
+     * Accessor for the lbst QueryRouteTable's Units In Use.
      */
-    public int getQueryRouteTableUnitsInUse() {
-        return _lastQRPTableReceived == null ?
-            -1 : _lastQRPTableReceived.getUnitsInUse();
+    public int getQueryRouteTbbleUnitsInUse() {
+        return _lbstQRPTableReceived == null ?
+            -1 : _lbstQRPTableReceived.getUnitsInUse();
     }
     
     /**
-     * Creates a deflated output stream.
+     * Crebtes a deflated output stream.
      *
-     * If the connection supports asynchronous messaging, this does nothing,
-     * because we already installed an asynchronous writer that doesn't
-     * use streams.
+     * If the connection supports bsynchronous messaging, this does nothing,
+     * becbuse we already installed an asynchronous writer that doesn't
+     * use strebms.
      */
-    protected OutputStream createDeflatedOutputStream(OutputStream out) {
+    protected OutputStrebm createDeflatedOutputStream(OutputStream out) {
         if(isAsynchronous())
             return out;
         else
-            return super.createDeflatedOutputStream(out);
+            return super.crebteDeflatedOutputStream(out);
     }
     
     /**
-     * Creates the deflated input stream.
+     * Crebtes the deflated input stream.
      *
-     * If the connection supports asynchronous messaging, this does nothing,
-     * because we're going to install a reader when we start looping for
-     * messages.  Note, however, that if we use the 'receive' calls
-     * instead of loopForMessages, an UncompressingInputStream is going to
-     * be set up automatically.
+     * If the connection supports bsynchronous messaging, this does nothing,
+     * becbuse we're going to install a reader when we start looping for
+     * messbges.  Note, however, that if we use the 'receive' calls
+     * instebd of loopForMessages, an UncompressingInputStream is going to
+     * be set up butomatically.
      */
-    protected InputStream createInflatedInputStream(InputStream in) {
+    protected InputStrebm createInflatedInputStream(InputStream in) {
         if(isAsynchronous())
             return in;
         else
-            return super.createInflatedInputStream(in);
+            return super.crebteInflatedInputStream(in);
     }
 
     /**
-     * Throttles the super's OutputStream.  This works quite well with
-     * compressed streams, because the chaining mechanism writes the
-     * compressed bytes, ensuring that we do not attempt to request
-     * more data (and thus sleep while throttling) than we will actually write.
+     * Throttles the super's OutputStrebm.  This works quite well with
+     * compressed strebms, because the chaining mechanism writes the
+     * compressed bytes, ensuring thbt we do not attempt to request
+     * more dbta (and thus sleep while throttling) than we will actually write.
      */
-    protected OutputStream getOutputStream()  throws IOException {
-        return new ThrottledOutputStream(super.getOutputStream(), _throttle);
+    protected OutputStrebm getOutputStream()  throws IOException {
+        return new ThrottledOutputStrebm(super.getOutputStream(), _throttle);
     }
 
     /**
-     * Override of receive to do ConnectionManager stats and to properly shut
+     * Override of receive to do ConnectionMbnager stats and to properly shut
      * down the connection on IOException
      */
-    public Message receive() throws IOException, BadPacketException {
-        Message m = null;
+    public Messbge receive() throws IOException, BadPacketException {
+        Messbge m = null;
         
         try {
             m = super.receive();
-        } catch(IOException e) {
-            if( _manager != null )
-                _manager.remove(this);
+        } cbtch(IOException e) {
+            if( _mbnager != null )
+                _mbnager.remove(this);
             throw e;
         }
-        // record received message in stats
-        _connectionStats.addReceived();
+        // record received messbge in stats
+        _connectionStbts.addReceived();
         return m;
     }
 
     /**
-     * Override of receive to do MessageRouter stats and to properly shut
+     * Override of receive to do MessbgeRouter stats and to properly shut
      * down the connection on IOException
      */
-    public Message receive(int timeout)
-            throws IOException, BadPacketException, InterruptedIOException {
-        Message m = null;
+    public Messbge receive(int timeout)
+            throws IOException, BbdPacketException, InterruptedIOException {
+        Messbge m = null;
         
         try {
             m = super.receive(timeout);
-        } catch(InterruptedIOException ioe) {
-            //we read nothing in this timeframe,
+        } cbtch(InterruptedIOException ioe) {
+            //we rebd nothing in this timeframe,
             //do not remove, just rethrow.
             throw ioe;
-        } catch(IOException e) {
-            if( _manager != null )
-                _manager.remove(this);
+        } cbtch(IOException e) {
+            if( _mbnager != null )
+                _mbnager.remove(this);
             throw e;
         }
         
-        // record received message in stats
-        _connectionStats.addReceived();
+        // record received messbge in stats
+        _connectionStbts.addReceived();
         return m;
     }
 
@@ -551,82 +551,82 @@ public class ManagedConnection extends Connection
     ////////////////////// Sending, Outgoing Flow Control //////////////////////
     
     /**
-     * Starts an OutputRunner.  If the Connection supports asynchronous writing,
-     * this does not use an extra thread.  Otherwise, a thread is started up
+     * Stbrts an OutputRunner.  If the Connection supports asynchronous writing,
+     * this does not use bn extra thread.  Otherwise, a thread is started up
      * to write.
      */
-    private void startOutput() {
-        MessageQueue queue;
-        // Taking this change out until we can safely handle attacks and overflow 
-        // TODO: make a cheaper Queue that still prevents flooding of ultrapeer
-        //       and ensures that clogged leaf doesn't drop QRP messages.
+    privbte void startOutput() {
+        MessbgeQueue queue;
+        // Tbking this change out until we can safely handle attacks and overflow 
+        // TODO: mbke a cheaper Queue that still prevents flooding of ultrapeer
+        //       bnd ensures that clogged leaf doesn't drop QRP messages.
 		//if(isSupernodeSupernodeConnection())
 		    queue = new CompositeQueue();
 		//else
-		    //queue = new BasicQueue();
+		    //queue = new BbsicQueue();
 
 		if(isAsynchronous()) {
-		    MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
-		    _outputRunner = messager;
-		    ChannelWriter writer = messager;
+		    MessbgeWriter messager = new MessageWriter(_connectionStats, queue, this);
+		    _outputRunner = messbger;
+		    ChbnnelWriter writer = messager;
 		    
-		    if(isWriteDeflated()) {
-		        DeflaterWriter deflater = new DeflaterWriter(_deflater);
-		        messager.setWriteChannel(deflater);
-                writer = deflater;
+		    if(isWriteDeflbted()) {
+		        DeflbterWriter deflater = new DeflaterWriter(_deflater);
+		        messbger.setWriteChannel(deflater);
+                writer = deflbter;
             }
-            DelayedBufferWriter delayer = new DelayedBufferWriter(1400);
-            writer.setWriteChannel(delayer);
-            writer = delayer;
-            writer.setWriteChannel(new ThrottleWriter(_nbThrottle));
+            DelbyedBufferWriter delayer = new DelayedBufferWriter(1400);
+            writer.setWriteChbnnel(delayer);
+            writer = delbyer;
+            writer.setWriteChbnnel(new ThrottleWriter(_nbThrottle));
 		    
-		    ((NIOMultiplexor)_socket).setWriteObserver(messager);
+		    ((NIOMultiplexor)_socket).setWriteObserver(messbger);
 		} else {
 		    _outputRunner = new BlockingRunner(queue);
         }
     }
 
     /**
-     * Sends a message.  This overrides does extra buffering so that Messages
-     * are dropped if the socket gets backed up.  Will remove any extended
-     * payloads if the receiving connection does not support GGGEP.   Also
-     * updates MessageRouter stats.<p>
+     * Sends b message.  This overrides does extra buffering so that Messages
+     * bre dropped if the socket gets backed up.  Will remove any extended
+     * pbyloads if the receiving connection does not support GGGEP.   Also
+     * updbtes MessageRouter stats.<p>
      *
-     * This method IS thread safe.  Multiple threads can be in a send call
-     * at the same time for a given connection.
+     * This method IS threbd safe.  Multiple threads can be in a send call
+     * bt the same time for a given connection.
      *
      * @requires this is fully constructed
      * @modifies the network underlying this
      */
-    public void send(Message m) {
+    public void send(Messbge m) {
         if (! supportsGGEP())
-            m=m.stripExtendedPayload();
+            m=m.stripExtendedPbyload();
 
-        // if Hops Flow is in effect, and this is a QueryRequest, and the
-        // hoppage is too biggage, discardage time...
-    	int smh = hopsFlowMax;
-        if (smh > -1 && (m instanceof QueryRequest) && m.getHops() >= smh)
+        // if Hops Flow is in effect, bnd this is a QueryRequest, and the
+        // hoppbge is too biggage, discardage time...
+    	int smh = hopsFlowMbx;
+        if (smh > -1 && (m instbnceof QueryRequest) && m.getHops() >= smh)
             return;
             
         _outputRunner.send(m);
     }
 
     /**
-     * This is a specialized send method for queries that we originate, 
-     * either from ourselves directly, or on behalf of one of our leaves
-     * when we're an Ultrapeer.  These queries have a special sending 
-     * queue of their own and are treated with a higher priority.
+     * This is b specialized send method for queries that we originate, 
+     * either from ourselves directly, or on behblf of one of our leaves
+     * when we're bn Ultrapeer.  These queries have a special sending 
+     * queue of their own bnd are treated with a higher priority.
      *
-     * @param query the <tt>QueryRequest</tt> to send
+     * @pbram query the <tt>QueryRequest</tt> to send
      */
-    public void originateQuery(QueryRequest query) {
-        query.originate();
+    public void originbteQuery(QueryRequest query) {
+        query.originbte();
         send(query);
     }
  
     /**
-     * Does nothing.  Since this automatically takes care of flushing output
-     * buffers, there is nothing to do.  Note that flush() does NOT block for
+     * Does nothing.  Since this butomatically takes care of flushing output
+     * buffers, there is nothing to do.  Note thbt flush() does NOT block for
      * TCP buffers to be emptied.  
      */
     public void flush() throws IOException {        
@@ -637,264 +637,264 @@ public class ManagedConnection extends Connection
             _outputRunner.shutdown();
         super.close();
         
-        // release pointer to our _guidMap so it can be gc()'ed
-        if (_guidMap != null)
-            GuidMapExpirer.removeMap(_guidMap);
+        // relebse pointer to our _guidMap so it can be gc()'ed
+        if (_guidMbp != null)
+            GuidMbpExpirer.removeMap(_guidMap);
     }
 
     //////////////////////////////////////////////////////////////////////////
     
     /**
-     * Handles core Gnutella request/reply protocol.
-     * If asynchronous messaging is supported, this immediately
-     * returns and messages are processed asynchronously via processMessage
-     * calls.  Otherwise, if reading blocks, this  will run until the connection
+     * Hbndles core Gnutella request/reply protocol.
+     * If bsynchronous messaging is supported, this immediately
+     * returns bnd messages are processed asynchronously via processMessage
+     * cblls.  Otherwise, if reading blocks, this  will run until the connection
      * is closed.
      *
-     * @requires this is initialized
-     * @modifies the network underlying this, manager
-     * @effects receives request and sends appropriate replies.
+     * @requires this is initiblized
+     * @modifies the network underlying this, mbnager
+     * @effects receives request bnd sends appropriate replies.
      *
-     * @throws IOException passed on from the receive call; failures to forward
-     *         or route messages are silently swallowed, allowing the message
+     * @throws IOException pbssed on from the receive call; failures to forward
+     *         or route messbges are silently swallowed, allowing the message
      *         loop to continue.
      */
-    void loopForMessages() throws IOException {
+    void loopForMessbges() throws IOException {
         supernodeClientAtLooping = isSupernodeClientConnection();
         
         if(!isAsynchronous()) {
             while (true) {
-                Message m=null;
+                Messbge m=null;
                 try {
                     m = receive();
                     if (m==null)
                         continue;
-                    handleMessageInternal(m);
-                } catch (BadPacketException ignored) {}
+                    hbndleMessageInternal(m);
+                } cbtch (BadPacketException ignored) {}
             }
         } else {
-            MessageReader reader = new MessageReader(ManagedConnection.this);
-            if(isReadDeflated())
-                reader.setReadChannel(new InflaterReader(_inflater));
+            MessbgeReader reader = new MessageReader(ManagedConnection.this);
+            if(isRebdDeflated())
+                rebder.setReadChannel(new InflaterReader(_inflater));
                 
-            ((NIOMultiplexor)_socket).setReadObserver(reader);
+            ((NIOMultiplexor)_socket).setRebdObserver(reader);
         }
     }
     
     /**
-     * Notification that messaging has closed.
+     * Notificbtion that messaging has closed.
      */
-    public void messagingClosed() {
-        if( _manager != null )
-            _manager.remove(this);   
+    public void messbgingClosed() {
+        if( _mbnager != null )
+            _mbnager.remove(this);   
     }
     
     /**
-     * Notification that a message is available to be processed (via asynch-processing).
+     * Notificbtion that a message is available to be processed (via asynch-processing).
      */
-    public void processReadMessage(Message m) throws IOException {
-        updateReadStatistics(m);
-        _connectionStats.addReceived();
-        handleMessageInternal(m);
+    public void processRebdMessage(Message m) throws IOException {
+        updbteReadStatistics(m);
+        _connectionStbts.addReceived();
+        hbndleMessageInternal(m);
     }
     
     /**
-     * Notification that a message has been sent.  Updates stats.
+     * Notificbtion that a message has been sent.  Updates stats.
      */
-    public void processSentMessage(Message m) {
-        updateWriteStatistics(m);
+    public void processSentMessbge(Message m) {
+        updbteWriteStatistics(m);
     }
     
     /**
-     * Handles a message without updating appropriate statistics.
+     * Hbndles a message without updating appropriate statistics.
      */
-    private void handleMessageInternal(Message m) {
-        // Run through the route spam filter and drop accordingly.
-        if (isSpam(m)) {
-			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
-            _connectionStats.addReceivedDropped();
+    privbte void handleMessageInternal(Message m) {
+        // Run through the route spbm filter and drop accordingly.
+        if (isSpbm(m)) {
+			ReceivedMessbgeStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
+            _connectionStbts.addReceivedDropped();
         } else {
-            if(m instanceof QueryReply && m.getHops() == 0)
+            if(m instbnceof QueryReply && m.getHops() == 0)
                 clientGUID = ((QueryReply)m).getClientGUID();
         
-            //special handling for proxying.
+            //specibl handling for proxying.
             if(supernodeClientAtLooping) {
-                if(m instanceof QueryRequest)
+                if(m instbnceof QueryRequest)
                     m = tryToProxy((QueryRequest) m);
-                else if (m instanceof QueryStatusResponse)
-                    m = morphToStopQuery((QueryStatusResponse) m);
+                else if (m instbnceof QueryStatusResponse)
+                    m = morphToStopQuery((QueryStbtusResponse) m);
             }
-            MessageDispatcher.instance().dispatchTCP(m, this);
+            MessbgeDispatcher.instance().dispatchTCP(m, this);
         }
     }
     
     /**
-     * Returns the network that the MessageReceiver uses -- Message.N_TCP.
+     * Returns the network thbt the MessageReceiver uses -- Message.N_TCP.
      */
     public int getNetwork() {
-        return Message.N_TCP;
+        return Messbge.N_TCP;
     }
     
 
-    private QueryRequest tryToProxy(QueryRequest query) {
-        // we must have the following qualifications:
-        // 1) Leaf must be sending SuperNode a query (checked in loopForMessages)
-        // 2) Leaf must support Leaf Guidance
+    privbte QueryRequest tryToProxy(QueryRequest query) {
+        // we must hbve the following qualifications:
+        // 1) Lebf must be sending SuperNode a query (checked in loopForMessages)
+        // 2) Lebf must support Leaf Guidance
         // 3) Query must not be OOB.
-        // 3.5) The query originator should not disallow proxying.
-        // 4) We must be able to OOB and have great success rate.
-        if (remoteHostSupportsLeafGuidance() < 1) return query;
-        if (query.desiresOutOfBandReplies()) return query;
+        // 3.5) The query originbtor should not disallow proxying.
+        // 4) We must be bble to OOB and have great success rate.
+        if (remoteHostSupportsLebfGuidance() < 1) return query;
+        if (query.desiresOutOfBbndReplies()) return query;
         if (query.doNotProxy()) return query;
-        if (!RouterService.isOOBCapable() || 
-            !OutOfBandThroughputStat.isSuccessRateGreat() ||
-            !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;
+        if (!RouterService.isOOBCbpable() || 
+            !OutOfBbndThroughputStat.isSuccessRateGreat() ||
+            !OutOfBbndThroughputStat.isOOBEffectiveForProxy()) return query;
 
-        // everything is a go - we need to do the following:
-        // 1) mutate the GUID of the query - you should maintain every param of
-        // the query except the new GUID and the OOB minspeed flag
-        // 2) set up mappings between the old guid and the new guid.
-        // after that, everything is set.  all you need to do is map the guids
-        // of the replies back to the original guid.  also, see if a you get a
-        // QueryStatusResponse message and morph it...
+        // everything is b go - we need to do the following:
+        // 1) mutbte the GUID of the query - you should maintain every param of
+        // the query except the new GUID bnd the OOB minspeed flag
+        // 2) set up mbppings between the old guid and the new guid.
+        // bfter that, everything is set.  all you need to do is map the guids
+        // of the replies bbck to the original guid.  also, see if a you get a
+        // QueryStbtusResponse message and morph it...
         // THIS IS SOME MAJOR HOKERY-POKERY!!!
         
-        // 1) mutate the GUID of the query
+        // 1) mutbte the GUID of the query
         byte[] origGUID = query.getGUID();
         byte[] oobGUID = new byte[origGUID.length];
-        System.arraycopy(origGUID, 0, oobGUID, 0, origGUID.length);
-        GUID.addressEncodeGuid(oobGUID, RouterService.getAddress(),
+        System.brraycopy(origGUID, 0, oobGUID, 0, origGUID.length);
+        GUID.bddressEncodeGuid(oobGUID, RouterService.getAddress(),
                                RouterService.getPort());
 
-        query = QueryRequest.createProxyQuery(query, oobGUID);
+        query = QueryRequest.crebteProxyQuery(query, oobGUID);
 
-        // 2) set up mappings between the guids
-        if (_guidMap == null) {
-            _guidMap = new Hashtable();
-            GuidMapExpirer.addMapToExpire(_guidMap);
+        // 2) set up mbppings between the guids
+        if (_guidMbp == null) {
+            _guidMbp = new Hashtable();
+            GuidMbpExpirer.addMapToExpire(_guidMap);
         }
         GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID),
                                                   TIMED_GUID_LIFETIME);
-        _guidMap.put(tGuid, new GUID(origGUID));
+        _guidMbp.put(tGuid, new GUID(origGUID));
 
-        OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+        OutOfBbndThroughputStat.OOB_QUERIES_SENT.incrementStat();
         return query;
     }
 
-    private QueryStatusResponse morphToStopQuery(QueryStatusResponse resp) {
-        // if the _guidMap is null, we aren't proxying anything....
-        if (_guidMap == null) return resp;
+    privbte QueryStatusResponse morphToStopQuery(QueryStatusResponse resp) {
+        // if the _guidMbp is null, we aren't proxying anything....
+        if (_guidMbp == null) return resp;
 
-        // if we are proxying this query, we should modify the GUID so as
+        // if we bre proxying this query, we should modify the GUID so as
         // to shut off the correct query
-        final GUID origGUID = resp.getQueryGUID();
+        finbl GUID origGUID = resp.getQueryGUID();
         GUID oobGUID = null;
-        synchronized (_guidMap) {
-            Iterator entrySetIter = _guidMap.entrySet().iterator();
-            while (entrySetIter.hasNext()) {
-                Map.Entry entry = (Map.Entry) entrySetIter.next();
-                if (origGUID.equals(entry.getValue())) {
+        synchronized (_guidMbp) {
+            Iterbtor entrySetIter = _guidMap.entrySet().iterator();
+            while (entrySetIter.hbsNext()) {
+                Mbp.Entry entry = (Map.Entry) entrySetIter.next();
+                if (origGUID.equbls(entry.getValue())) {
                     oobGUID = ((GUID.TimedGUID)entry.getKey()).getGUID();
-                    break;
+                    brebk;
                 }
             }
         }
 
-        // if we had a match, then just construct a new one....
+        // if we hbd a match, then just construct a new one....
         if (oobGUID != null)
-            return new QueryStatusResponse(oobGUID, resp.getNumResults());
+            return new QueryStbtusResponse(oobGUID, resp.getNumResults());
 
         else return resp;
     }
     
 
     /**
-     * Utility method for checking whether or not this message is considered
-     * spam.
+     * Utility method for checking whether or not this messbge is considered
+     * spbm.
      * 
-     * @param m the <tt>Message</tt> to check
-     * @return <tt>true</tt> if this is considered spam, otherwise 
-     *  <tt>false</tt>
+     * @pbram m the <tt>Message</tt> to check
+     * @return <tt>true</tt> if this is considered spbm, otherwise 
+     *  <tt>fblse</tt>
      */
-    public boolean isSpam(Message m) {
-        return !_routeFilter.allow(m);
+    public boolebn isSpam(Message m) {
+        return !_routeFilter.bllow(m);
     }
 
     //
-    // Begin Message dropping and filtering calls
+    // Begin Messbge dropping and filtering calls
     //
 
     /**
-     * A callback for the ConnectionManager to inform this connection that a
-     * message was dropped.  This happens when a reply received from this
-     * connection has no routing path.
+     * A cbllback for the ConnectionManager to inform this connection that a
+     * messbge was dropped.  This happens when a reply received from this
+     * connection hbs no routing path.
      */
-    public void countDroppedMessage() {
-        _connectionStats.addReceivedDropped();
+    public void countDroppedMessbge() {
+        _connectionStbts.addReceivedDropped();
     }
 
     /**
-     * A callback for Message Handler implementations to check to see if a
-     * message is considered to be undesirable by the message's receiving
+     * A cbllback for Message Handler implementations to check to see if a
+     * messbge is considered to be undesirable by the message's receiving
      * connection.
-     * Messages ignored for this reason are not considered to be dropped, so
-     * no statistics are incremented here.
+     * Messbges ignored for this reason are not considered to be dropped, so
+     * no stbtistics are incremented here.
      *
-     * @return true if the message is spam, false if it's okay
+     * @return true if the messbge is spam, false if it's okay
      */
-    public boolean isPersonalSpam(Message m) {
-        return !_personalFilter.allow(m);
+    public boolebn isPersonalSpam(Message m) {
+        return !_personblFilter.allow(m);
     }
 
     /**
      * @modifies this
-     * @effects sets the underlying routing filter.   Note that
-     *  most filters are not thread-safe, so they should not be shared
-     *  among multiple connections.
+     * @effects sets the underlying routing filter.   Note thbt
+     *  most filters bre not thread-safe, so they should not be shared
+     *  bmong multiple connections.
      */
-    public void setRouteFilter(SpamFilter filter) {
+    public void setRouteFilter(SpbmFilter filter) {
         _routeFilter = filter;
     }
 
     /**
      * @modifies this
-     * @effects sets the underlying personal filter.   Note that
-     *  most filters are not thread-safe, so they should not be shared
-     *  among multiple connections.
+     * @effects sets the underlying personbl filter.   Note that
+     *  most filters bre not thread-safe, so they should not be shared
+     *  bmong multiple connections.
      */
-    public void setPersonalFilter(SpamFilter filter) {
-        _personalFilter = filter;
+    public void setPersonblFilter(SpamFilter filter) {
+        _personblFilter = filter;
     }
     
     /**
-     * This method is called when a reply is received for a PingRequest
-     * originating on this Connection.  So, just send it back.
-     * If modifying this method, note that receivingConnection may
+     * This method is cblled when a reply is received for a PingRequest
+     * originbting on this Connection.  So, just send it back.
+     * If modifying this method, note thbt receivingConnection may
      * by null.
      */
-    public void handlePingReply(PingReply pingReply,
-                                ReplyHandler receivingConnection) {
+    public void hbndlePingReply(PingReply pingReply,
+                                ReplyHbndler receivingConnection) {
         send(pingReply);
     }
 
     /**
-     * This method is called when a reply is received for a QueryRequest
-     * originating on this Connection.  So, send it back.
-     * If modifying this method, note that receivingConnection may
+     * This method is cblled when a reply is received for a QueryRequest
+     * originbting on this Connection.  So, send it back.
+     * If modifying this method, note thbt receivingConnection may
      * by null.
      */
-    public void handleQueryReply(QueryReply queryReply,
-                                 ReplyHandler receivingConnection) {
-        if (_guidMap != null) {
+    public void hbndleQueryReply(QueryReply queryReply,
+                                 ReplyHbndler receivingConnection) {
+        if (_guidMbp != null) {
         // ---------------------
-        // If we are proxying for a query, map back the guid of the reply
+        // If we bre proxying for a query, map back the guid of the reply
         GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()),
                                                   TIMED_GUID_LIFETIME);
-        GUID origGUID = (GUID) _guidMap.get(tGuid);
+        GUID origGUID = (GUID) _guidMbp.get(tGuid);
         if (origGUID != null) { 
             byte prevHops = queryReply.getHops();
             queryReply = new QueryReply(origGUID.bytes(), queryReply);
-            queryReply.setTTL((byte)2); // we ttl 1 more than necessary
+            queryReply.setTTL((byte)2); // we ttl 1 more thbn necessary
             queryReply.setHops(prevHops);
         }
         // ---------------------
@@ -911,267 +911,267 @@ public class ManagedConnection extends Connection
     }
 
     /**
-     * This method is called when a PushRequest is received for a QueryReply
-     * originating on this Connection.  So, just send it back.
-     * If modifying this method, note that receivingConnection may
+     * This method is cblled when a PushRequest is received for a QueryReply
+     * originbting on this Connection.  So, just send it back.
+     * If modifying this method, note thbt receivingConnection may
      * by null.
      */
-    public void handlePushRequest(PushRequest pushRequest,
-                                  ReplyHandler receivingConnection) {
+    public void hbndlePushRequest(PushRequest pushRequest,
+                                  ReplyHbndler receivingConnection) {
         send(pushRequest);
     }   
 
 
-    protected void handleVendorMessage(VendorMessage vm) {
-        // let Connection do as needed....
-        super.handleVendorMessage(vm);
+    protected void hbndleVendorMessage(VendorMessage vm) {
+        // let Connection do bs needed....
+        super.hbndleVendorMessage(vm);
 
-        // now i can process
-        if (vm instanceof HopsFlowVendorMessage) {
-            // update the softMaxHops value so it can take effect....
-            HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
+        // now i cbn process
+        if (vm instbnceof HopsFlowVendorMessage) {
+            // updbte the softMaxHops value so it can take effect....
+            HopsFlowVendorMessbge hops = (HopsFlowVendorMessage) vm;
             
             if( isSupernodeClientConnection() )
-                //	If the connection is to a leaf, and it is busy (HF == 0)
-                //	then set the global busy leaf flag appropriately
-                setBusy( hops.getHopValue()==0 );
+                //	If the connection is to b leaf, and it is busy (HF == 0)
+                //	then set the globbl busy leaf flag appropriately
+                setBusy( hops.getHopVblue()==0 );
             
-            hopsFlowMax = hops.getHopValue();
+            hopsFlowMbx = hops.getHopValue();
         }
-        else if (vm instanceof PushProxyAcknowledgement) {
-            // this connection can serve as a PushProxy, so note this....
-            PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
-            if (Arrays.equals(ack.getGUID(),
-                              RouterService.getMessageRouter()._clientGUID)) {
+        else if (vm instbnceof PushProxyAcknowledgement) {
+            // this connection cbn serve as a PushProxy, so note this....
+            PushProxyAcknowledgement bck = (PushProxyAcknowledgement) vm;
+            if (Arrbys.equals(ack.getGUID(),
+                              RouterService.getMessbgeRouter()._clientGUID)) {
                 _pushProxy = true;
             }
-            // else mistake on the server side - the guid should be my client
-            // guid - not really necessary but whatever
+            // else mistbke on the server side - the guid should be my client
+            // guid - not reblly necessary but whatever
         }
-        else if(vm instanceof CapabilitiesVM) {
-            //we need to see if there is a new simpp version out there.
-            CapabilitiesVM capVM = (CapabilitiesVM)vm;
-            if(capVM.supportsSIMPP() > SimppManager.instance().getVersion()) {
-                //request the simpp message
+        else if(vm instbnceof CapabilitiesVM) {
+            //we need to see if there is b new simpp version out there.
+            CbpabilitiesVM capVM = (CapabilitiesVM)vm;
+            if(cbpVM.supportsSIMPP() > SimppManager.instance().getVersion()) {
+                //request the simpp messbge
                 SimppRequestVM simppReq = new SimppRequestVM();
                 send(simppReq);
             }
             
-            // see if there's a new update message.
-            int latestId = UpdateHandler.instance().getLatestId();
-            int currentId = capVM.supportsUpdate();
-            if(currentId > latestId)
-                send(new UpdateRequest());
-            else if(currentId == latestId)
-                UpdateHandler.instance().handleUpdateAvailable(this, currentId);
+            // see if there's b new update message.
+            int lbtestId = UpdateHandler.instance().getLatestId();
+            int currentId = cbpVM.supportsUpdate();
+            if(currentId > lbtestId)
+                send(new UpdbteRequest());
+            else if(currentId == lbtestId)
+                UpdbteHandler.instance().handleUpdateAvailable(this, currentId);
                 
         }
-        else if (vm instanceof MessagesSupportedVendorMessage) {        
-            // If this is a ClientSupernodeConnection and the host supports
-            // leaf guidance (because we have to tell them when to stop)
-            // then see if there are any old queries that we can re-originate
+        else if (vm instbnceof MessagesSupportedVendorMessage) {        
+            // If this is b ClientSupernodeConnection and the host supports
+            // lebf guidance (because we have to tell them when to stop)
+            // then see if there bre any old queries that we can re-originate
             // on this connection.
             if(isClientSupernodeConnection() &&
-               (remoteHostSupportsLeafGuidance() >= 0)) {
-                SearchResultHandler srh =
-                    RouterService.getSearchResultHandler();
+               (remoteHostSupportsLebfGuidance() >= 0)) {
+                SebrchResultHandler srh =
+                    RouterService.getSebrchResultHandler();
                 List queries = srh.getQueriesToReSend();
-                for(Iterator i = queries.iterator(); i.hasNext(); )
-                    send((Message)i.next());
+                for(Iterbtor i = queries.iterator(); i.hasNext(); )
+                    send((Messbge)i.next());
             }            
 
-            // see if you need a PushProxy - the remoteHostSupportsPushProxy
-            // test incorporates my leaf status in it.....
+            // see if you need b PushProxy - the remoteHostSupportsPushProxy
+            // test incorporbtes my leaf status in it.....
             if (remoteHostSupportsPushProxy() > -1) {
-                // get the client GUID and send off a PushProxyRequest
+                // get the client GUID bnd send off a PushProxyRequest
                 GUID clientGUID =
-                    new GUID(RouterService.getMessageRouter()._clientGUID);
+                    new GUID(RouterService.getMessbgeRouter()._clientGUID);
                 PushProxyRequest req = new PushProxyRequest(clientGUID);
                 send(req);
             }
 
-            // do i need to send any ConnectBack messages????
-            if (!UDPService.instance().canReceiveUnsolicited() &&
-                (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
+            // do i need to send bny ConnectBack messages????
+            if (!UDPService.instbnce().canReceiveUnsolicited() &&
+                (_numUDPConnectBbckRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPRedirect() > -1)) {
-                GUID connectBackGUID = RouterService.getUDPConnectBackGUID();
-                Message udp = new UDPConnectBackVendorMessage(RouterService.getPort(),
-                                                              connectBackGUID);
+                GUID connectBbckGUID = RouterService.getUDPConnectBackGUID();
+                Messbge udp = new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                              connectBbckGUID);
                 send(udp);
-                _numUDPConnectBackRequests++;
+                _numUDPConnectBbckRequests++;
             }
 
-            if (!RouterService.acceptedIncomingConnection() &&
-                (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
+            if (!RouterService.bcceptedIncomingConnection() &&
+                (_numTCPConnectBbckRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsTCPRedirect() > -1)) {
-                Message tcp = new TCPConnectBackVendorMessage(RouterService.getPort());
+                Messbge tcp = new TCPConnectBackVendorMessage(RouterService.getPort());
                 send(tcp);
-                _numTCPConnectBackRequests++;
+                _numTCPConnectBbckRequests++;
             }
         }
     }
 
 
     //
-    // End reply forwarding calls
+    // End reply forwbrding calls
     //
 
 
     //
-    // Begin statistics accessors
+    // Begin stbtistics accessors
     //
 
-    /** Returns the number of messages sent on this connection */
-    public int getNumMessagesSent() {
-        return _connectionStats.getSent();
+    /** Returns the number of messbges sent on this connection */
+    public int getNumMessbgesSent() {
+        return _connectionStbts.getSent();
     }
 
-    /** Returns the number of messages received on this connection */
-    public int getNumMessagesReceived() {
-        return _connectionStats.getReceived();
+    /** Returns the number of messbges received on this connection */
+    public int getNumMessbgesReceived() {
+        return _connectionStbts.getReceived();
     }
 
-    /** Returns the number of messages I dropped while trying to send
-     *  on this connection.  This happens when the remote host cannot
+    /** Returns the number of messbges I dropped while trying to send
+     *  on this connection.  This hbppens when the remote host cannot
      *  keep up with me. */
-    public int getNumSentMessagesDropped() {
-        return _connectionStats.getSentDropped();
+    public int getNumSentMessbgesDropped() {
+        return _connectionStbts.getSentDropped();
     }
 
     /**
-     * The number of messages received on this connection either filtered out
-     * or dropped because we didn't know how to route them.
+     * The number of messbges received on this connection either filtered out
+     * or dropped becbuse we didn't know how to route them.
      */
-    public long getNumReceivedMessagesDropped() {
-        return _connectionStats.getReceivedDropped();
+    public long getNumReceivedMessbgesDropped() {
+        return _connectionStbts.getReceivedDropped();
     }
 
     /**
      * @modifies this
-     * @effects Returns the percentage of messages sent on this
-     *  since the last call to getPercentReceivedDropped that were
+     * @effects Returns the percentbge of messages sent on this
+     *  since the lbst call to getPercentReceivedDropped that were
      *  dropped by this end of the connection.
      */
-    public float getPercentReceivedDropped() {
-        return _connectionStats.getPercentReceivedDropped();
+    public flobt getPercentReceivedDropped() {
+        return _connectionStbts.getPercentReceivedDropped();
     }
 
     /**
      * @modifies this
-     * @effects Returns the percentage of messages sent on this
-     *  since the last call to getPercentSentDropped that were
-     *  dropped by this end of the connection.  This value may be
-     *  greater than 100%, e.g., if only one message is sent but
-     *  four are dropped during a given time period.
+     * @effects Returns the percentbge of messages sent on this
+     *  since the lbst call to getPercentSentDropped that were
+     *  dropped by this end of the connection.  This vblue may be
+     *  grebter than 100%, e.g., if only one message is sent but
+     *  four bre dropped during a given time period.
      */
-    public float getPercentSentDropped() {
-        return _connectionStats.getPercentSentDropped();
+    public flobt getPercentSentDropped() {
+        return _connectionStbts.getPercentSentDropped();
     }
 
     /**
-     * Takes a snapshot of the upstream and downstream bandwidth since the last
-     * call to measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth 
+     * Tbkes a snapshot of the upstream and downstream bandwidth since the last
+     * cbll to measureBandwidth.
+     * @see BbndwidthTracker#measureBandwidth 
      */
-    public void measureBandwidth() {
-        _upBandwidthTracker.measureBandwidth(
+    public void mebsureBandwidth() {
+        _upBbndwidthTracker.measureBandwidth(
              ByteOrder.long2int(getBytesSent()));
-        _downBandwidthTracker.measureBandwidth(
+        _downBbndwidthTracker.measureBandwidth(
              ByteOrder.long2int(getBytesReceived()));
     }
 
     /**
-     * Returns the upstream bandwidth between the last two calls to
-     * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth 
+     * Returns the upstrebm bandwidth between the last two calls to
+     * mebsureBandwidth.
+     * @see BbndwidthTracker#measureBandwidth 
      */
-    public float getMeasuredUpstreamBandwidth() {
-        float retValue = 0; //initialize to default
+    public flobt getMeasuredUpstreamBandwidth() {
+        flobt retValue = 0; //initialize to default
         try {
-            retValue = _upBandwidthTracker.getMeasuredBandwidth();
-        } catch(InsufficientDataException ide) {
+            retVblue = _upBandwidthTracker.getMeasuredBandwidth();
+        } cbtch(InsufficientDataException ide) {
             return 0;
         }
-        return retValue;
+        return retVblue;
     }
 
     /**
-     * Returns the downstream bandwidth between the last two calls to
-     * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth 
+     * Returns the downstrebm bandwidth between the last two calls to
+     * mebsureBandwidth.
+     * @see BbndwidthTracker#measureBandwidth 
      */
-    public float getMeasuredDownstreamBandwidth() {
-        float retValue = 0;
+    public flobt getMeasuredDownstreamBandwidth() {
+        flobt retValue = 0;
         try {
-            retValue = _downBandwidthTracker.getMeasuredBandwidth();
-        } catch (InsufficientDataException ide) {
+            retVblue = _downBandwidthTracker.getMeasuredBandwidth();
+        } cbtch (InsufficientDataException ide) {
             return 0;
         }
-        return retValue;
+        return retVblue;
     }
 
     //
-    // End statistics accessors
+    // End stbtistics accessors
     //
 
-    /** Returns the system time that we should next forward a query route table
-     *  along this connection.  Only valid if isClientSupernodeConnection() is
+    /** Returns the system time thbt we should next forward a query route table
+     *  blong this connection.  Only valid if isClientSupernodeConnection() is
      *  true. */
-    public long getNextQRPForwardTime() {
-        return _nextQRPForwardTime;
+    public long getNextQRPForwbrdTime() {
+        return _nextQRPForwbrdTime;
     }
 
 	/**
-	 * Increments the next time we should forward query route tables for
-	 * this connection.  This depends on whether or not this is a connection
-	 * to a leaf or to an Ultrapeer.
+	 * Increments the next time we should forwbrd query route tables for
+	 * this connection.  This depends on whether or not this is b connection
+	 * to b leaf or to an Ultrapeer.
 	 *
-	 * @param curTime the current time in milliseconds, used to calculate 
-	 *  the next update time
+	 * @pbram curTime the current time in milliseconds, used to calculate 
+	 *  the next updbte time
 	 */
-	public void incrementNextQRPForwardTime(long curTime) {
-		if(isLeafConnection()) {
-			_nextQRPForwardTime = curTime + LEAF_QUERY_ROUTE_UPDATE_TIME;
+	public void incrementNextQRPForwbrdTime(long curTime) {
+		if(isLebfConnection()) {
+			_nextQRPForwbrdTime = curTime + LEAF_QUERY_ROUTE_UPDATE_TIME;
 		} else {
-			// otherwise, it's an Ultrapeer
-			_nextQRPForwardTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
+			// otherwise, it's bn Ultrapeer
+			_nextQRPForwbrdTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
 		}
 	} 
     
     /** 
-     * Returns true if this should not be policed by the ConnectionWatchdog,
-     * e.g., because this is a connection to a Clip2 reflector. Default value:
+     * Returns true if this should not be policed by the ConnectionWbtchdog,
+     * e.g., becbuse this is a connection to a Clip2 reflector. Default value:
      * true.
      */
-	public boolean isKillable() {
-		return _isKillable;
+	public boolebn isKillable() {
+		return _isKillbble;
 	}
     
     /** 
-     * Accessor for the query route table associated with this.  This is
-     * guaranteed to be non-null, but it may not yet contain any data.
+     * Accessor for the query route tbble associated with this.  This is
+     * gubranteed to be non-null, but it may not yet contain any data.
      *
-     * @return the <tt>QueryRouteTable</tt> instance containing
-     *  query route table data sent along this connection, or <tt>null</tt>
-     *  if no data has yet been sent
+     * @return the <tt>QueryRouteTbble</tt> instance containing
+     *  query route tbble data sent along this connection, or <tt>null</tt>
+     *  if no dbta has yet been sent
      */
-    public QueryRouteTable getQueryRouteTableSent() {
-        return _lastQRPTableSent;
+    public QueryRouteTbble getQueryRouteTableSent() {
+        return _lbstQRPTableSent;
     }
 
     /**
-     * Mutator for the last query route table that was sent along this
+     * Mutbtor for the last query route table that was sent along this
      * connection.
      *
-     * @param qrt the last query route table that was sent along this
+     * @pbram qrt the last query route table that was sent along this
      *  connection
      */
-    public void setQueryRouteTableSent(QueryRouteTable qrt) {
-        _lastQRPTableSent = qrt;
+    public void setQueryRouteTbbleSent(QueryRouteTable qrt) {
+        _lbstQRPTableSent = qrt;
     }
 
     
-    public boolean isPushProxy() {
+    public boolebn isPushProxy() {
         return _pushProxy;
     }
 
@@ -1181,37 +1181,37 @@ public class ManagedConnection extends Connection
 
     /**
      * set preferencing for the responder
-     * (The preference of the Responder is used when creating the response 
-     * (in Connection.java: conclude..))
+     * (The preference of the Responder is used when crebting the response 
+     * (in Connection.jbva: conclude..))
      */
-    public void setLocalePreferencing(boolean b) {
-        RESPONSE_HEADERS.setLocalePreferencing(b);
+    public void setLocblePreferencing(boolean b) {
+        RESPONSE_HEADERS.setLocblePreferencing(b);
     }
     
-    public void reply(Message m){
+    public void reply(Messbge m){
     	send(m);
     }
     
 
-    /** Repeatedly sends all the queued data using a thread. */
-    private class BlockingRunner implements Runnable, OutputRunner {
-        private final Object LOCK = new Object();
-        private final MessageQueue queue;
-        private boolean shutdown = false;
+    /** Repebtedly sends all the queued data using a thread. */
+    privbte class BlockingRunner implements Runnable, OutputRunner {
+        privbte final Object LOCK = new Object();
+        privbte final MessageQueue queue;
+        privbte boolean shutdown = false;
         
-        public BlockingRunner(MessageQueue queue) {
+        public BlockingRunner(MessbgeQueue queue) {
             this.queue = queue;
-            Thread output = new ManagedThread(this, "OutputRunner");
-            output.setDaemon(true);
-            output.start();
+            Threbd output = new ManagedThread(this, "OutputRunner");
+            output.setDbemon(true);
+            output.stbrt();
         }
 
-        public void send(Message m) {
+        public void send(Messbge m) {
             synchronized (LOCK) {
-                _connectionStats.addSent();
-                queue.add(m);
+                _connectionStbts.addSent();
+                queue.bdd(m);
                 int dropped = queue.resetDropped();
-                _connectionStats.addSentDropped(dropped);
+                _connectionStbts.addSentDropped(dropped);
                 LOCK.notify();
             }
         }
@@ -1223,35 +1223,35 @@ public class ManagedConnection extends Connection
             }
         }
 
-        /** While the connection is not closed, sends all data delay. */
+        /** While the connection is not closed, sends bll data delay. */
         public void run() {
-            //For non-IOExceptions, Throwable is caught to notify ErrorService.
+            //For non-IOExceptions, Throwbble is caught to notify ErrorService.
             try {
                 while (true) {
-                    waitForQueued();
+                    wbitForQueued();
                     sendQueued();
                 }                
-            } catch (IOException e) {
-                if(_manager != null)
-                    _manager.remove(ManagedConnection.this);
-            } catch(Throwable t) {
-                if(_manager != null)
-                    _manager.remove(ManagedConnection.this);
+            } cbtch (IOException e) {
+                if(_mbnager != null)
+                    _mbnager.remove(ManagedConnection.this);
+            } cbtch(Throwable t) {
+                if(_mbnager != null)
+                    _mbnager.remove(ManagedConnection.this);
                 ErrorService.error(t);
             }
         }
 
         /** 
-         * Wait until the queue is (probably) non-empty or closed. 
-         * @exception IOException this was closed while waiting
+         * Wbit until the queue is (probably) non-empty or closed. 
+         * @exception IOException this wbs closed while waiting
          */
-        private final void waitForQueued() throws IOException {
-            // Lock outside of the loop so that the MessageQueue is synchronized.
+        privbte final void waitForQueued() throws IOException {
+            // Lock outside of the loop so thbt the MessageQueue is synchronized.
             synchronized (LOCK) {
                 while (!shutdown && isOpen() && queue.isEmpty()) {           
                     try {
-                        LOCK.wait();
-                    } catch (InterruptedException e) {
+                        LOCK.wbit();
+                    } cbtch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -1261,70 +1261,70 @@ public class ManagedConnection extends Connection
                 throw CONNECTION_CLOSED;
         }
         
-        /** Send several queued message of each type. */
-        private final void sendQueued() throws IOException {
-            // Send as many messages as we can, until we run out.
+        /** Send severbl queued message of each type. */
+        privbte final void sendQueued() throws IOException {
+            // Send bs many messages as we can, until we run out.
             while(true) {
-                Message m = null;
+                Messbge m = null;
                 synchronized(LOCK) {
                     m = queue.removeNext();
                     int dropped = queue.resetDropped();
-                    _connectionStats.addSentDropped(dropped);
+                    _connectionStbts.addSentDropped(dropped);
                 }
                 if(m == null)
-                    break;
+                    brebk;
 
-                //Note that if the ougoing stream is compressed
-                //(isWriteDeflated()), this call may not actually
-                //do anything.  This is because the Deflater waits
-                //until an optimal time to start deflating, buffering
-                //up incoming data until that time is reached, or the
-                //data is explicitly flushed.
-                ManagedConnection.super.send(m);
+                //Note thbt if the ougoing stream is compressed
+                //(isWriteDeflbted()), this call may not actually
+                //do bnything.  This is because the Deflater waits
+                //until bn optimal time to start deflating, buffering
+                //up incoming dbta until that time is reached, or the
+                //dbta is explicitly flushed.
+                MbnagedConnection.super.send(m);
             }
             
-            //Note that if the outgoing stream is compressed 
-            //(isWriteDeflated()), then this call may block while the
-            //Deflater deflates the data.
-            ManagedConnection.super.flush();
+            //Note thbt if the outgoing stream is compressed 
+            //(isWriteDeflbted()), then this call may block while the
+            //Deflbter deflates the data.
+            MbnagedConnection.super.flush();
         }
     }
     
 
-    /** Class-wide expiration mechanism for all ManagedConnections.
-     *  Only expires on-demand.
+    /** Clbss-wide expiration mechanism for all ManagedConnections.
+     *  Only expires on-dembnd.
      */
-    private static class GuidMapExpirer implements Runnable {
+    privbte static class GuidMapExpirer implements Runnable {
         
-        private static List toExpire = new LinkedList();
-        private static boolean scheduled = false;
+        privbte static List toExpire = new LinkedList();
+        privbte static boolean scheduled = false;
 
-        public GuidMapExpirer() {};
+        public GuidMbpExpirer() {};
 
-        public static synchronized void addMapToExpire(Map expiree) {
-            // schedule it on demand
+        public stbtic synchronized void addMapToExpire(Map expiree) {
+            // schedule it on dembnd
             if (!scheduled) {
-                RouterService.schedule(new GuidMapExpirer(), 0,
+                RouterService.schedule(new GuidMbpExpirer(), 0,
                                        TIMED_GUID_LIFETIME);
                 scheduled = true;
             }
-            toExpire.add(expiree);
+            toExpire.bdd(expiree);
         }
 
-        public static synchronized void removeMap(Map expiree) {
+        public stbtic synchronized void removeMap(Map expiree) {
             toExpire.remove(expiree);
         }
 
         public void run() {
-            synchronized (GuidMapExpirer.class) {
-                // iterator through all the maps....
-                Iterator iter = toExpire.iterator();
-                while (iter.hasNext()) {
-                    Map currMap = (Map) iter.next();
-                    synchronized (currMap) {
-                        Iterator keyIter = currMap.keySet().iterator();
-                        // and expire as many entries as possible....
-                        while (keyIter.hasNext()) 
+            synchronized (GuidMbpExpirer.class) {
+                // iterbtor through all the maps....
+                Iterbtor iter = toExpire.iterator();
+                while (iter.hbsNext()) {
+                    Mbp currMap = (Map) iter.next();
+                    synchronized (currMbp) {
+                        Iterbtor keyIter = currMap.keySet().iterator();
+                        // bnd expire as many entries as possible....
+                        while (keyIter.hbsNext()) 
                             if (((GUID.TimedGUID) keyIter.next()).shouldExpire())
                                 keyIter.remove();
                     }

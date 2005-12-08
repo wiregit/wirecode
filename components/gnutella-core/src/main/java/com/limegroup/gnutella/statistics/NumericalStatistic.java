@@ -1,31 +1,31 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * Specialized statistics class that just records numerical statistics,
- * i.e. statistics that are not time-based.
+ * Speciblized statistics class that just records numerical statistics,
+ * i.e. stbtistics that are not time-based.
  */
-public abstract class NumericalStatistic extends AbstractStatistic {
+public bbstract class NumericalStatistic extends AbstractStatistic {
 
 	/**
-	 * Adds the statistic to the list of numerical statistics.
+	 * Adds the stbtistic to the list of numerical statistics.
 	 */
-    protected NumericalStatistic() {
-        StatisticsManager.instance().addNumericalStatistic(this);
+    protected NumericblStatistic() {
+        StbtisticsManager.instance().addNumericalStatistic(this);
     }
 
     /**
-     * Overridden to actually write the data as a field in our buffer,
-     * as opposed to waiting for some time-based event to write.
+     * Overridden to bctually write the data as a field in our buffer,
+     * bs opposed to waiting for some time-based event to write.
      */
-    public void addData(int data) {
-        super.addData(data);
+    public void bddData(int data) {
+        super.bddData(data);
         synchronized(_buffer) {
-            initializeBuffer();
-            _buffer.addLast(data);
+            initiblizeBuffer();
+            _buffer.bddLast(data);
         }
-        _totalStatsRecorded++;
-        if(data > _max) {
-            _max = data;
+        _totblStatsRecorded++;
+        if(dbta > _max) {
+            _mbx = data;
         }
     }
 }

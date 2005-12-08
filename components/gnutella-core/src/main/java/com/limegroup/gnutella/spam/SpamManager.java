@@ -1,132 +1,132 @@
-package com.limegroup.gnutella.spam;
+pbckage com.limegroup.gnutella.spam;
 
-import java.util.Locale;
+import jbva.util.Locale;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.settings.SearchSettings;
 
-public class SpamManager {
-	private static final Log LOG = LogFactory.getLog(SpamManager.class);
-
-	/**
-	 * If an RFDs spam rating is > MAX_THRESHOLD we will not remember the rating
-	 * for the Tokens of the RFD because it e.g. a spammer very frequently
-	 * sending a bad UrnToken with varying keywords, sizes and addresses may be
-	 * able to pollute the filter data
-	 */
-	public static final float MAX_THRESHOLD = 0.995f;
+public clbss SpamManager {
+	privbte static final Log LOG = LogFactory.getLog(SpamManager.class);
 
 	/**
-	 * If the spam rating of a file is greater than this, we will remember the
-	 * rating for all Tokens associated with it
+	 * If bn RFDs spam rating is > MAX_THRESHOLD we will not remember the rating
+	 * for the Tokens of the RFD becbuse it e.g. a spammer very frequently
+	 * sending b bad UrnToken with varying keywords, sizes and addresses may be
+	 * bble to pollute the filter data
 	 */
-	public static final float SPAM_THRESHOLD = 0.7f;
+	public stbtic final float MAX_THRESHOLD = 0.995f;
 
 	/**
-	 * If a rating is smaller than this, we will remember it for all tokens
-	 * associated with it.
+	 * If the spbm rating of a file is greater than this, we will remember the
+	 * rbting for all Tokens associated with it
 	 */
-	public static final float GOOD_THRESHOLD = 0.15f;
+	public stbtic final float SPAM_THRESHOLD = 0.7f;
 
 	/**
-	 * inverse rating (1 - probability) for an RFD without SHA1 urn. 
+	 * If b rating is smaller than this, we will remember it for all tokens
+	 * bssociated with it.
 	 */
-	private static final float NO_SHA1_URN_RATING = 0.5f;
+	public stbtic final float GOOD_THRESHOLD = 0.15f;
 
 	/**
-	 * incomplete file... save the user the trouble of downloading it, if he has
-	 * his spam filter enabled
+	 * inverse rbting (1 - probability) for an RFD without SHA1 urn. 
 	 */
-	private static final float INCOMPLETE_FILE_RATING = 0.2f;
+	privbte static final float NO_SHA1_URN_RATING = 0.5f;
 
-	private static final SpamManager INSTANCE = new SpamManager();
+	/**
+	 * incomplete file... sbve the user the trouble of downloading it, if he has
+	 * his spbm filter enabled
+	 */
+	privbte static final float INCOMPLETE_FILE_RATING = 0.2f;
+
+	privbte static final SpamManager INSTANCE = new SpamManager();
     
-	public static SpamManager instance() {
+	public stbtic SpamManager instance() {
 		return INSTANCE;
 	}
     
-	private SpamManager() {
+	privbte SpamManager() {
 	}
 
 	/**
-	 * informs the SpamManager of any query that was started and clears bad
-	 * ratings for the keywords in the query
+	 * informs the SpbmManager of any query that was started and clears bad
+	 * rbtings for the keywords in the query
 	 * 
-	 * @param qr
+	 * @pbram qr
 	 *            the QueryRequest for the query.
 	 */
-	public void startedQuery(QueryRequest qr) {
-		if (SearchSettings.ENABLE_SPAM_FILTER.getValue())
-			RatingTable.instance().mark(qr, Token.RATING_CLEARED);
+	public void stbrtedQuery(QueryRequest qr) {
+		if (SebrchSettings.ENABLE_SPAM_FILTER.getValue())
+			RbtingTable.instance().mark(qr, Token.RATING_CLEARED);
 	}
 
 	/**
-	 * This method will rate a given rfd and return whether or not the
-	 * SpamManager believes this is spam
+	 * This method will rbte a given rfd and return whether or not the
+	 * SpbmManager believes this is spam
 	 * 
-	 * @param rfd
-	 *            the RemoteFileDesc to rate
+	 * @pbram rfd
+	 *            the RemoteFileDesc to rbte
 	 * @modifies rfd
-	 * @return true if the SpamManager internally rated it as spam and false if
-	 *         the SpamManager did not rate it as spam
+	 * @return true if the SpbmManager internally rated it as spam and false if
+	 *         the SpbmManager did not rate it as spam
 	 */
-	public boolean isSpam(RemoteFileDesc rfd) {
-		if (!SearchSettings.ENABLE_SPAM_FILTER.getValue())
-			return false;
+	public boolebn isSpam(RemoteFileDesc rfd) {
+		if (!SebrchSettings.ENABLE_SPAM_FILTER.getValue())
+			return fblse;
 
-		// rate simple spam...
-		float rating = 0.f;
+		// rbte simple spam...
+		flobt rating = 0.f;
 		if (rfd.getSHA1Urn() == null && 
                 rfd.getXMLDocument() != null &&
                 rfd.getXMLDocument().getAction().length() == 0)
-			rating = 1 - (1 - rating) * NO_SHA1_URN_RATING;
+			rbting = 1 - (1 - rating) * NO_SHA1_URN_RATING;
         
-		if (isIncompleteFile(rfd.getFileName().toLowerCase(Locale.US))) {
-			rating = 1 - (1 - rating) * INCOMPLETE_FILE_RATING;
+		if (isIncompleteFile(rfd.getFileNbme().toLowerCase(Locale.US))) {
+			rbting = 1 - (1 - rating) * INCOMPLETE_FILE_RATING;
 		}
 
-		// apply bayesian filter
-		rating = 1 - (1 - rating) * (1 - RatingTable.instance().getRating(rfd));
-		rfd.setSpamRating(rating);
-		return rating >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
-                SearchSettings.QUERY_SPAM_CUTOFF.getValue());
+		// bpply bayesian filter
+		rbting = 1 - (1 - rating) * (1 - RatingTable.instance().getRating(rfd));
+		rfd.setSpbmRating(rating);
+		return rbting >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
+                SebrchSettings.QUERY_SPAM_CUTOFF.getValue());
 	}
 
 	/**
-	 * this method is called if the user marked some RFDs as being spam
+	 * this method is cblled if the user marked some RFDs as being spam
 	 * 
-	 * @param rfds
-	 *            an array of RemoteFileDesc that should be marked as good
+	 * @pbram rfds
+	 *            bn array of RemoteFileDesc that should be marked as good
 	 */
-	public void handleUserMarkedSpam(RemoteFileDesc[] rfds) {
+	public void hbndleUserMarkedSpam(RemoteFileDesc[] rfds) {
 		for (int i = 0; i < rfds.length; i++)
-			rfds[i].setSpamRating(1.f);
+			rfds[i].setSpbmRating(1.f);
 
-		RatingTable.instance().mark(rfds, Token.RATING_USER_MARKED_SPAM);
+		RbtingTable.instance().mark(rfds, Token.RATING_USER_MARKED_SPAM);
 	}
 
 	/**
-	 * this method is called if the user marked some RFDs as not being spam
+	 * this method is cblled if the user marked some RFDs as not being spam
 	 * 
-	 * @param rfds
-	 *            an array of RemoteFileDesc that should be marked as good
+	 * @pbram rfds
+	 *            bn array of RemoteFileDesc that should be marked as good
 	 */
-	public void handleUserMarkedGood(RemoteFileDesc[] rfds) {
+	public void hbndleUserMarkedGood(RemoteFileDesc[] rfds) {
 		for (int i = 0; i < rfds.length; i++)
-			rfds[i].setSpamRating(0.f);
+			rfds[i].setSpbmRating(0.f);
 
-		RatingTable.instance().mark(rfds, Token.RATING_USER_MARKED_GOOD);
+		RbtingTable.instance().mark(rfds, Token.RATING_USER_MARKED_GOOD);
 	}
 
 	/**
-	 * clears all collected filter data
+	 * clebrs all collected filter data
 	 */
-	public void clearFilterData() {
-		RatingTable.instance().clear();
+	public void clebrFilterData() {
+		RbtingTable.instance().clear();
 	}
     
 	/**
@@ -139,35 +139,35 @@ public class SpamManager {
 	 * <li>CORRUPT-(number)-</li>
 	 * <li>T-(number)-</li>
 	 * 
-	 * @param name
-	 *            the name of the file from a search result
-	 * @return true if we think that this is an incomplete file
+	 * @pbram name
+	 *            the nbme of the file from a search result
+	 * @return true if we think thbt this is an incomplete file
 	 */
-	private boolean isIncompleteFile(String name) {
-		if (name.startsWith("__incomplete"))
+	privbte boolean isIncompleteFile(String name) {
+		if (nbme.startsWith("__incomplete"))
 			return true;
-		if (name.startsWith("___incompleted"))
+		if (nbme.startsWith("___incompleted"))
 			return true;
-		if (name.startsWith("___arestra"))
+		if (nbme.startsWith("___arestra"))
 			return true;
-		if (name.startsWith("preview-t-"))
+		if (nbme.startsWith("preview-t-"))
 			return true;
-		if (name.startsWith("t-")) {
-			for (int i = 2; i < name.length(); i++) {
-				if (Character.isDigit(name.charAt(i)))
+		if (nbme.startsWith("t-")) {
+			for (int i = 2; i < nbme.length(); i++) {
+				if (Chbracter.isDigit(name.charAt(i)))
 					continue;
 				else
-					return name.charAt(i) == '-';
+					return nbme.charAt(i) == '-';
 			}
 		}
-		if (name.startsWith("corrupt-")) {
-			for (int i = 8; i < name.length(); i++) {
-				if (Character.isDigit(name.charAt(i)))
+		if (nbme.startsWith("corrupt-")) {
+			for (int i = 8; i < nbme.length(); i++) {
+				if (Chbracter.isDigit(name.charAt(i)))
 					continue;
 				else
-					return name.charAt(i) == '-';
+					return nbme.charAt(i) == '-';
 			}
 		}
-		return false;
+		return fblse;
 	}
 }

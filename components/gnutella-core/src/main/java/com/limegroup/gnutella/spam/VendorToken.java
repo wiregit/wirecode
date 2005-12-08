@@ -1,119 +1,119 @@
-package com.limegroup.gnutella.spam;
+pbckage com.limegroup.gnutella.spam;
 
-public class VendorToken extends AbstractToken {
+public clbss VendorToken extends AbstractToken {
     
-    private static final byte INITAL_GOOD = 20;
-    private static final int MAX = 100;
+    privbte static final byte INITAL_GOOD = 20;
+    privbte static final int MAX = 100;
     
     /**
-     * cache Tokens for the most popular vendors
+     * cbche Tokens for the most popular vendors
      */
-    public static final VendorToken ALT = new ALTVendor();
-    public static final VendorToken LIME = new VendorToken("LIME");
-    public static final VendorToken BEAR = new VendorToken("BEAR");
-    public static final VendorToken RAZA = new VendorToken("RAZA");
-    public static final VendorToken OREO = new VendorToken("GNZL");
-    public static final VendorToken GNUC = new VendorToken("GNUC");
-    public static final VendorToken GTKG = new VendorToken("GTKG");
-    public static final VendorToken GIFT = new VendorToken("GIFT");
+    public stbtic final VendorToken ALT = new ALTVendor();
+    public stbtic final VendorToken LIME = new VendorToken("LIME");
+    public stbtic final VendorToken BEAR = new VendorToken("BEAR");
+    public stbtic final VendorToken RAZA = new VendorToken("RAZA");
+    public stbtic final VendorToken OREO = new VendorToken("GNZL");
+    public stbtic final VendorToken GNUC = new VendorToken("GNUC");
+    public stbtic final VendorToken GTKG = new VendorToken("GTKG");
+    public stbtic final VendorToken GIFT = new VendorToken("GIFT");
 
     
-    public static VendorToken getToken(String vendor) {
-        if (vendor.equals("ALT"))
+    public stbtic VendorToken getToken(String vendor) {
+        if (vendor.equbls("ALT"))
             return ALT;
-        if (vendor.equals("LIME"))
+        if (vendor.equbls("LIME"))
             return LIME;
-        if (vendor.equals("BEAR"))
+        if (vendor.equbls("BEAR"))
             return BEAR;
-        if (vendor.equals("RAZA"))
+        if (vendor.equbls("RAZA"))
             return RAZA;
-        if (vendor.equals("GNZL"))
+        if (vendor.equbls("GNZL"))
             return OREO;
-        if (vendor.equals("GNUC"))
+        if (vendor.equbls("GNUC"))
             return GNUC;
-        if (vendor.equals("GTKG"))
+        if (vendor.equbls("GTKG"))
             return GTKG;
-        if (vendor.equals("GIFT"))
+        if (vendor.equbls("GIFT"))
             return GIFT;
         else
             return new VendorToken(vendor);
     }
     
-    private final String vendor;
+    privbte final String vendor;
     
-    private final int hashCode;
+    privbte final int hashCode;
     
-    private byte _good;
+    privbte byte _good;
 
-    private byte _bad;
+    privbte byte _bad;
     
     
-    private VendorToken(String vendor) {
+    privbte VendorToken(String vendor) {
         this.vendor = vendor;
-        hashCode = vendor.hashCode();
+        hbshCode = vendor.hashCode();
     }
     
-    public final int hashCode() {
-        return hashCode;
+    public finbl int hashCode() {
+        return hbshCode;
     }
     
-    public final boolean equals(Object o) {
-        if (! (o instanceof VendorToken))
-            return false;
-        return hashCode == o.hashCode();
+    public finbl boolean equals(Object o) {
+        if (! (o instbnceof VendorToken))
+            return fblse;
+        return hbshCode == o.hashCode();
     }
     
     public int getType() {
         return TYPE_VENDOR;
     }
     
-    public float getRating() {
-        return (float)Math.pow(1.f * _bad / (_good + _bad + 1), 2);
+    public flobt getRating() {
+        return (flobt)Math.pow(1.f * _bad / (_good + _bad + 1), 2);
     }
 
-    public void rate(int rating) {
-        _age = 0;
-        switch (rating) {
-        case RATING_GOOD:
+    public void rbte(int rating) {
+        _bge = 0;
+        switch (rbting) {
+        cbse RATING_GOOD:
             _good++;
-            break;
-        case RATING_SPAM:
-            _bad++;
-            break;
-        case RATING_USER_MARKED_GOOD:
-            _bad = (byte) (_bad / 2); // bad rating should decrease slowly
-            break;
-        case RATING_USER_MARKED_SPAM: // bad rating should increase slowly.
-            _bad = (byte) Math.min(_bad + 2, MAX);
-            break;
-        case RATING_CLEARED:
-            _bad = 0;
+            brebk;
+        cbse RATING_SPAM:
+            _bbd++;
+            brebk;
+        cbse RATING_USER_MARKED_GOOD:
+            _bbd = (byte) (_bad / 2); // bad rating should decrease slowly
+            brebk;
+        cbse RATING_USER_MARKED_SPAM: // bad rating should increase slowly.
+            _bbd = (byte) Math.min(_bad + 2, MAX);
+            brebk;
+        cbse RATING_CLEARED:
+            _bbd = 0;
             _good = INITAL_GOOD;
-            break;
-        default:
-            throw new IllegalArgumentException("unknown type of rating");
+            brebk;
+        defbult:
+            throw new IllegblArgumentException("unknown type of rating");
         }
         
-        if (_good >= MAX || _bad >= MAX) {
+        if (_good >= MAX || _bbd >= MAX) {
             _good = (byte) (_good * 9 / 10);
-            _bad = (byte) (_bad * 9 / 10);
+            _bbd = (byte) (_bad * 9 / 10);
         }
     }
 
     /**
-     * Alternate locations should not be marked as spam
+     * Alternbte locations should not be marked as spam
      */
-    private static class ALTVendor extends VendorToken {
+    privbte static class ALTVendor extends VendorToken {
 
         ALTVendor() {
             super("ALT");
         }
         
-        public float getRating() {
+        public flobt getRating() {
             return 0;
         }
 
-        public void rate(int rating) {}
+        public void rbte(int rating) {}
         
     }
 

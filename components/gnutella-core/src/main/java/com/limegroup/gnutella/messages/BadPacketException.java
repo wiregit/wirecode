@@ -1,43 +1,43 @@
-package com.limegroup.gnutella.messages;
+pbckage com.limegroup.gnutella.messages;
 
 /** 
- * An exception for reading bad data from the network. 
- * This is generally non-fatal.
+ * An exception for rebding bad data from the network. 
+ * This is generblly non-fatal.
  */
-public class BadPacketException extends Exception {
-    public BadPacketException() { }
-    public BadPacketException(String msg) { super(msg); }
+public clbss BadPacketException extends Exception {
+    public BbdPacketException() { }
+    public BbdPacketException(String msg) { super(msg); }
 
     /** 
-     * Reusable exception for efficiency that can be statically
-     * accessed.  These are created a lot, so it makes sense to
-     * cache it.
+     * Reusbble exception for efficiency that can be statically
+     * bccessed.  These are created a lot, so it makes sense to
+     * cbche it.
      */
-    public static final BadPacketException HOPS_EXCEED_SOFT_MAX = 
-        new BadPacketException("Hops already exceeds soft maximum");
+    public stbtic final BadPacketException HOPS_EXCEED_SOFT_MAX = 
+        new BbdPacketException("Hops already exceeds soft maximum");
 
     /**
-     * Cached exception for not handling URN queries.
+     * Cbched exception for not handling URN queries.
      */
-    public static final BadPacketException CANNOT_ACCEPT_URN_QUERIES =
-        new BadPacketException("cannot accept URN queries");
+    public stbtic final BadPacketException CANNOT_ACCEPT_URN_QUERIES =
+        new BbdPacketException("cannot accept URN queries");
 
     /**
-     * Cached exception for queries that are too big.
+     * Cbched exception for queries that are too big.
      */
-    public static final BadPacketException QUERY_TOO_BIG =
-        new BadPacketException("query too big");
+    public stbtic final BadPacketException QUERY_TOO_BIG =
+        new BbdPacketException("query too big");
 
     /**
-     * Cached exception for XML queries that are too big.
+     * Cbched exception for XML queries that are too big.
      */
-    public static final BadPacketException XML_QUERY_TOO_BIG =
-        new BadPacketException("XML query too big");
+    public stbtic final BadPacketException XML_QUERY_TOO_BIG =
+        new BbdPacketException("XML query too big");
 
     /**
-     * Cached exception for queries that have illegal characters.
+     * Cbched exception for queries that have illegal characters.
      */
-    public static final BadPacketException ILLEGAL_CHAR_IN_QUERY =
-        new BadPacketException("illegal chars in query");
+    public stbtic final BadPacketException ILLEGAL_CHAR_IN_QUERY =
+        new BbdPacketException("illegal chars in query");
 
 }

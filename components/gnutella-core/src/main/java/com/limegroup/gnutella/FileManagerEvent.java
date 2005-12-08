@@ -1,69 +1,69 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.File;
-import java.util.EventObject;
+import jbva.io.File;
+import jbva.util.EventObject;
 
 /**
- * This class implements a FileManagerEvent which is
- * used by FileManager and MetaFileManager to notify
- * the front end about add, remove, rename and change
- * events in the Library.
+ * This clbss implements a FileManagerEvent which is
+ * used by FileMbnager and MetaFileManager to notify
+ * the front end bbout add, remove, rename and change
+ * events in the Librbry.
  */
-public class FileManagerEvent extends EventObject {
+public clbss FileManagerEvent extends EventObject {
     
-    public static final int ADD     = 1;
-    public static final int REMOVE  = 2;
-    public static final int RENAME  = 3;
-    public static final int CHANGE  = 4;
-    public static final int FAILED  = 5;
-    public static final int ALREADY_SHARED = 6;
-    public static final int ADD_FOLDER = 7;
-    public static final int REMOVE_FOLDER = 8;
+    public stbtic final int ADD     = 1;
+    public stbtic final int REMOVE  = 2;
+    public stbtic final int RENAME  = 3;
+    public stbtic final int CHANGE  = 4;
+    public stbtic final int FAILED  = 5;
+    public stbtic final int ALREADY_SHARED = 6;
+    public stbtic final int ADD_FOLDER = 7;
+    public stbtic final int REMOVE_FOLDER = 8;
     
-    private final int kind;
-    private final FileDesc[] fds;
-    private final File[] files;
+    privbte final int kind;
+    privbte final FileDesc[] fds;
+    privbte final File[] files;
 
     /**
-     * Constructs a FileManagerEvent with a single FD.
+     * Constructs b FileManagerEvent with a single FD.
      * Useful for 'ADD' & 'REMOVE' events.
      */    
-    public FileManagerEvent(FileManager manager, int kind, FileDesc fd) {
-        this(manager, kind, new FileDesc[] { fd });
+    public FileMbnagerEvent(FileManager manager, int kind, FileDesc fd) {
+        this(mbnager, kind, new FileDesc[] { fd });
     }
     
     /**
-     * Constructs a FileManagerEvent with multiple FDs.
+     * Constructs b FileManagerEvent with multiple FDs.
      * Useful for 'RENAME' & 'CHANGE' events.
      */
-    public FileManagerEvent(FileManager manager, int kind, FileDesc[] fds) {
-        super(manager);
+    public FileMbnagerEvent(FileManager manager, int kind, FileDesc[] fds) {
+        super(mbnager);
         this.kind = kind;
         this.fds = fds;
         this.files = null;
     }
     
     /**
-     * Constructs a FileManagerEvent with a single File.
+     * Constructs b FileManagerEvent with a single File.
      * Useful for 'FAILED', 'ALREADY_SHARED', 'REMOVE_FOLDER' events.
      */
-    public FileManagerEvent(FileManager manager, int kind, File file) {
-        this(manager, kind, new File[] { file } );
+    public FileMbnagerEvent(FileManager manager, int kind, File file) {
+        this(mbnager, kind, new File[] { file } );
     }
     
     /**
-     * Constructs a FileManagerEvent with a File & its parent.
+     * Constructs b FileManagerEvent with a File & its parent.
      * Useful for 'ADD_FOLDER' events.
      */
-    public FileManagerEvent(FileManager manager, int kind, File folder, File parent) {
-        this(manager, kind, new File[] { folder, parent });
+    public FileMbnagerEvent(FileManager manager, int kind, File folder, File parent) {
+        this(mbnager, kind, new File[] { folder, parent });
     }
     
     /**
-     * Constructs a FileManagerEvent with a bunch of files.
+     * Constructs b FileManagerEvent with a bunch of files.
      */
-    public FileManagerEvent(FileManager manager, int kind, File[] files) {
-        super(manager);
+    public FileMbnagerEvent(FileManager manager, int kind, File[] files) {
+        super(mbnager);
         this.kind = kind;
         this.files = files;
         this.fds = null;
@@ -74,9 +74,9 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Note: RENAME and CHANGE events return an array with
+     * Note: RENAME bnd CHANGE events return an array with
      * two elements. The first element is the previous
-     * FileDesc and the second is the new FileDesc.
+     * FileDesc bnd the second is the new FileDesc.
      */
     public FileDesc[] getFileDescs() {
         return fds;
@@ -90,119 +90,119 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Returns true if this event is an ADD event
+     * Returns true if this event is bn ADD event
      */
-    public boolean isAddEvent() {
+    public boolebn isAddEvent() {
         return (kind==ADD);
     }
     
     /**
-     * Returns true if this event is a REMOVE event
+     * Returns true if this event is b REMOVE event
      */
-    public boolean isRemoveEvent() {
+    public boolebn isRemoveEvent() {
         return (kind==REMOVE);
     }
     
     /**
-     * Returns true if this event is a RENAME (MOVE) 
+     * Returns true if this event is b RENAME (MOVE) 
      * event
      */
-    public boolean isRenameEvent() {
+    public boolebn isRenameEvent() {
         return (kind==RENAME);
     }
     
     /**
-     * Returns true if this event is a CHANGE (i.e.
-     * when ID3 Tags changed) event.
+     * Returns true if this event is b CHANGE (i.e.
+     * when ID3 Tbgs changed) event.
      */
-    public boolean isChangeEvent() {
+    public boolebn isChangeEvent() {
         return (kind==CHANGE);
     }
     
     /**
-     * Returns true if this is a FAILED add event (ie, addFile failed).
+     * Returns true if this is b FAILED add event (ie, addFile failed).
      */
-    public boolean isFailedEvent() {
+    public boolebn isFailedEvent() {
         return (kind==FAILED);
     }
 
     /**
-     * Returns true if this is an event for a file that was ALREADY_SHARED
-     * (ie, an addFile event was ignored because the file was already shared)
+     * Returns true if this is bn event for a file that was ALREADY_SHARED
+     * (ie, bn addFile event was ignored because the file was already shared)
      */
-    public boolean isAlreadySharedEvent() {
+    public boolebn isAlreadySharedEvent() {
         return (kind==ALREADY_SHARED);
     }
     
     /**
-     * Returns true if this is a ADD_FOLDER event.
+     * Returns true if this is b ADD_FOLDER event.
      */
-    public boolean isAddFolderEvent() {
+    public boolebn isAddFolderEvent() {
         return kind == ADD_FOLDER;
     }
     
     /**
-     * Returns true if this is a REMOVE_FOLDER event;
+     * Returns true if this is b REMOVE_FOLDER event;
      */
-    public boolean isRemoveFolderEvent() {
+    public boolebn isRemoveFolderEvent() {
         return kind == REMOVE_FOLDER;
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer("FileManagerEvent: [event=");
+        StringBuffer buffer = new StringBuffer("FileMbnagerEvent: [event=");
         
         switch(kind) {
-            case ADD:
-                buffer.append("ADD");
-                break;
-            case REMOVE:
-                buffer.append("REMOVE");
-                break;
-            case RENAME:
-                buffer.append("RENAME");
-                break;
-            case CHANGE:
-                buffer.append("CHANGE");
-                break;
-            case FAILED:
-                buffer.append("FAILED");
-                break;
-            case ALREADY_SHARED:
-                buffer.append("ALREADY_SHARED");
-                break;
-            case ADD_FOLDER:
-                buffer.append("ADD_FOLDER");
-                break;
-            case REMOVE_FOLDER:
-                buffer.append("REMOVE_FOLDER");
-                break;
-            default:
-                buffer.append("UNKNOWN");
-                break;
+            cbse ADD:
+                buffer.bppend("ADD");
+                brebk;
+            cbse REMOVE:
+                buffer.bppend("REMOVE");
+                brebk;
+            cbse RENAME:
+                buffer.bppend("RENAME");
+                brebk;
+            cbse CHANGE:
+                buffer.bppend("CHANGE");
+                brebk;
+            cbse FAILED:
+                buffer.bppend("FAILED");
+                brebk;
+            cbse ALREADY_SHARED:
+                buffer.bppend("ALREADY_SHARED");
+                brebk;
+            cbse ADD_FOLDER:
+                buffer.bppend("ADD_FOLDER");
+                brebk;
+            cbse REMOVE_FOLDER:
+                buffer.bppend("REMOVE_FOLDER");
+                brebk;
+            defbult:
+                buffer.bppend("UNKNOWN");
+                brebk;
         }
         
         if (fds != null) {
-            buffer.append(", fds=").append(fds.length).append("\n");
+            buffer.bppend(", fds=").append(fds.length).append("\n");
             for(int i = 0; i < fds.length; i++) {
-                buffer.append(fds[i]);
+                buffer.bppend(fds[i]);
                 if(i != fds.length -1)
-                    buffer.append(", ");
+                    buffer.bppend(", ");
             }
         } else {
-            buffer.append(", fds=null");
+            buffer.bppend(", fds=null");
         }
         
         if (files != null) {
-            buffer.append(", files=").append(files.length).append("\n");
+            buffer.bppend(", files=").append(files.length).append("\n");
             for(int i = 0; i < files.length; i++) {
-                buffer.append(files[i]);
+                buffer.bppend(files[i]);
                 if(i != files.length -1)
-                    buffer.append(", ");
+                    buffer.bppend(", ");
             }
         } else {
-            buffer.append(", files=null");
+            buffer.bppend(", files=null");
         }
         
-        return buffer.append("]").toString();
+        return buffer.bppend("]").toString();
     }
 }

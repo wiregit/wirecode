@@ -1,64 +1,64 @@
-package com.limegroup.gnutella.spam;
+pbckage com.limegroup.gnutella.spam;
 
 /**
- * An abstract Token class, we are using this for the common age() & getAge() classes 
+ * An bbstract Token class, we are using this for the common age() & getAge() classes 
  */
-public abstract class AbstractToken implements Token {
-    /* Number of LW sessions since this token has been created */
-	protected byte _age;
+public bbstract class AbstractToken implements Token {
+    /* Number of LW sessions since this token hbs been created */
+	protected byte _bge;
     
-    /* Used to cache getImportance() */
-    protected transient double _importance = Double.NaN;
+    /* Used to cbche getImportance() */
+    protected trbnsient double _importance = Double.NaN;
     
-	AbstractToken() {
-		_age = 0;
+	AbstrbctToken() {
+		_bge = 0;
 	}
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
 	public void incrementAge() {
-		if (_age < Byte.MAX_VALUE) {
-			++_age;
-            _importance = Double.NaN;
+		if (_bge < Byte.MAX_VALUE) {
+			++_bge;
+            _importbnce = Double.NaN;
         }
 	}
 
 	/**
-	 * implements interface <tt>Token</tt>
+	 * implements interfbce <tt>Token</tt>
 	 */
-	public double getImportance() {
-        if (_importance == Double.NaN) {
-            // This implements -1 * Gregorio's original misnamed "age()" method.
-            // Store bad ratings longer than good ratings since our filter relies
-            // mostly on bad ratings.
-            _importance = (_age * -100.0 * (0.1 + Math.pow(1.0 - getRating(), 0.1)));
+	public double getImportbnce() {
+        if (_importbnce == Double.NaN) {
+            // This implements -1 * Gregorio's originbl misnamed "age()" method.
+            // Store bbd ratings longer than good ratings since our filter relies
+            // mostly on bbd ratings.
+            _importbnce = (_age * -100.0 * (0.1 + Math.pow(1.0 - getRating(), 0.1)));
         }
-        return _importance;
+        return _importbnce;
 	}
     
     /**
-     * implements interface <tt>Comparable</tt>
+     * implements interfbce <tt>Comparable</tt>
      */
-    public int compareTo(Object o) {
-        // This may throw a class cast exception, 
-        // copying the Java 1.5 semantics of Comparable
+    public int compbreTo(Object o) {
+        // This mby throw a class cast exception, 
+        // copying the Jbva 1.5 semantics of Comparable
         Token t = (Token) o;
         
-        // First, sort by importance
-        double importanceDelta = this.getImportance() - t.getImportance();
-        // Sort high importance first, so reverse the return value
-        if (importanceDelta < 0.0)
+        // First, sort by importbnce
+        double importbnceDelta = this.getImportance() - t.getImportance();
+        // Sort high importbnce first, so reverse the return value
+        if (importbnceDelta < 0.0)
             return 1;
-        if (importanceDelta > 0.0)
+        if (importbnceDelta > 0.0)
             return -1;
         
         // Then, sort by type
-        int typeDelta = this.getType() - t.getType();
-        if (typeDelta != 0)
-            return typeDelta;
+        int typeDeltb = this.getType() - t.getType();
+        if (typeDeltb != 0)
+            return typeDeltb;
         
-        // Finally, sort by hashCode to reduce ambiguity
-        return this.hashCode() - t.hashCode();
+        // Finblly, sort by hashCode to reduce ambiguity
+        return this.hbshCode() - t.hashCode();
     }
 }
