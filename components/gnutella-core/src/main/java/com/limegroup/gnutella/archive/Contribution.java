@@ -6,10 +6,7 @@ import java.util.Set;
 import com.limegroup.gnutella.FileDesc;
 
 public interface Contribution {
-
-	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.2 2005-12-06 17:39:32 zlatinb Exp $";
-
+    
 	/**
 	 * 
 	 * A contribution consists of one or more files that we upload to a location

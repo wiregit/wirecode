@@ -7,9 +7,6 @@ import java.io.InterruptedIOException;
 
 class UploadMonitorInputStream extends FilterInputStream {
 
-	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadMonitorInputStream.java,v 1.2 2005-12-06 17:39:32 zlatinb Exp $";
-	
 	/* not sure if this class should really have references
 	 * to the contribution and the uploadEvent.  this design 
 	 * sort of screams out for another layer of indirection

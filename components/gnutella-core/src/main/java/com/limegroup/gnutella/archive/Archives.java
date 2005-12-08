@@ -6,10 +6,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Archives {
-	
-	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.2 2005-12-06 17:39:32 zlatinb Exp $";
-
+    
 	/** Internet Archive Media Types */
 	
 	/** Contributions of media type movies will default to 

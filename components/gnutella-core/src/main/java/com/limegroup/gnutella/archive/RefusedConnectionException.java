@@ -5,9 +5,6 @@ import java.io.IOException;
 public class RefusedConnectionException extends IOException {
 
 	private static final long serialVersionUID = -1734468926065538629L;
-	
-	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/RefusedConnectionException.java,v 1.2 2005-12-06 17:39:32 zlatinb Exp $";
 
 	public RefusedConnectionException() {
 		super();

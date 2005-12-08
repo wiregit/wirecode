@@ -33,11 +33,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 abstract class ArchiveContribution extends AbstractContribution {
 	
-	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.3 2005-12-08 03:06:12 zlatinb Exp $";
-
-
-
 	/**
 	 * @param media
 	 *        One of ArchiveConstants.MEDIA_*
