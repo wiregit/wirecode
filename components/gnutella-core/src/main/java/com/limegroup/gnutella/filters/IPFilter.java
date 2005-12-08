@@ -51,11 +51,8 @@ public final class IPFilter extends SpamFilter {
     /**
      * Return the badList of the instance
      */
-    public static IPList getBadHosts() {
-        if (_instance == null) {
-            instance();
-        }
-        return _instance.badHosts;
+    public IPList getBadHosts() {
+        return badHosts;
     }
     
     /** 

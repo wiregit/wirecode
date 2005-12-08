@@ -17,7 +17,7 @@ public abstract class AbstractToken implements Token {
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
-	public void incrimentAge() {
+	public void incrementAge() {
 		if (_age < Byte.MAX_VALUE) {
 			++_age;
             _importance = Double.NaN;

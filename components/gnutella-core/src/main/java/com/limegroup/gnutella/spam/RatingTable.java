@@ -264,7 +264,7 @@ public class RatingTable {
      */
     public synchronized void ageAndSave() {
         for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
-            ((Token) iter.next()).incrimentAge();
+            ((Token) iter.next()).incrementAge();
         save();
     }
     

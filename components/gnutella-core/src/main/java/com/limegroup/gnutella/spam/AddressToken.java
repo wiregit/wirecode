@@ -61,7 +61,7 @@ public class AddressToken extends AbstractToken {
         // this initial value is an
         _good = INITIAL_GOOD;
         IP ip = new IP(_address);
-        int logDistance = IPFilter.getBadHosts().logMinDistanceTo(ip);
+        int logDistance = IPFilter.instance().getBadHosts().logMinDistanceTo(ip);
         
         // Constants 1600 and 3.3 chosen such that:
         // Same /24 subnet as a banned IP results in a rating of 0.07

@@ -103,5 +103,5 @@ public interface Token extends Serializable, Comparable {
 	/**
 	 * increase the age of the token (measured in limewire sessions)
 	 */
-	public void incrimentAge();
+	public void incrementAge();
 }
