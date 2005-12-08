@@ -48,6 +48,13 @@ public final class IPFilter extends SpamFilter {
         _instance = new IPFilter();
     }
 
+    /**
+     * Return the badList of the instance
+     */
+    public IPList getBadHosts() {
+        return badHosts;
+    }
+    
     /** 
      * Checks if a given host is banned.  This method will be
      * called when accepting an incoming or outgoing connection.

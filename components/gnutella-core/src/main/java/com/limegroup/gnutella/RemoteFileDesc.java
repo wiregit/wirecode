@@ -163,6 +163,11 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * Whether to serialize the push proxies
      */
     private transient volatile boolean _serializeProxies = false;
+	
+	/**
+	 * the spam rating of this rfd.
+	 */
+	private transient float _spamRating = 0.f;
     
     /**
      * A map of various properties we want to serialize.  Currently we use
@@ -984,5 +989,13 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 			return new InetSocketAddress(addr, getPort());
 		}
 		return null;
+	}
+	
+	public void setSpamRating(float rating) {
+		_spamRating = rating;
+	}
+	
+	public float getSpamRating() {
+		return _spamRating;
 	}
 }

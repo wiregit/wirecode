@@ -176,6 +176,24 @@ public class IP {
         return mask;
     }
 
+    /** Returns the 32-bit netmask for this IPv4 address range. */
+    /* package */ int getMask() {
+        return mask;
+    }
+    
+    /**
+     * Computes the minimum distance between any two IPv4 addresses within two
+     * IPv4 address ranges.  Uses xor as the distance metric.
+     * 
+     * @param ip a 32-bit IPv4 address range, represented as an IP object
+     * @return the distance between ipV4Addr and the nearest ip address
+     *   represented by the range using the xor metric, a 32-bit unsigned
+     *   integer value returned as a 32-bit signed int.
+     */
+    public int getDistanceTo(IP ip) {
+        return (ip.addr ^ this.addr) & ip.mask & this.mask;
+    }
+    
     /**
      * Returns if ip is contained in this.
      * @param ip a singleton IP set, e.g., one representing a single address

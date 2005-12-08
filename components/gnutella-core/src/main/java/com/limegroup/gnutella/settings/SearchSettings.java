@@ -75,10 +75,44 @@ public final class SearchSettings extends LimeProps {
 	 */    
     public static final IntSetting PARALLEL_SEARCH =
         FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
+	
+	/**
+	 * Whether or not to enable the spam filter.
+	 */    
+    public static final BooleanSetting ENABLE_SPAM_FILTER =
+        FACTORY.createBooleanSetting("ENABLE_SPAM_FILTER", true);
+
+    /**
+     * Whether or not spam is hidden
+     */    
+    public static final BooleanSetting HIDE_SPAM =
+        FACTORY.createBooleanSetting("HIDE_SPAM", true);
     
     /**
+	 * Set how sensitive the spamfilter should be
+	 */    
+    public static final FloatSetting FILTER_SPAM_RESULTS =
+        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 1.0f);
+    
+	/**
+	 * Whether or not to filter spam results
+	 */    
+    public static final BooleanSetting MARK_SPAM_RESULTS =
+        FACTORY.createBooleanSetting("MARK_SPAM_RESULTS", true);
+    
+    /**
+     * The minimum spam rating at which we stop counting results for 
+     * dynamic querying.  Meant to prevent very strict user settings
+     * from making dynamic querying too agressive. 
+     */
+    public static final FloatSetting QUERY_SPAM_CUTOFF =
+        FACTORY.createSettableFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
+                "SpamManager.displayTreshold",1.0f,0.1f);
+    
+	/**
      * Do not issue query keys more than this often
      */
     public static final IntSetting QUERY_KEY_DELAY = 
-        FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,"MessageRouter.QueryKeyDelay",10000,10);
+        FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,
+                "MessageRouter.QueryKeyDelay",10000,10);
 }
