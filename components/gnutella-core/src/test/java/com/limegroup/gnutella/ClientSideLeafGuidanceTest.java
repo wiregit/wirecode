@@ -1,6 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -13,7 +16,11 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -46,6 +53,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }
 
+    static MyActivityCallback myCallback = new MyActivityCallback();
+    
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
@@ -176,22 +185,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // no UPs should get a QueryStatusResponse
-        for (int i = 0; i < testUP.length; i++) {
-            final int index = i;
-            Thread newThread = new Thread() {
-                    public void run() {
-                        try {
-                            QueryStatusResponse stat = 
-                                getFirstQueryStatus(testUP[index]);
-                            assertNull(stat);
-                        }
-                        catch (Exception e) {
-                            assertNull(e);
-                        }
-                    }
-                };
-            newThread.start();
-        }
+        drainQSRespones();
     }
 
 
@@ -298,22 +292,72 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // no UPs should get a QueryStatusResponse
+        drainQSRespones();
+    }
+    
+    /**
+     * tests that spammy results are shown to the gui but are not counted 
+     * in leaf guidance
+     */
+    public void testSpamFiltering() throws Exception {
+        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.4f);
+        
+        myCallback.responses.clear();
+        
+        Message m = null;
+
+        for (int i = 0; i < testUP.length; i++)
+            drain(testUP[i]);
+        
+        // spawn a query and make sure all UPs get it
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        RouterService.query(queryGuid.bytes(), "anita kesavan");
+
         for (int i = 0; i < testUP.length; i++) {
-            final int index = i;
-            Thread newThread = new Thread() {
-                    public void run() {
-                        try {
-                            QueryStatusResponse stat = 
-                                getFirstQueryStatus(testUP[index]);
-                            assertNull(stat);
-                        }
-                        catch (Exception e) {
-                            assertNull(e);
-                        }
-                    }
-                };
-            newThread.start();
+            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            assertNotNull(qr);
+            assertEquals(new GUID(qr.getGUID()), queryGuid);
         }
+        
+        // mark anita as spammy
+        RemoteFileDesc anita =new RemoteFileDesc("127.0.0.1", 6355, 1, "anita kasevan",
+                1000, DataUtils.EMPTY_GUID, 3, 
+                false, 3, false,
+                null, Collections.EMPTY_SET,
+                false,false,
+                "ALT",0l,
+                Collections.EMPTY_SET, 0l);
+        
+        SpamManager.instance().handleUserMarkedSpam(new RemoteFileDesc[]{anita});
+        assertTrue(SpamManager.instance().isSpam(anita));
+        
+        // now send back results and make sure that we do not get a QueryStatus
+        // from the leaf
+        Response[] res = new Response[REPORT_INTERVAL*4];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "anita kasevan "+j);
+
+        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        testUP[0].send(m);
+        testUP[0].flush();
+        Thread.sleep(1000);
+        
+        // the gui should be informed about the results 
+        assertEquals(REPORT_INTERVAL * 4, myCallback.responses.size());
+        
+        // but the ultrapeers should not be told about them cause they were all spam.
+        drainQSRespones();
+    }
+    
+    /**
+     * drains the ultrapeers for any QueryStatusResponses and fails if one is received.
+     * @throws Exception
+     */
+    private static void drainQSRespones() throws Exception {
+        failIfAnyArrive(testUP,QueryStatusResponse.class);
     }
 
     private static byte[] myIP() {
@@ -325,19 +369,17 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
     }
 
     public static ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
+        return myCallback;
     }
 
     public static class MyActivityCallback extends ActivityCallbackStub {
-        private RemoteFileDesc rfd = null;
-        public RemoteFileDesc getRFD() {
-            return rfd;
-        }
+        public List responses = new ArrayList();
+        
 
         public void handleQueryResult(RemoteFileDesc rfdParam,
                                       HostData data,
                                       Set locs) {
-            this.rfd = rfdParam;
+            responses.add(rfdParam);
         }
     }
 
