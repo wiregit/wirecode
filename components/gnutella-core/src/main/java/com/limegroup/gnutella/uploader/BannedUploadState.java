@@ -1,37 +1,37 @@
-package com.limegroup.gnutella.uploader;
+pbckage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 /**
- * Sends a 403 Banned For Hammering reply to a greedy client
+ * Sends b 403 Banned For Hammering reply to a greedy client
  */
-public class BannedUploadState extends UploadState {
+public clbss BannedUploadState extends UploadState {
 
 
 	/**
-	 * Constant for the error message to send.
+	 * Constbnt for the error message to send.
 	 */
-	public static final byte[] ERROR_MESSAGE =
-		"Your client sends too many requests.".getBytes();
+	public stbtic final byte[] ERROR_MESSAGE =
+		"Your client sends too mbny requests.".getBytes();
 
 	/**
-	 * Write HTTP headers
+	 * Write HTTP hebders
 	 * 
-	 * @param os
-	 *            the <tt>OutputStream</tt> to write to.
+	 * @pbram os
+	 *            the <tt>OutputStrebm</tt> to write to.
 	 * @throws IOException
-	 *             if there was a problem writing to the <tt>OutputStream</tt>.
+	 *             if there wbs a problem writing to the <tt>OutputStream</tt>.
 	 */
-	public void writeMessageHeaders(OutputStream os) throws IOException {
+	public void writeMessbgeHeaders(OutputStream os) throws IOException {
 		String str;
-		str = "HTTP/1.1 403 Banned\r\n";
+		str = "HTTP/1.1 403 Bbnned\r\n";
 		os.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		os.write(str.getBytes());
-		str = "Content-Type: text/plain\r\n";
+		str = "Content-Type: text/plbin\r\n";
 		os.write(str.getBytes());
 		str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
 		os.write(str.getBytes());
@@ -40,22 +40,22 @@ public class BannedUploadState extends UploadState {
 	}
 
 	/**
-	 * Write HTTP message body
+	 * Write HTTP messbge body
 	 * 
-	 * @param os
-	 *            the <tt>OutputStream</tt> to write to.
+	 * @pbram os
+	 *            the <tt>OutputStrebm</tt> to write to.
 	 * @throws IOException
-	 *             if there was a problem writing to the <tt>OutputStream</tt>.
+	 *             if there wbs a problem writing to the <tt>OutputStream</tt>.
 	 */
-	public void writeMessageBody(OutputStream os) throws IOException {
+	public void writeMessbgeBody(OutputStream os) throws IOException {
 		os.write(ERROR_MESSAGE);
 	}
 
 	/**
-	 * @return <tt>true</tt> if the connection should be closed after writing
-	 *         the message.
+	 * @return <tt>true</tt> if the connection should be closed bfter writing
+	 *         the messbge.
 	 */
-	public boolean getCloseConnection() {
+	public boolebn getCloseConnection() {
 		return true;
 	}
 }

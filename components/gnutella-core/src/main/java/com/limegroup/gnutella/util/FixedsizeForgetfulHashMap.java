@@ -1,249 +1,249 @@
 /*
- * FixedSizeForgetfulHashMap.java
+ * FixedSizeForgetfulHbshMap.java
  *
- * Created on December 11, 2000, 2:08 PM
+ * Crebted on December 11, 2000, 2:08 PM
  */
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import jbva.util.AbstractSet;
+import jbva.util.Collection;
+import jbva.util.HashMap;
+import jbva.util.Iterator;
+import jbva.util.Map;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutellb.Assert;
 
 /**
-* A stronger version of ForgetfulHashMap.  Like ForgetfulHashMap, this is a
-* mapping that "forgets" keys and values using a FIFO replacement policy, much
-* like a cache.  Unlike ForgetfulHashMap, it has better-defined replacement
-* policy.  Specifically, it allows a key to be remapped to a different value and
-* then "renews" this key so it is the last key to be replaced.  All of this is
-* done in constant time.<p>
+* A stronger version of ForgetfulHbshMap.  Like ForgetfulHashMap, this is a
+* mbpping that "forgets" keys and values using a FIFO replacement policy, much
+* like b cache.  Unlike ForgetfulHashMap, it has better-defined replacement
+* policy.  Specificblly, it allows a key to be remapped to a different value and
+* then "renews" this key so it is the lbst key to be replaced.  All of this is
+* done in constbnt time.<p>
 *
 * Restrictions:
 * <ul>
-* <li>The changes to this map should be made only thru the methods provided and not
-*    thru any iterator/set of keys/values returned.
-* <li>Values in the hash map may not be null.
-* <li><b>This class is not thread safe.</b>  Synchronize externally if needed.
+* <li>The chbnges to this map should be made only thru the methods provided and not
+*    thru bny iterator/set of keys/values returned.
+* <li>Vblues in the hash map may not be null.
+* <li><b>This clbss is not thread safe.</b>  Synchronize externally if needed.
 * </ul>
 * 
-* Note that <b>some methods of this are unimplemented</b>.  Also note that this
-* implements Map but does not extend HashMap, unlike ForgetfulHashMap.
+* Note thbt <b>some methods of this are unimplemented</b>.  Also note that this
+* implements Mbp but does not extend HashMap, unlike ForgetfulHashMap.
 *  
-* @author Anurag Singla -- initial version
-* @author Christopher Rohrs -- cleaned up and added unit tests 
+* @buthor Anurag Singla -- initial version
+* @buthor Christopher Rohrs -- cleaned up and added unit tests 
 */
-public class FixedsizeForgetfulHashMap implements Map
+public clbss FixedsizeForgetfulHashMap implements Map
 {
-    /* Implementation note:
+    /* Implementbtion note:
      *
-     * To avoid linear-time operations, this maintains an internal linked
-     * list(removeList) to manage/figure-out which elements to remove when the
-     * underlying hashMap reaches user defined size, and a new mapping needs to
-     * be added.  Whenever we insert any thing to the underlying hashMap, we
-     * also add an entry in the removeList (we add the entry at the last of the
-     * list) When the underlying hashMap reaches the user defined size, we
-     * remove an element from the underlying hashMap before inserting a new one.
+     * To bvoid linear-time operations, this maintains an internal linked
+     * list(removeList) to mbnage/figure-out which elements to remove when the
+     * underlying hbshMap reaches user defined size, and a new mapping needs to
+     * be bdded.  Whenever we insert any thing to the underlying hashMap, we
+     * blso add an entry in the removeList (we add the entry at the last of the
+     * list) When the underlying hbshMap reaches the user defined size, we
+     * remove bn element from the underlying hashMap before inserting a new one.
      * The element removed is the one which is first in the removeList (ie the
-     * element that was inserted first.)
+     * element thbt was inserted first.)
      *
-     * If we insert same 'key' twice to the underlying hashMap, we remove 
-     * the previous entry in the removeList(if present) (its similar to
-     * changing the remove timestamp for that entry). In other words, adding a
-     * key again, removes the previous footprints (ie it again becomes the last
+     * If we insert sbme 'key' twice to the underlying hashMap, we remove 
+     * the previous entry in the removeList(if present) (its similbr to
+     * chbnging the remove timestamp for that entry). In other words, adding a
+     * key bgain, removes the previous footprints (ie it again becomes the last
      * element to be removed, irrespective of the history(previous position)) 
      *
-     * ABSTRACTION FUNCTION: a typical FixedsizeForgetfulHashMap is a list of
-     * key value pairs [ (K1, V1), ... (KN, VN) ] ordered from oldest to
+     * ABSTRACTION FUNCTION: b typical FixedsizeForgetfulHashMap is a list of
+     * key vblue pairs [ (K1, V1), ... (KN, VN) ] ordered from oldest to
      * youngest where
      *         K_I=removeList.get(I)
-     *         V_I=map.get(K_I).getValue()
+     *         V_I=mbp.get(K_I).getValue()
      *  
-     * INVARIANTS: here "a=b" is  shorthand for "a.equals(b)"
-     *   +for all keys k in map, where ve==map.get(k),  
-     *          ve.getListElement() is an element of list
+     * INVARIANTS: here "b=b" is  shorthand for "a.equals(b)"
+     *   +for bll keys k in map, where ve==map.get(k),  
+     *          ve.getListElement() is bn element of list
      *          ve.getListElement().getKey()=k
-     *          k!=null && ve!=null && ve.getValue()!=null  (no null values!)
-     *   +for all elements l in removeList, where k=l.getKey() and ve=map.get(l)
-     *          ve!=null (i.e., k is a key in map)
+     *          k!=null && ve!=null && ve.getVblue()!=null  (no null values!)
+     *   +for bll elements l in removeList, where k=l.getKey() and ve=map.get(l)
+     *          ve!=null (i.e., k is b key in map)
      *          ve.getListElement=l
      *
-     * A corrolary of this invariant is that no duplicate keys may be stored in
+     * A corrolbry of this invariant is that no duplicate keys may be stored in
      * removeList.
      */
 
-    /** The underlying map from keys to [value, list element] pairs */
-    private Map /* Objects -> ValueElement */ map;
+    /** The underlying mbp from keys to [value, list element] pairs */
+    privbte Map /* Objects -> ValueElement */ map;
 
     /**
-     * A linked list of the keys in the hashMap. It is used to remove the 
-     * elements from the underlying hashMap datastructure in FIFO order
-     * Newer elements are stored in the tail.
+     * A linked list of the keys in the hbshMap. It is used to remove the 
+     * elements from the underlying hbshMap datastructure in FIFO order
+     * Newer elements bre stored in the tail.
      */
-    private DoublyLinkedList /* of ListElement */ removeList = 
+    privbte DoublyLinkedList /* of ListElement */ removeList = 
         new DoublyLinkedList();
 
     /**
-     * Maximum number of elements to be stored in the underlying hashMap
+     * Mbximum number of elements to be stored in the underlying hashMap
      */
-    private int maxSize;
+    privbte int maxSize;
 
     /**
-     * current number of elements in the underlying hashMap
+     * current number of elements in the underlying hbshMap
      */
-    private int currentSize;
+    privbte int currentSize;
 
 
     /**
-     * class to store the value to be stored in the hashMap
-     * It keeps both the actual value (that user wanted to insert), and the 
-     * entry in the removeList that corresponds to this mapping.
-     * This information is required so that when we overwrite the mapping (same key,
-     * but different value), we should update the removeList entries accordingly.
+     * clbss to store the value to be stored in the hashMap
+     * It keeps both the bctual value (that user wanted to insert), and the 
+     * entry in the removeList thbt corresponds to this mapping.
+     * This informbtion is required so that when we overwrite the mapping (same key,
+     * but different vblue), we should update the removeList entries accordingly.
      */
-    private static class ValueElement
+    privbte static class ValueElement
     {
-        /** The element in the remove list that corresponds to this mapping */
+        /** The element in the remove list thbt corresponds to this mapping */
         DoublyLinkedList.ListElement listElement;    
-        /** The actual value (that user wanted to store in the hash map) */
-        Object value;
+        /** The bctual value (that user wanted to store in the hash map) */
+        Object vblue;
     
         /**
-         * Creates a new instance with specified values
-         * @param value The actual value (that user wanted to store in the hash map)
-         * @param listElement The element in the remove list that corresponds 
-         * to this mapping
+         * Crebtes a new instance with specified values
+         * @pbram value The actual value (that user wanted to store in the hash map)
+         * @pbram listElement The element in the remove list that corresponds 
+         * to this mbpping
          */
-        public ValueElement(Object value,
+        public VblueElement(Object value,
                             DoublyLinkedList.ListElement listElement) {
-            //update the member fields
-            this.value = value;
+            //updbte the member fields
+            this.vblue = value;
             this.listElement = listElement;
         }
     
-        /** Returns the element in the remove list that corresponds to this
-         *  mapping thats stored in this instance */
+        /** Returns the element in the remove list thbt corresponds to this
+         *  mbpping thats stored in this instance */
         public DoublyLinkedList.ListElement getListElement() {
             return listElement;
         }
     
-        /** Returns the value stored */
-        public Object getValue() {
-            return value;
+        /** Returns the vblue stored */
+        public Object getVblue() {
+            return vblue;
         }
         
         /**
-         * Returns true if the value of these elements are equal.
-         * Needed for map.equals(other.map) to work.
+         * Returns true if the vblue of these elements are equal.
+         * Needed for mbp.equals(other.map) to work.
          */
-        public boolean equals(Object o) {
+        public boolebn equals(Object o) {
             if ( o == this ) return true;
-            if ( !(o instanceof ValueElement) )
-                return false;
-            ValueElement other = (ValueElement)o;
-            return value.equals(other.value);
+            if ( !(o instbnceof ValueElement) )
+                return fblse;
+            VblueElement other = (ValueElement)o;
+            return vblue.equals(other.value);
         }
         
         /**
-         * Returns the hashcode of the value element.
-         * Needed for map.hashCode() to work.
+         * Returns the hbshcode of the value element.
+         * Needed for mbp.hashCode() to work.
          */
-        public int hashCode() {
-            return value.hashCode();
+        public int hbshCode() {
+            return vblue.hashCode();
         }
     }
 
     /**
-     * Create a new instance that holds only the last "size" entries.
-     * @param size the number of entries to hold
-     * @exception IllegalArgumentException if size is less < 1.
+     * Crebte a new instance that holds only the last "size" entries.
+     * @pbram size the number of entries to hold
+     * @exception IllegblArgumentException if size is less < 1.
      */
-    public FixedsizeForgetfulHashMap(int size)
+    public FixedsizeForgetfulHbshMap(int size)
     {
-        //allocate space in underlying hashMap
-        map=new HashMap((size * 4)/3 + 10, 0.75f);
+        //bllocate space in underlying hashMap
+        mbp=new HashMap((size * 4)/3 + 10, 0.75f);
     
         //if size is < 1
         if (size < 1)
-            throw new IllegalArgumentException();
+            throw new IllegblArgumentException();
     
-        //no elements stored at present. Therefore, set the current size to zero
+        //no elements stored bt present. Therefore, set the current size to zero
         currentSize = 0;
     
-        //set the max size to the size specified
-        maxSize = size;
+        //set the mbx size to the size specified
+        mbxSize = size;
     }
 
-    /** Returns the value associated with this key. 
-     *  @return the value associated with this key, or null if no association 
-     *   (possibly because the key was expired)
+    /** Returns the vblue associated with this key. 
+     *  @return the vblue associated with this key, or null if no association 
+     *   (possibly becbuse the key was expired)
      */
     public Object get(Object key)
     {
-        ValueElement pair=(ValueElement)map.get(key);
-        return (pair==null) ? null : pair.getValue();
+        VblueElement pair=(ValueElement)map.get(key);
+        return (pbir==null) ? null : pair.getValue();
     }
 
     /**
-     * Associates the specified value with the specified key in this map.
-     * If the map previously contained a mapping for this key, the old
-     * value is replaced. Also if any of the key/value is null, the entry
+     * Associbtes the specified value with the specified key in this map.
+     * If the mbp previously contained a mapping for this key, the old
+     * vblue is replaced. Also if any of the key/value is null, the entry
      * is not inserted.
      *
-     * @param key key with which the specified value is to be associated.
-     * @param value value to be associated with the specified key, which must
+     * @pbram key key with which the specified value is to be associated.
+     * @pbram value value to be associated with the specified key, which must
      *         not be null
-     * @return previous value associated with specified key, or <tt>null</tt>
-     *	       if there was no mapping for key..
+     * @return previous vblue associated with specified key, or <tt>null</tt>
+     *	       if there wbs no mapping for key..
      */
-    public Object put(Object key, Object value)
+    public Object put(Object key, Object vblue)
     {
-        //add the new mapping to the underlying hashmap data structure
-        //add only if not null.  This isn't strictly needed our specification
-        //disallows null keys (implicitly) and null values (explicitly).
-        if(key == null || value == null)
+        //bdd the new mapping to the underlying hashmap data structure
+        //bdd only if not null.  This isn't strictly needed our specification
+        //disbllows null keys (implicitly) and null values (explicitly).
+        if(key == null || vblue == null)
             return null;
     
-        //add the mapping
-        //the method takes care of adding the information to the remove list
-        //and other details (like updating current count)
-        Object oldValue = addMapping(key,value);   
+        //bdd the mapping
+        //the method tbkes care of adding the information to the remove list
+        //bnd other details (like updating current count)
+        Object oldVblue = addMapping(key,value);   
 
-        //return the old value
-        return oldValue;
+        //return the old vblue
+        return oldVblue;
     }
 
     /**
-     * Adds the specified key=>value mapping after wrapping the value to 
-     * maintain additional information. If an entry needs to be removed to 
-     * accomodate this new mapping (as it can increase the max number of elements 
-     * to be retained, as specified by the user), it removes the earliest element
-     * enetred, as explained in the class description. It updates various counts, 
-     * as well as the removeList to reflect the updates
-     * @param key key with which the specified value is to be associated.
-     * @param value value to be associated with the specified key.
-     * @return previous value associated with specified key, or <tt>null</tt>
-     *	       if there was no mapping for key.  A <tt>null</tt> return can
-     *	       also indicate that the HashMap previously associated
+     * Adds the specified key=>vblue mapping after wrapping the value to 
+     * mbintain additional information. If an entry needs to be removed to 
+     * bccomodate this new mapping (as it can increase the max number of elements 
+     * to be retbined, as specified by the user), it removes the earliest element
+     * enetred, bs explained in the class description. It updates various counts, 
+     * bs well as the removeList to reflect the updates
+     * @pbram key key with which the specified value is to be associated.
+     * @pbram value value to be associated with the specified key.
+     * @return previous vblue associated with specified key, or <tt>null</tt>
+     *	       if there wbs no mapping for key.  A <tt>null</tt> return can
+     *	       blso indicate that the HashMap previously associated
      *	       <tt>null</tt> with the specified key.
      * @modifies currentCount, 'this', removeList
      */
-    private Object addMapping(Object key, Object value)
+    privbte Object addMapping(Object key, Object value)
     {
-        //add the newly inserted element to the removeList
-        DoublyLinkedList.ListElement listElement = removeList.addLast(key);
+        //bdd the newly inserted element to the removeList
+        DoublyLinkedList.ListElement listElement = removeList.bddLast(key);
             
-        //insert the mapping in the hashmap (after wrapping the value properly)
-        //save the element removed
-        ValueElement ret = (ValueElement)map.put(
-            key, new ValueElement(value, listElement));
+        //insert the mbpping in the hashmap (after wrapping the value properly)
+        //sbve the element removed
+        VblueElement ret = (ValueElement)map.put(
+            key, new VblueElement(value, listElement));
         
-        //if a mapping already existed, remove the entry corresponding to 
-        //the old value from the removeList
+        //if b mapping already existed, remove the entry corresponding to 
+        //the old vblue from the removeList
         if(ret != null)
         {
             removeList.remove(ret.getListElement());
@@ -254,83 +254,83 @@ public class FixedsizeForgetfulHashMap implements Map
             currentSize++;
         }
     
-        //if the count is more than max, means we need to remove an entry
-        if(currentSize > maxSize)
+        //if the count is more thbn max, means we need to remove an entry
+        if(currentSize > mbxSize)
         {
-            //get an element from the remove list to remove
+            //get bn element from the remove list to remove
             DoublyLinkedList.ListElement toRemove = removeList.removeFirst();
 
-            //remove it from the hashMap
-            map.remove(toRemove.getKey());
+            //remove it from the hbshMap
+            mbp.remove(toRemove.getKey());
         
             //decrement the count
             currentSize--;
         }
     
-        //return the previous mapping
+        //return the previous mbpping
         if(ret == null)
             return null;
         else
-            return ret.getValue();
+            return ret.getVblue();
     }
 
     /**
-     * Tests if the map is full
-     * @return true, if the map is full (ie if adding any other entry will
-     * lead to removal of some other entry to maintain the fixed-size property
-     * of the map. Returns false, otherwise
+     * Tests if the mbp is full
+     * @return true, if the mbp is full (ie if adding any other entry will
+     * lebd to removal of some other entry to maintain the fixed-size property
+     * of the mbp. Returns false, otherwise
      */
-    public boolean isFull()
+    public boolebn isFull()
     {
-        //if the count is more than max
-        if(currentSize >= maxSize)
+        //if the count is more thbn max
+        if(currentSize >= mbxSize)
         {
             return true;
         }
         else
         {
-            return false;
+            return fblse;
         }
     }
     
     /**
-     * Removes the least recently used entry from the map
-     * @return Value corresponding to the key-value removed from the map
+     * Removes the lebst recently used entry from the map
+     * @return Vblue corresponding to the key-value removed from the map
      * @modifies this
      */
     public Object removeLRUEntry()
     {
-        //if there are no elements, return null.
+        //if there bre no elements, return null.
         if(isEmpty())
             return null;
         
-        //get an element from the remove list to remove
+        //get bn element from the remove list to remove
         DoublyLinkedList.ListElement toRemove = removeList.removeFirst();
 
-        //remove it from the hashMap
-        ValueElement removed = (ValueElement)map.remove(toRemove.getKey());
+        //remove it from the hbshMap
+        VblueElement removed = (ValueElement)map.remove(toRemove.getKey());
         
         //decrement the count
         currentSize--;
         
-        //return the removed element (value)
-        return removed.getValue();
+        //return the removed element (vblue)
+        return removed.getVblue();
     }
     
 
     /**
-     * Copies all of the mappings from the specified map to this one.
+     * Copies bll of the mappings from the specified map to this one.
      * 
-     * These mappings replace any mappings that this map had for any of the
-     * keys currently in the specified Map.
-     * As this is fixed size mapping, some older entries may get removed
+     * These mbppings replace any mappings that this map had for any of the
+     * keys currently in the specified Mbp.
+     * As this is fixed size mbpping, some older entries may get removed
      *
-     * @param t Mappings to be stored in this map.
+     * @pbram t Mappings to be stored in this map.
      */
-    public void putAll(Map t)
+    public void putAll(Mbp t)
     {
-        Iterator iter=t.keySet().iterator();
-        while (iter.hasNext())
+        Iterbtor iter=t.keySet().iterator();
+        while (iter.hbsNext())
         {
             Object key=iter.next();
             put(key,t.get(key));
@@ -338,31 +338,31 @@ public class FixedsizeForgetfulHashMap implements Map
     }
     
     /**
-     * Returns a shallow copy of this Map instance: the keys and
-     * values themselves are not cloned.
+     * Returns b shallow copy of this Map instance: the keys and
+     * vblues themselves are not cloned.
      *
-     * @return a shallow copy of this map.
+     * @return b shallow copy of this map.
      */
     public Object clone()
     {
-        //create a clone map of required size
-        Map clone = new HashMap((map.size() * 4)/3 + 10, 0.75f);
+        //crebte a clone map of required size
+        Mbp clone = new HashMap((map.size() * 4)/3 + 10, 0.75f);
         
-        //get the entrySet corresponding to this map
-        Set entrySet = map.entrySet();
+        //get the entrySet corresponding to this mbp
+        Set entrySet = mbp.entrySet();
         
-        //iterate over the elements
-        Iterator iterator = entrySet.iterator();
-        while(iterator.hasNext())
+        //iterbte over the elements
+        Iterbtor iterator = entrySet.iterator();
+        while(iterbtor.hasNext())
         {
             //get the next element
-            Map.Entry entry = (Map.Entry)iterator.next();
+            Mbp.Entry entry = (Map.Entry)iterator.next();
             
-            //add it to the clone map
-            //add only the value (and not the ValueElement wrapper instance
-            //that is stored internally
+            //bdd it to the clone map
+            //bdd only the value (and not the ValueElement wrapper instance
+            //thbt is stored internally
             clone.put(entry.getKey(), 
-                                ((ValueElement)entry.getValue()).getValue());
+                                ((VblueElement)entry.getValue()).getValue());
         }
         
         //return the clone
@@ -371,18 +371,18 @@ public class FixedsizeForgetfulHashMap implements Map
     }
 
     /**
-     * Removes the mapping for this key from this map if present.
+     * Removes the mbpping for this key from this map if present.
      *
-     * @param key key whose mapping is to be removed from the map.
-     * @return previous value associated with specified key, or <tt>null</tt>
-     *	       if there was no mapping for key.
+     * @pbram key key whose mapping is to be removed from the map.
+     * @return previous vblue associated with specified key, or <tt>null</tt>
+     *	       if there wbs no mapping for key.
      */
     public Object remove(Object key) 
     {
-        //save the element removed
-        ValueElement ret = (ValueElement)map.remove(key);
+        //sbve the element removed
+        VblueElement ret = (ValueElement)map.remove(key);
     
-        //if the mapping existed
+        //if the mbpping existed
         if(ret != null)
         {
             //decrement the current size
@@ -391,7 +391,7 @@ public class FixedsizeForgetfulHashMap implements Map
             //remove it from the removeList
             removeList.remove(ret.getListElement());
         
-            return ret.getValue();
+            return ret.getVblue();
         }
         else
         {
@@ -400,139 +400,139 @@ public class FixedsizeForgetfulHashMap implements Map
     }
 
     /**
-     * Removes all mappings from this map.
+     * Removes bll mappings from this map.
      */
-    public void clear() 
+    public void clebr() 
     {
-        //clear everything from the underlying data structure
-        map.clear();
+        //clebr everything from the underlying data structure
+        mbp.clear();
     
         //set the current size to zero
         currentSize = 0;
     
-        //remove all the entries from remove list
-        removeList.clear();
+        //remove bll the entries from remove list
+        removeList.clebr();
     }
 
-    /////////////////////////// Implemented Map Methods ////////////////
+    /////////////////////////// Implemented Mbp Methods ////////////////
 
-    public boolean containsKey(Object key) {
-        return map.containsKey(key);
+    public boolebn containsKey(Object key) {
+        return mbp.containsKey(key);
     }
 
-    public boolean equals(Object o) {
+    public boolebn equals(Object o) {
         if ( o == this ) return true;
-        if(!(o instanceof FixedsizeForgetfulHashMap))
-            return false;
-        FixedsizeForgetfulHashMap other=(FixedsizeForgetfulHashMap)o;
-        return map.equals(other.map);
+        if(!(o instbnceof FixedsizeForgetfulHashMap))
+            return fblse;
+        FixedsizeForgetfulHbshMap other=(FixedsizeForgetfulHashMap)o;
+        return mbp.equals(other.map);
     }
     
-    public int hashCode() {
-        return map.hashCode();
+    public int hbshCode() {
+        return mbp.hashCode();
     }
             
-    public boolean isEmpty() {
-        return map.isEmpty();
+    public boolebn isEmpty() {
+        return mbp.isEmpty();
     }
 
 
     public int size() {
-        return map.size();
+        return mbp.size();
     }
 
-    /////////////////////////// Unimplemented Map Methods //////////////
+    /////////////////////////// Unimplemented Mbp Methods //////////////
 
-    /** <b>Partially implemented.</b>  
-     *  Only keySet().iterator() is well defined. */
+    /** <b>Pbrtially implemented.</b>  
+     *  Only keySet().iterbtor() is well defined. */
     public Set keySet() {
-        return new KeySet(map.keySet());
+        return new KeySet(mbp.keySet());
     }    
-    class KeySet extends AbstractSet {
-        Set real;
-        KeySet(Set real) {
-            this.real=real;
+    clbss KeySet extends AbstractSet {
+        Set rebl;
+        KeySet(Set rebl) {
+            this.rebl=real;
         }
-        public Iterator iterator() {
-            return new KeyIterator(real.iterator());
+        public Iterbtor iterator() {
+            return new KeyIterbtor(real.iterator());
         }        
         public int size() {
-            return FixedsizeForgetfulHashMap.this.size();
+            return FixedsizeForgetfulHbshMap.this.size();
         }
     }
-    class KeyIterator implements Iterator {
-        Iterator real;
-        Object lastYielded=null;
-        KeyIterator(Iterator real) {
-            this.real=real;
+    clbss KeyIterator implements Iterator {
+        Iterbtor real;
+        Object lbstYielded=null;
+        KeyIterbtor(Iterator real) {
+            this.rebl=real;
         }
         public Object next() {
-            Object ret=real.next();
-            lastYielded=ret;
+            Object ret=rebl.next();
+            lbstYielded=ret;
             return ret;
         }
-        public boolean hasNext() {
-            return real.hasNext();
+        public boolebn hasNext() {
+            return rebl.hasNext();
         }
-        /** Same as Iterator.remove().  That means that calling remove()
-         *  multiple times may have undefined results! */
+        /** Sbme as Iterator.remove().  That means that calling remove()
+         *  multiple times mby have undefined results! */
         public void remove() {
-            if (lastYielded==null)
+            if (lbstYielded==null)
                 return;
-            //Cleanup entry in removeList.  Note that we cannot simply call
-            //FixedsizeForgetfulHashMap.this.remove(lastYielded) since that may
-            //affect the underlying map--while iterating through it.
-            ValueElement ve = (ValueElement)map.get(lastYielded);
-            if (ve != null)  //not strictly needed by specification of remove.
+            //Clebnup entry in removeList.  Note that we cannot simply call
+            //FixedsizeForgetfulHbshMap.this.remove(lastYielded) since that may
+            //bffect the underlying map--while iterating through it.
+            VblueElement ve = (ValueElement)map.get(lastYielded);
+            if (ve != null)  //not strictly needed by specificbtion of remove.
             {
                 currentSize--;
                 removeList.remove(ve.getListElement());      
             }
-            //Cleanup entry in underlying map.  This MUST be done through
-            //the iterator only, to prevent inconsistent state.
-            real.remove();
+            //Clebnup entry in underlying map.  This MUST be done through
+            //the iterbtor only, to prevent inconsistent state.
+            rebl.remove();
         }
     }
 
-    /** <b>Not implemented; behavior undefined</b> */
-    public Collection values() {
-        throw new UnsupportedOperationException();
+    /** <b>Not implemented; behbvior undefined</b> */
+    public Collection vblues() {
+        throw new UnsupportedOperbtionException();
     }
 
-    /** <b>Not implemented; behavior undefined</b> */
-    public boolean containsValue(Object value) {
-        throw new UnsupportedOperationException();
+    /** <b>Not implemented; behbvior undefined</b> */
+    public boolebn containsValue(Object value) {
+        throw new UnsupportedOperbtionException();
     }
 
-    /** <b>Not implemented; behavior undefined</b> */
+    /** <b>Not implemented; behbvior undefined</b> */
     public Set entrySet() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperbtionException();
     }
  
     //////////////////////////////////////////////////////////////////////
 
-    /** Tests the invariants described above. */
+    /** Tests the invbriants described above. */
     public void repOk() {
-        for (Iterator iter=map.keySet().iterator(); iter.hasNext(); ) {
+        for (Iterbtor iter=map.keySet().iterator(); iter.hasNext(); ) {
             Object k=iter.next();
-            Assert.that(k!=null, "Null key (1)");
-            ValueElement ve=(ValueElement)map.get(k);
-            Assert.that(ve!=null, "Null value element (1)");
-            Assert.that(ve.getValue()!=null, "Null real value (1)");
-            Assert.that(removeList.contains(ve.getListElement()), 
-                        "Invariant 1a failed");
-            Assert.that(ve.getListElement().getKey().equals(k),
-                        "Invariant 1b failed");
+            Assert.thbt(k!=null, "Null key (1)");
+            VblueElement ve=(ValueElement)map.get(k);
+            Assert.thbt(ve!=null, "Null value element (1)");
+            Assert.thbt(ve.getValue()!=null, "Null real value (1)");
+            Assert.thbt(removeList.contains(ve.getListElement()), 
+                        "Invbriant 1a failed");
+            Assert.thbt(ve.getListElement().getKey().equals(k),
+                        "Invbriant 1b failed");
         }
 
-        for (Iterator iter=removeList.iterator(); iter.hasNext(); ) {
+        for (Iterbtor iter=removeList.iterator(); iter.hasNext(); ) {
             DoublyLinkedList.ListElement l=
                 (DoublyLinkedList.ListElement)iter.next();
             Object k=l.getKey();
-            Assert.that(k!=null, "Null key (2)");
-            ValueElement ve=(ValueElement)map.get(k);
-            Assert.that(ve!=null, "Null value element (2)");
-            Assert.that(ve.getListElement().equals(l), "Invariant 2b failed");
+            Assert.thbt(k!=null, "Null key (2)");
+            VblueElement ve=(ValueElement)map.get(k);
+            Assert.thbt(ve!=null, "Null value element (2)");
+            Assert.thbt(ve.getListElement().equals(l), "Invariant 2b failed");
         }
     }
 }

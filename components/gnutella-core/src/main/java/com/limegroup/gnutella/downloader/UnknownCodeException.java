@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
 /**
  * Thrown when the response code is unknown
  */
-public class UnknownCodeException extends IOException {
-    private int code;
+public clbss UnknownCodeException extends IOException {
+    privbte int code;
 	public UnknownCodeException() { super("unknown code"); }
 	
 	public UnknownCodeException(int code) { 

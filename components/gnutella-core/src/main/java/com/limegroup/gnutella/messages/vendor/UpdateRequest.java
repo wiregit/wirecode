@@ -1,30 +1,30 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutellb.messages.BadGGEPBlockException;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.GGEP;
+import com.limegroup.gnutellb.util.DataUtils;
 
-public final class UpdateRequest extends VendorMessage {
+public finbl class UpdateRequest extends VendorMessage {
     
-    public static final int VERSION = 1;
+    public stbtic final int VERSION = 1;
     
-    static final String COMPRESSED_UPDATE_KEY = "C";
-    static final String UNCOMPRESSED_UPDATE_KEY = "U";
+    stbtic final String COMPRESSED_UPDATE_KEY = "C";
+    stbtic final String UNCOMPRESSED_UPDATE_KEY = "U";
     
-    private GGEP _ggep;
-    private boolean parsed;
+    privbte GGEP _ggep;
+    privbte boolean parsed;
 
     /**
-     * Constructs a new SimppRequest from network data.
+     * Constructs b new SimppRequest from network data.
      */
-    UpdateRequest(byte[] guid, byte ttl, byte hops, int version, 
-                                  byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_REQ, version, payload);
+    UpdbteRequest(byte[] guid, byte ttl, byte hops, int version, 
+                                  byte[] pbyload) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_REQ, version, pbyload);
     }
     
-    public UpdateRequest() {
-        super(F_LIME_VENDOR_ID, F_UPDATE_REQ, VERSION, DataUtils.EMPTY_BYTE_ARRAY);
+    public UpdbteRequest() {
+        super(F_LIME_VENDOR_ID, F_UPDATE_REQ, VERSION, DbtaUtils.EMPTY_BYTE_ARRAY);
     }
     
     public int getVersion() {
@@ -32,36 +32,36 @@ public final class UpdateRequest extends VendorMessage {
     }
     
     public String toString() {
-        return "{UpdateRequest:"+super.toString()+"}";
+        return "{UpdbteRequest:"+super.toString()+"}";
     }
     
     /**
-     * @return the GGEP block carried in this request, if any.
+     * @return the GGEP block cbrried in this request, if any.
      */
-    public boolean hasGGEP() {
-        if (_ggep == null && !parsed) {
-            _ggep = parseGGEP();
-            parsed = true;
+    public boolebn hasGGEP() {
+        if (_ggep == null && !pbrsed) {
+            _ggep = pbrseGGEP();
+            pbrsed = true;
         }
         return _ggep != null;
     }
     
-    private GGEP parseGGEP() {
-        byte [] payload = getPayload();
-        if (payload == null  || payload.length == 0)
+    privbte GGEP parseGGEP() {
+        byte [] pbyload = getPayload();
+        if (pbyload == null  || payload.length == 0)
             return null;
         
         try {
-            return new GGEP(payload, 0, null);
-        } catch (BadGGEPBlockException bad) {
+            return new GGEP(pbyload, 0, null);
+        } cbtch (BadGGEPBlockException bad) {
             return null;
         }
     }
     
-    public boolean requestsCompressed() {
-        if (!hasGGEP())
-            return false;
+    public boolebn requestsCompressed() {
+        if (!hbsGGEP())
+            return fblse;
         
-        return _ggep.hasKey(COMPRESSED_UPDATE_KEY);
+        return _ggep.hbsKey(COMPRESSED_UPDATE_KEY);
     }
 }

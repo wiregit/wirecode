@@ -1,23 +1,23 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 /**
  * Setting for Internet Archive connection
  */
-public class InternetArchiveSetting extends LimeProps {
+public clbss InternetArchiveSetting extends LimeProps {
 
-	private InternetArchiveSetting() {}
+	privbte InternetArchiveSetting() {}
 	
 	/**
-     * Setting for the username to use for the Internet Archive connection
+     * Setting for the usernbme to use for the Internet Archive connection
      */
-    public static final StringSetting INTERNETARCHIVE_USERNAME = 
-        FACTORY.createStringSetting("INTERNETARCHIVE_USERNAME", "");
+    public stbtic final StringSetting INTERNETARCHIVE_USERNAME = 
+        FACTORY.crebteStringSetting("INTERNETARCHIVE_USERNAME", "");
     
     /**
-     * Setting for the password to use for the Internet Archive connection
+     * Setting for the pbssword to use for the Internet Archive connection
      */
-    public static final StringSetting INTERNETARCHIVE_PASS = 
-        FACTORY.createStringSetting("INTERNETARCHIVE_PASS", "");
+    public stbtic final StringSetting INTERNETARCHIVE_PASS = 
+        FACTORY.crebteStringSetting("INTERNETARCHIVE_PASS", "");
 
 
 }

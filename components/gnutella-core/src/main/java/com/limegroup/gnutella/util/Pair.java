@@ -3,13 +3,13 @@
  *
  */
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-public class Pair {
-    private int _key;
-    private Object _elem;
+public clbss Pair {
+    privbte int _key;
+    privbte Object _elem;
 	
-    public Pair (int key, Object elem) {
+    public Pbir (int key, Object elem) {
 		_key = key;
 		_elem = elem;
     }
@@ -20,6 +20,6 @@ public class Pair {
     public void setElement(Object elem) {_elem = elem;}
     public void print() {
 		//File f = (File)_elem;
-		//String path = f.getAbsolutePath();
+		//String pbth = f.getAbsolutePath();
     }    
 }

@@ -1,72 +1,72 @@
-package com.limegroup.gnutella.archive;
+pbckage com.limegroup.gnutella.archive;
 
-import java.io.IOException;
-import java.util.Set;
+import jbva.io.IOException;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutellb.FileDesc;
 
-public interface Contribution {
+public interfbce Contribution {
 
-	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.6 2005-11-17 15:46:40 tolsen Exp $";
+	public stbtic final String REPOSITORY_VERSION = 
+		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.6 2005/11/17 15:46:40 tolsen Exp $";
 
 	/**
 	 * 
-	 * A contribution consists of one or more files that we upload to a location
-	 * such as the Internet Archive.
+	 * A contribution consists of one or more files thbt we upload to a location
+	 * such bs the Internet Archive.
 	 * 
-	 * Follow these steps to do upload a contribution to the 
+	 * Follow these steps to do uplobd a contribution to the 
 	 * Internet Archive:
 	 * 
-	 * 	1.	create a Contribution object by calling ContributionFactory.createContribution()
-	 * 	2.	call reservetIdentifier() with your requested identifier
-	 * 	3.	if step 2 successful, call getVerificationUrl() to get the verification URL
-	 * 	4.	call addFile() for each file you want to add to the contribution
-	 * 	5.	call addListener() with your UploadListener
-	 * 	6.  call upload() to upload the contribution
+	 * 	1.	crebte a Contribution object by calling ContributionFactory.createContribution()
+	 * 	2.	cbll reservetIdentifier() with your requested identifier
+	 * 	3.	if step 2 successful, cbll getVerificationUrl() to get the verification URL
+	 * 	4.	cbll addFile() for each file you want to add to the contribution
+	 * 	5.	cbll addListener() with your UploadListener
+	 * 	6.  cbll upload() to upload the contribution
 	 */
 	
 	
-	public static final int NOT_CONNECTED = 0;
-	public static final int CONNECTED = 1;
-	public static final int FILE_STARTED = 2;
-	public static final int FILE_PROGRESSED = 3;
-	public static final int FILE_COMPLETED = 4;
-	public static final int CHECKIN_STARTED = 5;
-	public static final int CHECKIN_COMPLETED = 6;
+	public stbtic final int NOT_CONNECTED = 0;
+	public stbtic final int CONNECTED = 1;
+	public stbtic final int FILE_STARTED = 2;
+	public stbtic final int FILE_PROGRESSED = 3;
+	public stbtic final int FILE_COMPLETED = 4;
+	public stbtic final int CHECKIN_STARTED = 5;
+	public stbtic final int CHECKIN_COMPLETED = 6;
 
 	/**
-	 * @return the verification URL that should be used for the contribution
+	 * @return the verificbtion URL that should be used for the contribution
 	 */
-	public String getVerificationUrl();
+	public String getVerificbtionUrl();
 
 	/**
-	 * @return normalized identifier
+	 * @return normblized identifier
 	 */
 	public String requestIdentifier(String identifier)
-			throws IdentifierUnavailableException, IOException;
+			throws IdentifierUnbvailableException, IOException;
 
 	/**
-	 * only call this after having successfully called requestIdentifier()
+	 * only cbll this after having successfully called requestIdentifier()
 	 * @return
 	 */
 	public String getIdentifier();
 
-	public void upload() throws IOException;
+	public void uplobd() throws IOException;
 
-	public void addFileDesc(FileDesc fd);
+	public void bddFileDesc(FileDesc fd);
 
 	public void removeFileDesc(FileDesc fd);
 
-	public boolean containsFileDesc(FileDesc fd);
+	public boolebn containsFileDesc(FileDesc fd);
 
-	public void cancel();
+	public void cbncel();
 
 	/**
-	 * @return a set of the files in the collection
+	 * @return b set of the files in the collection
 	 * 
-	 * I'm guessing that LinkedHashMap returns a LinkedHashSet for keySet() 
-	 * so the order should be in the order they were added
+	 * I'm guessing thbt LinkedHashMap returns a LinkedHashSet for keySet() 
+	 * so the order should be in the order they were bdded
 	 *         
 	 */
 	public Set getFileDescs();
@@ -79,9 +79,9 @@ public interface Contribution {
 	
 	public String getDescription();
 
-	public void setMedia(int media);
+	public void setMedib(int media);
 
-	public int getMedia();
+	public int getMedib();
 
 	public void setCollection(int collection);
 
@@ -91,52 +91,52 @@ public interface Contribution {
 
 	public int getType();
 
-	public String getPassword();
+	public String getPbssword();
 
-	public void setPassword(String password);
+	public void setPbssword(String password);
 
-	public String getUsername();
+	public String getUsernbme();
 
-	public void setUsername(String username);
+	public void setUsernbme(String username);
 
 	/**
-	 * Fields You can include whatever fields you like, but the following are
-	 * known (possibly semantically)  by the Internet Archive
+	 * Fields You cbn include whatever fields you like, but the following are
+	 * known (possibly sembntically)  by the Internet Archive
 	 * 
-	 * Movies and Audio: date, description, runtime
+	 * Movies bnd Audio: date, description, runtime
 	 * 
-	 * Audio: creator, notes, source, taper 	 
+	 * Audio: crebtor, notes, source, taper 	 
 	 *  
-	 * Movies: color, contact, country, credits, director, producer,
-	 *		production_company, segments, segments, sound, sponsor, shotlist 
+	 * Movies: color, contbct, country, credits, director, producer,
+	 *		production_compbny, segments, segments, sound, sponsor, shotlist 
 	 *
 	 * Also see the Dublin Core: http://dublincore.org/documents/dces/
 	 * 
 	 */
 
-	public void setField(String field, String value);
+	public void setField(String field, String vblue);
 
 	public String getField(String field);
 
 	public void removeField(String field);
 
-	public void addListener(UploadListener l);
+	public void bddListener(UploadListener l);
 
-	public void removeListener(UploadListener l);
+	public void removeListener(UplobdListener l);
 
 	public int getFilesSent();
 
-	public int getTotalFiles();
+	public int getTotblFiles();
 
 	public long getFileBytesSent();
 
 	public long getFileSize();
 
-	public long getTotalBytesSent();
+	public long getTotblBytesSent();
 
-	public long getTotalSize();
+	public long getTotblSize();
 
-	public String getFileName();
+	public String getFileNbme();
 
 	public int getID();
 	

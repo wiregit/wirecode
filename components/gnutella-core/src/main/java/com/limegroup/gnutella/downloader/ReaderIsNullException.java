@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
 /**
- * Thrown when the ByteReader is null
+ * Thrown when the ByteRebder is null
  */
 
-public class ReaderIsNullException extends IOException {
-	public ReaderIsNullException() { super("Reader is Null"); }
-	public ReaderIsNullException(String msg) { super(msg); }
+public clbss ReaderIsNullException extends IOException {
+	public RebderIsNullException() { super("Reader is Null"); }
+	public RebderIsNullException(String msg) { super(msg); }
 }

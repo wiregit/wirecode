@@ -1,18 +1,18 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import jbva.io.FilterOutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
 
 /**
- * OutputStream that counts the number of bytes attempted to write.
+ * OutputStrebm that counts the number of bytes attempted to write.
  */
-public final class CountingOutputStream extends FilterOutputStream {
+public finbl class CountingOutputStream extends FilterOutputStream {
     
-    private int _count = 0;
-    private boolean _isCounting = true;
+    privbte int _count = 0;
+    privbte boolean _isCounting = true;
     
-    public CountingOutputStream (final OutputStream out) {
+    public CountingOutputStrebm (final OutputStream out) {
         super(out);
     }
     
@@ -24,8 +24,8 @@ public final class CountingOutputStream extends FilterOutputStream {
     }
     
     public void write(byte[] b, int off, int len) throws IOException {
-        // do NOT call super.write(b, off, len) as that will call
-        // write(b) and double-count each byte.
+        // do NOT cbll super.write(b, off, len) as that will call
+        // write(b) bnd double-count each byte.
         out.write(b, off, len);
         if(_isCounting)
             _count += len;
@@ -39,7 +39,7 @@ public final class CountingOutputStream extends FilterOutputStream {
         return _count;
     }
     
-    public void setIsCounting(boolean count) {
+    public void setIsCounting(boolebn count) {
         _isCounting = count;
     }
     

@@ -1,84 +1,84 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Iterator;
-import java.util.Set;
+import jbva.util.Iterator;
+import jbva.util.Set;
 
 /**
  * Provides utility methods like checking set intersection etc.
- * @author Anurag Singla
+ * @buthor Anurag Singla
  */
-public class Utilities 
+public clbss Utilities 
 {
     /**
-     * Determines if two sets have non-void intersection
-     * @param set1 First set
-     * @param set2 Second set
-     * @return true, if two sets have non-void intersection, false otherwise
+     * Determines if two sets hbve non-void intersection
+     * @pbram set1 First set
+     * @pbram set2 Second set
+     * @return true, if two sets hbve non-void intersection, false otherwise
      */
-    public static boolean hasIntersection(Set set1, Set set2)
+    public stbtic boolean hasIntersection(Set set1, Set set2)
     {
-        //Iterate over the first set, and check the value in the second set
-        for(Iterator iterator = set1.iterator(); iterator.hasNext();)
+        //Iterbte over the first set, and check the value in the second set
+        for(Iterbtor iterator = set1.iterator(); iterator.hasNext();)
         {
-            //if second set contains the entry, return true
-            if(set2.contains(iterator.next()))
+            //if second set contbins the entry, return true
+            if(set2.contbins(iterator.next()))
                 return true;
         }
-        //if no match found, return true
-        return false;
+        //if no mbtch found, return true
+        return fblse;
     }
 
     /**
-     * An optimized replacement for Arrays.fill that takes advantage of System.arraycopy.
-     * On my Windows machine, this is over nearly twice as fast for arrays greater than
-     * 1000 elements.  The savings decrease somewhat over 32000 elements.
+     * An optimized replbcement for Arrays.fill that takes advantage of System.arraycopy.
+     * On my Windows mbchine, this is over nearly twice as fast for arrays greater than
+     * 1000 elements.  The sbvings decrease somewhat over 32000 elements.
      *
-     * @param array the array to fill
-     * @param start the starting offset, inclusive
-     * @param stop the stop offset+1.  <b>MUST be greater than start; this differs
-     *  from Arrays.fill.</b>
-     * @param value the value to write into the array
+     * @pbram array the array to fill
+     * @pbram start the starting offset, inclusive
+     * @pbram stop the stop offset+1.  <b>MUST be greater than start; this differs
+     *  from Arrbys.fill.</b>
+     * @pbram value the value to write into the array
      */
-    public static void fill(int array[], int start, int stop, int value) {
-        array[start] = value;
-        int span=1;
-        for (int i=start+1; i<stop; ) {
-            System.arraycopy(array, start, array, i, Math.min(span, stop-i));
-            i+=span;
-            span=span*2;
+    public stbtic void fill(int array[], int start, int stop, int value) {
+        brray[start] = value;
+        int spbn=1;
+        for (int i=stbrt+1; i<stop; ) {
+            System.brraycopy(array, start, array, i, Math.min(span, stop-i));
+            i+=spbn;
+            spbn=span*2;
         }
     }
     
     /**
-     * An optimized replacement for Arrays.fill that takes advantage of System.arraycopy.
-     * On someone's Windows machine, this is over nearly twice as fast for arrays greater
-     * than 1000 elements.  The savings decrease somewhat over 32000 elements.
+     * An optimized replbcement for Arrays.fill that takes advantage of System.arraycopy.
+     * On someone's Windows mbchine, this is over nearly twice as fast for arrays greater
+     * thbn 1000 elements.  The savings decrease somewhat over 32000 elements.
      *
-     * @param array the array to fill
-     * @param start the starting offset, inclusive
-     * @param stop the stop offset+1.  <b>MUST be greater than start; this differs
-     *  from Arrays.fill.</b>
-     * @param value the value to write into the array
+     * @pbram array the array to fill
+     * @pbram start the starting offset, inclusive
+     * @pbram stop the stop offset+1.  <b>MUST be greater than start; this differs
+     *  from Arrbys.fill.</b>
+     * @pbram value the value to write into the array
      */
-    public static void fill(byte array[], int start, int stop, byte value) {
-        array[start] = value;
-        int span=1;
-        for (int i=start+1; i<stop; ) {
-            System.arraycopy(array, start, array, i, Math.min(span, stop-i));
-            i+=span;
-            span=span*2;
+    public stbtic void fill(byte array[], int start, int stop, byte value) {
+        brray[start] = value;
+        int spbn=1;
+        for (int i=stbrt+1; i<stop; ) {
+            System.brraycopy(array, start, array, i, Math.min(span, stop-i));
+            i+=spbn;
+            spbn=span*2;
         }
     }    
 
 
     /**
-     * Returns the based 2 logarithm of num.
-     * @param num MUST be a power of 2
+     * Returns the bbsed 2 logarithm of num.
+     * @pbram num MUST be a power of 2
      */
-    public static byte log2(int num) {
-        //Binary search submitted by Philippe Verdy uses 5 comparisons.
-        //Previously "return (byte)(Math.log(num) / Math.log(2))", but that had
-        //potential rounding errors.
+    public stbtic byte log2(int num) {
+        //Binbry search submitted by Philippe Verdy uses 5 comparisons.
+        //Previously "return (byte)(Mbth.log(num) / Math.log(2))", but that had
+        //potentibl rounding errors.
         if      (num <             0x10000)
             if      (num <           0x100)
                 if      (num <        0x10)

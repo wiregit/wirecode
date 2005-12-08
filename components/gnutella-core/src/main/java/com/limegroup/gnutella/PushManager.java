@@ -1,140 +1,140 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.net.Socket;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.http.HTTPRequestMethod;
-import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutellb.http.HTTPRequestMethod;
+import com.limegroup.gnutellb.statistics.UploadStat;
+import com.limegroup.gnutellb.udpconnect.UDPConnection;
+import com.limegroup.gnutellb.util.IOUtils;
+import com.limegroup.gnutellb.util.ManagedThread;
+import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutellb.util.Sockets;
 
 /**
- * Manages state for push upload requests.
+ * Mbnages state for push upload requests.
  */
-public final class PushManager {
+public finbl class PushManager {
     
-    private static final Log LOG =
-      LogFactory.getLog(PushManager.class);
+    privbte static final Log LOG =
+      LogFbctory.getLog(PushManager.class);
 
     /**
-     * The timeout for the connect time while establishing the socket. Set to
-     * the same value as NORMAL_CONNECT_TIME is ManagedDownloader.
+     * The timeout for the connect time while estbblishing the socket. Set to
+     * the sbme value as NORMAL_CONNECT_TIME is ManagedDownloader.
      */
-    private static final int CONNECT_TIMEOUT = 10000;//10 secs
+    privbte static final int CONNECT_TIMEOUT = 10000;//10 secs
 
 
 	/**
-	 * Accepts a new push upload.
-     * NON-BLOCKING: creates a new thread to transfer the file.
+	 * Accepts b new push upload.
+     * NON-BLOCKING: crebtes a new thread to transfer the file.
 	 * <p>
-     * The thread connects to the other side, waits for a GET/HEAD,
-     * and delegates to the UploaderManager.acceptUpload method with the
-     * socket it created.
-     * Essentially, this is a reverse-Acceptor.
+     * The threbd connects to the other side, waits for a GET/HEAD,
+     * bnd delegates to the UploaderManager.acceptUpload method with the
+     * socket it crebted.
+     * Essentiblly, this is a reverse-Acceptor.
      * <p>
-     * No file and index are needed since the GET/HEAD will include that
-     * information.  Just put in our first file and filename to create a
+     * No file bnd index are needed since the GET/HEAD will include that
+     * informbtion.  Just put in our first file and filename to create a
      * well-formed.
-	 * @param host the ip address of the host to upload to
-	 * @param port the port over which the transfer will occur
-	 * @param guid the unique identifying client guid of the uploading client
-     * @param forceAllow whether or not to force the UploadManager to send
-     *  accept this request when it comes back.
-     * @param isFWTransfer whether or not to use a UDP pipe to service this
-     * upload.
+	 * @pbram host the ip address of the host to upload to
+	 * @pbram port the port over which the transfer will occur
+	 * @pbram guid the unique identifying client guid of the uploading client
+     * @pbram forceAllow whether or not to force the UploadManager to send
+     *  bccept this request when it comes back.
+     * @pbram isFWTransfer whether or not to use a UDP pipe to service this
+     * uplobd.
 	 */
-	public void acceptPushUpload(final String host, 
-                                 final int port, 
-                                 final String guid,
-                                 final boolean forceAllow,
-                                 final boolean isFWTransfer) {
-        if(LOG.isDebugEnabled())  {
-            LOG.debug("acceptPushUp ip:"+host+" port:"+port+
-              " FW:"+isFWTransfer);
+	public void bcceptPushUpload(final String host, 
+                                 finbl int port, 
+                                 finbl String guid,
+                                 finbl boolean forceAllow,
+                                 finbl boolean isFWTransfer) {
+        if(LOG.isDebugEnbbled())  {
+            LOG.debug("bcceptPushUp ip:"+host+" port:"+port+
+              " FW:"+isFWTrbnsfer);
         }
                                     
         if( host == null )
             throw new NullPointerException("null host");
-        if( !NetworkUtils.isValidPort(port) )
-            throw new IllegalArgumentException("invalid port: " + port);
+        if( !NetworkUtils.isVblidPort(port) )
+            throw new IllegblArgumentException("invalid port: " + port);
         if( guid == null )
             throw new NullPointerException("null guid");
                                     
 
-        FileManager fm = RouterService.getFileManager();
+        FileMbnager fm = RouterService.getFileManager();
         
-        // TODO: why is this check here?  it's a tiny optimization,
-        // but could potentially kill any sharing of files that aren't
-        // counted in the library.
+        // TODO: why is this check here?  it's b tiny optimization,
+        // but could potentiblly kill any sharing of files that aren't
+        // counted in the librbry.
         if (fm.getNumFiles() < 1 && fm.getNumIncompleteFiles() < 1)
             return;
 
-        // We used to have code here that tested if the guy we are pushing to is
-        // 1) hammering us, or 2) is actually firewalled.  1) is done above us
-        // now, and 2) isn't as much an issue with the advent of connectback
+        // We used to hbve code here that tested if the guy we are pushing to is
+        // 1) hbmmering us, or 2) is actually firewalled.  1) is done above us
+        // now, bnd 2) isn't as much an issue with the advent of connectback
 
-        Thread runner=new ManagedThread("PushUploadThread") {
-            public void managedRun() {
+        Threbd runner=new ManagedThread("PushUploadThread") {
+            public void mbnagedRun() {
                 Socket s = null;
                 try {
-        			// try to create the socket.
-                    if (isFWTransfer)
+        			// try to crebte the socket.
+                    if (isFWTrbnsfer)
                         s = new UDPConnection(host, port);
                     else 
                         s = Sockets.connect(host, port, CONNECT_TIMEOUT);
-        			// open a stream for writing to the socket
-        			OutputStream ostream = s.getOutputStream();        
+        			// open b stream for writing to the socket
+        			OutputStrebm ostream = s.getOutputStream();        
         			String giv = "GIV 0:" + guid + "/file\n\n";
-        			ostream.write(giv.getBytes());
-        			ostream.flush();
+        			ostrebm.write(giv.getBytes());
+        			ostrebm.flush();
         			
-        			// try to read a GET or HEAD for only 30 seconds.
+        			// try to rebd a GET or HEAD for only 30 seconds.
         			s.setSoTimeout(30 * 1000);
 
-                    //read GET or HEAD and delegate appropriately.
-                    String word = IOUtils.readWord(s.getInputStream(), 4);
-                    if(isFWTransfer)
-                        UploadStat.FW_FW_SUCCESS.incrementStat();
+                    //rebd GET or HEAD and delegate appropriately.
+                    String word = IOUtils.rebdWord(s.getInputStream(), 4);
+                    if(isFWTrbnsfer)
+                        UplobdStat.FW_FW_SUCCESS.incrementStat();
                     
-                    if (word.equals("GET")) {
-                        UploadStat.PUSHED_GET.incrementStat();
-                        RouterService.getUploadManager().acceptUpload(
+                    if (word.equbls("GET")) {
+                        UplobdStat.PUSHED_GET.incrementStat();
+                        RouterService.getUplobdManager().acceptUpload(
                             HTTPRequestMethod.GET, s, forceAllow);
-                    } else if (word.equals("HEAD")) {
-                        UploadStat.PUSHED_HEAD.incrementStat();
-                        RouterService.getUploadManager().acceptUpload(
+                    } else if (word.equbls("HEAD")) {
+                        UplobdStat.PUSHED_HEAD.incrementStat();
+                        RouterService.getUplobdManager().acceptUpload(
                             HTTPRequestMethod.HEAD, s, forceAllow);
                     } else {
-                        UploadStat.PUSHED_UNKNOWN.incrementStat();
+                        UplobdStat.PUSHED_UNKNOWN.incrementStat();
                         throw new IOException();
                     }
-                } catch(IOException ioe){
-                    if(isFWTransfer)
-                        UploadStat.FW_FW_FAILURE.incrementStat();
-                    UploadStat.PUSH_FAILED.incrementStat();
-                } finally {
+                } cbtch(IOException ioe){
+                    if(isFWTrbnsfer)
+                        UplobdStat.FW_FW_FAILURE.incrementStat();
+                    UplobdStat.PUSH_FAILED.incrementStat();
+                } finblly {
                     if( s != null ) {
                         try {
-                            s.getInputStream().close();
-                        } catch(IOException ioe) {}
+                            s.getInputStrebm().close();
+                        } cbtch(IOException ioe) {}
                         try {
-                            s.getOutputStream().close();
-                        } catch(IOException ioe) {}
+                            s.getOutputStrebm().close();
+                        } cbtch(IOException ioe) {}
                         try {
                             s.close();
-                        } catch(IOException ioe) {}
+                        } cbtch(IOException ioe) {}
                     }
                 }
             }
         };
-        runner.setDaemon(true);
-        runner.start();
+        runner.setDbemon(true);
+        runner.stbrt();
 	}
 }

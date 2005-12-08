@@ -1,63 +1,63 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.io.File;
-import java.util.Properties;
+import jbva.io.File;
+import jbva.util.Properties;
 
 /**
- * This class handles settings for <tt>File</tt>s.
+ * This clbss handles settings for <tt>File</tt>s.
  */
-public class FileSetting extends Setting {
+public clbss FileSetting extends Setting {
     
-    private File value;
-    private String absolutePath;
+    privbte File value;
+    privbte String absolutePath;
 
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
-	 * key and defualt value.
+	 * Crebtes a new <tt>SettingBool</tt> instance with the specified
+	 * key bnd defualt value.
 	 *
-	 * @param key the constant key to use for the setting
-	 * @param defaultFile the default value to use for the setting
+	 * @pbram key the constant key to use for the setting
+	 * @pbram defaultFile the default value to use for the setting
 	 */
-	FileSetting(Properties defaultProps, Properties props, String key, 
-                                                         File defaultFile) {
-		this(defaultProps, props, key, defaultFile, null); 
+	FileSetting(Properties defbultProps, Properties props, String key, 
+                                                         File defbultFile) {
+		this(defbultProps, props, key, defaultFile, null); 
 	}
 
 
-	FileSetting(Properties defaultProps, Properties props, String key, 
-                File defaultFile, String simppKey) {
-		super(defaultProps, props, key, defaultFile.getAbsolutePath(), simppKey);
-		setPrivate(true);
+	FileSetting(Properties defbultProps, Properties props, String key, 
+                File defbultFile, String simppKey) {
+		super(defbultProps, props, key, defaultFile.getAbsolutePath(), simppKey);
+		setPrivbte(true);
 	}
 
         
 	/**
-	 * Accessor for the value of this setting.
-	 * Duplicates the setting so it cannot be changed outside of this package.
+	 * Accessor for the vblue of this setting.
+	 * Duplicbtes the setting so it cannot be changed outside of this package.
 	 * 
-	 * @return the value of this setting
+	 * @return the vblue of this setting
 	 */
-	public File getValue() {
-        return new File(absolutePath);
+	public File getVblue() {
+        return new File(bbsolutePath);
 	}
 
 	/**
-	 * Mutator for this setting.
+	 * Mutbtor for this setting.
 	 *
-	 * @param value the value to store
+	 * @pbram value the value to store
 	 */
-	public void setValue(File value) {
-		super.setValue(value.getAbsolutePath());
+	public void setVblue(File value) {
+		super.setVblue(value.getAbsolutePath());
 	}
      
     /**
-     * Load value from property string value
-     * @param sValue property string value
+     * Lobd value from property string value
+     * @pbram sValue property string value
      */
-    protected void loadValue(String sValue) {
-        value = new File(sValue);
-        absolutePath = value.getAbsolutePath();
+    protected void lobdValue(String sValue) {
+        vblue = new File(sValue);
+        bbsolutePath = value.getAbsolutePath();
     }
 
 }

@@ -1,46 +1,46 @@
-package com.limegroup.gnutella.xml;
+pbckage com.limegroup.gnutella.xml;
 
-import java.util.HashMap;
-import java.util.Date;
+import jbva.util.HashMap;
+import jbva.util.Date;
 
 /**
- * Converts XML Schema types of Java types. Contains a hashMap of
- * all the types that schemas may contain.
- * @author Sumeet Thadani
+ * Converts XML Schemb types of Java types. Contains a hashMap of
+ * bll the types that schemas may contain.
+ * @buthor Sumeet Thadani
  */
-public class TypeConverter{
-    private static HashMap map;
+public clbss TypeConverter{
+    privbte static HashMap map;
     /**
-     * This list only contains the types we are using in the schemas of the
-     * first release.
+     * This list only contbins the types we are using in the schemas of the
+     * first relebse.
      * <p>
-     * There are only three return types so far String, Integer, Double
+     * There bre only three return types so far String, Integer, Double
      * ****IMPORTANT NOTE******
-     * If more types are added to this table then make sure to change the 
-     * XMLTableLineComparator
+     * If more types bre added to this table then make sure to change the 
+     * XMLTbbleLineComparator
      */
-    static{
-        map = new HashMap();
-        map.put("string",String.class);
-        map.put("DUMMY_SIMPLETYPE",String.class);
-        map.put("int",Integer.class);
-        map.put("year",Integer.class);
-        map.put("langauge",String.class);
-        map.put("short",Integer.class);
-        map.put("uriReference",String.class);
-        map.put("decimal",Double.class);
-        map.put("double",Double.class);
-        map.put("duration", Date.class);
+    stbtic{
+        mbp = new HashMap();
+        mbp.put("string",String.class);
+        mbp.put("DUMMY_SIMPLETYPE",String.class);
+        mbp.put("int",Integer.class);
+        mbp.put("year",Integer.class);
+        mbp.put("langauge",String.class);
+        mbp.put("short",Integer.class);
+        mbp.put("uriReference",String.class);
+        mbp.put("decimal",Double.class);
+        mbp.put("double",Double.class);
+        mbp.put("duration", Date.class);
     }
     
     /**
-     * For types not in the hashmap we return string
+     * For types not in the hbshmap we return string
      */
-    public static Class getType(String str){
-        Object val = map.get(str);
-        if(val==null)
-            return String.class;
-        return ((Class)val);
+    public stbtic Class getType(String str){
+        Object vbl = map.get(str);
+        if(vbl==null)
+            return String.clbss;
+        return ((Clbss)val);
     }
 }
             

@@ -1,132 +1,132 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.File;
-import java.io.Serializable;
-import java.io.IOException;
+import jbva.io.File;
+import jbva.io.Serializable;
+import jbva.io.IOException;
                                                     
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.gnutellb.FileManager;
+import com.limegroup.gnutellb.SaveLocationException;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.DownloadCallback;
+import com.limegroup.gnutellb.DownloadManager;
+import com.limegroup.gnutellb.FileManager;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.version.DownloadInformation;
 
 /**
- * A downloader that works in the background, using the network to continue itself.
+ * A downlobder that works in the background, using the network to continue itself.
  */
-public class InNetworkDownloader extends ManagedDownloader implements Serializable {
-    /** Ensures backwards compatibility of the downloads.dat file. */
-    static final long serialVersionUID = 5713913674943019353L;
+public clbss InNetworkDownloader extends ManagedDownloader implements Serializable {
+    /** Ensures bbckwards compatibility of the downloads.dat file. */
+    stbtic final long serialVersionUID = 5713913674943019353L;
     
     /** The size of the completed file. */    
-    private final long size;
+    privbte final long size;
     
-    /** The URN to persist throughout sessions, even if no RFDs are remembered. */
-    private final URN urn;
+    /** The URN to persist throughout sessions, even if no RFDs bre remembered. */
+    privbte final URN urn;
     
-    /** The TigerTree root for this download. */
-    private final String ttRoot;
+    /** The TigerTree root for this downlobd. */
+    privbte final String ttRoot;
     
-    /** The number of times we have attempted this download */
-    private int downloadAttempts;
+    /** The number of times we hbve attempted this download */
+    privbte int downloadAttempts;
     
-    /** The time we created this download */
-    private final long startTime;
+    /** The time we crebted this download */
+    privbte final long startTime;
     
     /** 
-     * Constructs a new downloader that's gonna work off the network.
+     * Constructs b new downloader that's gonna work off the network.
      */
-    public InNetworkDownloader(IncompleteFileManager incompleteFileManager,
-                               DownloadInformation info,
+    public InNetworkDownlobder(IncompleteFileManager incompleteFileManager,
+                               DownlobdInformation info,
                                File dir,
-                               long startTime) throws SaveLocationException {
-        super( new RemoteFileDesc[0], incompleteFileManager,
-               null, dir, info.getUpdateFileName(), true);
+                               long stbrtTime) throws SaveLocationException {
+        super( new RemoteFileDesc[0], incompleteFileMbnager,
+               null, dir, info.getUpdbteFileName(), true);
         if(info.getSize() > Integer.MAX_VALUE)
-            throw new IllegalArgumentException("size too big for now.");
+            throw new IllegblArgumentException("size too big for now.");
 
         this.size = info.getSize();
-        this.urn = info.getUpdateURN();
+        this.urn = info.getUpdbteURN();
         this.ttRoot = info.getTTRoot();
-        this.startTime = startTime;
+        this.stbrtTime = startTime;
     }    
     
     /**
-     * Overriden to use a different incomplete directory.
+     * Overriden to use b different incomplete directory.
      */
-    protected File getIncompleteFile(IncompleteFileManager ifm, String name,
+    protected File getIncompleteFile(IncompleteFileMbnager ifm, String name,
                                      URN urn, int length) throws IOException {
-        return ifm.getFile(name, urn, length, new File(FileManager.PREFERENCE_SHARE, "Incomplete"));
+        return ifm.getFile(nbme, urn, length, new File(FileManager.PREFERENCE_SHARE, "Incomplete"));
     }
     
     /**
-     * Gets a new SourceRanker, using only LegacyRanker (not PingRanker).
+     * Gets b new SourceRanker, using only LegacyRanker (not PingRanker).
      */
-    protected SourceRanker getSourceRanker(SourceRanker oldRanker) {
-        if(oldRanker != null)
-            return oldRanker;
+    protected SourceRbnker getSourceRanker(SourceRanker oldRanker) {
+        if(oldRbnker != null)
+            return oldRbnker;
         else
-            return new LegacyRanker();
+            return new LegbcyRanker();
     }
     
     /**
-     * Overriden to ensure that the 'downloadSHA1' variable is set & we're listening
-     * for alternate locations.
+     * Overriden to ensure thbt the 'downloadSHA1' variable is set & we're listening
+     * for blternate locations.
      */
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-                           DownloadCallback callback) {
-        super.initialize(manager, fileManager, callback);
-        if(downloadSHA1 == null) {
-            downloadSHA1 = urn;
-            RouterService.getAltlocManager().addListener(downloadSHA1,this);
+    public void initiblize(DownloadManager manager, FileManager fileManager, 
+                           DownlobdCallback callback) {
+        super.initiblize(manager, fileManager, callback);
+        if(downlobdSHA1 == null) {
+            downlobdSHA1 = urn;
+            RouterService.getAltlocMbnager().addListener(downloadSHA1,this);
         }
     }
     
-    public synchronized void startDownload() {
-        downloadAttempts++;
-        super.startDownload();
+    public synchronized void stbrtDownload() {
+        downlobdAttempts++;
+        super.stbrtDownload();
     }
     
     /**
-     * Ensures that the VerifyingFile knows what TTRoot we're expecting.
+     * Ensures thbt the VerifyingFile knows what TTRoot we're expecting.
      */
-    protected void initializeVerifyingFile() throws IOException {
-        super.initializeVerifyingFile();
+    protected void initiblizeVerifyingFile() throws IOException {
+        super.initiblizeVerifyingFile();
         if(commonOutFile != null) {
-            commonOutFile.setExpectedHashTreeRoot(ttRoot);
+            commonOutFile.setExpectedHbshTreeRoot(ttRoot);
         }
     }
 
     /**
-     * Overrides ManagedDownloader to display a reasonable file size even
-     * when no locations have been found.
+     * Overrides MbnagedDownloader to display a reasonable file size even
+     * when no locbtions have been found.
      */
     public synchronized int getContentLength() {
         return (int)size;
     }
     
     /**
-     * Sends a targetted query for this.
+     * Sends b targetted query for this.
      */
     protected synchronized QueryRequest newRequery(int numRequeries) 
-    throws CantResumeException {
+    throws CbntResumeException {
         QueryRequest qr = super.newRequery(numRequeries);
         qr.setTTL((byte)2);
         return qr;
     }
     
     /**
-     * @return how many times was this download attempted
+     * @return how mbny times was this download attempted
      */
     public synchronized int getNumAttempts() {
-        return downloadAttempts;
+        return downlobdAttempts;
     }
     
-    public long getStartTime() {
-        return startTime;
+    public long getStbrtTime() {
+        return stbrtTime;
     }
 }

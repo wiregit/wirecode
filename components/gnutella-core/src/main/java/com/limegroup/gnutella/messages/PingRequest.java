@@ -1,181 +1,181 @@
-package com.limegroup.gnutella.messages;
+pbckage com.limegroup.gnutella.messages;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.LinkedList;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.util.List;
+import jbva.util.LinkedList;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.GUID;
+import com.limegroup.gnutellb.UDPService;
+import com.limegroup.gnutellb.settings.ApplicationSettings;
+import com.limegroup.gnutellb.settings.ConnectionSettings;
+import com.limegroup.gnutellb.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutellb.util.DataUtils;
+import com.limegroup.gnutellb.util.NameValue;
 
 /**
- * A Gnutella ping message.
+ * A Gnutellb ping message.
  */
 
-public class PingRequest extends Message {
+public clbss PingRequest extends Message {
 
     /**
-     * various flags related to the SCP ggep field
+     * vbrious flags related to the SCP ggep field
      */
-    public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
-    public static final byte SCP_LEAF = 0x0;
-    public static final byte SCP_ULTRAPEER = 0x1;
+    public stbtic final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
+    public stbtic final byte SCP_LEAF = 0x0;
+    public stbtic final byte SCP_ULTRAPEER = 0x1;
    
 
     /**
-     * With the Big Ping and Big Pong extensions pings may have a payload
+     * With the Big Ping bnd Big Pong extensions pings may have a payload
      */
-    private byte[] payload = null;
+    privbte byte[] payload = null;
     
     /**
-     * The GGEP blocks carried in this ping - parsed when necessary
+     * The GGEP blocks cbrried in this ping - parsed when necessary
      */
-    private GGEP _ggep;
+    privbte GGEP _ggep;
     
-    /////////////////Constructors for incoming messages/////////////////
+    /////////////////Constructors for incoming messbges/////////////////
     /**
-     * Creates a normal ping from data read on the network
+     * Crebtes a normal ping from data read on the network
      */
     public PingRequest(byte[] guid, byte ttl, byte hops) {
-        super(guid, Message.F_PING, ttl, hops, 0);
+        super(guid, Messbge.F_PING, ttl, hops, 0);
     }
 
     /**
-     * Creates an incoming group ping. Used only by boot-strap server
+     * Crebtes an incoming group ping. Used only by boot-strap server
      */
     protected PingRequest(byte[] guid, byte ttl, byte hops, byte length) {
-        super(guid, Message.F_PING, ttl, hops, length);
+        super(guid, Messbge.F_PING, ttl, hops, length);
     }
 
     /**
-     * Creates a big ping request from data read from the network
+     * Crebtes a big ping request from data read from the network
      * 
-     * @param payload the headers etc. which the big pings contain.
+     * @pbram payload the headers etc. which the big pings contain.
      */
-    public PingRequest(byte[] guid, byte ttl, byte hops, byte[] payload) {
-        super(guid, Message.F_PING, ttl, hops, payload.length);
-        this.payload = payload;
+    public PingRequest(byte[] guid, byte ttl, byte hops, byte[] pbyload) {
+        super(guid, Messbge.F_PING, ttl, hops, payload.length);
+        this.pbyload = payload;
     }
 
     //////////////////////Constructors for outgoing Pings/////////////
     /**
-     * Creates a normal ping with a new GUID
+     * Crebtes a normal ping with a new GUID
      *
-     * @param ttl the ttl of the new Ping
+     * @pbram ttl the ttl of the new Ping
      */
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
-        addBasicGGEPs();
+        bddBasicGGEPs();
     }
     
     /**
-     * Creates a normal ping with a specified GUID
+     * Crebtes a normal ping with a specified GUID
      *
-     * @param ttl the ttl of the new Ping
+     * @pbram ttl the ttl of the new Ping
      */
     public PingRequest(byte [] guid,byte ttl) {
         super(guid,(byte)0x0, ttl, (byte)0,0);
-        addBasicGGEPs();
+        bddBasicGGEPs();
     }
     
     /**
-     * Creates a ping with the specified GUID, ttl, and GGEP fields.
+     * Crebtes a ping with the specified GUID, ttl, and GGEP fields.
      */
-    private PingRequest(byte[] guid, byte ttl, List /* of NameValue */ ggeps) {
+    privbte PingRequest(byte[] guid, byte ttl, List /* of NameValue */ ggeps) {
         super(guid, (byte)0x0, ttl, (byte)0, 0);
-        addGGEPs(ggeps);
+        bddGGEPs(ggeps);
     }
 
     /**
-     * Creates a Query Key ping.
+     * Crebtes a Query Key ping.
      */
-    public static PingRequest createQueryKeyRequest() {
+    public stbtic PingRequest createQueryKeyRequest() {
         List l = new LinkedList();
-        l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
-        return new PingRequest(GUID.makeGuid(), (byte)1, l);
+        l.bdd(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
+        return new PingRequest(GUID.mbkeGuid(), (byte)1, l);
     }
     
     /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
+     * Crebtes a TTL 1 Ping for faster bootstrapping, intended
      * for sending to UDP hosts.
      */
-    public static PingRequest createUDPPing() {
+    public stbtic PingRequest createUDPPing() {
         List l = new LinkedList();
-        return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
+        return new PingRequest(populbteUDPGGEPList(l).bytes(), (byte)1, l);
     }
     
     /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
+     * Crebtes a TTL 1 Ping for faster bootstrapping, intended
      * for sending to UHCs.
      */    
-    public static PingRequest createUHCPing() {
+    public stbtic PingRequest createUHCPing() {
         List ggeps = new LinkedList();
-        GUID guid = populateUDPGGEPList(ggeps);
-        ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
+        GUID guid = populbteUDPGGEPList(ggeps);
+        ggeps.bdd(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
         return new PingRequest(guid.bytes(),(byte)1,ggeps);
     }
     
     /**
-     * @param l list to put the standard extentions we add to UDP pings
+     * @pbram l list to put the standard extentions we add to UDP pings
      * @return the guid to use for the ping
      */
-    private static GUID populateUDPGGEPList(List l) {
+    privbte static GUID populateUDPGGEPList(List l) {
         GUID guid;
-        if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
+        if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getVblue()) {
             guid = new GUID();
         } else {
-            l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
-            guid = UDPService.instance().getSolicitedGUID();
+            l.bdd(new NameValue(GGEP.GGEP_HEADER_IPPORT));
+            guid = UDPService.instbnce().getSolicitedGUID();
         }
-        byte[] data = new byte[1];
+        byte[] dbta = new byte[1];
         if(RouterService.isSupernode())
-            data[0] = SCP_ULTRAPEER;
+            dbta[0] = SCP_ULTRAPEER;
         else
-            data[0] = SCP_LEAF;
-        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
+            dbta[0] = SCP_LEAF;
+        l.bdd(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
         
         return guid;
     }
     
     /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to the multicast network.
+     * Crebtes a TTL 1 Ping for faster bootstrapping, intended
+     * for sending to the multicbst network.
      */
-    public static PingRequest createMulticastPing() {
+    public stbtic PingRequest createMulticastPing() {
         GUID guid = new GUID();
-        byte[] data = new byte[1];
+        byte[] dbta = new byte[1];
         if(RouterService.isSupernode())
-            data[0] = 0x1;
+            dbta[0] = 0x1;
         else
-            data[0] = 0x0;
+            dbta[0] = 0x0;
         List l = new LinkedList();
-        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
+        l.bdd(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
         return new PingRequest(guid.bytes(), (byte)1, l);
     }    
             
 
     /////////////////////////////methods///////////////////////////
 
-    protected void writePayload(OutputStream out) throws IOException {
-        if(payload != null) {
-            out.write(payload);
+    protected void writePbyload(OutputStream out) throws IOException {
+        if(pbyload != null) {
+            out.write(pbyload);
         }
-        // the ping is still written even if there's no payload
-        SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-        //Do nothing...there is no payload!
+        // the ping is still written even if there's no pbyload
+        SentMessbgeStatHandler.TCP_PING_REQUESTS.addMessage(this);
+        //Do nothing...there is no pbyload!
     }
 
-    public Message stripExtendedPayload() {
-        if (payload==null)
+    public Messbge stripExtendedPayload() {
+        if (pbyload==null)
             return this;
         else
             return new PingRequest(this.getGUID(), 
@@ -185,7 +185,7 @@ public class PingRequest extends Message {
 
 	// inherit doc comment
 	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
+		DroppedSentMessbgeStatHandler.TCP_PING_REQUESTS.addMessage(this);
 	}
 
     public String toString() {
@@ -193,140 +193,140 @@ public class PingRequest extends Message {
     }
 
     /**
-     * Accessor for whether or not this ping meets the criteria for being a
-     * "heartbeat" ping, namely having ttl=0 and hops=1.
+     * Accessor for whether or not this ping meets the criterib for being a
+     * "hebrtbeat" ping, namely having ttl=0 and hops=1.
      * 
-     * @return <tt>true</tt> if this ping apears to be a "heartbeat" ping,
-     *  otherwise <tt>false</tt>
+     * @return <tt>true</tt> if this ping bpears to be a "heartbeat" ping,
+     *  otherwise <tt>fblse</tt>
      */
-    public boolean isHeartbeat() {
+    public boolebn isHeartbeat() {
         return (getHops() == 1 && getTTL() == 0);
     }
     
     /**
-     * Marks this ping request as requesting a pong carrying
-     * an ip:port info.
+     * Mbrks this ping request as requesting a pong carrying
+     * bn ip:port info.
      */
-    public void addIPRequest() {
+    public void bddIPRequest() {
         List l = new LinkedList();
-        l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
-        addGGEPs(l);
+        l.bdd(new NameValue(GGEP.GGEP_HEADER_IPPORT));
+        bddGGEPs(l);
     }
 
     /**
-     * Adds all basic GGEP information to the outgoing ping.
-     * Currently adds a Locale field.
+     * Adds bll basic GGEP information to the outgoing ping.
+     * Currently bdds a Locale field.
      */
-    private void addBasicGGEPs() {
+    privbte void addBasicGGEPs() {
         List l = new LinkedList();
-        l.add(new NameValue(GGEP.GGEP_HEADER_CLIENT_LOCALE, 
-                            ApplicationSettings.LANGUAGE.getValue()));
-        addGGEPs(l);
+        l.bdd(new NameValue(GGEP.GGEP_HEADER_CLIENT_LOCALE, 
+                            ApplicbtionSettings.LANGUAGE.getValue()));
+        bddGGEPs(l);
     }
     
     /**
      * Adds the specified GGEPs.
      */
-     private void addGGEPs(List /* of NameValue */ ggeps) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+     privbte void addGGEPs(List /* of NameValue */ ggeps) {
+        ByteArrbyOutputStream baos = new ByteArrayOutputStream();
         try {
             if (_ggep == null)
                 _ggep = new GGEP(true);
 
             _ggep.putAll(ggeps);
-            _ggep.write(baos);
-            baos.write(0);            
-            payload = baos.toByteArray();
-            updateLength(payload.length);
-        } catch(IOException e) {
+            _ggep.write(bbos);
+            bbos.write(0);            
+            pbyload = baos.toByteArray();
+            updbteLength(payload.length);
+        } cbtch(IOException e) {
             ErrorService.error(e);
         }
     }
 
     /**
-     * get locale of this PingRequest 
+     * get locble of this PingRequest 
      */
-    public String getLocale() {
-        if(payload != null) {
+    public String getLocble() {
+        if(pbyload != null) {
             try {
-                parseGGEP();
-                if(_ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
+                pbrseGGEP();
+                if(_ggep.hbsKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
                 	return _ggep.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-            } catch(BadGGEPBlockException ignored) {
-            } catch(BadGGEPPropertyException ignoredToo) {}
+            } cbtch(BadGGEPBlockException ignored) {
+            } cbtch(BadGGEPPropertyException ignoredToo) {}
         }
         
-        return ApplicationSettings.DEFAULT_LOCALE.getValue();
+        return ApplicbtionSettings.DEFAULT_LOCALE.getValue();
     }
     
     /**
-     * Determines if this PingRequest has the 'supports cached pongs'
-     * marking.
+     * Determines if this PingRequest hbs the 'supports cached pongs'
+     * mbrking.
      */
-    public boolean supportsCachedPongs() {
-        if(payload != null) {
+    public boolebn supportsCachedPongs() {
+        if(pbyload != null) {
             try {
-                parseGGEP();
-                return _ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
-            } catch(BadGGEPBlockException ignored) {}
+                pbrseGGEP();
+                return _ggep.hbsKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
+            } cbtch(BadGGEPBlockException ignored) {}
         }
-        return false;
+        return fblse;
     }
     
     /**
-     * Gets the data value for the SCP field, if one exists.
-     * If none exist, null is returned.  Else, a byte[] of some
+     * Gets the dbta value for the SCP field, if one exists.
+     * If none exist, null is returned.  Else, b byte[] of some
      * size is returned.
     */
-    public byte[] getSupportsCachedPongData() {
+    public byte[] getSupportsCbchedPongData() {
         byte[] ret = null;
 
-        if(payload != null) {
+        if(pbyload != null) {
             try {
-                parseGGEP();
-                if(_ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
-                    ret = DataUtils.EMPTY_BYTE_ARRAY;
-                    // this may throw, which is why we first set it to an empty value.
+                pbrseGGEP();
+                if(_ggep.hbsKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
+                    ret = DbtaUtils.EMPTY_BYTE_ARRAY;
+                    // this mby throw, which is why we first set it to an empty value.
                     return _ggep.getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
                 }
-            } catch(BadGGEPBlockException ignored) {
-            } catch(BadGGEPPropertyException ignored) {
+            } cbtch(BadGGEPBlockException ignored) {
+            } cbtch(BadGGEPPropertyException ignored) {
             }
         }
 
         return ret;
     }
 
-    public boolean isQueryKeyRequest() {
+    public boolebn isQueryKeyRequest() {
         if (!(getTTL() == 0) || !(getHops() == 1))
-            return false;
+            return fblse;
 
-        if(payload != null) {
+        if(pbyload != null) {
             try {
-                parseGGEP();
-                return _ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-            } catch (BadGGEPBlockException ignored) {}
+                pbrseGGEP();
+                return _ggep.hbsKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+            } cbtch (BadGGEPBlockException ignored) {}
         }
 
-        return false;
+        return fblse;
     }
     
     /**
-     * @return whether this ping wants a reply carrying IP:Port info.
+     * @return whether this ping wbnts a reply carrying IP:Port info.
      */
-    public boolean requestsIP() {
-       if(payload != null) {
+    public boolebn requestsIP() {
+       if(pbyload != null) {
            try {
-               parseGGEP();
-               return _ggep.hasKey(GGEP.GGEP_HEADER_IPPORT);
-           } catch(BadGGEPBlockException ignored) {}
+               pbrseGGEP();
+               return _ggep.hbsKey(GGEP.GGEP_HEADER_IPPORT);
+           } cbtch(BadGGEPBlockException ignored) {}
         }
 
-       return false;
+       return fblse;
     }
     
-    private void parseGGEP() throws BadGGEPBlockException {
+    privbte void parseGGEP() throws BadGGEPBlockException {
         if(_ggep == null)
-            _ggep = new GGEP(payload, 0, null);
+            _ggep = new GGEP(pbyload, 0, null);
     }
 }

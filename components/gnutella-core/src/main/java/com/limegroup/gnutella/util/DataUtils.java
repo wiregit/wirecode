@@ -1,45 +1,45 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
+import jbva.util.Collection;
+import jbva.util.Iterator;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutellb.ByteOrder;
 
 /**
- * Utility class that supplies commonly used data sets that each
- * class should not have to create on its own.  These data sets
- * are immutable objects, so any class and any thread may access them
+ * Utility clbss that supplies commonly used data sets that each
+ * clbss should not have to create on its own.  These data sets
+ * bre immutable objects, so any class and any thread may access them
  * whenever they like.
  */
-public final class DataUtils {
+public finbl class DataUtils {
     
     /**
-     * Ensure that this class cannot be constructed.
+     * Ensure thbt this class cannot be constructed.
      */
-    private DataUtils() {}
+    privbte DataUtils() {}
     
     /**
-     * Constant empty byte array for any class to use -- immutable.
+     * Constbnt empty byte array for any class to use -- immutable.
      */
-    public static byte[] EMPTY_BYTE_ARRAY = new byte[0];
+    public stbtic byte[] EMPTY_BYTE_ARRAY = new byte[0];
     
     /**
-     * An empty byte array length 1.
+     * An empty byte brray length 1.
      */
-    public static byte[] BYTE_ARRAY_ONE = new byte[1];
+    public stbtic byte[] BYTE_ARRAY_ONE = new byte[1];
     
     /**
-     * An empty byte array length 2.
+     * An empty byte brray length 2.
      */
-    public static byte[] BYTE_ARRAY_TWO = new byte[2];
+    public stbtic byte[] BYTE_ARRAY_TWO = new byte[2];
     
     /**
-     * An empty byte array length 3.
+     * An empty byte brray length 3.
      */
-    public static byte[] BYTE_ARRAY_THREE = new byte[3];
+    public stbtic byte[] BYTE_ARRAY_THREE = new byte[3];
     
-    static {
+    stbtic {
         BYTE_ARRAY_ONE[0] = 0;
         BYTE_ARRAY_TWO[0] = 0;
         BYTE_ARRAY_TWO[1] = 0;
@@ -49,59 +49,59 @@ public final class DataUtils {
     }
     
     /**
-     * Constant empty string array for any class to use -- immutable.
+     * Constbnt empty string array for any class to use -- immutable.
      */
-    public static String[] EMPTY_STRING_ARRAY = new String[0];
+    public stbtic String[] EMPTY_STRING_ARRAY = new String[0];
         
     /**
-     * An 16-length empty byte array, for GUIDs.
+     * An 16-length empty byte brray, for GUIDs.
      */
-    public static final byte[] EMPTY_GUID = new byte[16];
+    public stbtic final byte[] EMPTY_GUID = new byte[16];
     
     /**
-     * The amount of milliseconds in a week.
+     * The bmount of milliseconds in a week.
      */
-    public static final long ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    public stbtic final long ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
     
     /**
-     * Determines whether or not the the child Set contains any elements
-     * that are in the parent's set.
+     * Determines whether or not the the child Set contbins any elements
+     * thbt are in the parent's set.
      */
-    public static boolean containsAny(Collection parent, Collection children) {
-        for(Iterator i = children.iterator(); i.hasNext(); )
-            if(parent.contains(i.next()))
+    public stbtic boolean containsAny(Collection parent, Collection children) {
+        for(Iterbtor i = children.iterator(); i.hasNext(); )
+            if(pbrent.contains(i.next()))
                 return true;
-        return false;
+        return fblse;
     }    
     
     /**
      * Utility function to write out the toString contents
-     * of a URN.
+     * of b URN.
      */
-    public static String listSet(Set s) {
+    public stbtic String listSet(Set s) {
         StringBuffer sb = new StringBuffer();
-        for(Iterator i = s.iterator(); i.hasNext();)
-            sb.append(i.next().toString());
+        for(Iterbtor i = s.iterator(); i.hasNext();)
+            sb.bppend(i.next().toString());
         return sb.toString();
     }
 
     /**
-     * Prints out the contents of the input array as a hex string.
+     * Prints out the contents of the input brray as a hex string.
      */
-    public static String toHexString(byte[] bytes) {
+    public stbtic String toHexString(byte[] bytes) {
         StringBuffer buf=new StringBuffer();
         String str;
-        int val;
+        int vbl;
         for (int i=0; i<bytes.length; i++) {
-            //Treating each byte as an unsigned value ensures
-            //that we don't str doesn't equal things like 0xFFFF...
-            val = ByteOrder.ubyte2int(bytes[i]);
-            str = Integer.toHexString(val);
+            //Trebting each byte as an unsigned value ensures
+            //thbt we don't str doesn't equal things like 0xFFFF...
+            vbl = ByteOrder.ubyte2int(bytes[i]);
+            str = Integer.toHexString(vbl);
             while ( str.length() < 2 )
             str = "0" + str;
-            buf.append( str );
+            buf.bppend( str );
         }
-        return buf.toString().toUpperCase();
+        return buf.toString().toUpperCbse();
     }
 
 }

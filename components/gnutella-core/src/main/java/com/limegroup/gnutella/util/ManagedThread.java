@@ -1,66 +1,66 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutellb.ErrorService;
 
 /**
- * A ManagedThread, always reporting errors to the ErrorService.
+ * A MbnagedThread, always reporting errors to the ErrorService.
  *
- * If passing a Runnable, use as:
- * Thread t = new ManagedThread(myRunnable);
- * t.start();
+ * If pbssing a Runnable, use as:
+ * Threbd t = new ManagedThread(myRunnable);
+ * t.stbrt();
  *
- * If extending, extend the managedRun() method instead of run().
+ * If extending, extend the mbnagedRun() method instead of run().
  */
-public class ManagedThread extends Thread {
+public clbss ManagedThread extends Thread {
     
     /**
-     * Constructs a ManagedThread with no target.
+     * Constructs b ManagedThread with no target.
      */
-    public ManagedThread() {
+    public MbnagedThread() {
         super();
-        setPriority(Thread.NORM_PRIORITY);
+        setPriority(Threbd.NORM_PRIORITY);
     }
     
     /**
-     * Constructs a ManagedThread with the specified target.
+     * Constructs b ManagedThread with the specified target.
      */
-    public ManagedThread(Runnable r) {
+    public MbnagedThread(Runnable r) {
         super(r);
-        setPriority(Thread.NORM_PRIORITY);
+        setPriority(Threbd.NORM_PRIORITY);
     }
     
     /**
-     * Constructs a ManagedThread with the specified name.
+     * Constructs b ManagedThread with the specified name.
      */
-    public ManagedThread(String name) {
-        super(name);
-        setPriority(Thread.NORM_PRIORITY);
+    public MbnagedThread(String name) {
+        super(nbme);
+        setPriority(Threbd.NORM_PRIORITY);
     }
     
     /**
-     * Constructs a ManagedThread with the specified target and name.
+     * Constructs b ManagedThread with the specified target and name.
      */
-    public ManagedThread(Runnable r, String name) {
-        super(r, name);
-        setPriority(Thread.NORM_PRIORITY);
+    public MbnagedThread(Runnable r, String name) {
+        super(r, nbme);
+        setPriority(Threbd.NORM_PRIORITY);
     }
     
     /**
-     * Runs the target, reporting any errors to the ErrorService.
+     * Runs the tbrget, reporting any errors to the ErrorService.
      */
-    public final void run() {
+    public finbl void run() {
         try {
-            managedRun();
-        } catch(Throwable t) {
-            ErrorService.error(t, "Uncaught thread error.");
+            mbnagedRun();
+        } cbtch(Throwable t) {
+            ErrorService.error(t, "Uncbught thread error.");
         }
     }
     
     /**
-     * If a target exists, runs the target.  Otherwise this method must
-     * be extended to do anything.
+     * If b target exists, runs the target.  Otherwise this method must
+     * be extended to do bnything.
      */
-    protected void managedRun() {
+    protected void mbnagedRun() {
         super.run();
     }
 }

@@ -1,43 +1,43 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.util.Arrays;
+import jbva.util.Arrays;
 
 /**
- * Simple representation of a remote host.
+ * Simple representbtion of a remote host.
  */
-public class RemoteHostData {
+public clbss RemoteHostData {
 
     /**
-     * The host's address.
+     * The host's bddress.
      */
-    private final String _host;
+    privbte final String _host;
     
     /**
      * The host's port.
      */
-    private final int _port;
+    privbte final int _port;
 
     /**
      * The host's clientGUID.
      */
-    private final byte[] _clientGUID;
+    privbte final byte[] _clientGUID;
 
     /**
-     * The cached hashCode.
+     * The cbched hashCode.
      */
-    private volatile int _hashcode = 0;
+    privbte volatile int _hashcode = 0;
 
     /**
-     * Constructs a new RemoteHostData with the specified host, port & guid.
+     * Constructs b new RemoteHostData with the specified host, port & guid.
      */
-    public RemoteHostData(String host, int port, byte[] guid) {
+    public RemoteHostDbta(String host, int port, byte[] guid) {
         _host = host;
         _port = port;
         _clientGUID = (byte[]) guid.clone();
     }
     
     
-    //////accessors
+    //////bccessors
     public String getHost() {
         return _host;
     }
@@ -51,28 +51,28 @@ public class RemoteHostData {
     }
     
 
-    //////////////////hashtable  methods///////////////
+    //////////////////hbshtable  methods///////////////
 
-    public boolean equals(Object o) {
+    public boolebn equals(Object o) {
         if(this == o)
             return true;
         
-        RemoteHostData other = (RemoteHostData)o;//dont catch ClassCastException
-        return (_host.equals(other._host) &&
+        RemoteHostDbta other = (RemoteHostData)o;//dont catch ClassCastException
+        return (_host.equbls(other._host) &&
                 _port==other._port &&
-                Arrays.equals(_clientGUID, other._clientGUID) );
+                Arrbys.equals(_clientGUID, other._clientGUID) );
     }
 
-    public int hashCode() {
-        if(_hashcode == 0) {
+    public int hbshCode() {
+        if(_hbshcode == 0) {
             int result = 17;
-            result = (37* result)+_host.hashCode();
+            result = (37* result)+_host.hbshCode();
             result = (37* result)+_port;
             for(int i=0; i < _clientGUID.length; i++) 
                 result = (37* result)+_clientGUID[i];
-            _hashcode = result;
+            _hbshcode = result;
         }
-        return _hashcode;
+        return _hbshcode;
     }
 
 }

@@ -1,155 +1,155 @@
-package com.limegroup.gnutella.connection;
+pbckage com.limegroup.gnutella.connection;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.ReadableByteChannel;
+import jbva.io.IOException;
+import jbva.nio.ByteBuffer;
+import jbva.nio.ByteOrder;
+import jbva.nio.channels.ReadableByteChannel;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.io.ChannelReadObserver;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.io.ChannelReadObserver;
 
 /**
- * Reads messages from a channel.  This class is notified when more of a message
- * can potentially be read by its handleRead() method being called.  To change
- * the channel this reads from, use setReaderChannel(ReadableByteChannel).
+ * Rebds messages from a channel.  This class is notified when more of a message
+ * cbn potentially be read by its handleRead() method being called.  To change
+ * the chbnnel this reads from, use setReaderChannel(ReadableByteChannel).
  *
- * It is possible to construct this class without an initial source channel.
- * However, before handleRead is called, the channel must be set.
+ * It is possible to construct this clbss without an initial source channel.
+ * However, before hbndleRead is called, the channel must be set.
  *
- * The first time the channel returns -1 this will throw an IOException, as it
- * never expects the channel to run out of data.  Upon each read notification,
- * as much data as possible will be read from the source channel.
+ * The first time the chbnnel returns -1 this will throw an IOException, as it
+ * never expects the chbnnel to run out of data.  Upon each read notification,
+ * bs much data as possible will be read from the source channel.
  */
-public class MessageReader implements ChannelReadObserver {
+public clbss MessageReader implements ChannelReadObserver {
     
-    /** the maximum size of a message payload that we'll accept */
-    private static final long MAX_MESSAGE_SIZE = 64 * 1024;
-    /** the size of the header */
-    private static final int HEADER_SIZE = 23;
-    /** where in the header the payload is */
-    private static final int PAYLOAD_LENGTH_OFFSET = 19;
+    /** the mbximum size of a message payload that we'll accept */
+    privbte static final long MAX_MESSAGE_SIZE = 64 * 1024;
+    /** the size of the hebder */
+    privbte static final int HEADER_SIZE = 23;
+    /** where in the hebder the payload is */
+    privbte static final int PAYLOAD_LENGTH_OFFSET = 19;
     
-    /** the constant buffer to use for emtpy payloads. */
-    private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.allocate(0);
+    /** the constbnt buffer to use for emtpy payloads. */
+    privbte static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.allocate(0);
     
-    /** the sole buffer for parsing msg headers */
-    private final ByteBuffer header;
-    /** the buffer used for parsing the payload -- recreated for each message */
-    private ByteBuffer payload;
+    /** the sole buffer for pbrsing msg headers */
+    privbte final ByteBuffer header;
+    /** the buffer used for pbrsing the payload -- recreated for each message */
+    privbte ByteBuffer payload;
     
-    /** the sole receiver of messages */
-    private final MessageReceiver receiver;
-    /** the source channel */
-    private ReadableByteChannel channel;
+    /** the sole receiver of messbges */
+    privbte final MessageReceiver receiver;
+    /** the source chbnnel */
+    privbte ReadableByteChannel channel;
     
-    /** whether or not this reader has been shut down yet. */
-    private boolean shutdown = false;
+    /** whether or not this rebder has been shut down yet. */
+    privbte boolean shutdown = false;
     
     /**
-     * Constructs a new MessageReader without an underlying source.
-     * Prior to handleRead() being called, setReadChannel(ReadableByteChannel)
-     * MUST be called.
+     * Constructs b new MessageReader without an underlying source.
+     * Prior to hbndleRead() being called, setReadChannel(ReadableByteChannel)
+     * MUST be cblled.
      */    
-    public MessageReader(MessageReceiver receiver) {
+    public MessbgeReader(MessageReceiver receiver) {
         this(null, receiver);
     }
     
     /**
-     * Constructs a new MessageReader with the given source channel & receiver.
+     * Constructs b new MessageReader with the given source channel & receiver.
      */
-    public MessageReader(ReadableByteChannel channel, MessageReceiver receiver) {
+    public MessbgeReader(ReadableByteChannel channel, MessageReceiver receiver) {
         if(receiver == null)
             throw new NullPointerException("null receiver");
             
-        this.channel = channel;
+        this.chbnnel = channel;
         this.receiver = receiver;
-        this.header = ByteBuffer.allocate(HEADER_SIZE);
-        header.order(ByteOrder.LITTLE_ENDIAN);
-        this.payload = null;
+        this.hebder = ByteBuffer.allocate(HEADER_SIZE);
+        hebder.order(ByteOrder.LITTLE_ENDIAN);
+        this.pbyload = null;
     }
     
     /**
-     * Sets the new channel to be reading from.
+     * Sets the new chbnnel to be reading from.
      */
-    public void setReadChannel(ReadableByteChannel channel) {
-        if(channel == null)
-            throw new NullPointerException("cannot set null channel!");
+    public void setRebdChannel(ReadableByteChannel channel) {
+        if(chbnnel == null)
+            throw new NullPointerException("cbnnot set null channel!");
         
-        this.channel = channel;
+        this.chbnnel = channel;
     }
     
     /**
-     * Gets the channel that is used for reading.
+     * Gets the chbnnel that is used for reading.
      */
-    public ReadableByteChannel getReadChannel() {
-        return channel;
+    public RebdableByteChannel getReadChannel() {
+        return chbnnel;
     }
     
     /**
-     * Notification that a read can be performed from the given channel.
-     * All messages that can be read without blocking are read & dispatched.
+     * Notificbtion that a read can be performed from the given channel.
+     * All messbges that can be read without blocking are read & dispatched.
      */
-    public void handleRead() throws IOException {
-        // Continue reading until we can't fill up the header or payload.
+    public void hbndleRead() throws IOException {
+        // Continue rebding until we can't fill up the header or payload.
         while(true) {
-            int read = 0;
+            int rebd = 0;
             
-            // First try to fill up the header.
-            while(header.hasRemaining() && (read = channel.read(header)) > 0);
+            // First try to fill up the hebder.
+            while(hebder.hasRemaining() && (read = channel.read(header)) > 0);
             
-            // If there header's not full, we can't bother reading the payload, so abort.
-            if(header.hasRemaining()) {
-                if(read == -1)
+            // If there hebder's not full, we can't bother reading the payload, so abort.
+            if(hebder.hasRemaining()) {
+                if(rebd == -1)
                     throw new IOException("EOF");
-                break;
+                brebk;
             }
                 
-            // if we haven't set up a payload yet, set one up (if necessary).
-            if(payload == null) {
-                int payloadLength = header.getInt(PAYLOAD_LENGTH_OFFSET);
+            // if we hbven't set up a payload yet, set one up (if necessary).
+            if(pbyload == null) {
+                int pbyloadLength = header.getInt(PAYLOAD_LENGTH_OFFSET);
                 
-                if(payloadLength < 0 || payloadLength > MAX_MESSAGE_SIZE)
+                if(pbyloadLength < 0 || payloadLength > MAX_MESSAGE_SIZE)
                     throw new IOException("should i implement skipping?");
                 
-                if(payloadLength == 0) {
-                    payload = EMPTY_PAYLOAD;
+                if(pbyloadLength == 0) {
+                    pbyload = EMPTY_PAYLOAD;
                 } else {
                     try {
-                        payload = ByteBuffer.allocate(payloadLength);
-                    } catch(OutOfMemoryError oome) {
-                        throw new IOException("message too large.");
+                        pbyload = ByteBuffer.allocate(payloadLength);
+                    } cbtch(OutOfMemoryError oome) {
+                        throw new IOException("messbge too large.");
                     }
                 }
             }
             
-            // Okay, a payload is set up, let's read into it.
-            while(payload.hasRemaining() && (read = channel.read(payload)) > 0);
+            // Okby, a payload is set up, let's read into it.
+            while(pbyload.hasRemaining() && (read = channel.read(payload)) > 0);
             
-            // If the payload's not full, we can't create a message, so abort.
-            if(payload.hasRemaining()) {
-                if(read == -1)
+            // If the pbyload's not full, we can't create a message, so abort.
+            if(pbyload.hasRemaining()) {
+                if(rebd == -1)
                     throw new IOException("eof");
-                break;
+                brebk;
             }
                 
-            // Yay, we've got a full message.
+            // Yby, we've got a full message.
             try {
-                Message m = Message.createMessage(header.array(), payload.array(), 
-                                                  receiver.getSoftMax(), receiver.getNetwork());
-                receiver.processReadMessage(m);
-            } catch(BadPacketException ignored) {}
+                Messbge m = Message.createMessage(header.array(), payload.array(), 
+                                                  receiver.getSoftMbx(), receiver.getNetwork());
+                receiver.processRebdMessage(m);
+            } cbtch(BadPacketException ignored) {}
             
-            if(read == -1)
+            if(rebd == -1)
                 throw new IOException("eof");
             
-            payload = null;
-            header.clear();
+            pbyload = null;
+            hebder.clear();
         }
     }
     
     /** 
-     * Informs the receiver that the message is shutdown.
+     * Informs the receiver thbt the message is shutdown.
      */
     public void shutdown() {
         synchronized(this) {
@@ -158,12 +158,12 @@ public class MessageReader implements ChannelReadObserver {
                 
             shutdown = true;
         }
-        receiver.messagingClosed();
+        receiver.messbgingClosed();
     }
     
     /** Unused */
-    public void handleIOException(IOException iox) {
-        throw new RuntimeException("unsupported operation", iox);
+    public void hbndleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operbtion", iox);
     }
     
 }

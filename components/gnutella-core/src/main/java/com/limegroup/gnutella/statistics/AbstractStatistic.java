@@ -1,96 +1,96 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.StringTokenizer;
+import jbva.io.FileWriter;
+import jbva.io.IOException;
+import jbva.io.Writer;
+import jbva.lang.reflect.Field;
+import jbva.util.Arrays;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.StringTokenizer;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.IntBuffer;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.util.IntBuffer;
 
 /**
- * This class provides a default implementation of the <tt>Statistic</tt>
- * interface, providing such functionality as keeping track of the
- * history for the given statistic, providing access to the average
- * value, the maximum value, etc.
+ * This clbss provides a default implementation of the <tt>Statistic</tt>
+ * interfbce, providing such functionality as keeping track of the
+ * history for the given stbtistic, providing access to the average
+ * vblue, the maximum value, etc.
  */
-public abstract class AbstractStatistic implements Statistic {
+public bbstract class AbstractStatistic implements Statistic {
 
 	/**
-	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
+	 * Constbnt for the <tt>StatisticsManager</tt> for use in subclasses.
 	 */
-	protected static final StatisticsManager STATS_MANAGER = 
-		StatisticsManager.instance();
+	protected stbtic final StatisticsManager STATS_MANAGER = 
+		StbtisticsManager.instance();
 
 	/**
-	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
-     * an empty buffer until stats are actually recorded.
+	 * <tt>IntBuffer</tt> for recording stbts data -- initialized to
+     * bn empty buffer until stats are actually recorded.
 	 */
-	protected final IntBuffer _buffer = new IntBuffer(HISTORY_LENGTH);
+	protected finbl IntBuffer _buffer = new IntBuffer(HISTORY_LENGTH);
 
 	/**
-	 * Int for the statistic currently being added to.
+	 * Int for the stbtistic currently being added to.
 	 */
-	protected volatile int _current = 0;
+	protected volbtile int _current = 0;
 
 	/**
-	 * Int for the most recently stored statistic. 
+	 * Int for the most recently stored stbtistic. 
 	 */
-	private volatile int _lastStored = 0;
+	privbte volatile int _lastStored = 0;
 
 	/**
-	 * Variable for the total number of messages received for this 
-	 * statistic.
+	 * Vbriable for the total number of messages received for this 
+	 * stbtistic.
 	 */
-	protected volatile double _total = 0;
+	protected volbtile double _total = 0;
 
 	/**
-	 * The total number of stats recorded.
+	 * The totbl number of stats recorded.
 	 */
-	protected volatile int _totalStatsRecorded = 0;
+	protected volbtile int _totalStatsRecorded = 0;
 
 	/**
-	 * The maximum value ever recorded for any time period.
+	 * The mbximum value ever recorded for any time period.
 	 */
-	protected volatile double _max = 0;
+	protected volbtile double _max = 0;
 
-	private Writer _writer;
+	privbte Writer _writer;
 
-	private boolean _writeStat = false;
+	privbte boolean _writeStat = false;
 	
-	private int _numWriters = 0;
+	privbte int _numWriters = 0;
 
 
 	/**
-	 * The file name to write stat data to.  If this is null or the empty
-	 * string, we attempt to derive the appropriate file name via
+	 * The file nbme to write stat data to.  If this is null or the empty
+	 * string, we bttempt to derive the appropriate file name via
 	 * reflection.
 	 */
-	protected String _fileName;
+	protected String _fileNbme;
 
 	/**
-	 * Constructs a new <tt>Statistic</tt> instance.
+	 * Constructs b new <tt>Statistic</tt> instance.
 	 */
-	protected AbstractStatistic() {}
+	protected AbstrbctStatistic() {}
 
 	// inherit doc comment
-	public double getTotal() {
-		return _total;
+	public double getTotbl() {
+		return _totbl;
 	}
 
 	// inherit doc comment
-	public double getAverage() {
-	    if(_totalStatsRecorded == 0) return 0;
-		return _total/_totalStatsRecorded;
+	public double getAverbge() {
+	    if(_totblStatsRecorded == 0) return 0;
+		return _totbl/_totalStatsRecorded;
 	}
 
 	// inherit doc comment
-	public double getMax() {
-		return _max;
+	public double getMbx() {
+		return _mbx;
 	}
 
 	public int getCurrent() {
@@ -98,104 +98,104 @@ public abstract class AbstractStatistic implements Statistic {
 	}
 	
 	
-	public int getLastStored() {
-		return _lastStored;
+	public int getLbstStored() {
+		return _lbstStored;
 	}
 	
 	// inherit doc comment
-	public void incrementStat() {
+	public void incrementStbt() {
 		_current++;
-		_total++;		
+		_totbl++;		
 	}
 
 	// inherit doc comment
-	public void addData(int data) {		
-		_current += data;
-		_total += data;
+	public void bddData(int data) {		
+		_current += dbta;
+		_totbl += data;
 	}
 		
 	// inherit doc comment
-	public IntBuffer getStatHistory() {
+	public IntBuffer getStbtHistory() {
 		synchronized(_buffer) {
-			initializeBuffer();
+			initiblizeBuffer();
 			return _buffer;
 		}
 	}
 	
 	// inherit doc comment
-	public void clearData() {
+	public void clebrData() {
 	    _current = 0;
-	    _total = 0;
-	    _totalStatsRecorded = 0;
-	    _max = 0;
+	    _totbl = 0;
+	    _totblStatsRecorded = 0;
+	    _mbx = 0;
 	    synchronized(_buffer) {
-	        _buffer.clear();
+	        _buffer.clebr();
 	    }
 	}
 
 	// inherit doc comment
-	public void storeCurrentStat() {
+	public void storeCurrentStbt() {
  		synchronized(_buffer) {
-			initializeBuffer();
- 			_buffer.addLast(_current);
+			initiblizeBuffer();
+ 			_buffer.bddLast(_current);
  		}
-		if(_current > _max) {
-			_max = _current;
+		if(_current > _mbx) {
+			_mbx = _current;
 		}
-		if(_writeStat) {
+		if(_writeStbt) {
 			if(_writer != null) {
 				try {
 					_writer.write(Integer.toString(_current));
 					_writer.write(",");
 					_writer.flush();
-				} catch(IOException e) {
+				} cbtch(IOException e) {
 				    ErrorService.error(e);
 				}
 			}
 		}
-		_lastStored = _current;
+		_lbstStored = _current;
 		_current = 0;
-		_totalStatsRecorded++;
+		_totblStatsRecorded++;
 	}
 
 	// inherit doc comment
-	public synchronized void setWriteStatToFile(boolean write) {
+	public synchronized void setWriteStbtToFile(boolean write) {
 		if(write) {			
 			_numWriters++;
-			_writeStat = true;
+			_writeStbt = true;
 			if(_numWriters == 1) {
 				try {
-					if(_fileName == null || _fileName.equals("")) {
-						Class superclass = getClass().getSuperclass();
-						Class declaringClass = getClass().getDeclaringClass();
+					if(_fileNbme == null || _fileName.equals("")) {
+						Clbss superclass = getClass().getSuperclass();
+						Clbss declaringClass = getClass().getDeclaringClass();
 						List fieldsList = new LinkedList();
-						if(superclass != null) {
-							fieldsList.addAll(Arrays.asList(superclass.getFields()));
+						if(superclbss != null) {
+							fieldsList.bddAll(Arrays.asList(superclass.getFields()));
 						}
-						if(declaringClass != null) {
-							fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
+						if(declbringClass != null) {
+							fieldsList.bddAll(Arrays.asList(declaringClass.getFields()));
 						}
-						fieldsList.addAll(Arrays.asList(getClass().getFields()));
-						Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
+						fieldsList.bddAll(Arrays.asList(getClass().getFields()));
+						Field[] fields = (Field[])fieldsList.toArrby(new Field[0]);
 						for(int i=0; i<fields.length; i++) {
 							try {
 								Object fieldObject = fields[i].get(null);
-								if(fieldObject.equals(this)) {
+								if(fieldObject.equbls(this)) {
 									StringTokenizer st = 
 										new StringTokenizer(fields[i].toString());
-									while(st.hasMoreTokens()) {
-										_fileName = st.nextToken();
+									while(st.hbsMoreTokens()) {
+										_fileNbme = st.nextToken();
 									}
-									_fileName = _fileName.substring(34);
+									_fileNbme = _fileName.substring(34);
 								}
-							} catch(IllegalAccessException e) {
+							} cbtch(IllegalAccessException e) {
 								continue;
 							}
 						}
 					}					 
-					_writer = new FileWriter(_fileName, false);
+					_writer = new FileWriter(_fileNbme, false);
 					
-				} catch(IOException e) {
+				} cbtch(IOException e) {
 				    ErrorService.error(e);
 				}
 			}
@@ -203,19 +203,19 @@ public abstract class AbstractStatistic implements Statistic {
 			_numWriters--;
 		} 
 		if(_numWriters == 0) {
-			_writeStat = false;
+			_writeStbt = false;
 			_writer = null;
 		}
 	}
 
 	/**
-	 * Constructs the <tt>IntBuffer</tt> with 0 for all values if it is
-	 * not already constructed.
+	 * Constructs the <tt>IntBuffer</tt> with 0 for bll values if it is
+	 * not blready constructed.
 	 */
-	protected final void initializeBuffer() {
+	protected finbl void initializeBuffer() {
 		if(_buffer.isEmpty()) {
 			for(int i=0; i<HISTORY_LENGTH; i++) {
-				_buffer.addLast(0);
+				_buffer.bddLast(0);
 			}
 		}
 	}

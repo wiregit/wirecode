@@ -1,69 +1,69 @@
 /**
- * Code taken freely from
- * http://www.java-engineer.com/java/auto-complete.html
+ * Code tbken freely from
+ * http://www.jbva-engineer.com/java/auto-complete.html
  */
 
 //------------------------------------------------------------------------------
-// Copyright (c) 1999-2001 Matt Welsh.  All Rights Reserved.
+// Copyright (c) 1999-2001 Mbtt Welsh.  All Rights Reserved.
 //------------------------------------------------------------------------------
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Iterator;
+import jbva.util.Iterator;
 
 /**
- * This interface defines the API that dictionaries for autocomplete components
- * must implement. Note that implementations of this interface should perform
- * look ups as quickly as possible to avoid delays as the user types.
+ * This interfbce defines the API that dictionaries for autocomplete components
+ * must implement. Note thbt implementations of this interface should perform
+ * look ups bs quickly as possible to avoid delays as the user types.
  *
- * @author Matt Welsh (matt@matt-welsh.com)
+ * @buthor Matt Welsh (matt@matt-welsh.com)
  *
- * @modified David Soh (yunharla00@hotmail.com)
- *      added getIterator() & getIterator(String) for enhanced AutoCompleteTextField use.
+ * @modified Dbvid Soh (yunharla00@hotmail.com)
+ *      bdded getIterator() & getIterator(String) for enhanced AutoCompleteTextField use.
  *
  */
-public interface AutoCompleteDictionary {
+public interfbce AutoCompleteDictionary {
     /**
-     * Adds an entry to the dictionary.
+     * Adds bn entry to the dictionary.
      *
-     * @param s The string to add to the dictionary.
+     * @pbram s The string to add to the dictionary.
      */
-    public void addEntry(String s);
+    public void bddEntry(String s);
 
     /**
-     * Removes an entry from the dictionary.
+     * Removes bn entry from the dictionary.
      *
-     * @param s The string to remove to the dictionary.
-     * @return True if successful, false if the string is not contained or cannot
+     * @pbram s The string to remove to the dictionary.
+     * @return True if successful, fblse if the string is not contained or cannot
      *         be removed.
      */
-    public boolean removeEntry(String s);
+    public boolebn removeEntry(String s);
 
     /**
-     * Perform a lookup and returns the closest matching string to the passed
+     * Perform b lookup and returns the closest matching string to the passed
      * string.
      *
-     * @param s The string to use as the base for the lookup. How this routine
-     *          is implemented determines the behaviour of the component.
-     *          Typically, the closest matching string that completely contains
+     * @pbram s The string to use as the base for the lookup. How this routine
+     *          is implemented determines the behbviour of the component.
+     *          Typicblly, the closest matching string that completely contains
      *          the given string is returned.
      */
     public String lookup(String s);
 
     /**
-     * Returns all available entries in dictionary
+     * Returns bll available entries in dictionary
      *
      */
-    public Iterator getIterator();
+    public Iterbtor getIterator();
 
     /**
-     * Returns an iterator of potential matches from the given string.
+     * Returns bn iterator of potential matches from the given string.
      *
      */
-    public Iterator getIterator(String s);
+    public Iterbtor getIterator(String s);
     
     /**
-     * Clears the dictionary.
+     * Clebrs the dictionary.
      */
-    public void clear();
+    public void clebr();
 }

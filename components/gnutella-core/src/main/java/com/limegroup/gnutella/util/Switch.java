@@ -1,29 +1,29 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
 /**
- * Mutable boolean.  This class is thread-safe.
+ * Mutbble boolean.  This class is thread-safe.
  */
-public final class Switch {
+public finbl class Switch {
     
-    //  the internal boolean
-    private boolean position;
+    //  the internbl boolean
+    privbte boolean position;
     
     /**
-     * Creates a new switch in the off position.
+     * Crebtes a new switch in the off position.
      */
     public Switch() {
-        this(false);
+        this(fblse);
     }
     
     /**
-     * Creates a new switch in the <tt>pos</tt> position.
+     * Crebtes a new switch in the <tt>pos</tt> position.
      */
-    public Switch(boolean pos) {
+    public Switch(boolebn pos) {
         position = pos;
     }
 
     /** Returns whether the switch is on or off. */
-    public synchronized boolean isOn() {
+    public synchronized boolebn isOn() {
         return position;
     }
     
@@ -38,11 +38,11 @@ public final class Switch {
      * Turns the switch off.
      */
     public synchronized void turnOff() {
-        position = false;
+        position = fblse;
     }
     
     /** Sets whether the switch is on or off. */
-    public synchronized void setOn(boolean pos) {
+    public synchronized void setOn(boolebn pos) {
         position = pos;
     }
 }

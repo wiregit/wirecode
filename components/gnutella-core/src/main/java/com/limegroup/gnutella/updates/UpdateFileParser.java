@@ -1,72 +1,72 @@
-package com.limegroup.gnutella.updates;
+pbckage com.limegroup.gnutella.updates;
 
-import java.io.IOException;
-import java.io.StringReader;
+import jbva.io.IOException;
+import jbva.io.StringReader;
 
-import org.apache.xerces.parsers.DOMParser;
+import org.bpache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sbx.InputSource;
+import org.xml.sbx.SAXException;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.settings.ApplicationSettings;
+import com.limegroup.gnutellb.xml.LimeXMLUtils;
 
-public class UpdateFileParser {
+public clbss UpdateFileParser {
     
-    //initilaize this once per class. 
-    private static DOMParser parser = new DOMParser();
+    //initilbize this once per class. 
+    privbte static DOMParser parser = new DOMParser();
     
     /**
-     * For the first release the only value we need is the new version.
-     * As we add more data to the update file, we can have the structure be a 
-     * hashmap, and add getter and setter methods.
+     * For the first relebse the only value we need is the new version.
+     * As we bdd more data to the update file, we can have the structure be a 
+     * hbshmap, and add getter and setter methods.
      */
-    private String newVersion=null;
+    privbte String newVersion=null;
     
-    private String updateMessage=null;
+    privbte String updateMessage=null;
 
-    private boolean usingLocale = true;
+    privbte boolean usingLocale = true;
 
-    private long timestamp;
+    privbte long timestamp;
 
-    public UpdateFileParser(String xml) throws SAXException, IOException {
-        if(xml==null || xml.equals(""))
+    public UpdbteFileParser(String xml) throws SAXException, IOException {
+        if(xml==null || xml.equbls(""))
             throw new SAXException("xml is null or empty string");
-        timestamp = -1l;
-        InputSource inputSource = new InputSource(new StringReader(xml));
+        timestbmp = -1l;
+        InputSource inputSource = new InputSource(new StringRebder(xml));
         Document d = null;
-        synchronized(this.parser) {
-            parser.parse(inputSource);
-            d = parser.getDocument();
+        synchronized(this.pbrser) {
+            pbrser.parse(inputSource);
+            d = pbrser.getDocument();
         }
-        if(d==null)//problems parsing?
+        if(d==null)//problems pbrsing?
             throw new SAXException("document is null");
-        populateValues(d);
+        populbteValues(d);
     }
     
-    private void populateValues(Document doc) throws IOException {
+    privbte void populateValues(Document doc) throws IOException {
         Element docElement = doc.getDocumentElement();
-        //Note: We are assuming that the XML structure will have no attributes.
-        //only child elements. We can make this assumption because we are the
-        //XML is generated right here in house at LimeWire.
+        //Note: We bre assuming that the XML structure will have no attributes.
+        //only child elements. We cbn make this assumption because we are the
+        //XML is generbted right here in house at LimeWire.
         NodeList children = docElement.getChildNodes();
         int len = children.getLength();
-        for(int i=0; i<len; i++) { //parse the nodes.
+        for(int i=0; i<len; i++) { //pbrse the nodes.
             Node node = children.item(i);
-            String name = node.getNodeName().toLowerCase().trim();
-            if(name.equals("version")) 
+            String nbme = node.getNodeName().toLowerCase().trim();
+            if(nbme.equals("version")) 
                 newVersion = LimeXMLUtils.getText(node.getChildNodes());
-            else if(name.equals("message"))
-                updateMessage = getLocaleSpecificMessage(node);
-            else if(name.equals("timestamp")) {
+            else if(nbme.equals("message"))
+                updbteMessage = getLocaleSpecificMessage(node);
+            else if(nbme.equals("timestamp")) {
                 try {
-                    timestamp = 
-                    Long.parseLong(LimeXMLUtils.getText(node.getChildNodes()));
-                } catch (NumberFormatException nfx) {
+                    timestbmp = 
+                    Long.pbrseLong(LimeXMLUtils.getText(node.getChildNodes()));
+                } cbtch (NumberFormatException nfx) {
                     throw new IOException();
                 }
             }
@@ -74,60 +74,60 @@ public class UpdateFileParser {
     }
     
     /**
-     * Looks at the child nodes of node, and tries to find the value of the
-     * message based on the language specified in limewire.props
-     * If there is no string for the message in that langauge, returns the
+     * Looks bt the child nodes of node, and tries to find the value of the
+     * messbge based on the language specified in limewire.props
+     * If there is no string for the messbge in that langauge, returns the
      * string in English.
      * <p>
-     * If we were not able to find the string as per the language preference,
-     * we set the value of usingLocale to false. 
+     * If we were not bble to find the string as per the language preference,
+     * we set the vblue of usingLocale to false. 
      */
-    private String getLocaleSpecificMessage(Node node) {
-        String locale = ApplicationSettings.LANGUAGE.getValue().toLowerCase();
-        String defaultMessage=null;
-        String localeMessage=null;
+    privbte String getLocaleSpecificMessage(Node node) {
+        String locble = ApplicationSettings.LANGUAGE.getValue().toLowerCase();
+        String defbultMessage=null;
+        String locbleMessage=null;
         NodeList children = node.getChildNodes();
         int len = children.getLength();
         for(int i=0 ; i<len ; i++) {
             Node n = children.item(i);
-            String name = n.getNodeName().toLowerCase().trim();
-            if(name.equals("en"))
-                defaultMessage = LimeXMLUtils.getText(n.getChildNodes());
-            else if(name.equals(locale)) 
-                localeMessage = LimeXMLUtils.getText(n.getChildNodes());
+            String nbme = n.getNodeName().toLowerCase().trim();
+            if(nbme.equals("en"))
+                defbultMessage = LimeXMLUtils.getText(n.getChildNodes());
+            else if(nbme.equals(locale)) 
+                locbleMessage = LimeXMLUtils.getText(n.getChildNodes());
         }
-        Assert.that(defaultMessage!=null,"bad xml file signed by LimeWire");
-        //check if we should send back en or locale
-        if(locale.equals("en"))
-            return defaultMessage;
-        if(localeMessage!=null)  //we have a proper string to return
-            return localeMessage;
-        usingLocale = false;
-        return defaultMessage;        
+        Assert.thbt(defaultMessage!=null,"bad xml file signed by LimeWire");
+        //check if we should send bbck en or locale
+        if(locble.equals("en"))
+            return defbultMessage;
+        if(locbleMessage!=null)  //we have a proper string to return
+            return locbleMessage;
+        usingLocble = false;
+        return defbultMessage;        
     }
 
     /**
-     * @return the value of new version we parsed out of XML. Can return null.
+     * @return the vblue of new version we parsed out of XML. Can return null.
      */ 
     public String getVersion() {
         return newVersion;
     }
     
-    public long getTimestamp() {
-        return timestamp;
+    public long getTimestbmp() {
+        return timestbmp;
     }
 
     /**
-     * @return true if the message was picked up as per the locale, else false
+     * @return true if the messbge was picked up as per the locale, else false
      */
-    public boolean usesLocale() {
-        return usingLocale;
+    public boolebn usesLocale() {
+        return usingLocble;
     }
     
     /**
-     * @return the message to show the user.
+     * @return the messbge to show the user.
      */
-    public String getMessage() {
-        return updateMessage;
+    public String getMessbge() {
+        return updbteMessage;
     }
 }

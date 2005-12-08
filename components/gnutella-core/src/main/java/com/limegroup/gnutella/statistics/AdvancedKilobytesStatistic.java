@@ -1,38 +1,38 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * Specialized subclass for recording advanced kilobytes statistics.
+ * Speciblized subclass for recording advanced kilobytes statistics.
  */
-class AdvancedKilobytesStatistic extends AbstractKilobytesStatistic {
+clbss AdvancedKilobytesStatistic extends AbstractKilobytesStatistic {
 
 	/**
-	 * Adds the statistic to the list of advanced statistics.
+	 * Adds the stbtistic to the list of advanced statistics.
 	 */
-	protected AdvancedKilobytesStatistic() {
-		StatisticsManager.instance().addAdvancedStatistic(this);
+	protected AdvbncedKilobytesStatistic() {
+		StbtisticsManager.instance().addAdvancedStatistic(this);
 	}
 
 	/**
-	 * Adds the statistic to the list of advanced statistics, with
-	 * a specified file name to write to.
+	 * Adds the stbtistic to the list of advanced statistics, with
+	 * b specified file name to write to.
 	 *
-	 * @param fileName the file name to write to
+	 * @pbram fileName the file name to write to
 	 */
-	protected AdvancedKilobytesStatistic(String fileName) {
-		StatisticsManager.instance().addAdvancedStatistic(this);
-		_fileName = fileName;
+	protected AdvbncedKilobytesStatistic(String fileName) {
+		StbtisticsManager.instance().addAdvancedStatistic(this);
+		_fileNbme = fileName;
 	}
 	
-	public void incrementStat() {
-		// if we're not recording advanced stats, ignore the call
-		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
-		super.incrementStat();
+	public void incrementStbt() {
+		// if we're not recording bdvanced stats, ignore the call
+		if(!STATS_MANAGER.getRecordAdvbncedStats()) return;
+		super.incrementStbt();
 	}
 
 	// override to only record
-	public void addData(int data) {
-		// if we're not recording advanced stats, ignore the call
-		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
-		super.addData(data);
+	public void bddData(int data) {
+		// if we're not recording bdvanced stats, ignore the call
+		if(!STATS_MANAGER.getRecordAdvbncedStats()) return;
+		super.bddData(data);
 	}	
 }

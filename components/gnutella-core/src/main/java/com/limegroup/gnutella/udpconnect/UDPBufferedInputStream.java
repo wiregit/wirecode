@@ -1,79 +1,79 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.InterruptedIOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
 /**
- *  Handle reading from a UDP Connection in the form of a stream.
- *  This class tries to minimize byte array allocations by using the
- *  data directly as it comes out of messages.
+ *  Hbndle reading from a UDP Connection in the form of a stream.
+ *  This clbss tries to minimize byte array allocations by using the
+ *  dbta directly as it comes out of messages.
  */
-public class UDPBufferedInputStream extends InputStream {
+public clbss UDPBufferedInputStream extends InputStream {
 
 	
-    private static final Log LOG =
-        LogFactory.getLog(UDPBufferedInputStream.class);
+    privbte static final Log LOG =
+        LogFbctory.getLog(UDPBufferedInputStream.class);
     
     /**
-     *  The maximum blocking time of a read.
+     *  The mbximum blocking time of a read.
      */
-    private static final int FOREVER = 10 * 60 * 60 * 1000;
+    privbte static final int FOREVER = 10 * 60 * 60 * 1000;
 
     /**
-     *  A cached chunk of data that hasn't been completely written 
-     *  to the stream.
+     *  A cbched chunk of data that hasn't been completely written 
+     *  to the strebm.
      */
-    protected Chunk _activeChunk;
+    protected Chunk _bctiveChunk;
 
     /**
-     *  The reader of information coming into this output stream.
+     *  The rebder of information coming into this output stream.
      */
-    private UDPConnectionProcessor _processor;
+    privbte UDPConnectionProcessor _processor;
 
     /**
-     * Create the InputStream with a handle to the connection processor 
-     * to be used as an input source.
+     * Crebte the InputStream with a handle to the connection processor 
+     * to be used bs an input source.
      */
-    public UDPBufferedInputStream(UDPConnectionProcessor p) {
+    public UDPBufferedInputStrebm(UDPConnectionProcessor p) {
         _processor   = p; 
-        _activeChunk = null;
+        _bctiveChunk = null;
     }
 
     /**
-     * Read the next byte of data from the input source.  As normal, return -1 
-     * if there is no more data.
+     * Rebd the next byte of data from the input source.  As normal, return -1 
+     * if there is no more dbta.
      */
-    public int read() throws IOException  {
-    	boolean timedOut=false;
+    public int rebd() throws IOException  {
+    	boolebn timedOut=false;
     	
         synchronized(_processor) { // Lock on the ConnectionProcessor
             while (true) {
-                // Try to fetch some data if necessary
-                checkForData();
+                // Try to fetch some dbta if necessary
+                checkForDbta();
 
-                if ( _activeChunk != null && _activeChunk.length > 0 ) {
-                    // return a byte of data
-                    _activeChunk.length--;
-                    return (_activeChunk.data[_activeChunk.start++] & 0xff);
+                if ( _bctiveChunk != null && _activeChunk.length > 0 ) {
+                    // return b byte of data
+                    _bctiveChunk.length--;
+                    return (_bctiveChunk.data[_activeChunk.start++] & 0xff);
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _bctiveChunk == null && _processor.isConnected() ) {
 
-                    // Wait for some data to become available
+                    // Wbit for some data to become available
                 	if (timedOut) {
                 		InterruptedIOException e = new InterruptedIOException();
                 		
-                		if (LOG.isDebugEnabled()) {
-                			LOG.debug("read() timed out for timeout "+
-                					_processor.getReadTimeout(),e);
+                		if (LOG.isDebugEnbbled()) {
+                			LOG.debug("rebd() timed out for timeout "+
+                					_processor.getRebdTimeout(),e);
                 		}
                 		
                 		throw e;
                 	}
-                    waitOnData();
+                    wbitOnData();
                     timedOut=true;
                 } else {
 
@@ -85,62 +85,62 @@ public class UDPBufferedInputStream extends InputStream {
     }
 
     /**
-     * Just ensure that this call is passed to the detailed local read method.
+     * Just ensure thbt this call is passed to the detailed local read method.
      */
-    public int read(byte b[]) throws IOException  {
-        return read(b, 0, b.length);
+    public int rebd(byte b[]) throws IOException  {
+        return rebd(b, 0, b.length);
     } 
 
     /**
-     * Read the next len byte of data from the input source. Return how much
-     * was really read.  
+     * Rebd the next len byte of data from the input source. Return how much
+     * wbs really read.  
      */
-    public int read(byte b[], int off, int len)
+    public int rebd(byte b[], int off, int len)
       throws IOException  {
         int origLen = len;
         int origOff = off;
         int wlength;
-        boolean timedOut= false;
+        boolebn timedOut= false;
         
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             while (true) {
-                // Try to fetch some data if necessary
-                checkForData();
+                // Try to fetch some dbta if necessary
+                checkForDbta();
 
-                if ( _activeChunk != null && _activeChunk.length > 0 ) {
-                	timedOut=false;
+                if ( _bctiveChunk != null && _activeChunk.length > 0 ) {
+                	timedOut=fblse;
 
-                    // Load some data
-                    wlength = Math.min(_activeChunk.length, len);
-                    System.arraycopy( _activeChunk.data, _activeChunk.start, 
+                    // Lobd some data
+                    wlength = Mbth.min(_activeChunk.length, len);
+                    System.brraycopy( _activeChunk.data, _activeChunk.start, 
                       b, off, wlength);
                     len                 -= wlength;
                     off                 += wlength;
-                    _activeChunk.start  += wlength;
-                    _activeChunk.length -= wlength;
+                    _bctiveChunk.start  += wlength;
+                    _bctiveChunk.length -= wlength;
                     if ( len <= 0 ) 
                         return origLen;
 
                 } else if ( origLen != len ){
 
-                    // Return whatever was available
+                    // Return whbtever was available
                     return(origLen - len);
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _bctiveChunk == null && _processor.isConnected() ) {
 
-                    // Wait for some data to become available
+                    // Wbit for some data to become available
                 	if (timedOut) {
                 		InterruptedIOException e = new InterruptedIOException();
                 		
-                		if (LOG.isDebugEnabled()) {
-                			LOG.debug("read(byte [], int, int) timed out for timeout "+
-                					_processor.getReadTimeout(),e);
+                		if (LOG.isDebugEnbbled()) {
+                			LOG.debug("rebd(byte [], int, int) timed out for timeout "+
+                					_processor.getRebdTimeout(),e);
                 		}
                 		
                 		throw e;
                 	}
                 	
-                    waitOnData();
+                    wbitOnData();
                     timedOut=true;
                 } else {
 
@@ -153,52 +153,52 @@ public class UDPBufferedInputStream extends InputStream {
     }
 
     /**
-     *  Throw away n bytes of data.  Return the true amount of bytes skipped.
-     *  Note that I am downgrading the long input to an int.
+     *  Throw bway n bytes of data.  Return the true amount of bytes skipped.
+     *  Note thbt I am downgrading the long input to an int.
      */
     public long skip(long n) 
       throws IOException  {
         int len     = (int) n;
         int origLen = len;
         int wlength;
-        boolean timedOut=false;
+        boolebn timedOut=false;
         
-        // Just like reading a chunk of data above but the bytes get ignored
+        // Just like rebding a chunk of data above but the bytes get ignored
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             while (true) {
-                // Try to fetch some data if necessary
-                checkForData();
+                // Try to fetch some dbta if necessary
+                checkForDbta();
 
-                if ( _activeChunk != null && _activeChunk.length > 0 ) {
-                	timedOut=false;
+                if ( _bctiveChunk != null && _activeChunk.length > 0 ) {
+                	timedOut=fblse;
 
-                    // Load some data
-                    wlength = Math.min(_activeChunk.length, len);
+                    // Lobd some data
+                    wlength = Mbth.min(_activeChunk.length, len);
                     len                 -= wlength;
-                    _activeChunk.start  += wlength;
-                    _activeChunk.length -= wlength;
+                    _bctiveChunk.start  += wlength;
+                    _bctiveChunk.length -= wlength;
                     if ( len <= 0 ) 
                         return origLen;
 
                 } else if ( origLen != len ){
 
-                    // Return whatever was available
+                    // Return whbtever was available
                     return(origLen - len);
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _bctiveChunk == null && _processor.isConnected() ) {
 
-                    // Wait for some data to become available
+                    // Wbit for some data to become available
                 	if (timedOut) {
                 		InterruptedIOException e = new InterruptedIOException();
                 		
-                		if (LOG.isDebugEnabled()) {
+                		if (LOG.isDebugEnbbled()) {
                 			LOG.debug("skip() timed out for timeout "+
-                					_processor.getReadTimeout(),e);
+                					_processor.getRebdTimeout(),e);
                 		}
                 		
                 		throw e;
                 	}
-                    waitOnData();
+                    wbitOnData();
                     timedOut=true;
                 } else {
 
@@ -210,32 +210,32 @@ public class UDPBufferedInputStream extends InputStream {
     }
 
     /**
-     *  Returns how many bytes I know are immediately available.
-     *  This can be optimized later but these things never seem to be accurate.
+     *  Returns how mbny bytes I know are immediately available.
+     *  This cbn be optimized later but these things never seem to be accurate.
      */
-    public int available() {
+    public int bvailable() {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
-            if ( _activeChunk == null )
+            if ( _bctiveChunk == null )
                 return 0;
-            return _activeChunk.length;
+            return _bctiveChunk.length;
         }
     }
 
     /**
-     *  I hope that I don't need to support this.
+     *  I hope thbt I don't need to support this.
      */
-    public boolean markSupported() {
-        return false;
+    public boolebn markSupported() {
+        return fblse;
     }
 
     /**
-     *  I hope that I don't need to support this.
+     *  I hope thbt I don't need to support this.
      */
-    public void mark(int readAheadLimit) {
+    public void mbrk(int readAheadLimit) {
     }
 
     /**
-     *  I hope that I don't need to support this.
+     *  I hope thbt I don't need to support this.
      */
     public void reset() {
     }
@@ -248,35 +248,35 @@ public class UDPBufferedInputStream extends InputStream {
     }
 
     /**
-     *  If no pending data then try to get some.
+     *  If no pending dbta then try to get some.
      */
-    private void checkForData() {
+    privbte void checkForData() {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
-            if ( _activeChunk == null || _activeChunk.length <= 0 ) {
-                _activeChunk = _processor.getIncomingChunk();
+            if ( _bctiveChunk == null || _activeChunk.length <= 0 ) {
+                _bctiveChunk = _processor.getIncomingChunk();
             }
         }
     }
 
     /**
-     *  Wait for a new chunk to become available.
+     *  Wbit for a new chunk to become available.
      */
-    private void waitOnData() throws InterruptedIOException {
+    privbte void waitOnData() throws InterruptedIOException {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
-            	_processor.wait(_processor.getReadTimeout());
-            } catch(InterruptedException e) {
-                throw new InterruptedIOException(e.getMessage()); 
+            	_processor.wbit(_processor.getReadTimeout());
+            } cbtch(InterruptedException e) {
+                throw new InterruptedIOException(e.getMessbge()); 
             } 
         }
     }
 
     /**
-     *  Package accessor for notifying readers that data is available.
+     *  Pbckage accessor for notifying readers that data is available.
      */
-    void wakeup() {
+    void wbkeup() {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
-            // Wakeup any read operation waiting for data
+            // Wbkeup any read operation waiting for data
             _processor.notify();  
         }
     }

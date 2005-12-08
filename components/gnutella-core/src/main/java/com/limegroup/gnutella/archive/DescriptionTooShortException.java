@@ -1,9 +1,9 @@
-package com.limegroup.gnutella.archive;
+pbckage com.limegroup.gnutella.archive;
 
-public class DescriptionTooShortException extends Exception {
+public clbss DescriptionTooShortException extends Exception {
 
-	private static final long serialVersionUID = 3437602690969241796L;
-	private int _minWords;
+	privbte static final long serialVersionUID = 3437602690969241796L;
+	privbte int _minWords;
 	
 	public DescriptionTooShortException( int minWords ) {
 		_minWords = minWords; 

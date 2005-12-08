@@ -1,13 +1,13 @@
-package com.limegroup.gnutella.connection;
+pbckage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.io.Shutdownable;
 
 /**
- * Basic interface allowing various asynchronous message senders.
+ * Bbsic interface allowing various asynchronous message senders.
  */
-public interface OutputRunner extends Shutdownable {
+public interfbce OutputRunner extends Shutdownable {
     
-    public void send(Message m);
+    public void send(Messbge m);
 
 }

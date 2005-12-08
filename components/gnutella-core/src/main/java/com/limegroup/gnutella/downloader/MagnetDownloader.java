@@ -1,356 +1,356 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.io.ObjectInputStream;
+import jbva.io.Serializable;
+import jbva.net.URL;
+import jbva.util.HashSet;
+import jbva.util.Set;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.httpclient.HttpClient;
+import org.bpache.commons.httpclient.HttpMethod;
+import org.bpache.commons.httpclient.HttpStatus;
+import org.bpache.commons.httpclient.URI;
+import org.bpache.commons.httpclient.URIException;
+import org.bpache.commons.httpclient.methods.HeadMethod;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.DownloadCallback;
+import com.limegroup.gnutellb.DownloadManager;
+import com.limegroup.gnutellb.Downloader;
+import com.limegroup.gnutellb.FileManager;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.SaveLocationException;
+import com.limegroup.gnutellb.SpeedConstants;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.browser.MagnetOptions;
+import com.limegroup.gnutellb.http.HttpClientManager;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.StringUtils;
 
 /**
- * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
- * MagnetDownloader need not have an initial RemoteFileDesc.  Instead it can be
- * started with various combinations of the following:
+ * A MbnagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
+ * MbgnetDownloader need not have an initial RemoteFileDesc.  Instead it can be
+ * stbrted with various combinations of the following:
  * <ul>
- * <li>initial URL (exact source)
- * <li>hash/URN (exact topic)
- * <li>file name (display name)
- * <li>search keywords (keyword topic)
+ * <li>initibl URL (exact source)
+ * <li>hbsh/URN (exact topic)
+ * <li>file nbme (display name)
+ * <li>sebrch keywords (keyword topic)
  * </ul>
- * Names in parentheses are those given by the MAGNET specification at
- * http://magnet-uri.sourceforge.net/magnet-draft-overview.txt
+ * Nbmes in parentheses are those given by the MAGNET specification at
+ * http://mbgnet-uri.sourceforge.net/magnet-draft-overview.txt
  * <p>
- * Implementation note: this uses ManagedDownloader to try the initial download
- * location.  Unfortunately ManagedDownloader requires RemoteFileDesc's.  We can
- * fake up most of the RFD fields, but size presents problems.
- * ManagedDownloader depends on size for swarming purposes.  It is possible to
- * redesign the swarming algorithm to work around the lack of size, but this is
- * complex, especially with regard to HTTP/1.1 swarming.  For this reason, we
- * simply make a HEAD request to get the content length before starting the
- * download.  
+ * Implementbtion note: this uses ManagedDownloader to try the initial download
+ * locbtion.  Unfortunately ManagedDownloader requires RemoteFileDesc's.  We can
+ * fbke up most of the RFD fields, but size presents problems.
+ * MbnagedDownloader depends on size for swarming purposes.  It is possible to
+ * redesign the swbrming algorithm to work around the lack of size, but this is
+ * complex, especiblly with regard to HTTP/1.1 swarming.  For this reason, we
+ * simply mbke a HEAD request to get the content length before starting the
+ * downlobd.  
  */
-public class MagnetDownloader extends ManagedDownloader implements Serializable {
+public clbss MagnetDownloader extends ManagedDownloader implements Serializable {
 
-    private static final Log LOG = LogFactory.getLog(MagnetDownloader.class);
+    privbte static final Log LOG = LogFactory.getLog(MagnetDownloader.class);
 
     /** Prevent versioning problems. */
-    static final long serialVersionUID = 9092913030585214105L;
+    stbtic final long serialVersionUID = 9092913030585214105L;
 
-	private static final transient String MAGNET = "MAGNET"; 
+	privbte static final transient String MAGNET = "MAGNET"; 
 
     /**
-     * Creates a new MAGNET downloader.  Immediately tries to download from
-     * <tt>defaultURLs</tt>, if specified. If that fails, or if defaultURLs does
-     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
-     * and </tt>urn</tt>, as provided.  (Note that at least one must be
-     * non-null.)  If <tt>filename</tt> is specified, it will be used as the
-     * name of the complete file; otherwise it will be taken from any search
-     * results or guessed from <tt>defaultURLs</tt>.
+     * Crebtes a new MAGNET downloader.  Immediately tries to download from
+     * <tt>defbultURLs</tt>, if specified. If that fails, or if defaultURLs does
+     * not provide blternate locations, issues a requery with <tt>textQuery</tt>
+     * bnd </tt>urn</tt>, as provided.  (Note that at least one must be
+     * non-null.)  If <tt>filenbme</tt> is specified, it will be used as the
+     * nbme of the complete file; otherwise it will be taken from any search
+     * results or guessed from <tt>defbultURLs</tt>.
      *
-     * @param magnet contains all the information for the download, must be
-     * {@link MagnetOptions#isDownloadable() downloadable}.
-     * @param overwrite whether file at download location should be overwritten
-     * @param saveDir can be null, then the default save directory is used
-	 * @param fileName the final file name, can be <code>null</code>
+     * @pbram magnet contains all the information for the download, must be
+     * {@link MbgnetOptions#isDownloadable() downloadable}.
+     * @pbram overwrite whether file at download location should be overwritten
+     * @pbram saveDir can be null, then the default save directory is used
+	 * @pbram fileName the final file name, can be <code>null</code>
 	 *
-     * @throws SaveLocationException if there was an error setting the downloads
-     * final file location 
+     * @throws SbveLocationException if there was an error setting the downloads
+     * finbl file location 
      */
-    public MagnetDownloader(IncompleteFileManager ifm,
-							MagnetOptions magnet,
-							boolean overwrite,
-                            File saveDir,
-                            String fileName) throws SaveLocationException {
-        //Initialize superclass with no locations.  We'll add the default
-        //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null, saveDir, 
-			  checkMagnetAndExtractFileName(magnet, fileName), overwrite);
-		propertiesMap.put(MAGNET, magnet);
+    public MbgnetDownloader(IncompleteFileManager ifm,
+							MbgnetOptions magnet,
+							boolebn overwrite,
+                            File sbveDir,
+                            String fileNbme) throws SaveLocationException {
+        //Initiblize superclass with no locations.  We'll add the default
+        //locbtion when the download control thread calls tryAllDownloads.
+        super(new RemoteFileDesc[0], ifm, null, sbveDir, 
+			  checkMbgnetAndExtractFileName(magnet, fileName), overwrite);
+		propertiesMbp.put(MAGNET, magnet);
     }
     
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-            DownloadCallback callback) {
-		Assert.that(getMagnet() != null);
-        downloadSHA1 = getMagnet().getSHA1Urn();
-        super.initialize(manager, fileManager, callback);
+    public void initiblize(DownloadManager manager, FileManager fileManager, 
+            DownlobdCallback callback) {
+		Assert.thbt(getMagnet() != null);
+        downlobdSHA1 = getMagnet().getSHA1Urn();
+        super.initiblize(manager, fileManager, callback);
     }
 
-	private MagnetOptions getMagnet() {
-		return (MagnetOptions)propertiesMap.get(MAGNET);
+	privbte MagnetOptions getMagnet() {
+		return (MbgnetOptions)propertiesMap.get(MAGNET);
 	}
     
     /**
-     * overrides ManagedDownloader to ensure that we issue requests to the known
-     * locations until we find out enough information to start the download 
+     * overrides MbnagedDownloader to ensure that we issue requests to the known
+     * locbtions until we find out enough information to start the download 
      */
-    protected int initializeDownload() {
+    protected int initiblizeDownload() {
         
-		if (!hasRFD()) {
-			MagnetOptions magnet = getMagnet();
-			String[] defaultURLs = magnet.getDefaultURLs();
-			if (defaultURLs.length == 0 )
-				return Downloader.GAVE_UP;
+		if (!hbsRFD()) {
+			MbgnetOptions magnet = getMagnet();
+			String[] defbultURLs = magnet.getDefaultURLs();
+			if (defbultURLs.length == 0 )
+				return Downlobder.GAVE_UP;
 
 
 			RemoteFileDesc firstDesc = null;
 			
-			for (int i = 0; i < defaultURLs.length && firstDesc == null; i++) {
+			for (int i = 0; i < defbultURLs.length && firstDesc == null; i++) {
 				try {
-					firstDesc = createRemoteFileDesc(defaultURLs[i],
-													 getSaveFile().getName(), magnet.getSHA1Urn());
+					firstDesc = crebteRemoteFileDesc(defaultURLs[i],
+													 getSbveFile().getName(), magnet.getSHA1Urn());
 							
-					initPropertiesMap(firstDesc);
-					addDownloadForced(firstDesc, true);
-				} catch (IOException badRFD) {}
+					initPropertiesMbp(firstDesc);
+					bddDownloadForced(firstDesc, true);
+				} cbtch (IOException badRFD) {}
 			}
         
-			// if all locations included in the magnet URI fail we can't do much
+			// if bll locations included in the magnet URI fail we can't do much
 			if (firstDesc == null)
 				return GAVE_UP;
 		}
-        return super.initializeDownload();
+        return super.initiblizeDownload();
     }
     
     /**
-     * Overrides ManagedDownloader to ensure that the default location is tried.
+     * Overrides MbnagedDownloader to ensure that the default location is tried.
      *
-    protected int performDownload() {     
+    protected int performDownlobd() {     
 
-		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
-			//Send HEAD request to default location (if present)to get its size.
-			//This can block, so it must be done here instead of in constructor.
-			//See class overview and ManagedDownloader.tryAllDownloads.
+		for (int i = 0; _defbultURLs != null && i < _defaultURLs.length; i++) {
+			//Send HEAD request to defbult location (if present)to get its size.
+			//This cbn block, so it must be done here instead of in constructor.
+			//See clbss overview and ManagedDownloader.tryAllDownloads.
             try {
-                RemoteFileDesc defaultRFD = 
-                    createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
+                RemoteFileDesc defbultRFD = 
+                    crebteRemoteFileDesc(_defaultURLs[i], _filename, _urn);
                 
-                //Add the faked up location before starting download. Note that 
-                //we must force ManagedDownloader to accept this RFD in case 
-                //it has no hash and a name that doesn't match the search 
+                //Add the fbked up location before starting download. Note that 
+                //we must force MbnagedDownloader to accept this RFD in case 
+                //it hbs no hash and a name that doesn't match the search 
                 //keywords.
-                super.addDownloadForced(defaultRFD,true);
+                super.bddDownloadForced(defaultRFD,true);
                 
-            }catch(IOException badRFD) {
-                if(LOG.isWarnEnabled())
-                    LOG.warn("Ignoring magnet url: " + _defaultURLs[i]);
+            }cbtch(IOException badRFD) {
+                if(LOG.isWbrnEnabled())
+                    LOG.wbrn("Ignoring magnet url: " + _defaultURLs[i]);
             }
 		}
 
-        //Start the downloads for real.
-        return super.performDownload();
+        //Stbrt the downloads for real.
+        return super.performDownlobd();
 		}*/
 
 
     /** 
-     * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
-     * is provided, issues a HEAD request to get the file size.  If this fails,
-     * returns null.  Package-access and static for easy testing.
+     * Crebtes a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
+     * is provided, issues b HEAD request to get the file size.  If this fails,
+     * returns null.  Pbckage-access and static for easy testing.
      */
-    private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
-        String filename, URN urn) throws IOException{
-        if (defaultURL==null) {
-            LOG.debug("createRemoteFileDesc called with null URL");        
+    privbte static RemoteFileDesc createRemoteFileDesc(String defaultURL,
+        String filenbme, URN urn) throws IOException{
+        if (defbultURL==null) {
+            LOG.debug("crebteRemoteFileDesc called with null URL");        
             return null;
         }
 
         URL url = null;
-        // Use the URL class to do a little parsing for us.
-        url = new URL(defaultURL);
+        // Use the URL clbss to do a little parsing for us.
+        url = new URL(defbultURL);
         int port = url.getPort();
         if (port<0)
-            port=80;      //assume default for HTTP (not 6346)
+            port=80;      //bssume default for HTTP (not 6346)
         
-        Set urns=new HashSet(1);
+        Set urns=new HbshSet(1);
         if (urn!=null)
-            urns.add(urn);
+            urns.bdd(urn);
         
         URI uri = new URI(url);
         
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
-                0l,             //index--doesn't matter since we won't push
-                filename != null ? filename : MagnetOptions.extractFileName(uri),
+                0l,             //index--doesn't mbtter since we won't push
+                filenbme != null ? filename : MagnetOptions.extractFileName(uri),
                 contentLength(url),
-                new byte[16],   //GUID--doesn't matter since we won't push
-                SpeedConstants.T3_SPEED_INT,
-                false,          //no chat support
-                3,              //four [sic] star quality
-                false,          //no browse host
-                null,           //no metadata
+                new byte[16],   //GUID--doesn't mbtter since we won't push
+                SpeedConstbnts.T3_SPEED_INT,
+                fblse,          //no chat support
+                3,              //four [sic] stbr quality
+                fblse,          //no browse host
+                null,           //no metbdata
                 urns,
-                false,          //not a reply to a multicast query
-                false,"",0l, //not firewalled, no vendor, timestamp=0 (OK?)
+                fblse,          //not a reply to a multicast query
+                fblse,"",0l, //not firewalled, no vendor, timestamp=0 (OK?)
                 url,            //url for GET request
                 null,           //no push proxies
-                0);         //assume no firewall transfer
+                0);         //bssume no firewall transfer
     } 
 
-    /** Returns the length of the content at the given URL. 
-     *  @exception IOException couldn't find the length for some reason */
-    private static int contentLength(URL url) throws IOException {
+    /** Returns the length of the content bt the given URL. 
+     *  @exception IOException couldn't find the length for some rebson */
+    privbte static int contentLength(URL url) throws IOException {
         try {
-            // Verify that the URL is valid.
-            new URI(url.toExternalForm().toCharArray());
-        } catch(URIException e) {
-            //invalid URI, don't allow this URL.
-            throw new IOException("invalid url: " + url);
+            // Verify thbt the URL is valid.
+            new URI(url.toExternblForm().toCharArray());
+        } cbtch(URIException e) {
+            //invblid URI, don't allow this URL.
+            throw new IOException("invblid url: " + url);
         }
 
-        HttpClient client = HttpClientManager.getNewClient();
-        HttpMethod head = new HeadMethod(url.toExternalForm());
-        head.addRequestHeader("User-Agent",
+        HttpClient client = HttpClientMbnager.getNewClient();
+        HttpMethod hebd = new HeadMethod(url.toExternalForm());
+        hebd.addRequestHeader("User-Agent",
                               CommonUtils.getHttpServer());
         try {
-            client.executeMethod(head);
-            //Extract Content-length, but only if the response was 200 OK.
-            //Generally speaking any 2xx response is ok, but in this situation
+            client.executeMethod(hebd);
+            //Extrbct Content-length, but only if the response was 200 OK.
+            //Generblly speaking any 2xx response is ok, but in this situation
             //we expect only 200.
-            if (head.getStatusCode() != HttpStatus.SC_OK)
-                throw new IOException("Got " + head.getStatusCode() +
-                                      " instead of 200");
+            if (hebd.getStatusCode() != HttpStatus.SC_OK)
+                throw new IOException("Got " + hebd.getStatusCode() +
+                                      " instebd of 200");
             
-            int length = head.getResponseContentLength();
+            int length = hebd.getResponseContentLength();
             if (length<0)
                 throw new IOException("No content length");
             return length;
-        } finally {
-            if(head != null)
-                head.releaseConnection();
+        } finblly {
+            if(hebd != null)
+                hebd.releaseConnection();
         }
     }
 
     ////////////////////////////// Requery Logic ///////////////////////////
 
     /** 
-     * Overrides ManagedDownloader to use the query words 
+     * Overrides MbnagedDownloader to use the query words 
      * specified by the MAGNET URI.
      */
     protected QueryRequest newRequery(int numRequeries)
-        throws CantResumeException {
-        MagnetOptions magnet = getMagnet();
-		String textQuery = magnet.getQueryString();
+        throws CbntResumeException {
+        MbgnetOptions magnet = getMagnet();
+		String textQuery = mbgnet.getQueryString();
         if (textQuery != null) {
-            String q = StringUtils.createQueryString(textQuery);
-            return QueryRequest.createQuery(q);
+            String q = StringUtils.crebteQueryString(textQuery);
+            return QueryRequest.crebteQuery(q);
         }
         else {
-            String q = StringUtils.createQueryString(getSaveFile().getName());
-            return QueryRequest.createQuery(q);
+            String q = StringUtils.crebteQueryString(getSaveFile().getName());
+            return QueryRequest.crebteQuery(q);
         }
     }
 
     /** 
-     * Overrides ManagedDownloader to allow any files with the right
-     * hash even if this doesn't currently have any download
-     * locations.  
+     * Overrides MbnagedDownloader to allow any files with the right
+     * hbsh even if this doesn't currently have any download
+     * locbtions.  
      * <p>
-     * We only allow for additions if the download has a sha1.  
+     * We only bllow for additions if the download has a sha1.  
      */
-    protected boolean allowAddition(RemoteFileDesc other) {        
-        // Allow if we have a hash and other matches it.
+    protected boolebn allowAddition(RemoteFileDesc other) {        
+        // Allow if we hbve a hash and other matches it.
 		URN otherSHA1 = other.getSHA1Urn();
-		if (downloadSHA1 != null && otherSHA1 != null) {
-			return downloadSHA1.equals(otherSHA1);
+		if (downlobdSHA1 != null && otherSHA1 != null) {
+			return downlobdSHA1.equals(otherSHA1);
         }
-        return false;
+        return fblse;
     }
 
     /**
-	 * Overridden for internal purposes, returns result from super method
-	 * call.
+	 * Overridden for internbl purposes, returns result from super method
+	 * cbll.
      */
-	protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
-													 boolean cache) {
-		if (!hasRFD())
-			initPropertiesMap(rfd);
-		return super.addDownloadForced(rfd, cache);
+	protected synchronized boolebn addDownloadForced(RemoteFileDesc rfd,
+													 boolebn cache) {
+		if (!hbsRFD())
+			initPropertiesMbp(rfd);
+		return super.bddDownloadForced(rfd, cache);
 	}
 
 	/**
-	 * Creates a magnet downloader object when converting from the old 
-	 * downloader version.
+	 * Crebtes a magnet downloader object when converting from the old 
+	 * downlobder version.
 	 * 
-	 * @throws IOException when the created magnet is not downloadable
+	 * @throws IOException when the crebted magnet is not downloadable
 	 */
-	private void readObject(ObjectInputStream stream)
-	throws IOException, ClassNotFoundException {
-        MagnetOptions magnet = getMagnet();
-		if (magnet == null) {
-			ObjectInputStream.GetField fields = stream.readFields();
+	privbte void readObject(ObjectInputStream stream)
+	throws IOException, ClbssNotFoundException {
+        MbgnetOptions magnet = getMagnet();
+		if (mbgnet == null) {
+			ObjectInputStrebm.GetField fields = stream.readFields();
 			String textQuery = (String) fields.get("_textQuery", null);
 			URN urn = (URN) fields.get("_urn", null);
-			String fileName = (String) fields.get("_filename", null);
-			String[] defaultURLs = (String[])fields.get("_defaultURLs", null);
-			magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
-			if (!magnet.isDownloadable()) {
-				throw new IOException("Old undownloadable magnet");
+			String fileNbme = (String) fields.get("_filename", null);
+			String[] defbultURLs = (String[])fields.get("_defaultURLs", null);
+			mbgnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
+			if (!mbgnet.isDownloadable()) {
+				throw new IOException("Old undownlobdable magnet");
 			}
-			propertiesMap.put(MAGNET, magnet);
+			propertiesMbp.put(MAGNET, magnet);
 		}
         
-        if (propertiesMap.get(DEFAULT_FILENAME) == null) 
-            propertiesMap.put(DEFAULT_FILENAME, magnet.getFileNameForSaving());
+        if (propertiesMbp.get(DEFAULT_FILENAME) == null) 
+            propertiesMbp.put(DEFAULT_FILENAME, magnet.getFileNameForSaving());
         
     }
 
     /**
-	 * Only allow requeries when <code>downloadSHA1</code> is not null.
+	 * Only bllow requeries when <code>downloadSHA1</code> is not null.
      */
-	protected boolean shouldSendRequeryImmediately(int numRequeries) {
-		return downloadSHA1 != null ? super.shouldSendRequeryImmediately(numRequeries) 
-				: false;
+	protected boolebn shouldSendRequeryImmediately(int numRequeries) {
+		return downlobdSHA1 != null ? super.shouldSendRequeryImmediately(numRequeries) 
+				: fblse;
 	}
 
 	/**
-	 * Checks if the magnet is downloadable and extracts a fileName if
-	 * <code>fileName</code> is null.
+	 * Checks if the mbgnet is downloadable and extracts a fileName if
+	 * <code>fileNbme</code> is null.
 	 *
-	 * @throws IllegalArgumentException if the magnet is not downloadable
+	 * @throws IllegblArgumentException if the magnet is not downloadable
 	 */
-	private static String checkMagnetAndExtractFileName(MagnetOptions magnet, 
-														String fileName) {
-		if (!magnet.isDownloadable()) {
-			throw new IllegalArgumentException("magnet not downloadable");
+	privbte static String checkMagnetAndExtractFileName(MagnetOptions magnet, 
+														String fileNbme) {
+		if (!mbgnet.isDownloadable()) {
+			throw new IllegblArgumentException("magnet not downloadable");
 		}
-		if (fileName != null) {
-			return fileName;
+		if (fileNbme != null) {
+			return fileNbme;
 		}
-		return magnet.getFileNameForSaving();
+		return mbgnet.getFileNameForSaving();
     }
 
 	/**
-	 * Overridden to make sure it calls the super method only if 
+	 * Overridden to mbke sure it calls the super method only if 
 	 * the filesize is known.
 	 */
-	protected void initializeIncompleteFile() throws IOException {
+	protected void initiblizeIncompleteFile() throws IOException {
 		if (getContentLength() != -1) {
-			super.initializeIncompleteFile();
+			super.initiblizeIncompleteFile();
 		}
 	}
 }

@@ -1,64 +1,64 @@
-package com.limegroup.gnutella.metadata;
+pbckage com.limegroup.gnutella.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutellb.xml.LimeXMLUtils;
 
 /**
- * a metadata editor for audio files.
+ * b metadata editor for audio files.
  */
-public abstract class AudioMetaDataEditor extends MetaDataEditor {
+public bbstract class AudioMetaDataEditor extends MetaDataEditor {
 	
-	private Log LOG = LogFactory.getLog(AudioMetaDataEditor.class);
+	privbte Log LOG = LogFactory.getLog(AudioMetaDataEditor.class);
 	
 	protected String title_;
-    protected String artist_;
-    protected String album_;
-    protected String year_;
-    protected String track_;
+    protected String brtist_;
+    protected String blbum_;
+    protected String yebr_;
+    protected String trbck_;
     protected String comment_;
     protected String genre_;
     protected String license_;
     
-    private static final String TITLE   = "audios__audio__title__";
-    private static final String ARTIST  = "audios__audio__artist__";
-    private static final String ALBUM   = "audios__audio__album__";
-    private static final String YEAR    = "audios__audio__year__";
-    private static final String TRACK   = "audios__audio__track__";
-    private static final String COMMENT = "audios__audio__comments__";
-    private static final String GENRE   = "audios__audio__genre__";    
-    private static final String LICENSE = "audios__audio__license__";
+    privbte static final String TITLE   = "audios__audio__title__";
+    privbte static final String ARTIST  = "audios__audio__artist__";
+    privbte static final String ALBUM   = "audios__audio__album__";
+    privbte static final String YEAR    = "audios__audio__year__";
+    privbte static final String TRACK   = "audios__audio__track__";
+    privbte static final String COMMENT = "audios__audio__comments__";
+    privbte static final String GENRE   = "audios__audio__genre__";    
+    privbte static final String LICENSE = "audios__audio__license__";
     
     /**
-     * Determines if this editor matches every field of another.
+     * Determines if this editor mbtches every field of another.
      */
-    public boolean equals(Object o) {
+    public boolebn equals(Object o) {
         if( o == this ) return true;
-        if( !(o instanceof MetaDataEditor) ) return false;
+        if( !(o instbnceof MetaDataEditor) ) return false;
         
-        AudioMetaDataEditor other = (AudioMetaDataEditor)o;
+        AudioMetbDataEditor other = (AudioMetaDataEditor)o;
 
-        return matches(title_, other.title_) &&
-               matches(artist_, other.artist_) &&
-               matches(album_, other.album_) &&
-               matches(year_, other.year_) &&
-               matches(track_, other.track_) &&
-               matches(comment_, other.comment_) &&
-               matches(genre_, other.genre_) &&
-               matches(license_, other.license_);
+        return mbtches(title_, other.title_) &&
+               mbtches(artist_, other.artist_) &&
+               mbtches(album_, other.album_) &&
+               mbtches(year_, other.year_) &&
+               mbtches(track_, other.track_) &&
+               mbtches(comment_, other.comment_) &&
+               mbtches(genre_, other.genre_) &&
+               mbtches(license_, other.license_);
     }
     
     /**
-     * Determines if this editor has all better fields than another.
+     * Determines if this editor hbs all better fields than another.
      */
-    public boolean betterThan(MetaDataEditor o) {
-    	AudioMetaDataEditor other = (AudioMetaDataEditor)o;
+    public boolebn betterThan(MetaDataEditor o) {
+    	AudioMetbDataEditor other = (AudioMetaDataEditor)o;
         return firstBetter(title_, other.title_) &&
-               firstBetter(artist_, other.artist_) &&
-               firstBetter(album_, other.album_) &&
-               firstBetter(track_, other.track_) &&
+               firstBetter(brtist_, other.artist_) &&
+               firstBetter(blbum_, other.album_) &&
+               firstBetter(trbck_, other.track_) &&
                firstBetter(comment_, other.comment_) &&
                firstBetter(genre_, other.genre_) &&
                firstBetter(license_, other.license_);
@@ -68,16 +68,16 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
      * Sets the fields in this editor to be the better of the two
      * editors.
      */
-    public void pickBetterFields(MetaDataEditor o) {
-    	AudioMetaDataEditor other = (AudioMetaDataEditor)o;
+    public void pickBetterFields(MetbDataEditor o) {
+    	AudioMetbDataEditor other = (AudioMetaDataEditor)o;
         if(firstBetter(other.title_, title_))
             title_ = other.title_;
-        if(firstBetter(other.artist_, artist_))
-           artist_ = other.artist_;
-        if(firstBetter(other.album_, album_))
-           album_ = other.album_;
-        if(firstBetter(other.track_, track_))
-           track_ = other.track_;
+        if(firstBetter(other.brtist_, artist_))
+           brtist_ = other.artist_;
+        if(firstBetter(other.blbum_, album_))
+           blbum_ = other.album_;
+        if(firstBetter(other.trbck_, track_))
+           trbck_ = other.track_;
         if(firstBetter(other.comment_, comment_))
            comment_ = other.comment_;
         if(firstBetter(other.genre_, genre_))
@@ -87,28 +87,28 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
     }
     
     /**
-     * Factory method for retrieving the correct editor
-     * for a given file.
+     * Fbctory method for retrieving the correct editor
+     * for b given file.
      */
-    public static MetaDataEditor getEditorForFile(String name) {
-    	if (LimeXMLUtils.isMP3File(name))
-    		return new MP3DataEditor();
-    	if (LimeXMLUtils.isOGGFile(name))
-    		return new OGGDataEditor();
+    public stbtic MetaDataEditor getEditorForFile(String name) {
+    	if (LimeXMLUtils.isMP3File(nbme))
+    		return new MP3DbtaEditor();
+    	if (LimeXMLUtils.isOGGFile(nbme))
+    		return new OGGDbtaEditor();
     	return null;
     }
 
 	/** 
-	 * Populates the internal values from the document.
+	 * Populbtes the internal values from the document.
 	 */
-	public void populate(LimeXMLDocument doc) {
-	    title_   = doc.getValue(TITLE);
-	    artist_  = doc.getValue(ARTIST);
-	    album_   = doc.getValue(ALBUM);
-	    year_    = doc.getValue(YEAR);
-	    track_   = doc.getValue(TRACK);
-	    comment_ = doc.getValue(COMMENT);
-	    genre_   = doc.getValue(GENRE);
-	    license_ = doc.getValue(LICENSE);
+	public void populbte(LimeXMLDocument doc) {
+	    title_   = doc.getVblue(TITLE);
+	    brtist_  = doc.getValue(ARTIST);
+	    blbum_   = doc.getValue(ALBUM);
+	    yebr_    = doc.getValue(YEAR);
+	    trbck_   = doc.getValue(TRACK);
+	    comment_ = doc.getVblue(COMMENT);
+	    genre_   = doc.getVblue(GENRE);
+	    license_ = doc.getVblue(LICENSE);
 	}
 }

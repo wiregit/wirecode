@@ -1,36 +1,36 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.util.zip.Inflater;
+import jbva.util.zip.InflaterInputStream;
 
 /**
- * The counterpart to CompressingOutputStream.  This class extends
- * InflaterInputStream solely to catch the potential NPE that can occur
- * during the native inflateBytes call if we have concurrently closed
- * the stream.
+ * The counterpbrt to CompressingOutputStream.  This class extends
+ * InflbterInputStream solely to catch the potential NPE that can occur
+ * during the nbtive inflateBytes call if we have concurrently closed
+ * the strebm.
  */
-public final class UncompressingInputStream extends InflaterInputStream {
+public finbl class UncompressingInputStream extends InflaterInputStream {
     
-    public UncompressingInputStream (final InputStream in, final Inflater flate) {
-      super(in, flate);
+    public UncompressingInputStrebm (final InputStream in, final Inflater flate) {
+      super(in, flbte);
     }
     
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int rebd(byte[] b, int off, int len) throws IOException {
         try {
-            return super.read(b, off, len);
-        } catch(NullPointerException e) {
-            //This will happen if 'end' was called on the inflate
-            //while we were inflating.
-            throw new IOException("inflater was ended");
-        } catch(ArrayIndexOutOfBoundsException aioobe) {
-            //This will happen occasionally on Windows machines
-            //when the underlying socket was closed/disconnected
-            //while the read reached the native socketRead0
-            throw new IOException(aioobe.getMessage());
-        } catch(OutOfMemoryError oome) {
-            throw new IOException(oome.getMessage());
+            return super.rebd(b, off, len);
+        } cbtch(NullPointerException e) {
+            //This will hbppen if 'end' was called on the inflate
+            //while we were inflbting.
+            throw new IOException("inflbter was ended");
+        } cbtch(ArrayIndexOutOfBoundsException aioobe) {
+            //This will hbppen occasionally on Windows machines
+            //when the underlying socket wbs closed/disconnected
+            //while the rebd reached the native socketRead0
+            throw new IOException(bioobe.getMessage());
+        } cbtch(OutOfMemoryError oome) {
+            throw new IOException(oome.getMessbge());
         }
     }
-} // class
+} // clbss

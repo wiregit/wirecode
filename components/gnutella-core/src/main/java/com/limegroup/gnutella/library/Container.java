@@ -1,93 +1,93 @@
-package com.limegroup.gnutella.library;
+pbckage com.limegroup.gnutella.library;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.RandomAccess;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.ArrayList;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
+import jbva.util.Collection;
+import jbva.util.Collections;
+import jbva.util.List;
+import jbva.util.Map;
+import jbva.util.HashMap;
+import jbva.util.RandomAccess;
+import jbva.util.Set;
+import jbva.util.HashSet;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.ArrayList;
+import jbva.util.SortedSet;
+import jbva.util.TreeSet;
+import jbva.io.ObjectOutputStream;
+import jbva.io.ObjectInputStream;
+import jbva.io.BufferedInputStream;
+import jbva.io.BufferedOutputStream;
+import jbva.io.File;
+import jbva.io.FileOutputStream;
+import jbva.io.FileInputStream;
+import jbva.io.IOException;
 
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.util.IOUtils;
+import com.limegroup.gnutellb.util.CommonUtils;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * A container for storing serialized objects to disk.
- * This supports only storing objects that fit in the Collections framework.
- * Either Collections or Maps.
- * All collections are returned as synchronized on this container.
+ * A contbiner for storing serialized objects to disk.
+ * This supports only storing objects thbt fit in the Collections framework.
+ * Either Collections or Mbps.
+ * All collections bre returned as synchronized on this container.
  */
-class Container {
+clbss Container {
     
-    private static final Log LOG = LogFactory.getLog(Container.class);
+    privbte static final Log LOG = LogFactory.getLog(Container.class);
     
-    private final Map STORED = new HashMap();
-    private final String filename;
+    privbte final Map STORED = new HashMap();
+    privbte final String filename;
     
     /**
-     * Constructs a new container with the given filename.
-     * It will always save to this name in the user's
-     * setting's directory, also loading the data from disk.
+     * Constructs b new container with the given filename.
+     * It will blways save to this name in the user's
+     * setting's directory, blso loading the data from disk.
      */
-    Container(String name) {
-        filename = name;
-        load();
+    Contbiner(String name) {
+        filenbme = name;
+        lobd();
     }
     
     /**
-     * Loads data from disk.  This requires the data either be
-     * a Map or a Collection if it already existed (in order
-     * to refresh data, instead of replace it).
+     * Lobds data from disk.  This requires the data either be
+     * b Map or a Collection if it already existed (in order
+     * to refresh dbta, instead of replace it).
      */
-    void load() {
-        // Read without grabbing the lock.
-        Map read = readFromDisk();
+    void lobd() {
+        // Rebd without grabbing the lock.
+        Mbp read = readFromDisk();
         
         synchronized(this) {
-            // Simple case -- no stored data yet.
+            // Simple cbse -- no stored data yet.
             if(STORED.isEmpty()) {
-                STORED.putAll(read);
+                STORED.putAll(rebd);
             } else {
-                // If data was stored, we can't replace, we have to refresh.
-                for(Iterator i = read.entrySet().iterator(); i.hasNext(); ) {
-                    Map.Entry next = (Map.Entry)i.next();
+                // If dbta was stored, we can't replace, we have to refresh.
+                for(Iterbtor i = read.entrySet().iterator(); i.hasNext(); ) {
+                    Mbp.Entry next = (Map.Entry)i.next();
                     Object k = next.getKey();
-                    Object v = next.getValue();
+                    Object v = next.getVblue();
                     Object storedV = STORED.get(k);
                     if(storedV == null) {
-                        // Another simple case -- key wasn't stored yet.
+                        // Another simple cbse -- key wasn't stored yet.
                         STORED.put(k, v);
                     } else {
                         synchronized(storedV) {
-                            // We can only refresh if both values are either
-                            // Collections or Maps.
-                            if(v instanceof Collection && storedV instanceof Collection) {
+                            // We cbn only refresh if both values are either
+                            // Collections or Mbps.
+                            if(v instbnceof Collection && storedV instanceof Collection) {
                                 Collection cv = (Collection)storedV;
-                                cv.clear();
-                                cv.addAll((Collection)v);
-                            } else if(v instanceof Map && storedV instanceof Map) {
-                                Map mv = (Map)storedV;
-                                mv.clear();
-                                mv.putAll((Map)v);
-                            } else if(LOG.isWarnEnabled()) {
-                                LOG.warn("Unable to reload data, key: " + k);
+                                cv.clebr();
+                                cv.bddAll((Collection)v);
+                            } else if(v instbnceof Map && storedV instanceof Map) {
+                                Mbp mv = (Map)storedV;
+                                mv.clebr();
+                                mv.putAll((Mbp)v);
+                            } else if(LOG.isWbrnEnabled()) {
+                                LOG.wbrn("Unable to reload data, key: " + k);
                             }
                         }
                     }
@@ -97,147 +97,147 @@ class Container {
     }
     
     /**
-     * Retrieves a set from the Container.  If the object
-     * stored is not null or is not a set, a Set is inserted instead.
+     * Retrieves b set from the Container.  If the object
+     * stored is not null or is not b set, a Set is inserted instead.
      *
-     * The returned sets are synchronized, but the serialized sets are NOT SYNCHRONIZED.
-     * This means that the future can change what they synchronize on easily.
+     * The returned sets bre synchronized, but the serialized sets are NOT SYNCHRONIZED.
+     * This mebns that the future can change what they synchronize on easily.
      */
-    synchronized Set getSet(String name) {
-        Object data = STORED.get(name);
-        if (data != null) {
-        	return (Set)data;
+    synchronized Set getSet(String nbme) {
+        Object dbta = STORED.get(name);
+        if (dbta != null) {
+        	return (Set)dbta;
         }
         else { 
-            Set set = Collections.synchronizedSet(new HashSet());
-            STORED.put(name, set);
+            Set set = Collections.synchronizedSet(new HbshSet());
+            STORED.put(nbme, set);
             return set;
         }
     }
     
     /**
-     * Clears all entries.  This assumes all entries are either Collections or Maps.
+     * Clebrs all entries.  This assumes all entries are either Collections or Maps.
      */
-    synchronized void clear() {
-        for(Iterator i = STORED.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            Object v = next.getValue();
+    synchronized void clebr() {
+        for(Iterbtor i = STORED.entrySet().iterator(); i.hasNext(); ) {
+            Mbp.Entry next = (Map.Entry)i.next();
+            Object v = next.getVblue();
             synchronized(v) {
-                if(v instanceof Collection)
-                    ((Collection)v).clear();
-                else if(v instanceof Map)
-                    ((Map)v).clear();
-                else if(LOG.isDebugEnabled())
-                    LOG.debug("Unable to clear data, key: " + next.getKey());
+                if(v instbnceof Collection)
+                    ((Collection)v).clebr();
+                else if(v instbnceof Map)
+                    ((Mbp)v).clear();
+                else if(LOG.isDebugEnbbled())
+                    LOG.debug("Unbble to clear data, key: " + next.getKey());
             }
         }
     }
         
     
     /**
-     * Saves the data to disk.
+     * Sbves the data to disk.
      */
-    void save() {
-        Map toSave;
+    void sbve() {
+        Mbp toSave;
         
         synchronized(this) {
-            toSave = new HashMap(STORED.size());
-            // This assumes that all objects are basic Collections objects. 
-            // If any aren't, we ignore them.
-            // Ideally we would use Cloneable, but the method is protected.
-            for(Iterator i = STORED.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry next = (Map.Entry)i.next();
+            toSbve = new HashMap(STORED.size());
+            // This bssumes that all objects are basic Collections objects. 
+            // If bny aren't, we ignore them.
+            // Ideblly we would use Cloneable, but the method is protected.
+            for(Iterbtor i = STORED.entrySet().iterator(); i.hasNext(); ) {
+                Mbp.Entry next = (Map.Entry)i.next();
                 Object k = next.getKey();
-                Object v = next.getValue();
+                Object v = next.getVblue();
                 synchronized(v) {
-                	if(v instanceof SortedSet)
-            			toSave.put(k, new TreeSet((SortedSet)v));
-            		else if(v instanceof Set)
-            			toSave.put(k, new HashSet((Set)v));
-            		else if(v instanceof Map)
-            			toSave.put(k, new HashMap((Map)v));
-            		else if(v instanceof List) {
-            			if (v instanceof RandomAccess)
-            				toSave.put(k, new ArrayList((List)v));
+                	if(v instbnceof SortedSet)
+            			toSbve.put(k, new TreeSet((SortedSet)v));
+            		else if(v instbnceof Set)
+            			toSbve.put(k, new HashSet((Set)v));
+            		else if(v instbnceof Map)
+            			toSbve.put(k, new HashMap((Map)v));
+            		else if(v instbnceof List) {
+            			if (v instbnceof RandomAccess)
+            				toSbve.put(k, new ArrayList((List)v));
             			else 
-            				toSave.put(k, new LinkedList((List)v));
+            				toSbve.put(k, new LinkedList((List)v));
             		}
                     else {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Update to clone! key: " + k);
-                        toSave.put(k, v);
+                        if(LOG.isWbrnEnabled())
+                            LOG.wbrn("Update to clone! key: " + k);
+                        toSbve.put(k, v);
                     }
                 }
             }
         }
         
-        writeToDisk(toSave);
+        writeToDisk(toSbve);
     }
     
     /**
-     * Saves the given object to disk.
+     * Sbves the given object to disk.
      */
-    private void writeToDisk(Object o) {
-        File f = new File(CommonUtils.getUserSettingsDir(), filename);
-        ObjectOutputStream oos = null;
+    privbte void writeToDisk(Object o) {
+        File f = new File(CommonUtils.getUserSettingsDir(), filenbme);
+        ObjectOutputStrebm oos = null;
         try {
-            oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f)));
+            oos = new ObjectOutputStrebm(new BufferedOutputStream(new FileOutputStream(f)));
             oos.writeObject(o);
             oos.flush();
-        } catch(IOException iox) {
-            LOG.warn("Can't write to disk!", iox);
-        } finally {
+        } cbtch(IOException iox) {
+            LOG.wbrn("Can't write to disk!", iox);
+        } finblly {
             IOUtils.close(oos);
         }
     }
     
     /**
-     * Reads a Map from disk.
+     * Rebds a Map from disk.
      */
-    private Map readFromDisk() {
-        File f = new File(CommonUtils.getUserSettingsDir(), filename);
-        ObjectInputStream ois = null;
-        Map map = null;
+    privbte Map readFromDisk() {
+        File f = new File(CommonUtils.getUserSettingsDir(), filenbme);
+        ObjectInputStrebm ois = null;
+        Mbp map = null;
         try {
-            ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
-            map = (Map)ois.readObject();
-        } catch(ClassCastException cce) {
-            LOG.warn("Not a map!", cce);
-        } catch(IOException iox) {
-            LOG.warn("Can't write to disk!", iox);
-        } catch(Throwable x) {
-            LOG.warn("Error reading!", x);
-        } finally {
+            ois = new ObjectInputStrebm(new BufferedInputStream(new FileInputStream(f)));
+            mbp = (Map)ois.readObject();
+        } cbtch(ClassCastException cce) {
+            LOG.wbrn("Not a map!", cce);
+        } cbtch(IOException iox) {
+            LOG.wbrn("Can't write to disk!", iox);
+        } cbtch(Throwable x) {
+            LOG.wbrn("Error reading!", x);
+        } finblly {
             IOUtils.close(ois);
         }
         
-        if (map != null) {
+        if (mbp != null) {
         	
-        	HashMap toReturn = new HashMap(map.size());
+        	HbshMap toReturn = new HashMap(map.size());
         	
-        	for (Iterator i = map.entrySet().iterator(); i.hasNext();) {
-        		Map.Entry entry = (Map.Entry)i.next();
+        	for (Iterbtor i = map.entrySet().iterator(); i.hasNext();) {
+        		Mbp.Entry entry = (Map.Entry)i.next();
         		Object k = entry.getKey();
-        		Object v = entry.getValue();
+        		Object v = entry.getVblue();
         	
-        		if(v instanceof SortedSet)
+        		if(v instbnceof SortedSet)
         			toReturn.put(k, Collections.synchronizedSortedSet((SortedSet)v));
-        		else if(v instanceof Set)
+        		else if(v instbnceof Set)
         			toReturn.put(k, Collections.synchronizedSet((Set)v));
-        		else if(v instanceof Map)
-        			toReturn.put(k, Collections.synchronizedMap((Map)v));
-        		else if(v instanceof List)
+        		else if(v instbnceof Map)
+        			toReturn.put(k, Collections.synchronizedMbp((Map)v));
+        		else if(v instbnceof List)
         			toReturn.put(k, Collections.synchronizedList((List)v));
         		else {
-        			if(LOG.isWarnEnabled())
-        				LOG.warn("Update to clone! key: " + k);
+        			if(LOG.isWbrnEnabled())
+        				LOG.wbrn("Update to clone! key: " + k);
         			toReturn.put(k, v);
         		}
         	}
         	return toReturn;
         }
         else {
-        	return new HashMap();
+        	return new HbshMap();
         }
     }
 }

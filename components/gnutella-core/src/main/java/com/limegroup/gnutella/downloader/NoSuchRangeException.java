@@ -1,13 +1,13 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
 /**
- * Thrown when we are not able to find a range that an uploader offers, that we
- * need. Thrown after locally checking for the range stored in the RFD versus 
- * some range we need.
+ * Thrown when we bre not able to find a range that an uploader offers, that we
+ * need. Thrown bfter locally checking for the range stored in the RFD versus 
+ * some rbnge we need.
  */
-public class NoSuchRangeException extends IOException {
-	public NoSuchRangeException() { super("Try Again Later"); }
-	public NoSuchRangeException(String msg) { super(msg); }
+public clbss NoSuchRangeException extends IOException {
+	public NoSuchRbngeException() { super("Try Again Later"); }
+	public NoSuchRbngeException(String msg) { super(msg); }
 }

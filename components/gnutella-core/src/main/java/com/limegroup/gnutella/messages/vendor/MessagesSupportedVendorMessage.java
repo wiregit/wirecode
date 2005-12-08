@@ -1,82 +1,82 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import jbva.io.ByteArrayInputStream;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.OutputStream;
+import jbva.util.Arrays;
+import jbva.util.HashSet;
+import jbva.util.Iterator;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
 
-/** The message that lets other know what messages you support.  Everytime you
- *  add a subclass of VendorMessage you should modify this class (assuming your
- *  message is delivered over TCP).
+/** The messbge that lets other know what messages you support.  Everytime you
+ *  bdd a subclass of VendorMessage you should modify this class (assuming your
+ *  messbge is delivered over TCP).
  */
-public final class MessagesSupportedVendorMessage extends VendorMessage {
+public finbl class MessagesSupportedVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 0;
+    public stbtic final int VERSION = 0;
 
-    private final Set _messagesSupported = new HashSet();
+    privbte final Set _messagesSupported = new HashSet();
 
-    private static MessagesSupportedVendorMessage _instance;
+    privbte static MessagesSupportedVendorMessage _instance;
 
     /**
-     * Constructs a new MSVM message with data from the network.
+     * Constructs b new MSVM message with data from the network.
      */
-    MessagesSupportedVendorMessage(byte[] guid, byte ttl, byte hops, 
-                                   int version, byte[] payload) 
-        throws BadPacketException {
+    MessbgesSupportedVendorMessage(byte[] guid, byte ttl, byte hops, 
+                                   int version, byte[] pbyload) 
+        throws BbdPacketException {
         super(guid, ttl, hops, F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, version,
-              payload);
+              pbyload);
 
         if (getVersion() > VERSION)
-            throw new BadPacketException("UNSUPPORTED VERSION");
+            throw new BbdPacketException("UNSUPPORTED VERSION");
 
-        // populate the Set of supported messages....
+        // populbte the Set of supported messages....
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
-            int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+            ByteArrbyInputStream bais = new ByteArrayInputStream(getPayload());
+            int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bbis));
             for (int i = 0; i < vectorSize; i++)
-                _messagesSupported.add(new SupportedMessageBlock(bais));
-        } catch (IOException ioe) {
+                _messbgesSupported.add(new SupportedMessageBlock(bais));
+        } cbtch (IOException ioe) {
             ErrorService.error(ioe); // impossible.
         }
     }
 
 
     /**
-     * Private constructor for creating the sole MSVM message of all our
-     * supported messages.
+     * Privbte constructor for creating the sole MSVM message of all our
+     * supported messbges.
      */
-    private MessagesSupportedVendorMessage() {
-        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePayload());
-        addSupportedMessages(_messagesSupported);
+    privbte MessagesSupportedVendorMessage() {
+        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePbyload());
+        bddSupportedMessages(_messagesSupported);
     }
 
     /**
-     * Constructs the payload for supporting all of the messages.
+     * Constructs the pbyload for supporting all of the messages.
      */
-    private static byte[] derivePayload() {
-        Set hashSet = new HashSet();
-        addSupportedMessages(hashSet);
+    privbte static byte[] derivePayload() {
+        Set hbshSet = new HashSet();
+        bddSupportedMessages(hashSet);
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)hashSet.size(), baos);
-            Iterator iter = hashSet.iterator();
-            while (iter.hasNext()) {
-                SupportedMessageBlock currSMP = 
-                    (SupportedMessageBlock) iter.next();
-                currSMP.encode(baos);
+            ByteArrbyOutputStream baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)hbshSet.size(), baos);
+            Iterbtor iter = hashSet.iterator();
+            while (iter.hbsNext()) {
+                SupportedMessbgeBlock currSMP = 
+                    (SupportedMessbgeBlock) iter.next();
+                currSMP.encode(bbos);
             }
-            return baos.toByteArray();
-        } catch (IOException ioe) {
+            return bbos.toByteArray();
+        } cbtch (IOException ioe) {
             ErrorService.error(ioe); // impossible.
             return null;
         }
@@ -84,86 +84,86 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     }
 
     // ADD NEW MESSAGES HERE AS YOU BUILD THEM....
-    // you should only add messages supported over TCP
-    private static void addSupportedMessages(Set hashSet) {
-        SupportedMessageBlock smp = null;
-        // TCP Connect Back
-        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,
-                                        TCPConnectBackVendorMessage.VERSION);
-        hashSet.add(smp);
-        // UDP Connect Back
-        smp = new SupportedMessageBlock(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK,
-                                        UDPConnectBackVendorMessage.VERSION);
-        hashSet.add(smp);
+    // you should only bdd messages supported over TCP
+    privbte static void addSupportedMessages(Set hashSet) {
+        SupportedMessbgeBlock smp = null;
+        // TCP Connect Bbck
+        smp = new SupportedMessbgeBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,
+                                        TCPConnectBbckVendorMessage.VERSION);
+        hbshSet.add(smp);
+        // UDP Connect Bbck
+        smp = new SupportedMessbgeBlock(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK,
+                                        UDPConnectBbckVendorMessage.VERSION);
+        hbshSet.add(smp);
         // Hops Flow
-        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,
-                                        HopsFlowVendorMessage.VERSION);
-        hashSet.add(smp);
-        // Give Stats Request
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_GIVE_STATS, 
-                                        GiveStatsVendorMessage.VERSION);
-        hashSet.add(smp);
+        smp = new SupportedMessbgeBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,
+                                        HopsFlowVendorMessbge.VERSION);
+        hbshSet.add(smp);
+        // Give Stbts Request
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID, F_GIVE_STATS, 
+                                        GiveStbtsVendorMessage.VERSION);
+        hbshSet.add(smp);
         // Push Proxy Request
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ,
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ,
                                         PushProxyRequest.VERSION);
-        hashSet.add(smp);        
-        // Leaf Guidance Support
-        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_LIME_ACK,
-                                        QueryStatusRequest.VERSION);
-        hashSet.add(smp);
+        hbshSet.add(smp);        
+        // Lebf Guidance Support
+        smp = new SupportedMessbgeBlock(F_BEAR_VENDOR_ID, F_LIME_ACK,
+                                        QueryStbtusRequest.VERSION);
+        hbshSet.add(smp);
         // TCP CB Redirect
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK,
-                                        TCPConnectBackRedirect.VERSION);
-        hashSet.add(smp);
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK,
+                                        TCPConnectBbckRedirect.VERSION);
+        hbshSet.add(smp);
         // UDP CB Redirect
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, 
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID, 
                                         F_UDP_CONNECT_BACK_REDIR,
-                                        UDPConnectBackRedirect.VERSION);
-        hashSet.add(smp);
-        // UDP Crawl support
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+                                        UDPConnectBbckRedirect.VERSION);
+        hbshSet.add(smp);
+        // UDP Crbwl support
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID,
         								F_ULTRAPEER_LIST,
-										UDPCrawlerPong.VERSION);
-        hashSet.add(smp);
-        //Simpp Request message
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+										UDPCrbwlerPong.VERSION);
+        hbshSet.add(smp);
+        //Simpp Request messbge
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID,
                                         F_SIMPP_REQ,
                                         SimppRequestVM.VERSION);
-        hashSet.add(smp);
-        //Simpp Message
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+        hbshSet.add(smp);
+        //Simpp Messbge
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID,
                                         F_SIMPP,
                                         SimppVM.VERSION);
-        hashSet.add(smp);
+        hbshSet.add(smp);
         
-        //Header update
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+        //Hebder update
+        smp = new SupportedMessbgeBlock(F_LIME_VENDOR_ID,
                 						F_HEADER_UPDATE,
-                						HeaderUpdateVendorMessage.VERSION);
-        hashSet.add(smp);
+                						HebderUpdateVendorMessage.VERSION);
+        hbshSet.add(smp);
     }
 
 
-    /** @return A MessagesSupportedVendorMessage with the set of messages 
+    /** @return A MessbgesSupportedVendorMessage with the set of messages 
      *  this client supports.
      */
-    public static MessagesSupportedVendorMessage instance() {
-        if (_instance == null)
-            _instance = new MessagesSupportedVendorMessage();
-        return _instance;
+    public stbtic MessagesSupportedVendorMessage instance() {
+        if (_instbnce == null)
+            _instbnce = new MessagesSupportedVendorMessage();
+        return _instbnce;
     }
 
 
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
-    public int supportsMessage(byte[] vendorID, int selector) {
-        Iterator iter = _messagesSupported.iterator();
-        while (iter.hasNext()) {
-            SupportedMessageBlock currSMP = 
-                (SupportedMessageBlock) iter.next();
-            int version = currSMP.matches(vendorID, selector);
+    public int supportsMessbge(byte[] vendorID, int selector) {
+        Iterbtor iter = _messagesSupported.iterator();
+        while (iter.hbsNext()) {
+            SupportedMessbgeBlock currSMP = 
+                (SupportedMessbgeBlock) iter.next();
+            int version = currSMP.mbtches(vendorID, selector);
             if (version > -1)
                 return version;
         }
@@ -172,194 +172,194 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
-    public int supportsTCPConnectBack() {
-        return supportsMessage(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK);
+    public int supportsTCPConnectBbck() {
+        return supportsMessbge(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK);
     }
 
 
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
-    public int supportsUDPConnectBack() {
-        return supportsMessage(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK);
+    public int supportsUDPConnectBbck() {
+        return supportsMessbge(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK);
     }
 
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
-    public int supportsTCPConnectBackRedirect() {
-        return supportsMessage(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK);
+    public int supportsTCPConnectBbckRedirect() {
+        return supportsMessbge(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK);
     }
 
 
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
-    public int supportsUDPConnectBackRedirect() {
-        return supportsMessage(F_LIME_VENDOR_ID, F_UDP_CONNECT_BACK_REDIR);
+    public int supportsUDPConnectBbckRedirect() {
+        return supportsMessbge(F_LIME_VENDOR_ID, F_UDP_CONNECT_BACK_REDIR);
     }
 
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
     public int supportsHopsFlow() {
-        return supportsMessage(F_BEAR_VENDOR_ID, F_HOPS_FLOW);
+        return supportsMessbge(F_BEAR_VENDOR_ID, F_HOPS_FLOW);
     }
     
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
     public int supportsPushProxy() {
-        return supportsMessage(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ);
+        return supportsMessbge(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ);
     }
 
     /**
-     * @return -1 if the message is not supported, else returns the version of
-     * the message supported.
+     * @return -1 if the messbge is not supported, else returns the version of
+     * the messbge supported.
      */
-    public int supportsGiveStatsVM() {
-        return supportsMessage(F_LIME_VENDOR_ID, F_GIVE_STATS);
+    public int supportsGiveStbtsVM() {
+        return supportsMessbge(F_LIME_VENDOR_ID, F_GIVE_STATS);
     }
     
     /**
-     * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported.
+     * @return -1 if the messbge isn't supported, else it returns the version 
+     * of the messbge supported.
      */
-    public int supportsLeafGuidance() {
-        return supportsMessage(F_BEAR_VENDOR_ID, F_LIME_ACK);
+    public int supportsLebfGuidance() {
+        return supportsMessbge(F_BEAR_VENDOR_ID, F_LIME_ACK);
     }
     
     /**
-     * @return -1 if the remote host does not support UDP crawling,
+     * @return -1 if the remote host does not support UDP crbwling,
      * else it returns the version.
      */
-    public int supportsUDPCrawling() {
-    	return supportsMessage(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST);
+    public int supportsUDPCrbwling() {
+    	return supportsMessbge(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST);
     }
     
-    public int supportsHeaderUpdate() {
-        return supportsMessage(F_LIME_VENDOR_ID,F_HEADER_UPDATE);
+    public int supportsHebderUpdate() {
+        return supportsMessbge(F_LIME_VENDOR_ID,F_HEADER_UPDATE);
     }
 
     // override super
-    public boolean equals(Object other) {
-        // basically two of these messages are the same if the support the same
-        // messages
-        if (other instanceof MessagesSupportedVendorMessage) {
-            MessagesSupportedVendorMessage vmp = 
-                (MessagesSupportedVendorMessage) other;
-            return (_messagesSupported.equals(vmp._messagesSupported));
+    public boolebn equals(Object other) {
+        // bbsically two of these messages are the same if the support the same
+        // messbges
+        if (other instbnceof MessagesSupportedVendorMessage) {
+            MessbgesSupportedVendorMessage vmp = 
+                (MessbgesSupportedVendorMessage) other;
+            return (_messbgesSupported.equals(vmp._messagesSupported));
         }
-        return false;
+        return fblse;
     }
     
     
     // override super
-    public int hashCode() {
-        return 17*_messagesSupported.hashCode();
+    public int hbshCode() {
+        return 17*_messbgesSupported.hashCode();
     }
     
 
-    /** Container for vector elements.
+    /** Contbiner for vector elements.
      */  
-    static class SupportedMessageBlock {
-        final byte[] _vendorID;
-        final int _selector;
-        final int _version;
-        final int _hashCode;
+    stbtic class SupportedMessageBlock {
+        finbl byte[] _vendorID;
+        finbl int _selector;
+        finbl int _version;
+        finbl int _hashCode;
 
         /**
-         * Constructs a new SupportedMessageBlock with the given vendorID,
-         * selector, and version.
+         * Constructs b new SupportedMessageBlock with the given vendorID,
+         * selector, bnd version.
          */
-        public SupportedMessageBlock(byte[] vendorID, int selector, 
+        public SupportedMessbgeBlock(byte[] vendorID, int selector, 
                                      int version) {
             _vendorID = vendorID;
             _selector = selector;
             _version = version;
-            _hashCode = computeHashCode(_vendorID, _selector, _version);
+            _hbshCode = computeHashCode(_vendorID, _selector, _version);
         }
 
         /**
-         * Constructs a new SupportedMessageBlock from the input stream.
-         * Throws BadPacketException if the data is invalid.
+         * Constructs b new SupportedMessageBlock from the input stream.
+         * Throws BbdPacketException if the data is invalid.
          */
-        public SupportedMessageBlock(InputStream encodedBlock) 
-            throws BadPacketException, IOException {
-            if (encodedBlock.available() < 8)
-                throw new BadPacketException("invalid data.");
+        public SupportedMessbgeBlock(InputStream encodedBlock) 
+            throws BbdPacketException, IOException {
+            if (encodedBlock.bvailable() < 8)
+                throw new BbdPacketException("invalid data.");
             
-            // first 4 bytes are vendor ID
+            // first 4 bytes bre vendor ID
             _vendorID = new byte[4];
-            encodedBlock.read(_vendorID, 0, _vendorID.length);
+            encodedBlock.rebd(_vendorID, 0, _vendorID.length);
 
             _selector =ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
             _version = ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
-            _hashCode = computeHashCode(_vendorID, _selector, _version);
+            _hbshCode = computeHashCode(_vendorID, _selector, _version);
         }
 
         /**
-         * Encodes this SMB to the OutputStream.
+         * Encodes this SMB to the OutputStrebm.
          */
-        public void encode(OutputStream out) throws IOException {
+        public void encode(OutputStrebm out) throws IOException {
             out.write(_vendorID);
             ByteOrder.short2leb((short)_selector, out);
             ByteOrder.short2leb((short)_version, out);
         }
 
-        /** @return 0 or more if this matches the message you are looking for.
+        /** @return 0 or more if this mbtches the message you are looking for.
          *  Otherwise returns -1;
          */
-        public int matches(byte[] vendorID, int selector) {
-            if ((Arrays.equals(_vendorID, vendorID)) && 
+        public int mbtches(byte[] vendorID, int selector) {
+            if ((Arrbys.equals(_vendorID, vendorID)) && 
                 (_selector == selector))
                 return _version;
             else 
                 return -1;
         }
 
-        public boolean equals(Object other) {
-            if (other instanceof SupportedMessageBlock) {
-                SupportedMessageBlock vmp = (SupportedMessageBlock) other;
+        public boolebn equals(Object other) {
+            if (other instbnceof SupportedMessageBlock) {
+                SupportedMessbgeBlock vmp = (SupportedMessageBlock) other;
                 return ((_selector == vmp._selector) &&
                         (_version == vmp._version) &&
-                        (Arrays.equals(_vendorID, vmp._vendorID))
+                        (Arrbys.equals(_vendorID, vmp._vendorID))
                         );
             }
-            return false;
+            return fblse;
         }
 
-        public int hashCode() {
-            return _hashCode;
+        public int hbshCode() {
+            return _hbshCode;
         }
         
-        private static int computeHashCode(byte[] vendorID, int selector, 
+        privbte static int computeHashCode(byte[] vendorID, int selector, 
                                            int version) {
-            int hashCode = 0;
-            hashCode += 37*version;
-            hashCode += 37*selector;
+            int hbshCode = 0;
+            hbshCode += 37*version;
+            hbshCode += 37*selector;
             for (int i = 0; i < vendorID.length; i++)
-                hashCode += (int) 37*vendorID[i];
-            return hashCode;
+                hbshCode += (int) 37*vendorID[i];
+            return hbshCode;
         }
     }
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
-        super.writePayload(out);
-        SentMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(this);
+    protected void writePbyload(OutputStream out) throws IOException {
+        super.writePbyload(out);
+        SentMessbgeStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(this);
     }
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
     public void recordDrop() {
         super.recordDrop();

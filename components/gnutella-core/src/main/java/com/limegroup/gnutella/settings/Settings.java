@@ -1,16 +1,16 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 /**
- * Marks something as being a 'Settings' provider.
+ * Mbrks something as being a 'Settings' provider.
  */
-public interface Settings {
+public interfbce Settings {
     
-    public void reload();
+    public void relobd();
     
-    public void save();
+    public void sbve();
     
-    public void revertToDefault();
+    public void revertToDefbult();
     
-    public void setShouldSave(boolean save);
+    public void setShouldSbve(boolean save);
     
 }

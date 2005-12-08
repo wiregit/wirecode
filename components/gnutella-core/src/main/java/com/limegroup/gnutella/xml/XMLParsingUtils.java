@@ -1,174 +1,174 @@
-package com.limegroup.gnutella.xml;
+pbckage com.limegroup.gnutella.xml;
 
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Collections;
+import jbva.io.IOException;
+import jbva.io.StringReader;
+import jbva.util.ArrayList;
+import jbva.util.HashMap;
+import jbva.util.List;
+import jbva.util.Map;
+import jbva.util.Collections;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import org.apache.xerces.parsers.SAXParser;
+import org.xml.sbx.Attributes;
+import org.xml.sbx.InputSource;
+import org.xml.sbx.SAXException;
+import org.xml.sbx.XMLReader;
+import org.xml.sbx.helpers.DefaultHandler;
+import org.bpache.xerces.parsers.SAXParser;
 
-import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutellb.ErrorService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
 /**
- * Provides just enough functionality for our simple schemas,
- * based on SAX
- * @author  tjones
+ * Provides just enough functionblity for our simple schemas,
+ * bbsed on SAX
+ * @buthor  tjones
  */
-public class XMLParsingUtils {
+public clbss XMLParsingUtils {
     
-    private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
+    privbte static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
     
 
-    static final private String XML_START = "<?xml";
+    stbtic final private String XML_START = "<?xml";
     
     /**
-     * a ThreadLocal to contain the instance of the Lime parser
+     * b ThreadLocal to contain the instance of the Lime parser
      */
-    private static ThreadLocal _parserContainer = new ThreadLocal() {
-        protected Object initialValue() {
-            return new LimeParser();
+    privbte static ThreadLocal _parserContainer = new ThreadLocal() {
+        protected Object initiblValue() {
+            return new LimePbrser();
         }
     };
     
     /**
-     * Parses our simplified XML
+     * Pbrses our simplified XML
      */
-    public static ParseResult parse(String xml, int responseCount) 
+    public stbtic ParseResult parse(String xml, int responseCount) 
       throws IOException, SAXException {
-        return parse(new InputSource(new StringReader(xml)),responseCount);
+        return pbrse(new InputSource(new StringReader(xml)),responseCount);
     }
     
-    public static ParseResult parse(InputSource inputSource) 
+    public stbtic ParseResult parse(InputSource inputSource) 
       throws IOException,SAXException {
-        return parse(inputSource, 8);
+        return pbrse(inputSource, 8);
     }
     
     /**
-     * Parses our simplified XML
+     * Pbrses our simplified XML
      */
-    public static ParseResult parse(InputSource inputSource, int responseCount) 
+    public stbtic ParseResult parse(InputSource inputSource, int responseCount) 
       throws IOException, SAXException {
-        ParseResult result = new ParseResult(responseCount);
-        LimeParser parser = (LimeParser)_parserContainer.get();
-        parser.parse(result,inputSource);
+        PbrseResult result = new ParseResult(responseCount);
+        LimePbrser parser = (LimeParser)_parserContainer.get();
+        pbrser.parse(result,inputSource);
         return result;
     }
 
     /**
-     * Splits an aggregated XML string into individual XML strings
-     * @param aggregatedXmlDocuments
+     * Splits bn aggregated XML string into individual XML strings
+     * @pbram aggregatedXmlDocuments
      * @return List of Strings
      */    
-    public static List split(String aggregatedXmlDocuments) {
-        List results = new ArrayList();
+    public stbtic List split(String aggregatedXmlDocuments) {
+        List results = new ArrbyList();
         
-        int begin=aggregatedXmlDocuments.indexOf(XML_START);
-        int end=aggregatedXmlDocuments.indexOf(XML_START,begin+1);
+        int begin=bggregatedXmlDocuments.indexOf(XML_START);
+        int end=bggregatedXmlDocuments.indexOf(XML_START,begin+1);
         
         while(end!=-1) {
-            results.add(aggregatedXmlDocuments.substring(begin,end));
+            results.bdd(aggregatedXmlDocuments.substring(begin,end));
             begin = end;
-            end = aggregatedXmlDocuments.indexOf(XML_START,begin+1);
+            end = bggregatedXmlDocuments.indexOf(XML_START,begin+1);
         }
         
         if(begin!=-1) 
-            results.add(aggregatedXmlDocuments.substring(begin));
+            results.bdd(aggregatedXmlDocuments.substring(begin));
         
         return results;
     }
     
     /**
-     * A list of maps, also containing the Schema URI, the type and
-     * the canonical key prefix
+     * A list of mbps, also containing the Schema URI, the type and
+     * the cbnonical key prefix
      */
-    public static class ParseResult extends ArrayList {
+    public stbtic class ParseResult extends ArrayList {
         
-        public ParseResult(int size) {
+        public PbrseResult(int size) {
             super(size*2/3);
         }
         
-        public String schemaURI;            //like http://www.limewire.com/schemas/audio.xsd
-        public String type;                 //e.g. audio, video, etc.
-        public String canonicalKeyPrefix;   //like audios__audio__
+        public String schembURI;            //like http://www.limewire.com/schemas/audio.xsd
+        public String type;                 //e.g. budio, video, etc.
+        public String cbnonicalKeyPrefix;   //like audios__audio__
     }
     
     /**
-     * this class does the actual parsing of the document.  It is a reusable
-     * DocumentHandler.
+     * this clbss does the actual parsing of the document.  It is a reusable
+     * DocumentHbndler.
      */
-    private static class LimeParser extends DefaultHandler {
-        private final XMLReader _reader;
-        private ParseResult _result;
+    privbte static class LimeParser extends DefaultHandler {
+        privbte final XMLReader _reader;
+        privbte ParseResult _result;
         
-        boolean _isFirstElement=true;
+        boolebn _isFirstElement=true;
         
-        LimeParser() {
-            XMLReader reader;
+        LimePbrser() {
+            XMLRebder reader;
             try {
-                reader = new SAXParser();
-                reader.setContentHandler(this);
-                reader.setFeature("http://xml.org/sax/features/namespaces", false);
-            }catch(SAXException bad) {
-                ErrorService.error(bad);
-                reader = null; 
+                rebder = new SAXParser();
+                rebder.setContentHandler(this);
+                rebder.setFeature("http://xml.org/sax/features/namespaces", false);
+            }cbtch(SAXException bad) {
+                ErrorService.error(bbd);
+                rebder = null; 
             }
-            _reader=reader;
+            _rebder=reader;
         }
         
         /**
-         * parses the given document input.  Any state from previous parsing is
-         * discarded.
+         * pbrses the given document input.  Any state from previous parsing is
+         * discbrded.
          */
-        public void parse(ParseResult dest, InputSource input) 
+        public void pbrse(ParseResult dest, InputSource input) 
         	throws SAXException, IOException {
             
-            //if parser creation failed, do not try to parse.
-            if (_reader==null)
+            //if pbrser creation failed, do not try to parse.
+            if (_rebder==null)
                 return;
             
             _isFirstElement=true;
             _result = dest;
 
-            _reader.parse(input);
+            _rebder.parse(input);
         }
         
-        public void startElement(String namespaceUri, String localName, 
-                                 String qualifiedName, Attributes attributes) {
+        public void stbrtElement(String namespaceUri, String localName, 
+                                 String qublifiedName, Attributes attributes) {
             if(_isFirstElement) {
-                _isFirstElement=false; 
-                _result.canonicalKeyPrefix = qualifiedName;
+                _isFirstElement=fblse; 
+                _result.cbnonicalKeyPrefix = qualifiedName;
                 return;
             }
             
             if(_result.type==null) {
-                _result.type = qualifiedName;
-                _result.schemaURI = "http://www.limewire.com/schemas/"+_result.type+".xsd";
-                _result.canonicalKeyPrefix += "__"+qualifiedName+"__";
+                _result.type = qublifiedName;
+                _result.schembURI = "http://www.limewire.com/schemas/"+_result.type+".xsd";
+                _result.cbnonicalKeyPrefix += "__"+qualifiedName+"__";
             } 
             
-            int attributesLength = attributes.getLength();
-            if(attributesLength > 0) {
-                Map attributeMap = new HashMap(attributesLength);
-                for(int i = 0; i < attributesLength; i++) {
-                    attributeMap.put(_result.canonicalKeyPrefix + 
-                                     attributes.getQName(i) + "__",
-                                     attributes.getValue(i).trim());
+            int bttributesLength = attributes.getLength();
+            if(bttributesLength > 0) {
+                Mbp attributeMap = new HashMap(attributesLength);
+                for(int i = 0; i < bttributesLength; i++) {
+                    bttributeMap.put(_result.canonicalKeyPrefix + 
+                                     bttributes.getQName(i) + "__",
+                                     bttributes.getValue(i).trim());
                 }
-                _result.add(attributeMap);
+                _result.bdd(attributeMap);
             } else {
-                _result.add(Collections.EMPTY_MAP);
+                _result.bdd(Collections.EMPTY_MAP);
             }
         }
     }

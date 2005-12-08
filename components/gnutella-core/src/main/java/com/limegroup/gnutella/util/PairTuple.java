@@ -1,16 +1,16 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-public class PairTuple{
+public clbss PairTuple{
     Object first;
     Object second;
     
     //constructor
-    public PairTuple(Object obj1, Object obj2){
+    public PbirTuple(Object obj1, Object obj2){
         this.first= obj1;
         this.second=obj2;
     }
 
-    public Object[] getPair(){
+    public Object[] getPbir(){
         Object[] tuple = new Object[2];
         tuple[0] = first;
         tuple[1] = second;

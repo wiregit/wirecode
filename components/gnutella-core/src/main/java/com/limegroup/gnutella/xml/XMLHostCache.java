@@ -1,88 +1,88 @@
-package com.limegroup.gnutella.xml;
+pbckage com.limegroup.gnutella.xml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.InputStream;
+import jbva.net.InetAddress;
+import jbva.net.UnknownHostException;
+import jbva.util.ArrayList;
+import jbva.util.Properties;
+import jbva.util.StringTokenizer;
 
-/** This class provides IP addresses for specialized gnutella content
+/** This clbss provides IP addresses for specialized gnutella content
     deliverers.
 */
-public class XMLHostCache {
+public clbss XMLHostCache {
 
-    // important literals.....
+    // importbnt literals.....
     //-----------------------------
-    private final String XML_HOSTS_DIR = 
-        "xml" + File.separator + "misc"+ File.separator;
-    private final String XML_HOSTS_FILE = "server.props";
-    private final String HOSTS_DELIM = ",";
+    privbte final String XML_HOSTS_DIR = 
+        "xml" + File.sepbrator + "misc"+ File.separator;
+    privbte final String XML_HOSTS_FILE = "server.props";
+    privbte final String HOSTS_DELIM = ",";
     //-----------------------------
     
-    /** allows access to XML_HOSTS_FILE....
+    /** bllows access to XML_HOSTS_FILE....
      */
-    private Properties _props;
+    privbte Properties _props;
 
-    /** file that stuff is saved in....
+    /** file thbt stuff is saved in....
      */
-    private String _dbFile;
+    privbte String _dbFile;
 
     /**
-     *@exception java.lang.Exception Thrown if could not access underlying DB.
+     *@exception jbva.lang.Exception Thrown if could not access underlying DB.
      */
-    public XMLHostCache() throws Exception {
-        // setup file to load props from.....
-        String limeHome = LimeXMLProperties.instance().getPath();
-        _dbFile = limeHome + File.separator + XML_HOSTS_DIR +
-        File.separator + XML_HOSTS_FILE;        
-        InputStream toLoadProps = new FileInputStream(_dbFile);
+    public XMLHostCbche() throws Exception {
+        // setup file to lobd props from.....
+        String limeHome = LimeXMLProperties.instbnce().getPath();
+        _dbFile = limeHome + File.sepbrator + XML_HOSTS_DIR +
+        File.sepbrator + XML_HOSTS_FILE;        
+        InputStrebm toLoadProps = new FileInputStream(_dbFile);
         
-        // load the props....
+        // lobd the props....
         _props = new Properties();
-        _props.load(toLoadProps);
+        _props.lobd(toLoadProps);
 
         debug(""+_props);
     }
 
-    private String getHostsForSchema(String schemaURI) {
+    privbte String getHostsForSchema(String schemaURI) {
         String retString = null;
 
         // use sumeet's stuff to get the key....
-        String displayString = LimeXMLSchema.getDisplayString(schemaURI);
-        if (displayString != null) 
-            // get the values and make a string[] out of them....
-            retString = _props.getProperty(displayString);
+        String displbyString = LimeXMLSchema.getDisplayString(schemaURI);
+        if (displbyString != null) 
+            // get the vblues and make a string[] out of them....
+            retString = _props.getProperty(displbyString);
 
         return retString;
     }
 
-    /** @return A array of Strings which are addresses of category specific
-     *  gnutella servents (the assumed port is 6346).  May return null.
+    /** @return A brray of Strings which are addresses of category specific
+     *  gnutellb servents (the assumed port is 6346).  May return null.
      */
-    public String[] getCachedHostsForURI(String schemaURI) {
+    public String[] getCbchedHostsForURI(String schemaURI) {
         String[] retHosts = null;
 
-        // get the hosts for the appropriate schema....
-        String hosts = getHostsForSchema(schemaURI);
+        // get the hosts for the bppropriate schema....
+        String hosts = getHostsForSchemb(schemaURI);
         if (hosts != null) {
-            // need to make them presentable....
+            // need to mbke them presentable....
             StringTokenizer st = new StringTokenizer(hosts,
                                                      HOSTS_DELIM);
 
-            // use an arraylist cuz a nslookup may fail....
-            ArrayList ipAddresses = new ArrayList();
-            while (st.hasMoreTokens()) {
+            // use bn arraylist cuz a nslookup may fail....
+            ArrbyList ipAddresses = new ArrayList();
+            while (st.hbsMoreTokens()) {
                 String currHost = st.nextToken();
                 try {
-                    InetAddress currIA = InetAddress.getByName(currHost);
-                    ipAddresses.add(currIA.getHostAddress());
+                    InetAddress currIA = InetAddress.getByNbme(currHost);
+                    ipAddresses.bdd(currIA.getHostAddress());
                 }
-                catch (UnknownHostException ignored) {}
+                cbtch (UnknownHostException ignored) {}
             }
-            // aggregate all successful ones into a string array....
+            // bggregate all successful ones into a string array....
             retHosts = new String[ipAddresses.size()];
             for (int i = 0; i < retHosts.length; i++)
                 retHosts[i] = (String) ipAddresses.get(i);            
@@ -91,15 +91,15 @@ public class XMLHostCache {
         return retHosts;
     }
 
-    public static void main(String argv[]) throws Exception {
-        XMLHostCache xmlhc = new XMLHostCache();
+    public stbtic void main(String argv[]) throws Exception {
+        XMLHostCbche xmlhc = new XMLHostCache();
         
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        LimeXMLSchembRepository rep = LimeXMLSchemaRepository.instance();
         if (rep != null) {
-            String[] uris = rep.getAvailableSchemaURIs();
+            String[] uris = rep.getAvbilableSchemaURIs();
             for (int i = 0; i < uris.length; i++) {
                 debug("curr uri = " + uris[i]);
-                String[] hosts = xmlhc.getCachedHostsForURI(uris[i]);
+                String[] hosts = xmlhc.getCbchedHostsForURI(uris[i]);
                 for (int j = 0; 
                      (hosts != null) && (j < hosts.length);
                      j++)
@@ -113,8 +113,8 @@ public class XMLHostCache {
 
 
 
-    private final static boolean debugOn = false;
-    public final static void debug(String out) {
+    privbte final static boolean debugOn = false;
+    public finbl static void debug(String out) {
         if (debugOn)
             System.out.println(out);
     }

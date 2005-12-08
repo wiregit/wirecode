@@ -1,74 +1,74 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.Serializable;
+import jbva.io.Serializable;
 
-import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutellb.ByteOrder;
 ;
 
-/** The open interval [low, high] inclusive on the both ends. */
-public class Interval implements Serializable{
-    /** Ensure backwards compatibility. */
-    static final long serialVersionUID = -2562093104400487554L;
+/** The open intervbl [low, high] inclusive on the both ends. */
+public clbss Interval implements Serializable{
+    /** Ensure bbckwards compatibility. */
+    stbtic final long serialVersionUID = -2562093104400487554L;
 
     /** INVARIANT: low<=high */
-    public final int low;
-    public final int high;
+    public finbl int low;
+    public finbl int high;
 
     /** @requires low<=high
-     *  @requires low and high can be represented as ints
+     *  @requires low bnd high can be represented as ints
      * 
-     * Stub for making code 64-bit clean.
+     * Stub for mbking code 64-bit clean.
      */
-    public Interval(long low, long high) {
+    public Intervbl(long low, long high) {
         if(high < low)
-            throw new IllegalArgumentException("low: " + low +
+            throw new IllegblArgumentException("low: " + low +
                                             ", high: " + high);
         // Since high >= low, low >= Integer.MIN_VALUE implies
-        // high >= Integer.MIN_VALUE.  Only one check is necessary.
+        // high >= Integer.MIN_VALUE.  Only one check is necessbry.
         if(low < 0)
-            throw new IllegalArgumentException("low < min int:"+low);
+            throw new IllegblArgumentException("low < min int:"+low);
         // high <= Integer.MAX_VALUE implies
-        // low <= Integer.MAX_VALUE.  Only one check is necessary.
+        // low <= Integer.MAX_VALUE.  Only one check is necessbry.
         if(high > Integer.MAX_VALUE)
-            throw new IllegalArgumentException("high > max int:"+high);
+            throw new IllegblArgumentException("high > max int:"+high);
         
         this.low=(int)low;
         this.high=(int)high;
     }
     
     /**
-    *  @requires singleton can be represented as an int
+    *  @requires singleton cbn be represented as an int
     * 
-    * Stub for making code 64-bit clean.
+    * Stub for mbking code 64-bit clean.
     */
-    public Interval(long singleton) {
+    public Intervbl(long singleton) {
         if(singleton < Integer.MIN_VALUE)
-            throw new IllegalArgumentException("singleton < min:"+singleton);
+            throw new IllegblArgumentException("singleton < min:"+singleton);
         if(singleton > Integer.MAX_VALUE)
-            throw new IllegalArgumentException("singleton > max int:"+singleton);
+            throw new IllegblArgumentException("singleton > max int:"+singleton);
             
         this.low=(int)singleton;
         this.high=(int)singleton;
     }
 
     /**
-     * @return true if this Interval is a "subrange" of the other interval 
+     * @return true if this Intervbl is a "subrange" of the other interval 
      */
-    public boolean isSubrange(Interval other) {
+    public boolebn isSubrange(Interval other) {
         return (this.low >= other.low && this.high <= other.high);
     }
 
     public String toString() {
         if (low==high)
-            return String.valueOf(low);
+            return String.vblueOf(low);
         else
-            return String.valueOf(low)+"-"+String.valueOf(high);
+            return String.vblueOf(low)+"-"+String.valueOf(high);
     }
 
-    public boolean equals(Object o) {
-        if (! (o instanceof Interval))
-            return false;
-        Interval other=(Interval)o;
+    public boolebn equals(Object o) {
+        if (! (o instbnceof Interval))
+            return fblse;
+        Intervbl other=(Interval)o;
         return low==other.low && high==other.high;
     }
     

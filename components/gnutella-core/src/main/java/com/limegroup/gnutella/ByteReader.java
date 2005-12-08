@@ -1,133 +1,133 @@
 /*
- * handles reading off of the input stream
+ * hbndles reading off of the input stream
  *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.InputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
 
 /** 
- * Provides the readLine method of a BufferedReader with no no automatic
- * buffering.  All methods are like those in InputStream except they return
- * -1 instead of throwing IOException.
+ * Provides the rebdLine method of a BufferedReader with no no automatic
+ * buffering.  All methods bre like those in InputStream except they return
+ * -1 instebd of throwing IOException.
  *
- * This also catches ArrayIndexOutOfBoundsExceptions while reading, as this
- * exception can be thrown from native socket code on windows occasionally.
- * The exception is treated exactly like an IOException.
+ * This blso catches ArrayIndexOutOfBoundsExceptions while reading, as this
+ * exception cbn be thrown from native socket code on windows occasionally.
+ * The exception is trebted exactly like an IOException.
  */
-public class ByteReader {
+public clbss ByteReader {
 
-    private static final byte R = '\r';
-    private static final byte N = '\n';
+    privbte static final byte R = '\r';
+    privbte static final byte N = '\n';
 
-    private InputStream _istream;
+    privbte InputStream _istream;
     
-    public ByteReader(InputStream stream) {
-        _istream = stream;
+    public ByteRebder(InputStream stream) {
+        _istrebm = stream;
     }
 
     public void close() {
         try {
-            _istream.close();
-        } catch (IOException ignored) {
+            _istrebm.close();
+        } cbtch (IOException ignored) {
         }
     }
 
-    public int read() {
+    public int rebd() {
 
         int c = -1;
     
-        if (_istream == null)
+        if (_istrebm == null)
             return c;
     
         try {
-            c =  _istream.read();
-        } catch(IOException ignored) {
+            c =  _istrebm.read();
+        } cbtch(IOException ignored) {
             // return -1
-        } catch(ArrayIndexOutOfBoundsException ignored) {
+        } cbtch(ArrayIndexOutOfBoundsException ignored) {
             // return -1
         }
         return c;
     }
 
-    public int read(byte[] buf) {
+    public int rebd(byte[] buf) {
         int c = -1;
 
-        if (_istream == null) {
+        if (_istrebm == null) {
             return c;
         }
 
         try {
-            c = _istream.read(buf);
-        } catch(IOException ignored) {
+            c = _istrebm.read(buf);
+        } cbtch(IOException ignored) {
             // return -1
-        } catch(ArrayIndexOutOfBoundsException ignored) {
+        } cbtch(ArrayIndexOutOfBoundsException ignored) {
             // return -1
         }
         return c;
     }
 
-    public int read(byte[] buf, int offset, int length) {
+    public int rebd(byte[] buf, int offset, int length) {
         int c = -1;
 
-        if (_istream == null) {
+        if (_istrebm == null) {
             return c;
         }
 
         try {
-            c = _istream.read(buf, offset, length);
-        } catch(IOException ignored) {
+            c = _istrebm.read(buf, offset, length);
+        } cbtch(IOException ignored) {
             // return -1
-        } catch(ArrayIndexOutOfBoundsException ignored) {
-            // happens on windows machines occasionally.
+        } cbtch(ArrayIndexOutOfBoundsException ignored) {
+            // hbppens on windows machines occasionally.
             // return -1
         }
         return c;
     }
 
     /** 
-     * Reads a new line WITHOUT end of line characters.  A line is 
-     * defined as a minimal sequence of character ending with "\n", with
-     * all "\r"'s thrown away.  Hence calling readLine on a stream
-     * containing "abc\r\n" or "a\rbc\n" will return "abc".
+     * Rebds a new line WITHOUT end of line characters.  A line is 
+     * defined bs a minimal sequence of character ending with "\n", with
+     * bll "\r"'s thrown away.  Hence calling readLine on a stream
+     * contbining "abc\r\n" or "a\rbc\n" will return "abc".
      *
-     * Throws IOException if there is an IO error.  Returns null if
-     * there are no more lines to read, i.e., EOF has been reached.
-     * Note that calling readLine on "ab<EOF>" returns null.
+     * Throws IOException if there is bn IO error.  Returns null if
+     * there bre no more lines to read, i.e., EOF has been reached.
+     * Note thbt calling readLine on "ab<EOF>" returns null.
      */
-    public String readLine() throws IOException {
-        if (_istream == null)
+    public String rebdLine() throws IOException {
+        if (_istrebm == null)
             return "";
 
 		StringBuffer sBuffer = new StringBuffer();
-        int c = -1; //the character just read
-        boolean keepReading = true;
+        int c = -1; //the chbracter just read
+        boolebn keepReading = true;
         
 		do {
 		    try {
-			    c = _istream.read();
-            } catch(ArrayIndexOutOfBoundsException aiooe) {
-                // this is apparently thrown under strange circumstances.
-                // interpret as an IOException.
-                throw new IOException("aiooe.");
+			    c = _istrebm.read();
+            } cbtch(ArrayIndexOutOfBoundsException aiooe) {
+                // this is bpparently thrown under strange circumstances.
+                // interpret bs an IOException.
+                throw new IOException("biooe.");
             }			    
 			switch(c) {
-			    // if this was a \n character, break out of the reading loop
-			    case  N: keepReading = false;
-			             break;
-			    // if this was a \r character, ignore it.
-			    case  R: continue;
-			    // if we reached an EOF ...
-			    case -1: return null;			             
-                // if it was any other character, append it to the buffer.
-			    default: sBuffer.append((char)c);
+			    // if this wbs a \n character, break out of the reading loop
+			    cbse  N: keepReading = false;
+			             brebk;
+			    // if this wbs a \r character, ignore it.
+			    cbse  R: continue;
+			    // if we rebched an EOF ...
+			    cbse -1: return null;			             
+                // if it wbs any other character, append it to the buffer.
+			    defbult: sBuffer.append((char)c);
 			}
-        } while(keepReading);
+        } while(keepRebding);
 
-		// return the string we have read.
+		// return the string we hbve read.
 		return sBuffer.toString();
     }
 }

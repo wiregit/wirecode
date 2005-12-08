@@ -1,68 +1,68 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Random;
+import jbva.util.Random;
 
 /**
  * A simple UUID.
  */
-public final class UUID {
+public finbl class UUID {
     
     /**
-     * The characters to generate this UUID with.
+     * The chbracters to generate this UUID with.
      */
-    private static final char[] HEX = new char[] {
+    privbte static final char[] HEX = new char[] {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'a', 'b', 'c', 'd', 'e', 'f'
+        'b', 'b', 'c', 'd', 'e', 'f'
     };
     
     /**
      * Index into the UUID to set its type.
      */
-    private static final byte INDEX_TYPE = 6;
+    privbte static final byte INDEX_TYPE = 6;
     
     /**
-     * Index into the UUID to set its variation.
+     * Index into the UUID to set its vbriation.
      */
-    private static final byte INDEX_VARIATION = 8;
+    privbte static final byte INDEX_VARIATION = 8;
     
     /**
      * The specific type of the UUID.
      */
-    private static final byte TYPE_RANDOM_BASED = 4;
+    privbte static final byte TYPE_RANDOM_BASED = 4;
     
     /**
-     * The rnd generator.
+     * The rnd generbtor.
      */
-    private static final Random RANDOM = new Random();
+    privbte static final Random RANDOM = new Random();
     
     /**
      * The string representing this UUID.
      */
-    private final String uuid;
+    privbte final String uuid;
     
     /**
-     * Constructs a new UUID with the specified bytes.
+     * Constructs b new UUID with the specified bytes.
      */
-    private UUID(byte[] bytes) {
+    privbte UUID(byte[] bytes) {
        this.uuid = genString(bytes);
     }
     
     /**
-     * Constructs a new UUID with the specified string.
+     * Constructs b new UUID with the specified string.
      *
-     * The size of the string must be 32, but no other characters
-     * are checked.
+     * The size of the string must be 32, but no other chbracters
+     * bre checked.
      */
     public UUID(String uuid) {
-        this.uuid = uuid.toLowerCase();
+        this.uuid = uuid.toLowerCbse();
         if(uuid.length() != 36)
-            throw new IllegalArgumentException();
+            throw new IllegblArgumentException();
     }
     
     /**
      * Returns the next UUID.
      */
-    public static UUID nextUUID() {
+    public stbtic UUID nextUUID() {
         byte[] bytes = new byte[16];
         RANDOM.nextBytes(bytes);
         bytes[INDEX_TYPE] &= (byte) 0x0F;
@@ -73,45 +73,45 @@ public final class UUID {
     }
     
     /**
-     * Creates the string of this UUID.
+     * Crebtes the string of this UUID.
      */
-    private static String genString(byte[] info) {
+    privbte static String genString(byte[] info) {
         StringBuffer sb = new StringBuffer(32);
         for(int i = 0; i < 16; i++) {
             if (i==4 || i==6 || i==8 || i==10)
-                sb.append('-');
+                sb.bppend('-');
             int hex = info[i] & 0xFF;
-            sb.append(HEX[hex >> 4]);
-            sb.append(HEX[hex & 0x0F]);
+            sb.bppend(HEX[hex >> 4]);
+            sb.bppend(HEX[hex & 0x0F]);
         }
         return sb.toString();      
     }  
     
     /**
-     * Generates the string of this UUID.
+     * Generbtes the string of this UUID.
      */
     public String toString() {
         return uuid;
     }
     
     /**
-     * Determines if this UUID is the same as another.
+     * Determines if this UUID is the sbme as another.
      */
-    public boolean equals(Object o) {
+    public boolebn equals(Object o) {
         if(o == this)
             return true;
-        else if (o instanceof UUID) {
+        else if (o instbnceof UUID) {
             UUID other = (UUID)o;
-            return uuid.equals(other.uuid);
+            return uuid.equbls(other.uuid);
         }
-        return false;
+        return fblse;
     }
     
     /**
-     * The hashCode of this UUID.
+     * The hbshCode of this UUID.
      */
-    public int hashCode() {
-        return uuid.hashCode();
+    public int hbshCode() {
+        return uuid.hbshCode();
     }
 }
    

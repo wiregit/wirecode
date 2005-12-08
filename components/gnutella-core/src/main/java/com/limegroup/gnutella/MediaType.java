@@ -1,55 +1,55 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import jbva.io.Serializable;
+import jbva.util.Arrays;
+import jbva.util.Collections;
+import jbva.util.HashSet;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.Set;
+import jbva.util.TreeSet;
 
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.util.Comparators;
 
 /**
- * A generic type of media, i.e., "video" or "audio".
- * Many different file formats can be of the same media type.
- * MediaType's are immutable.
+ * A generic type of medib, i.e., "video" or "audio".
+ * Mbny different file formats can be of the same media type.
+ * MedibType's are immutable.
  *
- * MediaType is Serializable so that older downloads.dat files
- * with serialized wishlist downloaders can be deserialized.
- * Note that we no longer serialize MediaType though.
+ * MedibType is Serializable so that older downloads.dat files
+ * with seriblized wishlist downloaders can be deserialized.
+ * Note thbt we no longer serialize MediaType though.
  *
- * // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
+ * // See http://www.mrc-cbu.cbm.ac.uk/Help/mimedefault.html
  */
-public class MediaType implements Serializable {
-    private static final long serialVersionUID = 3999062781289258389L;
+public clbss MediaType implements Serializable {
+    privbte static final long serialVersionUID = 3999062781289258389L;
     
-    // These values should match standard MIME content-type
-    // categories and/or XSD schema names.
-    public static final String SCHEMA_ANY_TYPE = "*";
-    public static final String SCHEMA_DOCUMENTS = "document";
-    public static final String SCHEMA_PROGRAMS = "application";
-    public static final String SCHEMA_AUDIO = "audio";
-    public static final String SCHEMA_VIDEO = "video";
-    public static final String SCHEMA_IMAGES = "image";
+    // These vblues should match standard MIME content-type
+    // cbtegories and/or XSD schema names.
+    public stbtic final String SCHEMA_ANY_TYPE = "*";
+    public stbtic final String SCHEMA_DOCUMENTS = "document";
+    public stbtic final String SCHEMA_PROGRAMS = "application";
+    public stbtic final String SCHEMA_AUDIO = "audio";
+    public stbtic final String SCHEMA_VIDEO = "video";
+    public stbtic final String SCHEMA_IMAGES = "image";
     
-    // These are used as resource keys to retreive descriptions in the GUI
-    public static final String ANY_TYPE = "MEDIA_ANY_TYPE";
-    public static final String DOCUMENTS = "MEDIA_DOCUMENTS";
-    public static final String PROGRAMS = "MEDIA_PROGRAMS";
-    public static final String AUDIO = "MEDIA_AUDIO";
-    public static final String VIDEO = "MEDIA_VIDEO";
-    public static final String IMAGES = "MEDIA_IMAGES";
+    // These bre used as resource keys to retreive descriptions in the GUI
+    public stbtic final String ANY_TYPE = "MEDIA_ANY_TYPE";
+    public stbtic final String DOCUMENTS = "MEDIA_DOCUMENTS";
+    public stbtic final String PROGRAMS = "MEDIA_PROGRAMS";
+    public stbtic final String AUDIO = "MEDIA_AUDIO";
+    public stbtic final String VIDEO = "MEDIA_VIDEO";
+    public stbtic final String IMAGES = "MEDIA_IMAGES";
 
     /**
-     * Type for 'any file'
+     * Type for 'bny file'
      */
-    private static final MediaType TYPE_ANY = 
-        new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, null) {
-            public boolean matches(String ext) {
+    privbte static final MediaType TYPE_ANY = 
+        new MedibType(SCHEMA_ANY_TYPE, ANY_TYPE, null) {
+            public boolebn matches(String ext) {
                 return true;
             }
         };
@@ -57,82 +57,82 @@ public class MediaType implements Serializable {
     /**
      * Type for 'documents'
      */
-    private static final MediaType TYPE_DOCUMENTS =
-        new MediaType(SCHEMA_DOCUMENTS, DOCUMENTS,
+    privbte static final MediaType TYPE_DOCUMENTS =
+        new MedibType(SCHEMA_DOCUMENTS, DOCUMENTS,
             new String[] {
                 "html", "htm", "xhtml", "mht", "mhtml", "xml",
-                "txt", "ans", "asc", "diz", "eml",
+                "txt", "bns", "asc", "diz", "eml",
                 "pdf", "ps", "eps", "epsf", "dvi", 
                 "rtf", "wri", "doc", "mcw", "wps",
                 "xls", "wk1", "dif", "csv", "ppt", "tsv",
                 "hlp", "chm", "lit", 
-                "tex", "texi", "latex", "info", "man",
+                "tex", "texi", "lbtex", "info", "man",
                 "wp", "wpd", "wp5", "wk3", "wk4", "shw", 
                 "sdd", "sdw", "sdp", "sdc",
                 "sxd", "sxw", "sxp", "sxc",
-                "abw", "kwd"
+                "bbw", "kwd"
             });
             
     /**
-     * Type for linux/osx programs, used for Aggregator.
+     * Type for linux/osx progrbms, used for Aggregator.
      */
-   private static final MediaType TYPE_LINUX_OSX_PROGRAMS =
-        new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
+   privbte static final MediaType TYPE_LINUX_OSX_PROGRAMS =
+        new MedibType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
-                "bin", "mdb", "sh", "csh", "awk", "pl",
-                "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz",
-                "taz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg",
-                "cue", "iso", "jnlp", "rar", "sh"
+                "bin", "mdb", "sh", "csh", "bwk", "pl",
+                "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tbr", "tgz",
+                "tbz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg",
+                "cue", "iso", "jnlp", "rbr", "sh"
             });
 
     /**
-     * Type for windows programs, used for Aggregator.
+     * Type for windows progrbms, used for Aggregator.
      */
-    private static final MediaType TYPE_WINDOWS_PROGRAMS =
-        new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
+    privbte static final MediaType TYPE_WINDOWS_PROGRAMS =
+        new MedibType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
-                "exe", "zip", "jar", "cab", "msi", "msp",
-                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", 
+                "exe", "zip", "jbr", "cab", "msi", "msp",
+                "brj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", 
                 "iso", "jnlp"
             });            
         
     /**
-     * Type for 'programs'
+     * Type for 'progrbms'
      */
-    private static final MediaType TYPE_PROGRAMS =
-        new MediaType(SCHEMA_PROGRAMS, PROGRAMS, 
-                makeArray(TYPE_LINUX_OSX_PROGRAMS.exts,
+    privbte static final MediaType TYPE_PROGRAMS =
+        new MedibType(SCHEMA_PROGRAMS, PROGRAMS, 
+                mbkeArray(TYPE_LINUX_OSX_PROGRAMS.exts,
                           TYPE_WINDOWS_PROGRAMS.exts)
         );
         
     /**
-     * Type for 'audio'
+     * Type for 'budio'
      */
-    private static final MediaType TYPE_AUDIO =
-        new MediaType(SCHEMA_AUDIO, AUDIO,
+    privbte static final MediaType TYPE_AUDIO =
+        new MedibType(SCHEMA_AUDIO, AUDIO,
             new String[] {
-                "mp3", "mpa", "mp1", "mpga", "mp2", 
-                "ra", "rm", "ram", "rmj",
-                "wma", "wav", "m4a", "m4p","mp4",
+                "mp3", "mpb", "mp1", "mpga", "mp2", 
+                "rb", "rm", "ram", "rmj",
+                "wmb", "wav", "m4a", "m4p","mp4",
                 "lqt", "ogg", "med",
-                "aif", "aiff", "aifc",
-                "au", "snd", "s3m", "aud", 
-                "mid", "midi", "rmi", "mod", "kar",
-                "ac3", "shn", "fla", "flac", "cda", 
-                "mka"
+                "bif", "aiff", "aifc",
+                "bu", "snd", "s3m", "aud", 
+                "mid", "midi", "rmi", "mod", "kbr",
+                "bc3", "shn", "fla", "flac", "cda", 
+                "mkb"
             });
         
     /**
      * Type for 'video'
      */
-    private static final MediaType TYPE_VIDEO =
-        new MediaType(SCHEMA_VIDEO, VIDEO,
+    privbte static final MediaType TYPE_VIDEO =
+        new MedibType(SCHEMA_VIDEO, VIDEO,
             new String[] {
                 "mpg", "mpeg", "mpe", "mng", "mpv", "m1v",
                 "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v", "mpgv", 
                 "vcd", "mp4", "dv", "dvd", "div", "divx", "dvx",
-                "smi", "smil", "rm", "ram", "rv", "rmm", "rmvb", 
-                "avi", "asf", "asx", "wmv", "qt", "mov",
+                "smi", "smil", "rm", "rbm", "rv", "rmm", "rmvb", 
+                "bvi", "asf", "asx", "wmv", "qt", "mov",
                 "fli", "flc", "flx", "flv", 
                 "wml", "vrml", "swf", "dcr", "jve", "nsv", 
                 "mkv", "ogm", 
@@ -140,119 +140,119 @@ public class MediaType implements Serializable {
             });
         
     /**
-     * Type for 'images'
+     * Type for 'imbges'
      */
-    private static final MediaType TYPE_IMAGES =
-        new MediaType(SCHEMA_IMAGES, IMAGES,
+    privbte static final MediaType TYPE_IMAGES =
+        new MedibType(SCHEMA_IMAGES, IMAGES,
             new String[] {
                 "gif", "png",
                 "jpg", "jpeg", "jpe", "jif", "jiff", "jfif",
                 "tif", "tiff", "iff", "lbm", "ilbm", "eps",
-                "mac", "drw", "pct", "img",
-                "bmp", "dib", "rle", "ico", "ani", "icl", "cur",
+                "mbc", "drw", "pct", "img",
+                "bmp", "dib", "rle", "ico", "bni", "icl", "cur",
                 "emf", "wmf", "pcx",
-                "pcd", "tga", "pic", "fig",
+                "pcd", "tgb", "pic", "fig",
                 "psd", "wpg", "dcx", "cpt", "mic",
                 "pbm", "pnm", "ppm", "xbm", "xpm", "xwd",
-                "sgi", "fax", "rgb", "ras"
+                "sgi", "fbx", "rgb", "ras"
             });
         
     /**
-     * All media types.
+     * All medib types.
      */
-    private static final MediaType[] ALL_MEDIA_TYPES =
-        new MediaType[] { TYPE_ANY, TYPE_DOCUMENTS, TYPE_PROGRAMS,
+    privbte static final MediaType[] ALL_MEDIA_TYPES =
+        new MedibType[] { TYPE_ANY, TYPE_DOCUMENTS, TYPE_PROGRAMS,
                           TYPE_AUDIO, TYPE_VIDEO, TYPE_IMAGES };     
     
     /**
-     * The description of this MediaType.
+     * The description of this MedibType.
      */
-    private final String schema;
+    privbte final String schema;
     
     /**
-     * The key to look up this MediaType.
+     * The key to look up this MedibType.
      */
-    private final String descriptionKey;
+    privbte final String descriptionKey;
     
     /**
-     * The list of extensions within this MediaType.
+     * The list of extensions within this MedibType.
      */
-    private final Set exts;
+    privbte final Set exts;
     
     /**
-     * Whether or not this is one of the default media types.
+     * Whether or not this is one of the defbult media types.
      */
-    private final boolean isDefault;
+    privbte final boolean isDefault;
     
     /**
-     * Constructs a MediaType with only a MIME-Type.
+     * Constructs b MediaType with only a MIME-Type.
      */
-    public MediaType(String schema) {
-    	if (schema == null) {
-    		throw new NullPointerException("schema must not be null");
+    public MedibType(String schema) {
+    	if (schemb == null) {
+    		throw new NullPointerException("schemb must not be null");
     	}
-        this.schema = schema;
+        this.schemb = schema;
         this.descriptionKey = null;
         this.exts = Collections.EMPTY_SET;
-        this.isDefault = false;
+        this.isDefbult = false;
     }
     
     /**
-     * @param schema a MIME compliant non-localizable identifier,
-     *  that matches file categories (and XSD schema names).
-     * @param descriptionKey a media identifier that can be used
-     *  to retreive a localizable descriptive text.
-     * @param extensions a list of all file extensions of this
-     *  type.  Must be all lowercase.  If null, this matches
-     *  any file.
+     * @pbram schema a MIME compliant non-localizable identifier,
+     *  thbt matches file categories (and XSD schema names).
+     * @pbram descriptionKey a media identifier that can be used
+     *  to retreive b localizable descriptive text.
+     * @pbram extensions a list of all file extensions of this
+     *  type.  Must be bll lowercase.  If null, this matches
+     *  bny file.
      */
-    public MediaType(String schema, String descriptionKey,
+    public MedibType(String schema, String descriptionKey,
                      String[] extensions) {
-    	if (schema == null) {
-    		throw new NullPointerException("schema must not be null");
+    	if (schemb == null) {
+    		throw new NullPointerException("schemb must not be null");
     	}
-        this.schema = schema;
+        this.schemb = schema;
         this.descriptionKey = descriptionKey;
-        this.isDefault = true;
+        this.isDefbult = true;
         if(extensions == null) {
             this.exts = Collections.EMPTY_SET;
         } else {
             Set set =
-                new TreeSet(Comparators.caseInsensitiveStringComparator());
-            set.addAll(Arrays.asList(extensions));
+                new TreeSet(Compbrators.caseInsensitiveStringComparator());
+            set.bddAll(Arrays.asList(extensions));
             this.exts = set;
         }
     }
         
     /** 
-     * Returns true if a file with the given name is of this
-     * media type, i.e., the suffix of the filename matches
+     * Returns true if b file with the given name is of this
+     * medib type, i.e., the suffix of the filename matches
      * one of this' extensions. 
      */
-    public boolean matches(String filename) {
+    public boolebn matches(String filename) {
         if (exts == null)
             return true;
 
-        //Get suffix of filename.
-        int j = filename.lastIndexOf(".");
-        if (j == -1 || j == filename.length())
-            return false;
-        String suffix = filename.substring(j+1);
+        //Get suffix of filenbme.
+        int j = filenbme.lastIndexOf(".");
+        if (j == -1 || j == filenbme.length())
+            return fblse;
+        String suffix = filenbme.substring(j+1);
 
-        // Match with extensions.
-        return exts.contains(suffix);
+        // Mbtch with extensions.
+        return exts.contbins(suffix);
     }
     
     /** 
-     * Returns this' media-type (a MIME content-type category)
-     * (previously returned a description key)
+     * Returns this' medib-type (a MIME content-type category)
+     * (previously returned b description key)
      */
     public String toString() {
-        return schema;
+        return schemb;
     }
     
     /** 
-     * Returns this' description key in localizable resources
+     * Returns this' description key in locblizable resources
      * (now distinct from the result of the toString method)
      */
     public String getDescriptionKey() {
@@ -263,161 +263,161 @@ public class MediaType implements Serializable {
      * Returns the MIME-Type of this.
      */
     public String getMimeType() {
-        return schema;
+        return schemb;
     }
     
     /**
-     * Determines whether or not this is a default media type.
+     * Determines whether or not this is b default media type.
      */
-    public boolean isDefault() {
-        return isDefault;
+    public boolebn isDefault() {
+        return isDefbult;
     }
     
     /**
-     * Returns the extensions for this media type.
+     * Returns the extensions for this medib type.
      */
     public Set getExtensions() {
         return exts;
     }
     
     /**
-     * Returns all default media types.
+     * Returns bll default media types.
      */
-    public static final MediaType[] getDefaultMediaTypes() {
+    public stbtic final MediaType[] getDefaultMediaTypes() {
         return ALL_MEDIA_TYPES;
     }
     
     /**
-     * Retrieves the media type for the specified schema's description.
+     * Retrieves the medib type for the specified schema's description.
      */
-    public static MediaType getMediaTypeForSchema(String schema) {
+    public stbtic MediaType getMediaTypeForSchema(String schema) {
         for (int i = ALL_MEDIA_TYPES.length; --i >= 0;)
-            if (schema.equals(ALL_MEDIA_TYPES[i].schema))
+            if (schemb.equals(ALL_MEDIA_TYPES[i].schema))
                 return ALL_MEDIA_TYPES[i];
         return null;
     }
     
     /**
-     * Retrieves the media type for the specified extension.
+     * Retrieves the medib type for the specified extension.
      */
-    public static MediaType getMediaTypeForExtension(String ext) {
+    public stbtic MediaType getMediaTypeForExtension(String ext) {
         for(int i = ALL_MEDIA_TYPES.length; --i >= 0;)
-            if(ALL_MEDIA_TYPES[i].exts.contains(ext))
+            if(ALL_MEDIA_TYPES[i].exts.contbins(ext))
                 return ALL_MEDIA_TYPES[i];
         return null;
     }
     
     /**
-     * Determines whether or not the specified schema is a default.
+     * Determines whether or not the specified schemb is a default.
      */
-    public static boolean isDefaultType(String schema) {
+    public stbtic boolean isDefaultType(String schema) {
         for (int i = ALL_MEDIA_TYPES.length; --i >= 0;)
-            if (schema.equals(ALL_MEDIA_TYPES[i].schema))
+            if (schemb.equals(ALL_MEDIA_TYPES[i].schema))
                 return true;
-        return false;
+        return fblse;
     }
 
  
     /**
-     * Retrieves the any media type.
+     * Retrieves the bny media type.
      */
-    public static MediaType getAnyTypeMediaType() {
+    public stbtic MediaType getAnyTypeMediaType() {
         return TYPE_ANY;
     }
         
     /**
-     * Retrieves the audio media type.
+     * Retrieves the budio media type.
      */
-    public static MediaType getAudioMediaType() {
+    public stbtic MediaType getAudioMediaType() {
         return TYPE_AUDIO;
     }
     
     /**
-     * Retrieves the video media type.
+     * Retrieves the video medib type.
      */
-    public static MediaType getVideoMediaType() {
+    public stbtic MediaType getVideoMediaType() {
         return TYPE_VIDEO;
     }
     
     /**
-     * Retrieves the image media type.
+     * Retrieves the imbge media type.
      */
-    public static MediaType getImageMediaType() {
+    public stbtic MediaType getImageMediaType() {
         return TYPE_IMAGES;
     }
     
     /**
-     * Retrieves the document media type.
+     * Retrieves the document medib type.
      */
-    public static MediaType getDocumentMediaType() {
+    public stbtic MediaType getDocumentMediaType() {
         return TYPE_DOCUMENTS;
     }
     
     /**
-     * Retrieves the programs media type.
+     * Retrieves the progrbms media type.
      */
-    public static MediaType getProgramMediaType() {
+    public stbtic MediaType getProgramMediaType() {
         return TYPE_PROGRAMS;
     }
 
-    /** @return a MediaType.Aggregator to use for your query.  Null is a
-     *  possible return value.
+    /** @return b MediaType.Aggregator to use for your query.  Null is a
+     *  possible return vblue.
      */
-    public static Aggregator getAggregator(QueryRequest query) {
+    public stbtic Aggregator getAggregator(QueryRequest query) {
         if (query.desiresAll())
             return null;
 
-        Aggregator retAggr = new Aggregator();
-        if (query.desiresLinuxOSXPrograms())
-            retAggr.addFilter(TYPE_LINUX_OSX_PROGRAMS);
-        if (query.desiresWindowsPrograms())
-            retAggr.addFilter(TYPE_WINDOWS_PROGRAMS);
+        Aggregbtor retAggr = new Aggregator();
+        if (query.desiresLinuxOSXProgrbms())
+            retAggr.bddFilter(TYPE_LINUX_OSX_PROGRAMS);
+        if (query.desiresWindowsProgrbms())
+            retAggr.bddFilter(TYPE_WINDOWS_PROGRAMS);
         if (query.desiresDocuments())
-            retAggr.addFilter(TYPE_DOCUMENTS);
+            retAggr.bddFilter(TYPE_DOCUMENTS);
         if (query.desiresAudio())
-            retAggr.addFilter(TYPE_AUDIO);
+            retAggr.bddFilter(TYPE_AUDIO);
         if (query.desiresVideo())
-            retAggr.addFilter(TYPE_VIDEO);
-        if (query.desiresImages())
-            retAggr.addFilter(TYPE_IMAGES);
+            retAggr.bddFilter(TYPE_VIDEO);
+        if (query.desiresImbges())
+            retAggr.bddFilter(TYPE_IMAGES);
         return retAggr;
     }
 
-    /** Utility class for aggregating MediaTypes.
-     *  This class is not synchronized - it should never be used in a fashion
-     *  where synchronization is necessary.  If that changes, add synch.
+    /** Utility clbss for aggregating MediaTypes.
+     *  This clbss is not synchronized - it should never be used in a fashion
+     *  where synchronizbtion is necessary.  If that changes, add synch.
      */
-    public static class Aggregator {
-        /** A list of MediaType objects.
+    public stbtic class Aggregator {
+        /** A list of MedibType objects.
          */
-        private List _filters = new LinkedList();
+        privbte List _filters = new LinkedList();
 
-        private Aggregator() {}
-        /** I don't check for duplicates. */
-        private void addFilter(MediaType filter) {
-            _filters.add(filter);
+        privbte Aggregator() {}
+        /** I don't check for duplicbtes. */
+        privbte void addFilter(MediaType filter) {
+            _filters.bdd(filter);
         }
 
-        /** @return true if the Response falls within one of the MediaTypes
-         *  this aggregates.
+        /** @return true if the Response fblls within one of the MediaTypes
+         *  this bggregates.
          */
-        public boolean allow(final String fName) {
-            Iterator iter = _filters.iterator();
-            while (iter.hasNext()) {
-                MediaType currType = (MediaType)iter.next();
-                if (currType.matches(fName))
+        public boolebn allow(final String fName) {
+            Iterbtor iter = _filters.iterator();
+            while (iter.hbsNext()) {
+                MedibType currType = (MediaType)iter.next();
+                if (currType.mbtches(fName))
                     return true;
             }
-            return false;
+            return fblse;
         }
     }
     
     /**
-     * Utility that makes an array out of two sets.
+     * Utility thbt makes an array out of two sets.
      */
-    private static String[] makeArray(Set one, Set two) {
-        Set all = new HashSet(one);
-        all.addAll(two);
-        return (String[])all.toArray(new String[all.size()]);
+    privbte static String[] makeArray(Set one, Set two) {
+        Set bll = new HashSet(one);
+        bll.addAll(two);
+        return (String[])bll.toArray(new String[all.size()]);
     }
 }

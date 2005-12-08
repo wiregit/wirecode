@@ -1,142 +1,142 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.util.Properties;
+import jbva.util.Properties;
 
 
 /**
- * Private abstract class for an individual setting.  Subclasses of this
- * class provide typing for settings.
+ * Privbte abstract class for an individual setting.  Subclasses of this
+ * clbss provide typing for settings.
  */
-public abstract class Setting {
+public bbstract class Setting {
 
 
 	/**
-	 * Protected default <tt>Properties</tt> instance for subclasses.
+	 * Protected defbult <tt>Properties</tt> instance for subclasses.
 	 */
-	protected final Properties DEFAULT_PROPS;
+	protected finbl Properties DEFAULT_PROPS;
 
 	/**
-	 * Protected <tt>Properties</tt> instance containing properties for any
-	 * subclasses.
+	 * Protected <tt>Properties</tt> instbnce containing properties for any
+	 * subclbsses.
 	 */
-	protected final Properties PROPS;
+	protected finbl Properties PROPS;
 
 	/**
-	 * The constant key for this property, specified upon construction.
+	 * The constbnt key for this property, specified upon construction.
 	 */
-	protected final String KEY;
+	protected finbl String KEY;
 
 	/**
-	 * Constant for the default value for this <tt>Setting</tt>.
+	 * Constbnt for the default value for this <tt>Setting</tt>.
 	 */
-	protected final String DEFAULT_VALUE;
+	protected finbl String DEFAULT_VALUE;
 	
 	/**
-	 * Value for whether or not this setting should always save.
+	 * Vblue for whether or not this setting should always save.
 	 */
-	private boolean _alwaysSave = false;
+	privbte boolean _alwaysSave = false;
 	
 	/**
-	 * Setting for whether or not this setting is private and should
+	 * Setting for whether or not this setting is privbte and should
 	 * not be reported in bug reports.
 	 */
-	private boolean _isPrivate = false;
+	privbte boolean _isPrivate = false;
 
 
     /**
-     * The string which will be used to identify the setting the simpp message
-     * is trying to set. For non-simppable setting this value must be null, for
-     * simppable settings the setting must have a value which will NEVER change
+     * The string which will be used to identify the setting the simpp messbge
+     * is trying to set. For non-simppbble setting this value must be null, for
+     * simppbble settings the setting must have a value which will NEVER change
      */
-    private final String SIMPP_KEY;
+    privbte final String SIMPP_KEY;
 
     
 	/**
-	 * Constructs a new setting with the specified key and default
-	 * value.  Private access ensures that only this class can construct
+	 * Constructs b new setting with the specified key and default
+	 * vblue.  Private access ensures that only this class can construct
 	 * new <tt>Setting</tt>s.
 	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the defaultValue for the setting
-     * @param simppKey the string used to identify a simpp setting. This must
-     * have a valid value for simppable settings and must be null for
-     * non-simppable settings.
-	 * @throws <tt>IllegalArgumentException</tt> if the key for this 
-	 *  setting is already contained in the map of default settings
+	 * @pbram key the key for the setting
+	 * @pbram defaultValue the defaultValue for the setting
+     * @pbram simppKey the string used to identify a simpp setting. This must
+     * hbve a valid value for simppable settings and must be null for
+     * non-simppbble settings.
+	 * @throws <tt>IllegblArgumentException</tt> if the key for this 
+	 *  setting is blready contained in the map of default settings
 	 */
-	protected Setting(Properties defaultProps, Properties props, String key, 
-                String defaultValue, String simppKey) {
-		DEFAULT_PROPS = defaultProps;
+	protected Setting(Properties defbultProps, Properties props, String key, 
+                String defbultValue, String simppKey) {
+		DEFAULT_PROPS = defbultProps;
 		PROPS = props;
 		KEY = key;
         SIMPP_KEY = simppKey;
-		DEFAULT_VALUE = defaultValue;
-		if(DEFAULT_PROPS.containsKey(key)) 
-			throw new IllegalArgumentException("duplicate setting key");
-		DEFAULT_PROPS.put(KEY, defaultValue);
-        loadValue(defaultValue);
+		DEFAULT_VALUE = defbultValue;
+		if(DEFAULT_PROPS.contbinsKey(key)) 
+			throw new IllegblArgumentException("duplicate setting key");
+		DEFAULT_PROPS.put(KEY, defbultValue);
+        lobdValue(defaultValue);
 	}
     
     /**
-     * Reload value from properties object
+     * Relobd value from properties object
      */
-    public void reload() {
-        String value = PROPS.getProperty(KEY);
-        if (value == null) value = DEFAULT_VALUE;
-        loadValue(value);
+    public void relobd() {
+        String vblue = PROPS.getProperty(KEY);
+        if (vblue == null) value = DEFAULT_VALUE;
+        lobdValue(value);
     }
 
 	/**
-	 * Revert to the default value.
-	 * It is critically important that the DEFAULT_VALUE is valid,
-	 * otherwise an infinite loop will be encountered when revertToDefault
-	 * is called, as invalid values call revertToDefault.
-	 * Because default values are hard-coded into the program, this is okay.
+	 * Revert to the defbult value.
+	 * It is criticblly important that the DEFAULT_VALUE is valid,
+	 * otherwise bn infinite loop will be encountered when revertToDefault
+	 * is cblled, as invalid values call revertToDefault.
+	 * Becbuse default values are hard-coded into the program, this is okay.
 	 */
-	public void revertToDefault() {
-        setValue(DEFAULT_VALUE);
+	public void revertToDefbult() {
+        setVblue(DEFAULT_VALUE);
 	}
 	
 	/**
-	 * Determines whether or not this value should always be saved to disk.
+	 * Determines whether or not this vblue should always be saved to disk.
 	 */
-    public boolean shouldAlwaysSave() {
-        return _alwaysSave;
+    public boolebn shouldAlwaysSave() {
+        return _blwaysSave;
     }
     
     /**
-     * Sets whether or not this setting should always save, even if
-     * it is default.
-     * Returns this so it can be used during assignment.
+     * Sets whether or not this setting should blways save, even if
+     * it is defbult.
+     * Returns this so it cbn be used during assignment.
      */
-    public Setting setAlwaysSave(boolean save) {
-        _alwaysSave = save;
+    public Setting setAlwbysSave(boolean save) {
+        _blwaysSave = save;
         return this;
     }
     
     /**
      * Sets whether or not this setting should be reported in bug reports.
      */
-    public Setting setPrivate(boolean priv) {
-        _isPrivate = priv;
+    public Setting setPrivbte(boolean priv) {
+        _isPrivbte = priv;
         return this;
     }
     
     /**
-     * Determines whether or not a setting is private.
+     * Determines whether or not b setting is private.
      */
-    public boolean isPrivate() {
-        return _isPrivate;
+    public boolebn isPrivate() {
+        return _isPrivbte;
     }
 	
     /**
-     * Determines whether or not the current value is the default value.
+     * Determines whether or not the current vblue is the default value.
      */
-    public boolean isDefault() {
-        String value = PROPS.getProperty(KEY);
-        if (value == null)
-            return false;
-        return value.equals(DEFAULT_PROPS.getProperty(KEY));
+    public boolebn isDefault() {
+        String vblue = PROPS.getProperty(KEY);
+        if (vblue == null)
+            return fblse;
+        return vblue.equals(DEFAULT_PROPS.getProperty(KEY));
     }
     
     /**
@@ -147,32 +147,32 @@ public abstract class Setting {
     }
     
     /**
-     * Returns the value as stored in the properties file.
+     * Returns the vblue as stored in the properties file.
      */
-    public String getValueAsString() {
+    public String getVblueAsString() {
         return PROPS.getProperty(KEY);
     }
     
     /**
-     * Set new property value
-     * @param value new property value 
+     * Set new property vblue
+     * @pbram value new property value 
      *
-     * Note: This is the method used by SimmSettingsManager to load the setting
-     * with the value specified by Simpp 
+     * Note: This is the method used by SimmSettingsMbnager to load the setting
+     * with the vblue specified by Simpp 
      */
-    protected void setValue(String value) {
-        PROPS.put(KEY, value);
-        loadValue(value);
+    protected void setVblue(String value) {
+        PROPS.put(KEY, vblue);
+        lobdValue(value);
     }
 
-    public boolean isSimppEnabled() {
+    public boolebn isSimppEnabled() {
         return (SIMPP_KEY != null);
     }
 
     /**
-     * Load value from property string value
-     * @param sValue property string value
+     * Lobd value from property string value
+     * @pbram sValue property string value
      */
-    abstract protected void loadValue(String sValue);    
+    bbstract protected void loadValue(String sValue);    
 
 }

@@ -1,174 +1,174 @@
-package com.limegroup.gnutella.licenses;
+pbckage com.limegroup.gnutella.licenses;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.io.ObjectInputStream;
+import jbva.io.IOException;
+import jbva.io.Serializable;
+import jbva.io.StringReader;
+import jbva.io.ObjectInputStream;
 
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.http.HttpClientManager;
+import com.limegroup.gnutellb.util.ProcessingQueue;
+import com.limegroup.gnutellb.util.CommonUtils;
 
-import org.apache.xerces.parsers.DOMParser;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.bpache.xerces.parsers.DOMParser;
+import org.xml.sbx.InputSource;
+import org.xml.sbx.SAXException;
 import org.w3c.dom.Node;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.URI;
+import org.bpache.commons.httpclient.HttpClient;
+import org.bpache.commons.httpclient.methods.GetMethod;
+import org.bpache.commons.httpclient.URI;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * A base license class, implementing common functionality.
+ * A bbse license class, implementing common functionality.
  */
-abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable {
+bbstract class AbstractLicense implements NamedLicense, Serializable, Cloneable {
     
-    private static final Log LOG = LogFactory.getLog(AbstractLicense.class);
+    privbte static final Log LOG = LogFactory.getLog(AbstractLicense.class);
     
     /**
-     * The queue that all license verification attempts are processed in.
+     * The queue thbt all license verification attempts are processed in.
      */
-    private static final ProcessingQueue VQUEUE = new ProcessingQueue("LicenseVerifier");
+    privbte static final ProcessingQueue VQUEUE = new ProcessingQueue("LicenseVerifier");
     
-    private static final long serialVersionUID = 6508972367931096578L;
+    privbte static final long serialVersionUID = 6508972367931096578L;
     
-    /** Whether or not this license has been verified. */
-    protected transient int verified = UNVERIFIED;
+    /** Whether or not this license hbs been verified. */
+    protected trbnsient int verified = UNVERIFIED;
     
-    /** The URI where verification will be performed. */
-    protected transient URI licenseLocation;
+    /** The URI where verificbtion will be performed. */
+    protected trbnsient URI licenseLocation;
     
-    /** The license name. */
-    private transient String licenseName;
+    /** The license nbme. */
+    privbte transient String licenseName;
     
-    /** The last time this license was verified. */
-    private long lastVerifiedTime;
+    /** The lbst time this license was verified. */
+    privbte long lastVerifiedTime;
     
-    /** Constructs a new AbstractLicense. */
-    AbstractLicense(URI uri) {
-        this.licenseLocation = uri;
+    /** Constructs b new AbstractLicense. */
+    AbstrbctLicense(URI uri) {
+        this.licenseLocbtion = uri;
     }
     
-    public void setLicenseName(String name) { this.licenseName = name; }
+    public void setLicenseNbme(String name) { this.licenseName = name; }
     
-    public boolean isVerifying() { return verified == VERIFYING; }
-    public boolean isVerified() { return verified == VERIFIED; }
-    public String getLicenseName() { return licenseName; }
-    public URI getLicenseURI() { return licenseLocation; }
-    public long getLastVerifiedTime() { return lastVerifiedTime; }
+    public boolebn isVerifying() { return verified == VERIFYING; }
+    public boolebn isVerified() { return verified == VERIFIED; }
+    public String getLicenseNbme() { return licenseName; }
+    public URI getLicenseURI() { return licenseLocbtion; }
+    public long getLbstVerifiedTime() { return lastVerifiedTime; }
     
     /**
-     * Assume that all serialized licenses were verified.
-     * (Otherwise they wouldn't have been serialized.
+     * Assume thbt all serialized licenses were verified.
+     * (Otherwise they wouldn't hbve been serialized.
      */
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        ois.defaultReadObject();
+    privbte void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defbultReadObject();
         verified = VERIFIED;
     }
     
     /**
-     * Clears all internal state that could be set while verifying.
+     * Clebrs all internal state that could be set while verifying.
      */
-    protected abstract void clear();
+    protected bbstract void clear();
     
     /**
-     * Starts verification of the license.
+     * Stbrts verification of the license.
      *
-     * The listener is notified when verification is finished.
+     * The listener is notified when verificbtion is finished.
      */
-    public void verify(VerificationListener listener) {
+    public void verify(VerificbtionListener listener) {
         verified = VERIFYING;
-        clear();
-        VQUEUE.add(new Verifier(listener));
+        clebr();
+        VQUEUE.bdd(new Verifier(listener));
     }
     
     /**
-     * Retrieves the body of a URL from a webserver.
+     * Retrieves the body of b URL from a webserver.
      *
-     * Returns null if the page could not be found.
+     * Returns null if the pbge could not be found.
      */
     protected String getBody(String url) {
         return getBodyFromURL(url);
     }
     
     /**
-     * Contacts the given URL and downloads returns the body of the
+     * Contbcts the given URL and downloads returns the body of the
      * HTTP request.
      */
     protected String getBodyFromURL(String url) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Contacting: " + url);
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("Contacting: " + url);
         
-        HttpClient client = HttpClientManager.getNewClient();
+        HttpClient client = HttpClientMbnager.getNewClient();
         GetMethod get = new GetMethod(url);
-        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+        get.bddRequestHeader("User-Agent", CommonUtils.getHttpServer());
         try {
-            HttpClientManager.executeMethodRedirecting(client, get);
+            HttpClientMbnager.executeMethodRedirecting(client, get);
             return get.getResponseBodyAsString();
-        } catch(IOException ioe) {
-            LOG.warn("Can't contact license server: " + url, ioe);
+        } cbtch(IOException ioe) {
+            LOG.wbrn("Can't contact license server: " + url, ioe);
             return null;
-        } finally {
-            get.releaseConnection();
+        } finblly {
+            get.relebseConnection();
         }
     }
     
-    /** Parses the document node of the XML. */
-    protected abstract void parseDocumentNode(Node node, boolean liveData);
+    /** Pbrses the document node of the XML. */
+    protected bbstract void parseDocumentNode(Node node, boolean liveData);
     
     /**
-     * Attempts to parse the given XML.
-     * The actual handling of the XML is sent to parseDocumentNode,
-     * which subclasses can implement as they see fit.
+     * Attempts to pbrse the given XML.
+     * The bctual handling of the XML is sent to parseDocumentNode,
+     * which subclbsses can implement as they see fit.
      *
-     * If this is a request directly from our Verifier, 'liveData' is true.
-     * Subclasses may use this to know where the XML data is coming from.
+     * If this is b request directly from our Verifier, 'liveData' is true.
+     * Subclbsses may use this to know where the XML data is coming from.
      */
-    protected void parseXML(String xml, boolean liveData) {
+    protected void pbrseXML(String xml, boolean liveData) {
         if(xml == null)
             return;
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("Attempting to parse: " + xml);
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("Attempting to parse: " + xml);
 
-        DOMParser parser = new DOMParser();
-        InputSource is = new InputSource(new StringReader(xml));
+        DOMPbrser parser = new DOMParser();
+        InputSource is = new InputSource(new StringRebder(xml));
         try {
-            parser.parse(is);
-        } catch (IOException ioe) {
-            LOG.debug("IOX parsing XML\n" + xml, ioe);
+            pbrser.parse(is);
+        } cbtch (IOException ioe) {
+            LOG.debug("IOX pbrsing XML\n" + xml, ioe);
             return;
-        } catch (SAXException saxe) {
-            LOG.debug("SAX parsing XML\n" + xml, saxe);
+        } cbtch (SAXException saxe) {
+            LOG.debug("SAX pbrsing XML\n" + xml, saxe);
             return;
         }
         
-        parseDocumentNode(parser.getDocument().getDocumentElement(), liveData);
+        pbrseDocumentNode(parser.getDocument().getDocumentElement(), liveData);
     }
     
     /**
-     * Runnable that actually does the verification.
-     * This will retrieve the body of a webpage from the licenseURI,
-     * parse it, set the last verified time, and cache it in the LicenseCache.
+     * Runnbble that actually does the verification.
+     * This will retrieve the body of b webpage from the licenseURI,
+     * pbrse it, set the last verified time, and cache it in the LicenseCache.
      */
-    private class Verifier implements Runnable {
-        private final VerificationListener vc;
+    privbte class Verifier implements Runnable {
+        privbte final VerificationListener vc;
         
-        Verifier(VerificationListener listener) {
+        Verifier(VerificbtionListener listener) {
             vc = listener;
         }
         
         public void run() {
             String body = getBody(getLicenseURI().toString());
-            parseXML(body, true);
-            lastVerifiedTime = System.currentTimeMillis();
+            pbrseXML(body, true);
+            lbstVerifiedTime = System.currentTimeMillis();
             verified = VERIFIED;
-            LicenseCache.instance().addVerifiedLicense(AbstractLicense.this);
+            LicenseCbche.instance().addVerifiedLicense(AbstractLicense.this);
             if(vc != null)
-                vc.licenseVerified(AbstractLicense.this);
+                vc.licenseVerified(AbstrbctLicense.this);
         }
     }
 }

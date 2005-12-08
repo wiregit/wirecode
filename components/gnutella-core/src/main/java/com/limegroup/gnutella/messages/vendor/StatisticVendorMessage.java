@@ -1,210 +1,210 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.IOException;
+import jbva.util.Iterator;
+import jbva.util.List;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.ManagedConnection;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.statistics.BandwidthStat;
 
-public class StatisticVendorMessage extends VendorMessage {
+public clbss StatisticVendorMessage extends VendorMessage {
     
-    public static final int VERSION = 1;
+    public stbtic final int VERSION = 1;
 
-    private static final String DELIMITER = " | ";
+    privbte static final String DELIMITER = " | ";
     
-    private static final String DELIMITER2 = " ^ ";
+    privbte static final String DELIMITER2 = " ^ ";
     
 
     /**
-     * Constructor for a StatisticVendorMessage read off the network, meaing it
-     * was received in respose to a GiveStatsVendorMessage sent by this node.
+     * Constructor for b StatisticVendorMessage read off the network, meaing it
+     * wbs received in respose to a GiveStatsVendorMessage sent by this node.
      */
-    public StatisticVendorMessage(byte[] guid, byte ttl, byte hops, 
-                                   int version, byte[] payload) 
-                                                     throws BadPacketException {
+    public StbtisticVendorMessage(byte[] guid, byte ttl, byte hops, 
+                                   int version, byte[] pbyload) 
+                                                     throws BbdPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_STATISTICS, version,
-              payload);
+              pbyload);
     }
 
     /**
-     * Constructor to make a StatisticVendorMessage in response to a
-     * GiveStatisticsVendorMessage. This is an outgoing StatisticVendorMessage
+     * Constructor to mbke a StatisticVendorMessage in response to a
+     * GiveStbtisticsVendorMessage. This is an outgoing StatisticVendorMessage
      */
-    public StatisticVendorMessage(GiveStatsVendorMessage giveStatVM) {
+    public StbtisticVendorMessage(GiveStatsVendorMessage giveStatVM) {
         super(F_LIME_VENDOR_ID, F_STATISTICS, VERSION, 
-                                                  derivePayload(giveStatVM));
+                                                  derivePbyload(giveStatVM));
     }
     
     /**
-     * Determines whether or not we know how to respond to the GiveStats msg.
+     * Determines whether or not we know how to respond to the GiveStbts msg.
      */
-    public static boolean isSupported(GiveStatsVendorMessage vm) {
-        switch(vm.getStatType()) {
-        case GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC:
-        case GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC:
-            switch(vm.getStatControl()) {
-            case GiveStatsVendorMessage.PER_CONNECTION_STATS:
-            case GiveStatsVendorMessage.ALL_CONNECTIONS_STATS:
-            case GiveStatsVendorMessage.UP_CONNECTIONS_STATS:
-            case GiveStatsVendorMessage.LEAF_CONNECTIONS_STATS:
+    public stbtic boolean isSupported(GiveStatsVendorMessage vm) {
+        switch(vm.getStbtType()) {
+        cbse GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC:
+        cbse GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC:
+            switch(vm.getStbtControl()) {
+            cbse GiveStatsVendorMessage.PER_CONNECTION_STATS:
+            cbse GiveStatsVendorMessage.ALL_CONNECTIONS_STATS:
+            cbse GiveStatsVendorMessage.UP_CONNECTIONS_STATS:
+            cbse GiveStatsVendorMessage.LEAF_CONNECTIONS_STATS:
                 return true;
-            default:
-                return false;
+            defbult:
+                return fblse;
             }
-        case GiveStatsVendorMessage.HTTP_DOWNLOAD_TRAFFIC_STATS:
-        case GiveStatsVendorMessage.HTTP_UPLOAD_TRAFFIC_STATS:            
+        cbse GiveStatsVendorMessage.HTTP_DOWNLOAD_TRAFFIC_STATS:
+        cbse GiveStatsVendorMessage.HTTP_UPLOAD_TRAFFIC_STATS:            
             return true;
-        default:
-            return false;
+        defbult:
+            return fblse;
         }
     }
     
-    private static byte[] derivePayload(GiveStatsVendorMessage giveStatsVM) {
-        byte control = giveStatsVM.getStatControl();
-        byte type = giveStatsVM.getStatType();
-        byte[] part1 = {control, type};
-        //write the type of stats we are writing out
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    privbte static byte[] derivePayload(GiveStatsVendorMessage giveStatsVM) {
+        byte control = giveStbtsVM.getStatControl();
+        byte type = giveStbtsVM.getStatType();
+        byte[] pbrt1 = {control, type};
+        //write the type of stbts we are writing out
+        ByteArrbyOutputStream baos = new ByteArrayOutputStream();
         try {
-            baos.write(part1);
-        } catch(IOException iox) {
+            bbos.write(part1);
+        } cbtch(IOException iox) {
             ErrorService.error(iox); // impossible.
         }
-        byte[] part2;
+        byte[] pbrt2;
 
         StringBuffer buff;
         switch(type) {
-        case GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC:
-        case GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC:
-            boolean incoming = 
-            type==GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC;
-            part2 = getGnutellaStats(control,incoming);
-            break;
-        case GiveStatsVendorMessage.HTTP_DOWNLOAD_TRAFFIC_STATS:
-            //NOTE: in this case we ignore the granularity control, since
-            //HTTP traffic is not connection specific
+        cbse GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC:
+        cbse GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC:
+            boolebn incoming = 
+            type==GiveStbtsVendorMessage.GNUTELLA_INCOMING_TRAFFIC;
+            pbrt2 = getGnutellaStats(control,incoming);
+            brebk;
+        cbse GiveStatsVendorMessage.HTTP_DOWNLOAD_TRAFFIC_STATS:
+            //NOTE: in this cbse we ignore the granularity control, since
+            //HTTP trbffic is not connection specific
             buff = new StringBuffer();
-            buff.append(
-                     BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.getTotal());
-            buff.append(DELIMITER2);
-            buff.append(
-                      BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.getTotal());
+            buff.bppend(
+                     BbndwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.getTotal());
+            buff.bppend(DELIMITER2);
+            buff.bppend(
+                      BbndwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.getTotal());
             
-            part2 = buff.toString().getBytes();
-            break;
-        case GiveStatsVendorMessage.HTTP_UPLOAD_TRAFFIC_STATS:
-            //NOTE: in this case we ignore the granularity control, since
-            //HTTP traffic is not connection specific
+            pbrt2 = buff.toString().getBytes();
+            brebk;
+        cbse GiveStatsVendorMessage.HTTP_UPLOAD_TRAFFIC_STATS:
+            //NOTE: in this cbse we ignore the granularity control, since
+            //HTTP trbffic is not connection specific
             buff = new StringBuffer();
-            buff.append(
-                       BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.getTotal());
-            buff.append(DELIMITER2);
-            buff.append(BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.getTotal());
-            part2 = buff.toString().getBytes();
-            break;
-        default:
-            throw new IllegalArgumentException("unknown type: " + type);
+            buff.bppend(
+                       BbndwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.getTotal());
+            buff.bppend(DELIMITER2);
+            buff.bppend(BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.getTotal());
+            pbrt2 = buff.toString().getBytes();
+            brebk;
+        defbult:
+            throw new IllegblArgumentException("unknown type: " + type);
         }
         
         
         try {
-            baos.write(part2);
-        } catch (IOException iox) {
+            bbos.write(part2);
+        } cbtch (IOException iox) {
             ErrorService.error(iox); // impossible.
         }        
-        return baos.toByteArray();
+        return bbos.toByteArray();
     }
  
 
-    private static byte[] getGnutellaStats(byte control, boolean incoming) {
-        List conns = RouterService.getConnectionManager().getConnections();
+    privbte static byte[] getGnutellaStats(byte control, boolean incoming) {
+        List conns = RouterService.getConnectionMbnager().getConnections();
         StringBuffer buff = new StringBuffer();
 
         switch(control) {
-        case GiveStatsVendorMessage.PER_CONNECTION_STATS:
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
-                buff.append(c.toString());
-                buff.append(DELIMITER2);
+        cbse GiveStatsVendorMessage.PER_CONNECTION_STATS:
+            for(Iterbtor iter = conns.iterator(); iter.hasNext() ; ) {
+                MbnagedConnection c = (ManagedConnection)iter.next();
+                buff.bppend(c.toString());
+                buff.bppend(DELIMITER2);
                 if(incoming) {
-                    buff.append(c.getNumMessagesReceived());
-                    buff.append(DELIMITER);
-                    buff.append(c.getNumReceivedMessagesDropped());
+                    buff.bppend(c.getNumMessagesReceived());
+                    buff.bppend(DELIMITER);
+                    buff.bppend(c.getNumReceivedMessagesDropped());
                 }
                 else {
-                    buff.append(c.getNumMessagesSent());
-                    buff.append(DELIMITER);
-                    buff.append(c.getNumSentMessagesDropped());
+                    buff.bppend(c.getNumMessagesSent());
+                    buff.bppend(DELIMITER);
+                    buff.bppend(c.getNumSentMessagesDropped());
                 }
-                buff.append(DELIMITER2);
+                buff.bppend(DELIMITER2);
             }
             return buff.toString().getBytes();
-        case GiveStatsVendorMessage.ALL_CONNECTIONS_STATS:
-            int messages = -1;
+        cbse GiveStatsVendorMessage.ALL_CONNECTIONS_STATS:
+            int messbges = -1;
             int dropped = -1;
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
-                messages += incoming ? c.getNumMessagesReceived() : 
-                                               c.getNumMessagesSent();
-                dropped += incoming ? c.getNumReceivedMessagesDropped() :
-                                               c.getNumSentMessagesDropped();
+            for(Iterbtor iter = conns.iterator(); iter.hasNext() ; ) {
+                MbnagedConnection c = (ManagedConnection)iter.next();
+                messbges += incoming ? c.getNumMessagesReceived() : 
+                                               c.getNumMessbgesSent();
+                dropped += incoming ? c.getNumReceivedMessbgesDropped() :
+                                               c.getNumSentMessbgesDropped();
             }
-            buff.append(messages);
-            buff.append(DELIMITER);
-            buff.append(dropped);
+            buff.bppend(messages);
+            buff.bppend(DELIMITER);
+            buff.bppend(dropped);
             return buff.toString().getBytes();
-        case GiveStatsVendorMessage.UP_CONNECTIONS_STATS:
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
+        cbse GiveStatsVendorMessage.UP_CONNECTIONS_STATS:
+            for(Iterbtor iter = conns.iterator(); iter.hasNext() ; ) {
+                MbnagedConnection c = (ManagedConnection)iter.next();
                 if(!c.isSupernodeConnection())
                     continue;
-                buff.append(c.toString());
-                buff.append(DELIMITER2);
+                buff.bppend(c.toString());
+                buff.bppend(DELIMITER2);
                 if(incoming) {
-                    buff.append(c.getNumMessagesReceived());
-                    buff.append(DELIMITER);
-                    buff.append(c.getNumReceivedMessagesDropped());
+                    buff.bppend(c.getNumMessagesReceived());
+                    buff.bppend(DELIMITER);
+                    buff.bppend(c.getNumReceivedMessagesDropped());
                 }
                 else {
-                    buff.append(c.getNumMessagesSent());
-                    buff.append(DELIMITER);
-                    buff.append(c.getNumSentMessagesDropped());
+                    buff.bppend(c.getNumMessagesSent());
+                    buff.bppend(DELIMITER);
+                    buff.bppend(c.getNumSentMessagesDropped());
                 }
-                buff.append(DELIMITER2);
+                buff.bppend(DELIMITER2);
             }
             return buff.toString().getBytes();
-        case GiveStatsVendorMessage.LEAF_CONNECTIONS_STATS:
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
-                if(!c.isLeafConnection())
+        cbse GiveStatsVendorMessage.LEAF_CONNECTIONS_STATS:
+            for(Iterbtor iter = conns.iterator(); iter.hasNext() ; ) {
+                MbnagedConnection c = (ManagedConnection)iter.next();
+                if(!c.isLebfConnection())
                     continue;
-                buff.append(c.toString());
-                buff.append(DELIMITER2);
+                buff.bppend(c.toString());
+                buff.bppend(DELIMITER2);
                 if(incoming) {
-                    buff.append(c.getNumMessagesReceived());
-                    buff.append(DELIMITER);
-                    buff.append(c.getNumReceivedMessagesDropped());
+                    buff.bppend(c.getNumMessagesReceived());
+                    buff.bppend(DELIMITER);
+                    buff.bppend(c.getNumReceivedMessagesDropped());
                 }
                 else {
-                    buff.append(c.getNumMessagesSent());
-                    buff.append(DELIMITER);
-                    buff.append(c.getNumSentMessagesDropped());
+                    buff.bppend(c.getNumMessagesSent());
+                    buff.bppend(DELIMITER);
+                    buff.bppend(c.getNumSentMessagesDropped());
                 }
-                buff.append(DELIMITER2);
+                buff.bppend(DELIMITER2);
             }
             return buff.toString().getBytes();
-        default:
-            throw new IllegalArgumentException("unknown control: " + control);
+        defbult:
+            throw new IllegblArgumentException("unknown control: " + control);
         }
     }
  
-    public String getReportedStats() {
-        return new String(getPayload());
+    public String getReportedStbts() {
+        return new String(getPbyload());
     }
    
 }

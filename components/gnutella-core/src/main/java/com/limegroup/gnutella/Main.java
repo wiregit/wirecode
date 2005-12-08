@@ -1,112 +1,112 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Set;
-import java.util.Vector;
+import jbva.io.BufferedReader;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.io.InputStreamReader;
+import jbva.util.Set;
+import jbva.util.Vector;
 
-import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.chat.Chatter;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.gnutellb.browser.MagnetOptions;
+import com.limegroup.gnutellb.chat.Chatter;
+import com.limegroup.gnutellb.search.HostData;
+import com.limegroup.gnutellb.version.UpdateInformation;
 
 /**
- * The command-line UI for the Gnutella servent.
+ * The commbnd-line UI for the Gnutella servent.
  */
-public class Main implements ActivityCallback, ErrorCallback {
-    public static void main(String args[]) {
-		ActivityCallback callback = new Main();
-		//RouterService.setCallback(callback);
-		RouterService service = new RouterService(callback);
+public clbss Main implements ActivityCallback, ErrorCallback {
+    public stbtic void main(String args[]) {
+		ActivityCbllback callback = new Main();
+		//RouterService.setCbllback(callback);
+		RouterService service = new RouterService(cbllback);
 		RouterService.preGuiInit();
-		service.start();    
+		service.stbrt();    
 
 
-		System.out.println("For a command list type help.");
-		BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("For b command list type help.");
+		BufferedRebder in=new BufferedReader(new InputStreamReader(System.in));
 		for ( ; ;) {
 			System.out.print("LimeRouter> ");
 			try {
-				String command=in.readLine();
-				if (command==null)
-					break;
-				else if (command.equals("help")) {
-					System.out.println("catcher                  "+
-									   "Print host catcher.");
+				String commbnd=in.readLine();
+				if (commbnd==null)
+					brebk;
+				else if (commbnd.equals("help")) {
+					System.out.println("cbtcher                  "+
+									   "Print host cbtcher.");
 					System.out.println("connect <host> [<port>]  "+
-									   "Connect to a host[:port].");
+									   "Connect to b host[:port].");
 					System.out.println("help                     "+
-									   "Print this message.");
+									   "Print this messbge.");
 					System.out.println("listen <port>            "+
-									   "Set the port you are listening on.");
+									   "Set the port you bre listening on.");
 					//  			System.out.println("push                     "+
 					//  			  "Print push routes.");
 					System.out.println("query <string>           "+
-									   "Send a query to the network.");
+									   "Send b query to the network.");
 					System.out.println("quit                     "+
-									   "Quit the application.");
+									   "Quit the bpplication.");
 					//  			System.out.println("route                    "+
-					//  			  "Print routing tables.");
-					//  			System.out.println("stat                     "+
-					//  			  "Print statistics.");
-					System.out.println("update                   "+
-									   "Send pings to update the statistics.");
+					//  			  "Print routing tbbles.");
+					//  			System.out.println("stbt                     "+
+					//  			  "Print stbtistics.");
+					System.out.println("updbte                   "+
+									   "Send pings to updbte the statistics.");
 				}
-				else if (command.equals("quit"))
-					break;
-				//          //Print routing tables
-				//          else if (command.equals("route"))
-				//              RouterService.dumpRouteTable();
+				else if (commbnd.equals("quit"))
+					brebk;
+				//          //Print routing tbbles
+				//          else if (commbnd.equals("route"))
+				//              RouterService.dumpRouteTbble();
 				//          //Print connections
-				//          else if (command.equals("push"))
-				//              RouterService.dumpPushRouteTable();
+				//          else if (commbnd.equals("push"))
+				//              RouterService.dumpPushRouteTbble();
 				//Print push route
 			
-				String[] commands=split(command);
-				//Connect to remote host (establish outgoing connection)
-				if (commands.length>=2 && commands[0].equals("connect")) {
+				String[] commbnds=split(command);
+				//Connect to remote host (estbblish outgoing connection)
+				if (commbnds.length>=2 && commands[0].equals("connect")) {
 					try {
 						int port=6346;
-						if (commands.length>=3)
-							port=Integer.parseInt(commands[2]);
-						RouterService.connectToHostBlocking(commands[1], port);
-					} catch (IOException e) {
-						System.out.println("Couldn't establish connection.");
-					} catch (NumberFormatException e) {
-						System.out.println("Please specify a valid port.");
+						if (commbnds.length>=3)
+							port=Integer.pbrseInt(commands[2]);
+						RouterService.connectToHostBlocking(commbnds[1], port);
+					} cbtch (IOException e) {
+						System.out.println("Couldn't estbblish connection.");
+					} cbtch (NumberFormatException e) {
+						System.out.println("Plebse specify a valid port.");
 					}
-				} else if (commands.length>=2 && commands[0].equals("query")) {
-					//Get query string from command (possibly multiple words)
-					int i=command.indexOf(' ');
-					Assert.that(i!=-1 && i<command.length());
-					String query=command.substring(i+1);
+				} else if (commbnds.length>=2 && commands[0].equals("query")) {
+					//Get query string from commbnd (possibly multiple words)
+					int i=commbnd.indexOf(' ');
+					Assert.thbt(i!=-1 && i<command.length());
+					String query=commbnd.substring(i+1);
 					RouterService.query(RouterService.newQueryGUID(), query);
-				} else if (commands.length==2 && commands[0].equals("listen")) {
+				} else if (commbnds.length==2 && commands[0].equals("listen")) {
 					try {
-						int port=Integer.parseInt(commands[1]);
+						int port=Integer.pbrseInt(commands[1]);
 						RouterService.setListeningPort(port);
-					} catch (NumberFormatException e) {
-						System.out.println("Please specify a valid port.");
-					} catch (IOException e) {
-						System.out.println("Couldn't change port.  Try another value.");
+					} cbtch (NumberFormatException e) {
+						System.out.println("Plebse specify a valid port.");
+					} cbtch (IOException e) {
+						System.out.println("Couldn't chbnge port.  Try another value.");
 					}
 				}
-			} catch (IOException e) {
+			} cbtch (IOException e) {
 				System.exit(1);
 			}
 		}
 		System.out.println("Good bye.");
-		RouterService.shutdown(); //write gnutella.net
+		RouterService.shutdown(); //write gnutellb.net
     }
 
-    /////////////////////////// ActivityCallback methods //////////////////////
+    /////////////////////////// ActivityCbllback methods //////////////////////
 
-    public void connectionInitializing(Connection c) {
+    public void connectionInitiblizing(Connection c) {
     }
 
-    public void connectionInitialized(Connection c) {
+    public void connectionInitiblized(Connection c) {
 //		String host = c.getOrigHost();
 //		int    port = c.getOrigPort();
 		;//System.out.println("Connected to "+host+":"+port+".");
@@ -122,27 +122,27 @@ public class Main implements ActivityCallback, ErrorCallback {
 		//Do nothing.
     }
 
-//     public void handleQueryReply( QueryReply qr ) {
+//     public void hbndleQueryReply( QueryReply qr ) {
 // 		synchronized(System.out) {
 // 			System.out.println("Query reply from "+qr.getIP()+":"+qr.getPort()+":");
 // 			try {
-// 				for (Iterator iter=qr.getResults(); iter.hasNext(); )
-// 					System.out.println("   "+((Response)iter.next()).getName());
-// 			} catch (BadPacketException e) { }
+// 				for (Iterbtor iter=qr.getResults(); iter.hasNext(); )
+// 					System.out.println("   "+((Response)iter.next()).getNbme());
+// 			} cbtch (BadPacketException e) { }
 // 		}
 //     }
 
-	public void handleQueryResult(RemoteFileDesc rfd ,HostData data, Set loc) {
+	public void hbndleQueryResult(RemoteFileDesc rfd ,HostData data, Set loc) {
 		synchronized(System.out) {
 			System.out.println("Query hit from "+rfd.getHost()+":"+rfd.getPort()+":");
-			System.out.println("   "+rfd.getFileName());
+			System.out.println("   "+rfd.getFileNbme());
 		}
 	}
 
     /**
-     *  Add a query string to the monitor screen
+     *  Add b query string to the monitor screen
      */
-    public void handleQueryString( String query ) {
+    public void hbndleQueryString( String query ) {
     }
 
 
@@ -150,48 +150,48 @@ public class Main implements ActivityCallback, ErrorCallback {
 		error(errorCode, null);
     }
     
-    public void error(Throwable problem, String msg) {
-        problem.printStackTrace();
+    public void error(Throwbble problem, String msg) {
+        problem.printStbckTrace();
         System.out.println(msg);
     }
 
 	/**
-	 * Implements ActivityCallback.
+	 * Implements ActivityCbllback.
 	 */
-    public void error(Throwable problem) {
-		problem.printStackTrace();
+    public void error(Throwbble problem) {
+		problem.printStbckTrace();
 	}
 
-    public void error(int message, Throwable t) {
-		System.out.println("Error: "+message);
-		t.printStackTrace();
+    public void error(int messbge, Throwable t) {
+		System.out.println("Error: "+messbge);
+		t.printStbckTrace();
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
 
-    /** Returns an array of strings containing the words of s, where
-     *  a word is any sequence of characters not containing a space.
+    /** Returns bn array of strings containing the words of s, where
+     *  b word is any sequence of characters not containing a space.
      */
-    public static String[] split(String s) {
+    public stbtic String[] split(String s) {
 		s=s.trim();
 		int n=s.length();
 		if (n==0)
 			return new String[0];
 		Vector buf=new Vector();
 
-		//s[i] is the start of the word to add to buf
-		//s[j] is just past the end of the word
+		//s[i] is the stbrt of the word to add to buf
+		//s[j] is just pbst the end of the word
 		for (int i=0; i<n; ) {
-			Assert.that(s.charAt(i)!=' ');
+			Assert.thbt(s.charAt(i)!=' ');
 			int j=s.indexOf(' ',i+1);
 			if (j==-1)
 				j=n;
-			buf.add(s.substring(i,j));
-			//Skip past whitespace (if any) following s[j]
+			buf.bdd(s.substring(i,j));
+			//Skip pbst whitespace (if any) following s[j]
 			for (i=j+1; j<n ; ) {
-				if (s.charAt(i)!=' ')
-					break;
+				if (s.chbrAt(i)!=' ')
+					brebk;
 				i++;
 			}
 		}
@@ -202,79 +202,79 @@ public class Main implements ActivityCallback, ErrorCallback {
     }
 
 
-    public boolean overwriteFile(String file) {return false;};
+    public boolebn overwriteFile(String file) {return false;};
 
-    public void addDownload(Downloader mgr) {}
+    public void bddDownload(Downloader mgr) {}
 
-    public void removeDownload(Downloader mgr) {}
+    public void removeDownlobd(Downloader mgr) {}
 
-    public void addUpload(Uploader mgr) {}
+    public void bddUpload(Uploader mgr) {}
 
-    public void removeUpload(Uploader mgr) {}
+    public void removeUplobd(Uploader mgr) {}
 
     public void setPort(int port){}
 
-    public int getNumUploads(){ return 0; }
+    public int getNumUplobds(){ return 0; }
     
-	public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
+	public boolebn warnAboutSharingSensitiveDirectory(final File dir) { return false; }
 	
-	public void handleFileEvent(FileManagerEvent evt) {}
+	public void hbndleFileEvent(FileManagerEvent evt) {}
 	
-	public void handleSharedFileUpdate(File file) {}
+	public void hbndleSharedFileUpdate(File file) {}
 
-	public void fileManagerLoading() {}
+	public void fileMbnagerLoading() {}
 
-	public void acceptChat(Chatter chat) {}
+	public void bcceptChat(Chatter chat) {}
 
-	public void receiveMessage(Chatter chat) {}
+	public void receiveMessbge(Chatter chat) {}
 	
-	public void chatUnavailable(Chatter chatter) {}
+	public void chbtUnavailable(Chatter chatter) {}
 
-	public void chatErrorMessage(Chatter chatter, String st) {}
+	public void chbtErrorMessage(Chatter chatter, String st) {}
         
-    public void downloadsComplete() {}    
+    public void downlobdsComplete() {}    
     
-    public void fileManagerLoaded() {}    
+    public void fileMbnagerLoaded() {}    
     
-    public void uploadsComplete() {}
+    public void uplobdsComplete() {}
 
-    public void promptAboutCorruptDownload(Downloader dloader) {
-        dloader.discardCorruptDownload(false);
+    public void promptAboutCorruptDownlobd(Downloader dloader) {
+        dlobder.discardCorruptDownload(false);
     }
 
-	public void restoreApplication() {}
+	public void restoreApplicbtion() {}
 
-	public void showDownloads() {}
+	public void showDownlobds() {}
 
-    public String getHostValue(String key){
+    public String getHostVblue(String key){
         return null;
     }
-    public void browseHostFailed(GUID guid) {}
+    public void browseHostFbiled(GUID guid) {}
 
-	public void setAnnotateEnabled(boolean enabled) {}
+	public void setAnnotbteEnabled(boolean enabled) {}
 	
-	public void updateAvailable(UpdateInformation update) {
-        if (update.getUpdateCommand() != null)
-            System.out.println("there's a new version out "+update.getUpdateVersion()+
-                    ", to get it shutdown limewire and run "+update.getUpdateCommand());
+	public void updbteAvailable(UpdateInformation update) {
+        if (updbte.getUpdateCommand() != null)
+            System.out.println("there's b new version out "+update.getUpdateVersion()+
+                    ", to get it shutdown limewire bnd run "+update.getUpdateCommand());
         else
-            System.out.println("You're running an older version.  Get " +
-	                     update.getUpdateVersion() + ", from " + update.getUpdateURL());
+            System.out.println("You're running bn older version.  Get " +
+	                     updbte.getUpdateVersion() + ", from " + update.getUpdateURL());
     }  
 
-    public boolean isQueryAlive(GUID guid) {
-        return false;
+    public boolebn isQueryAlive(GUID guid) {
+        return fblse;
     }
     
-    public void componentLoading(String component) {
-        System.out.println("Loading component: " + component);
+    public void componentLobding(String component) {
+        System.out.println("Lobding component: " + component);
     }
     
-    public void addressStateChanged() {}
+    public void bddressStateChanged() {}
 
-	public boolean handleMagnets(final MagnetOptions[] magnets) {
-		return false;
+	public boolebn handleMagnets(final MagnetOptions[] magnets) {
+		return fblse;
 	}
 
-	public void acceptedIncomingChanged(boolean status) { }
+	public void bcceptedIncomingChanged(boolean status) { }
 }

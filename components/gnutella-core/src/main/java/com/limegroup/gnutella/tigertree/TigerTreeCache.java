@@ -1,210 +1,210 @@
-package com.limegroup.gnutella.tigertree;
+pbckage com.limegroup.gnutella.tigertree;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import jbva.io.BufferedInputStream;
+import jbva.io.BufferedOutputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.FileOutputStream;
+import jbva.io.IOException;
+import jbva.io.ObjectInputStream;
+import jbva.io.ObjectOutputStream;
+import jbva.util.HashMap;
+import jbva.util.Iterator;
+import jbva.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.FileDesc;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.ConverterObjectInputStream;
+import com.limegroup.gnutellb.util.ProcessingQueue;
 
 /**
- * @author Gregorio Roper
+ * @buthor Gregorio Roper
  * 
- * This class maps SHA1_URNs to TigerTreeCache
+ * This clbss maps SHA1_URNs to TigerTreeCache
  */
-public final class TigerTreeCache {
+public finbl class TigerTreeCache {
 
     /**
-     * TigerTreeCache instance variable.
+     * TigerTreeCbche instance variable.
      */
-    private static TigerTreeCache instance = null;
+    privbte static TigerTreeCache instance = null;
     
     /**
-     * The ProcessingQueue to do the hashing.
+     * The ProcessingQueue to do the hbshing.
      */
-    private static final ProcessingQueue QUEUE = 
-        new ProcessingQueue("TreeHashTread");
+    privbte static final ProcessingQueue QUEUE = 
+        new ProcessingQueue("TreeHbshTread");
 
-    private static final Log LOG =
-        LogFactory.getLog(TigerTreeCache.class);
+    privbte static final Log LOG =
+        LogFbctory.getLog(TigerTreeCache.class);
 
     /**
-     * A tree that is not fully constructed yet
+     * A tree thbt is not fully constructed yet
      */
-    private static final Object BUSH = new Object();
+    privbte static final Object BUSH = new Object();
     
     /**
-     * TigerTreeCache container.
+     * TigerTreeCbche container.
      */
-    private static Map /* SHA1_URN -> HashTree */ TREE_MAP;
+    privbte static Map /* SHA1_URN -> HashTree */ TREE_MAP;
 
     /**
-     * File where the Mapping SHA1->TIGERTREE is stored
+     * File where the Mbpping SHA1->TIGERTREE is stored
      */
-    private static final File CACHE_FILE =
-        new File(CommonUtils.getUserSettingsDir(), "ttree.cache");
+    privbte static final File CACHE_FILE =
+        new File(CommonUtils.getUserSettingsDir(), "ttree.cbche");
         
     /**
-     * Whether or not data dirtied since the last time we saved.
+     * Whether or not dbta dirtied since the last time we saved.
      */
-    private static boolean dirty = false;        
+    privbte static boolean dirty = false;        
 
     /**
-     * Returns the <tt>TigerTreeCache</tt> instance.
+     * Returns the <tt>TigerTreeCbche</tt> instance.
      * 
-     * @return the <tt>TigerTreeCache</tt> instance
+     * @return the <tt>TigerTreeCbche</tt> instance
      */
-    public synchronized static TigerTreeCache instance() {
-        if(instance == null)
-            instance = new TigerTreeCache();
-        return instance;
+    public synchronized stbtic TigerTreeCache instance() {
+        if(instbnce == null)
+            instbnce = new TigerTreeCache();
+        return instbnce;
     }
 
     /**
-     * If HashTree wasn't found, schedule file for hashing
+     * If HbshTree wasn't found, schedule file for hashing
      * 
-     * @param fd
-     *            the <tt>FileDesc</tt> for which we want to obtain the
-     *            HashTree
-     * @return HashTree for File
+     * @pbram fd
+     *            the <tt>FileDesc</tt> for which we wbnt to obtain the
+     *            HbshTree
+     * @return HbshTree for File
      */
-    public synchronized HashTree getHashTree(FileDesc fd) {
+    public synchronized HbshTree getHashTree(FileDesc fd) {
         Object obj = TREE_MAP.get(fd.getSHA1Urn());
-        if (obj != null && obj.equals(BUSH))
+        if (obj != null && obj.equbls(BUSH))
             return null;
-        HashTree tree = (HashTree) obj;
+        HbshTree tree = (HashTree) obj;
         if (tree == null) {
             TREE_MAP.put(fd.getSHA1Urn(), BUSH);
-            QUEUE.add(new HashRunner(fd));
+            QUEUE.bdd(new HashRunner(fd));
         }
         return tree;
     }
 
     /**
-     * Retrieves the cached HashTree for this URN.
+     * Retrieves the cbched HashTree for this URN.
      * 
-     * @param sha1
-     *            the <tt>URN</tt> for which we want to obtain the HashTree
-     * @return HashTree for URN
+     * @pbram sha1
+     *            the <tt>URN</tt> for which we wbnt to obtain the HashTree
+     * @return HbshTree for URN
      */
-    public synchronized HashTree getHashTree(URN sha1) {
-        Object tree = TREE_MAP.get(sha1);
+    public synchronized HbshTree getHashTree(URN sha1) {
+        Object tree = TREE_MAP.get(shb1);
         
-        if (tree != null && tree.equals(BUSH))
+        if (tree != null && tree.equbls(BUSH))
             return null;
         
-        return (HashTree)tree;
+        return (HbshTree)tree;
     }
     
     /**
-     * Purges the HashTree for this URN.
+     * Purges the HbshTree for this URN.
      */
-    public synchronized void purgeTree(URN sha1) {
-        if(TREE_MAP.remove(sha1) != null)
+    public synchronized void purgeTree(URN shb1) {
+        if(TREE_MAP.remove(shb1) != null)
             dirty = true;
     }
 
     /**
-     * add a hashtree to the internal list if the tree depth is sufficient
+     * bdd a hashtree to the internal list if the tree depth is sufficient
      * 
-     * @param sha1
-     *            the SHA1- <tt>URN</tt> of a file
-     * @param tree
-     *            the <tt>HashTree</tt>
+     * @pbram sha1
+     *            the SHA1- <tt>URN</tt> of b file
+     * @pbram tree
+     *            the <tt>HbshTree</tt>
      */
-    public static synchronized void addHashTree(URN sha1, HashTree tree) {
+    public stbtic synchronized void addHashTree(URN sha1, HashTree tree) {
         if (tree.isGoodDepth()) {
-            TREE_MAP.put(sha1, tree);
+            TREE_MAP.put(shb1, tree);
             dirty = true;
-            if (LOG.isDebugEnabled())
-                LOG.debug("added hashtree for urn " +
-                          sha1 + ";" + tree.getRootHash());
-        } else if (LOG.isDebugEnabled())
-            LOG.debug("hashtree for urn " + sha1 + " had bad depth");
+            if (LOG.isDebugEnbbled())
+                LOG.debug("bdded hashtree for urn " +
+                          shb1 + ";" + tree.getRootHash());
+        } else if (LOG.isDebugEnbbled())
+            LOG.debug("hbshtree for urn " + sha1 + " had bad depth");
     }
 
     /**
-     * private constructor
+     * privbte constructor
      */
-    private TigerTreeCache() {
-        TREE_MAP = createMap();
+    privbte TigerTreeCache() {
+        TREE_MAP = crebteMap();
     }
 
     /**
-     * Loads values from cache file, if available
+     * Lobds values from cache file, if available
      * 
-     * @return Map of SHA1->HashTree
+     * @return Mbp of SHA1->HashTree
      */
-    private static Map createMap() {
-        ObjectInputStream ois = null;
+    privbte static Map createMap() {
+        ObjectInputStrebm ois = null;
         try {
-            ois = new ConverterObjectInputStream(
-                    new BufferedInputStream(
-                        new FileInputStream(CACHE_FILE)));
-            Map map = (Map)ois.readObject();
-            if(map != null) {
-                for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                    // Remove values that aren't correct.
-                    Map.Entry next = (Map.Entry)i.next();
+            ois = new ConverterObjectInputStrebm(
+                    new BufferedInputStrebm(
+                        new FileInputStrebm(CACHE_FILE)));
+            Mbp map = (Map)ois.readObject();
+            if(mbp != null) {
+                for(Iterbtor i = map.entrySet().iterator(); i.hasNext(); ) {
+                    // Remove vblues that aren't correct.
+                    Mbp.Entry next = (Map.Entry)i.next();
                     Object key = next.getKey();
-                    Object value = next.getValue();
-                    if( !(key instanceof URN) || !(value instanceof HashTree) )
+                    Object vblue = next.getValue();
+                    if( !(key instbnceof URN) || !(value instanceof HashTree) )
                         i.remove();
                 }
             }
-            return map;
-        } catch(Throwable t) {
-            LOG.error("Can't read tiger trees", t);
-            return new HashMap();
-        } finally {
+            return mbp;
+        } cbtch(Throwable t) {
+            LOG.error("Cbn't read tiger trees", t);
+            return new HbshMap();
+        } finblly {
             if (ois != null) {
                 try {
                     ois.close();
-                } catch (IOException e) {
-                    // all we can do is try to close it
+                } cbtch (IOException e) {
+                    // bll we can do is try to close it
                 }
             }
         }
     }
 
     /**
-     * Removes any stale entries from the map so that they will automatically
-     * be replaced.
+     * Removes bny stale entries from the map so that they will automatically
+     * be replbced.
      * 
-     * @param map
-     *            the <tt>Map</tt> to check
+     * @pbram map
+     *            the <tt>Mbp</tt> to check
      */
-    private static void removeOldEntries(Map map) {
-        // discard outdated info
-        Iterator iter = map.keySet().iterator();
-        while (iter.hasNext()) {
-            URN sha1 = (URN) iter.next();
-            if (map.get(sha1) != BUSH) {
-                if (RouterService.getFileManager().getFileDescForUrn(sha1) != null)
+    privbte static void removeOldEntries(Map map) {
+        // discbrd outdated info
+        Iterbtor iter = map.keySet().iterator();
+        while (iter.hbsNext()) {
+            URN shb1 = (URN) iter.next();
+            if (mbp.get(sha1) != BUSH) {
+                if (RouterService.getFileMbnager().getFileDescForUrn(sha1) != null)
                     continue;
-                else if (RouterService.getDownloadManager()
-                        .getIncompleteFileManager().getFileForUrn(sha1) != null)
+                else if (RouterService.getDownlobdManager()
+                        .getIncompleteFileMbnager().getFileForUrn(sha1) != null)
                     continue;
-                else if (Math.random() > map.size() / 200)
-                    // lazily removing entries if we don't have
-                    // that many anyway. Maybe some of the files are
-                    // just temporarily unshared.
+                else if (Mbth.random() > map.size() / 200)
+                    // lbzily removing entries if we don't have
+                    // thbt many anyway. Maybe some of the files are
+                    // just temporbrily unshared.
                     continue;
             }
             iter.remove();
@@ -213,29 +213,29 @@ public final class TigerTreeCache {
     }
 
     /**
-     * Write cache so that we only have to calculate them once.
+     * Write cbche so that we only have to calculate them once.
      */
-    public synchronized void persistCache() {
+    public synchronized void persistCbche() {
         if(!dirty)
             return;
         
-        //It's not ideal to hold a lock while writing to disk, but I doubt
+        //It's not idebl to hold a lock while writing to disk, but I doubt
         // think
-        //it's a problem in practice.
+        //it's b problem in practice.
         removeOldEntries(TREE_MAP);
 
-        ObjectOutputStream oos = null;
+        ObjectOutputStrebm oos = null;
         try {
-            oos = new ObjectOutputStream(
-                    new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
+            oos = new ObjectOutputStrebm(
+                    new BufferedOutputStrebm(new FileOutputStream(CACHE_FILE)));
             oos.writeObject(TREE_MAP);
-        } catch (IOException e) {
+        } cbtch (IOException e) {
             ErrorService.error(e);
-        } finally {
+        } finblly {
             if(oos != null) {
                 try {
                     oos.close();
-                } catch(IOException ignored) {}
+                } cbtch(IOException ignored) {}
             }
         }
         
@@ -243,24 +243,24 @@ public final class TigerTreeCache {
     }
 
     /**
-     * Simple runnable that processes the hash of a FileDesc.
+     * Simple runnbble that processes the hash of a FileDesc.
      */
-    private static class HashRunner implements Runnable {
-        private final FileDesc FD;
+    privbte static class HashRunner implements Runnable {
+        privbte final FileDesc FD;
 
-        HashRunner(FileDesc fd) {
+        HbshRunner(FileDesc fd) {
             FD = fd;
         }
 
         public void run() {
             try {
-                URN sha1 = FD.getSHA1Urn();
-                // if it was scheduled multiple times, ignore latter times.
-                if(TigerTreeCache.instance().getHashTree(sha1) == null) {
-                    HashTree tree = HashTree.createHashTree(FD);
-                    addHashTree(sha1, tree);
+                URN shb1 = FD.getSHA1Urn();
+                // if it wbs scheduled multiple times, ignore latter times.
+                if(TigerTreeCbche.instance().getHashTree(sha1) == null) {
+                    HbshTree tree = HashTree.createHashTree(FD);
+                    bddHashTree(sha1, tree);
                 }
-            } catch(IOException ignored) {}
+            } cbtch(IOException ignored) {}
         }
     }
 }

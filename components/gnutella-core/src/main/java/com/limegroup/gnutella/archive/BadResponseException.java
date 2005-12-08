@@ -1,25 +1,25 @@
-package com.limegroup.gnutella.archive;
+pbckage com.limegroup.gnutella.archive;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
-public class BadResponseException extends IOException {
+public clbss BadResponseException extends IOException {
 
-	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/BadResponseException.java,v 1.1.2.3 2005-11-02 20:59:38 tolsen Exp $";
+	public stbtic final String REPOSITORY_VERSION = 
+		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/BadResponseException.java,v 1.1.2.3 2005/11/02 20:59:38 tolsen Exp $";
 
-	private static final long serialVersionUID = 4844119150283787850L;
+	privbte static final long serialVersionUID = 4844119150283787850L;
 
-	public BadResponseException( Throwable cause ) {
-		initCause( cause );
+	public BbdResponseException( Throwable cause ) {
+		initCbuse( cause );
 	}
 	
-	public BadResponseException( String message, Throwable cause ) {
-		super( message );
-		initCause( cause );
+	public BbdResponseException( String message, Throwable cause ) {
+		super( messbge );
+		initCbuse( cause );
 	}
 
-	public BadResponseException( String message ) {
-		super( message );
+	public BbdResponseException( String message ) {
+		super( messbge );
 	}
 	
 }

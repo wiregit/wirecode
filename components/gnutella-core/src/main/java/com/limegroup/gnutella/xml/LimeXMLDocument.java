@@ -1,240 +1,240 @@
-package com.limegroup.gnutella.xml;
+pbckage com.limegroup.gnutella.xml;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.io.Serializable;
+import jbva.io.StringReader;
+import jbva.util.ArrayList;
+import jbva.util.Collection;
+import jbva.util.Collections;
+import jbva.util.HashMap;
+import jbva.util.Iterator;
+import jbva.util.List;
+import jbva.util.Map;
+import jbva.util.Set;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sbx.InputSource;
+import org.xml.sbx.SAXException;
 
-import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.licenses.CCConstants;
-import com.limegroup.gnutella.licenses.License;
-import com.limegroup.gnutella.licenses.LicenseConstants;
-import com.limegroup.gnutella.licenses.LicenseFactory;
-import com.limegroup.gnutella.metadata.WeedInfo;
-import com.limegroup.gnutella.metadata.WRMXML;
+import com.limegroup.gnutellb.util.NameValue;
+import com.limegroup.gnutellb.licenses.CCConstants;
+import com.limegroup.gnutellb.licenses.License;
+import com.limegroup.gnutellb.licenses.LicenseConstants;
+import com.limegroup.gnutellb.licenses.LicenseFactory;
+import com.limegroup.gnutellb.metadata.WeedInfo;
+import com.limegroup.gnutellb.metadata.WRMXML;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 
 /**
- * @author  Sumeet Thadani
- * A LimeXMLDocument is basically a hashmap that maps a
- * Names of fields to the values as per a XML document.
+ * @buthor  Sumeet Thadani
+ * A LimeXMLDocument is bbsically a hashmap that maps a
+ * Nbmes of fields to the values as per a XML document.
  */
-public class LimeXMLDocument implements Serializable {
+public clbss LimeXMLDocument implements Serializable {
     
-    private static final Log LOG = LogFactory.getLog(LimeXMLDocument.class);
+    privbte static final Log LOG = LogFactory.getLog(LimeXMLDocument.class);
 
-    public static final String XML_ID_ATTRIBUTE = "identifier__";
-    public static final String XML_ACTION_ATTRIBUTE = "action__";
-    public static final String XML_INDEX_ATTRIBUTE = "index__";
-    public static final String XML_LICENSE_ATTRIBUTE = "license__";
-    public static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
+    public stbtic final String XML_ID_ATTRIBUTE = "identifier__";
+    public stbtic final String XML_ACTION_ATTRIBUTE = "action__";
+    public stbtic final String XML_INDEX_ATTRIBUTE = "index__";
+    public stbtic final String XML_LICENSE_ATTRIBUTE = "license__";
+    public stbtic final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
     
     /**
      * The current version of LimeXMLDocuments.
      *
-     * Increment this number as features are added which require
-     * reparsing documents on disk.
+     * Increment this number bs features are added which require
+     * repbrsing documents on disk.
      */
-    private static final int CURRENT_VERSION = 2;
+    privbte static final int CURRENT_VERSION = 2;
 
 	/**
-	 * Cached hash code for this instance.
+	 * Cbched hash code for this instance.
 	 */
-	private volatile transient int hashCode = 0;
+	privbte volatile transient int hashCode = 0;
 
-    /** For backwards compatibility with downloads.dat. */
-    private static final long serialVersionUID = 7396170507085078485L;
+    /** For bbckwards compatibility with downloads.dat. */
+    privbte static final long serialVersionUID = 7396170507085078485L;
 
-    //TODO2: Need to build in the ability to work with multiple instances
+    //TODO2: Need to build in the bbility to work with multiple instances
     //of some fields. 
     
     /**
-     * Map of canonical attribute name -> value.
+     * Mbp of canonical attribute name -> value.
      */
-    private Map fieldToValue = new HashMap();
+    privbte Map fieldToValue = new HashMap();
     
     /**
-     * The schema of this LimeXMLDocument.
+     * The schemb of this LimeXMLDocument.
      */
-    private String schemaUri;
+    privbte String schemaUri;
     
     /**
-     * The cached string of attributes.
+     * The cbched string of attributes.
      */
-    private transient String attributeString;
+    privbte transient String attributeString;
 
     /** 
-     * The file this is related to.  Can be null if pure meta-data.
+     * The file this is relbted to.  Can be null if pure meta-data.
      */
-    private transient File fileId;
+    privbte transient File fileId;
     
     /**
-     * The action that this doc has.
+     * The bction that this doc has.
      */
-    private transient String action;
+    privbte transient String action;
     
     /**
      * The version of this LimeXMLDocument.
      */
-    private int version = CURRENT_VERSION;
-    boolean isCurrent() { return version == CURRENT_VERSION; }
+    privbte int version = CURRENT_VERSION;
+    boolebn isCurrent() { return version == CURRENT_VERSION; }
     void setCurrent() { version = CURRENT_VERSION; }
     
     /**
-     * Cached list of keywords.  Because keywords are only filled up
-     * upon construction, they can be cached upon retrieval.
+     * Cbched list of keywords.  Because keywords are only filled up
+     * upon construction, they cbn be cached upon retrieval.
      */
-    private transient List CACHED_KEYWORDS = null;
+    privbte transient List CACHED_KEYWORDS = null;
     
-    /** The kind of license this has. */
-    private transient int licenseType = LicenseConstants.NO_LICENSE;
+    /** The kind of license this hbs. */
+    privbte transient int licenseType = LicenseConstants.NO_LICENSE;
 
     /**
-     * Constructs a LimeXMLDocument with the given string.
+     * Constructs b LimeXMLDocument with the given string.
      */
     public LimeXMLDocument(String xml)
-      throws SAXException, SchemaNotFoundException, IOException {
-        if(xml==null || xml.equals(""))
+      throws SAXException, SchembNotFoundException, IOException {
+        if(xml==null || xml.equbls(""))
             throw new SAXException("null or empty string");
 
-        InputSource doc = new InputSource(new StringReader(xml));
-        XMLParsingUtils.ParseResult result = XMLParsingUtils.parse(doc);
+        InputSource doc = new InputSource(new StringRebder(xml));
+        XMLPbrsingUtils.ParseResult result = XMLParsingUtils.parse(doc);
         if (result.isEmpty())
             throw new IOException("No element present");
-        if (result.schemaURI == null)
-            throw new SchemaNotFoundException("no schema");
+        if (result.schembURI == null)
+            throw new SchembNotFoundException("no schema");
 
-        this.fieldToValue = (Map)result.get(0);
-        this.schemaUri = result.schemaURI;
-        setFields(result.canonicalKeyPrefix);
+        this.fieldToVblue = (Map)result.get(0);
+        this.schembUri = result.schemaURI;
+        setFields(result.cbnonicalKeyPrefix);
         
-        if(!isValid())
-            throw new IOException("Invalid XML: " + xml);
+        if(!isVblid())
+            throw new IOException("Invblid XML: " + xml);
     }
 
     /**
-     * Constructs a new LimeXMLDocument
-     * @param map Map with keys in canonicalized
-     * form and corresponding values that will be used to create the 
-     * new instance
-     * @param schemaURI The schema URI for the LimeXMLDocument to be
-     * created
+     * Constructs b new LimeXMLDocument
+     * @pbram map Map with keys in canonicalized
+     * form bnd corresponding values that will be used to create the 
+     * new instbnce
+     * @pbram schemaURI The schema URI for the LimeXMLDocument to be
+     * crebted
      */    
-    LimeXMLDocument(Map map, String schemaURI, String keyPrefix) 
+    LimeXMLDocument(Mbp map, String schemaURI, String keyPrefix) 
       throws IOException {
-        if(map.isEmpty())
-            throw new IllegalArgumentException("empty map");
+        if(mbp.isEmpty())
+            throw new IllegblArgumentException("empty map");
 
-        this.schemaUri = schemaURI;
-        this.fieldToValue = map;
-        fieldToValue.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
+        this.schembUri = schemaURI;
+        this.fieldToVblue = map;
+        fieldToVblue.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
         setFields(keyPrefix);
         
-        if(!isValid())
-            throw new IOException("invalid doc! "+map+" \nschema uri: "+schemaURI);
+        if(!isVblid())
+            throw new IOException("invblid doc! "+map+" \nschema uri: "+schemaURI);
         
     }
 
     /**
-     * Constructs a new LimeXMLDocument
-     * @param nameValueList List (of Map.Entry) of fieldnames (in canonicalized
-     * form) and corresponding values that will be used to create the 
-     * new instance
-     * @param schemaURI The schema URI for the LimeXMLDocument to be
-     * created
+     * Constructs b new LimeXMLDocument
+     * @pbram nameValueList List (of Map.Entry) of fieldnames (in canonicalized
+     * form) bnd corresponding values that will be used to create the 
+     * new instbnce
+     * @pbram schemaURI The schema URI for the LimeXMLDocument to be
+     * crebted
      */
-    public LimeXMLDocument(Collection nameValueList, String schemaURI) {
-        if(nameValueList.isEmpty())
-            throw new IllegalArgumentException("empty list");
+    public LimeXMLDocument(Collection nbmeValueList, String schemaURI) {
+        if(nbmeValueList.isEmpty())
+            throw new IllegblArgumentException("empty list");
 
-        //set the schema URI
-        this.schemaUri = schemaURI;
+        //set the schemb URI
+        this.schembUri = schemaURI;
                 
-        //iterate over the passed list of fieldnames & values
-        for(Iterator i = nameValueList.iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            String name = (String)next.getKey();
-            Object value = next.getValue();
-            fieldToValue.put(name.trim(), value);
+        //iterbte over the passed list of fieldnames & values
+        for(Iterbtor i = nameValueList.iterator(); i.hasNext(); ) {
+            Mbp.Entry next = (Map.Entry)i.next();
+            String nbme = (String)next.getKey();
+            Object vblue = next.getValue();
+            fieldToVblue.put(name.trim(), value);
         }
         
-        // scan for action/id/etc..
-        scanFields();
+        // scbn for action/id/etc..
+        scbnFields();
         
-        if(!isValid())
-            throw new IllegalArgumentException("Invalid Doc!");
+        if(!isVblid())
+            throw new IllegblArgumentException("Invalid Doc!");
     }
     
     /**
-     * Determines whether or not this LimeXMLDocument is valid.
+     * Determines whether or not this LimeXMLDocument is vblid.
      */
-    boolean isValid() {
-        // no schemaURI or the schemaURI doesn't map to a LimeXMLSchema
-        if(schemaUri == null || getSchema() == null)
-            return false;
+    boolebn isValid() {
+        // no schembURI or the schemaURI doesn't map to a LimeXMLSchema
+        if(schembUri == null || getSchema() == null)
+            return fblse;
 
-        // no valid attributes.
+        // no vblid attributes.
         if(getAttributeString().length() == 0)
-            return false;
+            return fblse;
             
         return true;
     }
 
     /**
-     * Reads the object and initializes transient fields.
+     * Rebds the object and initializes transient fields.
      */
-    private void readObject(java.io.ObjectInputStream in)
-      throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        scanFields();
+    privbte void readObject(java.io.ObjectInputStream in)
+      throws IOException, ClbssNotFoundException {
+        in.defbultReadObject();
+        scbnFields();
     }
 
     /**
-     * Returns the number of fields this document has.
+     * Returns the number of fields this document hbs.
      */
     public int getNumFields() {
-        return fieldToValue.size();
+        return fieldToVblue.size();
     }
 
     /**
-     * Returns all the non-numeric fields in this.  These are
-     * not necessarily QRP keywords.  For example, one of the
-     * elements of the returned list may be "Some comment-blah".
-     * QRP code may want to split this into the QRP keywords
-     * "Some", "comment", and "blah".
+     * Returns bll the non-numeric fields in this.  These are
+     * not necessbrily QRP keywords.  For example, one of the
+     * elements of the returned list mby be "Some comment-blah".
+     * QRP code mby want to split this into the QRP keywords
+     * "Some", "comment", bnd "blah".
      *
-     * Indivisible keywords are not returned.  To retrieve those,
-     * use getIndivisibleKeywords().  Indivisible keywords are
+     * Indivisible keywords bre not returned.  To retrieve those,
+     * use getIndivisibleKeywords().  Indivisible keywords bre
      * those which QRP will not split up.
      */
     public List getKeyWords() {
         if( CACHED_KEYWORDS != null )
             return CACHED_KEYWORDS;
 
-        List retList = new ArrayList();
-        Iterator iter = fieldToValue.keySet().iterator();
-        while(iter.hasNext()){
+        List retList = new ArrbyList();
+        Iterbtor iter = fieldToValue.keySet().iterator();
+        while(iter.hbsNext()){
             String currKey = (String) iter.next();
-            String val = (String) fieldToValue.get(currKey);
-            if(val != null && !val.equals("") && !isIndivisible(currKey, val)) {
+            String vbl = (String) fieldToValue.get(currKey);
+            if(vbl != null && !val.equals("") && !isIndivisible(currKey, val)) {
                 try {
-                    Double.parseDouble(val); // will trigger NFE.
-                } catch(NumberFormatException ignored) {
-                    retList.add(val);
+                    Double.pbrseDouble(val); // will trigger NFE.
+                } cbtch(NumberFormatException ignored) {
+                    retList.bdd(val);
                 }
             }
         }
@@ -243,54 +243,54 @@ public class LimeXMLDocument implements Serializable {
     }
 
     /**
-     * Returns all the indivisible keywords for entry into QRP tables.
+     * Returns bll the indivisible keywords for entry into QRP tables.
      */
     public List getKeyWordsIndivisible() {
-        return LicenseConstants.getIndivisible(licenseType);
+        return LicenseConstbnts.getIndivisible(licenseType);
     }
 
     /**
-     * Determines if this keyword & value is indivisible
-     * (thus making QRP not split it).
+     * Determines if this keyword & vblue is indivisible
+     * (thus mbking QRP not split it).
      */
-    private boolean isIndivisible(String currKey, String val) {
-        //the license-type is always indivisible.
-        //note that for weed licenses, this works because getKeyWordsIndivisible
-        //is returning a list of only 'WeedInfo.LAINFO'.  the content-id & version-id
-        //are essentially lost & ignored.
+    privbte boolean isIndivisible(String currKey, String val) {
+        //the license-type is blways indivisible.
+        //note thbt for weed licenses, this works because getKeyWordsIndivisible
+        //is returning b list of only 'WeedInfo.LAINFO'.  the content-id & version-id
+        //bre essentially lost & ignored.
         return currKey.endsWith(XML_LICENSE_TYPE_ATTRIBUTE);
     }    
 
     /**
-     * Returns the unique identifier which identifies the schema this XML
+     * Returns the unique identifier which identifies the schemb this XML
      * document conforms to
      */
-    public String getSchemaURI() {
-        return schemaUri;
+    public String getSchembURI() {
+        return schembUri;
     }
     
     /**
-     * Returns the LimeXMLSchema associated with this XML document.
+     * Returns the LimeXMLSchemb associated with this XML document.
      */
-    public LimeXMLSchema getSchema() {
-        return LimeXMLSchemaRepository.instance().getSchema(schemaUri);
+    public LimeXMLSchemb getSchema() {
+        return LimeXMLSchembRepository.instance().getSchema(schemaUri);
     }
     
     /**
-     * Returns the description of the schema URI.
+     * Returns the description of the schemb URI.
      */
-    public String getSchemaDescription() {
-        LimeXMLSchema schema = getSchema();
-        if(schema != null)
-            return schema.getDescription();
+    public String getSchembDescription() {
+        LimeXMLSchemb schema = getSchema();
+        if(schemb != null)
+            return schemb.getDescription();
         else
-            return LimeXMLSchema.getDisplayString(schemaUri);
+            return LimeXMLSchemb.getDisplayString(schemaUri);
     }
     
     /**
-     * Returns the name of the file that the data in this XML document 
-     * corresponds to. If the meta-data does not correspond to any file
-     * in the file system, this method will rerurn a null.
+     * Returns the nbme of the file that the data in this XML document 
+     * corresponds to. If the metb-data does not correspond to any file
+     * in the file system, this method will rerurn b null.
      */
     public File getIdentifier() {
         return fileId;
@@ -304,87 +304,87 @@ public class LimeXMLDocument implements Serializable {
     }
 
     /**
-     * Returns the action corresponding with this LimeXMLDocument.
+     * Returns the bction corresponding with this LimeXMLDocument.
      */
     public String getAction() {
-        if(action == null)
+        if(bction == null)
             return "";
         else
-            return action;
+            return bction;
     }
 
     /**
-     * Returns a Set of Map.Entry, where each key-value corresponds to a
-     * Canonicalized field name (placeholder), and its corresponding value in
+     * Returns b Set of Map.Entry, where each key-value corresponds to a
+     * Cbnonicalized field name (placeholder), and its corresponding value in
      * the XML Document.
      * <p>
-     * Canonicalization:
+     * Cbnonicalization:
      * <p>
-     * So as to preserve the structure, Structure.Field will be represented as
-     * Structure__Field (Double Underscore is being used as a delimiter to
+     * So bs to preserve the structure, Structure.Field will be represented as
+     * Structure__Field (Double Underscore is being used bs a delimiter to
      * represent the structure).
      *<p>
-     * In case of multiple structured values with same name,
-     * as might occur while using + or * in the regular expressions in schema,
-     * those should be represented as using the array index using the __
-     * notation (withouth the square brackets)
-     * for e.g. myarray[0].name ==> myarray__0__name
+     * In cbse of multiple structured values with same name,
+     * bs might occur while using + or * in the regular expressions in schema,
+     * those should be represented bs using the array index using the __
+     * notbtion (withouth the square brackets)
+     * for e.g. mybrray[0].name ==> myarray__0__name
      *
-     * attribute names for an element in the XML schema should be postfixed 
+     * bttribute names for an element in the XML schema should be postfixed 
      * with __ (double underscore).
-     * So element.attribute ==> element__attribute__
+     * So element.bttribute ==> element__attribute__
      *
-     * @return a Set of Map.Entry, where each key-value corresponds to a
-     * canonicalized field name (placeholder), and its corresponding value in
+     * @return b Set of Map.Entry, where each key-value corresponds to a
+     * cbnonicalized field name (placeholder), and its corresponding value in
      * the XML Document.
      */
-    public Set getNameValueSet() {
-        return fieldToValue.entrySet();
+    public Set getNbmeValueSet() {
+        return fieldToVblue.entrySet();
     }
     
     /**
-     * Returns a set of the names within this LimeXMLDocument.
+     * Returns b set of the names within this LimeXMLDocument.
      */
-    public Set getNameSet() {
-        return fieldToValue.keySet();
+    public Set getNbmeSet() {
+        return fieldToVblue.keySet();
     }
     
     /**
-     * Returns a collection of the values of this LimeXMLDocument.
+     * Returns b collection of the values of this LimeXMLDocument.
      */
-    public Collection getValueList() {
-        return fieldToValue.values();
+    public Collection getVblueList() {
+        return fieldToVblue.values();
     }
     
     /**
-     * Determines if a license exists that this LimeXMLDocument knows about.
+     * Determines if b license exists that this LimeXMLDocument knows about.
      */
-    public boolean isLicenseAvailable() {
-        return licenseType != LicenseConstants.NO_LICENSE;
+    public boolebn isLicenseAvailable() {
+        return licenseType != LicenseConstbnts.NO_LICENSE;
     }
     
     /**
-     * Returns a string that can be used to verify if this license is valid.
+     * Returns b string that can be used to verify if this license is valid.
      */
     public String getLicenseString() {
-        if(isLicenseAvailable()) {
-            String licenseStringSuffix = getVerifiableLicenseElement(licenseType);
+        if(isLicenseAvbilable()) {
+            String licenseStringSuffix = getVerifibbleLicenseElement(licenseType);
             if (licenseStringSuffix == null)
                 return null;
-            for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry next = (Map.Entry)i.next();
+            for(Iterbtor i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
+                Mbp.Entry next = (Map.Entry)i.next();
                 String key = (String)next.getKey();
                 if (key.endsWith(licenseStringSuffix))
-                    return (String)next.getValue();
+                    return (String)next.getVblue();
             }
         }
         return null;
     }
     
-    private static String getVerifiableLicenseElement(int type) {
-        if (type == LicenseConstants.CC_LICENSE)
+    privbte static String getVerifiableLicenseElement(int type) {
+        if (type == LicenseConstbnts.CC_LICENSE)
             return LimeXMLDocument.XML_LICENSE_ATTRIBUTE;
-        if (type == LicenseConstants.WEED_LICENSE)
+        if (type == LicenseConstbnts.WEED_LICENSE)
             return LimeXMLDocument.XML_LICENSE_TYPE_ATTRIBUTE;
         return null;
     }
@@ -395,146 +395,146 @@ public class LimeXMLDocument implements Serializable {
     public License getLicense() {
         String license = getLicenseString();
         if(license != null)
-            return LicenseFactory.create(license);
+            return LicenseFbctory.create(license);
         else
             return null;
     }
 
     /**
-     * Returns a list of attributes and their values in the same order
-     * as is in the schema.
+     * Returns b list of attributes and their values in the same order
+     * bs is in the schema.
      */
-    public List getOrderedNameValueList() {
-        String[] fNames = getSchema().getCanonicalizedFieldNames();
-        List retList = new ArrayList(fNames.length);
-        for (int i = 0; i < fNames.length; i++) {
-            String name = fNames[i].trim();
-            Object value = fieldToValue.get(name);
-            if (value != null)
-                retList.add(new NameValue(name, value));
+    public List getOrderedNbmeValueList() {
+        String[] fNbmes = getSchema().getCanonicalizedFieldNames();
+        List retList = new ArrbyList(fNames.length);
+        for (int i = 0; i < fNbmes.length; i++) {
+            String nbme = fNames[i].trim();
+            Object vblue = fieldToValue.get(name);
+            if (vblue != null)
+                retList.bdd(new NameValue(name, value));
         }
             
         return retList;
     }
     
     /**
-     * Returns the value associated with this canonicalized fieldname.
+     * Returns the vblue associated with this canonicalized fieldname.
      */
-    public String getValue(String fieldName) {
-        return (String)fieldToValue.get(fieldName);
+    public String getVblue(String fieldName) {
+        return (String)fieldToVblue.get(fieldName);
     }
     
     /**
-     * Constructs an XML string from this document.
+     * Constructs bn XML string from this document.
      */
     public String getXMLString() {
         StringBuffer fullXML = new StringBuffer();
-        LimeXMLDocumentHelper.buildXML(fullXML, getSchema(), getAttributeString() + "/>");
+        LimeXMLDocumentHelper.buildXML(fullXML, getSchemb(), getAttributeString() + "/>");
         return fullXML.toString();
     }
     
     /**
-     * Returns the attribute string with the given index.
+     * Returns the bttribute string with the given index.
      *
-     * For example, this will return:
-     *   <thing att1="value1" att2="value2" att3="value3" index="4"/>
+     * For exbmple, this will return:
+     *   <thing btt1="value1" att2="value2" att3="value3" index="4"/>
      */
     public String getAttributeStringWithIndex(int i) {
-        String attributes = getAttributeString();
-        return attributes + " index=\"" + i + "\"/>";
+        String bttributes = getAttributeString();
+        return bttributes + " index=\"" + i + "\"/>";
     }
     
     /**
-     * Returns the attribute string. THIS IS NOT A FULL XML ELEMENT.
-     * It is purposely left unclosed so an index can easily be inserted.
+     * Returns the bttribute string. THIS IS NOT A FULL XML ELEMENT.
+     * It is purposely left unclosed so bn index can easily be inserted.
      */
-    private String getAttributeString() {
-        if(attributeString == null)
-            attributeString = constructAttributeString();
-        return attributeString;
+    privbte String getAttributeString() {
+        if(bttributeString == null)
+            bttributeString = constructAttributeString();
+        return bttributeString;
     }
     
     /**
-     * Constructs the open-ended XML that contains the attributes.
-     * This is purposely open-ended so that an index can easily be
+     * Constructs the open-ended XML thbt contains the attributes.
+     * This is purposely open-ended so thbt an index can easily be
      * inserted.
-     * If no attributes exist, this returns an empty string,
-     * to easily be marked as invalid.
+     * If no bttributes exist, this returns an empty string,
+     * to ebsily be marked as invalid.
      */
-    private String constructAttributeString() {
-        List attributes = getOrderedNameValueList();
-        if(attributes.isEmpty())
-            return ""; // invalid.
+    privbte String constructAttributeString() {
+        List bttributes = getOrderedNameValueList();
+        if(bttributes.isEmpty())
+            return ""; // invblid.
             
-        StringBuffer tag = new StringBuffer();
-        String root = getSchema().getRootXMLName();
-        String type = getSchema().getInnerXMLName();
-        String canonicalKey = root + "__" + type + "__";
-        tag.append("<");
-        tag.append(type);
+        StringBuffer tbg = new StringBuffer();
+        String root = getSchemb().getRootXMLName();
+        String type = getSchemb().getInnerXMLName();
+        String cbnonicalKey = root + "__" + type + "__";
+        tbg.append("<");
+        tbg.append(type);
 
-        for(Iterator i = attributes.iterator(); i.hasNext(); ) {
-            NameValue nv = (NameValue)i.next();
-            String name = XMLStringUtils.getLastField(canonicalKey, nv.getName());
-            if(name == null)
+        for(Iterbtor i = attributes.iterator(); i.hasNext(); ) {
+            NbmeValue nv = (NameValue)i.next();
+            String nbme = XMLStringUtils.getLastField(canonicalKey, nv.getName());
+            if(nbme == null)
                 continue;
-            // Construct: ' attribute="value"'
-            tag.append(" ");
-            tag.append(name);
-            tag.append("=\"");
-            tag.append(LimeXMLUtils.encodeXML((String)nv.getValue()));
-            tag.append("\"");
+            // Construct: ' bttribute="value"'
+            tbg.append(" ");
+            tbg.append(name);
+            tbg.append("=\"");
+            tbg.append(LimeXMLUtils.encodeXML((String)nv.getValue()));
+            tbg.append("\"");
         }
         
-        return tag.toString();
+        return tbg.toString();
     }
 
 	/**
-	 * Overrides equals to check for equality of all xml document fields.
+	 * Overrides equbls to check for equality of all xml document fields.
 	 *
-	 * @param o the object to compare
-	 * @return <tt>true</tt> if the objects are equal, <tt>false</tt>
+	 * @pbram o the object to compare
+	 * @return <tt>true</tt> if the objects bre equal, <tt>false</tt>
 	 *  otherwise
 	 */
-	public boolean equals(Object o) {
+	public boolebn equals(Object o) {
 		if(o == this)
 		    return true;
 		if(o == null)
-		    return false;
-		if(!(o instanceof LimeXMLDocument))
-		    return false;
+		    return fblse;
+		if(!(o instbnceof LimeXMLDocument))
+		    return fblse;
 
 		LimeXMLDocument xmlDoc = (LimeXMLDocument)o;
-		return ((schemaUri == null ? xmlDoc.schemaUri == null :
-				 schemaUri.equals(xmlDoc.schemaUri)) &&
+		return ((schembUri == null ? xmlDoc.schemaUri == null :
+				 schembUri.equals(xmlDoc.schemaUri)) &&
 				(fileId == null ? xmlDoc.fileId == null :
-				 fileId.equals(xmlDoc.fileId)) &&
-				(action == null ? xmlDoc.action == null :
-				 action.equals(xmlDoc.action)) &&
-				(fieldToValue == null ? xmlDoc.fieldToValue == null : 
-				 fieldToValue.equals(xmlDoc.fieldToValue)));
+				 fileId.equbls(xmlDoc.fileId)) &&
+				(bction == null ? xmlDoc.action == null :
+				 bction.equals(xmlDoc.action)) &&
+				(fieldToVblue == null ? xmlDoc.fieldToValue == null : 
+				 fieldToVblue.equals(xmlDoc.fieldToValue)));
 	}
 
 	/**
-	 * Overrides <tt>Object.hashCode</tt> to satisfy the contract for
-	 * hashCode, given that we're overriding equals.
+	 * Overrides <tt>Object.hbshCode</tt> to satisfy the contract for
+	 * hbshCode, given that we're overriding equals.
 	 *
-	 * @return a hashcode for this object for use in hash-based collections
+	 * @return b hashcode for this object for use in hash-based collections
 	 */
-	public int hashCode() {
-		if(hashCode == 0) {
+	public int hbshCode() {
+		if(hbshCode == 0) {
 			int result = 17;
-			if(fieldToValue != null)
-				result = 37*result + fieldToValue.hashCode();
-			if(schemaUri != null)
-				result = 37*result + schemaUri.hashCode();
+			if(fieldToVblue != null)
+				result = 37*result + fieldToVblue.hashCode();
+			if(schembUri != null)
+				result = 37*result + schembUri.hashCode();
 			if(fileId != null)
-				result = 37*result + fileId.hashCode();
-			if(action != null)
-				result = 37*result + action.hashCode();
-			hashCode = result;
+				result = 37*result + fileId.hbshCode();
+			if(bction != null)
+				result = 37*result + bction.hashCode();
+			hbshCode = result;
 		} 
-		return hashCode;
+		return hbshCode;
 	}
 	
 	/**
@@ -545,58 +545,58 @@ public class LimeXMLDocument implements Serializable {
     }
     
     /**
-     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX, and a license.
-     * Action is stored, index & identifier are removed.
+     * Looks in the fields for the ACTION, IDENTIFIER, bnd INDEX, and a license.
+     * Action is stored, index & identifier bre removed.
      */
-    private void scanFields() {
-        String canonicalKey = getCanonicalKey(getNameValueSet());
-        if(canonicalKey == null)
+    privbte void scanFields() {
+        String cbnonicalKey = getCanonicalKey(getNameValueSet());
+        if(cbnonicalKey == null)
             return;
 
-        setFields(canonicalKey);
-        fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
-        fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE);
+        setFields(cbnonicalKey);
+        fieldToVblue.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
+        fieldToVblue.remove(canonicalKey + XML_ID_ATTRIBUTE);
     }
     
     /**
-     * Stores whether or not an action or CC license are in this LimeXMLDocument.
+     * Stores whether or not bn action or CC license are in this LimeXMLDocument.
      */
-    private void setFields(String prefix) {
-        // store action.
-        action = (String)fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
+    privbte void setFields(String prefix) {
+        // store bction.
+        bction = (String)fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
 
-        // deal with updating license_type based on the license
-        String license = (String)fieldToValue.get(prefix + XML_LICENSE_ATTRIBUTE);
-        String type = (String)fieldToValue.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+        // debl with updating license_type based on the license
+        String license = (String)fieldToVblue.get(prefix + XML_LICENSE_ATTRIBUTE);
+        String type = (String)fieldToVblue.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
         
-        if(LOG.isDebugEnabled())
+        if(LOG.isDebugEnbbled())
             LOG.debug("type: " + type);
         
-        // Do specific stuff on licenseType for various licenses.
-        // CC licenses require that the 'license' field has the CC_URI_PREFIX & CC_URL_INDICATOR
-        // somewhere.  Weed licenses require that the 'license type' field has WeedInfo.LINFO,
-        // a content id & a version id.
-        licenseType = LicenseConstants.determineLicenseType(license, type);
-        if (licenseType == LicenseConstants.CC_LICENSE)
-            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
+        // Do specific stuff on licenseType for vbrious licenses.
+        // CC licenses require thbt the 'license' field has the CC_URI_PREFIX & CC_URL_INDICATOR
+        // somewhere.  Weed licenses require thbt the 'license type' field has WeedInfo.LINFO,
+        // b content id & a version id.
+        licenseType = LicenseConstbnts.determineLicenseType(license, type);
+        if (licenseType == LicenseConstbnts.CC_LICENSE)
+            fieldToVblue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
 
-        if(LOG.isDebugEnabled())
-            LOG.debug("Fields after setting: " + fieldToValue);
+        if(LOG.isDebugEnbbled())
+            LOG.debug("Fields bfter setting: " + fieldToValue);
     }
     
     /**
-     * Derives a canonicalKey from a collection of Map.Entry's.
+     * Derives b canonicalKey from a collection of Map.Entry's.
      */
-    private String getCanonicalKey(Collection entries) {
+    privbte String getCanonicalKey(Collection entries) {
         if(entries.isEmpty())
             return null;
-        Map.Entry firstEntry = (Map.Entry)entries.iterator().next();
+        Mbp.Entry firstEntry = (Map.Entry)entries.iterator().next();
         String firstKey = (String)firstEntry.getKey();
         
-        // The canonicalKey is always going to be x__x__<other stuff here>
+        // The cbnonicalKey is always going to be x__x__<other stuff here>
         int idx = firstKey.indexOf(XMLStringUtils.DELIMITER);
         idx = firstKey.indexOf(XMLStringUtils.DELIMITER, idx+1);
-        // not two delimiters? can't find the canonicalKey
+        // not two delimiters? cbn't find the canonicalKey
         if(idx == -1)
             return null;
             

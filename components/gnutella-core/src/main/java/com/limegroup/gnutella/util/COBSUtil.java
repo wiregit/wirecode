@@ -1,56 +1,56 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.IOException;
 
-import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutellb.ByteOrder;
 
-/** For implementation details, please see:
- *  http://www.acm.org/sigcomm/sigcomm97/papers/p062.pdf 
+/** For implementbtion details, please see:
+ *  http://www.bcm.org/sigcomm/sigcomm97/papers/p062.pdf 
  */
-public class COBSUtil {
+public clbss COBSUtil {
     
-    /** Encode a byte array with COBS.  The non-allowable byte value is 0.
+    /** Encode b byte array with COBS.  The non-allowable byte value is 0.
      *  PRE: src is not null.
-     *  POST: the return array will be a cobs encoded version of src.  namely,
+     *  POST: the return brray will be a cobs encoded version of src.  namely,
      *  cobsDecode(cobsEncode(src)) ==  src.
-     *  @return a COBS encoded version of src.
+     *  @return b COBS encoded version of src.
      */
-    public static byte[] cobsEncode(byte[] src) throws IOException {
-        final int srcLen = src.length;
+    public stbtic byte[] cobsEncode(byte[] src) throws IOException {
+        finbl int srcLen = src.length;
         int code = 1;
         int currIndex = 0;
-        // COBS encoding adds no more than one byte of overhead for every 254
-        // bytes of packet data
-        final int maxEncodingLen = src.length + ((src.length+1)/254) + 1;
-        ByteArrayOutputStream sink = new ByteArrayOutputStream(maxEncodingLen);
-        int writeStartIndex = -1;
+        // COBS encoding bdds no more than one byte of overhead for every 254
+        // bytes of pbcket data
+        finbl int maxEncodingLen = src.length + ((src.length+1)/254) + 1;
+        ByteArrbyOutputStream sink = new ByteArrayOutputStream(maxEncodingLen);
+        int writeStbrtIndex = -1;
 
         while (currIndex < srcLen) {
             if (src[currIndex] == 0) {
-                // currIndex was incremented so take 1 less
-                code = finishBlock(code, sink, src, writeStartIndex,
+                // currIndex wbs incremented so take 1 less
+                code = finishBlock(code, sink, src, writeStbrtIndex,
                                    (currIndex-1));
-                writeStartIndex = -1;
+                writeStbrtIndex = -1;
             }
             else {
-                if (writeStartIndex < 0) writeStartIndex = currIndex;
+                if (writeStbrtIndex < 0) writeStartIndex = currIndex;
                 code++;
                 if (code == 0xFF) {
-                    code = finishBlock(code, sink, src, writeStartIndex,
+                    code = finishBlock(code, sink, src, writeStbrtIndex,
                                        currIndex);
-                    writeStartIndex = -1;
+                    writeStbrtIndex = -1;
                 }
             }
             currIndex++;
         }
 
-        // currIndex was incremented so take 1 less
-        finishBlock(code, sink, src, writeStartIndex, (currIndex-1));
-        return sink.toByteArray();
+        // currIndex wbs incremented so take 1 less
+        finishBlock(code, sink, src, writeStbrtIndex, (currIndex-1));
+        return sink.toByteArrby();
     }
 
-    private static int finishBlock(int code, ByteArrayOutputStream sink, 
+    privbte static int finishBlock(int code, ByteArrayOutputStream sink, 
                                    byte[] src, int begin, int end) 
         throws IOException {
         sink.write(code);
@@ -59,17 +59,17 @@ public class COBSUtil {
         return (byte) 0x01;
     }
 
-    /** Decode a COBS-encoded byte array.  The non-allowable byte value is 0.
+    /** Decode b COBS-encoded byte array.  The non-allowable byte value is 0.
      *  PRE: src is not null.
-     *  POST: the return array will be a cobs decoded version of src.  namely,
+     *  POST: the return brray will be a cobs decoded version of src.  namely,
      *  cobsDecode(cobsEncode(src)) ==  src.  
-     *  @return the original COBS decoded string
+     *  @return the originbl COBS decoded string
      */
-    public static byte[] cobsDecode(byte[] src) throws IOException {
-        final int srcLen = src.length;
+    public stbtic byte[] cobsDecode(byte[] src) throws IOException {
+        finbl int srcLen = src.length;
         int currIndex = 0;
         int code = 0;
-        ByteArrayOutputStream sink = new ByteArrayOutputStream();        
+        ByteArrbyOutputStream sink = new ByteArrayOutputStream();        
 
         while (currIndex < srcLen) {
             code = ByteOrder.ubyte2int(src[currIndex++]);
@@ -78,11 +78,11 @@ public class COBSUtil {
             for (int i = 1; i < code; i++) {
                 sink.write((int)src[currIndex++]);
             }
-            if (currIndex < srcLen) // don't write this last one, it isn't used
+            if (currIndex < srcLen) // don't write this lbst one, it isn't used
                 if (code < 0xFF) sink.write(0);
         }
 
-        return sink.toByteArray();
+        return sink.toByteArrby();
     }
 
 }

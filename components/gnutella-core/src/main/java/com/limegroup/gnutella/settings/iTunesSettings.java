@@ -1,25 +1,25 @@
 
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 /**
  * Settings for iTunes
  */
-public class iTunesSettings extends LimeProps {
+public clbss iTunesSettings extends LimeProps {
     
-    private iTunesSettings() {}
+    privbte iTunesSettings() {}
     
     /**
-     * whether or not player should be enabled.
+     * whether or not plbyer should be enabled.
      */
-    public static BooleanSetting ITUNES_SUPPORT_ENABLED =
-        FACTORY.createBooleanSetting("ITUNES_SUPPORT_ENABLED", true);
+    public stbtic BooleanSetting ITUNES_SUPPORT_ENABLED =
+        FACTORY.crebteBooleanSetting("ITUNES_SUPPORT_ENABLED", true);
 
       
     /**
      * Supported file types
      */
-    public static StringArraySetting ITUNES_SUPPORTED_FILE_TYPES = 
-        FACTORY.createStringArraySetting("ITUNES_SUPPORTED_FILE_TYPES", 
-            new String[]{".mp3", ".aif", ".aiff", ".wav", ".mp2", ".mp4", 
-                        ".aac", ".mid", ".m4a", ".m4p", ".ogg"});
+    public stbtic StringArraySetting ITUNES_SUPPORTED_FILE_TYPES = 
+        FACTORY.crebteStringArraySetting("ITUNES_SUPPORTED_FILE_TYPES", 
+            new String[]{".mp3", ".bif", ".aiff", ".wav", ".mp2", ".mp4", 
+                        ".bac", ".mid", ".m4a", ".m4p", ".ogg"});
 }

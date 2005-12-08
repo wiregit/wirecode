@@ -1,52 +1,52 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.BufferedInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
+import jbva.io.BufferedInputStream;
+import jbva.io.FilterInputStream;
+import jbva.io.IOException;
 
 /**
- * InputStream that catches NPEs from BufferedInputStream
- * and rethrows them as IOExceptions.
+ * InputStrebm that catches NPEs from BufferedInputStream
+ * bnd rethrows them as IOExceptions.
  *
- * Prior to Java 1.5 (which finally was able to properly implement a completely
- * asynchronous BufferedInputStream), various internal methods could throw an NPE
- * if the connection was asynchronously closed).
+ * Prior to Jbva 1.5 (which finally was able to properly implement a completely
+ * bsynchronous BufferedInputStream), various internal methods could throw an NPE
+ * if the connection wbs asynchronously closed).
  */
-public class NPECatchingInputStream extends FilterInputStream { 
+public clbss NPECatchingInputStream extends FilterInputStream { 
     
-    public NPECatchingInputStream (final BufferedInputStream in) {
+    public NPECbtchingInputStream (final BufferedInputStream in) {
         super(in);
     }
     
-    public int read() throws IOException {
+    public int rebd() throws IOException {
         try {
-            return in.read();
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+            return in.rebd();
+        } cbtch(NullPointerException npe) {
+            throw (IOException)new IOException().initCbuse(npe);
         }
     }
     
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int rebd(byte[] b, int off, int len) throws IOException {
         try {
-            return in.read(b, off, len);
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+            return in.rebd(b, off, len);
+        } cbtch(NullPointerException npe) {
+            throw (IOException)new IOException().initCbuse(npe);
         }
     }
     
     public long skip(long n) throws IOException {
         try {
             return in.skip(n);
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+        } cbtch(NullPointerException npe) {
+            throw (IOException)new IOException().initCbuse(npe);
         }
     }
     
     public void close() throws IOException {
         try {
             in.close();
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+        } cbtch(NullPointerException npe) {
+            throw (IOException)new IOException().initCbuse(npe);
         }
     }
 }

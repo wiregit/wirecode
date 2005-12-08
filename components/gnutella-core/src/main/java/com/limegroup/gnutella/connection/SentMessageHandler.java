@@ -1,10 +1,10 @@
-package com.limegroup.gnutella.connection;
+pbckage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutellb.messages.Message;
 
-/** Simple interfaces that allows a callback of 'sent' messages. */
-public interface SentMessageHandler {
+/** Simple interfbces that allows a callback of 'sent' messages. */
+public interfbce SentMessageHandler {
     
-    public void processSentMessage(Message m);
+    public void processSentMessbge(Message m);
     
 }

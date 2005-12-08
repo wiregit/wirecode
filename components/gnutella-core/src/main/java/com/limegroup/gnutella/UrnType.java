@@ -1,97 +1,97 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import jbva.io.IOException;
+import jbva.io.InvalidObjectException;
+import jbva.io.ObjectInputStream;
+import jbva.io.ObjectOutputStream;
+import jbva.io.Serializable;
+import jbva.util.HashSet;
+import jbva.util.Set;
 
 /**
- * This class defines the types of URNs supported in the application and 
- * provides utility functions for handling urn types.
+ * This clbss defines the types of URNs supported in the application and 
+ * provides utility functions for hbndling urn types.
  *
  * @see URN
- * @see UrnCache
+ * @see UrnCbche
  */
-public class UrnType implements Serializable {
+public clbss UrnType implements Serializable {
 
-	private static final long serialVersionUID = -8211681448456483713L;
+	privbte static final long serialVersionUID = -8211681448456483713L;
 
 	/**
 	 * Identifier string for the SHA1 type.
 	 */
-	public static final String SHA1_STRING = "sha1:";
+	public stbtic final String SHA1_STRING = "sha1:";
 
     /**
      * Identifier string for the BITPRINT type.
      */
-    public static final String BITPRINT_STRING = "bitprint:";
+    public stbtic final String BITPRINT_STRING = "bitprint:";
 
     /**
-     * The <tt>UrnType</tt> for an invalid UrnType.
+     * The <tt>UrnType</tt> for bn invalid UrnType.
      */
-    public static final UrnType INVALID = new UrnType("invalid");
+    public stbtic final UrnType INVALID = new UrnType("invalid");
 
 	/**
-	 * The <tt>UrnType</tt> for SHA1 hashes.
+	 * The <tt>UrnType</tt> for SHA1 hbshes.
 	 */
-	public static final UrnType SHA1 = new UrnType(SHA1_STRING);
+	public stbtic final UrnType SHA1 = new UrnType(SHA1_STRING);
 	
 	/**
-	 * The <tt>UrnType</tt> for bitprint hashes.
+	 * The <tt>UrnType</tt> for bitprint hbshes.
 	 */
-	public static final UrnType BITPRINT = new UrnType(BITPRINT_STRING);
+	public stbtic final UrnType BITPRINT = new UrnType(BITPRINT_STRING);
 
 	/**
-	 * The <tt>UrnType</tt> for specifying any URN type.
+	 * The <tt>UrnType</tt> for specifying bny URN type.
 	 */
-	public static final UrnType ANY_TYPE = new UrnType("");
+	public stbtic final UrnType ANY_TYPE = new UrnType("");
 
 	/**
-	 * Constant for specifying SHA1 URNs in replies.
+	 * Constbnt for specifying SHA1 URNs in replies.
 	 */
-	public static transient final Set SHA1_SET = new HashSet();		
+	public stbtic transient final Set SHA1_SET = new HashSet();		
 
 	/**
-	 * Constant for specifying any type of URN for replies.
+	 * Constbnt for specifying any type of URN for replies.
 	 */
-	public static transient final Set ANY_TYPE_SET = new HashSet();	
+	public stbtic transient final Set ANY_TYPE_SET = new HashSet();	
 
 	/**
-	 * Statically add the SHA1 type to the set. 
+	 * Stbtically add the SHA1 type to the set. 
 	 */
-	static {
-		SHA1_SET.add(UrnType.SHA1);
-		ANY_TYPE_SET.add(UrnType.ANY_TYPE);
+	stbtic {
+		SHA1_SET.bdd(UrnType.SHA1);
+		ANY_TYPE_SET.bdd(UrnType.ANY_TYPE);
 	}
 
 	/**
-	 * Constant for the leading URN string identifier, as specified in
-	 * RFC 2141.  This is equal to "urn:", although note that this
-	 * should be used in a case-insensitive manner in compliance with
-	 * the URN specification (RFC 2141).
+	 * Constbnt for the leading URN string identifier, as specified in
+	 * RFC 2141.  This is equbl to "urn:", although note that this
+	 * should be used in b case-insensitive manner in compliance with
+	 * the URN specificbtion (RFC 2141).
 	 */
-	public static final String URN_NAMESPACE_ID = "urn:";
+	public stbtic final String URN_NAMESPACE_ID = "urn:";
 
 	/**
-	 * Constant string for the URN type. INVARIANT: this cannot be null
+	 * Constbnt string for the URN type. INVARIANT: this cannot be null
 	 */
-	private transient String _urnType;
+	privbte transient String _urnType;
 
 
 	/**
-	 * Private constructor ensures that this class can never be constructed 
-	 * from outside the class.  This assigns the _urnType string.
+	 * Privbte constructor ensures that this class can never be constructed 
+	 * from outside the clbss.  This assigns the _urnType string.
 	 * 
-	 * @param typeString the string representation of the URN type
+	 * @pbram typeString the string representation of the URN type
 	 * @throws <tt>NullPointerException</tt> if the <tt>typeString</tt>
-	 *  argument is <tt>null</tt>
+	 *  brgument is <tt>null</tt>
 	 */
-	private UrnType(String typeString) {
+	privbte UrnType(String typeString) {
 		if(typeString == null) {
-			throw new NullPointerException("UrnTypes cannot except null strings");
+			throw new NullPointerException("UrnTypes cbnnot except null strings");
 		}
 		_urnType = typeString;
 	}
@@ -99,96 +99,96 @@ public class UrnType implements Serializable {
 	/**
 	 * Returns whether or not this URN type is SHA1.  
 	 *
-	 * @return <tt>true</tt> if this is a SHA1 URN type, <tt>false</tt> 
+	 * @return <tt>true</tt> if this is b SHA1 URN type, <tt>false</tt> 
 	 *  otherwise
 	 */
-	public boolean isSHA1() {
-		return _urnType.equals(SHA1_STRING);
+	public boolebn isSHA1() {
+		return _urnType.equbls(SHA1_STRING);
 	}
 
 	/**
-	 * Returns the string representation of this URN type.
+	 * Returns the string representbtion of this URN type.
 	 *
-	 * @return the string representation of this URN type
+	 * @return the string representbtion of this URN type
 	 */
 	public String toString() {
 		return URN_NAMESPACE_ID+_urnType;
 	}
 
 	/**
-	 * It is necessary for this class to override equals because the 
-	 * readResolve method was not added to the serialization API until 
-	 * Java 1.2, which means that we cannot use it to ensure that the
-	 * <tt>UrnType</tt> enum constants are actually the same instances upon
-	 * deserialization.  Therefore, we must rely on Object.equals instead
+	 * It is necessbry for this class to override equals because the 
+	 * rebdResolve method was not added to the serialization API until 
+	 * Jbva 1.2, which means that we cannot use it to ensure that the
+	 * <tt>UrnType</tt> enum constbnts are actually the same instances upon
+	 * deseriblization.  Therefore, we must rely on Object.equals instead
 	 * of upon "==".  
 	 *
-	 * @param o the <tt>Object</tt> to compare for equality
-	 * @return <tt>true</tt> if these represent the same UrnType, <tt>false</tt>
+	 * @pbram o the <tt>Object</tt> to compare for equality
+	 * @return <tt>true</tt> if these represent the sbme UrnType, <tt>false</tt>
 	 *  otherwise
-	 * @see java.lang.Object#equals(Object)
+	 * @see jbva.lang.Object#equals(Object)
 	 */
-	public boolean equals(Object o) {
+	public boolebn equals(Object o) {
 		if(o == this) return true;
-		if(!(o instanceof UrnType)) return false;
+		if(!(o instbnceof UrnType)) return false;
 		UrnType type = (UrnType)o;
-		return _urnType.equals(type._urnType);
+		return _urnType.equbls(type._urnType);
 	}
 
 	/**
-	 * Overridden to meet the contract of Object.hashCode.
+	 * Overridden to meet the contrbct of Object.hashCode.
 	 *
-	 * @return the unique hashcode for this <tt>UrnType</tt>, in accordance with
-	 *  Object.equals
-	 * @see java.lang.Object#hashCode
+	 * @return the unique hbshcode for this <tt>UrnType</tt>, in accordance with
+	 *  Object.equbls
+	 * @see jbva.lang.Object#hashCode
 	 */
-	public int hashCode() {
+	public int hbshCode() {
 		int result = 17;
-		result = 37*result + _urnType.hashCode();
+		result = 37*result + _urnType.hbshCode();
 		return result;
 	}
 
 	/**
-	 * Serializes this instance.
+	 * Seriblizes this instance.
 	 *
-	 * @serialData the string representation of the URN type
+	 * @seriblData the string representation of the URN type
 	 */
-	private void writeObject(ObjectOutputStream s) 
+	privbte void writeObject(ObjectOutputStream s) 
 		throws IOException {
-		s.defaultWriteObject();
+		s.defbultWriteObject();
 		s.writeObject(_urnType);
 	}
 
 	/**
-	 * Deserializes this <tt>UrnType</tt> instance, validating the input string.
+	 * Deseriblizes this <tt>UrnType</tt> instance, validating the input string.
 	 */
-	private void readObject(ObjectInputStream s) 
-		throws IOException, ClassNotFoundException {
-		s.defaultReadObject();
-		_urnType = (String)s.readObject();
-		if(!_urnType.equals("") &&
-		   !_urnType.equals(SHA1_STRING) &&
-		   !_urnType.equals(BITPRINT_STRING)) {
-			throw new InvalidObjectException("invalid urn type: "+_urnType);
+	privbte void readObject(ObjectInputStream s) 
+		throws IOException, ClbssNotFoundException {
+		s.defbultReadObject();
+		_urnType = (String)s.rebdObject();
+		if(!_urnType.equbls("") &&
+		   !_urnType.equbls(SHA1_STRING) &&
+		   !_urnType.equbls(BITPRINT_STRING)) {
+			throw new InvblidObjectException("invalid urn type: "+_urnType);
 		}
 	}
 
 	/**
-	 * Factory method for obtaining <tt>UrnType</tt> instances from strings.
+	 * Fbctory method for obtaining <tt>UrnType</tt> instances from strings.
 	 * If the isSupportedUrnType method returns <tt>true</tt> this is
-	 * guaranteed to return a non-null UrnType.
+	 * gubranteed to return a non-null UrnType.
 	 *
-	 * @param type the string representation of the urn type
-	 * @return the <tt>UrnType</tt> instance corresponding with the specified
+	 * @pbram type the string representation of the urn type
+	 * @return the <tt>UrnType</tt> instbnce corresponding with the specified
 	 *  string, or <tt>null</tt> if the type is not supported
 	 */
-	public static UrnType createUrnType(String type) {
-		String lowerCaseType = type.toLowerCase().trim();
-		if(lowerCaseType.equals(SHA1.toString())) { 
+	public stbtic UrnType createUrnType(String type) {
+		String lowerCbseType = type.toLowerCase().trim();
+		if(lowerCbseType.equals(SHA1.toString())) { 
 			return SHA1;
-		} else if(lowerCaseType.equals(ANY_TYPE.toString())) {
+		} else if(lowerCbseType.equals(ANY_TYPE.toString())) {
 			return ANY_TYPE;
-		} else if(lowerCaseType.equals(BITPRINT.toString())) {
+		} else if(lowerCbseType.equals(BITPRINT.toString())) {
 		    return BITPRINT;
         } else {
 			return null;
@@ -196,16 +196,16 @@ public class UrnType implements Serializable {
 	}
 
 	/**
-	 * Returns whether or not the string argument is a urn type that
-	 * we know about.
+	 * Returns whether or not the string brgument is a urn type that
+	 * we know bbout.
 	 *
-	 * @param urnString to string to check 
-	 * @return <tt>true</tt> if it is a valid URN type, <tt>false</tt>
+	 * @pbram urnString to string to check 
+	 * @return <tt>true</tt> if it is b valid URN type, <tt>false</tt>
 	 *  otherwise
 	 */
-	public static boolean isSupportedUrnType(final String urnString) {
-		UrnType type = UrnType.createUrnType(urnString);
-		if(type == null) return false;
+	public stbtic boolean isSupportedUrnType(final String urnString) {
+		UrnType type = UrnType.crebteUrnType(urnString);
+		if(type == null) return fblse;
 		return true;
 	}
 }

@@ -1,109 +1,109 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import jbva.util.ArrayList;
+import jbva.util.Collection;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.ListIterator;
 
-import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutellb.ErrorService;
 
-interface ListCreator {
+interfbce ListCreator {
     public List getList();
 }
 
-public class CoWList implements List {
+public clbss CoWList implements List {
     
-    public static final ListCreator ARRAY_LIST = new ArrayCreator(); 
+    public stbtic final ListCreator ARRAY_LIST = new ArrayCreator(); 
     
-    public static final ListCreator LINKED_LIST = new LinkedCreator();
+    public stbtic final ListCreator LINKED_LIST = new LinkedCreator();
     
-    private volatile List l;
+    privbte volatile List l;
     
-    private final ListCreator creator;
+    privbte final ListCreator creator;
     
-    /** Object to synchronize the atomic operations on */
-    private final Object lock;
+    /** Object to synchronize the btomic operations on */
+    privbte final Object lock;
     
     public CoWList(List l, Object lock) {
         this.l = l;
-        this.creator = new ReflectiveCreator(l.getClass());
+        this.crebtor = new ReflectiveCreator(l.getClass());
         this.lock = lock == null ? this : lock;
     }
     
-    public CoWList(Class listType, Object lock) {
-        this(new ReflectiveCreator(listType),lock);
+    public CoWList(Clbss listType, Object lock) {
+        this(new ReflectiveCrebtor(listType),lock);
     }
     
-    public CoWList(ListCreator creator) {
-        this(creator, null);
+    public CoWList(ListCrebtor creator) {
+        this(crebtor, null);
     }
     
-    public CoWList(ListCreator creator, Object lock) {
-        this.creator = creator;
-        l = creator.getList();
+    public CoWList(ListCrebtor creator, Object lock) {
+        this.crebtor = creator;
+        l = crebtor.getList();
         this.lock = lock == null ? this : lock;
     }
     
-    private List getListCopy() {
-        List ret = creator.getList();
+    privbte List getListCopy() {
+        List ret = crebtor.getList();
         
         if (l != null)
-            ret.addAll(l);
+            ret.bddAll(l);
         
         return ret;
     }
     
-    public void add(int arg0, Object arg1) {
+    public void bdd(int arg0, Object arg1) {
         synchronized(lock) {
             List newList = getListCopy();
-            newList.add(arg0, arg1);
+            newList.bdd(arg0, arg1);
             l = newList;
         }
     }
 
-    public boolean add(Object arg0) {
+    public boolebn add(Object arg0) {
         synchronized(lock) {
             List newList = getListCopy();
-            boolean ret = newList.add(arg0);
-            l = newList;
-            return ret;
-        }
-    }
-
-    public boolean addAll(Collection arg0) {
-        synchronized(lock) {
-            List newList = getListCopy();
-            boolean ret = newList.addAll(arg0);
+            boolebn ret = newList.add(arg0);
             l = newList;
             return ret;
         }
     }
 
-    public boolean addAll(int arg0, Collection arg1) {
+    public boolebn addAll(Collection arg0) {
         synchronized(lock) {
             List newList = getListCopy();
-            boolean ret = newList.addAll(arg0,arg1);
+            boolebn ret = newList.addAll(arg0);
             l = newList;
             return ret;
         }
     }
 
-    public void clear() {
+    public boolebn addAll(int arg0, Collection arg1) {
         synchronized(lock) {
             List newList = getListCopy();
-            newList.clear();
+            boolebn ret = newList.addAll(arg0,arg1);
+            l = newList;
+            return ret;
+        }
+    }
+
+    public void clebr() {
+        synchronized(lock) {
+            List newList = getListCopy();
+            newList.clebr();
             l = newList;
         }
     }
 
-    public boolean contains(Object o) {
-        return l.contains(o);
+    public boolebn contains(Object o) {
+        return l.contbins(o);
     }
 
-    public boolean containsAll(Collection arg0) {
-        return l.containsAll(arg0);
+    public boolebn containsAll(Collection arg0) {
+        return l.contbinsAll(arg0);
     }
 
     public Object get(int index) {
@@ -114,24 +114,24 @@ public class CoWList implements List {
         return l.indexOf(o);
     }
 
-    public boolean isEmpty() {
+    public boolebn isEmpty() {
         return l.isEmpty();
     }
 
-    public Iterator iterator() {
-        return l.iterator();
+    public Iterbtor iterator() {
+        return l.iterbtor();
     }
 
-    public int lastIndexOf(Object o) {
-        return l.lastIndexOf(o);
+    public int lbstIndexOf(Object o) {
+        return l.lbstIndexOf(o);
     }
 
-    public ListIterator listIterator() {
-        return l.listIterator();
+    public ListIterbtor listIterator() {
+        return l.listIterbtor();
     }
 
-    public ListIterator listIterator(int index) {
-        return l.listIterator(index);
+    public ListIterbtor listIterator(int index) {
+        return l.listIterbtor(index);
     }
 
     public Object remove(int index) {
@@ -144,37 +144,37 @@ public class CoWList implements List {
         }
     }
 
-    public boolean remove(Object o) {
+    public boolebn remove(Object o) {
         synchronized(lock) {
             List newList = getListCopy();
-            boolean ret = newList.remove(o);
+            boolebn ret = newList.remove(o);
             l = newList;
             return ret;    
         }
     }
 
-    public boolean removeAll(Collection arg0) {
+    public boolebn removeAll(Collection arg0) {
         synchronized(lock) {
             List newList = getListCopy();
-            boolean ret = newList.removeAll(arg0);
+            boolebn ret = newList.removeAll(arg0);
             l = newList;
             return ret;    
         }
     }
 
-    public boolean retainAll(Collection arg0) {
+    public boolebn retainAll(Collection arg0) {
         synchronized(lock) {
             List newList = getListCopy();
-            boolean ret = newList.retainAll(arg0);
+            boolebn ret = newList.retainAll(arg0);
             l = newList;
             return ret;
         }
     }
 
-    public Object set(int arg0, Object arg1) {
+    public Object set(int brg0, Object arg1) {
         synchronized(lock) {
             List newList = getListCopy();
-            Object ret = newList.set(arg0,arg1);
+            Object ret = newList.set(brg0,arg1);
             l = newList;
             return ret;
         }
@@ -188,40 +188,40 @@ public class CoWList implements List {
         return l.subList(fromIndex, toIndex);
     }
 
-    public Object[] toArray() {
-        return l.toArray();
+    public Object[] toArrby() {
+        return l.toArrby();
     }
 
-    public Object[] toArray(Object[] arg0) {
-        return l.toArray(arg0);
+    public Object[] toArrby(Object[] arg0) {
+        return l.toArrby(arg0);
     }
     
-    private static class ReflectiveCreator implements ListCreator {
-        private final Class listType;
-        public ReflectiveCreator(Class c) {
+    privbte static class ReflectiveCreator implements ListCreator {
+        privbte final Class listType;
+        public ReflectiveCrebtor(Class c) {
             this.listType = c;
         }
         
         public List getList() {            
             List ret = null;
             try {
-                ret = (List) listType.newInstance();
-            } catch (IllegalAccessException bad) {
-                ErrorService.error(bad);
-            } catch (InstantiationException bad) {
-                ErrorService.error(bad);
+                ret = (List) listType.newInstbnce();
+            } cbtch (IllegalAccessException bad) {
+                ErrorService.error(bbd);
+            } cbtch (InstantiationException bad) {
+                ErrorService.error(bbd);
             }
             return ret;
         }
     }
     
-    private static class ArrayCreator implements ListCreator {
+    privbte static class ArrayCreator implements ListCreator {
         public List getList() {
-            return new ArrayList();
+            return new ArrbyList();
         }
     }
 
-    private static class LinkedCreator implements ListCreator {
+    privbte static class LinkedCreator implements ListCreator {
         public List getList() {
             return new LinkedList();
         }

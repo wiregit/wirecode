@@ -1,44 +1,44 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.BadPacketException;
 
-/** The Syn message begins a reliable udp connection by pinging the other host
- *  and by communicating the desired identifying connectionID.
+/** The Syn messbge begins a reliable udp connection by pinging the other host
+ *  bnd by communicating the desired identifying connectionID.
  */
-public class SynMessage extends UDPConnectionMessage {
+public clbss SynMessage extends UDPConnectionMessage {
 
-	private byte _senderConnectionID;
-    private int  _protocolVersionNumber;
+	privbte byte _senderConnectionID;
+    privbte int  _protocolVersionNumber;
 
     /**
-     * Construct a new SynMessage with the specified settings and data
+     * Construct b new SynMessage with the specified settings and data
      */
-    public SynMessage(byte connectionID) {
+    public SynMessbge(byte connectionID) {
 
         super(
           /* his connectionID           */ (byte)0, 
           /* opcode                     */ OP_SYN, 
           /* sequenceNumber             */ 0, 
-          /* my data is my connectionID and the protocol version number */ 
-          buildByteArray(connectionID, PROTOCOL_VERSION_NUMBER),
-          /* data length                */ 3
+          /* my dbta is my connectionID and the protocol version number */ 
+          buildByteArrby(connectionID, PROTOCOL_VERSION_NUMBER),
+          /* dbta length                */ 3
           );
 		  _senderConnectionID    = connectionID;
           _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
     }
 
     /**
-     * Construct a new SynMessage with both my Connection ID and theirs
+     * Construct b new SynMessage with both my Connection ID and theirs
      */
-    public SynMessage(byte connectionID, byte theirConnectionID) {
+    public SynMessbge(byte connectionID, byte theirConnectionID) {
 
         super(
           /* his connectionID           */ theirConnectionID, 
           /* opcode                     */ OP_SYN, 
           /* sequenceNumber             */ 0, 
-          /* my data is my connectionID and the protocol version number */ 
-          buildByteArray(connectionID, PROTOCOL_VERSION_NUMBER),
-          /* data length                */ 3
+          /* my dbta is my connectionID and the protocol version number */ 
+          buildByteArrby(connectionID, PROTOCOL_VERSION_NUMBER),
+          /* dbta length                */ 3
           );
           _senderConnectionID    = connectionID;
           _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
@@ -46,13 +46,13 @@ public class SynMessage extends UDPConnectionMessage {
 
 
     /**
-     * Construct a new SynMessage from the network
+     * Construct b new SynMessage from the network
      */
-    public SynMessage(
-      byte[] guid, byte ttl, byte hops, byte[] payload) 
-      throws BadPacketException {
+    public SynMessbge(
+      byte[] guid, byte ttl, byte hops, byte[] pbyload) 
+      throws BbdPacketException {
 
-      	super(guid, ttl, hops, payload);
+      	super(guid, ttl, hops, pbyload);
         _senderConnectionID    = guid[GUID_DATA_START];
         _protocolVersionNumber = 
           getShortInt(guid[GUID_DATA_START+1],guid[GUID_DATA_START+2]);
@@ -67,7 +67,7 @@ public class SynMessage extends UDPConnectionMessage {
 	}
 
 	public String toString() {
-		return "SynMessage DestID:"+getConnectionID()+
+		return "SynMessbge DestID:"+getConnectionID()+
 		  " SrcID:"+_senderConnectionID+" vNo:"+_protocolVersionNumber;
 	}
 }

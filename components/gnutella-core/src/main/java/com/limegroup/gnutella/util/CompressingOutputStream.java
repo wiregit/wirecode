@@ -1,62 +1,62 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.util.zip.Deflater;
+import jbva.util.zip.DeflaterOutputStream;
 
 /**
- * Simulates zlib's Z_PARTIAL_FLUSH and Z_SYNC_FLUSH behaviour.
- * This is a workaround for the following bugParade bugs:<br>
- * http://developer.java.sun.com/developer/bugParade/bugs/4255743.html <br>
- * http://developer.java.sun.com/developer/bugParade/bugs/4206909.html <br>
- * The code was taken from the comments at those respective pages and
+ * Simulbtes zlib's Z_PARTIAL_FLUSH and Z_SYNC_FLUSH behaviour.
+ * This is b workaround for the following bugParade bugs:<br>
+ * http://developer.jbva.sun.com/developer/bugParade/bugs/4255743.html <br>
+ * http://developer.jbva.sun.com/developer/bugParade/bugs/4206909.html <br>
+ * The code wbs taken from the comments at those respective pages and
  * modified slightly.
  */
-public final class CompressingOutputStream extends DeflaterOutputStream {
+public finbl class CompressingOutputStream extends DeflaterOutputStream {
     
-    public CompressingOutputStream (final OutputStream out, final Deflater flate) {
-      super(out, flate);
+    public CompressingOutputStrebm (final OutputStream out, final Deflater flate) {
+      super(out, flbte);
     }
 
-    private static final byte [] EMPTYBYTEARRAY = new byte [0];
+    privbte static final byte [] EMPTYBYTEARRAY = new byte [0];
     /**
-     * Insure all remaining data will be output.
+     * Insure bll remaining data will be output.
      */
     public void flush() throws IOException {
         if( def.finished() ) return;
         
         /**
-         * Now this is tricky: We force the Deflater to flush
-         * its data by switching compression level.
-         * As yet, a perplexingly simple workaround for 
-         * http://developer.java.sun.com/developer/bugParade/bugs/4255743.html 
+         * Now this is tricky: We force the Deflbter to flush
+         * its dbta by switching compression level.
+         * As yet, b perplexingly simple workaround for 
+         * http://developer.jbva.sun.com/developer/bugParade/bugs/4255743.html 
          */
         def.setInput(EMPTYBYTEARRAY, 0, 0);
 
-        def.setLevel(Deflater.NO_COMPRESSION);
-        deflate();
+        def.setLevel(Deflbter.NO_COMPRESSION);
+        deflbte();
 
-        def.setLevel(Deflater.DEFAULT_COMPRESSION);
-        deflate();
+        def.setLevel(Deflbter.DEFAULT_COMPRESSION);
+        deflbte();
 
         super.flush();
     }
     
-    protected void deflate() throws IOException {
+    protected void deflbte() throws IOException {
         try {
-            // DO NOT CALL super.deflate(), it is wrong.
-            // It incorrectly assumes that its buffer will be large enough
-            // to hold all data from a single deflate call.  That is wrong.
-            // We need to loop until deflate returns <= 0, saying it couldn't
-            // deflate.
-            int deflated;
-            while( (deflated = def.deflate(buf, 0, buf.length)) > 0)
-                out.write(buf, 0, deflated);
-        } catch(NullPointerException e) {
-            //This will happen if 'end' was called on the deflater
-            //while we were deflating.
-            throw new IOException("deflater was ended");
+            // DO NOT CALL super.deflbte(), it is wrong.
+            // It incorrectly bssumes that its buffer will be large enough
+            // to hold bll data from a single deflate call.  That is wrong.
+            // We need to loop until deflbte returns <= 0, saying it couldn't
+            // deflbte.
+            int deflbted;
+            while( (deflbted = def.deflate(buf, 0, buf.length)) > 0)
+                out.write(buf, 0, deflbted);
+        } cbtch(NullPointerException e) {
+            //This will hbppen if 'end' was called on the deflater
+            //while we were deflbting.
+            throw new IOException("deflbter was ended");
         }
     }
-} // class
+} // clbss

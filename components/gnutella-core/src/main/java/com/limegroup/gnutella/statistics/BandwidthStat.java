@@ -1,236 +1,236 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * This class contains a type-safe enumeration of all classes for
- * bandwidth data.
+ * This clbss contains a type-safe enumeration of all classes for
+ * bbndwidth data.
  */
-public class BandwidthStat extends BasicKilobytesStatistic {
+public clbss BandwidthStat extends BasicKilobytesStatistic {
 	
 	/**
-	 * Make the constructor private so that only this class can construct
-	 * a <tt>BandwidthStat</tt> instances.
+	 * Mbke the constructor private so that only this class can construct
+	 * b <tt>BandwidthStat</tt> instances.
 	 */
-	private BandwidthStat() {}
+	privbte BandwidthStat() {}
 
 	/**
-	 * Specialized class for accumulating all upstream bandwidth data.
+	 * Speciblized class for accumulating all upstream bandwidth data.
 	 */
-	private static class UpstreamBandwidthStat extends BandwidthStat {
-		public void addData(int data) {
-			super.addData(data);
-			UPSTREAM_BANDWIDTH.addData(data);
+	privbte static class UpstreamBandwidthStat extends BandwidthStat {
+		public void bddData(int data) {
+			super.bddData(data);
+			UPSTREAM_BANDWIDTH.bddData(data);
 		}
 	}
 
 	/**
-	 * Specialized class for accumulating all downstream bandwidth data.
+	 * Speciblized class for accumulating all downstream bandwidth data.
 	 */
-	private static class DownstreamBandwidthStat extends BandwidthStat {
-		public void addData(int data) {
-			super.addData(data);
-			DOWNSTREAM_BANDWIDTH.addData(data);
+	privbte static class DownstreamBandwidthStat extends BandwidthStat {
+		public void bddData(int data) {
+			super.bddData(data);
+			DOWNSTREAM_BANDWIDTH.bddData(data);
 		}
 	}	
 
 	/**
-	 * Specialized class for accumulating all downstream bandwidth sent
-	 * over Gnutella.
+	 * Speciblized class for accumulating all downstream bandwidth sent
+	 * over Gnutellb.
 	 */
-	private static class DownstreamGnutellaBandwidthStat extends BandwidthStat {
-		public void addData(int data) {
-			super.addData(data);
-			GNUTELLA_DOWNSTREAM_BANDWIDTH.addData(data);
+	privbte static class DownstreamGnutellaBandwidthStat extends BandwidthStat {
+		public void bddData(int data) {
+			super.bddData(data);
+			GNUTELLA_DOWNSTREAM_BANDWIDTH.bddData(data);
 		}
 	}
 
 	/**
-	 * Specialized class for accumulating all upstream bandwidth sent
-	 * over Gnutella.
+	 * Speciblized class for accumulating all upstream bandwidth sent
+	 * over Gnutellb.
 	 */
-	private static class UpstreamGnutellaBandwidthStat extends BandwidthStat {
-		public void addData(int data) {
-			super.addData(data);
-			GNUTELLA_UPSTREAM_BANDWIDTH.addData(data);
+	privbte static class UpstreamGnutellaBandwidthStat extends BandwidthStat {
+		public void bddData(int data) {
+			super.bddData(data);
+			GNUTELLA_UPSTREAM_BANDWIDTH.bddData(data);
 		}
 	}	
 
 	/**
-	 * Specialized class for accumulating all downstream bandwidth sent
+	 * Speciblized class for accumulating all downstream bandwidth sent
 	 * over HTTP.
 	 */
-	private static class DownstreamHTTPBandwidthStat extends BandwidthStat {
-		public void addData(int data) {
-			super.addData(data);
-			HTTP_DOWNSTREAM_BANDWIDTH.addData(data);
+	privbte static class DownstreamHTTPBandwidthStat extends BandwidthStat {
+		public void bddData(int data) {
+			super.bddData(data);
+			HTTP_DOWNSTREAM_BANDWIDTH.bddData(data);
 		}
 	}
 
 	/**
-	 * Specialized class for accumulating all upstream bandwidth sent
+	 * Speciblized class for accumulating all upstream bandwidth sent
 	 * over HTTP.
 	 */
-	private static class UpstreamHTTPBandwidthStat extends BandwidthStat {
-		public void addData(int data) {
-			super.addData(data);
-			HTTP_UPSTREAM_BANDWIDTH.addData(data);
+	privbte static class UpstreamHTTPBandwidthStat extends BandwidthStat {
+		public void bddData(int data) {
+			super.bddData(data);
+			HTTP_UPSTREAM_BANDWIDTH.bddData(data);
 		}
 	}
     
     /**
-     * Specialized class for accumulating all downstream bandwidth sent
-     * over HTTP by in-network downloaders
+     * Speciblized class for accumulating all downstream bandwidth sent
+     * over HTTP by in-network downlobders
      */
-    private static class DownstreamInNetworkHTTPBandwidthStat extends BandwidthStat {
-        public void addData(int data) {
-            super.addData(data);
-            HTTP_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(data);
+    privbte static class DownstreamInNetworkHTTPBandwidthStat extends BandwidthStat {
+        public void bddData(int data) {
+            super.bddData(data);
+            HTTP_DOWNSTREAM_INNETWORK_BANDWIDTH.bddData(data);
         }
     }
 
     /**
-     * Specialized class for accumulating all upstream bandwidth sent
-     * over HTTP by forced-share uploaders
+     * Speciblized class for accumulating all upstream bandwidth sent
+     * over HTTP by forced-shbre uploaders
      */
-    private static class UpstreamInNetworkHTTPBandwidthStat extends BandwidthStat {
-        public void addData(int data) {
-            super.addData(data);
-            HTTP_UPSTREAM_INNETWORK_BANDWIDTH.addData(data);
+    privbte static class UpstreamInNetworkHTTPBandwidthStat extends BandwidthStat {
+        public void bddData(int data) {
+            super.bddData(data);
+            HTTP_UPSTREAM_INNETWORK_BANDWIDTH.bddData(data);
         }
     }
     
 
 	/**
-	 * <tt>Statistic</tt> for all upstream bandwidth.
+	 * <tt>Stbtistic</tt> for all upstream bandwidth.
 	 */
-	public static final Statistic UPSTREAM_BANDWIDTH =
-		new BandwidthStat();
+	public stbtic final Statistic UPSTREAM_BANDWIDTH =
+		new BbndwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all downstream bandwidth.
+	 * <tt>Stbtistic</tt> for all downstream bandwidth.
 	 */
-	public static final Statistic DOWNSTREAM_BANDWIDTH =
-		new BandwidthStat();
+	public stbtic final Statistic DOWNSTREAM_BANDWIDTH =
+		new BbndwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP downstream bandwidth.
+	 * <tt>Stbtistic</tt> for all HTTP downstream bandwidth.
 	 */
-	public static final Statistic HTTP_DOWNSTREAM_BANDWIDTH =
-		new DownstreamBandwidthStat();
+	public stbtic final Statistic HTTP_DOWNSTREAM_BANDWIDTH =
+		new DownstrebmBandwidthStat();
     
     /**
-     * <tt>Statistic</tt> for all HTTP downstream bandwidth used by in-network downloaders
+     * <tt>Stbtistic</tt> for all HTTP downstream bandwidth used by in-network downloaders
      */
-    public static final Statistic HTTP_DOWNSTREAM_INNETWORK_BANDWIDTH =
-        new DownstreamBandwidthStat();
+    public stbtic final Statistic HTTP_DOWNSTREAM_INNETWORK_BANDWIDTH =
+        new DownstrebmBandwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP upstream bandwidth.
+	 * <tt>Stbtistic</tt> for all HTTP upstream bandwidth.
 	 */
-	public static final Statistic HTTP_UPSTREAM_BANDWIDTH =
-		new UpstreamBandwidthStat();
+	public stbtic final Statistic HTTP_UPSTREAM_BANDWIDTH =
+		new UpstrebmBandwidthStat();
     
     /**
-     * <tt>Statistic</tt> for all HTTP upstream bandwidth used by forced uploaders
+     * <tt>Stbtistic</tt> for all HTTP upstream bandwidth used by forced uploaders
      */
-    public static final Statistic HTTP_UPSTREAM_INNETWORK_BANDWIDTH =
-        new UpstreamBandwidthStat();
+    public stbtic final Statistic HTTP_UPSTREAM_INNETWORK_BANDWIDTH =
+        new UpstrebmBandwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP downstream header bandwidth -- http
-	 * headers read from the network.
+	 * <tt>Stbtistic</tt> for all HTTP downstream header bandwidth -- http
+	 * hebders read from the network.
 	 */
-	public static final Statistic HTTP_HEADER_DOWNSTREAM_BANDWIDTH =
-		new DownstreamHTTPBandwidthStat();
+	public stbtic final Statistic HTTP_HEADER_DOWNSTREAM_BANDWIDTH =
+		new DownstrebmHTTPBandwidthStat();
 
     /**
-     * <tt>Statistic</tt> for all HTTP downstream header bandwidth -- http
-     * headers read from the network by forced-share uploaders
+     * <tt>Stbtistic</tt> for all HTTP downstream header bandwidth -- http
+     * hebders read from the network by forced-share uploaders
      */
-    public static final Statistic HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH =
-        new DownstreamInNetworkHTTPBandwidthStat();
+    public stbtic final Statistic HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH =
+        new DownstrebmInNetworkHTTPBandwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP message body bytes read from the
+	 * <tt>Stbtistic</tt> for all HTTP message body bytes read from the
 	 * network.
 	 */
-	public static final Statistic HTTP_BODY_DOWNSTREAM_BANDWIDTH =
-		new DownstreamHTTPBandwidthStat();
+	public stbtic final Statistic HTTP_BODY_DOWNSTREAM_BANDWIDTH =
+		new DownstrebmHTTPBandwidthStat();
     
     /**
-     * <tt>Statistic</tt> for all HTTP message body bytes read from the
-     * network by InNetwork downloaders.
+     * <tt>Stbtistic</tt> for all HTTP message body bytes read from the
+     * network by InNetwork downlobders.
      */
-    public static final Statistic HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH =
-        new DownstreamInNetworkHTTPBandwidthStat();
+    public stbtic final Statistic HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH =
+        new DownstrebmInNetworkHTTPBandwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP upstream header bandwidth -- http
-	 * headers read from the network.
+	 * <tt>Stbtistic</tt> for all HTTP upstream header bandwidth -- http
+	 * hebders read from the network.
 	 */
-	public static final Statistic HTTP_HEADER_UPSTREAM_BANDWIDTH =
-		new UpstreamHTTPBandwidthStat();
+	public stbtic final Statistic HTTP_HEADER_UPSTREAM_BANDWIDTH =
+		new UpstrebmHTTPBandwidthStat();
 
     /**
-     * <tt>Statistic</tt> for all HTTP upstream header bandwidth -- http
-     * headers read from the network by in-network downloaders.
+     * <tt>Stbtistic</tt> for all HTTP upstream header bandwidth -- http
+     * hebders read from the network by in-network downloaders.
      */
-    public static final Statistic HTTP_HEADER_UPSTREAM_INNETWORK_BANDWIDTH =
-        new UpstreamInNetworkHTTPBandwidthStat();
+    public stbtic final Statistic HTTP_HEADER_UPSTREAM_INNETWORK_BANDWIDTH =
+        new UpstrebmInNetworkHTTPBandwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all HTTP message body bytes written to the
+	 * <tt>Stbtistic</tt> for all HTTP message body bytes written to the
 	 * network.
 	 */
-	public static final Statistic HTTP_BODY_UPSTREAM_BANDWIDTH =
-		new UpstreamHTTPBandwidthStat();
+	public stbtic final Statistic HTTP_BODY_UPSTREAM_BANDWIDTH =
+		new UpstrebmHTTPBandwidthStat();
     
     /**
-     * <tt>Statistic</tt> for all HTTP message body bytes written to the
-     * network by force-shared uploaders.
+     * <tt>Stbtistic</tt> for all HTTP message body bytes written to the
+     * network by force-shbred uploaders.
      */
-    public static final Statistic HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH =
-        new UpstreamInNetworkHTTPBandwidthStat();
+    public stbtic final Statistic HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH =
+        new UpstrebmInNetworkHTTPBandwidthStat();
 		
 	/**
-	 * <tt>Statistic</tt> for all downstream bandwidth used by Gnutella.
+	 * <tt>Stbtistic</tt> for all downstream bandwidth used by Gnutella.
 	 */
-	public static final Statistic GNUTELLA_DOWNSTREAM_BANDWIDTH =
-		new DownstreamBandwidthStat();
+	public stbtic final Statistic GNUTELLA_DOWNSTREAM_BANDWIDTH =
+		new DownstrebmBandwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all upstream bandwidth used by Gnutella.
+	 * <tt>Stbtistic</tt> for all upstream bandwidth used by Gnutella.
 	 */
-	public static final Statistic GNUTELLA_UPSTREAM_BANDWIDTH =
-		new UpstreamBandwidthStat();
+	public stbtic final Statistic GNUTELLA_UPSTREAM_BANDWIDTH =
+		new UpstrebmBandwidthStat();
 
 	/**
-	 * <tt>Statistic</tt> for all downstream bandwidth used by Gnutella
-	 * message traffic.
+	 * <tt>Stbtistic</tt> for all downstream bandwidth used by Gnutella
+	 * messbge traffic.
 	 */
-	public static final Statistic GNUTELLA_MESSAGE_DOWNSTREAM_BANDWIDTH =
-		new DownstreamGnutellaBandwidthStat();
-
-
-	/**
-	 * <tt>Statistic</tt> for all upstream bandwidth used by Gnutella
-	 * message traffic.
-	 */
-	public static final Statistic GNUTELLA_MESSAGE_UPSTREAM_BANDWIDTH =
-		new UpstreamGnutellaBandwidthStat();
-
-	/**
-	 * <tt>Statistic</tt> for all downstream bandwidth used by Gnutella
-	 * connection headers.
-	 */
-	public static final Statistic GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH =
-		new DownstreamGnutellaBandwidthStat();
+	public stbtic final Statistic GNUTELLA_MESSAGE_DOWNSTREAM_BANDWIDTH =
+		new DownstrebmGnutellaBandwidthStat();
 
 
 	/**
-	 * <tt>Statistic</tt> for all upstream bandwidth used by Gnutella
-	 * connection headers.
+	 * <tt>Stbtistic</tt> for all upstream bandwidth used by Gnutella
+	 * messbge traffic.
 	 */
-	public static final Statistic GNUTELLA_HEADER_UPSTREAM_BANDWIDTH =
-		new UpstreamGnutellaBandwidthStat();
+	public stbtic final Statistic GNUTELLA_MESSAGE_UPSTREAM_BANDWIDTH =
+		new UpstrebmGnutellaBandwidthStat();
+
+	/**
+	 * <tt>Stbtistic</tt> for all downstream bandwidth used by Gnutella
+	 * connection hebders.
+	 */
+	public stbtic final Statistic GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH =
+		new DownstrebmGnutellaBandwidthStat();
+
+
+	/**
+	 * <tt>Stbtistic</tt> for all upstream bandwidth used by Gnutella
+	 * connection hebders.
+	 */
+	public stbtic final Statistic GNUTELLA_HEADER_UPSTREAM_BANDWIDTH =
+		new UpstrebmGnutellaBandwidthStat();
 
 }

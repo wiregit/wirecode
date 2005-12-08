@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
 /**
- * Allows IOExceptions generated during NIO dispatching to be handled.
+ * Allows IOExceptions generbted during NIO dispatching to be handled.
  */
-public interface IOErrorObserver extends Shutdownable {
+public interfbce IOErrorObserver extends Shutdownable {
     
-    /** Notification that an IOException occurred on the while dispatching. */
-    void handleIOException(IOException iox);
+    /** Notificbtion that an IOException occurred on the while dispatching. */
+    void hbndleIOException(IOException iox);
 }

@@ -1,129 +1,129 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import jbva.io.IOException;
+import jbva.io.ObjectInputStream;
+import jbva.io.Serializable;
+import jbva.util.HashSet;
+import jbva.util.List;
+import jbva.util.Set;
+import jbva.util.StringTokenizer;
+import jbva.util.Vector;
 
-import org.xml.sax.SAXException;
+import org.xml.sbx.SAXException;
 
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.ResponseVerifier;
-import com.limegroup.gnutella.util.ApproximateMatcher;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.SchemaNotFoundException;
+import com.limegroup.gnutellb.FileManager;
+import com.limegroup.gnutellb.MediaType;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.ResponseVerifier;
+import com.limegroup.gnutellb.util.ApproximateMatcher;
+import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutellb.xml.SchemaNotFoundException;
 
 /** 
- * Encapsulates important details about an auto download.  Serializable for 
- * downloads.dat file; be careful when modifying!
+ * Encbpsulates important details about an auto download.  Serializable for 
+ * downlobds.dat file; be careful when modifying!
  */
-public class AutoDownloadDetails implements Serializable {
-    static final long serialVersionUID = 3400666689236195243L;
+public clbss AutoDownloadDetails implements Serializable {
+    stbtic final long serialVersionUID = 3400666689236195243L;
 
-    // the query associated with this search
-    private String query = null;
-    // the rich query associated with this search
-    private String richQuery = null;
+    // the query bssociated with this search
+    privbte String query = null;
+    // the rich query bssociated with this search
+    privbte String richQuery = null;
     // the LimeXMLDocument of this rich query ... 
-    // initialized when needed.
-    private transient LimeXMLDocument xmlDoc = null;
-    // flag of whether or not we've tried to create the doc.
-    private transient boolean xmlCreated = false;
-    // the 'filter' associated with this search
-    private transient MediaType type = null;
-    // the GUID associated with this search
-    private byte[] guid = null;
-    // the list of downloads made so far - should not exceed size
+    // initiblized when needed.
+    privbte transient LimeXMLDocument xmlDoc = null;
+    // flbg of whether or not we've tried to create the doc.
+    privbte transient boolean xmlCreated = false;
+    // the 'filter' bssociated with this search
+    privbte transient MediaType type = null;
+    // the GUID bssociated with this search
+    privbte byte[] guid = null;
+    // the list of downlobds made so far - should not exceed size
     // MAX_DOWNLOADS
-    private List /* of RemoteFileDesc */ dlList = null;
+    privbte List /* of RemoteFileDesc */ dlList = null;
     
     /**
-     * The description of the media type.
+     * The description of the medib type.
      */
-    private String mediaDesc;
+    privbte String mediaDesc;
     
-    /** the size of the approx matcher 2d buffer...
+    /** the size of the bpprox matcher 2d buffer...
      */
-    private static final int MATCHER_BUF_SIZE = 120;
-    /** this is used for matching of filenames.  kind of big so we only want
+    privbte static final int MATCHER_BUF_SIZE = 120;
+    /** this is used for mbtching of filenames.  kind of big so we only want
      *  one.
      */
-    private static ApproximateMatcher matcher = 
-        new ApproximateMatcher(MATCHER_BUF_SIZE);
+    privbte static ApproximateMatcher matcher = 
+        new ApproximbteMatcher(MATCHER_BUF_SIZE);
     
-    /** the precision that the matcher uses for comparing candidates to RFDs
-     *  that have already been accepted for download....
+    /** the precision thbt the matcher uses for comparing candidates to RFDs
+     *  thbt have already been accepted for download....
      */
-    private float MATCH_PRECISION_DL = .30f;
+    privbte float MATCH_PRECISION_DL = .30f;
 
-    /** the percentage of matching that invalidates a new file from being
-     *  downloaded.  in other words, if a file matches on more than ~51% of
-     *  words, then don't download it.
+    /** the percentbge of matching that invalidates a new file from being
+     *  downlobded.  in other words, if a file matches on more than ~51% of
+     *  words, then don't downlobd it.
      */
-    private float WORD_INCIDENCE_RATE = .509999f;
+    privbte float WORD_INCIDENCE_RATE = .509999f;
 
-    /** what is considered to be a low score, compared to the return value of
+    /** whbt is considered to be a low score, compared to the return value of
      *  the score method...
      */
-    private int LOW_SCORE = 95;
+    privbte int LOW_SCORE = 95;
 
 
-    /** the set of words that are already being downloaded.  this can be used
-     *  as a heuristic when determining what to download.....
+    /** the set of words thbt are already being downloaded.  this can be used
+     *  bs a heuristic when determining what to download.....
      */
-    private Set wordSet = null;
+    privbte Set wordSet = null;
 
-    static {
-        matcher.setIgnoreCase(true);
-        matcher.setIgnoreWhitespace(true);
-        matcher.setCompareBackwards(true);
+    stbtic {
+        mbtcher.setIgnoreCase(true);
+        mbtcher.setIgnoreWhitespace(true);
+        mbtcher.setCompareBackwards(true);
     }
     
     
-    // don't auto dl any more than this number of files....
-    public static final int MAX_DOWNLOADS = 1;
+    // don't buto dl any more than this number of files....
+    public stbtic final int MAX_DOWNLOADS = 1;
     
-    // keeps track of committed downloads....
-    private int committedDLs = 0;
+    // keeps trbck of committed downloads....
+    privbte int committedDLs = 0;
 
     /**
-     * @param inQuery the standard query string associated with this query.
-     * @param inRichQuery the rich query associated with this string.
-     * @param inType the mediatype associated with this string.....
+     * @pbram inQuery the standard query string associated with this query.
+     * @pbram inRichQuery the rich query associated with this string.
+     * @pbram inType the mediatype associated with this string.....
      */
-    public AutoDownloadDetails(String inQuery, String inRichQuery, 
-                               byte[] inGuid, MediaType inType) {
+    public AutoDownlobdDetails(String inQuery, String inRichQuery, 
+                               byte[] inGuid, MedibType inType) {
         query = inQuery;
         richQuery = inRichQuery;
         type = inType;
         if(type != null)
-            mediaDesc = type.getMimeType();
+            medibDesc = type.getMimeType();
         else
-            mediaDesc = null;
+            medibDesc = null;
         guid = inGuid;
         dlList = new Vector();
-        wordSet = new HashSet();
+        wordSet = new HbshSet();
     }
     
     /**
-     * Extended to set the media type.
+     * Extended to set the medib type.
      */
-    private void readObject(ObjectInputStream stream) throws IOException,
-                                                    ClassNotFoundException {
-        stream.defaultReadObject();
+    privbte void readObject(ObjectInputStream stream) throws IOException,
+                                                    ClbssNotFoundException {
+        strebm.defaultReadObject();
 
-        if(mediaDesc == null)
-            type = MediaType.getAnyTypeMediaType();
+        if(medibDesc == null)
+            type = MedibType.getAnyTypeMediaType();
         else
-            type = MediaType.getMediaTypeForSchema(mediaDesc);
+            type = MedibType.getMediaTypeForSchema(mediaDesc);
         if(type == null)
-            type = MediaType.getAnyTypeMediaType();
+            type = MedibType.getAnyTypeMediaType();
     }
     
     public String getQuery() {
@@ -134,188 +134,188 @@ public class AutoDownloadDetails implements Serializable {
         return richQuery;
     }
     
-    public MediaType getMediaType() {
+    public MedibType getMediaType() {
         return type;
     }
 
     /**
-     * @param toAdd The RFD you are TRYING to add.
-     * @return Whether or not the add was successful. 
+     * @pbram toAdd The RFD you are TRYING to add.
+     * @return Whether or not the bdd was successful. 
      */
-    public synchronized boolean addDownload(RemoteFileDesc toAdd) {
-        debug("ADD.addDownload(): *-----------");
-        debug("ADD.addDownload(): entered.");
-        // this is used not only as a return value but to control processing.
-        // if it every turns false we just stop processing....
-        boolean retVal = true;
+    public synchronized boolebn addDownload(RemoteFileDesc toAdd) {
+        debug("ADD.bddDownload(): *-----------");
+        debug("ADD.bddDownload(): entered.");
+        // this is used not only bs a return value but to control processing.
+        // if it every turns fblse we just stop processing....
+        boolebn retVal = true;
         
-        // if this hasn't become expired....
+        // if this hbsn't become expired....
         if (!expired()) {
-            final String inputFileName = toAdd.getFileName();
+            finbl String inputFileName = toAdd.getFileName();
 
-            // make sure the file ext is legit....
-            if ((type != null) && !(type.matches(inputFileName))) {
-                retVal = false;
-                debug("ADD.addDownload(): file " +
-                      inputFileName + " isn't the right type.");
+            // mbke sure the file ext is legit....
+            if ((type != null) && !(type.mbtches(inputFileName))) {
+                retVbl = false;
+                debug("ADD.bddDownload(): file " +
+                      inputFileNbme + " isn't the right type.");
             }
 
-            // create our xml doc if we need to...
-            if( !xmlCreated ) {
-                xmlCreated = true;
-                if( richQuery != null && !richQuery.equals("") ) {
+            // crebte our xml doc if we need to...
+            if( !xmlCrebted ) {
+                xmlCrebted = true;
+                if( richQuery != null && !richQuery.equbls("") ) {
                     try {
                         xmlDoc = new LimeXMLDocument(richQuery);
-                    } catch(SchemaNotFoundException ignored) {
-                    } catch(SAXException ignored) {
-                    } catch(IOException ignored) {
+                    } cbtch(SchemaNotFoundException ignored) {
+                    } cbtch(SAXException ignored) {
+                    } cbtch(IOException ignored) {
                     }
                 }
             }
-            // make sure the score for this file isn't too low....
+            // mbke sure the score for this file isn't too low....
             int score = ResponseVerifier.score(query, xmlDoc, toAdd);
             if (score < LOW_SCORE) {
-                retVal = false;
-                debug("ADD.addDownload(): file " +
-                      inputFileName + " has low score of " + score);
+                retVbl = false;
+                debug("ADD.bddDownload(): file " +
+                      inputFileNbme + " has low score of " + score);
             }
 
-            // check to see there is a high incidence of words here in stuff we
-            // are already downloading....
-            if (retVal && (wordSet.size() > 0)) {
+            // check to see there is b high incidence of words here in stuff we
+            // bre already downloading....
+            if (retVbl && (wordSet.size() > 0)) {
                 StringTokenizer st = 
-                new StringTokenizer(ripExtension(inputFileName),
-                                    FileManager.DELIMITERS);
-                int additions = 0;
-                final int numTokens = st.countTokens();
-                while (st.hasMoreTokens()) {
-                    String currToken = st.nextToken().toLowerCase();
-                    debug("ADD.addDownload(): currToken = " +
+                new StringTokenizer(ripExtension(inputFileNbme),
+                                    FileMbnager.DELIMITERS);
+                int bdditions = 0;
+                finbl int numTokens = st.countTokens();
+                while (st.hbsMoreTokens()) {
+                    String currToken = st.nextToken().toLowerCbse();
+                    debug("ADD.bddDownload(): currToken = " +
                           currToken);
-                    if (!wordSet.contains(currToken)) 
-                        additions++;
+                    if (!wordSet.contbins(currToken)) 
+                        bdditions++;
                 }
-                float matchRate = 
-                ((float)(numTokens - additions)/
-                 (float)wordSet.size());
-                if ((additions == 0) || 
-                    (matchRate > WORD_INCIDENCE_RATE)) {
-                    retVal = false;
-                    debug("ADD.addDownload(): file " +
-                          inputFileName + " has many elements similar to" +
-                          " other files. matchRate = " + matchRate + 
-                          ", additions = " + additions);
+                flobt matchRate = 
+                ((flobt)(numTokens - additions)/
+                 (flobt)wordSet.size());
+                if ((bdditions == 0) || 
+                    (mbtchRate > WORD_INCIDENCE_RATE)) {
+                    retVbl = false;
+                    debug("ADD.bddDownload(): file " +
+                          inputFileNbme + " has many elements similar to" +
+                          " other files. mbtchRate = " + matchRate + 
+                          ", bdditions = " + additions);
                 }
             }
 
-            // see if it compares to any other file already being DLed....
-            if (retVal && (dlList.size() > 0)) {
-                String processedFileName;
-                synchronized (matcher) {
-                    processedFileName = matcher.process(inputFileName);
+            // see if it compbres to any other file already being DLed....
+            if (retVbl && (dlList.size() > 0)) {
+                String processedFileNbme;
+                synchronized (mbtcher) {
+                    processedFileNbme = matcher.process(inputFileName);
                 }
                 for (int i = 0; i < dlList.size(); i++) {
                     RemoteFileDesc currRFD = (RemoteFileDesc) dlList.get(i);
-                    String currFileName = currRFD.getFileName();
-                    String currProcessedFileName;
+                    String currFileNbme = currRFD.getFileName();
+                    String currProcessedFileNbme;
                     int diffs = 0;
-                    synchronized (matcher) {
-                        currProcessedFileName = matcher.process(currFileName);
-                        diffs = matcher.match(processedFileName,
-                                              currProcessedFileName);
+                    synchronized (mbtcher) {
+                        currProcessedFileNbme = matcher.process(currFileName);
+                        diffs = mbtcher.match(processedFileName,
+                                              currProcessedFileNbme);
                     }
-                    int smaller = Math.min(processedFileName.length(),
-                                           currProcessedFileName.length());
-                    if (((float)diffs)/((float)smaller) < MATCH_PRECISION_DL) {
-                        retVal = false;
-                        debug("ADD.addDownload(): conflict for file " +
-                              inputFileName + " and " + currFileName);
+                    int smbller = Math.min(processedFileName.length(),
+                                           currProcessedFileNbme.length());
+                    if (((flobt)diffs)/((float)smaller) < MATCH_PRECISION_DL) {
+                        retVbl = false;
+                        debug("ADD.bddDownload(): conflict for file " +
+                              inputFileNbme + " and " + currFileName);
                     }
 
-                    // oops, we have already accepted that file for DL, don't
-                    // add it and break out of this costly loop....
-                    if (!retVal)
-                        break;
+                    // oops, we hbve already accepted that file for DL, don't
+                    // bdd it and break out of this costly loop....
+                    if (!retVbl)
+                        brebk;
                 }
             }
 
-            // ok, all processing passed, add this...
-            if (retVal) {
-                // used by the approx. matcher...
-                dlList.add(toAdd);
-                // used by my hashset comparator....
+            // ok, bll processing passed, add this...
+            if (retVbl) {
+                // used by the bpprox. matcher...
+                dlList.bdd(toAdd);
+                // used by my hbshset comparator....
                 StringTokenizer st = 
-                new StringTokenizer(ripExtension(inputFileName),
-                                    FileManager.DELIMITERS);
-                while (st.hasMoreTokens())
-                    wordSet.add(st.nextToken().toLowerCase());
-                debug("ADD.addDownload(): wordSet = " + wordSet);
+                new StringTokenizer(ripExtension(inputFileNbme),
+                                    FileMbnager.DELIMITERS);
+                while (st.hbsMoreTokens())
+                    wordSet.bdd(st.nextToken().toLowerCase());
+                debug("ADD.bddDownload(): wordSet = " + wordSet);
             }
         }
         else 
-            retVal = false;
+            retVbl = false;
 
-        debug("ADD.addDownload(): returning " + retVal);        
-        debug("ADD.addDownload(): -----------*");
-        return retVal;
+        debug("ADD.bddDownload(): returning " + retVal);        
+        debug("ADD.bddDownload(): -----------*");
+        return retVbl;
     }
 
-    /** Removes the input RFD from the list.  Use this if the DL failed and
-     *  you want to back it out....
+    /** Removes the input RFD from the list.  Use this if the DL fbiled and
+     *  you wbnt to back it out....
      */
-    public synchronized void removeDownload(RemoteFileDesc toRemove) {
-        // used by the approx. matcher...
+    public synchronized void removeDownlobd(RemoteFileDesc toRemove) {
+        // used by the bpprox. matcher...
         dlList.remove(toRemove);
-        // used by the hashset comparator....
-        // technically, this is bad.  i'm doing it because in practice this will
-        // decrease the amount of downloads, which isn't horrible.  also, i
-        // don't see a download being removed very frequently.  if i want i can
-        // move to a new set which keeps a count for each element of the set and
-        // only discards after the appropriate amt. of removes....
+        // used by the hbshset comparator....
+        // technicblly, this is bad.  i'm doing it because in practice this will
+        // decrebse the amount of downloads, which isn't horrible.  also, i
+        // don't see b download being removed very frequently.  if i want i can
+        // move to b new set which keeps a count for each element of the set and
+        // only discbrds after the appropriate amt. of removes....
         StringTokenizer st = 
-        new StringTokenizer(ripExtension(toRemove.getFileName()),
-                            FileManager.DELIMITERS);
-        while (st.hasMoreTokens())
-            wordSet.remove(st.nextToken().toLowerCase());
+        new StringTokenizer(ripExtension(toRemove.getFileNbme()),
+                            FileMbnager.DELIMITERS);
+        while (st.hbsMoreTokens())
+            wordSet.remove(st.nextToken().toLowerCbse());
         
     }
 
-    /** Call this when the DL was 'successful'.
+    /** Cbll this when the DL was 'successful'.
      */
-    public synchronized void commitDownload(RemoteFileDesc toCommit) {
-        if (dlList.contains(toCommit))
+    public synchronized void commitDownlobd(RemoteFileDesc toCommit) {
+        if (dlList.contbins(toCommit))
             committedDLs++;
     }
 
-    /** @return true when the AutoDownload process is complete.
+    /** @return true when the AutoDownlobd process is complete.
      */
-    public synchronized boolean expired() {
-        boolean retVal = false;
+    public synchronized boolebn expired() {
+        boolebn retVal = false;
         if (committedDLs >= MAX_DOWNLOADS)
-            retVal = true;
-        return retVal;
+            retVbl = true;
+        return retVbl;
     }
 
 
-    // take the extension off the filename...
-    private String ripExtension(String fileName) {
+    // tbke the extension off the filename...
+    privbte String ripExtension(String fileName) {
         String retString = null;
-        int extStart = fileName.lastIndexOf('.');
-        if (extStart == -1)
-            retString = fileName;
+        int extStbrt = fileName.lastIndexOf('.');
+        if (extStbrt == -1)
+            retString = fileNbme;
         else
-            retString = fileName.substring(0, extStart);
+            retString = fileNbme.substring(0, extStart);
         return retString;
     }
 
-    private static final boolean debugOn = false;
-    private static void debug(String out) {
+    privbte static final boolean debugOn = false;
+    privbte static void debug(String out) {
         if (debugOn)
             System.out.println(out);
     }
-    private static void debug(Exception e) {
+    privbte static void debug(Exception e) {
         if (debugOn)
-            e.printStackTrace();
+            e.printStbckTrace();
     }
     
 }

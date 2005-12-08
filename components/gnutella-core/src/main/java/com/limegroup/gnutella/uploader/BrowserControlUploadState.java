@@ -1,39 +1,39 @@
-package com.limegroup.gnutella.uploader;
+pbckage com.limegroup.gnutella.uploader;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Iterator;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.util.Iterator;
 
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.Constants;
+import com.limegroup.gnutellb.Response;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.messages.QueryReply;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 /**
- * A stub implementation of the UploadState interface
- * when the request is for a special browser-control operation.
+ * A stub implementbtion of the UploadState interface
+ * when the request is for b special browser-control operation.
  */
-public final class BrowserControlUploadState extends UploadState {
+public finbl class BrowserControlUploadState extends UploadState {
     
-    public BrowserControlUploadState(HTTPUploader uploader) {
-		super(uploader);
+    public BrowserControlUplobdState(HTTPUploader uploader) {
+		super(uplobder);
     }
         
-	public void writeMessageHeaders(OutputStream ostream) throws IOException {
+	public void writeMessbgeHeaders(OutputStream ostream) throws IOException {
         String str;
-		str = "HTTP/1.1 404 Feature Not Active\r\n";
-		ostream.write(str.getBytes());
+		str = "HTTP/1.1 404 Febture Not Active\r\n";
+		ostrebm.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
-		ostream.write(str.getBytes());
+		ostrebm.write(str.getBytes());
 	}
 
-	public void writeMessageBody(OutputStream ostream) throws IOException {
+	public void writeMessbgeBody(OutputStream ostream) throws IOException {
 	}
 	
-	public boolean getCloseConnection() {
+	public boolebn getCloseConnection() {
 	    return true;
 	}  	
 

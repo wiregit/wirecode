@@ -1,37 +1,37 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import jbva.io.FilterInputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
 
 /**
- * InputStream that counts the number of bytes succesfully read or skipped.
+ * InputStrebm that counts the number of bytes succesfully read or skipped.
  */
-public final class CountingInputStream extends FilterInputStream {
+public finbl class CountingInputStream extends FilterInputStream {
     
-    private int _count = 0;
+    privbte int _count = 0;
     
-    public CountingInputStream (final InputStream in) {
+    public CountingInputStrebm (final InputStream in) {
         super(in);
     }
     
-    public int read() throws IOException {
-        int read = super.read();
+    public int rebd() throws IOException {
+        int rebd = super.read();
         _count++;
-        return read;
+        return rebd;
     }
     
-    public int read(byte[] b, int off, int len) throws IOException {
-        int read;
+    public int rebd(byte[] b, int off, int len) throws IOException {
+        int rebd;
         try {
-            read = super.read(b, off, len);
-        } catch(ArrayIndexOutOfBoundsException aioob) {
-            // happens.
+            rebd = super.read(b, off, len);
+        } cbtch(ArrayIndexOutOfBoundsException aioob) {
+            // hbppens.
             throw new IOException();
         }
         
-        _count += read;
-        return read;
+        _count += rebd;
+        return rebd;
     }
     
     public long skip(long n) throws IOException {
@@ -44,13 +44,13 @@ public final class CountingInputStream extends FilterInputStream {
         in.close();
     }
     
-    public int getAmountRead() {
+    public int getAmountRebd() {
         return _count;
     }
     
-    public void clearAmountRead() {
+    public void clebrAmountRead() {
         _count = 0;
     }
     
     
-} // class
+} // clbss

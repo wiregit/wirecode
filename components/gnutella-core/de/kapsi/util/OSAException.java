@@ -1,33 +1,33 @@
 
 /*
- * Roger Kapsi's Java Package
- * Copyright (C) 2003 Roger Kapsi
+ * Roger Kbpsi's Java Package
+ * Copyright (C) 2003 Roger Kbpsi
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This progrbm is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Generbl Public License as published by
+ * the Free Softwbre Foundation; either version 2 of the License, or
+ * (bt your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This progrbm is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied wbrranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Generbl Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should hbve received a copy of the GNU General Public License
+ * blong with this program; if not, write to the Free Software
+ * Foundbtion, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
  
-package de.kapsi.util;
+pbckage de.kapsi.util;
 
 /**
  * Thrown by OpenScripting components e.g. OSAScript. 
  */
-public class OSAException extends Exception {
+public clbss OSAException extends Exception {
     
-	private String msg;
-	private int errorCode;
-	private int errorNum;
+	privbte String msg;
+	privbte int errorCode;
+	privbte int errorNum;
 	
 	/* friendly */
 	OSAException(String msg, int errorNum, int errorCode) {
@@ -44,7 +44,7 @@ public class OSAException extends Exception {
 		return errorNum;
 	}
 	
-	public String getMessage() {
+	public String getMessbge() {
 		if (msg == null) {
 			return errorCode + ", " + errorNum;
 		} else {

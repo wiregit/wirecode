@@ -1,51 +1,51 @@
-package com.limegroup.gnutella.archive;
+pbckage com.limegroup.gnutella.archive;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
+import jbva.io.FilterInputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.InterruptedIOException;
 
-class UploadMonitorInputStream extends FilterInputStream {
+clbss UploadMonitorInputStream extends FilterInputStream {
 
-	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadMonitorInputStream.java,v 1.1.2.5 2005-11-07 17:00:18 zlatinb Exp $";
+	public stbtic final String REPOSITORY_VERSION =
+		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/UploadMonitorInputStream.java,v 1.1.2.5 2005/11/07 17:00:18 zlatinb Exp $";
 	
-	/* not sure if this class should really have references
-	 * to the contribution and the uploadEvent.  this design 
-	 * sort of screams out for another layer of indirection
-	 * but at least this class is only package visible
+	/* not sure if this clbss should really have references
+	 * to the contribution bnd the uploadEvent.  this design 
+	 * sort of screbms out for another layer of indirection
+	 * but bt least this class is only package visible
 	 */
-	private final AbstractContribution _uploadState;
+	privbte final AbstractContribution _uploadState;
 			
-	UploadMonitorInputStream(InputStream in, AbstractContribution uploadEvent) {
+	UplobdMonitorInputStream(InputStream in, AbstractContribution uploadEvent) {
 		super(in);
-		_uploadState = uploadEvent;
+		_uplobdState = uploadEvent;
 	}
 
-	public int read() throws InterruptedIOException, IOException {
-		int result = super.read();
+	public int rebd() throws InterruptedIOException, IOException {
+		int result = super.rebd();
 		
 		if (result != -1) {
-			_uploadState.fileProgressedDelta( 1 );
+			_uplobdState.fileProgressedDelta( 1 );
 		}
 		return result;
 	}
 	
-	public int read(byte[] b) throws InterruptedIOException, IOException {
-		int result = super.read(b);
+	public int rebd(byte[] b) throws InterruptedIOException, IOException {
+		int result = super.rebd(b);
 		
 		if (result != -1) {
-			_uploadState.fileProgressedDelta( result );
+			_uplobdState.fileProgressedDelta( result );
 		}
 		return result;
 	}
 	
-	public int read(byte[] b, int off, int len) 
+	public int rebd(byte[] b, int off, int len) 
 	throws InterruptedIOException, IOException {
-		int result = super.read(b, off, len);
+		int result = super.rebd(b, off, len);
 	
 		if (result != -1) {
-			_uploadState.fileProgressedDelta( off + result );
+			_uplobdState.fileProgressedDelta( off + result );
 		}
 		return result;
 	}
@@ -54,19 +54,19 @@ class UploadMonitorInputStream extends FilterInputStream {
 		long result = super.skip( n );
 		
 		
-		_uploadState.fileProgressedDelta( result );
+		_uplobdState.fileProgressedDelta( result );
 		return result;
 	}
 	
-	private long _markedPosition = 0;
+	privbte long _markedPosition = 0;
 	
-	public void mark(int readlimit) {
-		super.mark( readlimit );
-		_markedPosition = _uploadState.getFileBytesSent();
+	public void mbrk(int readlimit) {
+		super.mbrk( readlimit );
+		_mbrkedPosition = _uploadState.getFileBytesSent();
 	}
 	
 	public void reset() throws IOException {
 		super.reset();		
-		_uploadState.fileProgressed( _markedPosition );
+		_uplobdState.fileProgressed( _markedPosition );
 	}
 }

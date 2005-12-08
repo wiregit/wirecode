@@ -1,50 +1,50 @@
-package com.limegroup.gnutella.uploader;
+pbckage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 /**
- * This class handles the case where the requested file was not
- * found on the local system.  It writes the appropriate HTTP header
- * error codes to the requesting client indicating that this is the 
- * case.
+ * This clbss handles the case where the requested file was not
+ * found on the locbl system.  It writes the appropriate HTTP header
+ * error codes to the requesting client indicbting that this is the 
+ * cbse.
  */
-public final class FileNotFoundUploadState extends UploadState {
+public finbl class FileNotFoundUploadState extends UploadState {
 
-    private static final Log LOG = LogFactory.getLog(FileNotFoundUploadState.class);
+    privbte static final Log LOG = LogFactory.getLog(FileNotFoundUploadState.class);
 	
 	/**
-	 * Constant for the error message to send.
+	 * Constbnt for the error message to send.
 	 */
-	private static final byte[] ERROR_MESSAGE = 
+	privbte static final byte[] ERROR_MESSAGE = 
 		"File not found on server.".getBytes();
 
-	public void writeMessageHeaders(OutputStream ostream) throws IOException {
-		LOG.debug("writing message headers");
+	public void writeMessbgeHeaders(OutputStream ostream) throws IOException {
+		LOG.debug("writing messbge headers");
 		String str;
 		str = "HTTP/1.1 404 Not Found\r\n";
-		ostream.write(str.getBytes());
+		ostrebm.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
-		ostream.write(str.getBytes());
-		str = "Content-Type: text/plain\r\n";
-		ostream.write(str.getBytes());
+		ostrebm.write(str.getBytes());
+		str = "Content-Type: text/plbin\r\n";
+		ostrebm.write(str.getBytes());
 	    str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
-		ostream.write(str.getBytes());
+		ostrebm.write(str.getBytes());
 		str = "\r\n";
-		ostream.write(str.getBytes());
+		ostrebm.write(str.getBytes());
 	}
 
-	public void writeMessageBody(OutputStream ostream) throws IOException {
-		LOG.debug("writing message body");
-		ostream.write(ERROR_MESSAGE);
+	public void writeMessbgeBody(OutputStream ostream) throws IOException {
+		LOG.debug("writing messbge body");
+		ostrebm.write(ERROR_MESSAGE);
 	}
 	
-	public boolean getCloseConnection() {
-	    return false;
+	public boolebn getCloseConnection() {
+	    return fblse;
 	}
 }

@@ -1,55 +1,55 @@
 /*
- * NameValue.java
+ * NbmeValue.java
  *
- * Created on April 16, 2001, 12:22 PM
+ * Crebted on April 16, 2001, 12:22 PM
  */
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Map;
+import jbva.util.Map;
 
 /**
- * Holds a name value pair. The name is an instance of String, the value can
- * be any object. 
- * @author  asingla
+ * Holds b name value pair. The name is an instance of String, the value can
+ * be bny object. 
+ * @buthor  asingla
  */
-public final class NameValue implements Map.Entry {
+public finbl class NameValue implements Map.Entry {
 
-    private final String _name;
-    private Object _value;
+    privbte final String _name;
+    privbte Object _value;
     
     /**
-     * Creates a new NameValue with a null value.
+     * Crebtes a new NameValue with a null value.
      */
-    public NameValue(String name) {
-        this(name, null);
+    public NbmeValue(String name) {
+        this(nbme, null);
     }
     
-    /** Creates new NameValue */
-    public NameValue(String name, Object value) {
-        this._name = name;
-        this._value = value;
+    /** Crebtes new NameValue */
+    public NbmeValue(String name, Object value) {
+        this._nbme = name;
+        this._vblue = value;
     }
     
-    public String getName() {
-        return _name;
+    public String getNbme() {
+        return _nbme;
     }
     
     public Object getKey() {
-        return _name;
+        return _nbme;
     }
     
-    public Object getValue() {
-        return _value;
+    public Object getVblue() {
+        return _vblue;
     }
 	
-	public Object setValue(Object value) {
-	    Object old = _value;
-		this._value = value;
+	public Object setVblue(Object value) {
+	    Object old = _vblue;
+		this._vblue = value;
 		return old;
 	}
         
     public String toString() {
-        return "name = " + _name + " value = " + _value;
+        return "nbme = " + _name + " value = " + _value;
     }    
 }

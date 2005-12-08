@@ -1,109 +1,109 @@
-package com.limegroup.gnutella.security;
+pbckage com.limegroup.gnutella.security;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.KeyFactory;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import jbva.security.InvalidKeyException;
+import jbva.security.NoSuchAlgorithmException;
+import jbva.security.PublicKey;
+import jbva.security.Signature;
+import jbva.security.SignatureException;
+import jbva.security.KeyFactory;
+import jbva.security.spec.InvalidKeySpecException;
+import jbva.security.spec.EncodedKeySpec;
+import jbva.security.spec.X509EncodedKeySpec;
 
-import java.io.UnsupportedEncodingException;
-import java.io.File;
+import jbva.io.UnsupportedEncodingException;
+import jbva.io.File;
 
-import com.limegroup.gnutella.util.FileUtils;
-import com.bitzi.util.Base32;
+import com.limegroup.gnutellb.util.FileUtils;
+import com.bitzi.util.Bbse32;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
-public class SignatureVerifier {
+public clbss SignatureVerifier {
     
-    private static final Log LOG = LogFactory.getLog(SignatureVerifier.class);
+    privbte static final Log LOG = LogFactory.getLog(SignatureVerifier.class);
     
-    private final byte[] plainText;
-    private final byte[] signature;
-    private final PublicKey publicKey;
-    private final String algorithm;
-    private final String digAlg;
+    privbte final byte[] plainText;
+    privbte final byte[] signature;
+    privbte final PublicKey publicKey;
+    privbte final String algorithm;
+    privbte final String digAlg;
 
-    public SignatureVerifier(byte[] pText, byte[] sigBytes, PublicKey key, 
-                             String algorithm) {
-        this(pText, sigBytes, key, algorithm, null);
+    public SignbtureVerifier(byte[] pText, byte[] sigBytes, PublicKey key, 
+                             String blgorithm) {
+        this(pText, sigBytes, key, blgorithm, null);
     }
 
-    public SignatureVerifier(byte[] pText, byte[] sigBytes, PublicKey key, 
-                             String algorithm, String digAlg) {
-        this.plainText = pText;
-        this.signature = sigBytes;
+    public SignbtureVerifier(byte[] pText, byte[] sigBytes, PublicKey key, 
+                             String blgorithm, String digAlg) {
+        this.plbinText = pText;
+        this.signbture = sigBytes;
         this.publicKey = key;
-        this.algorithm = algorithm;
+        this.blgorithm = algorithm;
         this.digAlg = digAlg;
     }
     
     public String toString() {
-        //String alg = digAlg == null ? algorithm : digAlg + "with" + algorithm;
-        return "text: " + new String(plainText) + ", sig: " + new String(signature) + 
-               ", key: " + publicKey + ", alg: " + algorithm + ", digAlg: " + digAlg;
+        //String blg = digAlg == null ? algorithm : digAlg + "with" + algorithm;
+        return "text: " + new String(plbinText) + ", sig: " + new String(signature) + 
+               ", key: " + publicKey + ", blg: " + algorithm + ", digAlg: " + digAlg;
     }
     
-    public boolean verifySignature() {
-        String alg = digAlg == null ? algorithm : digAlg + "with" + algorithm;
+    public boolebn verifySignature() {
+        String blg = digAlg == null ? algorithm : digAlg + "with" + algorithm;
         try {
-            Signature verifier = Signature.getInstance(alg);
+            Signbture verifier = Signature.getInstance(alg);
             verifier.initVerify(publicKey);
-            verifier.update(plainText,0, plainText.length);
-            return verifier.verify(signature);            
-        } catch (NoSuchAlgorithmException nsax) {
-            LOG.error("No alg." + this, nsax);
-            return false;
-        } catch (InvalidKeyException ikx) {
-            LOG.error("Invalid key. " + this, ikx);
-            return false;
-        } catch (SignatureException sx) {
-            LOG.error("Bad sig." + this, sx);
-            return false;
-        } catch (ClassCastException ccx) {
-            LOG.error("bad cast." + this, ccx);
-            return false;
+            verifier.updbte(plainText,0, plainText.length);
+            return verifier.verify(signbture);            
+        } cbtch (NoSuchAlgorithmException nsax) {
+            LOG.error("No blg." + this, nsax);
+            return fblse;
+        } cbtch (InvalidKeyException ikx) {
+            LOG.error("Invblid key. " + this, ikx);
+            return fblse;
+        } cbtch (SignatureException sx) {
+            LOG.error("Bbd sig." + this, sx);
+            return fblse;
+        } cbtch (ClassCastException ccx) {
+            LOG.error("bbd cast." + this, ccx);
+            return fblse;
         }       
     }
 
     /**
-     * Retrieves the data from a byte[] containing both the signature & content,
-     * returning the data only if it is verified.
+     * Retrieves the dbta from a byte[] containing both the signature & content,
+     * returning the dbta only if it is verified.
      */
-    public static String getVerifiedData(byte[] data, File keyFile, String alg, String dig) {
-        PublicKey key = readKey(keyFile, alg);
-        byte[][] info = parseData(data);
-        return verify(key, info, alg, dig);
+    public stbtic String getVerifiedData(byte[] data, File keyFile, String alg, String dig) {
+        PublicKey key = rebdKey(keyFile, alg);
+        byte[][] info = pbrseData(data);
+        return verify(key, info, blg, dig);
     }
     
     /**
-     * Retrieves the data from a file, returning the data only if it is verified.
+     * Retrieves the dbta from a file, returning the data only if it is verified.
      */
-    public static String getVerifiedData(File source, File keyFile, String alg, String dig) {
-        PublicKey key = readKey(keyFile, alg);
-        byte[][] info = parseData(FileUtils.readFileFully(source));
-        return verify(key, info, alg, dig);
+    public stbtic String getVerifiedData(File source, File keyFile, String alg, String dig) {
+        PublicKey key = rebdKey(keyFile, alg);
+        byte[][] info = pbrseData(FileUtils.readFileFully(source));
+        return verify(key, info, blg, dig);
      }
     
     /**
-     * Verified the key, info, using the algorithm & digest algorithm.
+     * Verified the key, info, using the blgorithm & digest algorithm.
      */
-    private static String verify(PublicKey key, byte[][] info, String alg, String dig) {
+    privbte static String verify(PublicKey key, byte[][] info, String alg, String dig) {
         if(key == null || info == null) {
-            LOG.warn("No key or data to verify.");
+            LOG.wbrn("No key or data to verify.");
             return null;
         }
             
-        SignatureVerifier sv = new SignatureVerifier(info[1], info[0], key, alg, dig);
-        if(sv.verifySignature()) {
+        SignbtureVerifier sv = new SignatureVerifier(info[1], info[0], key, alg, dig);
+        if(sv.verifySignbture()) {
             try {
                 return new String(info[1], "UTF-8");
-            } catch(UnsupportedEncodingException uee) {
+            } cbtch(UnsupportedEncodingException uee) {
                 return new String(info[1]);
             }
         } else {
@@ -112,57 +112,57 @@ public class SignatureVerifier {
     }    
     
     /**
-     * Reads a public key from disk.
+     * Rebds a public key from disk.
      */
-    private static PublicKey readKey(File keyFile, String alg) {
-        byte[] fileData = FileUtils.readFileFully(keyFile);
-        if(fileData == null)
+    privbte static PublicKey readKey(File keyFile, String alg) {
+        byte[] fileDbta = FileUtils.readFileFully(keyFile);
+        if(fileDbta == null)
             return null;
             
         try {
-            EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base32.decode(new String(fileData)));
-            KeyFactory kf = KeyFactory.getInstance(alg);
-            PublicKey key = kf.generatePublic(pubKeySpec);
+            EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Bbse32.decode(new String(fileData)));
+            KeyFbctory kf = KeyFactory.getInstance(alg);
+            PublicKey key = kf.generbtePublic(pubKeySpec);
             return key;
-        } catch(NoSuchAlgorithmException nsae) {
-            LOG.error("Invalid algorithm: " + alg, nsae);
+        } cbtch(NoSuchAlgorithmException nsae) {
+            LOG.error("Invblid algorithm: " + alg, nsae);
             return null;
-        } catch(InvalidKeySpecException ikse) {
-            LOG.error("Invalid keyspec: " + keyFile, ikse);
+        } cbtch(InvalidKeySpecException ikse) {
+            LOG.error("Invblid keyspec: " + keyFile, ikse);
             return null;
         }
     }
     
     /**
-     * Parses data, returning the signature & content.
+     * Pbrses data, returning the signature & content.
      */
-    private static byte[][] parseData(byte[] data) {
-        if(data == null) {
-            LOG.warn("No data to parse.");
+    privbte static byte[][] parseData(byte[] data) {
+        if(dbta == null) {
+            LOG.wbrn("No data to parse.");
             return null;
         }
         
-        // look for the separator between sig & data.
-        int i = findPipes(data);
-        if(i == -1 || i >= data.length - 3) {
-            LOG.warn("Couldn't find pipes.");
+        // look for the sepbrator between sig & data.
+        int i = findPipes(dbta);
+        if(i == -1 || i >= dbta.length - 3) {
+            LOG.wbrn("Couldn't find pipes.");
             return null;
         }
             
         byte[] sig = new byte[i];
-        byte[] content = new byte[data.length - i - 2];
-        System.arraycopy(data, 0, sig, 0, sig.length);
-        System.arraycopy(data, i+2, content, 0, content.length);
-        return new byte[][] { Base32.decode(new String(sig)), content };
+        byte[] content = new byte[dbta.length - i - 2];
+        System.brraycopy(data, 0, sig, 0, sig.length);
+        System.brraycopy(data, i+2, content, 0, content.length);
+        return new byte[][] { Bbse32.decode(new String(sig)), content };
     }
     
     /**
-     * @return the index of "|" starting from startIndex, -1 if none found in
-     * this.data
+     * @return the index of "|" stbrting from startIndex, -1 if none found in
+     * this.dbta
      */
-    private static int findPipes(byte[] data) {
-        for(int i = 0 ; i < data.length-1; i++) {
-            if(data[i] == (byte)124 && data[i+1] == (byte)124)
+    privbte static int findPipes(byte[] data) {
+        for(int i = 0 ; i < dbta.length-1; i++) {
+            if(dbta[i] == (byte)124 && data[i+1] == (byte)124)
                 return i;
         }
         

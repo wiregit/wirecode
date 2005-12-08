@@ -3,60 +3,60 @@
  *
  */
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
 
-public class LimitedList {
+public clbss LimitedList {
     
-    private int MAX = 5;
-    // private ArrayList _list;
-    private LimitedArray _list;
-    private int _size;
+    privbte int MAX = 5;
+    // privbte ArrayList _list;
+    privbte LimitedArray _list;
+    privbte int _size;
 
     public LimitedList() {
-        // _list = new ArrayList();
-        _list = new LimitedArray(MAX);
+        // _list = new ArrbyList();
+        _list = new LimitedArrby(MAX);
         _size = 0;
     }
         
     public Object[] getAllElements() {
         Object[] elems = new Object[_size];
-        elems = _list.toArray();
+        elems = _list.toArrby();
         return elems;
     }
     
     public void print() {               
         for (int i=0; i < _size; i++) {
-            Pair p = (Pair)_list.get(i);
+            Pbir p = (Pair)_list.get(i);
 			if (p != null)
 				p.print();
         }               
     }
         
-    public void add(Object elem, int key) {
+    public void bdd(Object elem, int key) {
                 
         if (key == 0)
             return;
         int index = _size - 1;
-		Pair p;
+		Pbir p;
 		int pkey;
 
 
 		if (index > -1) {
-			while( (p = (Pair)_list.get(index)) == null ) {
+			while( (p = (Pbir)_list.get(index)) == null ) {
 				index--;
-				if( index==0 ) break;
+				if( index==0 ) brebk;
 			}
 		}
 		
 		while (index > -1) {
-			p = (Pair)_list.get(index);
+			p = (Pbir)_list.get(index);
 			
 			pkey = p.getKey();
 
 			if (key <= pkey) {
 				if (index != MAX-1) { 
-					_list.add(index+1, elem);
+					_list.bdd(index+1, elem);
 					_size++;
 					return;
 				}
@@ -66,7 +66,7 @@ public class LimitedList {
 			index--;
 		}
 		
-		_list.add(0, elem);
+		_list.bdd(0, elem);
 		_size++;
 
     }

@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
 /**
- * Thrown when the download path is invalid
+ * Thrown when the downlobd path is invalid
  */
-public class InvalidPathException extends IOException {
-	public InvalidPathException() { super("Invalid Path"); }
-	public InvalidPathException(String msg) { super(msg); }
+public clbss InvalidPathException extends IOException {
+	public InvblidPathException() { super("Invalid Path"); }
+	public InvblidPathException(String msg) { super(msg); }
 }

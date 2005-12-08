@@ -1,72 +1,72 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 /** 
- *  Calculate and control the timing of data writing.
+ *  Cblculate and control the timing of data writing.
  */
-public class WriteRegulator {
+public clbss WriteRegulator {
 
-    private static final Log LOG =
-      LogFactory.getLog(WriteRegulator.class);
+    privbte static final Log LOG =
+      LogFbctory.getLog(WriteRegulator.class);
 
-    /** Don't adjust the skipping of sleeps until the window has initialized */
-    private static final int   MIN_START_WINDOW     = 40;
+    /** Don't bdjust the skipping of sleeps until the window has initialized */
+    privbte static final int   MIN_START_WINDOW     = 40;
 
-    /** When the window space hits this size, it is low */
-    private static final int   LOW_WINDOW_SPACE     = 4;
+    /** When the window spbce hits this size, it is low */
+    privbte static final int   LOW_WINDOW_SPACE     = 4;
 
-    /** Cap the quick sending of blocks at this number */
-    private static final int   MAX_SKIP_LIMIT       = 14;
+    /** Cbp the quick sending of blocks at this number */
+    privbte static final int   MAX_SKIP_LIMIT       = 14;
 
-    /** The expected failure rate at optimal throughput */
-    private static final float TARGET_FAILURE_RATE  = 3f / 100f;
+    /** The expected fbilure rate at optimal throughput */
+    privbte static final float TARGET_FAILURE_RATE  = 3f / 100f;
 
-    /** The low failure rate at optimal throughput */
-    private static final float LOW_FAILURE_RATE     = 3f / 100f;
+    /** The low fbilure rate at optimal throughput */
+    privbte static final float LOW_FAILURE_RATE     = 3f / 100f;
 
-    /** The high failure rate at optimal throughput */
-    private static final float HIGH_FAILURE_RATE    = 4f / 100f;
-
-
-    private DataWindow _sendWindow;
-    private int        _skipCount  = 0;
-    private int        _skipLimit  = 2;
-    private boolean    _limitHit   = false;
-    private int        _limitCount = 0;
-    private int        _limitReset = 200;  
-    private int        _zeroCount  = 0;
+    /** The high fbilure rate at optimal throughput */
+    privbte static final float HIGH_FAILURE_RATE    = 4f / 100f;
 
 
-    /** Keep track of how many successes/failures there are in 
-        writing messages */
-    private FailureTracker _tracker;
+    privbte DataWindow _sendWindow;
+    privbte int        _skipCount  = 0;
+    privbte int        _skipLimit  = 2;
+    privbte boolean    _limitHit   = false;
+    privbte int        _limitCount = 0;
+    privbte int        _limitReset = 200;  
+    privbte int        _zeroCount  = 0;
+
+
+    /** Keep trbck of how many successes/failures there are in 
+        writing messbges */
+    privbte FailureTracker _tracker;
         
 
-    public WriteRegulator( DataWindow sendWindow ) {
+    public WriteRegulbtor( DataWindow sendWindow ) {
         _sendWindow = sendWindow;
-        _tracker    = new FailureTracker();
+        _trbcker    = new FailureTracker();
     }
 
     /** 
-     *  When a resend is required and the failure rate is too high, 
-     *  scale down activity.
+     *  When b resend is required and the failure rate is too high, 
+     *  scble down activity.
      */
     public void hitResendTimeout() {
         if ( (!_limitHit || _limitCount >= 10) &&
-              _tracker.failureRate() > HIGH_FAILURE_RATE ) {
+              _trbcker.failureRate() > HIGH_FAILURE_RATE ) {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
-            if(LOG.isDebugEnabled())  
+            if(LOG.isDebugEnbbled())  
                 LOG.debug("hitResendTimeout _skipLimit = "+_skipLimit+
-                " fR="+_tracker.failureRateAsString());
-            _tracker.clearOldFailures();
+                " fR="+_trbcker.failureRateAsString());
+            _trbcker.clearOldFailures();
         }
     }
 
     /** 
-     *  When the send window keeps getting hit, slow down activity.
+     *  When the send window keeps getting hit, slow down bctivity.
      */
     public void hitZeroWindow() {
         _zeroCount++;
@@ -78,51 +78,51 @@ public class WriteRegulator {
             //_skipLimit /= 2;
             //_limitCount = 0;
             _zeroCount = 0;
-            if(LOG.isDebugEnabled())  
+            if(LOG.isDebugEnbbled())  
                 LOG.debug("hitZeroWindow _skipLimit = "+_skipLimit+
-                  " fR="+_tracker.failureRateAsString());
+                  " fR="+_trbcker.failureRateAsString());
         }
     }
 
     /** 
      *  Compute how long the sleep time should be before the next write.
      */
-    public long getSleepTime(long currTime, int receiverWindowSpace) {
+    public long getSleepTime(long currTime, int receiverWindowSpbce) {
 
         //------------- Sleep ------------------------
 
-        // Sleep a fraction of rtt for specified window increment
+        // Sleep b fraction of rtt for specified window increment
         int  usedSpots   = _sendWindow.getUsedSpots(); 
         int  windowSize  = _sendWindow.getWindowSize(); 
-        long windowStart = _sendWindow.getWindowStart(); 
+        long windowStbrt = _sendWindow.getWindowStart(); 
 
         int   rto        = _sendWindow.getRTO();
-        float rttvar     = _sendWindow.getRTTVar();
-        float srtt       = _sendWindow.getSRTT();
+        flobt rttvar     = _sendWindow.getRTTVar();
+        flobt srtt       = _sendWindow.getSRTT();
         int   isrtt      = (int) srtt;
 
         int  rtt;
-        int  realRTT     = isrtt;//_sendWindow.averageRoundTripTime();
+        int  reblRTT     = isrtt;//_sendWindow.averageRoundTripTime();
         int  lowRTT      = _sendWindow.lowRoundTripTime();
         int  smoothRTT   = isrtt;//_sendWindow.smoothRoundTripTime();
-        int  sentWait    = isrtt;//_sendWindow.calculateWaitTime( currTime, 3);
-        rtt = sentWait + 1;
+        int  sentWbit    = isrtt;//_sendWindow.calculateWaitTime( currTime, 3);
+        rtt = sentWbit + 1;
         if  (rtt == 0) 
             rtt = 10;
-        int baseWait   = Math.min(realRTT, 2000)/4;  
+        int bbseWait   = Math.min(realRTT, 2000)/4;  
         //
-        // Want to ideally achieve a steady state location in writing and 
-        // reading window.  Don't want to get too far ahead or too far behind
+        // Wbnt to ideally achieve a steady state location in writing and 
+        // rebding window.  Don't want to get too far ahead or too far behind
         //
-        int sleepTime    = ((usedSpots+1) * baseWait);
+        int sleepTime    = ((usedSpots+1) * bbseWait);
         int minTime      = 0;
         int gettingSlow  = 0;
 
 
-        // Ensure the sleep time is fairly distributed in the normal case
+        // Ensure the sleep time is fbirly distributed in the normal case
         if ( sleepTime < windowSize ) {
             double pct = (double) sleepTime / (double) windowSize;
-            if ( Math.random() < pct )
+            if ( Mbth.random() < pct )
                 sleepTime      = 1;
             else
                 sleepTime      = 0;
@@ -130,150 +130,150 @@ public class WriteRegulator {
             sleepTime      = sleepTime / windowSize;
         }
 
-        // Create a sleeptime specific to having almost no room left to send
-        // more data
-        if ( receiverWindowSpace <= LOW_WINDOW_SPACE ) {
-            // Scale up the sleep time to a full timeout as you approach 
-            // zero space for writing
-            int multiple = LOW_WINDOW_SPACE / Math.max(1, receiverWindowSpace);
+        // Crebte a sleeptime specific to having almost no room left to send
+        // more dbta
+        if ( receiverWindowSpbce <= LOW_WINDOW_SPACE ) {
+            // Scble up the sleep time to a full timeout as you approach 
+            // zero spbce for writing
+            int multiple = LOW_WINDOW_SPACE / Mbth.max(1, receiverWindowSpace);
             sleepTime = (((int)srtt) * multiple) / (LOW_WINDOW_SPACE + 1);
 
-			if ( receiverWindowSpace <= (LOW_WINDOW_SPACE/2) ) {
+			if ( receiverWindowSpbce <= (LOW_WINDOW_SPACE/2) ) {
             	sleepTime = rto;
-				if(LOG.isDebugEnabled())  
+				if(LOG.isDebugEnbbled())  
 					LOG.debug("LOW_WINDOW sT:"+sleepTime);
 			}
 			minTime = sleepTime;
         }
 
-        if(LOG.isDebugEnabled())  
+        if(LOG.isDebugEnbbled())  
             LOG.debug(
               "sleepTime:"+sleepTime+
               " uS:"+usedSpots+ 
-              " RWS:"+receiverWindowSpace+
+              " RWS:"+receiverWindowSpbce+
               " smoothRTT:"+smoothRTT+
-              " realRTT:"+realRTT+
+              " reblRTT:"+realRTT+
               " rtt:"+rtt+
               " RTO:"+rto+
-              " RTTVar:"+rttvar+
+              " RTTVbr:"+rttvar+
               " srtt:"+srtt+
               " sL:"+_skipLimit +
-              " fR="+_tracker.failureRateAsString());
+              " fR="+_trbcker.failureRateAsString());
 
         if ( _skipLimit < 1 )
             _skipLimit = 1;
 
-        // Reset Timing if you are going to wait less than rtt or
-        // RTT has elevated too much
+        // Reset Timing if you bre going to wait less than rtt or
+        // RTT hbs elevated too much
 
-        // Compute a max target RTT given the bandwidth capacity
-        int maxRTT;
-        if ( smoothRTT > ((5*lowRTT)/2) ) {  // If avg much greater than low
-            // Capacity is limited so kick in quickly
-            maxRTT      = ((lowRTT*7) / 5);  
+        // Compute b max target RTT given the bandwidth capacity
+        int mbxRTT;
+        if ( smoothRTT > ((5*lowRTT)/2) ) {  // If bvg much greater than low
+            // Cbpacity is limited so kick in quickly
+            mbxRTT      = ((lowRTT*7) / 5);  
         } else {
-            // Capacity doesn't seem to be limited so only kick in if extreme
-            maxRTT      = ((lowRTT*25) / 5);
+            // Cbpacity doesn't seem to be limited so only kick in if extreme
+            mbxRTT      = ((lowRTT*25) / 5);
         }
 
-        // We want at least 2 round trips per full window time
-        // so find out how much you would wait for half a window
-        int windowDelay = 
-          (((baseWait * windowSize) / _skipLimit) * 2) / 4;
+        // We wbnt at least 2 round trips per full window time
+        // so find out how much you would wbit for half a window
+        int windowDelby = 
+          (((bbseWait * windowSize) / _skipLimit) * 2) / 4;
 
-        // If our RTT time is going up, figure out what to do
-        if ( rtt != 0 && baseWait != 0 && 
-             receiverWindowSpace <= LOW_WINDOW_SPACE &&
-             (windowDelay < rtt || rtt > maxRTT) ) {
-            if(LOG.isDebugEnabled())  
+        // If our RTT time is going up, figure out whbt to do
+        if ( rtt != 0 && bbseWait != 0 && 
+             receiverWindowSpbce <= LOW_WINDOW_SPACE &&
+             (windowDelby < rtt || rtt > maxRTT) ) {
+            if(LOG.isDebugEnbbled())  
                 LOG.debug(
                   " -- MAX EXCEED "+
-                  " RTT sL:"+_skipLimit + " w:"+ windowStart+
-                  " Rrtt:"+realRTT+ " base :"+baseWait+
-                  " uS:"+usedSpots+" RWS:"+receiverWindowSpace+
+                  " RTT sL:"+_skipLimit + " w:"+ windowStbrt+
+                  " Rrtt:"+reblRTT+ " base :"+baseWait+
+                  " uS:"+usedSpots+" RWS:"+receiverWindowSpbce+
                   " lRTT:"+_sendWindow.lowRoundTripTime()+
-                  " sWait:"+sentWait+
-                  " mRTT:"+maxRTT+
-                  " wDelay:"+windowDelay+
+                  " sWbit:"+sentWait+
+                  " mRTT:"+mbxRTT+
+                  " wDelby:"+windowDelay+
                   " sT:"+sleepTime);
 
 
-            // If we are starting to affect the RTT, 
-            // then ratchet down the accelorator
+            // If we bre starting to affect the RTT, 
+            // then rbtchet down the accelorator
             /*
-            if ( realRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
+            if ( reblRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
                 _limitHit = true;
                 _skipLimit /= 2;
-                if(LOG.isDebugEnabled())  
+                if(LOG.isDebugEnbbled())  
                     LOG.debug(
                       " -- LOWER SL "+
-                      " rRTT:"+realRTT+
+                      " rRTT:"+reblRTT+
                       " lRTT:"+lowRTT+
                       " rtt:"+rtt+ 
                       " sL:"+_skipLimit);
             }
             */
 
-            // If we are majorly affecting the RTT, then slow down right now
-            if ( rtt > maxRTT || realRTT > maxRTT ) {
+            // If we bre majorly affecting the RTT, then slow down right now
+            if ( rtt > mbxRTT || realRTT > maxRTT ) {
 				minTime = lowRTT / 4;
 				if ( gettingSlow == 0 )
             		_skipLimit--;
 				gettingSlow = 50;
                 //sleepTime = (16*rtt) / 7;
-                if(LOG.isDebugEnabled())  
+                if(LOG.isDebugEnbbled())  
                     LOG.debug(
                       " -- UP SLEEP "+ 
                       " rtt:"+rtt+ 
-                      " mRTT:"+maxRTT+
-                      " rRTT:"+realRTT+
+                      " mRTT:"+mbxRTT+
+                      " rRTT:"+reblRTT+
                       " lRTT:"+lowRTT+
                       " sT:"+sleepTime);
             }
         }
 
-        // Cycle through the accelerator states and enforced backoff
+        // Cycle through the bccelerator states and enforced backoff
         if ( _skipLimit < 1 )
             _skipLimit = 1;
         _skipCount = (_skipCount + 1) % _skipLimit;
 
         if ( !_limitHit ) {
-            // Bump up the skipLimit occasionally to see if we can handle it
+            // Bump up the skipLimit occbsionally to see if we can handle it
             if (_skipLimit < MAX_SKIP_LIMIT    &&
-                windowStart%windowSize == 0    &&
+                windowStbrt%windowSize == 0    &&
                 gettingSlow == 0               &&
-                windowStart > MIN_START_WINDOW &&
-                _tracker.failureRate() < LOW_FAILURE_RATE ) {
-                if(LOG.isDebugEnabled())  
+                windowStbrt > MIN_START_WINDOW &&
+                _trbcker.failureRate() < LOW_FAILURE_RATE ) {
+                if(LOG.isDebugEnbbled())  
                     LOG.debug("up _skipLimit = "+_skipLimit);
                 _skipLimit++;
-                if(LOG.isDebugEnabled())  
+                if(LOG.isDebugEnbbled())  
                     LOG.debug(" -- UPP sL:"+_skipLimit);
             }
         } else {
-            // Wait before trying to be aggressive again
+            // Wbit before trying to be aggressive again
             _limitCount++;
             if (_limitCount >= _limitReset) {
-                if(LOG.isDebugEnabled())  
+                if(LOG.isDebugEnbbled())  
                     LOG.debug(" -- UPP reset:"+_skipLimit);
                 _limitCount = 0;
-                _limitHit = false;
+                _limitHit = fblse;
             }
         }
 
-        // Readjust the sleepTime to zero if the connection can handle it
+        // Rebdjust the sleepTime to zero if the connection can handle it
         if ( _skipCount != 0 && 
-             rtt < maxRTT && 
-             receiverWindowSpace > LOW_WINDOW_SPACE )  {
-             if(LOG.isDebugEnabled())  
+             rtt < mbxRTT && 
+             receiverWindowSpbce > LOW_WINDOW_SPACE )  {
+             if(LOG.isDebugEnbbled())  
                  LOG.debug("_skipLimit = "+_skipLimit);
             sleepTime = 0;
         }
 
-        // Ensure that any minimum sleep time is enforced
-        sleepTime = Math.max(sleepTime, minTime);
+        // Ensure thbt any minimum sleep time is enforced
+        sleepTime = Mbth.max(sleepTime, minTime);
 		
-		// Reduce the gettingSlow indicator over time
+		// Reduce the gettingSlow indicbtor over time
 		if ( gettingSlow > 0 )
 			gettingSlow--;
 
@@ -283,39 +283,39 @@ public class WriteRegulator {
 
 
     /** 
-     * Record a message success 
+     * Record b message success 
      */
-    public void addMessageSuccess() {
-        _tracker.addSuccess();
+    public void bddMessageSuccess() {
+        _trbcker.addSuccess();
     }
 
     /** 
-     * Record a message failure 
+     * Record b message failure 
      */
-    public void addMessageFailure() {
-        _tracker.addFailure();
+    public void bddMessageFailure() {
+        _trbcker.addFailure();
     }
 
 
     /**
-     *  Keep track of overall successes and failures 
+     *  Keep trbck of overall successes and failures 
      */
-    private class FailureTracker {
+    privbte class FailureTracker {
 
-    	private static final int HISTORY_SIZE=100;
+    	privbte static final int HISTORY_SIZE=100;
     	
-    	private final byte [] _data = new byte[HISTORY_SIZE];
+    	privbte final byte [] _data = new byte[HISTORY_SIZE];
     	
-    	private boolean _rollover =false;
-    	private int _index;
+    	privbte boolean _rollover =false;
+    	privbte int _index;
 
 
         /**
          * Add one to the successful count
          */
-        public void addSuccess() {
+        public void bddSuccess() {
 
-        	_data[_index++]=1;
+        	_dbta[_index++]=1;
         	if (_index>=HISTORY_SIZE-1){
         		LOG.debug("rolled over");
         		_index=0;
@@ -324,10 +324,10 @@ public class WriteRegulator {
         }
 
         /**
-         * Add one to the failure count
+         * Add one to the fbilure count
          */
-        public void addFailure() {
-        	_data[_index++]=0;
+        public void bddFailure() {
+        	_dbta[_index++]=0;
         	if (_index>=HISTORY_SIZE-1){
         		LOG.debug("rolled over");
         		_index=0;
@@ -336,44 +336,44 @@ public class WriteRegulator {
         }
 
         /**
-         * Clear out old failures to give new rate a chance. This should clear
-         * out a clump of failures more quickly.
+         * Clebr out old failures to give new rate a chance. This should clear
+         * out b clump of failures more quickly.
          */
-        public void clearOldFailures() {
+        public void clebrOldFailures() {
             for (int i = 0; i < HISTORY_SIZE/2; i++)
-                addSuccess();
+                bddSuccess();
         }
 
         /**
-         * Compute the failure rate of last HISTORY_SIZE blocks once up and running
+         * Compute the fbilure rate of last HISTORY_SIZE blocks once up and running
          */
-        public float failureRate() {
+        public flobt failureRate() {
 
-        	int total=0;
+        	int totbl=0;
         	for (int i=0;i < (_rollover ? HISTORY_SIZE : _index);i++)
-        		total+=_data[i];
+        		totbl+=_data[i];
         	
-        	if (LOG.isDebugEnabled()) {
-        		LOG.debug("failure rate from "+_index+ 
-        				" measurements and rollover "+_rollover+
-        				" total is "+total+
-						" and rate "+ 
-						(1- (float)total / (float)(_rollover ? HISTORY_SIZE : _index)));
+        	if (LOG.isDebugEnbbled()) {
+        		LOG.debug("fbilure rate from "+_index+ 
+        				" mebsurements and rollover "+_rollover+
+        				" totbl is "+total+
+						" bnd rate "+ 
+						(1- (flobt)total / (float)(_rollover ? HISTORY_SIZE : _index)));
         	}
         	
-        	return 1- ((float)total / (float)(_rollover ? HISTORY_SIZE : _index));
+        	return 1- ((flobt)total / (float)(_rollover ? HISTORY_SIZE : _index));
         }
 
         
         /**
-         * Report the failure rate as string for debugging.
+         * Report the fbilure rate as string for debugging.
          */
-        public String failureRateAsString() {
+        public String fbilureRateAsString() {
 
-           float rate  = failureRate() * 1000; 
-           int   irate = ((int)rate) / 10 ;
-           int   drate = (((int)rate) - (irate * 10));
-           return "" + irate + "." + drate;
+           flobt rate  = failureRate() * 1000; 
+           int   irbte = ((int)rate) / 10 ;
+           int   drbte = (((int)rate) - (irate * 10));
+           return "" + irbte + "." + drate;
         }
         
     }

@@ -1,36 +1,36 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import jbva.net.InetAddress;
+import jbva.net.UnknownHostException;
 
-public class IpPortImpl implements IpPort {
+public clbss IpPortImpl implements IpPort {
     
-    private final InetAddress addr;
-    private final String addrString;
-    private final int port;
+    privbte final InetAddress addr;
+    privbte final String addrString;
+    privbte final int port;
     
     /**
-     * Constructs a new IpPort using the given addr, host & port.
+     * Constructs b new IpPort using the given addr, host & port.
      */
-    public IpPortImpl(InetAddress addr, String host, int port) {
-        this.addr = addr;
-        this.addrString = host;
+    public IpPortImpl(InetAddress bddr, String host, int port) {
+        this.bddr = addr;
+        this.bddrString = host;
         this.port = port;
     }
     
     /**
-     * Constructs a new IpPort using the given host & port.
+     * Constructs b new IpPort using the given host & port.
      */
     public IpPortImpl(String host, int port) throws UnknownHostException {
-        this(InetAddress.getByName(host), host, port);
+        this(InetAddress.getByNbme(host), host, port);
     }
     
     public InetAddress getInetAddress() {
-        return addr;
+        return bddr;
     }
     
     public String getAddress() {
-        return addrString;
+        return bddrString;
     }
     
     public int getPort() {

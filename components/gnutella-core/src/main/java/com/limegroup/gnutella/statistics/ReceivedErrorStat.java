@@ -1,278 +1,278 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * This class contains a type-safe enumeration of statistics for 
- * errors in received messages.
+ * This clbss contains a type-safe enumeration of statistics for 
+ * errors in received messbges.
  */
-public class ReceivedErrorStat extends AdvancedStatistic {
+public clbss ReceivedErrorStat extends AdvancedStatistic {
 
 	/**
-	 * Make the constructor private so that only this class can construct
-	 * an <tt>ReceivedErrorStat</tt> instances.
+	 * Mbke the constructor private so that only this class can construct
+	 * bn <tt>ReceivedErrorStat</tt> instances.
 	 */
-	private ReceivedErrorStat() {}
+	privbte ReceivedErrorStat() {}
 	
 	/**
-	 * Specialized class for accumulating all errors.
+	 * Speciblized class for accumulating all errors.
 	 */
-	private static class ErrorStat extends ReceivedErrorStat {
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_RECEIVED_ERRORS.incrementStat();
+	privbte static class ErrorStat extends ReceivedErrorStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+			ALL_RECEIVED_ERRORS.incrementStbt();
 		}
 	}
 	
 	/**
-	 * Class for accumulating query errors.
+	 * Clbss for accumulating query errors.
 	 */
-	private static class QueryErrorStat extends ErrorStat {
-		public void incrementStat() {
-			super.incrementStat();
-	        ALL_QUERY_ERRORS.incrementStat();
+	privbte static class QueryErrorStat extends ErrorStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+	        ALL_QUERY_ERRORS.incrementStbt();
 	    }
 	}
 	
 	/**
-	 * Class for accumulating query reply errors.
+	 * Clbss for accumulating query reply errors.
 	 */
-	private static class QueryReplyErrorStat extends ErrorStat {
-		public void incrementStat() {
-			super.incrementStat();
-	        ALL_QUERY_REPLY_ERRORS.incrementStat();
+	privbte static class QueryReplyErrorStat extends ErrorStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+	        ALL_QUERY_REPLY_ERRORS.incrementStbt();
 	    }
 	}
 	
 	/**
-	 * Class for accumulating push errors.
+	 * Clbss for accumulating push errors.
 	 */
-	private static class PushErrorStat extends ErrorStat {
-		public void incrementStat() {
-			super.incrementStat();
-	        ALL_PUSH_ERRORS.incrementStat();
+	privbte static class PushErrorStat extends ErrorStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+	        ALL_PUSH_ERRORS.incrementStbt();
 	    }
 	}
 	
 	/**
-	 * Class for accumulating ping reply errors.
+	 * Clbss for accumulating ping reply errors.
 	 */
-	private static class PingReplyErrorStat extends ErrorStat {
-		public void incrementStat() {
-			super.incrementStat();
-	        ALL_PING_REPLY_ERRORS.incrementStat();
+	privbte static class PingReplyErrorStat extends ErrorStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+	        ALL_PING_REPLY_ERRORS.incrementStbt();
 	    }
 	}
 	
 	/**
-	 * Class for accumulating vendor message errors.
+	 * Clbss for accumulating vendor message errors.
 	 */
-	private static class VendorErrorStat extends ErrorStat {
-		public void incrementStat() {
-			super.incrementStat();
-            ALL_VENDOR_ERRORS.incrementStat();
+	privbte static class VendorErrorStat extends ErrorStat {
+		public void incrementStbt() {
+			super.incrementStbt();
+            ALL_VENDOR_ERRORS.incrementStbt();
         }
     }
 	
 	/**
-	 * Statistic for all received errors.
+	 * Stbtistic for all received errors.
 	 */
-    public static final Statistic ALL_RECEIVED_ERRORS =
-        new ReceivedErrorStat();
+    public stbtic final Statistic ALL_RECEIVED_ERRORS =
+        new ReceivedErrorStbt();
         
 	/**
-	 * Statistic for all received query errors.
+	 * Stbtistic for all received query errors.
 	 */
-    public static final Statistic ALL_QUERY_ERRORS =
-        new ReceivedErrorStat();
+    public stbtic final Statistic ALL_QUERY_ERRORS =
+        new ReceivedErrorStbt();
 
 	/**
-	 * Statistic for all received query reply errors.
+	 * Stbtistic for all received query reply errors.
 	 */
-    public static final Statistic ALL_QUERY_REPLY_ERRORS =
-        new ReceivedErrorStat();
+    public stbtic final Statistic ALL_QUERY_REPLY_ERRORS =
+        new ReceivedErrorStbt();
 
 	/**
-	 * Statistic for all received push errors.
+	 * Stbtistic for all received push errors.
 	 */
-    public static final Statistic ALL_PUSH_ERRORS =
-        new ReceivedErrorStat();
+    public stbtic final Statistic ALL_PUSH_ERRORS =
+        new ReceivedErrorStbt();
         
     /**
-	 * Statistic for all received ping reply errors.
+	 * Stbtistic for all received ping reply errors.
 	 */
-    public static final Statistic ALL_PING_REPLY_ERRORS =
-        new ReceivedErrorStat();
+    public stbtic final Statistic ALL_PING_REPLY_ERRORS =
+        new ReceivedErrorStbt();
         
     /**
-	 * Statistic for all received vendor errors.
+	 * Stbtistic for all received vendor errors.
 	 */
-    public static final Statistic ALL_VENDOR_ERRORS =
-        new ReceivedErrorStat();
+    public stbtic final Statistic ALL_VENDOR_ERRORS =
+        new ReceivedErrorStbt();
         
     /**
-     * Statistic for failure due to connection closing.
+     * Stbtistic for failure due to connection closing.
      */
-    public static final Statistic CONNECTION_CLOSED =
-        new ErrorStat();
+    public stbtic final Statistic CONNECTION_CLOSED =
+        new ErrorStbt();
         
     /**
-     * Statistic for an invalid payload length.
+     * Stbtistic for an invalid payload length.
      */
-    public static final Statistic INVALID_LENGTH =
-        new ErrorStat();
+    public stbtic final Statistic INVALID_LENGTH =
+        new ErrorStbt();
         
     /**
-     * Statistic for an invalid hops.
+     * Stbtistic for an invalid hops.
      */
-    public static final Statistic INVALID_HOPS =
-        new ErrorStat();
+    public stbtic final Statistic INVALID_HOPS =
+        new ErrorStbt();
         
     /**
-     * Statistic for an invalid TTL.
+     * Stbtistic for an invalid TTL.
      */
-    public static final Statistic INVALID_TTL =
-        new ErrorStat();
+    public stbtic final Statistic INVALID_TTL =
+        new ErrorStbt();
         
     /**
-     * Statistic for hops exceeding soft max.
+     * Stbtistic for hops exceeding soft max.
      */
-    public static final Statistic HOPS_EXCEED_SOFT_MAX =
-        new ErrorStat();
+    public stbtic final Statistic HOPS_EXCEED_SOFT_MAX =
+        new ErrorStbt();
         
     /**
-     * Statistic for hops + ttl exceeding hard max.
+     * Stbtistic for hops + ttl exceeding hard max.
      */
-    public static final Statistic HOPS_AND_TTL_OVER_HARD_MAX =
-        new ErrorStat();
+    public stbtic final Statistic HOPS_AND_TTL_OVER_HARD_MAX =
+        new ErrorStbt();
         
     /**
-     * Statistic for an invalid function code.
+     * Stbtistic for an invalid function code.
      */
-    public static final Statistic INVALID_CODE =
-        new ErrorStat();
+    public stbtic final Statistic INVALID_CODE =
+        new ErrorStbt();
 
 	/**
-	 * Statistic for failure due to URNs.
+	 * Stbtistic for failure due to URNs.
 	 */
-	public static final Statistic QUERY_URN =
-	    new QueryErrorStat();
+	public stbtic final Statistic QUERY_URN =
+	    new QueryErrorStbt();
 	    
 	/**
-	 * Statistic for failure due to query length too large.
+	 * Stbtistic for failure due to query length too large.
 	 */
-	public static final Statistic QUERY_TOO_LARGE =
-	    new QueryErrorStat();
+	public stbtic final Statistic QUERY_TOO_LARGE =
+	    new QueryErrorStbt();
 	    
     /**
-     * Statistic for failure due to the XML query length.
+     * Stbtistic for failure due to the XML query length.
      */
-    public static final Statistic QUERY_XML_TOO_LARGE =
-        new QueryErrorStat();
+    public stbtic final Statistic QUERY_XML_TOO_LARGE =
+        new QueryErrorStbt();
     
     /**
-     * Statistic for failure due to empty query.
+     * Stbtistic for failure due to empty query.
      */
-    public static final Statistic QUERY_EMPTY =
-        new QueryErrorStat();
+    public stbtic final Statistic QUERY_EMPTY =
+        new QueryErrorStbt();
     
     /**
-     * Statistic for failure due to illegal characters.
+     * Stbtistic for failure due to illegal characters.
      */
-    public static final Statistic QUERY_ILLEGAL_CHARS =
-        new QueryErrorStat();
+    public stbtic final Statistic QUERY_ILLEGAL_CHARS =
+        new QueryErrorStbt();
     
     /**
-     * Statistic for failure due to invalid port in QueryReply.
+     * Stbtistic for failure due to invalid port in QueryReply.
      */
-    public static final Statistic REPLY_INVALID_PORT =
-        new QueryReplyErrorStat();
+    public stbtic final Statistic REPLY_INVALID_PORT =
+        new QueryReplyErrorStbt();
         
     /**
-     * Statistic for failure due to invalid address in QueryReply.
+     * Stbtistic for failure due to invalid address in QueryReply.
      */
-    public static final Statistic REPLY_INVALID_ADDRESS =
-        new QueryReplyErrorStat();
+    public stbtic final Statistic REPLY_INVALID_ADDRESS =
+        new QueryReplyErrorStbt();
     
     /**
-     * Statistic for failure due to invalid speed in QueryReply.
+     * Stbtistic for failure due to invalid speed in QueryReply.
      */
-    public static final Statistic REPLY_INVALID_SPEED =
-        new QueryReplyErrorStat();
+    public stbtic final Statistic REPLY_INVALID_SPEED =
+        new QueryReplyErrorStbt();
     
     /**
-     * Statistic for failure due to invalid port in a push.
+     * Stbtistic for failure due to invalid port in a push.
      */
-    public static final Statistic PUSH_INVALID_PORT =
-        new PushErrorStat();
+    public stbtic final Statistic PUSH_INVALID_PORT =
+        new PushErrorStbt();
     
     /**
-     * Statistic for failure due to invalid address in a push.
+     * Stbtistic for failure due to invalid address in a push.
      */
-    public static final Statistic PUSH_INVALID_ADDRESS =
-        new PushErrorStat();
+    public stbtic final Statistic PUSH_INVALID_ADDRESS =
+        new PushErrorStbt();
     
     /**
-     * Statistic for failure due to invalid payload in a push.
+     * Stbtistic for failure due to invalid payload in a push.
      */
-    public static final Statistic PUSH_INVALID_PAYLOAD =
-        new PushErrorStat();
+    public stbtic final Statistic PUSH_INVALID_PAYLOAD =
+        new PushErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid ping reply payload.
+     * Stbtistic for failure due to an invalid ping reply payload.
      */
-    public static final Statistic PING_REPLY_INVALID_PAYLOAD =
-        new PingReplyErrorStat();
+    public stbtic final Statistic PING_REPLY_INVALID_PAYLOAD =
+        new PingReplyErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid ping reply port.
+     * Stbtistic for failure due to an invalid ping reply port.
      */
-    public static final Statistic PING_REPLY_INVALID_PORT =
-        new PingReplyErrorStat();
+    public stbtic final Statistic PING_REPLY_INVALID_PORT =
+        new PingReplyErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid ping reply address.
+     * Stbtistic for failure due to an invalid ping reply address.
      */
-    public static final Statistic PING_REPLY_INVALID_ADDRESS =
-        new PingReplyErrorStat();
+    public stbtic final Statistic PING_REPLY_INVALID_ADDRESS =
+        new PingReplyErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid ping reply ggep block.
+     * Stbtistic for failure due to an invalid ping reply ggep block.
      */
-    public static final Statistic PING_REPLY_INVALID_GGEP =
-        new PingReplyErrorStat();
+    public stbtic final Statistic PING_REPLY_INVALID_GGEP =
+        new PingReplyErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid ping reply vendor length.
+     * Stbtistic for failure due to an invalid ping reply vendor length.
      */
-    public static final Statistic PING_REPLY_INVALID_VENDOR =
-        new PingReplyErrorStat();
+    public stbtic final Statistic PING_REPLY_INVALID_VENDOR =
+        new PingReplyErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid vendor id.
+     * Stbtistic for failure due to an invalid vendor id.
      */
-    public static final Statistic VENDOR_INVALID_ID =
-        new VendorErrorStat();
+    public stbtic final Statistic VENDOR_INVALID_ID =
+        new VendorErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid selector.
+     * Stbtistic for failure due to an invalid selector.
      */
-    public static final Statistic VENDOR_INVALID_SELECTOR =
-        new VendorErrorStat();
+    public stbtic final Statistic VENDOR_INVALID_SELECTOR =
+        new VendorErrorStbt();
         
     /**
-     * Statistic for failure due to an invalid version.
+     * Stbtistic for failure due to an invalid version.
      */
-    public static final Statistic VENDOR_INVALID_VERSION =
-        new VendorErrorStat();
+    public stbtic final Statistic VENDOR_INVALID_VERSION =
+        new VendorErrorStbt();
         
     /**
-     * Statistic for failure due an invalid payload.
+     * Stbtistic for failure due an invalid payload.
      */
-    public static final Statistic VENDOR_INVALID_PAYLOAD =
-        new VendorErrorStat();
+    public stbtic final Statistic VENDOR_INVALID_PAYLOAD =
+        new VendorErrorStbt();
         
     /**
-     * Statistic for failure due an unrecognized vendor message.
+     * Stbtistic for failure due an unrecognized vendor message.
      */
-    public static final Statistic VENDOR_UNRECOGNIZED =
-        new VendorErrorStat();
+    public stbtic final Statistic VENDOR_UNRECOGNIZED =
+        new VendorErrorStbt();
 }

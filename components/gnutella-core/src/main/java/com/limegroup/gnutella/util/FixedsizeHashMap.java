@@ -1,92 +1,92 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import jbva.util.HashMap;
+import jbva.util.Map;
 
 /**
- * This class implements fixed size HashMap. If its get full, no new entry
- * can be inserted into it, except by removing some entry first.
- * An attempt to add new entry throws an NoMoreStorageException
- * @see NoMoreStorageException
+ * This clbss implements fixed size HashMap. If its get full, no new entry
+ * cbn be inserted into it, except by removing some entry first.
+ * An bttempt to add new entry throws an NoMoreStorageException
+ * @see NoMoreStorbgeException
  */
-public class FixedsizeHashMap {
+public clbss FixedsizeHashMap {
     
     /**
-     * The underlying storage
+     * The underlying storbge
      */
-    private final Map hashMap;
+    privbte final Map hashMap;
     
     /**
-     * The max number of elements that can be stored
+     * The mbx number of elements that can be stored
      */
-    private final int maxSize;
+    privbte final int maxSize;
     
     /**
-     * Create a new hashMap that stores only the specified number of entries
+     * Crebte a new hashMap that stores only the specified number of entries
      *
-     * @param size the number of entries to hold
-     * @exception IllegalArgumentException if size is less < 1.
+     * @pbram size the number of entries to hold
+     * @exception IllegblArgumentException if size is less < 1.
      */
-    public FixedsizeHashMap(int size)
+    public FixedsizeHbshMap(int size)
     {
-        hashMap = new HashMap(size * 4/3);
-        this.maxSize = size;
+        hbshMap = new HashMap(size * 4/3);
+        this.mbxSize = size;
     }
     
     /**
-     * Maps the given key to the given value. If adding the key
-     * would make this contain more elements than the size given at
-     * construction, the passed entry is not stored and NoMoreStorageException
+     * Mbps the given key to the given value. If adding the key
+     * would mbke this contain more elements than the size given at
+     * construction, the pbssed entry is not stored and NoMoreStorageException
      * gets throwned.
-     * @exception NoMoreStorageException when no more space left in the storage
-     * ideally, before calling put method, it should be checked whether the map is
-     * already full or not
+     * @exception NoMoreStorbgeException when no more space left in the storage
+     * ideblly, before calling put method, it should be checked whether the map is
+     * blready full or not
      * @see isfull()
      */
-    public synchronized Object put(Object key, Object value) throws NoMoreStorageException
+    public synchronized Object put(Object key, Object vblue) throws NoMoreStorageException
     {
-        Object retValue = null;
+        Object retVblue = null;
         
-        //check if the count is less than size, in that case no problem
+        //check if the count is less thbn size, in that case no problem
         //inserting this new entry
-        if(hashMap.size() < maxSize) 
-            retValue = hashMap.put(key,value);
+        if(hbshMap.size() < maxSize) 
+            retVblue = hashMap.put(key,value);
         else {
-            //if the entry already existed, we can safely add this new pair
-            //without affecting the size
-            retValue = hashMap.get(key);
+            //if the entry blready existed, we can safely add this new pair
+            //without bffecting the size
+            retVblue = hashMap.get(key);
             
-            if(retValue != null) //mapping existed, so update the mapping 
-                retValue = hashMap.put(key,value);
-            else //no space to enter anything more 
-                throw new NoMoreStorageException();
+            if(retVblue != null) //mapping existed, so update the mapping 
+                retVblue = hashMap.put(key,value);
+            else //no spbce to enter anything more 
+                throw new NoMoreStorbgeException();
         }
         
-        return retValue;
+        return retVblue;
     }
     
     /**
-     * Returns the value mapped to the given key
-     * @param key The given key
-     * @return the value given key maps to
+     * Returns the vblue mapped to the given key
+     * @pbram key The given key
+     * @return the vblue given key maps to
      */
     public synchronized Object get(Object key) {
-        return hashMap.get(key);
+        return hbshMap.get(key);
     }
     
     /**
-     * clears all entries from the map.
+     * clebrs all entries from the map.
      */
-    public synchronized void clear() {
-        hashMap.clear();
+    public synchronized void clebr() {
+        hbshMap.clear();
     }
     
     /**
-     * Returns the string representation of the mappings
-     * @return the string representation of the mappings
+     * Returns the string representbtion of the mappings
+     * @return the string representbtion of the mappings
      */
     public synchronized String toString() {
-        return hashMap.toString();
+        return hbshMap.toString();
     }
     
     

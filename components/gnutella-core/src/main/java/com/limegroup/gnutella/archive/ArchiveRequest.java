@@ -1,62 +1,62 @@
-package com.limegroup.gnutella.archive;
+pbckage com.limegroup.gnutella.archive;
 
-import java.io.IOException;
-import java.io.InputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import jbvax.xml.parsers.DocumentBuilder;
+import jbvax.xml.parsers.DocumentBuilderFactory;
+import jbvax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.bpache.commons.httpclient.HttpClient;
+import org.bpache.commons.httpclient.HttpException;
+import org.bpache.commons.httpclient.NameValuePair;
+import org.bpache.commons.httpclient.methods.PostMethod;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
+import org.xml.sbx.SAXException;
 
-class ArchiveRequest {
+clbss ArchiveRequest {
 
-	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveRequest.java,v 1.1.2.2 2005-11-16 17:07:08 zlatinb Exp $";
+	public stbtic final String REPOSITORY_VERSION =
+		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/ArchiveRequest.java,v 1.1.2.2 2005/11/16 17:07:08 zlatinb Exp $";
 	
-	private final String _url;
-	private final NameValuePair[] _parameters;
-	private PostMethod _post; 
+	privbte final String _url;
+	privbte final NameValuePair[] _parameters;
+	privbte PostMethod _post; 
 	
-	private ArchiveResponse _response;
+	privbte ArchiveResponse _response;
 		
-	/* no default constructor */
-	private ArchiveRequest() {
+	/* no defbult constructor */
+	privbte ArchiveRequest() {
 		_url = null;
-		_parameters = null;
+		_pbrameters = null;
 	}
 	
-	ArchiveRequest( String url, NameValuePair[] parameters ) {
+	ArchiveRequest( String url, NbmeValuePair[] parameters ) {
 		_url = url;
-		_parameters = parameters;		
+		_pbrameters = parameters;		
 	}
 	
 	/**
 	 * 
-	 * @throws BadResponseException
+	 * @throws BbdResponseException
 	 * @throws HttpException
 	 * @throws IOException
 	 * 
-	 * @throws IllegalStateException
-	 *         If java's xml parser is broken
+	 * @throws IllegblStateException
+	 *         If jbva's xml parser is broken
 	 */
 		
-	void execute() throws BadResponseException, HttpException, 
+	void execute() throws BbdResponseException, HttpException, 
 	IOException {
 	
-		final PostMethod post = new PostMethod( _url );
-		post.addRequestHeader("Content-type","application/x-www-form-urlencoded");
-		post.addRequestHeader("Accept","text/plain");
-		post.addParameters( _parameters );
+		finbl PostMethod post = new PostMethod( _url );
+		post.bddRequestHeader("Content-type","application/x-www-form-urlencoded");
+		post.bddRequestHeader("Accept","text/plain");
+		post.bddParameters( _parameters );
 	
-		final HttpClient client = new HttpClient();
+		finbl HttpClient client = new HttpClient();
 				
 		synchronized(this) {
 			_post = post;
@@ -64,135 +64,135 @@ class ArchiveRequest {
 		
 		client.executeMethod( post );
 		
-		final String responseString = post.getResponseBodyAsString();
-		final InputStream responseStream = post.getResponseBodyAsStream();
+		finbl String responseString = post.getResponseBodyAsString();
+		finbl InputStream responseStream = post.getResponseBodyAsStream();
 		
 		synchronized(this) {
 			_post = null;
 		}
 		
-		post.releaseConnection();
+		post.relebseConnection();
 		
 		/*
-		 * kinds of responses we might get back:
+		 * kinds of responses we might get bbck:
 		 * 
 		 * <result type="..."> <url>...</url></result>
 		 * 
-		 * <result type="..." code="..."><message>...</message></result>
-		 *  (result's code attribute is optional)
+		 * <result type="..." code="..."><messbge>...</message></result>
+		 *  (result's code bttribute is optional)
 		 *  
-		 * <result type="..."> <message>...</message> </result> <url> ... </url>
+		 * <result type="..."> <messbge>...</message> </result> <url> ... </url>
 		 *
-		 *  url element can be inside or outside result element
+		 *  url element cbn be inside or outside result element
 		 * 
 		 */
 		
-		final String RESULT_ELEMENT = "result";
-		final String TYPE_ATTR = "type";
-		final String CODE_ATTR = "code";
-		final String URL_ELEMENT = "url";
-		final String MESSAGE_ELEMENT = "message";
+		finbl String RESULT_ELEMENT = "result";
+		finbl String TYPE_ATTR = "type";
+		finbl String CODE_ATTR = "code";
+		finbl String URL_ELEMENT = "url";
+		finbl String MESSAGE_ELEMENT = "message";
 		
-		final DocumentBuilderFactory factory = 
-			DocumentBuilderFactory.newInstance();
-		factory.setIgnoringComments( true );
-		factory.setCoalescing( true );
+		finbl DocumentBuilderFactory factory = 
+			DocumentBuilderFbctory.newInstance();
+		fbctory.setIgnoringComments( true );
+		fbctory.setCoalescing( true );
 		
-		final DocumentBuilder parser;
-		final Document document;
+		finbl DocumentBuilder parser;
+		finbl Document document;
 		
 		try {
-			parser = factory.newDocumentBuilder();
-			document = parser.parse( responseStream );
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
-			ise.initCause(e);
+			pbrser = factory.newDocumentBuilder();
+			document = pbrser.parse( responseStream );
+		} cbtch (final ParserConfigurationException e) {
+			e.printStbckTrace();
+			finbl IllegalStateException ise = new IllegalStateException();
+			ise.initCbuse(e);
 			throw ise;
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			throw new BadResponseException(e);
-		} catch (final IOException e) {
-			e.printStackTrace();
+		} cbtch (final SAXException e) {
+			e.printStbckTrace();
+			throw new BbdResponseException(e);
+		} cbtch (final IOException e) {
+			e.printStbckTrace();
 			throw (e);
-		} finally {
-			responseStream.close();
+		} finblly {
+			responseStrebm.close();
 		}
 		
-		final Element resultElement = _findChildElement( document, RESULT_ELEMENT );
+		finbl Element resultElement = _findChildElement( document, RESULT_ELEMENT );
 		
 		if ( resultElement == null ) {
-			throw new BadResponseException( "No top level element <" + 
+			throw new BbdResponseException( "No top level element <" + 
 					RESULT_ELEMENT + ">\n" + responseString );
 		}
 		
-		final String type = resultElement.getAttribute( TYPE_ATTR );
+		finbl String type = resultElement.getAttribute( TYPE_ATTR );
 		
-		if ( type.equals( "" ) ) {
-			throw new BadResponseException( "<" + RESULT_ELEMENT + 
-					"> element does not have a \"" + TYPE_ATTR + "" +
-					"\" attribute\n" + responseString );
+		if ( type.equbls( "" ) ) {
+			throw new BbdResponseException( "<" + RESULT_ELEMENT + 
+					"> element does not hbve a \"" + TYPE_ATTR + "" +
+					"\" bttribute\n" + responseString );
 		}
 		
-		final String code = resultElement.getAttribute( CODE_ATTR );
+		finbl String code = resultElement.getAttribute( CODE_ATTR );
 		
-		final String message = _findChildElementsText( resultElement, MESSAGE_ELEMENT );
+		finbl String message = _findChildElementsText( resultElement, MESSAGE_ELEMENT );
 		
 		String url = _findChildElementsText( resultElement, URL_ELEMENT );		
-		if ( url.equals( "" ) ) {
+		if ( url.equbls( "" ) ) {
 			// ok, look for it outside the <result> element
 			url = _findChildElementsText( document, URL_ELEMENT );
 		}		
 
-		_response = new ArchiveResponse( type, code, message, url );
+		_response = new ArchiveResponse( type, code, messbge, url );
 	}
 
-	synchronized void cancel() {
+	synchronized void cbncel() {
 	    if ( _post != null ) {
-	        _post.abort();
+	        _post.bbort();
             _post = null;
 	    }
 	}
 
 	/**
-	 * @throws IllegalStateException
-	 *         if you didn't (successfully) call execute() before calling getResponse()
+	 * @throws IllegblStateException
+	 *         if you didn't (successfully) cbll execute() before calling getResponse()
 	 * @return
 	 */
 	ArchiveResponse getResponse() {
 		if ( _response == null ) {
-			throw new IllegalStateException( "call execute() before calling getResponse()" );
+			throw new IllegblStateException( "call execute() before calling getResponse()" );
 		}
 		
 		return _response;
 	}
 	
 	/** helper function  */
-	private static Element _findChildElement( Node parent, String name ) {
-		Node n = parent.getFirstChild();
+	privbte static Element _findChildElement( Node parent, String name ) {
+		Node n = pbrent.getFirstChild();
 		for ( ; n != null; n = n.getNextSibling() ) {
 			if ( n.getNodeType() == Node.ELEMENT_NODE
-					&& n.getNodeName().equals( name )) {
+					&& n.getNodeNbme().equals( name )) {
 				return (Element) n;
 			}
 		}		
 		return null;
 	}
 	
-	private static String _findText( Node parent ) {
+	privbte static String _findText( Node parent ) {
 
-		for ( Node n = parent.getFirstChild(); 
+		for ( Node n = pbrent.getFirstChild(); 
 			n != null; n = n.getNextSibling()) {
 			
 			if (n.getNodeType() == Node.TEXT_NODE ) {
-				return n.getNodeValue();
+				return n.getNodeVblue();
 			}
 		}
 		return "";
 	}
 	
-	private static String _findChildElementsText( Node parent, String name ) {
-		final Element e = _findChildElement( parent, name );
+	privbte static String _findChildElementsText( Node parent, String name ) {
+		finbl Element e = _findChildElement( parent, name );
 		if ( e == null ) {
 			return "";
 		} else {

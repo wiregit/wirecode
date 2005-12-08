@@ -1,120 +1,120 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
-import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutellb.http.HTTPRequestMethod;
 
 /**
- * This interface outlines the basic functionality for a class that 
- * performs uploads.
+ * This interfbce outlines the basic functionality for a class that 
+ * performs uplobds.
  */
-public interface Uploader extends BandwidthTracker {
+public interfbce Uploader extends BandwidthTracker {
 
-	public static final int CONNECTING        = 0;
-	public static final int FREELOADER        = 1;
-	public static final int LIMIT_REACHED     = 2;
-	public static final int UPLOADING         = 3;
-	public static final int COMPLETE          = 4;
-	public static final int INTERRUPTED       = 5;
-	public static final int FILE_NOT_FOUND    = 7;
-    public static final int BROWSE_HOST       = 8;
-    public static final int QUEUED            = 9;
-    public static final int UPDATE_FILE       = 10;
-    public static final int MALFORMED_REQUEST = 11;
-    public static final int PUSH_PROXY        = 12;
-    public static final int UNAVAILABLE_RANGE = 13;
-    public static final int BANNED_GREEDY  	  = 14;
-    public static final int THEX_REQUEST      = 15;
-    public static final int BROWSER_CONTROL   = 16;
+	public stbtic final int CONNECTING        = 0;
+	public stbtic final int FREELOADER        = 1;
+	public stbtic final int LIMIT_REACHED     = 2;
+	public stbtic final int UPLOADING         = 3;
+	public stbtic final int COMPLETE          = 4;
+	public stbtic final int INTERRUPTED       = 5;
+	public stbtic final int FILE_NOT_FOUND    = 7;
+    public stbtic final int BROWSE_HOST       = 8;
+    public stbtic final int QUEUED            = 9;
+    public stbtic final int UPDATE_FILE       = 10;
+    public stbtic final int MALFORMED_REQUEST = 11;
+    public stbtic final int PUSH_PROXY        = 12;
+    public stbtic final int UNAVAILABLE_RANGE = 13;
+    public stbtic final int BANNED_GREEDY  	  = 14;
+    public stbtic final int THEX_REQUEST      = 15;
+    public stbtic final int BROWSER_CONTROL   = 16;
 
     /**
-	 * Stops this upload.  If the download is already 
+	 * Stops this uplobd.  If the download is already 
 	 * stopped, it does nothing.
 	 */ 
 	public void stop();
     
 	/**
-	 * returns the name of the file being uploaded.
+	 * returns the nbme of the file being uploaded.
 	 */
-	public String getFileName();
+	public String getFileNbme();
 	
 	/**
-	 * returns the length of the file being uploaded.
+	 * returns the length of the file being uplobded.
 	 */ 
 	public int getFileSize();
 	
 	/**
-	 * returns the length of the requested size for uploading
+	 * returns the length of the requested size for uplobding
 	 */ 
 	public int getAmountRequested();	
 
 	/**
-	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
-	 * is being uploaded.
+	 * Returns the <tt>FileDesc</tt> for this uplobder -- the file that
+	 * is being uplobded.
 	 *
-	 * @return the <tt>FileDesc</tt> for this uploader -- the file that
-	 *  is being uploaded, which can be <tt>null</tt> in cases such as when
-	 *  the file can't be found
+	 * @return the <tt>FileDesc</tt> for this uplobder -- the file that
+	 *  is being uplobded, which can be <tt>null</tt> in cases such as when
+	 *  the file cbn't be found
 	 */
 	public FileDesc getFileDesc();
 
 	/**
-	 * returns the index of the file being uploaded.
+	 * returns the index of the file being uplobded.
 	 */ 
 	public int getIndex();
 
 	/**
-	 * returns the amount that of data that has been uploaded.
-	 * this method was previously called "amountRead", but the
-	 * name was changed to make more sense.
+	 * returns the bmount that of data that has been uploaded.
+	 * this method wbs previously called "amountRead", but the
+	 * nbme was changed to make more sense.
 	 */ 
-	public int amountUploaded();
+	public int bmountUploaded();
 	
 	/**
-	 * Returns the amount of data that this uploader and all previous
-	 * uploaders exchanging this file have uploaded.
+	 * Returns the bmount of data that this uploader and all previous
+	 * uplobders exchanging this file have uploaded.
 	 */
-	public int getTotalAmountUploaded();
+	public int getTotblAmountUploaded();
 
 	/**
-	 * returns the string representation of the IP Address
-	 * of the host being uploaded to.
+	 * returns the string representbtion of the IP Address
+	 * of the host being uplobded to.
 	 */
 	public String getHost();
 
     /**
-     * Returns the current state of this uploader.
+     * Returns the current stbte of this uploader.
      */
-    public int getState();
+    public int getStbte();
     
     /**
-     * Returns the last transfer state of this uploader.
-     * Transfers states are all states except INTERRUPTED, COMPLETE,
-     * and CONNECTING.
+     * Returns the lbst transfer state of this uploader.
+     * Trbnsfers states are all states except INTERRUPTED, COMPLETE,
+     * bnd CONNECTING.
      */
-    public int getLastTransferState();
+    public int getLbstTransferState();
 
 	/**
-	 * Sets the state of this uploader.
+	 * Sets the stbte of this uploader.
 	 */
-	public void setState(int state);
+	public void setStbte(int state);
 
 	public void writeResponse() throws IOException;
 
 	/**
-	 * returns true if chat for the host is on, false if it is not.
+	 * returns true if chbt for the host is on, false if it is not.
 	 */
-	public boolean isChatEnabled();
+	public boolebn isChatEnabled();
 	
 	/**
-	 * returns true if browse host is enabled, false if it is not.
+	 * returns true if browse host is enbbled, false if it is not.
 	 */
-	public boolean isBrowseHostEnabled();
+	public boolebn isBrowseHostEnabled();
 	
 	/**
-	 * return the port of the gnutella-client host (not the HTTP port)
+	 * return the port of the gnutellb-client host (not the HTTP port)
 	 */
-	public int getGnutellaPort();
+	public int getGnutellbPort();
 	
 	/** 
 	 * return the userAgent
@@ -122,11 +122,11 @@ public interface Uploader extends BandwidthTracker {
 	public String getUserAgent();
 	
 	/** 
-	 * return whether or not the headers have been parsed
+	 * return whether or not the hebders have been parsed
 	 */
-	public boolean isHeaderParsed();
+	public boolebn isHeaderParsed();
 
-    public boolean supportsQueueing();
+    public boolebn supportsQueueing();
     
     /**
      * returns the current request method.
@@ -139,9 +139,9 @@ public interface Uploader extends BandwidthTracker {
     public int getQueuePosition();
     
     /**
-     * Returns whether or not the uploader is in an inactive state.
+     * Returns whether or not the uplobder is in an inactive state.
      */
-    public boolean isInactive();
+    public boolebn isInactive();
 
 }
 

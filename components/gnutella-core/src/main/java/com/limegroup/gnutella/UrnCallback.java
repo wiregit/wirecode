@@ -1,14 +1,14 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.util.Set;
-import java.io.File;
+import jbva.util.Set;
+import jbva.io.File;
 
-public interface UrnCallback {
+public interfbce UrnCallback {
  
-    /** If urns.isEmpty() == true, the operation failed. */   
-    public void urnsCalculated(File f, Set /* of URN */ urns);
+    /** If urns.isEmpty() == true, the operbtion failed. */   
+    public void urnsCblculated(File f, Set /* of URN */ urns);
     
-    /** Determines if this callback is owned by the specified object. */
-    public boolean isOwner(Object owner);
+    /** Determines if this cbllback is owned by the specified object. */
+    public boolebn isOwner(Object owner);
     
 }

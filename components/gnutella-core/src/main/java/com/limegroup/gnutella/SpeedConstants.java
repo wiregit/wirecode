@@ -1,45 +1,45 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 /**
- * Constants used for speeds.
+ * Constbnts used for speeds.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public final class SpeedConstants {
+public finbl class SpeedConstants {
 	
     // STRINGS FOR DIFFERENT CONNECTION SPEEDS
-    public static final String MODEM_SPEED = "Modem";
-    public static final String CABLE_SPEED = "Cable/DSL";
-    public static final String T1_SPEED    = "T1";
-    public static final String T3_SPEED    = "T3 or Higher";
+    public stbtic final String MODEM_SPEED = "Modem";
+    public stbtic final String CABLE_SPEED = "Cable/DSL";
+    public stbtic final String T1_SPEED    = "T1";
+    public stbtic final String T3_SPEED    = "T3 or Higher";
     
 	/**
 	 * INTS ASSOCIATED WITH CONNECTION SPEED NAMES.  See 
-	 * SettingsManager.setKeepAlive and setMaxConn before changing.
+	 * SettingsMbnager.setKeepAlive and setMaxConn before changing.
 	 */
-    public static final int MODEM_SPEED_INT = 56;
-    public static final int CABLE_SPEED_INT = 350;
-    public static final int T1_SPEED_INT    = 1000;
-    public static final int T3_SPEED_INT    = 3000;
+    public stbtic final int MODEM_SPEED_INT = 56;
+    public stbtic final int CABLE_SPEED_INT = 350;
+    public stbtic final int T1_SPEED_INT    = 1000;
+    public stbtic final int T3_SPEED_INT    = 3000;
     
-    public static final int MIN_SPEED_INT	= 0;
-    public static final int MAX_SPEED_INT	= 20000;
+    public stbtic final int MIN_SPEED_INT	= 0;
+    public stbtic final int MAX_SPEED_INT	= 20000;
 
-    public static final int MODEM_SWARM = 2;
-    public static final int T1_SWARM = 8;
-    public static final int T3_SWARM = 10;
+    public stbtic final int MODEM_SWARM = 2;
+    public stbtic final int T1_SWARM = 8;
+    public stbtic final int T3_SWARM = 10;
     
    
     
     /** 
-     * Converts the following bandwidth value, in kbytes/second, to 
-     *  a human readable string. 
+     * Converts the following bbndwidth value, in kbytes/second, to 
+     *  b human readable string. 
      */
-    public static String speed2name(long rate) {
-        if (rate<=MODEM_SPEED_INT)
+    public stbtic String speed2name(long rate) {
+        if (rbte<=MODEM_SPEED_INT)
             return MODEM_SPEED;
-        else if (rate<=CABLE_SPEED_INT)
+        else if (rbte<=CABLE_SPEED_INT)
             return CABLE_SPEED;
-        else if (rate<=T1_SPEED_INT)
+        else if (rbte<=T1_SPEED_INT)
             return T1_SPEED;
         else
             return T3_SPEED;

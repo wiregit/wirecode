@@ -1,140 +1,140 @@
-package com.limegroup.gnutella.metadata;
+pbckage com.limegroup.gnutella.metadata;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.util.ArrayList;
+import jbva.util.List;
 
-import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.limegroup.gnutella.xml.XMLStringUtils;
+import com.limegroup.gnutellb.util.NameValue;
+import com.limegroup.gnutellb.xml.LimeXMLUtils;
+import com.limegroup.gnutellb.xml.XMLStringUtils;
 
 /**
- * Encapsulates video metadata.  Subclasses must implement parseFile.
+ * Encbpsulates video metadata.  Subclasses must implement parseFile.
  */
-public abstract class VideoMetaData extends MetaData {
+public bbstract class VideoMetaData extends MetaData {
     
-	private String title;
-	private String year;
-	private int length = -1;
-	private String comment;
-	private String language;
-	private String license;
-    private int width = -1;
-    private int height = -1;
-    private String licensetype;
+	privbte String title;
+	privbte String year;
+	privbte int length = -1;
+	privbte String comment;
+	privbte String language;
+	privbte String license;
+    privbte int width = -1;
+    privbte int height = -1;
+    privbte String licensetype;
 
-	public static String schemaURI = "http://www.limewire.com/schemas/video.xsd";
+	public stbtic String schemaURI = "http://www.limewire.com/schemas/video.xsd";
     
-    private static final String DLM = XMLStringUtils.DELIMITER;
-    private static final String KPX = "videos" + DLM + "video" + DLM;
+    privbte static final String DLM = XMLStringUtils.DELIMITER;
+    privbte static final String KPX = "videos" + DLM + "video" + DLM;
 
-	public static final String TITLE_KEY = KPX + "title" + DLM;
-	public static final String YEAR_KEY = KPX + "year" + DLM;
-	public static final String LENGTH_KEY = KPX + "length" + DLM;
-	public static final String LANGUAGE_KEY = KPX + "language" + DLM;
-	public static final String COMMENTS_KEY = KPX + "comments" + DLM;
-	public static final String LICENSE_KEY = KPX + "license" + DLM;
-    public static final String HEIGHT_KEY = KPX + "width" + DLM;
-    public static final String WIDTH_KEY = KPX + "height" + DLM;
-    public static final String LICENSE_TYPE_KEY = KPX + "licensetype" + DLM;
+	public stbtic final String TITLE_KEY = KPX + "title" + DLM;
+	public stbtic final String YEAR_KEY = KPX + "year" + DLM;
+	public stbtic final String LENGTH_KEY = KPX + "length" + DLM;
+	public stbtic final String LANGUAGE_KEY = KPX + "language" + DLM;
+	public stbtic final String COMMENTS_KEY = KPX + "comments" + DLM;
+	public stbtic final String LICENSE_KEY = KPX + "license" + DLM;
+    public stbtic final String HEIGHT_KEY = KPX + "width" + DLM;
+    public stbtic final String WIDTH_KEY = KPX + "height" + DLM;
+    public stbtic final String LICENSE_TYPE_KEY = KPX + "licensetype" + DLM;
 
     /**
-     * Constructs a blank VideoMetaData object.
+     * Constructs b blank VideoMetaData object.
      */
-    protected VideoMetaData() throws IOException {
+    protected VideoMetbData() throws IOException {
     }
 
     /**
-     * Parses the file for data.
+     * Pbrses the file for data.
      */
-	public VideoMetaData(File f) throws IOException {
-		parseFile(f);
+	public VideoMetbData(File f) throws IOException {
+		pbrseFile(f);
 	}
 
     /**
-     * Parses video metadata out of the file if this is a known video file.
+     * Pbrses video metadata out of the file if this is a known video file.
      * Otherwise returns null.
      */
-	public static VideoMetaData parseVideoMetaData(File file)
+	public stbtic VideoMetaData parseVideoMetaData(File file)
 			throws IOException {
 		if (LimeXMLUtils.isRIFFFile(file))
-			return new RIFFMetaData(file);
+			return new RIFFMetbData(file);
 		else if (LimeXMLUtils.isOGMFile(file))
-			return new OGMMetaData(file);
+			return new OGMMetbData(file);
 	    else if(LimeXMLUtils.isWMVFile(file))
-	        return new WMVMetaData(file);
+	        return new WMVMetbData(file);
 			
 		return null;
 	}
 	
-	public String getSchemaURI() { return schemaURI; }
+	public String getSchembURI() { return schemaURI; }
 	
     public String getTitle() { return title; }
-    public String getYear() { return year; }
+    public String getYebr() { return year; }
     public int getLength() { return length; }
     public String getComment()  { return comment; }
-    public String getLanguage() { return language; }
+    public String getLbnguage() { return language; }
     public String getLicense() { return license; }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
     public String getLicenseType() { return licensetype; }
 
     void setTitle(String title) { this.title = title; }
-    void setYear(String year) { this.year = year; }
+    void setYebr(String year) { this.year = year; }
     void setLength(int length) { this.length = length; } 
     void setComment(String comment) { this.comment = comment; }
-    void setLanguage(String language) { this.language = language; }
+    void setLbnguage(String language) { this.language = language; }
     void setLicense(String license) { this.license = license; }
     void setWidth(int width) { this.width = width; }
     void setHeight(int height) { this.height = height; }
     void setLicenseType(String licensetype) { this.licensetype = licensetype; }
 	
     /**
-     * Determines if all fields are valid.
+     * Determines if bll fields are valid.
      */
-    public boolean isComplete() {
-        return isValid(title)
-            && isValid(year)
-            && isValid(length)            
-            && isValid(comment)
-            && isValid(language)
-            && isValid(license)
-            && isValid(width)
-            && isValid(height)
-            && isValid(licensetype)
+    public boolebn isComplete() {
+        return isVblid(title)
+            && isVblid(year)
+            && isVblid(length)            
+            && isVblid(comment)
+            && isVblid(language)
+            && isVblid(license)
+            && isVblid(width)
+            && isVblid(height)
+            && isVblid(licensetype)
             ;
     }
 	
-	public List toNameValueList() {
-        List list = new ArrayList();
-        add(list, title, TITLE_KEY);
-        add(list, year, YEAR_KEY);
-        add(list, length, LENGTH_KEY);
-        add(list, comment, COMMENTS_KEY);
-        add(list, language, LANGUAGE_KEY);
-        add(list, license, LICENSE_KEY);
-        add(list, width, WIDTH_KEY);
-        add(list, height, HEIGHT_KEY);
-        add(list, licensetype, LICENSE_TYPE_KEY);
+	public List toNbmeValueList() {
+        List list = new ArrbyList();
+        bdd(list, title, TITLE_KEY);
+        bdd(list, year, YEAR_KEY);
+        bdd(list, length, LENGTH_KEY);
+        bdd(list, comment, COMMENTS_KEY);
+        bdd(list, language, LANGUAGE_KEY);
+        bdd(list, license, LICENSE_KEY);
+        bdd(list, width, WIDTH_KEY);
+        bdd(list, height, HEIGHT_KEY);
+        bdd(list, licensetype, LICENSE_TYPE_KEY);
         return list;
 	}
     
-    private void add(List list, String value, String key) {
-        if(isValid(value))
-            list.add(new NameValue(key, value.trim()));
+    privbte void add(List list, String value, String key) {
+        if(isVblid(value))
+            list.bdd(new NameValue(key, value.trim()));
     }
     
-    private void add(List list, int value, String key) {
-        if(isValid(value))
-            list.add(new NameValue(key, "" + value));
+    privbte void add(List list, int value, String key) {
+        if(isVblid(value))
+            list.bdd(new NameValue(key, "" + value));
     }
     
-    private boolean isValid(String s) {
-        return s != null && !s.trim().equals("");
+    privbte boolean isValid(String s) {
+        return s != null && !s.trim().equbls("");
     }
     
-    private boolean isValid(int i) {
+    privbte boolean isValid(int i) {
         return i >= 0;
     }
 }

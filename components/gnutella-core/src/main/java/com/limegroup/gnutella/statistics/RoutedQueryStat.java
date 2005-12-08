@@ -1,127 +1,127 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * This class contains a type-safe enumeration of all classes that
- * store statistics on routed queries.
+ * This clbss contains a type-safe enumeration of all classes that
+ * store stbtistics on routed queries.
  */
-public class RoutedQueryStat extends AdvancedStatistic {
+public clbss RoutedQueryStat extends AdvancedStatistic {
 	
 	/**
-	 * Constructs a new <tt>RoutedQueryStat</tt> instance, ensuring
-	 * that no other class can construct one.
+	 * Constructs b new <tt>RoutedQueryStat</tt> instance, ensuring
+	 * thbt no other class can construct one.
 	 */
-	private RoutedQueryStat() {}
+	privbte RoutedQueryStat() {}
 
 	/**
-	 * Private class for recording statistics for routed queries
-	 * that should also be counted in all Ultrapeer queries.
+	 * Privbte class for recording statistics for routed queries
+	 * thbt should also be counted in all Ultrapeer queries.
 	 */
-	private static class UltrapeerQueryOutgoingStat extends RoutedQueryStat {
+	privbte static class UltrapeerQueryOutgoingStat extends RoutedQueryStat {
 		
 		/**
-		 * Overridden to also increment to statistic for all routed
-		 * Ultrapeer queries potentially sent (maybe sent or maybe
-		 * not, depending on matches in the QRP tables).
+		 * Overridden to blso increment to statistic for all routed
+		 * Ultrbpeer queries potentially sent (maybe sent or maybe
+		 * not, depending on mbtches in the QRP tables).
 		 */
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_OUTGOING_ULTRAPEER_QUERIES.incrementStat();
+		public void incrementStbt() {
+			super.incrementStbt();
+			ALL_OUTGOING_ULTRAPEER_QUERIES.incrementStbt();
 		}
 	}
 
 	/**
-	 * Private class for recording statistics for routed queries
-	 * that should also be counted in all leaf queries.
+	 * Privbte class for recording statistics for routed queries
+	 * thbt should also be counted in all leaf queries.
 	 */
-	private static class LeafQueryOutgoingStat extends RoutedQueryStat {
+	privbte static class LeafQueryOutgoingStat extends RoutedQueryStat {
 		
 		/**
-		 * Overridden to also increment to statistic for all routed
-		 * Ultrapeer queries potentially sent (maybe sent or maybe
-		 * not, depending on matches in the QRP tables).
+		 * Overridden to blso increment to statistic for all routed
+		 * Ultrbpeer queries potentially sent (maybe sent or maybe
+		 * not, depending on mbtches in the QRP tables).
 		 */
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_OUTGOING_LEAF_QUERIES.incrementStat();
+		public void incrementStbt() {
+			super.incrementStbt();
+			ALL_OUTGOING_LEAF_QUERIES.incrementStbt();
 		}
 	}
 	
 	/**
-	 * Private class for recording statistics for 
+	 * Privbte class for recording statistics for 
 	 * incoming routed queries.
 	 */
-	private static class LeafQueryIncomingStat extends RoutedQueryStat {
+	privbte static class LeafQueryIncomingStat extends RoutedQueryStat {
 		
 		/**
-		 * Overridden to also increment to statistic for all routed
-		 * Ultrapeer queries potentially sent (maybe sent or maybe
-		 * not, depending on matches in the QRP tables).
+		 * Overridden to blso increment to statistic for all routed
+		 * Ultrbpeer queries potentially sent (maybe sent or maybe
+		 * not, depending on mbtches in the QRP tables).
 		 */
-		public void incrementStat() {
-			super.incrementStat();
-			ALL_INCOMING_LEAF_QUERIES.incrementStat();
+		public void incrementStbt() {
+			super.incrementStbt();
+			ALL_INCOMING_LEAF_QUERIES.incrementStbt();
 		}
 	}	
 
 	/**
-	 * <tt>RoutedQueryStat</tt> for all queries potentially routed to
-	 * Ultrapeers.
+	 * <tt>RoutedQueryStbt</tt> for all queries potentially routed to
+	 * Ultrbpeers.
 	 */
-	public static final RoutedQueryStat ALL_OUTGOING_ULTRAPEER_QUERIES =
-		new RoutedQueryStat();
+	public stbtic final RoutedQueryStat ALL_OUTGOING_ULTRAPEER_QUERIES =
+		new RoutedQueryStbt();
 
 	/**
-	 * <tt>RoutedQueryStat</tt> for all queries potentially routed to
-	 * leaves.
+	 * <tt>RoutedQueryStbt</tt> for all queries potentially routed to
+	 * lebves.
 	 */
-	public static final RoutedQueryStat ALL_OUTGOING_LEAF_QUERIES =
-		new RoutedQueryStat();
+	public stbtic final RoutedQueryStat ALL_OUTGOING_LEAF_QUERIES =
+		new RoutedQueryStbt();
 		
     /**
-     * <tt>RoutedQueryStat</tt> for all incoming routed queries.
+     * <tt>RoutedQueryStbt</tt> for all incoming routed queries.
      */
-    public static final RoutedQueryStat ALL_INCOMING_LEAF_QUERIES =
-        new RoutedQueryStat();
+    public stbtic final RoutedQueryStat ALL_INCOMING_LEAF_QUERIES =
+        new RoutedQueryStbt();
 
 	/**
-	 * <tt>RoutedQueryStat</tt> for queries that are forwarded to other
-	 * QRP Ultrapeers (match in the QRP tables).
+	 * <tt>RoutedQueryStbt</tt> for queries that are forwarded to other
+	 * QRP Ultrbpeers (match in the QRP tables).
 	 */
-	public static final RoutedQueryStat ULTRAPEER_SEND =
-		new UltrapeerQueryOutgoingStat();
+	public stbtic final RoutedQueryStat ULTRAPEER_SEND =
+		new UltrbpeerQueryOutgoingStat();
 
 	/**
-	 * <tt>RoutedQueryStat</tt> for queries that are dropped before being
-	 * sent to other Ultrapeers (no match in the QRP tables).
+	 * <tt>RoutedQueryStbt</tt> for queries that are dropped before being
+	 * sent to other Ultrbpeers (no match in the QRP tables).
 	 */
-	public static final RoutedQueryStat ULTRAPEER_DROP =
-		new UltrapeerQueryOutgoingStat();
+	public stbtic final RoutedQueryStat ULTRAPEER_DROP =
+		new UltrbpeerQueryOutgoingStat();
 
 	/**
-	 * <tt>RoutedQueryStat</tt> for queries that are forwarded to other
-	 * QRP leaves (match in the QRP tables).
+	 * <tt>RoutedQueryStbt</tt> for queries that are forwarded to other
+	 * QRP lebves (match in the QRP tables).
 	 */
-	public static final RoutedQueryStat LEAF_SEND =
-		new LeafQueryOutgoingStat();
+	public stbtic final RoutedQueryStat LEAF_SEND =
+		new LebfQueryOutgoingStat();
 
 	/**
-	 * <tt>RoutedQueryStat</tt> for queries that are dropped before being
-	 * sent to other leaves (no match in the QRP tables).
+	 * <tt>RoutedQueryStbt</tt> for queries that are dropped before being
+	 * sent to other lebves (no match in the QRP tables).
 	 */
-	public static final RoutedQueryStat LEAF_DROP =
-		new LeafQueryOutgoingStat();
+	public stbtic final RoutedQueryStat LEAF_DROP =
+		new LebfQueryOutgoingStat();
 		
     /**
-     * <tt>RoutedQueryStat</tt> for incoming routed queries that are false
+     * <tt>RoutedQueryStbt</tt> for incoming routed queries that are false
      * positives.
      */
-    public static final RoutedQueryStat LEAF_FALSE_POSITIVE =
-        new LeafQueryIncomingStat();
+    public stbtic final RoutedQueryStat LEAF_FALSE_POSITIVE =
+        new LebfQueryIncomingStat();
         
     /**
-     * <tt>RoutedQueryStat</tt> for incoming routed queries that are
+     * <tt>RoutedQueryStbt</tt> for incoming routed queries that are
      * hits.
      */
-    public static final RoutedQueryStat LEAF_HIT =
-        new LeafQueryIncomingStat();
+    public stbtic final RoutedQueryStat LEAF_HIT =
+        new LebfQueryIncomingStat();
 }

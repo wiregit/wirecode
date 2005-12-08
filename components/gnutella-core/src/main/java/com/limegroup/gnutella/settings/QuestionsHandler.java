@@ -1,135 +1,135 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 
 
 /**
- * Controls all 'Do not ask this again' or 'Always use this answer' questions.
+ * Controls bll 'Do not ask this again' or 'Always use this answer' questions.
  */
-public class QuestionsHandler extends AbstractSettings {
+public clbss QuestionsHandler extends AbstractSettings {
 
-    private static final QuestionsHandler INSTANCE =
-        new QuestionsHandler();
-    private static final SettingsFactory FACTORY =
-        INSTANCE.getFactory();
+    privbte static final QuestionsHandler INSTANCE =
+        new QuestionsHbndler();
+    privbte static final SettingsFactory FACTORY =
+        INSTANCE.getFbctory();
 
-    private QuestionsHandler() {
+    privbte QuestionsHandler() {
         super("questions.props", "LimeWire questions file");
     }
 
-    public static QuestionsHandler instance() {
+    public stbtic QuestionsHandler instance() {
         return INSTANCE;
     }
 
-    //////////// The actual questions ///////////////
+    //////////// The bctual questions ///////////////
 
     /**
-    * Setting for whether or not to allow multiple instances of LimeWire.
+    * Setting for whether or not to bllow multiple instances of LimeWire.
     */
-    public static final BooleanSetting MONITOR_VIEW =
-        FACTORY.createBooleanSetting("MONITOR_VIEW", false);
+    public stbtic final BooleanSetting MONITOR_VIEW =
+        FACTORY.crebteBooleanSetting("MONITOR_VIEW", false);
 
     /**
-     * Setting for whether or not to ask about discarding corrupt downloads
+     * Setting for whether or not to bsk about discarding corrupt downloads
      */
-    public static final IntSetting CORRUPT_DOWNLOAD =
-        FACTORY.createIntSetting("CORRUPT_DOWNLOAD", 0);
+    public stbtic final IntSetting CORRUPT_DOWNLOAD =
+        FACTORY.crebteIntSetting("CORRUPT_DOWNLOAD", 0);
 
     /**
-     * Setting for whether or not to display a browse host failed
+     * Setting for whether or not to displby a browse host failed
      */
-    public static final BooleanSetting BROWSE_HOST_FAILED =
-        FACTORY.createBooleanSetting("BROWSE_HOST_FAILED", false);
+    public stbtic final BooleanSetting BROWSE_HOST_FAILED =
+        FACTORY.crebteBooleanSetting("BROWSE_HOST_FAILED", false);
 
     /**
-     * Setting for unsharing directory
+     * Setting for unshbring directory
      */
-    public static final IntSetting UNSHARE_DIRECTORY =
-        FACTORY.createIntSetting("UNSHARE_DIRECTORY", 0);
+    public stbtic final IntSetting UNSHARE_DIRECTORY =
+        FACTORY.crebteIntSetting("UNSHARE_DIRECTORY", 0);
 
     /**
-     * Setting for the theme changed message
+     * Setting for the theme chbnged message
      */
-    public static final BooleanSetting THEME_CHANGED =
-        FACTORY.createBooleanSetting("THEME_CHANGED", false);
+    public stbtic final BooleanSetting THEME_CHANGED =
+        FACTORY.crebteBooleanSetting("THEME_CHANGED", false);
 
     /**
-     * Setting for already downloading message
+     * Setting for blready downloading message
      */
-    public static final BooleanSetting ALREADY_DOWNLOADING =
-        FACTORY.createBooleanSetting("ALREADY_DOWNLOADING", false);
+    public stbtic final BooleanSetting ALREADY_DOWNLOADING =
+        FACTORY.crebteBooleanSetting("ALREADY_DOWNLOADING", false);
 
     /**
-     * Setting for removing the last column
+     * Setting for removing the lbst column
      */
-    public static final BooleanSetting REMOVE_LAST_COLUMN =
-        FACTORY.createBooleanSetting("REMOVE_LAST_COLUMN", false);
+    public stbtic final BooleanSetting REMOVE_LAST_COLUMN =
+        FACTORY.crebteBooleanSetting("REMOVE_LAST_COLUMN", false);
 
     /**
-     * Setting for being unable to resume an incomplete file
+     * Setting for being unbble to resume an incomplete file
      */
-    public static final BooleanSetting CANT_RESUME =
-        FACTORY.createBooleanSetting("CANT_RESUME", false);
+    public stbtic final BooleanSetting CANT_RESUME =
+        FACTORY.crebteBooleanSetting("CANT_RESUME", false);
         
 	/**
-     * Setting for whether or not program should ignore prompting
+     * Setting for whether or not progrbm should ignore prompting
      * for incomplete files.
      */
-    public static final IntSetting PROMPT_FOR_EXE =
-        FACTORY.createIntSetting("PROMPT_FOR_EXE", 0);
+    public stbtic final IntSetting PROMPT_FOR_EXE =
+        FACTORY.crebteIntSetting("PROMPT_FOR_EXE", 0);
         
     /**
-     * Settings for whether or not to apply a new theme after
-     * downloading it
+     * Settings for whether or not to bpply a new theme after
+     * downlobding it
      */
-    public static final IntSetting THEME_DOWNLOADED =
-        FACTORY.createIntSetting("THEME_DOWNLOADED", 0);
+    public stbtic final IntSetting THEME_DOWNLOADED =
+        FACTORY.crebteIntSetting("THEME_DOWNLOADED", 0);
         
     /**
-     * Settings for whether or not to display a message that no
+     * Settings for whether or not to displby a message that no
      * internet connection is detected.
      */
-    public static final BooleanSetting NO_INTERNET =
-        FACTORY.createBooleanSetting("NO_INTERNET", false);
+    public stbtic final BooleanSetting NO_INTERNET =
+        FACTORY.crebteBooleanSetting("NO_INTERNET", false);
 
     /**
-     * Settings for whether or not to display a message that no
-     * internet connection is detected and the user has been notified that 
-     * LimeWire will automatically keep trying to connect.
+     * Settings for whether or not to displby a message that no
+     * internet connection is detected bnd the user has been notified that 
+     * LimeWire will butomatically keep trying to connect.
      */
-    public static final BooleanSetting NO_INTERNET_RETRYING =
-        FACTORY.createBooleanSetting("NO_INTERNET_RETRYING ", false);
+    public stbtic final BooleanSetting NO_INTERNET_RETRYING =
+        FACTORY.crebteBooleanSetting("NO_INTERNET_RETRYING ", false);
 
     /**
-     * Settings for whether or not to display a message that a failed preview
+     * Settings for whether or not to displby a message that a failed preview
      * should be ignored.
      */
-    public static final BooleanSetting NO_PREVIEW_REPORT =
-        FACTORY.createBooleanSetting("NO_PREVIEW_REPORT ", false);
+    public stbtic final BooleanSetting NO_PREVIEW_REPORT =
+        FACTORY.crebteBooleanSetting("NO_PREVIEW_REPORT ", false);
 
     /**
-     * Settings for whether or not to display a message if searching
+     * Settings for whether or not to displby a message if searching
      * while not connected.
      */
-    public static final BooleanSetting NO_NOT_CONNECTED =
-        FACTORY.createBooleanSetting("NO_NOT_CONNECTED", false);
+    public stbtic final BooleanSetting NO_NOT_CONNECTED =
+        FACTORY.crebteBooleanSetting("NO_NOT_CONNECTED", false);
 
     /**
-     * Settings for whether or not to display a message if searching
+     * Settings for whether or not to displby a message if searching
      * while still connecting.
      */
-    public static final BooleanSetting NO_STILL_CONNECTING =
-        FACTORY.createBooleanSetting("NO_STILL_CONNECTING", false);
+    public stbtic final BooleanSetting NO_STILL_CONNECTING =
+        FACTORY.crebteBooleanSetting("NO_STILL_CONNECTING", false);
 	
 	/**
-	 * Setting for whether or not to display a warning message if one of the
-	 * created magnet links contains a firewalled address.
+	 * Setting for whether or not to displby a warning message if one of the
+	 * crebted magnet links contains a firewalled address.
 	 */
-	public static final BooleanSetting FIREWALLED_MAGNET_LINK = 
-		FACTORY.createBooleanSetting("FIREWALLED_MAGNET_LINK", false);
+	public stbtic final BooleanSetting FIREWALLED_MAGNET_LINK = 
+		FACTORY.crebteBooleanSetting("FIREWALLED_MAGNET_LINK", false);
 
     /**
-     * Initial warning for first download.
+     * Initibl warning for first download.
      */
-    public static final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
-        FACTORY.createIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
+    public stbtic final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
+        FACTORY.crebteIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
 }

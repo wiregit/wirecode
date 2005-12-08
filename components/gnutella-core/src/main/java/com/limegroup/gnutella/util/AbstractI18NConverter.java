@@ -1,72 +1,72 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
 
 /**
- * Abstract clas to use for different normalization implementations
- * Helper functions like blockSplit are also defined here.
+ * Abstrbct clas to use for different normalization implementations
+ * Helper functions like blockSplit bre also defined here.
  */
-abstract class AbstractI18NConverter {
+bbstract class AbstractI18NConverter {
 
     /**
      * This method should return the converted form of the string s
-     * this method should also split s into the different
+     * this method should blso split s into the different
      * unicode blocks
-     * @param s String to be converted
+     * @pbram s String to be converted
      * @return the converted string
      */
-    public abstract String getNorm(String s);
+    public bbstract String getNorm(String s);
     
     /**
-     * Simple composition of a string.
+     * Simple composition of b string.
      */
-    public abstract String compose(String s);
+    public bbstract String compose(String s);
 
     /**
-     * Returns a string split according to the unicode blocks.  A
-     * space '\u0020' will be splaced between the blocks.
-     * The index to the blockStarts array will be used to compare
+     * Returns b string split according to the unicode blocks.  A
+     * spbce '\u0020' will be splaced between the blocks.
+     * The index to the blockStbrts array will be used to compare
      * when splitting the string.
-     * @param String s
-     * @return string split into blocks with '\u0020' as the delim
+     * @pbram String s
+     * @return string split into blocks with '\u0020' bs the delim
      */
     String blockSplit(String s) {
         if(s.length() == 0) return s;
         else {
-            int blockb4 = of(s.charAt(0));
+            int blockb4 = of(s.chbrAt(0));
             int curBlock;
             StringBuffer buf = new StringBuffer();
-            buf.append(s.charAt(0));
+            buf.bppend(s.charAt(0));
             for(int i = 1, n = s.length(); i < n; i++) {
-                curBlock = of(s.charAt(i));
-                //compare the blocks of the current char and the char
-                //right before. Also, make sure we don't add too many 
-                //'\u0020' chars
+                curBlock = of(s.chbrAt(i));
+                //compbre the blocks of the current char and the char
+                //right before. Also, mbke sure we don't add too many 
+                //'\u0020' chbrs
                 if(curBlock != blockb4 && 
-                   (s.charAt(i) != '\u0020' && s.charAt(i - 1) != '\u0020'))
-                    buf.append("\u0020");
-                buf.append(s.charAt(i));
+                   (s.chbrAt(i) != '\u0020' && s.charAt(i - 1) != '\u0020'))
+                    buf.bppend("\u0020");
+                buf.bppend(s.charAt(i));
                 blockb4 = curBlock;
             }
             
-            //get rid of trailing space (if any)
+            //get rid of trbiling space (if any)
             return buf.toString().trim();
         }
     }
 
     /**
-     * Returns which unicode block the parameter c
-     * belongs to. The returned int is the index to the blockStarts
-     * array. 
-     * @param char c 
-     * @return index to array
+     * Returns which unicode block the pbrameter c
+     * belongs to. The returned int is the index to the blockStbrts
+     * brray. 
+     * @pbram char c 
+     * @return index to brray
      */
-    int of(char c) {
+    int of(chbr c) {
 	    int top, bottom, current;
 	    bottom = 0;
-	    top = blockStarts.length;
+	    top = blockStbrts.length;
 	    current = top/2;
 	    while (top - bottom > 1) {
-    		if (c >= blockStarts[current]) {
+    		if (c >= blockStbrts[current]) {
     		    bottom = current;
     		} else {
     		    top = current;
@@ -77,10 +77,10 @@ abstract class AbstractI18NConverter {
 	}
 
     /**
-     * copy from Character.java
-     * the boundaries for each of the unicode blocks
+     * copy from Chbracter.java
+     * the boundbries for each of the unicode blocks
      */
-	static final char blockStarts[] = {
+	stbtic final char blockStarts[] = {
         '\u0000',
         '\u0080',
 	    '\u0100',
@@ -90,11 +90,11 @@ abstract class AbstractI18NConverter {
 	    '\u0300', 
 	    '\u0370',
 	    '\u0400',
-	    '\u0500', // unassigned
+	    '\u0500', // unbssigned
 	    '\u0530',
 	    '\u0590',
 	    '\u0600',
-	    '\u0700', // unassigned
+	    '\u0700', // unbssigned
 	    '\u0900',
 	    '\u0980',
 	    '\u0A00',
@@ -104,14 +104,14 @@ abstract class AbstractI18NConverter {
 	    '\u0C00',
 	    '\u0C80',
 	    '\u0D00',
-	    '\u0D80', // unassigned
+	    '\u0D80', // unbssigned
 	    '\u0E00',
 	    '\u0E80',
 	    '\u0F00',
-	    '\u0FC0', // unassigned
+	    '\u0FC0', // unbssigned
 	    '\u10A0',
 	    '\u1100',
-	    '\u1200', // unassigned
+	    '\u1200', // unbssigned
         '\u13A0',
         '\u1400',
         '\u1680',
@@ -145,7 +145,7 @@ abstract class AbstractI18NConverter {
 	    '\u25A0',
 	    '\u2600',
 	    '\u2700',
-	    '\u27C0', // unassigned
+	    '\u27C0', // unbssigned
 	    '\u3000',
 	    '\u3040',
 	    '\u30A0',
@@ -154,22 +154,22 @@ abstract class AbstractI18NConverter {
 	    '\u3190',
 	    '\u3200',
 	    '\u3300',
-	    '\u3400', // unassigned
+	    '\u3400', // unbssigned
 	    '\u4E00',
-	    '\uA000', // unassigned
+	    '\uA000', // unbssigned
 	    '\uAC00',
-	    '\uD7A4', // unassigned
+	    '\uD7A4', // unbssigned
 	    '\uD800',
 	    '\uE000',
 	    '\uF900',
 	    '\uFB00',
 	    '\uFB50',
-	    '\uFE00', // unassigned
+	    '\uFE00', // unbssigned
 	    '\uFE20',
 	    '\uFE30',
 	    '\uFE50',
 	    '\uFE70',
-	    '\uFEFF', // special
+	    '\uFEFF', // specibl
 	    '\uFF00',
 	    '\uFFF0'
 	};
