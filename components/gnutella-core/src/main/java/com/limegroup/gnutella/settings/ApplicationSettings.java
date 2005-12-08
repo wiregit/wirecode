@@ -151,6 +151,12 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("LIBRARY_VIEW_ENABLED", true);
     
     /**
+     * Sets whether or not DHT Tab should be enabled.
+     */
+    public static final BooleanSetting DHT_VIEW_ENABLED =
+        FACTORY.createBooleanSetting("DHT_VIEW_ENABLED", false);
+    
+    /**
 	 * Sets whether or not Shopping Tab should be enabled.
 	 */    
     public static final BooleanSetting SHOPPING_VIEW_ENABLED =
