@@ -151,12 +151,6 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("LIBRARY_VIEW_ENABLED", true);
     
     /**
-	 * Sets whether or not Shopping Tab should be enabled.
-	 */    
-    public static final BooleanSetting SHOPPING_VIEW_ENABLED =
-        FACTORY.createBooleanSetting("SHOPPING_VIEW_ENABLED", true);
-    
-    /**
 	 * Sets the name of the jar file to load on startup, which is read
 	 * in from the properties file by RunLime.
 	 */
