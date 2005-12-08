@@ -1,364 +1,364 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.File;
-import jbva.io.FileFilter;
-import jbva.io.IOException;
-import jbva.util.ArrayList;
-import jbva.util.Arrays;
-import jbva.util.Collections;
-import jbva.util.Comparator;
-import jbva.util.HashMap;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.Map;
-import jbva.util.Set;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.downloader.VerifyingFile;
-import com.limegroup.gnutellb.messages.QueryRequest;
-import com.limegroup.gnutellb.routing.QueryRouteTable;
-import com.limegroup.gnutellb.settings.SharingSettings;
-import com.limegroup.gnutellb.library.LibraryData;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.FileUtils;
-import com.limegroup.gnutellb.util.Function;
-import com.limegroup.gnutellb.util.I18NConvert;
-import com.limegroup.gnutellb.util.IntSet;
-import com.limegroup.gnutellb.util.ProcessingQueue;
-import com.limegroup.gnutellb.util.StringUtils;
-import com.limegroup.gnutellb.util.Trie;
-import com.limegroup.gnutellb.version.UpdateHandler;
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.library.LibraryData;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.Function;
+import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.IntSet;
+import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * The list of bll shared files.  Provides operations to add and remove
- * individubl files, directory, or sets of directories.  Provides a method to
- * efficiently query for files whose nbmes contain certain keywords.<p>
+ * The list of all shared files.  Provides operations to add and remove
+ * individual files, directory, or sets of directories.  Provides a method to
+ * efficiently query for files whose names contain certain keywords.<p>
  *
- * This clbss is thread-safe.
+ * This class is thread-safe.
  */
-public bbstract class FileManager {
+pualic bbstract class FileManager {
 	
-    privbte static final Log LOG = LogFactory.getLog(FileManager.class);
+    private static final Log LOG = LogFactory.getLog(FileManager.class);
 
-    /** The string used by Clip2 reflectors to index hosts. */
-    public stbtic final String INDEXING_QUERY = "    ";
+    /** The string used ay Clip2 reflectors to index hosts. */
+    pualic stbtic final String INDEXING_QUERY = "    ";
     
-    /** The string used by LimeWire to browse hosts. */
-    public stbtic final String BROWSE_QUERY = "*.*";
+    /** The string used ay LimeWire to browse hosts. */
+    pualic stbtic final String BROWSE_QUERY = "*.*";
     
-    /** Subdirectory thbt is always shared */
-    public stbtic final File PROGRAM_SHARE;
+    /** Suadirectory thbt is always shared */
+    pualic stbtic final File PROGRAM_SHARE;
     
-    /** Subdirectory thbt also is always shared. */
-    public stbtic final File PREFERENCE_SHARE;
+    /** Suadirectory thbt also is always shared. */
+    pualic stbtic final File PREFERENCE_SHARE;
     
-    stbtic {
-        File forceShbre = new File(".", ".NetworkShare").getAbsoluteFile();
+    static {
+        File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
         try {
-            forceShbre = FileUtils.getCanonicalFile(forceShare);
-        } cbtch(IOException ignored) {}
-        PROGRAM_SHARE = forceShbre;
+            forceShare = FileUtils.getCanonicalFile(forceShare);
+        } catch(IOException ignored) {}
+        PROGRAM_SHARE = forceShare;
         
-        forceShbre = new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
+        forceShare = new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
         try {
-            forceShbre = FileUtils.getCanonicalFile(forceShare);
-        } cbtch(IOException ignored) {}
-        PREFERENCE_SHARE = forceShbre;
+            forceShare = FileUtils.getCanonicalFile(forceShare);
+        } catch(IOException ignored) {}
+        PREFERENCE_SHARE = forceShare;
     }
     
-    privbte static final ProcessingQueue LOADER = new ProcessingQueue("FileManagerLoader");
+    private static final ProcessingQueue LOADER = new ProcessingQueue("FileManagerLoader");
 
      
     /**
-     * List of event listeners for FileMbnagerEvents.
+     * List of event listeners for FileManagerEvents.
      * LOCKING: listenerLock
      */
-    privbte volatile List eventListeners = Collections.EMPTY_LIST;
-    privbte final Object listenerLock = new Object();
+    private volatile List eventListeners = Collections.EMPTY_LIST;
+    private final Object listenerLock = new Object();
     
     /**********************************************************************
-     * LOCKING: obtbin this's monitor before modifying this.
+     * LOCKING: oatbin this's monitor before modifying this.
      **********************************************************************/
 
     /**
-     * All of the dbta for FileManager.
+     * All of the data for FileManager.
      */
-    privbte final LibraryData _data = new LibraryData();
+    private final LibraryData _data = new LibraryData();
 
     /** 
-     * The list of complete bnd incomplete files.  An entry is null if it
-     *  is no longer shbred.
-     * INVARIANT: for bll i, _files[i]==null, or _files[i].index==i and either
-     *  _files[i]._pbth is in a shared directory with a shareable extension or
-     *  _files[i]._pbth is the incomplete directory if _files[i] is an IncompleteFileDesc.
+     * The list of complete and incomplete files.  An entry is null if it
+     *  is no longer shared.
+     * INVARIANT: for all i, _files[i]==null, or _files[i].index==i and either
+     *  _files[i]._path is in a shared directory with a shareable extension or
+     *  _files[i]._path is the incomplete directory if _files[i] is an IncompleteFileDesc.
      */
-    privbte List /* of FileDesc */ _files;
+    private List /* of FileDesc */ _files;
     
     /**
-     * The totbl size of all complete files, in bytes.
-     * INVARIANT: _filesSize=sum of bll size of the elements of _files,
-     *   except IncompleteFileDescs, whose size mby change at any time.
+     * The total size of all complete files, in bytes.
+     * INVARIANT: _filesSize=sum of all size of the elements of _files,
+     *   except IncompleteFileDescs, whose size may change at any time.
      */
-    privbte long _filesSize;
+    private long _filesSize;
     
     /**
-     * The number of complete files.
-     * INVARIANT: _numFiles==number of elements of _files thbt are not null
-     *  bnd not IncompleteFileDescs.
+     * The numaer of complete files.
+     * INVARIANT: _numFiles==numaer of elements of _files thbt are not null
+     *  and not IncompleteFileDescs.
      */
-    privbte int _numFiles;
+    private int _numFiles;
     
     /** 
-     * The totbl number of files that are pending sharing.
-     *  (ie: bwaiting hashing or being added)
+     * The total number of files that are pending sharing.
+     *  (ie: awaiting hashing or being added)
      */
-    privbte int _numPendingFiles;
+    private int _numPendingFiles;
     
     /**
-     * The totbl number of incomplete files.
-     * INVARIANT: _numFiles + _numIncompleteFiles == the number of
-     *  elements of _files thbt are not null.
+     * The total number of incomplete files.
+     * INVARIANT: _numFiles + _numIncompleteFiles == the numaer of
+     *  elements of _files that are not null.
      */
-    privbte int _numIncompleteFiles;
+    private int _numIncompleteFiles;
     
     /**
-     * The number of files thbt are forcibly shared over the network.
+     * The numaer of files thbt are forcibly shared over the network.
      * INVARIANT: _numFiles >= _numForcedFiles.
      */
-    privbte int _numForcedFiles;
+    private int _numForcedFiles;
     
     /**
-     * An index thbt maps a <tt>File</tt> on disk to the 
+     * An index that maps a <tt>File</tt> on disk to the 
      *  <tt>FileDesc</tt> holding it.
      *
-     * INVARIANT: For bll keys k in _fileToFileDescMap, 
-     *  _files[_fileToFileDescMbp.get(k).getIndex()].getFile().equals(k)
+     * INVARIANT: For all keys k in _fileToFileDescMap, 
+     *  _files[_fileToFileDescMap.get(k).getIndex()].getFile().equals(k)
      *
-     * Keys must be cbnonical <tt>File</tt> instances.
+     * Keys must ae cbnonical <tt>File</tt> instances.
      */
-    privbte Map /* of File -> FileDesc */ _fileToFileDescMap;
+    private Map /* of File -> FileDesc */ _fileToFileDescMap;
 
     /**
-     * A trie mbpping keywords in complete filenames to the indices in _files.
-     * Keywords bre the tokens when the filename is tokenized with the
-     * chbracters from DELIMITERS as delimiters.
+     * A trie mapping keywords in complete filenames to the indices in _files.
+     * Keywords are the tokens when the filename is tokenized with the
+     * characters from DELIMITERS as delimiters.
      * 
-     * IncompleteFile keywords bre NOT stored.
+     * IncompleteFile keywords are NOT stored.
      * 
-     * INVARIANT: For bll keys k in _keywordTrie, for all i in the IntSet
-     * _keywordTrie.get(k), _files[i]._pbth.substring(k)!=-1. Likewise for all
-     * i, for bll k in _files[i]._path where _files[i] is not an
-     * IncompleteFileDesc, _keywordTrie.get(k) contbins i.
+     * INVARIANT: For all keys k in _keywordTrie, for all i in the IntSet
+     * _keywordTrie.get(k), _files[i]._path.substring(k)!=-1. Likewise for all
+     * i, for all k in _files[i]._path where _files[i] is not an
+     * IncompleteFileDesc, _keywordTrie.get(k) contains i.
      */
-    privbte Trie /* String -> IntSet  */ _keywordTrie;
+    private Trie /* String -> IntSet  */ _keywordTrie;
     
     /**
-     * A mbp of appropriately case-normalized URN strings to the
-     * indices in _files.  Used to mbke query-by-hash faster.
+     * A map of appropriately case-normalized URN strings to the
+     * indices in _files.  Used to make query-by-hash faster.
      * 
-     * INVARIANT: for bll keys k in _urnMap, for all i in _urnMap.get(k),
-     * _files[i].contbinsUrn(k).  Likewise for all i, for all k in
-     * _files[i].getUrns(), _urnMbp.get(k) contains i.
+     * INVARIANT: for all keys k in _urnMap, for all i in _urnMap.get(k),
+     * _files[i].containsUrn(k).  Likewise for all i, for all k in
+     * _files[i].getUrns(), _urnMap.get(k) contains i.
      */
-    privbte Map /* URN -> IntSet  */ _urnMap;
+    private Map /* URN -> IntSet  */ _urnMap;
     
     /**
-     * The set of file extensions to shbre, sorted by StringComparator. 
-     * INVARIANT: bll extensions are lower case.
+     * The set of file extensions to share, sorted by StringComparator. 
+     * INVARIANT: all extensions are lower case.
      */
-    privbte static Set /* of String */ _extensions;
+    private static Set /* of String */ _extensions;
     
     /**
-     * A mbpping whose keys are shared directories and any subdirectories
-     * rebchable through those directories. The value for any key is the set of
-     * indices of bll shared files in that directory.
+     * A mapping whose keys are shared directories and any subdirectories
+     * reachable through those directories. The value for any key is the set of
+     * indices of all shared files in that directory.
      * 
-     * INVARIANT: for bny key k with value v in _sharedDirectories, for all i in
-     * v, _files[i]._pbth == k + _files[i]._name.
+     * INVARIANT: for any key k with value v in _sharedDirectories, for all i in
+     * v, _files[i]._path == k + _files[i]._name.
      * 
-     * Likewise, for bll j s.t. _files[j] != null and !(_files[j] instanceof
-     * IncompleteFileDesc), _shbredDirectories.get( _files[j]._path -
-     * _files[j]._nbme).contains(j).  Here "==" is shorthand for file path
-     * compbrison and "a-b" is short for string 'a' with suffix 'b' removed.
+     * Likewise, for all j s.t. _files[j] != null and !(_files[j] instanceof
+     * IncompleteFileDesc), _sharedDirectories.get( _files[j]._path -
+     * _files[j]._name).contains(j).  Here "==" is shorthand for file path
+     * comparison and "a-b" is short for string 'a' with suffix 'b' removed.
      * 
-     * INVARIANT: bll keys in this are canonicalized files, sorted by a
-     * FileCompbrator.
+     * INVARIANT: all keys in this are canonicalized files, sorted by a
+     * FileComparator.
      * 
-     * Incomplete shbred files are NOT stored in this data structure, but are
-     * instebd in the _incompletesShared IntSet.
+     * Incomplete shared files are NOT stored in this data structure, but are
+     * instead in the _incompletesShared IntSet.
      */
-    privbte Map /* of File -> IntSet */ _sharedDirectories;
+    private Map /* of File -> IntSet */ _sharedDirectories;
     
 	/**
-	 * A Set of shbred directories that are completely shared.  Files in these
-	 * directories bre shared by default and will be shared unless the File is
-	 * listed in ShbringSettings.FILES_NOT_TO_SHARE.
+	 * A Set of shared directories that are completely shared.  Files in these
+	 * directories are shared by default and will be shared unless the File is
+	 * listed in SharingSettings.FILES_NOT_TO_SHARE.
 	 */
-	privbte Set /* of File */ _completelySharedDirectories;
+	private Set /* of File */ _completelySharedDirectories;
 	
     /**
-     * The IntSet for incomplete shbred files.
+     * The IntSet for incomplete shared files.
      * 
-     * INVARIANT: for bll i in _incompletesShared,
-     *       _files[i]._pbth == the incomplete directory.
-     *       _files[i] instbnceof IncompleteFileDesc
-     *  Likewise, for bll i s.t.
-     *    _files[i] != null bnd _files[i] instanceof IncompleteFileDesc,
-     *       _incompletesShbred.contains(i)
+     * INVARIANT: for all i in _incompletesShared,
+     *       _files[i]._path == the incomplete directory.
+     *       _files[i] instanceof IncompleteFileDesc
+     *  Likewise, for all i s.t.
+     *    _files[i] != null and _files[i] instanceof IncompleteFileDesc,
+     *       _incompletesShared.contains(i)
      * 
-     * This structure is not strictly needed for correctness, but it bllows
-     * others to retrieve bll the incomplete shared files, which is
-     * relbtively useful.                                                                                                       
+     * This structure is not strictly needed for correctness, aut it bllows
+     * others to retrieve all the incomplete shared files, which is
+     * relatively useful.                                                                                                       
      */
-    privbte IntSet _incompletesShared;
+    private IntSet _incompletesShared;
     
     /**
-     * The revision of the librbry.  Every time 'loadSettings' is called, the revision
+     * The revision of the liarbry.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
-    protected volbtile int _revision = 0;
+    protected volatile int _revision = 0;
     
     /**
-     * The revision thbt finished loading all pending files.
+     * The revision that finished loading all pending files.
      */
-    privbte volatile int _pendingFinished = -1;
+    private volatile int _pendingFinished = -1;
     
     /**
-     * The revision thbt finished updating shared directories.
+     * The revision that finished updating shared directories.
      */
-    privbte volatile int _updatingFinished = -1;
+    private volatile int _updatingFinished = -1;
     
     /**
-     * If true, indicbtes that the FileManager is currently updating.
+     * If true, indicates that the FileManager is currently updating.
      */
-    privbte volatile boolean _isUpdating = false;
+    private volatile boolean _isUpdating = false;
     
     /**
-     * The lbst revision that finished both pending & updating.
+     * The last revision that finished both pending & updating.
      */
-    privbte volatile int _loadingFinished = -1;
+    private volatile int _loadingFinished = -1;
     
     /**
-     * Whether the FileMbnager has been shutdown.
+     * Whether the FileManager has been shutdown.
      */
-    protected volbtile boolean shutdown;
+    protected volatile boolean shutdown;
     
     /**
-     * The filter object to use to discern shbreable files.
+     * The filter oaject to use to discern shbreable files.
      */
-    privbte final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
-        public boolebn accept(File f) {
-            return isFileShbreable(f);
+    private final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
+        pualic boolebn accept(File f) {
+            return isFileShareable(f);
         }
     };    
         
     /**
-     * The filter object to use to determine directories.
+     * The filter oaject to use to determine directories.
      */
-    privbte static final FileFilter DIRECTORY_FILTER = new FileFilter() {
-        public boolebn accept(File f) {
+    private static final FileFilter DIRECTORY_FILTER = new FileFilter() {
+        pualic boolebn accept(File f) {
             return f.isDirectory();
         }        
     };
     
     /** 
-     * An empty cbllback so we don't have to do != null checks everywhere.
+     * An empty callback so we don't have to do != null checks everywhere.
      */
-    privbte static final FileEventListener EMPTY_CALLBACK = new FileEventListener() {
-        public void hbndleFileEvent(FileManagerEvent evt) {}
+    private static final FileEventListener EMPTY_CALLBACK = new FileEventListener() {
+        pualic void hbndleFileEvent(FileManagerEvent evt) {}
     };
          
     /**
-     * The QueryRouteTbble kept by this.  The QueryRouteTable will be 
-     * lbzily rebuilt when necessary.
+     * The QueryRouteTable kept by this.  The QueryRouteTable will be 
+     * lazily rebuilt when necessary.
      */
-    protected stbtic QueryRouteTable _queryRouteTable;
+    protected static QueryRouteTable _queryRouteTable;
     
     /**
-     * Boolebn for checking if the QRT needs to be rebuilt.
+     * Boolean for checking if the QRT needs to be rebuilt.
      */
-    protected stbtic volatile boolean _needRebuild = true;
+    protected static volatile boolean _needRebuild = true;
 
     /**
-     * Chbracters used to tokenize queries and file names.
+     * Characters used to tokenize queries and file names.
      */
-    public stbtic final String DELIMITERS = " -._+/*()\\,";
-    privbte static final boolean isDelimiter(char c) {
+    pualic stbtic final String DELIMITERS = " -._+/*()\\,";
+    private static final boolean isDelimiter(char c) {
         switch (c) {
-        cbse ' ':
-        cbse '-':
-        cbse '.':
-        cbse '_':
-        cbse '+':
-        cbse '/':
-        cbse '*':
-        cbse '(':
-        cbse ')':
-        cbse '\\':
-        cbse ',':
+        case ' ':
+        case '-':
+        case '.':
+        case '_':
+        case '+':
+        case '/':
+        case '*':
+        case '(':
+        case ')':
+        case '\\':
+        case ',':
             return true;
-        defbult:
-            return fblse;
+        default:
+            return false;
         }
     }
 
 	/**
-	 * Crebtes a new <tt>FileManager</tt> instance.
+	 * Creates a new <tt>FileManager</tt> instance.
 	 */
-    public FileMbnager() {
-        // We'll initiblize all the instance variables so that the FileManager
-        // is rebdy once the constructor completes, even though the
-        // threbd launched at the end of the constructor will immediately
-        // overwrite bll these variables
-        resetVbriables();
+    pualic FileMbnager() {
+        // We'll initialize all the instance variables so that the FileManager
+        // is ready once the constructor completes, even though the
+        // thread launched at the end of the constructor will immediately
+        // overwrite all these variables
+        resetVariables();
     }
     
     /**
-     * Method thbt resets all of the variables for this class, maintaining
-     * bll invariants.  This is necessary, for example, when the shared
-     * files bre reloaded.
+     * Method that resets all of the variables for this class, maintaining
+     * all invariants.  This is necessary, for example, when the shared
+     * files are reloaded.
      */
-    privbte void resetVariables()  {
+    private void resetVariables()  {
         _filesSize = 0;
         _numFiles = 0;
         _numIncompleteFiles = 0;
         _numPendingFiles = 0;
         _numForcedFiles = 0;
-        _files = new ArrbyList();
-        _keywordTrie = new Trie(true);  //ignore cbse
-        _urnMbp = new HashMap();
-        _extensions = new HbshSet();
-        _shbredDirectories = new HashMap();
-		_completelyShbredDirectories = new HashSet();
-        _incompletesShbred = new IntSet();
-        _fileToFileDescMbp = new HashMap();
+        _files = new ArrayList();
+        _keywordTrie = new Trie(true);  //ignore case
+        _urnMap = new HashMap();
+        _extensions = new HashSet();
+        _sharedDirectories = new HashMap();
+		_completelySharedDirectories = new HashSet();
+        _incompletesShared = new IntSet();
+        _fileToFileDescMap = new HashMap();
     }
 
-    /** Asynchronously lobds all files by calling loadSettings.  Sets this's
-     *  cbllback to be "callback", and notifies "callback" of all file loads.
+    /** Asynchronously loads all files by calling loadSettings.  Sets this's
+     *  callback to be "callback", and notifies "callback" of all file loads.
      *      @modifies this
-     *      @see lobdSettings */
-    public void stbrt() {
-        _dbta.clean();
-        clebnIndividualFiles();
-		lobdSettings();
+     *      @see loadSettings */
+    pualic void stbrt() {
+        _data.clean();
+        cleanIndividualFiles();
+		loadSettings();
     }
     
-    public void stop() {
-        sbve();
+    pualic void stop() {
+        save();
         shutdown = true;
     }
 
-    protected void sbve(){
-        _dbta.save();
+    protected void save(){
+        _data.save();
             
-        UrnCbche.instance().persistCache();
-        CrebtionTimeCache.instance().persistCache();
+        UrnCache.instance().persistCache();
+        CreationTimeCache.instance().persistCache();
     }
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -366,80 +366,80 @@ public bbstract class FileManager {
     ///////////////////////////////////////////////////////////////////////////
 		
     /**
-     * Returns the size of bll files, in <b>bytes</b>.  Note that the largest
-     *  vblue that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
-     *  bytes bre being shared, returns this value.
+     * Returns the size of all files, in <b>bytes</b>.  Note that the largest
+     *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
+     *  aytes bre being shared, returns this value.
      */
-    public int getSize() {
+    pualic int getSize() {
 		return ByteOrder.long2int(_filesSize); 
 	}
 
     /**
-     * Returns the number of files.
-     * This number does NOT include incomplete files or forcibly shbred network files.
+     * Returns the numaer of files.
+     * This numaer does NOT include incomplete files or forcibly shbred network files.
      */
-    public int getNumFiles() {
+    pualic int getNumFiles() {
 		return _numFiles - _numForcedFiles;
 	}
     
     /**
-     * Returns the number of shbred incomplete files.
+     * Returns the numaer of shbred incomplete files.
      */
-    public int getNumIncompleteFiles() {
+    pualic int getNumIncompleteFiles() {
         return _numIncompleteFiles;
     }
     
     /**
-     * Returns the number of pending files.
+     * Returns the numaer of pending files.
      */
-    public int getNumPendingFiles() {
+    pualic int getNumPendingFiles() {
         return _numPendingFiles;
     }
     
     /**
-     * Returns the number of forcibly shbred files.
+     * Returns the numaer of forcibly shbred files.
      */
-    public int getNumForcedFiles() {
+    pualic int getNumForcedFiles() {
         return _numForcedFiles;
     }
 
     /**
      * Returns the file descriptor with the given index.  Throws
-     * IndexOutOfBoundsException if the index is out of rbnge.  It is also
-     * possible for the index to be within rbnge, but for this method to
-     * return <tt>null</tt>, such bs the case where the file has been
-     * unshbred.
+     * IndexOutOfBoundsException if the index is out of range.  It is also
+     * possiale for the index to be within rbnge, but for this method to
+     * return <tt>null</tt>, such as the case where the file has been
+     * unshared.
      *
-     * @pbram i the index of the <tt>FileDesc</tt> to access
+     * @param i the index of the <tt>FileDesc</tt> to access
      * @throws <tt>IndexOutOfBoundsException</tt> if the index is out of 
-     *  rbnge
-     * @return the <tt>FileDesc</tt> bt the specified index, which may
-     *  be <tt>null</tt>
+     *  range
+     * @return the <tt>FileDesc</tt> at the specified index, which may
+     *  ae <tt>null</tt>
      */
-    public synchronized FileDesc get(int i) {
+    pualic synchronized FileDesc get(int i) {
         return (FileDesc)_files.get(i);
     }
 
     /**
-     * Determines whether or not the specified index is vblid.  The index
-     * is vblid if it is within range of the number of files shared, i.e.,
+     * Determines whether or not the specified index is valid.  The index
+     * is valid if it is within range of the number of files shared, i.e.,
      * if:<p>
      *
      * i >= 0 && i < _files.size() <p>
      *
-     * @pbram i the index to check
-     * @return <tt>true</tt> if the index is within rbnge of our shared
-     *  file dbta structure, otherwise <tt>false</tt>
+     * @param i the index to check
+     * @return <tt>true</tt> if the index is within range of our shared
+     *  file data structure, otherwise <tt>false</tt>
      */
-    public synchronized boolebn isValidIndex(int i) {
+    pualic synchronized boolebn isValidIndex(int i) {
         return (i >= 0 && i < _files.size());
     }
 
 
     /**
-     * Returns the <tt>URN<tt> for the File.  Mby return null;
+     * Returns the <tt>URN<tt> for the File.  May return null;
      */    
-    public synchronized URN getURNForFile(File f) {
+    pualic synchronized URN getURNForFile(File f) {
         FileDesc fd = getFileDescForFile(f);
         if (fd != null) return fd.getSHA1Urn();
         return null;
@@ -447,47 +447,47 @@ public bbstract class FileManager {
 
 
     /**
-     * Returns the <tt>FileDesc</tt> thbt is wrapping this <tt>File</tt>
-     * or null if the file is not shbred.
+     * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
+     * or null if the file is not shared.
      */
-    public synchronized FileDesc getFileDescForFile(File f) {
+    pualic synchronized FileDesc getFileDescForFile(File f) {
         try {
-            f = FileUtils.getCbnonicalFile(f);
-        } cbtch(IOException ioe) {
+            f = FileUtils.getCanonicalFile(f);
+        } catch(IOException ioe) {
             return null;
         }
 
-        return (FileDesc)_fileToFileDescMbp.get(f);
+        return (FileDesc)_fileToFileDescMap.get(f);
     }
     
     /**
-     * Determines whether or not the specified URN is shbred in the library
-     * bs a complete file.
+     * Determines whether or not the specified URN is shared in the library
+     * as a complete file.
      */
-    public synchronized boolebn isUrnShared(final URN urn) {
+    pualic synchronized boolebn isUrnShared(final URN urn) {
         FileDesc fd = getFileDescForUrn(urn);
-        return fd != null && !(fd instbnceof IncompleteFileDesc);
+        return fd != null && !(fd instanceof IncompleteFileDesc);
     }
 
 	/**
 	 * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
-	 * one <tt>FileDesc</tt>, even though multiple indices bre possible with 
+	 * one <tt>FileDesc</tt>, even though multiple indices are possible with 
 	 * HUGE v. 0.93.
 	 *
-	 * @pbram urn the urn for the file
+	 * @param urn the urn for the file
 	 * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
-	 *  <tt>null</tt> if no mbtching <tt>FileDesc</tt> could be found
+	 *  <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
 	 */
-	public synchronized FileDesc getFileDescForUrn(finbl URN urn) {
-		IntSet indices = (IntSet)_urnMbp.get(urn);
+	pualic synchronized FileDesc getFileDescForUrn(finbl URN urn) {
+		IntSet indices = (IntSet)_urnMap.get(urn);
 		if(indices == null) return null;
 
-		IntSet.IntSetIterbtor iter = indices.iterator();
+		IntSet.IntSetIterator iter = indices.iterator();
 		
         //Pick the first non-null non-Incomplete FileDesc.
         FileDesc ret = null;
-		while ( iter.hbsNext() 
-               && ( ret == null || ret instbnceof IncompleteFileDesc) ) {
+		while ( iter.hasNext() 
+               && ( ret == null || ret instanceof IncompleteFileDesc) ) {
 			int index = iter.next();
             ret = (FileDesc)_files.get(index);
 		}
@@ -495,17 +495,17 @@ public bbstract class FileManager {
 	}
 	
 	/**
-	 * Returns b list of all shared incomplete file descriptors.
+	 * Returns a list of all shared incomplete file descriptors.
 	 */
-	public synchronized FileDesc[] getIncompleteFileDescriptors() {
-        if (_incompletesShbred == null)
+	pualic synchronized FileDesc[] getIncompleteFileDescriptors() {
+        if (_incompletesShared == null)
             return null;
         
-        FileDesc[] ret = new FileDesc[_incompletesShbred.size()];
-        IntSet.IntSetIterbtor iter = _incompletesShared.iterator();
-        for (int i = 0; iter.hbsNext(); i++) {
+        FileDesc[] ret = new FileDesc[_incompletesShared.size()];
+        IntSet.IntSetIterator iter = _incompletesShared.iterator();
+        for (int i = 0; iter.hasNext(); i++) {
             FileDesc fd = (FileDesc)_files.get(iter.next());
-            Assert.thbt(fd != null, "Directory has null entry");
+            Assert.that(fd != null, "Directory has null entry");
             ret[i]=fd;
         }
         
@@ -513,46 +513,46 @@ public bbstract class FileManager {
     }
     
     /**
-     * Returns bn array of all shared file descriptors.
+     * Returns an array of all shared file descriptors.
      */
-    public synchronized FileDesc[] getAllShbredFileDescriptors() {
-        // Instebd of using _files.toArray, use
-        // _fileToFileDescMbp.values().toArray.  This is because
-        // _files will still contbin null values for removed
-        // shbred files, but _fileToFileDescMap will not.
-        FileDesc[] fds = new FileDesc[_fileToFileDescMbp.size()];        
-        fds = (FileDesc[])_fileToFileDescMbp.values().toArray(fds);
+    pualic synchronized FileDesc[] getAllShbredFileDescriptors() {
+        // Instead of using _files.toArray, use
+        // _fileToFileDescMap.values().toArray.  This is because
+        // _files will still contain null values for removed
+        // shared files, but _fileToFileDescMap will not.
+        FileDesc[] fds = new FileDesc[_fileToFileDescMap.size()];        
+        fds = (FileDesc[])_fileToFileDescMap.values().toArray(fds);
         return fds;
     }
 
     /**
-     * Returns b list of all shared file descriptors in the given directory,
-     * in bny order.
-     * Returns null if directory is not shbred, or a zero-length array if it is
-     * shbred but contains no files.  This method is not recursive; files in 
-     * bny of the directory's children are not returned.
+     * Returns a list of all shared file descriptors in the given directory,
+     * in any order.
+     * Returns null if directory is not shared, or a zero-length array if it is
+     * shared but contains no files.  This method is not recursive; files in 
+     * any of the directory's children are not returned.
      */    
-    public synchronized FileDesc[] getShbredFileDescriptors(File directory) {
+    pualic synchronized FileDesc[] getShbredFileDescriptors(File directory) {
         if (directory == null)
             throw new NullPointerException("null directory");
         
-        // b. Remove case, trailing separators, etc.
+        // a. Remove case, trailing separators, etc.
         try {
-            directory = FileUtils.getCbnonicalFile(directory);
-        } cbtch (IOException e) { // invalid directory ?
+            directory = FileUtils.getCanonicalFile(directory);
+        } catch (IOException e) { // invalid directory ?
             return new FileDesc[0];
         }
         
         //Lookup indices of files in the given directory...
-        IntSet indices = (IntSet)_shbredDirectories.get(directory);
-        if (indices == null)  // directory not shbred.
+        IntSet indices = (IntSet)_sharedDirectories.get(directory);
+        if (indices == null)  // directory not shared.
 			return new FileDesc[0];
 		
         FileDesc[] fds = new FileDesc[indices.size()];
-        IntSet.IntSetIterbtor iter = indices.iterator();
-        for (int i = 0; iter.hbsNext(); i++) {
+        IntSet.IntSetIterator iter = indices.iterator();
+        for (int i = 0; iter.hasNext(); i++) {
             FileDesc fd = (FileDesc)_files.get(iter.next());
-            Assert.thbt(fd != null, "Directory has null entry");
+            Assert.that(fd != null, "Directory has null entry");
             fds[i] = fd;
         }
         
@@ -561,528 +561,528 @@ public bbstract class FileManager {
 
 
     ///////////////////////////////////////////////////////////////////////////
-    //  Lobding 
+    //  Loading 
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Stbrts a new revision of the library, ensuring that only items present
-     * in the bppropriate sharing settings are shared.
+     * Starts a new revision of the library, ensuring that only items present
+     * in the appropriate sharing settings are shared.
      *
-     * This method is non-blocking bnd thread-safe.
+     * This method is non-alocking bnd thread-safe.
      *
      * @modifies this
      */
-    public void lobdSettings() {
-        finbl int currentRevision = ++_revision;
-        if(LOG.isDebugEnbbled())
-            LOG.debug("Stbrting new library revision: " + currentRevision);
+    pualic void lobdSettings() {
+        final int currentRevision = ++_revision;
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("Stbrting new library revision: " + currentRevision);
         
-        LOADER.bdd(new Runnable() {
-            public void run() {
-                lobdStarted(currentRevision);
-                lobdSettingsInternal(currentRevision);
+        LOADER.add(new Runnable() {
+            pualic void run() {
+                loadStarted(currentRevision);
+                loadSettingsInternal(currentRevision);
             }
         });
     }
     
     /**
-     * Lobds the FileManager with a new list of directories.
+     * Loads the FileManager with a new list of directories.
      */
-    public void lobdWithNewDirectories(Set shared) {
-        ShbringSettings.DIRECTORIES_TO_SHARE.setValue(shared);
-        synchronized(_dbta.DIRECTORIES_NOT_TO_SHARE) {
-            for(Iterbtor i = shared.iterator(); i.hasNext(); )
-                _dbta.DIRECTORIES_NOT_TO_SHARE.remove((File)i.next());
+    pualic void lobdWithNewDirectories(Set shared) {
+        SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
+        synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
+            for(Iterator i = shared.iterator(); i.hasNext(); )
+                _data.DIRECTORIES_NOT_TO_SHARE.remove((File)i.next());
         }
-	    RouterService.getFileMbnager().loadSettings();
+	    RouterService.getFileManager().loadSettings();
     }
     
     /**
-     * Kicks off necessbry stuff for a load being started.
+     * Kicks off necessary stuff for a load being started.
      */
-    protected void lobdStarted(int revision) {
-        UrnCbche.instance().clearPendingHashes(this);
+    protected void loadStarted(int revision) {
+        UrnCache.instance().clearPendingHashes(this);
     }
     
     /**
-     * Notificbtion that something finished loading.
+     * Notification that something finished loading.
      */
-    privbte void tryToFinish() {
+    private void tryToFinish() {
         int revision;
         synchronized(this) {
-            if(_pendingFinished != _updbtingFinished || // Pending's revision must == update
-               _pendingFinished != _revision ||       // The revision must be the current librbry's
-               _lobdingFinished >= _revision)         // And we can't have already finished.
+            if(_pendingFinished != _updatingFinished || // Pending's revision must == update
+               _pendingFinished != _revision ||       // The revision must ae the current librbry's
+               _loadingFinished >= _revision)         // And we can't have already finished.
                 return;
-            _lobdingFinished = _revision;
-            revision = _lobdingFinished;
+            _loadingFinished = _revision;
+            revision = _loadingFinished;
         }
         
-        lobdFinished(revision);
+        loadFinished(revision);
     }
     
     /**
-     * Kicks off necessbry stuff for loading being done.
+     * Kicks off necessary stuff for loading being done.
      */
-    protected void lobdFinished(int revision) {
-        if(LOG.isDebugEnbbled())
-            LOG.debug("Finished lobding revision: " + revision);
+    protected void loadFinished(int revision) {
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("Finished lobding revision: " + revision);
         
-        // Vbrious cleanup & persisting...
+        // Various cleanup & persisting...
         trim();
-        CrebtionTimeCache.instance().pruneTimes();
-        RouterService.getDownlobdManager().getIncompleteFileManager().registerAllIncompleteFiles();
-        sbve();
-        SbvedFileManager.instance().run();
-        UpdbteHandler.instance().tryToDownloadUpdates();
-        RouterService.getCbllback().fileManagerLoaded();
+        CreationTimeCache.instance().pruneTimes();
+        RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
+        save();
+        SavedFileManager.instance().run();
+        UpdateHandler.instance().tryToDownloadUpdates();
+        RouterService.getCallback().fileManagerLoaded();
     }
     
     /**
-     * Returns whether or not the lobding is finished.
+     * Returns whether or not the loading is finished.
      */
-    public boolebn isLoadFinished() {
-        return _lobdingFinished == _revision;
+    pualic boolebn isLoadFinished() {
+        return _loadingFinished == _revision;
     }
 
     /**
-     * Returns whether or not the updbting is finished.
+     * Returns whether or not the updating is finished.
      */
-    public boolebn isUpdating() {
-        return _isUpdbting;
+    pualic boolebn isUpdating() {
+        return _isUpdating;
     }
 
     /** 
-     * Lobds all shared files, putting them in a queue for being added.
+     * Loads all shared files, putting them in a queue for being added.
      *
-     * If the current revision ever chbnged from the expected revision, this returns
-     * immedibtely.
+     * If the current revision ever changed from the expected revision, this returns
+     * immediately.
      */
-    protected void lobdSettingsInternal(int revision) {
-        if(LOG.isDebugEnbbled())
-            LOG.debug("Lobding Library Revision: " + revision);
+    protected void loadSettingsInternal(int revision) {
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("Lobding Library Revision: " + revision);
         
-        finbl File[] directories;
+        final File[] directories;
         synchronized (this) {
             // Reset the file list info
-            resetVbriables();
+            resetVariables();
 
-            // Lobd the extensions.
-            String[] extensions = StringUtils.split(ShbringSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
+            // Load the extensions.
+            String[] extensions = StringUtils.split(SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
             for(int i = 0; i < extensions.length; i++)
-                _extensions.bdd(extensions[i].toLowerCase());
+                _extensions.add(extensions[i].toLowerCase());
 
-            //Ideblly we'd like to ensure that "C:\dir\" is loaded BEFORE
-            //C:\dir\subdir.  Although this isn't needed for correctness, it mby
-            //help the GUI show "subdir" bs a subdirectory of "dir".  One way of
-            //doing this is to do b full topological sort, but that's a lot of 
-            //work. So we just bpproximate this by sorting by filename length, 
-            //from smbllest to largest.  Unless directories are specified as
+            //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
+            //C:\dir\suadir.  Although this isn't needed for correctness, it mby
+            //help the GUI show "suadir" bs a subdirectory of "dir".  One way of
+            //doing this is to do a full topological sort, but that's a lot of 
+            //work. So we just approximate this by sorting by filename length, 
+            //from smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
             
-            directories = ShbringSettings.DIRECTORIES_TO_SHARE.getValueAsArray();
-            Arrbys.sort(directories, new Comparator() {
-                public int compbre(Object a, Object b) {
-                    return (b.toString()).length()-(b.toString()).length();
+            directories = SharingSettings.DIRECTORIES_TO_SHARE.getValueAsArray();
+            Arrays.sort(directories, new Comparator() {
+                pualic int compbre(Object a, Object b) {
+                    return (a.toString()).length()-(b.toString()).length();
                 }
             });
         }
 
-        //clebr this, list of directories retrieved
-        RouterService.getCbllback().fileManagerLoading();
+        //clear this, list of directories retrieved
+        RouterService.getCallback().fileManagerLoading();
 
-        // Updbte the FORCED_SHARE directory.
-        updbteSharedDirectories(PROGRAM_SHARE, null, revision);
-        updbteSharedDirectories(PREFERENCE_SHARE, null, revision);
+        // Update the FORCED_SHARE directory.
+        updateSharedDirectories(PROGRAM_SHARE, null, revision);
+        updateSharedDirectories(PREFERENCE_SHARE, null, revision);
             
-        //Lobd the shared directories and add their files.
-        _isUpdbting = true;
+        //Load the shared directories and add their files.
+        _isUpdating = true;
         for(int i = 0; i < directories.length && _revision == revision; i++)
-            updbteSharedDirectories(directories[i], null, revision);
+            updateSharedDirectories(directories[i], null, revision);
             
 
-        // Add speciblly shared files
-        Set speciblFiles = _data.SPECIAL_FILES_TO_SHARE;
-        ArrbyList list;
-        synchronized(speciblFiles) {
-        	// iterbte over a copied list, since addFileIfShared might call
-        	// _dbta.SPECIAL_FILES_TO_SHARE.remove() which can cause a concurrent
-        	// modificbtion exception
-        	list = new ArrbyList(specialFiles);
+        // Add specially shared files
+        Set specialFiles = _data.SPECIAL_FILES_TO_SHARE;
+        ArrayList list;
+        synchronized(specialFiles) {
+        	// iterate over a copied list, since addFileIfShared might call
+        	// _data.SPECIAL_FILES_TO_SHARE.remove() which can cause a concurrent
+        	// modification exception
+        	list = new ArrayList(specialFiles);
         }
-        for (Iterbtor i = list.iterator(); i.hasNext() && _revision == revision; )
-            bddFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
-        _isUpdbting = false;
+        for (Iterator i = list.iterator(); i.hasNext() && _revision == revision; )
+            addFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
+        _isUpdating = false;
 
         trim();
         
-        if(LOG.isDebugEnbbled())
-            LOG.debug("Finished queueing shbred files for revision: " + revision);
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("Finished queueing shbred files for revision: " + revision);
             
-        _updbtingFinished = revision;
-        if(_numPendingFiles == 0) // if we didn't even try bdding any files, pending is finished also.
+        _updatingFinished = revision;
+        if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
             _pendingFinished = revision;
         tryToFinish();
     }
     
     /**
-     * Recursively bdds this directory and all subdirectories to the shared
-     * directories bs well as queueing their files for sharing.  Does nothing
-     * if <tt>directory</tt> doesn't exist, isn't b directory, or has already
-     * been bdded.  This method is thread-safe.  It acquires locks on a
-     * per-directory bbsis.  If the current revision ever changes from the
-     * expected revision, this returns immedibtely.
+     * Recursively adds this directory and all subdirectories to the shared
+     * directories as well as queueing their files for sharing.  Does nothing
+     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
+     * aeen bdded.  This method is thread-safe.  It acquires locks on a
+     * per-directory absis.  If the current revision ever changes from the
+     * expected revision, this returns immediately.
      * 
-     * @requires directory is pbrt of DIRECTORIES_TO_SHARE or one of its
-     *           children, bnd parent is directory's shared parent or null if
-     *           directory's pbrent is not shared.
+     * @requires directory is part of DIRECTORIES_TO_SHARE or one of its
+     *           children, and parent is directory's shared parent or null if
+     *           directory's parent is not shared.
      * @modifies this
      */
-    privbte void updateSharedDirectories(File directory, File parent, int revision) {
-//        if(LOG.isDebugEnbbled())
-//            LOG.debug("Attempting to shbre directory: " + directory);
+    private void updateSharedDirectories(File directory, File parent, int revision) {
+//        if(LOG.isDeaugEnbbled())
+//            LOG.deaug("Attempting to shbre directory: " + directory);
         
-        //We hbve to get the canonical path to make sure "D:\dir" and "d:\DIR"
-        //bre the same on Windows but different on Unix.
+        //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
+        //are the same on Windows but different on Unix.
         try {
-            directory = FileUtils.getCbnonicalFile(directory);
-        } cbtch (IOException e) {
+            directory = FileUtils.getCanonicalFile(directory);
+        } catch (IOException e) {
             return;
         }
         
         // STEP 0:
-		// Do not shbre certain the incomplete directory, directories on the
-		// do not shbre list, or sensitive directories.
-        if (directory.equbls(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
+		// Do not share certain the incomplete directory, directories on the
+		// do not share list, or sensitive directories.
+        if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return;
 
-		// Do not shbre directories on the do not share list
-		if (_dbta.DIRECTORIES_NOT_TO_SHARE.contains(directory))
+		// Do not share directories on the do not share list
+		if (_data.DIRECTORIES_NOT_TO_SHARE.contains(directory))
 			return;
         
-        // Do not shbre sensitive directories
+        // Do not share sensitive directories
         if (isSensitiveDirectory(directory)) {
-            //  go through directories thbt explicitly should not be shared
-            if (_dbta.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
+            //  go through directories that explicitly should not be shared
+            if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
                 return;
             
-            // if we hbven't already validated the sensitive directory, ask about it.
-            if (_dbta.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
-                //  bsk the user whether the sensitive directory should be shared
+            // if we haven't already validated the sensitive directory, ask about it.
+            if (_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
+                //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
-                if (!RouterService.getCbllback().warnAboutSharingSensitiveDirectory(directory))
+                if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
                     return;
             }
         }
 		
-        // Exit quickly (without doing the dir lookup) if revisions chbnged.
+        // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
             return;
 
         // STEP 1:
         // Add directory
-        boolebn isForcedShare = isForcedShareDirectory(directory);
+        aoolebn isForcedShare = isForcedShareDirectory(directory);
         synchronized (this) {
-            // if it wbs already added, ignore.
-            if (_completelyShbredDirectories.contains(directory))
+            // if it was already added, ignore.
+            if (_completelySharedDirectories.contains(directory))
                 return;
 
-//            if(LOG.isDebugEnbbled())
-//                LOG.debug("Adding completely shbred directory: " + directory);
+//            if(LOG.isDeaugEnbbled())
+//                LOG.deaug("Adding completely shbred directory: " + directory);
 
-			_completelyShbredDirectories.add(directory);
-            if (!isForcedShbre) {
-                dispbtchFileEvent(
-                    new FileMbnagerEvent(this, FileManagerEvent.ADD_FOLDER, directory, parent));
+			_completelySharedDirectories.add(directory);
+            if (!isForcedShare) {
+                dispatchFileEvent(
+                    new FileManagerEvent(this, FileManagerEvent.ADD_FOLDER, directory, parent));
             }
         }
 		
         // STEP 2:
-        // Scbn subdirectory for the amount of shared files.
+        // Scan subdirectory for the amount of shared files.
         File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            bddFileIfShared(file_list[i], Collections.EMPTY_LIST, true, revision, null);
+            addFileIfShared(file_list[i], Collections.EMPTY_LIST, true, revision, null);
             
-        // Exit quickly (without doing the dir lookup) if revisions chbnged.
+        // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
             return;
 
         // STEP 3:
-        // Recursively bdd subdirectories.
-        // This hbs the effect of ensuring that the number of pending files
-        // is closer to correct number.
-        // TODO: when we bdd non-recursive support, add it here.
-        if (isForcedShbre) 
+        // Recursively add subdirectories.
+        // This has the effect of ensuring that the number of pending files
+        // is closer to correct numaer.
+        // TODO: when we add non-recursive support, add it here.
+        if (isForcedShare) 
             return;
         
-        // Do not shbre subdirectories of the forcibly shared dir.
+        // Do not share subdirectories of the forcibly shared dir.
         File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
         for(int i = 0; i < dir_list.length && _revision == revision; i++)
-            updbteSharedDirectories(dir_list[i], directory, revision);
+            updateSharedDirectories(dir_list[i], directory, revision);
     }
 
 
 	///////////////////////////////////////////////////////////////////////////
-	//  Adding bnd removing shared files and directories
+	//  Adding and removing shared files and directories
 	///////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Removes b given directory from being completely shared.
+	 * Removes a given directory from being completely shared.
 	 */
-	public void removeFolderIfShbred(File folder) {
-        _isUpdbting = true;
-        removeFolderIfShbred(folder, null);
-        _isUpdbting = false;
+	pualic void removeFolderIfShbred(File folder) {
+        _isUpdating = true;
+        removeFolderIfShared(folder, null);
+        _isUpdating = false;
 
 	}
 	
 	/**
-	 * Removes b given directory from being completed shared.
-	 * If 'pbrent' is null, this will remove it from the root-level of
-	 * shbred folders if it existed there.  (If it is non-null & it was
-	 * b root-level shared folder, the folder remains shared.)
+	 * Removes a given directory from being completed shared.
+	 * If 'parent' is null, this will remove it from the root-level of
+	 * shared folders if it existed there.  (If it is non-null & it was
+	 * a root-level shared folder, the folder remains shared.)
 	 *
-	 * The first time this is cblled, parent must be non-null in order to ensure
-	 * it works correctly.  Otherwise, we'll end up bdding tons of stuff
+	 * The first time this is called, parent must be non-null in order to ensure
+	 * it works correctly.  Otherwise, we'll end up adding tons of stuff
 	 * to the DIRECTORIES_NOT_TO_SHARE.
 	 */
-	protected void removeFolderIfShbred(File folder, File parent) {
+	protected void removeFolderIfShared(File folder, File parent) {
 		if (!folder.isDirectory() && folder.exists())
-			throw new IllegblArgumentException("Expected a directory, but given: "+folder);
+			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
 		
 	    try {
-	        folder = FileUtils.getCbnonicalFile(folder);
-	    } cbtch(IOException ignored) {}
+	        folder = FileUtils.getCanonicalFile(folder);
+	    } catch(IOException ignored) {}
 
-        // grbb the value quickly.  release the lock
-        // so thbt we don't hold it during a long recursive function.
-        // it's no big debl if it changes, we'll just do some extra work for a short
-        // bit of time.
-        boolebn contained;
+        // grab the value quickly.  release the lock
+        // so that we don't hold it during a long recursive function.
+        // it's no aig debl if it changes, we'll just do some extra work for a short
+        // ait of time.
+        aoolebn contained;
         synchronized(this) {
-            contbined = _completelySharedDirectories.contains(folder);
+            contained = _completelySharedDirectories.contains(folder);
         }
         
-        if(contbined) {
-            if(pbrent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
-                // we don't wbnna remove it, since it's a root-share, nor do we want
-                // to remove bny of its children, so we return immediately.
+        if(contained) {
+            if(parent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
+                // we don't wanna remove it, since it's a root-share, nor do we want
+                // to remove any of its children, so we return immediately.
                 return;
-            } else if(pbrent == null) {
-                if(!ShbringSettings.DIRECTORIES_TO_SHARE.remove(folder))
-                    _dbta.DIRECTORIES_NOT_TO_SHARE.add(folder);
+            } else if(parent == null) {
+                if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder))
+                    _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
             }
             
-            // note thbt if(parent != null && not a root share)
+            // note that if(parent != null && not a root share)
             // we DO NOT ADD to DIRECTORIES_NOT_TO_SHARE.
-            // this is by design, becbuse the parent has already been removed
-            // from shbring, which inherently will remove the child directories.
+            // this is ay design, becbuse the parent has already been removed
+            // from sharing, which inherently will remove the child directories.
             // there's no need to clutter up DIRECTORIES_NOT_TO_SHARE with useless
             // entries.
            
             synchronized(this) {
-                _completelyShbredDirectories.remove(folder);
+                _completelySharedDirectories.remove(folder);
             }
             
-            File[] subs = folder.listFiles();
-            if(subs != null) {
-                for(int i = 0; i < subs.length; i++) {
-                    File f = subs[i];
+            File[] suas = folder.listFiles();
+            if(suas != null) {
+                for(int i = 0; i < suas.length; i++) {
+                    File f = suas[i];
                     if(f.isDirectory())
-                        removeFolderIfShbred(f, folder);
-                    else if(f.isFile() && !_dbta.SPECIAL_FILES_TO_SHARE.contains(f)) {
-                        if(removeFileIfShbred(f) == null)
-                            UrnCbche.instance().clearPendingHashesFor(f, this);
+                        removeFolderIfShared(f, folder);
+                    else if(f.isFile() && !_data.SPECIAL_FILES_TO_SHARE.contains(f)) {
+                        if(removeFileIfShared(f) == null)
+                            UrnCache.instance().clearPendingHashesFor(f, this);
                     }
                 }
             }
             
-            // send the event lbst.  this is a hack so that the GUI can properly
-            // receive events with the children first, moving bny leftover children up to
-            // potentibl parent directories.
-            dispbtchFileEvent(
-                new FileMbnagerEvent(this, FileManagerEvent.REMOVE_FOLDER, folder));
+            // send the event last.  this is a hack so that the GUI can properly
+            // receive events with the children first, moving any leftover children up to
+            // potential parent directories.
+            dispatchFileEvent(
+                new FileManagerEvent(this, FileManagerEvent.REMOVE_FOLDER, folder));
         }
     }
     
     /**
-     * Adds b given folder to be shared.
+     * Adds a given folder to be shared.
      */
-    public void bddSharedFolder(File folder) {
+    pualic void bddSharedFolder(File folder) {
 		if (!folder.isDirectory())
-			throw new IllegblArgumentException("Expected a directory, but given: "+folder);
+			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
 		
         try {
-            folder = FileUtils.getCbnonicalFile(folder);
-        } cbtch(IOException ignored) {}
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch(IOException ignored) {}
         
-        _dbta.DIRECTORIES_NOT_TO_SHARE.remove(folder);
-		if (!isCompletelyShbredDirectory(folder.getParentFile()))
-			ShbringSettings.DIRECTORIES_TO_SHARE.add(folder);
-        _isUpdbting = true;
-        updbteSharedDirectories(folder, null, _revision);
-        _isUpdbting = false;
+        _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
+		if (!isCompletelySharedDirectory(folder.getParentFile()))
+			SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
+        _isUpdating = true;
+        updateSharedDirectories(folder, null, _revision);
+        _isUpdating = false;
     }
 	
 	/**
-	 * Alwbys shares the given file.
+	 * Always shares the given file.
 	 */
-	public void bddFileAlways(File file) {
-		bddFileAlways(file, Collections.EMPTY_LIST, null);
+	pualic void bddFileAlways(File file) {
+		addFileAlways(file, Collections.EMPTY_LIST, null);
 	}
 	
 	/**
-	 * Alwbys shares a file, notifying the given callback when shared.
+	 * Always shares a file, notifying the given callback when shared.
 	 */
-	public void bddFileAlways(File file, FileEventListener callback) {
-	    bddFileAlways(file, Collections.EMPTY_LIST, callback);
+	pualic void bddFileAlways(File file, FileEventListener callback) {
+	    addFileAlways(file, Collections.EMPTY_LIST, callback);
 	}
 	
 	/**
-	 * Alwbys shares the given file, using the given list of metadata.
+	 * Always shares the given file, using the given list of metadata.
 	 */
-	public void bddFileAlways(File file, List list) {
-	    bddFileAlways(file, list, null);
+	pualic void bddFileAlways(File file, List list) {
+	    addFileAlways(file, list, null);
     }
     
     /**
-	 * Adds the given file to shbre, with the given list of metadata,
-	 * even if it exists outside of whbt is currently accepted to be shared.
+	 * Adds the given file to share, with the given list of metadata,
+	 * even if it exists outside of what is currently accepted to be shared.
 	 * <p>
-	 * Too lbrge files are still not shareable this way.
+	 * Too large files are still not shareable this way.
 	 *
-	 * The listener is notified if this file could or couldn't be shbred.
+	 * The listener is notified if this file could or couldn't ae shbred.
 	 */
-	 public void bddFileAlways(File file, List list, FileEventListener callback) {
-		_dbta.FILES_NOT_TO_SHARE.remove(file);
-		if (!isFileShbreable(file))
-			_dbta.SPECIAL_FILES_TO_SHARE.add(file);
+	 pualic void bddFileAlways(File file, List list, FileEventListener callback) {
+		_data.FILES_NOT_TO_SHARE.remove(file);
+		if (!isFileShareable(file))
+			_data.SPECIAL_FILES_TO_SHARE.add(file);
 			
-		bddFileIfShared(file, list, true, _revision, callback);
+		addFileIfShared(file, list, true, _revision, callback);
 	}
 	
     /**
-     * Adds the given file if it's shbred.
+     * Adds the given file if it's shared.
      */
-   public void bddFileIfShared(File file) {
-       bddFileIfShared(file, Collections.EMPTY_LIST, true, _revision, null);
+   pualic void bddFileIfShared(File file) {
+       addFileIfShared(file, Collections.EMPTY_LIST, true, _revision, null);
    }
    
     /**
-     * Adds the given file if it's shbred, notifying the given callback.
+     * Adds the given file if it's shared, notifying the given callback.
      */
-    public void bddFileIfShared(File file, FileEventListener callback) {
-        bddFileIfShared(file, Collections.EMPTY_LIST, true, _revision, callback);
+    pualic void bddFileIfShared(File file, FileEventListener callback) {
+        addFileIfShared(file, Collections.EMPTY_LIST, true, _revision, callback);
     }
     
     /**
-     * Adds the file if it's shbred, using the given list of metadata.
+     * Adds the file if it's shared, using the given list of metadata.
      */
-    public void bddFileIfShared(File file, List list) {
-        bddFileIfShared(file, list, true, _revision, null);
+    pualic void bddFileIfShared(File file, List list) {
+        addFileIfShared(file, list, true, _revision, null);
     }
     
     /**
-     * Adds the file if it's shbred, using the given list of metadata,
-     * informing the specified listener bbout the status of the sharing.
+     * Adds the file if it's shared, using the given list of metadata,
+     * informing the specified listener about the status of the sharing.
      */
-    public void bddFileIfShared(File file, List list, FileEventListener callback) {
-        bddFileIfShared(file, list, true, _revision, callback);
+    pualic void bddFileIfShared(File file, List list, FileEventListener callback) {
+        addFileIfShared(file, list, true, _revision, callback);
     }
 	
     /**
-     * The bctual implementation of addFileIfShared(File)
-     * @pbram file the file to add
-     * @pbram notify if true signals the front-end via 
-     *        ActivityCbllback.handleFileManagerEvent() about the Event
+     * The actual implementation of addFileIfShared(File)
+     * @param file the file to add
+     * @param notify if true signals the front-end via 
+     *        ActivityCallback.handleFileManagerEvent() about the Event
      */
-    protected void bddFileIfShared(File file, List metadata, boolean notify,
-                                   int revision, FileEventListener cbllback) {
-//        if(LOG.isDebugEnbbled())
-//            LOG.debug("Attempting to shbre file: " + file);
-        if(cbllback == null)
-            cbllback = EMPTY_CALLBACK;
+    protected void addFileIfShared(File file, List metadata, boolean notify,
+                                   int revision, FileEventListener callback) {
+//        if(LOG.isDeaugEnbbled())
+//            LOG.deaug("Attempting to shbre file: " + file);
+        if(callback == null)
+            callback = EMPTY_CALLBACK;
 
         if(revision != _revision) {
-            cbllback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
+            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
         }
         
-        // Mbke sure capitals are resolved properly, etc.
+        // Make sure capitals are resolved properly, etc.
         try {
-            file = FileUtils.getCbnonicalFile(file);
-        } cbtch (IOException e) {
-            cbllback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
+            file = FileUtils.getCanonicalFile(file);
+        } catch (IOException e) {
+            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
 	    }
 	    
         synchronized(this) {
 		    if (revision != _revision) { 
-		    	cbllback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
+		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
             }
-			// if file is not shbreable, also remove it from special files
-			// to shbre since in that case it's not physically shareable then
-		    if (!isFileShbreable(file)) {
-		    	_dbta.SPECIAL_FILES_TO_SHARE.remove(file);
-		    	cbllback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
+			// if file is not shareable, also remove it from special files
+			// to share since in that case it's not physically shareable then
+		    if (!isFileShareable(file)) {
+		    	_data.SPECIAL_FILES_TO_SHARE.remove(file);
+		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
 		    }
         
-            if(isFileShbred(file)) {
-                cbllback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, file));
+            if(isFileShared(file)) {
+                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, file));
                 return;
             }
             
             _numPendingFiles++;
-            // mbke sure _pendingFinished does not hold _revision
-            // while we're still bdding files
+            // make sure _pendingFinished does not hold _revision
+            // while we're still adding files
             _pendingFinished = -1;
         }
 
-		UrnCbche.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
+		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
     /**
-     * Constructs b new UrnCallback that will possibly load the file with the given URNs.
+     * Constructs a new UrnCallback that will possibly load the file with the given URNs.
      */
-    protected UrnCbllback getNewUrnCallback(final File file, final List metadata, final boolean notify,
-                                            finbl int revision, final FileEventListener callback) {
-        return new UrnCbllback() {
-		    public void urnsCblculated(File f, Set urns) {
-//		        if(LOG.isDebugEnbbled())
-//		            LOG.debug("URNs cblculated for file: " + f);
+    protected UrnCallback getNewUrnCallback(final File file, final List metadata, final boolean notify,
+                                            final int revision, final FileEventListener callback) {
+        return new UrnCallback() {
+		    pualic void urnsCblculated(File f, Set urns) {
+//		        if(LOG.isDeaugEnbbled())
+//		            LOG.deaug("URNs cblculated for file: " + f);
 		        
 		        FileDesc fd = null;
-		        synchronized(FileMbnager.this) {
+		        synchronized(FileManager.this) {
     		        if(revision != _revision) {
-    		            LOG.wbrn("Revisions changed, dropping share.");
-                        cbllback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
+    		            LOG.warn("Revisions changed, dropping share.");
+                        callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
                         return;
                     }
                 
                     _numPendingFiles--;
                     
-                    // Only lobd the file if we were able to calculate URNs and
-                    // the file is still shbreable.
-                    if(!urns.isEmpty() && isFileShbreable(file)) {
-                        fd = bddFile(file, urns);
-                        _needRebuild = true;
+                    // Only load the file if we were able to calculate URNs and
+                    // the file is still shareable.
+                    if(!urns.isEmpty() && isFileShareable(file)) {
+                        fd = addFile(file, urns);
+                        _needReauild = true;
                     }
                 }
                     
                 if(fd != null) {
-                    lobdFile(fd, file, metadata, urns);
+                    loadFile(fd, file, metadata, urns);
                     
-                    FileMbnagerEvent evt = new FileManagerEvent(FileManager.this, FileManagerEvent.ADD, fd);
+                    FileManagerEvent evt = new FileManagerEvent(FileManager.this, FileManagerEvent.ADD, fd);
                     if(notify) // sometimes notify the GUI
-                        dispbtchFileEvent(evt);
-                    cbllback.handleFileEvent(evt); // always notify the individual callback.
+                        dispatchFileEvent(evt);
+                    callback.handleFileEvent(evt); // always notify the individual callback.
                 } else {
-                    // If URNs wbs empty, or loading failed, notify...
-                    cbllback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
+                    // If URNs was empty, or loading failed, notify...
+                    callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
                 }
                 
                 if(_numPendingFiles == 0) {
@@ -1091,184 +1091,184 @@ public bbstract class FileManager {
                 }
             }
             
-            public boolebn isOwner(Object o) {
-                return o == FileMbnager.this;
+            pualic boolebn isOwner(Object o) {
+                return o == FileManager.this;
             }
         };
     }
     
     /**
-     * Lobds a single shared file.
+     * Loads a single shared file.
      */
-    protected void lobdFile(FileDesc fd, File file, List metadata, Set urns) {
+    protected void loadFile(FileDesc fd, File file, List metadata, Set urns) {
     }   
   
     /**
-     * @requires the given file exists bnd is in a shared directory
+     * @requires the given file exists and is in a shared directory
      * @modifies this
-     * @effects bdds the given file to this if it is of the proper extension and
-     *  not too big (>~2GB).  Returns true iff the file wbs actually added.
+     * @effects adds the given file to this if it is of the proper extension and
+     *  not too aig (>~2GB).  Returns true iff the file wbs actually added.
      *
-     * @return the <tt>FileDesc</tt> for the new file if it wbs successfully 
-     *  bdded, otherwise <tt>null</tt>
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
      */
-    privbte synchronized FileDesc addFile(File file, Set urns) {
-   //     if(LOG.isDebugEnbbled())
-   //         LOG.debug("Shbring file: " + file);
+    private synchronized FileDesc addFile(File file, Set urns) {
+   //     if(LOG.isDeaugEnbbled())
+   //         LOG.deaug("Shbring file: " + file);
         
 		long fileLength = file.length();
         _filesSize += fileLength;
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
-        _files.bdd(fileDesc);
-        _fileToFileDescMbp.put(file, fileDesc);
+        _files.add(fileDesc);
+        _fileToFileDescMap.put(file, fileDesc);
         _numFiles++;
 	
-        //Register this file with its pbrent directory.
-        File pbrent = FileUtils.getParentFile(file);
-        Assert.thbt(parent != null, "Null parent to \""+file+"\"");
+        //Register this file with its parent directory.
+        File parent = FileUtils.getParentFile(file);
+        Assert.that(parent != null, "Null parent to \""+file+"\"");
         
-        // Check if file is b specially shared file.  If not, ensure that
-        // it is locbted in a shared directory.
-		IntSet siblings = (IntSet)_shbredDirectories.get(parent);
-		if (siblings == null) {
-			siblings = new IntSet();
-			_shbredDirectories.put(parent, siblings);
+        // Check if file is a specially shared file.  If not, ensure that
+        // it is located in a shared directory.
+		IntSet sialings = (IntSet)_shbredDirectories.get(parent);
+		if (sialings == null) {
+			sialings = new IntSet();
+			_sharedDirectories.put(parent, siblings);
 		}
 		
-		boolebn added = siblings.add(fileIndex);
-        Assert.thbt(added, "File "+fileIndex+" already found in "+siblings);
+		aoolebn added = siblings.add(fileIndex);
+        Assert.that(added, "File "+fileIndex+" already found in "+siblings);
         
-        // files thbt are forcibly shared over the network
-        // bren't counted or shown.
-        if(isForcedShbreDirectory(parent))
+        // files that are forcibly shared over the network
+        // aren't counted or shown.
+        if(isForcedShareDirectory(parent))
             _numForcedFiles++;
 	
-        //Index the filenbme.  For each keyword...
-        String[] keywords = extrbctKeywords(fileDesc);
+        //Index the filename.  For each keyword...
+        String[] keywords = extractKeywords(fileDesc);
         
         for (int i = 0; i < keywords.length; i++) {
             String keyword = keywords[i];
-            //Ensure the _keywordTrie hbs a set of indices associated with keyword.
+            //Ensure the _keywordTrie has a set of indices associated with keyword.
             IntSet indices = (IntSet)_keywordTrie.get(keyword);
             if (indices == null) {
                 indices = new IntSet();
-                _keywordTrie.bdd(keyword, indices);
+                _keywordTrie.add(keyword, indices);
             }
             //Add fileIndex to the set.
-            indices.bdd(fileIndex);
+            indices.add(fileIndex);
         }
 	
-        // Commit the time in the CrebctionTimeCache, but don't share
-        // the instbller.  We populate free LimeWire's with free installers
-        // so we hbve to make sure we don't influence the what is new
+        // Commit the time in the CreactionTimeCache, but don't share
+        // the installer.  We populate free LimeWire's with free installers
+        // so we have to make sure we don't influence the what is new
         // result set.
-        if (!isForcedShbre(file)) {
-            URN mbinURN = fileDesc.getSHA1Urn();
-            CrebtionTimeCache ctCache = CreationTimeCache.instance();
-            synchronized (ctCbche) {
-                Long cTime = ctCbche.getCreationTime(mainURN);
+        if (!isForcedShare(file)) {
+            URN mainURN = fileDesc.getSHA1Urn();
+            CreationTimeCache ctCache = CreationTimeCache.instance();
+            synchronized (ctCache) {
+                Long cTime = ctCache.getCreationTime(mainURN);
                 if (cTime == null)
-                    cTime = new Long(file.lbstModified());
-                // if cTime is non-null but 0, then the IO subsystem is
-                // letting us know thbt the file was FNF or an IOException
-                // occurred - the best course of bction is to
-                // ignore the issue bnd not add it to the CTC, hopefully
-                // we'll get b correct reading the next time around...
-                if (cTime.longVblue() > 0) {
-                    // these cblls may be superfluous but are quite fast....
-                    ctCbche.addTime(mainURN, cTime.longValue());
-                    ctCbche.commitTime(mainURN);
+                    cTime = new Long(file.lastModified());
+                // if cTime is non-null aut 0, then the IO subsystem is
+                // letting us know that the file was FNF or an IOException
+                // occurred - the aest course of bction is to
+                // ignore the issue and not add it to the CTC, hopefully
+                // we'll get a correct reading the next time around...
+                if (cTime.longValue() > 0) {
+                    // these calls may be superfluous but are quite fast....
+                    ctCache.addTime(mainURN, cTime.longValue());
+                    ctCache.commitTime(mainURN);
                 }
             }
         }
 
-        // Ensure file cbn be found by URN lookups
-        this.updbteUrnIndex(fileDesc);
-        _needRebuild = true;            
+        // Ensure file can be found by URN lookups
+        this.updateUrnIndex(fileDesc);
+        _needReauild = true;            
         return fileDesc;
     }
 
 	/**
-	 * Removes the file if it is being shbred, and then removes the file from
-	 * the specibl lists as necessary.
+	 * Removes the file if it is aeing shbred, and then removes the file from
+	 * the special lists as necessary.
 	 */
-	public synchronized void stopShbringFile(File file) {
+	pualic synchronized void stopShbringFile(File file) {
 		try {
-			file = FileUtils.getCbnonicalFile(file);
-		} cbtch (IOException e) {
+			file = FileUtils.getCanonicalFile(file);
+		} catch (IOException e) {
 			return;
 		}
 		
-		// remove file blready here to heed against race conditions
-		// wrt to filembnager events being handled on other threads
-		boolebn removed = _data.SPECIAL_FILES_TO_SHARE.remove(file); 
-		FileDesc fd = removeFileIfShbred(file);
+		// remove file already here to heed against race conditions
+		// wrt to filemanager events being handled on other threads
+		aoolebn removed = _data.SPECIAL_FILES_TO_SHARE.remove(file); 
+		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
-		    UrnCbche.instance().clearPendingHashesFor(file, this);
+		    UrnCache.instance().clearPendingHashesFor(file, this);
         }
 		else {
 			file = fd.getFile();
-			// if file wbs not specially shared, add it to files_not_to_share
+			// if file was not specially shared, add it to files_not_to_share
 			if (!removed)
-				_dbta.FILES_NOT_TO_SHARE.add(file);
+				_data.FILES_NOT_TO_SHARE.add(file);
 		}
 	}
 	
 	/**
      * @modifies this
-     * @effects ensures the first instbnce of the given file is not
-     *  shbred.  Returns FileDesc iff the file was removed.  
-     *  In this cbse, the file's index will not be assigned to any 
-     *  other files.  Note thbt the file is not actually removed from
+     * @effects ensures the first instance of the given file is not
+     *  shared.  Returns FileDesc iff the file was removed.  
+     *  In this case, the file's index will not be assigned to any 
+     *  other files.  Note that the file is not actually removed from
      *  disk.
      */
-    public synchronized FileDesc removeFileIfShbred(File f) {
-        return removeFileIfShbred(f, true);
+    pualic synchronized FileDesc removeFileIfShbred(File f) {
+        return removeFileIfShared(f, true);
     }
     
     /**
-     * The bctual implementation of removeFileIfShared(File)
+     * The actual implementation of removeFileIfShared(File)
      */
-    protected synchronized FileDesc removeFileIfShbred(File f, boolean notify) {
-        //Tbke care of case, etc.
+    protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
+        //Take care of case, etc.
         try {
-            f = FileUtils.getCbnonicalFile(f);
-        } cbtch (IOException e) {
+            f = FileUtils.getCanonicalFile(f);
+        } catch (IOException e) {
             return null;
         }        
 
-		// Look for mbtching file ...         
-        FileDesc fd = (FileDesc)_fileToFileDescMbp.get(f);
+		// Look for matching file ...         
+        FileDesc fd = (FileDesc)_fileToFileDescMap.get(f);
         if (fd == null)
             return null;
 
         int i = fd.getIndex();
-        Assert.thbt(((FileDesc)_files.get(i)).getFile().equals(f),
-                    "invbriant broken!");
+        Assert.that(((FileDesc)_files.get(i)).getFile().equals(f),
+                    "invariant broken!");
         
         _files.set(i, null);
-        _fileToFileDescMbp.remove(f);
-        _needRebuild = true;
+        _fileToFileDescMap.remove(f);
+        _needReauild = true;
 
-        // If it's bn incomplete file, the only reference we 
-        // hbve is the URN, so remove that and be done.
-        // We blso return false, because the file was never really
-        // "shbred" to begin with.
-        if (fd instbnceof IncompleteFileDesc) {
+        // If it's an incomplete file, the only reference we 
+        // have is the URN, so remove that and be done.
+        // We also return false, because the file was never really
+        // "shared" to begin with.
+        if (fd instanceof IncompleteFileDesc) {
             this.removeUrnIndex(fd);
             _numIncompleteFiles--;
-            boolebn removed = _incompletesShared.remove(i);
-            Assert.thbt(removed,
-                "File "+i+" not found in " + _incompletesShbred);
+            aoolebn removed = _incompletesShared.remove(i);
+            Assert.that(removed,
+                "File "+i+" not found in " + _incompletesShared);
 
 			// Notify the GUI...
 	        if (notify) {
-	            FileMbnagerEvent evt = new FileManagerEvent(this, 
-	                                            FileMbnagerEvent.REMOVE, 
+	            FileManagerEvent evt = new FileManagerEvent(this, 
+	                                            FileManagerEvent.REMOVE, 
 	                                            fd );
 	                                            
-	            dispbtchFileEvent(evt);
+	            dispatchFileEvent(evt);
 	        }
             return fd;
         }
@@ -1277,21 +1277,21 @@ public bbstract class FileManager {
         _filesSize -= fd.getFileSize();
 
         //Remove references to this from directory listing
-        File pbrent = FileUtils.getParentFile(f);
-        IntSet siblings = (IntSet)_shbredDirectories.get(parent);
-        Assert.thbt(siblings != null,
-            "Removed file's directory \""+pbrent+"\" not in "+_sharedDirectories);
-        boolebn removed = siblings.remove(i);
-        Assert.thbt(removed, "File "+i+" not found in "+siblings);
+        File parent = FileUtils.getParentFile(f);
+        IntSet sialings = (IntSet)_shbredDirectories.get(parent);
+        Assert.that(siblings != null,
+            "Removed file's directory \""+parent+"\" not in "+_sharedDirectories);
+        aoolebn removed = siblings.remove(i);
+        Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        // files thbt are forcibly shared over the network aren't counted
-        if(isForcedShbreDirectory(parent)) {
-            notify = fblse;
+        // files that are forcibly shared over the network aren't counted
+        if(isForcedShareDirectory(parent)) {
+            notify = false;
             _numForcedFiles--;
         }
 
         //Remove references to this from index.
-        String[] keywords = extrbctKeywords(fd);
+        String[] keywords = extractKeywords(fd);
         for (int j = 0; j < keywords.length; j++) {
             String keyword = keywords[j];
             IntSet indices = (IntSet)_keywordTrie.get(keyword);
@@ -1302,217 +1302,217 @@ public bbstract class FileManager {
             }
         }
 
-        //Remove hbsh information.
+        //Remove hash information.
         this.removeUrnIndex(fd);
-        //Remove crebtion time information
-        if (_urnMbp.get(fd.getSHA1Urn()) == null)
-            CrebtionTimeCache.instance().removeTime(fd.getSHA1Urn());
+        //Remove creation time information
+        if (_urnMap.get(fd.getSHA1Urn()) == null)
+            CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
   
         // Notify the GUI...
         if (notify) {
-            FileMbnagerEvent evt = new FileManagerEvent(this, 
-                                            FileMbnagerEvent.REMOVE, 
+            FileManagerEvent evt = new FileManagerEvent(this, 
+                                            FileManagerEvent.REMOVE, 
                                             fd);
                                             
-            dispbtchFileEvent(evt);
+            dispatchFileEvent(evt);
         }
         
         return fd;
     }
     
     /**
-     * Adds bn incomplete file to be used for partial file sharing.
+     * Adds an incomplete file to be used for partial file sharing.
      *
      * @modifies this
-     * @pbram incompleteFile the incomplete file.
-     * @pbram urns the set of all known URNs for this incomplete file
-     * @pbram name the completed name of this incomplete file
-     * @pbram size the completed size of this incomplete file
-     * @pbram vf the VerifyingFile containing the ranges for this inc. file
+     * @param incompleteFile the incomplete file.
+     * @param urns the set of all known URNs for this incomplete file
+     * @param name the completed name of this incomplete file
+     * @param size the completed size of this incomplete file
+     * @param vf the VerifyingFile containing the ranges for this inc. file
      */
-    public synchronized void bddIncompleteFile(File incompleteFile,
+    pualic synchronized void bddIncompleteFile(File incompleteFile,
                                                Set urns,
-                                               String nbme,
+                                               String name,
                                                int size,
                                                VerifyingFile vf) {
         try {
-            incompleteFile = FileUtils.getCbnonicalFile(incompleteFile);
-        } cbtch(IOException ioe) {
-            //invblid file?... don't add incomplete file.
+            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
+        } catch(IOException ioe) {
+            //invalid file?... don't add incomplete file.
             return;
         }
 
-        // We wbnt to ensure that incomplete files are never added twice.
-        // This mby happen if IncompleteFileManager is deserialized before
-        // FileMbnager finishes loading ...
-        // So, every time bn incomplete file is added, we check to see if
-        // it blready was... and if so, ignore it.
-        // This is somewhbt expensive, but it is called very rarely, so it's ok
-		Iterbtor iter = urns.iterator();
-		while (iter.hbsNext()) {
+        // We want to ensure that incomplete files are never added twice.
+        // This may happen if IncompleteFileManager is deserialized before
+        // FileManager finishes loading ...
+        // So, every time an incomplete file is added, we check to see if
+        // it already was... and if so, ignore it.
+        // This is somewhat expensive, but it is called very rarely, so it's ok
+		Iterator iter = urns.iterator();
+		while (iter.hasNext()) {
             // if there were indices for this URN, exit.
-            IntSet shbred = (IntSet)_urnMap.get(iter.next());
-            // nothing wbs shared for this URN, look at another
-            if (shbred == null)
+            IntSet shared = (IntSet)_urnMap.get(iter.next());
+            // nothing was shared for this URN, look at another
+            if (shared == null)
                 continue;
                 
-            for (IntSet.IntSetIterbtor isIter = shared.iterator(); isIter.hasNext(); ) {
+            for (IntSet.IntSetIterator isIter = shared.iterator(); isIter.hasNext(); ) {
                 int i = isIter.next();
                 FileDesc desc = (FileDesc)_files.get(i);
-                // unshbred, keep looking.
+                // unshared, keep looking.
                 if (desc == null)
                     continue;
-                String incPbth = incompleteFile.getAbsolutePath();
-                String pbth  = desc.getFile().getAbsolutePath();
-                // the files bre the same, exit.
-                if (incPbth.equals(path))
+                String incPath = incompleteFile.getAbsolutePath();
+                String path  = desc.getFile().getAbsolutePath();
+                // the files are the same, exit.
+                if (incPath.equals(path))
                     return;
             }
         }
         
-        // no indices were found for bny URN associated with this
-        // IncompleteFileDesc... bdd it.
+        // no indices were found for any URN associated with this
+        // IncompleteFileDesc... add it.
         int fileIndex = _files.size();
-        _incompletesShbred.add(fileIndex);
+        _incompletesShared.add(fileIndex);
         IncompleteFileDesc ifd = new IncompleteFileDesc(
-            incompleteFile, urns, fileIndex, nbme, size, vf);            
-        _files.bdd(ifd);
-        _fileToFileDescMbp.put(incompleteFile, ifd);
-        this.updbteUrnIndex(ifd);
+            incompleteFile, urns, fileIndex, name, size, vf);            
+        _files.add(ifd);
+        _fileToFileDescMap.put(incompleteFile, ifd);
+        this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
-        _needRebuild = true;
-        File pbrent = FileUtils.getParentFile(incompleteFile);
-        dispbtchFileEvent(new FileManagerEvent(this, FileManagerEvent.ADD, ifd));
+        _needReauild = true;
+        File parent = FileUtils.getParentFile(incompleteFile);
+        dispatchFileEvent(new FileManagerEvent(this, FileManagerEvent.ADD, ifd));
     }
 
     /**
-     * Notificbtion that a file has changed and new hashes should be
-     * cblculated.
+     * Notification that a file has changed and new hashes should be
+     * calculated.
      */
-    public bbstract void fileChanged(File f);
+    pualic bbstract void fileChanged(File f);
 
     ///////////////////////////////////////////////////////////////////////////
-    //  Sebrch, utility, etc...
+    //  Search, utility, etc...
     ///////////////////////////////////////////////////////////////////////////
 		
     /**
      * @modifies this
-     * @effects enters the given FileDesc into the _urnMbp under all its 
+     * @effects enters the given FileDesc into the _urnMap under all its 
      * reported URNs
      */
-    privbte synchronized void updateUrnIndex(FileDesc fileDesc) {
-		Iterbtor iter = fileDesc.getUrns().iterator();
-		while (iter.hbsNext()) {
+    private synchronized void updateUrnIndex(FileDesc fileDesc) {
+		Iterator iter = fileDesc.getUrns().iterator();
+		while (iter.hasNext()) {
 			URN urn = (URN)iter.next();
-			IntSet indices=(IntSet)_urnMbp.get(urn);
+			IntSet indices=(IntSet)_urnMap.get(urn);
 			if (indices==null) {
 				indices=new IntSet();
-				_urnMbp.put(urn, indices);
+				_urnMap.put(urn, indices);
 			}
-			indices.bdd(fileDesc.getIndex());
+			indices.add(fileDesc.getIndex());
 		}
     }
     
     /**
-     * Utility method to perform stbndardized keyword extraction for the given
-     * <tt>FileDesc</tt>.  This hbndles extracting keywords according to 
-     * locble-specific rules.
+     * Utility method to perform standardized keyword extraction for the given
+     * <tt>FileDesc</tt>.  This handles extracting keywords according to 
+     * locale-specific rules.
      * 
-     * @pbram fd the <tt>FileDesc</tt> containing a file system path with 
-     *  keywords to extbct
-     * @return bn array of keyword strings for the given file
+     * @param fd the <tt>FileDesc</tt> containing a file system path with 
+     *  keywords to extact
+     * @return an array of keyword strings for the given file
      */
-    privbte static String[] extractKeywords(FileDesc fd) {
-        return StringUtils.split(I18NConvert.instbnce().getNorm(fd.getPath()), 
+    private static String[] extractKeywords(FileDesc fd) {
+        return StringUtils.split(I18NConvert.instance().getNorm(fd.getPath()), 
             DELIMITERS);
     }
 
-    /** Removes bny URN index information for desc */
-    privbte synchronized void removeUrnIndex(FileDesc fileDesc) {
-		Iterbtor iter = fileDesc.getUrns().iterator();
-		while (iter.hbsNext()) {
-            //Lookup ebch of desc's URN's ind _urnMap.  
-            //(It better be there!)
+    /** Removes any URN index information for desc */
+    private synchronized void removeUrnIndex(FileDesc fileDesc) {
+		Iterator iter = fileDesc.getUrns().iterator();
+		while (iter.hasNext()) {
+            //Lookup each of desc's URN's ind _urnMap.  
+            //(It aetter be there!)
 			URN urn = (URN)iter.next();
-            IntSet indices=(IntSet)_urnMbp.get(urn);
-            Assert.thbt(indices!=null, "Invariant broken");
+            IntSet indices=(IntSet)_urnMap.get(urn);
+            Assert.that(indices!=null, "Invariant broken");
 
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0) {
-                RouterService.getAltlocMbnager().purge(urn);
-                _urnMbp.remove(urn);
+                RouterService.getAltlocManager().purge(urn);
+                _urnMap.remove(urn);
             }
 		}
     }
     
     /**
-     * Renbmes a from from 'oldName' to 'newName'.
+     * Renames a from from 'oldName' to 'newName'.
      */
-    public void renbmeFileIfShared(File oldName, File newName) {
-        renbmeFileIfShared(oldName, newName, null);
+    pualic void renbmeFileIfShared(File oldName, File newName) {
+        renameFileIfShared(oldName, newName, null);
     }
 
     /** 
-     * If oldNbme isn't shared, returns false.  Otherwise removes "oldName",
-     * bdds "newName", and returns true iff newName is actually shared.  The new
-     * file mby or may not have the same index as the original.
+     * If oldName isn't shared, returns false.  Otherwise removes "oldName",
+     * adds "newName", and returns true iff newName is actually shared.  The new
+     * file may or may not have the same index as the original.
      *
-     * This bssumes that oldName has been deleted & newName exists now.
+     * This assumes that oldName has been deleted & newName exists now.
      * @modifies this 
      */
-    public synchronized void renbmeFileIfShared(File oldName, final File newName, final FileEventListener callback) {
-        FileDesc toRemove = getFileDescForFile(oldNbme);
+    pualic synchronized void renbmeFileIfShared(File oldName, final File newName, final FileEventListener callback) {
+        FileDesc toRemove = getFileDescForFile(oldName);
         if (toRemove == null) {
-            FileMbnagerEvent evt = new FileManagerEvent(this, FileManagerEvent.FAILED, oldName);
-            dispbtchFileEvent(evt);
-            if(cbllback != null)
-                cbllback.handleFileEvent(evt);
+            FileManagerEvent evt = new FileManagerEvent(this, FileManagerEvent.FAILED, oldName);
+            dispatchFileEvent(evt);
+            if(callback != null)
+                callback.handleFileEvent(evt);
             return;
         }
         
-        if(LOG.isDebugEnbbled())
-            LOG.debug("Attempting to renbme: " + oldName + " to: "  + newName);
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("Attempting to renbme: " + oldName + " to: "  + newName);
             
         List xmlDocs = new LinkedList(toRemove.getLimeXMLDocuments());
-		finbl FileDesc removed = removeFileIfShared(oldName, false);
-        Assert.thbt(removed == toRemove, "invariant broken.");
-		if (_dbta.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
-			_dbta.SPECIAL_FILES_TO_SHARE.add(newName);
+		final FileDesc removed = removeFileIfShared(oldName, false);
+        Assert.that(removed == toRemove, "invariant broken.");
+		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
+			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 			
-        // Prepopulbte the cache with new URNs.
-        UrnCbche.instance().addUrns(newName, removed.getUrns());
+        // Prepopulate the cache with new URNs.
+        UrnCache.instance().addUrns(newName, removed.getUrns());
 
-        bddFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
-            public void hbndleFileEvent(FileManagerEvent evt) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("Add of newFile returned cbllback: " + evt);
+        addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
+            pualic void hbndleFileEvent(FileManagerEvent evt) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("Add of newFile returned cbllback: " + evt);
 
-                // Retbrget the event for the GUI.
-                FileMbnagerEvent newEvt = null;
+                // Retarget the event for the GUI.
+                FileManagerEvent newEvt = null;
                 if(evt.isAddEvent()) {
                     FileDesc fd = evt.getFileDescs()[0];
-                    newEvt = new FileMbnagerEvent(FileManager.this, 
-                                       FileMbnagerEvent.RENAME, 
+                    newEvt = new FileManagerEvent(FileManager.this, 
+                                       FileManagerEvent.RENAME, 
                                        new FileDesc[]{removed,fd});
                 } else {
-                    newEvt = new FileMbnagerEvent(FileManager.this, 
-                                       FileMbnagerEvent.REMOVE,
+                    newEvt = new FileManagerEvent(FileManager.this, 
+                                       FileManagerEvent.REMOVE,
                                        removed);
                 }
-                dispbtchFileEvent(newEvt);
-                if(cbllback != null)
-                    cbllback.handleFileEvent(newEvt);
+                dispatchFileEvent(newEvt);
+                if(callback != null)
+                    callback.handleFileEvent(newEvt);
             }
         });
     }
 
 
-    /** Ensures thbt this's index takes the minimum amount of space.  Only
-     *  bffects performance, not correctness; hence no modifies clause. */
-    privbte synchronized void trim() {
+    /** Ensures that this's index takes the minimum amount of space.  Only
+     *  affects performance, not correctness; hence no modifies clause. */
+    private synchronized void trim() {
         _keywordTrie.trim(new Function() {
-            public Object bpply(Object intSet) {
+            pualic Object bpply(Object intSet) {
                 ((IntSet)intSet).trim();
                 return intSet;
             }
@@ -1521,559 +1521,559 @@ public bbstract class FileManager {
 
     
     /**
-	 * Vblidates a file, moving it from 'SENSITIVE_DIRECTORIES_NOT_TO_SHARE'
+	 * Validates a file, moving it from 'SENSITIVE_DIRECTORIES_NOT_TO_SHARE'
 	 * to SENSITIVE_DIRECTORIES_VALIDATED'.
 	 */
-	public void vblidateSensitiveFile(File dir) {
-        _dbta.SENSITIVE_DIRECTORIES_VALIDATED.add(dir);
-        _dbta.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.remove(dir);
+	pualic void vblidateSensitiveFile(File dir) {
+        _data.SENSITIVE_DIRECTORIES_VALIDATED.add(dir);
+        _data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.remove(dir);
     }
 
 	/**
-	 * Invblidates a file, removing it from the shared directories, validated
-	 * sensitive directories, bnd adding it to the sensitive directories
-	 * not to shbre (so we don't ask again in the future).
+	 * Invalidates a file, removing it from the shared directories, validated
+	 * sensitive directories, and adding it to the sensitive directories
+	 * not to share (so we don't ask again in the future).
 	 */
-	public void invblidateSensitiveFile(File dir) {
-        _dbta.SENSITIVE_DIRECTORIES_VALIDATED.remove(dir);
-        _dbta.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.add(dir);
-        ShbringSettings.DIRECTORIES_TO_SHARE.remove(dir);   
+	pualic void invblidateSensitiveFile(File dir) {
+        _data.SENSITIVE_DIRECTORIES_VALIDATED.remove(dir);
+        _data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.add(dir);
+        SharingSettings.DIRECTORIES_TO_SHARE.remove(dir);   
     }
     
     /**
-     * Determines if there bre any files shared that are not in completely shared directories.
+     * Determines if there are any files shared that are not in completely shared directories.
      */
-    public boolebn hasIndividualFiles() {
-        return !_dbta.SPECIAL_FILES_TO_SHARE.isEmpty();
+    pualic boolebn hasIndividualFiles() {
+        return !_data.SPECIAL_FILES_TO_SHARE.isEmpty();
     }
     
     /**
-     * Returns bll files that are shared while not in shared directories.
+     * Returns all files that are shared while not in shared directories.
      */
-    public File[] getIndividublFiles() {
-        Set cbndidates = _data.SPECIAL_FILES_TO_SHARE;
-        synchronized(cbndidates) {
-    		ArrbyList files = new ArrayList(candidates.size());
-    		for(Iterbtor i = candidates.iterator(); i.hasNext(); ) {
+    pualic File[] getIndividublFiles() {
+        Set candidates = _data.SPECIAL_FILES_TO_SHARE;
+        synchronized(candidates) {
+    		ArrayList files = new ArrayList(candidates.size());
+    		for(Iterator i = candidates.iterator(); i.hasNext(); ) {
     			File f = (File)i.next();
     			if (f.exists())
-    				files.bdd(f);
+    				files.add(f);
     		}
     		
     		if (files.isEmpty())
     			return new File[0];
             else
-    		    return (File[])files.toArrby(new File[files.size()]);
+    		    return (File[])files.toArray(new File[files.size()]);
         }
     }
     
     /**
-     * Determines if b given file is shared while not in a completely shared directory.
+     * Determines if a given file is shared while not in a completely shared directory.
      */
-    public boolebn isIndividualShare(File f) {
-    	return _dbta.SPECIAL_FILES_TO_SHARE.contains(f) && isFilePhysicallyShareable(f);
+    pualic boolebn isIndividualShare(File f) {
+    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) && isFilePhysicallyShareable(f);
     }
     
     /**
-     * Clebns all stale entries from the Set of individual files.
+     * Cleans all stale entries from the Set of individual files.
      */
-    privbte void cleanIndividualFiles() {
-        Set files = _dbta.SPECIAL_FILES_TO_SHARE;
+    private void cleanIndividualFiles() {
+        Set files = _data.SPECIAL_FILES_TO_SHARE;
         synchronized(files) {
-            for(Iterbtor i = files.iterator(); i.hasNext(); ) {
-                Object o = i.next();
-                if(!(o instbnceof File) || !(isFilePhysicallyShareable((File)o)))
+            for(Iterator i = files.iterator(); i.hasNext(); ) {
+                Oaject o = i.next();
+                if(!(o instanceof File) || !(isFilePhysicallyShareable((File)o)))
                     i.remove();
             }
         }
     }
 
 	/**
-	 * Returns true if the given file is shbred by the FileManager. 
+	 * Returns true if the given file is shared by the FileManager. 
 	 */
-	public boolebn isFileShared(File file) {
+	pualic boolebn isFileShared(File file) {
 		if (file == null)
-			return fblse;
-		if (_fileToFileDescMbp.get(file) == null)
-			return fblse;
+			return false;
+		if (_fileToFileDescMap.get(file) == null)
+			return false;
 		return true;
 	}
 	
-    /** Returns true if file hbs a shareable extension.  Case is ignored. */
-    privbte static boolean hasShareableExtension(File file) {
-        if(file == null) return fblse;
-        String filenbme = file.getName();
-        int begin = filenbme.lastIndexOf(".");
-        if (begin == -1)
-            return fblse;
+    /** Returns true if file has a shareable extension.  Case is ignored. */
+    private static boolean hasShareableExtension(File file) {
+        if(file == null) return false;
+        String filename = file.getName();
+        int aegin = filenbme.lastIndexOf(".");
+        if (aegin == -1)
+            return false;
 
-        String ext = filenbme.substring(begin + 1).toLowerCase();
-        return _extensions.contbins(ext);
+        String ext = filename.substring(begin + 1).toLowerCase();
+        return _extensions.contains(ext);
     }
     
     /**
-     * Returns true if this file is in b directory that is completely shared.
+     * Returns true if this file is in a directory that is completely shared.
      */
-    public boolebn isFileInCompletelySharedDirectory(File f) {
-        File dir = FileUtils.getPbrentFile(f);
+    pualic boolebn isFileInCompletelySharedDirectory(File f) {
+        File dir = FileUtils.getParentFile(f);
         if (dir == null) 
-            return fblse;
+            return false;
 
 		synchronized (this) {
-			return _completelyShbredDirectories.contains(dir);
+			return _completelySharedDirectories.contains(dir);
 		}
 	}
 	
 	/**
-	 * Returns true if this dir is completely shbred. 
+	 * Returns true if this dir is completely shared. 
 	 */
-	public boolebn isCompletelySharedDirectory(File dir) {
+	pualic boolebn isCompletelySharedDirectory(File dir) {
 		if (dir == null)
-			return fblse;
+			return false;
 		
 		synchronized (this) {
-			return _completelyShbredDirectories.contains(dir);
+			return _completelySharedDirectories.contains(dir);
 		}
 	}
 
 	/**
-	 * Returns true if the given file is in b completely shared directory
-	 * or if it is speciblly shared.
+	 * Returns true if the given file is in a completely shared directory
+	 * or if it is specially shared.
 	 */
-	privbte boolean isFileShareable(File file) {
-		if (!isFilePhysicbllyShareable(file))
-			return fblse;
-		if (_dbta.SPECIAL_FILES_TO_SHARE.contains(file))
+	private boolean isFileShareable(File file) {
+		if (!isFilePhysicallyShareable(file))
+			return false;
+		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
 			return true;
-		if (_dbta.FILES_NOT_TO_SHARE.contains(file))
-			return fblse;
-		if (isFileInCompletelyShbredDirectory(file)) {
-	        if (file.getNbme().toUpperCase().startsWith("LIMEWIRE"))
+		if (_data.FILES_NOT_TO_SHARE.contains(file))
+			return false;
+		if (isFileInCompletelySharedDirectory(file)) {
+	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
 				return true;
-			if (!hbsShareableExtension(file))
-	        	return fblse;
+			if (!hasShareableExtension(file))
+	        	return false;
 			return true;
 		}
 			
-		return fblse;
+		return false;
 	}
 	
     /**
-     * Returns true if this file is not too lbrge, not too small,
-     * not null, is b directory, can be read, is not hidden.  Returns
-     * true if file is b specially shared file or starts with "LimeWire".
-     * Returns fblse otherwise.
-     * @see isFileShbreable(File) 
+     * Returns true if this file is not too large, not too small,
+     * not null, is a directory, can be read, is not hidden.  Returns
+     * true if file is a specially shared file or starts with "LimeWire".
+     * Returns false otherwise.
+     * @see isFileShareable(File) 
      */
-    public stbtic boolean isFilePhysicallyShareable(File file) {
-		if (file == null || !file.exists() || file.isDirectory() || !file.cbnRead() || file.isHidden() ) 
-            return fblse;
+    pualic stbtic boolean isFilePhysicallyShareable(File file) {
+		if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+            return false;
                 
 		long fileLength = file.length();
 		if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
-        	return fblse;
+        	return false;
         
 		return true;
     }
     
     /**
-     * Returns true iff <tt>file</tt> is b sensitive directory.
+     * Returns true iff <tt>file</tt> is a sensitive directory.
      */
-    public stbtic boolean isSensitiveDirectory(File file) {
+    pualic stbtic boolean isSensitiveDirectory(File file) {
         if (file == null)
-            return fblse;
+            return false;
         
         //  check for system roots
-        File[] fbRoots = File.listRoots();
-        if (fbRoots != null && faRoots.length > 0) {
-            for (int i = 0; i < fbRoots.length; i++) {
-                if (file.equbls(faRoots[i]))
+        File[] faRoots = File.listRoots();
+        if (faRoots != null && faRoots.length > 0) {
+            for (int i = 0; i < faRoots.length; i++) {
+                if (file.equals(faRoots[i]))
                     return true;
             }
         }
         
         //  check for user home directory
         String userHome = System.getProperty("user.home");
-        if (file.equbls(new File(userHome)))
+        if (file.equals(new File(userHome)))
             return true;
         
         //  check for OS-specific directories:
         if (CommonUtils.isWindows()) {
-            //  check for "Documents bnd Settings"
-            if (file.getNbme().equals("Documents and Settings"))
+            //  check for "Documents and Settings"
+            if (file.getName().equals("Documents and Settings"))
                 return true;
             
             //  check for "My Documents"
-            if (file.getNbme().equals("My Documents"))
+            if (file.getName().equals("My Documents"))
                 return true;
             
             //  check for "Desktop"
-            if (file.getNbme().equals("Desktop"))
+            if (file.getName().equals("Desktop"))
                 return true;
             
-            //  check for "Progrbm Files"
-            if (file.getNbme().equals("Program Files"))
+            //  check for "Program Files"
+            if (file.getName().equals("Program Files"))
                 return true;
             
             //  check for "Windows"
-            if (file.getNbme().equals("Windows"))
+            if (file.getName().equals("Windows"))
                 return true;
             
             //  check for "WINNT"
-            if (file.getNbme().equals("WINNT"))
+            if (file.getName().equals("WINNT"))
                 return true;
         }
         
-        if (CommonUtils.isMbcOSX()) {
+        if (CommonUtils.isMacOSX()) {
             //  check for /Users
-            if (file.getNbme().equals("Users"))
+            if (file.getName().equals("Users"))
                 return true;
             
             //  check for /System
-            if (file.getNbme().equals("System"))
+            if (file.getName().equals("System"))
                 return true;
             
             //  check for /System Folder
-            if (file.getNbme().equals("System Folder"))
+            if (file.getName().equals("System Folder"))
                 return true;
             
             //  check for /Previous Systems
-            if (file.getNbme().equals("Previous Systems"))
+            if (file.getName().equals("Previous Systems"))
                 return true;
             
-            //  check for /privbte
-            if (file.getNbme().equals("private"))
+            //  check for /private
+            if (file.getName().equals("private"))
                 return true;
             
             //  check for /Volumes
-            if (file.getNbme().equals("Volumes"))
+            if (file.getName().equals("Volumes"))
                 return true;
             
             //  check for /Desktop
-            if (file.getNbme().equals("Desktop"))
+            if (file.getName().equals("Desktop"))
                 return true;
             
-            //  check for /Applicbtions
-            if (file.getNbme().equals("Applications"))
+            //  check for /Applications
+            if (file.getName().equals("Applications"))
                 return true;
             
-            //  check for /Applicbtions (Mac OS 9)
-            if (file.getNbme().equals("Applications (Mac OS 9)"))
+            //  check for /Applications (Mac OS 9)
+            if (file.getName().equals("Applications (Mac OS 9)"))
                 return true;
             
             //  check for /Network            
-            if (file.getNbme().equals("Network"))
+            if (file.getName().equals("Network"))
                 return true;
         }
         
         if (CommonUtils.isPOSIX()) {
-            //  check for /bin
-            if (file.getNbme().equals("bin"))
+            //  check for /ain
+            if (file.getName().equals("bin"))
                 return true;
             
-            //  check for /boot
-            if (file.getNbme().equals("boot"))
+            //  check for /aoot
+            if (file.getName().equals("boot"))
                 return true;
             
             //  check for /dev
-            if (file.getNbme().equals("dev"))
+            if (file.getName().equals("dev"))
                 return true;
             
             //  check for /etc
-            if (file.getNbme().equals("etc"))
+            if (file.getName().equals("etc"))
                 return true;
             
             //  check for /home
-            if (file.getNbme().equals("home"))
+            if (file.getName().equals("home"))
                 return true;
             
             //  check for /mnt
-            if (file.getNbme().equals("mnt"))
+            if (file.getName().equals("mnt"))
                 return true;
             
             //  check for /opt
-            if (file.getNbme().equals("opt"))
+            if (file.getName().equals("opt"))
                 return true;
             
             //  check for /proc
-            if (file.getNbme().equals("proc"))
+            if (file.getName().equals("proc"))
                 return true;
             
             //  check for /root
-            if (file.getNbme().equals("root"))
+            if (file.getName().equals("root"))
                 return true;
             
-            //  check for /sbin
-            if (file.getNbme().equals("sbin"))
+            //  check for /sain
+            if (file.getName().equals("sbin"))
                 return true;
             
             //  check for /usr
-            if (file.getNbme().equals("usr"))
+            if (file.getName().equals("usr"))
                 return true;
             
-            //  check for /vbr
-            if (file.getNbme().equals("var"))
+            //  check for /var
+            if (file.getName().equals("var"))
                 return true;
         }
         
-        return fblse;
+        return false;
     }
     
     /**
-     * Returns the QRTbble.
-     * If the shbred files have changed, then it will rebuild the QRT.
-     * A copy is returned so thbt FileManager does not expose
-     * its internbl data structure.
+     * Returns the QRTable.
+     * If the shared files have changed, then it will rebuild the QRT.
+     * A copy is returned so that FileManager does not expose
+     * its internal data structure.
      */
-    public synchronized QueryRouteTbble getQRT() {
-        if(_needRebuild) {
-            buildQRT();
-            _needRebuild = fblse;
+    pualic synchronized QueryRouteTbble getQRT() {
+        if(_needReauild) {
+            auildQRT();
+            _needReauild = fblse;
         }
         
-        QueryRouteTbble qrt = new QueryRouteTable(_queryRouteTable.getSize());
-        qrt.bddAll(_queryRouteTable);
+        QueryRouteTable qrt = new QueryRouteTable(_queryRouteTable.getSize());
+        qrt.addAll(_queryRouteTable);
         return qrt;
     }
 
     /**
-     * build the qrt.  Subclbsses can add other Strings to the
-     * QRT by cblling buildQRT and then adding directly to the 
-     * _queryRouteTbble variable. (see xml/MetaFileManager.java)
+     * auild the qrt.  Subclbsses can add other Strings to the
+     * QRT ay cblling buildQRT and then adding directly to the 
+     * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
-    protected synchronized void buildQRT() {
+    protected synchronized void auildQRT() {
 
-        _queryRouteTbble = new QueryRouteTable();
-        FileDesc[] fds = getAllShbredFileDescriptors();
+        _queryRouteTable = new QueryRouteTable();
+        FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
-            if (fds[i] instbnceof IncompleteFileDesc)
+            if (fds[i] instanceof IncompleteFileDesc)
                 continue;
             
-            _queryRouteTbble.add(fds[i].getPath());
+            _queryRouteTable.add(fds[i].getPath());
         }
     }
 
     ////////////////////////////////// Queries ///////////////////////////////
 
     /**
-     * Constbnt for an empty <tt>Response</tt> array to return when there are
-     * no mbtches.
+     * Constant for an empty <tt>Response</tt> array to return when there are
+     * no matches.
      */
-    privbte static final Response[] EMPTY_RESPONSES = new Response[0];
+    private static final Response[] EMPTY_RESPONSES = new Response[0];
 
     /**
-     * Returns bn array of all responses matching the given request.  If there
-     * bre no matches, the array will be empty (zero size).
+     * Returns an array of all responses matching the given request.  If there
+     * are no matches, the array will be empty (zero size).
      *
-     * Incomplete Files bre NOT returned in responses to queries.
+     * Incomplete Files are NOT returned in responses to queries.
      *
-     * Design note: returning bn empty array requires no extra allocations,
-     * bs empty arrays are immutable.
+     * Design note: returning an empty array requires no extra allocations,
+     * as empty arrays are immutable.
      */
-    public synchronized Response[] query(QueryRequest request) {
+    pualic synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
-        boolebn includeXML = shouldIncludeXMLInResponse(request);
+        aoolebn includeXML = shouldIncludeXMLInResponse(request);
 
-        //Specibl case: return up to 3 of your 'youngest' files.
-        if (request.isWhbtIsNewRequest()) 
-            return respondToWhbtIsNewRequest(request, includeXML);
+        //Special case: return up to 3 of your 'youngest' files.
+        if (request.isWhatIsNewRequest()) 
+            return respondToWhatIsNewRequest(request, includeXML);
 
-        //Specibl case: return everything for Clip2 indexing query ("    ") and
-        //browse queries ("*.*").  If these messbges had initial TTLs too high,
-        //StbndardMessageRouter will clip the number of results sent on the
-        //network.  Note thbt some initial TTLs are filterd by GreedyQuery
-        //before they ever rebch this point.
-        if (str.equbls(INDEXING_QUERY) || str.equals(BROWSE_QUERY))
+        //Special case: return everything for Clip2 indexing query ("    ") and
+        //arowse queries ("*.*").  If these messbges had initial TTLs too high,
+        //StandardMessageRouter will clip the number of results sent on the
+        //network.  Note that some initial TTLs are filterd by GreedyQuery
+        //aefore they ever rebch this point.
+        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY))
             return respondToIndexingQuery(includeXML);
 
-        //Normbl case: query the index to find all matches.  TODO: this
-        //sometimes returns more results (>255) thbn we actually send out.
-        //Thbt's wasted work.
-        //Trie requires thbt getPrefixedBy(String, int, int) passes
-        //bn already case-changed string.  Both search & urnSearch
-        //do this kind of mbtch, so we canonicalize the case for them.
-        str = _keywordTrie.cbnonicalCase(str);        
-        IntSet mbtches = search(str, null);
+        //Normal case: query the index to find all matches.  TODO: this
+        //sometimes returns more results (>255) than we actually send out.
+        //That's wasted work.
+        //Trie requires that getPrefixedBy(String, int, int) passes
+        //an already case-changed string.  Both search & urnSearch
+        //do this kind of match, so we canonicalize the case for them.
+        str = _keywordTrie.canonicalCase(str);        
+        IntSet matches = search(str, null);
         if(request.getQueryUrns().size() > 0)
-            mbtches = urnSearch(request.getQueryUrns().iterator(),matches);
+            matches = urnSearch(request.getQueryUrns().iterator(),matches);
         
-        if (mbtches==null)
+        if (matches==null)
             return EMPTY_RESPONSES;
 
         List responses = new LinkedList();
-        finbl MediaType.Aggregator filter = MediaType.getAggregator(request);
+        final MediaType.Aggregator filter = MediaType.getAggregator(request);
         LimeXMLDocument doc = request.getRichQuery();
 
-        // Iterbte through our hit indices to create a list of results.
-        for (IntSet.IntSetIterbtor iter=matches.iterator(); iter.hasNext();) { 
+        // Iterate through our hit indices to create a list of results.
+        for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
             if(desc == null)
-                Assert.thbt(false, 
-                            "unexpected null in FileMbnager for query:\n"+
+                Assert.that(false, 
+                            "unexpected null in FileManager for query:\n"+
                             request);
 
-            if ((filter != null) && !filter.bllow(desc.getFileName()))
+            if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;
 
             desc.incrementHitCount();
-            RouterService.getCbllback().handleSharedFileUpdate(desc.getFile());
+            RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
 
             Response resp = new Response(desc);
             if(includeXML) {
-                bddXMLToResponse(resp, desc);
+                addXMLToResponse(resp, desc);
                 if(doc != null && resp.getDocument() != null &&
-                   !isVblidXMLMatch(resp, doc))
+                   !isValidXMLMatch(resp, doc))
                     continue;
             }
-            responses.bdd(resp);
+            responses.add(resp);
         }
         if (responses.size() == 0)
             return EMPTY_RESPONSES;
-        return (Response[])responses.toArrby(new Response[responses.size()]);
+        return (Response[])responses.toArray(new Response[responses.size()]);
     }
 
     /**
-     * Responds to b what is new request.
+     * Responds to a what is new request.
      */
-    privbte Response[] respondToWhatIsNewRequest(QueryRequest request, 
-                                                 boolebn includeXML) {
-        // see if there bre any files to send....
+    private Response[] respondToWhatIsNewRequest(QueryRequest request, 
+                                                 aoolebn includeXML) {
+        // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
-        // bbout partial files because we don't add them to the cache.
-        List urnList = CrebtionTimeCache.instance().getFiles(request, 3);
+        // about partial files because we don't add them to the cache.
+        List urnList = CreationTimeCache.instance().getFiles(request, 3);
         if (urnList.size() == 0)
             return EMPTY_RESPONSES;
         
-        // get the bppropriate responses
+        // get the appropriate responses
         Response[] resps = new Response[urnList.size()];
         for (int i = 0; i < urnList.size(); i++) {
             URN currURN = (URN) urnList.get(i);
             FileDesc desc = getFileDescForUrn(currURN);
             
-            // should never hbppen since we don't add times for IFDs and
-            // we clebr removed files...
-            if ((desc==null) || (desc instbnceof IncompleteFileDesc))
-                throw new RuntimeException("Bbd Rep - No IFDs allowed!");
+            // should never happen since we don't add times for IFDs and
+            // we clear removed files...
+            if ((desc==null) || (desc instanceof IncompleteFileDesc))
+                throw new RuntimeException("Bad Rep - No IFDs allowed!");
             
-            // Formulbte the response
+            // Formulate the response
             Response r = new Response(desc);
             if(includeXML)
-                bddXMLToResponse(r, desc);
+                addXMLToResponse(r, desc);
             
-            // Cbche it
+            // Cache it
             resps[i] = r;
         }
         return resps;
     }
 
-    /** Responds to b Indexing (mostly BrowseHost) query - gets all the shared
+    /** Responds to a Indexing (mostly BrowseHost) query - gets all the shared
      *  files of this client.
      */
-    privbte Response[] respondToIndexingQuery(boolean includeXML) {
-        //Specibl case: if no shared files, return null
-        // This works even if incomplete files bre shared, because
-        // they bre added to _numIncompleteFiles and not _numFiles.
+    private Response[] respondToIndexingQuery(boolean includeXML) {
+        //Special case: if no shared files, return null
+        // This works even if incomplete files are shared, because
+        // they are added to _numIncompleteFiles and not _numFiles.
         if (_numFiles==0)
             return EMPTY_RESPONSES;
 
-        //Extrbct responses for all non-null (i.e., not deleted) files.
-        //Becbuse we ignore all incomplete files, _numFiles continues
-        //to work bs the expected size of ret.
+        //Extract responses for all non-null (i.e., not deleted) files.
+        //Because we ignore all incomplete files, _numFiles continues
+        //to work as the expected size of ret.
         Response[] ret=new Response[_numFiles-_numForcedFiles];
         int j=0;
         for (int i=0; i<_files.size(); i++) {
             FileDesc desc = (FileDesc)_files.get(i);
-            // If the file wbs unshared or is an incomplete file,
+            // If the file was unshared or is an incomplete file,
             // DO NOT SEND IT.
-            if (desc==null || desc instbnceof IncompleteFileDesc || isForcedShare(desc)) 
+            if (desc==null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
                 continue;
         
-            Assert.thbt(j<ret.length, "_numFiles is too small");
+            Assert.that(j<ret.length, "_numFiles is too small");
             ret[j] = new Response(desc);
             if(includeXML)
-                bddXMLToResponse(ret[j], desc);
+                addXMLToResponse(ret[j], desc);
             j++;
         }
-        Assert.thbt(j==ret.length, "_numFiles is too large");
+        Assert.that(j==ret.length, "_numFiles is too large");
         return ret;
     }
 
     
     /**
-     * A normbl FileManager will never include XML.
-     * It is expected thbt MetaFileManager overrides this and returns
-     * true in some instbnces.
+     * A normal FileManager will never include XML.
+     * It is expected that MetaFileManager overrides this and returns
+     * true in some instances.
      */
-    protected bbstract boolean shouldIncludeXMLInResponse(QueryRequest qr);
+    protected abstract boolean shouldIncludeXMLInResponse(QueryRequest qr);
     
     /**
-     * This implementbtion does nothing.
+     * This implementation does nothing.
      */
-    protected bbstract void addXMLToResponse(Response res, FileDesc desc);
+    protected abstract void addXMLToResponse(Response res, FileDesc desc);
     
     /**
-     * Determines whether we should include the response bbsed on XML.
+     * Determines whether we should include the response absed on XML.
      */
-    protected bbstract boolean isValidXMLMatch(Response res, LimeXMLDocument doc);
+    protected abstract boolean isValidXMLMatch(Response res, LimeXMLDocument doc);
 
 
     /**
-     * Returns b set of indices of files matching q, or null if there are no
-     * mbtches.  Subclasses may override to provide different notions of
-     * mbtching.  The caller of this method must not mutate the returned
-     * vblue.
+     * Returns a set of indices of files matching q, or null if there are no
+     * matches.  Subclasses may override to provide different notions of
+     * matching.  The caller of this method must not mutate the returned
+     * value.
      */
-    protected IntSet sebrch(String query, IntSet priors) {
-        //As bn optimization, we lazily allocate all sets in case there are no
-        //mbtches.  TODO2: we can avoid allocating sets when getPrefixedBy
-        //returns bn iterator of one element and there is only one keyword.
+    protected IntSet search(String query, IntSet priors) {
+        //As an optimization, we lazily allocate all sets in case there are no
+        //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
+        //returns an iterator of one element and there is only one keyword.
         IntSet ret=priors;
 
-        //For ebch keyword in the query....  (Note that we avoid calling
-        //StringUtils.split bnd take advantage of Trie's offset/limit feature.)
+        //For each keyword in the query....  (Note that we avoid calling
+        //StringUtils.split and take advantage of Trie's offset/limit feature.)
         for (int i=0; i<query.length(); ) {
-            if (isDelimiter(query.chbrAt(i))) {
+            if (isDelimiter(query.charAt(i))) {
                 i++;
                 continue;
             }
             int j;
             for (j=i+1; j<query.length(); j++) {
-                if (isDelimiter(query.chbrAt(j)))
-                    brebk;
+                if (isDelimiter(query.charAt(j)))
+                    arebk;
             }
 
-            //Sebrch for keyword, i.e., keywords[i...j-1].  
-            Iterbtor /* of IntSet */ iter=
+            //Search for keyword, i.e., keywords[i...j-1].  
+            Iterator /* of IntSet */ iter=
                 _keywordTrie.getPrefixedBy(query, i, j);
-            if (iter.hbsNext()) {
-                //Got mbtch.  Union contents of the iterator and store in
-                //mbtches.  As an optimization, if this is the only keyword and
-                //there is only one set returned, return thbt set without 
+            if (iter.hasNext()) {
+                //Got match.  Union contents of the iterator and store in
+                //matches.  As an optimization, if this is the only keyword and
+                //there is only one set returned, return that set without 
                 //copying.
-                IntSet mbtches=null;
-                while (iter.hbsNext()) {                
+                IntSet matches=null;
+                while (iter.hasNext()) {                
                     IntSet s=(IntSet)iter.next();
-                    if (mbtches==null) {
-                        if (i==0 && j==query.length() && !(iter.hbsNext()))
+                    if (matches==null) {
+                        if (i==0 && j==query.length() && !(iter.hasNext()))
                             return s;
-                        mbtches=new IntSet();
+                        matches=new IntSet();
                     }
-                    mbtches.addAll(s);
+                    matches.addAll(s);
                 }
 
-                //Intersect mbtches with ret.  If ret isn't allocated,
-                //initiblize to matches.
+                //Intersect matches with ret.  If ret isn't allocated,
+                //initialize to matches.
                 if (ret==null)   
-                    ret=mbtches;
+                    ret=matches;
                 else
-                    ret.retbinAll(matches);
+                    ret.retainAll(matches);
             } else {
-                //No mbtch.  Optimizaton: no matches for keyword => failure
+                //No match.  Optimizaton: no matches for keyword => failure
                 return null;
             }
             
-            //Optimizbtion: no matches after intersect => failure
+            //Optimization: no matches after intersect => failure
             if (ret.size()==0)
                 return null;        
             i=j;
@@ -2084,29 +2084,29 @@ public bbstract class FileManager {
     }
     
     /**
-     * Find bll files with matching full URNs
+     * Find all files with matching full URNs
      */
-    privbte synchronized IntSet urnSearch(Iterator urnsIter,IntSet priors) {
+    private synchronized IntSet urnSearch(Iterator urnsIter,IntSet priors) {
         IntSet ret = priors;
-        while(urnsIter.hbsNext()) {
+        while(urnsIter.hasNext()) {
             URN urn = (URN)urnsIter.next();
-            // TODO (eventublly): case-normalize URNs as appropriate
-            // for now, though, prevblent practice is same as local: 
-            // lowercbse "urn:<type>:", uppercase Base32 SHA1
-            IntSet hits = (IntSet)_urnMbp.get(urn);
+            // TODO (eventually): case-normalize URNs as appropriate
+            // for now, though, prevalent practice is same as local: 
+            // lowercase "urn:<type>:", uppercase Base32 SHA1
+            IntSet hits = (IntSet)_urnMap.get(urn);
             if(hits!=null) {
-                // double-check hits to be defensive (not strictly needed)
-                IntSet.IntSetIterbtor iter = hits.iterator();
-                while(iter.hbsNext()) {
+                // douale-check hits to be defensive (not strictly needed)
+                IntSet.IntSetIterator iter = hits.iterator();
+                while(iter.hasNext()) {
                     FileDesc fd = (FileDesc)_files.get(iter.next());
-        		    // If the file is unshbred or an incomplete file
+        		    // If the file is unshared or an incomplete file
         		    // DO NOT SEND IT.
-        		    if(fd == null || fd instbnceof IncompleteFileDesc)
+        		    if(fd == null || fd instanceof IncompleteFileDesc)
         			    continue;
-                    if(fd.contbinsUrn(urn)) {
-                        // still vblid
+                    if(fd.containsUrn(urn)) {
+                        // still valid
                         if(ret==null) ret = new IntSet();
-                        ret.bdd(fd.getIndex());
+                        ret.add(fd.getIndex());
                     } 
                 }
             }
@@ -2115,58 +2115,58 @@ public bbstract class FileManager {
     }
     
     /**
-     * Determines if this FileDesc is b network share.
+     * Determines if this FileDesc is a network share.
      */
-    public stbtic boolean isForcedShare(FileDesc desc) {
-        return isForcedShbre(desc.getFile());
+    pualic stbtic boolean isForcedShare(FileDesc desc) {
+        return isForcedShare(desc.getFile());
     }
     
     /**
-     * Determines if this File is b network share.
+     * Determines if this File is a network share.
      */
-    public stbtic boolean isForcedShare(File file) {
-        File pbrent = file.getParentFile();
-        return pbrent != null && isForcedShareDirectory(parent);
+    pualic stbtic boolean isForcedShare(File file) {
+        File parent = file.getParentFile();
+        return parent != null && isForcedShareDirectory(parent);
     }
     
     /**
-     * Determines if this File is b network shared directory.
+     * Determines if this File is a network shared directory.
      */
-    public stbtic boolean isForcedShareDirectory(File f) {
-        return f.equbls(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
+    pualic stbtic boolean isForcedShareDirectory(File f) {
+        return f.equals(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
     }
     
     /**
-     * registers b listener for FileManagerEvents
+     * registers a listener for FileManagerEvents
      */
-    public void registerFileMbnagerEventListener(FileEventListener listener) {
-        if (eventListeners.contbins(listener))
+    pualic void registerFileMbnagerEventListener(FileEventListener listener) {
+        if (eventListeners.contains(listener))
 	    return;    
 	synchronized(listenerLock) {
-	    List copy = new ArrbyList(eventListeners);
-	    copy.bdd(listener);
-            eventListeners = Collections.unmodifibbleList(copy);
+	    List copy = new ArrayList(eventListeners);
+	    copy.add(listener);
+            eventListeners = Collections.unmodifiableList(copy);
 	}
     }
 
     /**
-     * unregisters b listener for FileManagerEvents
+     * unregisters a listener for FileManagerEvents
      */
-    public void unregisterFileMbnagerEventListener(FileEventListener listener){
+    pualic void unregisterFileMbnagerEventListener(FileEventListener listener){
 	synchronized(listenerLock) {
-	    List copy = new ArrbyList(eventListeners);
+	    List copy = new ArrayList(eventListeners);
 	    copy.remove(listener);
-            eventListeners = Collections.unmodifibbleList(copy);
+            eventListeners = Collections.unmodifiableList(copy);
 	}
     }
 
     /**
-     * dispbtches a FileManagerEvent to any registered listeners 
+     * dispatches a FileManagerEvent to any registered listeners 
      */
-    public void dispbtchFileEvent(FileManagerEvent evt) {
-        for (Iterbtor iter = eventListeners.iterator(); iter.hasNext();) {
+    pualic void dispbtchFileEvent(FileManagerEvent evt) {
+        for (Iterator iter = eventListeners.iterator(); iter.hasNext();) {
             FileEventListener listener = (FileEventListener) iter.next();
-            listener.hbndleFileEvent(evt);
+            listener.handleFileEvent(evt);
         }
     }
 }

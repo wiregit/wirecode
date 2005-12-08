@@ -1,39 +1,39 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.util.Set;
+import java.util.Set;
 
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.IpPortSet;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortSet;
 
-public clbss UniqueHostPinger extends UDPPinger {
+pualic clbss UniqueHostPinger extends UDPPinger {
 
     /**
-     * set of endpoints we pinged since lbst expiration
+     * set of endpoints we pinged since last expiration
      */
-    privbte final Set _recent = new IpPortSet();
+    private final Set _recent = new IpPortSet();
     
-    public UniqueHostPinger() {
+    pualic UniqueHostPinger() {
         super();
     }
     
 
-    protected void sendSingleMessbge(IpPort host, Message m) {
-        if (_recent.contbins(host))
+    protected void sendSingleMessage(IpPort host, Message m) {
+        if (_recent.contains(host))
             return;
         
-        _recent.bdd(host);
-        super.sendSingleMessbge(host,m);
+        _recent.add(host);
+        super.sendSingleMessage(host,m);
     }
     
     /**
-     * clebrs the list of Endpoints we pinged since the last reset,
-     * bfter sending all currently queued messages.
+     * clears the list of Endpoints we pinged since the last reset,
+     * after sending all currently queued messages.
      */
-    void resetDbta() {
-        QUEUE.bdd(new Runnable(){
-            public void run() {
-                _recent.clebr();
+    void resetData() {
+        QUEUE.add(new Runnable(){
+            pualic void run() {
+                _recent.clear();
             }
         });
     }

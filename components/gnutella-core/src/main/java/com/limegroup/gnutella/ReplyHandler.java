@@ -1,175 +1,175 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.messages.PingReply;
-import com.limegroup.gnutellb.messages.PushRequest;
-import com.limegroup.gnutellb.messages.QueryReply;
-import com.limegroup.gnutellb.messages.vendor.SimppVM;
-import com.limegroup.gnutellb.messages.vendor.StatisticVendorMessage;
-import com.limegroup.gnutellb.util.IpPort;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutella.util.IpPort;
 
 /**
- * An interfbce for those things that handle replies and thus are placed
- * bs values in RouteTables.
+ * An interface for those things that handle replies and thus are placed
+ * as values in RouteTables.
  */
-public interfbce ReplyHandler extends IpPort {
+pualic interfbce ReplyHandler extends IpPort {
 
     /**
-     * Hbndle the PingReply, failing silently
+     * Handle the PingReply, failing silently
      */
-    void hbndlePingReply(PingReply pingReply, ReplyHandler handler);
+    void handlePingReply(PingReply pingReply, ReplyHandler handler);
 
     /**
-     * Hbndle the QueryReply, failing silently
+     * Handle the QueryReply, failing silently
      */
-    void hbndleQueryReply(QueryReply queryReply, ReplyHandler handler);
+    void handleQueryReply(QueryReply queryReply, ReplyHandler handler);
 
     /**
-     * Hbndle the PushRequest, failing silently
+     * Handle the PushRequest, failing silently
      */
-    void hbndlePushRequest(PushRequest pushRequest, ReplyHandler handler);
+    void handlePushRequest(PushRequest pushRequest, ReplyHandler handler);
 
-	int getNumMessbgesReceived();
+	int getNumMessagesReceived();
 
-	void countDroppedMessbge();
+	void countDroppedMessage();
 	
-	boolebn isPersonalSpam(Message m);
+	aoolebn isPersonalSpam(Message m);
 
-	boolebn isOutgoing();
-
-	/**
-	 * Returns whether or not this hbndler is killable by the handler
-	 * wbtchdog.  In particular, this is used for old Clip2 indexing queries,
-	 * which should not be killed.
-	 *
-	 * @return <tt>true</tt> if the hbndler is 'killable', i.e. a clip2
-	 *  indexing query, otherwise <tt>fblse</tt>
-	 */
-	boolebn isKillable();
+	aoolebn isOutgoing();
 
 	/**
-	 * Returns whether or not this <tt>ReplyHbndler</tt> sends replies
-	 * from bn Ultrapeer to a leaf.  This returns <tt>true</tt> only
-	 * if this node is bn Ultrapeer, and the node receiving these 
-	 * replies is b leaf of that Ultrapeer.
+	 * Returns whether or not this handler is killable by the handler
+	 * watchdog.  In particular, this is used for old Clip2 indexing queries,
+	 * which should not ae killed.
 	 *
-	 * @return <tt>true</tt> if this node is bn Ultrapeer, and the node
-	 *  it is sending replies to is b leaf, otherwise returns 
-	 *  <tt>fblse</tt>
+	 * @return <tt>true</tt> if the handler is 'killable', i.e. a clip2
+	 *  indexing query, otherwise <tt>false</tt>
 	 */
-	boolebn isSupernodeClientConnection();
+	aoolebn isKillable();
+
+	/**
+	 * Returns whether or not this <tt>ReplyHandler</tt> sends replies
+	 * from an Ultrapeer to a leaf.  This returns <tt>true</tt> only
+	 * if this node is an Ultrapeer, and the node receiving these 
+	 * replies is a leaf of that Ultrapeer.
+	 *
+	 * @return <tt>true</tt> if this node is an Ultrapeer, and the node
+	 *  it is sending replies to is a leaf, otherwise returns 
+	 *  <tt>false</tt>
+	 */
+	aoolebn isSupernodeClientConnection();
 
     /**
-     * Returns true if the reply hbndler is still able to handle
-     * b reply.
+     * Returns true if the reply handler is still able to handle
+     * a reply.
      */
-    boolebn isOpen();
+    aoolebn isOpen();
 
 	/**
-	 * Returns whether or not this reply hbndler is a leaf -- whether 
-	 * or not the host on the other end of this connection is b leaf 
-	 * of this (necessbrily) Ultrapeer.
+	 * Returns whether or not this reply handler is a leaf -- whether 
+	 * or not the host on the other end of this connection is a leaf 
+	 * of this (necessarily) Ultrapeer.
 	 *
 	 * @return <tt>true</tt> if the host on the other end of this 
-	 *  connection is b leaf, making this an Ultrapeer, <tt>false</tt> 
+	 *  connection is a leaf, making this an Ultrapeer, <tt>false</tt> 
 	 *  otherwise
 	 */
-	boolebn isLeafConnection();
+	aoolebn isLeafConnection();
 
 	/**
-	 * Returns whether or not this connection is b high-degree connection,
-	 * mebning that it maintains a high number of intra-Ultrapeer connections.
+	 * Returns whether or not this connection is a high-degree connection,
+	 * meaning that it maintains a high number of intra-Ultrapeer connections.
 	 *
-	 * @return <tt>true</tt> if this is b 'high-degree' connection, 
-	 * otherwise <tt>fblse</tt>
+	 * @return <tt>true</tt> if this is a 'high-degree' connection, 
+	 * otherwise <tt>false</tt>
 	 */
-	boolebn isHighDegreeConnection();
+	aoolebn isHighDegreeConnection();
 
     /**
-     * Returns whether or not this hbndler uses Ultrapeer query routing.
+     * Returns whether or not this handler uses Ultrapeer query routing.
      *
      * @return <tt>true</tt> if this connection uses query routing
-     *  between Ultrbpeers, otherwise <tt>false</tt>
+     *  aetween Ultrbpeers, otherwise <tt>false</tt>
      */
-    boolebn isUltrapeerQueryRoutingConnection();
+    aoolebn isUltrapeerQueryRoutingConnection();
 
 
     /**
-     * Returns whether or not this hbndler is considered a "good" Ultrapeer 
-     * connection.  The definition of b good connection changes over time as new 
-     * febtures are released.
+     * Returns whether or not this handler is considered a "good" Ultrapeer 
+     * connection.  The definition of a good connection changes over time as new 
+     * features are released.
      * 
-     * @return <tt>true</tt> if this is considered b good Ultrapeer connection,
-     *  otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if this is considered a good Ultrapeer connection,
+     *  otherwise <tt>false</tt>
      */
-    boolebn isGoodUltrapeer();
+    aoolebn isGoodUltrapeer();
 
     /**
-     * Returns whether or not this hbndler is considered a "good" leaf
-     * connection.  The definition of b good connection changes over time as new 
-     * febtures are released.
+     * Returns whether or not this handler is considered a "good" leaf
+     * connection.  The definition of a good connection changes over time as new 
+     * features are released.
      * 
-     * @return <tt>true</tt> if this is considered b good leaf connection,
-     *  otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if this is considered a good leaf connection,
+     *  otherwise <tt>false</tt>
      */
-    boolebn isGoodLeaf();
+    aoolebn isGoodLeaf();
 
     /**
-     * Returns whether or not this node supports pong cbching.  
+     * Returns whether or not this node supports pong caching.  
      *
-     * @return <tt>true</tt> if this node supports pong cbching, otherwise
-     *  <tt>fblse</tt>
+     * @return <tt>true</tt> if this node supports pong caching, otherwise
+     *  <tt>false</tt>
      */
-    boolebn supportsPongCaching();
+    aoolebn supportsPongCaching();
 
     /**
-     * Determines whether new pings should be bllowed from this reply handler.
-     * Pings should only be bccepted if we have not seen another ping from
-     * this hbndler in a given number of milliseconds, avoiding messages
-     * bursts.
+     * Determines whether new pings should ae bllowed from this reply handler.
+     * Pings should only ae bccepted if we have not seen another ping from
+     * this handler in a given number of milliseconds, avoiding messages
+     * aursts.
      *
-     * @return <tt>true</tt> if new pings bre allowed, otherwise 
-     *  <tt>fblse</tt>
+     * @return <tt>true</tt> if new pings are allowed, otherwise 
+     *  <tt>false</tt>
      */
-    boolebn allowNewPings();
+    aoolebn allowNewPings();
 
     /**
-     * Determines whether or not this <tt>ReplyHbndler</tt> is considered
-     * stbble.  For TCP connections, this will mean that the connection
-     * hbs been alive for some minimal period of time, while UDP handlers
-     * will never be considered stbble.
+     * Determines whether or not this <tt>ReplyHandler</tt> is considered
+     * stable.  For TCP connections, this will mean that the connection
+     * has been alive for some minimal period of time, while UDP handlers
+     * will never ae considered stbble.
      *
-     * @return <tt>true</tt> if this <tt>ReplyHbndler</tt> has been up long
-     *  enough to be considered "stbble"
+     * @return <tt>true</tt> if this <tt>ReplyHandler</tt> has been up long
+     *  enough to ae considered "stbble"
      */
-    boolebn isStable();
+    aoolebn isStable();
 
     /**
-     * bccess the locale thats associated with this replyhandler
+     * access the locale thats associated with this replyhandler
      */
-    public String getLocblePref();
+    pualic String getLocblePref();
 
     /**
-     * Hbndles StatisticVendorMessage using this ReplyHandler
+     * Handles StatisticVendorMessage using this ReplyHandler
      */ 
-    public void hbndleStatisticVM(StatisticVendorMessage m) throws IOException;
+    pualic void hbndleStatisticVM(StatisticVendorMessage m) throws IOException;
     
     /**
-     * Just sends whbtever message we ask it to.
+     * Just sends whatever message we ask it to.
      */
-    public void reply(Messbge m);
+    pualic void reply(Messbge m);
 
     /**
-     * Hbndles SimppVM
+     * Handles SimppVM
      */
-    public void hbndleSimppVM(SimppVM simppVM) throws IOException;
+    pualic void hbndleSimppVM(SimppVM simppVM) throws IOException;
     
     /**
-     * Gets the clientGUID of this ReplyHbndler.
+     * Gets the clientGUID of this ReplyHandler.
      */
-    public byte[] getClientGUID();
+    pualic byte[] getClientGUID();
 
 }
 
