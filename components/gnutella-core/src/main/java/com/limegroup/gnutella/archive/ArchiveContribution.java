@@ -34,7 +34,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 abstract class ArchiveContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.2 2005-12-06 17:39:32 zlatinb Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.3 2005-12-08 03:06:12 zlatinb Exp $";
 
 
 
@@ -402,8 +402,6 @@ abstract class ArchiveContribution extends AbstractContribution {
 			return document;
 			
 		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-			
 			final IllegalStateException ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
@@ -454,7 +452,6 @@ abstract class ArchiveContribution extends AbstractContribution {
 			return document;
 			
 		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
 			final IllegalStateException ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
@@ -485,17 +482,14 @@ abstract class ArchiveContribution extends AbstractContribution {
 			return str;
 			
 		} catch (final ClassNotFoundException e) {
-			e.printStackTrace();
 			final IllegalStateException ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
 		} catch (final InstantiationException e) {
-			e.printStackTrace();
 			final IllegalStateException ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
 		} catch (final IllegalAccessException e) {
-			e.printStackTrace();
 			final IllegalStateException ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;

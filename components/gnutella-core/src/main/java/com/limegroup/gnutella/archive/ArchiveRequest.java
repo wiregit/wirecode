@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
 class ArchiveRequest {
 
 	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveRequest.java,v 1.2 2005-12-06 17:39:32 zlatinb Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveRequest.java,v 1.3 2005-12-08 03:06:12 zlatinb Exp $";
 	
 	private final String _url;
 	private final NameValuePair[] _parameters;
@@ -105,15 +105,12 @@ class ArchiveRequest {
 			parser = factory.newDocumentBuilder();
 			document = parser.parse( responseStream );
 		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
 			final IllegalStateException ise = new IllegalStateException();
 			ise.initCause(e);
 			throw ise;
 		} catch (final SAXException e) {
-			e.printStackTrace();
 			throw new BadResponseException(e);
 		} catch (final IOException e) {
-			e.printStackTrace();
 			throw (e);
 		} finally {
 			responseStream.close();
