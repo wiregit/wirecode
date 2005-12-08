@@ -1,18 +1,17 @@
 package com.limegroup.gnutella.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream; 
-import java.util.Arrays;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.limegroup.gnutella.FileDesc;
@@ -64,27 +63,6 @@ public class FileUtils {
             if(in != null)
                 in.close();
         }    
-    }
-
-    /** Same as the f.listFiles() in JDK1.3. */
-    public static File[] listFiles(File f) {
-        return f.listFiles();
-    }
-
-    /**
-     * Same as f.listFiles(FileNameFilter) in JDK1.2
-     */
-    public static File[] listFiles(File f, FilenameFilter filter) {
-        return f.listFiles(filter);
-    }
-
-    /** 
-     * Same as f.getParentFile() in JDK1.3. 
-     * @requires the File parameter must be a File object constructed
-     *  with the canonical path.
-     */
-    public static File getParentFile(File f) {
-        return f.getParentFile();
     }
     
     /**
@@ -257,8 +235,7 @@ public class FileUtils {
             try {
                 fos = new FileOutputStream(f);
             } catch(IOException ioe) {
-                if(CommonUtils.isJava14OrLater())
-                    ioe.initCause(failed);
+                ioe.initCause(failed);
                 throw ioe;
             } finally {
                 if(fos != null) {
