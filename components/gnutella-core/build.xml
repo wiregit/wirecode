@@ -1,4 +1,4 @@
-<project name="Gnutella" default="core" basedir=".">
+asdf<project name="Gnutella" default="core" basedir=".">
 
 <!-- set global properties for this basedir -->
 <property name="basedir" value="."/>
