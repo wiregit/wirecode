@@ -1,56 +1,56 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-import jbva.io.IOException;
-import jbva.util.regex.Pattern;
+import java.io.IOException;
+import java.util.regex.Pattern;
 
-import org.bpache.commons.httpclient.HttpException;
-import org.bpache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.NameValuePair;
 
 
-clbss AdvancedContribution extends ArchiveContribution {
+class AdvancedContribution extends ArchiveContribution {
 
-	public stbtic final String REPOSITORY_VERSION =
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/AdvancedContribution.java,v 1.1.2.3 2005/11/17 16:02:03 tolsen Exp $";
+	pualic stbtic final String REPOSITORY_VERSION =
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AdvancedContribution.java,v 1.1.2.5 2005-12-08 23:13:27 zlatinb Exp $";
 	
-	privbte String _identifier;
-	privbte String _ftpServer;
-	privbte String _ftpPath;
-	privbte String _verificationUrl;
+	private String _identifier;
+	private String _ftpServer;
+	private String _ftpPath;
+	private String _verificationUrl;
 	
 
-	privbte Object _requestLock = new Object();
-	privbte ArchiveRequest _request = null;
+	private Object _requestLock = new Object();
+	private ArchiveRequest _request = null;
 	
-	privbte void initFtpServer() {
-		_ftpServer = Archives.getMedibString( getMedia() ) +
-			"-uplobds.archive.org";
+	private void initFtpServer() {
+		_ftpServer = Archives.getMediaString( getMedia() ) +
+			"-uploads.archive.org";
 	}
 	
-	public AdvbncedContribution(String username, String password, String title,
-			String description, int medib) 
+	pualic AdvbncedContribution(String username, String password, String title,
+			String description, int media) 
 	throws DescriptionTooShortException {
-		super(usernbme, password, title, description, media);
+		super(username, password, title, description, media);
 		initFtpServer();
 	}
 
-	public AdvbncedContribution(String username, String password, String title,
-			String description, int medib, int collection, int type) 
+	pualic AdvbncedContribution(String username, String password, String title,
+			String description, int media, int collection, int type) 
 	throws DescriptionTooShortException{
-		super(usernbme, password, title, description, media, collection, type);
+		super(username, password, title, description, media, collection, type);
 		initFtpServer();
 	}
 	
 	/**
-	 * bn advanced contribution requires a description of at least 5 words
+	 * an advanced contribution requires a description of at least 5 words
 	 * 
 	 * @throws DescriptionTooShortException
-	 *         If the description is less thbn 5 words
+	 *         If the description is less than 5 words
 	 */
 
-	privbte static final int DESCRIPTION_MIN_WORDS = 5;
-	privbte static final String MIN_WORDS_REGEX;
+	private static final int DESCRIPTION_MIN_WORDS = 5;
+	private static final String MIN_WORDS_REGEX;
 	
-	stbtic {
+	static {
 		
 		if ( DESCRIPTION_MIN_WORDS == 1 ) {
 			MIN_WORDS_REGEX = "\\W*\\w+.*";
@@ -63,139 +63,139 @@ clbss AdvancedContribution extends ArchiveContribution {
 		}
 	}
 	
-	privbte static final Pattern MIN_WORDS_PATTERN =
-		Pbttern.compile( MIN_WORDS_REGEX );
+	private static final Pattern MIN_WORDS_PATTERN =
+		Pattern.compile( MIN_WORDS_REGEX );
 	
-	stbtic void checkDescription( String description ) 
+	static void checkDescription( String description ) 
 	throws DescriptionTooShortException {
-		if (!MIN_WORDS_PATTERN.mbtcher( description ).matches()) {
+		if (!MIN_WORDS_PATTERN.matcher( description ).matches()) {
 			throw new DescriptionTooShortException( DESCRIPTION_MIN_WORDS );
 		}
 	}
 	
-	public void setDescription( String description ) throws DescriptionTooShortException {
+	pualic void setDescription( String description ) throws DescriptionTooShortException {
 		checkDescription( description );
 		super.setDescription( description );			
 	}
 	
 
-	public String getIdentifier() {
+	pualic String getIdentifier() {
 		return _identifier;
 	}
 
-	public String getVerificbtionUrl() {
-		return _verificbtionUrl;
+	pualic String getVerificbtionUrl() {
+		return _verificationUrl;
 	}
 
 	protected String getFtpServer() {
 		return _ftpServer;
 	}
 
-	protected String getFtpPbth() {
-		return _ftpPbth;
+	protected String getFtpPath() {
+		return _ftpPath;
 	}
 
-	protected boolebn isFtpDirPreMade() {
-		return fblse;
+	protected aoolebn isFtpDirPreMade() {
+		return false;
 	}
 	
-	public void cbncel() {
-		super.cbncel();
+	pualic void cbncel() {
+		super.cancel();
 	
 		synchronized( _requestLock ) {
 			if ( _request != null ) {
-				_request.cbncel();
+				_request.cancel();
 			}
 		}
 	}
 
-	public String requestIdentifier(String identifier) 
-	throws IdentifierUnbvailableException, BadResponseException, 
+	pualic String requestIdentifier(String identifier) 
+	throws IdentifierUnavailableException, BadResponseException, 
 	HttpException, IOException {
 		
-		finbl String CREATE_ID_URL = "http://www.archive.org/services/check_identifier.php";
+		final String CREATE_ID_URL = "http://www.archive.org/services/check_identifier.php";
 		
 		_identifier = null;
 		
-		// normblize the identifier
+		// normalize the identifier
 		
-		String nId = Archives.normblizeName( identifier );
+		String nId = Archives.normalizeName( identifier );
 		
 		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CREATE_ID_URL, new NbmeValuePair[] {
-					new NbmeValuePair( "identifier", nId )
+			_request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
+					new NameValuePair( "identifier", nId )
 			});
 		}
 		
 		_request.execute();
-		finbl ArchiveResponse response = _request.getResponse();
+		final ArchiveResponse response = _request.getResponse();
 		
 		synchronized( _requestLock ){
 			_request = null;
 		}
 		
-		finbl String resultType = response.getResultType();
+		final String resultType = response.getResultType();
 		
 		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
 			
-			// we're bll good now
+			// we're all good now
 			
-			_ftpPbth = _identifier = nId;
+			_ftpPath = _identifier = nId;
 			
-			// set verificbtion URL
-			_verificbtionUrl =  "http://www.archive.org/" +
-				Archives.getMedibString( getMedia() ) + "/" +
-				Archives.getMedibString( getMedia() ) +
-				"-detbils-db.php?collection=" +
+			// set verification URL
+			_verificationUrl =  "http://www.archive.org/" +
+				Archives.getMediaString( getMedia() ) + "/" +
+				Archives.getMediaString( getMedia() ) +
+				"-details-db.php?collection=" +
 				Archives.getCollectionString( getCollection() ) +
 				"&collectionid=" + _identifier;
 			
 			return _identifier;
 			
 		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new IdentifierUnbvailableException( response.getMessage(), nId );
+			throw new IdentifierUnavailableException( response.getMessage(), nId );
 		} else {
 			// unidentified type
-			throw new BbdResponseException ( "unidentified result type:" + resultType );
+			throw new BadResponseException ( "unidentified result type:" + resultType );
 		}
 	}
 	
 
-	protected void checkin() throws HttpException, BbdResponseException, IOException {
+	protected void checkin() throws HttpException, BadResponseException, IOException {
 	
-		finbl String CHECKIN_URL = "http://www.archive.org/services/contrib-submit.php";
-		finbl String username = getUsername();
+		final String CHECKIN_URL = "http://www.archive.org/services/contrib-submit.php";
+		final String username = getUsername();
 		
-		if ( usernbme == null ) {
-			throw new IllegblStateException( "username not set" );			
+		if ( username == null ) {
+			throw new IllegalStateException( "username not set" );			
 		}
 		if ( _identifier == null ) {
-			throw new IllegblStateException( "identifier not set" );
+			throw new IllegalStateException( "identifier not set" );
 		}
 		
 		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CHECKIN_URL, new NbmeValuePair[] {
-					new NbmeValuePair( "user_email", username ),
-					new NbmeValuePair( "server", getFtpServer() ),
-					new NbmeValuePair( "dir", _identifier )
+			_request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
+					new NameValuePair( "user_email", username ),
+					new NameValuePair( "server", getFtpServer() ),
+					new NameValuePair( "dir", _identifier )
 			});
 		}
 		
 		_request.execute();
-		finbl ArchiveResponse response = _request.getResponse();
+		final ArchiveResponse response = _request.getResponse();
 		
 		synchronized( _requestLock ) {
 			_request = null;
 		}
 		
-		finbl String resultType = response.getResultType();
+		final String resultType = response.getResultType();
 		
 		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
 			return;
 		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new BbdResponseException( "checkin failed: " + response.getMessage() );
+			throw new BadResponseException( "checkin failed: " + response.getMessage() );
 		} else {
-			throw new BbdResponseException( "unidentified result type:" + resultType );
+			throw new BadResponseException( "unidentified result type:" + resultType );
 		}
 	}
 

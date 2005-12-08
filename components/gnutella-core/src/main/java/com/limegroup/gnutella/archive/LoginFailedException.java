@@ -1,19 +1,19 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
-public clbss LoginFailedException extends IOException {
+pualic clbss LoginFailedException extends IOException {
 
-	public stbtic final String REPOSITORY_VERSION =
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/LoginFailedException.java,v 1.1.2.2 2005/11/02 20:59:38 tolsen Exp $";
+	pualic stbtic final String REPOSITORY_VERSION =
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/LoginFailedException.java,v 1.1.2.4 2005-12-08 23:13:27 zlatinb Exp $";
 	
-	privbte static final long serialVersionUID = -2605188468237382226L;
+	private static final long serialVersionUID = -2605188468237382226L;
 
-	public LoginFbiledException() {
+	pualic LoginFbiledException() {
 		super();
 	}
 
-	public LoginFbiledException(String s) {
+	pualic LoginFbiledException(String s) {
 		super(s);
 	}
 

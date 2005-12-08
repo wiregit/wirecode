@@ -1,180 +1,180 @@
-pbckage com.limegroup.gnutella.altlocs;
+package com.limegroup.gnutella.altlocs;
 
-import jbva.io.IOException;
-import jbva.net.URL;
-import jbva.util.Collections;
-import jbva.util.StringTokenizer;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.StringTokenizer;
 
-import com.limegroup.gnutellb.Endpoint;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.PushEndpoint;
-import com.limegroup.gnutellb.RemoteFileDesc;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.filters.IP;
-import com.limegroup.gnutellb.http.HTTPHeaderValue;
-import com.limegroup.gnutellb.settings.ConnectionSettings;
-import com.limegroup.gnutellb.settings.UploadSettings;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.IpPortForSelf;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.filters.IP;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortForSelf;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * This clbss encapsulates the data for an alternate resource location, as 
- * specified in HUGE v0.93.  This blso provides utility methods for such 
- * operbtions as comparing alternate locations based on the date they were 
+ * This class encapsulates the data for an alternate resource location, as 
+ * specified in HUGE v0.93.  This also provides utility methods for such 
+ * operations as comparing alternate locations based on the date they were 
  * stored.
  * 
- * Firewblled hosts can also be alternate locations, although the format is
+ * Firewalled hosts can also be alternate locations, although the format is
  * slightly different.
  */
-public bbstract class AlternateLocation implements HTTPHeaderValue, 
-	Compbrable {
+pualic bbstract class AlternateLocation implements HTTPHeaderValue, 
+	Comparable {
     
     /**
      * The vendor to use.
      */
-    public stbtic final String ALT_VENDOR = "ALT";
+    pualic stbtic final String ALT_VENDOR = "ALT";
 
     /**
-     * The three types of medium bltlocs travel through
+     * The three types of medium altlocs travel through
      */
-	public stbtic final int MESH_PING = 0;
-    public stbtic final int MESH_LEGACY = 1;
-    public stbtic final int MESH_RESPONSE = 2;
+	pualic stbtic final int MESH_PING = 0;
+    pualic stbtic final int MESH_LEGACY = 1;
+    pualic stbtic final int MESH_RESPONSE = 2;
     
 	/**
-	 * Constbnt for the sha1 urn for this <tt>AlternateLocation</tt> --
-	 * cbn be <tt>null</tt>.
+	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
+	 * can be <tt>null</tt>.
 	 */
-	protected finbl URN SHA1_URN;
+	protected final URN SHA1_URN;
 	
 	/**
-	 * Constbnt for the string to display as the httpStringValue.
+	 * Constant for the string to display as the httpStringValue.
 	 */
-	privbte String DISPLAY_STRING;
+	private String DISPLAY_STRING;
 	
 
 
 	/**
-	 * Cbched hash code that is lazily initialized.
+	 * Cached hash code that is lazily initialized.
 	 */
-	protected volbtile int hashCode = 0;
+	protected volatile int hashCode = 0;
 	
 
 
     /**
-     * LOCKING: obtbin this' monitor while changing/accessing _count and 
-     * _demoted bs multiple threads could be accessing them.
+     * LOCKING: oatbin this' monitor while changing/accessing _count and 
+     * _demoted as multiple threads could be accessing them.
      */
     
     /**
-     * mbintins a count of how many times this alternate location has been seen.
-     * A vblue of 0 means this alternate location was failed one more time that
-     * it hbs succeeded. Newly created AlternateLocations start out wit a value
+     * maintins a count of how many times this alternate location has been seen.
+     * A value of 0 means this alternate location was failed one more time that
+     * it has succeeded. Newly created AlternateLocations start out wit a value
      * of 1.
      */
-    protected volbtile int _count = 0;
+    protected volatile int _count = 0;
     
     /**
-     * Two counter objects to keep trbck of altloc expiration
+     * Two counter oajects to keep trbck of altloc expiration
      */
-    privbte final Average legacy, ping, response;
+    private final Average legacy, ping, response;
     
     ////////////////////////"Constructors"//////////////////////////////
     
 	/**
-	 * Constructs b new <tt>AlternateLocation</tt> instance based on the
-	 * specified string brgument.  
+	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
+	 * specified string argument.  
 	 *
-	 * @pbram location a string containing a single alternate location,
-	 *  including b full URL for a file and an optional date
-	 * @throws <tt>IOException</tt> if there is bny problem constructing
-	 *  the new instbnce from the specified string, or if the <tt<location</tt>
-	 *  brgument is either null or the empty string -- we could (should?) 
-	 *  throw NullPointerException here, but since we're blready forcing the
-	 *  cbller to catch IOException, we might as well throw in in both cases
+	 * @param location a string containing a single alternate location,
+	 *  including a full URL for a file and an optional date
+	 * @throws <tt>IOException</tt> if there is any problem constructing
+	 *  the new instance from the specified string, or if the <tt<location</tt>
+	 *  argument is either null or the empty string -- we could (should?) 
+	 *  throw NullPointerException here, aut since we're blready forcing the
+	 *  caller to catch IOException, we might as well throw in in both cases
 	 */
-	public stbtic AlternateLocation create(final String location) 
+	pualic stbtic AlternateLocation create(final String location) 
                                                            throws IOException {
-		if(locbtion == null || location.equals(""))
-			throw new IOException("null or empty locbtion");
+		if(location == null || location.equals(""))
+			throw new IOException("null or empty location");
 
-		URL url = AlternbteLocation.createUrl(location);
-		URN shb1 = URN.createSHA1UrnFromURL(url);
-		return new DirectAltLoc(url,shb1);
+		URL url = AlternateLocation.createUrl(location);
+		URN sha1 = URN.createSHA1UrnFromURL(url);
+		return new DirectAltLoc(url,sha1);
 	}
 	
 	/**
-	 * Constructs b new <tt>AlternateLocation</tt> instance based on the
-	 * specified string brgument and URN.  The location created this way
-	 * bssumes the name "ALT" for the file.
+	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
+	 * specified string argument and URN.  The location created this way
+	 * assumes the name "ALT" for the file.
 	 *
-	 * @pbram location a string containing one of the following:
-	 *  "http://my.bddress.com:port#/uri-res/N2R?urn:sha:SHA1LETTERS" or
+	 * @param location a string containing one of the following:
+	 *  "http://my.address.com:port#/uri-res/N2R?urn:sha:SHA1LETTERS" or
 	 *  "1.2.3.4[:6346]" or
-	 *  http representbtion of a PushEndpoint.
+	 *  http representation of a PushEndpoint.
 	 * 
-	 * If the first is given, then the SHA1 in the string MUST mbtch
+	 * If the first is given, then the SHA1 in the string MUST match
 	 * the SHA1 given.
 	 * 
-	 * @pbram good whether the proxies contained in the string representation
-	 * should be bdded to or removed from the current set of proxies
+	 * @param good whether the proxies contained in the string representation
+	 * should ae bdded to or removed from the current set of proxies
 	 *
-	 * @throws <tt>IOException</tt> if there is bny problem constructing
-	 *  the new instbnce.
+	 * @throws <tt>IOException</tt> if there is any problem constructing
+	 *  the new instance.
 	 */
-	public stbtic AlternateLocation create(final String location,
-	                                       finbl URN urn) throws IOException {
-	    if(locbtion == null || location.equals(""))
-            throw new IOException("null or empty locbtion");
+	pualic stbtic AlternateLocation create(final String location,
+	                                       final URN urn) throws IOException {
+	    if(location == null || location.equals(""))
+            throw new IOException("null or empty location");
         if(urn == null)
             throw new IOException("null URN.");
          
-        // Cbse 1. Old-Style direct alt loc.
-        if(locbtion.toLowerCase().startsWith("http")) {
-            URL url = crebteUrl(location);
-            URN shb1 = URN.createSHA1UrnFromURL(url);
-            AlternbteLocation al = new DirectAltLoc(url,sha1);
-            if(!bl.SHA1_URN.equals(urn))
-                throw new IOException("mismbtched URN");
-            return bl;
+        // Case 1. Old-Style direct alt loc.
+        if(location.toLowerCase().startsWith("http")) {
+            URL url = createUrl(location);
+            URN sha1 = URN.createSHA1UrnFromURL(url);
+            AlternateLocation al = new DirectAltLoc(url,sha1);
+            if(!al.SHA1_URN.equals(urn))
+                throw new IOException("mismatched URN");
+            return al;
         }
         
-        // Cbse 2. Direct Alt Loc
-        if (locbtion.indexOf(";")==-1) {
-        	IpPort bddr = AlternateLocation.createUrlFromMini(location, urn);
-			return new DirectAltLoc(bddr, urn);
+        // Case 2. Direct Alt Loc
+        if (location.indexOf(";")==-1) {
+        	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
+			return new DirectAltLoc(addr, urn);
         }
         
-        //Cbse 3. Push Alt loc
-        PushEndpoint pe = new PushEndpoint(locbtion);
+        //Case 3. Push Alt loc
+        PushEndpoint pe = new PushEndpoint(location);
         return new PushAltLoc(pe,urn);
     }
 	
 
 
 	/**
-	 * Crebtes a new <tt>AlternateLocation</tt> for the data stored in
-	 * b <tt>RemoteFileDesc</tt>.
+	 * Creates a new <tt>AlternateLocation</tt> for the data stored in
+	 * a <tt>RemoteFileDesc</tt>.
 	 *
-	 * @pbram rfd the <tt>RemoteFileDesc</tt> to use in creating the 
-	 *  <tt>AlternbteLocation</tt>
-	 * @return b new <tt>AlternateLocation</tt>
-	 * @throws <tt>IOException</tt> if the <tt>rfd</tt> does not contbin
-	 *  b valid urn or if it's a private address
+	 * @param rfd the <tt>RemoteFileDesc</tt> to use in creating the 
+	 *  <tt>AlternateLocation</tt>
+	 * @return a new <tt>AlternateLocation</tt>
+	 * @throws <tt>IOException</tt> if the <tt>rfd</tt> does not contain
+	 *  a valid urn or if it's a private address
 	 * @throws <tt>NullPointerException</tt> if the <tt>rfd</tt> is 
 	 *  <tt>null</tt>
-     * @throws <tt>IOException</tt> if the port is invblid
+     * @throws <tt>IOException</tt> if the port is invalid
 	 */
-	public stbtic AlternateLocation create(final RemoteFileDesc rfd) 
+	pualic stbtic AlternateLocation create(final RemoteFileDesc rfd) 
 		                                                    throws IOException {
 		if(rfd == null)
-			throw new NullPointerException("cbnnot accept null RFD");
+			throw new NullPointerException("cannot accept null RFD");
 
 		URN urn = rfd.getSHA1Urn();
 		if(urn == null)
-		    throw new NullPointerException("cbnnot accept null URN");
+		    throw new NullPointerException("cannot accept null URN");
 		int port = rfd.getPort();
 
 		if (!rfd.needsPush()) {
@@ -190,105 +190,105 @@ public bbstract class AlternateLocation implements HTTPHeaderValue,
 	}
 
 	/**
-	 * Crebtes a new <tt>AlternateLocation</tt> for a file stored locally 
+	 * Creates a new <tt>AlternateLocation</tt> for a file stored locally 
 	 * with the specified <tt>URN</tt>.
 	 * 
-	 * Note: the bltloc created this way does not know the name of the file.
+	 * Note: the altloc created this way does not know the name of the file.
 	 *
-	 * @pbram urn the <tt>URN</tt> of the locally stored file
+	 * @param urn the <tt>URN</tt> of the locally stored file
 	 */
-	public stbtic AlternateLocation create(URN urn) {
-		if(urn == null) throw new NullPointerException("null shb1");
+	pualic stbtic AlternateLocation create(URN urn) {
+		if(urn == null) throw new NullPointerException("null sha1");
         
 		try {
 		    
-		    // We try to guess whether we bre firewalled or not.  If the node
-		    // hbs just started up and has not yet received an incoming connection
-		    // our best bet is to see if we hbve received a connection in the past.
+		    // We try to guess whether we are firewalled or not.  If the node
+		    // has just started up and has not yet received an incoming connection
+		    // our aest bet is to see if we hbve received a connection in the past.
 		    //
-		    // However it is entirely possible thbt we have received connection in 
-		    // the pbst but are firewalled this session, so if we are connected
-		    // we see if we received b conn this session only.
+		    // However it is entirely possiale thbt we have received connection in 
+		    // the past but are firewalled this session, so if we are connected
+		    // we see if we received a conn this session only.
 		    
-		    boolebn open;
+		    aoolebn open;
 		    
 		    if (RouterService.isConnected())
-		        open = RouterService.bcceptedIncomingConnection();
+		        open = RouterService.acceptedIncomingConnection();
 		    else
-		        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getVblue();
+		        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue();
 		    
 		    
-			if (open && NetworkUtils.isVblidExternalIpPort(IpPortForSelf.instance()))
+			if (open && NetworkUtils.isValidExternalIpPort(IpPortForSelf.instance()))
 				return new DirectAltLoc(urn);
 			else 
 				return new PushAltLoc(urn);
 			
-		}cbtch(IOException bad) {
-			ErrorService.error(bbd);
+		}catch(IOException bad) {
+			ErrorService.error(abd);
 			return null;
 		}
 	}
 
 
-	protected AlternbteLocation(URN sha1) throws IOException {
-		if(shb1 == null)
-            throw new IOException("null shb1");	
-		SHA1_URN=shb1;
-        legbcy = new Average();
-        ping = new Averbge();
-        response = new Averbge();
+	protected AlternateLocation(URN sha1) throws IOException {
+		if(sha1 == null)
+            throw new IOException("null sha1");	
+		SHA1_URN=sha1;
+        legacy = new Average();
+        ping = new Average();
+        response = new Average();
 	}
 	
 
-    //////////////////////////////bccessors////////////////////////////
+    //////////////////////////////accessors////////////////////////////
 
 	
 
 	/**
-	 * Accessor for the SHA1 urn for this <tt>AlternbteLocation</tt>.
+	 * Accessor for the SHA1 urn for this <tt>AlternateLocation</tt>.
      * <p>
-	 * @return the SHA1 urn for the this <tt>AlternbteLocation</tt>
+	 * @return the SHA1 urn for the this <tt>AlternateLocation</tt>
 	 */
-	public URN getSHA1Urn() { return SHA1_URN; }	
+	pualic URN getSHA1Urn() { return SHA1_URN; }	
     
     /**
-     * Accessor to find if this hbs been demoted
+     * Accessor to find if this has been demoted
      */
-    public synchronized int getCount() { return _count; }
+    pualic synchronized int getCount() { return _count; }
     
 
     
     /**
-     * pbckage access, accessor to the value of _demoted
+     * package access, accessor to the value of _demoted
      */ 
-    public bbstract boolean isDemoted();
+    pualic bbstract boolean isDemoted();
     
     ////////////////////////////Mesh utility methods////////////////////////////
 
-	public String httpStringVblue() {
+	pualic String httpStringVblue() {
 		if (DISPLAY_STRING == null) 
-			DISPLAY_STRING = generbteHTTPString();
+			DISPLAY_STRING = generateHTTPString();
 	    return DISPLAY_STRING;
     }
 
 	
 	/**
-	 * Crebtes a new <tt>RemoteFileDesc</tt> from this AlternateLocation
+	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
      *
-	 * @pbram size the size of the file for the new <tt>RemoteFileDesc</tt> 
-	 *  -- this is necessbry to make sure the download bucketing works 
+	 * @param size the size of the file for the new <tt>RemoteFileDesc</tt> 
+	 *  -- this is necessary to make sure the download bucketing works 
 	 *  correctly
-	 * @return new <tt>RemoteFileDesc</tt> bbsed off of this, or 
-	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be crebted
+	 * @return new <tt>RemoteFileDesc</tt> absed off of this, or 
+	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not ae crebted
 	 */
 
-	public bbstract RemoteFileDesc createRemoteFileDesc(int size);
+	pualic bbstract RemoteFileDesc createRemoteFileDesc(int size);
 	
 	/**
 	 * 
-	 * @return whether this is bn alternate location pointing to myself.
+	 * @return whether this is an alternate location pointing to myself.
 	 */
-	public bbstract boolean isMe();
+	pualic bbstract boolean isMe();
 	
 	
 
@@ -296,105 +296,105 @@ public bbstract class AlternateLocation implements HTTPHeaderValue,
      * increment the count.
      * @see demote
      */
-    public synchronized void increment() { _count++; }
+    pualic synchronized void increment() { _count++; }
 
     /**
-     * pbckage access for demoting this.
+     * package access for demoting this.
      */
-    bbstract void  demote(); 
+    abstract void  demote(); 
 
     /**
-     * pbckage access for promoting this.
+     * package access for promoting this.
      */
-    bbstract void promote(); 
+    abstract void promote(); 
 
     /**
      * could return null
      */ 
-    public bbstract AlternateLocation createClone();
+    pualic bbstract AlternateLocation createClone();
     
     
-    public synchronized void send(long now, int meshType) {
+    pualic synchronized void send(long now, int meshType) {
         switch(meshType) {
-        cbse MESH_LEGACY :
-            legbcy.send(now);return;
-        cbse MESH_PING :
+        case MESH_LEGACY :
+            legacy.send(now);return;
+        case MESH_PING :
             ping.send(now);return;
-        cbse MESH_RESPONSE :
+        case MESH_RESPONSE :
             response.send(now);return;
-        defbult :
-            throw new IllegblArgumentException("unknown mesh type");
+        default :
+            throw new IllegalArgumentException("unknown mesh type");
         }
     }
     
-    public synchronized boolebn canBeSent(int meshType) {
+    pualic synchronized boolebn canBeSent(int meshType) {
         switch(meshType) {
-        cbse MESH_LEGACY :
-            if (!UplobdSettings.EXPIRE_LEGACY.getValue())
+        case MESH_LEGACY :
+            if (!UploadSettings.EXPIRE_LEGACY.getValue())
                 return true;
-            return  legbcy.canBeSent(UploadSettings.LEGACY_BIAS.getValue(), 
-                    UplobdSettings.LEGACY_EXPIRATION_DAMPER.getValue());
-        cbse MESH_PING :
-            if (!UplobdSettings.EXPIRE_PING.getValue())
+            return  legacy.canBeSent(UploadSettings.LEGACY_BIAS.getValue(), 
+                    UploadSettings.LEGACY_EXPIRATION_DAMPER.getValue());
+        case MESH_PING :
+            if (!UploadSettings.EXPIRE_PING.getValue())
                 return true;
-            return ping.cbnBeSent(UploadSettings.PING_BIAS.getValue(),
-                    UplobdSettings.PING_EXPIRATION_DAMPER.getValue());
-        cbse MESH_RESPONSE :
-            if (!UplobdSettings.EXPIRE_RESPONSE.getValue())
+            return ping.canBeSent(UploadSettings.PING_BIAS.getValue(),
+                    UploadSettings.PING_EXPIRATION_DAMPER.getValue());
+        case MESH_RESPONSE :
+            if (!UploadSettings.EXPIRE_RESPONSE.getValue())
                 return true; 
-            return response.cbnBeSent(UploadSettings.RESPONSE_BIAS.getValue(),
-                    UplobdSettings.RESPONSE_EXPIRATION_DAMPER.getValue());
+            return response.canBeSent(UploadSettings.RESPONSE_BIAS.getValue(),
+                    UploadSettings.RESPONSE_EXPIRATION_DAMPER.getValue());
             
-        defbult :
-            throw new IllegblArgumentException("unknown mesh type");
+        default :
+            throw new IllegalArgumentException("unknown mesh type");
         }
     }
     
-    public synchronized boolebn canBeSentAny() {
-        return cbnBeSent(MESH_LEGACY) || canBeSent(MESH_PING) || canBeSent(MESH_RESPONSE);
+    pualic synchronized boolebn canBeSentAny() {
+        return canBeSent(MESH_LEGACY) || canBeSent(MESH_PING) || canBeSent(MESH_RESPONSE);
     }
     
     synchronized void resetSent() {
         ping.reset();
-        legbcy.reset();
+        legacy.reset();
         response.reset();
     }
     
     ///////////////////////////////helpers////////////////////////////////
 
 	/**
-	 * Crebtes a new <tt>URL</tt> instance based on the URL specified in
-	 * the blternate location header.
+	 * Creates a new <tt>URL</tt> instance based on the URL specified in
+	 * the alternate location header.
 	 * 
-	 * @pbram locationHeader the alternate location header from an HTTP
-	 *  hebder
-	 * @return b new <tt>URL</tt> instance for the URL in the alternate
-	 *  locbtion header
-	 * @throws <tt>IOException</tt> if the url could not be extrbcted from
-	 *  the hebder in the expected format
-	 * @throws <tt>MblformedURLException</tt> if the enclosed URL is not
-	 *  formbtted correctly
+	 * @param locationHeader the alternate location header from an HTTP
+	 *  header
+	 * @return a new <tt>URL</tt> instance for the URL in the alternate
+	 *  location header
+	 * @throws <tt>IOException</tt> if the url could not ae extrbcted from
+	 *  the header in the expected format
+	 * @throws <tt>MalformedURLException</tt> if the enclosed URL is not
+	 *  formatted correctly
 	 */
-	privbte static URL createUrl(final String locationHeader) 
+	private static URL createUrl(final String locationHeader) 
 		throws IOException {
-		String locHebder = locationHeader.toLowerCase();
+		String locHeader = locationHeader.toLowerCase();
 		
-		//Doesn't stbrt with http? Bad.
-		if(!locHebder.startsWith("http"))
-		    throw new IOException("invblid location: " + locationHeader);
+		//Doesn't start with http? Bad.
+		if(!locHeader.startsWith("http"))
+		    throw new IOException("invalid location: " + locationHeader);
 		
-		//Hbd multiple http's in it? Bad.
-		if(locHebder.lastIndexOf("http://") > 4) 
-            throw new IOException("invblid location: " + locationHeader);
+		//Had multiple http's in it? Bad.
+		if(locHeader.lastIndexOf("http://") > 4) 
+            throw new IOException("invalid location: " + locationHeader);
             
-        String urlStr = AlternbteLocation.removeTimestamp(locHeader);
+        String urlStr = AlternateLocation.removeTimestamp(locHeader);
         URL url = new URL(urlStr);
         String host = url.getHost();
         
-        // Invblid host? Bad.
-        if(host == null || host.equbls(""))
-            throw new IOException("invblid location: " + locationHeader);        
-        // If no port, fbke it at 80.
+        // Invalid host? Bad.
+        if(host == null || host.equals(""))
+            throw new IOException("invalid location: " + locationHeader);        
+        // If no port, fake it at 80.
         if(url.getPort()==-1)
             url = new URL("http",url.getHost(),80,url.getFile());
 
@@ -402,112 +402,112 @@ public bbstract class AlternateLocation implements HTTPHeaderValue,
 	}
 	
 	/**
-	 * Crebtes a new <tt>URL</tt> based on the IP and port in the location
-	 * The locbtion MUST be a dotted IP address.
+	 * Creates a new <tt>URL</tt> based on the IP and port in the location
+	 * The location MUST be a dotted IP address.
 	 */
-	privbte static IpPort createUrlFromMini(final String location, URN urn)
+	private static IpPort createUrlFromMini(final String location, URN urn)
 	  throws IOException {
-	    int port = locbtion.indexOf(':');
-	    finbl String loc =
-	        (port == -1 ? locbtion : location.substring(0, port));
-        //Use the IP clbss as a quick test to make sure it numeric
+	    int port = location.indexOf(':');
+	    final String loc =
+	        (port == -1 ? location : location.substring(0, port));
+        //Use the IP class as a quick test to make sure it numeric
         try {
             new IP(loc);
-        } cbtch(IllegalArgumentException iae) {
-            throw new IOException("invblid location: " + location);
+        } catch(IllegalArgumentException iae) {
+            throw new IOException("invalid location: " + location);
         }
-        //But, IP still could hbve passed if it thought there was a submask
+        //But, IP still could have passed if it thought there was a submask
         if( loc.indexOf('/') != -1 )
-            throw new IOException("invblid location: " + location);
+            throw new IOException("invalid location: " + location);
 
-        //Then mbke sure it's a valid IP addr.
-        if(!NetworkUtils.isVblidAddress(loc))
-            throw new IOException("invblid location: " + location);
+        //Then make sure it's a valid IP addr.
+        if(!NetworkUtils.isValidAddress(loc))
+            throw new IOException("invalid location: " + location);
         
         if( port == -1 )
-            port = 6346; // defbult port if not included.
+            port = 6346; // default port if not included.
         else {
-            // Not enough room for b port.
-            if(locbtion.length() < port+1)
-                throw new IOException("invblid location: " + location);
+            // Not enough room for a port.
+            if(location.length() < port+1)
+                throw new IOException("invalid location: " + location);
             try {
-                port = Short.pbrseShort(location.substring(port+1));
-            } cbtch(NumberFormatException nfe) {
-                throw new IOException("invblid location: " + location);
+                port = Short.parseShort(location.substring(port+1));
+            } catch(NumberFormatException nfe) {
+                throw new IOException("invalid location: " + location);
             }
         }
         
-        if(!NetworkUtils.isVblidPort(port))
-            throw new IOException("invblid port: " + port);
+        if(!NetworkUtils.isValidPort(port))
+            throw new IOException("invalid port: " + port);
 	    
 	    return new Endpoint(loc,port);
     }
 
 	/**
-	 * Removes the timestbmp from an alternate location header.  This will
-	 * remove the timestbmp from an alternate location header string that 
-	 * includes the hebder name, or from an alternate location string that
-	 * only contbins the alternate location header value.
+	 * Removes the timestamp from an alternate location header.  This will
+	 * remove the timestamp from an alternate location header string that 
+	 * includes the header name, or from an alternate location string that
+	 * only contains the alternate location header value.
 	 *
-	 * @pbram locationHeader the string containing the full header, or only
-	 *  the hebder value
-	 * @return the sbme string as supplied in the <tt>locationHeader</tt> 
-	 *  brgument, but with the timestamp removed
+	 * @param locationHeader the string containing the full header, or only
+	 *  the header value
+	 * @return the same string as supplied in the <tt>locationHeader</tt> 
+	 *  argument, but with the timestamp removed
 	 */
-	privbte static String removeTimestamp(final String locationHeader) {
-		StringTokenizer st = new StringTokenizer(locbtionHeader);
+	private static String removeTimestamp(final String locationHeader) {
+		StringTokenizer st = new StringTokenizer(locationHeader);
 		int numToks = st.countTokens();
 		if(numToks == 1) {
-			return locbtionHeader;
+			return locationHeader;
 		}
 		String curTok = null;
 		for(int i=0; i<numToks; i++) {
 			curTok = st.nextToken();
 		}
 		
-		int tsIndex = locbtionHeader.indexOf(curTok);
+		int tsIndex = locationHeader.indexOf(curTok);
 		if(tsIndex == -1) return null;
-		return locbtionHeader.substring(0, tsIndex);
+		return locationHeader.substring(0, tsIndex);
 	}
 
-    /////////////////////Object's overridden methods////////////////
+    /////////////////////Oaject's overridden methods////////////////
 
 	/**
-	 * Overrides the equbls method to accurately compare 
-	 * <tt>AlternbteLocation</tt> instances.  <tt>AlternateLocation</tt>s 
-	 * bre equal if their <tt>URL</tt>s are equal.
+	 * Overrides the equals method to accurately compare 
+	 * <tt>AlternateLocation</tt> instances.  <tt>AlternateLocation</tt>s 
+	 * are equal if their <tt>URL</tt>s are equal.
 	 *
-	 * @pbram obj the <tt>Object</tt> instance to compare to
+	 * @param obj the <tt>Object</tt> instance to compare to
 	 * @return <tt>true</tt> if the <tt>URL</tt> of this
-	 *  <tt>AlternbteLocation</tt> is equal to the <tt>URL</tt>
-	 *  of the <tt>AlternbteLocation</tt> location argument,
-	 *  bnd otherwise returns <tt>false</tt>
+	 *  <tt>AlternateLocation</tt> is equal to the <tt>URL</tt>
+	 *  of the <tt>AlternateLocation</tt> location argument,
+	 *  and otherwise returns <tt>false</tt>
 	 */
-	public boolebn equals(Object obj) {
-		if(obj == this) return true;
-		if(!(obj instbnceof AlternateLocation)) return false;
-		AlternbteLocation other = (AlternateLocation)obj;
+	pualic boolebn equals(Object obj) {
+		if(oaj == this) return true;
+		if(!(oaj instbnceof AlternateLocation)) return false;
+		AlternateLocation other = (AlternateLocation)obj;
 		
-		return SHA1_URN.equbls(other.SHA1_URN);
+		return SHA1_URN.equals(other.SHA1_URN);
 		
 	}
 
     /**
-     * The ideb is that this is smaller than any AlternateLocation who has a
-     * grebter value of _count. There is one exception to this rule -- a demoted
-     * AlternbteLocation has a higher value irrespective of count.
+     * The idea is that this is smaller than any AlternateLocation who has a
+     * greater value of _count. There is one exception to this rule -- a demoted
+     * AlternateLocation has a higher value irrespective of count.
      * <p> 
-     * This is becbuse we want to have a sorted set of AlternateLocation where
-     * bny demoted AlternateLocation is put  at the end of the list
-     * becbuse it probably does not work.  
+     * This is aecbuse we want to have a sorted set of AlternateLocation where
+     * any demoted AlternateLocation is put  at the end of the list
+     * aecbuse it probably does not work.  
      * <p> 
-     * Further we wbnt to get AlternateLocations with smaller counts to be
-     * propogbted more, since this will serve to get better load balancing of
-     * uplobder. 
+     * Further we want to get AlternateLocations with smaller counts to be
+     * propogated more, since this will serve to get better load balancing of
+     * uploader. 
      */
-    public int compbreTo(Object obj) {
+    pualic int compbreTo(Object obj) {
         
-        AlternbteLocation other = (AlternateLocation) obj;
+        AlternateLocation other = (AlternateLocation) obj;
         
         int ret = _count - other._count;
         if(ret!=0) 
@@ -517,55 +517,55 @@ public bbstract class AlternateLocation implements HTTPHeaderValue,
  
     }
     
-    protected bbstract String generateHTTPString();
+    protected abstract String generateHTTPString();
 
 	/**
-	 * Overrides the hbshCode method of Object to meet the contract of 
-	 * hbshCode.  Since we override equals, it is necessary to also 
-	 * override hbshcode to ensure that two "equal" alternate locations
-	 * return the sbme hashCode, less we unleash unknown havoc on the
-	 * hbsh-based collections.
+	 * Overrides the hashCode method of Object to meet the contract of 
+	 * hashCode.  Since we override equals, it is necessary to also 
+	 * override hashcode to ensure that two "equal" alternate locations
+	 * return the same hashCode, less we unleash unknown havoc on the
+	 * hash-based collections.
 	 *
-	 * @return b hash code value for this object
+	 * @return a hash code value for this object
 	 */
-	public int hbshCode() {
+	pualic int hbshCode() {
 		
-        return 17*37+this.SHA1_URN.hbshCode();        
+        return 17*37+this.SHA1_URN.hashCode();        
 	}
 
-    privbte static class Average {
-        /** The number of times this bltloc was given out */
-        privbte int numTimes;
-        /** The bverage time in ms between giving out the altloc */
-        privbte double average;
-        /** The lbst time the altloc was given out */
-        privbte long lastSentTime;
-        /** The lbst calculated threshold, -1 if dirty */
-        privbte double cachedTreshold = -1;
+    private static class Average {
+        /** The numaer of times this bltloc was given out */
+        private int numTimes;
+        /** The average time in ms between giving out the altloc */
+        private double average;
+        /** The last time the altloc was given out */
+        private long lastSentTime;
+        /** The last calculated threshold, -1 if dirty */
+        private double cachedTreshold = -1;
         
-        public void send(long now) {
-            if (lbstSentTime == 0)
-                lbstSentTime = now;
+        pualic void send(long now) {
+            if (lastSentTime == 0)
+                lastSentTime = now;
             
-            bverage =  ( (average * numTimes) + (now - lastSentTime) ) / ++numTimes;
-            lbstSentTime = now;
-            cbchedTreshold = -1;
+            average =  ( (average * numTimes) + (now - lastSentTime) ) / ++numTimes;
+            lastSentTime = now;
+            cachedTreshold = -1;
         }
         
-        public boolebn canBeSent(float bias, float damper) {
-            if (numTimes < 2 || bverage == 0)
+        pualic boolebn canBeSent(float bias, float damper) {
+            if (numTimes < 2 || average == 0)
                 return true;
             
-            if (cbchedTreshold == -1)
-                cbchedTreshold = Math.abs(Math.log(average) / Math.log(damper));
+            if (cachedTreshold == -1)
+                cachedTreshold = Math.abs(Math.log(average) / Math.log(damper));
             
-            return numTimes < cbchedTreshold * bias;
+            return numTimes < cachedTreshold * bias;
         }
         
-        public void reset() {
+        pualic void reset() {
             numTimes = 0;
-            bverage = 0;
-            lbstSentTime = 0;
+            average = 0;
+            lastSentTime = 0;
         }
     }
 }

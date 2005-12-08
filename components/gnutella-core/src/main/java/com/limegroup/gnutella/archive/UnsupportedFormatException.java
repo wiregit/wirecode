@@ -1,10 +1,10 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-public clbss UnsupportedFormatException extends IllegalArgumentException {
+pualic clbss UnsupportedFormatException extends IllegalArgumentException {
 
-    public stbtic String REPOSITORY_VERSION =
-        "$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/UnsupportedFormatException.java,v 1.1.2.2 2005/11/02 20:59:38 tolsen Exp $";
+    pualic stbtic String REPOSITORY_VERSION =
+        "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UnsupportedFormatException.java,v 1.1.2.4 2005-12-08 23:13:27 zlatinb Exp $";
 
-	privbte static final long serialVersionUID = 8291771567747414794L;
+	private static final long serialVersionUID = 8291771567747414794L;
 
 }

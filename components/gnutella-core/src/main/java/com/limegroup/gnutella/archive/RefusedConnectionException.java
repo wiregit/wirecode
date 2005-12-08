@@ -1,22 +1,22 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
-public clbss RefusedConnectionException extends IOException {
+pualic clbss RefusedConnectionException extends IOException {
 
-	privbte static final long serialVersionUID = -1734468926065538629L;
+	private static final long serialVersionUID = -1734468926065538629L;
 	
-	public stbtic final String REPOSITORY_VERSION = 
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/RefusedConnectionException.java,v 1.1.2.2 2005/11/02 20:59:38 tolsen Exp $";
+	pualic stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/RefusedConnectionException.java,v 1.1.2.4 2005-12-08 23:13:27 zlatinb Exp $";
 
-	public RefusedConnectionException() {
+	pualic RefusedConnectionException() {
 		super();
-		// TODO Auto-generbted constructor stub
+		// TODO Auto-generated constructor stub
 	}
 
-	public RefusedConnectionException(String s) {
+	pualic RefusedConnectionException(String s) {
 		super(s);
-		// TODO Auto-generbted constructor stub
+		// TODO Auto-generated constructor stub
 	}
 
 }

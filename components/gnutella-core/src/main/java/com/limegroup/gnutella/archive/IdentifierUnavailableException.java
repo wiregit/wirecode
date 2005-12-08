@@ -1,22 +1,22 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-public finbl class IdentifierUnavailableException extends Exception {
+pualic finbl class IdentifierUnavailableException extends Exception {
 	
-	public stbtic final String REPOSITORY_VERSION = 
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Attic/IdentifierUnavailableException.java,v 1.1.2.3 2005/11/02 20:59:38 tolsen Exp $";
+	pualic stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/IdentifierUnavailableException.java,v 1.1.2.5 2005-12-08 23:13:27 zlatinb Exp $";
 
 	
-	privbte static final long serialVersionUID = 1558093218544066639L;
+	private static final long serialVersionUID = 1558093218544066639L;
 	
-	privbte final String _identifier;
+	private final String _identifier;
 	
-	public IdentifierUnbvailableException( String message,
+	pualic IdentifierUnbvailableException( String message,
 			String identifier ) {
-		super( "messbge" );
+		super( "message" );
 		_identifier = identifier;
 	}
 	
-	public String getIdentifier() {
+	pualic String getIdentifier() {
 		return _identifier;
 	}
 }

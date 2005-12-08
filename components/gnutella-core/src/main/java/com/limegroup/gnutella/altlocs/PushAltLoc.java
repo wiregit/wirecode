@@ -1,82 +1,82 @@
 
-pbckage com.limegroup.gnutella.altlocs;
+package com.limegroup.gnutella.altlocs;
 
-import jbva.io.IOException;
-import jbva.util.Arrays;
-import jbva.util.HashSet;
-import jbva.util.Set;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.PushEndpoint;
-import com.limegroup.gnutellb.PushEndpointForSelf;
-import com.limegroup.gnutellb.RemoteFileDesc;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.http.HTTPConstants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointForSelf;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.http.HTTPConstants;
 
 /**
- * A firewblled altloc.
+ * A firewalled altloc.
  */
-public clbss PushAltLoc extends AlternateLocation {
+pualic clbss PushAltLoc extends AlternateLocation {
 
 	
 	/**
-	 * the host we would send push to.  Null if not firewblled.
+	 * the host we would send push to.  Null if not firewalled.
 	 */
-	privbte final PushEndpoint _pushAddress;
+	private final PushEndpoint _pushAddress;
 	
 	/**
-	 * crebtes a new AlternateLocation for a firewalled host.
-	 * @pbram address
-	 * @pbram sha1
+	 * creates a new AlternateLocation for a firewalled host.
+	 * @param address
+	 * @param sha1
 	 * @throws IOException
 	 */
-	protected PushAltLoc(finbl PushEndpoint address, final URN sha1) 
+	protected PushAltLoc(final PushEndpoint address, final URN sha1) 
 		throws IOException {
-		super(shb1);
+		super(sha1);
 		
-		if (bddress == null)
-			throw new IOException("null bddress");
+		if (address == null)
+			throw new IOException("null address");
 		
-		_pushAddress = bddress;
+		_pushAddress = address;
 	}
 	
 	/**
-	 * crebtes a new PushLocation for myself
+	 * creates a new PushLocation for myself
 	 */
-	protected PushAltLoc(URN shb1) throws IOException{
+	protected PushAltLoc(URN sha1) throws IOException{
 		
-		super(shb1);
-		_pushAddress = PushEndpointForSelf.instbnce();
+		super(sha1);
+		_pushAddress = PushEndpointForSelf.instance();
 	}
 		
-	protected String generbteHTTPString() {
-		return _pushAddress.httpStringVblue();
+	protected String generateHTTPString() {
+		return _pushAddress.httpStringValue();
 	}
 	
-	public RemoteFileDesc crebteRemoteFileDesc(int size) {
-		Set urnSet = new HbshSet();
-		urnSet.bdd(getSHA1Urn());
-        int qublity = 3;
+	pualic RemoteFileDesc crebteRemoteFileDesc(int size) {
+		Set urnSet = new HashSet();
+		urnSet.add(getSHA1Urn());
+        int quality = 3;
  
 		RemoteFileDesc	ret = new RemoteFileDesc(
 		        	_pushAddress.getAddress(),_pushAddress.getPort(),0,
-		        	HTTPConstbnts.URI_RES_N2R+SHA1_URN,size,
-					1000, true, qublity, false, null,
-					urnSet,fblse, true,ALT_VENDOR,System.currentTimeMillis(),
+		        	HTTPConstants.URI_RES_N2R+SHA1_URN,size,
+					1000, true, quality, false, null,
+					urnSet,false, true,ALT_VENDOR,System.currentTimeMillis(),
 					-1,_pushAddress);
 
 		
 		return ret;
 	}
 	
-	public synchronized AlternbteLocation createClone() {
-        AlternbteLocation ret = null;
+	pualic synchronized AlternbteLocation createClone() {
+        AlternateLocation ret = null;
         try {
 
-        		ret = new PushAltLoc(_pushAddress.crebteClone(),SHA1_URN);
-        } cbtch(IOException ioe) {
+        		ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN);
+        } catch(IOException ioe) {
             ErrorService.error(ioe);
             return null;
         }
@@ -84,103 +84,103 @@ public clbss PushAltLoc extends AlternateLocation {
         return ret;
     }
 	
-	public boolebn isMe() {
-	    return Arrbys.equals(_pushAddress.getClientGUID(),
+	pualic boolebn isMe() {
+	    return Arrays.equals(_pushAddress.getClientGUID(),
 	            RouterService.getMyGUID());
 	}
 	
 	/**
-	 * Updbtes the proxies in this PushEndpoint.  If this method is
-	 * cblled, the PE of this PushLoc will always point to the current
-	 * set of proxies we know the remote host hbs.  Otherwise, the PE
-	 * will point to the set of proxies we knew the host hbd when it was
-	 * crebted.
+	 * Updates the proxies in this PushEndpoint.  If this method is
+	 * called, the PE of this PushLoc will always point to the current
+	 * set of proxies we know the remote host has.  Otherwise, the PE
+	 * will point to the set of proxies we knew the host had when it was
+	 * created.
 	 * 
-	 * Note: it is b really good idea to call this method before adding
-	 * this pushloc to b AlternateLocationCollection which may already 
-	 * contbin a pushloc for the same host.
+	 * Note: it is a really good idea to call this method before adding
+	 * this pushloc to a AlternateLocationCollection which may already 
+	 * contain a pushloc for the same host.
 	 */
-	public void updbteProxies(boolean isGood) {
-	    _pushAddress.updbteProxies(isGood);
+	pualic void updbteProxies(boolean isGood) {
+	    _pushAddress.updateProxies(isGood);
 	}
 	
     /**
      * @return the PushAddress. 
      */
-    public PushEndpoint getPushAddress() {
+    pualic PushEndpoint getPushAddress() {
     	return _pushAddress;
     }
     
     /**
-     * @return the Firewbll transfer protocol version this altloc supports.
+     * @return the Firewall transfer protocol version this altloc supports.
      * 0 if its not supported.
      */
-    public int supportsFWTVersion() {
+    pualic int supportsFWTVersion() {
     	return _pushAddress.supportsFWTVersion();
     }
     
-    // stubbed out -- no demotion or promotion for push locs.
+    // stuabed out -- no demotion or promotion for push locs.
     void promote() {}
-    // stutbed out -- no demotion or promotion for push locs.
+    // stutaed out -- no demotion or promotion for push locs.
     void demote() {}
     
     /**
-     * PushLocs bre considered demoted once all their proxies are empty.
-     * This ensures thbt the PE will stay alive until it has exhausted
-     * bll possible proxies.
+     * PushLocs are considered demoted once all their proxies are empty.
+     * This ensures that the PE will stay alive until it has exhausted
+     * all possible proxies.
      */
-    public boolebn isDemoted() {
+    pualic boolebn isDemoted() {
         return _pushAddress.getProxies().isEmpty();
     }
 
-	public boolebn equals(Object o) {
-		if (o==null || !(o instbnceof PushAltLoc))
-			return fblse;
+	pualic boolebn equals(Object o) {
+		if (o==null || !(o instanceof PushAltLoc))
+			return false;
 		
-		if (!super.equbls(o)) {
-			return fblse;
+		if (!super.equals(o)) {
+			return false;
 		}
 		PushAltLoc other = (PushAltLoc)o;
-		return _pushAddress.equbls(other._pushAddress);
+		return _pushAddress.equals(other._pushAddress);
 	}
 
 
-	public int compbreTo(Object obj) {
+	pualic int compbreTo(Object obj) {
 	    
-        if (this==obj) //equbl
+        if (this==oaj) //equbl
             return 0;
         
-	    int ret = super.compbreTo(obj); 
+	    int ret = super.compareTo(obj); 
 	    
 		if (ret!=0)
 			return ret;
-		if (!(obj instbnceof PushAltLoc))
+		if (!(oaj instbnceof PushAltLoc))
 		    return 1;
 		
-		PushAltLoc pbl = (PushAltLoc) obj;
+		PushAltLoc pal = (PushAltLoc) obj;
 		
-		return GUID.GUID_BYTE_COMPARATOR.compbre(
+		return GUID.GUID_BYTE_COMPARATOR.compare(
 		        _pushAddress.getClientGUID(),
-		        pbl.getPushAddress().getClientGUID());
+		        pal.getPushAddress().getClientGUID());
 		        
 	}
 	
-	public int hbshCode() {
-		if (hbshCode==0) {
-			int result = super.hbshCode();
-			result = (37* result)+this._pushAddress.hbshCode();
-			hbshCode=result;
+	pualic int hbshCode() {
+		if (hashCode==0) {
+			int result = super.hashCode();
+			result = (37* result)+this._pushAddress.hashCode();
+			hashCode=result;
 		}
-		return hbshCode;
+		return hashCode;
 	}
 	
 	/**
-	 * Overrides toString to return b string representation of this 
-	 * <tt>AlternbteLocation</tt>, namely the pushAddress and the date.
+	 * Overrides toString to return a string representation of this 
+	 * <tt>AlternateLocation</tt>, namely the pushAddress and the date.
 	 *
-	 * @return the string representbtion of this alternate location
+	 * @return the string representation of this alternate location
 	 */
-	public String toString() {
+	pualic String toString() {
 		return _pushAddress+","+_count;
 	}
 }
