@@ -198,19 +198,5 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(! filter.allow(push2));
     }
 
-    public void testGetDistanceTo() {
-        IP ipRange = new IP("18.194.0.1/16");
-        IP ip = new IP("18.194.0.37");
-        assertEquals("Distance between an IP and its subnet should be zero.", 0, ipRange.getDistanceTo(ip));
-        ip = new IP("128.0.0.1");
-        assertLessThan("Expect the high-order bit of the xor distance to be set", 0 , ipRange.getDistanceTo(ip));
-        
-        ipRange = new IP("0.0.0.0/16");
-        ip      = new IP("127.255.255.255"); // = Integer.MAX_VALUE
-        assertEquals(0x7FFF0000, ipRange.getDistanceTo(ip));
-        
-        IP ipRange2 = new IP("10.1.2.3/8");
-        assertEquals("Incorrect distance between two ranges", 0x0A000000,ipRange.getDistanceTo(ipRange2));
-    }
 }
 

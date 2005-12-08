@@ -35,7 +35,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -826,27 +825,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     public static QueryReply getFirstQueryReply(Connection c, int tout) {
         return (QueryReply)getFirstMessageOfType(c, QueryReply.class, tout);
-    }
-    
-    public static void failIfAnyArrive(final Connection []connections, final Class type) 
-    throws Exception {
-        Thread [] drainers = new ManagedThread[connections.length];
-        for (int i = 0; i < connections.length; i++) {
-            final int index = i;
-            drainers[i] = new ManagedThread() {
-                public void managedRun() {
-                    try {
-                        Message m = 
-                            getFirstInstanceOfMessageType(connections[index],type);
-                        assertNull(m);
-                    } catch (BadPacketException bad) {
-                        fail(bad);
-                }
-            }};
-            drainers[i].start();
-        }
-        for(int i = 0;i < drainers.length;i++)
-            drainers[i].join();
     }
 }       
 
