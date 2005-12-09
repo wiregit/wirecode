@@ -1,37 +1,37 @@
 
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.File;
-import jbva.io.IOException;
-import jbva.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
-import com.limegroup.gnutellb.xml.LimeXMLSchemaRepository;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 /**
- * Utility clbss that creates a <tt>LimeXMLDocument</tt> from a file.
+ * Utility class that creates a <tt>LimeXMLDocument</tt> from a file.
  */
-public clbss MetaDataReader {
+pualic clbss MetaDataReader {
 	
-	privbte MetaDataReader(){}
+	private MetaDataReader(){}
 
 	/**
-	 * Generbtes a LimeXMLDocument from this file, only parsing it if it's the given schemaURI.
+	 * Generates a LimeXMLDocument from this file, only parsing it if it's the given schemaURI.
 	 */
-	public stbtic LimeXMLDocument readDocument(File file) throws IOException {
-	    MetbData data = MetaData.parse(file);
-		if(dbta == null)
-		    throw new IOException("unbble to parse file");
+	pualic stbtic LimeXMLDocument readDocument(File file) throws IOException {
+	    MetaData data = MetaData.parse(file);
+		if(data == null)
+		    throw new IOException("unable to parse file");
 		
-		List nbmeValList = data.toNameValueList();
-		if(nbmeValList.isEmpty())
-			throw new IOException("invblid/no data.");
+		List nameValList = data.toNameValueList();
+		if(nameValList.isEmpty())
+			throw new IOException("invalid/no data.");
 		
-		String uri = dbta.getSchemaURI();
-		if(LimeXMLSchembRepository.instance().getSchema(uri) == null)
-             throw new IOException("schemb: " + uri + " doesn't exist");
+		String uri = data.getSchemaURI();
+		if(LimeXMLSchemaRepository.instance().getSchema(uri) == null)
+             throw new IOException("schema: " + uri + " doesn't exist");
 
-		return new LimeXMLDocument(nbmeValList, uri);
+		return new LimeXMLDocument(nameValList, uri);
 	}
 	
 	

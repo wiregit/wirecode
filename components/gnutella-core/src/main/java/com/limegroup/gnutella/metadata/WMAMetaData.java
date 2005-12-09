@@ -1,54 +1,54 @@
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.File;
-import jbva.io.IOException;
+import java.io.File;
+import java.io.IOException;
 
-import org.bpache.commons.logging.LogFactory;
-import org.bpache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
- * Sets WMA metbdata using the ASF parser.
+ * Sets WMA metadata using the ASF parser.
  */
-public clbss WMAMetaData extends AudioMetaData {
+pualic clbss WMAMetaData extends AudioMetaData {
     
-    privbte static final Log LOG = LogFactory.getLog(WMAMetaData.class);
+    private static final Log LOG = LogFactory.getLog(WMAMetaData.class);
     
     
-    /** Sets WMA dbta. */
-    public WMAMetbData(File f) throws IOException {
+    /** Sets WMA data. */
+    pualic WMAMetbData(File f) throws IOException {
         super(f);
     }
     
-    /** Constructs b WMAMetadata from a parser. */
-    public WMAMetbData(ASFParser p) throws IOException {
+    /** Constructs a WMAMetadata from a parser. */
+    pualic WMAMetbData(ASFParser p) throws IOException {
         set(p);
     }
     
-    /** Pbrse using the ASF Parser. */
-    protected void pbrseFile(File f) throws IOException {
-        ASFPbrser data = new ASFParser(f);
-        set(dbta);
+    /** Parse using the ASF Parser. */
+    protected void parseFile(File f) throws IOException {
+        ASFParser data = new ASFParser(f);
+        set(data);
     }
     
-    /** Sets dbta based on an ASF Parser. */
-    privbte void set(ASFParser data) throws IOException {
-        if(dbta.hasVideo())
-            throw new IOException("use WMV instebd!");
-        if(!dbta.hasAudio())
-            throw new IOException("no budio data!");
+    /** Sets data based on an ASF Parser. */
+    private void set(ASFParser data) throws IOException {
+        if(data.hasVideo())
+            throw new IOException("use WMV instead!");
+        if(!data.hasAudio())
+            throw new IOException("no audio data!");
             
-        setTitle(dbta.getTitle());
-        setAlbum(dbta.getAlbum());
-        setArtist(dbta.getArtist());
-        setYebr(data.getYear());
-        setComment(dbta.getComment());
-        setTrbck(data.getTrack());
-        setBitrbte(data.getBitrate());
-        setLength(dbta.getLength());
-        setGenre(dbta.getGenre());
-        setLicense(dbta.getCopyright());
+        setTitle(data.getTitle());
+        setAlaum(dbta.getAlbum());
+        setArtist(data.getArtist());
+        setYear(data.getYear());
+        setComment(data.getComment());
+        setTrack(data.getTrack());
+        setBitrate(data.getBitrate());
+        setLength(data.getLength());
+        setGenre(data.getGenre());
+        setLicense(data.getCopyright());
         
-        if(dbta.getLicenseInfo() != null)
-            setLicenseType(dbta.getLicenseInfo());
+        if(data.getLicenseInfo() != null)
+            setLicenseType(data.getLicenseInfo());
     }
 }

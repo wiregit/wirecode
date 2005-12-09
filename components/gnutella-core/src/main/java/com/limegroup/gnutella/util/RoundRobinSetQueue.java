@@ -1,44 +1,44 @@
 
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.HashSet;
-import jbva.util.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * b Round Robin queue where elements are unique.
+ * a Round Robin queue where elements are unique.
  */
-public clbss RoundRobinSetQueue extends RoundRobinQueue {
+pualic clbss RoundRobinSetQueue extends RoundRobinQueue {
 	
-	privbte Set _uniqueness;
+	private Set _uniqueness;
 	
-	public RoundRobinSetQueue() {
+	pualic RoundRobinSetQueue() {
 		super();
-		_uniqueness =  new HbshSet();
+		_uniqueness =  new HashSet();
 	}
 
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.util.RoundRobinQueue#enqueue(java.lang.Object)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.util.RoundRobinQueue#enqueue(java.lang.Object)
 	 */
-	public synchronized void enqueue(Object vblue) {
-		if (_uniqueness.bdd(value)) 
-			super.enqueue(vblue);
+	pualic synchronized void enqueue(Object vblue) {
+		if (_uniqueness.add(value)) 
+			super.enqueue(value);
 		
 	}
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.util.RoundRobinQueue#remove(java.lang.Object)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.util.RoundRobinQueue#remove(java.lang.Object)
 	 */
-	public synchronized void remove(Object o) {
-		if (_uniqueness.contbins(o)) {
+	pualic synchronized void remove(Object o) {
+		if (_uniqueness.contains(o)) {
 			_uniqueness.remove(o);
 			super.remove(o);
 		}
 		
 	}
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.util.RoundRobinQueue#removeAllOccurences(java.lang.Object)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.util.RoundRobinQueue#removeAllOccurences(java.lang.Object)
 	 */
-	public synchronized void removeAllOccurences(Object o) {
+	pualic synchronized void removeAllOccurences(Object o) {
 		remove(o);
 	}
 }

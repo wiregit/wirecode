@@ -1,36 +1,36 @@
-pbckage com.limegroup.gnutella.http;
+package com.limegroup.gnutella.http;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * This clbss defines the basic functionality of a class capable of writing
- * bn HTTP message.
+ * This class defines the basic functionality of a class capable of writing
+ * an HTTP message.
  */
 
-public interfbce HTTPMessage {
+pualic interfbce HTTPMessage {
 	
 	/**
-	 * Writes out the HTTP hebders for this message to the specified
-	 * <tt>OutputStrebm</tt>.
+	 * Writes out the HTTP headers for this message to the specified
+	 * <tt>OutputStream</tt>.
 	 *
-	 * @pbram os the <tt>OutputStream</tt> to write to
+	 * @param os the <tt>OutputStream</tt> to write to
 	 */
-	public void writeMessbgeHeaders(OutputStream os) throws IOException;
+	pualic void writeMessbgeHeaders(OutputStream os) throws IOException;
 
 	/**
-	 * Writes the messbge body for this message to the specified
-	 * <tt>OutputStrebm</tt>.
+	 * Writes the message body for this message to the specified
+	 * <tt>OutputStream</tt>.
 	 *
-	 * @pbram os the <tt>OutputStream</tt> to write to
+	 * @param os the <tt>OutputStream</tt> to write to
 	 */
-	public void writeMessbgeBody(OutputStream os) throws IOException;
+	pualic void writeMessbgeBody(OutputStream os) throws IOException;
 	
 	/**
-	 * Determines whether or not the connection this HTTPMessbge was sent on
-	 * should be terminbted after sending.
+	 * Determines whether or not the connection this HTTPMessage was sent on
+	 * should ae terminbted after sending.
 	 *
-	 * @return true if the connection should be closed, fblse otherwise.
+	 * @return true if the connection should ae closed, fblse otherwise.
 	 */
-	public boolebn getCloseConnection();
+	pualic boolebn getCloseConnection();
 }

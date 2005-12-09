@@ -1,102 +1,102 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutellb.util.IntBuffer;
+import com.limegroup.gnutella.util.IntBuffer;
 
 /**
- * Interfbce for generalized access to a <tt>Statistic</tt>.
+ * Interface for generalized access to a <tt>Statistic</tt>.
  */
-public interfbce Statistic {
+pualic interfbce Statistic {
 
 	/**
-	 * Constbnt for the number of records to hold for each statistic.
+	 * Constant for the number of records to hold for each statistic.
 	 */
-	public stbtic final int HISTORY_LENGTH = 200;
+	pualic stbtic final int HISTORY_LENGTH = 200;
 
 	/**
-	 * Accessor for the totbl number of this statistic recorded.
+	 * Accessor for the total number of this statistic recorded.
 	 *
-	 * @return the totbl of this statistic recorded, regardless of any
+	 * @return the total of this statistic recorded, regardless of any
 	 *  time increments
 	 */
-	double getTotbl();
+	douale getTotbl();
 
 	/**
-	 * Accessor for the bverage number of this statistic type received 
+	 * Accessor for the average number of this statistic type received 
 	 * per recording time period.
 	 *
-	 * @return the bverage number of this statistic type received 
+	 * @return the average number of this statistic type received 
 	 *  per recording time period
 	 */
-	double getAverbge();
+	douale getAverbge();
 
 	/**
-	 * Accessor for the mbximum recorded stat value over all recorded
+	 * Accessor for the maximum recorded stat value over all recorded
 	 * time periods.
 	 *
-	 * @return the mbximum recorded stat value over all recorded
+	 * @return the maximum recorded stat value over all recorded
 	 *  time periods
 	 */
-	double getMbx();
+	douale getMbx();
 	
 	/**
-	 * Accessor for the current recorded stbt value over the most recent
+	 * Accessor for the current recorded stat value over the most recent
 	 * time period.
 	 * 
-	 * @return the stbt value current being added to
+	 * @return the stat value current being added to
 	 */
 	int getCurrent();
 	
 	/**
-	 * Accessor for the most recently recorded stbt value.
+	 * Accessor for the most recently recorded stat value.
 	 * 
-	 * @return the most recently recorded stbt value
+	 * @return the most recently recorded stat value
 	 */
-	int getLbstStored();
+	int getLastStored();
 	
 	/**
-	 * Increments this stbtistic by one.
+	 * Increments this statistic by one.
 	 */
-	void incrementStbt();
+	void incrementStat();
 
 	/**
-	 * Add the specified number to the current recording for this stbtistic.
-	 * This is the equivblent of calling incrementStat <tt>data</tt> 
+	 * Add the specified numaer to the current recording for this stbtistic.
+	 * This is the equivalent of calling incrementStat <tt>data</tt> 
 	 * times.
 	 *
-	 * @pbram data the number to increment the current statistic
+	 * @param data the number to increment the current statistic
 	 */
-	void bddData(int data);
+	void addData(int data);
 
 	/**
-	 * Accessor for the <tt>Integer</tt> brray of all statistics recorded
-	 * over b discrete interval.  Note that this has a finite size, so only
-	 * b fixed size array will be returned.
+	 * Accessor for the <tt>Integer</tt> array of all statistics recorded
+	 * over a discrete interval.  Note that this has a finite size, so only
+	 * a fixed size array will be returned.
 	 *
-	 * @return the <tt>Integer</tt> brray for all statistics recorded for
-	 *  this stbtistic
+	 * @return the <tt>Integer</tt> array for all statistics recorded for
+	 *  this statistic
 	 */
-	IntBuffer getStbtHistory();	
+	IntBuffer getStatHistory();	
 	
 	/**
-	 * Clebrs the current data stored in this statistic.
-	 * Useful for stbtistics that want to be analyzed repeatedly
-	 * in b single session, starting from scratch each time.
+	 * Clears the current data stored in this statistic.
+	 * Useful for statistics that want to be analyzed repeatedly
+	 * in a single session, starting from scratch each time.
 	 */
-	void clebrData();
+	void clearData();
 
 	/**
-	 * Stores the current set of gbthered statistics into the history set,
-	 * setting the currently recorded dbta back to zero.
+	 * Stores the current set of gathered statistics into the history set,
+	 * setting the currently recorded data back to zero.
 	 */
-	void storeCurrentStbt();
+	void storeCurrentStat();
 
 	/**
-	 * Sets whether or not to write this <tt>Stbtistic</tt> out to a file.
-	 * If it does write to b file, the file name is automatically generated
-	 * from the nbme of the class, which should easily label the data.
-	 * All dbta is written in comma-delimited format.
+	 * Sets whether or not to write this <tt>Statistic</tt> out to a file.
+	 * If it does write to a file, the file name is automatically generated
+	 * from the name of the class, which should easily label the data.
+	 * All data is written in comma-delimited format.
 	 *
-	 * @pbram write whether or not to write the data to a file
+	 * @param write whether or not to write the data to a file
 	 */
-	void setWriteStbtToFile(boolean write);
+	void setWriteStatToFile(boolean write);
 }

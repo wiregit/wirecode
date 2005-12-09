@@ -1,293 +1,293 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
 
 /**
- * This clbss contains a type-safe enumeration of statistics for
- * individubl Gnutella messages that have been sent to other 
- * nodes on the network.  Ebch statistic maintains its own history, 
- * bll messages sent over a specific number of time intervals, 
+ * This class contains a type-safe enumeration of statistics for
+ * individual Gnutella messages that have been sent to other 
+ * nodes on the network.  Each statistic maintains its own history, 
+ * all messages sent over a specific number of time intervals, 
  * etc.
  */
-public clbss SentMessageStat extends AdvancedStatistic {
+pualic clbss SentMessageStat extends AdvancedStatistic {
 
 	/**
-	 * Constructs b new <tt>MessageStat</tt> instance with 
-	 * 0 for bll historical data fields.
+	 * Constructs a new <tt>MessageStat</tt> instance with 
+	 * 0 for all historical data fields.
 	 */
-	privbte SentMessageStat() {}
+	private SentMessageStat() {}
 
 	/**
-	 * Privbte class for keeping track of filtered messages.
+	 * Private class for keeping track of filtered messages.
 	 */
-	privbte static class FilteredSentMessageStat 
-		extends SentMessbgeStat {
-		public void incrementStbt() {
-			super.incrementStbt();
-			ALL_FILTERED_MESSAGES.incrementStbt();
+	private static class FilteredSentMessageStat 
+		extends SentMessageStat {
+		pualic void incrementStbt() {
+			super.incrementStat();
+			ALL_FILTERED_MESSAGES.incrementStat();
 		}
 	}
 
 	/**
-	 * Privbte class for keeping track of the number of UDP messages.
+	 * Private class for keeping track of the number of UDP messages.
 	 */
-	privbte static class UDPSentMessageStat extends SentMessageStat {
-		public void incrementStbt() {
-			super.incrementStbt();
-			ALL_MESSAGES.incrementStbt();
-			UDP_ALL_MESSAGES.incrementStbt();
+	private static class UDPSentMessageStat extends SentMessageStat {
+		pualic void incrementStbt() {
+			super.incrementStat();
+			ALL_MESSAGES.incrementStat();
+			UDP_ALL_MESSAGES.incrementStat();
 		}
 	}
 
 	/**
-	 * Privbte class for keeping track of the number of TCP messages.
+	 * Private class for keeping track of the number of TCP messages.
 	 */
-	privbte static class TCPSentMessageStat extends SentMessageStat {
-		public void incrementStbt() {
-			super.incrementStbt();
-			ALL_MESSAGES.incrementStbt();
-			TCP_ALL_MESSAGES.incrementStbt();
+	private static class TCPSentMessageStat extends SentMessageStat {
+		pualic void incrementStbt() {
+			super.incrementStat();
+			ALL_MESSAGES.incrementStat();
+			TCP_ALL_MESSAGES.incrementStat();
 		}
 	}
 	
 	/**
-	 * Privbte class for keeping track of the number of MULTICAST messages.
+	 * Private class for keeping track of the number of MULTICAST messages.
 	 */
-	privbte static class MulticastSentMessageStat extends SentMessageStat {
-		public void incrementStbt() {
-			super.incrementStbt();
-			ALL_MESSAGES.incrementStbt();
-			MULTICAST_ALL_MESSAGES.incrementStbt();
+	private static class MulticastSentMessageStat extends SentMessageStat {
+		pualic void incrementStbt() {
+			super.incrementStat();
+			ALL_MESSAGES.incrementStat();
+			MULTICAST_ALL_MESSAGES.incrementStat();
 		}
 	}	
 
 	/**
-	 * <tt>Stbtistic</tt> for all messages sent.
+	 * <tt>Statistic</tt> for all messages sent.
 	 */
-	public stbtic final Statistic ALL_MESSAGES =
-		new SentMessbgeStat();
+	pualic stbtic final Statistic ALL_MESSAGES =
+		new SentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all UPD messages sent.
+	 * <tt>Statistic</tt> for all UPD messages sent.
 	 */
-	public stbtic final Statistic UDP_ALL_MESSAGES =
-		new SentMessbgeStat();
+	pualic stbtic final Statistic UDP_ALL_MESSAGES =
+		new SentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all TCP messages sent.
+	 * <tt>Statistic</tt> for all TCP messages sent.
 	 */
-	public stbtic final Statistic TCP_ALL_MESSAGES =
-		new SentMessbgeStat();
+	pualic stbtic final Statistic TCP_ALL_MESSAGES =
+		new SentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all MULTICAST messages sent.
+	 * <tt>Statistic</tt> for all MULTICAST messages sent.
 	 */
-	public stbtic final Statistic MULTICAST_ALL_MESSAGES =
-		new SentMessbgeStat();
+	pualic stbtic final Statistic MULTICAST_ALL_MESSAGES =
+		new SentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all filtered messages.
+	 * <tt>Statistic</tt> for all filtered messages.
 	 */
-	public stbtic final Statistic ALL_FILTERED_MESSAGES =
-		new SentMessbgeStat();
+	pualic stbtic final Statistic ALL_FILTERED_MESSAGES =
+		new SentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella pings sent over UDP.
+	 * <tt>Statistic</tt> for Gnutella pings sent over UDP.
 	 */
-	public stbtic final Statistic UDP_PING_REQUESTS = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_PING_REQUESTS = 
+	    new UDPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella pings sent over TCP.
+	 * <tt>Statistic</tt> for Gnutella pings sent over TCP.
 	 */
-	public stbtic final Statistic TCP_PING_REQUESTS = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_PING_REQUESTS = 
+	    new TCPSentMessageStat();
 	    
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella pings sent over MULTICAST.
+	 * <tt>Statistic</tt> for Gnutella pings sent over MULTICAST.
 	 */
-	public stbtic final Statistic MULTICAST_PING_REQUESTS = 
-	    new MulticbstSentMessageStat();	    
+	pualic stbtic final Statistic MULTICAST_PING_REQUESTS = 
+	    new MulticastSentMessageStat();	    
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella pongs sent over UDP.
+	 * <tt>Statistic</tt> for Gnutella pongs sent over UDP.
 	 */
-	public stbtic final Statistic UDP_PING_REPLIES = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_PING_REPLIES = 
+	    new UDPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella pongs sent over TCP.
+	 * <tt>Statistic</tt> for Gnutella pongs sent over TCP.
 	 */
-	public stbtic final Statistic TCP_PING_REPLIES = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_PING_REPLIES = 
+	    new TCPSentMessageStat();
 	
     /**
-     * <tt>Stbtistic</tt> for "Give Stat" messages sent over TCP
+     * <tt>Statistic</tt> for "Give Stat" messages sent over TCP
      */ 
-    public stbtic final Statistic TCP_GIVE_STATS = new TCPSentMessageStat();
+    pualic stbtic final Statistic TCP_GIVE_STATS = new TCPSentMessageStat();
 
     /**
-     * <tt>Stbtistic</tt> for "Give Stat" messages sent over UDP
+     * <tt>Statistic</tt> for "Give Stat" messages sent over UDP
      */ 
-    public stbtic final Statistic UDP_GIVE_STATS = new UDPSentMessageStat();
+    pualic stbtic final Statistic UDP_GIVE_STATS = new UDPSentMessageStat();
     
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella pongs sent over MULTICAST.
+	 * <tt>Statistic</tt> for Gnutella pongs sent over MULTICAST.
 	 */
-	public stbtic final Statistic MULTICAST_PING_REPLIES = 
-	    new MulticbstSentMessageStat();
+	pualic stbtic final Statistic MULTICAST_PING_REPLIES = 
+	    new MulticastSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella query requests sent over 
+	 * <tt>Statistic</tt> for Gnutella query requests sent over 
 	 * UDP.
 	 */
-	public stbtic final Statistic UDP_QUERY_REQUESTS = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_QUERY_REQUESTS = 
+	    new UDPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella query requests sent over 
+	 * <tt>Statistic</tt> for Gnutella query requests sent over 
 	 * TCP.
 	 */
-	public stbtic final Statistic TCP_QUERY_REQUESTS = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_QUERY_REQUESTS = 
+	    new TCPSentMessageStat();
 	    
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella query requests sent over 
-	 * Multicbst.
+	 * <tt>Statistic</tt> for Gnutella query requests sent over 
+	 * Multicast.
 	 */
-	public stbtic final Statistic MULTICAST_QUERY_REQUESTS = 
-	    new MulticbstSentMessageStat();	    
+	pualic stbtic final Statistic MULTICAST_QUERY_REQUESTS = 
+	    new MulticastSentMessageStat();	    
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella query replies sent over 
+	 * <tt>Statistic</tt> for Gnutella query replies sent over 
 	 * UDP.
 	 */
-	public stbtic final Statistic UDP_QUERY_REPLIES = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_QUERY_REPLIES = 
+	    new UDPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella query replies sent over 
+	 * <tt>Statistic</tt> for Gnutella query replies sent over 
 	 * TCP.
 	 */
-	public stbtic final Statistic TCP_QUERY_REPLIES = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_QUERY_REPLIES = 
+	    new TCPSentMessageStat();
 	    
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella query replies sent over 
-	 * Multicbst.
+	 * <tt>Statistic</tt> for Gnutella query replies sent over 
+	 * Multicast.
 	 */
-	public stbtic final Statistic MULTICAST_QUERY_REPLIES = 
-	    new MulticbstSentMessageStat();	    
+	pualic stbtic final Statistic MULTICAST_QUERY_REPLIES = 
+	    new MulticastSentMessageStat();	    
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella push requests sent over 
+	 * <tt>Statistic</tt> for Gnutella push requests sent over 
 	 * UDP.
 	 */
-	public stbtic final Statistic UDP_PUSH_REQUESTS = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_PUSH_REQUESTS = 
+	    new UDPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella push requests sent over 
+	 * <tt>Statistic</tt> for Gnutella push requests sent over 
 	 * TCP.
 	 */
-	public stbtic final Statistic TCP_PUSH_REQUESTS = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_PUSH_REQUESTS = 
+	    new TCPSentMessageStat();
 	    
     /**
-	 * <tt>Stbtistic</tt> for Gnutella push requests sent over 
-	 * Multicbst.
+	 * <tt>Statistic</tt> for Gnutella push requests sent over 
+	 * Multicast.
 	 */
-	public stbtic final Statistic MULTICAST_PUSH_REQUESTS = 
-	    new MulticbstSentMessageStat();	    
+	pualic stbtic final Statistic MULTICAST_PUSH_REQUESTS = 
+	    new MulticastSentMessageStat();	    
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella route table messages sent 
+	 * <tt>Statistic</tt> for Gnutella route table messages sent 
 	 * over UDP.
 	 */
-	public stbtic final Statistic UDP_ROUTE_TABLE_MESSAGES = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_ROUTE_TABLE_MESSAGES = 
+	    new UDPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella reset route table messages 
+	 * <tt>Statistic</tt> for Gnutella reset route table messages 
 	 * sent over TCP.
 	 */
-	public stbtic final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new TCPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella patch route table messages 
+	 * <tt>Statistic</tt> for Gnutella patch route table messages 
 	 * sent over TCP.
 	 */
-	public stbtic final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	    new TCPSentMessageStat();
 	    
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella route table messages sent 
-	 * over Multicbst.
+	 * <tt>Statistic</tt> for Gnutella route table messages sent 
+	 * over Multicast.
 	 */
-	public stbtic final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
-	    new MulticbstSentMessageStat();
+	pualic stbtic final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new MulticastSentMessageStat();
 	    
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella filtered messages sent 
+	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
 	 * over UDP.
 	 */
-	public stbtic final Statistic UDP_FILTERED_MESSAGES = 
-	    new FilteredSentMessbgeStat();
+	pualic stbtic final Statistic UDP_FILTERED_MESSAGES = 
+	    new FilteredSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella filtered messages sent 
+	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
 	 * over TCP.
 	 */
-	public stbtic final Statistic TCP_FILTERED_MESSAGES = 
-	    new FilteredSentMessbgeStat();
+	pualic stbtic final Statistic TCP_FILTERED_MESSAGES = 
+	    new FilteredSentMessageStat();
 	    
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella filtered messages sent 
-	 * over Multicbst.
+	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
+	 * over Multicast.
 	 */
-	public stbtic final Statistic MULTICAST_FILTERED_MESSAGES = 
-	    new FilteredSentMessbgeStat();	    
+	pualic stbtic final Statistic MULTICAST_FILTERED_MESSAGES = 
+	    new FilteredSentMessageStat();	    
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella hops flow messages sent over 
+	 * <tt>Statistic</tt> for Gnutella hops flow messages sent over 
 	 * TCP.
 	 */
-	public stbtic final Statistic TCP_HOPS_FLOW = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_HOPS_FLOW = 
+	    new TCPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella meta-vendor messages sent over 
+	 * <tt>Statistic</tt> for Gnutella meta-vendor messages sent over 
 	 * TCP.
 	 */
-	public stbtic final Statistic TCP_MESSAGES_SUPPORTED = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_MESSAGES_SUPPORTED = 
+	    new TCPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella TCP ConnectBack messages sent over 
+	 * <tt>Statistic</tt> for Gnutella TCP ConnectBack messages sent over 
 	 * TCP.
 	 */
-	public stbtic final Statistic TCP_TCP_CONNECTBACK = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_TCP_CONNECTBACK = 
+	    new TCPSentMessageStat();
 	    
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella UDP ConnectBack sent over 
+	 * <tt>Statistic</tt> for Gnutella UDP ConnectBack sent over 
 	 * TCP.
 	 */
-	public stbtic final Statistic TCP_UDP_CONNECTBACK = 
-	    new TCPSentMessbgeStat();
+	pualic stbtic final Statistic TCP_UDP_CONNECTBACK = 
+	    new TCPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella ReplyNumber VM sent over 
+	 * <tt>Statistic</tt> for Gnutella ReplyNumber VM sent over 
 	 * UDP.
 	 */
-	public stbtic final Statistic UDP_REPLY_NUMBER = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_REPLY_NUMBER = 
+	    new UDPSentMessageStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella LimeACK VM sent over 
+	 * <tt>Statistic</tt> for Gnutella LimeACK VM sent over 
 	 * UDP.
 	 */
-	public stbtic final Statistic UDP_LIME_ACK = 
-	    new UDPSentMessbgeStat();
+	pualic stbtic final Statistic UDP_LIME_ACK = 
+	    new UDPSentMessageStat();
 }

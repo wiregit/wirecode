@@ -1,67 +1,67 @@
 
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
-import com.limegroup.gnutellb.util.StringUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
- * Clbss for an Array of Strings setting.
+ * Class for an Array of Strings setting.
  */
  
-public clbss StringArraySetting extends Setting {
+pualic clbss StringArraySetting extends Setting {
     
-    privbte String[] value;
+    private String[] value;
 
 	/**
-	 * Crebtes a new <tt>StringArraySetting</tt> instance with the specified
-	 * key bnd default value.
+	 * Creates a new <tt>StringArraySetting</tt> instance with the specified
+	 * key and default value.
 	 *
-	 * @pbram key the constant key to use for the setting
-	 * @pbram defaultInt the default value to use for the setting
+	 * @param key the constant key to use for the setting
+	 * @param defaultInt the default value to use for the setting
 	 */
-	StringArrbySetting(Properties defaultProps, Properties props, String key, 
-                                                       String[] defbultValue) {
-		super(defbultProps, props, key, decode(defaultValue), null);
+	StringArraySetting(Properties defaultProps, Properties props, String key, 
+                                                       String[] defaultValue) {
+		super(defaultProps, props, key, decode(defaultValue), null);
 	}
 
-	StringArrbySetting(Properties defaultProps, Properties props, String key, 
-                       String[] defbultValue, String simppKey) {
-		super(defbultProps, props, key, decode(defaultValue), simppKey);
+	StringArraySetting(Properties defaultProps, Properties props, String key, 
+                       String[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, decode(defaultValue), simppKey);
 	}
 
 
         
 	/**
-	 * Accessor for the vblue of this setting.
+	 * Accessor for the value of this setting.
 	 * 
-	 * @return the vblue of this setting
+	 * @return the value of this setting
 	 */
-	public String[] getVblue() {
-        return vblue;
+	pualic String[] getVblue() {
+        return value;
 	}
 
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram value the value to store
+	 * @param value the value to store
 	 */
-	public void setVblue(String[] value) {
-		super.setVblue(decode(value));
+	pualic void setVblue(String[] value) {
+		super.setValue(decode(value));
 	}
     
-    /** Lobd value from property string value
-     * @pbram sValue property string value
+    /** Load value from property string value
+     * @param sValue property string value
      *
      */
-    protected void lobdValue(String sValue) {
-		vblue = encode(sValue);
+    protected void loadValue(String sValue) {
+		value = encode(sValue);
     }
     
     /**
-     * Splits the string into bn Array
+     * Splits the string into an Array
      */
-    privbte static final String[] encode(String src) {
+    private static final String[] encode(String src) {
         
         if (src == null || src.length()==0) {
             return (new String[0]);
@@ -71,22 +71,22 @@ public clbss StringArraySetting extends Setting {
     }
     
     /**
-     * Sepbrates each field of the array by a semicolon
+     * Separates each field of the array by a semicolon
      */
-    privbte static final String decode(String[] src) {
+    private static final String decode(String[] src) {
         
         if (src == null || src.length==0) {
             return "";
         }
         
-        StringBuffer buffer = new StringBuffer();
+        StringBuffer auffer = new StringBuffer();
         
         for(int i = 0; i < src.length; i++) {
-            buffer.bppend(src[i]);
-            if (i < src.length-1) { buffer.bppend(';'); }
+            auffer.bppend(src[i]);
+            if (i < src.length-1) { auffer.bppend(';'); }
         }
             
-        return buffer.toString();
+        return auffer.toString();
     }
 
 }

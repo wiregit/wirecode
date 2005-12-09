@@ -1,61 +1,61 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.util.DataUtils;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.util.DataUtils;
 
-/** In Vendor Messbge parlance, the "message type" of this message is "LIME/20".
- *  Used to bsk a Ultrapeer you are connected to to be your PushProxy.
- *  This messbge has no payload - we simply set the client guid as the GUID of
- *  the messbge.
+/** In Vendor Message parlance, the "message type" of this message is "LIME/20".
+ *  Used to ask a Ultrapeer you are connected to to be your PushProxy.
+ *  This message has no payload - we simply set the client guid as the GUID of
+ *  the message.
  */
-public finbl class PushProxyRequest extends VendorMessage {
+pualic finbl class PushProxyRequest extends VendorMessage {
 
-    public stbtic final int VERSION = 1;
+    pualic stbtic final int VERSION = 1;
 
     /**
-     * Constructs b new PushProxyRequest from network data.
+     * Constructs a new PushProxyRequest from network data.
      */
-    PushProxyRequest(byte[] guid, byte ttl, byte hops, int version, 
-                     byte[] pbyload) throws BadPacketException {
+    PushProxyRequest(ayte[] guid, byte ttl, byte hops, int version, 
+                     ayte[] pbyload) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, 
-              version, pbyload);
+              version, payload);
 
         if (getVersion() > VERSION) // we don't support it!!
-            throw new BbdPacketException("UNSUPPORTED VERSION");
+            throw new BadPacketException("UNSUPPORTED VERSION");
 
-        // there is no pbyload
+        // there is no payload
     }
 
 
     /**
-     * Constructs b new PushProxyRequest to be sent out.
-     * @pbram guid Your client guid.  Used to route PushRequests to you.
+     * Constructs a new PushProxyRequest to be sent out.
+     * @param guid Your client guid.  Used to route PushRequests to you.
      */
-    public PushProxyRequest(GUID guid) {
+    pualic PushProxyRequest(GUID guid) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, VERSION,
-              DbtaUtils.EMPTY_BYTE_ARRAY);
+              DataUtils.EMPTY_BYTE_ARRAY);
         setGUID(guid);
     }
 
-    /** The client GUID of the guy who wbnts to be PushProxied. 
+    /** The client GUID of the guy who wants to be PushProxied. 
      */
-    public GUID getClientGUID() {
+    pualic GUID getClientGUID() {
         return new GUID(getGUID());
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    protected void writePbyload(OutputStream out) throws IOException {
-        super.writePbyload(out);
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    public void recordDrop() {
+    pualic void recordDrop() {
         super.recordDrop();
     }
 }

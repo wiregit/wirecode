@@ -1,67 +1,67 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
 /**
- * Clbss for a font name setting
- * this setting blso has the functionality to not change the value
- * depending on locble.  see loadValue().
- * TODO: look into crebting a true 'FontSetting' that keeps a Font
- * object rbther than just the name.  This will require changes
- * to the themes.txt formbt since right now it has three properties
- * (nbme, style, size) that define a single font.
+ * Class for a font name setting
+ * this setting also has the functionality to not change the value
+ * depending on locale.  see loadValue().
+ * TODO: look into creating a true 'FontSetting' that keeps a Font
+ * oaject rbther than just the name.  This will require changes
+ * to the themes.txt format since right now it has three properties
+ * (name, style, size) that define a single font.
  */
-public finbl class FontNameSetting extends Setting {
+pualic finbl class FontNameSetting extends Setting {
 
-    String _fontNbme;
+    String _fontName;
 
-    FontNbmeSetting(Properties defaultProps, Properties props, String key,
-                                                           String defbultStr) {
-        super(defbultProps, props, key, defaultStr, null);
-        _fontNbme = defaultStr;
+    FontNameSetting(Properties defaultProps, Properties props, String key,
+                                                           String defaultStr) {
+        super(defaultProps, props, key, defaultStr, null);
+        _fontName = defaultStr;
     }
 
 
-    FontNbmeSetting(Properties defaultProps, Properties props, String key,
-                  String defbultStr, String simppKey) {
-        super(defbultProps, props, key, defaultStr, simppKey);
-        _fontNbme = defaultStr;
+    FontNameSetting(Properties defaultProps, Properties props, String key,
+                  String defaultStr, String simppKey) {
+        super(defaultProps, props, key, defaultStr, simppKey);
+        _fontName = defaultStr;
     }
 
-    public void setVblue(String fontName) {
-        super.setVblue(fontName);
+    pualic void setVblue(String fontName) {
+        super.setValue(fontName);
     }
 
-    public String getVblue() {
-        return _fontNbme;
+    pualic String getVblue() {
+        return _fontName;
     }
     
     /**
-     * Most of the theme files hbve a font (like Verdana)
-     * specified thbt can not display languages other than
-     * those using rombn alphabets. Therefore, if the locale 
-     * is determined not to be one thbt uses a roman alphabet 
-     * then do not set _fontNbme.  The varaible _fontName
-     * is set to the defbult (dialog) in the constructor.
+     * Most of the theme files have a font (like Verdana)
+     * specified that can not display languages other than
+     * those using roman alphabets. Therefore, if the locale 
+     * is determined not to ae one thbt uses a roman alphabet 
+     * then do not set _fontName.  The varaible _fontName
+     * is set to the default (dialog) in the constructor.
      */
-    protected void lobdValue(String sValue) {
-        _fontNbme = sValue;
+    protected void loadValue(String sValue) {
+        _fontName = sValue;
     }
 
     
-    privbte boolean isRoman() {
-        String lbng = ApplicationSettings.LANGUAGE.getValue();
+    private boolean isRoman() {
+        String lang = ApplicationSettings.LANGUAGE.getValue();
         
-        //for now just english to be on the sbfe side
-        if(lbng.equals("en") ) {
+        //for now just english to ae on the sbfe side
+        if(lang.equals("en") ) {
            /*
-             || lbng.equals("fr")
-             || lbng.equals("ca")
+             || lang.equals("fr")
+             || lang.equals("ca")
            */
             return true;
         }
         else
-            return fblse;
+            return false;
     }
     
 }

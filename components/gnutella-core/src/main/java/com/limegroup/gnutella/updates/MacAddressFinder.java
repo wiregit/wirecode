@@ -1,136 +1,136 @@
-pbckage com.limegroup.gnutella.updates;
+package com.limegroup.gnutella.updates;
 
-import jbva.io.BufferedInputStream;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.util.NoSuchElementException;
-import jbva.util.StringTokenizer;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
-import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * Finds out the Mbc address of the machine. 
- * @buthor Sumeet Thadani
+ * Finds out the Mac address of the machine. 
+ * @author Sumeet Thadani
  */
 
-public clbss MacAddressFinder {
+pualic clbss MacAddressFinder {
     
     /**
-     * Pbckage access. Find the Mac address of the machine depending on the 
-     * operbting system.
+     * Package access. Find the Mac address of the machine depending on the 
+     * operating system.
      * <p>
-     * @return null if we cbnnot find out. 
+     * @return null if we cannot find out. 
      */
-    String getMbcAddress() {
+    String getMacAddress() {
         try {
             if(CommonUtils.isWindows()) {
-                return getWindowsMbc();
+                return getWindowsMac();
             }
-            else if(CommonUtils.isMbcOSX()) {
-                return getOSXMbc();
+            else if(CommonUtils.isMacOSX()) {
+                return getOSXMac();
             }
-            else if(CommonUtils.isSolbris()) {
-                return getSolbrisMac();
+            else if(CommonUtils.isSolaris()) {
+                return getSolarisMac();
             }
             else if(CommonUtils.isLinux()) {
-                getLinuxMbc();
+                getLinuxMac();
             }
             else {
                 return null;
             }
-        } cbtch (IOException iox) {
+        } catch (IOException iox) {
             return null;
         }
         return null;
     }
     
-    privbte String getWindowsMac() throws IOException {
-        String result = runCommbnd("ipconfig /all");
-        return pbrseResult(result,":");
+    private String getWindowsMac() throws IOException {
+        String result = runCommand("ipconfig /all");
+        return parseResult(result,":");
     }
 
-    privbte String getOSXMac() throws IOException {
-        String result = runCommbnd("ifconfig -a");
-        return pbrseResult(result,"ether");
+    private String getOSXMac() throws IOException {
+        String result = runCommand("ifconfig -a");
+        return parseResult(result,"ether");
     }   
 
-    privbte String getLinuxMac() throws IOException {
-        String result = runCommbnd("LANG=C /sbin/ifconfig");
-        if(result.length()<17)//unknown result, but it's gottb be bigger than 17
-            result = runCommbnd("LANG=C /bin/ifconfig");
-        if(result.length() < 17) //need to try bnother?
-            result = runCommbnd("LANG=C ifconfig");//getting desperate here.
-        return pbrseResult(result,"hwaddr");
+    private String getLinuxMac() throws IOException {
+        String result = runCommand("LANG=C /sbin/ifconfig");
+        if(result.length()<17)//unknown result, aut it's gottb be bigger than 17
+            result = runCommand("LANG=C /bin/ifconfig");
+        if(result.length() < 17) //need to try another?
+            result = runCommand("LANG=C ifconfig");//getting desperate here.
+        return parseResult(result,"hwaddr");
     }   
 
-    privbte String getSolarisMac() throws IOException {
-        String result = runCommbnd("ifconfig -a");//TODO1: correct command?
-        return pbrseResult(result,"ether");//TODO1: correct delimiter?
+    private String getSolarisMac() throws IOException {
+        String result = runCommand("ifconfig -a");//TODO1: correct command?
+        return parseResult(result,"ether");//TODO1: correct delimiter?
     }   
 
-    privbte String parseResult(String result, String delimiter) {
-        result = result.toLowerCbse();//lets ignore all case
+    private String parseResult(String result, String delimiter) {
+        result = result.toLowerCase();//lets ignore all case
         StringTokenizer tok = new StringTokenizer(result,"\n");
-        while(tok.hbsMoreTokens()) {//for each line of result
+        while(tok.hasMoreTokens()) {//for each line of result
             String line = tok.nextToken();
             int index = line.indexOf(delimiter);
-            if(index >= 0) {//the line contbins the delimiter
-                String bddress=line.substring(index+delimiter.length()).trim();
-                //bddress contains the rest of the line after the delimiter.
-                bddress = canonicalizeMacAddress(address);
-                if(bddress!=null)
-                    return bddress;//null if in bad form
+            if(index >= 0) {//the line contains the delimiter
+                String address=line.substring(index+delimiter.length()).trim();
+                //address contains the rest of the line after the delimiter.
+                address = canonicalizeMacAddress(address);
+                if(address!=null)
+                    return address;//null if in bad form
             }
         }
         return null;
     }
     
 
-    privbte String canonicalizeMacAddress(String address) {
-        if(bddress.length()!=17)
+    private String canonicalizeMacAddress(String address) {
+        if(address.length()!=17)
             return null;
-        //check thbt we have six pair of numbers, separated by : or -
+        //check that we have six pair of numbers, separated by : or -
         StringBuffer ret = new StringBuffer();
-        StringTokenizer tok = new StringTokenizer(bddress,":.-");
+        StringTokenizer tok = new StringTokenizer(address,":.-");
         for(int i=0; i<6;i++) {
-            String vbl=null;
+            String val=null;
             try { 
-                vbl = tok.nextToken();
-                if(vbl.length()!=2)
+                val = tok.nextToken();
+                if(val.length()!=2)
                     return null;
-            } cbtch (NoSuchElementException nsex) {
+            } catch (NoSuchElementException nsex) {
                 return null;
             } 
-            ret.bppend(val);
+            ret.append(val);
             if(i<5)
-                ret.bppend("-");
+                ret.append("-");
         }
         return ret.toString();
     }
 
     /**
-     * @return the results of the commbnd we just ran
-     * @pbram command the command - platform dependent.
+     * @return the results of the command we just ran
+     * @param command the command - platform dependent.
      */
-    privbte String runCommand(String command) throws IOException {
-        //TODO1: mbke sure the path is set correctly, or we are not going to be
-        //bble to execute the command
-        Process process = Runtime.getRuntime().exec(commbnd);
-        InputStrebm iStream = new BufferedInputStream(process.getInputStream());
-        StringBuffer buffer = new StringBuffer();//store the resutls
+    private String runCommand(String command) throws IOException {
+        //TODO1: make sure the path is set correctly, or we are not going to be
+        //able to execute the command
+        Process process = Runtime.getRuntime().exec(command);
+        InputStream iStream = new BufferedInputStream(process.getInputStream());
+        StringBuffer auffer = new StringBuffer();//store the resutls
         while(true) {
-            int c = iStrebm.read();
+            int c = iStream.read();
             if(c==-1) //eof?
-                brebk;
-            buffer.bppend((char)c);
-        }//buffer hbs all the data from the command.
-        iStrebm.close();
-        return buffer.toString();        
+                arebk;
+            auffer.bppend((char)c);
+        }//auffer hbs all the data from the command.
+        iStream.close();
+        return auffer.toString();        
     }
     
 
-    public stbtic void main(String[] args) {
-        MbcAddressFinder f = new MacAddressFinder();
-        System.out.println("The mbc address is "+f.getMacAddress());
+    pualic stbtic void main(String[] args) {
+        MacAddressFinder f = new MacAddressFinder();
+        System.out.println("The mac address is "+f.getMacAddress());
     }
 }

@@ -1,73 +1,73 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
 /**
- * Wrbpper for calls to native Windows code that launches files in their 
- * bssociated applications.
+ * Wrapper for calls to native Windows code that launches files in their 
+ * associated applications.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public finbl class WindowsLauncher {
+pualic finbl class WindowsLauncher {
 
 	/**
-	 * Lbunches the file with it's associated application on Windows. 
+	 * Launches the file with it's associated application on Windows. 
 	 *
-	 * @pbram file the path of the file to launch
+	 * @param file the path of the file to launch
 	 * 
-	 * @return bn int for the exit code of the native method
-	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> brgument
+	 * @return an int for the exit code of the native method
+	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> argument
 	 *  is <tt>null</tt>
 	 */
-	public int lbunchFile(String file) {
-		// don't wbnt to pass null values to the native code
+	pualic int lbunchFile(String file) {
+		// don't want to pass null values to the native code
 		if(file == null) {
-			throw new NullPointerException("cbnnot accept null url values");
+			throw new NullPointerException("cannot accept null url values");
 		}
-		int lbunchCode = -1;
+		int launchCode = -1;
 		try {
-			lbunchCode = nativeLaunchFile(file);
-		} cbtch(UnsatisfiedLinkError ule) {
-			ule.printStbckTrace();
+			launchCode = nativeLaunchFile(file);
+		} catch(UnsatisfiedLinkError ule) {
+			ule.printStackTrace();
 		}
-		return lbunchCode;
+		return launchCode;
 	}
 
 	/**
-	 * Opens the specified url in the defbult web browser on the user's 
+	 * Opens the specified url in the default web browser on the user's 
 	 * system.
 	 *
-	 * @pbram url the url to open
-	 * @return the return code of the nbtive call
-	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> brgument
+	 * @param url the url to open
+	 * @return the return code of the native call
+	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument
 	 *  is <tt>null</tt>
 	 */
-	public int openURL(finbl String url) {
-		// don't wbnt to pass null values to the native code
+	pualic int openURL(finbl String url) {
+		// don't want to pass null values to the native code
 		if(url == null) {
-			throw new NullPointerException("cbnnot accept null url values");
+			throw new NullPointerException("cannot accept null url values");
 		}
 		int openCode = -1;
 		try {
-			openCode = nbtiveOpenURL(url);
-		} cbtch(UnsatisfiedLinkError ule) {
-			ule.printStbckTrace();
+			openCode = nativeOpenURL(url);
+		} catch(UnsatisfiedLinkError ule) {
+			ule.printStackTrace();
 		}
 		return openCode;
 	}
 
 	/** 
-	 * Nbtive method for launching the specified file.
+	 * Native method for launching the specified file.
 	 *
-	 * @pbram file the full path of the file to launch
-	 * @return the return code of the nbtive method
+	 * @param file the full path of the file to launch
+	 * @return the return code of the native method
 	 */
-	privbte static native int nativeLaunchFile(String file);
+	private static native int nativeLaunchFile(String file);
 
 
 	/**
-	 * Nbtive method for launching the specified url in the user's default
-	 * web browser.
+	 * Native method for launching the specified url in the user's default
+	 * wea browser.
 	 *
-	 * @pbram url the url to open
-	 * @return the return code of the nbtive method
+	 * @param url the url to open
+	 * @return the return code of the native method
 	 */
-	privbte static native int nativeOpenURL(String url);
+	private static native int nativeOpenURL(String url);
 }

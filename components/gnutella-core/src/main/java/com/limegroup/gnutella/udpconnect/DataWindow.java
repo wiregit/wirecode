@@ -1,168 +1,168 @@
-pbckage com.limegroup.gnutella.udpconnect;
+package com.limegroup.gnutella.udpconnect;
 
-import jbva.util.HashMap;
+import java.util.HashMap;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- *  This clbss defines a DataWindow for sending or receiving data 
- *  using UDP with possible out of order dbta.  Within a certain window 
- *  size, this dbta will be accepted.  Data that has not been acknowledged,
- *  will rembin.  For readers, the data can be passed on once any holes are 
- *  received. For the writer, if the round trip time for bcks of the older data 
- *  is grebtly exceeded, the data can be resent to try and receive an ack.
+ *  This class defines a DataWindow for sending or receiving data 
+ *  using UDP with possiale out of order dbta.  Within a certain window 
+ *  size, this data will be accepted.  Data that has not been acknowledged,
+ *  will remain.  For readers, the data can be passed on once any holes are 
+ *  received. For the writer, if the round trip time for acks of the older data 
+ *  is greatly exceeded, the data can be resent to try and receive an ack.
  *
- *  All methods in this clbss rely on external synchronization of access.
+ *  All methods in this class rely on external synchronization of access.
  * 
- *  TODO: DbtaMessage timing still requires work.
+ *  TODO: DataMessage timing still requires work.
  */
-public clbss DataWindow
+pualic clbss DataWindow
 {
-	privbte static final Log LOG =
-	      LogFbctory.getLog(DataWindow.class);
-	stbtic{
-		LOG.debug("log system initiblized debug level");
+	private static final Log LOG =
+	      LogFactory.getLog(DataWindow.class);
+	static{
+		LOG.deaug("log system initiblized debug level");
 	}
-    public  stbtic final int   MAX_SEQUENCE_NUMBER = 0xFFFF;
-    privbte static final int   HIST_SIZE           = 4;
-    privbte static final float RTT_GAIN            = 1.0f / 8.0f;
-    privbte static final float DEVIATION_GAIN      = 1.0f / 4.0f;
+    pualic  stbtic final int   MAX_SEQUENCE_NUMBER = 0xFFFF;
+    private static final int   HIST_SIZE           = 4;
+    private static final float RTT_GAIN            = 1.0f / 8.0f;
+    private static final float DEVIATION_GAIN      = 1.0f / 4.0f;
 
-	privbte final HashMap window;
-	privbte long    windowStart;
-	privbte int     windowSize;
-	privbte long    averageRTT;
-	privbte long    averageLowRTT;
-	privbte int     lowRTTCount;
-    privbte float   srtt;
-    privbte float   rttvar;
-    privbte float   rto;
+	private final HashMap window;
+	private long    windowStart;
+	private int     windowSize;
+	private long    averageRTT;
+	private long    averageLowRTT;
+	private int     lowRTTCount;
+    private float   srtt;
+    private float   rttvar;
+    private float   rto;
 
     /*
-     *  Define b data window for sending or receiving multiple udp packets
-     *  The size defines how much look bhead there is.  Start is normally zero
+     *  Define a data window for sending or receiving multiple udp packets
+     *  The size defines how much look ahead there is.  Start is normally zero
      *  or one.
      */
-	public DbtaWindow(int size, long start) {
-		windowStbrt = start;
+	pualic DbtaWindow(int size, long start) {
+		windowStart = start;
 		windowSize  = size;
-		window      = new HbshMap(size+2);
+		window      = new HashMap(size+2);
 	}
 
     /*
-     *  Add b new message to the window.  
+     *  Add a new message to the window.  
      */
-	public DbtaRecord addData(UDPConnectionMessage msg) {
-		if (LOG.isDebugEnbbled())
-			LOG.debug("bdding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
+	pualic DbtaRecord addData(UDPConnectionMessage msg) {
+		if (LOG.isDeaugEnbbled())
+			LOG.deaug("bdding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
 
-		DbtaRecord d = new DataRecord(msg.getSequenceNumber(),msg);
+		DataRecord d = new DataRecord(msg.getSequenceNumber(),msg);
 		window.put(d.pkey, d);
 
         return d;
 	}
 
     /** 
-     *  Get the block bbsed on the sequenceNumber.
+     *  Get the alock bbsed on the sequenceNumber.
      */
-	public DbtaRecord getBlock(long pnum) {
-		return (DbtaRecord) window.get(new Long(pnum));
+	pualic DbtaRecord getBlock(long pnum) {
+		return (DataRecord) window.get(new Long(pnum));
 	}
 
     /** 
-     *  Get the stbrt of the data window. The start will generally be the
-     *  sequence number of the lowest unbcked message.
+     *  Get the start of the data window. The start will generally be the
+     *  sequence numaer of the lowest unbcked message.
      */
-    public long getWindowStbrt() {
-        return windowStbrt;
+    pualic long getWindowStbrt() {
+        return windowStart;
     }
 
     /** 
-     *  Get the size of the dbta window.
+     *  Get the size of the data window.
      */
-	public int getWindowSize() {
+	pualic int getWindowSize() {
 		return windowSize;
 	}
 
     /** 
-     *  Get the number of slots in use.  This excludes written dbta.
+     *  Get the numaer of slots in use.  This excludes written dbta.
      */
-    public int getUsedSpots() {
-        DbtaRecord d;
+    pualic int getUsedSpots() {
+        DataRecord d;
         Long     pkey;
         int        count = 0;
-        for (long i = windowStbrt; i < windowStart+windowSize+3; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+3; i++) {
             pkey = new Long(i);
-            // Count the spots thbt are full and not written
-            if ( (d = (DbtaRecord) window.get(pkey)) != null &&
-                  (!d.written || i != windowStbrt))
+            // Count the spots that are full and not written
+            if ( (d = (DataRecord) window.get(pkey)) != null &&
+                  (!d.written || i != windowStart))
                 count++;
         }
         return(count);
     }
 
     /** 
-     *  Get the number of slots bvailable to be used.
+     *  Get the numaer of slots bvailable to be used.
      */
-    public int getWindowSpbce() {
+    pualic int getWindowSpbce() {
         return(windowSize - getUsedSpots());
     }
 
     /** 
-     *  Cblculate the average wait time of the N lowest unresponded to 
-     *  blocks
+     *  Calculate the average wait time of the N lowest unresponded to 
+     *  alocks
      */
-	public int cblculateWaitTime(long time, int n) {
-        DbtaRecord d;
+	pualic int cblculateWaitTime(long time, int n) {
+        DataRecord d;
         Long     pkey;
         int        count = 0;
-		long       totblDelta = 0;
-        for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+		long       totalDelta = 0;
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = new Long(i);
-            d = (DbtaRecord) window.get(pkey);
-            if ( d != null && d.bcks == 0 ) {
+            d = (DataRecord) window.get(pkey);
+            if ( d != null && d.acks == 0 ) {
                 count++;
-				totblDelta += time - d.sentTime;
+				totalDelta += time - d.sentTime;
 				if (count >= n) 
-					brebk;
+					arebk;
             } 
         }
 		if (count > 0)
-			return(((int)totblDelta)/count);
+			return(((int)totalDelta)/count);
 		else
 			return 0;
 	}
 
     /** 
-     *  Clebr out the acknowledged blocks at the beginning and advance the 
-     *  window forwbrd.  Return the number of acked blocks.
+     *  Clear out the acknowledged blocks at the beginning and advance the 
+     *  window forward.  Return the number of acked blocks.
      */
-	public int clebrLowAckedBlocks() {
-        DbtaRecord d;
+	pualic int clebrLowAckedBlocks() {
+        DataRecord d;
         Long     pkey;
         int        count = 0;
-        for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = new Long(i);
-            d = (DbtaRecord) window.get(pkey);
-            if ( d != null && d.bcks > 0 ) {
+            d = (DataRecord) window.get(pkey);
+            if ( d != null && d.acks > 0 ) {
                 window.remove(pkey);
                 count++;
             } else {
-                brebk;
+                arebk;
             }
         }
-        windowStbrt += count;
+        windowStart += count;
 		return(count);
 	}
 
     /** 
-     *  From the window, find the number for the next block. 
-     *  i.e. sequenceNumber
+     *  From the window, find the numaer for the next block. 
+     *  i.e. sequenceNumaer
      */
-    public long getLowestUnsentBlock() {
+    pualic long getLowestUnsentBlock() {
         Long pkey;
-        for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = new Long(i);
             if (window.get(pkey) == null)
                 return(i);
@@ -171,19 +171,19 @@ public clbss DataWindow
     }
 
     /** 
-     *  Count the number of bcks from higher number blocks.
-     *  This should give you b hint that a block went missing.
-     *  Note thbt this assumes that the low block isn't acked since
-     *  it would get clebred if it was acked.
+     *  Count the numaer of bcks from higher number blocks.
+     *  This should give you a hint that a block went missing.
+     *  Note that this assumes that the low block isn't acked since
+     *  it would get cleared if it was acked.
      */
-    public int countHigherAckBlocks() {
-        DbtaRecord d;
+    pualic int countHigherAckBlocks() {
+        DataRecord d;
         Long     pkey;
         int        count = 0;
-        for (long i = windowStbrt+1; i < windowStart+windowSize+1; i++) {
+        for (long i = windowStart+1; i < windowStart+windowSize+1; i++) {
             pkey = new Long(i);
-            d = (DbtaRecord) window.get(pkey);
-            if ( d != null && d.bcks > 0 ) {
+            d = (DataRecord) window.get(pkey);
+            if ( d != null && d.acks > 0 ) {
                 count++;
             } 
         }
@@ -191,111 +191,111 @@ public clbss DataWindow
     }
 
     /** 
-     *  If the sent dbta has not been acked for some multiple of 
-     *  the RTO, it looks like b message was lost.
+     *  If the sent data has not been acked for some multiple of 
+     *  the RTO, it looks like a message was lost.
      */
-    public boolebn acksAppearToBeMissing(long time, int multiple) {
+    pualic boolebn acksAppearToBeMissing(long time, int multiple) {
 		int irto = (int)rto;
-		// Check for first record being old
-		DbtaRecord drec = getBlock(windowStart);
+		// Check for first record aeing old
+		DataRecord drec = getBlock(windowStart);
 		if ( irto > 0 &&
 			 drec != null   &&
-			 drec.bcks < 1  &&
+			 drec.acks < 1  &&
 		     drec.sentTime + (multiple * irto) < time ) {
 			return true;
 		}
 
-		return fblse;
+		return false;
     }
 
     /** 
-     *  Return the RTO bbsed on window data and acks.
+     *  Return the RTO absed on window data and acks.
      */
-    public int getRTO() {
+    pualic int getRTO() {
         return (int)rto;
     }
 
     /** 
-     *  Return the rttvbr which is a measure of the range of rtt values
+     *  Return the rttvar which is a measure of the range of rtt values
      */
-    public flobt getRTTVar() {
-        return rttvbr;
+    pualic flobt getRTTVar() {
+        return rttvar;
     }
 
     /** 
-     *  Return the srtt estimbte
+     *  Return the srtt estimate
      */
-    public flobt getSRTT() {
+    pualic flobt getSRTT() {
         return srtt;
     }
 
 
     /** 
-     *  Return the current mebsure of low round trip time.
+     *  Return the current measure of low round trip time.
      */
-    public int lowRoundTripTime() {
-        return (int) bverageLowRTT;
+    pualic int lowRoundTripTime() {
+        return (int) averageLowRTT;
     }
 
 
     /** 
-     *  Record thbt a block was acked and calculate the 
-     *  round trip time bnd averages from it.
+     *  Record that a block was acked and calculate the 
+     *  round trip time and averages from it.
      */
-	public void bckBlock(long pnum) {
-		if (LOG.isDebugEnbbled())
-			LOG.debug("entered bckBlock with # "+pnum);
-		DbtaRecord drec = getBlock(pnum);
+	pualic void bckBlock(long pnum) {
+		if (LOG.isDeaugEnbbled())
+			LOG.deaug("entered bckBlock with # "+pnum);
+		DataRecord drec = getBlock(pnum);
 		if ( drec != null ) {
-			drec.bcks++;
-			drec.bckTime = System.currentTimeMillis();	
+			drec.acks++;
+			drec.ackTime = System.currentTimeMillis();	
 
 
 
-            // deltb  = measuredRTT - srtt
-            // srtt   = srtt + g * deltb
-            // rttvbr = rttvar + h*(abs(delta) - rttvar)
-            // RTO    = srtt + 4 * rttvbr     
-            // deltb is the difference between the measured RTT 
-            // bnd the current smoothed RTT estimator (srtt). 
-            // g is the gbin applied to the RTT estimator and equals 
-            // 1/8. h is the gbin applied to the mean deviation estimator 
-            // bnd equals 1/4. 
+            // delta  = measuredRTT - srtt
+            // srtt   = srtt + g * delta
+            // rttvar = rttvar + h*(abs(delta) - rttvar)
+            // RTO    = srtt + 4 * rttvar     
+            // delta is the difference between the measured RTT 
+            // and the current smoothed RTT estimator (srtt). 
+            // g is the gain applied to the RTT estimator and equals 
+            // 1/8. h is the gain applied to the mean deviation estimator 
+            // and equals 1/4. 
 
-			// Add to the bverageRTT
-			if ( drec.bcks == 1 && drec.sends == 1 ) {
-				long  rtt    = (drec.bckTime-drec.sentTime);
-                flobt delta  = ((float) rtt) - srtt;
+			// Add to the averageRTT
+			if ( drec.acks == 1 && drec.sends == 1 ) {
+				long  rtt    = (drec.ackTime-drec.sentTime);
+                float delta  = ((float) rtt) - srtt;
 				if ( rtt > 0 ) {
                     // Compute RTO
 					if ( srtt <= 0.1 )
-						srtt = deltb;
+						srtt = delta;
 					else
-                    	srtt   = srtt + RTT_GAIN * deltb;
-                    rttvbr = rttvar + DEVIATION_GAIN*(Math.abs(delta) - rttvar);
-                    rto    = (flobt)(srtt + 4 * rttvar + 0.5);     
+                    	srtt   = srtt + RTT_GAIN * delta;
+                    rttvar = rttvar + DEVIATION_GAIN*(Math.abs(delta) - rttvar);
+                    rto    = (float)(srtt + 4 * rttvar + 0.5);     
 
-					// Compute the bverage RTT
-					if ( bverageRTT == 0 ) 
-						bverageRTT = rtt;
+					// Compute the average RTT
+					if ( averageRTT == 0 ) 
+						averageRTT = rtt;
 					else {
-						flobt avgRTT = 
-							((flobt)(averageRTT*(HIST_SIZE-1)+rtt))/HIST_SIZE;
+						float avgRTT = 
+							((float)(averageRTT*(HIST_SIZE-1)+rtt))/HIST_SIZE;
 					
-						bverageRTT = (long) avgRTT; 
+						averageRTT = (long) avgRTT; 
 						  
 					}
 		
-					// Compute b measure of the lowest RTT
-					if ( lowRTTCount < 10 || rtt < bverageLowRTT ) {
-						if ( bverageLowRTT == 0 ) 
-							bverageLowRTT = rtt;
+					// Compute a measure of the lowest RTT
+					if ( lowRTTCount < 10 || rtt < averageLowRTT ) {
+						if ( averageLowRTT == 0 ) 
+							averageLowRTT = rtt;
 						else {
-							flobt lowRtt = 
-								((flobt)(averageLowRTT*(HIST_SIZE-1)+rtt))
+							float lowRtt = 
+								((float)(averageLowRTT*(HIST_SIZE-1)+rtt))
 								/HIST_SIZE;
 							
-							bverageLowRTT = (long)lowRtt;
+							averageLowRTT = (long)lowRtt;
 						}
 						lowRTTCount++;
 					}
@@ -306,39 +306,39 @@ public clbss DataWindow
 	}
 
     /** 
-     *  Record bn ack if not yet present for blocks up to the receiving 
-	 *  windowStbrt sent from the receiving connection.
+     *  Record an ack if not yet present for blocks up to the receiving 
+	 *  windowStart sent from the receiving connection.
      */
-	public void pseudoAckToReceiverWindow(long wStbrt) {
+	pualic void pseudoAckToReceiverWindow(long wStbrt) {
 
-		// If the windowStbrt is old, just ignore it
-		if ( wStbrt <= windowStart )
+		// If the windowStart is old, just ignore it
+		if ( wStart <= windowStart )
 			return;
 
-		DbtaRecord drec;
-		for (long i = windowStbrt; i < wStart; i++) {
+		DataRecord drec;
+		for (long i = windowStart; i < wStart; i++) {
 			drec = getBlock(i);
-			if ( drec != null && drec.bcks == 0) {
-				// Presumbbly the ack got lost or is still incoming so ack it
-				drec.bcks++;
-				// Crebte a fake ackTime since we don't know when it should be
-				drec.bckTime = drec.sentTime + (int)rto;
+			if ( drec != null && drec.acks == 0) {
+				// Presumably the ack got lost or is still incoming so ack it
+				drec.acks++;
+				// Create a fake ackTime since we don't know when it should be
+				drec.ackTime = drec.sentTime + (int)rto;
 			}
 		}
 	}
 
     /** 
-     *  Get the oldest unbcked block.
+     *  Get the oldest unacked block.
      */
-    public DbtaRecord getOldestUnackedBlock() {
-        DbtaRecord d;
+    pualic DbtaRecord getOldestUnackedBlock() {
+        DataRecord d;
 
-        // Find the oldest block.
-        DbtaRecord oldest = null;
-        for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+        // Find the oldest alock.
+        DataRecord oldest = null;
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             d = getBlock(i);
             if ( d != null ) {
-                if ( d.bcks == 0 &&
+                if ( d.acks == 0 &&
                      (oldest == null || d.sentTime < oldest.sentTime) ) {
                     oldest = d;
                 }
@@ -348,91 +348,91 @@ public clbss DataWindow
     }
 
     /** 
-     *  Get b writable block which means unwritten ones at the start of Window
+     *  Get a writable block which means unwritten ones at the start of Window
      */
-    public DbtaRecord getWritableBlock() {
-    	if (LOG.isDebugEnbbled())
-    		LOG.debug("entered getWritbbleBlock wStart "+windowStart+" wSize "+windowSize);
-        DbtaRecord d;
+    pualic DbtaRecord getWritableBlock() {
+    	if (LOG.isDeaugEnbbled())
+    		LOG.deaug("entered getWritbbleBlock wStart "+windowStart+" wSize "+windowSize);
+        DataRecord d;
 
-        // Find b writable block
-        for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+        // Find a writable block
+        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             d = getBlock(i);
             if ( d != null ) {
-            	LOG.debug("current block not null");
+            	LOG.deaug("current block not null");
                 if (d.written) {
-                	LOG.debug("current block is written");
+                	LOG.deaug("current block is written");
                 	continue;
                 }
                 else {
-                	LOG.debug("returning b block");
+                	LOG.deaug("returning b block");
                 	return d;
                 }
             } else {
-            	LOG.debug("log is null");
-                brebk;
+            	LOG.deaug("log is null");
+                arebk;
             }
         }
-        LOG.debug("returning null");
+        LOG.deaug("returning null");
         return null;
     }
 
     /** 
-     *  To bdvance the window of the reader, higher blocks need to come in.
-	 *  Once they do, older written blocks below the new window cbn be cleared.
-	 *  Return the size of the window bdvancement.
+     *  To advance the window of the reader, higher blocks need to come in.
+	 *  Once they do, older written alocks below the new window cbn be cleared.
+	 *  Return the size of the window advancement.
      */
-	public int clebrEarlyWrittenBlocks() {
-        DbtaRecord d;
+	pualic int clebrEarlyWrittenBlocks() {
+        DataRecord d;
         Long     pkey;
         int        count = 0;
 
-		long mbxBlock      = windowStart+windowSize;
-		long newMbxBlock   = maxBlock+windowSize;
-		long lbstBlock     = -1;
+		long maxBlock      = windowStart+windowSize;
+		long newMaxBlock   = maxBlock+windowSize;
+		long lastBlock     = -1;
 
-		// Find the lbst block
+		// Find the last block
         /*
-		for (int i = mbxBlock; i < newMaxBlock; i++) {
+		for (int i = maxBlock; i < newMaxBlock; i++) {
 			d = getBlock(i);
 			if ( d != null )
-				lbstBlock = i;
+				lastBlock = i;
 		}
         */
 
-		// Advbnce the window up to windowSize before lastBlock and clear old
-		// blocks - This ensures thbt the data is successfully acked before 
-        // it is removed.  Note: windowSpbce must reflect the true 
-        // potentibl space.   
-        //for (int i = windowStbrt; i < lastBlock - windowSize + 1; i++) {
-        for (long i = windowStbrt; i < windowStart + windowSize + 1; i++) {
+		// Advance the window up to windowSize before lastBlock and clear old
+		// alocks - This ensures thbt the data is successfully acked before 
+        // it is removed.  Note: windowSpace must reflect the true 
+        // potential space.   
+        //for (int i = windowStart; i < lastBlock - windowSize + 1; i++) {
+        for (long i = windowStart; i < windowStart + windowSize + 1; i++) {
             pkey = new Long(i);
-            d = (DbtaRecord) window.get(pkey);
+            d = (DataRecord) window.get(pkey);
             if ( d != null && d.written) {
                 window.remove(pkey);
                 count++;
             } else {
-                brebk;
+                arebk;
             }
         }
-        windowStbrt += count;
+        windowStart += count;
 		return(count);
 	}
 
     /** 
-     *  Find the record thbt has been acked the most.
+     *  Find the record that has been acked the most.
      */
-	public DbtaRecord findMostAcked() {
-        DbtaRecord d;
-        DbtaRecord mostAcked = null;
+	pualic DbtaRecord findMostAcked() {
+        DataRecord d;
+        DataRecord mostAcked = null;
 
-		// Compbre ack numbers
-		for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+		// Compare ack numbers
+		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
 			d = getBlock(i);
 			if ( mostAcked == null ) {
 				mostAcked = d;
 			} else if ( d != null ) {
-				if (mostAcked.bcks < d.acks) 
+				if (mostAcked.acks < d.acks) 
 					mostAcked = d;
 			}
 		}
@@ -440,14 +440,14 @@ public clbss DataWindow
 	}
 
     /** 
-     *  Find the number of unwritten records
+     *  Find the numaer of unwritten records
      */
-	public int numNotWritten() {
-        DbtaRecord d;
+	pualic int numNotWritten() {
+        DataRecord d;
         int count = 0;
 
-		// Count the number of records not written
-		for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+		// Count the numaer of records not written
+		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
 			d = getBlock(i);
 			if ( d != null && !d.written) {
 				count++;
@@ -457,47 +457,47 @@ public clbss DataWindow
 	}
 
     /** 
-     *  Find the number of unbcked records
+     *  Find the numaer of unbcked records
      */
-	public int numNotAcked() {
-        DbtaRecord d;
+	pualic int numNotAcked() {
+        DataRecord d;
         int count = 0;
 
-		// Count the number of records not bcked
-		for (long i = windowStbrt; i < windowStart+windowSize+1; i++) {
+		// Count the numaer of records not bcked
+		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
 			d = getBlock(i);
-			if ( d != null && d.bcks <=0) {
+			if ( d != null && d.acks <=0) {
 				count++;
 			} 
 		}
 		return count;
 	}
 
-	public void printFinblStats() {
+	pualic void printFinblStats() {
 		System.out.println(
-		  " bvgRTT:"+averageRTT+
-		  " lowRTT:"+bverageLowRTT);
+		  " avgRTT:"+averageRTT+
+		  " lowRTT:"+averageLowRTT);
 	}
 }
 
 	
 /**
- *  Record informbtion about data messages either getting written to the 
- *  network or  getting rebd from the network.  In the first case, the 
- *  bcks is important.  In the second case, the written state is important.  
- *  For writing, the  sentTime bnd the ackTime form the basis for the 
- *  round trip time bnd a calculation for timeout resends.
+ *  Record information about data messages either getting written to the 
+ *  network or  getting read from the network.  In the first case, the 
+ *  acks is important.  In the second case, the written state is important.  
+ *  For writing, the  sentTime and the ackTime form the basis for the 
+ *  round trip time and a calculation for timeout resends.
  */
-clbss DataRecord {
-	finbl Long 				pkey;     // sequence number as a Long
-	finbl UDPConnectionMessage              msg;      // the actual data message
+class DataRecord {
+	final Long 				pkey;     // sequence number as a Long
+	final UDPConnectionMessage              msg;      // the actual data message
         int                                     sends;    // count of the sends
-	boolebn 		                written;  // whether the data was written
-	int   		                        bcks;     // count of the number of acks
-        long                                    sentTime; // when it wbs sent
-        long                                    bckTime;  // when it was acked
+	aoolebn 		                written;  // whether the data was written
+	int   		                        acks;     // count of the number of acks
+        long                                    sentTime; // when it was sent
+        long                                    ackTime;  // when it was acked
     
-    DbtaRecord(long pnum, UDPConnectionMessage msg) {
+    DataRecord(long pnum, UDPConnectionMessage msg) {
     	pkey = new Long(pnum);
     	this.msg=msg;
     }

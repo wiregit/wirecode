@@ -1,214 +1,214 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
 
 /**
- * Wrbpper class for keeping track of Gnutella message data.  For a given
- * Gnutellb message, this class provides the simultaneous updating of both 
- * the number of messbges sent and the total bytes sent.  All calls to add
- * dbta for sent Gnutella message statistics should go through this class 
- * to bvoid losing any data.
+ * Wrapper class for keeping track of Gnutella message data.  For a given
+ * Gnutella message, this class provides the simultaneous updating of both 
+ * the numaer of messbges sent and the total bytes sent.  All calls to add
+ * data for sent Gnutella message statistics should go through this class 
+ * to avoid losing any data.
  */
-public clbss DroppedSentMessageStatHandler extends AbstractStatHandler {
+pualic clbss DroppedSentMessageStatHandler extends AbstractStatHandler {
 
 	/**
-	 * Crebtes a new <tt>DroppedSentMessageStatHandler</tt> instance.  
-	 * Privbte constructor to ensure that no other classes can
-	 * construct this clbss, following the type-safe enum pattern.
+	 * Creates a new <tt>DroppedSentMessageStatHandler</tt> instance.  
+	 * Private constructor to ensure that no other classes can
+	 * construct this class, following the type-safe enum pattern.
 	 *
-	 * @pbram numberStat the statistic that is simply incremented with
-	 *  ebch new message
-	 * @pbram byteStat the statistic for keeping track of the total bytes
+	 * @param numberStat the statistic that is simply incremented with
+	 *  each new message
+	 * @param byteStat the statistic for keeping track of the total bytes
 	 */
-	privbte DroppedSentMessageStatHandler(Statistic numberStat, 
-										  Stbtistic byteStat,
-										  Stbtistic limeNumberStat,
-										  Stbtistic limeByteStat) {
-		super(numberStbt, byteStat, limeNumberStat, limeByteStat);
+	private DroppedSentMessageStatHandler(Statistic numberStat, 
+										  Statistic byteStat,
+										  Statistic limeNumberStat,
+										  Statistic limeByteStat) {
+		super(numaerStbt, byteStat, limeNumberStat, limeByteStat);
 		
 	}	
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella pings sent over UDP.
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pings sent over UDP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler UDP_PING_REQUESTS = 
-		new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.UDP_PING_REQUESTS, 
-								   DroppedSentMessbgeStatBytes.UDP_PING_REQUESTS,
-								   DroppedLimeSentMessbgeStat.UDP_PING_REQUESTS, 
-								   DroppedLimeSentMessbgeStatBytes.UDP_PING_REQUESTS);
+	pualic stbtic final DroppedSentMessageStatHandler UDP_PING_REQUESTS = 
+		new DroppedSentMessageStatHandler(DroppedSentMessageStat.UDP_PING_REQUESTS, 
+								   DroppedSentMessageStatBytes.UDP_PING_REQUESTS,
+								   DroppedLimeSentMessageStat.UDP_PING_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.UDP_PING_REQUESTS);
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella pings sent over TCP.
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pings sent over TCP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler TCP_PING_REQUESTS = 
-		new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.TCP_PING_REQUESTS,
-								   DroppedSentMessbgeStatBytes.TCP_PING_REQUESTS,
-								   DroppedLimeSentMessbgeStat.TCP_PING_REQUESTS,
-								   DroppedLimeSentMessbgeStatBytes.TCP_PING_REQUESTS);
+	pualic stbtic final DroppedSentMessageStatHandler TCP_PING_REQUESTS = 
+		new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_PING_REQUESTS,
+								   DroppedSentMessageStatBytes.TCP_PING_REQUESTS,
+								   DroppedLimeSentMessageStat.TCP_PING_REQUESTS,
+								   DroppedLimeSentMessageStatBytes.TCP_PING_REQUESTS);
 								   
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella pings sent over MULTICAST.
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pings sent over MULTICAST.
 	 */
-	public stbtic final DroppedSentMessageStatHandler MULTICAST_PING_REQUESTS = 
-		new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.MULTICAST_PING_REQUESTS,
-								   DroppedSentMessbgeStatBytes.MULTICAST_PING_REQUESTS,
-								   DroppedLimeSentMessbgeStat.MULTICAST_PING_REQUESTS,
-								   DroppedLimeSentMessbgeStatBytes.MULTICAST_PING_REQUESTS);								   
+	pualic stbtic final DroppedSentMessageStatHandler MULTICAST_PING_REQUESTS = 
+		new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_PING_REQUESTS,
+								   DroppedSentMessageStatBytes.MULTICAST_PING_REQUESTS,
+								   DroppedLimeSentMessageStat.MULTICAST_PING_REQUESTS,
+								   DroppedLimeSentMessageStatBytes.MULTICAST_PING_REQUESTS);								   
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella pongs sent over UDP.
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pongs sent over UDP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler UDP_PING_REPLIES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.UDP_PING_REPLIES, 
-								   DroppedSentMessbgeStatBytes.UDP_PING_REPLIES,
-								   DroppedLimeSentMessbgeStat.UDP_PING_REPLIES, 
-								   DroppedLimeSentMessbgeStatBytes.UDP_PING_REPLIES);
+	pualic stbtic final DroppedSentMessageStatHandler UDP_PING_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.UDP_PING_REPLIES, 
+								   DroppedSentMessageStatBytes.UDP_PING_REPLIES,
+								   DroppedLimeSentMessageStat.UDP_PING_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.UDP_PING_REPLIES);
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella pongs sent over TCP.
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pongs sent over TCP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler TCP_PING_REPLIES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.TCP_PING_REPLIES, 
-								   DroppedSentMessbgeStatBytes.TCP_PING_REPLIES,
-								   DroppedLimeSentMessbgeStat.TCP_PING_REPLIES, 
-								   DroppedLimeSentMessbgeStatBytes.TCP_PING_REPLIES);
+	pualic stbtic final DroppedSentMessageStatHandler TCP_PING_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_PING_REPLIES, 
+								   DroppedSentMessageStatBytes.TCP_PING_REPLIES,
+								   DroppedLimeSentMessageStat.TCP_PING_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.TCP_PING_REPLIES);
 								   
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella pongs sent over MULTICAST.
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pongs sent over MULTICAST.
 	 */
-	public stbtic final DroppedSentMessageStatHandler MULTICAST_PING_REPLIES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.MULTICAST_PING_REPLIES, 
-								   DroppedSentMessbgeStatBytes.MULTICAST_PING_REPLIES,
-								   DroppedLimeSentMessbgeStat.MULTICAST_PING_REPLIES, 
-								   DroppedLimeSentMessbgeStatBytes.MULTICAST_PING_REPLIES);								   
+	pualic stbtic final DroppedSentMessageStatHandler MULTICAST_PING_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_PING_REPLIES, 
+								   DroppedSentMessageStatBytes.MULTICAST_PING_REPLIES,
+								   DroppedLimeSentMessageStat.MULTICAST_PING_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_PING_REPLIES);								   
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella query requests sent 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query requests sent 
 	 * over UDP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler UDP_QUERY_REQUESTS = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.UDP_QUERY_REQUESTS, 
-								   DroppedSentMessbgeStatBytes.UDP_QUERY_REQUESTS,
-								   DroppedLimeSentMessbgeStat.UDP_QUERY_REQUESTS, 
-								   DroppedLimeSentMessbgeStatBytes.UDP_QUERY_REQUESTS);
+	pualic stbtic final DroppedSentMessageStatHandler UDP_QUERY_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.UDP_QUERY_REQUESTS, 
+								   DroppedSentMessageStatBytes.UDP_QUERY_REQUESTS,
+								   DroppedLimeSentMessageStat.UDP_QUERY_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.UDP_QUERY_REQUESTS);
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella query requests sent 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query requests sent 
 	 * over TCP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler TCP_QUERY_REQUESTS = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.TCP_QUERY_REQUESTS, 
-								   DroppedSentMessbgeStatBytes.TCP_QUERY_REQUESTS,
-								   DroppedLimeSentMessbgeStat.TCP_QUERY_REQUESTS, 
-								   DroppedLimeSentMessbgeStatBytes.TCP_QUERY_REQUESTS);
+	pualic stbtic final DroppedSentMessageStatHandler TCP_QUERY_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_QUERY_REQUESTS, 
+								   DroppedSentMessageStatBytes.TCP_QUERY_REQUESTS,
+								   DroppedLimeSentMessageStat.TCP_QUERY_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.TCP_QUERY_REQUESTS);
 								   
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella query requests sent 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query requests sent 
 	 * over MULTICAST.
 	 */
-	public stbtic final DroppedSentMessageStatHandler MULTICAST_QUERY_REQUESTS = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.MULTICAST_QUERY_REQUESTS, 
-								   DroppedSentMessbgeStatBytes.MULTICAST_QUERY_REQUESTS,
-								   DroppedLimeSentMessbgeStat.MULTICAST_QUERY_REQUESTS, 
-								   DroppedLimeSentMessbgeStatBytes.MULTICAST_QUERY_REQUESTS);
+	pualic stbtic final DroppedSentMessageStatHandler MULTICAST_QUERY_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_QUERY_REQUESTS, 
+								   DroppedSentMessageStatBytes.MULTICAST_QUERY_REQUESTS,
+								   DroppedLimeSentMessageStat.MULTICAST_QUERY_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_QUERY_REQUESTS);
 								   
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella query replies sent over 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query replies sent over 
 	 * UDP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler UDP_QUERY_REPLIES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.UDP_QUERY_REPLIES, 
-								   DroppedSentMessbgeStatBytes.UDP_QUERY_REPLIES,
-								   DroppedLimeSentMessbgeStat.UDP_QUERY_REPLIES, 
-								   DroppedLimeSentMessbgeStatBytes.UDP_QUERY_REPLIES);
+	pualic stbtic final DroppedSentMessageStatHandler UDP_QUERY_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.UDP_QUERY_REPLIES, 
+								   DroppedSentMessageStatBytes.UDP_QUERY_REPLIES,
+								   DroppedLimeSentMessageStat.UDP_QUERY_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.UDP_QUERY_REPLIES);
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella query replies sent over 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query replies sent over 
 	 * TCP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler TCP_QUERY_REPLIES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.TCP_QUERY_REPLIES, 
-								   DroppedSentMessbgeStatBytes.TCP_QUERY_REPLIES,
-								   DroppedLimeSentMessbgeStat.TCP_QUERY_REPLIES, 
-								   DroppedLimeSentMessbgeStatBytes.TCP_QUERY_REPLIES);
+	pualic stbtic final DroppedSentMessageStatHandler TCP_QUERY_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_QUERY_REPLIES, 
+								   DroppedSentMessageStatBytes.TCP_QUERY_REPLIES,
+								   DroppedLimeSentMessageStat.TCP_QUERY_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.TCP_QUERY_REPLIES);
 								   
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella query replies sent over 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query replies sent over 
 	 * MULTICAST.
 	 */
-	public stbtic final DroppedSentMessageStatHandler MULTICAST_QUERY_REPLIES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.MULTICAST_QUERY_REPLIES, 
-								   DroppedSentMessbgeStatBytes.MULTICAST_QUERY_REPLIES,
-								   DroppedLimeSentMessbgeStat.MULTICAST_QUERY_REPLIES, 
-								   DroppedLimeSentMessbgeStatBytes.MULTICAST_QUERY_REPLIES);								   
+	pualic stbtic final DroppedSentMessageStatHandler MULTICAST_QUERY_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_QUERY_REPLIES, 
+								   DroppedSentMessageStatBytes.MULTICAST_QUERY_REPLIES,
+								   DroppedLimeSentMessageStat.MULTICAST_QUERY_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_QUERY_REPLIES);								   
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella push requests sent over 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella push requests sent over 
 	 * UDP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler UDP_PUSH_REQUESTS = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.UDP_PUSH_REQUESTS, 
-								   DroppedSentMessbgeStatBytes.UDP_PUSH_REQUESTS,
-								   DroppedLimeSentMessbgeStat.UDP_PUSH_REQUESTS, 
-								   DroppedLimeSentMessbgeStatBytes.UDP_PUSH_REQUESTS);
+	pualic stbtic final DroppedSentMessageStatHandler UDP_PUSH_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.UDP_PUSH_REQUESTS, 
+								   DroppedSentMessageStatBytes.UDP_PUSH_REQUESTS,
+								   DroppedLimeSentMessageStat.UDP_PUSH_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.UDP_PUSH_REQUESTS);
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella push requests sent over 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella push requests sent over 
 	 * TCP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler TCP_PUSH_REQUESTS = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.TCP_PUSH_REQUESTS, 
-								   DroppedSentMessbgeStatBytes.TCP_PUSH_REQUESTS,
-								   DroppedLimeSentMessbgeStat.TCP_PUSH_REQUESTS, 
-								   DroppedLimeSentMessbgeStatBytes.TCP_PUSH_REQUESTS);
+	pualic stbtic final DroppedSentMessageStatHandler TCP_PUSH_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_PUSH_REQUESTS, 
+								   DroppedSentMessageStatBytes.TCP_PUSH_REQUESTS,
+								   DroppedLimeSentMessageStat.TCP_PUSH_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.TCP_PUSH_REQUESTS);
 								   
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella push requests sent over 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella push requests sent over 
 	 * MULTICAST.
 	 */
-	public stbtic final DroppedSentMessageStatHandler MULTICAST_PUSH_REQUESTS = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.MULTICAST_PUSH_REQUESTS, 
-								   DroppedSentMessbgeStatBytes.MULTICAST_PUSH_REQUESTS,
-								   DroppedLimeSentMessbgeStat.MULTICAST_PUSH_REQUESTS, 
-								   DroppedLimeSentMessbgeStatBytes.MULTICAST_PUSH_REQUESTS);								   
+	pualic stbtic final DroppedSentMessageStatHandler MULTICAST_PUSH_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_PUSH_REQUESTS, 
+								   DroppedSentMessageStatBytes.MULTICAST_PUSH_REQUESTS,
+								   DroppedLimeSentMessageStat.MULTICAST_PUSH_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_PUSH_REQUESTS);								   
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella route table messages sent 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella route table messages sent 
 	 * over UDP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler UDP_ROUTE_TABLE_MESSAGES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
-								   DroppedSentMessbgeStatBytes.UDP_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessbgeStat.UDP_ROUTE_TABLE_MESSAGES, 
-								   DroppedLimeSentMessbgeStatBytes.UDP_ROUTE_TABLE_MESSAGES);
+	pualic stbtic final DroppedSentMessageStatHandler UDP_ROUTE_TABLE_MESSAGES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
+								   DroppedSentMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
+								   DroppedLimeSentMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES);
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella reset route table messages 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella reset route table messages 
 	 * sent over TCP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler TCP_RESET_ROUTE_TABLE_MESSAGES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
-								   DroppedSentMessbgeStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessbgeStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessbgeStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES);
+	pualic stbtic final DroppedSentMessageStatHandler TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   DroppedSentMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES);
 
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella patch route table messages 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella patch route table messages 
 	 * sent over TCP.
 	 */
-	public stbtic final DroppedSentMessageStatHandler TCP_PATCH_ROUTE_TABLE_MESSAGES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
-								   DroppedSentMessbgeStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessbgeStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessbgeStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES);
+	pualic stbtic final DroppedSentMessageStatHandler TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   DroppedSentMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES);
 								   
 	/**
-	 * <tt>DroppedSentMessbgeStatHandler</tt> for Gnutella route table messages sent 
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella route table messages sent 
 	 * over MULTICAST.
 	 */
-	public stbtic final DroppedSentMessageStatHandler MULTICAST_ROUTE_TABLE_MESSAGES = 
-	    new DroppedSentMessbgeStatHandler(DroppedSentMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES,
-								   DroppedSentMessbgeStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessbgeStat.MULTICAST_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessbgeStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES);								   
+	pualic stbtic final DroppedSentMessageStatHandler MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   DroppedSentMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES);								   
 }

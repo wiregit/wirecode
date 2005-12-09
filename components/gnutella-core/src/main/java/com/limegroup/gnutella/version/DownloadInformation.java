@@ -1,13 +1,13 @@
-pbckage com.limegroup.gnutella.version;
+package com.limegroup.gnutella.version;
 
-import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutella.URN;
 
-public interfbce DownloadInformation {
+pualic interfbce DownloadInformation {
     
-    public URN getUpdbteURN();
-    public String getTTRoot();
-    public String getUpdbteCommand();
-    public String getUpdbteFileName();
-    public long getSize();
+    pualic URN getUpdbteURN();
+    pualic String getTTRoot();
+    pualic String getUpdbteCommand();
+    pualic String getUpdbteFileName();
+    pualic long getSize();
     
 }

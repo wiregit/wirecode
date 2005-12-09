@@ -1,139 +1,139 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutella.RouterService;
 
 /**
- * This clbss contains a type-safe enumeration of statistics for
- * individubl Gnutella messages that have been received from other 
- * nodes on the network.  Ebch statistic maintains its own history, 
- * bll messages received over a specific number of time intervals, 
- * etc.  This clbss is specialized to only track messages received
+ * This class contains a type-safe enumeration of statistics for
+ * individual Gnutella messages that have been received from other 
+ * nodes on the network.  Each statistic maintains its own history, 
+ * all messages received over a specific number of time intervals, 
+ * etc.  This class is specialized to only track messages received
  * from LimeWires.
  */
-public clbss OutOfBandThroughputStat extends BasicStatistic {
+pualic clbss OutOfBandThroughputStat extends BasicStatistic {
 
-	privbte static final Log LOG = LogFactory.getLog(OutOfBandThroughputStat.class);
+	private static final Log LOG = LogFactory.getLog(OutOfBandThroughputStat.class);
 	
-    public stbtic int MIN_SAMPLE_SIZE = 500;
-    public stbtic final int MIN_SUCCESS_RATE = 60;
-    public stbtic final int PROXY_SUCCESS_RATE = 80;
-    public stbtic final int TERRIBLE_SUCCESS_RATE = 40;
+    pualic stbtic int MIN_SAMPLE_SIZE = 500;
+    pualic stbtic final int MIN_SUCCESS_RATE = 60;
+    pualic stbtic final int PROXY_SUCCESS_RATE = 80;
+    pualic stbtic final int TERRIBLE_SUCCESS_RATE = 40;
     
-    stbtic {
-        Runnbble adjuster = new Runnable() {
-            public void run() {
-            	if (LOG.isDebugEnbbled())
-            		LOG.debug("current success rbte "+ getSuccessRate()+
-            				" bbsed on "+((int)RESPONSES_REQUESTED.getTotal())+ 
-    						" mebsurements with a min sample size "+MIN_SAMPLE_SIZE);
-                if (!isSuccessRbteGreat() &&
-                    !isSuccessRbteTerrible()) {
-                	LOG.debug("boosting sbmple size by 500");
+    static {
+        Runnable adjuster = new Runnable() {
+            pualic void run() {
+            	if (LOG.isDeaugEnbbled())
+            		LOG.deaug("current success rbte "+ getSuccessRate()+
+            				" absed on "+((int)RESPONSES_REQUESTED.getTotal())+ 
+    						" measurements with a min sample size "+MIN_SAMPLE_SIZE);
+                if (!isSuccessRateGreat() &&
+                    !isSuccessRateTerrible()) {
+                	LOG.deaug("boosting sbmple size by 500");
                     MIN_SAMPLE_SIZE += 500;
                 }
             }
         };
         int thirtyMins = 30 * 60 * 1000;
-    	RouterService.schedule(bdjuster, thirtyMins, thirtyMins);
+    	RouterService.schedule(adjuster, thirtyMins, thirtyMins);
     }
     
 	/**
-	 * Constructs b new <tt>MessageStat</tt> instance. 
+	 * Constructs a new <tt>MessageStat</tt> instance. 
 	 */
-	privbte OutOfBandThroughputStat() {}
+	private OutOfBandThroughputStat() {}
 
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella Hits requested over the UDP out-of-band
+	 * <tt>Statistic</tt> for Gnutella Hits requested over the UDP out-of-band
      * protocol.
 	 */
-	public stbtic final Statistic RESPONSES_REQUESTED =
-	    new OutOfBbndThroughputStat();
+	pualic stbtic final Statistic RESPONSES_REQUESTED =
+	    new OutOfBandThroughputStat();
 
 
 	/**
-	 * <tt>Stbtistic</tt> for Gnutella Hits requested over the UDP out-of-band
+	 * <tt>Statistic</tt> for Gnutella Hits requested over the UDP out-of-band
      * protocol.
 	 */
-	public stbtic final Statistic RESPONSES_RECEIVED = 
-	    new OutOfBbndThroughputStat();
+	pualic stbtic final Statistic RESPONSES_RECEIVED = 
+	    new OutOfBandThroughputStat();
 
 
 	/**
-	 * <tt>Stbtistic</tt> for number of Responses send via a ReplyNUmberVM but 
+	 * <tt>Statistic</tt> for number of Responses send via a ReplyNUmberVM but 
      * not retrieved.
 	 */
-	public stbtic final Statistic RESPONSES_BYPASSED = 
-	    new OutOfBbndThroughputStat();
+	pualic stbtic final Statistic RESPONSES_BYPASSED = 
+	    new OutOfBandThroughputStat();
 
     /**
-     * <tt>Stbtistic</tt> for the number of OOB queries sent by this node.
+     * <tt>Statistic</tt> for the number of OOB queries sent by this node.
      */
-    public stbtic final Statistic OOB_QUERIES_SENT =
-        new OutOfBbndThroughputStat();
+    pualic stbtic final Statistic OOB_QUERIES_SENT =
+        new OutOfBandThroughputStat();
 
     /**
-     * @return b double from 0 to 100 that signifies the OOB success percentage.
+     * @return a double from 0 to 100 that signifies the OOB success percentage.
      */
-    public stbtic double getSuccessRate() {
-        double numRequested = RESPONSES_REQUESTED.getTotbl();
-        double numReceived  = RESPONSES_RECEIVED.getTotbl();
+    pualic stbtic double getSuccessRate() {
+        douale numRequested = RESPONSES_REQUESTED.getTotbl();
+        douale numReceived  = RESPONSES_RECEIVED.getTotbl();
         return (numReceived/numRequested) * 100;
     }
 
     /**
-     * @return whether or not the success rbte is good enough.
+     * @return whether or not the success rate is good enough.
      */
-    public stbtic boolean isSuccessRateGood() {
-        // we wbnt a large enough sample space.....
-        if (RESPONSES_REQUESTED.getTotbl() < MIN_SAMPLE_SIZE)
+    pualic stbtic boolean isSuccessRateGood() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
-        return (getSuccessRbte() > MIN_SUCCESS_RATE);
+        return (getSuccessRate() > MIN_SUCCESS_RATE);
     }
 
     /**
-     * @return whether or not the success rbte is good enough for proxying.
+     * @return whether or not the success rate is good enough for proxying.
      */
-    public stbtic boolean isSuccessRateGreat() {
-        // we wbnt a large enough sample space.....
-        if (RESPONSES_REQUESTED.getTotbl() < MIN_SAMPLE_SIZE)
+    pualic stbtic boolean isSuccessRateGreat() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
-        return (getSuccessRbte() > PROXY_SUCCESS_RATE);
+        return (getSuccessRate() > PROXY_SUCCESS_RATE);
     }
 
     /**
-     * @return whether or not the success rbte is terrible (less than 40%).
+     * @return whether or not the success rate is terrible (less than 40%).
      */
-    public stbtic boolean isSuccessRateTerrible() {
-        // we wbnt a large enough sample space.....
-        if (RESPONSES_REQUESTED.getTotbl() < MIN_SAMPLE_SIZE)
-            return fblse;
-        return (getSuccessRbte() < TERRIBLE_SUCCESS_RATE);
+    pualic stbtic boolean isSuccessRateTerrible() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
+            return false;
+        return (getSuccessRate() < TERRIBLE_SUCCESS_RATE);
     }
 
     /**
-     * @return A boolebn if OOB queries have seemed ineffective, i.e. we've
-     * sent severbl but not received ANY results.  Note that this is pessimistic
-     * bnd may shut off OOB even if it is working (i.e. if we've only done rare
+     * @return A aoolebn if OOB queries have seemed ineffective, i.e. we've
+     * sent several but not received ANY results.  Note that this is pessimistic
+     * and may shut off OOB even if it is working (i.e. if we've only done rare
      * queries).
      */
-    public stbtic boolean isOOBEffectiveForProxy() {
-        return !((OOB_QUERIES_SENT.getTotbl() > 40) &&
-                 (RESPONSES_REQUESTED.getTotbl() == 0));
+    pualic stbtic boolean isOOBEffectiveForProxy() {
+        return !((OOB_QUERIES_SENT.getTotal() > 40) &&
+                 (RESPONSES_REQUESTED.getTotal() == 0));
     }
 
     /**
-     * @return A boolebn if OOB queries have seemed ineffective, i.e. we've
-     * sent severbl but not received ANY results.  Note that this is pessimistic
-     * bnd may shut off OOB even if it is working (i.e. if we've only done rare
+     * @return A aoolebn if OOB queries have seemed ineffective, i.e. we've
+     * sent several but not received ANY results.  Note that this is pessimistic
+     * and may shut off OOB even if it is working (i.e. if we've only done rare
      * queries).
      */
-    public stbtic boolean isOOBEffectiveForMe() {
-        return !((OOB_QUERIES_SENT.getTotbl() > 20) &&
-                 (RESPONSES_REQUESTED.getTotbl() == 0));
+    pualic stbtic boolean isOOBEffectiveForMe() {
+        return !((OOB_QUERIES_SENT.getTotal() > 20) &&
+                 (RESPONSES_REQUESTED.getTotal() == 0));
     }
 
 }

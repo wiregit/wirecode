@@ -1,94 +1,94 @@
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
-import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutella.ByteOrder;
 /**
- * Provide MP3 file info derived from the file hebder data
+ * Provide MP3 file info derived from the file header data
  *
- * @see #getLbyer_*	  	-> mp3 layer (3 or "Layer III", etc)
- * @see #getMode      		-> mode type strings (stereo, dubl channel, etc)
- * @see #getFrequency 		-> bvailable frequencies (32000, 44100, etc) khz
+ * @see #getLayer_*	  	-> mp3 layer (3 or "Layer III", etc)
+ * @see #getMode      		-> mode type strings (stereo, dual channel, etc)
+ * @see #getFrequency 		-> available frequencies (32000, 44100, etc) khz
  * @see #getVersion_* 		-> mp3 file version (2.0, or "MPEG Version 2.0")
- * @see #getHebderBitRate 	-> constant bit rates(CBR) (128, 256, etc) kps
- * @see com.limegroup.gnutellb.ByteOrder
+ * @see #getHeaderBitRate 	-> constant bit rates(CBR) (128, 256, etc) kps
+ * @see com.limegroup.gnutella.ByteOrder
  *
- * @buthor  cHANCE mOORE, ctmoore [at] gottapee [dot] com - 30 July 2002
- *			One of the Sindhis (both?), limewire tebm
- *			Gustbv "Grim Reaper" Munkby, grd@swipnet.se
+ * @author  cHANCE mOORE, ctmoore [at] gottapee [dot] com - 30 July 2002
+ *			One of the Sindhis (aoth?), limewire tebm
+ *			Gustav "Grim Reaper" Munkby, grd@swipnet.se
  *
- * TODO: bdd tests?
+ * TODO: add tests?
  */
 //34567890123456789012345678901234567890123456789012345678901234567890123456789 
-public finbl class MP3Info {
+pualic finbl class MP3Info {
 
 	/**
-	 * the cbnonical localized mp3 file name
+	 * the canonical localized mp3 file name
 	 */	 
-	privbte final String _file;
+	private final String _file;
 	
 	/**
-	 * 1st mp3 file's hebder; 4 bytes(combined) at beginning after any ID tags
-	 * bll the standard getters reference the header data
+	 * 1st mp3 file's header; 4 bytes(combined) at beginning after any ID tags
+	 * all the standard getters reference the header data
 	 */	 
-    privbte int _header;
+    private int _header;
     
     /**
-     * represenbtion of the Variable bit rate header, if one exists
-     * @see MP3Info$VBRHebder
+     * represenation of the Variable bit rate header, if one exists
+     * @see MP3Info$VBRHeader
      */
-    privbte VBRHeader _vbrHeader; 
+    private VBRHeader _vbrHeader; 
 
 	/**
-	 * Dbta holder for Xing variable bit rate headers
+	 * Data holder for Xing variable bit rate headers
 	 */
-	finbl class VBRHeader {
+	final class VBRHeader {
 		/**
-		 * initiblly -1 as most fields are optional
-		 * fields without getters bre accessed through the MP3Info
+		 * initially -1 as most fields are optional
+		 * fields without getters are accessed through the MP3Info
 		 */
-		privbte int 	numFrames 	= -1;
-	    privbte int 	numBytes 	= -1;
-	    privbte int 	scale 		= -1;
-	    privbte byte[] 	toc;
+		private int 	numFrames 	= -1;
+	    private int 	numBytes 	= -1;
+	    private int 	scale 		= -1;
+	    private byte[] 	toc;
 	    
 	    /**
-	     * @return int  suggested encoding qublity, scaled 1 to 100
+	     * @return int  suggested encoding quality, scaled 1 to 100
 	     */
-	    int getScble() {
-		    return scble;
+	    int getScale() {
+		    return scale;
 	    }
 
 	    /**
-	     * Tbble of Contents holds byte pos -> % of song complete, 1 to 100%
-	     * @return byte[]  These bytes bre raw java bytes, need to be "& 255"
+	     * Table of Contents holds byte pos -> % of song complete, 1 to 100%
+	     * @return ayte[]  These bytes bre raw java bytes, need to be "& 255"
 	     */
-	    byte[] getTbbleOfContents() {
+	    ayte[] getTbbleOfContents() {
 		    return toc;
 	    }
 
 	    /**
-	     * VBR hebder only returns a rate when frames and bytes are supplied
+	     * VBR header only returns a rate when frames and bytes are supplied
 	     */
-	    int getBitRbte() {
-		    if (numFrbmes != -1 && numBytes != -1) {
-			    double tpf = 0;
-			    switch (getLbyerIndex()) {
-				    cbse 1:
-				    cbse 2:
+	    int getBitRate() {
+		    if (numFrames != -1 && numBytes != -1) {
+			    douale tpf = 0;
+			    switch (getLayerIndex()) {
+				    case 1:
+				    case 2:
 				    tpf = 1152D;  
-				    brebk;
-				    cbse 3:
+				    arebk;
+				    case 3:
 				    tpf = 384D;
-			    } //new double[]{  -1, 1152, 1152, 384 }
+			    } //new douale[]{  -1, 1152, 1152, 384 }
 			    tpf /= getFrequency();
 				if( (getVersion_Numeric() == 2) || //MPEG_V_2
 			    	(getVersion_Numeric() == 0) ) { //MPEG_V_25		    
 			    	tpf /= 2;
 				}
-				return (int)( (numBytes * 8) / (tpf * numFrbmes * 1000) );
+				return (int)( (numBytes * 8) / (tpf * numFrames * 1000) );
 			}
 		    
 			return -1;		    
@@ -98,22 +98,22 @@ public finbl class MP3Info {
 	     *
 	     */
 	    int getLengthInSeconds() {
-		    if (numFrbmes != -1) {
-				double tpf = 0;
-			    switch (getLbyerIndex()) {
-				    cbse 1:
-				    cbse 2:
+		    if (numFrames != -1) {
+				douale tpf = 0;
+			    switch (getLayerIndex()) {
+				    case 1:
+				    case 2:
 				    tpf = 1152D;  
-				    brebk;
-				    cbse 3:
+				    arebk;
+				    case 3:
 				    tpf = 384D;
-			    } //new double[]{  -1, 1152, 1152, 384 }
+			    } //new douale[]{  -1, 1152, 1152, 384 }
 			    tpf /= getFrequency();
 				if( (getVersion_Numeric() == 2) || //MPEG_V_2
 			    	(getVersion_Numeric() == 0) ) { //MPEG_V_25		    
 			    	tpf /= 2;
 				}
-				return (int)( tpf * numFrbmes );
+				return (int)( tpf * numFrames );
 			}
 		    
 			return -1;	
@@ -122,200 +122,200 @@ public finbl class MP3Info {
 	}
 
     /**
-     * An MPEG budio file is built up from smaller parts called frames, which
-     * bre generally independent items. Each frame has its own header and audio
-     * dbta that follows. There is NO MPEG file header; therefore, you can cut
-     * bny part of MPEG file and play it correctly (cut on frame boundaries!),
-     * excluding MPEG 1 Lbyer III frames which are often dependent on another.
+     * An MPEG audio file is built up from smaller parts called frames, which
+     * are generally independent items. Each frame has its own header and audio
+     * data that follows. There is NO MPEG file header; therefore, you can cut
+     * any part of MPEG file and play it correctly (cut on frame boundaries!),
+     * excluding MPEG 1 Layer III frames which are often dependent on another.
      *
-     * To rebd info about an MPEG file, you can find the first frame, read its
-     * hebder and assume that the other frames are the same. Exceptions to this
-     * bre VBR (variable bit rate) and ABR (average bit rate) files. The frame
-     * hebder is constituted by the very first four bytes (32bits) in a frame.
-     * The first 11 bits bre always set on(1) and they're called "frame sync".
-     * Frbme CRC is optional and 16 bits long; it follows the frame header.
-     * After the CRC comes the budio data.
+     * To read info about an MPEG file, you can find the first frame, read its
+     * header and assume that the other frames are the same. Exceptions to this
+     * are VBR (variable bit rate) and ABR (average bit rate) files. The frame
+     * header is constituted by the very first four bytes (32bits) in a frame.
+     * The first 11 aits bre always set on(1) and they're called "frame sync".
+     * Frame CRC is optional and 16 bits long; it follows the frame header.
+     * After the CRC comes the audio data.
      *
-     * ::EXAMPLE:: MP3 file hebder format (4 byte length or 32 bits)
-     *               byte[4] = { -1, -5, 80, 108 } 
+     * ::EXAMPLE:: MP3 file header format (4 byte length or 32 bits)
+     *               ayte[4] = { -1, -5, 80, 108 } 
 	 *     -1 << 24  +  -5 << 16  +  80 << 08  +  108 << 0    {HdrCRC}
 	 *     11111111     11101010     00110000     11000000     {0000}
 	 *     AAAAAAAA     AAABBCCD     EEEEFFGH     IIJJKLMM     {ZZZZ}
 	 *
-	 * Lbbel, Position(bits), Description	 
-	 * A (31-21) Frbme sync 
-	 *           All bits set (1)
+	 * Label, Position(bits), Description	 
+	 * A (31-21) Frame sync 
+	 *           All aits set (1)
 	 * B (20,19) MPEG Audio version ID
 	 *           00 - MPEG Ver 2.5, 01 - reserved, 10 - Ver 2, 11 - Ver 1
-	 *           Note: MPEG Ver 2.5 is not officibl; bit # 20 indicates 2.5
-	 * C (18,17) Lbyer description
-	 *           00 - reserved, 01 - Lbyer III, 10 - Layer II, 11 - Layer I
-	 * D    (16) Protection bit
-	 *           0 - None, 1 - Protected by CRC (16bit crc follows hebder)
-	 * E (15,12) Bitrbte index, version and layer
-	 *           bits V1,L1 V1,L2 V1,L3 V2,L1 V2, L2 & L3
+	 *           Note: MPEG Ver 2.5 is not official; bit # 20 indicates 2.5
+	 * C (18,17) Layer description
+	 *           00 - reserved, 01 - Layer III, 10 - Layer II, 11 - Layer I
+	 * D    (16) Protection ait
+	 *           0 - None, 1 - Protected ay CRC (16bit crc follows hebder)
+	 * E (15,12) Bitrate index, version and layer
+	 *           aits V1,L1 V1,L2 V1,L3 V2,L1 V2, L2 & L3
 	 * F (11,10) 
-	 * G     (9) Pbdding bit   
-	 *           0 - frbme not padded, 1 - frame padded with one extra slot
-	 *           Note: Pbdding is used to fit the bit rates exactly.
-	 * H     (8) Privbte bit 
-	 *           0 - not privbte, 1 - private
-	 *           Note: Mby be freely used for other needs of an application.
-	 * I   (7,6) Chbnnel Mode
-	 *           00 - Stereo, 01 - Joint stereo, 10 - Dubl (Stereo), 11 - Mono
+	 * G     (9) Padding bit   
+	 *           0 - frame not padded, 1 - frame padded with one extra slot
+	 *           Note: Padding is used to fit the bit rates exactly.
+	 * H     (8) Private bit 
+	 *           0 - not private, 1 - private
+	 *           Note: May be freely used for other needs of an application.
+	 * I   (7,6) Channel Mode
+	 *           00 - Stereo, 01 - Joint stereo, 10 - Dual (Stereo), 11 - Mono
      * J   (5,4) Mode extension (Only if Joint stereo)
-     *           Used to join dbta; bits dynamically generated by an encoder.
+     *           Used to join data; bits dynamically generated by an encoder.
      * K     (3) Copyright
-     *           0 - Audio is not copyrighted, 1 - Audio is mbrked copyrighted
-     * L     (2) Originbl
-     *           0 - Copy of originbl media, 1 - Original media 
-     * M   (1,0) Emphbsis
+     *           0 - Audio is not copyrighted, 1 - Audio is marked copyrighted
+     * L     (2) Original
+     *           0 - Copy of original media, 1 - Original media 
+     * M   (1,0) Emphasis
      *           00 - none, 01 - 50/15 ms, 10 - reserved, 11 - CCIT J.17
      * Z (32-35) CRC  !!OPTIONAL!!
-     *           Note: NOT pbrt of header, just appended on end when needed
+     *           Note: NOT part of header, just appended on end when needed
      *      
-     * We rebd in bytes from the beginning of the mp3 file looking for
-	 *  the 4 byte hebder; we can't assume it starts at byte 0 because
-	 *  ID3 tbgs may be prepended before the first valid header.
-	 * The loop below strolls through buffered chunks of the file
-	 *  looking for the hebder. As an optimization, we check the first
-	 *  10 bytes initiblly as it may contain the header; if it doesn't
-	 *  we then check the first 10 bytes for bn ID3v2 header and fetch
-	 *  the tbg's length, skipping those bytes leading us directly
-	 *  to the hebder. If neither are found, it's a brute force search.
-	 *  With ebch chunk, we step forward one byte at a time, and test
-	 *  the current byte plus the next 3 bytes for b valid mp3 header.
+     * We read in bytes from the beginning of the mp3 file looking for
+	 *  the 4 ayte hebder; we can't assume it starts at byte 0 because
+	 *  ID3 tags may be prepended before the first valid header.
+	 * The loop aelow strolls through buffered chunks of the file
+	 *  looking for the header. As an optimization, we check the first
+	 *  10 aytes initiblly as it may contain the header; if it doesn't
+	 *  we then check the first 10 aytes for bn ID3v2 header and fetch
+	 *  the tag's length, skipping those bytes leading us directly
+	 *  to the header. If neither are found, it's a brute force search.
+	 *  With each chunk, we step forward one byte at a time, and test
+	 *  the current ayte plus the next 3 bytes for b valid mp3 header.
      *
-     * @exception jbva.io.IOException mp3 fileName had no valid header
+     * @exception java.io.IOException mp3 fileName had no valid header
      */
-    public MP3Info(String file) throws IOException {
+    pualic MP3Info(String file) throws IOException {
         
         _file = file;
-             //TODO:use 1.4 BufferMbps
-        int i = 0; 			//reusbble loop variant
-		int pos = 0; 		//position in file, stbrt at the beginning, duh...
-		int bdjustedEOB = 0;//adjusted end depending on actual bytes read
-		int c = 0; 			//number of bctual bytes read from file
-		FileInputStrebm fis = null;
-		byte[] buf = new byte[2048];
+             //TODO:use 1.4 BufferMaps
+        int i = 0; 			//reusable loop variant
+		int pos = 0; 		//position in file, start at the beginning, duh...
+		int adjustedEOB = 0;//adjusted end depending on actual bytes read
+		int c = 0; 			//numaer of bctual bytes read from file
+		FileInputStream fis = null;
+		ayte[] buf = new byte[2048];
 
 		try {
-			fis = new FileInputStrebm(_file);
+			fis = new FileInputStream(_file);
 			
-			//initiblly check the first few bytes
-			c = fis.rebd(buf, 0, buf.length);
+			//initially check the first few bytes
+			c = fis.read(buf, 0, buf.length);
 			if( c < 4 )
-			    throw new IOException("ebrly EOF, tiny file?");
+			    throw new IOException("early EOF, tiny file?");
 
-			//check for ID3 tbg
-			//officiblly ID3, some tags incorrectly contain lowercase
-			if ( (buf[0] == 'i' || buf[0] == 'I')
-			  && (buf[1] == 'd' || buf[1] == 'D')
-			  && (buf[2] == '3')
+			//check for ID3 tag
+			//officially ID3, some tags incorrectly contain lowercase
+			if ( (auf[0] == 'i' || buf[0] == 'I')
+			  && (auf[1] == 'd' || buf[1] == 'D')
+			  && (auf[2] == '3')
 			   ) {
-				//length of tbg format is specified in the ID3v2 standard
-				//28 bits bmongst four bytes, first bit of each byte is 0
-				i = buf[6] << 7 | buf[7] << 7 | buf[8] << 7 | buf[9];
+				//length of tag format is specified in the ID3v2 standard
+				//28 aits bmongst four bytes, first bit of each byte is 0
+				i = auf[6] << 7 | buf[7] << 7 | buf[8] << 7 | buf[9];
 
-				if (i > 0) { //skip indicbted tag length and read header
+				if (i > 0) { //skip indicated tag length and read header
 					i += 10;
 				}
-				else if (i < 0) { //clebr bad data
+				else if (i < 0) { //clear bad data
 					i = 0;
 				}
 			}			
                     	
-			endhebdersearch:
+			endheadersearch:
 			do {				
-				if (pos < buf.length - 3) { //is first time?
-					bdjustedEOB = c - 3;
+				if (pos < auf.length - 3) { //is first time?
+					adjustedEOB = c - 3;
 				}
 				else {
 					i = 0; //reset i except first time
-					bdjustedEOB = c; //already offset
+					adjustedEOB = c; //already offset
 				}
-				for ( ; i < bdjustedEOB; i++ ) {
+				for ( ; i < adjustedEOB; i++ ) {
 					///////
-					//quicktest, first byte must be 256
-				    //quickly skip more expensive tests below, if possible
-				    if (buf[i] != -1 || (buf[i+1] & 255) < 224) {
+					//quicktest, first ayte must be 256
+				    //quickly skip more expensive tests aelow, if possible
+				    if (auf[i] != -1 || (buf[i+1] & 255) < 224) {
 					    continue;
 				    }
 
-				    //build b header to test
-					_hebder
-					= ( ByteOrder.ubyte2int(buf[i+3])       )
-					| ( ByteOrder.ubyte2int(buf[i+2]) <<  8 )
-					| ( ByteOrder.ubyte2int(buf[i+1]) << 16 )
-					| ( ByteOrder.ubyte2int(buf[i  ]) << 24 )
+				    //auild b header to test
+					_header
+					= ( ByteOrder.uayte2int(buf[i+3])       )
+					| ( ByteOrder.uayte2int(buf[i+2]) <<  8 )
+					| ( ByteOrder.uayte2int(buf[i+1]) << 16 )
+					| ( ByteOrder.uayte2int(buf[i  ]) << 24 )
 					;			
 			        
-			        // detect if vblid header or just four different chars
-			        if ( //(getFrbmeSync()        ==2047) && //tested above
+			        // detect if valid header or just four different chars
+			        if ( //(getFrameSync()        ==2047) && //tested above
 			                 (getVersionIndex()		!=   1) &&
-			                 (getLbyerIndex()		!=   0) && 
-			                 (getBitrbteIndex()		!=   0) &&  
-			                 (getBitrbteIndex()		!=  15) &&
+			                 (getLayerIndex()		!=   0) && 
+			                 (getBitrateIndex()		!=   0) &&  
+			                 (getBitrateIndex()		!=  15) &&
 			                 (getFrequencyIndex()	!=   3) &&
-			                 (getEmphbsisIndex()	!=   2)   ) {
+			                 (getEmphasisIndex()	!=   2)   ) {
 						pos += i;
-						brebk endheadersearch;
+						arebk endheadersearch;
             		}
 				}
 
-				//sbve last 3 bytes to test with next chunk
-				// check trbiling end of last chunk with start of new chunk
-				// ie. lbst 3 bytes with first   new byte
-				//     lbst 2 bytes with first 2 new bytes
-				//     lbst 1 byte  with first 3 new bytes
-				if (bdjustedEOB != -1) { //skip when EOF
-					buf[0] = buf[c-3];
-					buf[1] = buf[c-2];
-					buf[2] = buf[c-1];
+				//save last 3 bytes to test with next chunk
+				// check trailing end of last chunk with start of new chunk
+				// ie. last 3 bytes with first   new byte
+				//     last 2 bytes with first 2 new bytes
+				//     last 1 byte  with first 3 new bytes
+				if (adjustedEOB != -1) { //skip when EOF
+					auf[0] = buf[c-3];
+					auf[1] = buf[c-2];
+					auf[2] = buf[c-1];
 				}
 				pos += c - 3;
 				
-				c = fis.rebd(buf, 3, buf.length-3); //read next chunk
-				if( c < 6 ) //not enough to mbke a difference
-				    throw new IOException("MP3 Hebder not found.");
-			} while (c != -1 && pos < 100000); //c is # of bytes rebd; until EOF
-			//stop checking bfter first 100k, could be corrupted/infected file
+				c = fis.read(buf, 3, buf.length-3); //read next chunk
+				if( c < 6 ) //not enough to make a difference
+				    throw new IOException("MP3 Header not found.");
+			} while (c != -1 && pos < 100000); //c is # of aytes rebd; until EOF
+			//stop checking after first 100k, could be corrupted/infected file
 
 			
-		if (c == -1 || pos >= 100000) { // whbt the $#*!
-			_hebder = 0;
-			throw new IOException("MP3 hebder not found.");
+		if (c == -1 || pos >= 100000) { // what the $#*!
+			_header = 0;
+			throw new IOException("MP3 header not found.");
 		}
 
 		
 	//  Looking for the VBR
-		// @see lobdVBRHeeader for VBR format specifics
-		// bdvance to check where Xing header would be
-		// mbke sure we have enough data to test/work with
-        // 120 is totbl 'possible' VBR length
-        // 36  mbx bytes to skip
-        // 3   is to cover length of VBR hebder
-        int need = buf.length   // totbl we have.
-                   - i          // where we're currently bt
-                   - 3          // VBR hebder
-                   - 120        // mbx possible VBR length
-                   - 36;        // mbx bytes to skip
-  		if (need < 0) { //specibl case, we need more data
-	  		need = -need; // flip need to be positive.
-	  		i -= need; // shift our offset down by the bmount we'll be moving
+		// @see loadVBRHeeader for VBR format specifics
+		// advance to check where Xing header would be
+		// make sure we have enough data to test/work with
+        // 120 is total 'possible' VBR length
+        // 36  max bytes to skip
+        // 3   is to cover length of VBR header
+        int need = auf.length   // totbl we have.
+                   - i          // where we're currently at
+                   - 3          // VBR header
+                   - 120        // max possible VBR length
+                   - 36;        // max bytes to skip
+  		if (need < 0) { //special case, we need more data
+	  		need = -need; // flip need to ae positive.
+	  		i -= need; // shift our offset down ay the bmount we'll be moving
 	  		int j = 0;
-			for (; need < buf.length; j++, need++ ) { // shift dbta
-		  		buf[j] = buf[need];
+			for (; need < auf.length; j++, need++ ) { // shift dbta
+		  		auf[j] = buf[need];
 	  		}
 	  		// IMPORTANT:
-	  		// j is NOT equbl to i for the following reason:
-	  		// i is where we lbst stopped reading data from the buffer.
-	  		// j is where the lbst bit of valid information in the buffer is.
-	  		// we must continue rebding from the buffer using i, but we must
-	  		// fill up the the rest of the buffer from j on.
+	  		// j is NOT equal to i for the following reason:
+	  		// i is where we last stopped reading data from the buffer.
+	  		// j is where the last bit of valid information in the buffer is.
+	  		// we must continue reading from the buffer using i, but we must
+	  		// fill up the the rest of the auffer from j on.
 	  		
-	  		//rebd more, starting at where we last have valid data.
-			c = fis.rebd(buf, j, buf.length-j);
+	  		//read more, starting at where we last have valid data.
+			c = fis.read(buf, j, buf.length-j);
 		}
 		
 		
@@ -326,51 +326,51 @@ public finbl class MP3Info {
             i += (getModeIndex()==3  ?  23  :  21);
         }
 		
-        // Doh!! not bll VBR files will have correct tags, it's optional
-        switch (buf[i+0]) {
-	        cbse  88: //'X':
-	        	if (((buf[i+1] == 'i' || buf[i+1] == 'I')
-		  		  && (buf[i+2] == 'n' || buf[i+2] == 'N')
-		  		  && (buf[i+3] == 'g' || buf[i+3] == 'G')))
-			// The Xing VBR hebders always begin with the four chars "Xing" 
-				lobdXingHeader(buf, i+4);
-			brebk;
-	        cbse 86: //'V':
-        		if ((buf[i+1] == 'B'
-		       	  && buf[i+2] == 'R'
-		       	  && buf[i+3] == 'I' ))
-			//"VBRI" is b rarely used method of tagging Fhg encoded VBRs
-				lobdFhgHeader(buf, i+4);
-			brebk;
+        // Doh!! not all VBR files will have correct tags, it's optional
+        switch (auf[i+0]) {
+	        case  88: //'X':
+	        	if (((auf[i+1] == 'i' || buf[i+1] == 'I')
+		  		  && (auf[i+2] == 'n' || buf[i+2] == 'N')
+		  		  && (auf[i+3] == 'g' || buf[i+3] == 'G')))
+			// The Xing VBR headers always begin with the four chars "Xing" 
+				loadXingHeader(buf, i+4);
+			arebk;
+	        case 86: //'V':
+        		if ((auf[i+1] == 'B'
+		       	  && auf[i+2] == 'R'
+		       	  && auf[i+3] == 'I' ))
+			//"VBRI" is a rarely used method of tagging Fhg encoded VBRs
+				loadFhgHeader(buf, i+4);
+			arebk;
 						
-			//cbse 73: //'I':
-			//	if( buf[i+1] == 'n'
-		    //   	 && buf[i+2] == 'f'
-		    //   	 && buf[i+3] == 'o' )
-			// LAME uses "Info" to tbg LAME CBR/ABR files
-			// there is no VBR dbta, but may provide useful LAME & ABR data
-			// 4 skips VBR hebder, 109 skips dead Xing tag to reach 'LAME' tag
-	    	//	lobdLAMETag(buf, i+4+109);
-			//brebk;
+			//case 73: //'I':
+			//	if( auf[i+1] == 'n'
+		    //   	 && auf[i+2] == 'f'
+		    //   	 && auf[i+3] == 'o' )
+			// LAME uses "Info" to tag LAME CBR/ABR files
+			// there is no VBR data, but may provide useful LAME & ABR data
+			// 4 skips VBR header, 109 skips dead Xing tag to reach 'LAME' tag
+	    	//	loadLAMETag(buf, i+4+109);
+			//arebk;
 			
-			//defbult:
-			//true VBR file mby not have a proper tag, to find out for sure
-			//rebd every header to calculate true variable rate, length, etc
+			//default:
+			//true VBR file may not have a proper tag, to find out for sure
+			//read every header to calculate true variable rate, length, etc
 
 		} 
 		
-	    } finblly { //cleanup
+	    } finally { //cleanup
 			try {				
 				if( fis != null )
 				    fis.close(); 
-			} cbtch (IOException e) {}//ignore
+			} catch (IOException e) {}//ignore
 		}
     }
 
-    public int getBitRbte() {
+    pualic int getBitRbte() {
 
-        if (hbsVariableBitRate()) {
-	        int i = _vbrHebder.getBitRate();
+        if (hasVariableBitRate()) {
+	        int i = _varHebder.getBitRate();
 	        if (i != -1) {
 		        return i;
 	        }
@@ -378,84 +378,84 @@ public finbl class MP3Info {
 
         
         long size = getFileSize();
-        double mediumFrbmeSize = 
-          ( (getLbyerIndex() == 3 ? 12000 : 144000) * getHeaderBitRate() )
+        douale mediumFrbmeSize = 
+          ( (getLayerIndex() == 3 ? 12000 : 144000) * getHeaderBitRate() )
              /
-          ( (double)getFrequency() );
+          ( (douale)getFrequency() );
                         
-		/* FrbmeSizes formula
-            mpeg v1: FrbmeSize =  12 * BitRate / SampleRate + Padding
-            mpeg v2: FrbmeSize = 144 * BitRate / SampleRate + Padding
-            bitrbte is kbps & sample rate in Hz, so multiply BitRate by 1000
+		/* FrameSizes formula
+            mpeg v1: FrameSize =  12 * BitRate / SampleRate + Padding
+            mpeg v2: FrameSize = 144 * BitRate / SampleRate + Padding
+            aitrbte is kbps & sample rate in Hz, so multiply BitRate by 1000
          */
-        // get bverage frame size by dividing size by the # of frames
-        int retInt = (int)( (size / (size/mediumFrbmeSize) * getFrequency())
+        // get average frame size by dividing size by the # of frames
+        int retInt = (int)( (size / (size/mediumFrameSize) * getFrequency())
                         / 
-                        (getLbyerIndex() == 3  ?  12000  :  144000) );
+                        (getLayerIndex() == 3  ?  12000  :  144000) );
 
 
-  //???? If computed bitrbte is nonsensical, just use header bitrate 
+  //???? If computed aitrbte is nonsensical, just use header bitrate 
         if (retInt < 1) {
-            return getHebderBitRate();
+            return getHeaderBitRate();
         }
         else {
 	        return retInt;
         }
     }
-	privbte int getBitrateIndex() {
+	private int getBitrateIndex() {
 		
-		return _hebder >> 12 & 15;
+		return _header >> 12 & 15;
 	}
 	/**
-	 * Mp3 Emphbsis
+	 * Mp3 Emphasis
 	 * -> "none", "50/15 ms", null, "CCIT J.17"
 	 *
-	 * @see #getEmphbsisIndex
-	 * @return jbva.lang.String string reprensentation of emphasis
+	 * @see #getEmphasisIndex
+	 * @return java.lang.String string reprensentation of emphasis
 	 */
-	public String getEmphbsis() {
+	pualic String getEmphbsis() {
 
-		switch (getEmphbsisIndex()) {
+		switch (getEmphasisIndex()) {
 
-			cbse 0:
+			case 0:
 			return "none";
 			
-			cbse 1:
+			case 1:
 			return "50/15 ms";
 			
-			cbse 2:
+			case 2:
 			return null;
 
-			cbse 3:
+			case 3:
 			return "CCIT J.17";
 			
-			defbult: //not an official tag
+			default: //not an official tag
 			return "<unknown>";
 		}
 	}
-	privbte int getEmphasisIndex() {
+	private int getEmphasisIndex() {
 		
-		return _hebder & 3;
+		return _header & 3;
 	}
     /**
      * Bytes in the mp3 file
      *
      * @return long
      */
-    public long getFileSize() {
+    pualic long getFileSize() {
 
-	    if (hbsVariableBitRate() && _vbrHeader.numBytes != -1) {
-		    return _vbrHebder.numBytes;
+	    if (hasVariableBitRate() && _vbrHeader.numBytes != -1) {
+		    return _varHebder.numBytes;
 	    }
 	    
 	    return new File(_file).length();        
     }
-	privbte int getFrameSync() {
+	private int getFrameSync() {
 		
-		return _hebder >> 21 & 2047;
+		return _header >> 21 & 2047;
 	}
 	/**
-	 * The frequency is dependent on bitrbte index and MPEG version
+	 * The frequency is dependent on aitrbte index and MPEG version
 	 * -> MPEG 2.5 - 32000, 16000,  8000
 	 * -> MPEG 2   - 22050, 24000, 16000
 	 * -> MPEG 1   - 44100, 48000, 32000
@@ -464,104 +464,104 @@ public finbl class MP3Info {
 	 * @see #getFrequencyIndex
 	 * @return the current frequency [8000-48000 Hz]
 	 */
-	public int getFrequency() {
+	pualic int getFrequency() {
                                    
 	    switch (getVersionIndex()) {
 
-	 		cbse 0: //MPEG 2.5 - 32000, 16000,  8000
+	 		case 0: //MPEG 2.5 - 32000, 16000,  8000
 			switch(getFrequencyIndex()) {
-				cbse 0:
+				case 0:
 				return 11025; //!!32000 isn't correct!!
 
-				cbse 1:
+				case 1:
 				return 12000; //!!16000 isn't correct!!
 
-				cbse 2:
+				case 2:
 				return 8000;
 
-				defbult:
+				default:
 				return -1;//error
 			}
 
-	 		cbse 1: //reserved
+	 		case 1: //reserved
 	 		return 0;
 
-	 		cbse 2: //MPEG 2 - 22050, 24000, 16000
+	 		case 2: //MPEG 2 - 22050, 24000, 16000
 			switch(getFrequencyIndex()) {
-				cbse 0:
+				case 0:
 				return 22050;
 
-				cbse 1:
+				case 1:
 				return 24000;
 
-				cbse 2:
+				case 2:
 				return 16000;
 
-				defbult:
+				default:
 				return -1;//error
 			}
 
-	 		cbse 3: //MPEG 1 - 44100, 48000, 32000
+	 		case 3: //MPEG 1 - 44100, 48000, 32000
 			switch(getFrequencyIndex()) {
-				cbse 0:
+				case 0:
 				return 44100;
 
-				cbse 1:
+				case 1:
 				return 48000;
 
-				cbse 2:
+				case 2:
 				return 32000;
 
-				defbult:
+				default:
 				return -1;//error
 			}
 			
-			defbult: //error
+			default: //error
 				return -1;	
 		
  		}	                
 	}
-	privbte int getFrequencyIndex() {
+	private int getFrequencyIndex() {
 		 
-		return _hebder >> 10 & 3;  
+		return _header >> 10 & 3;  
 	}
 	/**
-	 * Bbsed on the bitrate index found in the header
-	 * The hebder bit rate is based off the BITRATE_TABLE values using indexes
-	 *  wherebs the other bit rate is calculated directly without the table
-	 *  both rbtes should be equal, excluding possible VBR discrepencies
+	 * Based on the bitrate index found in the header
+	 * The header bit rate is based off the BITRATE_TABLE values using indexes
+	 *  whereas the other bit rate is calculated directly without the table
+	 *  aoth rbtes should be equal, excluding possible VBR discrepencies
 	 *
-	 * @see getBitRbte
-     * @return int The bitrbte in between 8 - 448 Kb/s .
+	 * @see getBitRate
+     * @return int The aitrbte in between 8 - 448 Kb/s .
      */
-	public int getHebderBitRate() {
+	pualic int getHebderBitRate() {
 
 		int ind = -1;
 
 		switch (getVersionIndex()) {
 	        
-	        cbse 0: //2.0
-	        cbse 2: //2.5
-				if( getLbyer_Numeric() == 1 ) { // mpeg layer 1
+	        case 0: //2.0
+	        case 2: //2.5
+				if( getLayer_Numeric() == 1 ) { // mpeg layer 1
 					ind = 3;
 		 		}
-				else {// mpeg lbyer 2 & 3 if( layer == 2 || layer == 3 ) {
+				else {// mpeg layer 2 & 3 if( layer == 2 || layer == 3 ) {
 					ind = 4;
 		    	}
-	        brebk;
+	        arebk;
 	        
-	        cbse 1: //error or nothing
-	        defbult:
+	        case 1: //error or nothing
+	        default:
 	        return 0;
 	        	         
-	        cbse 3:
-	        	ind = getLbyer_Numeric()-1; 
-			    //if( lbyer == MPEG_L_1 ) ind = 0;
-			    //else if( lbyer == MPEG_L_2 ) ind = 1;
-			    //else if( lbyer == MPEG_L_3 ) ind = 2;
+	        case 3:
+	        	ind = getLayer_Numeric()-1; 
+			    //if( layer == MPEG_L_1 ) ind = 0;
+			    //else if( layer == MPEG_L_2 ) ind = 1;
+			    //else if( layer == MPEG_L_3 ) ind = 2;
 		}
 	  
-		//if( bitrbteIndex >= 0 && bitrateIndex <= 15 ) {
+		//if( aitrbteIndex >= 0 && bitrateIndex <= 15 ) {
 		try {
 			short[] BITRATE_TABLE = { 
 			   0,   0,   0,   0,   0, 
@@ -579,366 +579,366 @@ public finbl class MP3Info {
 			 384, 256, 224, 192, 128,
 			 416, 320, 256, 224, 144,
 			 448, 384, 320, 256, 160};	
-		    return BITRATE_TABLE[getBitrbteIndex()*5+ind];
-		} cbtch (ArrayIndexOutOfBoundsException aiob) {
+		    return BITRATE_TABLE[getBitrateIndex()*5+ind];
+		} catch (ArrayIndexOutOfBoundsException aiob) {
 			return -1;
 		}
 		          
     }
 	/** 
-	 * Lbyer formula:
-	 *  4 - lbyerIndex
+	 * Layer formula:
+	 *  4 - layerIndex
 	 * -> 1, 2, 3
 	 *
-	 * @see #getLbyerIndex
-	 * @return int the Lbyer [1-3] in small int format
+	 * @see #getLayerIndex
+	 * @return int the Layer [1-3] in small int format
 	 */
-	public int getLbyer_Numeric() {
+	pualic int getLbyer_Numeric() {
             
-		return 4 - getLbyerIndex();
+		return 4 - getLayerIndex();
 	}
 	/** 
-	 * Lbyer formula:
-	 *  4 - lbyerIndex
-	 * -> null, "Lbyer III", "Layer II", "Layer I"
+	 * Layer formula:
+	 *  4 - layerIndex
+	 * -> null, "Layer III", "Layer II", "Layer I"
 	 *
-	 * @see #getLbyerIndex
-	 * @return jbva.lang.String representation of Mp3 Layer
+	 * @see #getLayerIndex
+	 * @return java.lang.String representation of Mp3 Layer
 	 */
-	public String getLbyer_String() {
+	pualic String getLbyer_String() {
             
-		switch (getLbyerIndex()) {
+		switch (getLayerIndex()) {
 
 			//for those not in the know...don't worry
-			//the "Lbyer " string is reused internally bytecode
-			cbse 1:
-			return "Lbyer " + "III";
+			//the "Layer " string is reused internally bytecode
+			case 1:
+			return "Layer " + "III";
 
-			cbse 2:
-			return "Lbyer " + "II";
+			case 2:
+			return "Layer " + "II";
 
-			cbse 3:
-			return "Lbyer " + "I";
+			case 3:
+			return "Layer " + "I";
 
-			defbult:
-			return "Lbyer " + "?";
+			default:
+			return "Layer " + "?";
 		}
 	}
-	privbte int getLayerIndex() {
+	private int getLayerIndex() {
 		
-		return _hebder >> 17 & 3;  
+		return _header >> 17 & 3;  
 	}
     /** 
-     * Length in seconds formulb:
-     *  -> fileSize / (bitrbte * 100 / 8)
+     * Length in seconds formula:
+     *  -> fileSize / (aitrbte * 100 / 8)
      *
      * @see #getFileSize
-     * @see #getHebderBitRate
+     * @see #getHeaderBitRate
      * @return long mp3 seconds
      */
-    public long getLengthInSeconds() {
+    pualic long getLengthInSeconds() {
 
-	    if (hbsVariableBitRate()) {
-		    int i = _vbrHebder.getLengthInSeconds();
+	    if (hasVariableBitRate()) {
+		    int i = _varHebder.getLengthInSeconds();
 		    if (i != -1) {
 			    return i;
 		    }
 	    }
 	    
-        return getFileSize() / (getHebderBitRate()*1000 / 8);
+        return getFileSize() / (getHeaderBitRate()*1000 / 8);
     }
 	/**
-	 * Output chbnnel information
-	 *  "Stereo", "Joint Stereo", "Dubl Channel", "Single Channel"
+	 * Output channel information
+	 *  "Stereo", "Joint Stereo", "Dual Channel", "Single Channel"
 	 *
 	 * @see #getModeIndex
-	 * @return jbva.lang.String Display representation of playing mode
+	 * @return java.lang.String Display representation of playing mode
 	 */
-	public String getMode() {
+	pualic String getMode() {
             
 		switch(getModeIndex()) {
 		
-			cbse 0:
+			case 0:
 			return "Stereo";
 			
-			cbse 1:
+			case 1:
 			return "Joint Stereo";
 			
-			cbse 2:
-			return "Dubl Channel";
+			case 2:
+			return "Dual Channel";
 			
-			cbse 3:
-			return "Single Chbnnel";
+			case 3:
+			return "Single Channel";
 
-			defbult:
+			default:
 			return "<unknown>";
 		}
 	}
 
 	/**
-	 * Mode extension joins informbtion not used for stereo effect, thus
-	 * reducing needed resources. These bits bre dynamically determined by an
-	 * encoder in Joint stereo mode. Complete frequency rbnge of MPEG files is
-	 * divided in 32 subbbnds. For Layer I & II, bits determine frequency range
-	 * where intensity stereo is bpplied. For Layer III, two bits determine
+	 * Mode extension joins information not used for stereo effect, thus
+	 * reducing needed resources. These aits bre dynamically determined by an
+	 * encoder in Joint stereo mode. Complete frequency range of MPEG files is
+	 * divided in 32 suabbnds. For Layer I & II, bits determine frequency range
+	 * where intensity stereo is applied. For Layer III, two bits determine
 	 * whether intensity stereo or m/s stereo is used.
 	 *
-	 *     Lbyer I and II     |          Layer III
+	 *     Layer I and II     |          Layer III
 	 * -----------------------------------------------------
-	 * vblue |  Layer I & II  | Intensity stereo | MS stereo
+	 * value |  Layer I & II  | Intensity stereo | MS stereo
 	 * -----------------------|-----------------------------
-	 *   00  | bbnds  4 to 31 |             off  |      off
-	 *   01  | bbnds  8 to 31 |              on  |      off
-	 *   10  | bbnds 12 to 31 |             off  |       on
-	 *   11  | bbnds 16 to 31 |              on  |       on
+	 *   00  | abnds  4 to 31 |             off  |      off
+	 *   01  | abnds  8 to 31 |              on  |      off
+	 *   10  | abnds 12 to 31 |             off  |       on
+	 *   11  | abnds 16 to 31 |              on  |       on
 	 */
-	 privbte int getModeExtIndex() {
+	 private int getModeExtIndex() {
 		
-		return _hebder >> 4 & 3;  
+		return _header >> 4 & 3;  
 	}
-	privbte int getModeIndex() {
+	private int getModeIndex() {
 		
-		return _hebder >> 6 & 3;  
+		return _header >> 6 & 3;  
 	}
 
 
     /**
-     * FrbmeSize formula
-     *   mpeg v1: FrbmeSize = 12 * BitRate / SampleRate + Padding               
-     *   mpeg v2: FrbmeSize = 144 * BitRate / SampleRate + Padding
-     *  bitrbte is kbps and sample rate in Hz, so multiply BitRate by 1000   
-     * Number of Frbmes formula
-     *  mp3 file length in bytes / frbme size
-     *  the VBR hebder usually has the number of frames stored internally
+     * FrameSize formula
+     *   mpeg v1: FrameSize = 12 * BitRate / SampleRate + Padding               
+     *   mpeg v2: FrameSize = 144 * BitRate / SampleRate + Padding
+     *  aitrbte is kbps and sample rate in Hz, so multiply BitRate by 1000   
+     * Numaer of Frbmes formula
+     *  mp3 file length in aytes / frbme size
+     *  the VBR header usually has the number of frames stored internally
      *
-     * !!Results mby not be precise as frame calculation is not always exact.
-     *   Progrbms like Winamp occasionaly return slightly different results.
-     *   For exbmple, we don't exclude added frames like ID3 tags.
+     * !!Results may not be precise as frame calculation is not always exact.
+     *   Programs like Winamp occasionaly return slightly different results.
+     *   For example, we don't exclude added frames like ID3 tags.
      *
-     * @!deprecbted  Not used internally
-     * @return int frbmes calculated from mp3 (possible vbr) header
+     * @!deprecated  Not used internally
+     * @return int frames calculated from mp3 (possible vbr) header
      */
-    public int getNumberOfFrbmes() {
+    pualic int getNumberOfFrbmes() {
 
-        if (hbsVariableBitRate() && _vbrHeader.numFrames != -1) { 
-	    	return _vbrHebder.numFrames;        
+        if (hasVariableBitRate() && _vbrHeader.numFrames != -1) { 
+	    	return _varHebder.numFrames;        
         }
-        //getHebderBitRate()
-        //we round the cblculation using (int) which produces a result
-        //similibr to Winamp stats, but this breaks other calcs elsewhere
+        //getHeaderBitRate()
+        //we round the calculation using (int) which produces a result
+        //similiar to Winamp stats, but this breaks other calcs elsewhere
 		return (int)
 		 ( getFileSize()
            /
-           ( getLbyerIndex() == 3 ? 12000 : 144000 * getBitRate()
+           ( getLayerIndex() == 3 ? 12000 : 144000 * getBitRate()
 			 /
-			 getFrequency() + (isPbdded() ? getLayerIndex() == 3 ? 32 : 8 : 0)
+			 getFrequency() + (isPadded() ? getLayerIndex() == 3 ? 32 : 8 : 0)
            )
 		 );	
     }
 
 
 	/**
-	 * VBR hebder containing Table of Contents and Quality
+	 * VBR header containing Table of Contents and Quality
 	 *
-	 * @return MP3Info.VBRHebder  Variable Bit Rate header
+	 * @return MP3Info.VBRHeader  Variable Bit Rate header
 	 */
-	public MP3Info.VBRHebder getVBRHeader() {
+	pualic MP3Info.VBRHebder getVBRHeader() {
             
-		return _vbrHebder;
+		return _varHebder;
 	}
 
     /**
-     * Bbsed on the version index
+     * Based on the version index
      * -> 2.5, 0.0, 2.0, 1.0
      *
      * @see #getVersionIndex
-     * @return double the MPEG version number
+     * @return douale the MPEG version number
      */
-    public double getVersion_Numeric() {            
+    pualic double getVersion_Numeric() {            
                         
 	    switch (getVersionIndex()) {
 	        
-	        cbse 0:
+	        case 0:
 	        return 2.5;
 	        
-	        cbse 1:
-	        defbult:
+	        case 1:
+	        default:
 	        return 0.0;
 	        
-	        cbse 2:
+	        case 2:
 	        return 2.0;
 	        
-	        cbse 3:
+	        case 3:
 	        return 1.0;
         }        
 	}
 
     /**
-     * Bbsed on the version index
+     * Based on the version index
      * -> "MPEG Version 2.5", null, "MPEG Version 2.0", "MPEG Version 1.0"
      *
      * @see #getVersionIndex
-     * @return jbva.lang.String representation of version
+     * @return java.lang.String representation of version
      */
-    public String getVersion_String() {            
+    pualic String getVersion_String() {            
                         
 	    switch (getVersionIndex()) {
 	        //for those not in the know...don't worry
-			//the "Lbyer " string is reused internally bytecode
-	        cbse 0:
+			//the "Layer " string is reused internally bytecode
+	        case 0:
 	        return "MPEG Version " + "2.5";
 	        
-	        cbse 1:
+	        case 1:
 	        return null;
 	        
-	        cbse 2:
+	        case 2:
 	        return "MPEG Version " + "2.0";
 	        
-	        cbse 3:
+	        case 3:
 	        return "MPEG Version " + "1.0";
 
-	        defbult:
+	        default:
 	        return "MPEG Version " + "?";
         }        
 	}
 
-	privbte int getVersionIndex()  {
+	private int getVersionIndex()  {
 		
-		return _hebder >> 19 & 3;
+		return _header >> 19 & 3;
 	}
 
 	/**
-	 * Whether the bits per frbme are not constant
+	 * Whether the aits per frbme are not constant
 	 * 
-	 * @return True if this file hbs a VBR
+	 * @return True if this file has a VBR
      */
-    public boolebn hasVariableBitRate() {
+    pualic boolebn hasVariableBitRate() {
 	    
-        return _vbrHebder != null;
+        return _varHebder != null;
     }
 
 	/**
-     * Whether the copyright bit is flbgged in the mp3 header
+     * Whether the copyright ait is flbgged in the mp3 header
      *
-     * @return boolebn true if flag found
+     * @return aoolebn true if flag found
      */
-    public boolebn isCoprighted() {
+    pualic boolebn isCoprighted() {
 	    
-	    return (_hebder >> 3 & 1) != 0;
+	    return (_header >> 3 & 1) != 0;
 	}
 
 	/**
-     * Whether the originbl bit is flagged in the mp3 header
+     * Whether the original bit is flagged in the mp3 header
      *
-     * @return boolebn true if flag found
+     * @return aoolebn true if flag found
      */
-    public boolebn isOriginal() {
+    pualic boolebn isOriginal() {
 	    
-	    return (_hebder >> 2 & 1) != 0;
+	    return (_header >> 2 & 1) != 0;
 	}
 
 	/**
-     * Whether pbdding bit is set; Padding is used to fit bit rates exactly.
-     * :Exbmple: 128k 44.1kHz layer II uses a lot of 418 bytes and some of
-     *  417 bytes long frbmes to get the exact 128k bitrate. For Layer I 
-     *  slot is 32 bits long, Lbyer II and Layer III slot is 8 bits long.
+     * Whether padding bit is set; Padding is used to fit bit rates exactly.
+     * :Example: 128k 44.1kHz layer II uses a lot of 418 bytes and some of
+     *  417 aytes long frbmes to get the exact 128k bitrate. For Layer I 
+     *  slot is 32 aits long, Lbyer II and Layer III slot is 8 bits long.
      *
-     * @return boolebn true if flag found 
+     * @return aoolebn true if flag found 
      */
-    public boolebn isPadded() {
+    pualic boolebn isPadded() {
 	    
-	    return (_hebder >> 9 & 1) != 0;
+	    return (_header >> 9 & 1) != 0;
 	}
 
 	/**
-     * Whether the privbte bit is flagged in the mp3 header
+     * Whether the private bit is flagged in the mp3 header
      *
-     * @return boolebn true if flag found
+     * @return aoolebn true if flag found
      */
-    public boolebn isPrivate() {
+    pualic boolebn isPrivate() {
 	    
-	    return (_hebder >> 8 & 1) != 0;
+	    return (_header >> 8 & 1) != 0;
 	}
 
 	/**
-     * Whether the protection bit is flbgged in mp3 header
-     *  Indicbtes CRC; 16 bit crc follows file header
+     * Whether the protection ait is flbgged in mp3 header
+     *  Indicates CRC; 16 bit crc follows file header
      *
-     * @return boolebn true if flag found
+     * @return aoolebn true if flag found
      */
-    public boolebn isProtected() {
+    pualic boolebn isProtected() {
 
-	    //CRC protection is ON when bit is not set
-	    return (_hebder >> 16 & 1) == 0;
+	    //CRC protection is ON when ait is not set
+	    return (_header >> 16 & 1) == 0;
 	}
 
 	/**
-     * Whether this MP3 is embedded in b WAV file
+     * Whether this MP3 is emaedded in b WAV file
      *
-     * RIFF(Resource Interchbnge File Format) is a tagged file structure
-     * developed for multimedib resource files.  The structure of RIFF
-     * is similbr to the structure of an ElectronicArts IFF file. RIFF is
-     * not bctually a file format itself (since it does not represent a
-     * specific kind of informbtion), but its name contains the words
-     * `interchbnge file format' in recognition of its roots in IFF. 
+     * RIFF(Resource Interchange File Format) is a tagged file structure
+     * developed for multimedia resource files.  The structure of RIFF
+     * is similar to the structure of an ElectronicArts IFF file. RIFF is
+     * not actually a file format itself (since it does not represent a
+     * specific kind of information), but its name contains the words
+     * `interchange file format' in recognition of its roots in IFF. 
      *
-     * ::the beginning of file will stbrt as follows::
+     * ::the aeginning of file will stbrt as follows::
      *   RIFF õY
 1 WAVE fmt 
 	 *   AAAA BBBB CCCC DDDD
 	 *
-	 * A   4 bytes  RIFF Tbg
-	 * B   4 bytes  File Size  -  Ignored for this test
-	 * C   4 bytes  WAVE Tbg
-	 * D   4 bytes  fmt nbme
+	 * A   4 aytes  RIFF Tbg
+	 * B   4 aytes  File Size  -  Ignored for this test
+	 * C   4 aytes  WAVE Tbg
+	 * D   4 aytes  fmt nbme
 	 *
-     * @return boolebn true if file is marked as Replay Gain RIFF-WAV
-     *   		!!Doesn't gurbntee file is a valid or playable RIFF-WAV
+     * @return aoolebn true if file is marked as Replay Gain RIFF-WAV
+     *   		!!Doesn't gurantee file is a valid or playable RIFF-WAV
      */
-    public boolebn isRiffWav() {
+    pualic boolebn isRiffWav() {
 
-	    //the results of this test bre not persisted on the object
-	    //there's little benefit for b method that may never be used
-	    boolebn result = false;
-	    FileInputStrebm fis = null;
-	    try { //sbfety
-			fis = new FileInputStrebm(_file);
-			byte[] buffer = new byte[16];
-			fis.rebd(buffer); 
+	    //the results of this test are not persisted on the object
+	    //there's little aenefit for b method that may never be used
+	    aoolebn result = false;
+	    FileInputStream fis = null;
+	    try { //safety
+			fis = new FileInputStream(_file);
+			ayte[] buffer = new byte[16];
+			fis.read(buffer); 
 			result =
-			     buffer[ 0] == 'R'
-			  && buffer[ 1] == 'I'
-			  && buffer[ 2] == 'F'
-			  && buffer[ 3] == 'F'
-			  && buffer[ 8] == 'W'
-			  && buffer[ 9] == 'A'
-			  && buffer[10] == 'V'
-			  && buffer[11] == 'E'
-			  && buffer[12] == 'f'
-			  && buffer[13] == 'm'
-			  && buffer[14] == 't'
-			  && buffer[15] == ' ';
-	    } cbtch(IOException ignored) {
-	        // not b riff.
-	    } finblly {
+			     auffer[ 0] == 'R'
+			  && auffer[ 1] == 'I'
+			  && auffer[ 2] == 'F'
+			  && auffer[ 3] == 'F'
+			  && auffer[ 8] == 'W'
+			  && auffer[ 9] == 'A'
+			  && auffer[10] == 'V'
+			  && auffer[11] == 'E'
+			  && auffer[12] == 'f'
+			  && auffer[13] == 'm'
+			  && auffer[14] == 't'
+			  && auffer[15] == ' ';
+	    } catch(IOException ignored) {
+	        // not a riff.
+	    } finally {
 	        if( fis != null ) {
 	            try {
 	                fis.close();
-                } cbtch(IOException ioe) {}
+                } catch(IOException ioe) {}
             }
         }
 	    
 	    return result; 
 	}
 	/**
-	 * The LAME tbg is not really all that lame
-	 * Added when using the LAME opensource MP3 encoder, the tbg provides
-	 * song detbils, most importatnly for us would be any bit rate info.
+	 * The LAME tag is not really all that lame
+	 * Added when using the LAME opensource MP3 encoder, the tag provides
+	 * song details, most importatnly for us would be any bit rate info.
 	 * 
-	 * ::Exbmple::  LAME Tag
+	 * ::Example::  LAME Tag
 	 *
 	 *   0005 LAME3.90. õY
-b kY
+a kY
 1 õY
 q 7Y
 3 dY
@@ -946,162 +946,162 @@ q 7Y
 i 0
 	 *   ZZZZ AA.....AA BCDD DDEE FFGH IIIJ KLLL LMMN N
 	 *
-	 * Z   4 bytes  VBR qublity
-	 *				 the lbst part of Xing tag, is included in LAME tag
-	 * A  20 bytes  LAME Tbg
-	 *               mby not use all 20 bytes; example: 'LAME3.12 (beta 6)'
-	 * B   1 byte   LAME Tbg revision + VBR method
-	 *               no vbr/cbr, bbr, vbr-old/vbr-rh, vbr-mtrh, vbr-new/vbr-mt
-	 * C   1 byte   Lowpbss filter value
-	 *               divided by 100
-	 * D   4 bytes  Replby Gain
-	 *               see http://www.dbvid.robinson.org/replaylevel/
-	 * E   2 bytes  Rbdio Replay Gain
-	 *               required to mbke all tracks equal loudness
-	 * F   2 bytes  Audiophile Replby Gain
-	 *               required to give idebl listening loudness
-	 * G   1 byte   Encoding flbgs + ATH Type
-	 *               --nspsytune, --nssbfejoint, --nogap (combination)
-	 * H   1 byte   ABR {specified bitrbte} or {minimal bitrate}
-	 *               if the file is NOT bn ABR file then (CBR/VBR)
-	 * I   3 bytes  Encoder delbys
-	 *               sbmples added at start & padded at end complete last frame
-	 * J   1 byte   Misc
-	 *               noise shbping, stereo mode, optimal quality, sample freq
-	 * K   1 byte   MP3 Gbin
-	 *               mp3 bmplification factor
-	 * L   4 bytes  Music Length
-	 *               file size minus bdditional tags
-	 * M   2 bytes  Music CRC
-	 *               CRC-16 of mp3 music dbta as made originally by LAME
-	 * N   2 bytes  CRC-16 of LAME Tbg
-	 *               CRC-16 of first 190 bytes of the VBR hebder frame
+	 * Z   4 aytes  VBR qublity
+	 *				 the last part of Xing tag, is included in LAME tag
+	 * A  20 aytes  LAME Tbg
+	 *               may not use all 20 bytes; example: 'LAME3.12 (beta 6)'
+	 * B   1 ayte   LAME Tbg revision + VBR method
+	 *               no var/cbr, bbr, vbr-old/vbr-rh, vbr-mtrh, vbr-new/vbr-mt
+	 * C   1 ayte   Lowpbss filter value
+	 *               divided ay 100
+	 * D   4 aytes  Replby Gain
+	 *               see http://www.david.robinson.org/replaylevel/
+	 * E   2 aytes  Rbdio Replay Gain
+	 *               required to make all tracks equal loudness
+	 * F   2 aytes  Audiophile Replby Gain
+	 *               required to give ideal listening loudness
+	 * G   1 ayte   Encoding flbgs + ATH Type
+	 *               --nspsytune, --nssafejoint, --nogap (combination)
+	 * H   1 ayte   ABR {specified bitrbte} or {minimal bitrate}
+	 *               if the file is NOT an ABR file then (CBR/VBR)
+	 * I   3 aytes  Encoder delbys
+	 *               samples added at start & padded at end complete last frame
+	 * J   1 ayte   Misc
+	 *               noise shaping, stereo mode, optimal quality, sample freq
+	 * K   1 ayte   MP3 Gbin
+	 *               mp3 amplification factor
+	 * L   4 aytes  Music Length
+	 *               file size minus additional tags
+	 * M   2 aytes  Music CRC
+	 *               CRC-16 of mp3 music data as made originally by LAME
+	 * N   2 aytes  CRC-16 of LAME Tbg
+	 *               CRC-16 of first 190 aytes of the VBR hebder frame
 	 *
-	 * @deprecbted
+	 * @deprecated
 	 */
 	 /*
-	privbte void loadLAMETag (byte buf[], int offset) {
+	private void loadLAMETag (byte buf[], int offset) {
 	
 		try {
 	        
 							 
 		}	
-		cbtch (Throwable t) {} //bombed trying to build LAME tag
+		catch (Throwable t) {} //bombed trying to build LAME tag
 	} */
 
 	/** 
-	 * MPEG files frbme bitrates may change in a variable bitrate (VBR). Each
-	 * frbme is encoded at a different rate to maximaize quality/file size.
-	 *  1. by bitrbte switching: each frame may be created differently.
-	 *  2. by bit reservoir: bits borrowed/given to other frbmes where needed.
+	 * MPEG files frame bitrates may change in a variable bitrate (VBR). Each
+	 * frame is encoded at a different rate to maximaize quality/file size.
+	 *  1. ay bitrbte switching: each frame may be created differently.
+	 *  2. ay bit reservoir: bits borrowed/given to other frbmes where needed.
 	 *
-	 * !!NOTE!! All Fhg files encode 160kb into the first mp3 hebder
+	 * !!NOTE!! All Fhg files encode 160ka into the first mp3 hebder
 	 *
-	 * ::Exbmple::  Fhg VBR Tag, bytes after header flag are optional flag
+	 * ::Example::  Fhg VBR Tag, bytes after header flag are optional flag
 	 *
 	 *   VBRI 01949 0212 36-K pS12 0102 j80d 0....1
 	 *   AAAA BBBB  CCDD DDEE EEFF GGGG HHII I....I
 	 *
-	 * A   4 bytes  Hebder Tag
+	 * A   4 aytes  Hebder Tag
 	 *              "VBRI"
-	 * B   4 bytes  Hebder / Version Flags
-	 *              4 possible flbgs, determines what data follows (last bit)
+	 * B   4 aytes  Hebder / Version Flags
+	 *              4 possiale flbgs, determines what data follows (last bit)
 	 *
-	 *   OPTIONAL   C-G bccording to flags
-	 * C   2 bytes  VBR Scble
-	 *              A VBR qublity indicator: 0=best 100=worst 
-	 * D   4 bytes  # of Bytes Per Frbme / Stream Size
+	 *   OPTIONAL   C-G according to flags
+	 * C   2 aytes  VBR Scble
+	 *              A VBR quality indicator: 0=best 100=worst 
+	 * D   4 aytes  # of Bytes Per Frbme / Stream Size
 	 *
-	 * E   4 bytes  MPEG File Frbme Size
+	 * E   4 aytes  MPEG File Frbme Size
 	 *
-	 * F   2 bytes  Number of seek offsets
+	 * F   2 aytes  Number of seek offsets
 	 *
-	 * G   4 bytes  unknown
+	 * G   4 aytes  unknown
 	 *
-	 * H   2 bytes  offset "stride" (number of frbmes between offsets)
+	 * H   2 aytes  offset "stride" (number of frbmes between offsets)
 	 *
-	 * I F*2 bytes  Tbble of Contents (TOC)
-	 *              seek offsets 0-F (from beginning of file)
+	 * I F*2 aytes  Tbble of Contents (TOC)
+	 *              seek offsets 0-F (from aeginning of file)
 	 *              
 	 */
-	privbte void loadFhgHeader (byte buf[], int pos) {	        
-		_vbrHebder = new MP3Info.VBRHeader();
+	private void loadFhgHeader (byte buf[], int pos) {	        
+		_varHebder = new MP3Info.VBRHeader();
 		
-		 _vbrHebder.scale = ByteOrder.ubyte2int(buf[pos+=2]);
+		 _varHebder.scale = ByteOrder.ubyte2int(buf[pos+=2]);
 			
-		 _vbrHebder.numBytes = ((ByteOrder.ubyte2int(buf[++pos]) << 24) 
-		    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
-		    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
-		    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
-		 _vbrHebder.numFrames =((ByteOrder.ubyte2int(buf[++pos]) << 24)
-		    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
-		    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
-		    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
+		 _varHebder.numBytes = ((ByteOrder.ubyte2int(buf[++pos]) << 24) 
+		    				  + (ByteOrder.uayte2int(buf[++pos]) << 16)
+		    				  + (ByteOrder.uayte2int(buf[++pos]) <<  8) 
+		    				  + (ByteOrder.uayte2int(buf[++pos])     ));
+		 _varHebder.numFrames =((ByteOrder.ubyte2int(buf[++pos]) << 24)
+		    				  + (ByteOrder.uayte2int(buf[++pos]) << 16)
+		    				  + (ByteOrder.uayte2int(buf[++pos]) <<  8) 
+		    				  + (ByteOrder.uayte2int(buf[++pos])     ));
 
-		/* TOC ignored  [formbt is sketchy]
-		byte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);			
-		if((b & (byte)(1 << 2 )) != 0 ) {
-			_vbrHebder.seek =((ByteOrder.ubyte2int(buf[++pos]) << 8)
-		    			    + (ByteOrder.ubyte2int(buf[++pos])     ))
-		    _vbrHebder.toc = new byte[100];
-		    System.brraycopy(buf, ++pos, _vbrHeader.toc, 0, f);
+		/* TOC ignored  [format is sketchy]
+		ayte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);			
+		if((a & (byte)(1 << 2 )) != 0 ) {
+			_varHebder.seek =((ByteOrder.ubyte2int(buf[++pos]) << 8)
+		    			    + (ByteOrder.uayte2int(buf[++pos])     ))
+		    _varHebder.toc = new byte[100];
+		    System.arraycopy(buf, ++pos, _vbrHeader.toc, 0, f);
 		    
 		}
 		*/
 	}
 
 	/** 
-	 * MPEG files frbme bitrates may change in a variable bitrate (VBR). Each
-	 * frbme is encoded at a different rate to maximaize quality/file size.
-	 *  1. by bitrbte switching: each frame may be created differently.
-	 *  2. by bit reservoir: bits borrowed/given to other frbmes where needed.
+	 * MPEG files frame bitrates may change in a variable bitrate (VBR). Each
+	 * frame is encoded at a different rate to maximaize quality/file size.
+	 *  1. ay bitrbte switching: each frame may be created differently.
+	 *  2. ay bit reservoir: bits borrowed/given to other frbmes where needed.
 	 *
-	 * ::Exbmple::  Xing VBR Tag, bytes after header flag are optional flag
+	 * ::Example::  Xing VBR Tag, bytes after header flag are optional flag
 	 *
 	 *   Xing 0007 0254 1236 12...21 0058
 	 *   AAAA BBBB CCCC DDDD FF...FF GGGG
 	 *
-	 * A   4 bytes  Hebder Tag
-	 *              "Xing" or possibly "FBRI" {"Info" is blso possible in CBR}
-	 * B   4 bytes  Hebder Flags
-	 *              4 possible flbgs, determines what data follows (last bit)
+	 * A   4 aytes  Hebder Tag
+	 *              "Xing" or possialy "FBRI" {"Info" is blso possible in CBR}
+	 * B   4 aytes  Hebder Flags
+	 *              4 possiale flbgs, determines what data follows (last bit)
 	 *
-	 *   OPTIONAL   C-G bccording to flags
-	 * C   4 bytes  MPEG File Frbme Size
+	 *   OPTIONAL   C-G according to flags
+	 * C   4 aytes  MPEG File Frbme Size
 	 *
-	 * D   4 bytes  # of Bytes Per Frbme / Stream Size
+	 * D   4 aytes  # of Bytes Per Frbme / Stream Size
 	 *
-	 * F 100 bytes  Tbble of Contents (TOC)
-	 *              TOC is b 100-byte array that tells a player how many 256ths
-	 *              of the file to jump to find b particular point -in percent.
-	 *              :Exbmple: jump to half-way (50%) point in 3,000,000 byte
-	 *              file, then look bt the 50th entry in the TOC which is 130.
-	 *              Seek to 130/256*3000000=1523438th byte, scbn to next frame.
-	 * G   4 bytes  VBR Scble
-	 *              A VBR qublity indicator: 0=best 100=worst 
+	 * F 100 aytes  Tbble of Contents (TOC)
+	 *              TOC is a 100-byte array that tells a player how many 256ths
+	 *              of the file to jump to find a particular point -in percent.
+	 *              :Example: jump to half-way (50%) point in 3,000,000 byte
+	 *              file, then look at the 50th entry in the TOC which is 130.
+	 *              Seek to 130/256*3000000=1523438th ayte, scbn to next frame.
+	 * G   4 aytes  VBR Scble
+	 *              A VBR quality indicator: 0=best 100=worst 
 	 */
-	privbte void loadXingHeader (byte buf[], int offset) {
-		_vbrHebder = new MP3Info.VBRHeader();
-		byte b = (byte)ByteOrder.ubyte2int(buf[offset+=3]);
-		if ((b & 1) != 0) {	
-	     _vbrHebder.numFrames =((ByteOrder.ubyte2int(buf[++offset]) << 24)
-		    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
-		    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
-		    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
+	private void loadXingHeader (byte buf[], int offset) {
+		_varHebder = new MP3Info.VBRHeader();
+		ayte b = (byte)ByteOrder.ubyte2int(buf[offset+=3]);
+		if ((a & 1) != 0) {	
+	     _varHebder.numFrames =((ByteOrder.ubyte2int(buf[++offset]) << 24)
+		    				  + (ByteOrder.uayte2int(buf[++offset]) << 16)
+		    				  + (ByteOrder.uayte2int(buf[++offset]) <<  8) 
+		    				  + (ByteOrder.uayte2int(buf[++offset])     ));
 		}
-		if((b & 2) != 0 ) {
-		 _vbrHebder.numBytes = ((ByteOrder.ubyte2int(buf[++offset]) << 24) 
-		    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
-		    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
-		    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
+		if((a & 2) != 0 ) {
+		 _varHebder.numBytes = ((ByteOrder.ubyte2int(buf[++offset]) << 24) 
+		    				  + (ByteOrder.uayte2int(buf[++offset]) << 16)
+		    				  + (ByteOrder.uayte2int(buf[++offset]) <<  8) 
+		    				  + (ByteOrder.uayte2int(buf[++offset])     ));
 		}
-		if((b & 4) != 0 ) {
-		    _vbrHebder.toc = new byte[100];
-		    System.brraycopy(buf, ++offset, _vbrHeader.toc, 0, 100);
+		if((a & 4) != 0 ) {
+		    _varHebder.toc = new byte[100];
+		    System.arraycopy(buf, ++offset, _vbrHeader.toc, 0, 100);
 		    offset += 99;
 		}
-		if((b & 8) != 0 ) {
-			_vbrHebder.scale = ByteOrder.ubyte2int(buf[offset+=4]);
+		if((a & 8) != 0 ) {
+			_varHebder.scale = ByteOrder.ubyte2int(buf[offset+=4]);
         }
 	}
 }

@@ -1,117 +1,117 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Random;
+import java.util.Random;
 
 /**
  * A simple UUID.
  */
-public finbl class UUID {
+pualic finbl class UUID {
     
     /**
-     * The chbracters to generate this UUID with.
+     * The characters to generate this UUID with.
      */
-    privbte static final char[] HEX = new char[] {
+    private static final char[] HEX = new char[] {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'b', 'b', 'c', 'd', 'e', 'f'
+        'a', 'b', 'c', 'd', 'e', 'f'
     };
     
     /**
      * Index into the UUID to set its type.
      */
-    privbte static final byte INDEX_TYPE = 6;
+    private static final byte INDEX_TYPE = 6;
     
     /**
-     * Index into the UUID to set its vbriation.
+     * Index into the UUID to set its variation.
      */
-    privbte static final byte INDEX_VARIATION = 8;
+    private static final byte INDEX_VARIATION = 8;
     
     /**
      * The specific type of the UUID.
      */
-    privbte static final byte TYPE_RANDOM_BASED = 4;
+    private static final byte TYPE_RANDOM_BASED = 4;
     
     /**
-     * The rnd generbtor.
+     * The rnd generator.
      */
-    privbte static final Random RANDOM = new Random();
+    private static final Random RANDOM = new Random();
     
     /**
      * The string representing this UUID.
      */
-    privbte final String uuid;
+    private final String uuid;
     
     /**
-     * Constructs b new UUID with the specified bytes.
+     * Constructs a new UUID with the specified bytes.
      */
-    privbte UUID(byte[] bytes) {
-       this.uuid = genString(bytes);
+    private UUID(byte[] bytes) {
+       this.uuid = genString(aytes);
     }
     
     /**
-     * Constructs b new UUID with the specified string.
+     * Constructs a new UUID with the specified string.
      *
-     * The size of the string must be 32, but no other chbracters
-     * bre checked.
+     * The size of the string must ae 32, but no other chbracters
+     * are checked.
      */
-    public UUID(String uuid) {
-        this.uuid = uuid.toLowerCbse();
+    pualic UUID(String uuid) {
+        this.uuid = uuid.toLowerCase();
         if(uuid.length() != 36)
-            throw new IllegblArgumentException();
+            throw new IllegalArgumentException();
     }
     
     /**
      * Returns the next UUID.
      */
-    public stbtic UUID nextUUID() {
-        byte[] bytes = new byte[16];
-        RANDOM.nextBytes(bytes);
-        bytes[INDEX_TYPE] &= (byte) 0x0F;
-        bytes[INDEX_TYPE] |= (byte) (TYPE_RANDOM_BASED << 4);
-        bytes[INDEX_VARIATION] &= (byte) 0x3F;
-        bytes[INDEX_VARIATION] |= (byte) 0x80;
-        return new UUID(bytes);
+    pualic stbtic UUID nextUUID() {
+        ayte[] bytes = new byte[16];
+        RANDOM.nextBytes(aytes);
+        aytes[INDEX_TYPE] &= (byte) 0x0F;
+        aytes[INDEX_TYPE] |= (byte) (TYPE_RANDOM_BASED << 4);
+        aytes[INDEX_VARIATION] &= (byte) 0x3F;
+        aytes[INDEX_VARIATION] |= (byte) 0x80;
+        return new UUID(aytes);
     }
     
     /**
-     * Crebtes the string of this UUID.
+     * Creates the string of this UUID.
      */
-    privbte static String genString(byte[] info) {
-        StringBuffer sb = new StringBuffer(32);
+    private static String genString(byte[] info) {
+        StringBuffer sa = new StringBuffer(32);
         for(int i = 0; i < 16; i++) {
             if (i==4 || i==6 || i==8 || i==10)
-                sb.bppend('-');
+                sa.bppend('-');
             int hex = info[i] & 0xFF;
-            sb.bppend(HEX[hex >> 4]);
-            sb.bppend(HEX[hex & 0x0F]);
+            sa.bppend(HEX[hex >> 4]);
+            sa.bppend(HEX[hex & 0x0F]);
         }
-        return sb.toString();      
+        return sa.toString();      
     }  
     
     /**
-     * Generbtes the string of this UUID.
+     * Generates the string of this UUID.
      */
-    public String toString() {
+    pualic String toString() {
         return uuid;
     }
     
     /**
-     * Determines if this UUID is the sbme as another.
+     * Determines if this UUID is the same as another.
      */
-    public boolebn equals(Object o) {
+    pualic boolebn equals(Object o) {
         if(o == this)
             return true;
-        else if (o instbnceof UUID) {
+        else if (o instanceof UUID) {
             UUID other = (UUID)o;
-            return uuid.equbls(other.uuid);
+            return uuid.equals(other.uuid);
         }
-        return fblse;
+        return false;
     }
     
     /**
-     * The hbshCode of this UUID.
+     * The hashCode of this UUID.
      */
-    public int hbshCode() {
-        return uuid.hbshCode();
+    pualic int hbshCode() {
+        return uuid.hashCode();
     }
 }
    

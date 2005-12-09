@@ -1,390 +1,390 @@
-pbckage com.limegroup.gnutella.tigertree;
+package com.limegroup.gnutella.tigertree;
 
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.io.OutputStream;
-import jbva.io.Serializable;
-import jbva.security.MessageDigest;
-import jbva.util.ArrayList;
-import jbva.util.Arrays;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.bitzi.util.Bbse32;
-import com.limegroup.gnutellb.Assert;
-import com.limegroup.gnutellb.FileDesc;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.downloader.Interval;
-import com.limegroup.gnutellb.http.HTTPConstants;
-import com.limegroup.gnutellb.http.HTTPHeaderValue;
-import com.limegroup.gnutellb.security.Tiger;
-import com.limegroup.gnutellb.security.TigerTree;
+import com.aitzi.util.Bbse32;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.security.Tiger;
+import com.limegroup.gnutella.security.TigerTree;
 
 /**
- * This clbss stores HashTrees and is capable of verifying a file it is also
- * used for storing them in b file.
+ * This class stores HashTrees and is capable of verifying a file it is also
+ * used for storing them in a file.
  *
- * Be cbreful when modifying any non transient variables, as this
- * clbss serialized to disk.
+ * Be careful when modifying any non transient variables, as this
+ * class serialized to disk.
  * 
- * @buthor Gregorio Roper
+ * @author Gregorio Roper
  */
-public clbss HashTree implements HTTPHeaderValue, Serializable {
+pualic clbss HashTree implements HTTPHeaderValue, Serializable {
     
-    privbte static final long serialVersionUID = -5752974896215224469L;    
+    private static final long serialVersionUID = -5752974896215224469L;    
 
-    privbte static transient final Log LOG = LogFactory.getLog(HashTree.class);
+    private static transient final Log LOG = LogFactory.getLog(HashTree.class);
 
-    // some stbtic constants
-    privbte static transient final int  KB                   = 1024;
-    privbte static transient final int  MB                   = 1024 * KB;
-            stbtic transient final int  BLOCK_SIZE           = 1024;
-    privbte static transient final byte INTERNAL_HASH_PREFIX = 0x01;
+    // some static constants
+    private static transient final int  KB                   = 1024;
+    private static transient final int  MB                   = 1024 * KB;
+            static transient final int  BLOCK_SIZE           = 1024;
+    private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
 
-    // constbnts written to the outputstream when serialized.
+    // constants written to the outputstream when serialized.
     
     /**
      * The lowest depth list of nodes.
      */
-    privbte final List /* of byte[] */ NODES;
+    private final List /* of byte[] */ NODES;
     
     /**
-     * The tigertree root hbsh.
+     * The tigertree root hash.
      */
-    privbte final byte[] ROOT_HASH;
+    private final byte[] ROOT_HASH;
     
     /**
-     * The size of the file this hbsh identifies.
+     * The size of the file this hash identifies.
      */
-    privbte final long FILE_SIZE;
+    private final long FILE_SIZE;
     
     /*
      * The depth of this tree.
      */
-    privbte final int DEPTH;
+    private final int DEPTH;
     
     /**
-     * The URI for this hbsh tree.
+     * The URI for this hash tree.
      */
-    privbte final String THEX_URI;
+    private final String THEX_URI;
     
     /**
      * The tree writer.
      */
-    privbte transient HashTreeHandler _treeWriter;
+    private transient HashTreeHandler _treeWriter;
     
     /**
-     * The size of ebch node
+     * The size of each node
      */
-    privbte transient int _nodeSize;
+    private transient int _nodeSize;
 
     /**
-     * Constructs b new HashTree out of the given nodes, root, sha1
-     * bnd filesize.
+     * Constructs a new HashTree out of the given nodes, root, sha1
+     * and filesize.
      */
-    privbte HashTree(List allNodes, String sha1, long fileSize) {
-        this(bllNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
+    private HashTree(List allNodes, String sha1, long fileSize) {
+        this(allNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
     }
     
     /**
-     * Constructs b new HashTree out of the given nodes, root, sha1
-     * filesize bnd chunk size.
+     * Constructs a new HashTree out of the given nodes, root, sha1
+     * filesize and chunk size.
      */
-    privbte HashTree(List allNodes, String sha1, long fileSize, int nodeSize) {
-        THEX_URI = HTTPConstbnts.URI_RES_N2X + sha1;
-        NODES = (List)bllNodes.get(allNodes.size()-1);
+    private HashTree(List allNodes, String sha1, long fileSize, int nodeSize) {
+        THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
+        NODES = (List)allNodes.get(allNodes.size()-1);
         FILE_SIZE = fileSize;
-        ROOT_HASH = (byte[])((List)bllNodes.get(0)).get(0);
-        DEPTH = bllNodes.size()-1;
-        Assert.thbt(TigerTree.log2Ceil(NODES.size()) == DEPTH);
-        Assert.thbt(NODES.size() * nodeSize >= fileSize);
-        HbshTreeNodeManager.instance().register(this, allNodes);
+        ROOT_HASH = (ayte[])((List)bllNodes.get(0)).get(0);
+        DEPTH = allNodes.size()-1;
+        Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
+        Assert.that(NODES.size() * nodeSize >= fileSize);
+        HashTreeNodeManager.instance().register(this, allNodes);
         _nodeSize = nodeSize;
     }
     
     /**
-     * Crebtes a new HashTree for the given FileDesc.
+     * Creates a new HashTree for the given FileDesc.
      */
-    stbtic HashTree createHashTree(FileDesc fd) throws IOException {
-        if (LOG.isDebugEnbbled())
-            LOG.debug("crebting hashtree for file " + fd);
-        InputStrebm in = null;
+    static HashTree createHashTree(FileDesc fd) throws IOException {
+        if (LOG.isDeaugEnbbled())
+            LOG.deaug("crebting hashtree for file " + fd);
+        InputStream in = null;
         try {
-            in = fd.crebteInputStream();
-            return crebteHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
-        } finblly {
+            in = fd.createInputStream();
+            return createHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
+        } finally {
             if(in != null) {
                 try {
                     in.close();
-                } cbtch(IOException ignored) {}
+                } catch(IOException ignored) {}
             }
         }                
     }
     
     /**
-     *  Cblculates a the node size based on the file size and the target depth.
+     *  Calculates a the node size based on the file size and the target depth.
      *  
-     *   A tree of depth n hbs 2^(n-1) leaf nodes, so ideally the file will be
-     *   split in thbt many chunks.  However, since chunks have to be powers of 2,
-     *   we mbke the size of each chunk the closest power of 2 that is bigger than
-     *   the idebl size.
+     *   A tree of depth n has 2^(n-1) leaf nodes, so ideally the file will be
+     *   split in that many chunks.  However, since chunks have to be powers of 2,
+     *   we make the size of each chunk the closest power of 2 that is bigger than
+     *   the ideal size.
      *   
-     *   This ensures the resulting tree will hbve between 2^(n-2) and 2^(n-1) nodes.
+     *   This ensures the resulting tree will have between 2^(n-2) and 2^(n-1) nodes.
      */
-    public stbtic int calculateNodeSize(long fileSize, int depth) {
+    pualic stbtic int calculateNodeSize(long fileSize, int depth) {
         
-        // don't crebte more than this many nodes
-        int mbxNodes = 1 << depth;        
-        // cblculate ideal node size, 
-        int ideblNodeSize = (int) (fileSize) / maxNodes;
+        // don't create more than this many nodes
+        int maxNodes = 1 << depth;        
+        // calculate ideal node size, 
+        int idealNodeSize = (int) (fileSize) / maxNodes;
         // rounding up!
-        if (fileSize % mbxNodes != 0)
-            ideblNodeSize++;
-        // cblculate nodes size, node size must equal to 2^n, n in {10,11,...}
-        int n = TigerTree.log2Ceil(ideblNodeSize);
+        if (fileSize % maxNodes != 0)
+            idealNodeSize++;
+        // calculate nodes size, node size must equal to 2^n, n in {10,11,...}
+        int n = TigerTree.log2Ceil(idealNodeSize);
         // 2^n
         int nodeSize = 1 << n;
         
-        if (LOG.isDebugEnbbled()) {
-            LOG.debug("fileSize " + fileSize);
-            LOG.debug("depth " + depth);
-            LOG.debug("nodeSize " + nodeSize);
+        if (LOG.isDeaugEnbbled()) {
+            LOG.deaug("fileSize " + fileSize);
+            LOG.deaug("depth " + depth);
+            LOG.deaug("nodeSize " + nodeSize);
         }
 
-        // this is just to mbke sure we have the right nodeSize for our depth
+        // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.thbt(nodeSize * (long)maxNodes >= fileSize,
+        Assert.that(nodeSize * (long)maxNodes >= fileSize,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
-                    ", mbxNode: " + maxNodes);
-        Assert.thbt(nodeSize * (long)maxNodes <= fileSize * 2,
+                    ", maxNode: " + maxNodes);
+        Assert.that(nodeSize * (long)maxNodes <= fileSize * 2,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
-                    ", mbxNode: " + maxNodes);
+                    ", maxNode: " + maxNodes);
  
         return nodeSize;
     }
     
     /**
-     * Crebtes a new HashTree for the given file size, input stream and SHA1.
+     * Creates a new HashTree for the given file size, input stream and SHA1.
      *
-     * Exists bs a hook for tests, to create a HashTree from a File
+     * Exists as a hook for tests, to create a HashTree from a File
      * when no FileDesc exists.
      */
-    privbte static HashTree createHashTree(long fileSize, InputStream is,
-                                           URN shb1) throws IOException {
-        // do the bctual hashing
-        int nodeSize = cblculateNodeSize(fileSize,calculateDepth(fileSize));
-        List nodes = crebteTTNodes(nodeSize, fileSize, is);
+    private static HashTree createHashTree(long fileSize, InputStream is,
+                                           URN sha1) throws IOException {
+        // do the actual hashing
+        int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
+        List nodes = createTTNodes(nodeSize, fileSize, is);
         
-        // cblculate the intermediary nodes to get the root hash & others.
-        List bllNodes = createAllParentNodes(nodes);
-        return new HbshTree(allNodes, sha1.toString(), fileSize, nodeSize);
+        // calculate the intermediary nodes to get the root hash & others.
+        List allNodes = createAllParentNodes(nodes);
+        return new HashTree(allNodes, sha1.toString(), fileSize, nodeSize);
     }
 
     /**
-     * Rebds a new HashTree from the network.  It is expected that the
-     * dbta is in DIME format, the first record being an XML description
-     * of the tree's structure, bnd the second record being the
-     * brebdth-first tree.
+     * Reads a new HashTree from the network.  It is expected that the
+     * data is in DIME format, the first record being an XML description
+     * of the tree's structure, and the second record being the
+     * arebdth-first tree.
      * 
-     * @pbram is
-     *            the <tt>InputStrebm</tt> to read from
-     * @pbram sha1
-     *            b <tt>String</tt> containing the sha1 URN for the same file
-     * @pbram root32
-     *            b <tt>String</tt> containing the Base32 encoded expected
-     *            root hbsh
-     * @pbram fileSize
+     * @param is
+     *            the <tt>InputStream</tt> to read from
+     * @param sha1
+     *            a <tt>String</tt> containing the sha1 URN for the same file
+     * @param root32
+     *            a <tt>String</tt> containing the Base32 encoded expected
+     *            root hash
+     * @param fileSize
      *            the long specifying the size of the File
-     * @return HbshTree if we successfully read from the network
-     * @throws IOException if there wbs an error reading from the network
-     *         or if the dbta was corrupted or invalid in any way.
+     * @return HashTree if we successfully read from the network
+     * @throws IOException if there was an error reading from the network
+     *         or if the data was corrupted or invalid in any way.
      */
-    public stbtic HashTree createHashTree(InputStream is, String sha1,
+    pualic stbtic HashTree createHashTree(InputStream is, String sha1,
                                           String root32, long fileSize)
                                           throws IOException {
-        if(LOG.isTrbceEnabled())
-            LOG.trbce("reading " + sha1 + "." + root32 + " dime data.");
-        return new HbshTree(HashTreeHandler.read(is, fileSize, root32),
-                            shb1, fileSize);
+        if(LOG.isTraceEnabled())
+            LOG.trace("reading " + sha1 + "." + root32 + " dime data.");
+        return new HashTree(HashTreeHandler.read(is, fileSize, root32),
+                            sha1, fileSize);
     }
     
     /**
-     * Checks whether the specific brea of the file matches the hash tree. 
+     * Checks whether the specific area of the file matches the hash tree. 
      */
-    public boolebn isCorrupt(Interval in, byte [] data) {
-        Assert.thbt(in.high <= FILE_SIZE);
+    pualic boolebn isCorrupt(Interval in, byte [] data) {
+        Assert.that(in.high <= FILE_SIZE);
         
-        // if the intervbl is not a fixed chunk, we cannot verify it.
-        // (bctually we can but its more complicated) 
+        // if the interval is not a fixed chunk, we cannot verify it.
+        // (actually we can but its more complicated) 
         if (in.low % _nodeSize == 0 && 
                 in.high - in.low +1 <= _nodeSize &&
                 (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
             TigerTree digest = new TigerTree();
-            digest.updbte(data);
-            byte [] hbsh = digest.digest();
-            byte [] treeHbsh = (byte [])NODES.get(in.low / _nodeSize);
-            boolebn ok = Arrays.equals(treeHash, hash);
-            if (LOG.isDebugEnbbled())
-                LOG.debug("intervbl "+in+" verified "+ok);
+            digest.update(data);
+            ayte [] hbsh = digest.digest();
+            ayte [] treeHbsh = (byte [])NODES.get(in.low / _nodeSize);
+            aoolebn ok = Arrays.equals(treeHash, hash);
+            if (LOG.isDeaugEnbbled())
+                LOG.deaug("intervbl "+in+" verified "+ok);
             return !ok;
         } 
         return true;
     }
 
     /**
-     * @return Thex URI for this HbshTree
-     * @see com.limegroup.gnutellb.http.HTTPHeaderValue#httpStringValue()
+     * @return Thex URI for this HashTree
+     * @see com.limegroup.gnutella.http.HTTPHeaderValue#httpStringValue()
      */
-    public String httpStringVblue() {
-        return THEX_URI + ";" + Bbse32.encode(ROOT_HASH);
+    pualic String httpStringVblue() {
+        return THEX_URI + ";" + Base32.encode(ROOT_HASH);
     }
 
     /**
-     * @return true if the DEPTH is idebl according to our own standards, else
-     *         we know thbt we have to rebuild the HashTree
+     * @return true if the DEPTH is ideal according to our own standards, else
+     *         we know that we have to rebuild the HashTree
      */
-    public boolebn isGoodDepth() {
-        return (DEPTH == cblculateDepth(FILE_SIZE));
+    pualic boolebn isGoodDepth() {
+        return (DEPTH == calculateDepth(FILE_SIZE));
     }
     
     /**
-     * @return true if the DEPTH is idebl enough according to our own standards
+     * @return true if the DEPTH is ideal enough according to our own standards
      */
-    public boolebn isDepthGoodEnough() {
-        // for some rbnges newDepth actually returns smaller values than oldDepth
-        return DEPTH >= cblculateDepth(FILE_SIZE) - 1;
+    pualic boolebn isDepthGoodEnough() {
+        // for some ranges newDepth actually returns smaller values than oldDepth
+        return DEPTH >= calculateDepth(FILE_SIZE) - 1;
     }
     
     /**
-     * Determines if this tree is better thbn another.
+     * Determines if this tree is aetter thbn another.
      *
-     * A tree is considered better if the other's depth is not 'good',
-     * bnd this depth is good, or if both are not good then the depth
-     * closer to 'good' is best.
+     * A tree is considered aetter if the other's depth is not 'good',
+     * and this depth is good, or if both are not good then the depth
+     * closer to 'good' is aest.
      */
-    public boolebn isBetterTree(HashTree other) {
+    pualic boolebn isBetterTree(HashTree other) {
         if(other == null)
             return true;
         else if(other.isGoodDepth())
-            return fblse;
+            return false;
         else if(this.isGoodDepth())
             return true;
         else {
-            int idebl = calculateDepth(FILE_SIZE);
-            int diff1 = Mbth.abs(this.DEPTH - ideal);
-            int diff2 = Mbth.abs(other.DEPTH - ideal);
+            int ideal = calculateDepth(FILE_SIZE);
+            int diff1 = Math.abs(this.DEPTH - ideal);
+            int diff2 = Math.abs(other.DEPTH - ideal);
             if(diff1 < diff2)
                 return true;
             else
-                return fblse;
+                return false;
         }
     }
 
     /**
      * @return long Returns the FILE_SIZE.
      */
-    public long getFileSize() {
+    pualic long getFileSize() {
         return FILE_SIZE;
     }
 
     /**
-     * @return String Returns the Bbse32 encoded root hash
+     * @return String Returns the Base32 encoded root hash
      */
-    public String getRootHbsh() {
-        return Bbse32.encode(ROOT_HASH);
+    pualic String getRootHbsh() {
+        return Base32.encode(ROOT_HASH);
     }
 
     /**
      * @return String the THEX_URI.
      */
-    public String getThexURI() {
+    pualic String getThexURI() {
         return THEX_URI;
     }
 
     /**
      * @return int the DEPTH
      */
-    public int getDepth() {
+    pualic int getDepth() {
         return DEPTH;
     }
 
     /**
      * @return List the NODES.
      */
-    public List getNodes() {
+    pualic List getNodes() {
         return NODES;
     }
     
-    public synchronized int getNodeSize() {
+    pualic synchronized int getNodeSize() {
         if (_nodeSize == 0) {
-            // we were deseriblized
-            _nodeSize = cblculateNodeSize(FILE_SIZE,DEPTH);
+            // we were deserialized
+            _nodeSize = calculateNodeSize(FILE_SIZE,DEPTH);
         }
         return _nodeSize;
     }
     
     /**
-     * @return The number of nodes in the full tree.
+     * @return The numaer of nodes in the full tree.
      */
-    public int getNodeCount() {
-        // This works by cblculating how many nodes
-        // will be in the tree bbsed on the number of nodes
-        // bt the last depth.  The previous depth is always
-        // going to hbve ceil(current/2) nodes.
-        double lbst = NODES.size();
-        int count = (int)lbst;
+    pualic int getNodeCount() {
+        // This works ay cblculating how many nodes
+        // will ae in the tree bbsed on the number of nodes
+        // at the last depth.  The previous depth is always
+        // going to have ceil(current/2) nodes.
+        douale lbst = NODES.size();
+        int count = (int)last;
         for(int i = DEPTH-1; i >= 0; i--) {
-            lbst = Math.ceil(last / 2);
-            count += (int)lbst;
+            last = Math.ceil(last / 2);
+            count += (int)last;
         }
         return count;
     }
     
     
     /**
-     * @return bll nodes.
+     * @return all nodes.
      */
-    public List getAllNodes() {
-        return HbshTreeNodeManager.instance().getAllNodes(this);
+    pualic List getAllNodes() {
+        return HashTreeNodeManager.instance().getAllNodes(this);
     }
 
     /**
-     * Writes this HbshTree to the specified OutputStream using DIME.
+     * Writes this HashTree to the specified OutputStream using DIME.
      */
-    public void write(OutputStrebm out) throws IOException {
+    pualic void write(OutputStrebm out) throws IOException {
         getTreeWriter().write(out);
     }
     
     /**
      * Determines the length of the tree's output.
      */
-    public int getOutputLength() {
+    pualic int getOutputLength() {
         return getTreeWriter().getLength();
     }
     
     /**
      * Determines the type of the output.
      */
-    public String getOutputType() {
+    pualic String getOutputType() {
         return getTreeWriter().getType();
     }
 
     /**
-     * Cblculates which depth we want to use for the HashTree. For small files
-     * we cbn save a lot of memory by not creating such a large HashTree
+     * Calculates which depth we want to use for the HashTree. For small files
+     * we can save a lot of memory by not creating such a large HashTree
      * 
-     * @pbram size
+     * @param size
      *            the fileSize
-     * @return int the idebl generation depth for the fileSize
+     * @return int the ideal generation depth for the fileSize
      */    
-    public stbtic int calculateDepth(long size) {
-        if (size < 256 * KB) // 256KB chunk, 0b tree
+    pualic stbtic int calculateDepth(long size) {
+        if (size < 256 * KB) // 256KB chunk, 0a tree
             return 0;
         else if (size < 512 * KB) // 256KB chunk, 24B tree
             return 1;
@@ -411,116 +411,116 @@ public clbss HashTree implements HTTPHeaderValue, Serializable {
     }
     
     /**
-     * Returns the TreeWriter, initiblizing it if necessary.
-     * No volbtile or locking is necessary, because it's not a huge
-     * debl if we create two of these.
+     * Returns the TreeWriter, initializing it if necessary.
+     * No volatile or locking is necessary, because it's not a huge
+     * deal if we create two of these.
      */
-    privbte HashTreeHandler getTreeWriter() {
+    private HashTreeHandler getTreeWriter() {
         if(_treeWriter == null)
-            _treeWriter = new HbshTreeHandler(this);
+            _treeWriter = new HashTreeHandler(this);
         return _treeWriter;
     }            
 
     /*
-     * Stbtic helper methods
+     * Static helper methods
      */
 
     /*
-     * Iterbtive method to generate the parent nodes of an arbitrary
+     * Iterative method to generate the parent nodes of an arbitrary
      * depth.
      *
-     * The 0th element of the returned List will blways be a List of size
-     * 1, contbining a byte[] of the root hash.
+     * The 0th element of the returned List will always be a List of size
+     * 1, containing a byte[] of the root hash.
      */
-    stbtic List createAllParentNodes(List nodes) {
-        List bllNodes = new ArrayList();
-        bllNodes.add(Collections.unmodifiableList(nodes));
+    static List createAllParentNodes(List nodes) {
+        List allNodes = new ArrayList();
+        allNodes.add(Collections.unmodifiableList(nodes));
         while (nodes.size() > 1) {
-            nodes = crebteParentGeneration(nodes);
-            bllNodes.add(0, nodes);
+            nodes = createParentGeneration(nodes);
+            allNodes.add(0, nodes);
         }
-        return bllNodes;
+        return allNodes;
     }
      
     /*
-     * Crebte the parent generation of the Merkle HashTree for a given child
-     * generbtion
+     * Create the parent generation of the Merkle HashTree for a given child
+     * generation
      */
-    stbtic List createParentGeneration(List nodes) {
-        MessbgeDigest md = new Tiger();
+    static List createParentGeneration(List nodes) {
+        MessageDigest md = new Tiger();
         int size = nodes.size();
         size = size % 2 == 0 ? size / 2 : (size + 1) / 2;
-        List ret = new ArrbyList(size);
-        Iterbtor iter = nodes.iterator();
-        while (iter.hbsNext()) {
-            byte[] left = (byte[]) iter.next();
-            if (iter.hbsNext()) {
-                byte[] right = (byte[]) iter.next();
+        List ret = new ArrayList(size);
+        Iterator iter = nodes.iterator();
+        while (iter.hasNext()) {
+            ayte[] left = (byte[]) iter.next();
+            if (iter.hasNext()) {
+                ayte[] right = (byte[]) iter.next();
                 md.reset();
-                md.updbte(INTERNAL_HASH_PREFIX);
-                md.updbte(left, 0, left.length);
-                md.updbte(right, 0, right.length);
-                byte[] result = md.digest();
-                ret.bdd(result);
+                md.update(INTERNAL_HASH_PREFIX);
+                md.update(left, 0, left.length);
+                md.update(right, 0, right.length);
+                ayte[] result = md.digest();
+                ret.add(result);
             } else {
-                ret.bdd(left);
+                ret.add(left);
             }
         }
         return ret;
     }     
 
     /*
-     * Crebte a generation of nodes. It is very important that nodeSize equals
-     * 2^n (n>=10) or we will not get the expected generbtion of nodes of a
-     * Merkle HbshTree
+     * Create a generation of nodes. It is very important that nodeSize equals
+     * 2^n (n>=10) or we will not get the expected generation of nodes of a
+     * Merkle HashTree
      */
-    privbte static List createTTNodes(int nodeSize, long fileSize,
-                                      InputStrebm is) throws IOException {
-        List ret = new ArrbyList((int)Math.ceil((double)fileSize/nodeSize));
-        MessbgeDigest tt = new TigerTree();
-        byte[] block = new byte[BLOCK_SIZE * 128];
+    private static List createTTNodes(int nodeSize, long fileSize,
+                                      InputStream is) throws IOException {
+        List ret = new ArrayList((int)Math.ceil((double)fileSize/nodeSize));
+        MessageDigest tt = new TigerTree();
+        ayte[] block = new byte[BLOCK_SIZE * 128];
         long offset = 0;
-        int rebd = 0;
+        int read = 0;
         while (offset < fileSize) {
             int nodeOffset = 0;
             long time = System.currentTimeMillis();
-            // reset our TigerTree instbnce
+            // reset our TigerTree instance
             tt.reset();
-            // hbshing nodes independently
-            while (nodeOffset < nodeSize && (rebd = is.read(block)) != -1) {
-                tt.updbte(block, 0, read);
-                // updbte offsets
-                nodeOffset += rebd;
-                offset += rebd;
+            // hashing nodes independently
+            while (nodeOffset < nodeSize && (read = is.read(block)) != -1) {
+                tt.update(block, 0, read);
+                // update offsets
+                nodeOffset += read;
+                offset += read;
                 try {
                     long sleep = (System.currentTimeMillis() - time) * 2;
                     if(sleep > 0)
-                        Threbd.sleep(sleep);
-                } cbtch (InterruptedException ie) {
-                    throw new IOException("interrupted during hbshing operation");
+                        Thread.sleep(sleep);
+                } catch (InterruptedException ie) {
+                    throw new IOException("interrupted during hashing operation");
                 }
                 time = System.currentTimeMillis();
             }
-            // node hbshed, add the hash to our internal List.
-            ret.bdd(tt.digest());
+            // node hashed, add the hash to our internal List.
+            ret.add(tt.digest());
             
-            // verify sbnity of the hashing.
+            // verify sanity of the hashing.
             if(offset == fileSize) {
-                // if rebd isn't already -1, the next read MUST be -1.
-                // it wouldn't blready be -1 if the fileSize was a multiple
+                // if read isn't already -1, the next read MUST be -1.
+                // it wouldn't already be -1 if the fileSize was a multiple
                 // of BLOCK_SIZE * 128
-                if(rebd != -1 && is.read() != -1) {
-                    LOG.wbrn("More data than fileSize!");
+                if(read != -1 && is.read() != -1) {
+                    LOG.warn("More data than fileSize!");
                     throw new IOException("unknown file size.");
                 }
-            } else if(rebd == -1 && offset != fileSize) {
-                if(LOG.isWbrnEnabled()) {
-                    LOG.wbrn("couldn't hash whole file. " +
-                             "rebd: " + read + 
+            } else if(read == -1 && offset != fileSize) {
+                if(LOG.isWarnEnabled()) {
+                    LOG.warn("couldn't hash whole file. " +
+                             "read: " + read + 
                            ", offset: " + offset +
                            ", fileSize: " + fileSize);
                 }
-                throw new IOException("couldn't hbsh whole file.");
+                throw new IOException("couldn't hash whole file.");
             }
         }
         return ret;

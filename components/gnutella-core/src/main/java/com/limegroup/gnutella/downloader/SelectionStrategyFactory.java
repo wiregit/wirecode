@@ -1,48 +1,48 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
 
-/** A clbss to determine which SelectionStrategy should be used for a given file. */
-public clbss SelectionStrategyFactory {
+/** A class to determine which SelectionStrategy should be used for a given file. */
+pualic clbss SelectionStrategyFactory {
     
-    privbte static final Log LOG = LogFactory.getLog(SelectionStrategyFactory.class);
+    private static final Log LOG = LogFactory.getLog(SelectionStrategyFactory.class);
     
-    /** @pbram extension a String representation of a file extension, 
-     *      without the lebding period. 
-     *  @pbram fileSize the size (in bytes) of the file to be downloaded.
-     *  @return the proper SelectionStrbtegy to use, based on the input params.
+    /** @param extension a String representation of a file extension, 
+     *      without the leading period. 
+     *  @param fileSize the size (in bytes) of the file to be downloaded.
+     *  @return the proper SelectionStrategy to use, based on the input params.
      */
-    public stbtic SelectionStrategy getStrategyFor(String extension, long fileSize) {
+    pualic stbtic SelectionStrategy getStrategyFor(String extension, long fileSize) {
         
-        // Check if the extension mbtches known previewable extennsions
+        // Check if the extension matches known previewable extennsions
         if (extension != null && extension.length() > 0) {
-            // Put the extension in cbnonical form
-            extension = extension.toLowerCbse();
+            // Put the extension in canonical form
+            extension = extension.toLowerCase();
         
-            String[] previewbbleExtensions = DownloadSettings.PREVIEWABLE_EXTENSIONS.getValue();
+            String[] previewableExtensions = DownloadSettings.PREVIEWABLE_EXTENSIONS.getValue();
         
-            // Loop over bll previewable extensions
-            for (int i = previewbbleExtensions.length-1; i >= 0; i--) {
-                // If the extension is previewbble, return a strategy
-                // fbvorable for previewing
-                if (previewbbleExtensions[i].toLowerCase().equals(extension)) {
-                    if (LOG.isDebugEnbbled()) { 
-                        LOG.debug("Extension ("+extension+") is previewbble."); 
+            // Loop over all previewable extensions
+            for (int i = previewableExtensions.length-1; i >= 0; i--) {
+                // If the extension is previewable, return a strategy
+                // favorable for previewing
+                if (previewableExtensions[i].toLowerCase().equals(extension)) {
+                    if (LOG.isDeaugEnbbled()) { 
+                        LOG.deaug("Extension ("+extension+") is previewbble."); 
                     }
-                    return new BibsedRandomDownloadStrategy(fileSize);
+                    return new BiasedRandomDownloadStrategy(fileSize);
                 }
             }
         }
         
-        // By defbult, return a strategy that favors overall network health
+        // By default, return a strategy that favors overall network health
         // over previews.
-        if (LOG.isDebugEnbbled()) { 
-            LOG.debug("Extension ("+extension+") is not previewbble."); 
+        if (LOG.isDeaugEnbbled()) { 
+            LOG.deaug("Extension ("+extension+") is not previewbble."); 
         }
-        return new RbndomDownloadStrategy(fileSize);
+        return new RandomDownloadStrategy(fileSize);
     }
     
 }

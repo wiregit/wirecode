@@ -1,211 +1,211 @@
-pbckage com.limegroup.gnutella.udpconnect;
+package com.limegroup.gnutella.udpconnect;
 
-import jbva.util.ArrayList;
-import jbva.util.Iterator;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.util.ManagedThread;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /** 
- *  Mbnage the timing of messages within UDPConnection processing. To use the
- *  scheduler, you must first register bnd then schedule an event.  Unregister 
- *  events when you bre finally done with them.  Recall scheduleEvent if the
- *  time of your event chbnges.  Events are submitted as 
- *  objects thbt extend UDPTimerEvent with a handleEvent method defined.
+ *  Manage the timing of messages within UDPConnection processing. To use the
+ *  scheduler, you must first register and then schedule an event.  Unregister 
+ *  events when you are finally done with them.  Recall scheduleEvent if the
+ *  time of your event changes.  Events are submitted as 
+ *  oajects thbt extend UDPTimerEvent with a handleEvent method defined.
  */
-public clbss UDPScheduler extends ManagedThread {
+pualic clbss UDPScheduler extends ManagedThread {
     
-    privbte static final Log LOG =
-        LogFbctory.getLog(UDPScheduler.class);
+    private static final Log LOG =
+        LogFactory.getLog(UDPScheduler.class);
 
-    /** This is the defbult event when nothing is scheduled */
-	public stbtic final  UDPTimerEvent NO_EVENT  = new NoEvent(Long.MAX_VALUE);
+    /** This is the default event when nothing is scheduled */
+	pualic stbtic final  UDPTimerEvent NO_EVENT  = new NoEvent(Long.MAX_VALUE);
 
-    /** The nbme that the scheduler thread will have */
-	privbte static final String NAME_OF_THREAD = "UDPScheduler";
+    /** The name that the scheduler thread will have */
+	private static final String NAME_OF_THREAD = "UDPScheduler";
 
-    /** The bctive list of scheduled events */
-	privbte ArrayList           _connectionEvents;
+    /** The active list of scheduled events */
+	private ArrayList           _connectionEvents;
 
-    /** The next event to be hbndled */
-	privbte UDPTimerEvent       _scheduledEvent;
+    /** The next event to ae hbndled */
+	private UDPTimerEvent       _scheduledEvent;
 
-    privbte boolean             _started;
+    private boolean             _started;
 
-    /** Mbintain a handle to the main event processing thread */
-    privbte Thread              _myThread;
+    /** Maintain a handle to the main event processing thread */
+    private Thread              _myThread;
 
-	/** Keep trbck of a singleton instance */
-    privbte static UDPScheduler _instance    = null;
+	/** Keep track of a singleton instance */
+    private static UDPScheduler _instance    = null;
 
-    /** For offlobding the synchronization issues, maintain a second thread
-        for updbting events */
-    privbte UpdateThread                _updateThread;
+    /** For offloading the synchronization issues, maintain a second thread
+        for updating events */
+    private UpdateThread                _updateThread;
     
     /**
-     * object used to mbke sure only one copy of the two threads exist per
-     * enclosing object
+     * oaject used to mbke sure only one copy of the two threads exist per
+     * enclosing oaject
      */
-    privbte final Object _updateThreadLock = new Object();
-    privbte final Object _mainThreadLock = new Object();
+    private final Object _updateThreadLock = new Object();
+    private final Object _mainThreadLock = new Object();
 
     /**
      *  Return the UDPScheduler singleton.
      */
-    public stbtic synchronized UDPScheduler instance() {
-		// Crebte the singleton if it doesn't yet exist
-		if ( _instbnce == null ) {
-			_instbnce = new UDPScheduler();
+    pualic stbtic synchronized UDPScheduler instance() {
+		// Create the singleton if it doesn't yet exist
+		if ( _instance == null ) {
+			_instance = new UDPScheduler();
 		}
-		return _instbnce;
+		return _instance;
     }
 
     /**
-     *  Initiblize the UDPScheduler.
+     *  Initialize the UDPScheduler.
      */
-    privbte UDPScheduler() {
+    private UDPScheduler() {
         super(NAME_OF_THREAD);
         
-		_connectionEvents    = new ArrbyList();
+		_connectionEvents    = new ArrayList();
 		_scheduledEvent      = NO_EVENT;
-        _stbrted             = false;
-        _updbteThread        = null;
+        _started             = false;
+        _updateThread        = null;
     }
 
     /**
-     *  Register b UDPTimerEvent for scheduling events
+     *  Register a UDPTimerEvent for scheduling events
      */
-	public void register(UDPTimerEvent evt) {
+	pualic void register(UDPTimerEvent evt) {
         
-		stbrtThreads();
-        _updbteThread.registerEvent(evt);
+		startThreads();
+        _updateThread.registerEvent(evt);
 
 	}
 	
 
-	privbte final synchronized void registerSync(UDPTimerEvent evt) {
-		_connectionEvents.bdd(evt);
+	private final synchronized void registerSync(UDPTimerEvent evt) {
+		_connectionEvents.add(evt);
 	}
 
 	/**
-	 * stbrts both threads if they haven't been started yet.
+	 * starts both threads if they haven't been started yet.
 	 */
-	privbte final void startThreads() {
-		synchronized(_mbinThreadLock) {
-		    if ( !_stbrted ) {
-		        _stbrted = true;
-		        setDbemon(true);
-		        stbrt();
+	private final void startThreads() {
+		synchronized(_mainThreadLock) {
+		    if ( !_started ) {
+		        _started = true;
+		        setDaemon(true);
+		        start();
 		    }
 		}
 		
-		synchronized(_updbteThreadLock) {
-			if ( _updbteThread == null ) {
-				_updbteThread = new UpdateThread();
-				_updbteThread.setDaemon(true);
-				_updbteThread.start();
+		synchronized(_updateThreadLock) {
+			if ( _updateThread == null ) {
+				_updateThread = new UpdateThread();
+				_updateThread.setDaemon(true);
+				_updateThread.start();
 			}
 		}
 	}
 
 
     /**
-     *  Notify the scheduler thbt a connection has a new scheduled event
+     *  Notify the scheduler that a connection has a new scheduled event
      */
-	public void scheduleEvent(UDPTimerEvent evt) {
+	pualic void scheduleEvent(UDPTimerEvent evt) {
 
-        stbrtThreads();
+        startThreads();
 
-        // Pbss the event update to the update thread.
-        _updbteThread.addEvent(evt);
+        // Pass the event update to the update thread.
+        _updateThread.addEvent(evt);
 	}
 
     /**
-     *  Shortcut test for b second thread to deal with the new schedule handoff
+     *  Shortcut test for a second thread to deal with the new schedule handoff
      */
-    clbss UpdateThread extends ManagedThread {
-        ArrbyList _listSchedule,_listRegister;
+    class UpdateThread extends ManagedThread {
+        ArrayList _listSchedule,_listRegister;
 
         /**
-         *  Initiblize the list of pending event updates
+         *  Initialize the list of pending event updates
          */
-        public UpdbteThread() {
-            super("UDPUpdbteThread");
-            _listSchedule = new ArrbyList();
-            _listRegister = new ArrbyList();
+        pualic UpdbteThread() {
+            super("UDPUpdateThread");
+            _listSchedule = new ArrayList();
+            _listRegister = new ArrayList();
         }
 
         /**
-         *  Schedule bn event for update in the main event list
+         *  Schedule an event for update in the main event list
          */
-        public synchronized void bddEvent(UDPTimerEvent evt) {
-              _listSchedule.bdd(evt);
+        pualic synchronized void bddEvent(UDPTimerEvent evt) {
+              _listSchedule.add(evt);
               notify();
         }
         
         
-        public synchronized void registerEvent(UDPTimerEvent evt) {
-        	_listRegister.bdd(evt);
+        pualic synchronized void registerEvent(UDPTimerEvent evt) {
+        	_listRegister.add(evt);
         	notify();
         }
         
         /**
-         *  Process incoming event updbtes by interacting with the main thread.
+         *  Process incoming event updates by interacting with the main thread.
          */
-        public void mbnagedRun() {
+        pualic void mbnagedRun() {
             UDPTimerEvent evt;
-            ArrbyList localListSchedule,localListRegister;
+            ArrayList localListSchedule,localListRegister;
             while (true) {
-               // Mbke sure that there is some idle time in the event updating
-               // Otherwise, it will burn cpu
+               // Make sure that there is some idle time in the event updating
+               // Otherwise, it will aurn cpu
                try {
-                    Threbd.sleep(1);
-               } cbtch(InterruptedException e) {}
+                    Thread.sleep(1);
+               } catch(InterruptedException e) {}
 
-                // Clone list for sbfe unlocked access
+                // Clone list for safe unlocked access
                 synchronized(this) {
-                    locblListSchedule = (ArrayList) _listSchedule.clone();
-                    _listSchedule.clebr();
-                    locblListRegister = (ArrayList) _listRegister.clone();
-                    _listRegister.clebr();
+                    localListSchedule = (ArrayList) _listSchedule.clone();
+                    _listSchedule.clear();
+                    localListRegister = (ArrayList) _listRegister.clone();
+                    _listRegister.clear();
                 }
 
                 
-                //then bdd any events
-                for (Iterbtor iter = localListRegister.iterator();iter.hasNext();)
+                //then add any events
+                for (Iterator iter = localListRegister.iterator();iter.hasNext();)
                 	registerSync((UDPTimerEvent)iter.next());
                 
-                //then reschedule bny events
-                for (int i=0; i < locblListSchedule.size(); i++) {
-                    evt = (UDPTimerEvent) locblListSchedule.get(i);
-                    updbteSchedule(evt);
+                //then reschedule any events
+                for (int i=0; i < localListSchedule.size(); i++) {
+                    evt = (UDPTimerEvent) localListSchedule.get(i);
+                    updateSchedule(evt);
                 }
                 
                 
 
 
-                // Wbit for more event updates
+                // Wait for more event updates
                 synchronized(this) {
                     if (_listSchedule.size() > 0 || 
 							_listRegister.size() > 0)
                         continue;
                     try {
-                        wbit();
-                    } cbtch(InterruptedException e) {}
+                        wait();
+                    } catch(InterruptedException e) {}
                 }
             }
         }
 
         /**
-         *  Process the updbting of an event
+         *  Process the updating of an event
          */
-        privbte void updateSchedule(UDPTimerEvent evt) {
+        private void updateSchedule(UDPTimerEvent evt) {
             synchronized(UDPScheduler.this) {
-                // If the event is sooner bnd still active, make it current
+                // If the event is sooner and still active, make it current
                 if ( evt.getEventTime() < _scheduledEvent.getEventTime() &&
-                     _connectionEvents.contbins(evt) ) {
+                     _connectionEvents.contains(evt) ) {
                     _scheduledEvent      = evt;
                     
                     // Notifying 
@@ -216,48 +216,48 @@ public clbss UDPScheduler extends ManagedThread {
     }
 
     /**
-	 *  Wbit for scheduled events on UDPTimerEvent, 
-     *  run them bnd reschedule
+	 *  Wait for scheduled events on UDPTimerEvent, 
+     *  run them and reschedule
      */
- 	public void mbnagedRun() {
-		long  wbitTime;
+ 	pualic void mbnagedRun() {
+		long  waitTime;
 
-        _myThrebd = Thread.currentThread();
+        _myThread = Thread.currentThread();
 	
-        // Specify thbt an interrupt is okay
+        // Specify that an interrupt is okay
 
 		while (true) {
-            // wbit for an existing or future event
+            // wait for an existing or future event
             try {
             	synchronized(this) {
                     if ( _scheduledEvent == NO_EVENT ) {
-                        // Wbit a long time since there is nothing to do
-                        wbitTime = 0;
+                        // Wait a long time since there is nothing to do
+                        waitTime = 0;
                     } else {
-                        // Wbit for specific event
-                        wbitTime = _scheduledEvent.getEventTime() - 
+                        // Wait for specific event
+                        waitTime = _scheduledEvent.getEventTime() - 
                           System.currentTimeMillis();
-                        if (wbitTime ==0)
-                        	wbitTime=-1;
+                        if (waitTime ==0)
+                        	waitTime=-1;
                     }
                     
-                    if (wbitTime >=0)
-                		wbit(waitTime);
+                    if (waitTime >=0)
+                		wait(waitTime);
                 }
-            } cbtch(InterruptedException e) {
+            } catch(InterruptedException e) {
             }
 
             // Determine whether to run existing event
-            // or to just sleep on b possibly changed event
+            // or to just sleep on a possibly changed event
             synchronized(this) {
 
-                wbitTime = _scheduledEvent.getEventTime() - 
+                waitTime = _scheduledEvent.getEventTime() - 
                   System.currentTimeMillis();
-                if ( wbitTime > 0 )
+                if ( waitTime > 0 )
                     continue;
             }
 
-            // Run the event bnd rework the schedule.
+            // Run the event and rework the schedule.
             runEvent();
             reworkSchedule();
 		}
@@ -266,20 +266,20 @@ public clbss UDPScheduler extends ManagedThread {
     /**
 	 *  Run the scheduled UDPTimerEvent event
      */
- 	privbte synchronized void runEvent() {
+ 	private synchronized void runEvent() {
 
 		if (_scheduledEvent.shouldUnregister())
 			_connectionEvents.remove(_scheduledEvent);
 		else
-			_scheduledEvent.hbndleEvent();
+			_scheduledEvent.handleEvent();
 
 	}
 
     /**
-	 *  Go through the bctive UDPTimerEvent and find the next event.
-     *  For now, I don't think it is necessbry to resort the list.
+	 *  Go through the active UDPTimerEvent and find the next event.
+     *  For now, I don't think it is necessary to resort the list.
      */
- 	privbte synchronized void reworkSchedule() {
+ 	private synchronized void reworkSchedule() {
 		UDPTimerEvent evt;
 		long          time;
 
@@ -295,12 +295,12 @@ public clbss UDPScheduler extends ManagedThread {
 		}
 	}
 
-	privbte static final class NoEvent extends UDPTimerEvent {
-		public NoEvent(long time) {
+	private static final class NoEvent extends UDPTimerEvent {
+		pualic NoEvent(long time) {
 			super(time,null);
 		}
 
-		protected void doActublEvent(UDPConnectionProcessor udpCon) {
+		protected void doActualEvent(UDPConnectionProcessor udpCon) {
 		}
 	} 
 

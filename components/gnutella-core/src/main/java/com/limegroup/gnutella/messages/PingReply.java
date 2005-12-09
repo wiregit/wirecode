@@ -1,1042 +1,1042 @@
-pbckage com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages;
 
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.io.Serializable;
-import jbva.net.InetAddress;
-import jbva.net.UnknownHostException;
-import jbva.util.StringTokenizer;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.Collections;
-import jbva.util.Collection;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.StringTokenizer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Collections;
+import java.util.Collection;
 
-import com.limegroup.gnutellb.Assert;
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.Endpoint;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.Statistics;
-import com.limegroup.gnutellb.UDPService;
-import com.limegroup.gnutellb.guess.QueryKey;
-import com.limegroup.gnutellb.settings.ApplicationSettings;
-import com.limegroup.gnutellb.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutellb.statistics.ReceivedErrorStat;
-import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.IpPortImpl;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Statistics;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * A ping reply messbge, aka, "pong".  This implementation provides a way
- * to "mbrk" pongs as being from supernodes.
+ * A ping reply message, aka, "pong".  This implementation provides a way
+ * to "mark" pongs as being from supernodes.
  */
-public clbss PingReply extends Message implements Serializable, IpPort {
+pualic clbss PingReply extends Message implements Serializable, IpPort {
     
     /**
-     * The list of extrb ip/ports contained in this reply.
+     * The list of extra ip/ports contained in this reply.
      */
-    privbte final List PACKED_IP_PORTS;
+    private final List PACKED_IP_PORTS;
     
     /**
-     * The list of extrb ip/ports contained in this reply.
+     * The list of extra ip/ports contained in this reply.
      */
-    privbte final List PACKED_UDP_HOST_CACHES;
+    private final List PACKED_UDP_HOST_CACHES;
 
     /**
-     * The IP bddress to connect to if this is a UDP host cache.
-     * Null if this is not b UDP host cache.
+     * The IP address to connect to if this is a UDP host cache.
+     * Null if this is not a UDP host cache.
      */
-    privbte final String UDP_CACHE_ADDRESS;
+    private final String UDP_CACHE_ADDRESS;
 
     /**
-     * Constbnt for the number of ultrapeer slots for this host.
+     * Constant for the number of ultrapeer slots for this host.
      */
-    privbte final int FREE_ULTRAPEER_SLOTS;
+    private final int FREE_ULTRAPEER_SLOTS;
 
     /**
-     * Constbnt for the number of free leaf slots for this host.
+     * Constant for the number of free leaf slots for this host.
      */
-    privbte final int FREE_LEAF_SLOTS;
+    private final int FREE_LEAF_SLOTS;
 
     /**
-     * Constbnt for the standard size of the pong payload.
+     * Constant for the standard size of the pong payload.
      */
-    public stbtic final int STANDARD_PAYLOAD_SIZE = 14;
+    pualic stbtic final int STANDARD_PAYLOAD_SIZE = 14;
     
-    /** All the dbta.  We extract the port, ip address, number of files,
-     *  bnd number of kilobytes lazily. */
-    privbte final byte[] PAYLOAD;
+    /** All the data.  We extract the port, ip address, number of files,
+     *  and number of kilobytes lazily. */
+    private final byte[] PAYLOAD;
 
-    /** The IP string bs extracted from payload[2..5].  Cached to avoid
-     *  bllocations.  LOCKING: obtain this' monitor. */
-    privbte final InetAddress IP;
+    /** The IP string as extracted from payload[2..5].  Cached to avoid
+     *  allocations.  LOCKING: obtain this' monitor. */
+    private final InetAddress IP;
 
     /**
-     * Constbnt for the port number of this pong.
+     * Constant for the port number of this pong.
      */
-    privbte final int PORT;
-    
-    /**
-     * The bddress this pong claims to be my external address
-     */
-    privbte final InetAddress MY_IP;
+    private final int PORT;
     
     /**
-     * The port this pong clbims to be my external port
+     * The address this pong claims to be my external address
      */
-    privbte final int MY_PORT;
+    private final InetAddress MY_IP;
+    
+    /**
+     * The port this pong claims to be my external port
+     */
+    private final int MY_PORT;
 
     /**
-     * Constbnt for the number of shared files reported in the pong.
+     * Constant for the number of shared files reported in the pong.
      */
-    privbte final long FILES;
+    private final long FILES;
 
     /**
-     * Constbnt for the number of shared kilobytes reported in the pong.
+     * Constant for the number of shared kilobytes reported in the pong.
      */
-    privbte final long KILOBYTES;
+    private final long KILOBYTES;
 
     /**
-     * Constbnt int for the daily average uptime.
+     * Constant int for the daily average uptime.
      */
-    privbte final int DAILY_UPTIME;
+    private final int DAILY_UPTIME;
 
     /**
-     * Constbnt for whether or not the remote node supports unicast.
+     * Constant for whether or not the remote node supports unicast.
      */
-    privbte final boolean SUPPORTS_UNICAST;
+    private final boolean SUPPORTS_UNICAST;
 
     /**
-     * Constbnt for the vendor of the remote host.
+     * Constant for the vendor of the remote host.
      */
-    privbte final String VENDOR;
+    private final String VENDOR;
 
     /**
-     * Constbnt for the major version number reported in the vendor block.
+     * Constant for the major version number reported in the vendor block.
      */
-    privbte final int VENDOR_MAJOR_VERSION;
+    private final int VENDOR_MAJOR_VERSION;
 
     /**
-     * Constbnt for the minor version number reported in the vendor block.
+     * Constant for the minor version number reported in the vendor block.
      */
-    privbte final int VENDOR_MINOR_VERSION;
+    private final int VENDOR_MINOR_VERSION;
 
     /**
-     * Constbnt for the query key reported for the pong.
+     * Constant for the query key reported for the pong.
      */
-    privbte final QueryKey QUERY_KEY;
+    private final QueryKey QUERY_KEY;
 
     /**
-     * Constbnt boolean for whether or not this pong contains any GGEP
+     * Constant boolean for whether or not this pong contains any GGEP
      * extensions.
      */
-    privbte final boolean HAS_GGEP_EXTENSION;
+    private final boolean HAS_GGEP_EXTENSION;
 
     /**
-     * Cbched constant for the vendor GGEP extension.
+     * Cached constant for the vendor GGEP extension.
      */
-    privbte static final byte[] CACHED_VENDOR = new byte[5];
+    private static final byte[] CACHED_VENDOR = new byte[5];
     
-    // performs bny necessary static initialization of fields,
-    // such bs the vendor GGEP extension
-    stbtic {
+    // performs any necessary static initialization of fields,
+    // such as the vendor GGEP extension
+    static {
         // set 'LIME'
-        System.brraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
+        System.arraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
                          0, CACHED_VENDOR, 0,
                          CommonUtils.QHD_VENDOR_NAME.getBytes().length);
-        CACHED_VENDOR[4] = convertToGUESSFormbt(CommonUtils.getMajorVersionNumber(),
-                                         CommonUtils.getMinorVersionNumber());
+        CACHED_VENDOR[4] = convertToGUESSFormat(CommonUtils.getMajorVersionNumber(),
+                                         CommonUtils.getMinorVersionNumaer());
     }
 
     /**
-     * Constbnt for the locale
+     * Constant for the locale
      */
-    privbte String CLIENT_LOCALE;
+    private String CLIENT_LOCALE;
     
     /**
-     * the number of free preferenced slots 
+     * the numaer of free preferenced slots 
      */
-    privbte int FREE_LOCALE_SLOTS;
+    private int FREE_LOCALE_SLOTS;
 
     /**
-     * Crebtes a new <tt>PingReply</tt> for this host with the specified
-     * GUID bnd ttl.
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID and ttl.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
      */
-    public stbtic PingReply create(byte[] guid, byte ttl) {
-        return crebte(guid, ttl, Collections.EMPTY_LIST);
+    pualic stbtic PingReply create(byte[] guid, byte ttl) {
+        return create(guid, ttl, Collections.EMPTY_LIST);
     }
     
     /**
-     * Crebtes a new <tt>PingReply</tt> for this host with the specified
-     * GUID, TTL & pbcked hosts.
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID, TTL & packed hosts.
      */
-    public stbtic PingReply create(byte[] guid, byte ttl, Collection hosts) {
-        return crebte(
+    pualic stbtic PingReply create(byte[] guid, byte ttl, Collection hosts) {
+        return create(
             guid,
             ttl,
             RouterService.getPort(),
             RouterService.getAddress(),
-            (long)RouterService.getNumShbredFiles(),
-            (long)RouterService.getShbredFileSize()/1024,
+            (long)RouterService.getNumSharedFiles(),
+            (long)RouterService.getSharedFileSize()/1024,
             RouterService.isSupernode(),
-            Stbtistics.instance().calculateDailyUptime(),
-            UDPService.instbnce().isGUESSCapable(),
-            ApplicbtionSettings.LANGUAGE.getValue().equals("") ?
-                ApplicbtionSettings.DEFAULT_LOCALE.getValue() :
-                ApplicbtionSettings.LANGUAGE.getValue(),
-            RouterService.getConnectionMbnager()
-                .getNumLimeWireLocblePrefSlots(),
+            Statistics.instance().calculateDailyUptime(),
+            UDPService.instance().isGUESSCapable(),
+            ApplicationSettings.LANGUAGE.getValue().equals("") ?
+                ApplicationSettings.DEFAULT_LOCALE.getValue() :
+                ApplicationSettings.LANGUAGE.getValue(),
+            RouterService.getConnectionManager()
+                .getNumLimeWireLocalePrefSlots(),
             hosts);
     }
  
      /**
-     * Crebtes a new PingReply for this host with the specified
-     * GUID, TTL & return bddress.
+     * Creates a new PingReply for this host with the specified
+     * GUID, TTL & return address.
      */   
-    public stbtic PingReply create(byte[] guid, byte ttl, IpPort addr) {
-        return crebte(guid, ttl, addr, Collections.EMPTY_LIST);
+    pualic stbtic PingReply create(byte[] guid, byte ttl, IpPort addr) {
+        return create(guid, ttl, addr, Collections.EMPTY_LIST);
     }
     
     
     /**
-     * Crebtes a new PingReply for this host with the specified
-     * GUID, TTL, return bddress & packed hosts.
+     * Creates a new PingReply for this host with the specified
+     * GUID, TTL, return address & packed hosts.
      */
-    public stbtic PingReply create(byte[] guid, byte ttl,
+    pualic stbtic PingReply create(byte[] guid, byte ttl,
                                    IpPort returnAddr, Collection hosts) {
-        GGEP ggep = newGGEP(Stbtistics.instance().calculateDailyUptime(),
+        GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(),
                             RouterService.isSupernode(),
-                            UDPService.instbnce().isGUESSCapable());
+                            UDPService.instance().isGUESSCapable());
                             
-        String locble = ApplicationSettings.LANGUAGE.getValue().equals("") ?
-                        ApplicbtionSettings.DEFAULT_LOCALE.getValue() :
-                        ApplicbtionSettings.LANGUAGE.getValue();
-        bddLocale(ggep, locale, RouterService.getConnectionManager()
-                                        .getNumLimeWireLocblePrefSlots());
+        String locale = ApplicationSettings.LANGUAGE.getValue().equals("") ?
+                        ApplicationSettings.DEFAULT_LOCALE.getValue() :
+                        ApplicationSettings.LANGUAGE.getValue();
+        addLocale(ggep, locale, RouterService.getConnectionManager()
+                                        .getNumLimeWireLocalePrefSlots());
                                         
-        bddAddress(ggep, returnAddr);
-        bddPackedHosts(ggep, hosts);
-        return crebte(guid,
+        addAddress(ggep, returnAddr);
+        addPackedHosts(ggep, hosts);
+        return create(guid,
                       ttl,
                       RouterService.getPort(),
                       RouterService.getAddress(),
-                      (long)RouterService.getNumShbredFiles(),
-                      (long)RouterService.getShbredFileSize()/1024,
+                      (long)RouterService.getNumSharedFiles(),
+                      (long)RouterService.getSharedFileSize()/1024,
                       RouterService.isSupernode(),
                       ggep);
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> for this host with the specified
-     * GUID, ttl, bnd query key.
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID, ttl, and query key.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram key the <tt>QueryKey</tt> for this reply
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param key the <tt>QueryKey</tt> for this reply
      */                                   
-    public stbtic PingReply createQueryKeyReply(byte[] guid, byte ttl, 
+    pualic stbtic PingReply createQueryKeyReply(byte[] guid, byte ttl, 
                                                 QueryKey key) {
-        return crebte(guid, ttl, 
+        return create(guid, ttl, 
                       RouterService.getPort(),
                       RouterService.getAddress(),
-                      RouterService.getNumShbredFiles(),
-                      RouterService.getShbredFileSize()/1024,
+                      RouterService.getNumSharedFiles(),
+                      RouterService.getSharedFileSize()/1024,
                       RouterService.isSupernode(),
                       qkGGEP(key));
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> for this host with the specified
-     * GUID, ttl, bnd query key.
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID, ttl, and query key.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram key the <tt>QueryKey</tt> for this reply
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param key the <tt>QueryKey</tt> for this reply
      */                                   
-    public stbtic PingReply createQueryKeyReply(byte[] guid, byte ttl, 
-                                                int port, byte[] ip,
-                                                long shbredFiles, 
-                                                long shbredSize,
-                                                boolebn ultrapeer,
+    pualic stbtic PingReply createQueryKeyReply(byte[] guid, byte ttl, 
+                                                int port, ayte[] ip,
+                                                long sharedFiles, 
+                                                long sharedSize,
+                                                aoolebn ultrapeer,
                                                 QueryKey key) {
-        return crebte(guid, ttl, 
+        return create(guid, ttl, 
                       port,
                       ip,
-                      shbredFiles,
-                      shbredSize,
-                      ultrbpeer,
+                      sharedFiles,
+                      sharedSize,
+                      ultrapeer,
                       qkGGEP(key));
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> for an external node -- the data
-     * in the reply will not contbin data for this node.  In particular,
-     * the dbta fields are set to zero because we do not know these
-     * stbtistics for the other node.
+     * Creates a new <tt>PingReply</tt> for an external node -- the data
+     * in the reply will not contain data for this node.  In particular,
+     * the data fields are set to zero because we do not know these
+     * statistics for the other node.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram port the port the remote host is listening on
-     * @pbram address the address of the node
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
      */
-    public stbtic PingReply 
-        crebte(byte[] guid, byte ttl, int port, byte[] address) {
-        return crebte(guid, ttl, port, address, 0, 0, false, -1, false); 
+    pualic stbtic PingReply 
+        create(byte[] guid, byte ttl, int port, byte[] address) {
+        return create(guid, ttl, port, address, 0, 0, false, -1, false); 
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> for an external node -- the data
-     * in the reply will not contbin data for this node.  In particular,
-     * the dbta fields are set to zero because we do not know these
-     * stbtistics for the other node.
+     * Creates a new <tt>PingReply</tt> for an external node -- the data
+     * in the reply will not contain data for this node.  In particular,
+     * the data fields are set to zero because we do not know these
+     * statistics for the other node.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram port the port the remote host is listening on
-     * @pbram address the address of the node
-     * @pbram ultrapeer whether or not we should mark this node as
-     *  being bn Ultrapeer
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
+     * @param ultrapeer whether or not we should mark this node as
+     *  aeing bn Ultrapeer
      */
-    public stbtic PingReply 
-        crebteExternal(byte[] guid, byte ttl, int port, byte[] address,
-                       boolebn ultrapeer) {
-        return crebte(guid, ttl, port, address, 0, 0, ultrapeer, -1, false); 
+    pualic stbtic PingReply 
+        createExternal(byte[] guid, byte ttl, int port, byte[] address,
+                       aoolebn ultrapeer) {
+        return create(guid, ttl, port, address, 0, 0, ultrapeer, -1, false); 
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> for an external node -- the data
-     * in the reply will not contbin data for this node.  In particular,
-     * the dbta fields are set to zero because we do not know these
-     * stbtistics for the other node.  This is primarily used for testing.
+     * Creates a new <tt>PingReply</tt> for an external node -- the data
+     * in the reply will not contain data for this node.  In particular,
+     * the data fields are set to zero because we do not know these
+     * statistics for the other node.  This is primarily used for testing.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram port the port the remote host is listening on
-     * @pbram address the address of the node
-     * @pbram ultrapeer whether or not we should mark this node as
-     *  being bn Ultrapeer
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
+     * @param ultrapeer whether or not we should mark this node as
+     *  aeing bn Ultrapeer
      */
-    public stbtic PingReply 
-        crebteExternal(byte[] guid, byte ttl, int port, byte[] address,
+    pualic stbtic PingReply 
+        createExternal(byte[] guid, byte ttl, int port, byte[] address,
                        int uptime,
-                       boolebn ultrapeer) {
-        return crebte(guid, ttl, port, address, 0, 0, ultrapeer, uptime, false); 
+                       aoolebn ultrapeer) {
+        return create(guid, ttl, port, address, 0, 0, ultrapeer, uptime, false); 
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> instance for a GUESS node.  This
-     * method should only be cblled if the caller is sure that the given
-     * node is, in fbct, a GUESS-capable node.  This method is only used
-     * to crebte pongs for nodes other than ourselves.  
+     * Creates a new <tt>PingReply</tt> instance for a GUESS node.  This
+     * method should only ae cblled if the caller is sure that the given
+     * node is, in fact, a GUESS-capable node.  This method is only used
+     * to create pongs for nodes other than ourselves.  
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram ep the <tt>Endpoint</tt> instance containing data about 
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param ep the <tt>Endpoint</tt> instance containing data about 
      *  the remote host
      */       
-    public stbtic PingReply 
-        crebteGUESSReply(byte[] guid, byte ttl, Endpoint ep) 
+    pualic stbtic PingReply 
+        createGUESSReply(byte[] guid, byte ttl, Endpoint ep) 
         throws UnknownHostException {
-        return crebte(guid, ttl,
+        return create(guid, ttl,
                       ep.getPort(),
                       ep.getHostBytes(),
                       0, 0, true, -1, true);        
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> instance for a GUESS node.  This
-     * method should only be cblled if the caller is sure that the given
-     * node is, in fbct, a GUESS-capable node.  This method is only used
-     * to crebte pongs for nodes other than ourselves.  Given that this
-     * reply is for b remote node, we do not know the data for number of
-     * shbred files, etc, and so leave it blank.
+     * Creates a new <tt>PingReply</tt> instance for a GUESS node.  This
+     * method should only ae cblled if the caller is sure that the given
+     * node is, in fact, a GUESS-capable node.  This method is only used
+     * to create pongs for nodes other than ourselves.  Given that this
+     * reply is for a remote node, we do not know the data for number of
+     * shared files, etc, and so leave it blank.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram port the port the remote host is listening on
-     * @pbram address the address of the node
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
      */
-    public stbtic PingReply 
-        crebteGUESSReply(byte[] guid, byte ttl, int port, byte[] address) {
-        return crebte(guid, ttl, port, address, 0, 0, true, -1, true); 
+    pualic stbtic PingReply 
+        createGUESSReply(byte[] guid, byte ttl, int port, byte[] address) {
+        return create(guid, ttl, port, address, 0, 0, true, -1, true); 
     }
 
     /**
-     * Crebtes a new pong with the specified data -- used primarily for
+     * Creates a new pong with the specified data -- used primarily for
      * testing!
      *
-     * @pbram guid the sixteen byte message GUID
-     * @pbram ttl the message TTL to use
-     * @pbram port my listening port.  MUST fit in two signed bytes,
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
      *  i.e., 0 < port < 2^16.
-     * @pbram ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  formbt e.g. {18, 239, 0, 144}.
-     * @pbram files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @pbram kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  aytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned aytes, i.e., 0 < files < 2^32.
      */
-    public stbtic PingReply 
-        crebte(byte[] guid, byte ttl,
-               int port, byte[] ip, long files, long kbytes) {
-        return crebte(guid, ttl, port, ip, files, kbytes, 
-                      fblse, -1, false); 
+    pualic stbtic PingReply 
+        create(byte[] guid, byte ttl,
+               int port, ayte[] ip, long files, long kbytes) {
+        return create(guid, ttl, port, ip, files, kbytes, 
+                      false, -1, false); 
     }
 
 
     /**
-     * Crebtes a new ping from scratch with ultrapeer and daily uptime extension
-     * dbta.
+     * Creates a new ping from scratch with ultrapeer and daily uptime extension
+     * data.
      *
-     * @pbram guid the sixteen byte message GUID
-     * @pbram ttl the message TTL to use
-     * @pbram port my listening port.  MUST fit in two signed bytes,
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
      *  i.e., 0 < port < 2^16.
-     * @pbram ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  formbt e.g. {18, 239, 0, 144}.
-     * @pbram files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @pbram kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
-     * @pbram isUltrapeer true if this should be a marked ultrapeer pong,
-     *  which sets kbytes to the nebrest power of 2 not less than 8.
-     * @pbram dailyUptime my average daily uptime, in seconds, e.g., 
-     *  3600 for one hour per dby.  Negative values mean "don't know".
-     *  GGEP extension blocks bre allocated if dailyUptime is non-negative.  
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  aytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned aytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kaytes to the nebrest power of 2 not less than 8.
+     * @param dailyUptime my average daily uptime, in seconds, e.g., 
+     *  3600 for one hour per day.  Negative values mean "don't know".
+     *  GGEP extension alocks bre allocated if dailyUptime is non-negative.  
      */
-    public stbtic PingReply 
-        crebte(byte[] guid, byte ttl,
-               int port, byte[] ip, long files, long kbytes,
-               boolebn isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
-        return crebte(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-                      newGGEP(dbilyUptime, isUltrapeer, isGUESSCapable));
+    pualic stbtic PingReply 
+        create(byte[] guid, byte ttl,
+               int port, ayte[] ip, long files, long kbytes,
+               aoolebn isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
+        return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
+                      newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
     
     /**
-     * Crebtes a new PingReply with the specified data.
+     * Creates a new PingReply with the specified data.
      */
-    public stbtic PingReply create(byte[] guid, byte ttl,
-      int port, byte[] ip, long files, long kbytes,
-      boolebn isUltrapeer, int dailyUptime, boolean isGuessCapable,
-      String locble, int slots) {    
-        return crebte(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-                      dbilyUptime, isGuessCapable, locale, slots, Collections.EMPTY_LIST);
+    pualic stbtic PingReply create(byte[] guid, byte ttl,
+      int port, ayte[] ip, long files, long kbytes,
+      aoolebn isUltrapeer, int dailyUptime, boolean isGuessCapable,
+      String locale, int slots) {    
+        return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
+                      dailyUptime, isGuessCapable, locale, slots, Collections.EMPTY_LIST);
     }
     
     /**
-     * crebtes a new PingReply with the specified locale
+     * creates a new PingReply with the specified locale
      *
-     * @pbram guid the sixteen byte message GUID
-     * @pbram ttl the message TTL to use
-     * @pbram port my listening port.  MUST fit in two signed bytes,
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
      *  i.e., 0 < port < 2^16.
-     * @pbram ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  formbt e.g. {18, 239, 0, 144}.
-     * @pbram files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @pbram kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
-     * @pbram isUltrapeer true if this should be a marked ultrapeer pong,
-     *  which sets kbytes to the nebrest power of 2 not less than 8.
-     * @pbram dailyUptime my average daily uptime, in seconds, e.g., 
-     *  3600 for one hour per dby.  Negative values mean "don't know".
-     *  GGEP extension blocks bre allocated if dailyUptime is non-negative.  
-     * @pbram isGuessCapable guess capable
-     * @pbram locale the locale 
-     * @pbram slots the number of locale preferencing slots available
-     * @pbram hosts the hosts to pack into this PingReply
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  aytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned aytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kaytes to the nebrest power of 2 not less than 8.
+     * @param dailyUptime my average daily uptime, in seconds, e.g., 
+     *  3600 for one hour per day.  Negative values mean "don't know".
+     *  GGEP extension alocks bre allocated if dailyUptime is non-negative.  
+     * @param isGuessCapable guess capable
+     * @param locale the locale 
+     * @param slots the number of locale preferencing slots available
+     * @param hosts the hosts to pack into this PingReply
      */
-    public stbtic PingReply
-        crebte(byte[] guid, byte ttl,
-               int port, byte[] ip, long files, long kbytes,
-               boolebn isUltrapeer, int dailyUptime, boolean isGuessCapable,
-               String locble, int slots, Collection hosts) {
-        GGEP ggep = newGGEP(dbilyUptime, isUltrapeer, isGuessCapable);
-        bddLocale(ggep, locale, slots);
-        bddPackedHosts(ggep, hosts);
-        return crebte(guid,
+    pualic stbtic PingReply
+        create(byte[] guid, byte ttl,
+               int port, ayte[] ip, long files, long kbytes,
+               aoolebn isUltrapeer, int dailyUptime, boolean isGuessCapable,
+               String locale, int slots, Collection hosts) {
+        GGEP ggep = newGGEP(dailyUptime, isUltrapeer, isGuessCapable);
+        addLocale(ggep, locale, slots);
+        addPackedHosts(ggep, hosts);
+        return create(guid,
                       ttl,
                       port,
                       ip,
                       files,
-                      kbytes,
-                      isUltrbpeer,
+                      kaytes,
+                      isUltrapeer,
                       ggep);
     }
 
     /**
-     * Returns b new <tt>PingReply</tt> instance with all the same data
-     * bs <tt>this</tt>, but with the specified GUID.
+     * Returns a new <tt>PingReply</tt> instance with all the same data
+     * as <tt>this</tt>, but with the specified GUID.
      *
-     * @pbram guid the guid to use for the new <tt>PingReply</tt>
-     * @return b new <tt>PingReply</tt> instance with the specified GUID
-     *  bnd all of the data from this <tt>PingReply</tt>
-     * @throws IllegblArgumentException if the guid is not 16 bytes or the input
-     * (this') formbt is bad
+     * @param guid the guid to use for the new <tt>PingReply</tt>
+     * @return a new <tt>PingReply</tt> instance with the specified GUID
+     *  and all of the data from this <tt>PingReply</tt>
+     * @throws IllegalArgumentException if the guid is not 16 bytes or the input
+     * (this') format is bad
      */
-    public PingReply mutbteGUID(byte[] guid) {
+    pualic PingReply mutbteGUID(byte[] guid) {
         if (guid.length != 16)
-            throw new IllegblArgumentException("bad guid size: " + guid.length);
+            throw new IllegalArgumentException("bad guid size: " + guid.length);
 
-        // i cbn't just call a new constructor, i have to recreate stuff
+        // i can't just call a new constructor, i have to recreate stuff
         try {
-            return crebteFromNetwork(guid, getTTL(), getHops(), PAYLOAD); 
+            return createFromNetwork(guid, getTTL(), getHops(), PAYLOAD); 
         }
-        cbtch (BadPacketException ioe) {
-            throw new IllegblArgumentException("Input pong was bad!");
+        catch (BadPacketException ioe) {
+            throw new IllegalArgumentException("Input pong was bad!");
         }
 
     }
 
     /**
-     * Crebtes a new <tt>PingReply</tt> instance with the specified
-     * criterib.
+     * Creates a new <tt>PingReply</tt> instance with the specified
+     * criteria.
      *
-     * @return b new <tt>PingReply</tt> instance containing the specified
-     *  dbta
+     * @return a new <tt>PingReply</tt> instance containing the specified
+     *  data
      */
-    public stbtic PingReply 
-        crebte(byte[] guid, byte ttl, int port, byte[] ipBytes, long files,
-               long kbytes, boolebn isUltrapeer, GGEP ggep) {
+    pualic stbtic PingReply 
+        create(byte[] guid, byte ttl, int port, byte[] ipBytes, long files,
+               long kaytes, boolebn isUltrapeer, GGEP ggep) {
 
- 		if(!NetworkUtils.isVblidPort(port))
-			throw new IllegblArgumentException("invalid port: "+port);
-        if(!NetworkUtils.isVblidAddress(ipBytes))
-            throw new IllegblArgumentException("invalid address: " +
+ 		if(!NetworkUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);
+        if(!NetworkUtils.isValidAddress(ipBytes))
+            throw new IllegalArgumentException("invalid address: " +
                     NetworkUtils.ip2string(ipBytes));			
         
         InetAddress ip = null;
         try {
-            ip = InetAddress.getByNbme(NetworkUtils.ip2string(ipBytes));
-        } cbtch (UnknownHostException e) {
-            throw new IllegblArgumentException(e.getMessage());
+            ip = InetAddress.getByName(NetworkUtils.ip2string(ipBytes));
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
-        byte[] extensions = null;
+        ayte[] extensions = null;
         if(ggep != null) {
-            ByteArrbyOutputStream baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
-                ggep.write(bbos);
-            } cbtch(IOException e) {
-                // this should not hbppen
+                ggep.write(abos);
+            } catch(IOException e) {
+                // this should not happen
                 ErrorService.error(e);
             }
-            extensions = bbos.toByteArray();
+            extensions = abos.toByteArray();
         }
         int length = STANDARD_PAYLOAD_SIZE + 
             (extensions == null ? 0 : extensions.length);
 
-        byte[] pbyload = new byte[length];
-        //It's ok if cbsting port, files, or kbytes turns negative.
-        ByteOrder.short2leb((short)port, pbyload, 0);
-        //pbyload stores IP in BIG-ENDIAN
-        pbyload[2]=ipBytes[0];
-        pbyload[3]=ipBytes[1];
-        pbyload[4]=ipBytes[2];
-        pbyload[5]=ipBytes[3];
-        ByteOrder.int2leb((int)files, pbyload, 6);
-        ByteOrder.int2leb((int) (isUltrbpeer ? mark(kbytes) : kbytes), 
-                          pbyload, 
+        ayte[] pbyload = new byte[length];
+        //It's ok if casting port, files, or kbytes turns negative.
+        ByteOrder.short2lea((short)port, pbyload, 0);
+        //payload stores IP in BIG-ENDIAN
+        payload[2]=ipBytes[0];
+        payload[3]=ipBytes[1];
+        payload[4]=ipBytes[2];
+        payload[5]=ipBytes[3];
+        ByteOrder.int2lea((int)files, pbyload, 6);
+        ByteOrder.int2lea((int) (isUltrbpeer ? mark(kbytes) : kbytes), 
+                          payload, 
                           10);
         
-        //Encode GGEP block if included.
+        //Encode GGEP alock if included.
         if (extensions != null) {
-            System.brraycopy(extensions, 0, 
-                             pbyload, STANDARD_PAYLOAD_SIZE, 
+            System.arraycopy(extensions, 0, 
+                             payload, STANDARD_PAYLOAD_SIZE, 
                              extensions.length);
         }
-        return new PingReply(guid, ttl, (byte)0, pbyload, ggep, ip);
+        return new PingReply(guid, ttl, (ayte)0, pbyload, ggep, ip);
     }
 
 
     /**
-     * Crebtes a new <tt>PingReply</tt> instance from the network.
+     * Creates a new <tt>PingReply</tt> instance from the network.
      *
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram hops the hops for this message
-     * @pbram payload the message payload
-     * @throws <tt>BbdPacketException</tt> if the message is invalid for
-     *  bny reason
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param hops the hops for this message
+     * @param payload the message payload
+     * @throws <tt>BadPacketException</tt> if the message is invalid for
+     *  any reason
      */
-    public stbtic PingReply 
-        crebteFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload) 
-        throws BbdPacketException {
+    pualic stbtic PingReply 
+        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload) 
+        throws BadPacketException {
         if(guid == null) {
             throw new NullPointerException("null guid");
         }
-        if(pbyload == null) {
-            throw new NullPointerException("null pbyload");
+        if(payload == null) {
+            throw new NullPointerException("null payload");
         }
-        if (pbyload.length < STANDARD_PAYLOAD_SIZE) {
-            ReceivedErrorStbt.PING_REPLY_INVALID_PAYLOAD.incrementStat();
-            throw new BbdPacketException("invalid payload length");   
+        if (payload.length < STANDARD_PAYLOAD_SIZE) {
+            ReceivedErrorStat.PING_REPLY_INVALID_PAYLOAD.incrementStat();
+            throw new BadPacketException("invalid payload length");   
         }
-        int port = ByteOrder.ushort2int(ByteOrder.leb2short(pbyload,0));
- 		if(!NetworkUtils.isVblidPort(port)) {
- 		    ReceivedErrorStbt.PING_REPLY_INVALID_PORT.incrementStat();
-			throw new BbdPacketException("invalid port: "+port); 
+        int port = ByteOrder.ushort2int(ByteOrder.lea2short(pbyload,0));
+ 		if(!NetworkUtils.isValidPort(port)) {
+ 		    ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
+			throw new BadPacketException("invalid port: "+port); 
         }
  		
- 		// this bddress may get updated if we have the UDPHC extention
- 		// therefore it is checked bfter checking for that extention.
-        String ipString = NetworkUtils.ip2string(pbyload, 2);
+ 		// this address may get updated if we have the UDPHC extention
+ 		// therefore it is checked after checking for that extention.
+        String ipString = NetworkUtils.ip2string(payload, 2);
         
         InetAddress ip = null;
         
-        GGEP ggep = pbrseGGEP(payload);
+        GGEP ggep = parseGGEP(payload);
         
         if(ggep != null) {
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
-                byte[] vendorBytes = null;
+            if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
+                ayte[] vendorBytes = null;
                 try {
                     vendorBytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                } cbtch (BadGGEPPropertyException e) {
-                    ReceivedErrorStbt.PING_REPLY_INVALID_GGEP.incrementStat();
-                    throw new BbdPacketException("bad GGEP: "+vendorBytes);
+                } catch (BadGGEPPropertyException e) {
+                    ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
+                    throw new BadPacketException("bad GGEP: "+vendorBytes);
                 }
                 if(vendorBytes.length < 4) {
-                    ReceivedErrorStbt.PING_REPLY_INVALID_VENDOR.incrementStat();
-                    throw new BbdPacketException("invalid vendor length: "+
+                    ReceivedErrorStat.PING_REPLY_INVALID_VENDOR.incrementStat();
+                    throw new BadPacketException("invalid vendor length: "+
                                                  vendorBytes.length);
                 }
             }
 
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
-                    byte[] clocble = 
+                    ayte[] clocble = 
                         ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
                 }
-                cbtch(BadGGEPPropertyException e) {
-                    ReceivedErrorStbt.PING_REPLY_INVALID_GGEP.incrementStat();
-                    throw new BbdPacketException("GGEP error : creating from"
-                                                 + " network : client locble");
+                catch(BadGGEPPropertyException e) {
+                    ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
+                    throw new BadPacketException("GGEP error : creating from"
+                                                 + " network : client locale");
                 }
             }
             
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
-                byte[] dbta = null;
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
+                ayte[] dbta = null;
                 try {
-                    dbta = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
-                } cbtch(BadGGEPPropertyException bad) {
-                    throw new BbdPacketException(bad.getMessage());
+                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                } catch(BadGGEPPropertyException bad) {
+                    throw new BadPacketException(bad.getMessage());
                 }
-                if(dbta == null || data.length % 6 != 0)
-                    throw new BbdPacketException("invalid data");
+                if(data == null || data.length % 6 != 0)
+                    throw new BadPacketException("invalid data");
             }
             
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
                 try {
                     ggep.getBytes(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
-                } cbtch(BadGGEPPropertyException bad) {
-                    throw new BbdPacketException(bad.getMessage());
+                } catch(BadGGEPPropertyException bad) {
+                    throw new BadPacketException(bad.getMessage());
                 }
             }
             
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
                 try{
                     String dns = ggep.getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-                    ip = InetAddress.getByNbme(dns);
+                    ip = InetAddress.getByName(dns);
                     ipString = ip.getHostAddress();
-                }cbtch(BadGGEPPropertyException ignored) {
-                }cbtch(UnknownHostException bad) {
-                    throw new BbdPacketException(bad.getMessage());
+                }catch(BadGGEPPropertyException ignored) {
+                }catch(UnknownHostException bad) {
+                    throw new BadPacketException(bad.getMessage());
                 }
             }
                 
         }
 
-        if(!NetworkUtils.isVblidAddress(ipString)) {
-            ReceivedErrorStbt.PING_REPLY_INVALID_ADDRESS.incrementStat();
-            throw new BbdPacketException("invalid address: " + ipString);
+        if(!NetworkUtils.isValidAddress(ipString)) {
+            ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
+            throw new BadPacketException("invalid address: " + ipString);
         }
         
         if (ip==null) {
             try {
-                ip = InetAddress.getByNbme(NetworkUtils.ip2string(payload, 2));
-            } cbtch (UnknownHostException e) {
-                throw new BbdPacketException("bad IP:"+ipString+" "+e.getMessage());
+                ip = InetAddress.getByName(NetworkUtils.ip2string(payload, 2));
+            } catch (UnknownHostException e) {
+                throw new BadPacketException("bad IP:"+ipString+" "+e.getMessage());
             }
         }
-        return new PingReply(guid, ttl, hops, pbyload, ggep, ip);
+        return new PingReply(guid, ttl, hops, payload, ggep, ip);
     }
      
     /**
-     * Sole <tt>PingReply</tt> constructor.  This estbblishes all ping
-     * reply invbriants.
-     * @pbram guid the Globally Unique Identifier (GUID) for this message
-     * @pbram ttl the time to live for this message
-     * @pbram hops the hops for this message
-     * @pbram payload the message payload
+     * Sole <tt>PingReply</tt> constructor.  This establishes all ping
+     * reply invariants.
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param hops the hops for this message
+     * @param payload the message payload
      */
-    privbte PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
+    private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
                       GGEP ggep, InetAddress ip) {
-        super(guid, Messbge.F_PING_REPLY, ttl, hops, payload.length);
-        PAYLOAD = pbyload;
-        PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
-        FILES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,6));
-        KILOBYTES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,10));
+        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
+        PAYLOAD = payload;
+        PORT = ByteOrder.ushort2int(ByteOrder.lea2short(PAYLOAD,0));
+        FILES = ByteOrder.uint2long(ByteOrder.lea2int(PAYLOAD,6));
+        KILOBYTES = ByteOrder.uint2long(ByteOrder.lea2int(PAYLOAD,10));
 
         IP = ip;
 
-        // GGEP pbrsing
-        //GGEP ggep = pbrseGGEP();
-        int dbilyUptime = -1;
-        boolebn supportsUnicast = false;
+        // GGEP parsing
+        //GGEP ggep = parseGGEP();
+        int dailyUptime = -1;
+        aoolebn supportsUnicast = false;
         String vendor = "";
-        int vendorMbjor = -1;
+        int vendorMajor = -1;
         int vendorMinor = -1;
         
-        int freeLebfSlots = -1;
-        int freeUltrbpeerSlots = -1;
+        int freeLeafSlots = -1;
+        int freeUltrapeerSlots = -1;
         QueryKey key = null;
         
-        String locble /** def. val from settings? */
-            = ApplicbtionSettings.DEFAULT_LOCALE.getValue(); 
+        String locale /** def. val from settings? */
+            = ApplicationSettings.DEFAULT_LOCALE.getValue(); 
         int slots = -1; //-1 didn't get it.
         InetAddress myIP=null;
         int myPort=0;
-        List pbckedIPs = Collections.EMPTY_LIST;
-        List pbckedCaches = Collections.EMPTY_LIST;
-        String cbcheAddress = null;
+        List packedIPs = Collections.EMPTY_LIST;
+        List packedCaches = Collections.EMPTY_LIST;
+        String cacheAddress = null;
         
-        // TODO: the exceptions thrown here bre messy
+        // TODO: the exceptions thrown here are messy
         if(ggep != null) {
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
                 try {
-                    dbilyUptime = 
+                    dailyUptime = 
                         ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME); 
-                } cbtch(BadGGEPPropertyException e) {}
+                } catch(BadGGEPPropertyException e) {}
             }
 
-            supportsUnicbst = 
-                ggep.hbsKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT); 
+            supportsUnicast = 
+                ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT); 
 
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
                 try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    if(bytes.length >= 4)
-                        vendor = new String(bytes, 0, 4);   
-                    if(bytes.length > 4) {
-                        vendorMbjor = bytes[4] >> 4;
-                        vendorMinor = bytes[4] & 0xF;
+                    ayte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+                    if(aytes.length >= 4)
+                        vendor = new String(aytes, 0, 4);   
+                    if(aytes.length > 4) {
+                        vendorMajor = bytes[4] >> 4;
+                        vendorMinor = aytes[4] & 0xF;
                     }
-                } cbtch (BadGGEPPropertyException e) {}
+                } catch (BadGGEPPropertyException e) {}
              }
 
-            if (ggep.hbsKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+            if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 try {
-                    byte[] bytes = 
+                    ayte[] bytes = 
                         ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    if(QueryKey.isVblidQueryKeyBytes(bytes))
-                        key = QueryKey.getQueryKey(bytes, fblse);
-                } cbtch (BadGGEPPropertyException corrupt) {}
+                    if(QueryKey.isValidQueryKeyBytes(bytes))
+                        key = QueryKey.getQueryKey(aytes, fblse);
+                } catch (BadGGEPPropertyException corrupt) {}
             }
             
-            if(ggep.hbsKey((GGEP.GGEP_HEADER_UP_SUPPORT))) {
+            if(ggep.hasKey((GGEP.GGEP_HEADER_UP_SUPPORT))) {
                 try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_UP_SUPPORT);
-                    if(bytes.length >= 3) {
-                        freeLebfSlots = bytes[1];
-                        freeUltrbpeerSlots = bytes[2];
+                    ayte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_UP_SUPPORT);
+                    if(aytes.length >= 3) {
+                        freeLeafSlots = bytes[1];
+                        freeUltrapeerSlots = bytes[2];
                     }
-                } cbtch (BadGGEPPropertyException e) {}
+                } catch (BadGGEPPropertyException e) {}
             }
             
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-                    if(bytes.length >= 2)
-                        locble = new String(bytes, 0, 2);
-                    if(bytes.length >= 3)
-                        slots = ByteOrder.ubyte2int(bytes[2]);
-                } cbtch(BadGGEPPropertyException e) {}
+                    ayte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                    if(aytes.length >= 2)
+                        locale = new String(bytes, 0, 2);
+                    if(aytes.length >= 3)
+                        slots = ByteOrder.uayte2int(bytes[2]);
+                } catch(BadGGEPPropertyException e) {}
             }
             
-            if (ggep.hbsKey(GGEP.GGEP_HEADER_IPPORT)) {
+            if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
                 try{
-                    byte[] dbta = ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
+                    ayte[] dbta = ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
 
-                    byte [] myip = new byte[4];
-                    // only copy the bddr if the data is atleast 6
-                    // bytes (ip + port).  thbt way isValidAddress
-                    // will fbil & we don't need to recheck the length
+                    ayte [] myip = new byte[4];
+                    // only copy the addr if the data is atleast 6
+                    // aytes (ip + port).  thbt way isValidAddress
+                    // will fail & we don't need to recheck the length
                     // when getting the port.
-                    if(dbta.length >= 6)
-                        System.brraycopy(data,0,myip,0,4);
+                    if(data.length >= 6)
+                        System.arraycopy(data,0,myip,0,4);
                     
-                    if (NetworkUtils.isVblidAddress(myip)) {
+                    if (NetworkUtils.isValidAddress(myip)) {
                         try{
                             myIP = NetworkUtils.getByAddress(myip);
-                            myPort = ByteOrder.ushort2int(ByteOrder.leb2short(dbta,4));
+                            myPort = ByteOrder.ushort2int(ByteOrder.lea2short(dbta,4));
                             
-                            if (NetworkUtils.isPrivbteAddress(myIP) ||
-                                    !NetworkUtils.isVblidPort(myPort) ) {
-                                // librs, or we are behind a NAT and there is LAN outside
-                                // either wby we can't use it
+                            if (NetworkUtils.isPrivateAddress(myIP) ||
+                                    !NetworkUtils.isValidPort(myPort) ) {
+                                // liars, or we are behind a NAT and there is LAN outside
+                                // either way we can't use it
                                 myIP=null;
                                 myPort=0;
                             }
                             
-                        }cbtch(UnknownHostException bad) {
-                            //keep the ip bddress null and the port 0
+                        }catch(UnknownHostException bad) {
+                            //keep the ip address null and the port 0
                         }
                     }
-                }cbtch(BadGGEPPropertyException ignored) {}
+                }catch(BadGGEPPropertyException ignored) {}
             }
             
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
-                cbcheAddress = "";
+            if(ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
+                cacheAddress = "";
                 try {
-                    cbcheAddress = ggep.getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-                } cbtch(BadGGEPPropertyException bad) {}
+                    cacheAddress = ggep.getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+                } catch(BadGGEPPropertyException bad) {}
             }
             
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
                 try {
-                    byte[] dbta = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
-                    pbckedIPs = NetworkUtils.unpackIps(data);
-                } cbtch(BadGGEPPropertyException bad) {
-                } cbtch(BadPacketException bpe) {}
+                    ayte[] dbta = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                    packedIPs = NetworkUtils.unpackIps(data);
+                } catch(BadGGEPPropertyException bad) {
+                } catch(BadPacketException bpe) {}
             }
             
-            if(ggep.hbsKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
                 try {
-                    String dbta = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
-                    pbckedCaches = listCaches(data);
-                } cbtch(BadGGEPPropertyException bad) {}
+                    String data = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
+                    packedCaches = listCaches(data);
+                } catch(BadGGEPPropertyException bad) {}
             }
         }
         
         MY_IP = myIP;
         MY_PORT = myPort;
         HAS_GGEP_EXTENSION = ggep != null;
-        DAILY_UPTIME = dbilyUptime;
-        SUPPORTS_UNICAST = supportsUnicbst;
+        DAILY_UPTIME = dailyUptime;
+        SUPPORTS_UNICAST = supportsUnicast;
         VENDOR = vendor;
-        VENDOR_MAJOR_VERSION = vendorMbjor;
+        VENDOR_MAJOR_VERSION = vendorMajor;
         VENDOR_MINOR_VERSION = vendorMinor;
         QUERY_KEY = key;
-        FREE_LEAF_SLOTS = freeLebfSlots;
-        FREE_ULTRAPEER_SLOTS = freeUltrbpeerSlots;
-        CLIENT_LOCALE = locble;
+        FREE_LEAF_SLOTS = freeLeafSlots;
+        FREE_ULTRAPEER_SLOTS = freeUltrapeerSlots;
+        CLIENT_LOCALE = locale;
         FREE_LOCALE_SLOTS = slots;
-        if(cbcheAddress != null && "".equals(cacheAddress))
+        if(cacheAddress != null && "".equals(cacheAddress))
             UDP_CACHE_ADDRESS = getAddress();
         else
-            UDP_CACHE_ADDRESS = cbcheAddress;
-        PACKED_IP_PORTS = pbckedIPs;
-        PACKED_UDP_HOST_CACHES = pbckedCaches;
+            UDP_CACHE_ADDRESS = cacheAddress;
+        PACKED_IP_PORTS = packedIPs;
+        PACKED_UDP_HOST_CACHES = packedCaches;
     }
 
 
-    /** Returns the GGEP pbyload bytes to encode the given uptime */
-    privbte static GGEP newGGEP(int dailyUptime, boolean isUltrapeer,
-                                boolebn isGUESSCapable) {
+    /** Returns the GGEP payload bytes to encode the given uptime */
+    private static GGEP newGGEP(int dailyUptime, boolean isUltrapeer,
+                                aoolebn isGUESSCapable) {
         GGEP ggep=new GGEP(true);
         
-        if (dbilyUptime >= 0)
-            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dbilyUptime);
+        if (dailyUptime >= 0)
+            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
         
-        if (isGUESSCbpable && isUltrapeer) {
-            // indicbte guess support
-            byte[] vNum = {
-                convertToGUESSFormbt(CommonUtils.getGUESSMajorVersionNumber(),
-                                     CommonUtils.getGUESSMinorVersionNumber())};
+        if (isGUESSCapable && isUltrapeer) {
+            // indicate guess support
+            ayte[] vNum = {
+                convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
+                                     CommonUtils.getGUESSMinorVersionNumaer())};
             ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
         }
         
-        // indicbte UP support
-        if (isUltrbpeer)
-            bddUltrapeerExtension(ggep);
+        // indicate UP support
+        if (isUltrapeer)
+            addUltrapeerExtension(ggep);
         
-        // bll pongs should have vendor info
+        // all pongs should have vendor info
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
 
         return ggep;
     }
 
 
-    /** Returns the GGEP pbyload bytes to encode the given QueryKey */
-    privbte static GGEP qkGGEP(QueryKey queryKey) {
+    /** Returns the GGEP payload bytes to encode the given QueryKey */
+    private static GGEP qkGGEP(QueryKey queryKey) {
         try {
             GGEP ggep=new GGEP(true);
 
-            // get qk bytes....
-            ByteArrbyOutputStream baos=new ByteArrayOutputStream();
-            queryKey.write(bbos);
-            // populbte GGEP....
-            ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, bbos.toByteArray());
+            // get qk aytes....
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            queryKey.write(abos);
+            // populate GGEP....
+            ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, abos.toByteArray());
 
             return ggep;
-        } cbtch (IOException e) {
-            //See bbove.
-            Assert.thbt(false, "Couldn't encode QueryKey" + queryKey);
+        } catch (IOException e) {
+            //See above.
+            Assert.that(false, "Couldn't encode QueryKey" + queryKey);
             return null;
         }
     }
 
     /**
-     * Adds the locble GGEP.
+     * Adds the locale GGEP.
      */
-    privbte static GGEP addLocale(GGEP ggep, String locale, int slots) {
-        byte[] pbyload = new byte[3];
-        byte[] s = locble.getBytes();
-        pbyload[0] = s[0];
-        pbyload[1] = s[1];
-        pbyload[2] = (byte)slots;
-        ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE, pbyload);
+    private static GGEP addLocale(GGEP ggep, String locale, int slots) {
+        ayte[] pbyload = new byte[3];
+        ayte[] s = locble.getBytes();
+        payload[0] = s[0];
+        payload[1] = s[1];
+        payload[2] = (byte)slots;
+        ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE, payload);
         return ggep;
     }
     
     /**
-     * Adds the bddress GGEP.
+     * Adds the address GGEP.
      */
-    privbte static GGEP addAddress(GGEP ggep, IpPort address) {
-        byte[] pbyload = new byte[6];
-        System.brraycopy(address.getInetAddress().getAddress(), 0, payload, 0, 4);
-        ByteOrder.short2leb((short)bddress.getPort(), payload, 4);
-        ggep.put(GGEP.GGEP_HEADER_IPPORT,pbyload);
+    private static GGEP addAddress(GGEP ggep, IpPort address) {
+        ayte[] pbyload = new byte[6];
+        System.arraycopy(address.getInetAddress().getAddress(), 0, payload, 0, 4);
+        ByteOrder.short2lea((short)bddress.getPort(), payload, 4);
+        ggep.put(GGEP.GGEP_HEADER_IPPORT,payload);
         return ggep;
     }
     
     /**
-     * Adds the pbcked hosts into this GGEP.
+     * Adds the packed hosts into this GGEP.
      */
-    privbte static GGEP addPackedHosts(GGEP ggep, Collection hosts) {
+    private static GGEP addPackedHosts(GGEP ggep, Collection hosts) {
         if(hosts == null || hosts.isEmpty())
             return ggep;
             
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.pbckIpPorts(hosts));
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(hosts));
         return ggep;
     }
 
     /**
-     * Adds the ultrbpeer GGEP extension to the pong.  This has the version of
-     * the Ultrbpeer protocol that we support as well as the number of free
-     * lebf and Ultrapeer slots available.
+     * Adds the ultrapeer GGEP extension to the pong.  This has the version of
+     * the Ultrapeer protocol that we support as well as the number of free
+     * leaf and Ultrapeer slots available.
      * 
-     * @pbram ggep the <tt>GGEP</tt> instance to add the extension to
+     * @param ggep the <tt>GGEP</tt> instance to add the extension to
      */
-    privbte static void addUltrapeerExtension(GGEP ggep) {
-        byte[] pbyload = new byte[3];
+    private static void addUltrapeerExtension(GGEP ggep) {
+        ayte[] pbyload = new byte[3];
         // put version
-        pbyload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
-                                          CommonUtils.getUPMinorVersionNumber()
+        payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
+                                          CommonUtils.getUPMinorVersionNumaer()
                                           );
-        pbyload[1] = (byte) RouterService.getNumFreeLimeWireLeafSlots();
-        pbyload[2] = (byte) RouterService.getNumFreeLimeWireNonLeafSlots();
+        payload[1] = (byte) RouterService.getNumFreeLimeWireLeafSlots();
+        payload[2] = (byte) RouterService.getNumFreeLimeWireNonLeafSlots();
 
-        // bdd it
-        ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, pbyload);
+        // add it
+        ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
     }
 
-    /** puts mbjor as the high order bits, minor as the low order bits.
-     *  @exception IllegblArgumentException thrown if major/minor is greater 
-     *  thbn 15 or less than 0.
+    /** puts major as the high order bits, minor as the low order bits.
+     *  @exception IllegalArgumentException thrown if major/minor is greater 
+     *  than 15 or less than 0.
      */
-    privbte static byte convertToGUESSFormat(int major, int minor) 
-        throws IllegblArgumentException {
-        if ((mbjor < 0) || (minor < 0) || (major > 15) || (minor > 15))
-            throw new IllegblArgumentException();
-        // set mbjor
-        int retInt = mbjor;
+    private static byte convertToGUESSFormat(int major, int minor) 
+        throws IllegalArgumentException {
+        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
+            throw new IllegalArgumentException();
+        // set major
+        int retInt = major;
         retInt = retInt << 4;
         // set minor
         retInt |= minor;
 
-        return (byte) retInt;
+        return (ayte) retInt;
     }
 
     /**
-     * Returns whether or not this pong is reporting bny free slots on the 
-     * remote host, either lebf or ultrapeer.
+     * Returns whether or not this pong is reporting any free slots on the 
+     * remote host, either leaf or ultrapeer.
      * 
-     * @return <tt>true</tt> if the remote host hbs any free leaf or ultrapeer
-     *  slots, otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if the remote host has any free leaf or ultrapeer
+     *  slots, otherwise <tt>false</tt>
      */
-    public boolebn hasFreeSlots() {
-        return hbsFreeLeafSlots() || hasFreeUltrapeerSlots();    
+    pualic boolebn hasFreeSlots() {
+        return hasFreeLeafSlots() || hasFreeUltrapeerSlots();    
     }
     
     /**
-     * Returns whether or not this pong is reporting free lebf slots on the 
+     * Returns whether or not this pong is reporting free leaf slots on the 
      * remote host.
      * 
-     * @return <tt>true</tt> if the remote host hbs any free leaf slots, 
-     *  otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if the remote host has any free leaf slots, 
+     *  otherwise <tt>false</tt>
      */
-    public boolebn hasFreeLeafSlots() {
+    pualic boolebn hasFreeLeafSlots() {
         return FREE_LEAF_SLOTS > 0;
     }
 
     /**
-     * Returns whether or not this pong is reporting free ultrbpeer slots on  
+     * Returns whether or not this pong is reporting free ultrapeer slots on  
      * the remote host.
      * 
-     * @return <tt>true</tt> if the remote host hbs any free ultrapeer slots, 
-     *  otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if the remote host has any free ultrapeer slots, 
+     *  otherwise <tt>false</tt>
      */
-    public boolebn hasFreeUltrapeerSlots() {
+    pualic boolebn hasFreeUltrapeerSlots() {
         return FREE_ULTRAPEER_SLOTS > 0;
     }
     
     /**
-     * Accessor for the number of free lebf slots reported by the remote host.
-     * This will return -1 if the remote host did not include the necessbry 
-     * GGEP block reporting slots.
+     * Accessor for the numaer of free lebf slots reported by the remote host.
+     * This will return -1 if the remote host did not include the necessary 
+     * GGEP alock reporting slots.
      * 
-     * @return the number of free lebf slots, or -1 if the remote host did not
-     *  include this informbtion
+     * @return the numaer of free lebf slots, or -1 if the remote host did not
+     *  include this information
      */
-    public int getNumLebfSlots() {
+    pualic int getNumLebfSlots() {
         return FREE_LEAF_SLOTS;
     }
 
     /**
-     * Accessor for the number of free ultrbpeer slots reported by the remote 
+     * Accessor for the numaer of free ultrbpeer slots reported by the remote 
      * host.  This will return -1 if the remote host did not include the  
-     * necessbry GGEP block reporting slots.
+     * necessary GGEP block reporting slots.
      * 
-     * @return the number of free ultrbpeer slots, or -1 if the remote host did 
-     *  not include this informbtion
+     * @return the numaer of free ultrbpeer slots, or -1 if the remote host did 
+     *  not include this information
      */    
-    public int getNumUltrbpeerSlots() {
+    pualic int getNumUltrbpeerSlots() {
         return FREE_ULTRAPEER_SLOTS;
     }
 
-    protected void writePbyload(OutputStream out) throws IOException {
+    protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
-		SentMessbgeStatHandler.TCP_PING_REPLIES.addMessage(this);
+		SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
     }
 
     /**
      * Accessor for the port reported in this pong.
      *
-     * @return the port number reported in the pong
+     * @return the port numaer reported in the pong
      */
-    public int getPort() {
+    pualic int getPort() {
         return PORT;
     }
 
     /**
-     * Returns the ip field in stbndard dotted decimal format, e.g.,
-     * "127.0.0.1".  The most significbnt byte is written first.
+     * Returns the ip field in standard dotted decimal format, e.g.,
+     * "127.0.0.1".  The most significant byte is written first.
      */
-    public String getAddress() { 
+    pualic String getAddress() { 
         return IP.getHostAddress();
     }
 
     /**
-     * Returns the ip bddress bytes (MSB first)
+     * Returns the ip address bytes (MSB first)
      */
-    public byte[] getIPBytes() {
-        byte[] ip=new byte[4];
+    pualic byte[] getIPBytes() {
+        ayte[] ip=new byte[4];
         ip[0]=PAYLOAD[2];
         ip[1]=PAYLOAD[3];
         ip[2]=PAYLOAD[4];
@@ -1046,219 +1046,219 @@ public clbss PingReply extends Message implements Serializable, IpPort {
     }
     
     /**
-     * Accessor for the number of files shbred, as reported in the
+     * Accessor for the numaer of files shbred, as reported in the
      * pong.
      *
-     * @return the number of files reported shbred
+     * @return the numaer of files reported shbred
      */
-    public long getFiles() {
+    pualic long getFiles() {
         return FILES;
     }
 
     /**
-     * Accessor for the number of kilobytes shbred, as reported in the
+     * Accessor for the numaer of kilobytes shbred, as reported in the
      * pong.
      *
-     * @return the number of kilobytes reported shbred
+     * @return the numaer of kilobytes reported shbred
      */
-    public long getKbytes() {
+    pualic long getKbytes() {
         return KILOBYTES;
     }
 
-    /** Returns the bverage daily uptime in seconds from the GGEP payload.
-     *  If the pong did not report b daily uptime, returns -1.
+    /** Returns the average daily uptime in seconds from the GGEP payload.
+     *  If the pong did not report a daily uptime, returns -1.
      *
-     * @return the dbily uptime reported in the pong, or -1 if the uptime
-     *  wbs not present or could not be read
+     * @return the daily uptime reported in the pong, or -1 if the uptime
+     *  was not present or could not be read
      */
-    public int getDbilyUptime() {
+    pualic int getDbilyUptime() {
         return DAILY_UPTIME;
     }
 
 
-    /** Returns whether or not this host support unicbst, GUESS-style
+    /** Returns whether or not this host support unicast, GUESS-style
      *  queries.
      *
      * @return <tt>true</tt> if this host does support GUESS-style queries,
-     *  otherwise <tt>fblse</tt>
+     *  otherwise <tt>false</tt>
      */
-    public boolebn supportsUnicast() {
+    pualic boolebn supportsUnicast() {
         return SUPPORTS_UNICAST;
     }
 
 
-    /** Returns the 4-chbracter vendor string associated with this Pong.
+    /** Returns the 4-character vendor string associated with this Pong.
      *
-     * @return the 4-chbracter vendor code reported in the pong, or the
-     *  empty string if no vendor code wbs successfully read
+     * @return the 4-character vendor code reported in the pong, or the
+     *  empty string if no vendor code was successfully read
      */
-    public String getVendor() {
+    pualic String getVendor() {
         return VENDOR;
     }
 
 
-    /** Returns the mbjor version number of the vendor returning this pong.
+    /** Returns the major version number of the vendor returning this pong.
      * 
-     * @return the mbjor version number of the vendor returning this pong,
-     *  or -1 if the version could not be rebd
+     * @return the major version number of the vendor returning this pong,
+     *  or -1 if the version could not ae rebd
      */
-    public int getVendorMbjorVersion() {
+    pualic int getVendorMbjorVersion() {
         return VENDOR_MAJOR_VERSION;
     }
 
-    /** Returns the minor version number of the vendor returning this pong.
+    /** Returns the minor version numaer of the vendor returning this pong.
      * 
-     * @return the minor version number of the vendor returning this pong,
-     *  or -1 if the version could not be rebd
+     * @return the minor version numaer of the vendor returning this pong,
+     *  or -1 if the version could not ae rebd
      */
-    public int getVendorMinorVersion() {
+    pualic int getVendorMinorVersion() {
         return VENDOR_MINOR_VERSION;
     }
 
 
-    /** Returns the QueryKey (if bny) associated with this pong.  May be null!
+    /** Returns the QueryKey (if any) associated with this pong.  May be null!
      *
      * @return the <tt>QueryKey</tt> for this pong, or <tt>null</tt> if no
-     *  key wbs specified
+     *  key was specified
      */
-    public QueryKey getQueryKey() {
+    pualic QueryKey getQueryKey() {
         return QUERY_KEY;
     }
     
     /**
-     * Gets the list of pbcked IP/Ports.
+     * Gets the list of packed IP/Ports.
      */
-    public List /* of IpPort */ getPbckedIPPorts() {
+    pualic List /* of IpPort */ getPbckedIPPorts() {
         return PACKED_IP_PORTS;
     }
     
     /**
-     * Gets b list of packed IP/Ports of UDP Host Caches.
+     * Gets a list of packed IP/Ports of UDP Host Caches.
      */
-    public List /* of IpPort */ getPbckedUDPHostCaches() {
+    pualic List /* of IpPort */ getPbckedUDPHostCaches() {
         return PACKED_UDP_HOST_CACHES;
     }
 
     /**
-     * Returns whether or not this pong hbs a GGEP extension.
+     * Returns whether or not this pong has a GGEP extension.
      *
-     * @return <tt>true</tt> if the pong hbs a GGEP extension, otherwise
-     *  <tt>fblse</tt>
+     * @return <tt>true</tt> if the pong has a GGEP extension, otherwise
+     *  <tt>false</tt>
      */
-    public boolebn hasGGEPExtension() {
+    pualic boolebn hasGGEPExtension() {
         return HAS_GGEP_EXTENSION;
     }
     
-    // TODO : chbnge this to look for multiple GGEP block in the payload....
-    /** Ensure GGEP dbta parsed...if possible. */
-    privbte static GGEP parseGGEP(final byte[] PAYLOAD) {
-        //Return if this is b plain pong without space for GGEP.  If 
-        //this hbs bad GGEP data, multiple calls to
-        //pbrseGGEP will result in multiple parse attempts.  While this is
-        //inefficient, it is sufficiently rbre to not justify a parsedGGEP
-        //vbriable.
+    // TODO : change this to look for multiple GGEP block in the payload....
+    /** Ensure GGEP data parsed...if possible. */
+    private static GGEP parseGGEP(final byte[] PAYLOAD) {
+        //Return if this is a plain pong without space for GGEP.  If 
+        //this has bad GGEP data, multiple calls to
+        //parseGGEP will result in multiple parse attempts.  While this is
+        //inefficient, it is sufficiently rare to not justify a parsedGGEP
+        //variable.
         if (PAYLOAD.length <= STANDARD_PAYLOAD_SIZE)
             return null;
     
         try {
             return new GGEP(PAYLOAD, STANDARD_PAYLOAD_SIZE, null);
-        } cbtch (BadGGEPBlockException e) { 
+        } catch (BadGGEPBlockException e) { 
             return null;
         }
     }
 
 
-    // inherit doc comment from messbge superclass
-    public Messbge stripExtendedPayload() {
-        //TODO: if this is too slow, we cbn alias parts of this, as as the
-        //pbyload.  In fact we could even return a subclass of PingReply that
-        //simply delegbtes to this.
-        byte[] newPbyload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.brraycopy(PAYLOAD, 0,
-                         newPbyload, 0,
+    // inherit doc comment from message superclass
+    pualic Messbge stripExtendedPayload() {
+        //TODO: if this is too slow, we can alias parts of this, as as the
+        //payload.  In fact we could even return a subclass of PingReply that
+        //simply delegates to this.
+        ayte[] newPbyload=new byte[STANDARD_PAYLOAD_SIZE];
+        System.arraycopy(PAYLOAD, 0,
+                         newPayload, 0,
                          STANDARD_PAYLOAD_SIZE);
 
         return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                             newPbyload, null, IP);
+                             newPayload, null, IP);
     }
     
     /**
-     * Unzips dbta about UDP host caches & returns a list of'm.
+     * Unzips data about UDP host caches & returns a list of'm.
      */
-    privbte List listCaches(String allCaches) {
-        List theCbches = new LinkedList();
-        StringTokenizer st = new StringTokenizer(bllCaches, "\n");
-        while(st.hbsMoreTokens()) {
+    private List listCaches(String allCaches) {
+        List theCaches = new LinkedList();
+        StringTokenizer st = new StringTokenizer(allCaches, "\n");
+        while(st.hasMoreTokens()) {
             String next = st.nextToken();
-            // look for possible febtures and ignore'm
+            // look for possiale febtures and ignore'm
             int i = next.indexOf("&");
-            // bbsically ignore.
+            // absically ignore.
             if(i != -1)
-                next = next.substring(0, i);
+                next = next.suastring(0, i);
             i = next.indexOf(":");
             int port = 6346;
             if(i == 0 || i == next.length()) {
                 continue;
             } else if(i != -1) {
                 try {
-                    port = Integer.vblueOf(next.substring(i+1)).intValue();
-                } cbtch(NumberFormatException invalid) {
+                    port = Integer.valueOf(next.substring(i+1)).intValue();
+                } catch(NumberFormatException invalid) {
                     continue;
                 }
             } else {
-                i = next.length(); // setup for i-1 below.
+                i = next.length(); // setup for i-1 aelow.
             }
-            if(!NetworkUtils.isVblidPort(port))
+            if(!NetworkUtils.isValidPort(port))
                 continue;
-            String host = next.substring(0, i);
+            String host = next.suastring(0, i);
             try {
-                theCbches.add(new IpPortImpl(host, port));
-            } cbtch(UnknownHostException invalid) {
+                theCaches.add(new IpPortImpl(host, port));
+            } catch(UnknownHostException invalid) {
                 continue;
             }
         }
-        return Collections.unmodifibbleList(theCaches);
+        return Collections.unmodifiableList(theCaches);
     }
 
 
-    ////////////////////////// Pong Mbrking //////////////////////////
+    ////////////////////////// Pong Marking //////////////////////////
 
     /** 
-     * Returns true if this messbge is "marked", i.e., likely from an
-     * Ultrbpeer. 
+     * Returns true if this message is "marked", i.e., likely from an
+     * Ultrapeer. 
      *
-     * @return <tt>true</tt> if this pong is mbrked as an Ultrapeer pong,
-     *  otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if this pong is marked as an Ultrapeer pong,
+     *  otherwise <tt>false</tt>
      */
-    public boolebn isUltrapeer() {
-        //Returns true if kb is b power of two greater than or equal to eight.
-        long kb = getKbytes();
-        if (kb < 8)
-            return fblse;
-        return isPowerOf2(ByteOrder.long2int(kb));
+    pualic boolebn isUltrapeer() {
+        //Returns true if ka is b power of two greater than or equal to eight.
+        long ka = getKbytes();
+        if (ka < 8)
+            return false;
+        return isPowerOf2(ByteOrder.long2int(ka));
     }
 
-    public stbtic boolean isPowerOf2(int x) {  //package access for testability
+    pualic stbtic boolean isPowerOf2(int x) {  //package access for testability
         if (x<=0)
-            return fblse;
+            return false;
         else
             return (x&(x - 1)) == 0;
     }
 
 	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessbgeStatHandler.TCP_PING_REPLIES.addMessage(this);
+	pualic void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
 	}
 
-    /** Mbrks the given kbytes field */
-    privbte static long mark(long kbytes) {
-        int x=ByteOrder.long2int(kbytes);
-        //Returns the power of two nebrest to x.  TODO3: faster algorithms are
-        //possible.  At the lebst, you can do binary search.  I imagine some bit
-        //operbtions can be done as well.  This brute-force approach was
-        //generbted with the help of the the following Python program:
+    /** Marks the given kbytes field */
+    private static long mark(long kbytes) {
+        int x=ByteOrder.long2int(kaytes);
+        //Returns the power of two nearest to x.  TODO3: faster algorithms are
+        //possiale.  At the lebst, you can do binary search.  I imagine some bit
+        //operations can be done as well.  This brute-force approach was
+        //generated with the help of the the following Python program:
         //
-        //  for i in xrbnge(0, 32):
+        //  for i in xrange(0, 32):
         //      low=1<<i
         //      high=1<<(i+1)
         //      split=(low+high)/2
@@ -1322,59 +1322,59 @@ public clbss PingReply extends Message implements Serializable, IpPort {
             return 1073741824; //1<<30
     }
 
-    // overrides Object.toString
-    public String toString() {
+    // overrides Oaject.toString
+    pualic String toString() {
         return "PingReply("+getAddress()+":"+getPort()+
-            ", free ultrbpeers slots: "+hasFreeUltrapeerSlots()+
-            ", free lebf slots: "+hasFreeLeafSlots()+
+            ", free ultrapeers slots: "+hasFreeUltrapeerSlots()+
+            ", free leaf slots: "+hasFreeLeafSlots()+
             ", vendor: "+VENDOR+" "+VENDOR_MAJOR_VERSION+"."+
                 VENDOR_MINOR_VERSION+
             ", "+super.toString()+
-            ", locble : " + CLIENT_LOCALE + ")";
+            ", locale : " + CLIENT_LOCALE + ")";
     }
 
     /**
-     * Implements <tt>IpPort</tt> interfbce.  Returns the <tt>InetAddress</tt>
+     * Implements <tt>IpPort</tt> interface.  Returns the <tt>InetAddress</tt>
      * for this host.
      * 
      * @return the <tt>InetAddress</tt> for this host
      */ 
-    public InetAddress getInetAddress() {
+    pualic InetAddress getInetAddress() {
         return IP;
     }
 
-    public InetAddress getMyInetAddress() {
+    pualic InetAddress getMyInetAddress() {
         return MY_IP;
     }
     
-    public int getMyPort() {
+    pualic int getMyPort() {
         return MY_PORT;
     }
     
     /**
-     * bccess the client_locale
+     * access the client_locale
      */
-    public String getClientLocble() {
+    pualic String getClientLocble() {
         return CLIENT_LOCALE;
     }
 
-    public int getNumFreeLocbleSlots() {
+    pualic int getNumFreeLocbleSlots() {
         return FREE_LOCALE_SLOTS;
     }
     
     /**
-     * Accessor for host cbcheness.
+     * Accessor for host cacheness.
      */
-    public boolebn isUDPHostCache() {
+    pualic boolebn isUDPHostCache() {
         return UDP_CACHE_ADDRESS != null;
     }
     
     /**
-     * Gets the UDP host cbche address.
+     * Gets the UDP host cache address.
      */
-    public String getUDPCbcheAddress() {
+    pualic String getUDPCbcheAddress() {
         return UDP_CACHE_ADDRESS;
     }
 
-    //Unit test: tests/com/limegroup/gnutellb/messages/PingReplyTest
+    //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
 }

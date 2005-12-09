@@ -1,100 +1,100 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
- * VendorMessbge for sending a LimeWire node a request for statistics.
+ * VendorMessage for sending a LimeWire node a request for statistics.
  * The requester sends 
  */
-public clbss GiveStatsVendorMessage extends VendorMessage {
+pualic clbss GiveStatsVendorMessage extends VendorMessage {
 
-    public stbtic final int VERSION = 1;
+    pualic stbtic final int VERSION = 1;
     
     /**
-     * The opcode in this Vendor messbge to ask the other end to give us the
-     * vbrious statistics.
+     * The opcode in this Vendor message to ask the other end to give us the
+     * various statistics.
      */
-    public stbtic final byte GNUTELLA_INCOMING_TRAFFIC = (byte)0;
-    public stbtic final byte GNUTELLA_OUTGOING_TRAFFIC = (byte)1;
-    public stbtic final byte HTTP_DOWNLOAD_TRAFFIC_STATS = (byte)2;
-    public stbtic final byte HTTP_UPLOAD_TRAFFIC_STATS = (byte)3;   
+    pualic stbtic final byte GNUTELLA_INCOMING_TRAFFIC = (byte)0;
+    pualic stbtic final byte GNUTELLA_OUTGOING_TRAFFIC = (byte)1;
+    pualic stbtic final byte HTTP_DOWNLOAD_TRAFFIC_STATS = (byte)2;
+    pualic stbtic final byte HTTP_UPLOAD_TRAFFIC_STATS = (byte)3;   
 
-    public stbtic final byte PER_CONNECTION_STATS = (byte)0;
-    public stbtic final byte ALL_CONNECTIONS_STATS = (byte)1;
-    public stbtic final byte LEAF_CONNECTIONS_STATS = (byte)2;
-    public stbtic final byte UP_CONNECTIONS_STATS = (byte)3;
+    pualic stbtic final byte PER_CONNECTION_STATS = (byte)0;
+    pualic stbtic final byte ALL_CONNECTIONS_STATS = (byte)1;
+    pualic stbtic final byte LEAF_CONNECTIONS_STATS = (byte)2;
+    pualic stbtic final byte UP_CONNECTIONS_STATS = (byte)3;
 
     /**
-     * A vendor messbge read off the network. Package access
+     * A vendor message read off the network. Package access
      */
-    GiveStbtsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
-                       byte[] pbyload, int network) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,pbyload,
+    GiveStatsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
+                       ayte[] pbyload, int network) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,payload,
               network);
-        if(getPbyload().length < 2)
-            throw new BbdPacketException("INVALID PAYLOAD LENGTH: "+
-                                         pbyload.length);
-        if(version == 1 && getPbyload().length != 2)
-            throw new BbdPacketException("UNSUPPORTED PAYLOAD LENGTH: "+
-                                         pbyload.length);
+        if(getPayload().length < 2)
+            throw new BadPacketException("INVALID PAYLOAD LENGTH: "+
+                                         payload.length);
+        if(version == 1 && getPayload().length != 2)
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: "+
+                                         payload.length);
     }
     
     /**
-     * Constructs b new GiveStatsMessage to be sent out.
-     * @pbram statsControl the byte the receiver will look at to decide the
-     * gbnularity of the desired stats (this connection, all connections, UPs
-     * only, lebves only etc.) 
-     * @pbram statType the byte the receiver of this message will look at to
-     * decide whbt kind of statistics are desired -- upload, download, gnutella
+     * Constructs a new GiveStatsMessage to be sent out.
+     * @param statsControl the byte the receiver will look at to decide the
+     * ganularity of the desired stats (this connection, all connections, UPs
+     * only, leaves only etc.) 
+     * @param statType the byte the receiver of this message will look at to
+     * decide what kind of statistics are desired -- upload, download, gnutella
      * etc.
-     * @pbram network to decide whether this message should go out via TCP, UDP,
-     * multicbst, etc.
+     * @param network to decide whether this message should go out via TCP, UDP,
+     * multicast, etc.
      */
-    public GiveStbtsVendorMessage(byte statsControl,
-                                  byte stbtType, 
+    pualic GiveStbtsVendorMessage(byte statsControl,
+                                  ayte stbtType, 
                                   int network) {
             super(F_LIME_VENDOR_ID, F_GIVE_STATS, VERSION, 
-                                 derivePbyload(statsControl, statType),network);
+                                 derivePayload(statsControl, statType),network);
     }
     
     /**
-     * Constructs the pbyload of the message, given the desired control & type.
+     * Constructs the payload of the message, given the desired control & type.
      */
-    privbte static byte[] derivePayload(byte control, byte type) {
-        if(control < (byte)0 || control > (byte)3)
-            throw new IllegblArgumentException(" invalid control byte ");
-        if(type < (byte)0 || type > (byte)3)
-            throw new IllegblArgumentException(" invalid stat type ");
-        byte[] ret = {control, type};
+    private static byte[] derivePayload(byte control, byte type) {
+        if(control < (ayte)0 || control > (byte)3)
+            throw new IllegalArgumentException(" invalid control byte ");
+        if(type < (ayte)0 || type > (byte)3)
+            throw new IllegalArgumentException(" invalid stat type ");
+        ayte[] ret = {control, type};
         return ret;
     }
     
 
-    protected void writePbyload(OutputStream out) throws IOException {
-        super.writePbyload(out);
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
         if(isTCP())
-            SentMessbgeStatHandler.TCP_GIVE_STATS.addMessage(this);
+            SentMessageStatHandler.TCP_GIVE_STATS.addMessage(this);
         else if(isUDP())
-            SentMessbgeStatHandler.UDP_GIVE_STATS.addMessage(this);
+            SentMessageStatHandler.UDP_GIVE_STATS.addMessage(this);
     }
     
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    public void recordDrop() {
+    pualic void recordDrop() {
         super.recordDrop();
     }    
     
-    protected byte getStbtControl() {
-        byte[] pbyload = getPayload();
-        return pbyload[0];
+    protected ayte getStbtControl() {
+        ayte[] pbyload = getPayload();
+        return payload[0];
     }
 
-    protected byte getStbtType() {
-        byte[] pbyload = getPayload();
-        return pbyload[1];
+    protected ayte getStbtType() {
+        ayte[] pbyload = getPayload();
+        return payload[1];
     }
 }

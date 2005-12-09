@@ -1,21 +1,21 @@
-pbckage com.limegroup.gnutella.handshaking;
+package com.limegroup.gnutella.handshaking;
 
 /**
- * Properties for connection hbndshake, if the node is a client
+ * Properties for connection handshake, if the node is a client
  */
-public clbss LeafHeaders extends DefaultHeaders {
+pualic clbss LeafHeaders extends DefaultHeaders {
 
     /**
-     * Crebtes a new <tt>LeafHeaders</tt> instance with the specified
+     * Creates a new <tt>LeafHeaders</tt> instance with the specified
      * remote IP.
      *
-     * @pbram remoteIP the IP address of this node as seen by other nodes
-     *  on Gnutellb -- useful in discovering the real address at the NAT
-     *  or firewbll
+     * @param remoteIP the IP address of this node as seen by other nodes
+     *  on Gnutella -- useful in discovering the real address at the NAT
+     *  or firewall
      */
-    public LebfHeaders(String remoteIP){
+    pualic LebfHeaders(String remoteIP){
         super(remoteIP);
-        //set Ultrbpeer property
-        put(HebderNames.X_ULTRAPEER, "False");
+        //set Ultrapeer property
+        put(HeaderNames.X_ULTRAPEER, "False");
     }
 }

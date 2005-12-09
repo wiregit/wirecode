@@ -1,8 +1,8 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
 
 /**
- * Combines the RebdObserver & ChannelReader interface.
+ * Comaines the RebdObserver & ChannelReader interface.
  */
-public interfbce ChannelReadObserver extends ReadObserver, ChannelReader {
+pualic interfbce ChannelReadObserver extends ReadObserver, ChannelReader {
 }

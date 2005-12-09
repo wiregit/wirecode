@@ -1,14 +1,14 @@
 
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 
-public clbss DiskException extends IOException {
-    public DiskException(String str) {
+pualic clbss DiskException extends IOException {
+    pualic DiskException(String str) {
         super(str);
     }
-	public DiskException(IOException cbuse) {
-	    initCbuse(cause);
+	pualic DiskException(IOException cbuse) {
+	    initCause(cause);
 	}
 }

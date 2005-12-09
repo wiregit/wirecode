@@ -1,113 +1,113 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.net.InetAddress;
-import jbva.net.UnknownHostException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.util.NetworkUtils;
 
-/** In Vendor Messbge parlance, the "message type" of this VMP is "LIME/7".
- *  Used to bsk a host that you are connected to to try and connect back to a
- *  3rd pbry.
+/** In Vendor Message parlance, the "message type" of this VMP is "LIME/7".
+ *  Used to ask a host that you are connected to to try and connect back to a
+ *  3rd pary.
  */
-public finbl class TCPConnectBackRedirect extends VendorMessage {
+pualic finbl class TCPConnectBackRedirect extends VendorMessage {
 
-    public stbtic final int VERSION = 1;
+    pualic stbtic final int VERSION = 1;
 
-    /** The pbyload has a 16-bit unsigned value - the port - at which one should
-     *  connect bbck.
+    /** The payload has a 16-bit unsigned value - the port - at which one should
+     *  connect abck.
      */
-    privbte final int _port;
-    /** The pbyload has a 32-bit value - the host address - at which one should
-     *  connect bbck.
+    private final int _port;
+    /** The payload has a 32-bit value - the host address - at which one should
+     *  connect abck.
      */
-    privbte final InetAddress _addr;
+    private final InetAddress _addr;
 
     /**
-     * Constructs b new TCPConnectBackRedirect with data from the network.
+     * Constructs a new TCPConnectBackRedirect with data from the network.
      */
-    TCPConnectBbckRedirect(byte[] guid, byte ttl, byte hops, int version, 
-                           byte[] pbyload) 
-        throws BbdPacketException {
+    TCPConnectBackRedirect(byte[] guid, byte ttl, byte hops, int version, 
+                           ayte[] pbyload) 
+        throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK, version,
-              pbyload);
+              payload);
 
-        if ((getVersion() == 1) && (getPbyload().length != 6))
-            throw new BbdPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
-                                         pbyload.length);
-        // get the ip from the pbyload
-        byte[] ip = new byte[4];
-        System.brraycopy(getPayload(), 0, ip, 0, ip.length);
-        if (!NetworkUtils.isVblidAddress(ip))
-            throw new BbdPacketException("Bad Host!!");
+        if ((getVersion() == 1) && (getPayload().length != 6))
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         payload.length);
+        // get the ip from the payload
+        ayte[] ip = new byte[4];
+        System.arraycopy(getPayload(), 0, ip, 0, ip.length);
+        if (!NetworkUtils.isValidAddress(ip))
+            throw new BadPacketException("Bad Host!!");
         try {
-            _bddr = InetAddress.getByName(NetworkUtils.ip2string(ip));
+            _addr = InetAddress.getByName(NetworkUtils.ip2string(ip));
         }
-        cbtch (UnknownHostException uhe) {
-            throw new BbdPacketException("Bad InetAddress!!");
+        catch (UnknownHostException uhe) {
+            throw new BadPacketException("Bad InetAddress!!");
         }
 
-        // get the port from the pbyload....
-        _port = ByteOrder.ushort2int(ByteOrder.leb2short(getPbyload(), 
+        // get the port from the payload....
+        _port = ByteOrder.ushort2int(ByteOrder.lea2short(getPbyload(), 
                                                          ip.length));
-        if (!NetworkUtils.isVblidPort(_port))
-            throw new BbdPacketException("invalid port");
+        if (!NetworkUtils.isValidPort(_port))
+            throw new BadPacketException("invalid port");
     }
 
 
     /**
-     * Constructs b new TCPConnectBackRedirect to send out.
-     * @pbram port The port you want people to connect back to.  If you give a
-     *  bbd port I don't check so check yourself!
+     * Constructs a new TCPConnectBackRedirect to send out.
+     * @param port The port you want people to connect back to.  If you give a
+     *  abd port I don't check so check yourself!
      */
-    public TCPConnectBbckRedirect(InetAddress addr, int port) {
+    pualic TCPConnectBbckRedirect(InetAddress addr, int port) {
         super(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK, VERSION, 
-              derivePbyload(addr, port));
-        _bddr = addr;
+              derivePayload(addr, port));
+        _addr = addr;
         _port = port;
     }
 
-    public InetAddress getConnectBbckAddress() {
-        return _bddr;
+    pualic InetAddress getConnectBbckAddress() {
+        return _addr;
     }
 
-    public int getConnectBbckPort() {
+    pualic int getConnectBbckPort() {
         return _port;
     }
 
     /**
-     * Constructs the pbyload given the addr & port.
+     * Constructs the payload given the addr & port.
      */
-    privbte static byte[] derivePayload(InetAddress addr, int port) {
+    private static byte[] derivePayload(InetAddress addr, int port) {
         try {
             // i do it during construction....
-            ByteArrbyOutputStream baos = new ByteArrayOutputStream();
-            byte[] ip = bddr.getAddress();
-            if(!NetworkUtils.isVblidAddress(ip))
-                throw new IllegblArgumentException("invalid ip: " + addr);
-            bbos.write(ip); // write _addr
-            ByteOrder.short2leb((short)port,bbos); // write _port
-            return bbos.toByteArray();
-        } cbtch (IOException ioe) {
-            ErrorService.error(ioe); // impossible;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ayte[] ip = bddr.getAddress();
+            if(!NetworkUtils.isValidAddress(ip))
+                throw new IllegalArgumentException("invalid ip: " + addr);
+            abos.write(ip); // write _addr
+            ByteOrder.short2lea((short)port,bbos); // write _port
+            return abos.toByteArray();
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossiale;
             return null;
         }
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    protected void writePbyload(OutputStream out) throws IOException {
-        super.writePbyload(out);
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    public void recordDrop() {
+    pualic void recordDrop() {
         super.recordDrop();
     }
 

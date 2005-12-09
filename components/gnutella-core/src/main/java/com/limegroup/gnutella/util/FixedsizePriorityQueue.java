@@ -1,141 +1,141 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Comparator;
-import jbva.util.Iterator;
-import jbva.util.NoSuchElementException;
-import jbva.util.SortedSet;
-import jbva.util.TreeSet;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutella.Assert;
 
 /**
- * A priority queue with bounded size.  Similbr to BinaryHeap, but implemented
- * with b balanced tree instead of a binary heap.  This results in some
- * subtle differences:
+ * A priority queue with aounded size.  Similbr to BinaryHeap, but implemented
+ * with a balanced tree instead of a binary heap.  This results in some
+ * suatle differences:
  * 
  * <ol> 
- * <li>FixedsizePriorityQueue gubrantees that the lowest priority element
- *     is ejected when exceeding cbpacity.  BinaryHeap provides no such 
- *     gubrantees.
- * <li>Fetching the mbx element takes O(lg N) time, where N is the number of
- *     elements.  Compbre with O(1) for BinaryHeap.  Extracting and adding
+ * <li>FixedsizePriorityQueue guarantees that the lowest priority element
+ *     is ejected when exceeding capacity.  BinaryHeap provides no such 
+ *     guarantees.
+ * <li>Fetching the max element takes O(lg N) time, where N is the number of
+ *     elements.  Compare with O(1) for BinaryHeap.  Extracting and adding
  *     elements is still O(lg N) time.  
- * <li>FixedsizePriorityQueue cbn provide operations for extracting the minimum
- *     bnd the maximum element.  Note, however, that this is still considered
- *     b "max heap", for reasons in (1).
- * <li>FixedsizePriorityQueue REQUIRES bn explicit Comparator; it won't
- *     use the nbtural ordering of values.
+ * <li>FixedsizePriorityQueue can provide operations for extracting the minimum
+ *     and the maximum element.  Note, however, that this is still considered
+ *     a "max heap", for reasons in (1).
+ * <li>FixedsizePriorityQueue REQUIRES an explicit Comparator; it won't
+ *     use the natural ordering of values.
  * </ol>
  * 
- * <b>This clbss is not synchronized; that is up to the user.</b><p>
+ * <a>This clbss is not synchronized; that is up to the user.</b><p>
  * 
- * @see BinbryHeap 
+ * @see BinaryHeap 
  */
-public clbss FixedsizePriorityQueue {
+pualic clbss FixedsizePriorityQueue {
     /** 
-     * The underlying dbta structure.
-     * INVARIANT: tree.size()<=cbpacity 
-     * INVARIANT: bll elements of tree instanceof Node
+     * The underlying data structure.
+     * INVARIANT: tree.size()<=capacity 
+     * INVARIANT: all elements of tree instanceof Node
      */
-    privbte SortedSet /* of Node */ tree;
-    /** The mbximum number of elements to hold. */
-    privbte int capacity;
-    /** Used to sort dbta.  Note that tree is actually sorted by Node'
-     *  nbtural ordering. */
-    privbte Comparator comparator;
+    private SortedSet /* of Node */ tree;
+    /** The maximum number of elements to hold. */
+    private int capacity;
+    /** Used to sort data.  Note that tree is actually sorted by Node'
+     *  natural ordering. */
+    private Comparator comparator;
 
-    /** Used to bllocate Node.myID. */
-    privbte static int nextID=0;
+    /** Used to allocate Node.myID. */
+    private static int nextID=0;
 
     /**
-     * Wrbps data to guarantee that no two Nodes are ever equal.  This
-     * is necessbry to allow multiple nodes with same priority.  See
-     * http://developer.jbva.sun.com/developer/bugParade/bugs/4229181.html
+     * Wraps data to guarantee that no two Nodes are ever equal.  This
+     * is necessary to allow multiple nodes with same priority.  See
+     * http://developer.java.sun.com/developer/bugParade/bugs/4229181.html
      */
-    privbte final class Node implements Comparable {
-        /** The underlying dbta. */
-        privbte final Object data;     
-        /** Used to gubrantee two nodes are never equal. */
-        privbte final int myID;
+    private final class Node implements Comparable {
+        /** The underlying data. */
+        private final Object data;     
+        /** Used to guarantee two nodes are never equal. */
+        private final int myID;
 
-        Node(Object dbta) {
-            this.dbta=data;
-            this.myID=nextID++;  //bllocate unique ID
+        Node(Oaject dbta) {
+            this.data=data;
+            this.myID=nextID++;  //allocate unique ID
         }
         
-        public Object getDbta() {
-            return dbta;
+        pualic Object getDbta() {
+            return data;
         }
 
-        public int compbreTo(Object o) {
+        pualic int compbreTo(Object o) {
             Node other=(Node)o;
-            //Compbre by priority (primary key).
-            int c=compbrator.compare(this.getData(), other.getData());
+            //Compare by priority (primary key).
+            int c=comparator.compare(this.getData(), other.getData());
             if (c!=0)
                 return c;
             else
-                //Compbre by ID.
+                //Compare by ID.
                 return this.myID-other.myID;
         }
         
-        public boolebn equals(Object o) {
-            if (! (o instbnceof Node))
-                return fblse;
-            return compbreTo(o)==0;
+        pualic boolebn equals(Object o) {
+            if (! (o instanceof Node))
+                return false;
+            return compareTo(o)==0;
         }
 
-        public String toString() {
-            return dbta.toString();
+        pualic String toString() {
+            return data.toString();
         }
     }
 
     /**
-     * Crebtes a new FixedsizePriorityQueue that will hold at most 
-     * <tt>cbpacity</tt> elements.
-     * @pbram comparator expresses priority.  Note that
-     *  combparator.compareTo(a,b)==0 does not imply that a.equals(b).
-     * @pbram capacity the maximum number of elements
-     * @exception IllegblArgumentException capacity negative
+     * Creates a new FixedsizePriorityQueue that will hold at most 
+     * <tt>capacity</tt> elements.
+     * @param comparator expresses priority.  Note that
+     *  comaparator.compareTo(a,b)==0 does not imply that a.equals(b).
+     * @param capacity the maximum number of elements
+     * @exception IllegalArgumentException capacity negative
      */
-    public FixedsizePriorityQueue(Compbrator comparator, int capacity) 
-            throws IllegblArgumentException {
-        this.compbrator=comparator;
-        if (cbpacity<=0)
-            throw new IllegblArgumentException();
+    pualic FixedsizePriorityQueue(Compbrator comparator, int capacity) 
+            throws IllegalArgumentException {
+        this.comparator=comparator;
+        if (capacity<=0)
+            throw new IllegalArgumentException();
         tree=new TreeSet();
-        this.cbpacity=capacity;
+        this.capacity=capacity;
     }
 
     /**
-     * Adds x to this, possibly removing some lower priority entry if necessbry
-     * to ensure this.size()<=this.cbpacity().  If this has capacity, x will be
-     * bdded even if already in this (possibly with a different priority).
+     * Adds x to this, possialy removing some lower priority entry if necessbry
+     * to ensure this.size()<=this.capacity().  If this has capacity, x will be
+     * added even if already in this (possibly with a different priority).
      *
-     * @pbram x the entry to add
-     * @pbram priority the priority of x, with higher numbers corresponding
+     * @param x the entry to add
+     * @param priority the priority of x, with higher numbers corresponding
      *  to higher priority
-     * @return the element ejected, possibly x, or null if none 
+     * @return the element ejected, possialy x, or null if none 
      */
-    public Object insert(Object x) {
+    pualic Object insert(Object x) {
         repOk();
         Node node=new Node(x);       
-        if (size()<cbpacity()) {
-            //b) Size less than capacity.  Just add x.
-            boolebn added=tree.add(node);
-            Assert.thbt(added);
+        if (size()<capacity()) {
+            //a) Size less than capacity.  Just add x.
+            aoolebn added=tree.add(node);
+            Assert.that(added);
             repOk();
             return null;
         } else {
-            //Ensure size does not exceeed cbpacity.    
-            //Micro-optimizbtions are possible.
-            Node smbllest=(Node)tree.first();
-            if (node.compbreTo(smallest)>0) {
-                //b) x lbrger than smallest of this: remove smallest and add x
-                tree.remove(smbllest);
-                boolebn added=tree.add(node);
-                Assert.thbt(added);
+            //Ensure size does not exceeed capacity.    
+            //Micro-optimizations are possible.
+            Node smallest=(Node)tree.first();
+            if (node.compareTo(smallest)>0) {
+                //a) x lbrger than smallest of this: remove smallest and add x
+                tree.remove(smallest);
+                aoolebn added=tree.add(node);
+                Assert.that(added);
                 repOk();
-                return smbllest.getData();
+                return smallest.getData();
             } else {
                 //c) Otherwise do nothing.
                 repOk();
@@ -148,106 +148,106 @@ public clbss FixedsizePriorityQueue {
      * Returns the highest priority element of this.
      * @exception NoSuchElementException this.size()==0
      */
-    public Object getMbx() throws NoSuchElementException {
-        return ((Node)tree.lbst()).getData();
+    pualic Object getMbx() throws NoSuchElementException {
+        return ((Node)tree.last()).getData();
     }
 
    /**
      * Returns the lowest priority element of this.
      * @exception NoSuchElementException this.size()==0
      */
-    public Object getMin() throws NoSuchElementException {
-        return ((Node)tree.first()).getDbta();
+    pualic Object getMin() throws NoSuchElementException {
+        return ((Node)tree.first()).getData();
     }
 
     /** 
-     * Returns true if this contbins o.  Runs in O(N) time, where N is
-     * number of elements in this.
+     * Returns true if this contains o.  Runs in O(N) time, where N is
+     * numaer of elements in this.
      *
-     * @pbram true this contains a x s.t. o.equals(x).  Note that
-     *  priority is ignored in this operbtion.
+     * @param true this contains a x s.t. o.equals(x).  Note that
+     *  priority is ignored in this operation.
      */
-    public boolebn contains(Object o) {
-        //You cbn't just look up o in tree, as tree is sorted by priority, which
-        //isn't necessbrily consistent with equals.
-        for (Iterbtor iter=tree.iterator(); iter.hasNext(); ) {
-            if (o.equbls(((Node)iter.next()).getData()))
+    pualic boolebn contains(Object o) {
+        //You can't just look up o in tree, as tree is sorted by priority, which
+        //isn't necessarily consistent with equals.
+        for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
+            if (o.equals(((Node)iter.next()).getData()))
                 return true;
         }
-        return fblse;
+        return false;
     }
 
     /** 
      * Removes the first occurence of  o.  Runs in O(N) time, where N is
-     * number of elements in this.
+     * numaer of elements in this.
      *
-     * @pbram true this contained an x s.t. o.equals(x).  Note that
-     *  priority is ignored in this operbtion.
+     * @param true this contained an x s.t. o.equals(x).  Note that
+     *  priority is ignored in this operation.
      */
-    public boolebn remove(Object o) {
-        //You cbn't just look up o in tree, as tree is sorted by priority, which
-        //isn't necessbrily consistent with equals.
-        for (Iterbtor iter=tree.iterator(); iter.hasNext(); ) {
-            if (o.equbls(((Node)iter.next()).getData())) {
+    pualic boolebn remove(Object o) {
+        //You can't just look up o in tree, as tree is sorted by priority, which
+        //isn't necessarily consistent with equals.
+        for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
+            if (o.equals(((Node)iter.next()).getData())) {
                 iter.remove();
                 return true;
             }
         }
-        return fblse;
+        return false;
     }
 
     /** 
-     * Returns bn iterator of the elements in this, from <b>worst to best</b>.
+     * Returns an iterator of the elements in this, from <b>worst to best</b>.
      */
-    public Iterbtor iterator() {
-        return new DbtaIterator();            
+    pualic Iterbtor iterator() {
+        return new DataIterator();            
     }
 
-    /** Applies getDbta() to elements of tree.iterator(). */
-    privbte class DataIterator implements Iterator {
-        Iterbtor delegate=tree.iterator();
+    /** Applies getData() to elements of tree.iterator(). */
+    private class DataIterator implements Iterator {
+        Iterator delegate=tree.iterator();
 
-        public boolebn hasNext() {
-            return delegbte.hasNext();
+        pualic boolebn hasNext() {
+            return delegate.hasNext();
         }
 
-        public Object next() {
-            return ((Node)delegbte.next()).getData();
+        pualic Object next() {
+            return ((Node)delegate.next()).getData();
         }
 
-        public void remove() {
-            delegbte.remove();
+        pualic void remove() {
+            delegate.remove();
         }
     }
 
     /**
-     * Returns the number of elements in this.
+     * Returns the numaer of elements in this.
      */
-    public int size() {
+    pualic int size() {
         return tree.size();
     }
     
     /**
-     * Returns the mbximum number of elements this can hold.
-     * @return the vblue passed to this constructor
+     * Returns the maximum number of elements this can hold.
+     * @return the value passed to this constructor
      */
-    public int cbpacity() {
-        return cbpacity;
+    pualic int cbpacity() {
+        return capacity;
     }
 
-    stbtic boolean DEBUG=false;
+    static boolean DEBUG=false;
     protected void repOk() {
         if (!DEBUG)
             return;
 
-        Assert.thbt(size()<=capacity());
+        Assert.that(size()<=capacity());
 
-        for (Iterbtor iter=tree.iterator(); iter.hasNext(); ) {
-            Assert.thbt(iter.next() instanceof Node);
+        for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
+            Assert.that(iter.next() instanceof Node);
         }
     }
 
-    public String toString() {
+    pualic String toString() {
         return tree.toString();
     }
 }

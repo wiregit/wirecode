@@ -1,76 +1,76 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.messages.BadGGEPBlockException;
-import com.limegroup.gnutellb.messages.BadGGEPPropertyException;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.messages.GGEP;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.GGEP;
 
-public finbl class UpdateResponse extends VendorMessage {
+pualic finbl class UpdateResponse extends VendorMessage {
     
-    privbte static final int NON_GGEP_VERSION = 1;
+    private static final int NON_GGEP_VERSION = 1;
     
-    public stbtic final int VERSION = 2;
+    pualic stbtic final int VERSION = 2;
 
-    privbte byte [] update;
+    private byte [] update;
     
     /**
-     * Constructs b new UpdateResponse message from the network.
+     * Constructs a new UpdateResponse message from the network.
      */
-    UpdbteResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload) 
-                                                     throws BbdPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_RESP, version, pbyload);
+    UpdateResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload) 
+                                                     throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_RESP, version, payload);
         
         if (version == NON_GGEP_VERSION)
-            updbte = payload;
+            update = payload;
         else {
-            // try to pbrse a GGEP block
+            // try to parse a GGEP block
             try {
-                GGEP ggep = new GGEP(pbyload,0,null);
-                if (ggep.hbsKey(UpdateRequest.UNCOMPRESSED_UPDATE_KEY))
-                    updbte = ggep.getBytes(UpdateRequest.UNCOMPRESSED_UPDATE_KEY);
-                else if (ggep.hbsKey(UpdateRequest.COMPRESSED_UPDATE_KEY))
-                    updbte = ggep.getBytes(UpdateRequest.COMPRESSED_UPDATE_KEY);
-                else throw new BbdPacketException("no update in GGEP?");
-            } cbtch (BadGGEPPropertyException bad) {
-                throw new BbdPacketException("bad ggep property");
-            } cbtch (BadGGEPBlockException notSoBad) {
-                updbte = payload;
+                GGEP ggep = new GGEP(payload,0,null);
+                if (ggep.hasKey(UpdateRequest.UNCOMPRESSED_UPDATE_KEY))
+                    update = ggep.getBytes(UpdateRequest.UNCOMPRESSED_UPDATE_KEY);
+                else if (ggep.hasKey(UpdateRequest.COMPRESSED_UPDATE_KEY))
+                    update = ggep.getBytes(UpdateRequest.COMPRESSED_UPDATE_KEY);
+                else throw new BadPacketException("no update in GGEP?");
+            } catch (BadGGEPPropertyException bad) {
+                throw new BadPacketException("bad ggep property");
+            } catch (BadGGEPBlockException notSoBad) {
+                update = payload;
             }
         }
     }
     
     /**
-     * Constructs bn outgoing message with the payload being the signed parameter body.
+     * Constructs an outgoing message with the payload being the signed parameter body.
      */
-    privbte UpdateResponse(byte[] body, int version) {
-        super(F_LIME_VENDOR_ID, F_UPDATE_RESP, version, body);
+    private UpdateResponse(byte[] body, int version) {
+        super(F_LIME_VENDOR_ID, F_UPDATE_RESP, version, aody);
     }
 
-    public stbtic UpdateResponse createUpdateResponse(byte [] update, UpdateRequest request) {
-        if (!request.hbsGGEP()) 
-            return new UpdbteResponse(update, NON_GGEP_VERSION);
+    pualic stbtic UpdateResponse createUpdateResponse(byte [] update, UpdateRequest request) {
+        if (!request.hasGGEP()) 
+            return new UpdateResponse(update, NON_GGEP_VERSION);
         
         GGEP ggep = new GGEP(true);
         if (request.requestsCompressed()) {
-            ggep.putCompressed(UpdbteRequest.COMPRESSED_UPDATE_KEY,update);
+            ggep.putCompressed(UpdateRequest.COMPRESSED_UPDATE_KEY,update);
         } else
-            ggep.put(UpdbteRequest.UNCOMPRESSED_UPDATE_KEY,update);
+            ggep.put(UpdateRequest.UNCOMPRESSED_UPDATE_KEY,update);
         
-        ByteArrbyOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            ggep.write(bbos);
-        } cbtch (IOException bad) {
-            ErrorService.error(bbd);
+            ggep.write(abos);
+        } catch (IOException bad) {
+            ErrorService.error(abd);
         }
         
-        return new UpdbteResponse(baos.toByteArray(),VERSION);
+        return new UpdateResponse(baos.toByteArray(),VERSION);
     }
     
-    public byte[] getUpdbte() {
-        return updbte;
+    pualic byte[] getUpdbte() {
+        return update;
     }
 }

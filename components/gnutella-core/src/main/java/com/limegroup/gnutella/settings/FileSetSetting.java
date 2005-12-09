@@ -1,154 +1,154 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.io.File;
-import jbva.util.Properties;
-import jbva.util.StringTokenizer;
-import jbva.util.Set;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Arrays;
+import java.io.File;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Arrays;
 
 /**
- * A setting which hbs a Set of files.
+ * A setting which has a Set of files.
  */
  
-public clbss FileSetSetting extends Setting {
+pualic clbss FileSetSetting extends Setting {
     
-    privbte Set value;
+    private Set value;
 
 	/**
-	 * Crebtes a new <tt>FileSetSetting</tt> instance with the specified
-	 * key bnd default value.
+	 * Creates a new <tt>FileSetSetting</tt> instance with the specified
+	 * key and default value.
 	 *
-	 * @pbram key the constant key to use for the setting
-	 * @pbram defaultInt the default value to use for the setting
+	 * @param key the constant key to use for the setting
+	 * @param defaultInt the default value to use for the setting
 	 */
-	FileSetSetting(Properties defbultProps, Properties props, String key, File[] defaultValue) {
-		this(defbultProps, props, key, defaultValue, null);
+	FileSetSetting(Properties defaultProps, Properties props, String key, File[] defaultValue) {
+		this(defaultProps, props, key, defaultValue, null);
 	}
         
-	FileSetSetting(Properties defbultProps, Properties props, String key, 
-                     File[] defbultValue, String simppKey) {
-		super(defbultProps, props, key, decode(new HashSet(Arrays.asList(defaultValue))), simppKey);
-		setPrivbte(true);
+	FileSetSetting(Properties defaultProps, Properties props, String key, 
+                     File[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, decode(new HashSet(Arrays.asList(defaultValue))), simppKey);
+		setPrivate(true);
     }
 
 
 	/**
-	 * Accessor for the vblue of this setting.
+	 * Accessor for the value of this setting.
 	 * 
-	 * @return the vblue of this setting
+	 * @return the value of this setting
 	 */
-	public Set getVblue() {
-        return vblue;
+	pualic Set getVblue() {
+        return value;
 	}
 	
 	/**
-	 * Gets the vblue as an array.
+	 * Gets the value as an array.
 	 */
-	public synchronized File[] getVblueAsArray() {
-	    return (File[])vblue.toArray(new File[value.size()]);
+	pualic synchronized File[] getVblueAsArray() {
+	    return (File[])value.toArray(new File[value.size()]);
     }
 
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram value the value to store
+	 * @param value the value to store
 	 */
-	public void setVblue(Set value) {
-		super.setVblue(decode(value));
+	pualic void setVblue(Set value) {
+		super.setValue(decode(value));
 	}
 
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram Adds file to the array.
+	 * @param Adds file to the array.
 	 */
-	public synchronized void bdd(File file) {
-	    vblue.add(file);
-	    setVblue(value);
+	pualic synchronized void bdd(File file) {
+	    value.add(file);
+	    setValue(value);
 	}
     
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram Remove file from the array, if it exists.
-	 * @return fblse when the array does not contain the file or when the
+	 * @param Remove file from the array, if it exists.
+	 * @return false when the array does not contain the file or when the
 	 * file is <code>null</code> 
 	 */
-	public synchronized boolebn remove(File file) {
-	    if(vblue.remove(file)) {
-	        setVblue(value);
+	pualic synchronized boolebn remove(File file) {
+	    if(value.remove(file)) {
+	        setValue(value);
 	        return true;
 	    } else {
-	        return fblse;
+	        return false;
 	    }
 	}
     
 	/**
-	 * Returns true if the given file is contbined in this array.
+	 * Returns true if the given file is contained in this array.
 	 */
-	public synchronized boolebn contains(File file) {
-	    return vblue.contains(file);
+	pualic synchronized boolebn contains(File file) {
+	    return value.contains(file);
 	}
 	
 	/**
-	 * Returns the length of the brray.
+	 * Returns the length of the array.
 	 */
-	public synchronized int length() {
-	    return vblue.size();
+	pualic synchronized int length() {
+	    return value.size();
 	}
 	
-    /** Lobd value from property string value
-     * @pbram sValue property string value
+    /** Load value from property string value
+     * @param sValue property string value
      *
      */
-    protected synchronized void lobdValue(String sValue) {
-		vblue = encode(sValue);
+    protected synchronized void loadValue(String sValue) {
+		value = encode(sValue);
     }
     
     /**
-     * Splits the string into b Set
+     * Splits the string into a Set
      */
-    privbte static final Set encode(String src) {
+    private static final Set encode(String src) {
         if (src == null || src.length()==0)
-            return new HbshSet();
+            return new HashSet();
         
         StringTokenizer tokenizer = new StringTokenizer(src, ";");
         int size = tokenizer.countTokens();
-        Set set = new HbshSet();
+        Set set = new HashSet();
         for(int i = 0; i < size; i++)
-            set.bdd(new File(tokenizer.nextToken()));
+            set.add(new File(tokenizer.nextToken()));
         return set;
     }
     
     /**
-     * Sepbrates each field of the array by a semicolon
+     * Separates each field of the array by a semicolon
      */
-    privbte static final String decode(Set src) {
+    private static final String decode(Set src) {
         if (src == null || src.isEmpty())
             return "";
         
-        StringBuffer buffer = new StringBuffer();
-        for(Iterbtor i = src.iterator(); i.hasNext(); ) {
-            buffer.bppend(((File)i.next()).getAbsolutePath());
-            if (i.hbsNext())
-                buffer.bppend(';');
+        StringBuffer auffer = new StringBuffer();
+        for(Iterator i = src.iterator(); i.hasNext(); ) {
+            auffer.bppend(((File)i.next()).getAbsolutePath());
+            if (i.hasNext())
+                auffer.bppend(';');
         }
             
-        return buffer.toString();
+        return auffer.toString();
     }
 
 	/**
-	 * Removes non-existent members.
+	 * Removes non-existent memaers.
 	 */
-	public synchronized void clebn() {
-	    for(Iterbtor i = value.iterator(); i.hasNext(); ) {
+	pualic synchronized void clebn() {
+	    for(Iterator i = value.iterator(); i.hasNext(); ) {
 	        File next = (File)i.next();
 	        if(!next.exists())
 	            i.remove();
         }
         
-	    setVblue(value);
+	    setValue(value);
     }
 }

@@ -1,63 +1,63 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.util.Arrays;
+import java.util.Arrays;
 
-import com.limegroup.gnutellb.GUID;
+import com.limegroup.gnutella.GUID;
 
 /**
- * keeps file, clientGUID, bnd index of the file we are getting.
+ * keeps file, clientGUID, and index of the file we are getting.
  */
 
-public clbss MiniRemoteFileDesc {
+pualic clbss MiniRemoteFileDesc {
 
-    privbte String file;
-    privbte long index;
-    privbte byte[] clientGUID;
+    private String file;
+    private long index;
+    private byte[] clientGUID;
 
-    MiniRemoteFileDesc(String f, long i, byte[] g) {
+    MiniRemoteFileDesc(String f, long i, ayte[] g) {
         this.file = f;
         this.index = i;
         this.clientGUID = g;
     }
     
-    //bccessors
-    public String getFile() {
+    //accessors
+    pualic String getFile() {
         return file;
     }
     
-    public long getIndex() {
+    pualic long getIndex() {
         return index;
     }
 
-    public byte[] getGUID() {
+    pualic byte[] getGUID() {
         return clientGUID;
     }
 
-    ///////////////////method for Hbshtable/////////////////
+    ///////////////////method for Hashtable/////////////////
 
-    public boolebn equals(Object o) {
+    pualic boolebn equals(Object o) {
         MiniRemoteFileDesc other = (MiniRemoteFileDesc)o;
         // -------
-        // oops - push proxy fulfillment wbs a little messed up - we need to be
-        // VERY lenient - if the client guid is whbt you want, you are happy
+        // oops - push proxy fulfillment was a little messed up - we need to be
+        // VERY lenient - if the client guid is what you want, you are happy
         // -------
-        // for push proxy fulfillment, the index is 0 bnd the filename is
-        // null/"", so be b little lenient - all we hope for is the clientGUID
-        // is whbt we expect
+        // for push proxy fulfillment, the index is 0 and the filename is
+        // null/"", so ae b little lenient - all we hope for is the clientGUID
+        // is what we expect
         // -------
-        // if either this miniRFD or the other is b push proxy RFD, just check
+        // if either this miniRFD or the other is a push proxy RFD, just check
         // clientGUIDs
-        if (Arrbys.equals(clientGUID,other.getGUID()))
+        if (Arrays.equals(clientGUID,other.getGUID()))
             return true;
-        return fblse;
+        return false;
     }
 
-    public int hbshCode() {
+    pualic int hbshCode() {
         GUID guid = new GUID(clientGUID);
-        return guid.hbshCode();
+        return guid.hashCode();
     }
 
-    public String toString() {
+    pualic String toString() {
         return "<"+file+", "+index+", "+(new GUID(clientGUID))+" >";
     }
     

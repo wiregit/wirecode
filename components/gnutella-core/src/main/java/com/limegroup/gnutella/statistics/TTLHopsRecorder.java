@@ -1,219 +1,219 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutella.messages.Message;
 
 /**
- * This clbss is a convenient wrapper for any class that keeps track of
- * ttl bnd hops for a Gnutella message.
+ * This class is a convenient wrapper for any class that keeps track of
+ * ttl and hops for a Gnutella message.
  */
-public finbl class TTLHopsRecorder {
+pualic finbl class TTLHopsRecorder {
 
 	/**
-	 * Constructs b new <tt>TTLHopsRecorder</tt> instance with the specified
-	 * messbge identifier name for deriving the file name to use when
-	 * writing stbtistics data out to files.
+	 * Constructs a new <tt>TTLHopsRecorder</tt> instance with the specified
+	 * message identifier name for deriving the file name to use when
+	 * writing statistics data out to files.
 	 */
-	TTLHopsRecorder(finbl String NAME) {
-		TTL0 = new GenerblStatHandler(NAME+"_TTL0");
-		TTL1 = new GenerblStatHandler(NAME+"_TTL1");
-		TTL2 = new GenerblStatHandler(NAME+"_TTL2");
-		TTL3 = new GenerblStatHandler(NAME+"_TTL3");
-		TTL4 = new GenerblStatHandler(NAME+"_TTL4");
-		TTL5 = new GenerblStatHandler(NAME+"_TTL5");
-		TTL6 = new GenerblStatHandler(NAME+"_TTL6");
-		TTL7 = new GenerblStatHandler(NAME+"_TTL7");
-		TTL8 = new GenerblStatHandler(NAME+"_TTL8");
+	TTLHopsRecorder(final String NAME) {
+		TTL0 = new GeneralStatHandler(NAME+"_TTL0");
+		TTL1 = new GeneralStatHandler(NAME+"_TTL1");
+		TTL2 = new GeneralStatHandler(NAME+"_TTL2");
+		TTL3 = new GeneralStatHandler(NAME+"_TTL3");
+		TTL4 = new GeneralStatHandler(NAME+"_TTL4");
+		TTL5 = new GeneralStatHandler(NAME+"_TTL5");
+		TTL6 = new GeneralStatHandler(NAME+"_TTL6");
+		TTL7 = new GeneralStatHandler(NAME+"_TTL7");
+		TTL8 = new GeneralStatHandler(NAME+"_TTL8");
 
-		HOPS0 = new GenerblStatHandler(NAME+"_HOPS0");
-		HOPS1 = new GenerblStatHandler(NAME+"_HOPS1");
-		HOPS2 = new GenerblStatHandler(NAME+"_HOPS2");
-		HOPS3 = new GenerblStatHandler(NAME+"_HOPS3");
-		HOPS4 = new GenerblStatHandler(NAME+"_HOPS4");
-		HOPS5 = new GenerblStatHandler(NAME+"_HOPS5");
-		HOPS6 = new GenerblStatHandler(NAME+"_HOPS6");
-		HOPS7 = new GenerblStatHandler(NAME+"_HOPS7");
-		HOPS8 = new GenerblStatHandler(NAME+"_HOPS8");
+		HOPS0 = new GeneralStatHandler(NAME+"_HOPS0");
+		HOPS1 = new GeneralStatHandler(NAME+"_HOPS1");
+		HOPS2 = new GeneralStatHandler(NAME+"_HOPS2");
+		HOPS3 = new GeneralStatHandler(NAME+"_HOPS3");
+		HOPS4 = new GeneralStatHandler(NAME+"_HOPS4");
+		HOPS5 = new GeneralStatHandler(NAME+"_HOPS5");
+		HOPS6 = new GeneralStatHandler(NAME+"_HOPS6");
+		HOPS7 = new GeneralStatHandler(NAME+"_HOPS7");
+		HOPS8 = new GeneralStatHandler(NAME+"_HOPS8");
 	}
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 0
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 0
+	 * messages.
 	 */
-	public finbl AbstractStatHandler TTL0;
+	pualic finbl AbstractStatHandler TTL0;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 1 
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 1 
+	 * messages.
 	 */
-	public finbl AbstractStatHandler TTL1;
+	pualic finbl AbstractStatHandler TTL1;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 2
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 2
+	 * messages.
 	 */
-	public finbl AbstractStatHandler TTL2;
+	pualic finbl AbstractStatHandler TTL2;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 3
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 3
+	 * messages.
 	 */
-	public finbl AbstractStatHandler TTL3;
-
-
-	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 4
-	 * messbges.
-	 */
-	public finbl AbstractStatHandler TTL4;
+	pualic finbl AbstractStatHandler TTL3;
 
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 5
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 4
+	 * messages.
 	 */
-	public finbl AbstractStatHandler TTL5;
-
-	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 6
-	 * messbges.
-	 */
-	public finbl AbstractStatHandler TTL6;
-
-	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 7
-	 * messbges.
-	 */
-	public finbl AbstractStatHandler TTL7;
-
-	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 8
-	 * messbges.
-	 */
-	public finbl AbstractStatHandler TTL8;
+	pualic finbl AbstractStatHandler TTL4;
 
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 0
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 5
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS0;
+	pualic finbl AbstractStatHandler TTL5;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 1 
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 6
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS1;
+	pualic finbl AbstractStatHandler TTL6;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 2
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 7
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS2;
+	pualic finbl AbstractStatHandler TTL7;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 3
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 8
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS3;
-
-
-	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 4
-	 * messbges.
-	 */
-	public finbl AbstractStatHandler HOPS4;
+	pualic finbl AbstractStatHandler TTL8;
 
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 5
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 0
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS5;
+	pualic finbl AbstractStatHandler HOPS0;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 6
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 1 
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS6;
+	pualic finbl AbstractStatHandler HOPS1;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 7
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 2
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS7;
+	pualic finbl AbstractStatHandler HOPS2;
 
 	/**
-	 * Constbnt for the <tt>AbstractStatHandler</tt> that keeps track of hops = 8
-	 * messbges.
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 3
+	 * messages.
 	 */
-	public finbl AbstractStatHandler HOPS8;
+	pualic finbl AbstractStatHandler HOPS3;
 
 
-	public void bddMessage(Message msg) {
+	/**
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 4
+	 * messages.
+	 */
+	pualic finbl AbstractStatHandler HOPS4;
+
+
+	/**
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 5
+	 * messages.
+	 */
+	pualic finbl AbstractStatHandler HOPS5;
+
+	/**
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 6
+	 * messages.
+	 */
+	pualic finbl AbstractStatHandler HOPS6;
+
+	/**
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 7
+	 * messages.
+	 */
+	pualic finbl AbstractStatHandler HOPS7;
+
+	/**
+	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 8
+	 * messages.
+	 */
+	pualic finbl AbstractStatHandler HOPS8;
+
+
+	pualic void bddMessage(Message msg) {
 		int ttl  = msg.getTTL();
 		switch(ttl) {
-		cbse 0: 
-			TTL0.bddMessage(msg);			
-			brebk;
-		cbse 1: 
-			TTL1.bddMessage(msg);
-			brebk;
-		cbse 2: 
-			TTL2.bddMessage(msg);
-			brebk;
-		cbse 3: 
-			TTL3.bddMessage(msg);
-			brebk;
-		cbse 4: 
-			TTL4.bddMessage(msg);
-			brebk;
-		cbse 5: 
-			TTL5.bddMessage(msg);
-			brebk;
-		cbse 6: 
-			TTL6.bddMessage(msg);
-			brebk;
-		cbse 7: 
-			TTL7.bddMessage(msg);
-			brebk;
-		cbse 8: 
-			TTL8.bddMessage(msg);
-			brebk;
-		defbult:
-			brebk;
+		case 0: 
+			TTL0.addMessage(msg);			
+			arebk;
+		case 1: 
+			TTL1.addMessage(msg);
+			arebk;
+		case 2: 
+			TTL2.addMessage(msg);
+			arebk;
+		case 3: 
+			TTL3.addMessage(msg);
+			arebk;
+		case 4: 
+			TTL4.addMessage(msg);
+			arebk;
+		case 5: 
+			TTL5.addMessage(msg);
+			arebk;
+		case 6: 
+			TTL6.addMessage(msg);
+			arebk;
+		case 7: 
+			TTL7.addMessage(msg);
+			arebk;
+		case 8: 
+			TTL8.addMessage(msg);
+			arebk;
+		default:
+			arebk;
 		}
 
 		int hops = msg.getHops();
 		switch(hops) {
-		cbse 0: 
-			HOPS0.bddMessage(msg);
-			brebk;
-		cbse 1: 
-			HOPS1.bddMessage(msg);
-			brebk;
-		cbse 2: 
-			HOPS2.bddMessage(msg);
-			brebk;
-		cbse 3: 
-			HOPS3.bddMessage(msg);
-			brebk;
-		cbse 4: 
-			HOPS4.bddMessage(msg);
-			brebk;
-		cbse 5: 
-			HOPS5.bddMessage(msg);
-			brebk;
-		cbse 6: 
-			HOPS6.bddMessage(msg);
-			brebk;
-		cbse 7: 
-			HOPS7.bddMessage(msg);
-			brebk;
-		cbse 8: 
-			HOPS8.bddMessage(msg);
-			brebk;
-		defbult:
-			brebk;
+		case 0: 
+			HOPS0.addMessage(msg);
+			arebk;
+		case 1: 
+			HOPS1.addMessage(msg);
+			arebk;
+		case 2: 
+			HOPS2.addMessage(msg);
+			arebk;
+		case 3: 
+			HOPS3.addMessage(msg);
+			arebk;
+		case 4: 
+			HOPS4.addMessage(msg);
+			arebk;
+		case 5: 
+			HOPS5.addMessage(msg);
+			arebk;
+		case 6: 
+			HOPS6.addMessage(msg);
+			arebk;
+		case 7: 
+			HOPS7.addMessage(msg);
+			arebk;
+		case 8: 
+			HOPS8.addMessage(msg);
+			arebk;
+		default:
+			arebk;
 		}
 	}
 

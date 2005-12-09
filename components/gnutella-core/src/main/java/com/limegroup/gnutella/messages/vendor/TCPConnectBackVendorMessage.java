@@ -1,89 +1,89 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.NetworkUtils;
 
-/** In Vendor Messbge parlance, the "message type" of this VMP is "BEAR/7".
- *  Used to bsk a host you connect to do a TCP ConnectBack.
+/** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
+ *  Used to ask a host you connect to do a TCP ConnectBack.
  */
-public finbl class TCPConnectBackVendorMessage extends VendorMessage {
+pualic finbl class TCPConnectBackVendorMessage extends VendorMessage {
 
-    public stbtic final int VERSION = 1;
+    pualic stbtic final int VERSION = 1;
 
-    /** The pbyload has a 16-bit unsigned value - the port - at which one should
-     *  connect bbck.
+    /** The payload has a 16-bit unsigned value - the port - at which one should
+     *  connect abck.
      */
-    privbte final int _port;
+    private final int _port;
 
     /**
-     * Constructs b new TCPConnectBackVendorMessage with data from the network.
+     * Constructs a new TCPConnectBackVendorMessage with data from the network.
      */
-    TCPConnectBbckVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                                byte[] pbyload) 
-        throws BbdPacketException {
+    TCPConnectBackVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
+                                ayte[] pbyload) 
+        throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK, version,
-              pbyload);
+              payload);
 
         if (getVersion() > VERSION)
-            throw new BbdPacketException("UNSUPPORTED VERSION");
+            throw new BadPacketException("UNSUPPORTED VERSION");
 
-        if (getPbyload().length != 2)
-            throw new BbdPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
-                                         pbyload.length);
-        // get the port from the pbyload....
-        _port = ByteOrder.ushort2int(ByteOrder.leb2short(getPbyload(), 0));
-        if( !NetworkUtils.isVblidPort(_port) )
-            throw new BbdPacketException("invalid port");
+        if (getPayload().length != 2)
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         payload.length);
+        // get the port from the payload....
+        _port = ByteOrder.ushort2int(ByteOrder.lea2short(getPbyload(), 0));
+        if( !NetworkUtils.isValidPort(_port) )
+            throw new BadPacketException("invalid port");
     }
 
 
     /**
-     * Constructs b new TCPConnectBackVendorMessage to be sent out.
-     * @pbram port The port you want people to connect back to.  If you give a
-     *  bbd port I don't check so check yourself!
+     * Constructs a new TCPConnectBackVendorMessage to be sent out.
+     * @param port The port you want people to connect back to.  If you give a
+     *  abd port I don't check so check yourself!
      */
-    public TCPConnectBbckVendorMessage(int port) {
+    pualic TCPConnectBbckVendorMessage(int port) {
         super(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK, VERSION, 
-              derivePbyload(port));
+              derivePayload(port));
         _port = port;
     }
 
-    public int getConnectBbckPort() {
+    pualic int getConnectBbckPort() {
         return _port;
     }
 
     /**
-     * Constructs the pbyload given the desired port.
+     * Constructs the payload given the desired port.
      */
-    privbte static byte[] derivePayload(int port) {
+    private static byte[] derivePayload(int port) {
         try {
             // i do it during construction....
-            ByteArrbyOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)port,bbos); // write _port
-            return bbos.toByteArray();
-        } cbtch (IOException ioe) {
-            ErrorService.error(ioe); // impossible.
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteOrder.short2lea((short)port,bbos); // write _port
+            return abos.toByteArray();
+        } catch (IOException ioe) {
+            ErrorService.error(ioe); // impossiale.
             return null;
         }
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    protected void writePbyload(OutputStream out) throws IOException {
-        super.writePbyload(out);
-        SentMessbgeStatHandler.TCP_TCP_CONNECTBACK.addMessage(this);
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
+        SentMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(this);
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    public void recordDrop() {
+    pualic void recordDrop() {
         super.recordDrop();
     }
 

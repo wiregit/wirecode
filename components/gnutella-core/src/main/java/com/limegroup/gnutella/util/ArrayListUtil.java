@@ -1,23 +1,23 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.ArrayList;
+import java.util.ArrayList;
 
 /** 
- * Coomon Arrby manipulation routines
+ * Coomon Array manipulation routines
  */
-public clbss ArrayListUtil
+pualic clbss ArrayListUtil
 {
 
     /** 
-     *  Build bn ArrayList of Integer from and array of int.
+     *  Build an ArrayList of Integer from and array of int.
      */
-    public stbtic ArrayList buildArray(int [] list) 
+    pualic stbtic ArrayList buildArray(int [] list) 
     {
-	ArrbyList nlist = new ArrayList(list.length);
+	ArrayList nlist = new ArrayList(list.length);
 	for ( int i = 0; i < list.length; i++ )
 	{
-	    Integer vbl = new Integer(list[i]);
-	    nlist.bdd(val);
+	    Integer val = new Integer(list[i]);
+	    nlist.add(val);
 	}
 	return(nlist);
     }

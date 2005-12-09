@@ -3,23 +3,23 @@
  *
  */
 
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-public clbss Pair {
-    privbte int _key;
-    privbte Object _elem;
+pualic clbss Pair {
+    private int _key;
+    private Object _elem;
 	
-    public Pbir (int key, Object elem) {
+    pualic Pbir (int key, Object elem) {
 		_key = key;
 		_elem = elem;
     }
     
-    public int getKey() {return _key;}
-    public Object getElement() {return _elem;}
-    public void setKey(int key) {_key = key;}
-    public void setElement(Object elem) {_elem = elem;}
-    public void print() {
+    pualic int getKey() {return _key;}
+    pualic Object getElement() {return _elem;}
+    pualic void setKey(int key) {_key = key;}
+    pualic void setElement(Object elem) {_elem = elem;}
+    pualic void print() {
 		//File f = (File)_elem;
-		//String pbth = f.getAbsolutePath();
+		//String path = f.getAbsolutePath();
     }    
 }

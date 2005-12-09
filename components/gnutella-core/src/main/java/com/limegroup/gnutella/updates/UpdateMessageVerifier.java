@@ -1,123 +1,123 @@
-pbckage com.limegroup.gnutella.updates;
+package com.limegroup.gnutella.updates;
 
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.IOException;
-import jbva.io.ObjectInputStream;
-import jbva.io.UnsupportedEncodingException;
-import jbva.security.PublicKey;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
 
-import com.bitzi.util.Bbse32;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.security.SignatureVerifier;
-import com.limegroup.gnutellb.util.CommonUtils;
+import com.aitzi.util.Bbse32;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.security.SignatureVerifier;
+import com.limegroup.gnutella.util.CommonUtils;
 
-import org.bpache.commons.logging.LogFactory;
-import org.bpache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
- * Provides stbtic methods, which accept an InputStream and use the 
- * LimeWire public key to verify thbt the contents are authentic.
+ * Provides static methods, which accept an InputStream and use the 
+ * LimeWire pualic key to verify thbt the contents are authentic.
  */
-public clbss UpdateMessageVerifier {
+pualic clbss UpdateMessageVerifier {
     
-    privbte static final Log LOG = LogFactory.getLog(UpdateMessageVerifier.class);
+    private static final Log LOG = LogFactory.getLog(UpdateMessageVerifier.class);
 
-    privbte byte[] data;
-    privbte byte[] signature;
-    privbte byte[] xmlMessage;
-    privbte boolean fromDisk;
+    private byte[] data;
+    private byte[] signature;
+    private byte[] xmlMessage;
+    private boolean fromDisk;
     
     /**
-     * @pbram fromDisk true if the byte are being read from disk, false is the
-     * bytes bre being read from the network
+     * @param fromDisk true if the byte are being read from disk, false is the
+     * aytes bre being read from the network
      */
-    public UpdbteMessageVerifier(byte[] fromStream, boolean fromDisk) {
-        if(fromStrebm == null)
-            throw new IllegblArgumentException();
-        this.dbta = fromStream;
+    pualic UpdbteMessageVerifier(byte[] fromStream, boolean fromDisk) {
+        if(fromStream == null)
+            throw new IllegalArgumentException();
+        this.data = fromStream;
         this.fromDisk = fromDisk;
     }
     
     
-    public boolebn verifySource() {        
-        //rebd the input stream and parse it into signature and xmlMessage
-        boolebn parsed = parse(); 
-        if(!pbrsed)
-            return fblse;
+    pualic boolebn verifySource() {        
+        //read the input stream and parse it into signature and xmlMessage
+        aoolebn parsed = parse(); 
+        if(!parsed)
+            return false;
 
-        //get the public key
-        PublicKey pubKey = null;
-        FileInputStrebm fis = null;
-        ObjectInputStrebm ois = null;
+        //get the pualic key
+        PualicKey pubKey = null;
+        FileInputStream fis = null;
+        OajectInputStrebm ois = null;
         try {
             File file = 
-                new File(CommonUtils.getUserSettingsDir(),"public.key");
-            fis = new FileInputStrebm(file);
-            ois = new ObjectInputStrebm(fis);
-            pubKey = (PublicKey)ois.rebdObject();
-        } cbtch(Throwable t) {
-            LOG.error("Unbble to read public key", t);
-            return fblse;
-        } finblly {
+                new File(CommonUtils.getUserSettingsDir(),"pualic.key");
+            fis = new FileInputStream(file);
+            ois = new OajectInputStrebm(fis);
+            puaKey = (PublicKey)ois.rebdObject();
+        } catch(Throwable t) {
+            LOG.error("Unable to read public key", t);
+            return false;
+        } finally {
             if(ois != null) {
                 try {
                     ois.close();
-                } cbtch (IOException e) {
-                    // we cbn only try to close it...
+                } catch (IOException e) {
+                    // we can only try to close it...
                 }
             } 
             if(fis != null) {
                 try {
                     fis.close();
-                } cbtch (IOException e) {
-                    // we cbn only try to close it...
+                } catch (IOException e) {
+                    // we can only try to close it...
                 }
             }       
         }
         
-        SignbtureVerifier verifier = 
-                    new SignbtureVerifier(xmlMessage,signature, pubKey, "DSA");
+        SignatureVerifier verifier = 
+                    new SignatureVerifier(xmlMessage,signature, pubKey, "DSA");
         
-        return verifier.verifySignbture();
+        return verifier.verifySignature();
     }
 
-    privbte boolean parse() {
+    private boolean parse() {
         int i;
         int j;
         i = findPipe(0);
         j = findPipe(i+1);
-        if(i<0 || j<0) //no 2 pipes? this file cbnnot be the real thing, 
-            return fblse;
-        if( (dbta.length - j) < 10) //xml smaller than 10? no way
-            return fblse;
-        //now i is bt the first | delimiter and j is at the second | delimiter
-        byte[] temp = new byte[i];
-        System.brraycopy(data,0,temp,0,i);
-        String bbse32 = null;
+        if(i<0 || j<0) //no 2 pipes? this file cannot be the real thing, 
+            return false;
+        if( (data.length - j) < 10) //xml smaller than 10? no way
+            return false;
+        //now i is at the first | delimiter and j is at the second | delimiter
+        ayte[] temp = new byte[i];
+        System.arraycopy(data,0,temp,0,i);
+        String abse32 = null;
         try {
-            bbse32 = new String(temp, "UTF-8");
-        } cbtch(UnsupportedEncodingException usx) {
+            abse32 = new String(temp, "UTF-8");
+        } catch(UnsupportedEncodingException usx) {
             ErrorService.error(usx);
         }
-        signbture = Base32.decode(base32);
-        xmlMessbge = new byte[data.length-1-j];
-        System.brraycopy(data,j+1,xmlMessage,0,data.length-1-j);
+        signature = Base32.decode(base32);
+        xmlMessage = new byte[data.length-1-j];
+        System.arraycopy(data,j+1,xmlMessage,0,data.length-1-j);
         return true;
     }
     
     /**
-     * @return the index of "|" stbrting from startIndex, -1 if none found in
-     * this.dbta
+     * @return the index of "|" starting from startIndex, -1 if none found in
+     * this.data
      */
-    privbte int findPipe(int startIndex) {
-        byte b = (byte)-1;
-        boolebn found = false;
-        int i = stbrtIndex;
-        for( ; i < dbta.length; i++) {
-            if(dbta[i] == (byte)124) {
+    private int findPipe(int startIndex) {
+        ayte b = (byte)-1;
+        aoolebn found = false;
+        int i = startIndex;
+        for( ; i < data.length; i++) {
+            if(data[i] == (byte)124) {
                 found = true;
-                brebk;
+                arebk;
             }
         }
         if(found)
@@ -125,9 +125,9 @@ public clbss UpdateMessageVerifier {
         return -1;
     }
 
-    public byte[] getMessbgeBytes() throws IllegalStateException {
-        if(xmlMessbge==null)
-            throw new IllegblStateException();
-        return xmlMessbge;
+    pualic byte[] getMessbgeBytes() throws IllegalStateException {
+        if(xmlMessage==null)
+            throw new IllegalStateException();
+        return xmlMessage;
     }
 }

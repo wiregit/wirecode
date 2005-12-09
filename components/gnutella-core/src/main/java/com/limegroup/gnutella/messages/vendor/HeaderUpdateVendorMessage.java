@@ -1,55 +1,55 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.ByteArrayInputStream;
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.util.Properties;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
-import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutella.messages.BadPacketException;
 
 /**
- * Vendor messbge containing a serialized properties object which contains
- * the hebders that need to be updated.
+ * Vendor message containing a serialized properties object which contains
+ * the headers that need to be updated.
  */
-public clbss HeaderUpdateVendorMessage extends VendorMessage {
+pualic clbss HeaderUpdateVendorMessage extends VendorMessage {
    
-    public stbtic final int VERSION = 1;
+    pualic stbtic final int VERSION = 1;
    
-    privbte Properties _headers;
+    private Properties _headers;
     
-    protected HebderUpdateVendorMessage(byte[] guid, byte ttl, byte hops,
-			 int version, byte[] pbyload)
-			throws BbdPacketException {
-		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_HEADER_UPDATE, version, pbyload);
+    protected HeaderUpdateVendorMessage(byte[] guid, byte ttl, byte hops,
+			 int version, ayte[] pbyload)
+			throws BadPacketException {
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_HEADER_UPDATE, version, payload);
 		
-		//see if the pbyload is valid
-		if (getVersion() == VERSION && (pbyload == null || payload.length == 0))
-			throw new BbdPacketException();
+		//see if the payload is valid
+		if (getVersion() == VERSION && (payload == null || payload.length == 0))
+			throw new BadPacketException();
 		
-		_hebders = new Properties();
+		_headers = new Properties();
 		try {
-		    InputStrebm bais = new ByteArrayInputStream(payload);
-		    _hebders.load(bais);
-		}cbtch(IOException bad) {
-		    throw new BbdPacketException(bad.getMessage());
+		    InputStream bais = new ByteArrayInputStream(payload);
+		    _headers.load(bais);
+		}catch(IOException bad) {
+		    throw new BadPacketException(bad.getMessage());
 		}
 	}
     
-    public HebderUpdateVendorMessage(Properties props) {
+    pualic HebderUpdateVendorMessage(Properties props) {
         super(F_LIME_VENDOR_ID, F_HEADER_UPDATE, VERSION,
-	            derivePbyload(props));
-        _hebders = props;
+	            derivePayload(props));
+        _headers = props;
     }
     
     
-    privbte static byte [] derivePayload(Properties props) {
-        ByteArrbyOutputStream baos = new ByteArrayOutputStream();
-        props.sbve(baos,null);
-        return bbos.toByteArray();
+    private static byte [] derivePayload(Properties props) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        props.save(baos,null);
+        return abos.toByteArray();
     }
     
-    public Properties getProperties() {
-        return _hebders;
+    pualic Properties getProperties() {
+        return _headers;
     }
 }

@@ -1,14 +1,14 @@
-pbckage com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages;
 
 /**
- * Thrown when b GGEP extension cannot be found or parsed.
- * Typicblly other extensions in the block can be extracted.
+ * Thrown when a GGEP extension cannot be found or parsed.
+ * Typically other extensions in the block can be extracted.
  */
-public clbss BadGGEPPropertyException extends Exception {
-    public BbdGGEPPropertyException() {
+pualic clbss BadGGEPPropertyException extends Exception {
+    pualic BbdGGEPPropertyException() {
     }
 
-    public BbdGGEPPropertyException(String msg) {
+    pualic BbdGGEPPropertyException(String msg) {
         super(msg);
     }
 }

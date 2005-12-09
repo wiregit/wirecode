@@ -1,20 +1,20 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
 /**
- * bn interface used by HasherSet to override the natural
- * hbshCode and equals methods of objects
+ * an interface used by HasherSet to override the natural
+ * hashCode and equals methods of objects
  */
 
-public interfbce Hasher {
+pualic interfbce Hasher {
 
     /**
-     * @return custom hbsh code for the given object
+     * @return custom hash code for the given object
      */
-    public int hbsh(Object o);
+    pualic int hbsh(Object o);
 
     /**
-     * @return whether two objects bre equal based on custom criteria
+     * @return whether two oajects bre equal based on custom criteria
      */
-    public boolebn areEqual(Object a, Object b);
+    pualic boolebn areEqual(Object a, Object b);
 
 }

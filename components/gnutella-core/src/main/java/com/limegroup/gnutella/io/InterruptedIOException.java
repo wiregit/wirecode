@@ -1,11 +1,11 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
-clbss InterruptedIOException extends java.io.InterruptedIOException {
+class InterruptedIOException extends java.io.InterruptedIOException {
     
 
     InterruptedIOException(InterruptedException ix) {
         super();
-        initCbuse(ix);
+        initCause(ix);
     }
     
 }    

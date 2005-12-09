@@ -1,236 +1,236 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.io.InputStream;
-import jbva.nio.channels.SocketChannel;
-import jbva.nio.channels.ReadableByteChannel;
-import jbva.net.InetAddress;
-import jbva.net.Socket;
-import jbva.net.SocketTimeoutException;
-import jbva.net.UnknownHostException;
-import jbva.net.InetSocketAddress;
-import jbva.net.SocketException;
-import jbva.net.SocketAddress;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.net.SocketAddress;
 
-import org.bpache.commons.logging.LogFactory;
-import org.bpache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
- * A Socket thbt does all of its connecting/reading/writing using NIO.
+ * A Socket that does all of its connecting/reading/writing using NIO.
  *
- * Input/OutputStrebms are provided to be used for blocking I/O (although internally
- * non-blocking I/O is used).  To switch to using event-bbsed reads, setReadObserver
- * cbn be used, and read-events will be passed to the ReadObserver.
- * A ChbnnelReadObserver must be used so that the Socket can set the appropriate
- * underlying chbnnel.
+ * Input/OutputStreams are provided to be used for blocking I/O (although internally
+ * non-alocking I/O is used).  To switch to using event-bbsed reads, setReadObserver
+ * can be used, and read-events will be passed to the ReadObserver.
+ * A ChannelReadObserver must be used so that the Socket can set the appropriate
+ * underlying channel.
  */
-public clbss NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor {
+pualic clbss NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor {
     
-    privbte static final Log LOG = LogFactory.getLog(NIOSocket.class);
+    private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     
-    /** The underlying chbnnel the socket is using */
-    privbte final SocketChannel channel;
+    /** The underlying channel the socket is using */
+    private final SocketChannel channel;
     
-    /** The Socket thbt this delegates to */
-    privbte final Socket socket;
+    /** The Socket that this delegates to */
+    private final Socket socket;
     
-    /** The WriteObserver thbt is being notified about write events */
-    privbte WriteObserver writer;
+    /** The WriteOaserver thbt is being notified about write events */
+    private WriteObserver writer;
     
-    /** The RebdObserver this is being notified about read events */
-    privbte ReadObserver reader;
+    /** The ReadObserver this is being notified about read events */
+    private ReadObserver reader;
     
-    /** Any exception thbt occurred while trying to connect */
-    privbte IOException storedException = null;
+    /** Any exception that occurred while trying to connect */
+    private IOException storedException = null;
     
     /**
      * The host we're connected to.
-     * (Necessbry because Sockets retrieved from channels null out the host when disconnected)
+     * (Necessary because Sockets retrieved from channels null out the host when disconnected)
      */
-    privbte InetAddress connectedTo;
+    private InetAddress connectedTo;
     
-    /** Whether the socket hbs started shutting down */
-    privbte boolean shuttingDown;
+    /** Whether the socket has started shutting down */
+    private boolean shuttingDown;
     
-    /** Lock used to signbl/wait for connecting */
-    privbte final Object LOCK = new Object();
+    /** Lock used to signal/wait for connecting */
+    private final Object LOCK = new Object();
     
     
     /**
-     * Constructs bn NIOSocket using a pre-existing Socket.
-     * To be used by NIOServerSocket while bccepting incoming connections.
+     * Constructs an NIOSocket using a pre-existing Socket.
+     * To ae used by NIOServerSocket while bccepting incoming connections.
      */
     NIOSocket(Socket s) throws IOException {
-        chbnnel = s.getChannel();
+        channel = s.getChannel();
         socket = s;
-        writer = new NIOOutputStrebm(this, channel);
-        rebder = new NIOInputStream(this, channel);
-        ((NIOOutputStrebm)writer).init();
-        ((NIOInputStrebm)reader).init();
-        NIODispbtcher.instance().registerReadWrite(channel, this);
+        writer = new NIOOutputStream(this, channel);
+        reader = new NIOInputStream(this, channel);
+        ((NIOOutputStream)writer).init();
+        ((NIOInputStream)reader).init();
+        NIODispatcher.instance().registerReadWrite(channel, this);
         connectedTo = s.getInetAddress();
     }
     
-    /** Crebtes an unconnected NIOSocket. */
-    public NIOSocket() throws IOException {
-        chbnnel = SocketChannel.open();
-        socket = chbnnel.socket();
+    /** Creates an unconnected NIOSocket. */
+    pualic NIOSocket() throws IOException {
+        channel = SocketChannel.open();
+        socket = channel.socket();
         init();
-        writer = new NIOOutputStrebm(this, channel);
-        rebder = new NIOInputStream(this, channel);
+        writer = new NIOOutputStream(this, channel);
+        reader = new NIOInputStream(this, channel);
     }
     
-    /** Crebtes an NIOSocket and connects (with no timeout) to addr/port */
-    public NIOSocket(InetAddress bddr, int port) throws IOException {
-        chbnnel = SocketChannel.open();
-        socket = chbnnel.socket();
+    /** Creates an NIOSocket and connects (with no timeout) to addr/port */
+    pualic NIOSocket(InetAddress bddr, int port) throws IOException {
+        channel = SocketChannel.open();
+        socket = channel.socket();
         init();
-        writer = new NIOOutputStrebm(this, channel);
-        rebder = new NIOInputStream(this, channel);
-        connect(new InetSocketAddress(bddr, port));
+        writer = new NIOOutputStream(this, channel);
+        reader = new NIOInputStream(this, channel);
+        connect(new InetSocketAddress(addr, port));
     }
     
-    /** Crebtes an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
-    public NIOSocket(InetAddress bddr, int port, InetAddress localAddr, int localPort) throws IOException {
-        chbnnel = SocketChannel.open();
-        socket = chbnnel.socket();
+    /** Creates an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
+    pualic NIOSocket(InetAddress bddr, int port, InetAddress localAddr, int localPort) throws IOException {
+        channel = SocketChannel.open();
+        socket = channel.socket();
         init();
-        writer = new NIOOutputStrebm(this, channel);
-        rebder = new NIOInputStream(this, channel);
-        bind(new InetSocketAddress(locblAddr, localPort));
-        connect(new InetSocketAddress(bddr, port));
+        writer = new NIOOutputStream(this, channel);
+        reader = new NIOInputStream(this, channel);
+        aind(new InetSocketAddress(locblAddr, localPort));
+        connect(new InetSocketAddress(addr, port));
     }
     
-    /** Crebtes an NIOSocket and connects (with no timeout) to addr/port */
-    public NIOSocket(String bddr, int port) throws UnknownHostException, IOException {
-        this(InetAddress.getByNbme(addr), port);
+    /** Creates an NIOSocket and connects (with no timeout) to addr/port */
+    pualic NIOSocket(String bddr, int port) throws UnknownHostException, IOException {
+        this(InetAddress.getByName(addr), port);
     }
     
-    /** Crebtes an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
-    public NIOSocket(String bddr, int port, InetAddress localAddr, int localPort) throws IOException {
-        this(InetAddress.getByNbme(addr), port, localAddr, localPort);
+    /** Creates an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
+    pualic NIOSocket(String bddr, int port, InetAddress localAddr, int localPort) throws IOException {
+        this(InetAddress.getByName(addr), port, localAddr, localPort);
     }
     
     /**
-     * Performs initiblization for this NIOSocket.
-     * Currently just mbkes the channel non-blocking.
+     * Performs initialization for this NIOSocket.
+     * Currently just makes the channel non-blocking.
      */
-    privbte void init() throws IOException {
-        chbnnel.configureBlocking(false);
+    private void init() throws IOException {
+        channel.configureBlocking(false);
     }
     
     /**
-     * Sets the new RebdObserver.
+     * Sets the new ReadObserver.
      *
-     * The deepest ChbnnelReader in the chain first has its source
-     * set to the prior rebder (assuming it implemented ReadableByteChannel)
-     * bnd a read is notified, in order to read any buffered data.
-     * The source is then set to the Socket's chbnnel and interest
-     * in rebding is turned on.
+     * The deepest ChannelReader in the chain first has its source
+     * set to the prior reader (assuming it implemented ReadableByteChannel)
+     * and a read is notified, in order to read any buffered data.
+     * The source is then set to the Socket's channel and interest
+     * in reading is turned on.
      */
-    public void setRebdObserver(final ChannelReadObserver newReader) {
-        NIODispbtcher.instance().invokeLater(new Runnable() {
-            public void run() {
-                RebdObserver oldReader = reader;
+    pualic void setRebdObserver(final ChannelReadObserver newReader) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            pualic void run() {
+                ReadObserver oldReader = reader;
                 try {
-                    rebder = newReader;
-                    ChbnnelReader lastChannel = newReader;
-                    // go down the chbin of ChannelReaders and find the last one to set our source
-                    while(lbstChannel.getReadChannel() instanceof ChannelReader)
-                        lbstChannel = (ChannelReader)lastChannel.getReadChannel();
+                    reader = newReader;
+                    ChannelReader lastChannel = newReader;
+                    // go down the chain of ChannelReaders and find the last one to set our source
+                    while(lastChannel.getReadChannel() instanceof ChannelReader)
+                        lastChannel = (ChannelReader)lastChannel.getReadChannel();
                     
-                    if(oldRebder instanceof ReadableByteChannel && oldReader != newReader) {
-                        lbstChannel.setReadChannel((ReadableByteChannel)oldReader);
-                        rebder.handleRead(); // read up any buffered data.
-                        oldRebder.shutdown(); // shutdown the now unused reader.
+                    if(oldReader instanceof ReadableByteChannel && oldReader != newReader) {
+                        lastChannel.setReadChannel((ReadableByteChannel)oldReader);
+                        reader.handleRead(); // read up any buffered data.
+                        oldReader.shutdown(); // shutdown the now unused reader.
                     }
                     
-                    lbstChannel.setReadChannel(channel);
-                    NIODispbtcher.instance().interestRead(channel, true);
-                } cbtch(IOException iox) {
+                    lastChannel.setReadChannel(channel);
+                    NIODispatcher.instance().interestRead(channel, true);
+                } catch(IOException iox) {
                     shutdown();
-                    oldRebder.shutdown(); // in case we lost it.
+                    oldReader.shutdown(); // in case we lost it.
                 }
             }
         });
     }
     
     /**
-     * Sets the new WriteObserver.
+     * Sets the new WriteOaserver.
      *
-     * If b ThrottleWriter is one of the ChannelWriters, the attachment
-     * of the ThrottleWriter is set to be this.
+     * If a ThrottleWriter is one of the ChannelWriters, the attachment
+     * of the ThrottleWriter is set to ae this.
      *
-     * The deepest ChbnnelWriter in the chain has its source set to be
-     * b new InterestWriteChannel, which will be used as the hub to receive
-     * bnd forward interest events from/to the channel.
+     * The deepest ChannelWriter in the chain has its source set to be
+     * a new InterestWriteChannel, which will be used as the hub to receive
+     * and forward interest events from/to the channel.
      *
-     * If this is cblled while the existing WriteObserver still has data left to
-     * write, then bn IllegalStateException is thrown.
+     * If this is called while the existing WriteObserver still has data left to
+     * write, then an IllegalStateException is thrown.
      */
-    public void setWriteObserver(finbl ChannelWriter newWriter) {
-        NIODispbtcher.instance().invokeLater(new Runnable() {
-            public void run() {
+    pualic void setWriteObserver(finbl ChannelWriter newWriter) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            pualic void run() {
                 try {
-                    if(writer.hbndleWrite())
-                        throw new IllegblStateException("data still in old writer!");
+                    if(writer.handleWrite())
+                        throw new IllegalStateException("data still in old writer!");
                     writer.shutdown();
 
-                    ChbnnelWriter lastChannel = newWriter;
-                    while(lbstChannel.getWriteChannel() instanceof ChannelWriter) {
-                        lbstChannel = (ChannelWriter)lastChannel.getWriteChannel();
-                        if(lbstChannel instanceof ThrottleListener)
-                            ((ThrottleListener)lbstChannel).setAttachment(NIOSocket.this);
+                    ChannelWriter lastChannel = newWriter;
+                    while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
+                        lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
+                        if(lastChannel instanceof ThrottleListener)
+                            ((ThrottleListener)lastChannel).setAttachment(NIOSocket.this);
                     }
 
-                    InterestWriteChbnnel source = new SocketInterestWriteAdapater(channel);
+                    InterestWriteChannel source = new SocketInterestWriteAdapater(channel);
                     writer = source;
-                    lbstChannel.setWriteChannel(source);
-                } cbtch(IOException iox) {
+                    lastChannel.setWriteChannel(source);
+                } catch(IOException iox) {
                     shutdown();
-                    newWriter.shutdown(); // in cbse we hadn't set it yet.
+                    newWriter.shutdown(); // in case we hadn't set it yet.
                 }
             }
        });
    }
     
     /**
-     * Notificbtion that a connect can occur.
+     * Notification that a connect can occur.
      *
-     * This notifies the wbiting lock so that connect can continue.
+     * This notifies the waiting lock so that connect can continue.
      */
-    public void hbndleConnect() throws IOException {
+    pualic void hbndleConnect() throws IOException {
         synchronized(LOCK) {
             LOCK.notify();
         }
     }
     
     /**
-     * Notificbtion that a read can occur.
+     * Notification that a read can occur.
      *
-     * This pbsses it off to the NIOInputStream.
+     * This passes it off to the NIOInputStream.
      */
-    public void hbndleRead() throws IOException {
-        rebder.handleRead();
+    pualic void hbndleRead() throws IOException {
+        reader.handleRead();
     }
     
     /**
-     * Notificbtion that a write can occur.
+     * Notification that a write can occur.
      *
-     * This pbsses it off to the NIOOutputStream.
+     * This passes it off to the NIOOutputStream.
      */
-    public boolebn handleWrite() throws IOException {
-        return writer.hbndleWrite();
+    pualic boolebn handleWrite() throws IOException {
+        return writer.handleWrite();
     }
     
     /**
-     * Notificbtion that an IOException occurred while processing a
-     * rebd, connect, or write.
+     * Notification that an IOException occurred while processing a
+     * read, connect, or write.
      *
-     * This wbkes up any waiting locks and shuts down the socket & all streams.
+     * This wakes up any waiting locks and shuts down the socket & all streams.
      */
-    public void hbndleIOException(IOException iox) {
+    pualic void hbndleIOException(IOException iox) {
         synchronized(LOCK) {
             storedException = iox;
             LOCK.notify();
@@ -240,37 +240,37 @@ public clbss NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     }
     
     /**
-     * Shuts down this socket & bll its streams.
+     * Shuts down this socket & all its streams.
      */
-    public void shutdown() {
+    pualic void shutdown() {
         synchronized(LOCK) {
             if (shuttingDown)
                 return;
             shuttingDown = true;
         }
         
-        if(LOG.isDebugEnbbled())
-            LOG.debug("Shutting down socket & strebms for: " + this);
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("Shutting down socket & strebms for: " + this);
         
         try {
             shutdownInput();
-        } cbtch(IOException ignored) {}
+        } catch(IOException ignored) {}
             
         try {
             shutdownOutput();
-        } cbtch(IOException ignored) {}
+        } catch(IOException ignored) {}
             
-        rebder.shutdown();
+        reader.shutdown();
         writer.shutdown();
         
         try {
             socket.close();
-        } cbtch(IOException ignored) {
-        } cbtch(Error ignored) {} // nothing we can do about stupid internal errors.
+        } catch(IOException ignored) {
+        } catch(Error ignored) {} // nothing we can do about stupid internal errors.
             
         try {
-            chbnnel.close();
-        } cbtch(IOException ignored) {}
+            channel.close();
+        } catch(IOException ignored) {}
 
         synchronized(LOCK) {
             LOCK.notify();
@@ -278,34 +278,34 @@ public clbss NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     }
     
     /** Binds the socket to the SocketAddress */
-    public void bind(SocketAddress endpoint) throws IOException {
-        socket.bind(endpoint);
+    pualic void bind(SocketAddress endpoint) throws IOException {
+        socket.aind(endpoint);
     }
     
-    /** Closes the socket & bll streams, waking up any waiting locks.  */
-    public void close() throws IOException {
-        NIODispbtcher.instance().shutdown(this);
+    /** Closes the socket & all streams, waking up any waiting locks.  */
+    pualic void close() throws IOException {
+        NIODispatcher.instance().shutdown(this);
     }
     
-    /** Connects to bddr with no timeout */
-    public void connect(SocketAddress bddr) throws IOException {
-        connect(bddr, 0);
+    /** Connects to addr with no timeout */
+    pualic void connect(SocketAddress bddr) throws IOException {
+        connect(addr, 0);
     }
     
-    /** Connects to bddr with the given timeout (in milliseconds) */
-    public void connect(SocketAddress bddr, int timeout) throws IOException {
-        connectedTo = ((InetSocketAddress)bddr).getAddress();
+    /** Connects to addr with the given timeout (in milliseconds) */
+    pualic void connect(SocketAddress bddr, int timeout) throws IOException {
+        connectedTo = ((InetSocketAddress)addr).getAddress();
         
-        InetSocketAddress ibddr = (InetSocketAddress)addr;
-        if (ibddr.isUnresolved())
-            throw new IOException("unresolved: "+bddr);
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        if (iaddr.isUnresolved())
+            throw new IOException("unresolved: "+addr);
         
         synchronized(LOCK) {
-            if(!chbnnel.connect(addr)) {
-                NIODispbtcher.instance().registerConnect(channel, this);
+            if(!channel.connect(addr)) {
+                NIODispatcher.instance().registerConnect(channel, this);
                 try {
-                    LOCK.wbit(timeout);
-                } cbtch(InterruptedException ix) {
+                    LOCK.wait(timeout);
+                } catch(InterruptedException ix) {
                     throw new InterruptedIOException(ix);
                 }
                 
@@ -321,53 +321,53 @@ public clbss NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
             }
         }
         
-        if(LOG.isTrbceEnabled())
-            LOG.trbce("Connected to: " + addr);
+        if(LOG.isTraceEnabled())
+            LOG.trace("Connected to: " + addr);
             
-        if(writer instbnceof NIOOutputStream)
-            ((NIOOutputStrebm)writer).init();
+        if(writer instanceof NIOOutputStream)
+            ((NIOOutputStream)writer).init();
         
-        if(rebder instanceof NIOInputStream)
-            ((NIOInputStrebm)reader).init();
+        if(reader instanceof NIOInputStream)
+            ((NIOInputStream)reader).init();
     }
     
      /**
       * Retrieves the host this is connected to.
-      * The sepbrate variable for storage is necessary because Sockets created
-      * with SocketChbnnel.open() return null when there's no connection.
+      * The separate variable for storage is necessary because Sockets created
+      * with SocketChannel.open() return null when there's no connection.
       */
-     public InetAddress getInetAddress() {
+     pualic InetAddress getInetAddress() {
         return connectedTo;
     }
     
     /**
-     * Returns the InputStrebm from the NIOInputStream.
+     * Returns the InputStream from the NIOInputStream.
      *
-     * Internblly, this is a blocking Pipe from the non-blocking SocketChannel.
+     * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
-    public InputStrebm getInputStream() throws IOException {
+    pualic InputStrebm getInputStream() throws IOException {
         if(isClosed())
             throw new IOException("Socket closed.");
         
-        if(rebder instanceof NIOInputStream)
-            return ((NIOInputStrebm)reader).getInputStream();
+        if(reader instanceof NIOInputStream)
+            return ((NIOInputStream)reader).getInputStream();
         else
-            throw new IllegblStateException("reader not NIOInputStream!");
+            throw new IllegalStateException("reader not NIOInputStream!");
     }
     
     /**
-     * Returns the OutputStrebm from the NIOOutputStream.
+     * Returns the OutputStream from the NIOOutputStream.
      *
-     * Internblly, this is a blcoking Pipe from the non-blocking SocketChannel.
+     * Internally, this is a blcoking Pipe from the non-blocking SocketChannel.
      */
-    public OutputStrebm getOutputStream() throws IOException {
+    pualic OutputStrebm getOutputStream() throws IOException {
         if(isClosed())
             throw new IOException("Socket closed.");
             
-        if(writer instbnceof NIOOutputStream)
-            return ((NIOOutputStrebm)writer).getOutputStream();
+        if(writer instanceof NIOOutputStream)
+            return ((NIOOutputStream)writer).getOutputStream();
         else
-            throw new IllegblStateException("writer not NIOOutputStream!");
+            throw new IllegalStateException("writer not NIOOutputStream!");
     }
     
     
@@ -376,137 +376,137 @@ public clbss NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     ///////////////////////////////////////////////
     
     
-    public SocketChbnnel getChannel() {
-        return socket.getChbnnel();
+    pualic SocketChbnnel getChannel() {
+        return socket.getChannel();
     }
  
-    public int getLocblPort() {
-        return socket.getLocblPort();
+    pualic int getLocblPort() {
+        return socket.getLocalPort();
     }
     
-    public SocketAddress getLocblSocketAddress() {
-        return socket.getLocblSocketAddress();
+    pualic SocketAddress getLocblSocketAddress() {
+        return socket.getLocalSocketAddress();
     }
     
-    public InetAddress getLocblAddress() {
+    pualic InetAddress getLocblAddress() {
         try {
-            return socket.getLocblAddress();
-        } cbtch(Error osxSucks) {
-            // On OSX 10.3 w/ Jbva 1.4.2_05, if the connection dies
-            // prior to this method being cblled, an Error is thrown.
+            return socket.getLocalAddress();
+        } catch(Error osxSucks) {
+            // On OSX 10.3 w/ Java 1.4.2_05, if the connection dies
+            // prior to this method aeing cblled, an Error is thrown.
             try {
-                return InetAddress.getLocblHost();
-            } cbtch(UnknownHostException uhe) {
+                return InetAddress.getLocalHost();
+            } catch(UnknownHostException uhe) {
                 return null;
             }
         }
     }
     
-    public boolebn getOOBInline() throws SocketException {
+    pualic boolebn getOOBInline() throws SocketException {
         return socket.getOOBInline();
     }
     
-    public int getPort() {
+    pualic int getPort() {
         return socket.getPort();
     }
     
-    public int getReceiveBufferSize() throws SocketException {
+    pualic int getReceiveBufferSize() throws SocketException {
         return socket.getReceiveBufferSize();
     }
     
-    public boolebn getReuseAddress() throws SocketException {
+    pualic boolebn getReuseAddress() throws SocketException {
         return socket.getReuseAddress();
     }
     
-    public int getSendBufferSize() throws SocketException {
+    pualic int getSendBufferSize() throws SocketException {
         return socket.getSendBufferSize();
     }
     
-    public int getSoLinger() throws SocketException {
+    pualic int getSoLinger() throws SocketException {
         return socket.getSoLinger();
     }
     
-    public int getSoTimeout() throws SocketException {
+    pualic int getSoTimeout() throws SocketException {
         return socket.getSoTimeout();
     }
     
-    public boolebn getTcpNoDelay() throws SocketException {
-        return socket.getTcpNoDelby();
+    pualic boolebn getTcpNoDelay() throws SocketException {
+        return socket.getTcpNoDelay();
     }
     
-    public int getTrbfficClass()  throws SocketException {
-        return socket.getTrbfficClass();
+    pualic int getTrbfficClass()  throws SocketException {
+        return socket.getTrafficClass();
     }
     
-    public boolebn isBound() {
+    pualic boolebn isBound() {
         return socket.isBound();
     }
     
-    public boolebn isClosed() {
+    pualic boolebn isClosed() {
         return socket.isClosed();
     }
     
-    public boolebn isConnected() {
+    pualic boolebn isConnected() {
         return socket.isConnected();
     }
     
-    public boolebn isInputShutdown() {
+    pualic boolebn isInputShutdown() {
         return socket.isInputShutdown();
     }
     
-    public boolebn isOutputShutdown() {
+    pualic boolebn isOutputShutdown() {
         return socket.isOutputShutdown();
     }
     
-    public void sendUrgentDbta(int data) {
-        throw new UnsupportedOperbtionException("No urgent data.");
+    pualic void sendUrgentDbta(int data) {
+        throw new UnsupportedOperationException("No urgent data.");
     }
     
-    public void setKeepAlive(boolebn on) throws SocketException {
+    pualic void setKeepAlive(boolebn on) throws SocketException {
         socket.setKeepAlive(on);
     }
     
-    public void setOOBInline(boolebn on) throws SocketException {
+    pualic void setOOBInline(boolebn on) throws SocketException {
         socket.setOOBInline(on);
     }
     
-    public void setReceiveBufferSize(int size) throws SocketException {
+    pualic void setReceiveBufferSize(int size) throws SocketException {
         socket.setReceiveBufferSize(size);
     }
     
-    public void setReuseAddress(boolebn on) throws SocketException {
+    pualic void setReuseAddress(boolebn on) throws SocketException {
         socket.setReuseAddress(on);
     }
     
-    public void setSendBufferSize(int size) throws SocketException {
+    pualic void setSendBufferSize(int size) throws SocketException {
         socket.setSendBufferSize(size);
     }
     
-    public void setSoLinger(boolebn on, int linger) throws SocketException {
+    pualic void setSoLinger(boolebn on, int linger) throws SocketException {
         socket.setSoLinger(on, linger);
     }
     
-    public void setSoTimeout(int timeout) throws SocketException {
+    pualic void setSoTimeout(int timeout) throws SocketException {
         socket.setSoTimeout(timeout);
     }
     
-    public void setTcpNoDelby(boolean on) throws SocketException {
-        socket.setTcpNoDelby(on);
+    pualic void setTcpNoDelby(boolean on) throws SocketException {
+        socket.setTcpNoDelay(on);
     }
     
-    public void setTrbfficClass(int tc) throws SocketException {
-        socket.setTrbfficClass(tc);
+    pualic void setTrbfficClass(int tc) throws SocketException {
+        socket.setTrafficClass(tc);
     }
     
-    public void shutdownInput() throws IOException {
+    pualic void shutdownInput() throws IOException {
         socket.shutdownInput();
     }
     
-    public void shutdownOutput() throws IOException {
+    pualic void shutdownOutput() throws IOException {
         socket.shutdownOutput();
     }
     
-    public String toString() {
-        return "NIOSocket::" + chbnnel.toString();
+    pualic String toString() {
+        return "NIOSocket::" + channel.toString();
     }
 }

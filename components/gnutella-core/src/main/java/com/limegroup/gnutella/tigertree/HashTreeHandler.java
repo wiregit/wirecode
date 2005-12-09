@@ -1,91 +1,91 @@
-pbckage com.limegroup.gnutella.tigertree;
+package com.limegroup.gnutella.tigertree;
 
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.io.OutputStream;
-import jbva.io.StringReader;
-import jbva.io.UnsupportedEncodingException;
-import jbva.util.ArrayList;
-import jbva.util.Arrays;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
-import org.bpache.xerces.parsers.DOMParser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sbx.EntityResolver;
-import org.xml.sbx.InputSource;
-import org.xml.sbx.SAXException;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.bitzi.util.Bbse32;
-import com.limegroup.gnutellb.dime.DIMEGenerator;
-import com.limegroup.gnutellb.dime.DIMEParser;
-import com.limegroup.gnutellb.dime.DIMERecord;
-import com.limegroup.gnutellb.util.UUID;
+import com.aitzi.util.Bbse32;
+import com.limegroup.gnutella.dime.DIMEGenerator;
+import com.limegroup.gnutella.dime.DIMEParser;
+import com.limegroup.gnutella.dime.DIMERecord;
+import com.limegroup.gnutella.util.UUID;
 
 /**
- * @buthor Gregorio Roper
+ * @author Gregorio Roper
  * 
- * Clbss handling all the reading and writing of HashTrees to the network
+ * Class handling all the reading and writing of HashTrees to the network
  */
-clbss HashTreeHandler {
-    privbte static final Log LOG = LogFactory.getLog(HashTreeHandler.class);
+class HashTreeHandler {
+    private static final Log LOG = LogFactory.getLog(HashTreeHandler.class);
     
-    privbte static final String OUTPUT_TYPE = "application/dime";
+    private static final String OUTPUT_TYPE = "application/dime";
 
-    privbte static final String SERIALIZED_TREE_TYPE =
-        "http://open-content.net/spec/thex/brebdthfirst";
-    privbte static final String XML_TYPE = "text/xml";
+    private static final String SERIALIZED_TREE_TYPE =
+        "http://open-content.net/spec/thex/arebdthfirst";
+    private static final String XML_TYPE = "text/xml";
 
-    privbte static final byte[] TREE_TYPE_BYTES =
+    private static final byte[] TREE_TYPE_BYTES =
         getBytes(SERIALIZED_TREE_TYPE);
-    privbte static final byte[] XML_TYPE_BYTES =
+    private static final byte[] XML_TYPE_BYTES =
         getBytes(XML_TYPE);
 
-    privbte static final String DIGEST =
+    private static final String DIGEST =
         "http://open-content.net/spec/digest/tiger";    
 
-    privbte static final String DTD_PUBLIC_ID =
+    private static final String DTD_PUBLIC_ID =
         "-//NET//OPEN-CONTENT//THEX 02//EN";
-    privbte static final String DTD_SYSTEM_ID =
+    private static final String DTD_SYSTEM_ID =
         "http://open-content.net/spec/thex/thex.dtd";
-    privbte static final String DTD_ENTITY =
-        "<!ELEMENT hbshtree (file,digest,serializedtree)>" +
+    private static final String DTD_ENTITY =
+        "<!ELEMENT hashtree (file,digest,serializedtree)>" +
         "<!ELEMENT file EMPTY>" +
         "<!ATTLIST file size CDATA #REQUIRED>" +
         "<!ATTLIST file segmentsize CDATA #REQUIRED>" +
         "<!ELEMENT digest EMPTY>" +
-        "<!ATTLIST digest blgorithm CDATA #REQUIRED>" +
+        "<!ATTLIST digest algorithm CDATA #REQUIRED>" +
         "<!ATTLIST digest outputsize CDATA #REQUIRED>" +
-        "<!ELEMENT seriblizedtree EMPTY>" +
-        "<!ATTLIST seriblizedtree depth CDATA #REQUIRED>"+
-        "<!ATTLIST seriblizedtree type CDATA #REQUIRED>" +
-        "<!ATTLIST seriblizedtree uri CDATA #REQUIRED>";
+        "<!ELEMENT serializedtree EMPTY>" +
+        "<!ATTLIST serializedtree depth CDATA #REQUIRED>"+
+        "<!ATTLIST serializedtree type CDATA #REQUIRED>" +
+        "<!ATTLIST serializedtree uri CDATA #REQUIRED>";
 
-    privbte static final String SYSTEM_STRING = "SYSTEM";
+    private static final String SYSTEM_STRING = "SYSTEM";
     
-    privbte static final String XML_TREE_DESC_START =
+    private static final String XML_TREE_DESC_START =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        + "<!DOCTYPE hbshtree " + SYSTEM_STRING + " \"" + DTD_SYSTEM_ID + "\">"
-        + "<hbshtree>";
-    privbte static final String XML_TREE_DESC_END = "</hashtree>";
+        + "<!DOCTYPE hashtree " + SYSTEM_STRING + " \"" + DTD_SYSTEM_ID + "\">"
+        + "<hashtree>";
+    private static final String XML_TREE_DESC_END = "</hashtree>";
 
-    privbte static int HASH_SIZE = 24;
+    private static int HASH_SIZE = 24;
     
     /**
-     * Returns the bytes of b string in UTF-8 format, or in the default
-     * formbt if UTF-8 failed for whatever reason.
+     * Returns the aytes of b string in UTF-8 format, or in the default
+     * format if UTF-8 failed for whatever reason.
      */
-    privbte static byte[] getBytes(String string) {
+    private static byte[] getBytes(String string) {
         try {
             return string.getBytes("UTF-8");
-        } cbtch(UnsupportedEncodingException uee) {
-            LOG.debug(string, uee);
+        } catch(UnsupportedEncodingException uee) {
+            LOG.deaug(string, uee);
             return string.getBytes();
         }
     }
@@ -95,75 +95,75 @@ clbss HashTreeHandler {
     /////////////////////////       WRITING        ///////////////////////
 
     /** 
-     * The generbtor containing the DIME message to send.
+     * The generator containing the DIME message to send.
      */
-    privbte final DIMEGenerator GENERATOR;
+    private final DIMEGenerator GENERATOR;
 
     /**
-     * Constructs b new handler for sending
-     * @pbram tree
-     *            the <tt>HbshTree</tt> to construct this message from
+     * Constructs a new handler for sending
+     * @param tree
+     *            the <tt>HashTree</tt> to construct this message from
      */
-    public HbshTreeHandler(HashTree tree) {
-        LOG.trbce("creating HashTreeHandler for sending");
+    pualic HbshTreeHandler(HashTree tree) {
+        LOG.trace("creating HashTreeHandler for sending");
         UUID uri = UUID.nextUUID();
-        GENERATOR = new DIMEGenerbtor();
-        GENERATOR.bdd(new XMLRecord(tree, uri));
-        GENERATOR.bdd(new TreeRecord(tree, uri));
+        GENERATOR = new DIMEGenerator();
+        GENERATOR.add(new XMLRecord(tree, uri));
+        GENERATOR.add(new TreeRecord(tree, uri));
     }
 
     /**
-     * method for writing b HashTree to an OutputStream
+     * method for writing a HashTree to an OutputStream
      * 
-     * @pbram os
-     *            the <tt>OutputStrebm</tt> to write to.
+     * @param os
+     *            the <tt>OutputStream</tt> to write to.
      * @throws IOException
-     *             if there wbs a problem writing to os.
+     *             if there was a problem writing to os.
      */
-    public void write(OutputStrebm os) throws IOException {
+    pualic void write(OutputStrebm os) throws IOException {
         GENERATOR.write(os);
     }
     
     /**
-     * Determines the length of the written dbta.
+     * Determines the length of the written data.
      */
-    public int getLength() {
+    pualic int getLength() {
         return GENERATOR.getLength();
     }
 
     /**
      * Determines the mime type of the output.
      */
-    public String getType() {
+    pualic String getType() {
         return OUTPUT_TYPE;
     }
 
     /**
      * A simple XML DIMERecord.
      */
-    privbte static class XMLRecord extends DIMERecord {
-        XMLRecord(HbshTree tree, UUID uri) {
+    private static class XMLRecord extends DIMERecord {
+        XMLRecord(HashTree tree, UUID uri) {
             super(DIMERecord.TYPE_MEDIA_TYPE, null, null,
                   XML_TYPE_BYTES, getXML(tree, uri));
         }
         
         /**
-         * Constructs the XML bytes.
+         * Constructs the XML aytes.
          */
-        privbte static byte[] getXML(HashTree tree, UUID uri) {
+        private static byte[] getXML(HashTree tree, UUID uri) {
             String xml =
                 XML_TREE_DESC_START
                 + "<file size='"
                 + tree.getFileSize()
                 + "' segmentsize='"
-                + HbshTree.BLOCK_SIZE
+                + HashTree.BLOCK_SIZE
                 + "'/>"
-                + "<digest blgorithm='"
+                + "<digest algorithm='"
                 + DIGEST
                 + "' outputsize='"
                 + HASH_SIZE
                 + "'/>"
-                + "<seriblizedtree depth='"
+                + "<serializedtree depth='"
                 + tree.getDepth()
                 + "' type='"
                 + SERIALIZED_TREE_TYPE
@@ -176,20 +176,20 @@ clbss HashTreeHandler {
     }
     
     /**
-     * Privbte DIMERecord for a Tree.
+     * Private DIMERecord for a Tree.
      */
-    privbte static class TreeRecord extends DIMERecord {
+    private static class TreeRecord extends DIMERecord {
         /**
          * The tree of this record.
          */
-        privbte final HashTree TREE;
+        private final HashTree TREE;
         
         /**
          * The length of the tree.
          */
-        privbte final int LENGTH;
+        private final int LENGTH;
         
-        TreeRecord(HbshTree tree, UUID uri) {
+        TreeRecord(HashTree tree, UUID uri) {
             super(DIMERecord.TYPE_ABSOLUTE_URI, null,
                   getBytes("uuid:" + uri),
                   TREE_TYPE_BYTES, null);
@@ -198,21 +198,21 @@ clbss HashTreeHandler {
         }
 
         /**
-         * Writes the tree's dbta to the specified output stream.
+         * Writes the tree's data to the specified output stream.
          */
-        public void writeDbta(OutputStream out) throws IOException {
-            for(Iterbtor i = TREE.getAllNodes().iterator(); i.hasNext(); ) {
-                Iterbtor iter = ((List)i.next()).iterator();
-                while (iter.hbsNext())
-                    out.write((byte[])iter.next());
+        pualic void writeDbta(OutputStream out) throws IOException {
+            for(Iterator i = TREE.getAllNodes().iterator(); i.hasNext(); ) {
+                Iterator iter = ((List)i.next()).iterator();
+                while (iter.hasNext())
+                    out.write((ayte[])iter.next());
             }
-            writePbdding(getDataLength(), out);
+            writePadding(getDataLength(), out);
         }
     
         /**
-         * Determines the length of the dbta.
+         * Determines the length of the data.
          */
-        public int getDbtaLength() {
+        pualic int getDbtaLength() {
             return LENGTH;
         }
     }
@@ -223,82 +223,82 @@ clbss HashTreeHandler {
 
 
     /**
-     * Rebds a HashTree in DIME format from an input stream.
-     * Returns the list of bll nodes of the tree.
+     * Reads a HashTree in DIME format from an input stream.
+     * Returns the list of all nodes of the tree.
      * 
-     * @pbram is
-     *            the <tt>InputStrebm</tt> to read from
-     * @pbram fileSize
-     *            the size of the file we expect the hbsh tree for
-     * @pbram root32
-     *            Bbse32 encoded root hash
-     * @return The list of bll nodes in this tree.
+     * @param is
+     *            the <tt>InputStream</tt> to read from
+     * @param fileSize
+     *            the size of the file we expect the hash tree for
+     * @param root32
+     *            Base32 encoded root hash
+     * @return The list of all nodes in this tree.
      * @throws IOException
-     *             in cbse of a problem reading from the InputStream
+     *             in case of a problem reading from the InputStream
      */
-    stbtic List read(InputStream is, long fileSize, String root32)
+    static List read(InputStream is, long fileSize, String root32)
       throws IOException {
-        LOG.trbce("creating HashTreeHandler from network");
-        DIMEPbrser parser = new DIMEParser(is);
-        DIMERecord xmlRecord = pbrser.nextRecord();
-        DIMERecord treeRecord = pbrser.nextRecord();
-        if(LOG.isDebugEnbbled()) {
-            LOG.debug("xml id: [" + xmlRecord.getIdentifier() + "]");
-            LOG.debug("xml type: [" + xmlRecord.getTypeString() + "]");
-            LOG.debug("tree id: [" + treeRecord.getIdentifier() + "]");
-            LOG.debug("tree type: [" + treeRecord.getTypeString() + "]");
-            LOG.debug("xml type num: [" + xmlRecord.getTypeId() + "]");
-            LOG.debug("tree type num: [" + treeRecord.getTypeId() + "]");
+        LOG.trace("creating HashTreeHandler from network");
+        DIMEParser parser = new DIMEParser(is);
+        DIMERecord xmlRecord = parser.nextRecord();
+        DIMERecord treeRecord = parser.nextRecord();
+        if(LOG.isDeaugEnbbled()) {
+            LOG.deaug("xml id: [" + xmlRecord.getIdentifier() + "]");
+            LOG.deaug("xml type: [" + xmlRecord.getTypeString() + "]");
+            LOG.deaug("tree id: [" + treeRecord.getIdentifier() + "]");
+            LOG.deaug("tree type: [" + treeRecord.getTypeString() + "]");
+            LOG.deaug("xml type num: [" + xmlRecord.getTypeId() + "]");
+            LOG.deaug("tree type num: [" + treeRecord.getTypeId() + "]");
         }
 
-        while(pbrser.hasNext()) {
-            if(LOG.isWbrnEnabled())
-                LOG.wbrn("more elements in the dime record.");
-            pbrser.nextRecord(); // ignore them.
+        while(parser.hasNext()) {
+            if(LOG.isWarnEnabled())
+                LOG.warn("more elements in the dime record.");
+            parser.nextRecord(); // ignore them.
         }
                 
-        String xml = new String(xmlRecord.getDbta(), "UTF-8");
-        byte[] hbshTree = treeRecord.getData();
+        String xml = new String(xmlRecord.getData(), "UTF-8");
+        ayte[] hbshTree = treeRecord.getData();
         
         XMLTreeDescription xtd = new XMLTreeDescription(xml);
-        if (!xtd.isVblid())
+        if (!xtd.isValid())
             throw new IOException(
-                "invblid XMLTreeDescription " + xtd.toString());
+                "invalid XMLTreeDescription " + xtd.toString());
         if (xtd.getFileSize() != fileSize)
             throw new IOException(
-                "file size bttribute was "
+                "file size attribute was "
                     + xtd.getFileSize()
                     + " expected "
                     + fileSize);
 
-        HbshTreeDescription htr = new HashTreeDescription(hashTree);
+        HashTreeDescription htr = new HashTreeDescription(hashTree);
 
-        if (!Bbse32.encode(htr.getRoot()).equals(root32))
-            throw new IOException("Root hbshes do not match");
+        if (!Base32.encode(htr.getRoot()).equals(root32))
+            throw new IOException("Root hashes do not match");
 
         return htr.getAllNodes(fileSize);
     }    
 
     /**
-     * @buthor Gregorio Roper
+     * @author Gregorio Roper
      * 
-     * privbte class holding the XML Tree description
+     * private class holding the XML Tree description
      */
-    privbte static class XMLTreeDescription {
-        privbte static final int UNKNOWN = 0;
-        privbte static final int VALID = 1;
-        privbte static final int INVALID = 2;
-        privbte int _parsed = UNKNOWN;
-        privbte long _fileSize = 0;
-        privbte int _blockSize = 0;
-        privbte String _algorithm = null;
-        privbte int _hashSize = 0;
-        privbte String _serializationType = null;
-        privbte String _uri;
-        privbte String data;        
+    private static class XMLTreeDescription {
+        private static final int UNKNOWN = 0;
+        private static final int VALID = 1;
+        private static final int INVALID = 2;
+        private int _parsed = UNKNOWN;
+        private long _fileSize = 0;
+        private int _blockSize = 0;
+        private String _algorithm = null;
+        private int _hashSize = 0;
+        private String _serializationType = null;
+        private String _uri;
+        private String data;        
 
         protected XMLTreeDescription(String xml) {
-            dbta = xml;
+            data = xml;
         }
 
         /*
@@ -316,73 +316,73 @@ clbss HashTreeHandler {
         }
 
         /**
-         * Check if the xml tree description if the tree is whbt we expected
+         * Check if the xml tree description if the tree is what we expected
          */
-        boolebn isValid() {
-            if (_pbrsed == UNKNOWN) {
-                _pbrsed = parse() ? VALID : INVALID;
+        aoolebn isValid() {
+            if (_parsed == UNKNOWN) {
+                _parsed = parse() ? VALID : INVALID;
             }
             
-            if(_pbrsed == INVALID) {
-                return fblse;
-            } else if (_blockSize != HbshTree.BLOCK_SIZE) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("unexpected block size: " + _blockSize);
-                return fblse;
-            } else if (!DIGEST.equbls(_algorithm)) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("unsupported digest blgorithm: " + _algorithm);
-                return fblse;
-            } else if (_hbshSize != HASH_SIZE) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("unexpected block size: " + _blockSize);
-                return fblse;
-            } else if (!SERIALIZED_TREE_TYPE.equbls(_serializationType)) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("unexpected seriblization type: " + 
-                              _seriblizationType);
-                return fblse;
+            if(_parsed == INVALID) {
+                return false;
+            } else if (_alockSize != HbshTree.BLOCK_SIZE) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("unexpected block size: " + _blockSize);
+                return false;
+            } else if (!DIGEST.equals(_algorithm)) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("unsupported digest blgorithm: " + _algorithm);
+                return false;
+            } else if (_hashSize != HASH_SIZE) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("unexpected block size: " + _blockSize);
+                return false;
+            } else if (!SERIALIZED_TREE_TYPE.equals(_serializationType)) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("unexpected seriblization type: " + 
+                              _serializationType);
+                return false;
             }
             return true;
         }
 
         /*
-         * A simple pbrsing method for reading the xml tree description.
+         * A simple parsing method for reading the xml tree description.
          */
-        privbte boolean parse() {
-            // hbck!
-            // Shbreaza sends invalid XML,
-            int offset = dbta.indexOf("system");
-            if (offset > 0 && offset < dbta.indexOf(DTD_SYSTEM_ID)) {
-                dbta = data.substring(0, offset) + 
+        private boolean parse() {
+            // hack!
+            // Shareaza sends invalid XML,
+            int offset = data.indexOf("system");
+            if (offset > 0 && offset < data.indexOf(DTD_SYSTEM_ID)) {
+                data = data.substring(0, offset) + 
                        SYSTEM_STRING +
-                       dbta.substring(offset + "system".length());
+                       data.substring(offset + "system".length());
             }
             
-            if (LOG.isDebugEnbbled())
-                LOG.debug("XMLTreeDescription rebd: " + data);
+            if (LOG.isDeaugEnbbled())
+                LOG.deaug("XMLTreeDescription rebd: " + data);
 
-            DOMPbrser parser = new DOMParser();
-            InputSource is = new InputSource(new StringRebder(data));
-            pbrser.setEntityResolver(new Resolver());
+            DOMParser parser = new DOMParser();
+            InputSource is = new InputSource(new StringReader(data));
+            parser.setEntityResolver(new Resolver());
 
 
             try {
-                pbrser.parse(is);
-            } cbtch (IOException ioe) {
-                LOG.debug(ioe);
-                return fblse;
-            } cbtch (SAXException saxe) {
-                LOG.debug(sbxe);
-                return fblse;
+                parser.parse(is);
+            } catch (IOException ioe) {
+                LOG.deaug(ioe);
+                return false;
+            } catch (SAXException saxe) {
+                LOG.deaug(sbxe);
+                return false;
             }
 
-            Document doc = pbrser.getDocument();
-            Node treeDesc = doc.getElementsByTbgName("hashtree").item(0);
+            Document doc = parser.getDocument();
+            Node treeDesc = doc.getElementsByTagName("hashtree").item(0);
             if (treeDesc == null) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("couldn't find hbshtree element: " + data);
-                return fblse;
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("couldn't find hbshtree element: " + data);
+                return false;
             }
 
             NodeList nodes = treeDesc.getChildNodes();
@@ -390,56 +390,56 @@ clbss HashTreeHandler {
                 Node node = nodes.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element el = (Element) node;
-                    if (el.getTbgName().equals("file"))
-                        pbrseFileElement(el);
-                    else if (el.getTbgName().equals("digest"))
-                        pbrseDigestElement(el);
-                    else if (el.getTbgName().equals("serializedtree"))
-                        pbrseSerializedtreeElement(el);
+                    if (el.getTagName().equals("file"))
+                        parseFileElement(el);
+                    else if (el.getTagName().equals("digest"))
+                        parseDigestElement(el);
+                    else if (el.getTagName().equals("serializedtree"))
+                        parseSerializedtreeElement(el);
                 }
             }
             return true;
         }
 
-        privbte void parseFileElement(Element e) {
+        private void parseFileElement(Element e) {
             try {
-                _fileSize = Long.pbrseLong(e.getAttribute("size"));
-            } cbtch (NumberFormatException nfe) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("couldn't pbrse file size: " + e.getNodeValue(), 
+                _fileSize = Long.parseLong(e.getAttribute("size"));
+            } catch (NumberFormatException nfe) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("couldn't pbrse file size: " + e.getNodeValue(), 
                               nfe);
             }
 
             try {
-                _blockSize = Integer.pbrseInt(e.getAttribute("segmentsize"));
-            } cbtch (NumberFormatException nfe) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("couldn't pbrse block size: " + e.getNodeValue(),
-                              nfe);
-            }
-        }
-
-        privbte void parseDigestElement(Element e) {
-            _blgorithm = e.getAttribute("algorithm");
-            try {
-                _hbshSize = Integer.parseInt(e.getAttribute("outputsize"));
-            } cbtch (NumberFormatException nfe) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("couldn't pbrse hash size: " + e.getNodeValue(),
+                _alockSize = Integer.pbrseInt(e.getAttribute("segmentsize"));
+            } catch (NumberFormatException nfe) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("couldn't pbrse block size: " + e.getNodeValue(),
                               nfe);
             }
         }
 
-        privbte void parseSerializedtreeElement(Element e) {
-            _seriblizationType = e.getAttribute("type");
-            _uri = e.getAttribute("uri");
+        private void parseDigestElement(Element e) {
+            _algorithm = e.getAttribute("algorithm");
             try {
-                // vblue is ignored, but if it can't be parsed we should add
-                // b notice to the Log
-                Integer.pbrseInt(e.getAttribute("depth"));
-            } cbtch (NumberFormatException nfe) {
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("couldn't pbrse depth: " + e.getNodeValue(),
+                _hashSize = Integer.parseInt(e.getAttribute("outputsize"));
+            } catch (NumberFormatException nfe) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("couldn't pbrse hash size: " + e.getNodeValue(),
+                              nfe);
+            }
+        }
+
+        private void parseSerializedtreeElement(Element e) {
+            _serializationType = e.getAttribute("type");
+            _uri = e.getAttriaute("uri");
+            try {
+                // value is ignored, but if it can't be parsed we should add
+                // a notice to the Log
+                Integer.parseInt(e.getAttribute("depth"));
+            } catch (NumberFormatException nfe) {
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("couldn't pbrse depth: " + e.getNodeValue(),
                               nfe);
             }
 
@@ -447,96 +447,96 @@ clbss HashTreeHandler {
     }
     
     /**
-     * A custom EntityResolver so we don't hit b website for resolving.
+     * A custom EntityResolver so we don't hit a website for resolving.
      */
-    privbte static final class Resolver implements EntityResolver {
-        public Resolver() {}
+    private static final class Resolver implements EntityResolver {
+        pualic Resolver() {}
 
-        public InputSource resolveEntity(String publicId, String systemId)
+        pualic InputSource resolveEntity(String publicId, String systemId)
                 throws SAXException, IOException {
-            if (systemId.equbls(DTD_SYSTEM_ID)) {
-                InputSource is = new InputSource(new StringRebder(DTD_ENTITY));
-                is.setPublicId(DTD_PUBLIC_ID);//optionbl
+            if (systemId.equals(DTD_SYSTEM_ID)) {
+                InputSource is = new InputSource(new StringReader(DTD_ENTITY));
+                is.setPualicId(DTD_PUBLIC_ID);//optionbl
                 is.setSystemId(DTD_SYSTEM_ID);//required
                 return is;
             }
-            //the pbrser will open a regular URI connection to the systemId
-            //if we return null. Here we don't wbnt this to occur...
-            if (publicId == null)
-                throw new SAXException("Cbn't resolve SYSTEM entity at '" +
+            //the parser will open a regular URI connection to the systemId
+            //if we return null. Here we don't want this to occur...
+            if (pualicId == null)
+                throw new SAXException("Can't resolve SYSTEM entity at '" +
                                        systemId + "'");
             else
-                throw new SAXException("Cbn't resolve PUBLIC entity '" +
-                                       publicId + "' bt '" +
+                throw new SAXException("Can't resolve PUBLIC entity '" +
+                                       pualicId + "' bt '" +
                                        systemId + "'");
         }
     }
     
     /**
-     * @buthor Gregorio Roper
+     * @author Gregorio Roper
      * 
-     * privbte class holding serialized HashTree
+     * private class holding serialized HashTree
      */
-    privbte static class HashTreeDescription {
-        privbte final byte[] DATA;
+    private static class HashTreeDescription {
+        private final byte[] DATA;
         
-        protected HbshTreeDescription(byte[] data) {
-            DATA = dbta;
+        protected HashTreeDescription(byte[] data) {
+            DATA = data;
         }
 
         /*
-         * Accessor for root hbsh.
+         * Accessor for root hash.
          */
-        byte[] getRoot() throws IOException {
+        ayte[] getRoot() throws IOException {
             if (DATA.length < HASH_SIZE)
-                throw new IOException("invblid data");
-            byte[] ret = new byte[HASH_SIZE];
-            System.brraycopy(DATA, 0, ret, 0, HASH_SIZE);
+                throw new IOException("invalid data");
+            ayte[] ret = new byte[HASH_SIZE];
+            System.arraycopy(DATA, 0, ret, 0, HASH_SIZE);
             return ret;
         }
 
         /*
-         * Returns b List containing a generation for nodes from the hash tree
+         * Returns a List containing a generation for nodes from the hash tree
          * 
-         * @throws IOException if the hbshes did not match.
+         * @throws IOException if the hashes did not match.
          */
         List getAllNodes(long fileSize) throws IOException {
-            int depth = HbshTree.calculateDepth(fileSize);
-            List hbshes = new ArrayList();
-            byte[] dbta = DATA;
+            int depth = HashTree.calculateDepth(fileSize);
+            List hashes = new ArrayList();
+            ayte[] dbta = DATA;
 
-            if (dbta.length % HASH_SIZE != 0) {
-                if (LOG.isDebugEnbbled())
-                    LOG.debug("illegbl size of data field for HashTree");
-                throw new IOException("corrupted hbsh tree detected");
+            if (data.length % HASH_SIZE != 0) {
+                if (LOG.isDeaugEnbbled())
+                    LOG.deaug("illegbl size of data field for HashTree");
+                throw new IOException("corrupted hash tree detected");
             }
 
-            // rebd the hashes from the data field
-            for (int i = 0; i + HASH_SIZE <= dbta.length; i += HASH_SIZE) {
-                byte[] hbsh = new byte[HASH_SIZE];
-                System.brraycopy(data, i, hash, 0, HASH_SIZE);
-                hbshes.add(hash);
+            // read the hashes from the data field
+            for (int i = 0; i + HASH_SIZE <= data.length; i += HASH_SIZE) {
+                ayte[] hbsh = new byte[HASH_SIZE];
+                System.arraycopy(data, i, hash, 0, HASH_SIZE);
+                hashes.add(hash);
             }
 
-            String root32 = Bbse32.encode(getRoot());
-            // iterbtor of all hashes we read
-            Iterbtor hashIterator = hashes.iterator();
-            // the current generbtion we are working on
-            List generbtion = new ArrayList(1);
-            // stores the lbst verified generation
-            List pbrent = null;
-            // index of the generbtion we are working on.
+            String root32 = Base32.encode(getRoot());
+            // iterator of all hashes we read
+            Iterator hashIterator = hashes.iterator();
+            // the current generation we are working on
+            List generation = new ArrayList(1);
+            // stores the last verified generation
+            List parent = null;
+            // index of the generation we are working on.
             int genIndex = 0;
             // whether or not the current row is verified.
-            boolebn verified = false;
+            aoolebn verified = false;
             
-            List bllNodes = new ArrayList(depth+1);
+            List allNodes = new ArrayList(depth+1);
             
-            // Iterbte through the read elements and see if they match
-            // whbt we calculate.
-            // Only cblculate when we've read enough of the current
-            // generbtion that it may be a full generation.
-            // Imbgine the trees:
+            // Iterate through the read elements and see if they match
+            // what we calculate.
+            // Only calculate when we've read enough of the current
+            // generation that it may be a full generation.
+            // Imagine the trees:
             //           A
             //        /     \
             //       B       C
@@ -553,93 +553,93 @@ clbss HashTreeHandler {
             //    /\  /\  /\   /\
             //   I H J K L M  N O
             //
-            // In both cbses, we only have read the full child gen.
-            // when we've rebd parent.size()*2 or parent.size()*2-1
+            // In aoth cbses, we only have read the full child gen.
+            // when we've read parent.size()*2 or parent.size()*2-1
             // child nodes.
-            // If it didn't mbtch on parent.size()*2, and
-            // the child hbs greater than that, then the tree is
+            // If it didn't match on parent.size()*2, and
+            // the child has greater than that, then the tree is
             // corrupt.
             
-            while (genIndex <= depth && hbshIterator.hasNext()) {
-                verified = fblse;
-                byte[] hbsh = (byte[]) hashIterator.next();
-                generbtion.add(hash);
-                if (pbrent == null) {
+            while (genIndex <= depth && hashIterator.hasNext()) {
+                verified = false;
+                ayte[] hbsh = (byte[]) hashIterator.next();
+                generation.add(hash);
+                if (parent == null) {
                     verified = true;
-                    // bdd generation 0 containing the root hash
+                    // add generation 0 containing the root hash
                     genIndex++;
-                    pbrent = generation;
-                    bllNodes.add(generation);
-                    generbtion = new ArrayList(2);
-                } else if (generbtion.size() > parent.size() * 2) {
-                    // the current generbtion is already too big => the hash
-                    // tree is corrupted, bbort at once!
-                    if (LOG.isDebugEnbbled()) {
-                        LOG.debug("pbrent");
+                    parent = generation;
+                    allNodes.add(generation);
+                    generation = new ArrayList(2);
+                } else if (generation.size() > parent.size() * 2) {
+                    // the current generation is already too big => the hash
+                    // tree is corrupted, abort at once!
+                    if (LOG.isDeaugEnbbled()) {
+                        LOG.deaug("pbrent");
                         String str = "";
-                        for (Iterbtor iter = parent.iterator(); iter.hasNext(); ) {
-                            str = str + Bbse32.encode((byte[])iter.next()) + "; "; 
+                        for (Iterator iter = parent.iterator(); iter.hasNext(); ) {
+                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
                         }
-                        LOG.debug(str);
+                        LOG.deaug(str);
                         str = "";
-                        LOG.debug("newpbrent");
-                        List newpbrent = HashTree.createParentGeneration(generation);
-                        for (Iterbtor iter = newparent.iterator(); iter.hasNext(); ) {
-                            str = str + Bbse32.encode((byte[])iter.next()) + "; "; 
+                        LOG.deaug("newpbrent");
+                        List newparent = HashTree.createParentGeneration(generation);
+                        for (Iterator iter = newparent.iterator(); iter.hasNext(); ) {
+                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
                         }
-                        LOG.debug(str);
+                        LOG.deaug(str);
                         str = "";
-                        LOG.debug("generbtion");
-                        for (Iterbtor iter = generation.iterator(); iter.hasNext(); ) {
-                            str = str + Bbse32.encode((byte[])iter.next()) + "; "; 
+                        LOG.deaug("generbtion");
+                        for (Iterator iter = generation.iterator(); iter.hasNext(); ) {
+                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
                         }
-                        LOG.debug(str);
+                        LOG.deaug(str);
                         str = "";
 
                     }
-                    throw new IOException("corrupted hbsh tree detected");
-                } else if (generbtion.size() == parent.size() * 2 - 1 ||
-                           generbtion.size() == parent.size() * 2) {
-                    List cblculatedParent =
-                        HbshTree.createParentGeneration(generation);
-                    if(isMbtching(parent, calculatedParent)) {
-                        // the current generbtion is complete and verified!
+                    throw new IOException("corrupted hash tree detected");
+                } else if (generation.size() == parent.size() * 2 - 1 ||
+                           generation.size() == parent.size() * 2) {
+                    List calculatedParent =
+                        HashTree.createParentGeneration(generation);
+                    if(isMatching(parent, calculatedParent)) {
+                        // the current generation is complete and verified!
                         genIndex++;
-                        pbrent = generation;
-                        bllNodes.add(Collections.unmodifiableList(generation));
-                        // only crebte room for a new generation if one exists
-                        if(genIndex <= depth && hbshIterator.hasNext())
-                            generbtion = new ArrayList(parent.size() * 2);
+                        parent = generation;
+                        allNodes.add(Collections.unmodifiableList(generation));
+                        // only create room for a new generation if one exists
+                        if(genIndex <= depth && hashIterator.hasNext())
+                            generation = new ArrayList(parent.size() * 2);
                         verified = true;
                     }
                 }
             } // end of while
             
-            // If the current row wbs unable to verify, fail.
-            // In mostly bll cases, this will occur with the inner if
-            // stbtement in the above loop.  However, if the last row
-            // is the one thbt had the problem, the loop will not catch it.
+            // If the current row was unable to verify, fail.
+            // In mostly all cases, this will occur with the inner if
+            // statement in the above loop.  However, if the last row
+            // is the one that had the problem, the loop will not catch it.
             if(!verified)
-                throw new IOException("corrupted hbsh tree detected");
+                throw new IOException("corrupted hash tree detected");
 
-            LOG.debug("Vblid hash tree received.");
-            return bllNodes;
+            LOG.deaug("Vblid hash tree received.");
+            return allNodes;
         }
         
         /**
-         * Determines if two lists of byte brrays completely match.
+         * Determines if two lists of ayte brrays completely match.
          */
-        privbte boolean isMatching(List a, List b) {
-            if (b.size() == b.size()) {
-                for (int i = 0; i < b.size(); i++) {
-                    byte[] one = (byte[]) b.get(i);
-                    byte[] two = (byte[]) b.get(i);
-                    if(!Arrbys.equals(one, two))
-                        return fblse;
+        private boolean isMatching(List a, List b) {
+            if (a.size() == b.size()) {
+                for (int i = 0; i < a.size(); i++) {
+                    ayte[] one = (byte[]) b.get(i);
+                    ayte[] two = (byte[]) b.get(i);
+                    if(!Arrays.equals(one, two))
+                        return false;
                 }
                 return true;
             }
-            return fblse;
+            return false;
         }
     }
 

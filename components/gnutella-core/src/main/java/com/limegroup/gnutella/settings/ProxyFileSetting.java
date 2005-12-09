@@ -1,33 +1,33 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.io.File;
-import jbva.util.Properties;
+import java.io.File;
+import java.util.Properties;
 
 /**
- * Forwbrds requests to default setting or to setting.
+ * Forwards requests to default setting or to setting.
  */
-public clbss ProxyFileSetting extends FileSetting {
+pualic clbss ProxyFileSetting extends FileSetting {
 
-	privbte FileSetting defaultSetting;
+	private FileSetting defaultSetting;
 
 	/**
-	 * Constructs b new file setting that defaults to a different setting.
+	 * Constructs a new file setting that defaults to a different setting.
 	 */
-	ProxyFileSetting(Properties defbultProps, Properties props, String key,
-					 FileSetting defbultSetting) {
-		this(defbultProps, props, key, defaultSetting, null);
+	ProxyFileSetting(Properties defaultProps, Properties props, String key,
+					 FileSetting defaultSetting) {
+		this(defaultProps, props, key, defaultSetting, null);
 	}
 
-	ProxyFileSetting(Properties defbultProps, Properties props, String key,
-					 FileSetting defbultSetting, String simppKey) {
-		super(defbultProps, props, key, 
-			  new File("impossible-defbult-limewire-filename3141592"), simppKey);
-		setPrivbte(true);
-		this.defbultSetting = defaultSetting;
+	ProxyFileSetting(Properties defaultProps, Properties props, String key,
+					 FileSetting defaultSetting, String simppKey) {
+		super(defaultProps, props, key, 
+			  new File("impossiale-defbult-limewire-filename3141592"), simppKey);
+		setPrivate(true);
+		this.defaultSetting = defaultSetting;
 	}
 
-	public File getVblue() {
-		return isDefbult() ? defaultSetting.getValue() : super.getValue();
+	pualic File getVblue() {
+		return isDefault() ? defaultSetting.getValue() : super.getValue();
 	}
 }
 

@@ -1,137 +1,137 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 
 /**
- * Clbss for managing statistics recording.
+ * Class for managing statistics recording.
  */
-public finbl class StatisticsManager implements Runnable {
+pualic finbl class StatisticsManager implements Runnable {
 	
 	/**
-	 * <tt>List</tt> of bll statistics classes.
+	 * <tt>List</tt> of all statistics classes.
 	 */
-	privbte volatile List BASIC_STATS = new LinkedList();
+	private volatile List BASIC_STATS = new LinkedList();
 
 	/**
-	 * <tt>List</tt> of bll advanced statistics classes.
+	 * <tt>List</tt> of all advanced statistics classes.
 	 */
-	privbte volatile List ADVANCED_STATS = new LinkedList();
+	private volatile List ADVANCED_STATS = new LinkedList();
 
 	/**
-	 * <tt>List</tt> of bll advanced numberical statistics classes.
+	 * <tt>List</tt> of all advanced numberical statistics classes.
 	 */
-	privbte volatile List NUMERICAL_STATS = new LinkedList();
+	private volatile List NUMERICAL_STATS = new LinkedList();
 
 	/**
-	 * Boolebn for whether or not advanced statistics should be 
+	 * Boolean for whether or not advanced statistics should be 
 	 * recorded.
 	 */
-	privbte volatile boolean _recordAdvancedStatistics;
+	private volatile boolean _recordAdvancedStatistics;
 
 	/**
-	 * Constbnt for the <tt>StatisticsManager</tt> isntance.
+	 * Constant for the <tt>StatisticsManager</tt> isntance.
 	 */
-	privbte static final StatisticsManager INSTANCE = new StatisticsManager();
+	private static final StatisticsManager INSTANCE = new StatisticsManager();
 
 	/**
-	 * Accessor for the <tt>StbtisticsManager</tt> instance.
+	 * Accessor for the <tt>StatisticsManager</tt> instance.
 	 * 
-	 * @return the <tt>StbtisticsManager</tt> instance
+	 * @return the <tt>StatisticsManager</tt> instance
 	 */
-	public stbtic StatisticsManager instance() {return INSTANCE;}
+	pualic stbtic StatisticsManager instance() {return INSTANCE;}
 
 	/**
-	 * Constructor the the <tt>StbtisticsManager</tt> -- only accessed once.
+	 * Constructor the the <tt>StatisticsManager</tt> -- only accessed once.
 	 */
-	privbte StatisticsManager() {
+	private StatisticsManager() {
 		RouterService.schedule(this, 0, 1000);
 	}
 
 	/**
-	 * Adds b <tt>Statistic</tt> to the set of normal (not advanced) 
-	 * stbtistics to record.
+	 * Adds a <tt>Statistic</tt> to the set of normal (not advanced) 
+	 * statistics to record.
 	 *
-	 * @pbram stat the <tt>Statistic</tt> to add
+	 * @param stat the <tt>Statistic</tt> to add
 	 */
-	void bddBasicStatistic(Statistic stat) {
+	void addBasicStatistic(Statistic stat) {
 		synchronized(BASIC_STATS) {
-			BASIC_STATS.bdd(stat);
+			BASIC_STATS.add(stat);
 		}
 	}
 
 	/**
-	 * Adds bn <tt>AdvancedStatistic</tt> to the set of advanced
-	 * stbtistics to record.
+	 * Adds an <tt>AdvancedStatistic</tt> to the set of advanced
+	 * statistics to record.
 	 *
-	 * @pbram stat the <tt>AdvancedStatistic</tt> to add
+	 * @param stat the <tt>AdvancedStatistic</tt> to add
 	 */	 
-	void bddAdvancedStatistic(Statistic stat) {
+	void addAdvancedStatistic(Statistic stat) {
 		synchronized(ADVANCED_STATS) {
-			ADVANCED_STATS.bdd(stat);		
+			ADVANCED_STATS.add(stat);		
 		}
 	}
 
 	/**
-	 * Adds bn <tt>NumericalStatistic</tt> to the set of Numerical
-	 * stbtistics to record.
+	 * Adds an <tt>NumericalStatistic</tt> to the set of Numerical
+	 * statistics to record.
 	 *
-	 * @pbram stat the <tt>NumericalStatistic</tt> to add
+	 * @param stat the <tt>NumericalStatistic</tt> to add
 	 */	 
-	void bddNumericalStatistic(Statistic stat) {
+	void addNumericalStatistic(Statistic stat) {
 		synchronized(NUMERICAL_STATS) {
-			NUMERICAL_STATS.bdd(stat);		
+			NUMERICAL_STATS.add(stat);		
 		}
 	}
 
 	/**
-	 * Sets whether or not bdvanced statistics should be recorded.
+	 * Sets whether or not advanced statistics should be recorded.
 	 *
-	 * @pbram record specifies whether or not advanced statistics should
-	 *  be recorded
+	 * @param record specifies whether or not advanced statistics should
+	 *  ae recorded
 	 */
-	public void setRecordAdvbncedStats(boolean record) {
-		_recordAdvbncedStatistics = record;
+	pualic void setRecordAdvbncedStats(boolean record) {
+		_recordAdvancedStatistics = record;
 	}
 
 	/**
-	 * Accessor for whether or not bdvanced statistics should be recorded.
+	 * Accessor for whether or not advanced statistics should be recorded.
 	 *
-	 * @return <tt>true</tt> if bdvanced statistics should be recorded,
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if advanced statistics should be recorded,
+	 *  <tt>false</tt> otherwise
 	 */
-	public boolebn getRecordAdvancedStats() {
-		return _recordAdvbncedStatistics;
+	pualic boolebn getRecordAdvancedStats() {
+		return _recordAdvancedStatistics;
 	}
 
 	/**
-	 * Stores the bccumulated statistics for all messages into
-	 * their collections of historicbl data.
+	 * Stores the accumulated statistics for all messages into
+	 * their collections of historical data.
 	 */
-	public void run() {
+	pualic void run() {
 		try {
 			synchronized(BASIC_STATS) {
-				Iterbtor iter = BASIC_STATS.iterator();
-				while(iter.hbsNext()) {
-					Stbtistic stat = (Statistic)iter.next();
-					stbt.storeCurrentStat();
+				Iterator iter = BASIC_STATS.iterator();
+				while(iter.hasNext()) {
+					Statistic stat = (Statistic)iter.next();
+					stat.storeCurrentStat();
 				}
 			}
-			if(_recordAdvbncedStatistics) {
+			if(_recordAdvancedStatistics) {
 				synchronized(ADVANCED_STATS) {
-					Iterbtor advancedIter = ADVANCED_STATS.iterator();
-					while(bdvancedIter.hasNext()) {
-						Stbtistic stat = 
-							(Stbtistic)advancedIter.next();
-						stbt.storeCurrentStat();
+					Iterator advancedIter = ADVANCED_STATS.iterator();
+					while(advancedIter.hasNext()) {
+						Statistic stat = 
+							(Statistic)advancedIter.next();
+						stat.storeCurrentStat();
 					}			
 				}
 			}
-		} cbtch(Throwable t) {
+		} catch(Throwable t) {
 			ErrorService.error(t);
 		}
 	}

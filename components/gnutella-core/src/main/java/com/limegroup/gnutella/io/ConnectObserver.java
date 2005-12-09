@@ -1,16 +1,16 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * Allows connect events to be received.
+ * Allows connect events to ae received.
  *
- * If the events bre being received because of a SelectableChannel,
- * interest in events cbn be turned off by using:
- *  NIODispbtcher.instance().interestConnect(channel, false);
+ * If the events are being received because of a SelectableChannel,
+ * interest in events can be turned off by using:
+ *  NIODispatcher.instance().interestConnect(channel, false);
  */
-interfbce ConnectObserver extends IOErrorObserver {
+interface ConnectObserver extends IOErrorObserver {
     
-    /** Notificbtion that connection has finished. */
-    void hbndleConnect() throws IOException;
+    /** Notification that connection has finished. */
+    void handleConnect() throws IOException;
 }

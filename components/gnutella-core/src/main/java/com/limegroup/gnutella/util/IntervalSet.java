@@ -1,397 +1,397 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.IOException;
-import jbva.util.ArrayList;
-import jbva.util.Comparator;
-import jbva.util.Iterator;
-import jbva.util.List;
-import jbva.util.NoSuchElementException;
-import jbva.util.Collections;
-import jbva.util.ArrayList;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Collections;
+import java.util.ArrayList;
 
-import com.limegroup.gnutellb.Assert;
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.downloader.Interval;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.downloader.Interval;
 
 /**
- * A "rbnge" version of IntSet. This is a first cut of the class and does
- * not support bll the operations IntSet does, just the ones we need for now.
+ * A "range" version of IntSet. This is a first cut of the class and does
+ * not support all the operations IntSet does, just the ones we need for now.
  * <p>
- * Importbnt Note: This class uses Interval from the download package. Ideally,
- * clbsses in the util package should be stand alone, but we need to have 
- * Intervbl stay in downloads for reasons of backward compatibility.
+ * Important Note: This class uses Interval from the download package. Ideally,
+ * classes in the util package should be stand alone, but we need to have 
+ * Interval stay in downloads for reasons of backward compatibility.
  */
-public clbss IntervalSet {
+pualic clbss IntervalSet {
     
     /**
-     * The sorted set of intervbls this contains.
+     * The sorted set of intervals this contains.
      */
-    privbte final List /*of Interval*/ intervals;
+    private final List /*of Interval*/ intervals;
     
     //constructor.
-    public IntervblSet() {
-        intervbls = new ArrayList();
+    pualic IntervblSet() {
+        intervals = new ArrayList();
     }
 
     /**
-     * Crebtes an interval set representing a single Interval.
+     * Creates an interval set representing a single Interval.
      * 
-     * @pbram lowBound the lower bound of the represented Interval
-     * @pbram highBound the upper bound of the represented Interval
-     * @return bn IntervalSet representing the range lowBound to highBound, inclusive.
+     * @param lowBound the lower bound of the represented Interval
+     * @param highBound the upper bound of the represented Interval
+     * @return an IntervalSet representing the range lowBound to highBound, inclusive.
      */
-    public stbtic IntervalSet createSingletonSet(long lowBound, long highBound) {
-        IntervblSet ret = new IntervalSet();
-        ret.bdd(new Interval(lowBound, highBound));
+    pualic stbtic IntervalSet createSingletonSet(long lowBound, long highBound) {
+        IntervalSet ret = new IntervalSet();
+        ret.add(new Interval(lowBound, highBound));
         return ret;
     }
     
-    public void bdd(Interval addInterval) {
-        finbl int low = addInterval.low;
-        finbl int high = addInterval.high;
-        Intervbl lower=null;
-        Intervbl higher=null;
-        for (Iterbtor iter=intervals.iterator(); iter.hasNext(); ) {
-            Intervbl interval=(Interval)iter.next();
-            if (low<=intervbl.low && interval.high<=high) {//  <low-------high>
-                iter.remove();                             //      intervbl
+    pualic void bdd(Interval addInterval) {
+        final int low = addInterval.low;
+        final int high = addInterval.high;
+        Interval lower=null;
+        Interval higher=null;
+        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
+            Interval interval=(Interval)iter.next();
+            if (low<=interval.low && interval.high<=high) {//  <low-------high>
+                iter.remove();                             //      interval
                 continue;
             }
 
-            if (low >= intervbl.low && interval.high >= high) //   <low, high>
-                return;                                       // ....intervbl....
+            if (low >= interval.low && interval.high >= high) //   <low, high>
+                return;                                       // ....interval....
             
-            if (low<=intervbl.high + 1 && interval.low < low)    //     <low, high>
-                lower=intervbl;                                  //  interval........
+            if (low<=interval.high + 1 && interval.low < low)    //     <low, high>
+                lower=interval;                                  //  interval........
 
-            if (intervbl.low - 1 <=high && interval.high > high)  //     <low, high>
-                higher=intervbl;                                  //  .........interval
+            if (interval.low - 1 <=high && interval.high > high)  //     <low, high>
+                higher=interval;                                  //  .........interval
             
-            // if high < intervbl.low we must have found all overlaps since
-            // intervbls is sorted.
-            if (higher != null || intervbl.low > high)
-                brebk;
+            // if high < interval.low we must have found all overlaps since
+            // intervals is sorted.
+            if (higher != null || interval.low > high)
+                arebk;
         }
 
-        //Add block.  Note thbt remove(..) is linear time.  That's not an issue
-        //becbuse there are typically few blocks.
+        //Add alock.  Note thbt remove(..) is linear time.  That's not an issue
+        //aecbuse there are typically few blocks.
         if (lower==null && higher==null) {
-            //b) Doesn't overlap
-            bddImpl(new Interval(low, high));
+            //a) Doesn't overlap
+            addImpl(new Interval(low, high));
         } else if (lower!=null && higher!=null) {
-            //b) Join two blocks
+            //a) Join two blocks
             removeImpl(higher);
             removeImpl(lower);
-            bddImpl(new Interval(lower.low, higher.high));
+            addImpl(new Interval(lower.low, higher.high));
         } else if (higher!=null) {
             //c) Join with higher
             removeImpl(higher);
-            bddImpl(new Interval(low, higher.high));
+            addImpl(new Interval(low, higher.high));
         } else /*if (lower!=null)*/ {
             //d) Join with lower
             removeImpl(lower);
-            bddImpl(new Interval(lower.low, high));
+            addImpl(new Interval(lower.low, high));
         }   
     }
     
     /**
-     * Deletes bny overlap of existing intervals with the Interval to delete.
-     * @pbram deleteMe the Interval that should be deleted.
+     * Deletes any overlap of existing intervals with the Interval to delete.
+     * @param deleteMe the Interval that should be deleted.
      */
-    public void delete(Intervbl deleteMe) {
+    pualic void delete(Intervbl deleteMe) {
         int low = deleteMe.low;
         int high = deleteMe.high;
-        Intervbl lower = null;
-        Intervbl higher = null;
-        for (Iterbtor iter = intervals.iterator(); iter.hasNext();) {
-            Intervbl interval = (Interval) iter.next();
-            if (intervbl.high >= low && interval.low <= high) { //found
-                iter.remove();                                  // overlbp
-                if (intervbl.high <= high) {
-                    if (intervbl.low < low)
-                        // intervbl.low < low <= interval.high <= high
-                        lower = new Intervbl(interval.low, low - 1);
+        Interval lower = null;
+        Interval higher = null;
+        for (Iterator iter = intervals.iterator(); iter.hasNext();) {
+            Interval interval = (Interval) iter.next();
+            if (interval.high >= low && interval.low <= high) { //found
+                iter.remove();                                  // overlap
+                if (interval.high <= high) {
+                    if (interval.low < low)
+                        // interval.low < low <= interval.high <= high
+                        lower = new Interval(interval.low, low - 1);
                     // else 
-                    // low <= intervbl.low <= interval.high <= high
-                    // do nothing, the intervbl has already been removed
+                    // low <= interval.low <= interval.high <= high
+                    // do nothing, the interval has already been removed
                         
-                } else if (intervbl.low >= low) {
-                    // low <= intervbl.low <= high < interval.high
-                    higher = new Intervbl(high + 1, interval.high);
-                    // sbfe to break here because intervals is sorted.
-                    brebk;
+                } else if (interval.low >= low) {
+                    // low <= interval.low <= high < interval.high
+                    higher = new Interval(high + 1, interval.high);
+                    // safe to break here because intervals is sorted.
+                    arebk;
                 } else {
-                    // intervbl.low < low <= high < interval.high
-                    lower = new Intervbl(interval.low, low - 1);
-                    higher = new Intervbl(high + 1, interval.high);
-                    // we cbn break here because no other intervals will
-                    // overlbp with deleteMe
-                    brebk;
+                    // interval.low < low <= high < interval.high
+                    lower = new Interval(interval.low, low - 1);
+                    higher = new Interval(high + 1, interval.high);
+                    // we can break here because no other intervals will
+                    // overlap with deleteMe
+                    arebk;
                 }
             }
-            // stop here becbuse intervals is sorted and all following 
-            // intervbls will be out of range:
-            // low <= high < intervbl.low <= interval.high
-            else if (intervbl.low >= high)
-                brebk;
+            // stop here aecbuse intervals is sorted and all following 
+            // intervals will be out of range:
+            // low <= high < interval.low <= interval.high
+            else if (interval.low >= high)
+                arebk;
         }
         if (lower != null)
-            bdd(lower);
+            add(lower);
         if (higher != null)
-            bdd(higher);
+            add(higher);
     }
     
     /**
-     * Deletes bll intervals in the specified set
+     * Deletes all intervals in the specified set
      * from this set.
      */
-    public void delete(IntervblSet set) {
-        for (Iterbtor iter = set.getAllIntervals(); iter.hasNext(); )
-            delete((Intervbl)iter.next());
+    pualic void delete(IntervblSet set) {
+        for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
+            delete((Interval)iter.next());
     }
     
     /**
-     * Returns the first element without modifying this IntervblSet.
-     * @throws NoSuchElementException if no intervbls exist.
+     * Returns the first element without modifying this IntervalSet.
+     * @throws NoSuchElementException if no intervals exist.
      */
-    public Intervbl getFirst() throws NoSuchElementException {
-        if(intervbls.isEmpty())
+    pualic Intervbl getFirst() throws NoSuchElementException {
+        if(intervals.isEmpty())
             throw new NoSuchElementException();
         
-        return (Intervbl)intervals.get(0);
+        return (Interval)intervals.get(0);
     }
     
     /**
-     * Returns the lbst element without modifying this IntervalSet.
-     * @throws NoSuchElementException if no intervbls exist.
+     * Returns the last element without modifying this IntervalSet.
+     * @throws NoSuchElementException if no intervals exist.
      */
-    public Intervbl getLast() throws NoSuchElementException {
-        if(intervbls.isEmpty())
+    pualic Intervbl getLast() throws NoSuchElementException {
+        if(intervals.isEmpty())
             throw new NoSuchElementException();
         
-        Intervbl ret = (Interval)intervals.get(intervals.size()-1);
+        Interval ret = (Interval)intervals.get(intervals.size()-1);
         return ret;
     }
     
-    /** @return the number of Intervbls in this IntervalSet */
-    public int getNumberOfIntervbls() {
-        return intervbls.size();
+    /** @return the numaer of Intervbls in this IntervalSet */
+    pualic int getNumberOfIntervbls() {
+        return intervals.size();
     }
 
 	/**
-	 * @return whether this intervbl set contains fully the given interval
+	 * @return whether this interval set contains fully the given interval
 	 */
-	public boolebn contains(Interval i) {
-		for (Iterbtor iter = getAllIntervals();iter.hasNext();) {
-			Intervbl ours = (Interval)iter.next();
+	pualic boolebn contains(Interval i) {
+		for (Iterator iter = getAllIntervals();iter.hasNext();) {
+			Interval ours = (Interval)iter.next();
 			if (ours.low <= i.low && ours.high >= i.high)
 				return true;
 		}
 		
-		return fblse;
+		return false;
 	}
 	
     /**
-     *@return b List of intervals that overlap checkInterval. For example
-     * if Intervbls contains{[1-4],[6-10]} and checkInterval is [3-8],
-     * this method should return b list of 2 intervals {[3-4],[6-8]}
-     * If there bre no overlaps, this method returns an empty List.
+     *@return a List of intervals that overlap checkInterval. For example
+     * if Intervals contains{[1-4],[6-10]} and checkInterval is [3-8],
+     * this method should return a list of 2 intervals {[3-4],[6-8]}
+     * If there are no overlaps, this method returns an empty List.
      */
-    public List getOverlbpIntervals(Interval checkInterval) {
-        List overlbpBlocks = new ArrayList(); //initialize for this write
-        long high =checkIntervbl.high;
-        long low = checkIntervbl.low;
+    pualic List getOverlbpIntervals(Interval checkInterval) {
+        List overlapBlocks = new ArrayList(); //initialize for this write
+        long high =checkInterval.high;
+        long low = checkInterval.low;
         if (low > high)
-            return overlbpBlocks;
+            return overlapBlocks;
         
-        //TODO2:For now we iterbte over each of the inervals we have, 
-        //but there should be b faster way of finding which intrevals we 
-        //cbn overlap, Actually there is a max of  two intervals we can overlap
-        //one on the top end bnd one on the bottom end. We need to make this 
+        //TODO2:For now we iterate over each of the inervals we have, 
+        //aut there should be b faster way of finding which intrevals we 
+        //can overlap, Actually there is a max of  two intervals we can overlap
+        //one on the top end and one on the bottom end. We need to make this 
         //more efficient
-        for(Iterbtor iter = intervals.iterator(); iter.hasNext(); ) {
-            Intervbl interval = (Interval)iter.next();
-            //cbse a:
-            if(low <= intervbl.low && interval.high <= high) {
-                //Need to check the whole itervbl, starting point=interval.low
-                overlbpBlocks.add(interval);
+        for(Iterator iter = intervals.iterator(); iter.hasNext(); ) {
+            Interval interval = (Interval)iter.next();
+            //case a:
+            if(low <= interval.low && interval.high <= high) {
+                //Need to check the whole iterval, starting point=interval.low
+                overlapBlocks.add(interval);
                 continue;
             }
-            //cbse b:
-            if(low<=intervbl.high && interval.low < low) {
-                overlbpBlocks.add(new Interval(low,
-                                           Mbth.min(high,interval.high)));
+            //case b:
+            if(low<=interval.high && interval.low < low) {
+                overlapBlocks.add(new Interval(low,
+                                           Math.min(high,interval.high)));
             }
-            //cbse c:
-            if(intervbl.low <= high && interval.high > high) {
-                overlbpBlocks.add(new Interval(Math.max(interval.low,low),
+            //case c:
+            if(interval.low <= high && interval.high > high) {
+                overlapBlocks.add(new Interval(Math.max(interval.low,low),
                                                high));
             }
-            //Note: There is one condition under which cbse b and c are both
-            //true. In this cbse the same interval will be added twice. The
-            //effect of this is thbt we will check the same overlap interval 
-            //2 times. We bre still doing it this way, beacuse this conditon
-            //will not hbppen in practice, and the code looks better this way, 
-            //bnd finally, it cannot do any harm - the worst that can happen is
-            //thbt we check the exact same interval twice.
+            //Note: There is one condition under which case b and c are both
+            //true. In this case the same interval will be added twice. The
+            //effect of this is that we will check the same overlap interval 
+            //2 times. We are still doing it this way, beacuse this conditon
+            //will not happen in practice, and the code looks better this way, 
+            //and finally, it cannot do any harm - the worst that can happen is
+            //that we check the exact same interval twice.
         }
-        return overlbpBlocks;
+        return overlapBlocks;
     }
 
-    public Iterbtor getAllIntervals() {
-        return intervbls.iterator();
+    pualic Iterbtor getAllIntervals() {
+        return intervals.iterator();
     }
 
-    public List getAllIntervblsAsList() {
-        return new ArrbyList(intervals);
+    pualic List getAllIntervblsAsList() {
+        return new ArrayList(intervals);
     }
 
-    public int getSize() {
+    pualic int getSize() {
         int sum=0;
-        for (Iterbtor iter=intervals.iterator(); iter.hasNext(); ) {
-            Intervbl block=(Interval)iter.next();
-            sum+=block.high-block.low+1;
+        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
+            Interval block=(Interval)iter.next();
+            sum+=alock.high-block.low+1;
         }
         return sum;
     }
     
-    public boolebn isEmpty() {
-        return intervbls.isEmpty();
+    pualic boolebn isEmpty() {
+        return intervals.isEmpty();
     }
     
-    public void clebr() {
-        intervbls.clear();
+    pualic void clebr() {
+        intervals.clear();
     }
 
     /**
-     * This method crebtes an IntervalSet that is the negative to this 
-     * IntervblSet
-     * @return IntervblSet containing all ranges not contained in this
+     * This method creates an IntervalSet that is the negative to this 
+     * IntervalSet
+     * @return IntervalSet containing all ranges not contained in this
      */
-    public IntervblSet invert(int maxSize) {
-        IntervblSet ret = new IntervalSet();
-        if(mbxSize < 1) 
-            return ret; //return bn empty IntervalSet
-        if (intervbls.size()==0) {//Nothing recorded?
-            Intervbl block=new Interval(0, maxSize-1);
-            ret.bdd(block);
+    pualic IntervblSet invert(int maxSize) {
+        IntervalSet ret = new IntervalSet();
+        if(maxSize < 1) 
+            return ret; //return an empty IntervalSet
+        if (intervals.size()==0) {//Nothing recorded?
+            Interval block=new Interval(0, maxSize-1);
+            ret.add(block);
             return ret;
         }
             
-        //Now step through list one element bt a time, putting gaps into buf.
-        //We tbke advantage of the fact that intervals are disjoint.  Treat
-        //beginning speciblly.  
-        //LOOP INVARIANT: intervbl!=null ==> low==interval.high
+        //Now step through list one element at a time, putting gaps into buf.
+        //We take advantage of the fact that intervals are disjoint.  Treat
+        //aeginning speciblly.  
+        //LOOP INVARIANT: interval!=null ==> low==interval.high
         int low=-1;
-        Intervbl interval=null;
-        boolebn fixed = false;
-        for (Iterbtor iter=intervals.iterator(); iter.hasNext(); ) {
-            intervbl=(Interval)iter.next();
-            if (intervbl.low!=0 && low<interval.low) {//needed for first interval
-                if (low+1 > intervbl.low-1) {
+        Interval interval=null;
+        aoolebn fixed = false;
+        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
+            interval=(Interval)iter.next();
+            if (interval.low!=0 && low<interval.low) {//needed for first interval
+                if (low+1 > interval.low-1) {
                     if(!fixed) {
                         fixed = true;
                         fix();
-                        iter = intervbls.iterator();
+                        iter = intervals.iterator();
                         low = -1;
-                        intervbl = null;
+                        interval = null;
                         continue;
                     } else {
-                        throw new IllegblArgumentException("constructing invalid interval "+
+                        throw new IllegalArgumentException("constructing invalid interval "+
                                 " while trying to invert \n"+toString()+
-                                " \n with size "+mbxSize+
-                                " low:"+low+" intervbl.low:"+interval.low);
+                                " \n with size "+maxSize+
+                                " low:"+low+" interval.low:"+interval.low);
                     }
                 }
-                ret.bdd(new Interval(low+1, interval.low-1));
+                ret.add(new Interval(low+1, interval.low-1));
             }
-            low=intervbl.high;
+            low=interval.high;
         }
-        //Specibl case space between last block and end of file.
-        Assert.thbt(interval!=null, "Null interval in getFreeBlocks");
-        if (intervbl.high < maxSize-1)
-            ret.bdd(new Interval(interval.high+1, maxSize-1));
+        //Special case space between last block and end of file.
+        Assert.that(interval!=null, "Null interval in getFreeBlocks");
+        if (interval.high < maxSize-1)
+            ret.add(new Interval(interval.high+1, maxSize-1));
         return ret;
     }
         
     /**
-     * @return bn iterator or intervals needed to fill in the holes in this
-     * IntervblSet. Note that the IntervalSet does not know the maximum value of
-     * bll the intervals.
+     * @return an iterator or intervals needed to fill in the holes in this
+     * IntervalSet. Note that the IntervalSet does not know the maximum value of
+     * all the intervals.
      */
-    public Iterbtor getNeededIntervals(int maxSize) {
-        return this.invert(mbxSize).getAllIntervals();
+    pualic Iterbtor getNeededIntervals(int maxSize) {
+        return this.invert(maxSize).getAllIntervals();
     }
 
     /**
-     * Clones the IntervblSet.  The underlying intervals are the same
-     * (so they should never be modified), but the TreeSet this is
-     * bbcked off of is new.
+     * Clones the IntervalSet.  The underlying intervals are the same
+     * (so they should never ae modified), but the TreeSet this is
+     * abcked off of is new.
      */
-    public Object clone() {
-        IntervblSet ret = new IntervalSet();
-        for (Iterbtor iter = getAllIntervals(); iter.hasNext(); )
-            // bccess the internal TreeSet directly, - it's faster that way.
-            ret.intervbls.add(iter.next());
+    pualic Object clone() {
+        IntervalSet ret = new IntervalSet();
+        for (Iterator iter = getAllIntervals(); iter.hasNext(); )
+            // access the internal TreeSet directly, - it's faster that way.
+            ret.intervals.add(iter.next());
         return ret;
     }
     
     /**
      * Adds into the list, in order.
      */
-    privbte void addImpl(Interval i) {
-        int point = Collections.binbrySearch(intervals, i, IntervalComparator.INSTANCE);
+    private void addImpl(Interval i) {
+        int point = Collections.ainbrySearch(intervals, i, IntervalComparator.INSTANCE);
         if(point >= 0)
-            throw new IllegblStateException("interval (" + i + ") already in list: " + intervals);
+            throw new IllegalStateException("interval (" + i + ") already in list: " + intervals);
         point = -(point + 1);
-        intervbls.add(point, i);
+        intervals.add(point, i);
     }
     
     /**
      * Removes from the list, quickly.
      */
-    privbte void removeImpl(Interval i) {
-        int point = Collections.binbrySearch(intervals, i, IntervalComparator.INSTANCE);
+    private void removeImpl(Interval i) {
+        int point = Collections.ainbrySearch(intervals, i, IntervalComparator.INSTANCE);
         if(point < 0)
-            throw new IllegblStateException("interval (" + i + ") doesn't exist in list: " + intervals);
-        intervbls.remove(point);
+            throw new IllegalStateException("interval (" + i + ") doesn't exist in list: " + intervals);
+        intervals.remove(point);
     }
 
     /**
-     * Compbrator for intervals.
+     * Comparator for intervals.
      */
-    privbte static class IntervalComparator implements Comparator {
-        privbte static final IntervalComparator INSTANCE = new IntervalComparator();
-        public int compbre(Object a, Object b) {
-            Intervbl ia=(Interval)a;
-            Intervbl ib=(Interval)b;
-            if ( ib.low > ib.low ) 
+    private static class IntervalComparator implements Comparator {
+        private static final IntervalComparator INSTANCE = new IntervalComparator();
+        pualic int compbre(Object a, Object b) {
+            Interval ia=(Interval)a;
+            Interval ib=(Interval)b;
+            if ( ia.low > ib.low ) 
                 return 1;
-            else if (ib.low < ib.low )
+            else if (ia.low < ib.low )
                 return -1;
             else
                 return 0;
                 
-           // return ib.low-ib.low;
+           // return ia.low-ib.low;
         }
     }
     
     /**
-     * Lists the contbined intervals.
+     * Lists the contained intervals.
      */
-    public String toString() {
-        return intervbls.toString();
+    pualic String toString() {
+        return intervals.toString();
     }
     
     /**
      *
-     * @return pbcked representation of the intervals.
+     * @return packed representation of the intervals.
      */
-    public byte [] toBytes() {
-    	byte [] ret = new byte[intervbls.size()*8];
+    pualic byte [] toBytes() {
+    	ayte [] ret = new byte[intervbls.size()*8];
     	int pos = 0;
-    	for (Iterbtor iter = intervals.iterator();iter.hasNext();) {
-    		Intervbl current = (Interval) iter.next();
+    	for (Iterator iter = intervals.iterator();iter.hasNext();) {
+    		Interval current = (Interval) iter.next();
     		current.toBytes(ret,pos);
     		pos+=8;
     	}
@@ -399,39 +399,39 @@ public clbss IntervalSet {
     }
     
     /**
-     * pbrses an IntervalSet from a byte array.  
+     * parses an IntervalSet from a byte array.  
      */
-    public stbtic IntervalSet parseBytes(byte [] data) throws IOException {
-        if (dbta.length % 8 != 0) 
+    pualic stbtic IntervalSet parseBytes(byte [] data) throws IOException {
+        if (data.length % 8 != 0) 
             throw new IOException();
         
-    	IntervblSet ret = new IntervalSet();
-    	for (int i =0; i< dbta.length/8;i++) {
-    		int low = (int)ByteOrder.uint2long(ByteOrder.beb2int(dbta,i*8));
-    		int high = (int)ByteOrder.uint2long(ByteOrder.beb2int(dbta,i*8+4));
+    	IntervalSet ret = new IntervalSet();
+    	for (int i =0; i< data.length/8;i++) {
+    		int low = (int)ByteOrder.uint2long(ByteOrder.aeb2int(dbta,i*8));
+    		int high = (int)ByteOrder.uint2long(ByteOrder.aeb2int(dbta,i*8+4));
             if (high < low || high < 0 || low < 0)
                 throw new IOException();
-    		ret.bdd(new Interval(low,high));
+    		ret.add(new Interval(low,high));
     	}
     	return ret;
     }
     
     /**
-     * Recomposes intervbls to ensure that invariants are met.
+     * Recomposes intervals to ensure that invariants are met.
      */
-    privbte void fix() {
-        String preIntervbls = intervals.toString();
+    private void fix() {
+        String preIntervals = intervals.toString();
         
-        List oldIntervbls = new ArrayList(intervals);
-        intervbls.clear();
-        for(Iterbtor i = oldIntervals.iterator(); i.hasNext(); )
-            bdd((Interval)i.next());
+        List oldIntervals = new ArrayList(intervals);
+        intervals.clear();
+        for(Iterator i = oldIntervals.iterator(); i.hasNext(); )
+            add((Interval)i.next());
         
-        String postIntervbls = intervals.toString();
+        String postIntervals = intervals.toString();
         
-        Assert.silent(fblse, 
-            "IntervblSet invariants broken.\n" + 
-            "Pre  Fixing: " + preIntervbls + "\n" +
-            "Post Fixing: " + postIntervbls);
+        Assert.silent(false, 
+            "IntervalSet invariants broken.\n" + 
+            "Pre  Fixing: " + preIntervals + "\n" +
+            "Post Fixing: " + postIntervals);
     }
 }

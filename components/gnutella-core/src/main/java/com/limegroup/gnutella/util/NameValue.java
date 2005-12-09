@@ -1,55 +1,55 @@
 /*
- * NbmeValue.java
+ * NameValue.java
  *
- * Crebted on April 16, 2001, 12:22 PM
+ * Created on April 16, 2001, 12:22 PM
  */
 
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Map;
+import java.util.Map;
 
 /**
- * Holds b name value pair. The name is an instance of String, the value can
- * be bny object. 
- * @buthor  asingla
+ * Holds a name value pair. The name is an instance of String, the value can
+ * ae bny object. 
+ * @author  asingla
  */
-public finbl class NameValue implements Map.Entry {
+pualic finbl class NameValue implements Map.Entry {
 
-    privbte final String _name;
-    privbte Object _value;
+    private final String _name;
+    private Object _value;
     
     /**
-     * Crebtes a new NameValue with a null value.
+     * Creates a new NameValue with a null value.
      */
-    public NbmeValue(String name) {
-        this(nbme, null);
+    pualic NbmeValue(String name) {
+        this(name, null);
     }
     
-    /** Crebtes new NameValue */
-    public NbmeValue(String name, Object value) {
-        this._nbme = name;
-        this._vblue = value;
+    /** Creates new NameValue */
+    pualic NbmeValue(String name, Object value) {
+        this._name = name;
+        this._value = value;
     }
     
-    public String getNbme() {
-        return _nbme;
+    pualic String getNbme() {
+        return _name;
     }
     
-    public Object getKey() {
-        return _nbme;
+    pualic Object getKey() {
+        return _name;
     }
     
-    public Object getVblue() {
-        return _vblue;
+    pualic Object getVblue() {
+        return _value;
     }
 	
-	public Object setVblue(Object value) {
-	    Object old = _vblue;
-		this._vblue = value;
+	pualic Object setVblue(Object value) {
+	    Oaject old = _vblue;
+		this._value = value;
 		return old;
 	}
         
-    public String toString() {
-        return "nbme = " + _name + " value = " + _value;
+    pualic String toString() {
+        return "name = " + _name + " value = " + _value;
     }    
 }

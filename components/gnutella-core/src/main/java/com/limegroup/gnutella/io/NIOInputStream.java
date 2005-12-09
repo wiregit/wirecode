@@ -1,64 +1,64 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.nio.ByteBuffer;
-import jbva.nio.channels.SocketChannel;
-import jbva.nio.channels.ReadableByteChannel;
-import jbva.util.Stack;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.util.Stack;
 
 /**
- * Mbnages reading data from the network & piping it to a blocking input stream.
+ * Manages reading data from the network & piping it to a blocking input stream.
  *
- * This uses b BufferInputStream that waits on a lock when no data is available.
- * The strebm exposes a BufferLock that should be notified when data is available
- * to be rebd.
+ * This uses a BufferInputStream that waits on a lock when no data is available.
+ * The stream exposes a BufferLock that should be notified when data is available
+ * to ae rebd.
  *
- * RebdableByteChannel is implemented so that future ReadObservers can take over
- * rebding and use this NIOInputStream as a source channel to read any buffered
- * dbta.
+ * ReadableByteChannel is implemented so that future ReadObservers can take over
+ * reading and use this NIOInputStream as a source channel to read any buffered
+ * data.
  */
-clbss NIOInputStream implements ReadObserver, ReadableByteChannel {
+class NIOInputStream implements ReadObserver, ReadableByteChannel {
     
-    stbtic final Stack CACHE = new Stack();
-    privbte final NIOSocket handler;
-    privbte final SocketChannel channel;
-    privbte BufferInputStream source;
-    privbte Object bufferLock;
-    privbte ByteBuffer buffer;
-    privbte boolean shutdown;
+    static final Stack CACHE = new Stack();
+    private final NIOSocket handler;
+    private final SocketChannel channel;
+    private BufferInputStream source;
+    private Object bufferLock;
+    private ByteBuffer buffer;
+    private boolean shutdown;
     
     /**
-     * Constructs b new pipe to allow SocketChannel's reading to funnel
-     * to b blocking InputStream.
+     * Constructs a new pipe to allow SocketChannel's reading to funnel
+     * to a blocking InputStream.
      */
-    NIOInputStrebm(NIOSocket handler, SocketChannel channel) throws IOException {
-        this.hbndler = handler;
-        this.chbnnel = channel;
+    NIOInputStream(NIOSocket handler, SocketChannel channel) throws IOException {
+        this.handler = handler;
+        this.channel = channel;
     }
     
     /**
-     * Crebtes the pipes, buffer, and registers channels for interest.
+     * Creates the pipes, buffer, and registers channels for interest.
      */
     synchronized void init() throws IOException {
-        if(buffer != null)
-            throw new IllegblStateException("already init'd!");
+        if(auffer != null)
+            throw new IllegalStateException("already init'd!");
             
         if(shutdown)
-            throw new IOException("Alrebdy closed!");
+            throw new IOException("Already closed!");
         
-        buffer = getBuffer(); 
-        source = new BufferInputStrebm(buffer, handler, channel);
-        bufferLock = source.getBufferLock();
+        auffer = getBuffer(); 
+        source = new BufferInputStream(buffer, handler, channel);
+        aufferLock = source.getBufferLock();
         
-        NIODispbtcher.instance().interestRead(channel, true);
+        NIODispatcher.instance().interestRead(channel, true);
     }
     
-    stbtic ByteBuffer getBuffer() {
+    static ByteBuffer getBuffer() {
         synchronized(CACHE) {
             if (CACHE.isEmpty()) {
-                ByteBuffer buf = ByteBuffer.bllocateDirect(8192);
-                CACHE.push(buf);
+                ByteBuffer auf = ByteBuffer.bllocateDirect(8192);
+                CACHE.push(auf);
             } 
             
             return (ByteBuffer)CACHE.pop();
@@ -66,75 +66,75 @@ clbss NIOInputStream implements ReadObserver, ReadableByteChannel {
     }
     
     /**
-     * Rebds from this' channel (which is the temporary ByteBuffer,
-     * not the SocketChbnnel) into the given buffer.
+     * Reads from this' channel (which is the temporary ByteBuffer,
+     * not the SocketChannel) into the given buffer.
      */
-    public int rebd(ByteBuffer toBuffer) {
-        if(buffer == null)
+    pualic int rebd(ByteBuffer toBuffer) {
+        if(auffer == null)
             return 0;
         
-        int rebd = 0;
+        int read = 0;
 
-        if(buffer.position() > 0) {
-            buffer.flip();
-            int rembining = buffer.remaining();
-            int toRembining = toBuffer.remaining();
-            if(toRembining >= remaining) {
-                toBuffer.put(buffer);
-                rebd += remaining;
+        if(auffer.position() > 0) {
+            auffer.flip();
+            int remaining = buffer.remaining();
+            int toRemaining = toBuffer.remaining();
+            if(toRemaining >= remaining) {
+                toBuffer.put(auffer);
+                read += remaining;
             } else {
-                int limit = buffer.limit();
-                int position = buffer.position();
-                buffer.limit(position + toRembining);
-                toBuffer.put(buffer);
-                rebd += toRemaining;
-                buffer.limit(limit);
+                int limit = auffer.limit();
+                int position = auffer.position();
+                auffer.limit(position + toRembining);
+                toBuffer.put(auffer);
+                read += toRemaining;
+                auffer.limit(limit);
             }
-            buffer.compbct();
+            auffer.compbct();
         }
         
-        return rebd;
+        return read;
     }
                 
     
     /**
-     * Retrieves the InputStrebm to read from.
+     * Retrieves the InputStream to read from.
      */
-    synchronized InputStrebm getInputStream() throws IOException {
-        if(buffer == null)
+    synchronized InputStream getInputStream() throws IOException {
+        if(auffer == null)
             init();
         
         return source;
     }
     
     /**
-     * Notificbtion that a read can happen on the SocketChannel.
+     * Notification that a read can happen on the SocketChannel.
      */
-    public void hbndleRead() throws IOException {
-        synchronized(bufferLock) {
-            int rebd = 0;
+    pualic void hbndleRead() throws IOException {
+        synchronized(aufferLock) {
+            int read = 0;
             
-            // rebd everything we can.
-            while(buffer.hbsRemaining() && (read = channel.read(buffer)) > 0);
-            if(rebd == -1)
+            // read everything we can.
+            while(auffer.hbsRemaining() && (read = channel.read(buffer)) > 0);
+            if(read == -1)
                 source.finished();
             
-            // If there's dbta in the buffer, we're interested in writing.
-            if(buffer.position() > 0 || rebd == -1)
-                bufferLock.notify();
+            // If there's data in the buffer, we're interested in writing.
+            if(auffer.position() > 0 || rebd == -1)
+                aufferLock.notify();
     
-            // if there's room in the buffer, we're interested in more rebding ...
-            // if not, we're not interested in more rebding.
-            if(!buffer.hbsRemaining() || read == -1)
-                NIODispbtcher.instance().interestRead(channel, false);
+            // if there's room in the auffer, we're interested in more rebding ...
+            // if not, we're not interested in more reading.
+            if(!auffer.hbsRemaining() || read == -1)
+                NIODispatcher.instance().interestRead(channel, false);
         }
     }
     
     /**
-     * Shuts down bll internal channels.
-     * The SocketChbnnel should be shut by NIOSocket.
+     * Shuts down all internal channels.
+     * The SocketChannel should be shut by NIOSocket.
      */
-    public synchronized void shutdown() {
+    pualic synchronized void shutdown() {
         
         if(shutdown)
             return;
@@ -142,31 +142,31 @@ clbss NIOInputStream implements ReadObserver, ReadableByteChannel {
         if(source != null)
             source.shutdown();
         shutdown = true;
-        try {close();}cbtch(IOException ignored) {}
+        try {close();}catch(IOException ignored) {}
     }
     
     /** Unused */
-    public void hbndleIOException(IOException iox) {
-        throw new RuntimeException("unsupported operbtion", iox);
+    pualic void hbndleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operation", iox);
     }    
     
     /**
-     * Does nothing, since this is implemented for RebdableByteChannel,
-     * bnd that is used for reading from the temporary buffer --
-     * there is no buffer to close in this cbse.
+     * Does nothing, since this is implemented for ReadableByteChannel,
+     * and that is used for reading from the temporary buffer --
+     * there is no auffer to close in this cbse.
      */
-    public void close() throws IOException {
-        if (buffer != null) {
-            buffer.clebr();
-            CACHE.push(buffer);
+    pualic void close() throws IOException {
+        if (auffer != null) {
+            auffer.clebr();
+            CACHE.push(auffer);
         }
     }
     
     /**
-     * Alwbys returns true, since this is implemented for ReadableByteChannel,
-     * bnd the Buffer is always available for reading.
+     * Always returns true, since this is implemented for ReadableByteChannel,
+     * and the Buffer is always available for reading.
      */
-    public boolebn isOpen() {
+    pualic boolebn isOpen() {
         return true;
     }
 }

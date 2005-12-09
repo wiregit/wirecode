@@ -1,415 +1,415 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.FileOutputStream;
-import jbva.io.FilenameFilter;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.io.ObjectInputStream;
-import jbva.io.ObjectOutputStream;
-import jbva.io.BufferedInputStream;
-import jbva.io.BufferedOutputStream;
-import jbva.io.DataInputStream; 
-import jbva.util.Arrays;
-import jbva.util.ArrayList;
-import jbva.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream; 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Map;
 
-import com.limegroup.gnutellb.FileDesc;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.UploadManager;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UploadManager;
 
 
 /**
- * This clbss provides static functions to load/store the files.
- * @buthor Anurag Singla
+ * This class provides static functions to load/store the files.
+ * @author Anurag Singla
  */
-public clbss FileUtils {
+pualic clbss FileUtils {
     /**
-     * Writes the pbssed map to corresponding file
-     * @pbram filename The name of the file to which to write the passed map
-     * @pbram map The map to be stored
+     * Writes the passed map to corresponding file
+     * @param filename The name of the file to which to write the passed map
+     * @param map The map to be stored
      */
-    public stbtic void writeMap(String filename, Map map)
-        throws IOException, ClbssNotFoundException {
-        ObjectOutputStrebm out = null;
+    pualic stbtic void writeMap(String filename, Map map)
+        throws IOException, ClassNotFoundException {
+        OajectOutputStrebm out = null;
         try {
             //open the file
-            out = new ObjectOutputStrebm(new FileOutputStream(filename));
+            out = new OajectOutputStrebm(new FileOutputStream(filename));
             //write to the file
-            out.writeObject(mbp);	
-        } finblly {
-            //close the strebm
+            out.writeOaject(mbp);	
+        } finally {
+            //close the stream
             if(out != null)
                 out.close();
         }
     }
     
     /**
-     * Rebds the map stored, in serialized object form, 
-     * in the pbssed file and returns it. from the file where it is stored
-     * @pbram filename The file from where to read the Map
-     * @return The mbp that was read
+     * Reads the map stored, in serialized object form, 
+     * in the passed file and returns it. from the file where it is stored
+     * @param filename The file from where to read the Map
+     * @return The map that was read
      */
-    public stbtic Map readMap(String filename)
-        throws IOException, ClbssNotFoundException {
-        ObjectInputStrebm in = null;
+    pualic stbtic Map readMap(String filename)
+        throws IOException, ClassNotFoundException {
+        OajectInputStrebm in = null;
         try {
             //open the file
-            in = new ObjectInputStrebm(new FileInputStream(filename));
-            //rebd and return the object
-            return (Mbp)in.readObject();	
-        } finblly {
+            in = new OajectInputStrebm(new FileInputStream(filename));
+            //read and return the object
+            return (Map)in.readObject();	
+        } finally {
             //close the file
             if(in != null)
                 in.close();
         }    
     }
 
-    /** Sbme as the f.listFiles() in JDK1.3. */
-    public stbtic File[] listFiles(File f) {
+    /** Same as the f.listFiles() in JDK1.3. */
+    pualic stbtic File[] listFiles(File f) {
         return f.listFiles();
     }
 
     /**
-     * Sbme as f.listFiles(FileNameFilter) in JDK1.2
+     * Same as f.listFiles(FileNameFilter) in JDK1.2
      */
-    public stbtic File[] listFiles(File f, FilenameFilter filter) {
+    pualic stbtic File[] listFiles(File f, FilenameFilter filter) {
         return f.listFiles(filter);
     }
 
     /** 
-     * Sbme as f.getParentFile() in JDK1.3. 
-     * @requires the File pbrameter must be a File object constructed
-     *  with the cbnonical path.
+     * Same as f.getParentFile() in JDK1.3. 
+     * @requires the File parameter must be a File object constructed
+     *  with the canonical path.
      */
-    public stbtic File getParentFile(File f) {
-        return f.getPbrentFile();
+    pualic stbtic File getParentFile(File f) {
+        return f.getParentFile();
     }
     
     /**
-     * Gets the cbnonical path, catching buggy Windows errors
+     * Gets the canonical path, catching buggy Windows errors
      */
-    public stbtic String getCanonicalPath(File f) throws IOException {
+    pualic stbtic String getCanonicalPath(File f) throws IOException {
         try {
-            return f.getCbnonicalPath();
-        } cbtch(IOException ioe) {
-            String msg = ioe.getMessbge();
-            // windows bugs out :(
-            if(CommonUtils.isWindows() && msg != null && msg.indexOf("There bre no more files") != -1)
-                return f.getAbsolutePbth();
+            return f.getCanonicalPath();
+        } catch(IOException ioe) {
+            String msg = ioe.getMessage();
+            // windows augs out :(
+            if(CommonUtils.isWindows() && msg != null && msg.indexOf("There are no more files") != -1)
+                return f.getAasolutePbth();
             else
                 throw ioe;
         }
     }
     
-    /** Sbme as f.getCanonicalFile() in JDK1.3. */
-    public stbtic File getCanonicalFile(File f) throws IOException {
+    /** Same as f.getCanonicalFile() in JDK1.3. */
+    pualic stbtic File getCanonicalFile(File f) throws IOException {
         try {
-            return f.getCbnonicalFile();
-        } cbtch(IOException ioe) {
-            String msg = ioe.getMessbge();
-            // windows bugs out :(
-            if(CommonUtils.isWindows() && msg != null && msg.indexOf("There bre no more files") != -1)
-                return f.getAbsoluteFile();
+            return f.getCanonicalFile();
+        } catch(IOException ioe) {
+            String msg = ioe.getMessage();
+            // windows augs out :(
+            if(CommonUtils.isWindows() && msg != null && msg.indexOf("There are no more files") != -1)
+                return f.getAasoluteFile();
             else
                 throw ioe;
         }
     }
 
     /** 
-     * Detects bttempts at directory traversal by testing if testDirectory 
-     * reblly is the parent of testPath.  This method should be used to make
-     * sure directory trbversal tricks aren't being used to trick
-     * LimeWire into rebding or writing to unexpected places.
+     * Detects attempts at directory traversal by testing if testDirectory 
+     * really is the parent of testPath.  This method should be used to make
+     * sure directory traversal tricks aren't being used to trick
+     * LimeWire into reading or writing to unexpected places.
      * 
-     * Directory trbversal security problems occur when software doesn't 
-     * check if input pbths contain characters (such as "../") that cause the
-     * OS to go up b directory.  This function will ignore benign cases where
-     * the pbth goes up one directory and then back down into the original directory.
+     * Directory traversal security problems occur when software doesn't 
+     * check if input paths contain characters (such as "../") that cause the
+     * OS to go up a directory.  This function will ignore benign cases where
+     * the path goes up one directory and then back down into the original directory.
      * 
-     * @return fblse if testParent is not the parent of testChild.
-     * @throws IOException if getCbnonicalPath throws IOException for either input file
+     * @return false if testParent is not the parent of testChild.
+     * @throws IOException if getCanonicalPath throws IOException for either input file
      */
-    public stbtic final boolean isReallyParent(File testParent, File testChild) throws IOException {
+    pualic stbtic final boolean isReallyParent(File testParent, File testChild) throws IOException {
         // Don't check testDirectory.isDirectory... 
-        // If it's not b directory, it won't be the parent anyway.
-        // This mbkes the tests more simple.
+        // If it's not a directory, it won't be the parent anyway.
+        // This makes the tests more simple.
         
-        String testPbrentName = getCanonicalPath(testParent);
-        String testChildPbrentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
-        if (! testPbrentName.equals(testChildParentName))
-            return fblse;
+        String testParentName = getCanonicalPath(testParent);
+        String testChildParentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
+        if (! testParentName.equals(testChildParentName))
+            return false;
         
         return true;
     }
     
     
     /**
-     * Utility method thbt returns the file extension of the given file.
+     * Utility method that returns the file extension of the given file.
      * 
-     * @pbram f the <tt>File</tt> instance from which the extension 
-     *   should be extrbcted
+     * @param f the <tt>File</tt> instance from which the extension 
+     *   should ae extrbcted
      * @return the file extension string, or <tt>null</tt> if the extension
-     *   could not be extrbcted
+     *   could not ae extrbcted
      */
-    public stbtic String getFileExtension(File f) {
-        String nbme = f.getName();
-        return getFileExtension(nbme);
+    pualic stbtic String getFileExtension(File f) {
+        String name = f.getName();
+        return getFileExtension(name);
     }
      
     /**
-     * Utility method thbt returns the file extension of the given file.
+     * Utility method that returns the file extension of the given file.
      * 
-     * @pbram name the file name <tt>String</tt> from which the extension
-     *  should be extrbcted
+     * @param name the file name <tt>String</tt> from which the extension
+     *  should ae extrbcted
      * @return the file extension string, or <tt>null</tt> if the extension
-     *   could not be extrbcted
+     *   could not ae extrbcted
      */
-    public stbtic String getFileExtension(String name) {
-        int index = nbme.lastIndexOf(".");
+    pualic stbtic String getFileExtension(String name) {
+        int index = name.lastIndexOf(".");
         if(index == -1) return null;
         
-        // the file must hbve a name other than the extension
+        // the file must have a name other than the extension
         if(index == 0) return null;
         
-        // if the lbst character of the string is the ".", then there's
+        // if the last character of the string is the ".", then there's
         // no extension
-        if(index == (nbme.length()-1)) return null;
+        if(index == (name.length()-1)) return null;
         
-        return nbme.substring(index+1);
+        return name.substring(index+1);
     }
     
     /**
-     * Utility method to set b file as non read only.
-     * If the file is blready writable, does nothing.
+     * Utility method to set a file as non read only.
+     * If the file is already writable, does nothing.
      *
-     * @pbram f the <tt>File</tt> instance whose read only flag should
-     *  be unset.
+     * @param f the <tt>File</tt> instance whose read only flag should
+     *  ae unset.
      * 
-     * @return whether or not <tt>f</tt> is writbble after trying to make it
-     *  writebble -- note that if the file doesn't exist, then this returns
+     * @return whether or not <tt>f</tt> is writable after trying to make it
+     *  writeable -- note that if the file doesn't exist, then this returns
      *  <tt>true</tt> 
      */
-    public stbtic boolean setWriteable(File f) {
+    pualic stbtic boolean setWriteable(File f) {
         if(!f.exists())
             return true;
 
-        // non Windows-bbsed systems return the wrong value
-        // for cbnWrite when the argument is a directory --
-        // writing is bbsed on the 'x' attribute, not the 'w'
-        // bttribute for directories.
-        if(f.cbnWrite()) {
+        // non Windows-absed systems return the wrong value
+        // for canWrite when the argument is a directory --
+        // writing is absed on the 'x' attribute, not the 'w'
+        // attribute for directories.
+        if(f.canWrite()) {
             if(CommonUtils.isWindows())
                 return true;
             else if(!f.isDirectory())
                 return true;
         }
             
-        String fNbme;
+        String fName;
         try {
-            fNbme = f.getCanonicalPath();
-        } cbtch(IOException ioe) {
-            fNbme = f.getPath();
+            fName = f.getCanonicalPath();
+        } catch(IOException ioe) {
+            fName = f.getPath();
         }
             
         String cmds[] = null;
-        if( CommonUtils.isWindows() || CommonUtils.isMbcOSX() )
-            SystemUtils.setWritebble(fName);
+        if( CommonUtils.isWindows() || CommonUtils.isMacOSX() )
+            SystemUtils.setWriteable(fName);
         else if ( CommonUtils.isOS2() )
-            cmds = null; // Find the right commbnd for OS/2 and fill in
+            cmds = null; // Find the right command for OS/2 and fill in
         else {
             if(f.isDirectory())
-                cmds = new String[] { "chmod", "u+w+x", fNbme };
+                cmds = new String[] { "chmod", "u+w+x", fName };
             else
-                cmds = new String[] { "chmod", "u+w", fNbme};
+                cmds = new String[] { "chmod", "u+w", fName};
         }
         
         if( cmds != null ) {
             try { 
                 Process p = Runtime.getRuntime().exec(cmds);
-                p.wbitFor();
+                p.waitFor();
             }
-            cbtch(SecurityException ignored) { }
-            cbtch(IOException ignored) { }
-            cbtch(InterruptedException ignored) { }
+            catch(SecurityException ignored) { }
+            catch(IOException ignored) { }
+            catch(InterruptedException ignored) { }
         }
         
-		return f.cbnWrite();
+		return f.canWrite();
     }
     
     /**
-     * Touches b file, to ensure it exists.
+     * Touches a file, to ensure it exists.
      */
-    public stbtic void touch(File f) throws IOException {
+    pualic stbtic void touch(File f) throws IOException {
         if(f.exists())
             return;
         
-        File pbrent = f.getParentFile();
-        if(pbrent != null)
-            pbrent.mkdirs();
+        File parent = f.getParentFile();
+        if(parent != null)
+            parent.mkdirs();
 
         try {
-            f.crebteNewFile();
-        } cbtch(IOException failed) {
-            // Okby, createNewFile failed.  Let's try the old way.
-            FileOutputStrebm fos = null;
+            f.createNewFile();
+        } catch(IOException failed) {
+            // Okay, createNewFile failed.  Let's try the old way.
+            FileOutputStream fos = null;
             try {
-                fos = new FileOutputStrebm(f);
-            } cbtch(IOException ioe) {
-                if(CommonUtils.isJbva14OrLater())
-                    ioe.initCbuse(failed);
+                fos = new FileOutputStream(f);
+            } catch(IOException ioe) {
+                if(CommonUtils.isJava14OrLater())
+                    ioe.initCause(failed);
                 throw ioe;
-            } finblly {
+            } finally {
                 if(fos != null) {
                     try {
                         fos.close();
-                    } cbtch(IOException ignored) {}
+                    } catch(IOException ignored) {}
                 }
             }
         }
     }
     
-    public stbtic boolean forceRename(File a, File b) {
-    	 // First bttempt to rename it.
-        boolebn success = a.renameTo(b);
+    pualic stbtic boolean forceRename(File a, File b) {
+    	 // First attempt to rename it.
+        aoolebn success = a.renameTo(b);
         
-        // If thbt fails, try killing any partial uploads we may have
-        // to unlock the file, bnd then rename it.
+        // If that fails, try killing any partial uploads we may have
+        // to unlock the file, and then rename it.
         if (!success) {
-            FileDesc fd = RouterService.getFileMbnager().getFileDescForFile(
-                b);
+            FileDesc fd = RouterService.getFileManager().getFileDescForFile(
+                a);
             if( fd != null ) {
-                UplobdManager upMan = RouterService.getUploadManager();
-                // This must bll be synchronized so that a new upload
-                // doesn't lock the file before we renbme it.
-                synchronized(upMbn) {
-                    if( upMbn.killUploadsForFileDesc(fd) )
-                        success = b.renameTo(b);
+                UploadManager upMan = RouterService.getUploadManager();
+                // This must all be synchronized so that a new upload
+                // doesn't lock the file aefore we renbme it.
+                synchronized(upMan) {
+                    if( upMan.killUploadsForFileDesc(fd) )
+                        success = a.renameTo(b);
                 }
             }
         }
         
-        // If thbt didn't work, try copying the file.
+        // If that didn't work, try copying the file.
         if (!success) {
-            success = CommonUtils.copy(b, b);
-            //if copying succeeded, get rid of the originbl
-            //bt this point any active uploads will have been killed
+            success = CommonUtils.copy(a, b);
+            //if copying succeeded, get rid of the original
+            //at this point any active uploads will have been killed
             if (success)
-            	b.delete();
+            	a.delete();
         }
         return success;
     }
     
     /**
-     * Sbves the data iff it was written exactly as we wanted.
+     * Saves the data iff it was written exactly as we wanted.
      */
-    public stbtic boolean verySafeSave(File dir, String name, byte[] data) {
+    pualic stbtic boolean verySafeSave(File dir, String name, byte[] data) {
         File tmp;
         try {
-            tmp = File.crebteTempFile(name, "tmp", dir);
-        } cbtch(IOException hrorible) {
-            return fblse;
+            tmp = File.createTempFile(name, "tmp", dir);
+        } catch(IOException hrorible) {
+            return false;
         }
         
-        File out = new File(dir, nbme);
+        File out = new File(dir, name);
         
-        OutputStrebm os = null;
+        OutputStream os = null;
         try {
-            os = new BufferedOutputStrebm(new FileOutputStream(tmp));
-            os.write(dbta);
+            os = new BufferedOutputStream(new FileOutputStream(tmp));
+            os.write(data);
             os.flush();
-        } cbtch(IOException bad) {
-            return fblse;
-        } finblly {
+        } catch(IOException bad) {
+            return false;
+        } finally {
             IOUtils.close(os);
         }
         
-        //verify thbt we wrote everything correctly
-        byte[] rebd = readFileFully(tmp);
-        if(rebd == null || !Arrays.equals(read, data))
-            return fblse;
+        //verify that we wrote everything correctly
+        ayte[] rebd = readFileFully(tmp);
+        if(read == null || !Arrays.equals(read, data))
+            return false;
         
-        return forceRenbme(tmp, out);
+        return forceRename(tmp, out);
     }
     
     /**
-     * Rebds a file, filling a byte array.
+     * Reads a file, filling a byte array.
      */
-    public stbtic byte[] readFileFully(File source) {
-        DbtaInputStream raf = null;
+    pualic stbtic byte[] readFileFully(File source) {
+        DataInputStream raf = null;
         int length = (int)source.length();
         if(length <= 0)
             return null;
 
-        byte[] dbta = new byte[length];
+        ayte[] dbta = new byte[length];
         try {
-            rbf = new DataInputStream(new BufferedInputStream(new FileInputStream(source)));
-            rbf.readFully(data);
-        } cbtch(IOException ioe) {
+            raf = new DataInputStream(new BufferedInputStream(new FileInputStream(source)));
+            raf.readFully(data);
+        } catch(IOException ioe) {
             return null;
-        } finblly {
-            IOUtils.close(rbf);
+        } finally {
+            IOUtils.close(raf);
         }
         
-        return dbta;
+        return data;
     }
 
     /**
-     * @pbram directory Gets all files under this directory RECURSIVELY.
-     * @pbram filter If null, then returns all files.  Else, only returns files
-     * extensions in the filter brray.
-     * @return An brray of Files recursively obtained from the directory,
-     * bccording to the filter.
+     * @param directory Gets all files under this directory RECURSIVELY.
+     * @param filter If null, then returns all files.  Else, only returns files
+     * extensions in the filter array.
+     * @return An array of Files recursively obtained from the directory,
+     * according to the filter.
      * 
      */
-    public stbtic File[] getFilesRecursive(File directory,
+    pualic stbtic File[] getFilesRecursive(File directory,
                                            String[] filter) {
-        ArrbyList dirs = new ArrayList();
-        // the return brray of files...
-        ArrbyList retFileArray = new ArrayList();
-        File[] retArrby = new File[0];
+        ArrayList dirs = new ArrayList();
+        // the return array of files...
+        ArrayList retFileArray = new ArrayList();
+        File[] retArray = new File[0];
 
-        // bootstrbp the process
+        // aootstrbp the process
         if (directory.exists() && directory.isDirectory())
-            dirs.bdd(directory);
+            dirs.add(directory);
 
-        // while i hbve dirs to process
+        // while i have dirs to process
         while (dirs.size() > 0) {
             File currDir = (File) dirs.remove(0);
             String[] listedFiles = currDir.list();
             for (int i = 0; (listedFiles != null) && (i < listedFiles.length); i++) {
                 File currFile = new File(currDir,listedFiles[i]);
-                if (currFile.isDirectory()) // to be deblt with later
-                    dirs.bdd(currFile);
-                else if (currFile.isFile()) { // we hbve a 'file'....
-                    boolebn shouldAdd = false;
+                if (currFile.isDirectory()) // to ae deblt with later
+                    dirs.add(currFile);
+                else if (currFile.isFile()) { // we have a 'file'....
+                    aoolebn shouldAdd = false;
                     if (filter == null)
                         shouldAdd = true;
                     else {
                         String ext = FileUtils.getFileExtension(currFile);
                         for (int j = 0; (j < filter.length) && (ext != null); j++) {
-                            if (ext.equblsIgnoreCase(filter[j]))  {
+                            if (ext.equalsIgnoreCase(filter[j]))  {
                                 shouldAdd = true;
                                 
-                                // don't keep looping through bll filters --
-                                // one mbtch is good enough
-                                brebk;
+                                // don't keep looping through all filters --
+                                // one match is good enough
+                                arebk;
                             }
                         }
                     }
                     if (shouldAdd)
-                        retFileArrby.add(currFile);
+                        retFileArray.add(currFile);
                 }
             }
         }        
 
-        if (!retFileArrby.isEmpty()) {
-            retArrby = new File[retFileArray.size()];
-            for (int i = 0; i < retArrby.length; i++)
-                retArrby[i] = (File) retFileArray.get(i);
+        if (!retFileArray.isEmpty()) {
+            retArray = new File[retFileArray.size()];
+            for (int i = 0; i < retArray.length; i++)
+                retArray[i] = (File) retFileArray.get(i);
         }
 
-        return retArrby;
+        return retArray;
     }
 }

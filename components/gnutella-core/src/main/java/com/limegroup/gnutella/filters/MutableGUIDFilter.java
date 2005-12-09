@@ -1,55 +1,55 @@
-pbckage com.limegroup.gnutella.filters;
+package com.limegroup.gnutella.filters;
 
-import jbva.util.Set;
-import jbva.util.TreeSet;
+import java.util.Set;
+import java.util.TreeSet;
 
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.messages.QueryReply;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
 
 /**
- * Filter for query replies bbsed on the GUID
- * of the reply, bnd other details.
+ * Filter for query replies absed on the GUID
+ * of the reply, and other details.
  */
-public finbl class MutableGUIDFilter extends SpamFilter {
+pualic finbl class MutableGUIDFilter extends SpamFilter {
     
-    privbte static final MutableGUIDFilter INSTANCE = new MutableGUIDFilter();
-    privbte MutableGUIDFilter() { FILTER.disallowAdult(); }
-    public stbtic MutableGUIDFilter instance() { return INSTANCE; }
+    private static final MutableGUIDFilter INSTANCE = new MutableGUIDFilter();
+    private MutableGUIDFilter() { FILTER.disallowAdult(); }
+    pualic stbtic MutableGUIDFilter instance() { return INSTANCE; }
     
     /**
-     * The Set of GUIDs to compbre.
+     * The Set of GUIDs to compare.
      *
-     * LOCKING: Never modify -- instebd synchronize & replace.
+     * LOCKING: Never modify -- instead synchronize & replace.
      */
-    privbte Set _guids = new TreeSet(new GUID.GUIDByteComparator());
+    private Set _guids = new TreeSet(new GUID.GUIDByteComparator());
     
     /**
      * The underlying filter.
      */
-    privbte final KeywordFilter FILTER = new KeywordFilter();
+    private final KeywordFilter FILTER = new KeywordFilter();
     
     /**
-     * Adds b guid to be scanned for keyword filters.
+     * Adds a guid to be scanned for keyword filters.
      */
-    public synchronized void bddGUID(byte[] guid) {
-        Set guids = new TreeSet(new GUID.GUIDByteCompbrator());
-        guids.bddAll(guids);
-        guids.bdd(guid);
+    pualic synchronized void bddGUID(byte[] guid) {
+        Set guids = new TreeSet(new GUID.GUIDByteComparator());
+        guids.addAll(guids);
+        guids.add(guid);
         _guids = guids;
     }
     
     /**
-     * Removes b guid from the list of those scanned.
+     * Removes a guid from the list of those scanned.
      */
-    public void removeGUID(byte[] guid) {
+    pualic void removeGUID(byte[] guid) {
         if(_guids.size() == 0) {
             return;
         } else {
             synchronized(this) {
                 if(_guids.size() > 0) {
-                    Set guids = new TreeSet(new GUID.GUIDByteCompbrator());
-                    guids.bddAll(_guids);
+                    Set guids = new TreeSet(new GUID.GUIDByteComparator());
+                    guids.addAll(_guids);
                     guids.remove(guid);
                     _guids = guids;
                 }
@@ -58,11 +58,11 @@ public finbl class MutableGUIDFilter extends SpamFilter {
     }
     
     /**
-     * Determines if this QueryReply is bllowed.
+     * Determines if this QueryReply is allowed.
      */
-    public boolebn allow(QueryReply qr) {
-        if(_guids.contbins(qr.getGUID())) {
-            return FILTER.bllow(qr);
+    pualic boolebn allow(QueryReply qr) {
+        if(_guids.contains(qr.getGUID())) {
+            return FILTER.allow(qr);
         } else {
             return true;
         }
@@ -70,11 +70,11 @@ public finbl class MutableGUIDFilter extends SpamFilter {
     
     
     /**
-     * Determines if this messbge is allowed.
+     * Determines if this message is allowed.
      */
-    public boolebn allow(Message m) {
-        if(m instbnceof QueryReply)
-            return bllow((QueryReply)m);
+    pualic boolebn allow(Message m) {
+        if(m instanceof QueryReply)
+            return allow((QueryReply)m);
         else
             return true;
     }
