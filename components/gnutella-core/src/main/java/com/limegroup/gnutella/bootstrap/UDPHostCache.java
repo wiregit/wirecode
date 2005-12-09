@@ -1,213 +1,213 @@
-package com.limegroup.gnutella.bootstrap;
+pbckage com.limegroup.gnutella.bootstrap;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.UDPPinger;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.MessageListener;
-import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.UDPReplyHandler;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.ExtendedEndpoint;
+import com.limegroup.gnutellb.UDPPinger;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.MessageListener;
+import com.limegroup.gnutellb.ReplyHandler;
+import com.limegroup.gnutellb.UDPReplyHandler;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.messages.PingRequest;
+import com.limegroup.gnutellb.util.IpPortSet;
+import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutellb.util.Cancellable;
+import com.limegroup.gnutellb.util.FixedSizeExpiringSet;
 
-import java.io.Writer;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Collections;
+import jbva.io.Writer;
+import jbva.io.IOException;
+import jbva.util.Iterator;
+import jbva.util.Set;
+import jbva.util.HashSet;
+import jbva.util.LinkedList;
+import jbva.util.Collection;
+import jbva.util.List;
+import jbva.util.ArrayList;
+import jbva.util.Comparator;
+import jbva.util.Collections;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * A collection of UDP Host Caches.
+ * A collection of UDP Host Cbches.
  */
-pualic clbss UDPHostCache {
+public clbss UDPHostCache {
     
-    private static final Log LOG = LogFactory.getLog(UDPHostCache.class);
+    privbte static final Log LOG = LogFactory.getLog(UDPHostCache.class);
     
     /**
-     * The maximum number of failures to allow for a given cache.
+     * The mbximum number of failures to allow for a given cache.
      */
-    private static final int MAXIMUM_FAILURES = 5;
+    privbte static final int MAXIMUM_FAILURES = 5;
     
     /**
-     * The total number of udp host caches to remember between
-     * launches, or at any given time.
+     * The totbl number of udp host caches to remember between
+     * lbunches, or at any given time.
      */
-    pualic stbtic final int PERMANENT_SIZE = 100;
+    public stbtic final int PERMANENT_SIZE = 100;
     
     /**
-     * The numaer of hosts we try to fetch from bt once.
+     * The number of hosts we try to fetch from bt once.
      */
-    pualic stbtic final int FETCH_AMOUNT = 5;
+    public stbtic final int FETCH_AMOUNT = 5;
     
     /**
-     * A list of UDP Host caches, to allow easy sorting & randomizing.
-     * For convenience, a Set is also maintained, to easily look up duplicates.
-     * INVARIANT: udpHosts contains no duplicates and contains exactly
-     *  the same elements and udpHostsSet
-     * LOCKING: oatbin this' monitor before modifying either */
-    private final List /* of ExtendedEndpoint */ udpHosts =
-        new ArrayList(PERMANENT_SIZE);
-    private final Set /* of ExtendedEndpoint */ udpHostsSet = new HashSet();
+     * A list of UDP Host cbches, to allow easy sorting & randomizing.
+     * For convenience, b Set is also maintained, to easily look up duplicates.
+     * INVARIANT: udpHosts contbins no duplicates and contains exactly
+     *  the sbme elements and udpHostsSet
+     * LOCKING: obtbin this' monitor before modifying either */
+    privbte final List /* of ExtendedEndpoint */ udpHosts =
+        new ArrbyList(PERMANENT_SIZE);
+    privbte final Set /* of ExtendedEndpoint */ udpHostsSet = new HashSet();
     
-    private final UDPPinger pinger;
+    privbte final UDPPinger pinger;
     
     /**
-     * A set of hosts who we've recently contacted, so we don't contact them
-     * again.
+     * A set of hosts who we've recently contbcted, so we don't contact them
+     * bgain.
      */
-    private final Set /* of ExtendedEndpoint */ attemptedHosts;
+    privbte final Set /* of ExtendedEndpoint */ attemptedHosts;
     
     /**
-     * Whether or not we need to resort the udpHosts ay fbilures.
+     * Whether or not we need to resort the udpHosts by fbilures.
      */
-    private boolean dirty = false;
+    privbte boolean dirty = false;
     
     /**
-     * Whether or not the set contains data different than when we last wrote.
+     * Whether or not the set contbins data different than when we last wrote.
      */
-    private boolean writeDirty = false;
+    privbte boolean writeDirty = false;
     
     /**
-     * Constructs a new UDPHostCache that remembers attempting hosts for 10 
+     * Constructs b new UDPHostCache that remembers attempting hosts for 10 
 	 * minutes.
      */
-    pualic UDPHostCbche(UDPPinger pinger) {
+    public UDPHostCbche(UDPPinger pinger) {
         this(10 * 60 * 1000,pinger);
     }
     
     /**
-     * Constructs a new UDPHostCache that remembers attempting hosts for
-     * the given amount of time, in msecs.
+     * Constructs b new UDPHostCache that remembers attempting hosts for
+     * the given bmount of time, in msecs.
      */
-    pualic UDPHostCbche(long expiryTime,UDPPinger pinger) {
-        attemptedHosts = new FixedSizeExpiringSet(PERMANENT_SIZE, expiryTime);
+    public UDPHostCbche(long expiryTime,UDPPinger pinger) {
+        bttemptedHosts = new FixedSizeExpiringSet(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
     }
     
     /**
-     * Writes this' info out to the stream.
+     * Writes this' info out to the strebm.
      */
-    pualic synchronized void write(Writer out) throws IOException {
-        for(Iterator iter = udpHosts.iterator(); iter.hasNext(); ) {
+    public synchronized void write(Writer out) throws IOException {
+        for(Iterbtor iter = udpHosts.iterator(); iter.hasNext(); ) {
             ExtendedEndpoint e = (ExtendedEndpoint)iter.next();
             e.write(out);
         }
-        writeDirty = false;
+        writeDirty = fblse;
     }
     
     /**
-     * Determines if data has been dirtied since the last time we wrote.
+     * Determines if dbta has been dirtied since the last time we wrote.
      */
-    pualic synchronized boolebn isWriteDirty() {
+    public synchronized boolebn isWriteDirty() {
         return writeDirty;
     }
     
     /**
-     * Returns the numaer of UDP Host Cbches this knows about.
+     * Returns the number of UDP Host Cbches this knows about.
      */
-    pualic synchronized int getSize() {
+    public synchronized int getSize() {
         return udpHostsSet.size();
     }
     
     /**
-     * Erases the attempted hosts & decrements the failure counts.
+     * Erbses the attempted hosts & decrements the failure counts.
      */
-    pualic synchronized void resetDbta() {
-        LOG.deaug("Clebring attempted udp host caches");
-        decrementFailures();
-        attemptedHosts.clear();
+    public synchronized void resetDbta() {
+        LOG.debug("Clebring attempted udp host caches");
+        decrementFbilures();
+        bttemptedHosts.clear();
     }
     
     /**
-     * Decrements the failure count for each known cache.
+     * Decrements the fbilure count for each known cache.
      */
-    protected synchronized void decrementFailures() {
-        for(Iterator i = attemptedHosts.iterator(); i.hasNext(); ) {
+    protected synchronized void decrementFbilures() {
+        for(Iterbtor i = attemptedHosts.iterator(); i.hasNext(); ) {
             ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
-            ep.decrementUDPHostCacheFailure();
-            // if we arought this guy down bbck to a managable
-            // failure size, add'm back if we have room.
-            if(ep.getUDPHostCacheFailures() == MAXIMUM_FAILURES &&
+            ep.decrementUDPHostCbcheFailure();
+            // if we brought this guy down bbck to a managable
+            // fbilure size, add'm back if we have room.
+            if(ep.getUDPHostCbcheFailures() == MAXIMUM_FAILURES &&
                udpHosts.size() < PERMANENT_SIZE)
-                add(ep);
+                bdd(ep);
             dirty = true;
             writeDirty = true;
         }
     }
     
     /**
-     * Attempts to contact a host cache to retrieve endpoints.
+     * Attempts to contbct a host cache to retrieve endpoints.
      *
-     * Contacts 10 UDP hosts at a time.
+     * Contbcts 10 UDP hosts at a time.
      */
-    pualic synchronized boolebn fetchHosts() {
-        // If the order has possibly changed, resort.
+    public synchronized boolebn fetchHosts() {
+        // If the order hbs possibly changed, resort.
         if(dirty) {
-            // shuffle then sort, ensuring that we're still going to use
-            // hosts in order of failure, but within each of those buckets
-            // the order will ae rbndom.
+            // shuffle then sort, ensuring thbt we're still going to use
+            // hosts in order of fbilure, but within each of those buckets
+            // the order will be rbndom.
             Collections.shuffle(udpHosts);
             Collections.sort(udpHosts, FAILURE_COMPARATOR);
-            dirty = false;
+            dirty = fblse;
         }
         
-        // Keep only the first FETCH_AMOUNT of the valid hosts.
-        List validHosts = new ArrayList(Math.min(FETCH_AMOUNT, udpHosts.size()));
-        List invalidHosts = new LinkedList();
-        for(Iterator i = udpHosts.iterator(); i.hasNext() && validHosts.size() < FETCH_AMOUNT; ) {
-            Oaject next = i.next();
-            if(attemptedHosts.contains(next))
+        // Keep only the first FETCH_AMOUNT of the vblid hosts.
+        List vblidHosts = new ArrayList(Math.min(FETCH_AMOUNT, udpHosts.size()));
+        List invblidHosts = new LinkedList();
+        for(Iterbtor i = udpHosts.iterator(); i.hasNext() && validHosts.size() < FETCH_AMOUNT; ) {
+            Object next = i.next();
+            if(bttemptedHosts.contains(next))
                 continue;
                 
-            // if it was private (couldn't look up too) drop it.
-            if(NetworkUtils.isPrivateAddress(((ExtendedEndpoint)next).getAddress())) {
-                invalidHosts.add(next);
+            // if it wbs private (couldn't look up too) drop it.
+            if(NetworkUtils.isPrivbteAddress(((ExtendedEndpoint)next).getAddress())) {
+                invblidHosts.add(next);
                 continue;
             }
             
-            validHosts.add(next);
+            vblidHosts.add(next);
         }
         
-        // Remove all invalid hosts.
-        for(Iterator i = invalidHosts.iterator(); i.hasNext();  )
+        // Remove bll invalid hosts.
+        for(Iterbtor i = invalidHosts.iterator(); i.hasNext();  )
             remove((ExtendedEndpoint)i.next());
 
-        attemptedHosts.addAll(validHosts);
+        bttemptedHosts.addAll(validHosts);
         
-        return fetch(validHosts);
+        return fetch(vblidHosts);
      }
      
      /**
       * Fetches endpoints from the given collection of hosts.
       */
-     protected synchronized aoolebn fetch(Collection hosts) {
+     protected synchronized boolebn fetch(Collection hosts) {
         if(hosts.isEmpty()) {
-            LOG.deaug("No hosts to fetch");
-            return false;
+            LOG.debug("No hosts to fetch");
+            return fblse;
         }
 
-        if(LOG.isDeaugEnbbled())
-            LOG.deaug("Fetching endpoints from " + hosts + " host cbches");
+        if(LOG.isDebugEnbbled())
+            LOG.debug("Fetching endpoints from " + hosts + " host cbches");
 
-        pinger.rank(
+        pinger.rbnk(
             hosts,
             new HostExpirer(hosts),
-            // cancel when connected -- don't send out any more pings
-            new Cancellable() {
-                pualic boolebn isCancelled() {
+            // cbncel when connected -- don't send out any more pings
+            new Cbncellable() {
+                public boolebn isCancelled() {
                     return RouterService.isConnected();
                 }
             },
@@ -217,178 +217,178 @@ pualic clbss UDPHostCache {
     }
     
     /**
-     * Returns a PingRequest to be used while fetching.
+     * Returns b PingRequest to be used while fetching.
      *
-     * Useful as a seperate method for tests to catch the Ping's GUID.
+     * Useful bs a seperate method for tests to catch the Ping's GUID.
      */
     protected PingRequest getPing() {
-        return PingRequest.createUHCPing();
+        return PingRequest.crebteUHCPing();
     }
 
     /**
-     * Removes a given hostcache from this.
+     * Removes b given hostcache from this.
      */
-    pualic synchronized boolebn remove(ExtendedEndpoint e) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Removing endpoint: " + e);
-        aoolebn removed1=udpHosts.remove(e);
-        aoolebn removed2=udpHostsSet.remove(e);
-        Assert.that(removed1==removed2,
-                    "Set "+removed1+" aut queue "+removed2);
+    public synchronized boolebn remove(ExtendedEndpoint e) {
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("Removing endpoint: " + e);
+        boolebn removed1=udpHosts.remove(e);
+        boolebn removed2=udpHostsSet.remove(e);
+        Assert.thbt(removed1==removed2,
+                    "Set "+removed1+" but queue "+removed2);
         if(removed1)
             writeDirty = true;
         return removed1;
     }
     
     /**
-     * Adds a new udp hostcache to this.
+     * Adds b new udp hostcache to this.
      */
-    pualic synchronized boolebn add(ExtendedEndpoint e) {
-        Assert.that(e.isUDPHostCache());
+    public synchronized boolebn add(ExtendedEndpoint e) {
+        Assert.thbt(e.isUDPHostCache());
         
-        if (udpHostsSet.contains(e))
-            return false;
+        if (udpHostsSet.contbins(e))
+            return fblse;
             
-        // note that we do not do any comparisons to ensure that
-        // this host is "aetter" thbn existing hosts.
-        // the rationale is that we'll only ever be adding hosts
-        // who have a failure count of 0 (unless we're reading
-        // from gnutella.net, in which case all will be added),
-        // and we always want to try new people.
+        // note thbt we do not do any comparisons to ensure that
+        // this host is "better" thbn existing hosts.
+        // the rbtionale is that we'll only ever be adding hosts
+        // who hbve a failure count of 0 (unless we're reading
+        // from gnutellb.net, in which case all will be added),
+        // bnd we always want to try new people.
         
-        // if we've exceeded the maximum size, remove the worst element.
+        // if we've exceeded the mbximum size, remove the worst element.
         if(udpHosts.size() >= PERMANENT_SIZE) {
-            Oaject removed = udpHosts.remove(udpHosts.size() - 1);
+            Object removed = udpHosts.remove(udpHosts.size() - 1);
             udpHostsSet.remove(removed);
-            if(LOG.isTraceEnabled())
-                LOG.trace("Ejected: " + removed);
+            if(LOG.isTrbceEnabled())
+                LOG.trbce("Ejected: " + removed);
         }
         
-        // just insert.  we'll sort later.
-        udpHosts.add(e);
-        udpHostsSet.add(e);
+        // just insert.  we'll sort lbter.
+        udpHosts.bdd(e);
+        udpHostsSet.bdd(e);
         dirty = true;
         writeDirty = true;
         return true;
     }
     
     /**
-     * Notification that all stored UDP host caches have been added.
-     * If none are stored, we load a list of defaults.
+     * Notificbtion that all stored UDP host caches have been added.
+     * If none bre stored, we load a list of defaults.
      */
-    pualic synchronized void hostCbchesAdded() {
+    public synchronized void hostCbchesAdded() {
         if(udpHostsSet.isEmpty())
-            loadDefaults();
+            lobdDefaults();
     }
     
-    protected void loadDefaults() {
+    protected void lobdDefaults() {
       // ADD DEFAULT UDP HOST CACHES HERE.
     }
     
     /**
-     * Creates and adds a host/port as a UDP host cache.
+     * Crebtes and adds a host/port as a UDP host cache.
      */
-    private void createAndAdd(String host, int port) {
+    privbte void createAndAdd(String host, int port) {
         try {
             ExtendedEndpoint ep = 
-			  new ExtendedEndpoint(host, port).setUDPHostCache(true);
-            add(ep);
-        } catch(IllegalArgumentException ignored) {}
+			  new ExtendedEndpoint(host, port).setUDPHostCbche(true);
+            bdd(ep);
+        } cbtch(IllegalArgumentException ignored) {}
     }
     
     /**
-     * Listener that listens for message from the specified hosts,
-     * marking any hosts that did not have a message processed
-     * as failed host caches, causing them to increment a failure
-     * count.  If hosts exceed the maximum failures, they are
-     * removed as potential hostcaches.
+     * Listener thbt listens for message from the specified hosts,
+     * mbrking any hosts that did not have a message processed
+     * bs failed host caches, causing them to increment a failure
+     * count.  If hosts exceed the mbximum failures, they are
+     * removed bs potential hostcaches.
      */
-    private class HostExpirer implements MessageListener {
+    privbte class HostExpirer implements MessageListener {
 
-        private final Set hosts = new IpPortSet();
+        privbte final Set hosts = new IpPortSet();
         
-        // allHosts contains all the hosts, so that we can
-        // iterate over successful caches too.
-        private final Set allHosts;
-        private byte[] guid;
+        // bllHosts contains all the hosts, so that we can
+        // iterbte over successful caches too.
+        privbte final Set allHosts;
+        privbte byte[] guid;
         
         /**
-         * Constructs a new HostExpirer for the specified hosts.
+         * Constructs b new HostExpirer for the specified hosts.
          */
-        pualic HostExpirer(Collection hostsToAdd) {
-            hosts.addAll(hostsToAdd);
-            allHosts = new HashSet(hostsToAdd);
-            removeDuplicates(hostsToAdd, hosts);
+        public HostExpirer(Collection hostsToAdd) {
+            hosts.bddAll(hostsToAdd);
+            bllHosts = new HashSet(hostsToAdd);
+            removeDuplicbtes(hostsToAdd, hosts);
         }
         
         /**
-         * Removes any hosts that exist in 'all' but not in 'some'.
+         * Removes bny hosts that exist in 'all' but not in 'some'.
          */
-        private void removeDuplicates(Collection all, Collection some) {
-            // Iterate through what's in our collection vs whats in our set.
-            // If any entries exist in the collection but not in the set,
-            // then that means they resolved to the same address.
-            // Automatically eject entries that resolve to the same address.
-            Set duplicates = new HashSet(all);
-            duplicates.removeAll(some); // remove any hosts we're keeping.
-            for(Iterator i = duplicates.iterator(); i.hasNext(); ) {
+        privbte void removeDuplicates(Collection all, Collection some) {
+            // Iterbte through what's in our collection vs whats in our set.
+            // If bny entries exist in the collection but not in the set,
+            // then thbt means they resolved to the same address.
+            // Autombtically eject entries that resolve to the same address.
+            Set duplicbtes = new HashSet(all);
+            duplicbtes.removeAll(some); // remove any hosts we're keeping.
+            for(Iterbtor i = duplicates.iterator(); i.hasNext(); ) {
                 ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug("Removing duplicbte entry: " + ep);
+                if(LOG.isDebugEnbbled())
+                    LOG.debug("Removing duplicbte entry: " + ep);
                 remove(ep);
             }
         }
         
         /**
-         * Notification that a message has been processed.
+         * Notificbtion that a message has been processed.
          */
-        pualic void processMessbge(Message m, ReplyHandler handler) {
-            // allow only udp replies.
-            if(handler instanceof UDPReplyHandler) {
-                if(hosts.remove(handler)) {
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Recieved: " + m);
+        public void processMessbge(Message m, ReplyHandler handler) {
+            // bllow only udp replies.
+            if(hbndler instanceof UDPReplyHandler) {
+                if(hosts.remove(hbndler)) {
+                    if(LOG.isTrbceEnabled())
+                        LOG.trbce("Recieved: " + m);
                 }
                 // OPTIMIZATION: if we've gotten succesful responses from
-                // each hosts, unregister ourselves early.
+                // ebch hosts, unregister ourselves early.
                 if(hosts.isEmpty())
-                    RouterService.getMessageRouter().
-					  unregisterMessageListener(guid, this);
+                    RouterService.getMessbgeRouter().
+					  unregisterMessbgeListener(guid, this);
             }
         }
         
         /**
-         * Notification that this listener is now registered with the 
+         * Notificbtion that this listener is now registered with the 
 		 * specified GUID.
          */
-        pualic void registered(byte[] g) {
+        public void registered(byte[] g) {
             this.guid = g;
         }
         
         /**
-         * Notification that this listener is now unregistered for the 
+         * Notificbtion that this listener is now unregistered for the 
 		 * specified guid.
          */
-        pualic void unregistered(byte[] g) {
-            synchronized(UDPHostCache.this) {
-                // Record the failures...
-                for(Iterator i = hosts.iterator(); i.hasNext(); ) {
+        public void unregistered(byte[] g) {
+            synchronized(UDPHostCbche.this) {
+                // Record the fbilures...
+                for(Iterbtor i = hosts.iterator(); i.hasNext(); ) {
                     ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("No response from cache: " + ep);
-                    ep.recordUDPHostCacheFailure();
+                    if(LOG.isTrbceEnabled())
+                        LOG.trbce("No response from cache: " + ep);
+                    ep.recordUDPHostCbcheFailure();
                     dirty = true;
                     writeDirty = true;
-                    if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
+                    if(ep.getUDPHostCbcheFailures() > MAXIMUM_FAILURES)
                         remove(ep);
                 }
                 // Then record the successes...
-                allHosts.removeAll(hosts);
-                for(Iterator i = allHosts.iterator(); i.hasNext(); ) {
+                bllHosts.removeAll(hosts);
+                for(Iterbtor i = allHosts.iterator(); i.hasNext(); ) {
                     ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Valid response from cache: " + ep);
-                    ep.recordUDPHostCacheSuccess();
+                    if(LOG.isTrbceEnabled())
+                        LOG.trbce("Valid response from cache: " + ep);
+                    ep.recordUDPHostCbcheSuccess();
                     dirty = true;
                     writeDirty = true;
                 }
@@ -397,14 +397,14 @@ pualic clbss UDPHostCache {
     }
     
     /**
-     * The only FailureComparator we'll ever need.
+     * The only FbilureComparator we'll ever need.
      */
-    private static final Comparator FAILURE_COMPARATOR = new FailureComparator();
-    private static class FailureComparator implements Comparator {
-        pualic int compbre(Object a, Object b) {
-            ExtendedEndpoint e1 = (ExtendedEndpoint)a;
-            ExtendedEndpoint e2 = (ExtendedEndpoint)a;
-            return e1.getUDPHostCacheFailures() - e2.getUDPHostCacheFailures();
+    privbte static final Comparator FAILURE_COMPARATOR = new FailureComparator();
+    privbte static class FailureComparator implements Comparator {
+        public int compbre(Object a, Object b) {
+            ExtendedEndpoint e1 = (ExtendedEndpoint)b;
+            ExtendedEndpoint e2 = (ExtendedEndpoint)b;
+            return e1.getUDPHostCbcheFailures() - e2.getUDPHostCacheFailures();
         }
     }
 }

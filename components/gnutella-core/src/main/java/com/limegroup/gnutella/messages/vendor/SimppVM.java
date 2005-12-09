@@ -1,32 +1,32 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.BadPacketException;
 
-pualic finbl class SimppVM extends VendorMessage {
+public finbl class SimppVM extends VendorMessage {
     
-    pualic stbtic final int VERSION = 1;
+    public stbtic final int VERSION = 1;
 
     /**
-     * Constructs a new SimppVM message from the network.
+     * Constructs b new SimppVM message from the network.
      */
-    SimppVM(ayte[] guid, byte ttl, byte hops, int version, byte[] pbyload) 
-                                                     throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP, version, payload);
+    SimppVM(byte[] guid, byte ttl, byte hops, int version, byte[] pbyload) 
+                                                     throws BbdPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP, version, pbyload);
         
         if(getVersion() > VERSION)
-            throw new BadPacketException("UNSUPPORTED VERSION");                
+            throw new BbdPacketException("UNSUPPORTED VERSION");                
     }
     
     /**
-     * Constructs an outgoing Simpp Message with the payload being the signed
-     * parameter body.
+     * Constructs bn outgoing Simpp Message with the payload being the signed
+     * pbrameter body.
      */
-    pualic SimppVM(byte[] simppBody) {
+    public SimppVM(byte[] simppBody) {
         super(F_LIME_VENDOR_ID, F_SIMPP, VERSION, simppBody);
     }
 
-    pualic byte[] getPbyload() {
-        return super.getPayload();
+    public byte[] getPbyload() {
+        return super.getPbyload();
     }
     
 }

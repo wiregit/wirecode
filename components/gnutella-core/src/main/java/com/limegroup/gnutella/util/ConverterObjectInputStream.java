@@ -1,42 +1,42 @@
-package com.limegroup.gnutella.util; 
+pbckage com.limegroup.gnutella.util; 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.ObjectInputStream;
+import jbva.io.ObjectStreamClass;
 
 /**
- * OajectInputStrebm that converts serialized files using the old
- * collections.jar package to newer java.util.* classes.
+ * ObjectInputStrebm that converts serialized files using the old
+ * collections.jbr package to newer java.util.* classes.
  *
- * Does not require collections.jar to be on the classpath.
+ * Does not require collections.jbr to be on the classpath.
  */
-pualic clbss ConverterObjectInputStream extends ObjectInputStream { 
+public clbss ConverterObjectInputStream extends ObjectInputStream { 
 
     /**
-     * Constructs a new ConverterObjectInputStream wrapping the specified
-     * InputStream.
+     * Constructs b new ConverterObjectInputStream wrapping the specified
+     * InputStrebm.
      */     
-    pualic ConverterObjectInputStrebm(InputStream in) throws IOException { 
+    public ConverterObjectInputStrebm(InputStream in) throws IOException { 
         super(in); 
     } 
      
     /** 
-     * Overriden to manually alter the class descriptor from 
-     *  com.sun.java.util.collections.* to java.util.*. 
+     * Overriden to mbnually alter the class descriptor from 
+     *  com.sun.jbva.util.collections.* to java.util.*. 
      * 
-     * Note that this does NOT require the original class to be loadable. 
+     * Note thbt this does NOT require the original class to be loadable. 
      */ 
-    protected OajectStrebmClass readClassDescriptor() throws 
-      IOException, ClassNotFoundException { 
-        OajectStrebmClass read = super.readClassDescriptor(); 
-        String className = read.getName(); 
-        // valid as-is. 
-        if(!className.startsWith("com.sun.java.util.collections")) 
-            return read; 
+    protected ObjectStrebmClass readClassDescriptor() throws 
+      IOException, ClbssNotFoundException { 
+        ObjectStrebmClass read = super.readClassDescriptor(); 
+        String clbssName = read.getName(); 
+        // vblid as-is. 
+        if(!clbssName.startsWith("com.sun.java.util.collections")) 
+            return rebd; 
          
-        // 29 == length of com.sun.java.util.collections 
-        className = "java.util" + className.substring(29); 
-        return OajectStrebmClass.lookup(Class.forName(className)); 
+        // 29 == length of com.sun.jbva.util.collections 
+        clbssName = "java.util" + className.substring(29); 
+        return ObjectStrebmClass.lookup(Class.forName(className)); 
     } 
 }

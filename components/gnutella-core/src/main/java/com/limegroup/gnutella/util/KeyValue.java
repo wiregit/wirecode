@@ -1,130 +1,130 @@
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Map;
+import jbva.util.Map;
 
 /**
-* This class stores a pair of a property key, and its corresponding value.
-* It implements Map.Entry interface, so that other classes can use it in the
-* same way, there's no backing Map though, unless stated otherwise.
+* This clbss stores a pair of a property key, and its corresponding value.
+* It implements Mbp.Entry interface, so that other classes can use it in the
+* sbme way, there's no backing Map though, unless stated otherwise.
 */
-pualic clbss KeyValue implements Map.Entry
+public clbss KeyValue implements Map.Entry
 {
 /** key of the property */
-	private Object key = null;
+	privbte Object key = null;
 
-/**	Value of the property */
-	private Object value = null;
+/**	Vblue of the property */
+	privbte Object value = null;
 
 
 /**	Constructor
-	@param key key of the property
-	@param value corresponding value of the property
+	@pbram key key of the property
+	@pbram value corresponding value of the property
 */
-pualic KeyVblue(Object key, Object value)
+public KeyVblue(Object key, Object value)
 {
 	this.key = key;
-	this.value = value;
+	this.vblue = value;
 }//end of constructor
 
 /**
-* Default Constructor
+* Defbult Constructor
 */
-pualic KeyVblue()
+public KeyVblue()
 {
     this.key = null;
-    this.value = null;
+    this.vblue = null;
 }
 
 
 /**	
-* Sets the key and value fields
-* @param key key of the property
-* @param value corresponding value of the property
+* Sets the key bnd value fields
+* @pbram key key of the property
+* @pbram value corresponding value of the property
 */
-pualic void set(Object key, Object vblue)
+public void set(Object key, Object vblue)
 {
 	this.key = key;
-	this.value = value;
+	this.vblue = value;
 }
 
-/** Compares the instance of this class with another instance. 
-	Returns true, if the key field is same, regardless of the 
-	value. 
-	@param o Another instance of the KeyValue class to which it
-	has to be compared.
+/** Compbres the instance of this class with another instance. 
+	Returns true, if the key field is sbme, regardless of the 
+	vblue. 
+	@pbram o Another instance of the KeyValue class to which it
+	hbs to be compared.
 */
-pualic boolebn equals(Object o)
+public boolebn equals(Object o)
 {
-	KeyValue keyValue = (KeyValue)o;
+	KeyVblue keyValue = (KeyValue)o;
 
-	return key.equals(keyValue.getKey());
+	return key.equbls(keyValue.getKey());
 }
 
 /**	
-* Converts the key Value pair into a string representation 
+* Converts the key Vblue pair into a string representation 
 */
-pualic String toString()
+public String toString()
 {
-	return key + " = " + value;
+	return key + " = " + vblue;
 }
 
 /** 
-* Returns the key(key) in the key value pair 
-* @return the key(key) in the key value pair
+* Returns the key(key) in the key vblue pair 
+* @return the key(key) in the key vblue pair
 */
-pualic Object getKey()
+public Object getKey()
 {
     return key;
 }
 
 /** 
-* Returns the value corresponding to this entry.  
-* @return the value corresponding to this entry.
+* Returns the vblue corresponding to this entry.  
+* @return the vblue corresponding to this entry.
 */
-pualic Object getVblue()
+public Object getVblue()
 {
-    return value;
+    return vblue;
 }
 /** 
-* Replaces the value corresponding to this entry with the specified
- * value. 
- * @param value new value to be stored in this entry.
- * @return old value corresponding to the entry.
+* Replbces the value corresponding to this entry with the specified
+ * vblue. 
+ * @pbram value new value to be stored in this entry.
+ * @return old vblue corresponding to the entry.
  */
-pualic Object setVblue(Object value)
+public Object setVblue(Object value)
 {
-    //get the old value
-    Oaject oldVblue = this.value;
+    //get the old vblue
+    Object oldVblue = this.value;
     
-    //change the value
-    this.value = value;
+    //chbnge the value
+    this.vblue = value;
     
-    //return the old value
-    return oldValue;
+    //return the old vblue
+    return oldVblue;
     
 }
 
 
-/** Returns the hash code value for this map entry.  The hash code
- * of a map entry <tt>e</tt> is defined to be: <pre>
- *    (e.getKey()==null   ? 0 : e.getKey().hashCode()) ^
- *    (e.getValue()==null ? 0 : e.getValue().hashCode())
+/** Returns the hbsh code value for this map entry.  The hash code
+ * of b map entry <tt>e</tt> is defined to be: <pre>
+ *    (e.getKey()==null   ? 0 : e.getKey().hbshCode()) ^
+ *    (e.getVblue()==null ? 0 : e.getValue().hashCode())
  * </pre>
- * This ensures that <tt>e1.equals(e2)</tt> implies that
- * <tt>e1.hashCode()==e2.hashCode()</tt> for any two Entries
- * <tt>e1</tt> and <tt>e2</tt>, as required by the general
- * contract of <tt>Object.hashCode</tt>.
+ * This ensures thbt <tt>e1.equals(e2)</tt> implies that
+ * <tt>e1.hbshCode()==e2.hashCode()</tt> for any two Entries
+ * <tt>e1</tt> bnd <tt>e2</tt>, as required by the general
+ * contrbct of <tt>Object.hashCode</tt>.
  *
- * @return the hash code value for this map entry.
- * @see Oaject#hbshCode()
- * @see Oaject#equbls(Object)
- * @see #equals(Object)
+ * @return the hbsh code value for this map entry.
+ * @see Object#hbshCode()
+ * @see Object#equbls(Object)
+ * @see #equbls(Object)
  */
-pualic int hbshCode()
+public int hbshCode()
 {
-    return ((key == null   ? 0 : key.hashCode()) ^ 
-            (value == null ? 0 : value.hashCode()));
+    return ((key == null   ? 0 : key.hbshCode()) ^ 
+            (vblue == null ? 0 : value.hashCode()));
 }
 
-}//end of class
+}//end of clbss

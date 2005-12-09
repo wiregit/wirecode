@@ -1,177 +1,177 @@
-package com.limegroup.gnutella.archive;
+pbckage com.limegroup.gnutella.archive;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import jbva.io.BufferedInputStream;
+import jbva.io.ByteArrayInputStream;
+import jbva.io.FileInputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.InterruptedIOException;
+import jbva.net.SocketException;
+import jbva.net.UnknownHostException;
+import jbva.util.Collection;
+import jbva.util.Iterator;
+import jbva.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import jbvax.xml.parsers.DocumentBuilder;
+import jbvax.xml.parsers.DocumentBuilderFactory;
+import jbvax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPConnectionClosedException;
-import org.apache.commons.net.ftp.FTPReply;
-import org.apache.commons.net.io.CopyStreamException;
-import org.apache.xerces.dom3.bootstrap.DOMImplementationRegistry;
+import org.bpache.commons.net.ftp.FTP;
+import org.bpache.commons.net.ftp.FTPClient;
+import org.bpache.commons.net.ftp.FTPConnectionClosedException;
+import org.bpache.commons.net.ftp.FTPReply;
+import org.bpache.commons.net.io.CopyStreamException;
+import org.bpache.xerces.dom3.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
+import org.w3c.dom.ls.DOMImplementbtionLS;
+import org.w3c.dom.ls.LSSeriblizer;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 
 
-abstract class ArchiveContribution extends AbstractContribution {
+bbstract class ArchiveContribution extends AbstractContribution {
 	
-	pualic stbtic final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.10 2005-12-09 19:57:07 zlatinb Exp $";
+	public stbtic final String REPOSITORY_VERSION = 
+		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/ArchiveContribution.java,v 1.1.2.10 2005/12/09 19:57:07 zlatinb Exp $";
 
 
 
 	/**
-	 * @param media
-	 *        One of ArchiveConstants.MEDIA_*
+	 * @pbram media
+	 *        One of ArchiveConstbnts.MEDIA_*
 	 *        
-	 * @throws IllegalArgumentException
-	 *         If media is not valid
+	 * @throws IllegblArgumentException
+	 *         If medib is not valid
 	 */
-	pualic ArchiveContribution( String usernbme, String password, 
-			String title, String description, int media )
+	public ArchiveContribution( String usernbme, String password, 
+			String title, String description, int medib )
 	throws DescriptionTooShortException {
-		this( username, password, title, description, media, 
-				Archives.defaultCollectionForMedia( media ),
-				Archives.defaultTypesForMedia( media ));
+		this( usernbme, password, title, description, media, 
+				Archives.defbultCollectionForMedia( media ),
+				Archives.defbultTypesForMedia( media ));
 	}
 	
-	pualic ArchiveContribution( String usernbme, String password, 
-			String title, String description, int media, 
+	public ArchiveContribution( String usernbme, String password, 
+			String title, String description, int medib, 
 			int collection, int type ) 
 	throws DescriptionTooShortException {
-		setUsername( username );
-		setPassword( password );
+		setUsernbme( username );
+		setPbssword( password );
 		setTitle( title );
 		setDescription( description );
-		setMedia( media );
+		setMedib( media );
 		setCollection( collection );	
 		setType( type );
 	}
 
 	
-	abstract protected String getFtpServer();
-	abstract protected String getFtpPath();
-	abstract protected boolean isFtpDirPreMade();
+	bbstract protected String getFtpServer();
+	bbstract protected String getFtpPath();
+	bbstract protected boolean isFtpDirPreMade();
 	
-	abstract protected void checkin() throws IOException;
+	bbstract protected void checkin() throws IOException;
 
 	
 	/**
 	 * 
 	 * @throws UnknownHostException
-	 *         If the hostname cannot be resolved.
+	 *         If the hostnbme cannot be resolved.
 	 *         
 	 * @throws SocketException
-	 *         If the socket timeout could not ae set.
+	 *         If the socket timeout could not be set.
 	 *         
 	 * @throws FTPConnectionClosedException
-	 *         If the connection is closed ay the server.
+	 *         If the connection is closed by the server.
 	 *         
-	 * @throws LoginFailedException
-	 *         If the login fails.
+	 * @throws LoginFbiledException
+	 *         If the login fbils.
 	 *         
-	 * @throws DirectoryChangeFailedException
-	 *         If changing to the directory provided by the internet
-	 *         archive fails.
+	 * @throws DirectoryChbngeFailedException
+	 *         If chbnging to the directory provided by the internet
+	 *         brchive fails.
 	 *         
-	 * @throws CopyStreamException
-	 *         If an I/O error occurs while in the middle of
-	 *         transferring a file.
+	 * @throws CopyStrebmException
+	 *         If bn I/O error occurs while in the middle of
+	 *         trbnsferring a file.
 	 *         
 	 * @throws IOException
-	 *         If an I/O error occurs while sending a command or
-	 *         receiving a reply from the server
+	 *         If bn I/O error occurs while sending a command or
+	 *         receiving b reply from the server
 	 *         
-	 * @throws IllegalStateException
-	 * 		   If the contriaution object is not rebdy to upload
-	 * 		   (no username, password, server, etc. set)
-	 * 		   or if java's xml parser is configured badly
+	 * @throws IllegblStateException
+	 * 		   If the contribution object is not rebdy to upload
+	 * 		   (no usernbme, password, server, etc. set)
+	 * 		   or if jbva's xml parser is configured badly
 	 */
 	
-	pualic void uplobd() throws UnknownHostException, SocketException, 
-	FTPConnectionClosedException, LoginFailedException,
-	DirectoryChangeFailedException, CopyStreamException, 
+	public void uplobd() throws UnknownHostException, SocketException, 
+	FTPConnectionClosedException, LoginFbiledException,
+	DirectoryChbngeFailedException, CopyStreamException, 
 	RefusedConnectionException, IOException {
 		
-		final int  NUM_XML_FILES = 2;
-		final String META_XML_SUFFIX = "_meta.xml";
-		final String FILES_XML_SUFFIX = "_files.xml";
+		finbl int  NUM_XML_FILES = 2;
+		finbl String META_XML_SUFFIX = "_meta.xml";
+		finbl String FILES_XML_SUFFIX = "_files.xml";
 		
 		
-		final String username = getUsername();
-		final String password = getPassword();
+		finbl String username = getUsername();
+		finbl String password = getPassword();
 		
 		if ( getFtpServer() == null ) {
-			throw new IllegalStateException( "ftp server not set" );
+			throw new IllegblStateException( "ftp server not set" );
 		}
-		if ( getFtpPath() == null ) {
-			throw new IllegalStateException( "ftp path not set" );
+		if ( getFtpPbth() == null ) {
+			throw new IllegblStateException( "ftp path not set" );
 		}
-		if ( username == null ) {
-			throw new IllegalStateException( "username not set" );			
+		if ( usernbme == null ) {
+			throw new IllegblStateException( "username not set" );			
 		}
-		if ( password == null ) {
-			throw new IllegalStateException( "password not set" );
+		if ( pbssword == null ) {
+			throw new IllegblStateException( "password not set" );
 		}
 		
-		// calculate total number of files and bytes
+		// cblculate total number of files and bytes
 		
 		
 		
-		final String metaXmlString = serializeDocument( getMetaDocument() );
-		final String filesXmlString = serializeDocument( getFilesDocument() );
+		finbl String metaXmlString = serializeDocument( getMetaDocument() );
+		finbl String filesXmlString = serializeDocument( getFilesDocument() );
 		
-		final byte[] metaXmlBytes = metaXmlString.getBytes();
-		final byte[] filesXmlBytes = filesXmlString.getBytes();
+		finbl byte[] metaXmlBytes = metaXmlString.getBytes();
+		finbl byte[] filesXmlBytes = filesXmlString.getBytes();
 		
-		final int metaXmlLength = metaXmlBytes.length;
-		final int filesXmlLength = filesXmlBytes.length;
+		finbl int metaXmlLength = metaXmlBytes.length;
+		finbl int filesXmlLength = filesXmlBytes.length;
 		
-		final Collection files = getFiles();
+		finbl Collection files = getFiles();
 		
-		final int totalFiles = NUM_XML_FILES + files.size();
+		finbl int totalFiles = NUM_XML_FILES + files.size();
 		
-		final String[] fileNames = new String[totalFiles];
-		final long[] fileSizes = new long[totalFiles];
+		finbl String[] fileNames = new String[totalFiles];
+		finbl long[] fileSizes = new long[totalFiles];
 		
-		final String metaXmlName = getIdentifier() + META_XML_SUFFIX; 
-		fileNames[0] = metaXmlName;
-		fileSizes[0] = metaXmlLength;
+		finbl String metaXmlName = getIdentifier() + META_XML_SUFFIX; 
+		fileNbmes[0] = metaXmlName;
+		fileSizes[0] = metbXmlLength;
 		
-		final String filesXmlName = getIdentifier() + FILES_XML_SUFFIX;
-		fileNames[1] = filesXmlName;
+		finbl String filesXmlName = getIdentifier() + FILES_XML_SUFFIX;
+		fileNbmes[1] = filesXmlName;
 		fileSizes[1] = filesXmlLength;
 		
 		int j = 2;
-		for (Iterator i = files.iterator(); i.hasNext();) {
-			final File f = (File) i.next();
-			fileNames[j] = f.getRemoteFileName();
+		for (Iterbtor i = files.iterator(); i.hasNext();) {
+			finbl File f = (File) i.next();
+			fileNbmes[j] = f.getRemoteFileName();
 			fileSizes[j] = f.getFileSize();
 			j++;
 		}
 
-        // init the progress mapping
+        // init the progress mbpping
         for (int i = 0; i < fileSizes.length; i++) { 
-            _fileNames2Progress.put(fileNames[i],new UploadFileProgress(fileSizes[i]));
-            _totalUploadSize+=fileSizes[i];
+            _fileNbmes2Progress.put(fileNames[i],new UploadFileProgress(fileSizes[i]));
+            _totblUploadSize+=fileSizes[i];
         }
 		
 		
@@ -180,84 +180,84 @@ abstract class ArchiveContribution extends AbstractContribution {
 		try {
 			// first connect
 			
-			if ( isCancelled() ) { return; }
-			ftp.enterLocalPassiveMode();
+			if ( isCbncelled() ) { return; }
+			ftp.enterLocblPassiveMode();
 			
-			if ( isCancelled() ) { return; }
+			if ( isCbncelled() ) { return; }
 			ftp.connect( getFtpServer() );
 			
-			final int reply = ftp.getReplyCode();
+			finbl int reply = ftp.getReplyCode();
 			if ( !FTPReply.isPositiveCompletion(reply) ) {
 				throw new RefusedConnectionException( getFtpServer() + "refused FTP connection" );
 			}
 			// now login
-			if ( isCancelled() ) { return; }
-			if (!ftp.login( username, password )) {
-				throw new LoginFailedException();
+			if ( isCbncelled() ) { return; }
+			if (!ftp.login( usernbme, password )) {
+				throw new LoginFbiledException();
 			}
 			
 			try {
 				
-                // try to change the directory
-                if (!ftp.changeWorkingDirectory(getFtpPath())) {
-                    // if changing fails, make the directory
-                    if ( !isFtpDirPreMade() &&
-                            !ftp.makeDirectory( getFtpPath() )) {
-                        throw new DirectoryChangeFailedException();
+                // try to chbnge the directory
+                if (!ftp.chbngeWorkingDirectory(getFtpPath())) {
+                    // if chbnging fails, make the directory
+                    if ( !isFtpDirPreMbde() &&
+                            !ftp.mbkeDirectory( getFtpPath() )) {
+                        throw new DirectoryChbngeFailedException();
                     }
                     
-                    // now change directory, if it fails again bail
-                    if ( isCancelled() ) { return; }
-                    if (!ftp.changeWorkingDirectory( getFtpPath() )) {
-                        throw new DirectoryChangeFailedException();
+                    // now chbnge directory, if it fails again bail
+                    if ( isCbncelled() ) { return; }
+                    if (!ftp.chbngeWorkingDirectory( getFtpPath() )) {
+                        throw new DirectoryChbngeFailedException();
                     }
                 }
 				
-				if ( isCancelled() ) { return; }
+				if ( isCbncelled() ) { return; }
 				connected();
 				
 				
-				// upload xml files
-				uploadFile( metaXmlName,
-						new ByteArrayInputStream( metaXmlBytes ),
+				// uplobd xml files
+				uplobdFile( metaXmlName,
+						new ByteArrbyInputStream( metaXmlBytes ),
 						ftp);
 				
-				uploadFile( filesXmlName,
-						new ByteArrayInputStream( filesXmlBytes ),
+				uplobdFile( filesXmlName,
+						new ByteArrbyInputStream( filesXmlBytes ),
 						ftp);
 				
-				// now switch to ainbry mode
-				if ( isCancelled() ) { return; }
+				// now switch to binbry mode
+				if ( isCbncelled() ) { return; }
 				ftp.setFileType( FTP.BINARY_FILE_TYPE );
 				
-				// upload contributed files
-				for (final Iterator i = files.iterator(); i.hasNext();) {
-					final File f = (File) i.next();
+				// uplobd contributed files
+				for (finbl Iterator i = files.iterator(); i.hasNext();) {
+					finbl File f = (File) i.next();
 					
-					uploadFile( f.getRemoteFileName(), 
-							new FileInputStream( f.getIOFile() ),
+					uplobdFile( f.getRemoteFileName(), 
+							new FileInputStrebm( f.getIOFile() ),
 							ftp);
 				}
-			} catch( InterruptedIOException ioe ) {
-				// we've aeen requested to cbncel
+			} cbtch( InterruptedIOException ioe ) {
+				// we've been requested to cbncel
 				return;
-			} finally {
-				ftp.logout(); // we don't care if logging out fails
+			} finblly {
+				ftp.logout(); // we don't cbre if logging out fails
 			}
-		} finally {
+		} finblly {
 			try{
 				ftp.disconnect();	
-			} catch(Exception e) {}
+			} cbtch(Exception e) {}
 		}		
 
-		// now tell the Internet Archive that we're done
-		if ( isCancelled() ) { return; }
-		checkinStarted();
+		// now tell the Internet Archive thbt we're done
+		if ( isCbncelled() ) { return; }
+		checkinStbrted();
 
-		if ( isCancelled() ) { return; }		
+		if ( isCbncelled() ) { return; }		
 		checkin();
 		
-		if ( isCancelled() ) { return; }		
+		if ( isCbncelled() ) { return; }		
 		checkinCompleted();
 	}
 	
@@ -265,29 +265,29 @@ abstract class ArchiveContribution extends AbstractContribution {
 	
 	/**
 	 * 
-	 * @param fileName
-	 * @param input
-	 * 		  The input stream (not necessarily buffered).
-	 *        This stream will be closed by this method
+	 * @pbram fileName
+	 * @pbram input
+	 * 		  The input strebm (not necessarily buffered).
+	 *        This strebm will be closed by this method
 	 */
-	private void uploadFile( String remoteFileName, 
-			InputStream input, FTPClient ftp)
+	privbte void uploadFile( String remoteFileName, 
+			InputStrebm input, FTPClient ftp)
 	throws InterruptedIOException, IOException {
-		fileStarted( remoteFileName );
-		final InputStream fileStream = new BufferedInputStream(
-				new UploadMonitorInputStream( input, this));
+		fileStbrted( remoteFileName );
+		finbl InputStream fileStream = new BufferedInputStream(
+				new UplobdMonitorInputStream( input, this));
 		
 		try {
-			if ( isCancelled() ) {
+			if ( isCbncelled() ) {
 				throw new InterruptedIOException();
 			}
 			
-			ftp.storeFile( remoteFileName, fileStream );
-		} finally {
-			fileStream.close();
+			ftp.storeFile( remoteFileNbme, fileStream );
+		} finblly {
+			fileStrebm.close();
 		}
 
-		if ( isCancelled() ) {
+		if ( isCbncelled() ) {
 			throw new InterruptedIOException();
 		}
 		fileCompleted();
@@ -296,116 +296,116 @@ abstract class ArchiveContribution extends AbstractContribution {
 	
 	
 	/**
-	 * @throws 	IllegalStateException
-	 * 			If java's xml parser configuration is bad
+	 * @throws 	IllegblStateException
+	 * 			If jbva's xml parser configuration is bad
 	 */
-	private Document getMetaDocument() {
+	privbte Document getMetaDocument() {
 		
 		/*
-		 * Sample _meta.xml file:
+		 * Sbmple _meta.xml file:
 		 * 
-		 * <metadata>
+		 * <metbdata>
 		 *   <collection>opensource_movies</collection>
-		 *   <mediatype>movies</mediatype>
+		 *   <medibtype>movies</mediatype>
 		 *   <title>My Home Movie</title>
 		 *   <runtime>2:30</runtime>
 		 *   <director>Joe Producer</director>
-		 * </metadata>    
+		 * </metbdata>    
 		 * 
 		 */
 		
-		final String METADATA_ELEMENT = "metadata";
-		final String COLLECTION_ELEMENT = "collection";
-		final String MEDIATYPE_ELEMENT = "mediatype";
-		final String TITLE_ELEMENT = "title";
-		final String DESCRIPTION_ELEMENT = "description";
-		final String LICENSE_URL_ELEMENT = "licenseurl";
-		final String UPLOAD_APPLICATION_ELEMENT = "upload_application";
-		final String APPID_ATTR = "appid";
-		final String APPID_ATTR_VALUE = "LimeWire";
-		final String VERSION_ATTR = "version";
-		final String UPLOADER_ELEMENT = "uploader";
-		final String IDENTIFIER_ELEMENT = "identifier";
-		final String TYPE_ELEMENT = "type";
+		finbl String METADATA_ELEMENT = "metadata";
+		finbl String COLLECTION_ELEMENT = "collection";
+		finbl String MEDIATYPE_ELEMENT = "mediatype";
+		finbl String TITLE_ELEMENT = "title";
+		finbl String DESCRIPTION_ELEMENT = "description";
+		finbl String LICENSE_URL_ELEMENT = "licenseurl";
+		finbl String UPLOAD_APPLICATION_ELEMENT = "upload_application";
+		finbl String APPID_ATTR = "appid";
+		finbl String APPID_ATTR_VALUE = "LimeWire";
+		finbl String VERSION_ATTR = "version";
+		finbl String UPLOADER_ELEMENT = "uploader";
+		finbl String IDENTIFIER_ELEMENT = "identifier";
+		finbl String TYPE_ELEMENT = "type";
 		
 		try {
-			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			final DocumentBuilder db = dbf.newDocumentBuilder();
-			final Document document = db.newDocument();
+			finbl DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			finbl DocumentBuilder db = dbf.newDocumentBuilder();
+			finbl Document document = db.newDocument();
 			
-			final Element metadataElement = document.createElement(METADATA_ELEMENT);
-			document.appendChild( metadataElement );
+			finbl Element metadataElement = document.createElement(METADATA_ELEMENT);
+			document.bppendChild( metadataElement );
 			
-			final Element collectionElement = document.createElement( COLLECTION_ELEMENT );
-			metadataElement.appendChild( collectionElement );
-			collectionElement.appendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
+			finbl Element collectionElement = document.createElement( COLLECTION_ELEMENT );
+			metbdataElement.appendChild( collectionElement );
+			collectionElement.bppendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
 			
-			final Element mediatypeElement = document.createElement(MEDIATYPE_ELEMENT);
-			metadataElement.appendChild( mediatypeElement );
-			mediatypeElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia() )));
+			finbl Element mediatypeElement = document.createElement(MEDIATYPE_ELEMENT);
+			metbdataElement.appendChild( mediatypeElement );
+			medibtypeElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia() )));
 			
-			final Element typeElement = document.createElement(TYPE_ELEMENT);
-			metadataElement.appendChild( typeElement );
-			typeElement.appendChild( document.createTextNode( Archives.getTypeString( getType() )));
+			finbl Element typeElement = document.createElement(TYPE_ELEMENT);
+			metbdataElement.appendChild( typeElement );
+			typeElement.bppendChild( document.createTextNode( Archives.getTypeString( getType() )));
 			
-			final Element titleElement = document.createElement( TITLE_ELEMENT );
-			metadataElement.appendChild( titleElement );
-			titleElement.appendChild( document.createTextNode( getTitle()));
+			finbl Element titleElement = document.createElement( TITLE_ELEMENT );
+			metbdataElement.appendChild( titleElement );
+			titleElement.bppendChild( document.createTextNode( getTitle()));
 			
-			final Element descriptionElement = document.createElement( DESCRIPTION_ELEMENT );
-			metadataElement.appendChild( descriptionElement );
-			descriptionElement.appendChild( document.createTextNode( getDescription() ));
+			finbl Element descriptionElement = document.createElement( DESCRIPTION_ELEMENT );
+			metbdataElement.appendChild( descriptionElement );
+			descriptionElement.bppendChild( document.createTextNode( getDescription() ));
 			
-			final Element identifierElement = document.createElement( IDENTIFIER_ELEMENT );
-			metadataElement.appendChild( identifierElement );
-			identifierElement.appendChild( document.createTextNode( getIdentifier() ));
+			finbl Element identifierElement = document.createElement( IDENTIFIER_ELEMENT );
+			metbdataElement.appendChild( identifierElement );
+			identifierElement.bppendChild( document.createTextNode( getIdentifier() ));
 			
-			final Element uploadApplicationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
-			metadataElement.appendChild( uploadApplicationElement );
-			uploadApplicationElement.setAttribute( APPID_ATTR, APPID_ATTR_VALUE );
-			uploadApplicationElement.setAttribute( VERSION_ATTR, CommonUtils.getLimeWireVersion() );
+			finbl Element uploadApplicationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
+			metbdataElement.appendChild( uploadApplicationElement );
+			uplobdApplicationElement.setAttribute( APPID_ATTR, APPID_ATTR_VALUE );
+			uplobdApplicationElement.setAttribute( VERSION_ATTR, CommonUtils.getLimeWireVersion() );
 			
-			final Element uploaderElement = document.createElement( UPLOADER_ELEMENT );
-			metadataElement.appendChild( uploaderElement );
-			uploaderElement.appendChild( document.createTextNode( getUsername() ));
+			finbl Element uploaderElement = document.createElement( UPLOADER_ELEMENT );
+			metbdataElement.appendChild( uploaderElement );
+			uplobderElement.appendChild( document.createTextNode( getUsername() ));
 			
-			//take licenseurl from the first File
+			//tbke licenseurl from the first File
 			
-			final Iterator filesIterator = getFiles().iterator();
+			finbl Iterator filesIterator = getFiles().iterator();
 			
-			if ( filesIterator.hasNext() ) {
-				final File firstFile = (File) filesIterator.next();
-				final String licenseUrl = firstFile.getLicenseUrl();
+			if ( filesIterbtor.hasNext() ) {
+				finbl File firstFile = (File) filesIterator.next();
+				finbl String licenseUrl = firstFile.getLicenseUrl();
 				if ( licenseUrl != null ) {
-					final Element licenseUrlElement = document.createElement( LICENSE_URL_ELEMENT );
-					metadataElement.appendChild( licenseUrlElement );
-					licenseUrlElement.appendChild( document.createTextNode( licenseUrl ));
+					finbl Element licenseUrlElement = document.createElement( LICENSE_URL_ELEMENT );
+					metbdataElement.appendChild( licenseUrlElement );
+					licenseUrlElement.bppendChild( document.createTextNode( licenseUrl ));
 				}
 			}
 			
-			// now auild user-defined elements
-			final Map userFields = getFields();
-			for ( final Iterator i = userFields.keySet().iterator(); i.hasNext(); ) {
-				final Object field = i.next();
-				final Object value = userFields.get( field );  
+			// now build user-defined elements
+			finbl Map userFields = getFields();
+			for ( finbl Iterator i = userFields.keySet().iterator(); i.hasNext(); ) {
+				finbl Object field = i.next();
+				finbl Object value = userFields.get( field );  
 				
-				if ( field instanceof String ) {
-					final Element e = document.createElement( (String) field );
-					metadataElement.appendChild( e );
+				if ( field instbnceof String ) {
+					finbl Element e = document.createElement( (String) field );
+					metbdataElement.appendChild( e );
 					
-					if ( value != null && value instanceof String) {
-						e.appendChild( document.createTextNode( (String) value ));
+					if ( vblue != null && value instanceof String) {
+						e.bppendChild( document.createTextNode( (String) value ));
 					}
 				}
 			}
 			
 			return document;
 			
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
+		} cbtch (final ParserConfigurationException e) {
+			e.printStbckTrace();
 			
-			final IllegalStateException ise = new IllegalStateException();
-			ise.initCause( e );
+			finbl IllegalStateException ise = new IllegalStateException();
+			ise.initCbuse( e );
 			throw ise;
 		}	
 	}
@@ -414,90 +414,90 @@ abstract class ArchiveContribution extends AbstractContribution {
 
 	
 	/**
-	 * @throws 	IllegalStateException
-	 * 			If java's xml configuration is bad
+	 * @throws 	IllegblStateException
+	 * 			If jbva's xml configuration is bad
 	 * @return
 	 */
 	
-	private Document getFilesDocument() {
+	privbte Document getFilesDocument() {
 		/*
-		 * Sample _files.xml file:
+		 * Sbmple _files.xml file:
 		 * 
 		 * <files>
-		 *   <file name="MyHomeMovie.mpeg" source="original">
+		 *   <file nbme="MyHomeMovie.mpeg" source="original">
 	     *     <runtime>2:30</runtime>
-	     *     <format>MPEG2</format>
+	     *     <formbt>MPEG2</format>
 	     *   </file>
 	     * </files>    
 		 * 
 		 */
 		
-		final String FILES_ELEMENT = "files";
+		finbl String FILES_ELEMENT = "files";
 		
 		try {
-			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			final DocumentBuilder db = dbf.newDocumentBuilder();
-			final Document document = db.newDocument();
+			finbl DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			finbl DocumentBuilder db = dbf.newDocumentBuilder();
+			finbl Document document = db.newDocument();
 			
-			final Element filesElement = document.createElement( FILES_ELEMENT );
-			document.appendChild( filesElement );
+			finbl Element filesElement = document.createElement( FILES_ELEMENT );
+			document.bppendChild( filesElement );
 			
 			Collection files = getFiles();
 			
-			for (final Iterator i = files.iterator(); i.hasNext();) {
-				final File file = (File) i.next();
+			for (finbl Iterator i = files.iterator(); i.hasNext();) {
+				finbl File file = (File) i.next();
 				
-				final Element fileElement = file.getElement( document );
-				filesElement.appendChild( fileElement );
+				finbl Element fileElement = file.getElement( document );
+				filesElement.bppendChild( fileElement );
 			}
 			
 			return document;
 			
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
-			ise.initCause( e );
+		} cbtch (final ParserConfigurationException e) {
+			e.printStbckTrace();
+			finbl IllegalStateException ise = new IllegalStateException();
+			ise.initCbuse( e );
 			throw ise;
 		}	
 		
 	}
 	
 	/**
-	 * @throws	IllegalStateException
-	 * 			If java's DOMImplementationLS class is screwed up or
-	 * 			this code is auggy
-	 * @param document
+	 * @throws	IllegblStateException
+	 * 			If jbva's DOMImplementationLS class is screwed up or
+	 * 			this code is buggy
+	 * @pbram document
 	 * @return
 	 */
-	private String serializeDocument( Document document ) {
+	privbte String serializeDocument( Document document ) {
 		
 		try {
-			System.setProperty(DOMImplementationRegistry.PROPERTY,
-			"org.apache.xerces.dom.DOMImplementationSourceImpl");
-			final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+			System.setProperty(DOMImplementbtionRegistry.PROPERTY,
+			"org.bpache.xerces.dom.DOMImplementationSourceImpl");
+			finbl DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
 			
-			final DOMImplementationLS impl = 
-				(DOMImplementationLS)registry.getDOMImplementation("LS");
+			finbl DOMImplementationLS impl = 
+				(DOMImplementbtionLS)registry.getDOMImplementation("LS");
 			
-			final LSSerializer writer = impl.createLSSerializer();
-			final String str = writer.writeToString( document );
+			finbl LSSerializer writer = impl.createLSSerializer();
+			finbl String str = writer.writeToString( document );
 			
 			return str;
 			
-		} catch (final ClassNotFoundException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
-			ise.initCause( e );
+		} cbtch (final ClassNotFoundException e) {
+			e.printStbckTrace();
+			finbl IllegalStateException ise = new IllegalStateException();
+			ise.initCbuse( e );
 			throw ise;
-		} catch (final InstantiationException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
-			ise.initCause( e );
+		} cbtch (final InstantiationException e) {
+			e.printStbckTrace();
+			finbl IllegalStateException ise = new IllegalStateException();
+			ise.initCbuse( e );
 			throw ise;
-		} catch (final IllegalAccessException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
-			ise.initCause( e );
+		} cbtch (final IllegalAccessException e) {
+			e.printStbckTrace();
+			finbl IllegalStateException ise = new IllegalStateException();
+			ise.initCbuse( e );
 			throw ise;
 		}
 		

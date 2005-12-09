@@ -1,10 +1,10 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
 /**
- * Interface that combines ReadObserver & WriteObserver, to allow
- * one oaject to be pbssed around and marked as supporting both
- * read handling events & write handling events.
+ * Interfbce that combines ReadObserver & WriteObserver, to allow
+ * one object to be pbssed around and marked as supporting both
+ * rebd handling events & write handling events.
  */
-pualic interfbce ReadWriteObserver extends ReadObserver, WriteObserver {}
+public interfbce ReadWriteObserver extends ReadObserver, WriteObserver {}
     
     

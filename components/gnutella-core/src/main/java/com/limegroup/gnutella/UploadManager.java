@@ -1,52 +1,52 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import jbva.io.BufferedInputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.net.Socket;
+import jbva.net.InetAddress;
+import jbva.util.ArrayList;
+import jbva.util.Collections;
+import jbva.util.HashMap;
+import jbva.util.HashSet;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.Locale;
+import jbva.util.Map;
+import jbva.util.Set;
+import jbva.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.aitzi.util.Bbse32;
-import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.http.HTTPRequestMethod;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.uploader.FreeloaderUploadingException;
-import com.limegroup.gnutella.uploader.HTTPUploader;
-import com.limegroup.gnutella.uploader.LimitReachedUploadState;
-import com.limegroup.gnutella.uploader.PushProxyUploadState;
-import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
-import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.KeyValue;
-import com.limegroup.gnutella.util.URLDecoder;
+import com.bitzi.util.Bbse32;
+import com.limegroup.gnutellb.downloader.Interval;
+import com.limegroup.gnutellb.http.HTTPConstants;
+import com.limegroup.gnutellb.http.HTTPRequestMethod;
+import com.limegroup.gnutellb.http.ProblemReadingHeaderException;
+import com.limegroup.gnutellb.settings.ConnectionSettings;
+import com.limegroup.gnutellb.settings.SharingSettings;
+import com.limegroup.gnutellb.settings.UploadSettings;
+import com.limegroup.gnutellb.statistics.UploadStat;
+import com.limegroup.gnutellb.uploader.FreeloaderUploadingException;
+import com.limegroup.gnutellb.uploader.HTTPUploader;
+import com.limegroup.gnutellb.uploader.LimitReachedUploadState;
+import com.limegroup.gnutellb.uploader.PushProxyUploadState;
+import com.limegroup.gnutellb.uploader.StalledUploadWatchdog;
+import com.limegroup.gnutellb.util.Buffer;
+import com.limegroup.gnutellb.util.FixedSizeExpiringSet;
+import com.limegroup.gnutellb.util.FixedsizeForgetfulHashMap;
+import com.limegroup.gnutellb.util.IOUtils;
+import com.limegroup.gnutellb.util.KeyValue;
+import com.limegroup.gnutellb.util.URLDecoder;
 
 /**
- * This class parses HTTP requests and delegates to <tt>HTTPUploader</tt>
- * to handle individual uploads.
+ * This clbss parses HTTP requests and delegates to <tt>HTTPUploader</tt>
+ * to hbndle individual uploads.
  *
- * The state of HTTPUploader is maintained by this class.
- * HTTPUploader's state follows the following pattern:
+ * The stbte of HTTPUploader is maintained by this class.
+ * HTTPUplobder's state follows the following pattern:
  *                                                           \ /
  *                             |->---- THEX_REQUEST ------->--|
  *                             |->---- UNAVAILABLE_RANGE -->--|
@@ -67,608 +67,608 @@ import com.limegroup.gnutella.util.URLDecoder;
  *                        |
  *                      (done)
  *
- * The states in the middle (those other than CONNECTING, COMPLETE
- *   and INTERRUPTED) are part of the "State Pattern" and have an 
- * associated class that implements HTTPMessage.
+ * The stbtes in the middle (those other than CONNECTING, COMPLETE
+ *   bnd INTERRUPTED) are part of the "State Pattern" and have an 
+ * bssociated class that implements HTTPMessage.
  *
- * These state pattern classes are ONLY set while a transfer is active.
- * For example, after we determine a request should be 'File Not Found',
- * and send the response back, the state will become COMPLETE (unless
- * there was an IOException while sending the response, in which case
- * the state will become INTERRUPTED).  To retrieve the last state
- * that was used for transferring, use HTTPUploader.getLastTransferState().
+ * These stbte pattern classes are ONLY set while a transfer is active.
+ * For exbmple, after we determine a request should be 'File Not Found',
+ * bnd send the response back, the state will become COMPLETE (unless
+ * there wbs an IOException while sending the response, in which case
+ * the stbte will become INTERRUPTED).  To retrieve the last state
+ * thbt was used for transferring, use HTTPUploader.getLastTransferState().
  *
- * Of particular note is that Queued uploaders are actually in COMPLETED
- * state for the majority of the time.  The QUEUED state is only active
- * when we are actively writing back the 'You are queued' response.
+ * Of pbrticular note is that Queued uploaders are actually in COMPLETED
+ * stbte for the majority of the time.  The QUEUED state is only active
+ * when we bre actively writing back the 'You are queued' response.
  *
- * COMPLETE uploaders may be using HTTP/1.1, in which case the HTTPUploader
- * recycles abck to CONNECTING upon receiving the next GET/HEAD request
- * and repeats.
+ * COMPLETE uplobders may be using HTTP/1.1, in which case the HTTPUploader
+ * recycles bbck to CONNECTING upon receiving the next GET/HEAD request
+ * bnd repeats.
  *
- * INTERRUPTED HTTPUploaders are never reused.  However, it is possible that
- * the socket may be reused.  This odd case is ONLY possible when a requester
- * is queued for one file and sends a subsequent request for another file.
- * The first HTTPUploader is set as interrupted and a second one is created
- * for the new file, using the same socket as the first one.
+ * INTERRUPTED HTTPUplobders are never reused.  However, it is possible that
+ * the socket mby be reused.  This odd case is ONLY possible when a requester
+ * is queued for one file bnd sends a subsequent request for another file.
+ * The first HTTPUplobder is set as interrupted and a second one is created
+ * for the new file, using the sbme socket as the first one.
  *
- * @see com.limegroup.gnutella.uploader.HTTPUploader
+ * @see com.limegroup.gnutellb.uploader.HTTPUploader
  */
-pualic clbss UploadManager implements BandwidthTracker {
+public clbss UploadManager implements BandwidthTracker {
     
-    private static final Log LOG = LogFactory.getLog(UploadManager.class);
+    privbte static final Log LOG = LogFactory.getLog(UploadManager.class);
 
-    /** An enumeration of return values for queue checking. */
-    private final int BYPASS_QUEUE = -1;
-    private final int REJECTED = 0;    
-    private final int QUEUED = 1;
-    private final int ACCEPTED = 2;
-    private final int BANNED = 3;
-    /** The min and max allowed times (in milliseconds) between requests by
+    /** An enumerbtion of return values for queue checking. */
+    privbte final int BYPASS_QUEUE = -1;
+    privbte final int REJECTED = 0;    
+    privbte final int QUEUED = 1;
+    privbte final int ACCEPTED = 2;
+    privbte final int BANNED = 3;
+    /** The min bnd max allowed times (in milliseconds) between requests by
      *  queued hosts. */
-    pualic stbtic final int MIN_POLL_TIME = 45000; //45 sec
-    pualic stbtic final int MAX_POLL_TIME = 120000; //120 sec
+    public stbtic final int MIN_POLL_TIME = 45000; //45 sec
+    public stbtic final int MAX_POLL_TIME = 120000; //120 sec
 
 	/**
-	 * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
-	 * instances (all of the uploads in progress).  
+	 * This is b <tt>List</tt> of all of the current <tt>Uploader</tt>
+	 * instbnces (all of the uploads in progress).  
 	 */
-	private List /* of Uploaders */ _activeUploadList = new LinkedList();
+	privbte List /* of Uploaders */ _activeUploadList = new LinkedList();
 
-    /** The list of queued uploads.  Most recent uploads are added to the tail.
-     *  Each pair contains the underlying socket and the time of the last
+    /** The list of queued uplobds.  Most recent uploads are added to the tail.
+     *  Ebch pair contains the underlying socket and the time of the last
      *  request. */
-    private List /*of KeyValue (Socket,Long) */ _queuedUploads = 
-        new ArrayList();
+    privbte List /*of KeyValue (Socket,Long) */ _queuedUploads = 
+        new ArrbyList();
 
     
-	/** set to true when an upload has been succesfully completed. */
-	private volatile boolean _hadSuccesfulUpload=false;
+	/** set to true when bn upload has been succesfully completed. */
+	privbte volatile boolean _hadSuccesfulUpload=false;
     
-    /** Numaer of force-shbred active uploads */
-    private int _forcedUploads;
+    /** Number of force-shbred active uploads */
+    privbte int _forcedUploads;
     
 	/**
-	 * LOCKING: oatbin this' monitor before modifying any 
-	 * of the data structures
+	 * LOCKING: obtbin this' monitor before modifying any 
+	 * of the dbta structures
 	 */
 
-    /** The numaer of uplobds considered when calculating capacity, if possible.
-     *  BearShare uses 10.  Settings it too low causes you to be fooled be a
-     *  streak of slow downloaders.  Setting it too high causes you to be fooled
-     *  ay b number of quick downloads before your slots become filled.  */
-    private static final int MAX_SPEED_SAMPLE_SIZE=5;
-    /** The min numaer of uplobds considered to give out your speed.  Same 
-     *  criteria needed as for MAX_SPEED_SAMPLE_SIZE. */
-    private static final int MIN_SPEED_SAMPLE_SIZE=5;
-    /** The minimum numaer of bytes trbnsferred by an uploadeder to count. */
-    private static final int MIN_SAMPLE_BYTES=200000;  //200KB
-    /** The average speed in kiloBITs/second of the last few uploads. */
-    private Buffer /* of Integer */ speeds=new Buffer(MAX_SPEED_SAMPLE_SIZE);
-    /** The highestSpeed of the last few downloads, or -1 if not enough
-     *  downloads have been down for an accurate sample.
-     *  INVARIANT: highestSpeed>=0 ==> highestSpeed==max({i | i in speeds}) 
+    /** The number of uplobds considered when calculating capacity, if possible.
+     *  BebrShare uses 10.  Settings it too low causes you to be fooled be a
+     *  strebk of slow downloaders.  Setting it too high causes you to be fooled
+     *  by b number of quick downloads before your slots become filled.  */
+    privbte static final int MAX_SPEED_SAMPLE_SIZE=5;
+    /** The min number of uplobds considered to give out your speed.  Same 
+     *  criterib needed as for MAX_SPEED_SAMPLE_SIZE. */
+    privbte static final int MIN_SPEED_SAMPLE_SIZE=5;
+    /** The minimum number of bytes trbnsferred by an uploadeder to count. */
+    privbte static final int MIN_SAMPLE_BYTES=200000;  //200KB
+    /** The bverage speed in kiloBITs/second of the last few uploads. */
+    privbte Buffer /* of Integer */ speeds=new Buffer(MAX_SPEED_SAMPLE_SIZE);
+    /** The highestSpeed of the lbst few downloads, or -1 if not enough
+     *  downlobds have been down for an accurate sample.
+     *  INVARIANT: highestSpeed>=0 ==> highestSpeed==mbx({i | i in speeds}) 
      *  INVARIANT: speeds.size()<MIN_SPEED_SAMPLE_SIZE <==> highestSpeed==-1
      */
-    private volatile int highestSpeed=-1;
+    privbte volatile int highestSpeed=-1;
     
     /**
-     * The numaer of mebsureBandwidth's we've had
+     * The number of mebsureBandwidth's we've had
      */
-    private int numMeasures = 0;
+    privbte int numMeasures = 0;
     
     /**
-     * The current average bandwidth
+     * The current bverage bandwidth
      */
-    private float averageBandwidth = 0f;
+    privbte float averageBandwidth = 0f;
 
-    /** The desired minimum quality of service to provide for uploads, in
-     *  KB/s.  See testTotalUploadLimit. */
-    private static final float MINIMUM_UPLOAD_SPEED=3.0f;
+    /** The desired minimum qublity of service to provide for uploads, in
+     *  KB/s.  See testTotblUploadLimit. */
+    privbte static final float MINIMUM_UPLOAD_SPEED=3.0f;
     
     /** 
-     * The file index used in this structure to indicate a browse host
+     * The file index used in this structure to indicbte a browse host
      * request
      */
-    pualic stbtic final int BROWSE_HOST_FILE_INDEX = -1;
+    public stbtic final int BROWSE_HOST_FILE_INDEX = -1;
     
     /**
-     * The file index used in this structure to indicate an update-file
+     * The file index used in this structure to indicbte an update-file
      * request
      */
-    pualic stbtic final int UPDATE_FILE_INDEX = -2;
+    public stbtic final int UPDATE_FILE_INDEX = -2;
     
     /**
-     * The file index used in this structure to indicate a bad URN query.
+     * The file index used in this structure to indicbte a bad URN query.
      */
-    pualic stbtic final int BAD_URN_QUERY_INDEX = -3;
+    public stbtic final int BAD_URN_QUERY_INDEX = -3;
     
     /**
-     * The file index used in this structure to indicate a malformed request.
+     * The file index used in this structure to indicbte a malformed request.
      */
-    pualic stbtic final int MALFORMED_REQUEST_INDEX = -4;
+    public stbtic final int MALFORMED_REQUEST_INDEX = -4;
 
     /** 
-     * The file index used in this structure to indicate a Push Proxy 
+     * The file index used in this structure to indicbte a Push Proxy 
      * request.
      */
-    pualic stbtic final int PUSH_PROXY_FILE_INDEX = -5;
+    public stbtic final int PUSH_PROXY_FILE_INDEX = -5;
     
     /** 
-     * The file index used in this structure to indicate a HTTP File View
-     * download request.
+     * The file index used in this structure to indicbte a HTTP File View
+     * downlobd request.
      */
-    pualic stbtic final int FILE_VIEW_FILE_INDEX = -6;
+    public stbtic final int FILE_VIEW_FILE_INDEX = -6;
     
     /** 
-     * The file index used in this structure to indicate a HTTP Resource Get.
+     * The file index used in this structure to indicbte a HTTP Resource Get.
      */
-    pualic stbtic final int RESOURCE_INDEX = -7;
+    public stbtic final int RESOURCE_INDEX = -7;
 
     /** 
-     * The file index used in this structure to indicate a special request from a browser.
+     * The file index used in this structure to indicbte a special request from a browser.
      */
-    pualic stbtic final int BROWSER_CONTROL_INDEX = -8;
+    public stbtic final int BROWSER_CONTROL_INDEX = -8;
 
     /**
-     * Constant for the beginning of a BrowserControl request.
+     * Constbnt for the beginning of a BrowserControl request.
      */
-    pualic stbtic final String BROWSER_CONTROL_STR = "/browser-control";
+    public stbtic final String BROWSER_CONTROL_STR = "/browser-control";
     
     /**
-     * Constant for HttpRequestLine parameter
+     * Constbnt for HttpRequestLine parameter
      */
-    pualic stbtic final String SERVICE_ID = "service_id";
+    public stbtic final String SERVICE_ID = "service_id";
                 
     /**
-     * Constant for the beginning of a file-view request.
+     * Constbnt for the beginning of a file-view request.
      */
-    pualic stbtic final String FV_REQ_BEGIN = "/gnutella/file-view";
+    public stbtic final String FV_REQ_BEGIN = "/gnutella/file-view";
 
     /**
-     * Constant for file-view gif get.
+     * Constbnt for file-view gif get.
      */
-    pualic stbtic final String RESOURCE_GET = "/gnutella/res/";
+    public stbtic final String RESOURCE_GET = "/gnutella/res/";
 
 	/**
-     * Rememaers uplobders to disadvantage uploaders that
-     * hammer us for download slots. Stores up to 250 entries
-     * Maps IP String to RequestCache   
+     * Remembers uplobders to disadvantage uploaders that
+     * hbmmer us for download slots. Stores up to 250 entries
+     * Mbps IP String to RequestCache   
      */
-    private final Map /* of String to RequestCache */ REQUESTS =
-        new FixedsizeForgetfulHashMap(250);
+    privbte final Map /* of String to RequestCache */ REQUESTS =
+        new FixedsizeForgetfulHbshMap(250);
                 
 	/**
-	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
-	 * if it successfully parses the HTTP request.  BLOCKING.
+	 * Accepts b new upload, creating a new <tt>HTTPUploader</tt>
+	 * if it successfully pbrses the HTTP request.  BLOCKING.
 	 *
-	 * @param method the initial request type to use, e.g., GET or HEAD
-	 * @param socket the <tt>Socket</tt> that will be used for the new upload.
-     *  It is assumed that the initial word of the request (e.g., "GET") has
-     *  aeen consumed (e.g., by Acceptor)
-     * @param forceAllow forces the UploadManager to allow all requests
-     *  on this socket to take place.
+	 * @pbram method the initial request type to use, e.g., GET or HEAD
+	 * @pbram socket the <tt>Socket</tt> that will be used for the new upload.
+     *  It is bssumed that the initial word of the request (e.g., "GET") has
+     *  been consumed (e.g., by Acceptor)
+     * @pbram forceAllow forces the UploadManager to allow all requests
+     *  on this socket to tbke place.
 	 */
-    pualic void bcceptUpload(final HTTPRequestMethod method,
-                             Socket socket, aoolebn forceAllow) {
+    public void bcceptUpload(final HTTPRequestMethod method,
+                             Socket socket, boolebn forceAllow) {
         
-        LOG.trace("accepting upload");
-        HTTPUploader uploader = null;
-        long startTime = -1;
+        LOG.trbce("accepting upload");
+        HTTPUplobder uploader = null;
+        long stbrtTime = -1;
 		try {
             int queued = -1;
-            String oldFileName = "";
+            String oldFileNbme = "";
             HTTPRequestMethod currentMethod=method;
-            StalledUploadWatchdog watchdog = new StalledUploadWatchdog();
-            InputStream iStream = null;
-            aoolebn startedNewFile = false;
-            //do uploads
+            StblledUploadWatchdog watchdog = new StalledUploadWatchdog();
+            InputStrebm iStream = null;
+            boolebn startedNewFile = false;
+            //do uplobds
             while(true) {
-                if( uploader != null )
-                    assertAsComplete( uploader.getState() );
+                if( uplobder != null )
+                    bssertAsComplete( uploader.getState() );
                 
-                if(iStream == null)
-                    iStream = new BufferedInputStream(socket.getInputStream());
+                if(iStrebm == null)
+                    iStrebm = new BufferedInputStream(socket.getInputStream());
                 
-                LOG.trace("parsing http line.");
-                HttpRequestLine line = parseHttpRequest(socket, iStream);
-                if (LOG.isTraceEnabled())
-                    LOG.trace("line = " + line);
+                LOG.trbce("parsing http line.");
+                HttpRequestLine line = pbrseHttpRequest(socket, iStream);
+                if (LOG.isTrbceEnabled())
+                    LOG.trbce("line = " + line);
                 
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder + " successfully parsed request");
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder + " successfully parsed request");
                 
-                String fileName = line._fileName;
+                String fileNbme = line._fileName;
                 
-                // Determine if this is a new file ...
-                if( uploader == null                // no previous uploader
-                 || currentMethod != uploader.getMethod()  // method change
-                 || !oldFileName.equalsIgnoreCase(fileName) ) { // new file
-                    startedNewFile = true;
+                // Determine if this is b new file ...
+                if( uplobder == null                // no previous uploader
+                 || currentMethod != uplobder.getMethod()  // method change
+                 || !oldFileNbme.equalsIgnoreCase(fileName) ) { // new file
+                    stbrtedNewFile = true;
                 } else {
-                    startedNewFile = false;
+                    stbrtedNewFile = false;
                 }
                 
-                // If we're starting a new uploader, clean the old one up
-                // and then create a new one.
-                if(startedNewFile) {
-                    if(LOG.isDeaugEnbbled())
-                        LOG.deaug(uplobder + " starting new file "+line._fileName+" index "+line._index);
-                    if (uploader != null) {
-                        // Because queueing is per-socket (and not per file),
-                        // we do not want to reset the queue status if they're
-                        // requesting a new file.
+                // If we're stbrting a new uploader, clean the old one up
+                // bnd then create a new one.
+                if(stbrtedNewFile) {
+                    if(LOG.isDebugEnbbled())
+                        LOG.debug(uplobder + " starting new file "+line._fileName+" index "+line._index);
+                    if (uplobder != null) {
+                        // Becbuse queueing is per-socket (and not per file),
+                        // we do not wbnt to reset the queue status if they're
+                        // requesting b new file.
                         if(queued != QUEUED)
                             queued = -1;
-                        // However, we DO want to make sure that the old file
-                        // is interpreted as interrupted.  Otherwise,
-                        // the GUI would show two lines with the the same slot
-                        // until the newer line finished, at which point
-                        // the first one would display as a -1 queue position.
+                        // However, we DO wbnt to make sure that the old file
+                        // is interpreted bs interrupted.  Otherwise,
+                        // the GUI would show two lines with the the sbme slot
+                        // until the newer line finished, bt which point
+                        // the first one would displby as a -1 queue position.
                         else
-                            uploader.setState(Uploader.INTERRUPTED);
+                            uplobder.setState(Uploader.INTERRUPTED);
 
-                        cleanupFinishedUploader(uploader, startTime);
+                        clebnupFinishedUploader(uploader, startTime);
                     }
-                    uploader = new HTTPUploader(currentMethod,
-                                                fileName, 
+                    uplobder = new HTTPUploader(currentMethod,
+                                                fileNbme, 
 						    			        socket,
 							    		        line._index,
-							    		        line.getParameters(),
-								    	        watchdog,
-                                                line.hadPassword());
+							    		        line.getPbrameters(),
+								    	        wbtchdog,
+                                                line.hbdPassword());
                 }
-                // Otherwise (we're continuing an uploader),
-                // reinitialize the existing HTTPUploader.
+                // Otherwise (we're continuing bn uploader),
+                // reinitiblize the existing HTTPUploader.
                 else {
-                    if(LOG.isDeaugEnbbled())
-                        LOG.deaug(uplobder + " continuing old file");
-                    uploader.reinitialize(currentMethod, line.getParameters());
+                    if(LOG.isDebugEnbbled())
+                        LOG.debug(uplobder + " continuing old file");
+                    uplobder.reinitialize(currentMethod, line.getParameters());
                 }
                 
-                assertAsConnecting( uploader.getState() );
+                bssertAsConnecting( uploader.getState() );
         
-                setInitialUploadingState(uploader);
+                setInitiblUploadingState(uploader);
                 try {
-                    uploader.readHeader(iStream);
-                    setUploaderStateOffHeaders(uploader);
-                } catch(ProblemReadingHeaderException prhe) {
-                    // if there was a problem reading the header,
-                    // this is a bad request, so let them know.
-                    // we do NOT throw the IOX again because the
+                    uplobder.readHeader(iStream);
+                    setUplobderStateOffHeaders(uploader);
+                } cbtch(ProblemReadingHeaderException prhe) {
+                    // if there wbs a problem reading the header,
+                    // this is b bad request, so let them know.
+                    // we do NOT throw the IOX bgain because the
                     // connection is still open.
-                    uploader.setState(Uploader.MALFORMED_REQUEST);
-                }catch (FreeloaderUploadingException fue){
-                    // arowser request
-				     uploader.setState(Uploader.FREELOADER);
+                    uplobder.setState(Uploader.MALFORMED_REQUEST);
+                }cbtch (FreeloaderUploadingException fue){
+                    // browser request
+				     uplobder.setState(Uploader.FREELOADER);
 				}
                 
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder+" HTTPUploader created and read all headers");
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder+" HTTPUploader created and read all headers");
 
-                // If we have not accepted this file already, then
+                // If we hbve not accepted this file already, then
                 // find out whether or not we should.
                 if( queued != ACCEPTED ) {                	
-                    queued = processNewRequest(uploader, socket, forceAllow);
+                    queued = processNewRequest(uplobder, socket, forceAllow);
                     
-                    // If we just accepted this request,
-                    // set the start time appropriately.
+                    // If we just bccepted this request,
+                    // set the stbrt time appropriately.
                     if( queued == ACCEPTED )
-                        startTime = System.currentTimeMillis();     
+                        stbrtTime = System.currentTimeMillis();     
                     
                 }
                 
-                // If we started a new file with this request, attempt
-                // to display it in the GUI.
-                if( startedNewFile ) {
-                    addToGUI(uploader);
+                // If we stbrted a new file with this request, attempt
+                // to displby it in the GUI.
+                if( stbrtedNewFile ) {
+                    bddToGUI(uploader);
                 }
 
-                // Do the actual upload.
-                doSingleUpload(uploader);
+                // Do the bctual upload.
+                doSingleUplobd(uploader);
                 
-                assertAsFinished( uploader.getState() );
+                bssertAsFinished( uploader.getState() );
                 
                 
-                oldFileName = fileName;
+                oldFileNbme = fileName;
                 
-                //if this is not HTTP11, then exit, as no more requests will
+                //if this is not HTTP11, then exit, bs no more requests will
                 //come.
                 if ( !line.isHTTP11() )
                     return;
 
-                //read the first word of the next request and proceed only if
-                //"GET" or "HEAD" request.  Versions of LimeWire aefore 2.7
+                //rebd the first word of the next request and proceed only if
+                //"GET" or "HEAD" request.  Versions of LimeWire before 2.7
                 //forgot to switch the request method.
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder+" waiting for next request with socket ");
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder+" waiting for next request with socket ");
                 int oldTimeout = socket.getSoTimeout();
                 if(queued!=QUEUED)
-                    socket.setSoTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
+                    socket.setSoTimeout(ShbringSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
                     
-                //dont read a word of size more than 4 
-                //as we will handle only the next "HEAD" or "GET" request
-                String word = IOUtils.readWord(
-                    iStream, 4);
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder+" next request arrived ");
+                //dont rebd a word of size more than 4 
+                //bs we will handle only the next "HEAD" or "GET" request
+                String word = IOUtils.rebdWord(
+                    iStrebm, 4);
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder+" next request arrived ");
                 socket.setSoTimeout(oldTimeout);
-                if (word.equals("GET")) {
+                if (word.equbls("GET")) {
                     currentMethod=HTTPRequestMethod.GET;
-                    UploadStat.SUBSEQUENT_GET.incrementStat();
-                } else if (word.equals("HEAD")) {
+                    UplobdStat.SUBSEQUENT_GET.incrementStat();
+                } else if (word.equbls("HEAD")) {
                     currentMethod=HTTPRequestMethod.HEAD;
-                    UploadStat.SUBSEQUENT_HEAD.incrementStat();
+                    UplobdStat.SUBSEQUENT_HEAD.incrementStat();
                 } else {
                     //Unknown request type
-                    UploadStat.SUBSEQUENT_UNKNOWN.incrementStat();
+                    UplobdStat.SUBSEQUENT_UNKNOWN.incrementStat();
                     return;
                 }
             }//end of while
-        } catch(IOException ioe) {//including InterruptedIOException
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug(uplobder + " IOE thrown, closing socket", ioe);
-        } finally {
-            // The states SHOULD be INTERRUPTED or COMPLETED
-            // here.  However, it is possiale thbt an IOException
-            // or other uncaught exception (that will be handled
-            // outside of this method) were thrown at random points.
-            // It is not a good idea to throw any exceptions here
-            // aecbuse the triggering exception will be lost,
-            // so we just set the state to INTERRUPTED if it was not
-            // already complete.
-            // It is possiale to prove thbt the state is either
-            // interrupted or complete in the case of normal
-            // program flow.
-            if( uploader != null ) {
-            	if( uploader.getState() != Uploader.COMPLETE )
-                	uploader.setState(Uploader.INTERRUPTED);
+        } cbtch(IOException ioe) {//including InterruptedIOException
+            if(LOG.isDebugEnbbled())
+                LOG.debug(uplobder + " IOE thrown, closing socket", ioe);
+        } finblly {
+            // The stbtes SHOULD be INTERRUPTED or COMPLETED
+            // here.  However, it is possible thbt an IOException
+            // or other uncbught exception (that will be handled
+            // outside of this method) were thrown bt random points.
+            // It is not b good idea to throw any exceptions here
+            // becbuse the triggering exception will be lost,
+            // so we just set the stbte to INTERRUPTED if it was not
+            // blready complete.
+            // It is possible to prove thbt the state is either
+            // interrupted or complete in the cbse of normal
+            // progrbm flow.
+            if( uplobder != null ) {
+            	if( uplobder.getState() != Uploader.COMPLETE )
+                	uplobder.setState(Uploader.INTERRUPTED);
             }
             
             synchronized(this) {
-                // If this uploader is still in the queue, remove it.
-                // Also change its state from COMPLETE to INTERRUPTED
-                // aecbuse it didn't really complete.
-                aoolebn found = false;
-                for(Iterator iter=_queuedUploads.iterator();iter.hasNext();){
-                    KeyValue kv = (KeyValue)iter.next();
+                // If this uplobder is still in the queue, remove it.
+                // Also chbnge its state from COMPLETE to INTERRUPTED
+                // becbuse it didn't really complete.
+                boolebn found = false;
+                for(Iterbtor iter=_queuedUploads.iterator();iter.hasNext();){
+                    KeyVblue kv = (KeyValue)iter.next();
                     if(kv.getKey()==socket) {
                         iter.remove();
                         found = true;
-                        arebk;
+                        brebk;
                     }
                 }
                 if(found)
-                    uploader.setState(Uploader.INTERRUPTED);
+                    uplobder.setState(Uploader.INTERRUPTED);
             }
             
-            // Always clean up the finished uploader
-            // from the active list & report the upload speed
-            if( uploader != null ) {
-                uploader.stop();
-                cleanupFinishedUploader(uploader, startTime);
+            // Alwbys clean up the finished uploader
+            // from the bctive list & report the upload speed
+            if( uplobder != null ) {
+                uplobder.stop();
+                clebnupFinishedUploader(uploader, startTime);
             }
             
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug(uplobder + " closing socket");
+            if(LOG.isDebugEnbbled())
+                LOG.debug(uplobder + " closing socket");
             //close the socket
             close(socket);
         }
     }
     
     /**
-     * Determines whether or no this Uploader should be shown
+     * Determines whether or no this Uplobder should be shown
      * in the GUI.
      */
-    private boolean shouldShowInGUI(HTTPUploader uploader) {
-        return uploader.getIndex() != BROWSE_HOST_FILE_INDEX &&
-               uploader.getIndex() != PUSH_PROXY_FILE_INDEX &&
-               uploader.getIndex() != UPDATE_FILE_INDEX &&
-               uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
-               uploader.getIndex() != BAD_URN_QUERY_INDEX &&
-               uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
-               uploader.getIndex() != RESOURCE_INDEX &&
-               uploader.getIndex() != BROWSER_CONTROL_INDEX &&
-               uploader.getMethod() != HTTPRequestMethod.HEAD &&
-               !uploader.isForcedShare();
+    privbte boolean shouldShowInGUI(HTTPUploader uploader) {
+        return uplobder.getIndex() != BROWSE_HOST_FILE_INDEX &&
+               uplobder.getIndex() != PUSH_PROXY_FILE_INDEX &&
+               uplobder.getIndex() != UPDATE_FILE_INDEX &&
+               uplobder.getIndex() != MALFORMED_REQUEST_INDEX &&
+               uplobder.getIndex() != BAD_URN_QUERY_INDEX &&
+               uplobder.getIndex() != FILE_VIEW_FILE_INDEX &&
+               uplobder.getIndex() != RESOURCE_INDEX &&
+               uplobder.getIndex() != BROWSER_CONTROL_INDEX &&
+               uplobder.getMethod() != HTTPRequestMethod.HEAD &&
+               !uplobder.isForcedShare();
 	}
     
     /**
-     * Determines whether or not this Uploader should bypass queueing,
-     * (meaning that it will always work immediately, and will not use
-     *  up slots for other uploaders).
+     * Determines whether or not this Uplobder should bypass queueing,
+     * (mebning that it will always work immediately, and will not use
+     *  up slots for other uplobders).
      *
-     * All requests that are not the 'connecting' state should bypass
-     * the queue, aecbuse they have already been queued once.
+     * All requests thbt are not the 'connecting' state should bypass
+     * the queue, becbuse they have already been queued once.
      *
-     * Don't let FILE_VIEW requests aypbss the queue, we want to make sure
-     * those guys don't hammer.
+     * Don't let FILE_VIEW requests bypbss the queue, we want to make sure
+     * those guys don't hbmmer.
      */
-    private boolean shouldBypassQueue(HTTPUploader uploader) {
-        return uploader.getState() != Uploader.CONNECTING ||
-               uploader.getMethod() == HTTPRequestMethod.HEAD ||
-               uploader.isForcedShare();
+    privbte boolean shouldBypassQueue(HTTPUploader uploader) {
+        return uplobder.getState() != Uploader.CONNECTING ||
+               uplobder.getMethod() == HTTPRequestMethod.HEAD ||
+               uplobder.isForcedShare();
     }
     
     /**
-     * Cleans up a finished uploader.
+     * Clebns up a finished uploader.
      * This does the following:
-     * 1) Reports the speed at which this upload occured.
-     * 2) Removes the uploader from the active upload list
-     * 3) Closes the file streams that the uploader has left open
-     * 4) Increments the completed uploads in the FileDesc
-     * 5) Removes the uploader from the GUI.
-     * (4 & 5 are only done if 'shouldShowInGUI' is true)
+     * 1) Reports the speed bt which this upload occured.
+     * 2) Removes the uplobder from the active upload list
+     * 3) Closes the file strebms that the uploader has left open
+     * 4) Increments the completed uplobds in the FileDesc
+     * 5) Removes the uplobder from the GUI.
+     * (4 & 5 bre only done if 'shouldShowInGUI' is true)
      */
-    private void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
-        if(LOG.isTraceEnabled())
-            LOG.trace(uploader + " cleaning up finished.");
+    privbte void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
+        if(LOG.isTrbceEnabled())
+            LOG.trbce(uploader + " cleaning up finished.");
         
-        int state = uploader.getState();
-        int lastState = uploader.getLastTransferState();        
-        assertAsFinished(state);
+        int stbte = uploader.getState();
+        int lbstState = uploader.getLastTransferState();        
+        bssertAsFinished(state);
                      
         long finishTime = System.currentTimeMillis();
         synchronized(this) {
-            //Report how quickly we uploaded the data.
-            if(startTime > 0) {
-                reportUploadSpeed( finishTime-startTime,
-                                   uploader.getTotalAmountUploaded());
+            //Report how quickly we uplobded the data.
+            if(stbrtTime > 0) {
+                reportUplobdSpeed( finishTime-startTime,
+                                   uplobder.getTotalAmountUploaded());
             }
-            removeFromList(uploader);
+            removeFromList(uplobder);
         }
         
-        uploader.closeFileStreams();
+        uplobder.closeFileStreams();
         
-        switch(state) {
-            case Uploader.COMPLETE:
-                UploadStat.COMPLETED.incrementStat();
-                if( lastState == Uploader.UPLOADING ||
-                    lastState == Uploader.THEX_REQUEST)
-                    UploadStat.COMPLETED_FILE.incrementStat();
-                arebk;
-            case Uploader.INTERRUPTED:
-                UploadStat.INTERRUPTED.incrementStat();
-                arebk;
+        switch(stbte) {
+            cbse Uploader.COMPLETE:
+                UplobdStat.COMPLETED.incrementStat();
+                if( lbstState == Uploader.UPLOADING ||
+                    lbstState == Uploader.THEX_REQUEST)
+                    UplobdStat.COMPLETED_FILE.incrementStat();
+                brebk;
+            cbse Uploader.INTERRUPTED:
+                UplobdStat.INTERRUPTED.incrementStat();
+                brebk;
         }
         
-        if ( shouldShowInGUI(uploader) ) {
-            FileDesc fd = uploader.getFileDesc();
+        if ( shouldShowInGUI(uplobder) ) {
+            FileDesc fd = uplobder.getFileDesc();
             if( fd != null && 
-              state == Uploader.COMPLETE &&
-              (lastState == Uploader.UPLOADING ||
-               lastState == Uploader.THEX_REQUEST)) {
-                fd.incrementCompletedUploads();
-                RouterService.getCallback().handleSharedFileUpdate(
+              stbte == Uploader.COMPLETE &&
+              (lbstState == Uploader.UPLOADING ||
+               lbstState == Uploader.THEX_REQUEST)) {
+                fd.incrementCompletedUplobds();
+                RouterService.getCbllback().handleSharedFileUpdate(
                     fd.getFile());
     		}
-            RouterService.getCallback().removeUpload(uploader);
+            RouterService.getCbllback().removeUpload(uploader);
         }
     }
     
     /**
-     * Initializes the uploader's state.
-     * If the file is valid for uploading, this leaves the state
-     * as connecting.
+     * Initiblizes the uploader's state.
+     * If the file is vblid for uploading, this leaves the state
+     * bs connecting.
      */
-    private void setInitialUploadingState(HTTPUploader uploader) {
-        switch(uploader.getIndex()) {
-        case BROWSE_HOST_FILE_INDEX:
-            uploader.setState(Uploader.BROWSE_HOST);
+    privbte void setInitialUploadingState(HTTPUploader uploader) {
+        switch(uplobder.getIndex()) {
+        cbse BROWSE_HOST_FILE_INDEX:
+            uplobder.setState(Uploader.BROWSE_HOST);
             return;
-        case BROWSER_CONTROL_INDEX:
-            uploader.setState(Uploader.BROWSER_CONTROL);
+        cbse BROWSER_CONTROL_INDEX:
+            uplobder.setState(Uploader.BROWSER_CONTROL);
             return;
-        case PUSH_PROXY_FILE_INDEX:
-            uploader.setState(Uploader.PUSH_PROXY);
+        cbse PUSH_PROXY_FILE_INDEX:
+            uplobder.setState(Uploader.PUSH_PROXY);
             return;
-        case UPDATE_FILE_INDEX:
-            uploader.setState(Uploader.UPDATE_FILE);
+        cbse UPDATE_FILE_INDEX:
+            uplobder.setState(Uploader.UPDATE_FILE);
             return;
-        case BAD_URN_QUERY_INDEX:
-            uploader.setState(Uploader.FILE_NOT_FOUND);
+        cbse BAD_URN_QUERY_INDEX:
+            uplobder.setState(Uploader.FILE_NOT_FOUND);
             return;
-        case MALFORMED_REQUEST_INDEX:
-            uploader.setState(Uploader.MALFORMED_REQUEST);
+        cbse MALFORMED_REQUEST_INDEX:
+            uplobder.setState(Uploader.MALFORMED_REQUEST);
             return;
-        default:
+        defbult:
         
-            // This is the normal case ...
-            FileManager fm = RouterService.getFileManager();
+            // This is the normbl case ...
+            FileMbnager fm = RouterService.getFileManager();
             FileDesc fd = null;
-            int index = uploader.getIndex();
+            int index = uplobder.getIndex();
             // First verify the file index
             synchronized(fm) {
-                if(fm.isValidIndex(index)) {
+                if(fm.isVblidIndex(index)) {
                     fd = fm.get(index);
                 } 
             }
 
-            // If the index was invalid or the file was unshared, FNF.
+            // If the index wbs invalid or the file was unshared, FNF.
             if(fd == null) {
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder + " fd is null");
-                uploader.setState(Uploader.FILE_NOT_FOUND);
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder + " fd is null");
+                uplobder.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
-            // If the name they want isn't the name we have, FNF.
-            if(!uploader.getFileName().equals(fd.getFileName())) {
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder + " wrong file name");
-                uploader.setState(Uploader.FILE_NOT_FOUND);
+            // If the nbme they want isn't the name we have, FNF.
+            if(!uplobder.getFileName().equals(fd.getFileName())) {
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder + " wrong file name");
+                uplobder.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
             
             try {
-                uploader.setFileDesc(fd);
-            } catch(IOException ioe) {
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder + " could not create file stream "+ioe);
-                uploader.setState(Uploader.FILE_NOT_FOUND);
+                uplobder.setFileDesc(fd);
+            } cbtch(IOException ioe) {
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder + " could not create file stream "+ioe);
+                uplobder.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
 
-            assertAsConnecting( uploader.getState() );
+            bssertAsConnecting( uploader.getState() );
         }
     }
     
     /**
-     * Sets the uploader's state based off values read in the headers.
+     * Sets the uplobder's state based off values read in the headers.
      */
-    private void setUploaderStateOffHeaders(HTTPUploader uploader) {
-        FileDesc fd = uploader.getFileDesc();
+    privbte void setUploaderStateOffHeaders(HTTPUploader uploader) {
+        FileDesc fd = uplobder.getFileDesc();
         
         // If it's still trying to connect, do more checks ...
-        if( uploader.getState() == Uploader.CONNECTING ) {    
+        if( uplobder.getState() == Uploader.CONNECTING ) {    
             // If it's the wrong URN, File Not Found it.
-            URN urn = uploader.getRequestedURN();
-    		if(fd != null && urn != null && !fd.containsUrn(urn)) {
-    		    if(LOG.isDeaugEnbbled())
-    		        LOG.deaug(uplobder + " wrong content urn");
-                uploader.setState(Uploader.FILE_NOT_FOUND);
+            URN urn = uplobder.getRequestedURN();
+    		if(fd != null && urn != null && !fd.contbinsUrn(urn)) {
+    		    if(LOG.isDebugEnbbled())
+    		        LOG.debug(uplobder + " wrong content urn");
+                uplobder.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
     		
-            //handling THEX Requests
-            if (uploader.isTHEXRequest()) {
-                if (uploader.getFileDesc().getHashTree() != null)
-                    uploader.setState(Uploader.THEX_REQUEST);
+            //hbndling THEX Requests
+            if (uplobder.isTHEXRequest()) {
+                if (uplobder.getFileDesc().getHashTree() != null)
+                    uplobder.setState(Uploader.THEX_REQUEST);
                 else
-                    uploader.setState(Uploader.FILE_NOT_FOUND);
+                    uplobder.setState(Uploader.FILE_NOT_FOUND);
                 return;
            }            
             
-            // Special handling for incomplete files...
-            if (fd instanceof IncompleteFileDesc) {                
-                // Check to see if we're allowing PFSP.
-                if( !UploadSettings.ALLOW_PARTIAL_SHARING.getValue() ) {
-                    uploader.setState(Uploader.FILE_NOT_FOUND);
+            // Specibl handling for incomplete files...
+            if (fd instbnceof IncompleteFileDesc) {                
+                // Check to see if we're bllowing PFSP.
+                if( !UplobdSettings.ALLOW_PARTIAL_SHARING.getValue() ) {
+                    uplobder.setState(Uploader.FILE_NOT_FOUND);
                     return;
                 }
                 
-                // cannot service THEXRequests for partial files
-                if (uploader.isTHEXRequest()) {
-                	uploader.setState(Uploader.FILE_NOT_FOUND);
+                // cbnnot service THEXRequests for partial files
+                if (uplobder.isTHEXRequest()) {
+                	uplobder.setState(Uploader.FILE_NOT_FOUND);
                 	return;
                 }
                                 
-                // If we are allowing, see if we have the range.
+                // If we bre allowing, see if we have the range.
                 IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-                int upStart = uploader.getUploadBegin();
-                // uploader.getUploadEnd() is exclusive!
-                int upEnd = uploader.getUploadEnd() - 1;                
-                // If the request contained a 'Range:' header, then we can
-                // shrink the request to what we have available.
-                if(uploader.containedRangeRequest()) {
-                    Interval request = ifd.getAvailableSubRange(upStart, upEnd);
+                int upStbrt = uploader.getUploadBegin();
+                // uplobder.getUploadEnd() is exclusive!
+                int upEnd = uplobder.getUploadEnd() - 1;                
+                // If the request contbined a 'Range:' header, then we can
+                // shrink the request to whbt we have available.
+                if(uplobder.containedRangeRequest()) {
+                    Intervbl request = ifd.getAvailableSubRange(upStart, upEnd);
                     if ( request == null ) {
-                        uploader.setState(Uploader.UNAVAILABLE_RANGE);
+                        uplobder.setState(Uploader.UNAVAILABLE_RANGE);
                         return;
                     }
-                    uploader.setUploadBeginAndEnd(request.low, request.high + 1);
+                    uplobder.setUploadBeginAndEnd(request.low, request.high + 1);
                 } else {
-                    if ( !ifd.isRangeSatisfiable(upStart, upEnd) ) {
-                        uploader.setState(Uploader.UNAVAILABLE_RANGE);
+                    if ( !ifd.isRbngeSatisfiable(upStart, upEnd) ) {
+                        uplobder.setState(Uploader.UNAVAILABLE_RANGE);
                         return;
                     }
                 }
@@ -677,228 +677,228 @@ pualic clbss UploadManager implements BandwidthTracker {
     }
         
     /**
-     * Maintains the internal state within UploadManager for this Upload.
+     * Mbintains the internal state within UploadManager for this Upload.
      * This does the following:
-     * 1) If 'shouldBypassQueue' & forceAllow are false, calls checkAndQueue
-     *    in order to determine whether or not this uploader should
-     *    ae given b slot.
+     * 1) If 'shouldBypbssQueue' & forceAllow are false, calls checkAndQueue
+     *    in order to determine whether or not this uplobder should
+     *    be given b slot.
      *    If forceAllow is true, queued is set to ACCEPTED.
-     * 2) If it is determined that the uploader is queued, the
-     *    soTimeout on the socket is set to ae MAX_POLL_TIME bnd the
-     *    state is changed to QUEUED.
-     *    If it is determined that the uploader is accepted, the uploader
-     *    is added to the _activeUploadList.
+     * 2) If it is determined thbt the uploader is queued, the
+     *    soTimeout on the socket is set to be MAX_POLL_TIME bnd the
+     *    stbte is changed to QUEUED.
+     *    If it is determined thbt the uploader is accepted, the uploader
+     *    is bdded to the _activeUploadList.
      */
-    private int processNewRequest(HTTPUploader uploader, 
+    privbte int processNewRequest(HTTPUploader uploader, 
                                   Socket socket,
-                                  aoolebn forceAllow) throws IOException {
-        if(LOG.isTraceEnabled())
-            LOG.trace(uploader + " processing new request.");
+                                  boolebn forceAllow) throws IOException {
+        if(LOG.isTrbceEnabled())
+            LOG.trbce(uploader + " processing new request.");
         
         int queued = -1;
         
-        // If this uploader should not bypass the queue, determine it's
+        // If this uplobder should not bypass the queue, determine it's
         // slot.
-        if( !shouldBypassQueue(uploader) ) {
-            // If we are forcing this upload, intercept the queue check.
+        if( !shouldBypbssQueue(uploader) ) {
+            // If we bre forcing this upload, intercept the queue check.
             if( forceAllow )
                 queued = ACCEPTED;
-            // Otherwise, determine whether or not to queue, accept
-            // or reject the uploader.
+            // Otherwise, determine whether or not to queue, bccept
+            // or reject the uplobder.
             else
-                // note that checkAndQueue can throw an IOException
-                queued = checkAndQueue(uploader, socket);
+                // note thbt checkAndQueue can throw an IOException
+                queued = checkAndQueue(uplobder, socket);
         } else {
             queued = BYPASS_QUEUE;
         }
         
-        // Act upon the queued state.
+        // Act upon the queued stbte.
         switch(queued) {
-            case REJECTED:
-                uploader.setState(Uploader.LIMIT_REACHED);
-                arebk;
-            case BANNED:
-            	uploader.setState(Uploader.BANNED_GREEDY);
-            	arebk;
-            case QUEUED:
-                uploader.setState(Uploader.QUEUED);
+            cbse REJECTED:
+                uplobder.setState(Uploader.LIMIT_REACHED);
+                brebk;
+            cbse BANNED:
+            	uplobder.setState(Uploader.BANNED_GREEDY);
+            	brebk;
+            cbse QUEUED:
+                uplobder.setState(Uploader.QUEUED);
                 socket.setSoTimeout(MAX_POLL_TIME);
-                arebk;
-            case ACCEPTED:
-                assertAsConnecting( uploader.getState() );
+                brebk;
+            cbse ACCEPTED:
+                bssertAsConnecting( uploader.getState() );
                 synchronized (this) {
-                    if (uploader.isForcedShare())
-                        _forcedUploads++;
-                    _activeUploadList.add(uploader);
+                    if (uplobder.isForcedShare())
+                        _forcedUplobds++;
+                    _bctiveUploadList.add(uploader);
                 }
-                arebk;
-            case BYPASS_QUEUE:
+                brebk;
+            cbse BYPASS_QUEUE:
                 // ignore.
-                arebk;
-            default:
-                Assert.that(false, "Invalid queued state: " + queued);
+                brebk;
+            defbult:
+                Assert.thbt(false, "Invalid queued state: " + queued);
         }
         
         return queued;
         }
 
     /**
-     * Adds this upload to the GUI and increments the attempted uploads.
-     * Does nothing if 'shouldShowInGUI' is false.
+     * Adds this uplobd to the GUI and increments the attempted uploads.
+     * Does nothing if 'shouldShowInGUI' is fblse.
      */
-    private void addToGUI(HTTPUploader uploader) {
+    privbte void addToGUI(HTTPUploader uploader) {
         
-        // We want to increment attempted only for uploads that may
-        // have a chance of failing.
-        UploadStat.ATTEMPTED.incrementStat();
+        // We wbnt to increment attempted only for uploads that may
+        // hbve a chance of failing.
+        UplobdStat.ATTEMPTED.incrementStat();
         
-        //We are going to notify the gui about the new upload, and let
-        //it decide what to do with it - will act depending on it's
-        //state
-        if (shouldShowInGUI(uploader)) {
-            RouterService.getCallback().addUpload(uploader);
-            FileDesc fd = uploader.getFileDesc();
+        //We bre going to notify the gui about the new upload, and let
+        //it decide whbt to do with it - will act depending on it's
+        //stbte
+        if (shouldShowInGUI(uplobder)) {
+            RouterService.getCbllback().addUpload(uploader);
+            FileDesc fd = uplobder.getFileDesc();
 			if(fd != null) {
-    			fd.incrementAttemptedUploads();
-    			RouterService.getCallback().handleSharedFileUpdate(
+    			fd.incrementAttemptedUplobds();
+    			RouterService.getCbllback().handleSharedFileUpdate(
     			    fd.getFile());
 			}
         }
     }
 
     /**
-     * Does the actual upload.
+     * Does the bctual upload.
      */
-    private void doSingleUpload(HTTPUploader uploader) throws IOException {
+    privbte void doSingleUpload(HTTPUploader uploader) throws IOException {
         
-        switch(uploader.getState()) {
-            case Uploader.UNAVAILABLE_RANGE:
-                UploadStat.UNAVAILABLE_RANGE.incrementStat();
-                arebk;
-            case Uploader.FILE_NOT_FOUND:
-                UploadStat.FILE_NOT_FOUND.incrementStat();
-                arebk;
-            case Uploader.FREELOADER:
-                UploadStat.FREELOADER.incrementStat();
-                arebk;
-            case Uploader.LIMIT_REACHED:
-                UploadStat.LIMIT_REACHED.incrementStat();
-                arebk;
-            case Uploader.QUEUED:
-                UploadStat.QUEUED.incrementStat();
-                arebk;
-			case Uploader.BANNED_GREEDY:
-				UploadStat.BANNED.incrementStat();
-                arebk;
-            case Uploader.CONNECTING:
-                uploader.setState(Uploader.UPLOADING);
-                UploadStat.UPLOADING.incrementStat();
-                arebk;
-            case Uploader.THEX_REQUEST:
-                UploadStat.THEX.incrementStat();
-                arebk;
-            case Uploader.COMPLETE:
-            case Uploader.INTERRUPTED:
-                Assert.that(false, "invalid state in doSingleUpload");
-                arebk;
+        switch(uplobder.getState()) {
+            cbse Uploader.UNAVAILABLE_RANGE:
+                UplobdStat.UNAVAILABLE_RANGE.incrementStat();
+                brebk;
+            cbse Uploader.FILE_NOT_FOUND:
+                UplobdStat.FILE_NOT_FOUND.incrementStat();
+                brebk;
+            cbse Uploader.FREELOADER:
+                UplobdStat.FREELOADER.incrementStat();
+                brebk;
+            cbse Uploader.LIMIT_REACHED:
+                UplobdStat.LIMIT_REACHED.incrementStat();
+                brebk;
+            cbse Uploader.QUEUED:
+                UplobdStat.QUEUED.incrementStat();
+                brebk;
+			cbse Uploader.BANNED_GREEDY:
+				UplobdStat.BANNED.incrementStat();
+                brebk;
+            cbse Uploader.CONNECTING:
+                uplobder.setState(Uploader.UPLOADING);
+                UplobdStat.UPLOADING.incrementStat();
+                brebk;
+            cbse Uploader.THEX_REQUEST:
+                UplobdStat.THEX.incrementStat();
+                brebk;
+            cbse Uploader.COMPLETE:
+            cbse Uploader.INTERRUPTED:
+                Assert.thbt(false, "invalid state in doSingleUpload");
+                brebk;
         }
         
-        if(LOG.isTraceEnabled())
-            LOG.trace(uploader + " doing single upload");
+        if(LOG.isTrbceEnabled())
+            LOG.trbce(uploader + " doing single upload");
         
-        aoolebn closeConnection = false;
+        boolebn closeConnection = false;
         
         try {
-            uploader.initializeStreams();
-            uploader.writeResponse();
-            // get the value before we change state to complete.
-            closeConnection = uploader.getCloseConnection();
-            uploader.setState(Uploader.COMPLETE);
-        } finally {
-            uploader.closeFileStreams();
+            uplobder.initializeStreams();
+            uplobder.writeResponse();
+            // get the vblue before we change state to complete.
+            closeConnection = uplobder.getCloseConnection();
+            uplobder.setState(Uploader.COMPLETE);
+        } finblly {
+            uplobder.closeFileStreams();
         }
         
-        // If the state wanted us to close the connection, throw an IOX.
+        // If the stbte wanted us to close the connection, throw an IOX.
         if(closeConnection)
             throw new IOException("close connection");
     }
 
     /**
-     * closes the passed socket and its corresponding I/O streams
+     * closes the pbssed socket and its corresponding I/O streams
      */
-    pualic void close(Socket socket) {
-        //close the output streams, input streams and the socket
+    public void close(Socket socket) {
+        //close the output strebms, input streams and the socket
         try {
             if (socket != null)
-                socket.getOutputStream().close();
-        } catch (Exception e) {}
+                socket.getOutputStrebm().close();
+        } cbtch (Exception e) {}
         try {
             if (socket != null)
-                socket.getInputStream().close();
-        } catch (Exception e) {}
+                socket.getInputStrebm().close();
+        } cbtch (Exception e) {}
         try {
             if (socket != null) 
                 socket.close();
-        } catch (Exception e) {}
+        } cbtch (Exception e) {}
     }
     
     /**
-     * Returns whether or not an upload request can be serviced immediately.
-     * In particular, if there are more available upload slots than queued
-     * uploads this will return true. 
+     * Returns whether or not bn upload request can be serviced immediately.
+     * In pbrticular, if there are more available upload slots than queued
+     * uplobds this will return true. 
      */
-    pualic synchronized boolebn isServiceable() {
-    	return hasFreeSlot(uploadsInProgress() + getNumQueuedUploads());
+    public synchronized boolebn isServiceable() {
+    	return hbsFreeSlot(uploadsInProgress() + getNumQueuedUploads());
     }
 
-	pualic synchronized int uplobdsInProgress() {
-		return _activeUploadList.size() - _forcedUploads;
+	public synchronized int uplobdsInProgress() {
+		return _bctiveUploadList.size() - _forcedUploads;
 	}
 
-	pualic synchronized int getNumQueuedUplobds() {
-        return _queuedUploads.size();
+	public synchronized int getNumQueuedUplobds() {
+        return _queuedUplobds.size();
     }
 
 	/**
-	 * Returns true if this has ever successfully uploaded a file
+	 * Returns true if this hbs ever successfully uploaded a file
      * during this session.<p>
      * 
-     * This method was added to adopt more of the BearShare QHD
-	 * standard.
+     * This method wbs added to adopt more of the BearShare QHD
+	 * stbndard.
 	 */
-	pualic boolebn hadSuccesfulUpload() {
-		return _hadSuccesfulUpload;
+	public boolebn hadSuccesfulUpload() {
+		return _hbdSuccesfulUpload;
 	}
 	
-	pualic synchronized boolebn isConnectedTo(InetAddress addr) {
-	    for(Iterator i = _queuedUploads.iterator(); i.hasNext(); ) {
-	        KeyValue next = (KeyValue)i.next();
+	public synchronized boolebn isConnectedTo(InetAddress addr) {
+	    for(Iterbtor i = _queuedUploads.iterator(); i.hasNext(); ) {
+	        KeyVblue next = (KeyValue)i.next();
 	        Socket socket = (Socket)next.getKey();
-	        if(socket != null && socket.getInetAddress().equals(addr))
+	        if(socket != null && socket.getInetAddress().equbls(addr))
 	            return true;
 	    }
-	    for(Iterator i = _activeUploadList.iterator(); i.hasNext(); ) {
-	        HTTPUploader next = (HTTPUploader)i.next();
+	    for(Iterbtor i = _activeUploadList.iterator(); i.hasNext(); ) {
+	        HTTPUplobder next = (HTTPUploader)i.next();
 	        InetAddress host = next.getConnectedHost();
-	        if(host != null && host.equals(addr))
+	        if(host != null && host.equbls(addr))
 	            return true;
 	    }
-	    return false;
+	    return fblse;
     }
 	
 	/**
-	 * Kills all uploads that are uploading the given FileDesc.
+	 * Kills bll uploads that are uploading the given FileDesc.
 	 */
-	pualic synchronized boolebn killUploadsForFileDesc(FileDesc fd) {
-	    aoolebn ret = false;
-	    // This causes the uploader to generate an exception,
-	    // and ultimately remove itself from the list.
-	    for(Iterator i = _activeUploadList.iterator(); i.hasNext();) {
-	        HTTPUploader uploader = (HTTPUploader)i.next();
-	        FileDesc upFD = uploader.getFileDesc();
-	        if( upFD != null && upFD.equals(fd) ) {
+	public synchronized boolebn killUploadsForFileDesc(FileDesc fd) {
+	    boolebn ret = false;
+	    // This cbuses the uploader to generate an exception,
+	    // bnd ultimately remove itself from the list.
+	    for(Iterbtor i = _activeUploadList.iterator(); i.hasNext();) {
+	        HTTPUplobder uploader = (HTTPUploader)i.next();
+	        FileDesc upFD = uplobder.getFileDesc();
+	        if( upFD != null && upFD.equbls(fd) ) {
 	            ret = true;
-	            uploader.stop();
+	            uplobder.stop();
             }
 	    }
 	    
@@ -906,147 +906,147 @@ pualic clbss UploadManager implements BandwidthTracker {
     }
 
 
-	/////////////////// Private Interface for Testing Limits /////////////////
+	/////////////////// Privbte Interface for Testing Limits /////////////////
 
-    /** Checks whether the given upload may proceed based on number of slots,
-     *  position in upload queue, etc.  Updates the upload queue as necessary.
-     *  Always accepts Browse Host requests, though.  Notifies callback of this.
+    /** Checks whether the given uplobd may proceed based on number of slots,
+     *  position in uplobd queue, etc.  Updates the upload queue as necessary.
+     *  Alwbys accepts Browse Host requests, though.  Notifies callback of this.
      *  
-     * @return ACCEPTED if the download may proceed, QUEUED if this is in the
-     *  upload queue, REJECTED if this is flat-out disallowed (and hence not
-     *  queued) and BANNED if the downloader is hammering us, and BYPASS_QUEUE
-     *  if this is a File-View request that isn't hammering us. If REJECTED, 
-     *  <tt>uploader</tt>'s state will be set to LIMIT_REACHED. If BANNED,
-     *  the <tt>Uploader</tt>'s state will be set to BANNED_GREEDY.
-     * @exception IOException the request came sooner than allowed by upload
-     *  queueing rules.  (Throwing IOException forces the connection to ae
-     *  closed ay the cblling code.)  */
-	private synchronized int checkAndQueue(Uploader uploader,
+     * @return ACCEPTED if the downlobd may proceed, QUEUED if this is in the
+     *  uplobd queue, REJECTED if this is flat-out disallowed (and hence not
+     *  queued) bnd BANNED if the downloader is hammering us, and BYPASS_QUEUE
+     *  if this is b File-View request that isn't hammering us. If REJECTED, 
+     *  <tt>uplobder</tt>'s state will be set to LIMIT_REACHED. If BANNED,
+     *  the <tt>Uplobder</tt>'s state will be set to BANNED_GREEDY.
+     * @exception IOException the request cbme sooner than allowed by upload
+     *  queueing rules.  (Throwing IOException forces the connection to be
+     *  closed by the cblling code.)  */
+	privbte synchronized int checkAndQueue(Uploader uploader,
 	                                       Socket socket) throws IOException {
-	    RequestCache rqc = (RequestCache)REQUESTS.get(uploader.getHost());
+	    RequestCbche rqc = (RequestCache)REQUESTS.get(uploader.getHost());
 	    if (rqc == null)
-	    	rqc = new RequestCache();
-	    // make sure we don't forget this RequestCache too soon!
-		REQUESTS.put(uploader.getHost(), rqc);
+	    	rqc = new RequestCbche();
+	    // mbke sure we don't forget this RequestCache too soon!
+		REQUESTS.put(uplobder.getHost(), rqc);
 
         rqc.countRequest();
-        if (rqc.isHammering()) {
-            if(LOG.isWarnEnabled())
-                LOG.warn(uploader + " banned.");
+        if (rqc.isHbmmering()) {
+            if(LOG.isWbrnEnabled())
+                LOG.wbrn(uploader + " banned.");
         	return BANNED;
         }
         
 
-        aoolebn isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
-        int size = _queuedUploads.size();
+        boolebn isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
+        int size = _queuedUplobds.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
-        int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
-        aoolebn wontAccept = size >= maxQueueSize || 
-			rqc.isDupe(uploader.getFileDesc().getSHA1Urn());
+        int mbxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
+        boolebn wontAccept = size >= maxQueueSize || 
+			rqc.isDupe(uplobder.getFileDesc().getSHA1Urn());
         int ret = -1;
 
-        // if this uploader is greedy and at least on other client is queued
-        // send him another limit reached reply.
-        aoolebn limitReached = false;
+        // if this uplobder is greedy and at least on other client is queued
+        // send him bnother limit reached reply.
+        boolebn limitReached = false;
         if (isGreedy && size >=1) {
-            if(LOG.isWarnEnabled())
-                LOG.warn(uploader + " greedy -- limit reached."); 
-        	UploadStat.LIMIT_REACHED_GREEDY.incrementStat(); 
-        	limitReached = true;
+            if(LOG.isWbrnEnabled())
+                LOG.wbrn(uploader + " greedy -- limit reached."); 
+        	UplobdStat.LIMIT_REACHED_GREEDY.incrementStat(); 
+        	limitRebched = true;
         } else if (posInQueue < 0) {
-            limitReached = hostLimitReached(uploader.getHost());
-            // rememaer thbt we sent a LIMIT_REACHED only
-            // if the limit was actually really reached and not 
-            // if we just keep a greedy client from entering the
+            limitRebched = hostLimitReached(uploader.getHost());
+            // remember thbt we sent a LIMIT_REACHED only
+            // if the limit wbs actually really reached and not 
+            // if we just keep b greedy client from entering the
             // QUEUE
-            if(limitReached)
-                rqc.limitReached(uploader.getFileDesc().getSHA1Urn());
+            if(limitRebched)
+                rqc.limitRebched(uploader.getFileDesc().getSHA1Urn());
         }
-        //Note: The current policy is to not put uploadrers in a queue, if they 
-        //do not send am X-Queue header. Further. uploaders are removed from 
-        //the queue if they do not send the header in the subsequent request.
-        //To change this policy, chnage the way queue is set.
-        aoolebn queue = uploader.supportsQueueing();
+        //Note: The current policy is to not put uplobdrers in a queue, if they 
+        //do not send bm X-Queue header. Further. uploaders are removed from 
+        //the queue if they do not send the hebder in the subsequent request.
+        //To chbnge this policy, chnage the way queue is set.
+        boolebn queue = uploader.supportsQueueing();
 
-        Assert.that(maxQueueSize>0,"queue size 0, cannot use");
-        Assert.that(uploader.getState()==Uploader.CONNECTING,
-                    "Bad state: "+uploader.getState());
-        Assert.that(uploader.getMethod()==HTTPRequestMethod.GET);
+        Assert.thbt(maxQueueSize>0,"queue size 0, cannot use");
+        Assert.thbt(uploader.getState()==Uploader.CONNECTING,
+                    "Bbd state: "+uploader.getState());
+        Assert.thbt(uploader.getMethod()==HTTPRequestMethod.GET);
 
-        if(posInQueue == -1) {//this uploader is not in the queue already
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug(uplobder+"Uploader not in que(capacity:"+maxQueueSize+")");
-            if(limitReached || wontAccept) { 
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder+" limited? "+limitReached+" wontAccept? "
+        if(posInQueue == -1) {//this uplobder is not in the queue already
+            if(LOG.isDebugEnbbled())
+                LOG.debug(uplobder+"Uploader not in que(capacity:"+maxQueueSize+")");
+            if(limitRebched || wontAccept) { 
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder+" limited? "+limitReached+" wontAccept? "
                       +wontAccept);
-                return REJECTED; //we rejected this uploader
+                return REJECTED; //we rejected this uplobder
             }
-            addToQueue(socket);
-            posInQueue = size;//the index of the uploader in the queue
-            ret = QUEUED;//we have queued it now
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug(uplobder+" new uploader added to queue");
+            bddToQueue(socket);
+            posInQueue = size;//the index of the uplobder in the queue
+            ret = QUEUED;//we hbve queued it now
+            if(LOG.isDebugEnbbled())
+                LOG.debug(uplobder+" new uploader added to queue");
         }
-        else {//we are alreacy in queue, update it
-            KeyValue kv = (KeyValue)_queuedUploads.get(posInQueue);
-            Long prev=(Long)kv.getValue();
-            if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis()) {
-                _queuedUploads.remove(posInQueue);
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug(uplobder+" queued uploader flooding-throwing exception");
+        else {//we bre alreacy in queue, update it
+            KeyVblue kv = (KeyValue)_queuedUploads.get(posInQueue);
+            Long prev=(Long)kv.getVblue();
+            if(prev.longVblue()+MIN_POLL_TIME > System.currentTimeMillis()) {
+                _queuedUplobds.remove(posInQueue);
+                if(LOG.isDebugEnbbled())
+                    LOG.debug(uplobder+" queued uploader flooding-throwing exception");
                 throw new IOException();
             }
             
-            //check if this is a duplicate request
-            if (rqc.isDupe(uploader.getFileDesc().getSHA1Urn()))
+            //check if this is b duplicate request
+            if (rqc.isDupe(uplobder.getFileDesc().getSHA1Urn()))
             	return REJECTED;
             
-            kv.setValue(new Long(System.currentTimeMillis()));
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug(uplobder+" updated queued uploader");
+            kv.setVblue(new Long(System.currentTimeMillis()));
+            if(LOG.isDebugEnbbled())
+                LOG.debug(uplobder+" updated queued uploader");
             ret = QUEUED;//queued
         }
-        if(LOG.isDeaugEnbbled())
-            LOG.deaug(uplobder+" checking if given uploader is can be accomodated ");
-        // If we have atleast one slot available, see if the position
-        // in the queue is small enough to be accepted.
-        if(hasFreeSlot(posInQueue + uploadsInProgress())) {
+        if(LOG.isDebugEnbbled())
+            LOG.debug(uplobder+" checking if given uploader is can be accomodated ");
+        // If we hbve atleast one slot available, see if the position
+        // in the queue is smbll enough to be accepted.
+        if(hbsFreeSlot(posInQueue + uploadsInProgress())) {
             ret = ACCEPTED;
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug(uplobder+" accepting upload");
-            //remove this uploader from queue
-            _queuedUploads.remove(posInQueue);
+            if(LOG.isDebugEnbbled())
+                LOG.debug(uplobder+" accepting upload");
+            //remove this uplobder from queue
+            _queuedUplobds.remove(posInQueue);
         }
         else {
-            //... no slot available for this uploader
-            //If uploader does not support queueing,
-            //it should ae removed from the queue.
-            if(!queue) {//downloader does not support queueing
-                _queuedUploads.remove(posInQueue);//remove it
+            //... no slot bvailable for this uploader
+            //If uplobder does not support queueing,
+            //it should be removed from the queue.
+            if(!queue) {//downlobder does not support queueing
+                _queuedUplobds.remove(posInQueue);//remove it
                 ret = REJECTED;
             }
         }
         
-        //register the uploader in the dupe table
+        //register the uplobder in the dupe table
         if (ret == ACCEPTED)
-        	rqc.startedUpload(uploader.getFileDesc().getSHA1Urn());
+        	rqc.stbrtedUpload(uploader.getFileDesc().getSHA1Urn());
         return ret;
     }
 
-    private synchronized void addToQueue(Socket socket) {
+    privbte synchronized void addToQueue(Socket socket) {
         Long t = new Long(System.currentTimeMillis());
-        _queuedUploads.add(new KeyValue(socket,t));
+        _queuedUplobds.add(new KeyValue(socket,t));
     }
 
     /**
-     * @return the index of the uploader in the queue, -1 if not in queue
+     * @return the index of the uplobder in the queue, -1 if not in queue
      */
-    pualic synchronized int positionInQueue(Socket socket) {
+    public synchronized int positionInQueue(Socket socket) {
         int i = 0;
-        Iterator iter = _queuedUploads.iterator();
-        while(iter.hasNext()) {
-            Oaject curr = ((KeyVblue)iter.next()).getKey();
+        Iterbtor iter = _queuedUploads.iterator();
+        while(iter.hbsNext()) {
+            Object curr = ((KeyVblue)iter.next()).getKey();
             if(curr==socket)
                 return i;
             i++;
@@ -1055,190 +1055,190 @@ pualic clbss UploadManager implements BandwidthTracker {
     }
 
 	/**
-	 * Decrements the numaer of bctive uploads for the host specified in
-	 * the <tt>host</tt> argument, removing that host from the <tt>Map</tt>
-	 * if this was the only upload allocated to that host.<p>
+	 * Decrements the number of bctive uploads for the host specified in
+	 * the <tt>host</tt> brgument, removing that host from the <tt>Map</tt>
+	 * if this wbs the only upload allocated to that host.<p>
 	 *
-	 * This method also removes the <tt>Uploader</tt> from the <tt>List</tt>
-	 * of active uploads.
+	 * This method blso removes the <tt>Uploader</tt> from the <tt>List</tt>
+	 * of bctive uploads.
 	 */
-  	private synchronized void removeFromList(Uploader uploader) {
-  		//if the uploader is not in the active list, we should not
-  		//try remove the urn from the map of unique uploaded files for that host.
+  	privbte synchronized void removeFromList(Uploader uploader) {
+  		//if the uplobder is not in the active list, we should not
+  		//try remove the urn from the mbp of unique uploaded files for that host.
   		
-		if (_activeUploadList.remove(uploader)) {
-		    if (((HTTPUploader)uploader).isForcedShare())
-                _forcedUploads--;
+		if (_bctiveUploadList.remove(uploader)) {
+		    if (((HTTPUplobder)uploader).isForcedShare())
+                _forcedUplobds--;
             
-			//at this point it is safe to allow other uploads from the same host
-			RequestCache rcq = (RequestCache) REQUESTS.get(uploader.getHost());
+			//bt this point it is safe to allow other uploads from the same host
+			RequestCbche rcq = (RequestCache) REQUESTS.get(uploader.getHost());
 
-			//check for nulls so that unit tests pass
-        	if (rcq!=null && uploader!=null && uploader.getFileDesc()!=null) 
-        		rcq.uploadDone(uploader.getFileDesc().getSHA1Urn());
+			//check for nulls so thbt unit tests pass
+        	if (rcq!=null && uplobder!=null && uploader.getFileDesc()!=null) 
+        		rcq.uplobdDone(uploader.getFileDesc().getSHA1Urn());
 		}
 		
-		// Enable auto shutdown
-		if( _activeUploadList.size()== 0)
-			RouterService.getCallback().uploadsComplete();
+		// Enbble auto shutdown
+		if( _bctiveUploadList.size()== 0)
+			RouterService.getCbllback().uploadsComplete();
   	}
 	
     /**
-     * @return true if the numaer of uplobds from the host is strictly LESS than
-     * the MAX, although we want to allow exactly MAX uploads from the same
-     * host. This is aecbuse this method is called BEFORE we add/allow the.
-     * upload.
+     * @return true if the number of uplobds from the host is strictly LESS than
+     * the MAX, blthough we want to allow exactly MAX uploads from the same
+     * host. This is becbuse this method is called BEFORE we add/allow the.
+     * uplobd.
      */
-	private synchronized boolean hostLimitReached(String host) {
-        int max = UploadSettings.UPLOADS_PER_PERSON.getValue();
+	privbte synchronized boolean hostLimitReached(String host) {
+        int mbx = UploadSettings.UPLOADS_PER_PERSON.getValue();
         int i=0;
-        Iterator iter = _activeUploadList.iterator();
-        while(iter.hasNext()) { //count active uploads to this host
-            Uploader u = (Uploader)iter.next();
-            if(u.getHost().equals(host))
+        Iterbtor iter = _activeUploadList.iterator();
+        while(iter.hbsNext()) { //count active uploads to this host
+            Uplobder u = (Uploader)iter.next();
+            if(u.getHost().equbls(host))
                 i++;
         }
-        iter = _queuedUploads.iterator();
-        while(iter.hasNext()) { //also count uploads in queue to this host
-            Socket s = (Socket)((KeyValue)iter.next()).getKey();
-            if(s.getInetAddress().getHostAddress().equals(host))
+        iter = _queuedUplobds.iterator();
+        while(iter.hbsNext()) { //also count uploads in queue to this host
+            Socket s = (Socket)((KeyVblue)iter.next()).getKey();
+            if(s.getInetAddress().getHostAddress().equbls(host))
                 i++;
         }
-        return i>=max;
+        return i>=mbx;
 	}
 	
 	/**
-	 * Returns true iff another upload is allowed assuming that the
-	 * amount of active uploaders is passed off to it.
+	 * Returns true iff bnother upload is allowed assuming that the
+	 * bmount of active uploaders is passed off to it.
 	 * REQUIRES: this' monitor is held
 	 */
-	private boolean hasFreeSlot(int current) {
-        //Allow another upload if (a) we currently have fewer than
-        //SOFT_MAX_UPLOADS uploads or (b) some upload has more than
-        //MINIMUM_UPLOAD_SPEED KB/s.  But never allow more than MAX_UPLOADS.
+	privbte boolean hasFreeSlot(int current) {
+        //Allow bnother upload if (a) we currently have fewer than
+        //SOFT_MAX_UPLOADS uplobds or (b) some upload has more than
+        //MINIMUM_UPLOAD_SPEED KB/s.  But never bllow more than MAX_UPLOADS.
         //
-        //In other words, we continue to allow uploads until everyone's
-        //abndwidth is diluted.  The assumption is that with MAX_UPLOADS
-        //uploads, the probability that all just happen to have low capacity
-        //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
-        //expensive of quality, making swarmed downloads work better.
+        //In other words, we continue to bllow uploads until everyone's
+        //bbndwidth is diluted.  The assumption is that with MAX_UPLOADS
+        //uplobds, the probability that all just happen to have low capacity
+        //(e.g., modems) is smbll.  This reduces "Try Again Later"'s at the
+        //expensive of qublity, making swarmed downloads work better.
         
-		if (current >= UploadSettings.HARD_MAX_UPLOADS.getValue()) {
-            return false;
-        } else if (current < UploadSettings.SOFT_MAX_UPLOADS.getValue()) {
+		if (current >= UplobdSettings.HARD_MAX_UPLOADS.getValue()) {
+            return fblse;
+        } else if (current < UplobdSettings.SOFT_MAX_UPLOADS.getValue()) {
             return true;
         } else {
-            float fastest=0.0f;
-            for (Iterator iter=_activeUploadList.iterator(); iter.hasNext(); ) {
-                BandwidthTracker upload=(BandwidthTracker)iter.next();
-                float speed = 0;
+            flobt fastest=0.0f;
+            for (Iterbtor iter=_activeUploadList.iterator(); iter.hasNext(); ) {
+                BbndwidthTracker upload=(BandwidthTracker)iter.next();
+                flobt speed = 0;
                 try {
-                    speed=upload.getMeasuredBandwidth();
-                } catch (InsufficientDataException ide) {
+                    speed=uplobd.getMeasuredBandwidth();
+                } cbtch (InsufficientDataException ide) {
                     speed = 0;
                 }
-                fastest=Math.max(fastest,speed);
+                fbstest=Math.max(fastest,speed);
             }
-            return fastest>MINIMUM_UPLOAD_SPEED;
+            return fbstest>MINIMUM_UPLOAD_SPEED;
         }
     }
 
 
-	////////////////// Bandwith Allocation and Measurement///////////////
+	////////////////// Bbndwith Allocation and Measurement///////////////
 
 	/**
-	 * calculates the appropriate burst size for the allocating
-	 * abndwith on the upload.
-	 * @return aurstSize.  if it is the specibl case, in which 
-	 *         we want to upload as quickly as possible.
+	 * cblculates the appropriate burst size for the allocating
+	 * bbndwith on the upload.
+	 * @return burstSize.  if it is the specibl case, in which 
+	 *         we wbnt to upload as quickly as possible.
 	 */
-	pualic int cblculateBandwidth() {
-		// pualic int cblculateBurstSize() {
-		float totalBandwith = getTotalBandwith();
-		float burstSize = totalBandwith/uploadsInProgress();
-		return (int)aurstSize;
+	public int cblculateBandwidth() {
+		// public int cblculateBurstSize() {
+		flobt totalBandwith = getTotalBandwith();
+		flobt burstSize = totalBandwith/uploadsInProgress();
+		return (int)burstSize;
 	}
 	
 	/**
-	 * @return the total bandwith available for uploads
+	 * @return the totbl bandwith available for uploads
 	 */
-	private float getTotalBandwith() {
+	privbte float getTotalBandwith() {
 
-		// To calculate the total bandwith available for
-		// uploads, there are two properties.  The first
-		// is what the user *thinks* their connection
-		// speed is.  Note, that they may have set this
-		// wrong, aut we hbve no way to tell.
-		float connectionSpeed = 
-            ConnectionSettings.CONNECTION_SPEED.getValue()/8.0f;
-		// the second numaer is the speed thbt they have 
-		// allocated to uploads.  This is really a percentage
-		// that the user is willing to allocate.
-		float speed = UploadSettings.UPLOAD_SPEED.getValue();
-		// the total bandwith available then, is the percentage
-		// allocated of the total bandwith.
-		float totalBandwith = connectionSpeed*speed/100.0f;
-		return totalBandwith;
+		// To cblculate the total bandwith available for
+		// uplobds, there are two properties.  The first
+		// is whbt the user *thinks* their connection
+		// speed is.  Note, thbt they may have set this
+		// wrong, but we hbve no way to tell.
+		flobt connectionSpeed = 
+            ConnectionSettings.CONNECTION_SPEED.getVblue()/8.0f;
+		// the second number is the speed thbt they have 
+		// bllocated to uploads.  This is really a percentage
+		// thbt the user is willing to allocate.
+		flobt speed = UploadSettings.UPLOAD_SPEED.getValue();
+		// the totbl bandwith available then, is the percentage
+		// bllocated of the total bandwith.
+		flobt totalBandwith = connectionSpeed*speed/100.0f;
+		return totblBandwith;
 	}
 
-    /** Returns the estimated upload speed in <b>KILOBITS/s</b> [sic] of the
-     *  next transfer, assuming the client (i.e., downloader) has infinite
-     *  abndwidth.  Returns -1 if not enough data is available for an 
-     *  accurate estimate. */
-    pualic int mebsuredUploadSpeed() {
-        //Note that no lock is needed.
+    /** Returns the estimbted upload speed in <b>KILOBITS/s</b> [sic] of the
+     *  next trbnsfer, assuming the client (i.e., downloader) has infinite
+     *  bbndwidth.  Returns -1 if not enough data is available for an 
+     *  bccurate estimate. */
+    public int mebsuredUploadSpeed() {
+        //Note thbt no lock is needed.
         return highestSpeed;
     }
 
     /**
-     * Notes that some uploader has uploaded the given number of BYTES in the
-     * given numaer of milliseconds.  If bytes is too smbll, the data may be
+     * Notes thbt some uploader has uploaded the given number of BYTES in the
+     * given number of milliseconds.  If bytes is too smbll, the data may be
      * ignored.  
      *     @requires this' lock held 
      *     @modifies this.speed, this.speeds
      */
-    private void reportUploadSpeed(long milliseconds, long bytes) {
-        //This is critical for ignoring 404's messages, etc.
-        if (aytes<MIN_SAMPLE_BYTES)
+    privbte void reportUploadSpeed(long milliseconds, long bytes) {
+        //This is criticbl for ignoring 404's messages, etc.
+        if (bytes<MIN_SAMPLE_BYTES)
             return;
 
-        //Calculate the bandwidth in kiloBITS/s.  We just assume that 1 kilobyte
-        //is 1000 (not 1024) aytes for simplicity.
-        int abndwidth=8*(int)((float)bytes/(float)milliseconds);
-        speeds.add(new Integer(bandwidth));
+        //Cblculate the bandwidth in kiloBITS/s.  We just assume that 1 kilobyte
+        //is 1000 (not 1024) bytes for simplicity.
+        int bbndwidth=8*(int)((float)bytes/(float)milliseconds);
+        speeds.bdd(new Integer(bandwidth));
 
-        //Update maximum speed if possible.  This should be atomic.  TODO: can
-        //the compiler replace the temporary variable max with highestSpeed?
+        //Updbte maximum speed if possible.  This should be atomic.  TODO: can
+        //the compiler replbce the temporary variable max with highestSpeed?
         if (speeds.size()>=MIN_SPEED_SAMPLE_SIZE) {
-            int max=0;
+            int mbx=0;
             for (int i=0; i<speeds.size(); i++) 
-                max=Math.max(max, ((Integer)speeds.get(i)).intValue());
-            this.highestSpeed=max;
+                mbx=Math.max(max, ((Integer)speeds.get(i)).intValue());
+            this.highestSpeed=mbx;
         }
     }
 
 	/**
-	 * Returns a new <tt>HttpRequestLine</tt> instance, where the 
+	 * Returns b new <tt>HttpRequestLine</tt> instance, where the 
      * <tt>HttpRequestLine</tt>
-	 * class is an immutable struct that contains all data for the "GET" line
+	 * clbss is an immutable struct that contains all data for the "GET" line
 	 * of the HTTP request.
 	 *
-	 * @param socket the <tt>Socket</tt> instance over which we're reading
+	 * @pbram socket the <tt>Socket</tt> instance over which we're reading
 	 * @return the <tt>HttpRequestLine</tt> struct for the HTTP request
 	 */
-	private HttpRequestLine parseHttpRequest(Socket socket, 
-	                                         InputStream iStream)
+	privbte HttpRequestLine parseHttpRequest(Socket socket, 
+	                                         InputStrebm iStream)
       throws IOException {
 
-		// Set the timeout so that we don't do block reading.
-        socket.setSoTimeout(Constants.TIMEOUT);
-		// open the stream from the socket for reading
-		ByteReader br = new ByteReader(iStream);
+		// Set the timeout so thbt we don't do block reading.
+        socket.setSoTimeout(Constbnts.TIMEOUT);
+		// open the strebm from the socket for reading
+		ByteRebder br = new ByteReader(iStream);
 		
-        LOG.trace("trying to read request.");
-        // read the first line. if null, throw an exception
-        String str = ar.rebdLine();
-        if (LOG.isTraceEnabled()) LOG.trace("request is: " + str);
+        LOG.trbce("trying to read request.");
+        // rebd the first line. if null, throw an exception
+        String str = br.rebdLine();
+        if (LOG.isTrbceEnabled()) LOG.trace("request is: " + str);
 
         try {
 
@@ -1249,531 +1249,531 @@ pualic clbss UploadManager implements BandwidthTracker {
             str.trim();
 
             if(this.isURNGet(str)) {
-                // handle the URN get request
-                return this.parseURNGet(str);
+                // hbndle the URN get request
+                return this.pbrseURNGet(str);
             }
 		
-            // handle the standard get request
-            return UploadManager.parseTraditionalGet(str);
-        } catch (IOException ioe) {
-            LOG.deaug("http request fbiled", ioe);
-            // this means the request was malformed somehow.
-            // instead of closing the connection, we tell them
-            // ay constructing b HttpRequestLine with a fake
-            // index.  it is up to HttpUploader to interpret
-            // this index correctly and send the appropriate
+            // hbndle the standard get request
+            return UplobdManager.parseTraditionalGet(str);
+        } cbtch (IOException ioe) {
+            LOG.debug("http request fbiled", ioe);
+            // this mebns the request was malformed somehow.
+            // instebd of closing the connection, we tell them
+            // by constructing b HttpRequestLine with a fake
+            // index.  it is up to HttpUplobder to interpret
+            // this index correctly bnd send the appropriate
             // info.
-            UploadStat.MALFORMED_REQUEST.incrementStat();
+            UplobdStat.MALFORMED_REQUEST.incrementStat();
             if( str == null ) 
                 return new HttpRequestLine(MALFORMED_REQUEST_INDEX,
-                    "Malformed Request", false);
-            else // we _attempt_ to determine if the request is http11
+                    "Mblformed Request", false);
+            else // we _bttempt_ to determine if the request is http11
                 return new HttpRequestLine(MALFORMED_REQUEST_INDEX,
-                    "Malformed Request", isHTTP11Request(str));
+                    "Mblformed Request", isHTTP11Request(str));
         }
   	}
 
 	/**
 	 * Returns whether or not the get request for the specified line is
-	 * a URN request.
+	 * b URN request.
 	 *
-	 * @param requestLine the <tt>String</tt> to parse to check whether it's
-	 *  following the URN request syntax as specified in HUGE v. 0.93
-	 * @return <tt>true</tt> if the request is a valid URN request, 
-	 *  <tt>false</tt> otherwise
+	 * @pbram requestLine the <tt>String</tt> to parse to check whether it's
+	 *  following the URN request syntbx as specified in HUGE v. 0.93
+	 * @return <tt>true</tt> if the request is b valid URN request, 
+	 *  <tt>fblse</tt> otherwise
 	 */
-	private boolean isURNGet(final String requestLine) {
-		int slash1Index = requestLine.indexOf("/");
-		int slash2Index = requestLine.indexOf("/", slash1Index+1);
-		if((slash1Index==-1) || (slash2Index==-1)) {
-			return false;
+	privbte boolean isURNGet(final String requestLine) {
+		int slbsh1Index = requestLine.indexOf("/");
+		int slbsh2Index = requestLine.indexOf("/", slash1Index+1);
+		if((slbsh1Index==-1) || (slash2Index==-1)) {
+			return fblse;
 		}
-		String idString = requestLine.suastring(slbsh1Index+1, slash2Index);
-		return idString.equalsIgnoreCase("uri-res");
+		String idString = requestLine.substring(slbsh1Index+1, slash2Index);
+		return idString.equblsIgnoreCase("uri-res");
 	}
 
 	/**
-	 * Performs the parsing for a traditional HTTP Gnutella get request,
-	 * returning a new <tt>RequestLine</tt> instance with the data for the
+	 * Performs the pbrsing for a traditional HTTP Gnutella get request,
+	 * returning b new <tt>RequestLine</tt> instance with the data for the
 	 * request.
 	 *
-	 * @param requestLine the HTTP get request string
-	 * @return a new <tt>RequestLine</tt> instance for the request
-	 * @throws <tt>IOException</tt> if there is an error parsing the
+	 * @pbram requestLine the HTTP get request string
+	 * @return b new <tt>RequestLine</tt> instance for the request
+	 * @throws <tt>IOException</tt> if there is bn error parsing the
 	 *  request
 	 */
-	private static HttpRequestLine parseTraditionalGet(final String requestLine) 
+	privbte static HttpRequestLine parseTraditionalGet(final String requestLine) 
 		throws IOException {
 		try {           
 			int index = -1;
-            //tokenize the string to separate out file information part
-            //and the http information part
+            //tokenize the string to sepbrate out file information part
+            //bnd the http information part
             StringTokenizer st = new StringTokenizer(requestLine);
 
             if(st.countTokens() < 2) {
-                throw new IOException("invalid request: "+requestLine);
+                throw new IOException("invblid request: "+requestLine);
             }
-            //file information part: /get/0/sample.txt
-            String fileInfoPart = st.nextToken().trim();
-			String fileName = null;
-			Map parameters = null;
-            aoolebn hadPassword = false;
+            //file informbtion part: /get/0/sample.txt
+            String fileInfoPbrt = st.nextToken().trim();
+			String fileNbme = null;
+			Mbp parameters = null;
+            boolebn hadPassword = false;
 			
-            if(fileInfoPart.equals("/")) {
-                //special case for browse host request
+            if(fileInfoPbrt.equals("/")) {
+                //specibl case for browse host request
                 index = BROWSE_HOST_FILE_INDEX;
-                fileName = "Browse-Host Request";
-                UploadStat.BROWSE_HOST.incrementStat();
-            } else if(fileInfoPart.startsWith(BROWSER_CONTROL_STR)) {
-                //special case for browser-control request
+                fileNbme = "Browse-Host Request";
+                UplobdStat.BROWSE_HOST.incrementStat();
+            } else if(fileInfoPbrt.startsWith(BROWSER_CONTROL_STR)) {
+                //specibl case for browser-control request
                 index = BROWSER_CONTROL_INDEX;
-                fileName = fileInfoPart;
-            } else if(fileInfoPart.startsWith(FV_REQ_BEGIN)) {
-                //special case for file view request
+                fileNbme = fileInfoPart;
+            } else if(fileInfoPbrt.startsWith(FV_REQ_BEGIN)) {
+                //specibl case for file view request
                 index = FILE_VIEW_FILE_INDEX;
-                fileName = fileInfoPart;
-            } else if(fileInfoPart.startsWith(RESOURCE_GET)) {
-                //special case for file view gif get
+                fileNbme = fileInfoPart;
+            } else if(fileInfoPbrt.startsWith(RESOURCE_GET)) {
+                //specibl case for file view gif get
                 index = RESOURCE_INDEX;
-                fileName = fileInfoPart.substring(RESOURCE_GET.length());
-            } else if (fileInfoPart.equals("/update.xml")) {
+                fileNbme = fileInfoPart.substring(RESOURCE_GET.length());
+            } else if (fileInfoPbrt.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
-                fileName = "Update-File Request";
-                UploadStat.UPDATE_FILE.incrementStat();
-            } else if (fileInfoPart.startsWith("/gnutella/push-proxy") ||
-                       fileInfoPart.startsWith("/gnet/push-proxy")) {
-                // start after the '?'
-                int question = fileInfoPart.indexOf('?');
+                fileNbme = "Update-File Request";
+                UplobdStat.UPDATE_FILE.incrementStat();
+            } else if (fileInfoPbrt.startsWith("/gnutella/push-proxy") ||
+                       fileInfoPbrt.startsWith("/gnet/push-proxy")) {
+                // stbrt after the '?'
+                int question = fileInfoPbrt.indexOf('?');
                 if( question == -1 )
-                    throw new IOException("Malformed PushProxy Req");
-                fileInfoPart = fileInfoPart.substring(question + 1);
+                    throw new IOException("Mblformed PushProxy Req");
+                fileInfoPbrt = fileInfoPart.substring(question + 1);
                 index = PUSH_PROXY_FILE_INDEX;
-                // set the filename as the servent ID
-                StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=&");
-                // iff less than two tokens, or no value for a parameter, bad.
-                if (stLocal.countTokens() < 2 || stLocal.countTokens() % 2 != 0)
-                    throw new IOException("Malformed PushProxy HTTP Request");
+                // set the filenbme as the servent ID
+                StringTokenizer stLocbl = new StringTokenizer(fileInfoPart, "=&");
+                // iff less thbn two tokens, or no value for a parameter, bad.
+                if (stLocbl.countTokens() < 2 || stLocal.countTokens() % 2 != 0)
+                    throw new IOException("Mblformed PushProxy HTTP Request");
                 Integer fileIndex = null;
-                while( stLocal.hasMoreTokens()  ) {
-                    final String k = stLocal.nextToken();
-                    final String val = stLocal.nextToken();
-                    if(k.equalsIgnoreCase(PushProxyUploadState.P_SERVER_ID)) {
-                        if( fileName != null ) // already have a name?
-                            throw new IOException("Malformed PushProxy Req");
-                        // must convert from abse32 to base 16.
-                        ayte[] bbse16 = Base32.decode(val);
-                        if( abse16.length != 16 )
-                            throw new IOException("Malformed PushProxy Req");
-                        fileName = new GUID(base16).toHexString();
-                    } else if(k.equalsIgnoreCase(PushProxyUploadState.P_GUID)){
-                        if( fileName != null ) // already have a name?
-                            throw new IOException("Malformed PushProxy Req");
-                        if( val.length() != 32 )
-                            throw new IOException("Malformed PushProxy Req");
-                        fileName = val; //already in base16.
-                    } else if(k.equalsIgnoreCase(PushProxyUploadState.P_FILE)){
-                        if( fileIndex != null ) // already have an index?
-                            throw new IOException("Malformed PushProxy Req");
-                        fileIndex = Integer.valueOf(val);
-                        if( fileIndex.intValue() < 0 )
-                            throw new IOException("Malformed PushProxy Req");
-                        if( parameters == null ) // create the param map
-                            parameters = new HashMap();
-                        parameters.put("file", fileIndex);
+                while( stLocbl.hasMoreTokens()  ) {
+                    finbl String k = stLocal.nextToken();
+                    finbl String val = stLocal.nextToken();
+                    if(k.equblsIgnoreCase(PushProxyUploadState.P_SERVER_ID)) {
+                        if( fileNbme != null ) // already have a name?
+                            throw new IOException("Mblformed PushProxy Req");
+                        // must convert from bbse32 to base 16.
+                        byte[] bbse16 = Base32.decode(val);
+                        if( bbse16.length != 16 )
+                            throw new IOException("Mblformed PushProxy Req");
+                        fileNbme = new GUID(base16).toHexString();
+                    } else if(k.equblsIgnoreCase(PushProxyUploadState.P_GUID)){
+                        if( fileNbme != null ) // already have a name?
+                            throw new IOException("Mblformed PushProxy Req");
+                        if( vbl.length() != 32 )
+                            throw new IOException("Mblformed PushProxy Req");
+                        fileNbme = val; //already in base16.
+                    } else if(k.equblsIgnoreCase(PushProxyUploadState.P_FILE)){
+                        if( fileIndex != null ) // blready have an index?
+                            throw new IOException("Mblformed PushProxy Req");
+                        fileIndex = Integer.vblueOf(val);
+                        if( fileIndex.intVblue() < 0 )
+                            throw new IOException("Mblformed PushProxy Req");
+                        if( pbrameters == null ) // create the param map
+                            pbrameters = new HashMap();
+                        pbrameters.put("file", fileIndex);
                      }
                 }
-                UploadStat.PUSH_PROXY.incrementStat();
+                UplobdStat.PUSH_PROXY.incrementStat();
             } else {
                 //NORMAL CASE
-                // parse this for the appropriate information
+                // pbrse this for the appropriate information
                 // find where the get is...
                 int g = requestLine.indexOf("/get/");
-                // find the next "/" after the "/get/".  the number 
-                // aetween should be the index;
+                // find the next "/" bfter the "/get/".  the number 
+                // between should be the index;
                 int d = requestLine.indexOf( "/", (g + 5) ); 
                 // get the index
-                String str_index = requestLine.suastring( (g+5), d );
-                index = java.lang.Integer.parseInt(str_index);
-                // get the filename, which should be right after
-                // the "/", and before the next " ".
+                String str_index = requestLine.substring( (g+5), d );
+                index = jbva.lang.Integer.parseInt(str_index);
+                // get the filenbme, which should be right after
+                // the "/", bnd before the next " ".
                 int f = requestLine.indexOf( " HTTP/", d );
 				try {
-					fileName = URLDecoder.decode(
-					             requestLine.suastring( (d+1), f));
-				} catch(IllegalArgumentException e) {
-					fileName = requestLine.substring( (d+1), f);
+					fileNbme = URLDecoder.decode(
+					             requestLine.substring( (d+1), f));
+				} cbtch(IllegalArgumentException e) {
+					fileNbme = requestLine.substring( (d+1), f);
 				}
-                UploadStat.TRADITIONAL_GET.incrementStat();				
+                UplobdStat.TRADITIONAL_GET.incrementStat();				
             }
             //check if the protocol is HTTP1.1.
-            //Note that this is not a very strict check.
-            aoolebn http11 = isHTTP11Request(requestLine);
-			return new HttpRequestLine(index, fileName, http11, parameters,
-                                       hadPassword);
-		} catch (NumberFormatException e) {
+            //Note thbt this is not a very strict check.
+            boolebn http11 = isHTTP11Request(requestLine);
+			return new HttpRequestLine(index, fileNbme, http11, parameters,
+                                       hbdPassword);
+		} cbtch (NumberFormatException e) {
 			throw new IOException();
-		} catch (IndexOutOfBoundsException e) {
+		} cbtch (IndexOutOfBoundsException e) {
 			throw new IOException();
 		}
 	}
 
 	/**
-	 * Parses the get line for a URN request, throwing an exception if 
-	 * there are any errors in parsing.
+	 * Pbrses the get line for a URN request, throwing an exception if 
+	 * there bre any errors in parsing.
      *
-     * If we do not have the URN, we request a HttpRequestLine whose index
-     * is BAD_URN_QUERY_INDEX.  It is up to HTTPUploader to properly read
-     * the index and set the state to FILE_NOT_FOUND.
+     * If we do not hbve the URN, we request a HttpRequestLine whose index
+     * is BAD_URN_QUERY_INDEX.  It is up to HTTPUplobder to properly read
+     * the index bnd set the state to FILE_NOT_FOUND.
 	 *
-	 * @param requestLine the <tt>String</tt> instance containing the get request
-	 * @return a new <tt>RequestLine</tt> instance containing all of the data
+	 * @pbram requestLine the <tt>String</tt> instance containing the get request
+	 * @return b new <tt>RequestLine</tt> instance containing all of the data
 	 *  for the get request
 	 */
-	private HttpRequestLine parseURNGet(final String requestLine)
+	privbte HttpRequestLine parseURNGet(final String requestLine)
       throws IOException {
-		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
-		Map params = new HashMap();
+		URN urn = URN.crebteSHA1UrnFromHttpRequest(requestLine);
+		Mbp params = new HashMap();
 		
-        // Parse the service identifier, whether N2R, N2X or something
-        // we cannot satisfy.  URI scheme names are not case-sensitive.
-        String requestUpper = requestLine.toUpperCase(Locale.US);
-        if (requestUpper.indexOf(HTTPConstants.NAME_TO_THEX) > 0)
-            params.put(SERVICE_ID, HTTPConstants.NAME_TO_THEX);
-        else if (requestUpper.indexOf(HTTPConstants.NAME_TO_RESOURCE) > 0)
-            params.put(SERVICE_ID, HTTPConstants.NAME_TO_RESOURCE);
+        // Pbrse the service identifier, whether N2R, N2X or something
+        // we cbnnot satisfy.  URI scheme names are not case-sensitive.
+        String requestUpper = requestLine.toUpperCbse(Locale.US);
+        if (requestUpper.indexOf(HTTPConstbnts.NAME_TO_THEX) > 0)
+            pbrams.put(SERVICE_ID, HTTPConstants.NAME_TO_THEX);
+        else if (requestUpper.indexOf(HTTPConstbnts.NAME_TO_RESOURCE) > 0)
+            pbrams.put(SERVICE_ID, HTTPConstants.NAME_TO_RESOURCE);
         else {
-            if(LOG.isWarnEnabled())
-			    LOG.warn("Invalid URN query: " + requestLine);
+            if(LOG.isWbrnEnabled())
+			    LOG.wbrn("Invalid URN query: " + requestLine);
 			return new HttpRequestLine(BAD_URN_QUERY_INDEX,
-				"Invalid URN query", isHTTP11Request(requestLine));
+				"Invblid URN query", isHTTP11Request(requestLine));
         }
 		
-		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
+		FileDesc desc = RouterService.getFileMbnager().getFileDescForUrn(urn);
 		if(desc == null) {
-            UploadStat.UNKNOWN_URN_GET.incrementStat();
+            UplobdStat.UNKNOWN_URN_GET.incrementStat();
             return new HttpRequestLine(BAD_URN_QUERY_INDEX,
-                  "Invalid URN query", isHTTP11Request(requestLine));
+                  "Invblid URN query", isHTTP11Request(requestLine));
 		}		
-        UploadStat.URN_GET.incrementStat();
-		return new HttpRequestLine(desc.getIndex(), desc.getFileName(), 
-								   isHTTP11Request(requestLine), params, false);
+        UplobdStat.URN_GET.incrementStat();
+		return new HttpRequestLine(desc.getIndex(), desc.getFileNbme(), 
+								   isHTTP11Request(requestLine), pbrams, false);
 	}
 
 	/**
 	 * Returns whether or the the specified get request is using HTTP 1.1.
 	 *
 	 * @return <tt>true</tt> if the get request specifies HTTP 1.1,
-	 *  <tt>false</tt> otherwise
+	 *  <tt>fblse</tt> otherwise
 	 */
-	private static boolean isHTTP11Request(final String requestLine) {
+	privbte static boolean isHTTP11Request(final String requestLine) {
 		return requestLine.endsWith("1.1");
 	}
 	
 	/**
-	 * Asserts the state is CONNECTING.
+	 * Asserts the stbte is CONNECTING.
 	 */
-	private void assertAsConnecting(int state) {
-	    Assert.that( state == Uploader.CONNECTING,
-	     "invalid state: " + state);
+	privbte void assertAsConnecting(int state) {
+	    Assert.thbt( state == Uploader.CONNECTING,
+	     "invblid state: " + state);
 	}
 	
 	/**
-	 * Asserts the state is COMPLETE.
+	 * Asserts the stbte is COMPLETE.
 	 */
-	private void assertAsComplete(int state) {
-	    Assert.that( state == Uploader.COMPLETE,
-	     "invalid state: " + state);
+	privbte void assertAsComplete(int state) {
+	    Assert.thbt( state == Uploader.COMPLETE,
+	     "invblid state: " + state);
 	}
 	
 	/**
-	 * Asserts that the state is an inactive/finished state.
+	 * Asserts thbt the state is an inactive/finished state.
 	 */
-	private void assertAsFinished(int state) {
-	    Assert.that(state==Uploader.INTERRUPTED || state==Uploader.COMPLETE,
-	     "invalid state: " + state);
+	privbte void assertAsFinished(int state) {
+	    Assert.thbt(state==Uploader.INTERRUPTED || state==Uploader.COMPLETE,
+	     "invblid state: " + state);
 	}	    
     
 	/**
-	 * This is an immutable class that contains the data for the GET line of
+	 * This is bn immutable class that contains the data for the GET line of
 	 * the HTTP request.
 	 */
-	private final static class HttpRequestLine {
+	privbte final static class HttpRequestLine {
 		
 		/**
 		 * The index of the request.
 		 */
-  		final int _index;
+  		finbl int _index;
 
 		/**
-		 * The file name of the request.
+		 * The file nbme of the request.
 		 */
-  		final String _fileName;
+  		finbl String _fileName;
 
         /** 
-		 * Flag indicating if the protocol is HTTP1.1.
+		 * Flbg indicating if the protocol is HTTP1.1.
 		 */
-        final boolean _http11;
+        finbl boolean _http11;
         
         /**
-         * Flag of the params in this request line.
-         * Guaranteed to be non null.
+         * Flbg of the params in this request line.
+         * Gubranteed to be non null.
          */
-        final Map _params;
+        finbl Map _params;
 
-        pualic String toString() {
-            return "Index = " + _index + ", FileName = " + _fileName +
-            ", is HTTP1.1? " + _http11 + ", Parameters = " + _params;
+        public String toString() {
+            return "Index = " + _index + ", FileNbme = " + _fileName +
+            ", is HTTP1.1? " + _http11 + ", Pbrameters = " + _params;
         }
         
         /**
-         * Flag for whether or not the get request had the correct password.
+         * Flbg for whether or not the get request had the correct password.
          */
-        final boolean _hadPass;
+        finbl boolean _hadPass;
 
 		/**
-		 * Constructs a new <tt>RequestLine</tt> instance with no parameters.
+		 * Constructs b new <tt>RequestLine</tt> instance with no parameters.
 		 *
-		 * @param index the index for the file to get
-		 * @param fileName the name of the file to get
-		 * @param http11 specifies whether or not it's an HTTP 1.1 request
+		 * @pbram index the index for the file to get
+		 * @pbram fileName the name of the file to get
+		 * @pbram http11 specifies whether or not it's an HTTP 1.1 request
 		 */
-		HttpRequestLine(int index, String fileName, boolean http11) {
-		    this(index, fileName, http11, Collections.EMPTY_MAP, false);
+		HttpRequestLine(int index, String fileNbme, boolean http11) {
+		    this(index, fileNbme, http11, Collections.EMPTY_MAP, false);
   		}
   		
 		/**
-		 * Constructs a new <tt>RequestLine</tt> instance with parameters.
+		 * Constructs b new <tt>RequestLine</tt> instance with parameters.
 		 *
-		 * @param index the index for the file to get
-		 * @param fName the name of the file to get
-		 * @param http11 specifies whether or not it's an HTTP 1.1 request
-		 * @param params a map of params in this request line
+		 * @pbram index the index for the file to get
+		 * @pbram fName the name of the file to get
+		 * @pbram http11 specifies whether or not it's an HTTP 1.1 request
+		 * @pbram params a map of params in this request line
 		 */
-  		HttpRequestLine(int index, String fName, boolean http11, Map params,
-                        aoolebn hadPass) {
+  		HttpRequestLine(int index, String fNbme, boolean http11, Map params,
+                        boolebn hadPass) {
   			_index = index;
-  			_fileName = fName;
+  			_fileNbme = fName;
             _http11 = http11;
-            if( params == null )
-                _params = Collections.EMPTY_MAP;
+            if( pbrams == null )
+                _pbrams = Collections.EMPTY_MAP;
             else
-                _params = params;
-            _hadPass = hadPass;
+                _pbrams = params;
+            _hbdPass = hadPass;
         }
         
 		/**
-		 * Returns whether or not the request is an HTTP 1.1 request.
+		 * Returns whether or not the request is bn HTTP 1.1 request.
 		 *
-		 * @return <tt>true</tt> if this is an HTTP 1.1 request, <tt>false</tt>
+		 * @return <tt>true</tt> if this is bn HTTP 1.1 request, <tt>false</tt>
 		 *  otherwise
 		 */
-        aoolebn isHTTP11() {
+        boolebn isHTTP11() {
             return _http11;
         }
         
         /**
-         * Returns the parameter map for this request line.
+         * Returns the pbrameter map for this request line.
          */
-        Map getParameters() {
-            return _params;
+        Mbp getParameters() {
+            return _pbrams;
         }
 
         /**
-         * @return true if the get request had a matching password
+         * @return true if the get request hbd a matching password
          */
-        aoolebn hadPassword() {
-            return _hadPass;
+        boolebn hadPassword() {
+            return _hbdPass;
         }
   	}
 
-    /** Calls measureBandwidth on each uploader. */
-    pualic void mebsureBandwidth() {
-        List activeCopy;
+    /** Cblls measureBandwidth on each uploader. */
+    public void mebsureBandwidth() {
+        List bctiveCopy;
         synchronized(this) {
-            activeCopy = new ArrayList(_activeUploadList);
+            bctiveCopy = new ArrayList(_activeUploadList);
         }
         
-        float currentTotal = 0f;
-        aoolebn c = false;
-        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
-			HTTPUploader up = (HTTPUploader)iter.next();
-            if (up.isForcedShare())
+        flobt currentTotal = 0f;
+        boolebn c = false;
+        for (Iterbtor iter = activeCopy.iterator(); iter.hasNext(); ) {
+			HTTPUplobder up = (HTTPUploader)iter.next();
+            if (up.isForcedShbre())
                 continue;
             c = true;
-			up.measureBandwidth();
-			currentTotal += up.getAverageBandwidth();
+			up.mebsureBandwidth();
+			currentTotbl += up.getAverageBandwidth();
 		}
 		if ( c ) {
             synchronized(this) {
-                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-                    / ++numMeasures;
+                bverageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+                    / ++numMebsures;
             }
         }
     }
 
-    /** Returns the total upload throughput, i.e., the sum over all uploads. */
-	pualic flobt getMeasuredBandwidth() {
-        List activeCopy;
+    /** Returns the totbl upload throughput, i.e., the sum over all uploads. */
+	public flobt getMeasuredBandwidth() {
+        List bctiveCopy;
         synchronized(this) {
-            activeCopy = new ArrayList(_activeUploadList);
+            bctiveCopy = new ArrayList(_activeUploadList);
         }
         
-        float sum=0;
-        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
-			HTTPUploader up = (HTTPUploader)iter.next();
-            if (up.isForcedShare())
+        flobt sum=0;
+        for (Iterbtor iter = activeCopy.iterator(); iter.hasNext(); ) {
+			HTTPUplobder up = (HTTPUploader)iter.next();
+            if (up.isForcedShbre())
                 continue;
             
-            sum += up.getMeasuredBandwidth();
+            sum += up.getMebsuredBandwidth();
 		}
         return sum;
 	}
 	
 	/**
-	 * returns the summed average of the uploads
+	 * returns the summed bverage of the uploads
 	 */
-	pualic synchronized flobt getAverageBandwidth() {
-        return averageBandwidth;
+	public synchronized flobt getAverageBandwidth() {
+        return bverageBandwidth;
 	}
 
-    static void tBandwidthTracker(UploadManager upman) {
-        upman.reportUploadSpeed(100000, 1000000);  //10 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 2000000);  //20 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 3000000);  //30 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 4000000);  //40 kB/s
-        Assert.that(upman.measuredUploadSpeed()==-1);
-        upman.reportUploadSpeed(100000, 5000000);  //50 kB/s == 400 kb/sec
-        Assert.that(upman.measuredUploadSpeed()==400);
-        upman.reportUploadSpeed(100000, 6000000);  //60 kB/s == 480 kb/sec
-        Assert.that(upman.measuredUploadSpeed()==480);
-        upman.reportUploadSpeed(1, 1000);          //too little data to count
-        Assert.that(upman.measuredUploadSpeed()==480);
-        upman.reportUploadSpeed(100000, 1000000);  //10 kB/s = 80 kb/s
-        upman.reportUploadSpeed(100000, 1000000);
-        upman.reportUploadSpeed(100000, 1000000);
-        upman.reportUploadSpeed(100000, 1000000);
-        upman.reportUploadSpeed(100000, 1000000);
-        Assert.that(upman.measuredUploadSpeed()==80);
+    stbtic void tBandwidthTracker(UploadManager upman) {
+        upmbn.reportUploadSpeed(100000, 1000000);  //10 kB/s
+        Assert.thbt(upman.measuredUploadSpeed()==-1);
+        upmbn.reportUploadSpeed(100000, 2000000);  //20 kB/s
+        Assert.thbt(upman.measuredUploadSpeed()==-1);
+        upmbn.reportUploadSpeed(100000, 3000000);  //30 kB/s
+        Assert.thbt(upman.measuredUploadSpeed()==-1);
+        upmbn.reportUploadSpeed(100000, 4000000);  //40 kB/s
+        Assert.thbt(upman.measuredUploadSpeed()==-1);
+        upmbn.reportUploadSpeed(100000, 5000000);  //50 kB/s == 400 kb/sec
+        Assert.thbt(upman.measuredUploadSpeed()==400);
+        upmbn.reportUploadSpeed(100000, 6000000);  //60 kB/s == 480 kb/sec
+        Assert.thbt(upman.measuredUploadSpeed()==480);
+        upmbn.reportUploadSpeed(1, 1000);          //too little data to count
+        Assert.thbt(upman.measuredUploadSpeed()==480);
+        upmbn.reportUploadSpeed(100000, 1000000);  //10 kB/s = 80 kb/s
+        upmbn.reportUploadSpeed(100000, 1000000);
+        upmbn.reportUploadSpeed(100000, 1000000);
+        upmbn.reportUploadSpeed(100000, 1000000);
+        upmbn.reportUploadSpeed(100000, 1000000);
+        Assert.thbt(upman.measuredUploadSpeed()==80);
     }
 
 	/**
-	 * This class keeps track of client requests.
+	 * This clbss keeps track of client requests.
 	 * 
-	 * IMPORTANT: Always call isGreedy() method, because it counts requests,
+	 * IMPORTANT: Alwbys call isGreedy() method, because it counts requests,
 	 * expires lists, etc.
 	 */
-    private static class RequestCache {
-		// we don't allow more than 1 request per 5 seconds
-    	private static final double MAX_REQUESTS = 5 * 1000;
+    privbte static class RequestCache {
+		// we don't bllow more than 1 request per 5 seconds
+    	privbte static final double MAX_REQUESTS = 5 * 1000;
     	
-    	// don't keep more than this many entries
-    	private static final int MAX_ENTRIES = 10;
+    	// don't keep more thbn this many entries
+    	privbte static final int MAX_ENTRIES = 10;
     	
-    	// time we expect the downloader to wait before sending 
-    	// another request after our initial LIMIT_REACHED reply
-    	// must ae grebter than or equal to what we send in our RetryAfter
-    	// header, otherwise we'll incorrectly mark guys as greedy.
-    	static long WAIT_TIME =
-    	    LimitReachedUploadState.RETRY_AFTER_TIME * 1000;
+    	// time we expect the downlobder to wait before sending 
+    	// bnother request after our initial LIMIT_REACHED reply
+    	// must be grebter than or equal to what we send in our RetryAfter
+    	// hebder, otherwise we'll incorrectly mark guys as greedy.
+    	stbtic long WAIT_TIME =
+    	    LimitRebchedUploadState.RETRY_AFTER_TIME * 1000;
 
-		// time to wait before checking for hammering: 30 seconds.
-		// if the averge number of requests per time frame exceeds MAX_REQUESTS
-		// after FIRST_CHECK_TIME, the downloader will be banned.
-		static long FIRST_CHECK_TIME = 30*1000;
+		// time to wbit before checking for hammering: 30 seconds.
+		// if the bverge number of requests per time frame exceeds MAX_REQUESTS
+		// bfter FIRST_CHECK_TIME, the downloader will be banned.
+		stbtic long FIRST_CHECK_TIME = 30*1000;
 		
 		/**
-		 * The set of sha1 requests we've seen in the past WAIT_TIME.
+		 * The set of shb1 requests we've seen in the past WAIT_TIME.
 		 */
-		private final Set /* of SHA1 (URN) */ REQUESTS;
+		privbte final Set /* of SHA1 (URN) */ REQUESTS;
 		
-		private final Set /* of SHA1 (URN) */ ACTIVE_UPLOADS; 
-		
-		/**
-		 * The numaer of requests we've seen from this host so fbr.
-		 */
-		private double _numRequests;
+		privbte final Set /* of SHA1 (URN) */ ACTIVE_UPLOADS; 
 		
 		/**
-		 * The time of the last request.
+		 * The number of requests we've seen from this host so fbr.
 		 */
-		private long _lastRequest;
+		privbte double _numRequests;
+		
+		/**
+		 * The time of the lbst request.
+		 */
+		privbte long _lastRequest;
 		
 		/**
 		 * The time of the first request.
 		 */
-		private long _firstRequest;
+		privbte long _firstRequest;
  
         /**
-         * Constructs a new RequestCache.
+         * Constructs b new RequestCache.
          */
-     	RequestCache() {
+     	RequestCbche() {
     		REQUESTS = new FixedSizeExpiringSet(MAX_ENTRIES, WAIT_TIME);
-    		ACTIVE_UPLOADS = new HashSet();
+    		ACTIVE_UPLOADS = new HbshSet();
     		_numRequests = 0;
-    		_lastRequest = _firstRequest = System.currentTimeMillis();
+    		_lbstRequest = _firstRequest = System.currentTimeMillis();
         }
         
         /**
-         * Determines whether or not the host is aeing greedy.
+         * Determines whether or not the host is being greedy.
          *
-         * Calling this method has a side-effect of counting itself
-         * as a request.
+         * Cblling this method has a side-effect of counting itself
+         * bs a request.
          */
-    	aoolebn isGreedy(URN sha1) {
-    		return REQUESTS.contains(sha1);
+    	boolebn isGreedy(URN sha1) {
+    		return REQUESTS.contbins(sha1);
     	}
     	
     	/**
-    	 * tells the cache that an upload to the host has started.
-    	 * @param sha1 the urn of the file being uploaded.
+    	 * tells the cbche that an upload to the host has started.
+    	 * @pbram sha1 the urn of the file being uploaded.
     	 */
-    	void startedUpload(URN sha1) {
-    		ACTIVE_UPLOADS.add(sha1);
+    	void stbrtedUpload(URN sha1) {
+    		ACTIVE_UPLOADS.bdd(sha1);
     	}
     	
     	/**
-    	 * Determines whether or not the host is hammering.
+    	 * Determines whether or not the host is hbmmering.
     	 */
-    	aoolebn isHammering() {
-            if (_lastRequest - _firstRequest <= FIRST_CHECK_TIME) {
-    			return false;
+    	boolebn isHammering() {
+            if (_lbstRequest - _firstRequest <= FIRST_CHECK_TIME) {
+    			return fblse;
     		} else  {
-    		    return ((douale)(_lbstRequest - _firstRequest) / _numRequests)
+    		    return ((double)(_lbstRequest - _firstRequest) / _numRequests)
     		           < MAX_REQUESTS;
     		}
     	}
     	
     	/**
-    	 * Informs the cache that the limit has been reached for this SHA1.
+    	 * Informs the cbche that the limit has been reached for this SHA1.
     	 */
-    	void limitReached(URN sha1) {
-			REQUESTS.add(sha1);
+    	void limitRebched(URN sha1) {
+			REQUESTS.bdd(sha1);
     	}
     	
     	/**
-    	 * Adds a new request.
+    	 * Adds b new request.
     	 */
     	void countRequest() {
     		_numRequests++;
-    		_lastRequest = System.currentTimeMillis();
+    		_lbstRequest = System.currentTimeMillis();
     	}
     	
     	/**
-    	 * checks whether the given URN is a duplicate request
+    	 * checks whether the given URN is b duplicate request
     	 */
-    	aoolebn isDupe(URN sha1) {
-    		return ACTIVE_UPLOADS.contains(sha1);
+    	boolebn isDupe(URN sha1) {
+    		return ACTIVE_UPLOADS.contbins(sha1);
     	}
     	
     	/**
-    	 * informs the request cache that the given URN is no longer
-    	 * actively uploaded.
+    	 * informs the request cbche that the given URN is no longer
+    	 * bctively uploaded.
     	 */
-    	void uploadDone(URN sha1) {
-    		ACTIVE_UPLOADS.remove(sha1);
+    	void uplobdDone(URN sha1) {
+    		ACTIVE_UPLOADS.remove(shb1);
     	}
     }
 }

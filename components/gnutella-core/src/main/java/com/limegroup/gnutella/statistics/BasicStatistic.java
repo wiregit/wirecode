@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * Specialized subclass for recording basic statistics.
+ * Speciblized subclass for recording basic statistics.
  */
-abstract class BasicStatistic extends AbstractStatistic {
+bbstract class BasicStatistic extends AbstractStatistic {
 
-	protected BasicStatistic() {
-		StatisticsManager.instance().addBasicStatistic(this);
+	protected BbsicStatistic() {
+		StbtisticsManager.instance().addBasicStatistic(this);
 	}
 }

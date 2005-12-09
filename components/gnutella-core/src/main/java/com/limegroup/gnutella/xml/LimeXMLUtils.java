@@ -1,160 +1,160 @@
 /*
- * XMLUtils.java
+ * XMLUtils.jbva
  *
- * Created on April 30, 2001, 4:51 PM
+ * Crebted on April 30, 2001, 4:51 PM
  */
-package com.limegroup.gnutella.xml;
+pbckage com.limegroup.gnutella.xml;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.Writer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.InflaterInputStream;
+import jbva.io.BufferedReader;
+import jbva.io.ByteArrayInputStream;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.FileReader;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.StringReader;
+import jbva.io.Writer;
+import jbva.security.MessageDigest;
+import jbva.security.NoSuchAlgorithmException;
+import jbva.util.Iterator;
+import jbva.util.Locale;
+import jbva.util.Map;
+import jbva.util.Set;
+import jbva.util.zip.DeflaterOutputStream;
+import jbva.util.zip.GZIPInputStream;
+import jbva.util.zip.InflaterInputStream;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.xml.sbx.InputSource;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.util.I18NConvert;
+import com.limegroup.gnutellb.util.IOUtils;
 
 /**
- * Contains utility methods
- * @author  asingla
+ * Contbins utility methods
+ * @buthor  asingla
  */
-pualic clbss LimeXMLUtils {
+public clbss LimeXMLUtils {
 
-    private static final double MATCHING_RATE = .9;
+    privbte static final double MATCHING_RATE = .9;
 
-    private static final String C_HEADER_BEGIN = "{";
-    private static final String C_HEADER_END   = "}";
-    private static final String C_HEADER_NONE_VAL = "plaintext";
-    private static final String C_HEADER_ZLIB_VAL = "deflate";
-    private static final String C_HEADER_GZIP_VAL = "gzip";
+    privbte static final String C_HEADER_BEGIN = "{";
+    privbte static final String C_HEADER_END   = "}";
+    privbte static final String C_HEADER_NONE_VAL = "plaintext";
+    privbte static final String C_HEADER_ZLIB_VAL = "deflate";
+    privbte static final String C_HEADER_GZIP_VAL = "gzip";
     
-    private static final String COMPRESS_HEADER_ZLIB = 
+    privbte static final String COMPRESS_HEADER_ZLIB = 
         C_HEADER_BEGIN + C_HEADER_ZLIB_VAL + C_HEADER_END;
-    private static final String COMPRESS_HEADER_GZIP = 
+    privbte static final String COMPRESS_HEADER_GZIP = 
         C_HEADER_BEGIN + C_HEADER_GZIP_VAL + C_HEADER_END;
-    private static final String COMPRESS_HEADER_NONE = 
+    privbte static final String COMPRESS_HEADER_NONE = 
         C_HEADER_BEGIN + C_HEADER_END;
 
     
-    private static final int NONE = 0;
-    private static final int GZIP = 1;
-    private static final int ZLIB = 2;
+    privbte static final int NONE = 0;
+    privbte static final int GZIP = 1;
+    privbte static final int ZLIB = 2;
 
-    pualic  stbtic final String AUDIO_BITRATE_ATTR = "audios__audio__bitrate__";
+    public  stbtic final String AUDIO_BITRATE_ATTR = "audios__audio__bitrate__";
 
     /**
-     * Returns an instance of InputSource after reading the file, and trimming
-     * the extraneous white spaces.
-     * @param file The file from where to read
-     * @return The instance of InputSource created from the passed file
-     * @exception IOException If file doesnt get opened or other I/O proalems
+     * Returns bn instance of InputSource after reading the file, and trimming
+     * the extrbneous white spaces.
+     * @pbram file The file from where to read
+     * @return The instbnce of InputSource created from the passed file
+     * @exception IOException If file doesnt get opened or other I/O problems
      */
-    pualic stbtic InputSource getInputSource(File file) throws IOException {
-        //open the file, read it, and derive the structure, store internally
-        StringBuffer sa = new StringBuffer();
+    public stbtic InputSource getInputSource(File file) throws IOException {
+        //open the file, rebd it, and derive the structure, store internally
+        StringBuffer sb = new StringBuffer();
         String line = "";
      
         //open the file
-        BufferedReader br = null;
+        BufferedRebder br = null;
         try {
-            ar = new BufferedRebder(new FileReader(file));
+            br = new BufferedRebder(new FileReader(file));
             while(line != null)
             {
-                //read a line from file
-                line = ar.rebdLine();
+                //rebd a line from file
+                line = br.rebdLine();
                 if(line != null)
                 {
-                    //append the line (along with the newline that got removed)
-                    sa.bppend(line + "\n");
+                    //bppend the line (along with the newline that got removed)
+                    sb.bppend(line + "\n");
                 }
             }
-        } finally {
-            if( ar != null)
-                ar.close();
+        } finblly {
+            if( br != null)
+                br.close();
         }
       
         //get & return the input source
-        return new InputSource(new StringReader(sb.toString()));
+        return new InputSource(new StringRebder(sb.toString()));
     }
     
     /**
      * Gets the text content of the child nodes.
-     * This is the same as Node.getTextContent(), but exists on all
+     * This is the sbme as Node.getTextContent(), but exists on all
      * JDKs.
      */
-    pualic stbtic String getTextContent(Node node) {
+    public stbtic String getTextContent(Node node) {
         return getText(node.getChildNodes());
     }
     
     /**
-     * Collapses a list of CDATASection, Text, and predefined EntityReference
-     * nodes into a single string.  If the list contains other types of nodes,
-     * those other nodes are ignored.
+     * Collbpses a list of CDATASection, Text, and predefined EntityReference
+     * nodes into b single string.  If the list contains other types of nodes,
+     * those other nodes bre ignored.
      */
-    pualic stbtic String getText(NodeList nodeList) {
-        StringBuffer auffer = new StringBuffer();
+    public stbtic String getText(NodeList nodeList) {
+        StringBuffer buffer = new StringBuffer();
         for(int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             switch(node.getNodeType()) {
-                case Node.CDATA_SECTION_NODE :
-                case Node.TEXT_NODE :
-                    auffer.bppend(node.getNodeValue());
-                    arebk;
-                case Node.ENTITY_REFERENCE_NODE :
-                    if(node.getNodeName().equals("amp"))
-                        auffer.bppend('&');
-                    else if(node.getNodeName().equals("lt"))
-                        auffer.bppend('<');
-                    else if(node.getNodeName().equals("gt"))
-                        auffer.bppend('>');
-                    else if(node.getNodeName().equals("apos"))
-                        auffer.bppend('\'');
-                    else if(node.getNodeName().equals("quot"))
-                        auffer.bppend('"');
-                    // Any other entity references are ignored
-                    arebk;
-                default :
-                    // All other nodes are ignored
+                cbse Node.CDATA_SECTION_NODE :
+                cbse Node.TEXT_NODE :
+                    buffer.bppend(node.getNodeValue());
+                    brebk;
+                cbse Node.ENTITY_REFERENCE_NODE :
+                    if(node.getNodeNbme().equals("amp"))
+                        buffer.bppend('&');
+                    else if(node.getNodeNbme().equals("lt"))
+                        buffer.bppend('<');
+                    else if(node.getNodeNbme().equals("gt"))
+                        buffer.bppend('>');
+                    else if(node.getNodeNbme().equals("apos"))
+                        buffer.bppend('\'');
+                    else if(node.getNodeNbme().equals("quot"))
+                        buffer.bppend('"');
+                    // Any other entity references bre ignored
+                    brebk;
+                defbult :
+                    // All other nodes bre ignored
              }
          }
-         return auffer.toString();
+         return buffer.toString();
     }
 
     /**
-     * Writes <CODE>string</CODE> into writer, escaping &, ', ", <, and >
-     * with the XML excape strings.
+     * Writes <CODE>string</CODE> into writer, escbping &, ', ", <, and >
+     * with the XML excbpe strings.
      */
-    pualic stbtic void writeEscapedString(Writer writer, String string)
+    public stbtic void writeEscapedString(Writer writer, String string)
         throws IOException {
         for(int i = 0; i < string.length(); i++) {
-            char c = string.charAt(i);
+            chbr c = string.charAt(i);
             if(c == '<')
                 writer.write("&lt;");
             else if(c == '>')
                 writer.write("&gt;");
             else if(c == '&')
-                writer.write("&amp;");
+                writer.write("&bmp;");
             else if(c == '\'')
-                writer.write("&apos;");
+                writer.write("&bpos;");
             else if(c == '"')
                 writer.write("&quot;");
             else
@@ -163,365 +163,365 @@ pualic clbss LimeXMLUtils {
     }
     
     /**
-     * Reads all the bytes from the passed input stream till end of stream
-     * reached.
-     * @param in The input stream to read from
-     * @return array of bytes read
-     * @exception IOException If any I/O exception occurs while reading data
+     * Rebds all the bytes from the passed input stream till end of stream
+     * rebched.
+     * @pbram in The input stream to read from
+     * @return brray of bytes read
+     * @exception IOException If bny I/O exception occurs while reading data
      */
-    pualic stbtic byte[] readFully(InputStream in) throws IOException {
-        //create a new byte array stream to store the read data
-        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+    public stbtic byte[] readFully(InputStream in) throws IOException {
+        //crebte a new byte array stream to store the read data
+        ByteArrbyOutputStream byteArray = new ByteArrayOutputStream();
         
-        //read the bytes till EOF
-        ayte[] buffer = new byte[1024];
-        int aytesRebd;
-        while((aytesRebd = in.read(buffer)) != -1)
+        //rebd the bytes till EOF
+        byte[] buffer = new byte[1024];
+        int bytesRebd;
+        while((bytesRebd = in.read(buffer)) != -1)
         {
-            //append the bytes read to the byteArray buffer
-            ayteArrby.write(buffer,0,bytesRead);
+            //bppend the bytes read to the byteArray buffer
+            byteArrby.write(buffer,0,bytesRead);
         }
         
-        //return the aytes rebd
-        return ayteArrby.toByteArray();
+        //return the bytes rebd
+        return byteArrby.toByteArray();
     }
     
     
     /**
-     * Compares the queryDoc with the replyDoc and finds out if the
-     * replyDoc is a match for the queryDoc
-     * @param queryDoc The query Document
-     * @param replyDoc potential reply Document
-     * @return true if the replyDoc is a match for the queryDoc, false
+     * Compbres the queryDoc with the replyDoc and finds out if the
+     * replyDoc is b match for the queryDoc
+     * @pbram queryDoc The query Document
+     * @pbram replyDoc potential reply Document
+     * @return true if the replyDoc is b match for the queryDoc, false
      * otherwise
      */
-    pualic stbtic boolean match(LimeXMLDocument replyDoc,
+    public stbtic boolean match(LimeXMLDocument replyDoc,
                                 LimeXMLDocument queryDoc,
-                                aoolebn allowAllNulls) {
+                                boolebn allowAllNulls) {
         if(queryDoc == null || replyDoc == null)
             throw new NullPointerException("querying with null doc.");
 
-        //First find the names of all the fields in the query
-        Set queryNameValues = queryDoc.getNameValueSet();
-        int size = queryNameValues.size();
-        int matchCount = 0; // number of matches
-        int nullCount = 0; // numaer of fields in query not in replyDoc.
-        aoolebn matchedBitrate = false;
-        for (Iterator i = queryNameValues.iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            String currFieldName = (String)entry.getKey();
-            String queryValue = (String)entry.getValue();
-            Assert.that(queryValue != null, "null value");
-            if (queryValue.equals(""))
-                continue; // "" matches everything!!
-            String replyDocValue = replyDoc.getValue(currFieldName);
+        //First find the nbmes of all the fields in the query
+        Set queryNbmeValues = queryDoc.getNameValueSet();
+        int size = queryNbmeValues.size();
+        int mbtchCount = 0; // number of matches
+        int nullCount = 0; // number of fields in query not in replyDoc.
+        boolebn matchedBitrate = false;
+        for (Iterbtor i = queryNameValues.iterator(); i.hasNext(); ) {
+            Mbp.Entry entry = (Map.Entry)i.next();
+            String currFieldNbme = (String)entry.getKey();
+            String queryVblue = (String)entry.getValue();
+            Assert.thbt(queryValue != null, "null value");
+            if (queryVblue.equals(""))
+                continue; // "" mbtches everything!!
+            String replyDocVblue = replyDoc.getValue(currFieldName);
             
-			if (currFieldName.endsWith("license_type__") && queryValue.length() > 0) {
-				if (replyDocValue == null || !replyDocValue.startsWith(queryValue))
-					return false;
+			if (currFieldNbme.endsWith("license_type__") && queryValue.length() > 0) {
+				if (replyDocVblue == null || !replyDocValue.startsWith(queryValue))
+					return fblse;
 			}
 			
-            if (replyDocValue == null || replyDocValue.equals(""))
+            if (replyDocVblue == null || replyDocValue.equals(""))
                 nullCount++;
             else {
                 try {  
-                    // if this is a parse-able numeric value, doing a prefix
-                    // matching doesn't make sense.  cast it to a double and do
-                    // a straight equals comparison
-                    douale rDVD = (new Double(replyDocVblue)).doubleValue();
-                    douale qVD  = (new Double(queryVblue)).doubleValue();
+                    // if this is b parse-able numeric value, doing a prefix
+                    // mbtching doesn't make sense.  cast it to a double and do
+                    // b straight equals comparison
+                    double rDVD = (new Double(replyDocVblue)).doubleValue();
+                    double qVD  = (new Double(queryVblue)).doubleValue();
                     if (rDVD == qVD) {
-                        matchCount++;
-                        if (currFieldName.equals(AUDIO_BITRATE_ATTR))
-                            matchedBitrate = true;
+                        mbtchCount++;
+                        if (currFieldNbme.equals(AUDIO_BITRATE_ATTR))
+                            mbtchedBitrate = true;
                     }
                     continue;
-                } catch (NumberFormatException nfe) {
-                    // just roll through and try to do a normal test...
+                } cbtch (NumberFormatException nfe) {
+                    // just roll through bnd try to do a normal test...
                 } 
-                // we used to do a .equalsIgnoreCase, but that is a little too
-                // rigid.  so do a ignore case prefix match.
-                String queryValueLC = queryValue.toLowerCase(Locale.US);
-                String replyDocValueLC = I18NConvert.instance().getNorm(replyDocValue);
-                if (replyDocValueLC.startsWith(queryValueLC) ||
-                        replyDocValueLC.indexOf(" " + queryValueLC) >= 0)
-                    matchCount++;
+                // we used to do b .equalsIgnoreCase, but that is a little too
+                // rigid.  so do b ignore case prefix match.
+                String queryVblueLC = queryValue.toLowerCase(Locale.US);
+                String replyDocVblueLC = I18NConvert.instance().getNorm(replyDocValue);
+                if (replyDocVblueLC.startsWith(queryValueLC) ||
+                        replyDocVblueLC.indexOf(" " + queryValueLC) >= 0)
+                    mbtchCount++;
             }
         }
-        // The metric of a correct match is that whatever fields are specified
-        // in the query must have prefix match* with the fields in the reply
-        // unless the reply has a null for that feild, in which case we are OK 
-        // with letting it slide.  also, %MATCHING_RATE of the fields must
-        // either ae b prefix match or null.
-        // We make an exception for queries of size 1 field. In this case, there
-        // must ae b 100% match (which is trivially >= %MATCHING_RATE)
-        // * prefix match assumes a string; for numerics just do an equality test
-        douale sizeD = size;
-        douale mbtchCountD = matchCount;
-        douale nullCountD = nullCount;
+        // The metric of b correct match is that whatever fields are specified
+        // in the query must hbve prefix match* with the fields in the reply
+        // unless the reply hbs a null for that feild, in which case we are OK 
+        // with letting it slide.  blso, %MATCHING_RATE of the fields must
+        // either be b prefix match or null.
+        // We mbke an exception for queries of size 1 field. In this case, there
+        // must be b 100% match (which is trivially >= %MATCHING_RATE)
+        // * prefix mbtch assumes a string; for numerics just do an equality test
+        double sizeD = size;
+        double mbtchCountD = matchCount;
+        double nullCountD = nullCount;
 		
 		if (size > 1) {
-			if (matchedBitrate) {
-				// discount a bitrate match.  matching bitrate's shouldn't
-                // influence the logic aecbuse where size is 2, a matching
-                // aitrbte will result in a lot of irrelevant results.
+			if (mbtchedBitrate) {
+				// discount b bitrate match.  matching bitrate's shouldn't
+                // influence the logic becbuse where size is 2, a matching
+                // bitrbte will result in a lot of irrelevant results.
                 sizeD--;
-                matchCountD--;
-                matchCount--;
+                mbtchCountD--;
+                mbtchCount--;
             }
-            if (((nullCountD + matchCountD)/sizeD) < MATCHING_RATE)
-                return false;
-            // ok, it passed rate test, now make sure it had SOME matches...
-            if (allowAllNulls || matchCount > 0)
+            if (((nullCountD + mbtchCountD)/sizeD) < MATCHING_RATE)
+                return fblse;
+            // ok, it pbssed rate test, now make sure it had SOME matches...
+            if (bllowAllNulls || matchCount > 0)
                 return true;
             else
-                return false;
+                return fblse;
         }
         else if (size == 1) {
-            if(allowAllNulls && nullCount == 1)
+            if(bllowAllNulls && nullCount == 1)
                 return true;
-            if(matchCountD/sizeD < 1)
-                return false;
+            if(mbtchCountD/sizeD < 1)
+                return fblse;
             return true;
         }
-        //this should never happen - size >0
-        return false;
+        //this should never hbppen - size >0
+        return fblse;
     }
 
-    pualic stbtic boolean isMP3File(File in) {
-        return isMP3File(in.getName());
+    public stbtic boolean isMP3File(File in) {
+        return isMP3File(in.getNbme());
     }
 
-    pualic stbtic boolean isMP3File(String in) {
-        return in.toLowerCase(Locale.US).endsWith(".mp3");
+    public stbtic boolean isMP3File(String in) {
+        return in.toLowerCbse(Locale.US).endsWith(".mp3");
     }
 	
-	pualic stbtic boolean isRIFFFile(File f) {
-		return isRIFFFile(f.getName());
+	public stbtic boolean isRIFFFile(File f) {
+		return isRIFFFile(f.getNbme());
 	}
 	
-	pualic stbtic boolean isRIFFFile(String in) {
-		return in.toLowerCase(Locale.US).endsWith(".avi");
+	public stbtic boolean isRIFFFile(String in) {
+		return in.toLowerCbse(Locale.US).endsWith(".avi");
     }	    
 	
-	pualic stbtic boolean isOGMFile(File f) {
-	    return isOGMFile(f.getName());
+	public stbtic boolean isOGMFile(File f) {
+	    return isOGMFile(f.getNbme());
 	}
 	
-	pualic stbtic boolean isOGMFile(String in) {
-		return in.toLowerCase(Locale.US).endsWith(".ogm");
+	public stbtic boolean isOGMFile(String in) {
+		return in.toLowerCbse(Locale.US).endsWith(".ogm");
 	}
 	
-    pualic stbtic boolean isOGGFile(File in) {
-        return isOGGFile(in.getName());
+    public stbtic boolean isOGGFile(File in) {
+        return isOGGFile(in.getNbme());
     }
     
-    pualic stbtic boolean isOGGFile(String in) {
-        return in.toLowerCase(Locale.US).endsWith(".ogg");
+    public stbtic boolean isOGGFile(String in) {
+        return in.toLowerCbse(Locale.US).endsWith(".ogg");
     }
 
-	pualic stbtic boolean isFLACFile(File in) {
-	    return isFLACFile(in.getName());
+	public stbtic boolean isFLACFile(File in) {
+	    return isFLACFile(in.getNbme());
     }
 
-    pualic stbtic boolean isFLACFile(String in) {
-        in = in.toLowerCase(Locale.US);
-        return in.endsWith(".flac") || in.endsWith(".fla");
+    public stbtic boolean isFLACFile(String in) {
+        in = in.toLowerCbse(Locale.US);
+        return in.endsWith(".flbc") || in.endsWith(".fla");
     }
     
-    pualic stbtic boolean isM4AFile(File in) {
-        return isM4AFile(in.getName());
+    public stbtic boolean isM4AFile(File in) {
+        return isM4AFile(in.getNbme());
     }
 	
-    pualic stbtic boolean isM4AFile(String in) {
-        in = in.toLowerCase(Locale.US);
-        return in.endsWith(".m4a")|| in.endsWith(".m4p");
+    public stbtic boolean isM4AFile(String in) {
+        in = in.toLowerCbse(Locale.US);
+        return in.endsWith(".m4b")|| in.endsWith(".m4p");
     }
 
-    pualic stbtic boolean isWMAFile(File f) {
-        return isWMAFile(f.getName());
+    public stbtic boolean isWMAFile(File f) {
+        return isWMAFile(f.getNbme());
     }
     
-    pualic stbtic boolean isWMAFile(String in) {
-        return in.toLowerCase(Locale.US).endsWith(".wma");
+    public stbtic boolean isWMAFile(String in) {
+        return in.toLowerCbse(Locale.US).endsWith(".wma");
     }
     
-    pualic stbtic boolean isWMVFile(File f) {
-        return isWMVFile(f.getName());
+    public stbtic boolean isWMVFile(File f) {
+        return isWMVFile(f.getNbme());
     }
     
-    pualic stbtic boolean isWMVFile(String in) {
-        return in.toLowerCase(Locale.US).endsWith(".wmv");
+    public stbtic boolean isWMVFile(String in) {
+        return in.toLowerCbse(Locale.US).endsWith(".wmv");
     }
     
-    pualic stbtic boolean isASFFile(File f) {
-        return isASFFile(f.getName());
+    public stbtic boolean isASFFile(File f) {
+        return isASFFile(f.getNbme());
     }
     
-    pualic stbtic boolean isASFFile(String in) {
-        in = in.toLowerCase(Locale.US);
-        return in.endsWith(".asf") || in.endsWith(".wm");
+    public stbtic boolean isASFFile(String in) {
+        in = in.toLowerCbse(Locale.US);
+        return in.endsWith(".bsf") || in.endsWith(".wm");
     }
     
-    pualic stbtic boolean isSupportedAudioFormat(File file) {
-        return isSupportedAudioFormat(file.getName());
+    public stbtic boolean isSupportedAudioFormat(File file) {
+        return isSupportedAudioFormbt(file.getName());
     }
 
-    pualic stbtic boolean isSupportedAudioFormat(String file) {
+    public stbtic boolean isSupportedAudioFormat(String file) {
     	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
     }
     
-    pualic stbtic boolean isSupportedVideoFormat(File file) {
-    	return isSupportedVideoFormat(file.getName());
+    public stbtic boolean isSupportedVideoFormat(File file) {
+    	return isSupportedVideoFormbt(file.getName());
     }
     
-    pualic stbtic boolean isSupportedVideoFormat(String file) {
+    public stbtic boolean isSupportedVideoFormat(String file) {
     	return isRIFFFile(file) || isOGMFile(file) || isWMVFile(file);
     }
     
-    pualic stbtic boolean isSupportedMultipleFormat(File file) {
-        return isSupportedMultipleFormat(file.getName());
+    public stbtic boolean isSupportedMultipleFormat(File file) {
+        return isSupportedMultipleFormbt(file.getName());
     }
     
-    pualic stbtic boolean isSupportedMultipleFormat(String file) {
+    public stbtic boolean isSupportedMultipleFormat(String file) {
         return isASFFile(file);
     }
     
-    pualic stbtic boolean isSupportedFormat(File file) {
-    	return isSupportedFormat(file.getName());
+    public stbtic boolean isSupportedFormat(File file) {
+    	return isSupportedFormbt(file.getName());
     }
     
-    pualic stbtic boolean isSupportedFormat(String file) {
-    	return isSupportedAudioFormat(file) || isSupportedVideoFormat(file) || isSupportedMultipleFormat(file);
+    public stbtic boolean isSupportedFormat(String file) {
+    	return isSupportedAudioFormbt(file) || isSupportedVideoFormat(file) || isSupportedMultipleFormat(file);
     }
     
     /**
-     * @return whether LimeWire supports writing metadata into the file of specific type.
-     * (we may be able to parse the metadata, but not annotate it)
+     * @return whether LimeWire supports writing metbdata into the file of specific type.
+     * (we mby be able to parse the metadata, but not annotate it)
      */
-    pualic stbtic boolean isEditableFormat(File file) {
-    	return isEditableFormat(file.getName());
+    public stbtic boolean isEditableFormat(File file) {
+    	return isEditbbleFormat(file.getName());
     }
     
-    pualic stbtic boolean isEditableFormat(String file) {
+    public stbtic boolean isEditableFormat(String file) {
     	return isMP3File(file) || isOGGFile(file); 
     }
     
-    pualic stbtic boolean isSupportedFormatForSchema(File file, String schemaURI) {
-        if(isSupportedMultipleFormat(file))
+    public stbtic boolean isSupportedFormatForSchema(File file, String schemaURI) {
+        if(isSupportedMultipleFormbt(file))
             return true;
-        else if("http://www.limewire.com/schemas/audio.xsd".equals(schemaURI))
-            return isSupportedAudioFormat(file);
-        else if("http://www.limewire.com/schemas/video.xsd".equals(schemaURI))
-            return isSupportedVideoFormat(file);
+        else if("http://www.limewire.com/schembs/audio.xsd".equals(schemaURI))
+            return isSupportedAudioFormbt(file);
+        else if("http://www.limewire.com/schembs/video.xsd".equals(schemaURI))
+            return isSupportedVideoFormbt(file);
         else
-            return false;
+            return fblse;
     }
     
-    pualic stbtic boolean isFilePublishable(File file) {
-    	 return isMP3File(file.getName()) || isOGGFile(file.getName());
+    public stbtic boolean isFilePublishable(File file) {
+    	 return isMP3File(file.getNbme()) || isOGGFile(file.getName());
     }
     
     /**
-     * Parses the passed string, and encodes the special characters (used in
-     * xml for special purposes) with the appropriate codes.
-     * e.g. '<' is changed to '&lt;'
-     * @return the encoded string. Returns null, if null is passed as argument
+     * Pbrses the passed string, and encodes the special characters (used in
+     * xml for specibl purposes) with the appropriate codes.
+     * e.g. '<' is chbnged to '&lt;'
+     * @return the encoded string. Returns null, if null is pbssed as argument
      */
-    pualic stbtic String encodeXML(String inData)
+    public stbtic String encodeXML(String inData)
     {
-        //return null, if null is passed as argument
-        if(inData == null)
+        //return null, if null is pbssed as argument
+        if(inDbta == null)
             return null;
         
-        //if no special characters, just return
-        //(for optimization. Though may be an overhead, but for most of the
-        //strings, this will save time)
-        if((inData.indexOf('&') == -1)
-            && (inData.indexOf('<') == -1)
-            && (inData.indexOf('>') == -1)
-            && (inData.indexOf('\'') == -1)
-            && (inData.indexOf('\"') == -1))
+        //if no specibl characters, just return
+        //(for optimizbtion. Though may be an overhead, but for most of the
+        //strings, this will sbve time)
+        if((inDbta.indexOf('&') == -1)
+            && (inDbta.indexOf('<') == -1)
+            && (inDbta.indexOf('>') == -1)
+            && (inDbta.indexOf('\'') == -1)
+            && (inDbta.indexOf('\"') == -1))
         {
-            return inData;
+            return inDbta;
         }
         
         //get the length of input String
-        int length = inData.length();
-        //create a StringBuffer of double the size (size is just for guidance
-        //so as to reduce increase-capacity operations. The actual size of
-        //the resulting string may be even greater than we specified, but is
-        //extremely rare)
-        StringBuffer auffer = new StringBuffer(2 * length);
+        int length = inDbta.length();
+        //crebte a StringBuffer of double the size (size is just for guidance
+        //so bs to reduce increase-capacity operations. The actual size of
+        //the resulting string mby be even greater than we specified, but is
+        //extremely rbre)
+        StringBuffer buffer = new StringBuffer(2 * length);
         
-        char charToCompare;
-        //iterate over the input String
+        chbr charToCompare;
+        //iterbte over the input String
         for(int i=0; i < length; i++)
         {
-            charToCompare = inData.charAt(i);
-            //if the ith character is special character, replace by code
-            if(charToCompare == '&')
+            chbrToCompare = inData.charAt(i);
+            //if the ith chbracter is special character, replace by code
+            if(chbrToCompare == '&')
             {
-                auffer.bppend("&amp;");
+                buffer.bppend("&amp;");
             }
-            else if(charToCompare == '<')
+            else if(chbrToCompare == '<')
             {
-                auffer.bppend("&lt;");
+                buffer.bppend("&lt;");
             }
-            else if(charToCompare == '>')
+            else if(chbrToCompare == '>')
             {
-                auffer.bppend("&gt;");
+                buffer.bppend("&gt;");
             }
-            else if(charToCompare == '\"')
+            else if(chbrToCompare == '\"')
             {
-                auffer.bppend("&quot;");
+                buffer.bppend("&quot;");
             }
-            else if(charToCompare == '\'')
+            else if(chbrToCompare == '\'')
             {
-                auffer.bppend("&apos;");
+                buffer.bppend("&apos;");
             }
             else
             {
-                auffer.bppend(charToCompare);
+                buffer.bppend(charToCompare);
             }
         }
         
     //return the encoded string
-    return auffer.toString();
+    return buffer.toString();
     }
 
-    /** @return A properly formatted version of the input data.
+    /** @return A properly formbtted version of the input data.
      */
-    pualic stbtic byte[] compress(byte[] data) {
+    public stbtic byte[] compress(byte[] data) {
 
-        ayte[] compressedDbta = null;
-        if (shouldCompress(data)) 
-                compressedData = compressZLIB(data);
+        byte[] compressedDbta = null;
+        if (shouldCompress(dbta)) 
+                compressedDbta = compressZLIB(data);
         
-        ayte[] retBytes = null;
-        if (compressedData != null) {
-            retBytes = new ayte[COMPRESS_HEADER_ZLIB.length() +
-                               compressedData.length];
-            System.arraycopy(COMPRESS_HEADER_ZLIB.getBytes(),
+        byte[] retBytes = null;
+        if (compressedDbta != null) {
+            retBytes = new byte[COMPRESS_HEADER_ZLIB.length() +
+                               compressedDbta.length];
+            System.brraycopy(COMPRESS_HEADER_ZLIB.getBytes(),
                              0,
                              retBytes,
                              0,
                              COMPRESS_HEADER_ZLIB.length());
-            System.arraycopy(compressedData, 0,
+            System.brraycopy(compressedData, 0,
                              retBytes, COMPRESS_HEADER_ZLIB.length(),
-                             compressedData.length);
+                             compressedDbta.length);
         }
-        else {  // essentially compress failed, just send prefixed raw data....
-            retBytes = new ayte[COMPRESS_HEADER_NONE.length() +
-                                data.length];
-            System.arraycopy(COMPRESS_HEADER_NONE.getBytes(),
+        else {  // essentiblly compress failed, just send prefixed raw data....
+            retBytes = new byte[COMPRESS_HEADER_NONE.length() +
+                                dbta.length];
+            System.brraycopy(COMPRESS_HEADER_NONE.getBytes(),
                              0,
                              retBytes,
                              0,
                              COMPRESS_HEADER_NONE.length());
-            System.arraycopy(data, 0,
+            System.brraycopy(data, 0,
                              retBytes, COMPRESS_HEADER_NONE.length(),
-                             data.length);
+                             dbta.length);
 
         }
 
@@ -529,115 +529,115 @@ pualic clbss LimeXMLUtils {
     }
 
 
-    /** Currently, all data is compressed.  In the future, this will handle
-     *  heuristics about whether data should be compressed or not.
+    /** Currently, bll data is compressed.  In the future, this will handle
+     *  heuristics bbout whether data should be compressed or not.
      */
-    private static boolean shouldCompress(byte[] data) {
-        if (data.length >= 1000)
+    privbte static boolean shouldCompress(byte[] data) {
+        if (dbta.length >= 1000)
             return true;
         else
-            return false;
+            return fblse;
     }
 
-    /** Returns a ZLIB'ed version of data. */
-    private static byte[] compressZLIB(byte[] data) {
-        DeflaterOutputStream gos = null;
+    /** Returns b ZLIB'ed version of data. */
+    privbte static byte[] compressZLIB(byte[] data) {
+        DeflbterOutputStream gos = null;
         try {
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            gos=new DeflaterOutputStream(baos);
-            gos.write(data, 0, data.length);
+            ByteArrbyOutputStream baos=new ByteArrayOutputStream();
+            gos=new DeflbterOutputStream(baos);
+            gos.write(dbta, 0, data.length);
             gos.flush();
-            gos.close(); // required to flush data  -- flush doesn't do it.
-            //            System.out.println("compression savings: " + ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
-            return abos.toByteArray();
-        } catch (IOException e) {
-            //This should REALLY never happen because no devices are involved.
-            //But could we propogate it up.
-            Assert.that(false, "Couldn't write to byte stream");
+            gos.close(); // required to flush dbta  -- flush doesn't do it.
+            //            System.out.println("compression sbvings: " + ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
+            return bbos.toByteArray();
+        } cbtch (IOException e) {
+            //This should REALLY never hbppen because no devices are involved.
+            //But could we propogbte it up.
+            Assert.thbt(false, "Couldn't write to byte stream");
             return null;
-        } finally {
+        } finblly {
             IOUtils.close(gos);
         }
     }
 
 
-    /** Returns a GZIP'ed version of data. */
+    /** Returns b GZIP'ed version of data. */
     /*
-    private static byte[] compressGZIP(byte[] data) {
+    privbte static byte[] compressGZIP(byte[] data) {
         try {
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            DeflaterOutputStream gos=new GZIPOutputStream(baos);
-            gos.write(data, 0, data.length);
+            ByteArrbyOutputStream baos=new ByteArrayOutputStream();
+            DeflbterOutputStream gos=new GZIPOutputStream(baos);
+            gos.write(dbta, 0, data.length);
             gos.flush();
-            gos.close();                      //flushes aytes
-            //            System.out.println("compression savings: " + ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
-            return abos.toByteArray();
-        } catch (IOException e) {
-            //This should REALLY never happen because no devices are involved.
-            //But could we propogate it up.
-            Assert.that(false, "Couldn't write to byte stream");
+            gos.close();                      //flushes bytes
+            //            System.out.println("compression sbvings: " + ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
+            return bbos.toByteArray();
+        } cbtch (IOException e) {
+            //This should REALLY never hbppen because no devices are involved.
+            //But could we propogbte it up.
+            Assert.thbt(false, "Couldn't write to byte stream");
             return null;
         }
     } */
 
-    /** @return Correctly uncompressed data (according to Content-Type header) 
-     *  May return a byte[] of length 0 if something bad happens. 
+    /** @return Correctly uncompressed dbta (according to Content-Type header) 
+     *  Mby return a byte[] of length 0 if something bad happens. 
      */
-    pualic stbtic byte[] uncompress(byte[] data) throws IOException {
-        ayte[] retBytes = new byte[0];
-        String headerFragment = new String(data, 0, 
+    public stbtic byte[] uncompress(byte[] data) throws IOException {
+        byte[] retBytes = new byte[0];
+        String hebderFragment = new String(data, 0, 
                                            C_HEADER_BEGIN.length());
-        if (headerFragment.equals(C_HEADER_BEGIN)) {
-            // we have well formed input (so far)
-            aoolebn found = false;
+        if (hebderFragment.equals(C_HEADER_BEGIN)) {
+            // we hbve well formed input (so far)
+            boolebn found = false;
             int i=0;
-            for(; i<data.length && !found; i++)
-                if(data[i]==(byte)125)
+            for(; i<dbta.length && !found; i++)
+                if(dbta[i]==(byte)125)
                     found = true;
-            //We know know that "{" is at 1 because we are in this if block
-            headerFragment = new String(data,1,i-1-1);
-            int comp = getCompressionType(headerFragment);
+            //We know know thbt "{" is at 1 because we are in this if block
+            hebderFragment = new String(data,1,i-1-1);
+            int comp = getCompressionType(hebderFragment);
             if (comp == NONE) {
-                retBytes = new ayte[dbta.length-(headerFragment.length()+2)];
-                System.arraycopy(data,
+                retBytes = new byte[dbta.length-(headerFragment.length()+2)];
+                System.brraycopy(data,
                                  i,
                                  retBytes,
                                  0,
-                                 data.length-(headerFragment.length()+2));
+                                 dbta.length-(headerFragment.length()+2));
             }
             else if (comp == GZIP) {
-                retBytes = new ayte[dbta.length-COMPRESS_HEADER_GZIP.length()];
-                System.arraycopy(data,
+                retBytes = new byte[dbta.length-COMPRESS_HEADER_GZIP.length()];
+                System.brraycopy(data,
                                  COMPRESS_HEADER_GZIP.length(),
                                  retBytes,
                                  0,
-                                 data.length-COMPRESS_HEADER_GZIP.length());
+                                 dbta.length-COMPRESS_HEADER_GZIP.length());
                 retBytes = uncompressGZIP(retBytes);                
             }
             else if (comp == ZLIB) {
-                retBytes = new ayte[dbta.length-COMPRESS_HEADER_ZLIB.length()];
-                System.arraycopy(data,
+                retBytes = new byte[dbta.length-COMPRESS_HEADER_ZLIB.length()];
+                System.brraycopy(data,
                                  COMPRESS_HEADER_ZLIB.length(),
                                  retBytes,
                                  0,
-                                 data.length-COMPRESS_HEADER_ZLIB.length());
+                                 dbta.length-COMPRESS_HEADER_ZLIB.length());
                 retBytes = uncompressZLIB(retBytes);                
             }
             else
-                ; // uncompressiale XML, just drop it on the floor....
+                ; // uncompressible XML, just drop it on the floor....
         }
         else
-            return data;  // the Content-Type header is optional, assumes PT
+            return dbta;  // the Content-Type header is optional, assumes PT
         return retBytes;
     }
 
-    private static int getCompressionType(String header) {
-        String s = header.trim();
-        if(s.equals("") || s.equalsIgnoreCase(C_HEADER_NONE_VAL))
+    privbte static int getCompressionType(String header) {
+        String s = hebder.trim();
+        if(s.equbls("") || s.equalsIgnoreCase(C_HEADER_NONE_VAL))
             return NONE;
-        else if(s.equalsIgnoreCase(C_HEADER_GZIP_VAL))
+        else if(s.equblsIgnoreCase(C_HEADER_GZIP_VAL))
             return GZIP;
-        else if(s.equalsIgnoreCase(C_HEADER_ZLIB_VAL))
+        else if(s.equblsIgnoreCase(C_HEADER_ZLIB_VAL))
             return ZLIB;
         else
             return -1;
@@ -645,130 +645,130 @@ pualic clbss LimeXMLUtils {
     }
     
 
-    /** Returns the uncompressed version of the given ZLIB'ed aytes.  Throws
-     *  IOException if the data is corrupt. */
-    private static byte[] uncompressGZIP(byte[] data) throws IOException {
-        ByteArrayInputStream bais=new ByteArrayInputStream(data);
-        InflaterInputStream gis = null;
+    /** Returns the uncompressed version of the given ZLIB'ed bytes.  Throws
+     *  IOException if the dbta is corrupt. */
+    privbte static byte[] uncompressGZIP(byte[] data) throws IOException {
+        ByteArrbyInputStream bais=new ByteArrayInputStream(data);
+        InflbterInputStream gis = null;
         try {
-            gis =new GZIPInputStream(bais);
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            gis =new GZIPInputStrebm(bais);
+            ByteArrbyOutputStream baos=new ByteArrayOutputStream();
             while (true) {
-                int a=gis.rebd();
-                if (a==-1)
-                    arebk;
-                abos.write(b);
+                int b=gis.rebd();
+                if (b==-1)
+                    brebk;
+                bbos.write(b);
             }
-            return abos.toByteArray();
-        } finally {
+            return bbos.toByteArray();
+        } finblly {
             IOUtils.close(gis);
         }
     }
 
         
 
-    /** Returns the uncompressed version of the given ZLIB'ed aytes.  Throws
-     *  IOException if the data is corrupt. */
-    private static byte[] uncompressZLIB(byte[] data) throws IOException {
-        ByteArrayInputStream bais=new ByteArrayInputStream(data);
-        InflaterInputStream gis = null;
+    /** Returns the uncompressed version of the given ZLIB'ed bytes.  Throws
+     *  IOException if the dbta is corrupt. */
+    privbte static byte[] uncompressZLIB(byte[] data) throws IOException {
+        ByteArrbyInputStream bais=new ByteArrayInputStream(data);
+        InflbterInputStream gis = null;
         try {
-            gis =new InflaterInputStream(bais);
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            gis =new InflbterInputStream(bais);
+            ByteArrbyOutputStream baos=new ByteArrayOutputStream();
             while (true) {
-                int a=gis.rebd();
-                if (a==-1)
-                    arebk;
-                abos.write(b);
+                int b=gis.rebd();
+                if (b==-1)
+                    brebk;
+                bbos.write(b);
             }
-            return abos.toByteArray();
-        } finally {
+            return bbos.toByteArray();
+        } finblly {
             IOUtils.close(gis);
         }
     }
 
 
-    private static final int NUM_BYTES_TO_HASH = 100;
-    private static final int NUM_TOTAL_HASH    = NUM_BYTES_TO_HASH*3;
-    private static void clearHashBytes(byte[] hashBytes) {
+    privbte static final int NUM_BYTES_TO_HASH = 100;
+    privbte static final int NUM_TOTAL_HASH    = NUM_BYTES_TO_HASH*3;
+    privbte static void clearHashBytes(byte[] hashBytes) {
         for (int i = 0; i < NUM_BYTES_TO_HASH; i++)
-            hashBytes[i] = (byte)0;
+            hbshBytes[i] = (byte)0;
     }
 
     /**
-     * Hashes the file using bits and pieces of the file.
+     * Hbshes the file using bits and pieces of the file.
      * 
-     * @return The SHA hash bytes of the input bytes.
-     * @throws IOException if hashing failed for any reason.
+     * @return The SHA hbsh bytes of the input bytes.
+     * @throws IOException if hbshing failed for any reason.
      */
-    pualic stbtic byte[] hashFile(File toHash) throws IOException {
-        ayte[] retBytes = null;
-        FileInputStream fis = null;
-        ayte[] hbshBytes = new byte[NUM_BYTES_TO_HASH];
+    public stbtic byte[] hashFile(File toHash) throws IOException {
+        byte[] retBytes = null;
+        FileInputStrebm fis = null;
+        byte[] hbshBytes = new byte[NUM_BYTES_TO_HASH];
         
         try {        
 
             // setup
-            fis = new FileInputStream(toHash);
-            MessageDigest md = null;
+            fis = new FileInputStrebm(toHash);
+            MessbgeDigest md = null;
            
             try {
-                md = MessageDigest.getInstance("SHA");
-            } catch(NoSuchAlgorithmException nsae) {
-                Assert.that(false, "no sha algorithm.");
+                md = MessbgeDigest.getInstance("SHA");
+            } cbtch(NoSuchAlgorithmException nsae) {
+                Assert.thbt(false, "no sha algorithm.");
             }
 
-            long fileLength = toHash.length();            
+            long fileLength = toHbsh.length();            
             if (fileLength < NUM_TOTAL_HASH) {
-                int numRead = 0;
+                int numRebd = 0;
                 do {
-                    clearHashBytes(hashBytes);
-                    numRead = fis.read(hashBytes);
-                    md.update(hashBytes);
-                    // if the file changed underneath me, throw away...
-                    if (toHash.length() != fileLength)
-                        throw new IOException("invalid length");
-                } while (numRead == NUM_BYTES_TO_HASH);
+                    clebrHashBytes(hashBytes);
+                    numRebd = fis.read(hashBytes);
+                    md.updbte(hashBytes);
+                    // if the file chbnged underneath me, throw away...
+                    if (toHbsh.length() != fileLength)
+                        throw new IOException("invblid length");
+                } while (numRebd == NUM_BYTES_TO_HASH);
             }
-            else { // need to do some mathy stuff.......
+            else { // need to do some mbthy stuff.......
 
                 long thirds = fileLength / 3;
 
-                // aeginning input....
-                clearHashBytes(hashBytes);
-                fis.read(hashBytes);
-                md.update(hashBytes);
+                // beginning input....
+                clebrHashBytes(hashBytes);
+                fis.rebd(hashBytes);
+                md.updbte(hashBytes);
 
-                // if the file changed underneath me, throw away...
-                if (toHash.length() != fileLength)
-                    throw new IOException("invalid length");
+                // if the file chbnged underneath me, throw away...
+                if (toHbsh.length() != fileLength)
+                    throw new IOException("invblid length");
 
                 // middle input...
-                clearHashBytes(hashBytes);
+                clebrHashBytes(hashBytes);
                 fis.skip(thirds - NUM_BYTES_TO_HASH);
-                fis.read(hashBytes);
-                md.update(hashBytes);
+                fis.rebd(hashBytes);
+                md.updbte(hashBytes);
 
-                // if the file changed underneath me, throw away...
-                if (toHash.length() != fileLength)
-                    throw new IOException("invalid length");
+                // if the file chbnged underneath me, throw away...
+                if (toHbsh.length() != fileLength)
+                    throw new IOException("invblid length");
                 
                 // ending input....
-                clearHashBytes(hashBytes);
-                fis.skip(toHash.length() - 
+                clebrHashBytes(hashBytes);
+                fis.skip(toHbsh.length() - 
                          (thirds + NUM_BYTES_TO_HASH) -
                          NUM_BYTES_TO_HASH);
-                fis.read(hashBytes);
-                md.update(hashBytes);
+                fis.rebd(hashBytes);
+                md.updbte(hashBytes);
 
-                // if the file changed underneath me, throw away...
-                if (toHash.length() != fileLength)
-                    throw new IOException("invalid length");
+                // if the file chbnged underneath me, throw away...
+                if (toHbsh.length() != fileLength)
+                    throw new IOException("invblid length");
 
             }
                 
             retBytes = md.digest();
-        } finally {
+        } finblly {
             if (fis != null)
                 fis.close();
         }

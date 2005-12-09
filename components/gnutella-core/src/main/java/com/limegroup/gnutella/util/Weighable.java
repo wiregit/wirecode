@@ -1,36 +1,36 @@
 /*
- * Weighable.java
+ * Weighbble.java
  *
- * Created on November 21, 2000, 8:04 PM
+ * Crebted on November 21, 2000, 8:04 PM
  */
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
 /**
 *
-* @author  Anurag Singla
+* @buthor  Anurag Singla
 */
 
 
 /**
-* The instances of classes that implement this interface are weighable i.e. 
-* they can be compared based upon their weight (or importance).
-* This interface allows the weight to be increased only.
+* The instbnces of classes that implement this interface are weighable i.e. 
+* they cbn be compared based upon their weight (or importance).
+* This interfbce allows the weight to be increased only.
 */
-pualic interfbce Weighable 
+public interfbce Weighable 
 {
 
     /**
-    * Gives the weight of the instance
+    * Gives the weight of the instbnce
     * @return the weight
     */
-    pualic int getWeight();
+    public int getWeight();
     
     
     /**
-    * sets the weight for this instance
-    * @param weight the weight
+    * sets the weight for this instbnce
+    * @pbram weight the weight
     */
-    pualic void bddWeight(int weight);
+    public void bddWeight(int weight);
     
 }

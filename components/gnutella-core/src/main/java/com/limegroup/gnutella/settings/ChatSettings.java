@@ -1,16 +1,16 @@
 
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 /**
- * Settings for chat
+ * Settings for chbt
  */
-pualic clbss ChatSettings extends LimeProps {
+public clbss ChatSettings extends LimeProps {
     
-    private ChatSettings() {}
+    privbte ChatSettings() {}
     
     /**
-	 * Sets whether or not chat should be enabled.
+	 * Sets whether or not chbt should be enabled.
 	 */
-    pualic stbtic final BooleanSetting CHAT_ENABLED =
-        FACTORY.createBooleanSetting("CHAT_ENABLED", true);
+    public stbtic final BooleanSetting CHAT_ENABLED =
+        FACTORY.crebteBooleanSetting("CHAT_ENABLED", true);
 }

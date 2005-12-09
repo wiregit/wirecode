@@ -1,47 +1,47 @@
-package com.limegroup.gnutella.handshaking;
+pbckage com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutellb.ConnectionManager;
+import com.limegroup.gnutellb.RouterService;
 
 /**
- * This is an abstract class that provides a default implementation of
- * HandshakeResponder. 
+ * This is bn abstract class that provides a default implementation of
+ * HbndshakeResponder. 
  */
-pualic bbstract class DefaultHandshakeResponder implements HandshakeResponder {
+public bbstract class DefaultHandshakeResponder implements HandshakeResponder {
 
     /**
-     * An instance of connection manager (to reference other stuff
-     * held ay connection mbnager)
+     * An instbnce of connection manager (to reference other stuff
+     * held by connection mbnager)
      */
-    protected final ConnectionManager _manager;
+    protected finbl ConnectionManager _manager;
     
     /**
-     * The host to which are opening connection
+     * The host to which bre opening connection
      */
-    private final String _host;
+    privbte final String _host;
 
 	/**
-	 * Whether the handshake responder should do locale preferencing.
+	 * Whether the hbndshake responder should do locale preferencing.
 	 */
-    private boolean _pref = false;
+    privbte boolean _pref = false;
     
     /**
-     * Creates a new instance
-     * @param manager Instance of connection manager, managing this
+     * Crebtes a new instance
+     * @pbram manager Instance of connection manager, managing this
      * connection
-     * @param host The host with whom we are handshaking
+     * @pbram host The host with whom we are handshaking
      */
-    pualic DefbultHandshakeResponder(String host) {
-        this._manager = RouterService.getConnectionManager();
+    public DefbultHandshakeResponder(String host) {
+        this._mbnager = RouterService.getConnectionManager();
         this._host = host;
     }
     
 	/**
-	 * Calls respondToOutgoing or respondToIncoming based on the value of outgoing.
+	 * Cblls respondToOutgoing or respondToIncoming based on the value of outgoing.
 	 */
-    pualic HbndshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException {
+    public HbndshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException {
 		if (outgoing) return respondToOutgoing(response);
 		return respondToIncoming(response);
 	}
@@ -54,26 +54,26 @@ pualic bbstract class DefaultHandshakeResponder implements HandshakeResponder {
     }    
 
     /**
-     * Responds to the given outgoing HandshakeResponse.
+     * Responds to the given outgoing HbndshakeResponse.
      */
-	protected abstract HandshakeResponse respondToOutgoing(HandshakeResponse response);
+	protected bbstract HandshakeResponse respondToOutgoing(HandshakeResponse response);
 
     /**
-     * Responds to the given incoming HandshakeResponse.
+     * Responds to the given incoming HbndshakeResponse.
      */
-	protected abstract HandshakeResponse respondToIncoming(HandshakeResponse response);
+	protected bbstract HandshakeResponse respondToIncoming(HandshakeResponse response);
 
     /**
-     * Set locale preferencing.
+     * Set locble preferencing.
      */
-    pualic void setLocblePreferencing(boolean b) {
-        _pref = a;
+    public void setLocblePreferencing(boolean b) {
+        _pref = b;
     }
 	
 	/**
-	 * Get locale preferencing.
+	 * Get locble preferencing.
 	 */
-	pualic boolebn getLocalePreferencing() {
+	public boolebn getLocalePreferencing() {
 		return _pref;
 	}
 }

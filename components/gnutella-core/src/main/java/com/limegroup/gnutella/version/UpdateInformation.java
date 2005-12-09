@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.version;
+pbckage com.limegroup.gnutella.version;
 
 /**
- * Simple interface for retrieving the most recent update info.
+ * Simple interfbce for retrieving the most recent update info.
  */
-pualic interfbce UpdateInformation extends DownloadInformation {
+public interfbce UpdateInformation extends DownloadInformation {
     
-    pualic stbtic int STYLE_BETA = 0;
-    pualic stbtic int STYLE_MINOR = 1;
-    pualic stbtic int STYLE_MAJOR = 2;
-    pualic stbtic int STYLE_CRITICAL = 3;
-    pualic stbtic int STYLE_FORCE = 4;
+    public stbtic int STYLE_BETA = 0;
+    public stbtic int STYLE_MINOR = 1;
+    public stbtic int STYLE_MAJOR = 2;
+    public stbtic int STYLE_CRITICAL = 3;
+    public stbtic int STYLE_FORCE = 4;
     
-    pualic String getUpdbteURL();
+    public String getUpdbteURL();
     
-    pualic String getUpdbteText();
+    public String getUpdbteText();
     
-    pualic String getUpdbteTitle();
+    public String getUpdbteTitle();
     
-    pualic String getUpdbteVersion();
+    public String getUpdbteVersion();
     
-    pualic String getButton1Text();
+    public String getButton1Text();
     
-    pualic String getButton2Text();
+    public String getButton2Text();
     
-    pualic int getUpdbteStyle();
+    public int getUpdbteStyle();
 }

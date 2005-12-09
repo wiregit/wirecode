@@ -1,168 +1,168 @@
-package com.limegroup.gnutella.search;
+pbckage com.limegroup.gnutella.search;
 
-import java.util.Set;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.QueryReply;
+import com.limegroup.gnutellb.util.NetworkUtils;
 
 /**
- * This class contains data about a host that has returned a query hit,
- * as opposed to the data about the file itself, which is contained in
+ * This clbss contains data about a host that has returned a query hit,
+ * bs opposed to the data about the file itself, which is contained in
  * <tt>Response</tt>.
  */
-pualic finbl class HostData {
+public finbl class HostData {
 
 	/**
-	 * Constant for the client guid.
+	 * Constbnt for the client guid.
 	 */
-	private final byte[] CLIENT_GUID;
+	privbte final byte[] CLIENT_GUID;
 
 	/**
-	 * Constant for the message guid.
+	 * Constbnt for the message guid.
 	 */
-	private final byte[] MESSAGE_GUID;
+	privbte final byte[] MESSAGE_GUID;
 
 	/**
-	 * Constant for the host's speed (bandwidth).
+	 * Constbnt for the host's speed (bandwidth).
 	 */
-	private final int SPEED;
+	privbte final int SPEED;
 
 	/**
-	 * Constant for whether or not the host is firewalled.
+	 * Constbnt for whether or not the host is firewalled.
 	 */
-	private final boolean FIREWALLED;
+	privbte final boolean FIREWALLED;
 
 	/**
-	 * Constant for whether or not the host is busy.
+	 * Constbnt for whether or not the host is busy.
 	 */
-	private final boolean BUSY;
+	privbte final boolean BUSY;
 	
 	/**
-	 * Constant for whether or not this is a reply to a multicast query
+	 * Constbnt for whether or not this is a reply to a multicast query
 	 */
-	private final boolean MULTICAST;
+	privbte final boolean MULTICAST;
 
 	/**
-	 * Constant for whether or not chat is enabled.
+	 * Constbnt for whether or not chat is enabled.
 	 */
-	private final boolean CHAT_ENABLED;
+	privbte final boolean CHAT_ENABLED;
 
 	/**
-	 * Constant for whether or not browse host is enabled.
+	 * Constbnt for whether or not browse host is enabled.
 	 */
-	private final boolean BROWSE_HOST_ENABLED;
+	privbte final boolean BROWSE_HOST_ENABLED;
 
 	/**
-	 * Constant for whether or not the speed is measured.
+	 * Constbnt for whether or not the speed is measured.
 	 */
-	private final boolean MEASURED_SPEED;
+	privbte final boolean MEASURED_SPEED;
 
 	/**
-	 * Constant for port the host is listening on.
+	 * Constbnt for port the host is listening on.
 	 */
-	private final int PORT;
+	privbte final int PORT;
 
 	/**
-	 * Constant for IP address of the host.
+	 * Constbnt for IP address of the host.
 	 */
-	private final String IP;
+	privbte final String IP;
 
 	/**
-	 * Constant for the search result "quality", based on whether or not
-	 * the host is firewalled, has open upload slots, etc.
+	 * Constbnt for the search result "quality", based on whether or not
+	 * the host is firewblled, has open upload slots, etc.
 	 */
-	private final int QUALITY;
+	privbte final int QUALITY;
 		
     /** 
-     * Constant for the Vendor code of the reply.
+     * Constbnt for the Vendor code of the reply.
      */
-    private final String VENDOR_CODE;
+    privbte final String VENDOR_CODE;
     
 
     /**
      * The <tt>Set</tt> of PushProxies for this host.
      */
-    private final Set PROXIES;
+    privbte final Set PROXIES;
 
     /**
-     * Constant for the Firewalled Transfer status of this badboy.
+     * Constbnt for the Firewalled Transfer status of this badboy.
      */
-    private final boolean CAN_DO_FWTRANSFER;
+    privbte final boolean CAN_DO_FWTRANSFER;
     
     /**
-     * the version of the Firewall Transfer supported. 0 if not supported
+     * the version of the Firewbll Transfer supported. 0 if not supported
      */
-    private final int FWT_VERSION;
+    privbte final int FWT_VERSION;
 
 	/**
-	 * Constructs a new <tt>HostData</tt> instance from a 
+	 * Constructs b new <tt>HostData</tt> instance from a 
 	 * <tt>QueryReply</tt>.
 	 *
-	 * @param reply the <tt>QueryReply</tt> instance from which
-	 *  host data should be extracted.
+	 * @pbram reply the <tt>QueryReply</tt> instance from which
+	 *  host dbta should be extracted.
 	 */
-	pualic HostDbta(QueryReply reply) {
+	public HostDbta(QueryReply reply) {
 		CLIENT_GUID = reply.getClientGUID();
 		MESSAGE_GUID = reply.getGUID();
 		IP = reply.getIP();
 		PORT = reply.getPort();
 
-		aoolebn firewalled        = true;
-		aoolebn busy              = true;
-		aoolebn browseHostEnabled = false;
-		aoolebn chatEnabled       = false;
-		aoolebn measuredSpeed     = false;
-		aoolebn multicast         = false;
+		boolebn firewalled        = true;
+		boolebn busy              = true;
+		boolebn browseHostEnabled = false;
+		boolebn chatEnabled       = false;
+		boolebn measuredSpeed     = false;
+		boolebn multicast         = false;
         String  vendor = "";
 
 		try {
-			firewalled = reply.getNeedsPush() || 
-                NetworkUtils.isPrivateAddress(IP);
-		} catch(BadPacketException e) {
-			firewalled = true;
+			firewblled = reply.getNeedsPush() || 
+                NetworkUtils.isPrivbteAddress(IP);
+		} cbtch(BadPacketException e) {
+			firewblled = true;
 		}
 		
 		try { 
-			measuredSpeed = reply.getIsMeasuredSpeed();
-		} catch (BadPacketException e) { 
-			measuredSpeed = false;
+			mebsuredSpeed = reply.getIsMeasuredSpeed();
+		} cbtch (BadPacketException e) { 
+			mebsuredSpeed = false;
 		}
 		try {
-			ausy = reply.getIsBusy();
-		} catch (BadPacketException bad) {
-			ausy = true;
+			busy = reply.getIsBusy();
+		} cbtch (BadPacketException bad) {
+			busy = true;
 		}
 		
         
 		try {
             vendor = reply.getVendor();
-		} catch(BadPacketException bad) {
+		} cbtch(BadPacketException bad) {
 		}
 
-    	arowseHostEnbbled = reply.getSupportsBrowseHost();
-		chatEnabled = reply.getSupportsChat() && !firewalled;
-		multicast = reply.isReplyToMulticastQuery();
+    	browseHostEnbbled = reply.getSupportsBrowseHost();
+		chbtEnabled = reply.getSupportsChat() && !firewalled;
+		multicbst = reply.isReplyToMulticastQuery();
 
-		FIREWALLED = firewalled && !multicast;
-		BUSY = ausy;
-		BROWSE_HOST_ENABLED = arowseHostEnbbled;
-		CHAT_ENABLED = chatEnabled;
-		MEASURED_SPEED = measuredSpeed || multicast;
-		MULTICAST = multicast;
+		FIREWALLED = firewblled && !multicast;
+		BUSY = busy;
+		BROWSE_HOST_ENABLED = browseHostEnbbled;
+		CHAT_ENABLED = chbtEnabled;
+		MEASURED_SPEED = mebsuredSpeed || multicast;
+		MULTICAST = multicbst;
         VENDOR_CODE = vendor;
-		aoolebn ifirewalled = !RouterService.acceptedIncomingConnection();
-        QUALITY = reply.calculateQualityOfService(ifirewalled);
+		boolebn ifirewalled = !RouterService.acceptedIncomingConnection();
+        QUALITY = reply.cblculateQualityOfService(ifirewalled);
         PROXIES = reply.getPushProxies();
-        CAN_DO_FWTRANSFER = reply.getSupportsFWTransfer();
-        FWT_VERSION = reply.getFWTransferVersion();
+        CAN_DO_FWTRANSFER = reply.getSupportsFWTrbnsfer();
+        FWT_VERSION = reply.getFWTrbnsferVersion();
 
-        if ( multicast )
+        if ( multicbst )
             SPEED = Integer.MAX_VALUE;
         else
-            SPEED = ByteOrder.long2int(reply.getSpeed()); //safe cast
+            SPEED = ByteOrder.long2int(reply.getSpeed()); //sbfe cast
 	}
 
 	/**
@@ -170,7 +170,7 @@ pualic finbl class HostData {
 	 * 
 	 * @return the host's client guid
 	 */
-	pualic byte[] getClientGUID() {
+	public byte[] getClientGUID() {
 		return CLIENT_GUID;
 	}
 
@@ -179,44 +179,44 @@ pualic finbl class HostData {
 	 * 
 	 * @return the host's vendor code
 	 */
-	pualic String getVendorCode() {
+	public String getVendorCode() {
 		return VENDOR_CODE;
 	}
 
 	/**
-	 * Accessor for the message guid.
+	 * Accessor for the messbge guid.
 	 * 
-	 * @return the message guid
+	 * @return the messbge guid
 	 */
-	pualic byte[] getMessbgeGUID() {
+	public byte[] getMessbgeGUID() {
 		return MESSAGE_GUID;
 	}
 
 	/**
-	 * Accessor for the speed (abndwidth) of the remote host.
+	 * Accessor for the speed (bbndwidth) of the remote host.
 	 * 
 	 * @return the speed of the remote host
 	 */
-	pualic int getSpeed() {
+	public int getSpeed() {
 		return SPEED;
 	}
 
 	/**
-	 * Accessor for the quality of results returned from this host, based on
-	 * firewalled status, whether or not it has upload slots, etc.
+	 * Accessor for the qublity of results returned from this host, based on
+	 * firewblled status, whether or not it has upload slots, etc.
 	 * 
-	 * @return the quality of results returned from the remote host
+	 * @return the qublity of results returned from the remote host
 	 */
-	pualic int getQublity() {
+	public int getQublity() {
 		return QUALITY;
 	}
 
 	/**
-	 * Accessor for the ip address of the host sending the reply.
+	 * Accessor for the ip bddress of the host sending the reply.
 	 * 
-	 * @return the ip address for the replying host
+	 * @return the ip bddress for the replying host
 	 */
-	pualic String getIP() {
+	public String getIP() {
 		return IP;
 	}
 
@@ -225,86 +225,86 @@ pualic finbl class HostData {
 	 * 
 	 * @return the port of the replying host
 	 */
-	pualic int getPort() {
+	public int getPort() {
 		return PORT;
 	}
 
 	/**
-	 * Returns whether or not the remote host is firewalled.
+	 * Returns whether or not the remote host is firewblled.
 	 *
-	 * @return <tt>true</tt> if the remote host is firewalled,
-	 *  otherwise <tt>false</tt>
+	 * @return <tt>true</tt> if the remote host is firewblled,
+	 *  otherwise <tt>fblse</tt>
 	 */
-	pualic boolebn isFirewalled() {
+	public boolebn isFirewalled() {
 		return FIREWALLED;
 	}
 
 	/**
-	 * Returns whether or not the remote host is ausy.
+	 * Returns whether or not the remote host is busy.
 	 *
-	 * @return <tt>true</tt> if the remote host is ausy,
-	 *  otherwise <tt>false</tt>
+	 * @return <tt>true</tt> if the remote host is busy,
+	 *  otherwise <tt>fblse</tt>
 	 */
-	pualic boolebn isBusy() {
+	public boolebn isBusy() {
 		return BUSY;
 	}
 
 	/**
-	 * Returns whether or not the remote host has browse host enabled.
+	 * Returns whether or not the remote host hbs browse host enabled.
 	 *
-	 * @return <tt>true</tt> if the remote host has browse host enabled,
-	 *  otherwise <tt>false</tt>
+	 * @return <tt>true</tt> if the remote host hbs browse host enabled,
+	 *  otherwise <tt>fblse</tt>
 	 */
-	pualic boolebn isBrowseHostEnabled() {
+	public boolebn isBrowseHostEnabled() {
 		return BROWSE_HOST_ENABLED;
 	}
 
 	/**
-	 * Returns whether or not the remote host has chat enabled.
+	 * Returns whether or not the remote host hbs chat enabled.
 	 *
-	 * @return <tt>true</tt> if the remote host has chat enabled,
-	 *  otherwise <tt>false</tt>
+	 * @return <tt>true</tt> if the remote host hbs chat enabled,
+	 *  otherwise <tt>fblse</tt>
 	 */
-	pualic boolebn isChatEnabled() {
+	public boolebn isChatEnabled() {
 		return CHAT_ENABLED;
 	}
 
 	/**
-	 * Returns whether or not the remote host is reporting a speed that 
-	 * has been measured by the application, as opposed to simply selected
-	 * ay the user..
+	 * Returns whether or not the remote host is reporting b speed that 
+	 * hbs been measured by the application, as opposed to simply selected
+	 * by the user..
 	 *
-	 * @return <tt>true</tt> if the remote host has as measured speed,
-	 *  otherwise <tt>false</tt>
+	 * @return <tt>true</tt> if the remote host hbs as measured speed,
+	 *  otherwise <tt>fblse</tt>
 	 */
-	pualic boolebn isMeasuredSpeed() {
+	public boolebn isMeasuredSpeed() {
 		return MEASURED_SPEED;
 	}
 	
 	/**
-	 * Returns whether or not this was a response to a multicast query.
+	 * Returns whether or not this wbs a response to a multicast query.
 	 *
-	 * @return <tt>true</tt> if this is a response to a multicast query,
-	 *  otherwise <tt>false</tt>
+	 * @return <tt>true</tt> if this is b response to a multicast query,
+	 *  otherwise <tt>fblse</tt>
 	 */
-	pualic boolebn isReplyToMulticastQuery() {
+	public boolebn isReplyToMulticastQuery() {
 	    return MULTICAST;
 	}
 
     /**
-     * Returns the <tt>Set</tt> of push proxies, which can be empty.
+     * Returns the <tt>Set</tt> of push proxies, which cbn be empty.
      *
-     * @return a <tt>Set</tt> of push proxies, which can be empty
+     * @return b <tt>Set</tt> of push proxies, which can be empty
      */
-    pualic Set getPushProxies() {
+    public Set getPushProxies() {
         return PROXIES;
     }
 
     /**
-     * Returns whether or not this Host can do Firewalled Transfer.
+     * Returns whether or not this Host cbn do Firewalled Transfer.
      *
      */
-    pualic boolebn supportsFWTransfer() {
+    public boolebn supportsFWTransfer() {
         return CAN_DO_FWTRANSFER;
     }
     
@@ -312,7 +312,7 @@ pualic finbl class HostData {
      * 
      * @return the version of FWT protocol this host supports. 0 if none
      */
-    pualic int getFWTVersionSupported() {
+    public int getFWTVersionSupported() {
     	return FWT_VERSION;
     }
 

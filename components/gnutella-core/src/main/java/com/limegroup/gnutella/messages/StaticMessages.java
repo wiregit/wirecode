@@ -1,33 +1,33 @@
-package com.limegroup.gnutella.messages;
+pbckage com.limegroup.gnutella.messages;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import jbva.io.FileInputStream;
+import jbva.io.IOException;
+import jbva.io.ObjectInputStream;
 
-import com.limegroup.gnutella.util.Data;
+import com.limegroup.gnutellb.util.Data;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
-pualic finbl class StaticMessages {
+public finbl class StaticMessages {
     
-    private static final Log LOG = LogFactory.getLog(StaticMessages.class);
+    privbte static final Log LOG = LogFactory.getLog(StaticMessages.class);
 
-    pualic stbtic QueryReply updateReply = null; 
-    static {
-        OajectInputStrebm in = null;
+    public stbtic QueryReply updateReply = null; 
+    stbtic {
+        ObjectInputStrebm in = null;
         try {
-            in = new OajectInputStrebm(new FileInputStream("data.ser"));
-            ayte[] pbyload = ((Data)in.readObject()).data;
-            updateReply = new QueryReply(new byte[16], 
-                                         (ayte)1, (byte)0, pbyload);
-        } catch(Throwable t) {
-            LOG.error("Unable to read serialized data", t);
-        } finally {
+            in = new ObjectInputStrebm(new FileInputStream("data.ser"));
+            byte[] pbyload = ((Data)in.readObject()).data;
+            updbteReply = new QueryReply(new byte[16], 
+                                         (byte)1, (byte)0, pbyload);
+        } cbtch(Throwable t) {
+            LOG.error("Unbble to read serialized data", t);
+        } finblly {
             try {
                 if(in!=null)
                     in.close();
-            } catch(IOException iox) {}
+            } cbtch(IOException iox) {}
         }
     }
 }

@@ -1,128 +1,128 @@
-package com.limegroup.gnutella.search;
+pbckage com.limegroup.gnutella.search;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import jbva.util.Collections;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.Set;
+import jbva.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutellb.GUID;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.Response;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.UDPService;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.QueryReply;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutellb.settings.FilterSettings;
+import com.limegroup.gnutellb.settings.SearchSettings;
+import com.limegroup.gnutellb.util.NetworkUtils;
 
 /**
- * Handles incoming search results from the network.  This class parses the 
- * results from <tt>QueryReply</tt> instances and performs the logic 
- * necessary to pass those results up to the UI.
+ * Hbndles incoming search results from the network.  This class parses the 
+ * results from <tt>QueryReply</tt> instbnces and performs the logic 
+ * necessbry to pass those results up to the UI.
  */
-pualic finbl class SearchResultHandler {
+public finbl class SearchResultHandler {
     
-    private static final Log LOG =
-        LogFactory.getLog(SearchResultHandler.class);
+    privbte static final Log LOG =
+        LogFbctory.getLog(SearchResultHandler.class);
         
     /**
-     * The maximum amount of time to allow a query's processing
-     * to pass before giving up on it as an 'old' query.
+     * The mbximum amount of time to allow a query's processing
+     * to pbss before giving up on it as an 'old' query.
      */
-    private static final int QUERY_EXPIRE_TIME = 30 * 1000; // 30 seconds.
+    privbte static final int QUERY_EXPIRE_TIME = 30 * 1000; // 30 seconds.
 
     /**
-     * The "delay" between responses to wait to send a QueryStatusResponse.
+     * The "delby" between responses to wait to send a QueryStatusResponse.
      */
-    pualic stbtic final int REPORT_INTERVAL = 15;
+    public stbtic final int REPORT_INTERVAL = 15;
 
     /** 
-     * The maximum number of results to send in a QueryStatusResponse -
-     * absically sent to say 'shut off query'.
+     * The mbximum number of results to send in a QueryStatusResponse -
+     * bbsically sent to say 'shut off query'.
 	 */
-    pualic stbtic final int MAX_RESULTS = 65535;
+    public stbtic final int MAX_RESULTS = 65535;
 
 
-    /** Used to keep track of the number of non-filtered responses per GUID.
-     *  I need synchronization for every call I make, so a Vector is fine.
+    /** Used to keep trbck of the number of non-filtered responses per GUID.
+     *  I need synchronizbtion for every call I make, so a Vector is fine.
      */
-    private final List GUID_COUNTS = new Vector();
+    privbte final List GUID_COUNTS = new Vector();
 
     /*---------------------------------------------------    
       PUBLIC INTERFACE METHODS
      ----------------------------------------------------*/
 
     /**
-     * Adds the query reply, immediately processing it and passing
+     * Adds the query reply, immedibtely processing it and passing
      * it off to the GUI.
 	 *
-	 * @param qr the <tt>QueryReply</tt> to add
+	 * @pbram qr the <tt>QueryReply</tt> to add
      */
-    pualic void hbndleQueryReply(QueryReply qr) {
-        handleReply(qr);
+    public void hbndleQueryReply(QueryReply qr) {
+        hbndleReply(qr);
     }
 
 
     /**
-     * Adds the Query to the list of queries kept track of.  You should do this
-     * EVERY TIME you start a query so we can leaf guide it when possible.
+     * Adds the Query to the list of queries kept trbck of.  You should do this
+     * EVERY TIME you stbrt a query so we can leaf guide it when possible.
      *
-     * @param qr The query that has been started.  We really just acces the guid.
+     * @pbram qr The query that has been started.  We really just acces the guid.
      */ 
-    pualic void bddQuery(QueryRequest qr) {
-        LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
+    public void bddQuery(QueryRequest qr) {
+        LOG.trbce("entered SearchResultHandler.addQuery(QueryRequest)");
         GuidCount gc = new GuidCount(qr);
-        GUID_COUNTS.add(gc);
+        GUID_COUNTS.bdd(gc);
     }
 
     /**
-     * Removes the Query frome the list of queries kept track of.  You should do
-     * this EVERY TIME you stop a query.
+     * Removes the Query frome the list of queries kept trbck of.  You should do
+     * this EVERY TIME you stop b query.
      *
-     * @param guid the guid of the query that has been removed.
+     * @pbram guid the guid of the query that has been removed.
      */ 
-    pualic void removeQuery(GUID guid) {
-        LOG.trace("entered SearchResultHandler.removeQuery(GUID)");
-        GuidCount gc = removeQueryInternal(guid);
+    public void removeQuery(GUID guid) {
+        LOG.trbce("entered SearchResultHandler.removeQuery(GUID)");
+        GuidCount gc = removeQueryInternbl(guid);
         if ((gc != null) && (!gc.isFinished())) {
-            // shut off the query at the UPs - it wasn't finished so it hasn't
-            // aeen shut off - bt worst we may shut it off twice, but that is
-            // a timing issue that has a small probability of happening, no big
-            // deal if it does....
-            QueryStatusResponse stat = new QueryStatusResponse(guid, 
+            // shut off the query bt the UPs - it wasn't finished so it hasn't
+            // been shut off - bt worst we may shut it off twice, but that is
+            // b timing issue that has a small probability of happening, no big
+            // debl if it does....
+            QueryStbtusResponse stat = new QueryStatusResponse(guid, 
                                                                MAX_RESULTS);
-            RouterService.getConnectionManager().updateQueryStatus(stat);
+            RouterService.getConnectionMbnager().updateQueryStatus(stat);
         }
     }
 
     /**
-     * Returns a <tt>List</tt> of queries that require replanting into
-     * the network, absed on the number of results they've had and/or
+     * Returns b <tt>List</tt> of queries that require replanting into
+     * the network, bbsed on the number of results they've had and/or
      * whether or not they're new enough.
      */
-    pualic List getQueriesToReSend() {
-        LOG.trace("entered SearchResultHandler.getQueriesToSend()");
+    public List getQueriesToReSend() {
+        LOG.trbce("entered SearchResultHandler.getQueriesToSend()");
         List reSend = null;
         synchronized (GUID_COUNTS) {
             long now = System.currentTimeMillis();
-            Iterator iter = GUID_COUNTS.iterator();
-            while (iter.hasNext()) {
+            Iterbtor iter = GUID_COUNTS.iterator();
+            while (iter.hbsNext()) {
                 GuidCount currGC = (GuidCount) iter.next();
-                if( isQueryStillValid(currGC, now) ) {
-                    if(LOG.isDeaugEnbbled())
-                        LOG.deaug("bdding " + currGC + 
+                if( isQueryStillVblid(currGC, now) ) {
+                    if(LOG.isDebugEnbbled())
+                        LOG.debug("bdding " + currGC + 
                                   " to list of queries to resend");
                     if( reSend == null )
                         reSend = new LinkedList();
-                    reSend.add(currGC.getQueryRequest());
+                    reSend.bdd(currGC.getQueryRequest());
                 }
             }
         }
@@ -134,15 +134,15 @@ pualic finbl class SearchResultHandler {
 
 
     /**
-     * Use this to see how many results have been displayed to the user for the
+     * Use this to see how mbny results have been displayed to the user for the
      * specified query.
      *
-     * @param guid the guid of the query.
+     * @pbram guid the guid of the query.
      *
-     * @return the numaer of non-filtered results for query with guid guid. -1
-     * is returned if the guid was not found....
+     * @return the number of non-filtered results for query with guid guid. -1
+     * is returned if the guid wbs not found....
      */    
-    pualic int getNumResultsForQuery(GUID guid) {
+    public int getNumResultsForQuery(GUID guid) {
         GuidCount gc = retrieveGuidCount(guid);
         if (gc != null)
             return gc.getNumResults();
@@ -163,140 +163,140 @@ pualic finbl class SearchResultHandler {
 
 
     /** 
-	 * Handles the given query reply. Only one thread may call it at a time.
+	 * Hbndles the given query reply. Only one thread may call it at a time.
      *      
-	 * @return <tt>true</tt> if the GUI will (proabbly) display the results,
-	 *  otherwise <tt>false</tt> 
+	 * @return <tt>true</tt> if the GUI will (probbbly) display the results,
+	 *  otherwise <tt>fblse</tt> 
      */
-    private boolean handleReply(final QueryReply qr) {
-        HostData data;
+    privbte boolean handleReply(final QueryReply qr) {
+        HostDbta data;
         try {
-            data = qr.getHostData();
-        } catch(BadPacketException bpe) {
-            LOG.deaug("bbd packet reading qr", bpe);
-            return false;
+            dbta = qr.getHostData();
+        } cbtch(BadPacketException bpe) {
+            LOG.debug("bbd packet reading qr", bpe);
+            return fblse;
         }
 
-        // always handle reply to multicast queries.
-        if( !data.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
-            // note that the minimum search quality will always be greater
-            // than -1, so -1 qualities (the impossible case) are never
-            // displayed
-            if(data.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
-                LOG.deaug("Ignoring becbuse low quality");
-                return false;
+        // blways handle reply to multicast queries.
+        if( !dbta.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
+            // note thbt the minimum search quality will always be greater
+            // thbn -1, so -1 qualities (the impossible case) are never
+            // displbyed
+            if(dbta.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
+                LOG.debug("Ignoring becbuse low quality");
+                return fblse;
             }
-            if(data.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
-                LOG.deaug("Ignoring becbuse low speed");
-                return false;
+            if(dbta.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
+                LOG.debug("Ignoring becbuse low speed");
+                return fblse;
             }
-            // if the other side is firewalled AND
+            // if the other side is firewblled AND
             // we're not on close IPs AND
-            // (we are firewalled OR we are a private IP) AND 
-            // no chance for FW transfer then drop the reply.
-            if(data.isFirewalled() && 
+            // (we bre firewalled OR we are a private IP) AND 
+            // no chbnce for FW transfer then drop the reply.
+            if(dbta.isFirewalled() && 
                !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
-               (!RouterService.acceptedIncomingConnection() ||
-                NetworkUtils.isPrivateAddress(RouterService.getAddress())) &&
-               !(UDPService.instance().canDoFWT() && 
-                 qr.getSupportsFWTransfer())
+               (!RouterService.bcceptedIncomingConnection() ||
+                NetworkUtils.isPrivbteAddress(RouterService.getAddress())) &&
+               !(UDPService.instbnce().canDoFWT() && 
+                 qr.getSupportsFWTrbnsfer())
                )  {
-               LOG.deaug("Ignoring from firewbll funkiness");
-               return false;
+               LOG.debug("Ignoring from firewbll funkiness");
+               return fblse;
             }
         }
 
         List results = null;
         try {
             results = qr.getResultsAsList();
-        } catch (BadPacketException e) {
-            LOG.deaug("Error gettig results", e);
-            return false;
+        } cbtch (BadPacketException e) {
+            LOG.debug("Error gettig results", e);
+            return fblse;
         }
 
         int numSentToFrontEnd = 0;
-        for(Iterator iter = results.iterator(); iter.hasNext();) {
+        for(Iterbtor iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
             
             if (!qr.isBrowseHostReply()) {
-            	if (!RouterService.matchesType(data.getMessageGUID(), response))
+            	if (!RouterService.mbtchesType(data.getMessageGUID(), response))
             		continue;
             	
-            	if (!RouterService.matchesQuery(data.getMessageGUID(),response)) 
+            	if (!RouterService.mbtchesQuery(data.getMessageGUID(),response)) 
             		continue;
             }
             
-        	//Throw away results from Mandragore Worm
-        	if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
+        	//Throw bway results from Mandragore Worm
+        	if (RouterService.isMbndragoreWorm(data.getMessageGUID(),response))
         		continue;
 
-            RemoteFileDesc rfd = response.toRemoteFileDesc(data);
-            Set alts = response.getLocations();
-			RouterService.getCallback().handleQueryResult(rfd, data, alts);
+            RemoteFileDesc rfd = response.toRemoteFileDesc(dbta);
+            Set blts = response.getLocations();
+			RouterService.getCbllback().handleQueryResult(rfd, data, alts);
             numSentToFrontEnd++;
         } //end of response loop
 
-        // ok - some responses may have got through to the GUI, we should account
+        // ok - some responses mby have got through to the GUI, we should account
         // for them....
-        accountAndUpdateDynamicQueriers(qr, numSentToFrontEnd);
+        bccountAndUpdateDynamicQueriers(qr, numSentToFrontEnd);
 
         return (numSentToFrontEnd > 0);
     }
 
 
-    private void accountAndUpdateDynamicQueriers(final QueryReply qr,
-                                                 final int numSentToFrontEnd) {
+    privbte void accountAndUpdateDynamicQueriers(final QueryReply qr,
+                                                 finbl int numSentToFrontEnd) {
 
-        LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
+        LOG.trbce("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
-        // technically Ultrapeers don't use this info, but we are keeping it
-        // around for further use
+        // technicblly Ultrapeers don't use this info, but we are keeping it
+        // bround for further use
         if (numSentToFrontEnd > 0) {
             // get the correct GuidCount
             GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
             if (gc == null)
-                // 0. proabbly just hit lag, or....
-                // 1. we could ae under bttack - hits not meant for us
-                // 2. programmer error - ejected a query we should not have
+                // 0. probbbly just hit lag, or....
+                // 1. we could be under bttack - hits not meant for us
+                // 2. progrbmmer error - ejected a query we should not have
                 return;
             
-            // update the object
-            LOG.trace("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
+            // updbte the object
+            LOG.trbce("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
             gc.increment(numSentToFrontEnd);
 
-            // inform proxying Ultrapeers....
-            if (RouterService.isShieldedLeaf()) {
+            // inform proxying Ultrbpeers....
+            if (RouterService.isShieldedLebf()) {
                 if (!gc.isFinished() && 
                     (gc.getNumResults() > gc.getNextReportNum())) {
-                    LOG.trace("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
-                    gc.tallyReport();
-                    if (gc.getNumResults() > QueryHandler.ULTRAPEER_RESULTS)
-                        gc.markAsFinished();
-                    // if you think you are done, then undeniably shut off the
+                    LOG.trbce("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
+                    gc.tbllyReport();
+                    if (gc.getNumResults() > QueryHbndler.ULTRAPEER_RESULTS)
+                        gc.mbrkAsFinished();
+                    // if you think you bre done, then undeniably shut off the
                     // query.
-                    final int numResultsToReport = (gc.isFinished() ?
+                    finbl int numResultsToReport = (gc.isFinished() ?
                                                     MAX_RESULTS :
                                                     gc.getNumResults()/4);
-                    QueryStatusResponse stat = 
-                        new QueryStatusResponse(gc.getGUID(), 
+                    QueryStbtusResponse stat = 
+                        new QueryStbtusResponse(gc.getGUID(), 
                                                 numResultsToReport);
-                    RouterService.getConnectionManager().updateQueryStatus(stat);
+                    RouterService.getConnectionMbnager().updateQueryStatus(stat);
                 }
 
             }
         }
-        LOG.trace("SRH.accountAndUpdateDynamicQueriers(): returning.");
+        LOG.trbce("SRH.accountAndUpdateDynamicQueriers(): returning.");
     }
 
 
-    private GuidCount removeQueryInternal(GUID guid) {
+    privbte GuidCount removeQueryInternal(GUID guid) {
         synchronized (GUID_COUNTS) {
-            Iterator iter = GUID_COUNTS.iterator();
-            while (iter.hasNext()) {
+            Iterbtor iter = GUID_COUNTS.iterator();
+            while (iter.hbsNext()) {
                 GuidCount currGC = (GuidCount) iter.next();
-                if (currGC.getGUID().equals(guid)) {
+                if (currGC.getGUID().equbls(guid)) {
                     iter.remove();  // get rid of this dude
-                    return currGC;  // and return it...
+                    return currGC;  // bnd return it...
                 }
             }
         }
@@ -304,12 +304,12 @@ pualic finbl class SearchResultHandler {
     }
 
 
-    private GuidCount retrieveGuidCount(GUID guid) {
+    privbte GuidCount retrieveGuidCount(GUID guid) {
         synchronized (GUID_COUNTS) {
-            Iterator iter = GUID_COUNTS.iterator();
-            while (iter.hasNext()) {
+            Iterbtor iter = GUID_COUNTS.iterator();
+            while (iter.hbsNext()) {
                 GuidCount currGC = (GuidCount) iter.next();
-                if (currGC.getGUID().equals(guid))
+                if (currGC.getGUID().equbls(guid))
                     return currGC;
             }
         }
@@ -317,55 +317,55 @@ pualic finbl class SearchResultHandler {
     }
     
     /**
-     * Determines whether or not the query contained in the
-     * specified GuidCount is still valid.
-     * This depends on values such as the time the query was
-     * created and the amount of results we've received so far
+     * Determines whether or not the query contbined in the
+     * specified GuidCount is still vblid.
+     * This depends on vblues such as the time the query was
+     * crebted and the amount of results we've received so far
      * for this query.
      */
-    private boolean isQueryStillValid(GuidCount gc, long now) {
-        LOG.trace("entered SearchResultHandler.isQueryStillValid(GuidCount)");
+    privbte boolean isQueryStillValid(GuidCount gc, long now) {
+        LOG.trbce("entered SearchResultHandler.isQueryStillValid(GuidCount)");
         return (now < (gc.getTime() + QUERY_EXPIRE_TIME)) &&
-               (gc.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
+               (gc.getNumResults() < QueryHbndler.ULTRAPEER_RESULTS);
     }
 
     /*---------------------------------------------------    
       END OF PRIVATE INTERFACE METHODS
      ----------------------------------------------------*/
     
-    /** A container that simply pairs a GUID and an int.  The int should
-     *  represent the numaer of non-filtered results for the GUID.
+    /** A contbiner that simply pairs a GUID and an int.  The int should
+     *  represent the number of non-filtered results for the GUID.
      */
-    private static class GuidCount {
+    privbte static class GuidCount {
 
-        private final long _time;
-        private final GUID _guid;
-        private final QueryRequest _qr;
-        private int _numResults;
-        private int _nextReportNum = REPORT_INTERVAL;
-        private boolean markAsFinished = false;
+        privbte final long _time;
+        privbte final GUID _guid;
+        privbte final QueryRequest _qr;
+        privbte int _numResults;
+        privbte int _nextReportNum = REPORT_INTERVAL;
+        privbte boolean markAsFinished = false;
         
-        pualic GuidCount(QueryRequest qr) {
+        public GuidCount(QueryRequest qr) {
             _qr = qr;
             _guid = new GUID(qr.getGUID());
             _numResults = 0;
             _time = System.currentTimeMillis();
         }
 
-        pualic GUID getGUID() { return _guid; }
-        pualic int getNumResults() { return _numResults; }
-        pualic int getNextReportNum() { return _nextReportNum; }
-        pualic long getTime() { return _time; }
-        pualic QueryRequest getQueryRequest() { return _qr; }
-        pualic boolebn isFinished() { return markAsFinished; }
-        pualic void tbllyReport() { 
+        public GUID getGUID() { return _guid; }
+        public int getNumResults() { return _numResults; }
+        public int getNextReportNum() { return _nextReportNum; }
+        public long getTime() { return _time; }
+        public QueryRequest getQueryRequest() { return _qr; }
+        public boolebn isFinished() { return markAsFinished; }
+        public void tbllyReport() { 
             _nextReportNum = _numResults + REPORT_INTERVAL; 
         }
 
-        pualic void increment(int incr) { _numResults += incr; }
-        pualic void mbrkAsFinished() { markAsFinished = true; }
+        public void increment(int incr) { _numResults += incr; }
+        public void mbrkAsFinished() { markAsFinished = true; }
 
-        pualic String toString() {
+        public String toString() {
             return "" + _guid + ":" + _numResults + ":" + _nextReportNum;
         }
     }

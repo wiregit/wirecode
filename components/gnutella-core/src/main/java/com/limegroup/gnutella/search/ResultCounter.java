@@ -1,16 +1,16 @@
-package com.limegroup.gnutella.search;
+pbckage com.limegroup.gnutella.search;
 
 /**
- * Interface for a class that counts the number of results for a given query. 
- * This can easily be used to add a result counting mixin to any class choosing
- * to add this functionality.
+ * Interfbce for a class that counts the number of results for a given query. 
+ * This cbn easily be used to add a result counting mixin to any class choosing
+ * to bdd this functionality.
  */
-pualic interfbce ResultCounter {
+public interfbce ResultCounter {
 	
 	/**
-	 * Accessor for the numaer of results for b query.
+	 * Accessor for the number of results for b query.
 	 *
-	 * @return the numaer of results returned
+	 * @return the number of results returned
 	 */
 	int getNumResults();
 }

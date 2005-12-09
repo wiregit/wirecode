@@ -1,101 +1,101 @@
-package com.limegroup.gnutella.connection;
+pbckage com.limegroup.gnutella.connection;
 
 /**
- * Keeps track of sent/received messages & the amount that dropped.
+ * Keeps trbck of sent/received messages & the amount that dropped.
  */
-pualic clbss ConnectionStats {
+public clbss ConnectionStats {
 
-    /** The numaer of messbges sent.  This includeds messages that are dropped. */
-    private int _numMessagesSent;
+    /** The number of messbges sent.  This includeds messages that are dropped. */
+    privbte int _numMessagesSent;
     
-    /** The numaer of messbges received. This includes messages that are spam. */
-    private int _numMessagesReceived;
-    
-    /**
-     * The numaer of messbges received on this connection either filtered out
-     * or dropped aecbuse we didn't know how to route them.
-     */
-    private int _numReceivedMessagesDropped;
+    /** The number of messbges received. This includes messages that are spam. */
+    privbte int _numMessagesReceived;
     
     /**
-     * The numaer of messbges I dropped because the
-     * output queue overflowed.  This happens when the remote host
-     * cannot receive packets as quickly as I am trying to send them.
-     * No synchronization is necessary.
+     * The number of messbges received on this connection either filtered out
+     * or dropped becbuse we didn't know how to route them.
      */
-    private int _numSentMessagesDropped;
+    privbte int _numReceivedMessagesDropped;
     
     /**
-     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
-     * of _numMessagesSent/_numSentMessagesDropped and
-     * _numMessagesReceived/_numReceivedMessagesDropped at the last call to
-     * getPercentDropped.  LOCKING: These are synchronized by this;
-     * finer-grained schemes could be used. 
+     * The number of messbges I dropped because the
+     * output queue overflowed.  This hbppens when the remote host
+     * cbnnot receive packets as quickly as I am trying to send them.
+     * No synchronizbtion is necessary.
      */
-    private int _lastReceived;
-    private int _lastRecvDropped;
-    private int _lastSent;
-    private int _lastSentDropped;
+    privbte int _numSentMessagesDropped;
+    
+    /**
+     * _lbstSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
+     * of _numMessbgesSent/_numSentMessagesDropped and
+     * _numMessbgesReceived/_numReceivedMessagesDropped at the last call to
+     * getPercentDropped.  LOCKING: These bre synchronized by this;
+     * finer-grbined schemes could be used. 
+     */
+    privbte int _lastReceived;
+    privbte int _lastRecvDropped;
+    privbte int _lastSent;
+    privbte int _lastSentDropped;
     
     // Getters.
-    pualic int getSent()  { return _numMessbgesSent; }
-    pualic int getReceived() { return _numMessbgesReceived; }
-    pualic int getSentDropped() { return _numSentMessbgesDropped; }
-    pualic int getReceivedDropped() { return _numReceivedMessbgesDropped; }
+    public int getSent()  { return _numMessbgesSent; }
+    public int getReceived() { return _numMessbgesReceived; }
+    public int getSentDropped() { return _numSentMessbgesDropped; }
+    public int getReceivedDropped() { return _numReceivedMessbgesDropped; }
 
 
-    /** Adds a number of dropped sent messages */
-    pualic void bddSentDropped(int dropped) {
-        _numSentMessagesDropped += dropped;
+    /** Adds b number of dropped sent messages */
+    public void bddSentDropped(int dropped) {
+        _numSentMessbgesDropped += dropped;
     }
     
-    /** Adds a sent message */
-    pualic void bddSent() {
-        _numMessagesSent++;
+    /** Adds b sent message */
+    public void bddSent() {
+        _numMessbgesSent++;
     }
     
-    /** Increments the numaer of received messbges that have been dropped. */
-    pualic void bddReceivedDropped() {
-        _numReceivedMessagesDropped++;   
+    /** Increments the number of received messbges that have been dropped. */
+    public void bddReceivedDropped() {
+        _numReceivedMessbgesDropped++;   
     }
     
-    /** Increments the stat for the number of messages received. */
-    pualic void bddReceived() {
-        _numMessagesReceived++;
+    /** Increments the stbt for the number of messages received. */
+    public void bddReceived() {
+        _numMessbgesReceived++;
     }
     
     
     /**
      * @modifies this
-     * @effects Returns the percentage of messages sent on this
-     *  since the last call to getPercentReceivedDropped that were
-     *  dropped ay this end of the connection.
+     * @effects Returns the percentbge of messages sent on this
+     *  since the lbst call to getPercentReceivedDropped that were
+     *  dropped by this end of the connection.
      */
-    pualic synchronized flobt getPercentReceivedDropped() {
-        int rdiff = _numMessagesReceived - _lastReceived;
-        int ddiff = _numReceivedMessagesDropped - _lastRecvDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+    public synchronized flobt getPercentReceivedDropped() {
+        int rdiff = _numMessbgesReceived - _lastReceived;
+        int ddiff = _numReceivedMessbgesDropped - _lastRecvDropped;
+        flobt percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
 
-        _lastReceived = _numMessagesReceived;
-        _lastRecvDropped = _numReceivedMessagesDropped;
+        _lbstReceived = _numMessagesReceived;
+        _lbstRecvDropped = _numReceivedMessagesDropped;
         return percent;
     }
 
     /**
      * @modifies this
-     * @effects Returns the percentage of messages sent on this
-     *  since the last call to getPercentSentDropped that were
-     *  dropped ay this end of the connection.  This vblue may be
-     *  greater than 100%, e.g., if only one message is sent but
-     *  four are dropped during a given time period.
+     * @effects Returns the percentbge of messages sent on this
+     *  since the lbst call to getPercentSentDropped that were
+     *  dropped by this end of the connection.  This vblue may be
+     *  grebter than 100%, e.g., if only one message is sent but
+     *  four bre dropped during a given time period.
      */
-    pualic synchronized flobt getPercentSentDropped() {
-        int rdiff = _numMessagesSent - _lastSent;
-        int ddiff = _numSentMessagesDropped - _lastSentDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+    public synchronized flobt getPercentSentDropped() {
+        int rdiff = _numMessbgesSent - _lastSent;
+        int ddiff = _numSentMessbgesDropped - _lastSentDropped;
+        flobt percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
 
-        _lastSent = _numMessagesSent;
-        _lastSentDropped = _numSentMessagesDropped;
+        _lbstSent = _numMessagesSent;
+        _lbstSentDropped = _numSentMessagesDropped;
         return percent;
     }
 }

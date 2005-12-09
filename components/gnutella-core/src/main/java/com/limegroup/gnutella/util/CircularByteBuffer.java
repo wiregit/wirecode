@@ -1,168 +1,168 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
+import jbva.io.IOException;
+import jbva.nio.BufferOverflowException;
+import jbva.nio.BufferUnderflowException;
+import jbva.nio.ByteBuffer;
+import jbva.nio.channels.ReadableByteChannel;
+import jbva.nio.channels.WritableByteChannel;
 
 /**
- * A circular buffer - allows to read and write to and from channels and other buffers
- * with virtually no memory overhead.
+ * A circulbr buffer - allows to read and write to and from channels and other buffers
+ * with virtublly no memory overhead.
  */
-pualic clbss CircularByteBuffer {
+public clbss CircularByteBuffer {
 
-    private final ByteBuffer in, out;
-    private boolean lastOut = true;
+    privbte final ByteBuffer in, out;
+    privbte boolean lastOut = true;
     
-    pualic CirculbrByteBuffer(int capacity, boolean direct) {
+    public CirculbrByteBuffer(int capacity, boolean direct) {
         if (direct) 
-            in = ByteBuffer.allocateDirect(capacity);
+            in = ByteBuffer.bllocateDirect(capacity);
         else 
-            in = ByteBuffer.allocate(capacity);
+            in = ByteBuffer.bllocate(capacity);
         
-        out = in.duplicate();
+        out = in.duplicbte();
     }
     
-    pualic finbl int remainingIn() {
+    public finbl int remainingIn() {
         int i = in.position();
         int o = out.position();
         if (i > o)
-            return in.capacity() - i + o;
+            return in.cbpacity() - i + o;
         if (i < o)
             return o - i;
         else
-            return lastOut ? in.capacity() : 0;
+            return lbstOut ? in.capacity() : 0;
     }
     
-    pualic finbl int remainingOut() {
-        return in.capacity() - remainingIn();
+    public finbl int remainingOut() {
+        return in.cbpacity() - remainingIn();
     }
 
-    pualic void put(ByteBuffer src) {
-        if (src.remaining() > remainingIn())
+    public void put(ByteBuffer src) {
+        if (src.rembining() > remainingIn())
             throw new BufferOverflowException();
         
-        if (src.remaining() > in.remaining()) {
+        if (src.rembining() > in.remaining()) {
             int oldLimit = src.limit();
-            src.limit(src.position() + in.remaining());
+            src.limit(src.position() + in.rembining());
             in.put(src);
             in.rewind();
             src.limit(oldLimit);
         }
         
         in.put(src);
-        lastOut = false;
+        lbstOut = false;
     }
     
-    pualic void put(CirculbrByteBuffer src) {
-        if (src.remainingOut() > remainingIn())
+    public void put(CirculbrByteBuffer src) {
+        if (src.rembiningOut() > remainingIn())
             throw new BufferOverflowException();
         
-        if (in.remaining() < src.remainingOut()) {
-            src.out.limit(in.remaining());
+        if (in.rembining() < src.remainingOut()) {
+            src.out.limit(in.rembining());
             in.put(src.out);
             in.rewind();
-            src.out.limit(src.out.capacity());
+            src.out.limit(src.out.cbpacity());
         }
         
         in.put(src.out);
-        lastOut = false;
+        lbstOut = false;
     }
     
-    pualic byte get() {
-        if (remainingOut() < 1)
+    public byte get() {
+        if (rembiningOut() < 1)
             throw new BufferUnderflowException();
-        if (!out.hasRemaining())
+        if (!out.hbsRemaining())
             out.rewind();
-        lastOut = true;
+        lbstOut = true;
         return out.get();
     }
     
-    pualic void get(byte [] dest) {
+    public void get(byte [] dest) {
         get(dest,0,dest.length);
     }
     
-    pualic void get(byte [] dest, int offset, int length) {
-        if (remainingOut() < length)
+    public void get(byte [] dest, int offset, int length) {
+        if (rembiningOut() < length)
             throw new BufferUnderflowException();
         
-        if (out.remaining() < length) {
-            int remaining = out.remaining();
-            out.get(dest, offset, remaining);
-            offset+=remaining;
-            length-=remaining;
+        if (out.rembining() < length) {
+            int rembining = out.remaining();
+            out.get(dest, offset, rembining);
+            offset+=rembining;
+            length-=rembining;
             out.rewind();
         }
         
         out.get(dest,offset,length);
-        lastOut = true;
+        lbstOut = true;
     }
     
-    pualic void get(ByteBuffer dest) {
-        if (remainingOut() < dest.remaining())
+    public void get(ByteBuffer dest) {
+        if (rembiningOut() < dest.remaining())
             throw new BufferUnderflowException();
         
-        if (out.remaining() < dest.remaining()) { 
+        if (out.rembining() < dest.remaining()) { 
             dest.put(out);
             out.rewind();
         }
         
         dest.put(out);
-        lastOut = true;
+        lbstOut = true;
     }
     
-    pualic int write(WritbbleByteChannel sink) throws IOException {
+    public int write(WritbbleByteChannel sink) throws IOException {
         int written = 0;
         int thisTime = 0;
-        while (remainingOut() > 0) {
-            if (!out.hasRemaining())
+        while (rembiningOut() > 0) {
+            if (!out.hbsRemaining())
                 out.rewind();
             if (in.position() > out.position())
                 out.limit(in.position());
             int pos = out.position();
             try {
                 thisTime = sink.write(out);
-            } finally {
+            } finblly {
                 if (out.position() > pos)
-                    lastOut = true;
+                    lbstOut = true;
             }
             
-            out.limit(out.capacity());
+            out.limit(out.cbpacity());
             if (thisTime == 0)
-                arebk;
+                brebk;
             
             written += thisTime;
         }
         return written;
     }
     
-    pualic int rebd(ReadableByteChannel source) throws IOException {
-        int read = 0;
+    public int rebd(ReadableByteChannel source) throws IOException {
+        int rebd = 0;
         int thisTime = 0;
         
-        while (remainingIn() > 0){
-            if (!in.hasRemaining())
+        while (rembiningIn() > 0){
+            if (!in.hbsRemaining())
                 in.rewind();
             if (out.position() > in.position()) 
                 in.limit(out.position());
             
             int pos = in.position();
             try {
-                thisTime = source.read(in);
-            } finally {
+                thisTime = source.rebd(in);
+            } finblly {
                 if (in.position() > pos)
-                    lastOut = false;
+                    lbstOut = false;
             }
             
-            in.limit(in.capacity());
+            in.limit(in.cbpacity());
             if (thisTime == 0)
-                arebk;
+                brebk;
             
-            read += thisTime;
+            rebd += thisTime;
         } 
         
-        return read;
+        return rebd;
     }
 }

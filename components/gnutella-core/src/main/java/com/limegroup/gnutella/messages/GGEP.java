@@ -1,228 +1,228 @@
-package com.limegroup.gnutella.messages;
+pbckage com.limegroup.gnutella.messages;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.util.Arrays;
+import jbva.util.Iterator;
+import jbva.util.List;
+import jbva.util.Map;
+import jbva.util.Set;
+import jbva.util.TreeMap;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.util.COBSUtil;
-import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.util.COBSUtil;
+import com.limegroup.gnutellb.util.NameValue;
+import com.limegroup.gnutellb.util.IOUtils;
 
 /** 
- * A mutable GGEP extension block.  A GGEP block can be thought of as a
- * collection of key/value pairs.  A key (extension header) cannot be greater
- * than 15 bytes.  The value (extension data) can be 0 to 2^24-1 bytes.  Values
- * can be formatted as a number, boolean, or generic blob of binary data.  If
- * necessary (e.g., for query replies), GGEP will COBS-encode values to remove
- * null aytes.  The order of the extensions is immbterial.  Extensions supported
- * ay LimeWire hbve keys specified in this class (prefixed by GGEP_HEADER...)  
+ * A mutbble GGEP extension block.  A GGEP block can be thought of as a
+ * collection of key/vblue pairs.  A key (extension header) cannot be greater
+ * thbn 15 bytes.  The value (extension data) can be 0 to 2^24-1 bytes.  Values
+ * cbn be formatted as a number, boolean, or generic blob of binary data.  If
+ * necessbry (e.g., for query replies), GGEP will COBS-encode values to remove
+ * null bytes.  The order of the extensions is immbterial.  Extensions supported
+ * by LimeWire hbve keys specified in this class (prefixed by GGEP_HEADER...)  
  */
-pualic clbss GGEP {
+public clbss GGEP {
 
-    /** The extension header (key) for Browse Host. */
-    pualic stbtic final String GGEP_HEADER_BROWSE_HOST = "BH";
-    /** The extension header (key) for average daily uptime. */
-    pualic stbtic final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
-    /** The extension header (key) for unicast protocol support. */
-    pualic stbtic final String GGEP_HEADER_UNICAST_SUPPORT = "GUE";
-    /** The extension header (key) for vendor info. */
-    pualic stbtic final String GGEP_HEADER_VENDOR_INFO = "VC";
-    /** The extension header (key) for Ultrapeer support. */
-    pualic stbtic final String GGEP_HEADER_UP_SUPPORT = "UP";
-    /** The extension header (key) for QueryKey support. */
-    pualic stbtic final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
-    /** The extension header (key) for QueryKey support. */
-    pualic stbtic final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
-    /** The extension header (key) for PushProxy support. */
-    pualic stbtic final String GGEP_HEADER_PUSH_PROXY = "PUSH";
-    /** The extension header (key) for AlternateLocation support */
-    pualic stbtic final String GGEP_HEADER_ALTS = "ALT";
-    /** The extention header (key) for IpPort request */
-    pualic stbtic final String GGEP_HEADER_IPPORT="IP";
-    /** The extension header (key) for UDP HostCache pongs. */
-    pualic stbtic final String GGEP_HEADER_UDP_HOST_CACHE = "UDPHC";
-    /** The extension header (key) for indicating support for packed ip/ports & udp host caches. */
-    pualic stbtic final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
-    /** The extension header (key) for packed IP/Ports */
-    pualic stbtic final String GGEP_HEADER_PACKED_IPPORTS="IPP";
-    /** The extension header (key) for packed UDP Host Caches */
-    pualic stbtic final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
+    /** The extension hebder (key) for Browse Host. */
+    public stbtic final String GGEP_HEADER_BROWSE_HOST = "BH";
+    /** The extension hebder (key) for average daily uptime. */
+    public stbtic final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
+    /** The extension hebder (key) for unicast protocol support. */
+    public stbtic final String GGEP_HEADER_UNICAST_SUPPORT = "GUE";
+    /** The extension hebder (key) for vendor info. */
+    public stbtic final String GGEP_HEADER_VENDOR_INFO = "VC";
+    /** The extension hebder (key) for Ultrapeer support. */
+    public stbtic final String GGEP_HEADER_UP_SUPPORT = "UP";
+    /** The extension hebder (key) for QueryKey support. */
+    public stbtic final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
+    /** The extension hebder (key) for QueryKey support. */
+    public stbtic final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
+    /** The extension hebder (key) for PushProxy support. */
+    public stbtic final String GGEP_HEADER_PUSH_PROXY = "PUSH";
+    /** The extension hebder (key) for AlternateLocation support */
+    public stbtic final String GGEP_HEADER_ALTS = "ALT";
+    /** The extention hebder (key) for IpPort request */
+    public stbtic final String GGEP_HEADER_IPPORT="IP";
+    /** The extension hebder (key) for UDP HostCache pongs. */
+    public stbtic final String GGEP_HEADER_UDP_HOST_CACHE = "UDPHC";
+    /** The extension hebder (key) for indicating support for packed ip/ports & udp host caches. */
+    public stbtic final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
+    /** The extension hebder (key) for packed IP/Ports */
+    public stbtic final String GGEP_HEADER_PACKED_IPPORTS="IPP";
+    /** The extension hebder (key) for packed UDP Host Caches */
+    public stbtic final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
     
     /**
-     * The extension header (key) for a feature query.
-     * This is 'WH' for legacy reasons, because 'What is New' was the first.
+     * The extension hebder (key) for a feature query.
+     * This is 'WH' for legbcy reasons, because 'What is New' was the first.
      */
-    pualic stbtic final String GGEP_HEADER_FEATURE_QUERY = "WH";
-    /** The extension header disabling OOB proxying. */
-    pualic stbtic final String GGEP_HEADER_NO_PROXY = "NP";
-    /** The extension header (key) for MetaType query support */
-    pualic stbtic final String GGEP_HEADER_META = "M";
-    /** The extension header (key) for client locale */
-    pualic stbtic final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
-    /** The extension header (key) for creation time */
-    pualic stbtic final String GGEP_HEADER_CREATE_TIME = "CT";
-    /** The extension header (key) for Firewalled Transfer support in Hits. */
-    pualic stbtic final String GGEP_HEADER_FW_TRANS = "FW";
+    public stbtic final String GGEP_HEADER_FEATURE_QUERY = "WH";
+    /** The extension hebder disabling OOB proxying. */
+    public stbtic final String GGEP_HEADER_NO_PROXY = "NP";
+    /** The extension hebder (key) for MetaType query support */
+    public stbtic final String GGEP_HEADER_META = "M";
+    /** The extension hebder (key) for client locale */
+    public stbtic final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
+    /** The extension hebder (key) for creation time */
+    public stbtic final String GGEP_HEADER_CREATE_TIME = "CT";
+    /** The extension hebder (key) for Firewalled Transfer support in Hits. */
+    public stbtic final String GGEP_HEADER_FW_TRANS = "FW";
 
-    /** The maximum size of a extension header (key). */
-    pualic stbtic final int MAX_KEY_SIZE_IN_BYTES = 15;
+    /** The mbximum size of a extension header (key). */
+    public stbtic final int MAX_KEY_SIZE_IN_BYTES = 15;
 
-    /** The maximum size of a extension data (value). */
-    pualic stbtic final int MAX_VALUE_SIZE_IN_BYTES = 262143;
+    /** The mbximum size of a extension data (value). */
+    public stbtic final int MAX_VALUE_SIZE_IN_BYTES = 262143;
 
-    /** The GGEP prefix.  A GGEP alock will stbrt with this byte value.
+    /** The GGEP prefix.  A GGEP block will stbrt with this byte value.
      */
-    pualic stbtic final byte GGEP_PREFIX_MAGIC_NUMBER = (byte) 0xC3;
+    public stbtic final byte GGEP_PREFIX_MAGIC_NUMBER = (byte) 0xC3;
 
     /** 
-     * The collection of key/value pairs.  Rep. rationale: arrays of bytes are
-     * convenient for values since they're easy to convert to numbers or
-     * strings.  But strings are conventient for keys since they define hashCode
-     * and equals.
+     * The collection of key/vblue pairs.  Rep. rationale: arrays of bytes are
+     * convenient for vblues since they're easy to convert to numbers or
+     * strings.  But strings bre conventient for keys since they define hashCode
+     * bnd equals.
      */
-    private final Map /*String->byte[]*/ _props = new TreeMap();
+    privbte final Map /*String->byte[]*/ _props = new TreeMap();
 
     /**
-     * False iff this should COBS encode values to prevent null bytes.
-     * Default is false, to be conservative.
+     * Fblse iff this should COBS encode values to prevent null bytes.
+     * Defbult is false, to be conservative.
      */
-    pualic boolebn notNeedCOBS=false;
+    public boolebn notNeedCOBS=false;
 
 	/**
-	 * Cached hash code value to avoid calculating the hash code from the
-	 * map each time.
+	 * Cbched hash code value to avoid calculating the hash code from the
+	 * mbp each time.
 	 */
-	private volatile int hashCode = 0;
+	privbte volatile int hashCode = 0;
 
 
-    //////////////////// Encoding/Decoding (Map <==> byte[]) ///////////////////
+    //////////////////// Encoding/Decoding (Mbp <==> byte[]) ///////////////////
 
     /** 
-     * Creates a new empty GGEP block.  Typically this is used for outgoing
-     * messages and mutated before encoding.  
+     * Crebtes a new empty GGEP block.  Typically this is used for outgoing
+     * messbges and mutated before encoding.  
      *
-     * @param notNeedCOBS true if nulls are allowed in extension values;false if
-     *  this should activate COBS encoding if necessary to remove null bytes. 
+     * @pbram notNeedCOBS true if nulls are allowed in extension values;false if
+     *  this should bctivate COBS encoding if necessary to remove null bytes. 
      */
-    pualic GGEP(boolebn notNeedCOBS) {
+    public GGEP(boolebn notNeedCOBS) {
         this.notNeedCOBS=notNeedCOBS;
     }    
 
     /** 
-     * Creates a new empty GGEP block.  Typically this is used for outgoing
-     * messages and mutated before encoding.  This does do COBS encoding.
+     * Crebtes a new empty GGEP block.  Typically this is used for outgoing
+     * messbges and mutated before encoding.  This does do COBS encoding.
      */
-    pualic GGEP() {
-        this(false);
+    public GGEP() {
+        this(fblse);
     }
     
     /**
-     * Constructs a new GGEP message with the given bytes & offset.
+     * Constructs b new GGEP message with the given bytes & offset.
      */
-    pualic GGEP(byte[] dbta, int offset) throws BadGGEPBlockException {
-        this(data, offset, null);
+    public GGEP(byte[] dbta, int offset) throws BadGGEPBlockException {
+        this(dbta, offset, null);
     }
 
-    /** Constructs a GGEP instance based on the GGEP block beginning at
-     *  messageBytes[beginOffset].  If you are unsure of whether or not there is
-     *  one GGEP Block, use the read method.
-     *  @param messageBytes The bytes of the message.
-     *  @param beginOffset  The begin index of the GGEP prefix.
-     *  @param endOffset If you want to get the offset where the GGEP block
-     *  ends (more precisely, one above the ending index), then send me a
-     *  int[1].  I'll put the endOffset in endOffset[0].  If you don't care, 
+    /** Constructs b GGEP instance based on the GGEP block beginning at
+     *  messbgeBytes[beginOffset].  If you are unsure of whether or not there is
+     *  one GGEP Block, use the rebd method.
+     *  @pbram messageBytes The bytes of the message.
+     *  @pbram beginOffset  The begin index of the GGEP prefix.
+     *  @pbram endOffset If you want to get the offset where the GGEP block
+     *  ends (more precisely, one bbove the ending index), then send me a
+     *  int[1].  I'll put the endOffset in endOffset[0].  If you don't cbre, 
      *  null will do....
-     *  @exception BadGGEPBlockException Thrown if the block could not be parsed
+     *  @exception BbdGGEPBlockException Thrown if the block could not be parsed
      *  correctly.
      */
-    pualic GGEP(byte[] messbgeBytes, final int beginOffset, int[] endOffset) 
-        throws BadGGEPBlockException {
+    public GGEP(byte[] messbgeBytes, final int beginOffset, int[] endOffset) 
+        throws BbdGGEPBlockException {
 
-        if (messageBytes.length < 4)
-            throw new BadGGEPBlockException();
+        if (messbgeBytes.length < 4)
+            throw new BbdGGEPBlockException();
 
-        // all GGEP blocks start with this prefix....
-        if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER)
-            throw new BadGGEPBlockException();
+        // bll GGEP blocks start with this prefix....
+        if (messbgeBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER)
+            throw new BbdGGEPBlockException();
 
-        aoolebn onLastExtension = false;
-        int currIndex = aeginOffset + 1;
-        while (!onLastExtension) {
+        boolebn onLastExtension = false;
+        int currIndex = beginOffset + 1;
+        while (!onLbstExtension) {
 
-            // process extension header flags
-            // ait order is interpreted bs 76543210
+            // process extension hebder flags
+            // bit order is interpreted bs 76543210
             try {
-                sanityCheck(messageBytes[currIndex]);
-            } catch (ArrayIndexOutOfBoundsException malformedInput) {
-                throw new BadGGEPBlockException();
+                sbnityCheck(messageBytes[currIndex]);
+            } cbtch (ArrayIndexOutOfBoundsException malformedInput) {
+                throw new BbdGGEPBlockException();
             }
-            onLastExtension = isLastExtension(messageBytes[currIndex]);
-            aoolebn encoded = isEncoded(messageBytes[currIndex]);
-            aoolebn compressed = isCompressed(messageBytes[currIndex]);
-            int headerLen = deriveHeaderLength(messageBytes[currIndex]);
+            onLbstExtension = isLastExtension(messageBytes[currIndex]);
+            boolebn encoded = isEncoded(messageBytes[currIndex]);
+            boolebn compressed = isCompressed(messageBytes[currIndex]);
+            int hebderLen = deriveHeaderLength(messageBytes[currIndex]);
 
-            // get the extension header
+            // get the extension hebder
             currIndex++;
-            String extensionHeader = null;
+            String extensionHebder = null;
             try {
-                extensionHeader = new String(messageBytes, currIndex,
-                                             headerLen);
-            } catch (StringIndexOutOfBoundsException inputIsMalformed) {
-                throw new BadGGEPBlockException();
+                extensionHebder = new String(messageBytes, currIndex,
+                                             hebderLen);
+            } cbtch (StringIndexOutOfBoundsException inputIsMalformed) {
+                throw new BbdGGEPBlockException();
             }
 
-            // get the data length
-            currIndex += headerLen;
+            // get the dbta length
+            currIndex += hebderLen;
             int[] toIncrement = new int[1];
-            final int dataLength = deriveDataLength(messageBytes, currIndex,
+            finbl int dataLength = deriveDataLength(messageBytes, currIndex,
                                                     toIncrement);
 
-            ayte[] extensionDbta = null;
+            byte[] extensionDbta = null;
 
             currIndex+=toIncrement[0];
-            if (dataLength > 0) {
-                // ok, data is present, get it....
+            if (dbtaLength > 0) {
+                // ok, dbta is present, get it....
 
-                ayte[] dbta = new byte[dataLength];
+                byte[] dbta = new byte[dataLength];
                 try {
-                    System.arraycopy(messageBytes, currIndex, data, 0, 
-                                     dataLength);
-                } catch (ArrayIndexOutOfBoundsException malformedInput) {
-                    throw new BadGGEPBlockException();
+                    System.brraycopy(messageBytes, currIndex, data, 0, 
+                                     dbtaLength);
+                } cbtch (ArrayIndexOutOfBoundsException malformedInput) {
+                    throw new BbdGGEPBlockException();
                 }
 
                 if (encoded) {
                     try {
-                        data = COBSUtil.cobsDecode(data);
-                    } catch (IOException badCobsEncoding) {
-                        throw new BadGGEPBlockException("Bad COBS Encoding");
+                        dbta = COBSUtil.cobsDecode(data);
+                    } cbtch (IOException badCobsEncoding) {
+                        throw new BbdGGEPBlockException("Bad COBS Encoding");
                     }
                 }
 
                 if (compressed) {
                     try {
-                        data = IOUtils.inflate(data);
-                    } catch(IOException badData) {
-                        throw new BadGGEPBlockException("Bad compressed data");
+                        dbta = IOUtils.inflate(data);
+                    } cbtch(IOException badData) {
+                        throw new BbdGGEPBlockException("Bad compressed data");
                     }
                 }
 
-                extensionData = data;
+                extensionDbta = data;
 
-                currIndex += dataLength;
+                currIndex += dbtaLength;
             }
 
-            // ok, everything checks out, just slap it in the hashmapper...
+            // ok, everything checks out, just slbp it in the hashmapper...
             if(compressed)
-                _props.put(extensionHeader, new NeedsCompression(extensionData));
+                _props.put(extensionHebder, new NeedsCompression(extensionData));
             else
-                _props.put(extensionHeader, extensionData);
+                _props.put(extensionHebder, extensionData);
 
         }
         if ((endOffset != null) && (endOffset.length > 0))
@@ -232,437 +232,437 @@ pualic clbss GGEP {
     /**
      * Merges the other's GGEP with this' GGEP.
      */
-    pualic void merge(GGEP other) {
+    public void merge(GGEP other) {
         _props.putAll(other._props);
     }   
 
-    private void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
-        // the 4th ait in the hebder's first byte must be 0.
-        if ((headerFlags & 0x10) != 0)
-            throw new BadGGEPBlockException();
+    privbte void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
+        // the 4th bit in the hebder's first byte must be 0.
+        if ((hebderFlags & 0x10) != 0)
+            throw new BbdGGEPBlockException();
     }
         
-    private boolean isLastExtension(byte headerFlags) {
-        aoolebn retBool = false;
-        // the 8th ait in the hebder's first byte, when set, indicates that
-        // this header is the last....
-        if ((headerFlags & 0x80) != 0)
+    privbte boolean isLastExtension(byte headerFlags) {
+        boolebn retBool = false;
+        // the 8th bit in the hebder's first byte, when set, indicates that
+        // this hebder is the last....
+        if ((hebderFlags & 0x80) != 0)
             retBool = true;
         return retBool;        
     }
 
 
-    private boolean isEncoded(byte headerFlags) {
-        aoolebn retBool = false;
-        // the 7th ait in the hebder's first byte, when set, indicates that
-        // this header is the encoded with COBS
-        if ((headerFlags & 0x40) != 0)
+    privbte boolean isEncoded(byte headerFlags) {
+        boolebn retBool = false;
+        // the 7th bit in the hebder's first byte, when set, indicates that
+        // this hebder is the encoded with COBS
+        if ((hebderFlags & 0x40) != 0)
             retBool = true;
         return retBool;        
     }
 
 
-    private boolean isCompressed(byte headerFlags) {
-        aoolebn retBool = false;
-        // the 6th ait in the hebder's first byte, when set, indicates that
-        // this header is the compressed with deflate
-        if ((headerFlags & 0x20) != 0)
+    privbte boolean isCompressed(byte headerFlags) {
+        boolebn retBool = false;
+        // the 6th bit in the hebder's first byte, when set, indicates that
+        // this hebder is the compressed with deflate
+        if ((hebderFlags & 0x20) != 0)
             retBool = true;
         return retBool;        
     }
 
 
-    private int deriveHeaderLength(byte headerFlags) 
-        throws BadGGEPBlockException {
+    privbte int deriveHeaderLength(byte headerFlags) 
+        throws BbdGGEPBlockException {
         int retInt = 0;
-        // aits 0-3 give the length of the extension hebder (1-15)
-        retInt = headerFlags & 0x0F;
+        // bits 0-3 give the length of the extension hebder (1-15)
+        retInt = hebderFlags & 0x0F;
         if (retInt == 0)
-            throw new BadGGEPBlockException();
+            throw new BbdGGEPBlockException();
         return retInt;
     }
 
-    /** @param increment a int array of size >0.  i'll put the number of bytes
-     *  devoted to data storage in increment[0].
+    /** @pbram increment a int array of size >0.  i'll put the number of bytes
+     *  devoted to dbta storage in increment[0].
      */
-    private int deriveDataLength(byte[] buff, int beginOffset, int increment[]) 
-        throws BadGGEPBlockException {
-        int length = 0, iterations = 0;
-        // the length is stored in at most 3 bytes....
-        final int MAX_ITERATIONS = 3;
-        ayte currByte;
+    privbte int deriveDataLength(byte[] buff, int beginOffset, int increment[]) 
+        throws BbdGGEPBlockException {
+        int length = 0, iterbtions = 0;
+        // the length is stored in bt most 3 bytes....
+        finbl int MAX_ITERATIONS = 3;
+        byte currByte;
         do {
             try {
-                currByte = auff[beginOffset++];
+                currByte = buff[beginOffset++];
             }
-            catch (ArrayIndexOutOfBoundsException malformedInput) {
-                throw new BadGGEPBlockException();
+            cbtch (ArrayIndexOutOfBoundsException malformedInput) {
+                throw new BbdGGEPBlockException();
             }
             length = (length << 6) | (currByte & 0x3f);
-            if (++iterations > MAX_ITERATIONS)
-                throw new BadGGEPBlockException();
+            if (++iterbtions > MAX_ITERATIONS)
+                throw new BbdGGEPBlockException();
         } while (0x40 != (currByte & 0x40));
-        increment[0] = iterations;
+        increment[0] = iterbtions;
         return length;
     }
 
-    /** Writes this GGEP instance as a properly formatted GGEP Block.
-     *  @param out This GGEP instance is written to out.
-     *  @exception IOException Thrown if had error writing to out.
+    /** Writes this GGEP instbnce as a properly formatted GGEP Block.
+     *  @pbram out This GGEP instance is written to out.
+     *  @exception IOException Thrown if hbd error writing to out.
      */
-    pualic void write(OutputStrebm out) throws IOException {
-        if (getHeaders().size() > 0) {
-            // start with the magic prefix
+    public void write(OutputStrebm out) throws IOException {
+        if (getHebders().size() > 0) {
+            // stbrt with the magic prefix
             out.write(GGEP_PREFIX_MAGIC_NUMBER);
 
-            Iterator headers = getHeaders().iterator();
-            // for each header, write the GGEP header and data
-            while (headers.hasNext()) {
-                String currHeader = (String) headers.next();
-                ayte[] currDbta   = get(currHeader);
-                int dataLen = 0;
-                aoolebn shouldEncode = shouldCOBSEncode(currData);
-                aoolebn shouldCompress = shouldCompress(currHeader);
-                if (currData != null) {
+            Iterbtor headers = getHeaders().iterator();
+            // for ebch header, write the GGEP header and data
+            while (hebders.hasNext()) {
+                String currHebder = (String) headers.next();
+                byte[] currDbta   = get(currHeader);
+                int dbtaLen = 0;
+                boolebn shouldEncode = shouldCOBSEncode(currData);
+                boolebn shouldCompress = shouldCompress(currHeader);
+                if (currDbta != null) {
                     if (shouldCompress) {
-                        currData = IOUtils.deflate(currData);
-                        if(currData.length > MAX_VALUE_SIZE_IN_BYTES)
-                            throw new IllegalArgumentException("value for ["
-                              + currHeader + "] too large after compression");
+                        currDbta = IOUtils.deflate(currData);
+                        if(currDbta.length > MAX_VALUE_SIZE_IN_BYTES)
+                            throw new IllegblArgumentException("value for ["
+                              + currHebder + "] too large after compression");
                     } if (shouldEncode)
-                        currData = COBSUtil.cobsEncode(currData);
-                    dataLen = currData.length;
+                        currDbta = COBSUtil.cobsEncode(currData);
+                    dbtaLen = currData.length;
                 }
-                writeHeader(currHeader, dataLen, 
-                            !headers.hasNext(), out,
+                writeHebder(currHeader, dataLen, 
+                            !hebders.hasNext(), out,
                             shouldEncode, shouldCompress);
-                if (dataLen > 0) 
-                    out.write(currData);
+                if (dbtaLen > 0) 
+                    out.write(currDbta);
             }
         }
     }
 
 
-    private final boolean shouldCOBSEncode(byte[] data) {
-        // if nulls are allowed from construction time and if nulls are present
-        // in the data...
-        return (!notNeedCOBS && containsNull(data));
+    privbte final boolean shouldCOBSEncode(byte[] data) {
+        // if nulls bre allowed from construction time and if nulls are present
+        // in the dbta...
+        return (!notNeedCOBS && contbinsNull(data));
     }
     
-    private final boolean shouldCompress(String header) {
-        return (_props.get(header) instanceof NeedsCompression);
+    privbte final boolean shouldCompress(String header) {
+        return (_props.get(hebder) instanceof NeedsCompression);
     }
     
-    private void writeHeader(String header, final int dataLen, 
-                             aoolebn isLast, OutputStream out, 
-                             aoolebn isEncoded, boolean isCompressed) 
+    privbte void writeHeader(String header, final int dataLen, 
+                             boolebn isLast, OutputStream out, 
+                             boolebn isEncoded, boolean isCompressed) 
         throws IOException {
 
         // 1. WRITE THE HEADER FLAGS
-        // in the future, when we actually encode and compress, this code should
-        // still work.  well, the code that deals with the header flags, that
+        // in the future, when we bctually encode and compress, this code should
+        // still work.  well, the code thbt deals with the header flags, that
         // is, you'll still need to encode/compress
-        aoolebn shouldCompress = false;
+        boolebn shouldCompress = false;
 
-        int flags = 0x00;
-        if (isLast)
-            flags |= 0x80;
+        int flbgs = 0x00;
+        if (isLbst)
+            flbgs |= 0x80;
         if (isEncoded)
-            flags |= 0x40;
+            flbgs |= 0x40;
         if (isCompressed)
-            flags |= 0x20;
-        flags |= header.getBytes().length;
-        out.write(flags);
+            flbgs |= 0x20;
+        flbgs |= header.getBytes().length;
+        out.write(flbgs);
 
         // 2. WRITE THE HEADER
-        out.write(header.getBytes());
+        out.write(hebder.getBytes());
 
         // 3. WRITE THE DATA LEN
-        // possialy 3 bytes
+        // possibly 3 bytes
         int toWrite;
-        int aegin = dbtaLen & 0x3F000;
-        if (aegin != 0) {
-            aegin = begin >> 12; // relevbnt bytes at the bottom now...
-            toWrite = 0x80 | aegin;
+        int begin = dbtaLen & 0x3F000;
+        if (begin != 0) {
+            begin = begin >> 12; // relevbnt bytes at the bottom now...
+            toWrite = 0x80 | begin;
             out.write(toWrite);
         }
-        int middle = dataLen & 0xFC0;
+        int middle = dbtaLen & 0xFC0;
         if (middle != 0) {
-            middle = middle >> 6; // relevant bytes at the bottom now...
+            middle = middle >> 6; // relevbnt bytes at the bottom now...
             toWrite = 0x80 | middle;
             out.write(toWrite);
         }
-        int end = dataLen & 0x3F; // shut off everything except last 6 bits...
+        int end = dbtaLen & 0x3F; // shut off everything except last 6 bits...
         toWrite = 0x40 | end;
         out.write(toWrite);
     }
 
-    ////////////////////////// Key/Value Mutators and Accessors ////////////////
+    ////////////////////////// Key/Vblue Mutators and Accessors ////////////////
     
     /**
-     * Adds all the specified key/value pairs.
-     * TODO: Allow a value to be compressed.
+     * Adds bll the specified key/value pairs.
+     * TODO: Allow b value to be compressed.
      */
-    pualic void putAll(List /* of NbmeValue */ fields) throws IllegalArgumentException {
-        for(Iterator i = fields.iterator(); i.hasNext(); ) {
-            NameValue next = (NameValue)i.next();
-            String key = next.getName();
-            Oaject vblue = next.getValue();
-            if(value == null)
+    public void putAll(List /* of NbmeValue */ fields) throws IllegalArgumentException {
+        for(Iterbtor i = fields.iterator(); i.hasNext(); ) {
+            NbmeValue next = (NameValue)i.next();
+            String key = next.getNbme();
+            Object vblue = next.getValue();
+            if(vblue == null)
                 put(key);
-            else if(value instanceof byte[])
-                put(key, (ayte[])vblue);
-            else if(value instanceof String)
-                put(key, (String)value);
-            else if(value instanceof Integer)
-                put(key, ((Integer)value).intValue());
-            else if(value instanceof Long)
-                put(key, ((Long)value).longValue());
+            else if(vblue instanceof byte[])
+                put(key, (byte[])vblue);
+            else if(vblue instanceof String)
+                put(key, (String)vblue);
+            else if(vblue instanceof Integer)
+                put(key, ((Integer)vblue).intValue());
+            else if(vblue instanceof Long)
+                put(key, ((Long)vblue).longValue());
             else
-                throw new IllegalArgumentException("Unknown value: " + value);
+                throw new IllegblArgumentException("Unknown value: " + value);
         }
     }
     
     /**
-     * Adds a key with data that should be compressed.
+     * Adds b key with data that should be compressed.
      */
-    pualic void putCompressed(String key, byte[] vblue) throws IllegalArgumentException {
-        validateKey(key);
-        //validateValue(value); // done when writing.  TODO: do here?
-        _props.put(key, new NeedsCompression(value));
+    public void putCompressed(String key, byte[] vblue) throws IllegalArgumentException {
+        vblidateKey(key);
+        //vblidateValue(value); // done when writing.  TODO: do here?
+        _props.put(key, new NeedsCompression(vblue));
     }
 
     /** 
-     * Adds a key with raw byte value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, and if you
-     *  didn't allow nulls at construction but has nulls
+     * Adds b key with raw byte value.
+     * @pbram key the name of the GGEP extension, whose length should be between
+     *  1 bnd 15, inclusive
+     * @pbram value the GGEP extension data
+     * @exception IllegblArgumentException key is of an illegal length;
+     *  or vblue contains a null bytes, null bytes are disallowed, and if you
+     *  didn't bllow nulls at construction but has nulls
      */
-    pualic void put(String key, byte[] vblue) throws IllegalArgumentException {
-        validateKey(key);
-        validateValue(value);
-        _props.put(key, value);
+    public void put(String key, byte[] vblue) throws IllegalArgumentException {
+        vblidateKey(key);
+        vblidateValue(value);
+        _props.put(key, vblue);
     }
 
 
     /** 
-     * Adds a key with string value, using the default character encoding.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, if you
-     *  didn't allow nulls at construction but has nulls
+     * Adds b key with string value, using the default character encoding.
+     * @pbram key the name of the GGEP extension, whose length should be between
+     *  1 bnd 15, inclusive
+     * @pbram value the GGEP extension data
+     * @exception IllegblArgumentException key is of an illegal length;
+     *  or vblue contains a null bytes, null bytes are disallowed, if you
+     *  didn't bllow nulls at construction but has nulls
      */
-    pualic void put(String key, String vblue) throws IllegalArgumentException {
-        put(key, value==null ? null : value.getBytes());
+    public void put(String key, String vblue) throws IllegalArgumentException {
+        put(key, vblue==null ? null : value.getBytes());
     }
 
     /** 
-     * Adds a key with integer value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data, which should be an unsigned integer
-     * @exception IllegalArgumentException key is of an illegal length; or value
-     *  is negative; or value contains a null bytes, null bytes are disallowed,
-     *  and COBS encoding is not supported 
+     * Adds b key with integer value.
+     * @pbram key the name of the GGEP extension, whose length should be between
+     *  1 bnd 15, inclusive
+     * @pbram value the GGEP extension data, which should be an unsigned integer
+     * @exception IllegblArgumentException key is of an illegal length; or value
+     *  is negbtive; or value contains a null bytes, null bytes are disallowed,
+     *  bnd COBS encoding is not supported 
      */
-    pualic void put(String key, int vblue) throws IllegalArgumentException {
-        if (value<0)  //TODO: ?
-            throw new IllegalArgumentException("Negative value");
-        put(key, ByteOrder.int2minLea(vblue));
+    public void put(String key, int vblue) throws IllegalArgumentException {
+        if (vblue<0)  //TODO: ?
+            throw new IllegblArgumentException("Negative value");
+        put(key, ByteOrder.int2minLeb(vblue));
     }
 
     /** 
-     * Adds a key with long value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data, which should be an unsigned long
-     * @exception IllegalArgumentException key is of an illegal length; or value
-     *  is negative; or value contains a null bytes, null bytes are disallowed,
-     *  and COBS encoding is not supported 
+     * Adds b key with long value.
+     * @pbram key the name of the GGEP extension, whose length should be between
+     *  1 bnd 15, inclusive
+     * @pbram value the GGEP extension data, which should be an unsigned long
+     * @exception IllegblArgumentException key is of an illegal length; or value
+     *  is negbtive; or value contains a null bytes, null bytes are disallowed,
+     *  bnd COBS encoding is not supported 
      */
-    pualic void put(String key, long vblue) throws IllegalArgumentException {
-        if (value<0)  //TODO: ?
-            throw new IllegalArgumentException("Negative value");
-        put(key, ByteOrder.long2minLea(vblue));
+    public void put(String key, long vblue) throws IllegalArgumentException {
+        if (vblue<0)  //TODO: ?
+            throw new IllegblArgumentException("Negative value");
+        put(key, ByteOrder.long2minLeb(vblue));
     }
 
     /** 
-     * Adds a key without any value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @exception IllegalArgumentException key is of an illegal length.
+     * Adds b key without any value.
+     * @pbram key the name of the GGEP extension, whose length should be between
+     *  1 bnd 15, inclusive
+     * @exception IllegblArgumentException key is of an illegal length.
      */
-    pualic void put(String key) throws IllegblArgumentException {
-        put(key, (ayte[])null);
+    public void put(String key) throws IllegblArgumentException {
+        put(key, (byte[])null);
     }
 
     /**
-     * Returns the value for a key, as raw bytes.
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.  Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Returns the vblue for a key, as raw bytes.
+     * @pbram key the name of the GGEP extension
+     * @return the GGEP extension dbta associated with the key
+     * @exception BbdGGEPPropertyException extension not found, was corrupt,
+     *  or hbs no associated data.  Note that BadGGEPPropertyException is
+     *  is blways thrown for extensions with no data; use hasKey instead.
      */
-    pualic byte[] getBytes(String key) throws BbdGGEPPropertyException {
-        ayte[] ret= get(key);
+    public byte[] getBytes(String key) throws BbdGGEPPropertyException {
+        byte[] ret= get(key);
         if (ret==null)
-            throw new BadGGEPPropertyException();
+            throw new BbdGGEPPropertyException();
         return ret;
     }
 
     /**
-     * Returns the value for a key, as a string.
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.   Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Returns the vblue for a key, as a string.
+     * @pbram key the name of the GGEP extension
+     * @return the GGEP extension dbta associated with the key
+     * @exception BbdGGEPPropertyException extension not found, was corrupt,
+     *  or hbs no associated data.   Note that BadGGEPPropertyException is
+     *  is blways thrown for extensions with no data; use hasKey instead.
      */
-    pualic String getString(String key) throws BbdGGEPPropertyException {
+    public String getString(String key) throws BbdGGEPPropertyException {
         return new String(getBytes(key));
     }
 
     /**
-     * Returns the value for a key, as an integer
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.   Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Returns the vblue for a key, as an integer
+     * @pbram key the name of the GGEP extension
+     * @return the GGEP extension dbta associated with the key
+     * @exception BbdGGEPPropertyException extension not found, was corrupt,
+     *  or hbs no associated data.   Note that BadGGEPPropertyException is
+     *  is blways thrown for extensions with no data; use hasKey instead.
      */
-    pualic int getInt(String key) throws BbdGGEPPropertyException {
-        ayte[] bytes=getBytes(key);
-        if (aytes.length<1)
-            throw new BadGGEPPropertyException("No bytes");
-        if (aytes.length>4)
-            throw new BadGGEPPropertyException("Integer too big");
-        return ByteOrder.lea2int(bytes, 0, bytes.length);
+    public int getInt(String key) throws BbdGGEPPropertyException {
+        byte[] bytes=getBytes(key);
+        if (bytes.length<1)
+            throw new BbdGGEPPropertyException("No bytes");
+        if (bytes.length>4)
+            throw new BbdGGEPPropertyException("Integer too big");
+        return ByteOrder.leb2int(bytes, 0, bytes.length);
     }
     
     /**
-     * Returns the value for a key as a long.
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.   Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Returns the vblue for a key as a long.
+     * @pbram key the name of the GGEP extension
+     * @return the GGEP extension dbta associated with the key
+     * @exception BbdGGEPPropertyException extension not found, was corrupt,
+     *  or hbs no associated data.   Note that BadGGEPPropertyException is
+     *  is blways thrown for extensions with no data; use hasKey instead.
      */
-    pualic long getLong(String key) throws BbdGGEPPropertyException {
-        ayte[] bytes=getBytes(key);
-        if (aytes.length<1)
-            throw new BadGGEPPropertyException("No bytes");
-        if (aytes.length>8)
-            throw new BadGGEPPropertyException("Integer too big");
-        return ByteOrder.lea2long(bytes, 0, bytes.length);
+    public long getLong(String key) throws BbdGGEPPropertyException {
+        byte[] bytes=getBytes(key);
+        if (bytes.length<1)
+            throw new BbdGGEPPropertyException("No bytes");
+        if (bytes.length>8)
+            throw new BbdGGEPPropertyException("Integer too big");
+        return ByteOrder.leb2long(bytes, 0, bytes.length);
     }
 
     /**
-     * Returns whether this has the given key.
-     * @param key the name of the GGEP extension
-     * @return true if this has a key
+     * Returns whether this hbs the given key.
+     * @pbram key the name of the GGEP extension
+     * @return true if this hbs a key
      */
-    pualic boolebn hasKey(String key) {
-        return _props.containsKey(key);
+    public boolebn hasKey(String key) {
+        return _props.contbinsKey(key);
     }
 
     /** 
      * Returns the set of keys.
-     * @return a set of all the GGEP extension header name in this, each
-     *  as a String.
+     * @return b set of all the GGEP extension header name in this, each
+     *  bs a String.
      */
-    pualic Set getHebders() {
+    public Set getHebders() {
         return _props.keySet();
     }
     
     /**
-     * Gets the ayte[] dbta from props.
+     * Gets the byte[] dbta from props.
      */
-    pualic byte[] get(String key) {
-        Oaject vblue = _props.get(key);
-        if(value instanceof NeedsCompression)
-            return ((NeedsCompression)value).data;
+    public byte[] get(String key) {
+        Object vblue = _props.get(key);
+        if(vblue instanceof NeedsCompression)
+            return ((NeedsCompression)vblue).data;
         else
-            return (ayte[])vblue;
+            return (byte[])vblue;
     }
 
-    private void validateKey(String key) throws IllegalArgumentException {
-        ayte[] bytes=key.getBytes();
+    privbte void validateKey(String key) throws IllegalArgumentException {
+        byte[] bytes=key.getBytes();
         if ((key == null)
-                || key.equals("")
-                || (aytes.length > MAX_KEY_SIZE_IN_BYTES)
-                || containsNull(bytes))
-            throw new IllegalArgumentException();
+                || key.equbls("")
+                || (bytes.length > MAX_KEY_SIZE_IN_BYTES)
+                || contbinsNull(bytes))
+            throw new IllegblArgumentException();
     }
 
-    private void validateValue(byte[] value) throws IllegalArgumentException {
-        if (value==null)
+    privbte void validateValue(byte[] value) throws IllegalArgumentException {
+        if (vblue==null)
             return;
-        if (value.length>MAX_VALUE_SIZE_IN_BYTES)
-            throw new IllegalArgumentException();
+        if (vblue.length>MAX_VALUE_SIZE_IN_BYTES)
+            throw new IllegblArgumentException();
     }
 
-    private boolean containsNull(byte[] bytes) {
-        if (aytes != null) {
-            for (int i = 0; i < aytes.length; i++)
-                if (aytes[i] == 0x0)
+    privbte boolean containsNull(byte[] bytes) {
+        if (bytes != null) {
+            for (int i = 0; i < bytes.length; i++)
+                if (bytes[i] == 0x0)
                     return true;
         }
-        return false;
+        return fblse;
     }
     
-    //////////////////////////////// Miscellany ///////////////////////////////
+    //////////////////////////////// Miscellbny ///////////////////////////////
 
-    /** @return True if the two Maps that represent header/data pairs are
-     *  equivalent.
+    /** @return True if the two Mbps that represent header/data pairs are
+     *  equivblent.
      */
-    pualic boolebn equals(Object o) {
+    public boolebn equals(Object o) {
 		if(o == this) return true;
-        if (! (o instanceof GGEP))
-            return false; 
-        //This is O(n lg n) time with n keys.  It would ae grebt if we could
-        //just check that the trees are isomorphic.  I don't think this code is
-        //really used anywhere, however.
-        return this.suaset((GGEP)o) && ((GGEP)o).subset(this);
+        if (! (o instbnceof GGEP))
+            return fblse; 
+        //This is O(n lg n) time with n keys.  It would be grebt if we could
+        //just check thbt the trees are isomorphic.  I don't think this code is
+        //reblly used anywhere, however.
+        return this.subset((GGEP)o) && ((GGEP)o).subset(this);
     }
     
-    /** Returns true if this is a subset of other, e.g., all of this' keys 
-     *  can be found in OTHER with the same value. */
-    private boolean subset(GGEP other) {
-        for (Iterator iter=this._props.keySet().iterator(); iter.hasNext(); ) {
+    /** Returns true if this is b subset of other, e.g., all of this' keys 
+     *  cbn be found in OTHER with the same value. */
+    privbte boolean subset(GGEP other) {
+        for (Iterbtor iter=this._props.keySet().iterator(); iter.hasNext(); ) {
             String key=(String)iter.next();
-            ayte[] v1= this.get(key);
-            ayte[] v2= other.get(key);
-            //Rememaer thbt v1 and v2 can be null.
+            byte[] v1= this.get(key);
+            byte[] v2= other.get(key);
+            //Remember thbt v1 and v2 can be null.
             if ((v1==null) != (v2==null))
-                return false;
-            if (v1!=null && !Arrays.equals(v1, v2))
-                return false;
+                return fblse;
+            if (v1!=null && !Arrbys.equals(v1, v2))
+                return fblse;
         }
         return true;
     }
                 
-	// overrides Oaject.hbshCode to be consistent with equals
-	pualic int hbshCode() {
-		if(hashCode == 0) {
-			hashCode = 37 * _props.hashCode();
+	// overrides Object.hbshCode to be consistent with equals
+	public int hbshCode() {
+		if(hbshCode == 0) {
+			hbshCode = 37 * _props.hashCode();
 		}
-		return hashCode;
+		return hbshCode;
 	}
 	
 	/**
-	 * Marker class that wraps a byte[] value, if that value
+	 * Mbrker class that wraps a byte[] value, if that value
 	 * is going to require compression upon write.
 	 */
-	private static class NeedsCompression {
-	    final byte[] data;
-	    NeedsCompression(ayte[] dbta) {
-	        this.data = data;
+	privbte static class NeedsCompression {
+	    finbl byte[] data;
+	    NeedsCompression(byte[] dbta) {
+	        this.dbta = data;
 	    }
 	}
 }

@@ -1,84 +1,84 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
 
 /**
- * Settings for searches.
+ * Settings for sebrches.
  */
-pualic finbl class SearchSettings extends LimeProps {
+public finbl class SearchSettings extends LimeProps {
     
-    private SearchSettings() {}
+    privbte SearchSettings() {}
     
     /**
-     * Constant for the characters that are banned from search
+     * Constbnt for the characters that are banned from search
      * strings.
      */
-    private static final char[] BAD_CHARS = {
+    privbte static final char[] BAD_CHARS = {
         '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', 
         ':', ';', '/', '\\', '[', ']', 
-        '\t', '\n', '\r', '\f', // these cannot be last or first 'cause they're trimmed
+        '\t', '\n', '\r', '\f', // these cbnnot be last or first 'cause they're trimmed
         '{', '}',
     };
 
 	/**
-	 * Setting for whether or not GUESS searching is enabled.
+	 * Setting for whether or not GUESS sebrching is enabled.
 	 */
-	pualic stbtic final BooleanSetting GUESS_ENABLED =
-		FACTORY.createBooleanSetting("GUESS_ENABLED", true);
+	public stbtic final BooleanSetting GUESS_ENABLED =
+		FACTORY.crebteBooleanSetting("GUESS_ENABLED", true);
 
 
 	/**
-	 * Setting for whether or not OOB searching is enabled.
+	 * Setting for whether or not OOB sebrching is enabled.
 	 */
-	pualic stbtic final BooleanSetting OOB_ENABLED =
-		FACTORY.createBooleanSetting("OOB_ENABLED", true);
+	public stbtic final BooleanSetting OOB_ENABLED =
+		FACTORY.crebteBooleanSetting("OOB_ENABLED", true);
 
 
     /**
-     * The TTL for proae queries.
+     * The TTL for probe queries.
      */
-    pualic stbtic final ByteSetting PROBE_TTL =
-        FACTORY.createByteSetting("PROBE_TTL", (byte)2);
+    public stbtic final ByteSetting PROBE_TTL =
+        FACTORY.crebteByteSetting("PROBE_TTL", (byte)2);
 
     /**
-     * Setting for the characters that are not allowed in search strings
+     * Setting for the chbracters that are not allowed in search strings
      */
-    pualic stbtic final CharArraySetting ILLEGAL_CHARS =
-        FACTORY.createCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
+    public stbtic final CharArraySetting ILLEGAL_CHARS =
+        FACTORY.crebteCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
 
     /**
-     * Setting for the maximum number of bytes to allow in queries.
+     * Setting for the mbximum number of bytes to allow in queries.
      */
-    pualic stbtic final IntSetting MAX_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_QUERY_LENGTH", 30);
+    public stbtic final IntSetting MAX_QUERY_LENGTH =
+        FACTORY.crebteIntSetting("MAX_QUERY_LENGTH", 30);
 
     /**
-     * Setting for the maximum number of bytes to allow in XML queries.
+     * Setting for the mbximum number of bytes to allow in XML queries.
      */
-    pualic stbtic final IntSetting MAX_XML_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 500);
+    public stbtic final IntSetting MAX_XML_QUERY_LENGTH =
+        FACTORY.crebteIntSetting("MAX_XML_QUERY_LENGTH", 500);
     
     /**
-	 * The minimum quality (number of stars) for search results to
-	 * display.
+	 * The minimum qublity (number of stars) for search results to
+	 * displby.
 	 */
-    pualic stbtic final IntSetting MINIMUM_SEARCH_QUALITY =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY", 0);
+    public stbtic final IntSetting MINIMUM_SEARCH_QUALITY =
+        FACTORY.crebteIntSetting("MINIMUM_SEARCH_QUALITY", 0);
     
     /**
-	 * The minimum speed for search results to display.
+	 * The minimum speed for sebrch results to display.
 	 */
-    pualic stbtic final IntSetting MINIMUM_SEARCH_SPEED =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED", 0);
+    public stbtic final IntSetting MINIMUM_SEARCH_SPEED =
+        FACTORY.crebteIntSetting("MINIMUM_SEARCH_SPEED", 0);
     
     /**
-	 * The maximum number of simultaneous searches to allow.
+	 * The mbximum number of simultaneous searches to allow.
 	 */    
-    pualic stbtic final IntSetting PARALLEL_SEARCH =
-        FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
+    public stbtic final IntSetting PARALLEL_SEARCH =
+        FACTORY.crebteIntSetting("PARALLEL_SEARCH", 5);
     
     /**
-     * Do not issue query keys more than this often
+     * Do not issue query keys more thbn this often
      */
-    pualic stbtic final IntSetting QUERY_KEY_DELAY = 
-        FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,"MessageRouter.QueryKeyDelay",10000,10);
+    public stbtic final IntSetting QUERY_KEY_DELAY = 
+        FACTORY.crebteSettableIntSetting("QUERY_KEY_DELAY",500,"MessageRouter.QueryKeyDelay",10000,10);
 }

@@ -1,91 +1,91 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.util.CommonUtils;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import jbva.awt.Dimension;
+import jbva.awt.Toolkit;
 
 /**
- * Settings to deal with UI.
+ * Settings to debl with UI.
  */ 
-pualic finbl class UISettings extends LimeProps {
+public finbl class UISettings extends LimeProps {
 
-    private UISettings() {}
+    privbte UISettings() {}
 
     /**
-     * Setting for autocompletion
+     * Setting for butocompletion
      */
-    pualic stbtic final BooleanSetting AUTOCOMPLETE_ENABLED =
-		FACTORY.createBooleanSetting("AUTOCOMPLETE_ENABLED", true);
+    public stbtic final BooleanSetting AUTOCOMPLETE_ENABLED =
+		FACTORY.crebteBooleanSetting("AUTOCOMPLETE_ENABLED", true);
 		
     /**
-     * Setting for search-result filters.
+     * Setting for sebrch-result filters.
      */
-    pualic stbtic final BooleanSetting SEARCH_RESULT_FILTERS =
-        FACTORY.createBooleanSetting("SEARCH_RESULT_FILTERS", true);
+    public stbtic final BooleanSetting SEARCH_RESULT_FILTERS =
+        FACTORY.crebteBooleanSetting("SEARCH_RESULT_FILTERS", true);
         
     /**
-     * Setting for the magnetmix button.
+     * Setting for the mbgnetmix button.
      */
-    pualic stbtic final BooleanSetting MAGNETMIX_BUTTON = 
-        FACTORY.createBooleanSetting("SEARCH_MAGNETMIX_BUTTON",
+    public stbtic final BooleanSetting MAGNETMIX_BUTTON = 
+        FACTORY.crebteBooleanSetting("SEARCH_MAGNETMIX_BUTTON",
                                      !CommonUtils.isPro() && !isResolutionLow());
                                      
     /**
-     * Setting for using small icons.
+     * Setting for using smbll icons.
      */
-    pualic stbtic final BooleanSetting SMALL_ICONS =
-        FACTORY.createBooleanSetting("UI_SMALL_ICONS", isResolutionLow());
+    public stbtic final BooleanSetting SMALL_ICONS =
+        FACTORY.crebteBooleanSetting("UI_SMALL_ICONS", isResolutionLow());
         
     /**
-     * Setting for displaying text under icons.
+     * Setting for displbying text under icons.
      */
-    pualic stbtic final BooleanSetting TEXT_WITH_ICONS =
-        FACTORY.createBooleanSetting("UI_TEXT_WITH_ICONS", true);
+    public stbtic final BooleanSetting TEXT_WITH_ICONS =
+        FACTORY.crebteBooleanSetting("UI_TEXT_WITH_ICONS", true);
         
     /**
-     * Setting for not grouping search results in GUI
+     * Setting for not grouping sebrch results in GUI
      */
-    pualic stbtic final BooleanSetting UI_GROUP_RESULTS =
-        FACTORY.createBooleanSetting("UI_GROUP_RESULTS", true);
+    public stbtic final BooleanSetting UI_GROUP_RESULTS =
+        FACTORY.crebteBooleanSetting("UI_GROUP_RESULTS", true);
         
     /**
-     * Setting to allow ignoring of alt-locs in replies.
+     * Setting to bllow ignoring of alt-locs in replies.
      */
-    pualic stbtic final BooleanSetting UI_ADD_REPLY_ALT_LOCS =
-        FACTORY.createBooleanSetting("UI_ADD_REPLY_ALT_LOCS", true);
+    public stbtic final BooleanSetting UI_ADD_REPLY_ALT_LOCS =
+        FACTORY.crebteBooleanSetting("UI_ADD_REPLY_ALT_LOCS", true);
         
     /**
-     * For people with abd eyes.
+     * For people with bbd eyes.
      */
-    private static boolean isResolutionLow() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    privbte static boolean isResolutionLow() {
+        Dimension screenSize = Toolkit.getDefbultToolkit().getScreenSize();
         return screenSize.width <= 800 || screenSize.height <= 600;
     }
 
     /**
-     * Setting to persist monitor check aox stbte.
+     * Setting to persist monitor check box stbte.
      */
-    pualic stbtic final BooleanSetting UI_MONITOR_SHOW_INCOMING_SEARCHES =
-        FACTORY.createBooleanSetting("UI_MONITOR_SHOW_INCOMING_SEARCHES", false);
+    public stbtic final BooleanSetting UI_MONITOR_SHOW_INCOMING_SEARCHES =
+        FACTORY.crebteBooleanSetting("UI_MONITOR_SHOW_INCOMING_SEARCHES", false);
 	
 	/**
-	 * Setting for the divider location between library tree and table.
+	 * Setting for the divider locbtion between library tree and table.
 	 */
-	pualic stbtic final IntSetting UI_LIBRARY_TREE_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_LIBRARY_TREE_DIVIDER_LOCATION", -1);
+	public stbtic final IntSetting UI_LIBRARY_TREE_DIVIDER_LOCATION =
+		FACTORY.crebteIntSetting("UI_LIBRARY_TREE_DIVIDER_LOCATION", -1);
 	
 	/**
-	 * Setting for the divider location between library and playlist.
+	 * Setting for the divider locbtion between library and playlist.
 	 */
-	pualic stbtic final IntSetting UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION",
+	public stbtic final IntSetting UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION =
+		FACTORY.crebteIntSetting("UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION",
 				300);
 	
 	/**
-	 * Setting for the divider location between incoming query monitors and
-	 * upload panel.
+	 * Setting for the divider locbtion between incoming query monitors and
+	 * uplobd panel.
 	 */
-	pualic stbtic final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
+	public stbtic final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
+		FACTORY.crebteIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
 }

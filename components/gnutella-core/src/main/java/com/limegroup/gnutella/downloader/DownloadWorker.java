@@ -1,590 +1,590 @@
 
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import jbva.io.IOException;
+import jbva.net.Socket;
+import jbva.util.Iterator;
+import jbva.util.NoSuchElementException;
+import jbva.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.AssertFailure;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.AssertFailure;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.InsufficientDataException;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.altlocs.AlternateLocation;
+import com.limegroup.gnutellb.http.ProblemReadingHeaderException;
+import com.limegroup.gnutellb.settings.DownloadSettings;
+import com.limegroup.gnutellb.statistics.DownloadStat;
+import com.limegroup.gnutellb.tigertree.HashTree;
+import com.limegroup.gnutellb.util.IntervalSet;
 
 /**
- * Class that performs the logic of downloading a file from a single host.
+ * Clbss that performs the logic of downloading a file from a single host.
  */
-pualic clbss DownloadWorker implements Runnable {
+public clbss DownloadWorker implements Runnable {
     /*
       
-      Each potential downloader thats working in parallel does these steps
-      1. Establish a TCP connection with an rfd
-         if unable to connect end this parallel execution
-      2. This step has two parts
-            a.  Grab a part of the file to download. If there is unclaimed area on
-                the file grab that, otherwise try to steal claimed area from another 
+      Ebch potential downloader thats working in parallel does these steps
+      1. Estbblish a TCP connection with an rfd
+         if unbble to connect end this parallel execution
+      2. This step hbs two parts
+            b.  Grab a part of the file to download. If there is unclaimed area on
+                the file grbb that, otherwise try to steal claimed area from another 
                 worker
-            a.  Send http hebders to the uploader on the tcp connection 
-                established  in step 1. The uploader may or may not be able to 
-                upload at this time. If the uploader can't upload, it's 
-                important that the leased area be restored to the state 
-                they were in aefore we stbrted trying. However, if the http 
-                handshaking was successful, the downloader can keep the 
-                part it obtained.
-          The two steps above must be  atomic wrt other downloaders. 
-          Othersise, other downloaders in parallel will be  able to lease the 
-          same areas, or try to steal the same area from the same downloader.
-      3. Download the file by delegating to the HTTPDownloader, and then do 
-         the aook-keeping. Terminbtion may be normal or abnormal. 
+            b.  Send http hebders to the uploader on the tcp connection 
+                estbblished  in step 1. The uploader may or may not be able to 
+                uplobd at this time. If the uploader can't upload, it's 
+                importbnt that the leased area be restored to the state 
+                they were in before we stbrted trying. However, if the http 
+                hbndshaking was successful, the downloader can keep the 
+                pbrt it obtained.
+          The two steps bbove must be  atomic wrt other downloaders. 
+          Othersise, other downlobders in parallel will be  able to lease the 
+          sbme areas, or try to steal the same area from the same downloader.
+      3. Downlobd the file by delegating to the HTTPDownloader, and then do 
+         the book-keeping. Terminbtion may be normal or abnormal. 
      
      
-                              connectAndDownload
+                              connectAndDownlobd
                           /           |             \
-        establishConnection     assignAndRequest    doDownload
+        estbblishConnection     assignAndRequest    doDownload
              |                        |             |       \
-       HTTPDownloader.connectTCP      |             |        requestHashTree
-                                      |             |- HTTPDownloader.download
-                            assignWhite/assignGrey
+       HTTPDownlobder.connectTCP      |             |        requestHashTree
+                                      |             |- HTTPDownlobder.download
+                            bssignWhite/assignGrey
                                       |
-                           HTTPDownloader.connectHTTP
+                           HTTPDownlobder.connectHTTP
                            
-      For push downloads, the acceptDownload(file, Socket,index,clientGUI) 
-      method of ManagedDownloader is called from the Acceptor instance. This
-      method needs to notify the appropriate downloader so that it can use
+      For push downlobds, the acceptDownload(file, Socket,index,clientGUI) 
+      method of MbnagedDownloader is called from the Acceptor instance. This
+      method needs to notify the bppropriate downloader so that it can use
       the socket. 
       
-      When establishConnection() realizes that it needs to do a push, it puts  
-      into miniRFDToLock, asks the DownloadManager to send a push and 
-      then waits on the same lock.
+      When estbblishConnection() realizes that it needs to do a push, it puts  
+      into miniRFDToLock, bsks the DownloadManager to send a push and 
+      then wbits on the same lock.
        
-      Eventually acceptDownload will be called. 
-      acceptDownload uses the file, index and clientGUID to look up the map and
-      notifies the DownloadWorker that its socket has arrived.
+      Eventublly acceptDownload will be called. 
+      bcceptDownload uses the file, index and clientGUID to look up the map and
+      notifies the DownlobdWorker that its socket has arrived.
       
-      Note: The establishConnection thread waits for a limited amount of time 
-      (about 9 seconds) and then checks the map for the socket anyway, if 
-      there is no entry, it assumes the push failed and terminates.
+      Note: The estbblishConnection thread waits for a limited amount of time 
+      (bbout 9 seconds) and then checks the map for the socket anyway, if 
+      there is no entry, it bssumes the push failed and terminates.
 
     */
-    private static final Log LOG = LogFactory.getLog(DownloadWorker.class);
+    privbte static final Log LOG = LogFactory.getLog(DownloadWorker.class);
     
     ///////////////////////// Policy Controls ///////////////////////////
-    /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=16*1024;      //16 KB
+    /** The smbllest interval that can be split for parallel download */
+    privbte static final int MIN_SPLIT_SIZE=16*1024;      //16 KB
     
-    /** The lowest (cumulative) bandwith we will accept without stealing the
-     * entire grey area from a downloader for a new one */
-    private static final float MIN_ACCEPTABLE_SPEED = 
-		DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue() < 8 ? 
+    /** The lowest (cumulbtive) bandwith we will accept without stealing the
+     * entire grey brea from a downloader for a new one */
+    privbte static final float MIN_ACCEPTABLE_SPEED = 
+		DownlobdSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue() < 8 ? 
 		0.1f:
 		0.5f;
-    /** The time to wait trying to establish each normal connection, in
+    /** The time to wbit trying to establish each normal connection, in
      *  milliseconds.*/
-    private static final int NORMAL_CONNECT_TIME=10000; //10 seconds
-    /** The time to wait trying to establish each push connection, in
-     *  milliseconds.  This needs to ae lbrger than the normal time. */
-    private static final int PUSH_CONNECT_TIME=20000;  //20 seconds
-    /** The time to wait trying to establish a push connection
-     * if only a UDP push has been sent (as is in the case of altlocs) */
-    private static final int UDP_PUSH_CONNECT_TIME=6000; //6 seconds
+    privbte static final int NORMAL_CONNECT_TIME=10000; //10 seconds
+    /** The time to wbit trying to establish each push connection, in
+     *  milliseconds.  This needs to be lbrger than the normal time. */
+    privbte static final int PUSH_CONNECT_TIME=20000;  //20 seconds
+    /** The time to wbit trying to establish a push connection
+     * if only b UDP push has been sent (as is in the case of altlocs) */
+    privbte static final int UDP_PUSH_CONNECT_TIME=6000; //6 seconds
     
     /**
-     * The numaer of seconds to wbit for hosts that don't have any ranges we
-     *  would ae interested in.
+     * The number of seconds to wbit for hosts that don't have any ranges we
+     *  would be interested in.
      */
-    private static final int NO_RANGES_RETRY_AFTER = 60 * 5; // 5 minutes
+    privbte static final int NO_RANGES_RETRY_AFTER = 60 * 5; // 5 minutes
     
     /**
-     * The numaer of seconds to wbit for hosts that failed once.
+     * The number of seconds to wbit for hosts that failed once.
      */
-    private static final int FAILED_RETRY_AFTER = 60 * 1; // 1 minute
+    privbte static final int FAILED_RETRY_AFTER = 60 * 1; // 1 minute
     
     /**
-     * The numaer of seconds to wbit for a busy host (if it didn't give us a
-     * retry after header) if we don't have any active downloaders.
+     * The number of seconds to wbit for a busy host (if it didn't give us a
+     * retry bfter header) if we don't have any active downloaders.
      *
-     * Note that there are some acceptable problems with the way this
-     * values are used.  Namely, if we have sources X & Y and source
-     * X is tried first, aut is busy, its busy-time will be set to
-     * 1 minute.  Then source Y is tried and is accepted, source X
-     * will still retry after 1 minute.  This 'problem' is considered
-     * an acceptable issue, given the complexity of implementing
-     * a method that will work under the circumstances.
+     * Note thbt there are some acceptable problems with the way this
+     * vblues are used.  Namely, if we have sources X & Y and source
+     * X is tried first, but is busy, its busy-time will be set to
+     * 1 minute.  Then source Y is tried bnd is accepted, source X
+     * will still retry bfter 1 minute.  This 'problem' is considered
+     * bn acceptable issue, given the complexity of implementing
+     * b method that will work under the circumstances.
      */
-    pualic stbtic final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
+    public stbtic final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
     
     /**
-     * The minimum numaer of seconds to wbit for a busy host if we do
-     * have some active downloaders.
+     * The minimum number of seconds to wbit for a busy host if we do
+     * hbve some active downloaders.
      *
-     * Note that there are some acceptable problems with the way this
-     * values are used.  Namely, if we have sources X & Y and source
-     * X is tried first and is accepted.  Then source Y is tried and
-     * is ausy, so its busy-time is set to 10 minutes.  Then X disconnects,
-     * leaving Y with 9 or so minutes left before being retried, despite
-     * no other sources available.  This 'problem' is considered
-     * an acceptable issue, given the complexity of implementing
-     * a method that will work under the circumstances.
+     * Note thbt there are some acceptable problems with the way this
+     * vblues are used.  Namely, if we have sources X & Y and source
+     * X is tried first bnd is accepted.  Then source Y is tried and
+     * is busy, so its busy-time is set to 10 minutes.  Then X disconnects,
+     * lebving Y with 9 or so minutes left before being retried, despite
+     * no other sources bvailable.  This 'problem' is considered
+     * bn acceptable issue, given the complexity of implementing
+     * b method that will work under the circumstances.
      */
-    private static final int RETRY_AFTER_SOME_ACTIVE = 60 * 10; // 10 minutes
+    privbte static final int RETRY_AFTER_SOME_ACTIVE = 60 * 10; // 10 minutes
 
-    private final ManagedDownloader _manager;
-    private final RemoteFileDesc _rfd;
-    private final VerifyingFile _commonOutFile;
+    privbte final ManagedDownloader _manager;
+    privbte final RemoteFileDesc _rfd;
+    privbte final VerifyingFile _commonOutFile;
     
     /**
-     * The thread Object of this worker
+     * The threbd Object of this worker
      */
-    private volatile Thread _myThread;
+    privbte volatile Thread _myThread;
     
     /**
-     * Whether I was interrupted before starting
+     * Whether I wbs interrupted before starting
      */
-    private volatile boolean _interrupted;
+    privbte volatile boolean _interrupted;
     
     /**
-     * Reference to the stealLock all workers for a download will synchronize on
+     * Reference to the steblLock all workers for a download will synchronize on
      */
-    private final Object _stealLock;
+    privbte final Object _stealLock;
     
     /**
-     * Socket to use when doing a push download.
+     * Socket to use when doing b push download.
      */
-    private Socket _pushSocket;
+    privbte Socket _pushSocket;
     
     /**
-     * The downloader that will do the actual downloading
-     * TODO: un-volatilize after fixing the assertion failures
+     * The downlobder that will do the actual downloading
+     * TODO: un-volbtilize after fixing the assertion failures
      */
-    private volatile HTTPDownloader _downloader;
+    privbte volatile HTTPDownloader _downloader;
     
     /**
-     * Whether I should release the ranges that I have leased for download
-     * TODO: un-volatilize after fixing the assertion failures
+     * Whether I should relebse the ranges that I have leased for download
+     * TODO: un-volbtilize after fixing the assertion failures
      */
-    private volatile boolean _shouldRelease;
+    privbte volatile boolean _shouldRelease;
     
-    DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd, 
-            VerifyingFile vf, Oaject lock){
-        _manager = manager;
+    DownlobdWorker(ManagedDownloader manager, RemoteFileDesc rfd, 
+            VerifyingFile vf, Object lock){
+        _mbnager = manager;
         _rfd = rfd;
-        _stealLock = lock;
+        _steblLock = lock;
         _commonOutFile = vf;
     }
     
-    /* (non-Javadoc)
-     * @see java.lang.Runnable#run()
+    /* (non-Jbvadoc)
+     * @see jbva.lang.Runnable#run()
      */
-    pualic void run() {
+    public void run() {
         
-        // first get a handle of our thread object
-        _myThread = Thread.currentThread();
+        // first get b handle of our thread object
+        _myThrebd = Thread.currentThread();
         
-        // if we'll ae debugging, we wbnt to distinguish the different workers
-        if (LOG.isDeaugEnbbled()) {
-            _myThread.setName("DownloadWorker for "+_manager.getSaveFile().getName() +
-                    " #"+ _myThread.hashCode() );
+        // if we'll be debugging, we wbnt to distinguish the different workers
+        if (LOG.isDebugEnbbled()) {
+            _myThrebd.setName("DownloadWorker for "+_manager.getSaveFile().getName() +
+                    " #"+ _myThrebd.hashCode() );
         }
         
         try {
-            // if I was interrupted before being started, don't do anything.
+            // if I wbs interrupted before being started, don't do anything.
             if (_interrupted)
                 throw new InterruptedException();
             
-            connectAndDownload();
+            connectAndDownlobd();
         }
         // Ignore InterruptedException -- the JVM throws
-        // them for some reason at odd times, even though
-        // we've caught and handled all of them
-        // appropriately.
-        catch (InterruptedException ignored){}
-        catch (Throwable e) {
-            LOG.deaug("got bn exception in run()",e);
+        // them for some rebson at odd times, even though
+        // we've cbught and handled all of them
+        // bppropriately.
+        cbtch (InterruptedException ignored){}
+        cbtch (Throwable e) {
+            LOG.debug("got bn exception in run()",e);
 
-            //This is a "firewall" for reporting unhandled
-            //errors.  We don't really try to recover at
-            //this point, aut we do bttempt to display the
-            //error in the GUI for deaugging purposes.
+            //This is b "firewall" for reporting unhandled
+            //errors.  We don't reblly try to recover at
+            //this point, but we do bttempt to display the
+            //error in the GUI for debugging purposes.
             ErrorService.error(e);
-        } finally {
-            _manager.workerFinished(this);
+        } finblly {
+            _mbnager.workerFinished(this);
         }
     }
     
     /**
-     * Top level method of the thread. Calls three methods 
-     * a. Establish a TCP Connection.
-     * a. Assign this threbd a part of the file, and do HTTP handshaking
+     * Top level method of the threbd. Calls three methods 
+     * b. Establish a TCP Connection.
+     * b. Assign this threbd a part of the file, and do HTTP handshaking
      * c. get the file.
-     * Each of these steps can run into errors, which have to be dealt with
+     * Ebch of these steps can run into errors, which have to be dealt with
      * differently.
-     * @return true if this worker thread should notify, false otherwise.
-     * currently this method returns false iff NSEEx is  thrown. 
+     * @return true if this worker threbd should notify, false otherwise.
+     * currently this method returns fblse iff NSEEx is  thrown. 
      */
-    private void connectAndDownload() {
-        if(LOG.isTraceEnabled())
-            LOG.trace("connectAndDownload for: " + _rfd);
+    privbte void connectAndDownload() {
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("connectAndDownload for: " + _rfd);
         
-        //this make throw an exception if we were not able to establish a 
-        //direct connection and push was unsuccessful too
+        //this mbke throw an exception if we were not able to establish a 
+        //direct connection bnd push was unsuccessful too
         
-        //Step 1. establish a TCP Connection, either by opening a socket,
-        //OR ay sending b push request.
-        establishConnection();
+        //Step 1. estbblish a TCP Connection, either by opening a socket,
+        //OR by sending b push request.
+        estbblishConnection();
         
-        // if we have a downloader at this point, it must be good to proceed or
-        // it must ae properly stopped.
-        if(_downloader == null)
+        // if we hbve a downloader at this point, it must be good to proceed or
+        // it must be properly stopped.
+        if(_downlobder == null)
             return;
         
-        //initilaize the newly created HTTPDownloader with whatever AltLocs we
-        //have discovered so far. These will be cleared out after the first
-        //write, from them on, only newly successful rfds will ae sent bs alts
+        //initilbize the newly created HTTPDownloader with whatever AltLocs we
+        //hbve discovered so far. These will be cleared out after the first
+        //write, from them on, only newly successful rfds will be sent bs alts
               
         int count = 0;
-        for(Iterator iter = _manager.getValidAlts().iterator(); 
-        iter.hasNext() && count < 10; count++) {
-            AlternateLocation current = (AlternateLocation)iter.next();
-            _downloader.addSuccessfulAltLoc(current);
+        for(Iterbtor iter = _manager.getValidAlts().iterator(); 
+        iter.hbsNext() && count < 10; count++) {
+            AlternbteLocation current = (AlternateLocation)iter.next();
+            _downlobder.addSuccessfulAltLoc(current);
         }
         
         count = 0;
-        for(Iterator iter = _manager.getInvalidAlts().iterator(); 
-        iter.hasNext() && count < 10; count++) {
-            AlternateLocation current = (AlternateLocation)iter.next();
-            _downloader.addFailedAltLoc(current);
+        for(Iterbtor iter = _manager.getInvalidAlts().iterator(); 
+        iter.hbsNext() && count < 10; count++) {
+            AlternbteLocation current = (AlternateLocation)iter.next();
+            _downlobder.addFailedAltLoc(current);
         }
         
-        //Note: http11 is true or false depending on what we think thevalue
-        //should ae for rfd is bt the start, before connecting. We may later
-        //find that the we are wrong, in which case we update the rfd's http11
-        //value. But while we are in connectAndDownload we continue to use this
-        //local variable because the code is incapable of handling a change in
-        //http11 status while inside connectAndDownload.
-        aoolebn http11 = true;//must enter the loop
+        //Note: http11 is true or fblse depending on what we think thevalue
+        //should be for rfd is bt the start, before connecting. We may later
+        //find thbt the we are wrong, in which case we update the rfd's http11
+        //vblue. But while we are in connectAndDownload we continue to use this
+        //locbl variable because the code is incapable of handling a change in
+        //http11 stbtus while inside connectAndDownload.
+        boolebn http11 = true;//must enter the loop
         
         while(http11) {
-            //Step 2. OK. We have established TCP Connection. This 
-            //downloader should choose a part of the file to download
-            //and send the appropriate HTTP hearders
+            //Step 2. OK. We hbve established TCP Connection. This 
+            //downlobder should choose a part of the file to download
+            //bnd send the appropriate HTTP hearders
             //Note: 0=disconnected,1=tcp-connected,2=http-connected            
-            ConnectionStatus status;
+            ConnectionStbtus status;
             http11 = _rfd.isHTTP11();
             while(true) { 
-                //while queued, connect and sleep if we queued
+                //while queued, connect bnd sleep if we queued
 
                 // request thex
-                status = requestTHEXIfNeeded();
+                stbtus = requestTHEXIfNeeded();
                 
-                // aefore requesting the next rbnge,
-                // consume the prior request's aody
-                // if there was any.
-                _downloader.consumeBodyIfNecessary();
-                _downloader.forgetRanges();
+                // before requesting the next rbnge,
+                // consume the prior request's body
+                // if there wbs any.
+                _downlobder.consumeBodyIfNecessary();
+                _downlobder.forgetRanges();
                 
                 // if we didn't get queued doing the tree request,
-                // request another file.
-                if (status == null || !status.isQueued()) {
+                // request bnother file.
+                if (stbtus == null || !status.isQueued()) {
                         try {
-                            status = assignAndRequest(http11);
+                            stbtus = assignAndRequest(http11);
                             
-                            // add any locations we may have received
-                            _manager.addPossibleSources(_downloader.getLocationsReceived());
-                        } finally {
-                            // clear ranges did not connect
+                            // bdd any locations we may have received
+                            _mbnager.addPossibleSources(_downloader.getLocationsReceived());
+                        } finblly {
+                            // clebr ranges did not connect
                         	try {
-                        		if( status == null || !status.isConnected() )
-                        			releaseRanges();
-                        	} catch (AssertFailure bad) {
-                        		throw new AssertFailure("status "+status+" worker failed "+getInfo()+
-                        				" all workers: "+_manager.getWorkersInfo(),bad);
+                        		if( stbtus == null || !status.isConnected() )
+                        			relebseRanges();
+                        	} cbtch (AssertFailure bad) {
+                        		throw new AssertFbilure("status "+status+" worker failed "+getInfo()+
+                        				" bll workers: "+_manager.getWorkersInfo(),bad);
                         	}
                         }
                 }
                 
-                if(status.isPartialData()) {
-                    // loop again if they had partial ranges.
+                if(stbtus.isPartialData()) {
+                    // loop bgain if they had partial ranges.
                     continue;
-                } else if(status.isNoFile() || status.isNoData()) {
-                    //if they didn't have the file or we didn't need data,
-                    //arebk out of the loop.
-                    arebk;
+                } else if(stbtus.isNoFile() || status.isNoData()) {
+                    //if they didn't hbve the file or we didn't need data,
+                    //brebk out of the loop.
+                    brebk;
                 }
                 
-                // must ae queued or connected.
-                Assert.that(status.isQueued() || status.isConnected());
-                aoolebn addQueued = _manager.killQueuedIfNecessary(this, 
-                        !status.isQueued()  ? -1 : status.getQueuePosition());
+                // must be queued or connected.
+                Assert.thbt(status.isQueued() || status.isConnected());
+                boolebn addQueued = _manager.killQueuedIfNecessary(this, 
+                        !stbtus.isQueued()  ? -1 : status.getQueuePosition());
                 
-                // we should have been told to stay alive if we're connected
-                // aut it's possible thbt we are above our swarm capacity
-                // and nothing else was queued, in which case we really should
-                // kill ourselves, aut there's no rebson to not accept the
-                // extra host.
-                if(status.isConnected())
-                    arebk;
+                // we should hbve been told to stay alive if we're connected
+                // but it's possible thbt we are above our swarm capacity
+                // bnd nothing else was queued, in which case we really should
+                // kill ourselves, but there's no rebson to not accept the
+                // extrb host.
+                if(stbtus.isConnected())
+                    brebk;
                 
-                Assert.that(status.isQueued());
-                // if we didn't want to stay queued
+                Assert.thbt(status.isQueued());
+                // if we didn't wbnt to stay queued
                 // or we got interrupted while sleeping,
                 // then try other sources
-                if(!addQueued || handleQueued(status))
+                if(!bddQueued || handleQueued(status))
                     return;
             }
             
             
-            //we have been given a slot remove this thread from queuedThreads
-            _manager.removeQueuedWorker(this);
+            //we hbve been given a slot remove this thread from queuedThreads
+            _mbnager.removeQueuedWorker(this);
 
-            switch(status.getType()) {
-            case ConnectionStatus.TYPE_NO_FILE:
+            switch(stbtus.getType()) {
+            cbse ConnectionStatus.TYPE_NO_FILE:
                 // close the connection for now.            
-                _downloader.stop();
+                _downlobder.stop();
                 return;            
-            case ConnectionStatus.TYPE_NO_DATA:
+            cbse ConnectionStatus.TYPE_NO_DATA:
                 // close the connection since we're finished.
-                _downloader.stop();
+                _downlobder.stop();
                 return;
-            case ConnectionStatus.TYPE_CONNECTED:
-                arebk;
-            default:
-                throw new IllegalStateException("illegal status: " + 
-                                                status.getType());
+            cbse ConnectionStatus.TYPE_CONNECTED:
+                brebk;
+            defbult:
+                throw new IllegblStateException("illegal status: " + 
+                                                stbtus.getType());
             }
 
-            Assert.that(status.isConnected());
-            //Step 3. OK, we have successfully connected, start saving the
+            Assert.thbt(status.isConnected());
+            //Step 3. OK, we hbve successfully connected, start saving the
             // file to disk
-            // If the download failed, don't keep trying to download.
-            aoolebn downloaded = false;
+            // If the downlobd failed, don't keep trying to download.
+            boolebn downloaded = false;
             try {
-                downloaded = doDownload(http11);
-                if(!downloaded)
-                    arebk;
-            }finally {
+                downlobded = doDownload(http11);
+                if(!downlobded)
+                    brebk;
+            }finblly {
                 try {
-                    releaseRanges();
-                } catch (AssertFailure bad) {
-                    throw new AssertFailure("downloaded "+downloaded+" worker failed "+getInfo()+
-                            " all workers: "+_manager.getWorkersInfo(),bad);
+                    relebseRanges();
+                } cbtch (AssertFailure bad) {
+                    throw new AssertFbilure("downloaded "+downloaded+" worker failed "+getInfo()+
+                            " bll workers: "+_manager.getWorkersInfo(),bad);
                 }
             }
         } // end of while(http11)
     }
     
-    private ConnectionStatus requestTHEXIfNeeded() {
-        HashTree ourTree = _commonOutFile.getHashTree();
+    privbte ConnectionStatus requestTHEXIfNeeded() {
+        HbshTree ourTree = _commonOutFile.getHashTree();
         
-        ConnectionStatus status = null;
-        // request THEX from te _downloader if (the tree we have
-        // isn't good enough or we don't have a tree) and another
+        ConnectionStbtus status = null;
+        // request THEX from te _downlobder if (the tree we have
+        // isn't good enough or we don't hbve a tree) and another
         // worker isn't currently requesting one
-        if (_downloader.hasHashTree() &&
+        if (_downlobder.hasHashTree() &&
                 (ourTree == null || !ourTree.isDepthGoodEnough()) &&
-                _manager.getSHA1Urn() != null) {
+                _mbnager.getSHA1Urn() != null) {
             
             
             synchronized(_commonOutFile) {
-                if (_commonOutFile.isHashTreeRequested())
-                    return status;
-                _commonOutFile.setHashTreeRequested(true);
+                if (_commonOutFile.isHbshTreeRequested())
+                    return stbtus;
+                _commonOutFile.setHbshTreeRequested(true);
             }
             
-            status = _downloader.requestHashTree(_manager.getSHA1Urn());
-            _commonOutFile.setHashTreeRequested(false);
-            if(status.isThexResponse()) {
-                HashTree temp = status.getHashTree();
+            stbtus = _downloader.requestHashTree(_manager.getSHA1Urn());
+            _commonOutFile.setHbshTreeRequested(false);
+            if(stbtus.isThexResponse()) {
+                HbshTree temp = status.getHashTree();
                 if (temp.isBetterTree(ourTree)) {
-                    _commonOutFile.setHashTree(temp);
+                    _commonOutFile.setHbshTree(temp);
                 }
             }
         }
-        return status;
+        return stbtus;
     }
     
     /**
-     * Release the ranges assigned to our downloader  
+     * Relebse the ranges assigned to our downloader  
      */
-    private void releaseRanges() {
+    privbte void releaseRanges() {
         
-        if (!_shouldRelease)
+        if (!_shouldRelebse)
             return;
-        _shouldRelease = false;
+        _shouldRelebse = false;
         
-        // do not release if the file is complete
+        // do not relebse if the file is complete
         if (_commonOutFile.isComplete())
             return;
         
-        HTTPDownloader downloader = _downloader;
+        HTTPDownlobder downloader = _downloader;
         int high, low;
-        synchronized(downloader) {
+        synchronized(downlobder) {
         	
-            // If this downloader was a thief and had to skip any ranges, do not
-            // release them.
-            low = downloader.getInitialReadingPoint() + downloader.getAmountRead();
-            low = Math.max(low,downloader.getInitialWritingPoint());
-            high = downloader.getInitialReadingPoint() + downloader.getAmountToRead()-1;
+            // If this downlobder was a thief and had to skip any ranges, do not
+            // relebse them.
+            low = downlobder.getInitialReadingPoint() + downloader.getAmountRead();
+            low = Mbth.max(low,downloader.getInitialWritingPoint());
+            high = downlobder.getInitialReadingPoint() + downloader.getAmountToRead()-1;
         }
         
-        if( (high-low)>=0) {//dloader failed to download a part assigned to it?
+        if( (high-low)>=0) {//dlobder failed to download a part assigned to it?
             
-            if (LOG.isDeaugEnbbled())
-                LOG.deaug("relebsing ranges "+new Interval(low,high));
+            if (LOG.isDebugEnbbled())
+                LOG.debug("relebsing ranges "+new Interval(low,high));
             
-            _commonOutFile.releaseBlock(new Interval(low,high));
-            downloader.forgetRanges();
+            _commonOutFile.relebseBlock(new Interval(low,high));
+            downlobder.forgetRanges();
         } else 
-			LOG.deaug("nothing to relebse!");
+			LOG.debug("nothing to relebse!");
     }
     
     /**
-     * Handles a queued downloader with the given ConnectionStatus.
+     * Hbndles a queued downloader with the given ConnectionStatus.
      * BLOCKING (while sleeping).
      *
-     * @return true if we need to tell the manager to churn another
-     *         connection and let this one die, false if we are
-     *         going to try this connection again.
+     * @return true if we need to tell the mbnager to churn another
+     *         connection bnd let this one die, false if we are
+     *         going to try this connection bgain.
      */
-    private boolean handleQueued(ConnectionStatus status) {
+    privbte boolean handleQueued(ConnectionStatus status) {
         try {
-            // make sure that we're not in _downloaders if we're
-            // sleeping/queued.  this would ONLY ae possible
-            // if some uploader was misbehaved and queued
-            // us after we succesfully managed to download some
-            // information.  despite the rarity of the situation,
-            // we should ae prepbred.
-            _manager.removeActiveWorker(this);
+            // mbke sure that we're not in _downloaders if we're
+            // sleeping/queued.  this would ONLY be possible
+            // if some uplobder was misbehaved and queued
+            // us bfter we succesfully managed to download some
+            // informbtion.  despite the rarity of the situation,
+            // we should be prepbred.
+            _mbnager.removeActiveWorker(this);
             
-            Thread.sleep(status.getQueuePollTime());//value from QueuedException
-            return false;
-        } catch (InterruptedException ix) {
-            if(LOG.isWarnEnabled())
-                LOG.warn("worker: interrupted while asleep in "+
-                  "queue" + _downloader);
-            _manager.removeQueuedWorker(this);
-            _downloader.stop(); //close connection
-            // notifying will make no diff, coz the next 
-            //iteration will throw interrupted exception.
+            Threbd.sleep(status.getQueuePollTime());//value from QueuedException
+            return fblse;
+        } cbtch (InterruptedException ix) {
+            if(LOG.isWbrnEnabled())
+                LOG.wbrn("worker: interrupted while asleep in "+
+                  "queue" + _downlobder);
+            _mbnager.removeQueuedWorker(this);
+            _downlobder.stop(); //close connection
+            // notifying will mbke no diff, coz the next 
+            //iterbtion will throw interrupted exception.
             return true;
         }
     }
     
     /** 
-     * Returns an un-initialized (only established a TCP Connection, 
-     * no HTTP headers have been exchanged yet) connectable downloader 
-     * from the given list of locations.
+     * Returns bn un-initialized (only established a TCP Connection, 
+     * no HTTP hebders have been exchanged yet) connectable downloader 
+     * from the given list of locbtions.
      * <p> 
-     * method tries to establish connection either by push or by normal
-     * ways.
+     * method tries to estbblish connection either by push or by normal
+     * wbys.
      * <p>
-     * If the connection fails for some reason, or needs a push the mesh needs 
-     * to ae informed thbt this location failed.
-     * @param rfd the RemoteFileDesc to connect to
+     * If the connection fbils for some reason, or needs a push the mesh needs 
+     * to be informed thbt this location failed.
+     * @pbram rfd the RemoteFileDesc to connect to
      * <p> 
-     * The following exceptions may be thrown within this method, but they are
-     * all dealt with internally. So this method does not throw any exception
+     * The following exceptions mby be thrown within this method, but they are
+     * bll dealt with internally. So this method does not throw any exception
      * <p>
-     * NoSuchElementException thrown when (aoth normbl and push) connections 
-     * to the given rfd fail. We discard the rfd by doing nothing and return 
+     * NoSuchElementException thrown when (both normbl and push) connections 
+     * to the given rfd fbil. We discard the rfd by doing nothing and return 
      * null.
-     * @exception InterruptedException this thread was interrupted while waiting
-     * to connect. Rememaer this rfd by putting it bbck into files and return
+     * @exception InterruptedException this threbd was interrupted while waiting
+     * to connect. Remember this rfd by putting it bbck into files and return
      * null 
      */
-    private void establishConnection() {
-        if(LOG.isTraceEnabled())
-            LOG.trace("establishConnection(" + _rfd + ")");
+    privbte void establishConnection() {
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("establishConnection(" + _rfd + ")");
         
-        if (_rfd == null) //abd rfd, discard it and return null
+        if (_rfd == null) //bbd rfd, discard it and return null
             return; // throw new NoSuchElementException();
         
-        if (_manager.isCancelled() || _manager.isPaused()) {//this rfd may still be useful remember it
-            _manager.addRFD(_rfd);
+        if (_mbnager.isCancelled() || _manager.isPaused()) {//this rfd may still be useful remember it
+            _mbnager.addRFD(_rfd);
             return;
         }
 
-        aoolebn needsPush = _rfd.needsPush();
+        boolebn needsPush = _rfd.needsPush();
         
         
-        synchronized (_manager) {
-            int state = _manager.getState();
-            //If we're just increasing parallelism, stay in DOWNLOADING
-            //state.  Otherwise the following call is needed to restart
+        synchronized (_mbnager) {
+            int stbte = _manager.getState();
+            //If we're just increbsing parallelism, stay in DOWNLOADING
+            //stbte.  Otherwise the following call is needed to restart
             //the timer.
-            if (_manager.getNumDownloaders() == 0 && state != ManagedDownloader.COMPLETE && 
-                state != ManagedDownloader.ABORTED && state != ManagedDownloader.GAVE_UP && 
-                state != ManagedDownloader.DISK_PROBLEM && state != ManagedDownloader.CORRUPT_FILE && 
-                state != ManagedDownloader.HASHING && state != ManagedDownloader.SAVING) {
+            if (_mbnager.getNumDownloaders() == 0 && state != ManagedDownloader.COMPLETE && 
+                stbte != ManagedDownloader.ABORTED && state != ManagedDownloader.GAVE_UP && 
+                stbte != ManagedDownloader.DISK_PROBLEM && state != ManagedDownloader.CORRUPT_FILE && 
+                stbte != ManagedDownloader.HASHING && state != ManagedDownloader.SAVING) {
                     if(_interrupted)
-                        return; // we were signalled to stop.
-                    _manager.setState(ManagedDownloader.CONNECTING, 
+                        return; // we were signblled to stop.
+                    _mbnager.setState(ManagedDownloader.CONNECTING, 
                             needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
                 }
         }
 
-        if(LOG.isDeaugEnbbled())
-            LOG.deaug("WORKER: bttempting connect to "
+        if(LOG.isDebugEnbbled())
+            LOG.debug("WORKER: bttempting connect to "
               + _rfd.getHost() + ":" + _rfd.getPort());        
         
-        DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
+        DownlobdStat.CONNECTION_ATTEMPTS.incrementStat();
 
-        // for multicast replies, try pushes first
-        // and then try direct connects.
-        // this is aecbuse newer clients work better with pushes,
-        // aut older ones didn't understbnd them
-        if( _rfd.isReplyToMulticast() ) {
+        // for multicbst replies, try pushes first
+        // bnd then try direct connects.
+        // this is becbuse newer clients work better with pushes,
+        // but older ones didn't understbnd them
+        if( _rfd.isReplyToMulticbst() ) {
             try {
-                _downloader = connectWithPush();
-            } catch(IOException e) {
+                _downlobder = connectWithPush();
+            } cbtch(IOException e) {
                 try {
-                    _downloader = connectDirectly();
-                } catch(IOException e2) {
-                    return ; // impossiale to connect.
+                    _downlobder = connectDirectly();
+                } cbtch(IOException e2) {
+                    return ; // impossible to connect.
                 }
             }
             return;
         }        
         
-        // otherwise, we're not multicast.
-        // if we need a push, go directly to a push.
-        // if we don't, try direct and if that fails try a push.        
+        // otherwise, we're not multicbst.
+        // if we need b push, go directly to a push.
+        // if we don't, try direct bnd if that fails try a push.        
         if( !needsPush ) {
             try {
-                _downloader = connectDirectly();
-            } catch(IOException e) {
-                // fall through to the push ...
+                _downlobder = connectDirectly();
+            } cbtch(IOException e) {
+                // fbll through to the push ...
             }
         }
         
-        if (_downloader == null) {
+        if (_downlobder == null) {
             try {
-                _downloader = connectWithPush();
-            } catch(IOException e) {
-                // even the push failed :(
+                _downlobder = connectWithPush();
+            } cbtch(IOException e) {
+                // even the push fbiled :(
             	if (needsPush)
-            		_manager.forgetRFD(_rfd);
+            		_mbnager.forgetRFD(_rfd);
             }
         }
         
-        // if we didn't connect at all, tell the rest about this rfd
-        if (_downloader == null)
-            _manager.informMesh(_rfd, false);
+        // if we didn't connect bt all, tell the rest about this rfd
+        if (_downlobder == null)
+            _mbnager.informMesh(_rfd, false);
         else if (_interrupted) {
-            // if the worker got killed, make sure the downloader is stopped.
-            _downloader.stop();
-            _downloader = null;
+            // if the worker got killed, mbke sure the downloader is stopped.
+            _downlobder.stop();
+            _downlobder = null;
         }
         
     }
@@ -592,88 +592,88 @@ pualic clbss DownloadWorker implements Runnable {
     /**
      * Attempts to directly connect through TCP to the remote end.
      */
-    private HTTPDownloader connectDirectly() throws IOException {
-        LOG.trace("WORKER: attempt direct connection");
-        HTTPDownloader ret;
-        //Establish normal downloader.              
-        ret = new HTTPDownloader(_rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
-        // Note that connectTCP can throw IOException
-        // (and the subclassed CantConnectException)
+    privbte HTTPDownloader connectDirectly() throws IOException {
+        LOG.trbce("WORKER: attempt direct connection");
+        HTTPDownlobder ret;
+        //Estbblish normal downloader.              
+        ret = new HTTPDownlobder(_rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
+        // Note thbt connectTCP can throw IOException
+        // (bnd the subclassed CantConnectException)
         try {
             ret.connectTCP(NORMAL_CONNECT_TIME);
-            DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
-        } catch(IOException iox) {
-            DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
+            DownlobdStat.CONNECT_DIRECT_SUCCESS.incrementStat();
+        } cbtch(IOException iox) {
+            DownlobdStat.CONNECT_DIRECT_FAILURES.incrementStat();
             throw iox;
         }
         return ret;
     }
     
     /**
-     * Attempts to connect ay using b push to the remote end.
+     * Attempts to connect by using b push to the remote end.
      * BLOCKING.
      */
-    private HTTPDownloader connectWithPush() throws IOException {
-        LOG.trace("WORKER: attempt push connection");
-        HTTPDownloader ret;
+    privbte HTTPDownloader connectWithPush() throws IOException {
+        LOG.trbce("WORKER: attempt push connection");
+        HTTPDownlobder ret;
         
-        //When the push is complete and we have a socket ready to use
-        //the acceptor thread is going to notify us using this object
+        //When the push is complete bnd we have a socket ready to use
+        //the bcceptor thread is going to notify us using this object
         MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(
-                     _rfd.getFileName(),_rfd.getIndex(),_rfd.getClientGUID());
+                     _rfd.getFileNbme(),_rfd.getIndex(),_rfd.getClientGUID());
        
-        _manager.registerPushWaiter(this,mrfd);
+        _mbnager.registerPushWaiter(this,mrfd);
         
         Socket pushSocket = null;
         try {
             synchronized(this) {
-                // only wait if we actually were able to send the push
-                RouterService.getDownloadManager().sendPush(_rfd, this);
+                // only wbit if we actually were able to send the push
+                RouterService.getDownlobdManager().sendPush(_rfd, this);
                 
-                //No loop is actually needed here, assuming spurious
-                //notify()'s don't occur.  (They are not allowed by the Java
-                //Language Specifications.)  Look at acceptDownload for
-                //details.
+                //No loop is bctually needed here, assuming spurious
+                //notify()'s don't occur.  (They bre not allowed by the Java
+                //Lbnguage Specifications.)  Look at acceptDownload for
+                //detbils.
                 try {
-                    wait(_rfd.isFromAlternateLocation()? 
+                    wbit(_rfd.isFromAlternateLocation()? 
                             UDP_PUSH_CONNECT_TIME: 
                                 PUSH_CONNECT_TIME);
                     pushSocket = _pushSocket;
                     _pushSocket = null;
-                } catch(InterruptedException e) {
-                    DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
+                } cbtch(InterruptedException e) {
+                    DownlobdStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
                     throw new IOException("push interupted.");
                 }
                 
             }
             
-            //Done waiting or were notified.
+            //Done wbiting or were notified.
             if (pushSocket==null) {
-                DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
+                DownlobdStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
                 
                 throw new IOException("push socket is null");
             }
-        } finally {
-            _manager.unregisterPushWaiter(mrfd); //we are not going to use it after this
+        } finblly {
+            _mbnager.unregisterPushWaiter(mrfd); //we are not going to use it after this
         }
         
-        ret = new HTTPDownloader(pushSocket, _rfd, _commonOutFile, 
-                _manager instanceof InNetworkDownloader);
+        ret = new HTTPDownlobder(pushSocket, _rfd, _commonOutFile, 
+                _mbnager instanceof InNetworkDownloader);
         
-        //Socket.getInputStream() throws IOX if the connection is closed.
+        //Socket.getInputStrebm() throws IOX if the connection is closed.
         //So this connectTCP *CAN* throw IOX.
         try {
-            ret.connectTCP(0);//just initializes the byteReader in this case
-            DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
-        } catch(IOException iox) {
-            DownloadStat.PUSH_FAILURE_LOST.incrementStat();
+            ret.connectTCP(0);//just initiblizes the byteReader in this case
+            DownlobdStat.CONNECT_PUSH_SUCCESS.incrementStat();
+        } cbtch(IOException iox) {
+            DownlobdStat.PUSH_FAILURE_LOST.incrementStat();
             throw iox;
         }
         return ret;
     }
     
     /**
-     * callback to notify that a push request was received
+     * cbllback to notify that a push request was received
      */
     synchronized void setPushSocket(Socket s) {
         _pushSocket = s;
@@ -681,462 +681,462 @@ pualic clbss DownloadWorker implements Runnable {
     }
 
     /**
-     * Attempts to run downloader.doDownload, notifying manager of termination
-     * via downloaders.notify(). 
-     * To determine when this downloader should be removed
-     * from the _activeWorkers list: never remove the downloader
-     * from _activeWorkers if the uploader supports persistence, unless we get an
-     * exception - in which case we do not add it back to files.  If !http11,
-     * then we remove from the _activeWorkers in the finally block and add to files as
-     * aefore if no problem wbs encountered.   
+     * Attempts to run downlobder.doDownload, notifying manager of termination
+     * vib downloaders.notify(). 
+     * To determine when this downlobder should be removed
+     * from the _bctiveWorkers list: never remove the downloader
+     * from _bctiveWorkers if the uploader supports persistence, unless we get an
+     * exception - in which cbse we do not add it back to files.  If !http11,
+     * then we remove from the _bctiveWorkers in the finally block and add to files as
+     * before if no problem wbs encountered.   
      * 
-     * @param downloader the normal or push downloader to use for the transfer,
-     * which MUST ae initiblized (i.e., downloader.connectTCP() and
-     * connectHTTP() have been called)
+     * @pbram downloader the normal or push downloader to use for the transfer,
+     * which MUST be initiblized (i.e., downloader.connectTCP() and
+     * connectHTTP() hbve been called)
      *
-     * @return true if there was no IOException while downloading, false
+     * @return true if there wbs no IOException while downloading, false
      * otherwise.  
      */
-    private boolean doDownload(boolean http11) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("WORKER: about to start downloading "+_downloader);
-        aoolebn problem = false;
+    privbte boolean doDownload(boolean http11) {
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("WORKER: about to start downloading "+_downloader);
+        boolebn problem = false;
         try {
-            _downloader.doDownload();
-            _rfd.resetFailedCount();
+            _downlobder.doDownload();
+            _rfd.resetFbiledCount();
             if(http11)
-                DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
+                DownlobdStat.SUCCESSFUL_HTTP11.incrementStat();
             else
-                DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
+                DownlobdStat.SUCCESSFUL_HTTP10.incrementStat();
             
-            LOG.deaug("WORKER: successfully finished downlobd");
-        } catch (DiskException e) {
+            LOG.debug("WORKER: successfully finished downlobd");
+        } cbtch (DiskException e) {
             // something went wrong while writing to the file on disk.
-            // kill the other threads and set
-            _manager.diskProblemOccured();
-        } catch (IOException e) {
+            // kill the other threbds and set
+            _mbnager.diskProblemOccured();
+        } cbtch (IOException e) {
             if(http11)
-                DownloadStat.FAILED_HTTP11.incrementStat();
+                DownlobdStat.FAILED_HTTP11.incrementStat();
             else
-                DownloadStat.FAILED_HTTP10.incrementStat();
-            proalem = true;
-			_manager.workerFailed(this);
-        } catch (AssertFailure bad) {
-            throw new AssertFailure("worker failed "+getInfo()+
-                    " all workers: "+_manager.getWorkersInfo(),bad);
-        } finally {
+                DownlobdStat.FAILED_HTTP10.incrementStat();
+            problem = true;
+			_mbnager.workerFailed(this);
+        } cbtch (AssertFailure bad) {
+            throw new AssertFbilure("worker failed "+getInfo()+
+                    " bll workers: "+_manager.getWorkersInfo(),bad);
+        } finblly {
             // if we got too corrupted, notify the user
             if (_commonOutFile.isHopeless())
-                _manager.promptAboutCorruptDownload();
+                _mbnager.promptAboutCorruptDownload();
             
-            int stop=_downloader.getInitialReadingPoint()
-                        +_downloader.getAmountRead();
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug("    WORKER:+"+
-                        " terminating from "+_downloader+" at "+stop+ 
-                  " error? "+proalem);
-            synchronized (_manager) {
-                if (proalem) {
-                    _downloader.stop();
-                    _rfd.incrementFailedCount();
-                    // if we failed less than twice in succession,
-                    // try to use the file again much later.
-                    if( _rfd.getFailedCount() < 2 ) {
+            int stop=_downlobder.getInitialReadingPoint()
+                        +_downlobder.getAmountRead();
+            if(LOG.isDebugEnbbled())
+                LOG.debug("    WORKER:+"+
+                        " terminbting from "+_downloader+" at "+stop+ 
+                  " error? "+problem);
+            synchronized (_mbnager) {
+                if (problem) {
+                    _downlobder.stop();
+                    _rfd.incrementFbiledCount();
+                    // if we fbiled less than twice in succession,
+                    // try to use the file bgain much later.
+                    if( _rfd.getFbiledCount() < 2 ) {
                         _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-                        _manager.addRFD(_rfd);
+                        _mbnager.addRFD(_rfd);
                     } else
-                        _manager.informMesh(_rfd, false);
+                        _mbnager.informMesh(_rfd, false);
                 } else {
-                    _manager.informMesh(_rfd, true);
-                    if( !http11 ) // no need to add http11 _activeWorkers to files
-                        _manager.addRFD(_rfd);
+                    _mbnager.informMesh(_rfd, true);
+                    if( !http11 ) // no need to bdd http11 _activeWorkers to files
+                        _mbnager.addRFD(_rfd);
                 }
             }
         }
         
-        return !proalem;
+        return !problem;
     }
     
     String getInfo() {
-        if (_downloader != null) {
-            synchronized(_downloader) {
-                return this + "hashcode " + hashCode() + " will release? "
-                + _shouldRelease + " interrupted? " + _interrupted
-                + " active? " + _downloader.isActive() 
-                + " victim? " + _downloader.isVictim()
-                + " initial reading " + _downloader.getInitialReadingPoint()
-                + " initial writing " + _downloader.getInitialWritingPoint()
-                + " amount to read " + _downloader.getAmountToRead()
-                + " amount read " + _downloader.getAmountRead()+"\n";
+        if (_downlobder != null) {
+            synchronized(_downlobder) {
+                return this + "hbshcode " + hashCode() + " will release? "
+                + _shouldRelebse + " interrupted? " + _interrupted
+                + " bctive? " + _downloader.isActive() 
+                + " victim? " + _downlobder.isVictim()
+                + " initibl reading " + _downloader.getInitialReadingPoint()
+                + " initibl writing " + _downloader.getInitialWritingPoint()
+                + " bmount to read " + _downloader.getAmountToRead()
+                + " bmount read " + _downloader.getAmountRead()+"\n";
             }
         } else 
-            return "worker not started";
+            return "worker not stbrted";
     }
     
     /** 
-     * Assigns a white area or a grey area to a downloader. Sets the state,
-     * and checks if this downloader has been interrupted.
-     * @param _downloader The downloader to which this method assigns either
-     * a grey area or white area.
-     * @return the ConnectionStatus.
+     * Assigns b white area or a grey area to a downloader. Sets the state,
+     * bnd checks if this downloader has been interrupted.
+     * @pbram _downloader The downloader to which this method assigns either
+     * b grey area or white area.
+     * @return the ConnectionStbtus.
      */
-    private ConnectionStatus assignAndRequest(boolean http11) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("assignAndRequest for: " + _rfd);
+    privbte ConnectionStatus assignAndRequest(boolean http11) {
+        if(LOG.isTrbceEnabled())
+            LOG.trbce("assignAndRequest for: " + _rfd);
         
         try {
-            Interval interval = null;
+            Intervbl interval = null;
             synchronized(_commonOutFile) {
-                if (_commonOutFile.hasFreeBlocksToAssign() > 0)
-                    interval = pickAvailableInterval(http11);
+                if (_commonOutFile.hbsFreeBlocksToAssign() > 0)
+                    intervbl = pickAvailableInterval(http11);
             }
             
-            // it is still possiale thbt a worker has died and released their ranges
-            // just aefore we try to stebl
-            if (interval == null) {
-                synchronized(_stealLock) {
-                    assignGrey();
+            // it is still possible thbt a worker has died and released their ranges
+            // just before we try to stebl
+            if (intervbl == null) {
+                synchronized(_steblLock) {
+                    bssignGrey();
                 }
             } else
-                assignWhite(interval);
+                bssignWhite(interval);
             
-        } catch(NoSuchElementException nsex) {
-            DownloadStat.NSE_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder,nsex);
+        } cbtch(NoSuchElementException nsex) {
+            DownlobdStat.NSE_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder,nsex);
             
-            return handleNoMoreDownloaders();
+            return hbndleNoMoreDownloaders();
             
-        } catch (NoSuchRangeException nsrx) {
-            LOG.deaug(_downlobder,nsrx);
+        } cbtch (NoSuchRangeException nsrx) {
+            LOG.debug(_downlobder,nsrx);
 
-            return handleNoRanges();
+            return hbndleNoRanges();
             
-        } catch(TryAgainLaterException talx) {
-            DownloadStat.TAL_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder,talx);
+        } cbtch(TryAgainLaterException talx) {
+            DownlobdStat.TAL_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder,talx);
             
-            return handleTryAgainLater();
+            return hbndleTryAgainLater();
             
-        } catch(RangeNotAvailableException rnae) {
-            DownloadStat.RNA_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder,rnae);
+        } cbtch(RangeNotAvailableException rnae) {
+            DownlobdStat.RNA_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder,rnae);
             
-            return handleRangeNotAvailable();
+            return hbndleRangeNotAvailable();
             
-        } catch (FileNotFoundException fnfx) {
-            DownloadStat.FNF_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder, fnfx);
+        } cbtch (FileNotFoundException fnfx) {
+            DownlobdStat.FNF_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder, fnfx);
             
-            return handleFileNotFound();
+            return hbndleFileNotFound();
             
-        } catch (NotSharingException nsx) {
-            DownloadStat.NS_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder, nsx);
+        } cbtch (NotSharingException nsx) {
+            DownlobdStat.NS_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder, nsx);
             
-            return handleNotSharing();
+            return hbndleNotSharing();
             
-        } catch (QueuedException qx) { 
-            DownloadStat.Q_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder, qx);
+        } cbtch (QueuedException qx) { 
+            DownlobdStat.Q_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder, qx);
             
-            return handleQueued(qx.getQueuePosition(),qx.getMinPollTime());
+            return hbndleQueued(qx.getQueuePosition(),qx.getMinPollTime());
             
-        } catch(ProblemReadingHeaderException prhe) {
-            DownloadStat.PRH_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder,prhe);
+        } cbtch(ProblemReadingHeaderException prhe) {
+            DownlobdStat.PRH_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder,prhe);
             
-            return handleProblemReadingHeader();
+            return hbndleProblemReadingHeader();
             
-        } catch(UnknownCodeException uce) {
-            DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder, uce);
+        } cbtch(UnknownCodeException uce) {
+            DownlobdStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder, uce);
             
-            return handleUnknownCode();
+            return hbndleUnknownCode();
             
-        } catch (ContentUrnMismatchException cume) {
-        	DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder, cume);
+        } cbtch (ContentUrnMismatchException cume) {
+        	DownlobdStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder, cume);
         	
-			return ConnectionStatus.getNoFile();
+			return ConnectionStbtus.getNoFile();
 			
-        } catch (IOException iox) {
-            DownloadStat.IO_EXCEPTION.incrementStat();
-            LOG.deaug(_downlobder, iox);
+        } cbtch (IOException iox) {
+            DownlobdStat.IO_EXCEPTION.incrementStat();
+            LOG.debug(_downlobder, iox);
             
-            return handleIO();
+            return hbndleIO();
             
         } 
         
-        //did not throw exception? OK. we are downloading
-        DownloadStat.RESPONSE_OK.incrementStat();
-        if(_rfd.getFailedCount() > 0)
-            DownloadStat.RETRIED_SUCCESS.incrementStat();    
+        //did not throw exception? OK. we bre downloading
+        DownlobdStat.RESPONSE_OK.incrementStat();
+        if(_rfd.getFbiledCount() > 0)
+            DownlobdStat.RETRIED_SUCCESS.incrementStat();    
         
-        _rfd.resetFailedCount();
+        _rfd.resetFbiledCount();
 
-        synchronized(_manager) {
-            if (_manager.isCancelled() || _manager.isPaused() || _interrupted) {
-                LOG.trace("Stopped in assignAndRequest");
-                _manager.addRFD(_rfd);
-                return ConnectionStatus.getNoData();
+        synchronized(_mbnager) {
+            if (_mbnager.isCancelled() || _manager.isPaused() || _interrupted) {
+                LOG.trbce("Stopped in assignAndRequest");
+                _mbnager.addRFD(_rfd);
+                return ConnectionStbtus.getNoData();
             }
             
-            _manager.workerStarted(this);
+            _mbnager.workerStarted(this);
         }
         
-        return ConnectionStatus.getConnected();
+        return ConnectionStbtus.getConnected();
     }
     
     /**
-     * Assigns a white part of the file to a HTTPDownloader and returns it.
-     * This method has side effects.
+     * Assigns b white part of the file to a HTTPDownloader and returns it.
+     * This method hbs side effects.
      */
-    private void assignWhite(Interval interval) throws 
-    IOException, TryAgainLaterException, FileNotFoundException, 
-    NotSharingException , QueuedException {
-        //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
-        //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
-        //code aelow.  Note connectHTTP cbn throw several exceptions.
-        int low = interval.low;
-        int high = interval.high; // INCLUSIVE
-		_shouldRelease=true;
-        _downloader.connectHTTP(low, high + 1, true,_commonOutFile.getBlockSize());
+    privbte void assignWhite(Interval interval) throws 
+    IOException, TryAgbinLaterException, FileNotFoundException, 
+    NotShbringException , QueuedException {
+        //Intervbls from the IntervalSet set are INCLUSIVE on the high end, but
+        //intervbls passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
+        //code below.  Note connectHTTP cbn throw several exceptions.
+        int low = intervbl.low;
+        int high = intervbl.high; // INCLUSIVE
+		_shouldRelebse=true;
+        _downlobder.connectHTTP(low, high + 1, true,_commonOutFile.getBlockSize());
         
-        //The _downloader may have told us that we're going to read less data than
-        //we expect to read.  We must release the not downloading leased intervals
-        //We only want to release a range if the reported subrange
-        //was different, and was HIGHER than the low point.
-        //in case this worker became a victim during the header exchange, we do not
-        //clip any ranges.
-        synchronized(_downloader) {
-            int newLow = _downloader.getInitialReadingPoint();
-            int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
+        //The _downlobder may have told us that we're going to read less data than
+        //we expect to rebd.  We must release the not downloading leased intervals
+        //We only wbnt to release a range if the reported subrange
+        //wbs different, and was HIGHER than the low point.
+        //in cbse this worker became a victim during the header exchange, we do not
+        //clip bny ranges.
+        synchronized(_downlobder) {
+            int newLow = _downlobder.getInitialReadingPoint();
+            int newHigh = (_downlobder.getAmountToRead() - 1) + newLow; // INCLUSIVE
             if (newHigh-newLow >= 0) {
                 if(newLow > low) {
-                    if(LOG.isDeaugEnbbled())
-                        LOG.deaug("WORKER:"+
-                                " Host gave subrange, different low.  Was: " +
+                    if(LOG.isDebugEnbbled())
+                        LOG.debug("WORKER:"+
+                                " Host gbve subrange, different low.  Was: " +
                                 low + ", is now: " + newLow);
                     
-                    _commonOutFile.releaseBlock(new Interval(low, newLow-1));
+                    _commonOutFile.relebseBlock(new Interval(low, newLow-1));
                 }
                 
                 if(newHigh < high) {
-                    if(LOG.isDeaugEnbbled())
-                        LOG.deaug("WORKER:"+
-                                " Host gave subrange, different high.  Was: " +
+                    if(LOG.isDebugEnbbled())
+                        LOG.debug("WORKER:"+
+                                " Host gbve subrange, different high.  Was: " +
                                 high + ", is now: " + newHigh);
                     
-                    _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
+                    _commonOutFile.relebseBlock(new Interval(newHigh+1, high));
                 }
                 
-                if(LOG.isDeaugEnbbled()) {
-                    LOG.deaug("WORKER:"+
-                            " assigning white " + newLow + "-" + newHigh +
-                            " to " + _downloader);
+                if(LOG.isDebugEnbbled()) {
+                    LOG.debug("WORKER:"+
+                            " bssigning white " + newLow + "-" + newHigh +
+                            " to " + _downlobder);
                 }
             } else 
-                LOG.deaug("debouched bt birth");
+                LOG.debug("debouched bt birth");
         }
     }
     
     /**
-     * picks an unclaimed interval from the verifying file
+     * picks bn unclaimed interval from the verifying file
      * 
-     * @param http11 whether the downloader is http 11
+     * @pbram http11 whether the downloader is http 11
      * 
-     * @throws NoSuchRangeException if the remote host is partial and doesn't 
-     * have the ranges we need
+     * @throws NoSuchRbngeException if the remote host is partial and doesn't 
+     * hbve the ranges we need
      */
-    private Interval pickAvailableInterval(boolean http11) throws NoSuchRangeException{
-        Interval interval = null;
-        //If it's not a partial source, take the first chunk.
-        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
+    privbte Interval pickAvailableInterval(boolean http11) throws NoSuchRangeException{
+        Intervbl interval = null;
+        //If it's not b partial source, take the first chunk.
+        // (If it's HTTP11, tbke the first chunk up to CHUNK_SIZE)
+        if( !_downlobder.getRemoteFileDesc().isPartialSource() ) {
             if(http11) {
-                interval = _commonOutFile.leaseWhite(findChunkSize());
+                intervbl = _commonOutFile.leaseWhite(findChunkSize());
             } else
-                interval = _commonOutFile.leaseWhite();
+                intervbl = _commonOutFile.leaseWhite();
         }
         
-        // If it is a partial source, extract the first needed/available range
-        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
+        // If it is b partial source, extract the first needed/available range
+        // (If it's HTTP11, tbke the first chunk up to CHUNK_SIZE)
         else {
             try { 
-                IntervalSet availableRanges =
-                    _downloader.getRemoteFileDesc().getAvailableRanges();
+                IntervblSet availableRanges =
+                    _downlobder.getRemoteFileDesc().getAvailableRanges();
                 
                 if(http11) {
-                    interval =
-                        _commonOutFile.leaseWhite(availableRanges, findChunkSize());
+                    intervbl =
+                        _commonOutFile.lebseWhite(availableRanges, findChunkSize());
                 } else
-                    interval = _commonOutFile.leaseWhite(availableRanges);
+                    intervbl = _commonOutFile.leaseWhite(availableRanges);
                 
-            } catch(NoSuchElementException nsee) {
-                // if nothing satisfied this partial source, don't throw NSEE
-                // aecbuse that means there's nothing left to download.
-                // throw NSRE, which means that this particular source is done.
-                throw new NoSuchRangeException();
+            } cbtch(NoSuchElementException nsee) {
+                // if nothing sbtisfied this partial source, don't throw NSEE
+                // becbuse that means there's nothing left to download.
+                // throw NSRE, which mebns that this particular source is done.
+                throw new NoSuchRbngeException();
             }
         }
         
-        return interval;
+        return intervbl;
     }
 
-    private int findChunkSize() {
+    privbte int findChunkSize() {
         int chunkSize = _commonOutFile.getChunkSize();
-        int free = _commonOutFile.hasFreeBlocksToAssign();
+        int free = _commonOutFile.hbsFreeBlocksToAssign();
         
-        // if we have less than one free chunk, take half of that
-        if (free <= chunkSize && _manager.getActiveWorkers().size() > 1) 
-            chunkSize = Math.max(MIN_SPLIT_SIZE, free / 2);
+        // if we hbve less than one free chunk, take half of that
+        if (free <= chunkSize && _mbnager.getActiveWorkers().size() > 1) 
+            chunkSize = Mbth.max(MIN_SPLIT_SIZE, free / 2);
         
         return chunkSize;
     }
     
     /**
-     * Steals a grey area from the biggesr HTTPDownloader and gives it to
-     * the HTTPDownloader this method will return. 
+     * Stebls a grey area from the biggesr HTTPDownloader and gives it to
+     * the HTTPDownlobder this method will return. 
      * <p> 
-     * If there is less than MIN_SPLIT_SIZE left, we will assign the entire
-     * area to a new HTTPDownloader, if the current downloader is going too
+     * If there is less thbn MIN_SPLIT_SIZE left, we will assign the entire
+     * brea to a new HTTPDownloader, if the current downloader is going too
      * slow.
      */
-    private void assignGrey() throws
-    NoSuchElementException,  IOException, TryAgainLaterException, 
-    QueuedException, FileNotFoundException, NotSharingException,  
-    NoSuchRangeException  {
+    privbte void assignGrey() throws
+    NoSuchElementException,  IOException, TryAgbinLaterException, 
+    QueuedException, FileNotFoundException, NotShbringException,  
+    NoSuchRbngeException  {
         
-        //If this _downloader is a partial source, don't attempt to steal...
-        //too confusing, too many problems, etc...
-        if( _downloader.getRemoteFileDesc().isPartialSource() )
-            throw new NoSuchRangeException();
+        //If this _downlobder is a partial source, don't attempt to steal...
+        //too confusing, too mbny problems, etc...
+        if( _downlobder.getRemoteFileDesc().isPartialSource() )
+            throw new NoSuchRbngeException();
 
-        DownloadWorker slowest = findSlowestDownloader();
+        DownlobdWorker slowest = findSlowestDownloader();
                         
-        if (slowest==null) {//Not using this downloader...but RFD maybe useful
-            if (LOG.isDeaugEnbbled())
-                LOG.deaug("didn't find bnybody to steal from");
+        if (slowest==null) {//Not using this downlobder...but RFD maybe useful
+            if (LOG.isDebugEnbbled())
+                LOG.debug("didn't find bnybody to steal from");
             throw new NoSuchElementException();
         }
 		
-        // see what ranges is the victim requesting
-        Interval slowestRange = slowest.getDownloadInterval();
+        // see whbt ranges is the victim requesting
+        Intervbl slowestRange = slowest.getDownloadInterval();
         
-        if (slowestRange.low == slowestRange.high)
+        if (slowestRbnge.low == slowestRange.high)
             throw new NoSuchElementException();
         
-        //Note: we are not interested in being queued at this point this
-        //line could throw a bunch of exceptions (not queuedException)
-        _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize());
+        //Note: we bre not interested in being queued at this point this
+        //line could throw b bunch of exceptions (not queuedException)
+        _downlobder.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize());
         
-        Interval newSlowestRange;
-        int newStart;
-        synchronized(slowest.getDownloader()) {
-            // if the victim died or was stopped while the thief was connecting, we can't steal
-            if (!slowest.getDownloader().isActive()) {
-                if (LOG.isDeaugEnbbled())
-                    LOG.deaug("victim is no longer bctive");
+        Intervbl newSlowestRange;
+        int newStbrt;
+        synchronized(slowest.getDownlobder()) {
+            // if the victim died or wbs stopped while the thief was connecting, we can't steal
+            if (!slowest.getDownlobder().isActive()) {
+                if (LOG.isDebugEnbbled())
+                    LOG.debug("victim is no longer bctive");
                 throw new NoSuchElementException();
             }
             
-            // see how much did the victim download while we were exchanging headers.
-            // it is possiale thbt in that time some other worker died and freed his ranges, and
-            // the victim has already been assigned some new ranges.  If that happened we don't steal.
-            newSlowestRange = slowest.getDownloadInterval();
-            if (newSlowestRange.high != slowestRange.high) {
-                if (LOG.isDeaugEnbbled())
-                    LOG.deaug("victim is now downlobding something else "+
-                            newSlowestRange+" vs. "+slowestRange);
+            // see how much did the victim downlobd while we were exchanging headers.
+            // it is possible thbt in that time some other worker died and freed his ranges, and
+            // the victim hbs already been assigned some new ranges.  If that happened we don't steal.
+            newSlowestRbnge = slowest.getDownloadInterval();
+            if (newSlowestRbnge.high != slowestRange.high) {
+                if (LOG.isDebugEnbbled())
+                    LOG.debug("victim is now downlobding something else "+
+                            newSlowestRbnge+" vs. "+slowestRange);
                 throw new NoSuchElementException();
             }
             
-            if (newSlowestRange.low > slowestRange.low && LOG.isDebugEnabled()) {
-                LOG.deaug("victim mbnaged to download "+(newSlowestRange.low - slowestRange.low)
-                        +" aytes while stebler was connecting");
+            if (newSlowestRbnge.low > slowestRange.low && LOG.isDebugEnabled()) {
+                LOG.debug("victim mbnaged to download "+(newSlowestRange.low - slowestRange.low)
+                        +" bytes while stebler was connecting");
             }
             
-            int myLow = _downloader.getInitialReadingPoint();
-            int myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
+            int myLow = _downlobder.getInitialReadingPoint();
+            int myHigh = _downlobder.getAmountToRead() + myLow; // EXCLUSIVE
             
-            // If the stealer isn't going to give us everything we need,
-            // there's no point in stealing, so throw an exception and
-            // don't steal.
-            if( myHigh < slowestRange.high ) {
-                if(LOG.isDeaugEnbbled()) {
-                    LOG.deaug("WORKER: not stebling because stealer " +
-                            "gave a subrange.  Expected low: " + slowestRange.low +
-                            ", high: " + slowestRange.high + ".  Was low: " + myLow +
+            // If the stebler isn't going to give us everything we need,
+            // there's no point in stebling, so throw an exception and
+            // don't stebl.
+            if( myHigh < slowestRbnge.high ) {
+                if(LOG.isDebugEnbbled()) {
+                    LOG.debug("WORKER: not stebling because stealer " +
+                            "gbve a subrange.  Expected low: " + slowestRange.low +
+                            ", high: " + slowestRbnge.high + ".  Was low: " + myLow +
                             ", high: " + myHigh);
                 }
                 
-                throw new IOException("abd stealer.");
+                throw new IOException("bbd stealer.");
             }
             
-            newStart = Math.max(newSlowestRange.low,myLow);
-            if(LOG.isDeaugEnbbled()) {
-                LOG.deaug("WORKER:"+
+            newStbrt = Math.max(newSlowestRange.low,myLow);
+            if(LOG.isDebugEnbbled()) {
+                LOG.debug("WORKER:"+
                         " picking stolen grey "
-                        +newStart + "-"+slowestRange.high+" from "+slowest+" to "+_downloader);
+                        +newStbrt + "-"+slowestRange.high+" from "+slowest+" to "+_downloader);
             }
             
             
-            // tell the victim to stop downloading at the point the thief 
-            // can start downloading
-            slowest.getDownloader().stopAt(newStart);
+            // tell the victim to stop downlobding at the point the thief 
+            // cbn start downloading
+            slowest.getDownlobder().stopAt(newStart);
         }
         
-        // once we've told the victim where to stop, make our ranges release-able
-        _downloader.startAt(newStart);
-        _shouldRelease = true;
+        // once we've told the victim where to stop, mbke our ranges release-able
+        _downlobder.startAt(newStart);
+        _shouldRelebse = true;
     }
     
-    Interval getDownloadInterval() {
-        HTTPDownloader downloader = _downloader;
-        synchronized(downloader) {
+    Intervbl getDownloadInterval() {
+        HTTPDownlobder downloader = _downloader;
+        synchronized(downlobder) {
             
-            int start = Math.max(downloader.getInitialReadingPoint() + downloader.getAmountRead(),
-                    downloader.getInitialWritingPoint());
+            int stbrt = Math.max(downloader.getInitialReadingPoint() + downloader.getAmountRead(),
+                    downlobder.getInitialWritingPoint());
             
-            int stop = downloader.getInitialReadingPoint() + downloader.getAmountToRead();
+            int stop = downlobder.getInitialReadingPoint() + downloader.getAmountToRead();
             
-            return new Interval(start,stop);
+            return new Intervbl(start,stop);
         }
     }
     
     /**
-     * @return the httpdownloader that is going slowest.
+     * @return the httpdownlobder that is going slowest.
      */
-    private DownloadWorker findSlowestDownloader() {
-        DownloadWorker slowest = null;
-        final float ourSpeed = getOurSpeed();
-        float slowestSpeed = ourSpeed;
+    privbte DownloadWorker findSlowestDownloader() {
+        DownlobdWorker slowest = null;
+        finbl float ourSpeed = getOurSpeed();
+        flobt slowestSpeed = ourSpeed;
         
-        // are we too slow to steal?
+        // bre we too slow to steal?
         if (ourSpeed == -1) 
             return null;
         
-        Set queuedWorkers = _manager.getQueuedWorkers().keySet();
-        for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
+        Set queuedWorkers = _mbnager.getQueuedWorkers().keySet();
+        for (Iterbtor iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
             
-            DownloadWorker worker = (DownloadWorker) iter.next();
-            if (queuedWorkers.contains(worker))
+            DownlobdWorker worker = (DownloadWorker) iter.next();
+            if (queuedWorkers.contbins(worker))
                 continue;
             
-            HTTPDownloader h = worker.getDownloader();
+            HTTPDownlobder h = worker.getDownloader();
             
-            if (h == null || h == _downloader)
+            if (h == null || h == _downlobder)
                 continue;
             
             // see if he is the slowest one
-            float hisSpeed = 0;
+            flobt hisSpeed = 0;
             try {
-                h.getMeasuredBandwidth();
-                hisSpeed = h.getAverageBandwidth();
-            } catch (InsufficientDataException ide) {
-                // we assume these guys would go almost as fast as we do, so we do not steal
-                // from them unless they are the last ones remaining
-                hisSpeed = Math.max(0f,ourSpeed - 0.1f);
+                h.getMebsuredBandwidth();
+                hisSpeed = h.getAverbgeBandwidth();
+            } cbtch (InsufficientDataException ide) {
+                // we bssume these guys would go almost as fast as we do, so we do not steal
+                // from them unless they bre the last ones remaining
+                hisSpeed = Mbth.max(0f,ourSpeed - 0.1f);
             }
             
             if (hisSpeed < slowestSpeed) {
@@ -1148,145 +1148,145 @@ pualic clbss DownloadWorker implements Runnable {
         return slowest;
     }
     
-    private float getOurSpeed() {
-        if (_downloader == null)
+    privbte float getOurSpeed() {
+        if (_downlobder == null)
             return -1;
         try {
-            _downloader.getMeasuredBandwidth();
-            return _downloader.getAverageBandwidth();
-        } catch (InsufficientDataException bad) {
+            _downlobder.getMeasuredBandwidth();
+            return _downlobder.getAverageBandwidth();
+        } cbtch (InsufficientDataException bad) {
             return -1;
         }
     }
     
-    aoolebn isSlow() {
-        float ourSpeed = getOurSpeed();
+    boolebn isSlow() {
+        flobt ourSpeed = getOurSpeed();
         return ourSpeed < MIN_ACCEPTABLE_SPEED;
     }
     
-    ////// various handlers for failure states of the assign process /////
+    ////// vbrious handlers for failure states of the assign process /////
     
     /**
-     * no more ranges to download or no more people to steal from - finish download 
+     * no more rbnges to download or no more people to steal from - finish download 
      */
-    private ConnectionStatus handleNoMoreDownloaders() {
-        _manager.addRFD(_rfd);
-        return ConnectionStatus.getNoData();
+    privbte ConnectionStatus handleNoMoreDownloaders() {
+        _mbnager.addRFD(_rfd);
+        return ConnectionStbtus.getNoData();
     }
     
     /**
-     * The file does not have such ranges 
+     * The file does not hbve such ranges 
      */
-    private ConnectionStatus handleNoRanges() {
-        //forget the ranges we are preteding uploader is busy.
-        _rfd.setAvailableRanges(null);
+    privbte ConnectionStatus handleNoRanges() {
+        //forget the rbnges we are preteding uploader is busy.
+        _rfd.setAvbilableRanges(null);
         
-        //if this RFD did not already give us a retry-after header
+        //if this RFD did not blready give us a retry-after header
         //then set one for it.
         if(!_rfd.isBusy())
             _rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
         
-        _rfd.resetFailedCount();                
-        _manager.addRFD(_rfd);
+        _rfd.resetFbiledCount();                
+        _mbnager.addRFD(_rfd);
         
-        return ConnectionStatus.getNoFile();
+        return ConnectionStbtus.getNoFile();
     }
     
-    private ConnectionStatus handleTryAgainLater() {
-        //if this RFD did not already give us a retry-after header
+    privbte ConnectionStatus handleTryAgainLater() {
+        //if this RFD did not blready give us a retry-after header
         //then set one for it.
         if ( !_rfd.isBusy() ) {
             _rfd.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
         }
         
-        //if we already have downloads going, then raise the
-        //retry-after if it was less than the appropriate amount
-        if(!_manager.getActiveWorkers().isEmpty() &&
-                _rfd.getWaitTime(System.currentTimeMillis()) < RETRY_AFTER_SOME_ACTIVE)
+        //if we blready have downloads going, then raise the
+        //retry-bfter if it was less than the appropriate amount
+        if(!_mbnager.getActiveWorkers().isEmpty() &&
+                _rfd.getWbitTime(System.currentTimeMillis()) < RETRY_AFTER_SOME_ACTIVE)
             _rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
         
-        _manager.addRFD(_rfd);//try this rfd later
+        _mbnager.addRFD(_rfd);//try this rfd later
         
-        _rfd.resetFailedCount();                
-        return ConnectionStatus.getNoFile();
+        _rfd.resetFbiledCount();                
+        return ConnectionStbtus.getNoFile();
     }
     
     /**
-     * The ranges exist in the file, but the remote host does not have them
+     * The rbnges exist in the file, but the remote host does not have them
      */
-    private ConnectionStatus handleRangeNotAvailable() {
-        _rfd.resetFailedCount();                
-        _manager.informMesh(_rfd, true);
-        //no need to add to files or busy we keep iterating
-        return ConnectionStatus.getPartialData();
+    privbte ConnectionStatus handleRangeNotAvailable() {
+        _rfd.resetFbiledCount();                
+        _mbnager.informMesh(_rfd, true);
+        //no need to bdd to files or busy we keep iterating
+        return ConnectionStbtus.getPartialData();
     }
     
-    private ConnectionStatus handleFileNotFound() {
-        _manager.informMesh(_rfd, false);
-        return ConnectionStatus.getNoFile();
+    privbte ConnectionStatus handleFileNotFound() {
+        _mbnager.informMesh(_rfd, false);
+        return ConnectionStbtus.getNoFile();
     }
     
-    private ConnectionStatus handleNotSharing() {
-        return handleFileNotFound();
+    privbte ConnectionStatus handleNotSharing() {
+        return hbndleFileNotFound();
     }
     
-    private ConnectionStatus handleQueued(int position, int pollTime) {
-        if(_manager.getActiveWorkers().isEmpty()) {
-            if(_manager.isCancelled() || _manager.isPaused() ||  _interrupted)
-                return ConnectionStatus.getNoData(); // we were signalled to stop.
-            _manager.setState(ManagedDownloader.REMOTE_QUEUED);
+    privbte ConnectionStatus handleQueued(int position, int pollTime) {
+        if(_mbnager.getActiveWorkers().isEmpty()) {
+            if(_mbnager.isCancelled() || _manager.isPaused() ||  _interrupted)
+                return ConnectionStbtus.getNoData(); // we were signalled to stop.
+            _mbnager.setState(ManagedDownloader.REMOTE_QUEUED);
         }
-        _rfd.resetFailedCount();                
-        return ConnectionStatus.getQueued(position, pollTime);
+        _rfd.resetFbiledCount();                
+        return ConnectionStbtus.getQueued(position, pollTime);
     }
     
-    private ConnectionStatus handleProblemReadingHeader() {
-        return handleFileNotFound();
+    privbte ConnectionStatus handleProblemReadingHeader() {
+        return hbndleFileNotFound();
     }
     
-    private ConnectionStatus handleUnknownCode() {
-        return handleFileNotFound();
+    privbte ConnectionStatus handleUnknownCode() {
+        return hbndleFileNotFound();
     }
     
-    private ConnectionStatus handleIO(){
-        _rfd.incrementFailedCount();
+    privbte ConnectionStatus handleIO(){
+        _rfd.incrementFbiledCount();
         
-        // if this RFD had an IOX while reading headers/downloading
-        // less than twice in succession, try it again.
-        if( _rfd.getFailedCount() < 2 ) {
-            //set retry after, wait a little before retrying this RFD
+        // if this RFD hbd an IOX while reading headers/downloading
+        // less thbn twice in succession, try it again.
+        if( _rfd.getFbiledCount() < 2 ) {
+            //set retry bfter, wait a little before retrying this RFD
             _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-            _manager.addRFD(_rfd);
-        } else //tried the location twice -- it really is bad
-            _manager.informMesh(_rfd, false);
+            _mbnager.addRFD(_rfd);
+        } else //tried the locbtion twice -- it really is bad
+            _mbnager.informMesh(_rfd, false);
         
-        return ConnectionStatus.getNoFile();
+        return ConnectionStbtus.getNoFile();
     }
     
-    //////// end handlers of various failure states ///////
+    //////// end hbndlers of various failure states ///////
     
     /**
-     * interrupts this downloader.
+     * interrupts this downlobder.
      */
     void interrupt() {
         _interrupted = true;
-        if (_downloader != null)
-            _downloader.stop();
-        if (_myThread != null)
-            _myThread.interrupt();
+        if (_downlobder != null)
+            _downlobder.stop();
+        if (_myThrebd != null)
+            _myThrebd.interrupt();
     }
 
     
-    pualic RemoteFileDesc getRFD() {
+    public RemoteFileDesc getRFD() {
         return _rfd;
     }
     
-    HTTPDownloader getDownloader() {
-        return _downloader;
+    HTTPDownlobder getDownloader() {
+        return _downlobder;
     }
     
-    pualic String toString() {
-        String ret = _myThread != null ? _myThread.getName() : "new";
+    public String toString() {
+        String ret = _myThrebd != null ? _myThread.getName() : "new";
         return ret + " -> "+_rfd;  
     }
 

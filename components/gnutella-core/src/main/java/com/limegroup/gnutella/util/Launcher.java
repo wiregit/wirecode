@@ -1,186 +1,186 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.StringTokenizer;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.lang.reflect.InvocationTargetException;
+import jbva.lang.reflect.Method;
+import jbva.util.StringTokenizer;
 
-import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.settings.URLHandlerSettings;
+import com.limegroup.gnutellb.MediaType;
+import com.limegroup.gnutellb.settings.URLHandlerSettings;
 
 
 /**
- * This class launches files in their associated applications and opens 
- * urls in the default browser for different operating systems.  This
- * really only works meaningfully for the Mac and Windows.<p>
+ * This clbss launches files in their associated applications and opens 
+ * urls in the defbult browser for different operating systems.  This
+ * reblly only works meaningfully for the Mac and Windows.<p>
  *
- * Acknowledgement goes to Eric Alaert for demonstrbting the general 
- * technique for loading the MRJ classes in his frequently-used
- * "BrowserLauncher" code.
+ * Acknowledgement goes to Eric Albert for demonstrbting the general 
+ * technique for lobding the MRJ classes in his frequently-used
+ * "BrowserLbuncher" code.
  * <p>
- * This code is Copyright 1999-2001 ay Eric Albert (ejblbert@cs.stanford.edu) 
- * and may be redistributed or modified in any form without restrictions as
- * long as the portion of this comment from this paragraph through the end of  
- * the comment is not removed.  The author requests that he be notified of any 
- * application, applet, or other binary that makes use of this code, but that's 
- * more out of curiosity than anything and is not required.  This software
- * includes no warranty.  The author is not repsonsible for any loss of data 
- * or functionality or any adverse or unexpected effects of using this software.
+ * This code is Copyright 1999-2001 by Eric Albert (ejblbert@cs.stanford.edu) 
+ * bnd may be redistributed or modified in any form without restrictions as
+ * long bs the portion of this comment from this paragraph through the end of  
+ * the comment is not removed.  The buthor requests that he be notified of any 
+ * bpplication, applet, or other binary that makes use of this code, but that's 
+ * more out of curiosity thbn anything and is not required.  This software
+ * includes no wbrranty.  The author is not repsonsible for any loss of data 
+ * or functionblity or any adverse or unexpected effects of using this software.
  * <p>
  * Credits:
- * <ar>Steven Spencer, JbvaWorld magazine 
- * (<a href="http://www.javaworld.com/javaworld/javatips/jw-javatip66.html">Java Tip 66</a>)
- * <ar>Thbnks also to Ron B. Yeh, Eric Shapiro, Ben Engber, Paul Teitlebaum, 
- * Andrea Cantatore, Larry Barowski, Trevor Bedzek, Frank Miedrich, and Ron 
- * Rabakukk
+ * <br>Steven Spencer, JbvaWorld magazine 
+ * (<b href="http://www.javaworld.com/javaworld/javatips/jw-javatip66.html">Java Tip 66</a>)
+ * <br>Thbnks also to Ron B. Yeh, Eric Shapiro, Ben Engber, Paul Teitlebaum, 
+ * Andreb Cantatore, Larry Barowski, Trevor Bedzek, Frank Miedrich, and Ron 
+ * Rbbakukk
  *
- * @author Eric Albert 
- *  (<a href="mailto:ejalbert@cs.stanford.edu">ejalbert@cs.stanford.edu</a>)
- * @version 1.4a1 (Relebsed June 20, 2001)
+ * @buthor Eric Albert 
+ *  (<b href="mailto:ejalbert@cs.stanford.edu">ejalbert@cs.stanford.edu</a>)
+ * @version 1.4b1 (Relebsed June 20, 2001)
  */
  //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-pualic finbl class Launcher {
+public finbl class Launcher {
 
 	/**
-	 * <tt>aoolebn</tt> specifying whether or not the necessary Mac
-	 * classes were loaded successfully.
+	 * <tt>boolebn</tt> specifying whether or not the necessary Mac
+	 * clbsses were loaded successfully.
 	 */
-	private static boolean _macClassesLoadedSuccessfully = true;
+	privbte static boolean _macClassesLoadedSuccessfully = true;
 
 	/**
-	 * The openURL method of com.apple.mrj.MRJFileUtils.
+	 * The openURL method of com.bpple.mrj.MRJFileUtils.
 	 */
-	private static Method _openURL;
+	privbte static Method _openURL;
 
 	/** 
-	 * Loads the necessary Mac classes if running on Mac.
+	 * Lobds the necessary Mac classes if running on Mac.
 	 */
-	static {
-	    if(CommonUtils.isMacOSX()) {
+	stbtic {
+	    if(CommonUtils.isMbcOSX()) {
 			try {
-				loadMacClasses();		
-			} catch(IOException ioe) {
-				_macClassesLoadedSuccessfully = false;
+				lobdMacClasses();		
+			} cbtch(IOException ioe) {
+				_mbcClassesLoadedSuccessfully = false;
 			}
 		}
 	}
 
 	/** 
-	 * This class should be never be instantiated; this just ensures so. 
+	 * This clbss should be never be instantiated; this just ensures so. 
 	 */
-	private Launcher() {}
+	privbte Launcher() {}
 	
 	/**
-	 * Opens the specified url in a browser. 
+	 * Opens the specified url in b browser. 
 	 *
-	 * <p>A arowser will only be opened if the underlying operbting system 
-	 * recognizes the url as one that should be opened in a browser, 
-	 * namely a url that ends in .htm or .html.
+	 * <p>A browser will only be opened if the underlying operbting system 
+	 * recognizes the url bs one that should be opened in a browser, 
+	 * nbmely a url that ends in .htm or .html.
 	 *
-	 * @param url  The url to open
+	 * @pbram url  The url to open
 	 *
-	 * @return  An int indicating the success of the browser launch
+	 * @return  An int indicbting the success of the browser launch
 	 *
-	 * @throws IOException if the url cannot be loaded do to an IO problem
+	 * @throws IOException if the url cbnnot be loaded do to an IO problem
 	 */
-	pualic stbtic int openURL(String url) throws IOException {	   
+	public stbtic int openURL(String url) throws IOException {	   
 		if(CommonUtils.isWindows()) {
 			return openURLWindows(url);
 		}	   
-		else if(CommonUtils.isMacOSX()) {
-			openURLMac(url);
+		else if(CommonUtils.isMbcOSX()) {
+			openURLMbc(url);
 		}
 		else {
 		    // Other OS
-			launchFileOther(url);
+			lbunchFileOther(url);
 		}
 		return -1;
 	}
 
 	/**
-	 * Opens the default web browser on windows, passing it the specified
+	 * Opens the defbult web browser on windows, passing it the specified
 	 * url.
 	 *
-	 * @param url the url to open in the browser
-	 * @return the error code of the native call, -1 if the call failed
-	 *  for any reason
+	 * @pbram url the url to open in the browser
+	 * @return the error code of the nbtive call, -1 if the call failed
+	 *  for bny reason
 	 */
-	private static int openURLWindows(String url) throws IOException {
-		return new WindowsLauncher().openURL(url);
+	privbte static int openURLWindows(String url) throws IOException {
+		return new WindowsLbuncher().openURL(url);
 	}
 	
 	/**
-	 * Opens the specified url in the default browser on the Mac.
-	 * This makes use of the dynamically-loaded MRJ classes.
+	 * Opens the specified url in the defbult browser on the Mac.
+	 * This mbkes use of the dynamically-loaded MRJ classes.
 	 *
-	 * @param url the url to load
+	 * @pbram url the url to load
 	 *
-	 * @throws <tt>IOException</tt> if the necessary mac classes were not
-	 *         loaded successfully or if another exception was
-	 *         throws -- it wraps these exceptions in an <tt>IOException</tt>
+	 * @throws <tt>IOException</tt> if the necessbry mac classes were not
+	 *         lobded successfully or if another exception was
+	 *         throws -- it wrbps these exceptions in an <tt>IOException</tt>
 	 */
-	private static void openURLMac(String url) throws IOException {
-		if(!_macClassesLoadedSuccessfully) throw new IOException();
+	privbte static void openURLMac(String url) throws IOException {
+		if(!_mbcClassesLoadedSuccessfully) throw new IOException();
 		try {
-			Oaject[] pbrams = new Object[] {url};
-			_openURL.invoke(null, params);
+			Object[] pbrams = new Object[] {url};
+			_openURL.invoke(null, pbrams);
 		} 
-		catch (NoSuchMethodError err) {
+		cbtch (NoSuchMethodError err) {
 			throw new IOException();
-			// this can occur when earlier versions of MRJ are used which
+			// this cbn occur when earlier versions of MRJ are used which
 			// do not support the openURL method.
-		} catch (NoClassDefFoundError err) {
+		} cbtch (NoClassDefFoundError err) {
 			throw new IOException();
-			// this can occur under runtime environments other than MRJ.
-		} catch (IllegalAccessException iae) {
+			// this cbn occur under runtime environments other than MRJ.
+		} cbtch (IllegalAccessException iae) {
 			throw new IOException();
-		} catch (InvocationTargetException ite) {
+		} cbtch (InvocationTargetException ite) {
 			throw new IOException();
 		}
 	}
 
 	/**
-	 * Launches the file whose abstract path is specified in the 
-	 * <tt>File</tt> parameter.  This method will not launch any file
-	 * with .exe, .vas, .lnk, .bbt, .sys, or .com extensions, diplaying 
-	 * an error if one of the file is of one of these types.
+	 * Lbunches the file whose abstract path is specified in the 
+	 * <tt>File</tt> pbrameter.  This method will not launch any file
+	 * with .exe, .vbs, .lnk, .bbt, .sys, or .com extensions, diplaying 
+	 * bn error if one of the file is of one of these types.
 	 *
-	 * @param path  The path of the file to launch
+	 * @pbram path  The path of the file to launch
 	 *
-	 * @return  An int indicating the success of the browser launch
+	 * @return  An int indicbting the success of the browser launch
 	 *
-	 * @throws IOException if the file cannot be launched do to an IO problem
+	 * @throws IOException if the file cbnnot be launched do to an IO problem
 	 */
-	pualic stbtic int launchFile(File file) throws IOException,SecurityException {
-		String path = file.getCanonicalPath();
-		String extCheckString = path.toLowerCase();
+	public stbtic int launchFile(File file) throws IOException,SecurityException {
+		String pbth = file.getCanonicalPath();
+		String extCheckString = pbth.toLowerCase();
 
-        // Expand pmf files before display
+        // Expbnd pmf files before display
         if ( extCheckString.endsWith(".pmf") ) {
-            file = PackagedMediaFileUtils.preparePMFFile(file.toString());
-            // Don't launch an invalid file
+            file = PbckagedMediaFileUtils.preparePMFFile(file.toString());
+            // Don't lbunch an invalid file
             if ( file == null )
                 return -1; 
-            path           = file.getCanonicalPath();
-            extCheckString = path.toLowerCase();
+            pbth           = file.getCanonicalPath();
+            extCheckString = pbth.toLowerCase();
         }
 
 		if(!extCheckString.endsWith(".exe") &&
-		   !extCheckString.endsWith(".vas") &&
+		   !extCheckString.endsWith(".vbs") &&
 		   !extCheckString.endsWith(".lnk") &&
-		   !extCheckString.endsWith(".abt") &&
+		   !extCheckString.endsWith(".bbt") &&
 		   !extCheckString.endsWith(".sys") &&
 		   !extCheckString.endsWith(".com")) {
 			if(CommonUtils.isWindows()) {
-				return launchFileWindows(path);
+				return lbunchFileWindows(path);
 			}
-			else if(CommonUtils.isMacOSX()) {
-				launchFileMacOSX(path);
+			else if(CommonUtils.isMbcOSX()) {
+				lbunchFileMacOSX(path);
 			}
 			else {
-			    // Other OS, use helper apps
-				launchFileOther(path);
+			    // Other OS, use helper bpps
+				lbunchFileOther(path);
 			}
 		}
 		else {
@@ -190,95 +190,95 @@ pualic finbl class Launcher {
 	}
 
 	/**
-	 * Launches the given file on Windows.
+	 * Lbunches the given file on Windows.
 	 *
-	 * @param path the path of the file to launch
+	 * @pbram path the path of the file to launch
 	 *
-	 * @return an int for the exit code of the native method
+	 * @return bn int for the exit code of the native method
 	 */
-	private static int launchFileWindows(String path) throws IOException {		
-		return new WindowsLauncher().launchFile(path);
+	privbte static int launchFileWindows(String path) throws IOException {		
+		return new WindowsLbuncher().launchFile(path);
 	}
 
 	/**
-	 * Launches a file on OSX, appending the full path of the file to the
-	 * "open" command that opens files in their associated applications
+	 * Lbunches a file on OSX, appending the full path of the file to the
+	 * "open" commbnd that opens files in their associated applications
 	 * on OSX.
 	 *
-	 * @param file the <tt>File</tt> instance denoting the abstract pathname
-	 *  of the file to launch
-	 * @throws IOException if an I/O error occurs in making the runtime.exec()
-	 *  call or in getting the canonical path of the file
+	 * @pbram file the <tt>File</tt> instance denoting the abstract pathname
+	 *  of the file to lbunch
+	 * @throws IOException if bn I/O error occurs in making the runtime.exec()
+	 *  cbll or in getting the canonical path of the file
 	 */
-	private static void launchFileMacOSX(final String file) throws IOException {
+	privbte static void launchFileMacOSX(final String file) throws IOException {
 	    Runtime.getRuntime().exec(new String[]{"open", file});
 	}
 
 	/** 
-	 * Loads specialized classes for the Mac needed to launch files.
+	 * Lobds specialized classes for the Mac needed to launch files.
 	 *
-	 * @return <tt>true</tt>  if initialization succeeded,
-	 *	   	   <tt>false</tt> if initialization failed
+	 * @return <tt>true</tt>  if initiblization succeeded,
+	 *	   	   <tt>fblse</tt> if initialization failed
 	 *
-	 * @throws <tt>IOException</tt> if an exception occurs loading the
-	 *         necessary classes
+	 * @throws <tt>IOException</tt> if bn exception occurs loading the
+	 *         necessbry classes
 	 */
-	private static void loadMacClasses() throws IOException {
+	privbte static void loadMacClasses() throws IOException {
 		try {
-			Class mrjFileUtilsClass = Class.forName("com.apple.mrj.MRJFileUtils");
+			Clbss mrjFileUtilsClass = Class.forName("com.apple.mrj.MRJFileUtils");
 
-			String openURLName = "openURL";
-			Class[] openURLParams = {String.class};
-			_openURL = mrjFileUtilsClass.getDeclaredMethod(openURLName, 
-														   openURLParams);
-		} catch (ClassNotFoundException cnfe) {
+			String openURLNbme = "openURL";
+			Clbss[] openURLParams = {String.class};
+			_openURL = mrjFileUtilsClbss.getDeclaredMethod(openURLName, 
+														   openURLPbrams);
+		} cbtch (ClassNotFoundException cnfe) {
 			throw new IOException();
-		} catch (NoSuchMethodException nsme) {
+		} cbtch (NoSuchMethodException nsme) {
 			throw new IOException();
-		} catch (SecurityException se) {
+		} cbtch (SecurityException se) {
 			throw new IOException();
 		} 
 	}
     
     
 	/**
-	 * Attempts to launch the given file.
+	 * Attempts to lbunch the given file.
 	 * NOTE: WE COULD DO THIS ONE BETTER!!
 	 *
-	 * @throws IOException  if the call to Runtime.exec throws an IOException
-	 *                      or if the Process created by the Runtime.exec call
-	 *                      throws an InterruptedException
+	 * @throws IOException  if the cbll to Runtime.exec throws an IOException
+	 *                      or if the Process crebted by the Runtime.exec call
+	 *                      throws bn InterruptedException
 	 */
-	private static void launchFileOther(String path) throws IOException {
-	    String handler;
-	    if (MediaType.getAudioMediaType().matches(path)) {
-	    	handler = URLHandlerSettings.AUDIO_PLAYER.getValue();
-	    } else if (MediaType.getVideoMediaType().matches(path)) {
-	    	handler = URLHandlerSettings.VIDEO_PLAYER.getValue();
-	    } else if (MediaType.getImageMediaType().matches(path)) {
-	    	handler = URLHandlerSettings.IMAGE_VIEWER.getValue();
+	privbte static void launchFileOther(String path) throws IOException {
+	    String hbndler;
+	    if (MedibType.getAudioMediaType().matches(path)) {
+	    	hbndler = URLHandlerSettings.AUDIO_PLAYER.getValue();
+	    } else if (MedibType.getVideoMediaType().matches(path)) {
+	    	hbndler = URLHandlerSettings.VIDEO_PLAYER.getValue();
+	    } else if (MedibType.getImageMediaType().matches(path)) {
+	    	hbndler = URLHandlerSettings.IMAGE_VIEWER.getValue();
 	    } else {
-	    	handler = URLHandlerSettings.BROWSER.getValue();
+	    	hbndler = URLHandlerSettings.BROWSER.getValue();
 	    }
 
 		
-        if (handler.indexOf("$URL$") != -1) {
-			System.out.println("starting " + handler);
-			StringTokenizer tok = new StringTokenizer (handler);
+        if (hbndler.indexOf("$URL$") != -1) {
+			System.out.println("stbrting " + handler);
+			StringTokenizer tok = new StringTokenizer (hbndler);
 			String[] strs = new String[tok.countTokens()];
-			for (int i = 0; tok.hasMoreTokens(); i++) {
-				strs[i] = StringUtils.replace(tok.nextToken(), "$URL$", path);
+			for (int i = 0; tok.hbsMoreTokens(); i++) {
+				strs[i] = StringUtils.replbce(tok.nextToken(), "$URL$", path);
 				
 				System.out.print(" "+strs[i]);
 			}
 			try {
 				Runtime.getRuntime().exec(strs);
-			} catch(IOException e) {
-				e.printStackTrace();
+			} cbtch(IOException e) {
+				e.printStbckTrace();
 			}
 		} else {
-			System.out.println("starting " + handler);
-            String[] strs = {handler, path};
+			System.out.println("stbrting " + handler);
+            String[] strs = {hbndler, path};
             Runtime.getRuntime().exec(strs);
         }
     }

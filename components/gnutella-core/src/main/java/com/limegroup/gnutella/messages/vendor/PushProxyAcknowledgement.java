@@ -1,118 +1,118 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.net.InetAddress;
+import jbva.net.UnknownHostException;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutellb.GUID;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.QueryReply;
 
-/** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
- *  Used to ask a host you connect to do a TCP ConnectBack.
+/** In Vendor Messbge parlance, the "message type" of this VMP is "BEAR/7".
+ *  Used to bsk a host you connect to do a TCP ConnectBack.
  */
-pualic finbl class PushProxyAcknowledgement extends VendorMessage {
+public finbl class PushProxyAcknowledgement extends VendorMessage {
 
-    pualic stbtic final int VERSION = 2;
+    public stbtic final int VERSION = 2;
 
-    /** The payload has 4 bytes dedicated to the IP of the proxy.
+    /** The pbyload has 4 bytes dedicated to the IP of the proxy.
      */
-    private final InetAddress _addr;
+    privbte final InetAddress _addr;
 
-    /** The payload has a 16-bit unsigned value - the port - at which one should
-     *  connect abck.
+    /** The pbyload has a 16-bit unsigned value - the port - at which one should
+     *  connect bbck.
      */
-    private final int _port;
+    privbte final int _port;
 
     /**
-     * Constructs a new PushProxyAcknowledgement message with data from the
+     * Constructs b new PushProxyAcknowledgement message with data from the
      * network.
      */
-    PushProxyAcknowledgement(ayte[] guid, byte ttl, byte hops, int version, 
-                             ayte[] pbyload) 
-        throws BadPacketException {
+    PushProxyAcknowledgement(byte[] guid, byte ttl, byte hops, int version, 
+                             byte[] pbyload) 
+        throws BbdPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, version,
-              payload);
+              pbyload);
 
         if (getVersion() == 1)
-            throw new BadPacketException("DEPRECATED VERSION");
+            throw new BbdPacketException("DEPRECATED VERSION");
 
         if (getVersion() > VERSION)
-            throw new BadPacketException("UNSUPPORTED VERSION");
+            throw new BbdPacketException("UNSUPPORTED VERSION");
 
-        if (getPayload().length != 6)
-            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
-                                         payload.length);
-        // get the ip and  port from the payload....
-        QueryReply.IPPortComao combo = 
-            QueryReply.IPPortComao.getCombo(getPbyload());
-        _addr = combo.getInetAddress();
-        _port = comao.getPort();
+        if (getPbyload().length != 6)
+            throw new BbdPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         pbyload.length);
+        // get the ip bnd  port from the payload....
+        QueryReply.IPPortCombo combo = 
+            QueryReply.IPPortCombo.getCombo(getPbyload());
+        _bddr = combo.getInetAddress();
+        _port = combo.getPort();
     }
 
     /**
-     * Constructs a new PushProxyAcknowledgement message to be sent out.
-     * @param addr The address of the person to connect back to.
-     * @param port The port you want people to connect back to.  If you give a
-     *  abd port I don't check so check yourself!
+     * Constructs b new PushProxyAcknowledgement message to be sent out.
+     * @pbram addr The address of the person to connect back to.
+     * @pbram port The port you want people to connect back to.  If you give a
+     *  bbd port I don't check so check yourself!
      */
-    pualic PushProxyAcknowledgement(InetAddress bddr, int port) {
+    public PushProxyAcknowledgement(InetAddress bddr, int port) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
-              derivePayload(addr, port));
-        _addr = addr;
+              derivePbyload(addr, port));
+        _bddr = addr;
         _port = port;
     }
 
     /**
-     * Constructs a new PushProxyAcknowledgement message to be sent out.
-     * @param addr The address of the person to connect back to.
-     * @param port The port you want people to connect back to.  If you give a
-     *  abd port I don't check so check yourself!
-     *  @param guid In case you want to set the guid (the PushProxy protocol
-     *  advises this).
+     * Constructs b new PushProxyAcknowledgement message to be sent out.
+     * @pbram addr The address of the person to connect back to.
+     * @pbram port The port you want people to connect back to.  If you give a
+     *  bbd port I don't check so check yourself!
+     *  @pbram guid In case you want to set the guid (the PushProxy protocol
+     *  bdvises this).
      */
-    pualic PushProxyAcknowledgement(InetAddress bddr, int port,
+    public PushProxyAcknowledgement(InetAddress bddr, int port,
                                     GUID guid) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
-              derivePayload(addr, port));
-        _addr = addr;
+              derivePbyload(addr, port));
+        _bddr = addr;
         _port = port;
         setGUID(guid);
     }
 
     /** @return the port the PushProxy is listening on....
      */
-    pualic int getListeningPort() {
+    public int getListeningPort() {
         return _port;
     }
 
     /** @return the InetAddress the PushProxy is listening on....
      */
-    pualic InetAddress getListeningAddress() {
-        return _addr;
+    public InetAddress getListeningAddress() {
+        return _bddr;
     }
 
-    private static byte[] derivePayload(InetAddress addr, int port) {
+    privbte static byte[] derivePayload(InetAddress addr, int port) {
         try {
             // i do it during construction....
-            QueryReply.IPPortComao combo = 
-                new QueryReply.IPPortComao(bddr.getHostAddress(), port);
-            return comao.toBytes();
-        } catch (UnknownHostException uhe) {
-            throw new IllegalArgumentException(uhe.getMessage());
+            QueryReply.IPPortCombo combo = 
+                new QueryReply.IPPortCombo(bddr.getHostAddress(), port);
+            return combo.toBytes();
+        } cbtch (UnknownHostException uhe) {
+            throw new IllegblArgumentException(uhe.getMessage());
         }
     }
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
-        super.writePayload(out);
+    protected void writePbyload(OutputStream out) throws IOException {
+        super.writePbyload(out);
     }
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
-    pualic void recordDrop() {
+    public void recordDrop() {
         super.recordDrop();
     }
 

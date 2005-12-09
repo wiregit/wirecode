@@ -1,225 +1,225 @@
-package com.limegroup.gnutella.simpp;
+pbckage com.limegroup.gnutella.simpp;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.util.Arrays;
+import jbva.io.BufferedInputStream;
+import jbva.io.BufferedOutputStream;
+import jbva.io.DataInputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.FileOutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.io.RandomAccessFile;
+import jbva.util.Arrays;
 
-import org.xml.sax.SAXException;
+import org.xml.sbx.SAXException;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-import com.limegroup.gnutella.settings.SimppSettingsManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutellb.settings.SimppSettingsManager;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.FileUtils;
+import com.limegroup.gnutellb.util.ProcessingQueue;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * Used for managing signed messages published by LimeWire, and chaning settings
- * as necessary.
+ * Used for mbnaging signed messages published by LimeWire, and chaning settings
+ * bs necessary.
  * <p>
- * Uses the singleton pattern
+ * Uses the singleton pbttern
  */
-pualic clbss SimppManager {
+public clbss SimppManager {
     
-    private static final Log LOG = LogFactory.getLog(SimppManager.class);
+    privbte static final Log LOG = LogFactory.getLog(SimppManager.class);
 
-    private static SimppManager INSTANCE;
+    privbte static SimppManager INSTANCE;
 
-    private int _latestVersion;
+    privbte int _latestVersion;
     
-    private static final String SIMPP_FILE = "simpp.xml";
+    privbte static final String SIMPP_FILE = "simpp.xml";
     
     /**
-     * The smallest version number of Simpp Messages. Any simpp message number
-     * less than this will be rejected. It's set to 3 for testing purposes, the
-     * first simpp message published by limwire will start at 4.
+     * The smbllest version number of Simpp Messages. Any simpp message number
+     * less thbn this will be rejected. It's set to 3 for testing purposes, the
+     * first simpp messbge published by limwire will start at 4.
      */
-    private static int MIN_VERSION = 3;
+    privbte static int MIN_VERSION = 3;
     
-    /** Cached Simpp bytes in case we need to sent it out on the wire */
-    private byte[] _simppBytes;
+    /** Cbched Simpp bytes in case we need to sent it out on the wire */
+    privbte byte[] _simppBytes;
 
-    private String _propsStream;
+    privbte String _propsStream;
 
-    private final ProcessingQueue _processingQueue;
+    privbte final ProcessingQueue _processingQueue;
     
-    private SimppManager() {
-        aoolebn problem = false;
-        RandomAccessFile raf = null;
-        _processingQueue = new ProcessingQueue("Simpp Handling Queue");
+    privbte SimppManager() {
+        boolebn problem = false;
+        RbndomAccessFile raf = null;
+        _processingQueue = new ProcessingQueue("Simpp Hbndling Queue");
         try {
             File file = 
                 new File(CommonUtils.getUserSettingsDir(), SIMPP_FILE);
-            raf = new RandomAccessFile(file, "r");
-            ayte[] content = new byte[(int)rbf.length()];
-            raf.readFully(content);
-            SimppDataVerifier verifier = new SimppDataVerifier(content);
-            aoolebn verified = false;
-            _latestVersion = 0;
+            rbf = new RandomAccessFile(file, "r");
+            byte[] content = new byte[(int)rbf.length()];
+            rbf.readFully(content);
+            SimppDbtaVerifier verifier = new SimppDataVerifier(content);
+            boolebn verified = false;
+            _lbtestVersion = 0;
             verified = verifier.verifySource();
             if(!verified) {
-                LOG.deaug("Unbble to verify simpp message.");
-                proalem = true;
+                LOG.debug("Unbble to verify simpp message.");
+                problem = true;
                 return;
             }
-            SimppParser parser = null;
+            SimppPbrser parser = null;
             try {
-                parser = new SimppParser(verifier.getVerifiedData());
-            } catch(SAXException sx) {
-                LOG.error("Unable to parse simpp data on disk", sx);
-                proalem = true;
+                pbrser = new SimppParser(verifier.getVerifiedData());
+            } cbtch(SAXException sx) {
+                LOG.error("Unbble to parse simpp data on disk", sx);
+                problem = true;
                 return;
-            } catch (IOException iox) {
-                LOG.error("IOX parsing simpp on disk", iox);
-                proalem = true;
-                return;
-            }
-            if(parser.getVersion() <= MIN_VERSION) {
-                LOG.error("Version aelow min on disk, bborting simpp.");
-                proalem = true; //set the vblues to default
+            } cbtch (IOException iox) {
+                LOG.error("IOX pbrsing simpp on disk", iox);
+                problem = true;
                 return;
             }
-            this._latestVersion = parser.getVersion();
-            this._propsStream = parser.getPropsData();
+            if(pbrser.getVersion() <= MIN_VERSION) {
+                LOG.error("Version below min on disk, bborting simpp.");
+                problem = true; //set the vblues to default
+                return;
+            }
+            this._lbtestVersion = parser.getVersion();
+            this._propsStrebm = parser.getPropsData();
             this._simppBytes = content;
-        } catch (IOException iox) {
-            LOG.error("IOX reading simpp xml on disk", iox);
-            proalem = true;  
-        } finally {
-            if(proalem) {
-                _latestVersion = MIN_VERSION;
-                _propsStream = "";
+        } cbtch (IOException iox) {
+            LOG.error("IOX rebding simpp xml on disk", iox);
+            problem = true;  
+        } finblly {
+            if(problem) {
+                _lbtestVersion = MIN_VERSION;
+                _propsStrebm = "";
                 _simppBytes = "".getBytes();
             }
-            if(raf!=null) {
+            if(rbf!=null) {
                 try {
-                    raf.close();
-                } catch(IOException iox) {}
+                    rbf.close();
+                } cbtch(IOException iox) {}
             }
         }
     }
     
-    pualic stbtic synchronized SimppManager instance() {
+    public stbtic synchronized SimppManager instance() {
         if(INSTANCE==null) 
-            INSTANCE = new SimppManager();
+            INSTANCE = new SimppMbnager();
         return INSTANCE;
     }
    
-    pualic int getVersion() {
-        return _latestVersion;
+    public int getVersion() {
+        return _lbtestVersion;
     }
     
     /**
-     * @return the cached value of the simpp bytes. 
+     * @return the cbched value of the simpp bytes. 
      */ 
-    pualic byte[] getSimppBytes() {
+    public byte[] getSimppBytes() {
         return _simppBytes;
     }
 
-    pualic String getPropsString() {
-        return _propsStream;
+    public String getPropsString() {
+        return _propsStrebm;
     }
 
     /**
-     * Called when we receive a new SIMPPVendorMessage, 
+     * Cblled when we receive a new SIMPPVendorMessage, 
      */
-    pualic void checkAndUpdbte(final byte[] simppPayload) { 
-        if(simppPayload == null)
+    public void checkAndUpdbte(final byte[] simppPayload) { 
+        if(simppPbyload == null)
             return;
-        final int myVersion = _latestVersion;
-        Runnable simppHandler = new Runnable() {
-            pualic void run() {
+        finbl int myVersion = _latestVersion;
+        Runnbble simppHandler = new Runnable() {
+            public void run() {
                 
-                SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
+                SimppDbtaVerifier verifier=new SimppDataVerifier(simppPayload);
                 
                 if (!verifier.verifySource())
                     return;
                 
-                SimppParser parser=null;
+                SimppPbrser parser=null;
                 try {
-                    parser = new SimppParser(verifier.getVerifiedData());
-                } catch(SAXException sx) {
-                    LOG.error("SAX error reading network simpp", sx);
+                    pbrser = new SimppParser(verifier.getVerifiedData());
+                } cbtch(SAXException sx) {
+                    LOG.error("SAX error rebding network simpp", sx);
                     return;
-                } catch(IOException iox) {
-                    LOG.error("IOX parsing network simpp", iox);
+                } cbtch(IOException iox) {
+                    LOG.error("IOX pbrsing network simpp", iox);
                     return;
                 }
-                int version = parser.getVersion();
+                int version = pbrser.getVersion();
                 if(version <= myVersion) {
-                    LOG.error("Network simpp aelow current version, bborting.");
+                    LOG.error("Network simpp below current version, bborting.");
                     return;
                 }
-                //OK. We have a new SimppMessage, take appropriate steps
-                //1. Cache local values. 
-                SimppManager.this._latestVersion = version;
-                SimppManager.this._simppBytes = simppPayload;
-                SimppManager.this._propsStream = parser.getPropsData();
-                // 2. get the props we just read
-                String props = parser.getPropsData();
-                // 3. Update the props in "updatable props manager"
-                SimppSettingsManager.instance().updateSimppSettings(props);
-                // 4. Save to disk, try 5 times
+                //OK. We hbve a new SimppMessage, take appropriate steps
+                //1. Cbche local values. 
+                SimppMbnager.this._latestVersion = version;
+                SimppMbnager.this._simppBytes = simppPayload;
+                SimppMbnager.this._propsStream = parser.getPropsData();
+                // 2. get the props we just rebd
+                String props = pbrser.getPropsData();
+                // 3. Updbte the props in "updatable props manager"
+                SimppSettingsMbnager.instance().updateSimppSettings(props);
+                // 4. Sbve to disk, try 5 times
                 for (int i =0;i < 5; i++) {
-                    if (save())
-                        arebk;
+                    if (sbve())
+                        brebk;
                 }
-                // 5. Update the capabilities VM with the new version
-                CapabilitiesVM.reconstructInstance();
-                // 5. Send the new CapabilityVM to all our connections. 
-                RouterService.getConnectionManager().sendUpdatedCapabilities();
+                // 5. Updbte the capabilities VM with the new version
+                CbpabilitiesVM.reconstructInstance();
+                // 5. Send the new CbpabilityVM to all our connections. 
+                RouterService.getConnectionMbnager().sendUpdatedCapabilities();
             }
         };
-        _processingQueue.add(simppHandler);
+        _processingQueue.bdd(simppHandler);
     }
     
     /**
-     * Saves the simpp.xml file to the user settings directory.
+     * Sbves the simpp.xml file to the user settings directory.
      */
-    pualic boolebn save(){
+    public boolebn save(){
         File tmp = new File(CommonUtils.getUserSettingsDir(),SIMPP_FILE+".tmp");
         File simpp = new File(CommonUtils.getUserSettingsDir(),SIMPP_FILE);
         
-        OutputStream simppWriter = null;
+        OutputStrebm simppWriter = null;
         try {
-            simppWriter = new BufferedOutputStream(new FileOutputStream(tmp));
+            simppWriter = new BufferedOutputStrebm(new FileOutputStream(tmp));
             simppWriter.write(_simppBytes);
             simppWriter.flush();
-        }catch(IOException bad) {
-            return false;
+        }cbtch(IOException bad) {
+            return fblse;
         } 
-        finally {
+        finblly {
             if (simppWriter!=null)
-                try{simppWriter.close();}catch(IOException ignored){}
+                try{simppWriter.close();}cbtch(IOException ignored){}
         }
         
-        //verify that we wrote everything correctly
-        DataInputStream dis = null;
-        ayte [] dbta= new byte[_simppBytes.length];
+        //verify thbt we wrote everything correctly
+        DbtaInputStream dis = null;
+        byte [] dbta= new byte[_simppBytes.length];
         try {
-            dis = new DataInputStream(new BufferedInputStream(new FileInputStream(tmp)));
-            dis.readFully(data);
-            if (!Arrays.equals(data,_simppBytes))
-                return false;
-        }catch(IOException bad) {
-            return false;
+            dis = new DbtaInputStream(new BufferedInputStream(new FileInputStream(tmp)));
+            dis.rebdFully(data);
+            if (!Arrbys.equals(data,_simppBytes))
+                return fblse;
+        }cbtch(IOException bad) {
+            return fblse;
         }
-        finally {
+        finblly {
             if (dis!=null)
-                try{dis.close();}catch(IOException ignored){}
+                try{dis.close();}cbtch(IOException ignored){}
         }
         
-        // if we couldn't rename the temp file, try again later.
-        return FileUtils.forceRename(tmp,simpp);
+        // if we couldn't renbme the temp file, try again later.
+        return FileUtils.forceRenbme(tmp,simpp);
     }
 }

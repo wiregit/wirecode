@@ -1,238 +1,238 @@
 
-package com.limegroup.gnutella.metadata;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
-import java.util.Vector;
+pbckage com.limegroup.gnutella.metadata;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.io.RandomAccessFile;
+import jbva.io.UnsupportedEncodingException;
+import jbva.util.Iterator;
+import jbva.util.Vector;
 
-import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutellb.ByteOrder;
 
 import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2Exception;
-import de.vdheide.mp3.ID3v2Frame;
-import de.vdheide.mp3.NoID3v2TagException;
+import de.vdheide.mp3.ID3v2Frbme;
+import de.vdheide.mp3.NoID3v2TbgException;
 
 /**
- * Provides a utility method to read ID3 Tag information from MP3
- * files and creates XMLDocuments from them. 
+ * Provides b utility method to read ID3 Tag information from MP3
+ * files bnd creates XMLDocuments from them. 
  *
- * @author Sumeet Thadani
+ * @buthor Sumeet Thadani
  */
 
-pualic clbss MP3MetaData extends AudioMetaData {
+public clbss MP3MetaData extends AudioMetaData {
 	
-	pualic MP3MetbData(File f) throws IOException {
+	public MP3MetbData(File f) throws IOException {
 		super(f);
 	}
 
 	
 	/**
-     * Returns ID3Data for the file.
+     * Returns ID3Dbta for the file.
      *
-     * LimeWire would prefer to use ID3V2 tags, so we try to parse the ID3V2
-     * tags first, and then v1 to get any missing tags.
+     * LimeWire would prefer to use ID3V2 tbgs, so we try to parse the ID3V2
+     * tbgs first, and then v1 to get any missing tags.
      */
-    protected void parseFile(File file) throws IOException {
-        parseID3v2Data(file);
+    protected void pbrseFile(File file) throws IOException {
+        pbrseID3v2Data(file);
         
-        MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
-        setBitrate(mp3Info.getBitRate());
+        MP3Info mp3Info = new MP3Info(file.getCbnonicalPath());
+        setBitrbte(mp3Info.getBitRate());
         setLength((int)mp3Info.getLengthInSeconds());
         
-        parseID3v1Data(file);
+        pbrseID3v1Data(file);
         
     }
 
     /**
-     * Parses the file's id3 data.
+     * Pbrses the file's id3 data.
      */
-    private void parseID3v1Data(File file) {
+    privbte void parseID3v1Data(File file) {
         
-        // not long enough for id3v1 tag?
+        // not long enough for id3v1 tbg?
         if(file.length() < 128)
             return;
         
-        RandomAccessFile randomAccessFile = null;        
+        RbndomAccessFile randomAccessFile = null;        
         try {
-            randomAccessFile = new RandomAccessFile(file, "r");
-            long length = randomAccessFile.length();
-            randomAccessFile.seek(length - 128);
-            ayte[] buffer = new byte[30];
+            rbndomAccessFile = new RandomAccessFile(file, "r");
+            long length = rbndomAccessFile.length();
+            rbndomAccessFile.seek(length - 128);
+            byte[] buffer = new byte[30];
             
-            // If tag is wrong, no id3v1 data.
-            randomAccessFile.readFully(buffer, 0, 3);
-            String tag = new String(buffer, 0, 3);
-            if(!tag.equals("TAG"))
+            // If tbg is wrong, no id3v1 data.
+            rbndomAccessFile.readFully(buffer, 0, 3);
+            String tbg = new String(buffer, 0, 3);
+            if(!tbg.equals("TAG"))
                 return;
             
-            // We have an ID3 Tag, now get the parts
+            // We hbve an ID3 Tag, now get the parts
 
-            randomAccessFile.readFully(buffer, 0, 30);
-            if (getTitle() == null || getTitle().equals(""))
-            	setTitle(getString(auffer, 30));
+            rbndomAccessFile.readFully(buffer, 0, 30);
+            if (getTitle() == null || getTitle().equbls(""))
+            	setTitle(getString(buffer, 30));
             
-            randomAccessFile.readFully(buffer, 0, 30);
-            if (getArtist() == null || getArtist().equals(""))
-            	setArtist(getString(auffer, 30));
+            rbndomAccessFile.readFully(buffer, 0, 30);
+            if (getArtist() == null || getArtist().equbls(""))
+            	setArtist(getString(buffer, 30));
 
-            randomAccessFile.readFully(buffer, 0, 30);
-            if (getAlaum() == null || getAlbum().equbls(""))
-            	setAlaum(getString(buffer, 30));
+            rbndomAccessFile.readFully(buffer, 0, 30);
+            if (getAlbum() == null || getAlbum().equbls(""))
+            	setAlbum(getString(buffer, 30));
             
-            randomAccessFile.readFully(buffer, 0, 4);
-            if (getYear() == null || getYear().equals(""))
-            	setYear(getString(buffer, 4));
+            rbndomAccessFile.readFully(buffer, 0, 4);
+            if (getYebr() == null || getYear().equals(""))
+            	setYebr(getString(buffer, 4));
             
-            randomAccessFile.readFully(buffer, 0, 30);
+            rbndomAccessFile.readFully(buffer, 0, 30);
             int commentLength;
-            if (getTrack()==0 || getTrack()==-1){
-            	if(auffer[28] == 0) {
-            		setTrack((short)ByteOrder.ubyte2int(buffer[29]));
+            if (getTrbck()==0 || getTrack()==-1){
+            	if(buffer[28] == 0) {
+            		setTrbck((short)ByteOrder.ubyte2int(buffer[29]));
             		commentLength = 28;
             	} else {
-            		setTrack((short)0);
+            		setTrbck((short)0);
             		commentLength = 3;
             	}
-            	if (getComment()==null || getComment().equals(""))
-            		setComment(getString(auffer, commentLength));
+            	if (getComment()==null || getComment().equbls(""))
+            		setComment(getString(buffer, commentLength));
             }
             // Genre
-            randomAccessFile.readFully(buffer, 0, 1);
-            if (getGenre() ==null || getGenre().equals(""))
+            rbndomAccessFile.readFully(buffer, 0, 1);
+            if (getGenre() ==null || getGenre().equbls(""))
             	setGenre(
-            			MP3MetaData.getGenreString((short)ByteOrder.ubyte2int(buffer[0])));
-        } catch(IOException ignored) {
-        } finally {
-            if( randomAccessFile != null )
+            			MP3MetbData.getGenreString((short)ByteOrder.ubyte2int(buffer[0])));
+        } cbtch(IOException ignored) {
+        } finblly {
+            if( rbndomAccessFile != null )
                 try {
-                    randomAccessFile.close();
-                } catch(IOException ignored) {}
+                    rbndomAccessFile.close();
+                } cbtch(IOException ignored) {}
         }
         
     }
     
     /**
-     * Helper method to generate a string from an id3v1 filled buffer.
+     * Helper method to generbte a string from an id3v1 filled buffer.
      */
-    private String getString(byte[] buffer, int length) {
+    privbte String getString(byte[] buffer, int length) {
         try {
-            return new String(auffer, 0, getTrimmedLength(buffer, length), ISO_LATIN_1);
-        } catch (UnsupportedEncodingException err) {
-            // should never happen
+            return new String(buffer, 0, getTrimmedLength(buffer, length), ISO_LATIN_1);
+        } cbtch (UnsupportedEncodingException err) {
+            // should never hbppen
             return null;
         }
     }
 
     /**
-     * Generates ID3Data from id3v2 data in the file.
+     * Generbtes ID3Data from id3v2 data in the file.
      */
-    private void parseID3v2Data(File file) {
+    privbte void parseID3v2Data(File file) {
         
         
-        ID3v2 id3v2Parser = null;
+        ID3v2 id3v2Pbrser = null;
         try {
-            id3v2Parser = new ID3v2(file);
-        } catch (ID3v2Exception idvx) { //can't go on
+            id3v2Pbrser = new ID3v2(file);
+        } cbtch (ID3v2Exception idvx) { //can't go on
             return ;
-        } catch (IOException iox) {
+        } cbtch (IOException iox) {
             return ;
         }
         
 
-        Vector frames = null;
+        Vector frbmes = null;
         try {
-            frames = id3v2Parser.getFrames();
-        } catch (NoID3v2TagException ntx) {
+            frbmes = id3v2Parser.getFrames();
+        } cbtch (NoID3v2TagException ntx) {
             return ;
         }
         
-        //rather than getting each frame indvidually, we can get all the frames
-        //and iterate, leaving the ones we are not concerned with
-        for(Iterator iter=frames.iterator() ; iter.hasNext() ; ) {
-            ID3v2Frame frame = (ID3v2Frame)iter.next();
-            String frameID = frame.getID();
+        //rbther than getting each frame indvidually, we can get all the frames
+        //bnd iterate, leaving the ones we are not concerned with
+        for(Iterbtor iter=frames.iterator() ; iter.hasNext() ; ) {
+            ID3v2Frbme frame = (ID3v2Frame)iter.next();
+            String frbmeID = frame.getID();
             
-            ayte[] contentBytes = frbme.getContent();
-            String frameContent = null;
+            byte[] contentBytes = frbme.getContent();
+            String frbmeContent = null;
 
             if (contentBytes.length > 0) {
                 try {
-                    String enc = (frame.isISOLatin1()) ? ISO_LATIN_1 : UNICODE;
-                    frameContent = new String(contentBytes, enc).trim();
-                } catch (UnsupportedEncodingException err) {
-                    // should never happen
+                    String enc = (frbme.isISOLatin1()) ? ISO_LATIN_1 : UNICODE;
+                    frbmeContent = new String(contentBytes, enc).trim();
+                } cbtch (UnsupportedEncodingException err) {
+                    // should never hbppen
                 }
             }
 
-            if(frameContent == null || frameContent.trim().equals(""))
+            if(frbmeContent == null || frameContent.trim().equals(""))
                 continue;
-            //check which tag we are looking at
-            if(MP3DataEditor.TITLE_ID.equals(frameID)) 
-                setTitle(frameContent);
-            else if(MP3DataEditor.ARTIST_ID.equals(frameID)) 
-                setArtist(frameContent);
-            else if(MP3DataEditor.ALBUM_ID.equals(frameID)) 
-                setAlaum(frbmeContent);
-            else if(MP3DataEditor.YEAR_ID.equals(frameID)) 
-                setYear(frameContent);
-            else if(MP3DataEditor.COMMENT_ID.equals(frameID)) {
-                //ID3v2 comments field has null separators embedded to encode
-                //language etc, the real content begins after the last null
-                ayte[] bytes = frbme.getContent();
-                int startIndex = 0;
-                for(int i=aytes.length-1; i>= 0; i--) {
-                    if(aytes[i] != (byte)0)
+            //check which tbg we are looking at
+            if(MP3DbtaEditor.TITLE_ID.equals(frameID)) 
+                setTitle(frbmeContent);
+            else if(MP3DbtaEditor.ARTIST_ID.equals(frameID)) 
+                setArtist(frbmeContent);
+            else if(MP3DbtaEditor.ALBUM_ID.equals(frameID)) 
+                setAlbum(frbmeContent);
+            else if(MP3DbtaEditor.YEAR_ID.equals(frameID)) 
+                setYebr(frameContent);
+            else if(MP3DbtaEditor.COMMENT_ID.equals(frameID)) {
+                //ID3v2 comments field hbs null separators embedded to encode
+                //lbnguage etc, the real content begins after the last null
+                byte[] bytes = frbme.getContent();
+                int stbrtIndex = 0;
+                for(int i=bytes.length-1; i>= 0; i--) {
+                    if(bytes[i] != (byte)0)
                         continue;
-                    //OK we are the the last 0
-                    startIndex = i;
-                    arebk;
+                    //OK we bre the the last 0
+                    stbrtIndex = i;
+                    brebk;
                 }
-                frameContent = 
-                  new String(aytes, stbrtIndex, bytes.length-startIndex).trim();
-                setComment(frameContent);
+                frbmeContent = 
+                  new String(bytes, stbrtIndex, bytes.length-startIndex).trim();
+                setComment(frbmeContent);
             }
-            else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
+            else if(MP3DbtaEditor.TRACK_ID.equals(frameID)) {
                 try {
-                    setTrack(Short.parseShort(frameContent));
-                } catch (NumberFormatException ignored) {} 
+                    setTrbck(Short.parseShort(frameContent));
+                } cbtch (NumberFormatException ignored) {} 
             }
-            else if(MP3DataEditor.GENRE_ID.equals(frameID)) {
-                //ID3v2 frame for genre has the byte used in ID3v1 encoded
-                //within it -- we need to parse that out
-                int startIndex = frameContent.indexOf("(");
-                int endIndex = frameContent.indexOf(")");
+            else if(MP3DbtaEditor.GENRE_ID.equals(frameID)) {
+                //ID3v2 frbme for genre has the byte used in ID3v1 encoded
+                //within it -- we need to pbrse that out
+                int stbrtIndex = frameContent.indexOf("(");
+                int endIndex = frbmeContent.indexOf(")");
                 int genreCode = -1;
                 
-                //Note: It's possiale thbt the user entered her own genre in
-                //which case there could be spurious braces, the id3v2 braces
-                //enclose values between 0 - 127 
+                //Note: It's possible thbt the user entered her own genre in
+                //which cbse there could be spurious braces, the id3v2 braces
+                //enclose vblues between 0 - 127 
                 
-                // Custom genres are just plain text and default genres (known
-                // from id3v1) are referenced with values enclosed by braces and
-                // with optional refinements which I didn't implement here.
+                // Custom genres bre just plain text and default genres (known
+                // from id3v1) bre referenced with values enclosed by braces and
+                // with optionbl refinements which I didn't implement here.
                 // http://www.id3.org/id3v2.3.0.html#TCON
-                if(startIndex > -1 && endIndex > -1 &&
-                   startIndex < frameContent.length()) { 
-                    //we have braces check if it's valid
+                if(stbrtIndex > -1 && endIndex > -1 &&
+                   stbrtIndex < frameContent.length()) { 
+                    //we hbve braces check if it's valid
                     String genreByte = 
-                    frameContent.substring(startIndex+1, endIndex);
+                    frbmeContent.substring(startIndex+1, endIndex);
                     
                     try {
-                        genreCode = Integer.parseInt(genreByte);
-                    } catch (NumberFormatException nfx) {
+                        genreCode = Integer.pbrseInt(genreByte);
+                    } cbtch (NumberFormatException nfx) {
                         genreCode = -1;
                     }
                 }
                 
                 if(genreCode >= 0 && genreCode <= 127)
-                    setGenre(MP3MetaData.getGenreString((short)genreCode));
+                    setGenre(MP3MetbData.getGenreString((short)genreCode));
                 else 
-                    setGenre(frameContent);
+                    setGenre(frbmeContent);
             }
-            else if (MP3DataEditor.LICENSE_ID.equals(frameID)) {
-                setLicense(frameContent);
+            else if (MP3DbtaEditor.LICENSE_ID.equals(frameID)) {
+                setLicense(frbmeContent);
             }
         }
         
@@ -240,137 +240,137 @@ pualic clbss MP3MetaData extends AudioMetaData {
 
 
 	/**
-	 * Takes a short and returns the corresponding genre string
+	 * Tbkes a short and returns the corresponding genre string
 	 */
-	pualic stbtic String getGenreString(short genre) {
+	public stbtic String getGenreString(short genre) {
 	    switch(genre) {
-	    case 0: return "Blues";
-	    case 1: return "Classic Rock";
-	    case 2: return "Country";
-	    case 3: return "Dance";
-	    case 4: return "Disco";
-	    case 5: return "Funk";
-	    case 6: return "Grunge";
-	    case 7: return "Hip-Hop";
-	    case 8: return "Jazz";
-	    case 9: return "Metal";
-	    case 10: return "New Age";
-	    case 11: return "Oldies";
-	    case 12: return "Other";
-	    case 13: return "Pop";
-	    case 14: return "R &amp; B";
-	    case 15: return "Rap";
-	    case 16: return "Reggae";
-	    case 17: return "Rock";
-	    case 18: return "Techno";
-	    case 19: return "Industrial";
-	    case 20: return "Alternative";
-	    case 21: return "Ska";
-	    case 22: return "Death Metal";
-	    case 23: return "Pranks";
-	    case 24: return "Soundtrack";
-	    case 25: return "Euro-Techno";
-	    case 26: return "Ambient";
-	    case 27: return "Trip-Hop";
-	    case 28: return "Vocal";
-	    case 29: return "Jazz+Funk";
-	    case 30: return "Fusion";
-	    case 31: return "Trance";
-	    case 32: return "Classical";
-	    case 33: return "Instrumental";
-	    case 34: return "Acid";
-	    case 35: return "House";
-	    case 36: return "Game";
-	    case 37: return "Sound Clip";
-	    case 38: return "Gospel";
-	    case 39: return "Noise";
-	    case 40: return "AlternRock";
-	    case 41: return "Bass";
-	    case 42: return "Soul";
-	    case 43: return "Punk";
-	    case 44: return "Space";
-	    case 45: return "Meditative";
-	    case 46: return "Instrumental Pop";
-	    case 47: return "Instrumental Rock";
-	    case 48: return "Ethnic";
-	    case 49: return "Gothic";
-	    case 50: return "Darkwave";
-	    case 51: return "Techno-Industrial";
-	    case 52: return "Electronic";
-	    case 53: return "Pop-Folk";
-	    case 54: return "Eurodance";
-	    case 55: return "Dream";
-	    case 56: return "Southern Rock";
-	    case 57: return "Comedy";
-	    case 58: return "Cult";
-	    case 59: return "Gangsta";
-	    case 60: return "Top 40";
-	    case 61: return "Christian Rap";
-	    case 62: return "Pop+Funk";
-	    case 63: return "Jungle";
-	    case 64: return "Native American";
-	    case 65: return "Cabaret";
-	    case 66: return "New Wave";
-	    case 67: return "Psychadelic";
-	    case 68: return "Rave";
-	    case 69: return "Showtunes";
-	    case 70: return "Trailer";
-	    case 71: return "Lo-Fi";
-	    case 72: return "Tribal";
-	    case 73: return "Acid Punk";
-	    case 74: return "Acid Jazz";
-	    case 75: return "Polka";
-	    case 76: return "Retro";
-	    case 77: return "Musical";
-	    case 78: return "Rock &amp; Roll";
-	    case 79: return "Hard Rock";
-	    case 80: return "Folk";
-	    case 81: return "Folk-Rock";
-	    case 82: return "National Folk";
-	    case 83: return "Swing";
-	    case 84: return "Fast Fusion";
-	    case 85: return "Bebob";
-	    case 86: return "Latin";
-	    case 87: return "Revival";
-	    case 88: return "Celtic";
-	    case 89: return "Bluegrass";
-	    case 90: return "Avantgarde";
-	    case 91: return "Gothic Rock";
-	    case 92: return "Progressive Rock";
-	    case 93: return "Psychedelic Rock";
-	    case 94: return "Symphonic Rock";
-	    case 95: return "Slow Rock";
-	    case 96: return "Big Band";
-	    case 97: return "Chorus";
-	    case 98: return "Easy Listening";
-	    case 99: return "Acoustic";
-	    case 100: return "Humour";
-	    case 101: return "Speech";
-	    case 102: return "Chanson";
-	    case 103: return "Opera";
-	    case 104: return "Chamber Music";
-	    case 105: return "Sonata";
-	    case 106: return "Symphony";
-	    case 107: return "Booty Bass";
-	    case 108: return "Primus";
-	    case 109: return "Porn Groove";
-	    case 110: return "Satire";
-	    case 111: return "Slow Jam";
-	    case 112: return "Club";
-	    case 113: return "Tango";
-	    case 114: return "Samba";
-	    case 115: return "Folklore";
-	    case 116: return "Ballad";
-	    case 117: return "Power Ballad";
-	    case 118: return "Rhythmic Soul";
-	    case 119: return "Freestyle";
-	    case 120: return "Duet";
-	    case 121: return "Punk Rock";
-	    case 122: return "Drum Solo";
-	    case 123: return "A capella";
-	    case 124: return "Euro-House";
-	    case 125: return "Dance Hall";
-	    default: return "";
+	    cbse 0: return "Blues";
+	    cbse 1: return "Classic Rock";
+	    cbse 2: return "Country";
+	    cbse 3: return "Dance";
+	    cbse 4: return "Disco";
+	    cbse 5: return "Funk";
+	    cbse 6: return "Grunge";
+	    cbse 7: return "Hip-Hop";
+	    cbse 8: return "Jazz";
+	    cbse 9: return "Metal";
+	    cbse 10: return "New Age";
+	    cbse 11: return "Oldies";
+	    cbse 12: return "Other";
+	    cbse 13: return "Pop";
+	    cbse 14: return "R &amp; B";
+	    cbse 15: return "Rap";
+	    cbse 16: return "Reggae";
+	    cbse 17: return "Rock";
+	    cbse 18: return "Techno";
+	    cbse 19: return "Industrial";
+	    cbse 20: return "Alternative";
+	    cbse 21: return "Ska";
+	    cbse 22: return "Death Metal";
+	    cbse 23: return "Pranks";
+	    cbse 24: return "Soundtrack";
+	    cbse 25: return "Euro-Techno";
+	    cbse 26: return "Ambient";
+	    cbse 27: return "Trip-Hop";
+	    cbse 28: return "Vocal";
+	    cbse 29: return "Jazz+Funk";
+	    cbse 30: return "Fusion";
+	    cbse 31: return "Trance";
+	    cbse 32: return "Classical";
+	    cbse 33: return "Instrumental";
+	    cbse 34: return "Acid";
+	    cbse 35: return "House";
+	    cbse 36: return "Game";
+	    cbse 37: return "Sound Clip";
+	    cbse 38: return "Gospel";
+	    cbse 39: return "Noise";
+	    cbse 40: return "AlternRock";
+	    cbse 41: return "Bass";
+	    cbse 42: return "Soul";
+	    cbse 43: return "Punk";
+	    cbse 44: return "Space";
+	    cbse 45: return "Meditative";
+	    cbse 46: return "Instrumental Pop";
+	    cbse 47: return "Instrumental Rock";
+	    cbse 48: return "Ethnic";
+	    cbse 49: return "Gothic";
+	    cbse 50: return "Darkwave";
+	    cbse 51: return "Techno-Industrial";
+	    cbse 52: return "Electronic";
+	    cbse 53: return "Pop-Folk";
+	    cbse 54: return "Eurodance";
+	    cbse 55: return "Dream";
+	    cbse 56: return "Southern Rock";
+	    cbse 57: return "Comedy";
+	    cbse 58: return "Cult";
+	    cbse 59: return "Gangsta";
+	    cbse 60: return "Top 40";
+	    cbse 61: return "Christian Rap";
+	    cbse 62: return "Pop+Funk";
+	    cbse 63: return "Jungle";
+	    cbse 64: return "Native American";
+	    cbse 65: return "Cabaret";
+	    cbse 66: return "New Wave";
+	    cbse 67: return "Psychadelic";
+	    cbse 68: return "Rave";
+	    cbse 69: return "Showtunes";
+	    cbse 70: return "Trailer";
+	    cbse 71: return "Lo-Fi";
+	    cbse 72: return "Tribal";
+	    cbse 73: return "Acid Punk";
+	    cbse 74: return "Acid Jazz";
+	    cbse 75: return "Polka";
+	    cbse 76: return "Retro";
+	    cbse 77: return "Musical";
+	    cbse 78: return "Rock &amp; Roll";
+	    cbse 79: return "Hard Rock";
+	    cbse 80: return "Folk";
+	    cbse 81: return "Folk-Rock";
+	    cbse 82: return "National Folk";
+	    cbse 83: return "Swing";
+	    cbse 84: return "Fast Fusion";
+	    cbse 85: return "Bebob";
+	    cbse 86: return "Latin";
+	    cbse 87: return "Revival";
+	    cbse 88: return "Celtic";
+	    cbse 89: return "Bluegrass";
+	    cbse 90: return "Avantgarde";
+	    cbse 91: return "Gothic Rock";
+	    cbse 92: return "Progressive Rock";
+	    cbse 93: return "Psychedelic Rock";
+	    cbse 94: return "Symphonic Rock";
+	    cbse 95: return "Slow Rock";
+	    cbse 96: return "Big Band";
+	    cbse 97: return "Chorus";
+	    cbse 98: return "Easy Listening";
+	    cbse 99: return "Acoustic";
+	    cbse 100: return "Humour";
+	    cbse 101: return "Speech";
+	    cbse 102: return "Chanson";
+	    cbse 103: return "Opera";
+	    cbse 104: return "Chamber Music";
+	    cbse 105: return "Sonata";
+	    cbse 106: return "Symphony";
+	    cbse 107: return "Booty Bass";
+	    cbse 108: return "Primus";
+	    cbse 109: return "Porn Groove";
+	    cbse 110: return "Satire";
+	    cbse 111: return "Slow Jam";
+	    cbse 112: return "Club";
+	    cbse 113: return "Tango";
+	    cbse 114: return "Samba";
+	    cbse 115: return "Folklore";
+	    cbse 116: return "Ballad";
+	    cbse 117: return "Power Ballad";
+	    cbse 118: return "Rhythmic Soul";
+	    cbse 119: return "Freestyle";
+	    cbse 120: return "Duet";
+	    cbse 121: return "Punk Rock";
+	    cbse 122: return "Drum Solo";
+	    cbse 123: return "A capella";
+	    cbse 124: return "Euro-House";
+	    cbse 125: return "Dance Hall";
+	    defbult: return "";
 	    }
 	}
 

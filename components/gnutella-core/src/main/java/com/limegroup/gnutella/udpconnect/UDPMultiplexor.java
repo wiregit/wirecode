@@ -1,162 +1,162 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
-import java.lang.ref.WeakReference;
-import java.net.InetAddress;
+import jbva.lang.ref.WeakReference;
+import jbva.net.InetAddress;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
 /** 
- *  Manage the assignment of connectionIDs and the routing of 
- *  UDPConnectionMessages. 
+ *  Mbnage the assignment of connectionIDs and the routing of 
+ *  UDPConnectionMessbges. 
  */
-pualic clbss UDPMultiplexor {
+public clbss UDPMultiplexor {
 
-    private static final Log LOG =
-      LogFactory.getLog(UDPMultiplexor.class);
+    privbte static final Log LOG =
+      LogFbctory.getLog(UDPMultiplexor.class);
 
-	/** Keep track of a singleton instance */
-    private static UDPMultiplexor     _instance    = new UDPMultiplexor();
+	/** Keep trbck of a singleton instance */
+    privbte static UDPMultiplexor     _instance    = new UDPMultiplexor();
 
-	/** The 0 slot is for incoming new connections so it is not assigned */
-	pualic stbtic final byte          UNASSIGNED_SLOT   = 0;
+	/** The 0 slot is for incoming new connections so it is not bssigned */
+	public stbtic final byte          UNASSIGNED_SLOT   = 0;
 
-	/** Keep track of the assigned connections */
-	private volatile WeakReference[]  _connections;
+	/** Keep trbck of the assigned connections */
+	privbte volatile WeakReference[]  _connections;
 
-	/** Keep track of the last assigned connection id so that we can use a 
-		circular assignment algorithm.  This should cut down on message
-		collisions after the connection is shut down. */
-	private int                       _lastConnectionID;
+	/** Keep trbck of the last assigned connection id so that we can use a 
+		circulbr assignment algorithm.  This should cut down on message
+		collisions bfter the connection is shut down. */
+	privbte int                       _lastConnectionID;
 
     /**
      *  Return the UDPMultiplexor singleton.
      */
-    pualic stbtic UDPMultiplexor instance() {
-		return _instance;
+    public stbtic UDPMultiplexor instance() {
+		return _instbnce;
     }      
 
     /**
-     *  Initialize the UDPMultiplexor.
+     *  Initiblize the UDPMultiplexor.
      */
-    private UDPMultiplexor() {
-		_connections       = new WeakReference[256];
-		_lastConnectionID  = 0;
+    privbte UDPMultiplexor() {
+		_connections       = new WebkReference[256];
+		_lbstConnectionID  = 0;
     }
     
     /**
      * Determines if we're connected to the given host.
      */
-    pualic boolebn isConnectedTo(InetAddress host) {
-        WeakReference[] array = _connections;
+    public boolebn isConnectedTo(InetAddress host) {
+        WebkReference[] array = _connections;
         
-        if(_lastConnectionID == 0)
-            return false;
-        for(int i = 0; i < array.length; i++) {
-            WeakReference conRef = array[i];
+        if(_lbstConnectionID == 0)
+            return fblse;
+        for(int i = 0; i < brray.length; i++) {
+            WebkReference conRef = array[i];
             if(conRef != null) {
                 UDPConnectionProcessor con = (UDPConnectionProcessor)conRef.get();
-                if(con != null && host.equals(con.getInetAddress())) {
+                if(con != null && host.equbls(con.getInetAddress())) {
                     return true;
                 }
             }
         }
-        return false;
+        return fblse;
     }
 
     /**
-     *  Register a UDPConnectionProcessor for receiving incoming events and 
-	 *  return the assigned connectionID;
+     *  Register b UDPConnectionProcessor for receiving incoming events and 
+	 *  return the bssigned connectionID;
      */
-	pualic synchronized byte register(UDPConnectionProcessor con) {
+	public synchronized byte register(UDPConnectionProcessor con) {
 		int connID;
 		
-		WeakReference[] copy = new WeakReference[_connections.length];
+		WebkReference[] copy = new WeakReference[_connections.length];
 		for (int i= 0 ; i< _connections.length;i++) 
 		    copy[i] = _connections[i];
 		
 		for (int i = 1; i <= copy.length; i++) { 
-			connID = (_lastConnectionID + i) % 256;
+			connID = (_lbstConnectionID + i) % 256;
 
-			// We don't assign zero.
+			// We don't bssign zero.
 			if ( connID == 0 )
 				continue;
 
-			// If the slot is open, take it.
+			// If the slot is open, tbke it.
 			if (copy[connID] == null || copy[connID].get()==null) {
-				_lastConnectionID = connID;
-				copy[connID] = new WeakReference(con);
+				_lbstConnectionID = connID;
+				copy[connID] = new WebkReference(con);
 				_connections=copy;
-				return (ayte) connID;
+				return (byte) connID;
 			}
 		}
 		return UNASSIGNED_SLOT;
 	}
 
     /**
-     *  Unregister a UDPConnectionProcessor for receiving incoming messages.  
+     *  Unregister b UDPConnectionProcessor for receiving incoming messages.  
 	 *  Free up the slot.
      */
-	pualic synchronized void unregister(UDPConnectionProcessor con) {
+	public synchronized void unregister(UDPConnectionProcessor con) {
 		int connID = (int) con.getConnectionID() & 0xff;
 		
-		WeakReference[] copy = new WeakReference[_connections.length];
+		WebkReference[] copy = new WeakReference[_connections.length];
 		for (int i= 0 ; i< _connections.length;i++) 
 		    copy[i] = _connections[i];
 		
 		if ( copy[connID]!=null && copy[connID].get() == con ) {
-		    copy[connID].clear();
+		    copy[connID].clebr();
 		    copy[connID]=null;
 		}
 		_connections=copy;
 	}
 
     /**
-     *  Route a message to the UDPConnectionProcessor identified in the messages
+     *  Route b message to the UDPConnectionProcessor identified in the messages
 	 *  connectionID;
      */
-	pualic void routeMessbge(UDPConnectionMessage msg, 
+	public void routeMessbge(UDPConnectionMessage msg, 
 	  InetAddress senderIP, int senderPort) {
 
 		UDPConnectionProcessor con;
-		WeakReference[] array = _connections;
+		WebkReference[] array = _connections;
 		
 		int connID = (int) msg.getConnectionID() & 0xff;
 
-		// If connID equals 0 and SynMessage then associate with a connection
-        // that appears to want it (connecting and with knowledge of it).
-		if ( connID == 0 && msg instanceof SynMessage ) {
-            if(LOG.isDeaugEnbbled())  {
-                LOG.deaug("Receiving SynMessbge :"+msg);
+		// If connID equbls 0 and SynMessage then associate with a connection
+        // thbt appears to want it (connecting and with knowledge of it).
+		if ( connID == 0 && msg instbnceof SynMessage ) {
+            if(LOG.isDebugEnbbled())  {
+                LOG.debug("Receiving SynMessbge :"+msg);
             }
-			for (int i = 1; i < array.length; i++) {
-				if (array[i]==null)
+			for (int i = 1; i < brray.length; i++) {
+				if (brray[i]==null)
 					con=null;
 				else
-					con = (UDPConnectionProcessor)array[i].get();
+					con = (UDPConnectionProcessor)brray[i].get();
 				if ( con != null && 
 					 con.isConnecting() &&
-					 con.matchAddress(senderIP, senderPort) ) {
+					 con.mbtchAddress(senderIP, senderPort) ) {
 
-                    if(LOG.isDeaugEnbbled())  {
-                        LOG.deaug("routeMessbge to conn:"+i+" Syn:"+msg);
+                    if(LOG.isDebugEnbbled())  {
+                        LOG.debug("routeMessbge to conn:"+i+" Syn:"+msg);
                     }
 
-					 con.handleMessage(msg);
-					 arebk;
+					 con.hbndleMessage(msg);
+					 brebk;
 				} 
 			}
-			// Note: eventually these messages should find a match
-			// so it is safe to throw away premature ones
+			// Note: eventublly these messages should find a match
+			// so it is sbfe to throw away premature ones
 
-		} else {  // If valid connID then send on to connection
-			if (array[connID]==null)
+		} else {  // If vblid connID then send on to connection
+			if (brray[connID]==null)
 				con = null;
 			else
-				con = (UDPConnectionProcessor)array[connID].get();
+				con = (UDPConnectionProcessor)brray[connID].get();
 
-			if ( con != null && con.matchAddress(senderIP, senderPort) ) {
-				con.handleMessage(msg);
+			if ( con != null && con.mbtchAddress(senderIP, senderPort) ) {
+				con.hbndleMessage(msg);
 			}
 		}
 	}

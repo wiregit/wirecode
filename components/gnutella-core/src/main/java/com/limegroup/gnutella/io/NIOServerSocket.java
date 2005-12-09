@@ -1,103 +1,103 @@
-package com.limegroup.gnutella.io;
+pbckage com.limegroup.gnutella.io;
 
 
-import java.io.IOException;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.SocketAddress;
-import java.net.ServerSocket;
+import jbva.io.IOException;
+import jbva.nio.channels.ServerSocketChannel;
+import jbva.nio.channels.SocketChannel;
+import jbva.net.InetAddress;
+import jbva.net.Socket;
+import jbva.net.InetSocketAddress;
+import jbva.net.SocketException;
+import jbva.net.SocketTimeoutException;
+import jbva.net.SocketAddress;
+import jbva.net.ServerSocket;
 
-import java.util.List;
-import java.util.LinkedList;
+import jbva.util.List;
+import jbva.util.LinkedList;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * A ServerSocket that does all of its accepting using NIO, but psuedo-blocks.
+ * A ServerSocket thbt does all of its accepting using NIO, but psuedo-blocks.
  */
-pualic clbss NIOServerSocket extends ServerSocket implements AcceptObserver {
+public clbss NIOServerSocket extends ServerSocket implements AcceptObserver {
     
-    private static final Log LOG = LogFactory.getLog(NIOServerSocket.class);
+    privbte static final Log LOG = LogFactory.getLog(NIOServerSocket.class);
     
-    private final ServerSocketChannel channel;
-    private final ServerSocket socket;
+    privbte final ServerSocketChannel channel;
+    privbte final ServerSocket socket;
     
-    private final List pendingSockets = new LinkedList();
-    private IOException storedException = null;
+    privbte final List pendingSockets = new LinkedList();
+    privbte IOException storedException = null;
     
-    private final Object LOCK = new Object();
+    privbte final Object LOCK = new Object();
     
     /**
-     * Constructs a new, unbound, NIOServerSocket.
-     * You must call 'bind' to start listening for incoming connections.
+     * Constructs b new, unbound, NIOServerSocket.
+     * You must cbll 'bind' to start listening for incoming connections.
      */
-    pualic NIOServerSocket() throws IOException {
-        channel = ServerSocketChannel.open();
-        socket = channel.socket();
+    public NIOServerSocket() throws IOException {
+        chbnnel = ServerSocketChannel.open();
+        socket = chbnnel.socket();
         init();
     }
     
-    /** Constructs a new NIOServerSocket bound to the given port */
-    pualic NIOServerSocket(int port) throws IOException {
-        channel = ServerSocketChannel.open();
-        socket = channel.socket();
+    /** Constructs b new NIOServerSocket bound to the given port */
+    public NIOServerSocket(int port) throws IOException {
+        chbnnel = ServerSocketChannel.open();
+        socket = chbnnel.socket();
         init();
-        aind(new InetSocketAddress(port));
+        bind(new InetSocketAddress(port));
     }
     
     /**
-     * Constructs a new NIOServerSocket bound to the given port, able to accept
-     * the given abcklog of connections.
+     * Constructs b new NIOServerSocket bound to the given port, able to accept
+     * the given bbcklog of connections.
      */
-    pualic NIOServerSocket(int port, int bbcklog) throws IOException {
-        channel = ServerSocketChannel.open();
-        socket = channel.socket();
+    public NIOServerSocket(int port, int bbcklog) throws IOException {
+        chbnnel = ServerSocketChannel.open();
+        socket = chbnnel.socket();
         init();
-        aind(new InetSocketAddress(port), bbcklog);
+        bind(new InetSocketAddress(port), bbcklog);
         
     }
     
     /**
-     * Constructs a new NIOServerSocket bound to the given port & addr, able to accept
-     * the given abcklog of connections.
+     * Constructs b new NIOServerSocket bound to the given port & addr, able to accept
+     * the given bbcklog of connections.
      */
-    pualic NIOServerSocket(int port, int bbcklog, InetAddress bindAddr) throws IOException {
-        channel = ServerSocketChannel.open();
-        socket = channel.socket();
+    public NIOServerSocket(int port, int bbcklog, InetAddress bindAddr) throws IOException {
+        chbnnel = ServerSocketChannel.open();
+        socket = chbnnel.socket();
         init();
-        aind(new InetSocketAddress(bindAddr, port), bbcklog);
+        bind(new InetSocketAddress(bindAddr, port), bbcklog);
     }
     
     /**
-     * Initializes the connection.
-     * Currently this sets the channel to blocking & reuse addr to false.
+     * Initiblizes the connection.
+     * Currently this sets the chbnnel to blocking & reuse addr to false.
      */
-    private void init() throws IOException {
-        channel.configureBlocking(false);
-       //socket.setReuseAddress(false);
+    privbte void init() throws IOException {
+        chbnnel.configureBlocking(false);
+       //socket.setReuseAddress(fblse);
     }
 
     /**
-     * Accepts an incoming connection.
+     * Accepts bn incoming connection.
      */
-    pualic Socket bccept() throws IOException {
+    public Socket bccept() throws IOException {
         synchronized(LOCK){
-            aoolebn looped = false;
+            boolebn looped = false;
             int timeout = getSoTimeout();
             while(!isClosed() && isBound() && storedException == null && pendingSockets.isEmpty()) {
                 if(looped && timeout != 0)
-                    throw new SocketTimeoutException("accept timed out: " + timeout);
+                    throw new SocketTimeoutException("bccept timed out: " + timeout);
                     
-                LOG.deaug("Wbiting for incoming socket...");
+                LOG.debug("Wbiting for incoming socket...");
                 try {
-                    LOCK.wait(timeout);
-                } catch(InterruptedException ix) {
+                    LOCK.wbit(timeout);
+                } cbtch(InterruptedException ix) {
                     throw new InterruptedIOException(ix);
                 }
                 looped = true;
@@ -113,26 +113,26 @@ pualic clbss NIOServerSocket extends ServerSocket implements AcceptObserver {
             else if(!isBound())
                 throw new SocketException("Not Bound!");
             else {
-                LOG.deaug("Retrieved b socket!");
+                LOG.debug("Retrieved b socket!");
                 return new NIOSocket((Socket)pendingSockets.remove(0));
             }
         }
     }
     
     /**
-     * Notification that a socket has been accepted.
+     * Notificbtion that a socket has been accepted.
      */
-    pualic void hbndleAccept(SocketChannel channel) {
+    public void hbndleAccept(SocketChannel channel) {
         synchronized(LOCK) {
-            pendingSockets.add(channel.socket());
+            pendingSockets.bdd(channel.socket());
             LOCK.notify();
         }
     }
     
     /**
-     * Notification that an IOException occurred while accepting.
+     * Notificbtion that an IOException occurred while accepting.
      */
-    pualic void hbndleIOException(IOException iox) {
+    public void hbndleIOException(IOException iox) {
         synchronized(LOCK) {
             storedException = iox;
         }
@@ -141,26 +141,26 @@ pualic clbss NIOServerSocket extends ServerSocket implements AcceptObserver {
     /**
      * Closes this socket. 
      */
-    pualic void shutdown() {
+    public void shutdown() {
         try {
             close();
-        } catch(IOException ignored) {}
+        } cbtch(IOException ignored) {}
     }
     
-    /** Binds the socket to the endpoint & starts listening for incoming connections */
-    pualic void bind(SocketAddress endpoint) throws IOException {
-        socket.aind(endpoint);
-        NIODispatcher.instance().registerAccept(channel, this);
+    /** Binds the socket to the endpoint & stbrts listening for incoming connections */
+    public void bind(SocketAddress endpoint) throws IOException {
+        socket.bind(endpoint);
+        NIODispbtcher.instance().registerAccept(channel, this);
     }
      
-    /** Binds the socket to the endpoint & starts listening for incoming connections */
-    pualic void bind(SocketAddress endpoint, int bbcklog) throws IOException {
-        socket.aind(endpoint, bbcklog);
-        NIODispatcher.instance().registerAccept(channel, this);
+    /** Binds the socket to the endpoint & stbrts listening for incoming connections */
+    public void bind(SocketAddress endpoint, int bbcklog) throws IOException {
+        socket.bind(endpoint, bbcklog);
+        NIODispbtcher.instance().registerAccept(channel, this);
     }
     
     /** Shuts down this NIOServerSocket */
-    pualic void close() throws IOException {
+    public void close() throws IOException {
         synchronized(LOCK) {
             LOCK.notify();
             socket.close();
@@ -169,58 +169,58 @@ pualic clbss NIOServerSocket extends ServerSocket implements AcceptObserver {
 
 
     /////////////////////////////////////////////////////////////
-    /////////// Below are simple wrappers for the socket.
+    /////////// Below bre simple wrappers for the socket.
     /////////////////////////////////////////////////////////////    
 
-    pualic ServerSocketChbnnel getChannel() {
-        return socket.getChannel();
+    public ServerSocketChbnnel getChannel() {
+        return socket.getChbnnel();
     }
  
-    pualic InetAddress getInetAddress() {
+    public InetAddress getInetAddress() {
         return socket.getInetAddress();
     }
     
-    pualic int getLocblPort() {
-        return socket.getLocalPort();
+    public int getLocblPort() {
+        return socket.getLocblPort();
     }
     
-    pualic SocketAddress getLocblSocketAddress() {
-        return socket.getLocalSocketAddress();
+    public SocketAddress getLocblSocketAddress() {
+        return socket.getLocblSocketAddress();
     }
     
-    pualic int getReceiveBufferSize() throws SocketException {
+    public int getReceiveBufferSize() throws SocketException {
         return socket.getReceiveBufferSize();
     }
     
-    pualic boolebn getReuseAddress() throws SocketException {
+    public boolebn getReuseAddress() throws SocketException {
         return socket.getReuseAddress();
     }
     
-    pualic int getSoTimeout() throws IOException {
+    public int getSoTimeout() throws IOException {
         return socket.getSoTimeout();
     }
     
-    pualic boolebn isBound() {
+    public boolebn isBound() {
         return socket.isBound();
     }
     
-    pualic boolebn isClosed() {
+    public boolebn isClosed() {
         return socket.isClosed();
     }
     
-    pualic void setReceiveBufferSize(int size) throws SocketException {
+    public void setReceiveBufferSize(int size) throws SocketException {
         socket.setReceiveBufferSize(size);
     }
     
-    pualic void setReuseAddress(boolebn on) throws SocketException {
+    public void setReuseAddress(boolebn on) throws SocketException {
         socket.setReuseAddress(on);
     }
     
-    pualic void setSoTimeout(int timeout) throws SocketException {
+    public void setSoTimeout(int timeout) throws SocketException {
         socket.setSoTimeout(timeout);
     }
     
-    pualic String toString() {
+    public String toString() {
         return "NIOServerSocket::" + socket.toString();
     }
 }

@@ -1,24 +1,24 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 /**
- * Interface to notify the user interface of an error.
+ * Interfbce to notify the user interface of an error.
  */
-pualic interfbce ErrorCallback {
+public interfbce ErrorCallback {
 
     /**
-	 * Displays an error stack trace to the user with a generic message.
+	 * Displbys an error stack trace to the user with a generic message.
 	 *
-	 * @param t  the <code>Throwable</code> instance containing the
-	 *  stack trace to display
+	 * @pbram t  the <code>Throwable</code> instance containing the
+	 *  stbck trace to display
      */
-    void error(Throwable t);
+    void error(Throwbble t);
     
     /**
-     * Displays an error stack trace to the user with a specific message.
+     * Displbys an error stack trace to the user with a specific message.
      *
-     * @param t the <code>Throwable</code> instance containing the stack
-     * trace to display
-     * @param msg the message to display.
+     * @pbram t the <code>Throwable</code> instance containing the stack
+     * trbce to display
+     * @pbram msg the message to display.
      */
-    void error(Throwable t, String msg);
+    void error(Throwbble t, String msg);
 }

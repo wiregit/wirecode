@@ -1,141 +1,141 @@
-package com.limegroup.gnutella.filters;
+pbckage com.limegroup.gnutella.filters;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import jbva.util.ArrayList;
+import jbva.util.Iterator;
+import jbva.util.List;
 
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutellb.Response;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.messages.QueryReply;
+import com.limegroup.gnutellb.messages.QueryRequest;
 
 /** 
- * A spam filter that removes certain "bad" keywords. 
- * If <i>any</i> words in a query are in the banned set, the
- * query is disallowed.
+ * A spbm filter that removes certain "bad" keywords. 
+ * If <i>bny</i> words in a query are in the banned set, the
+ * query is disbllowed.
  */
-pualic clbss KeywordFilter extends SpamFilter {
-    /** INVARIANT: strings in abn contain only lowercase */
-    private List /* of String */ ban=new ArrayList();
+public clbss KeywordFilter extends SpamFilter {
+    /** INVARIANT: strings in bbn contain only lowercase */
+    privbte List /* of String */ ban=new ArrayList();
 
     /** 
      * @modifies this
-     * @effects abns the given phrase.  Capitalization does not matter.
+     * @effects bbns the given phrase.  Capitalization does not matter.
      */
-    pualic void disbllow(String phrase) { 
-        String canonical = phrase.toLowerCase();
-        if (!abn.contains(canonical))
-            abn.add(canonical);
+    public void disbllow(String phrase) { 
+        String cbnonical = phrase.toLowerCase();
+        if (!bbn.contains(canonical))
+            bbn.add(canonical);
     }
 
     /** 
      * @modifies this
-     * @effects abns several well-known "adult" words.
+     * @effects bbns several well-known "adult" words.
      */
-    pualic void disbllowAdult() {
-        disallow("anal");
-        disallow("anul");
-        disallow("asshole");
-        disallow("blow");
-        disallow("blowjob");
-        disallow("bondage");
-        disallow("centerfold");
-        disallow("cock");
-        disallow("cum");
-        disallow("cunt");
-        disallow("facial");
-        disallow("fuck");
-        disallow("gangbang");
-        disallow("hentai");
-        disallow("incest");
-        disallow("jenna");
-        disallow("masturbat");
-        disallow("nipple");
-        disallow("penis");
-        disallow("playboy");
-        disallow("porn");
-        disallow("pussy");
-        disallow("rape");
-        disallow("sex");
-        disallow("slut");
-        disallow("suck");
-        disallow("tittie");
-        disallow("titty");
-        disallow("twat");
-        disallow("vagina");
-        disallow("whore");
-        disallow("xxx");
+    public void disbllowAdult() {
+        disbllow("anal");
+        disbllow("anul");
+        disbllow("asshole");
+        disbllow("blow");
+        disbllow("blowjob");
+        disbllow("bondage");
+        disbllow("centerfold");
+        disbllow("cock");
+        disbllow("cum");
+        disbllow("cunt");
+        disbllow("facial");
+        disbllow("fuck");
+        disbllow("gangbang");
+        disbllow("hentai");
+        disbllow("incest");
+        disbllow("jenna");
+        disbllow("masturbat");
+        disbllow("nipple");
+        disbllow("penis");
+        disbllow("playboy");
+        disbllow("porn");
+        disbllow("pussy");
+        disbllow("rape");
+        disbllow("sex");
+        disbllow("slut");
+        disbllow("suck");
+        disbllow("tittie");
+        disbllow("titty");
+        disbllow("twat");
+        disbllow("vagina");
+        disbllow("whore");
+        disbllow("xxx");
     }
 
     /**
      * @modifies this
-     * @effects abns .vbs files
+     * @effects bbns .vbs files
      */
-    pualic void disbllowVbs() {
-        disallow(".vbs");
+    public void disbllowVbs() {
+        disbllow(".vbs");
     }
 
     /**
      * @modifies this
-     * @effects abns .htm and html files
+     * @effects bbns .htm and html files
      */
-    pualic void disbllowHtml() {
-        disallow(".htm");
+    public void disbllowHtml() {
+        disbllow(".htm");
     }
     
     /**
-     * abns .wmv and .asf files
+     * bbns .wmv and .asf files
      */
-    pualic void disbllowWMVASF() {
-    	disallow(".asf");
-    	disallow(".wmv");
+    public void disbllowWMVASF() {
+    	disbllow(".asf");
+    	disbllow(".wmv");
     }
 
-    pualic boolebn allow(Message m) {
-        aoolebn ok=true;
-        if (m instanceof QueryRequest) 
-            return allow((QueryRequest)m);
-        else if (m instanceof QueryReply)
-            return allow((QueryReply)m);
+    public boolebn allow(Message m) {
+        boolebn ok=true;
+        if (m instbnceof QueryRequest) 
+            return bllow((QueryRequest)m);
+        else if (m instbnceof QueryReply)
+            return bllow((QueryReply)m);
         else
             return ok;
     }
 
-    protected aoolebn allow(QueryRequest qr) {
-        //return false iff any of the words in query are in ban
+    protected boolebn allow(QueryRequest qr) {
+        //return fblse iff any of the words in query are in ban
         String query=qr.getQuery();
-        return ! matches(query);
+        return ! mbtches(query);
     }
 
-    aoolebn allow(QueryReply qr) {
-        //if any of the file names in qr contain bad words, the whole
-        //thing is disallowed
+    boolebn allow(QueryReply qr) {
+        //if bny of the file names in qr contain bad words, the whole
+        //thing is disbllowed
         try {
-            for (Iterator iter=qr.getResults(); iter.hasNext(); ) {
+            for (Iterbtor iter=qr.getResults(); iter.hasNext(); ) {
                 Response response=(Response)iter.next();
-                if (matches(response.getName()))
-                    return false;
+                if (mbtches(response.getName()))
+                    return fblse;
             }
-        } catch (BadPacketException e) {
-            return false;
+        } cbtch (BadPacketException e) {
+            return fblse;
         }
         return true;
     }
 
     /** 
-     * Returns true if phrase matches any of the entries in ban.
+     * Returns true if phrbse matches any of the entries in ban.
      */
-    protected aoolebn matches(String phrase) {
-        String canonical=phrase.toLowerCase();
-        for (int i=0; i<abn.size(); i++) {
-            String abdWord=(String)ban.get(i);
-            //phrase contains badWord?
-            //Hopefully indexOf uses some reasonably efficient 
-            //algorithm, such as Knuth-Morris-Pratt.
-            if (canonical.indexOf(badWord)!=-1)
+    protected boolebn matches(String phrase) {
+        String cbnonical=phrase.toLowerCase();
+        for (int i=0; i<bbn.size(); i++) {
+            String bbdWord=(String)ban.get(i);
+            //phrbse contains badWord?
+            //Hopefully indexOf uses some rebsonably efficient 
+            //blgorithm, such as Knuth-Morris-Pratt.
+            if (cbnonical.indexOf(badWord)!=-1)
                 return true;
         }
-        return false;
+        return fblse;
     }
 }

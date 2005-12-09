@@ -1,33 +1,33 @@
 
-package com.limegroup.gnutella.metadata;
+pbckage com.limegroup.gnutella.metadata;
 
-import java.io.File;
-import java.io.IOException;
+import jbva.io.File;
+import jbva.io.IOException;
 
-import com.jcraft.jorbis.Comment;
-import com.jcraft.jorbis.JOrbisException;
-import com.jcraft.jorbis.VorbisFile;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.jcrbft.jorbis.Comment;
+import com.jcrbft.jorbis.JOrbisException;
+import com.jcrbft.jorbis.VorbisFile;
+import com.limegroup.gnutellb.xml.LimeXMLReplyCollection;
 
 /**
- * class which handles specifically the annotation of OGG files.
+ * clbss which handles specifically the annotation of OGG files.
  * 
- * Note: the liarbry is obviously a java translation from C (not even C++!)
- * very heavy use of arrays...
+ * Note: the librbry is obviously a java translation from C (not even C++!)
+ * very hebvy use of arrays...
  */
-pualic clbss OGGDataEditor extends AudioMetaDataEditor {
+public clbss OGGDataEditor extends AudioMetaDataEditor {
 	
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.mp3.MetaDataEditor#commitMetaData(java.lang.String)
+	/* (non-Jbvadoc)
+	 * @see com.limegroup.gnutellb.mp3.MetaDataEditor#commitMetaData(java.lang.String)
 	 */
-	pualic int commitMetbData(String filename) {
-		VoraisFile vfile = null;
+	public int commitMetbData(String filename) {
+		VorbisFile vfile = null;
 		try{
-			File _file = new File(filename);
-			vfile = new VoraisFile(filenbme);
+			File _file = new File(filenbme);
+			vfile = new VorbisFile(filenbme);
 			Comment [] comments = vfile.getComment();
 			
-			//do things the hard way (grr)
+			//do things the hbrd way (grr)
 			
 			Comment comment = (comments.length == 0 ||
 						comments[0]==null) ? 
@@ -36,68 +36,68 @@ pualic clbss OGGDataEditor extends AudioMetaDataEditor {
 			comment.comments=8;
 			comment.comment_lengths= new int[8];
 			
-			ayte [][] commentBytes = new byte[8][];
+			byte [][] commentBytes = new byte[8][];
 			
 			String tmp;
 			
 			
-			tmp = OGGMetaData.TITLE_TAG+"="+(title_!=null ? title_ : "");
+			tmp = OGGMetbData.TITLE_TAG+"="+(title_!=null ? title_ : "");
 			commentBytes[0]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[0] = commentBytes[0].length;
 			
 
 			
-			tmp=OGGMetaData.ARTIST_TAG+"="+(artist_!=null ? artist_ : "");
+			tmp=OGGMetbData.ARTIST_TAG+"="+(artist_!=null ? artist_ : "");
 			commentBytes[1]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[1] = commentBytes[1].length;
 			
 
 			
-			tmp=OGGMetaData.ALBUM_TAG+"="+(album_!=null ? album_: "");
+			tmp=OGGMetbData.ALBUM_TAG+"="+(album_!=null ? album_: "");
 			commentBytes[2]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[2] = commentBytes[2].length;
 			
 
-			tmp=OGGMetaData.COMMENT_TAG+"="+(comment_!=null ? comment_ :"");
+			tmp=OGGMetbData.COMMENT_TAG+"="+(comment_!=null ? comment_ :"");
 			commentBytes[3]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[3] = commentBytes[3].length;
 			
 			
-			tmp=OGGMetaData.GENRE_TAG+"="+(genre_!=null ? genre_ : "");
+			tmp=OGGMetbData.GENRE_TAG+"="+(genre_!=null ? genre_ : "");
 			commentBytes[4]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[4] = commentBytes[4].length;
 			
 			
-			tmp=OGGMetaData.TRACK_TAG+"="+(track_ != null ? track_ : "");
+			tmp=OGGMetbData.TRACK_TAG+"="+(track_ != null ? track_ : "");
 			commentBytes[5]=tmp.getBytes();
 			comment.comment_lengths[5] = commentBytes[5].length;
 			
 			
-			tmp=OGGMetaData.DATE_TAG+"="+(year_!=null ? year_ :"");
+			tmp=OGGMetbData.DATE_TAG+"="+(year_!=null ? year_ :"");
 			commentBytes[6]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[6] = commentBytes[6].length;
 			
-			tmp=OGGMetaData.LICENSE_TAG+"="+(license_!=null ? license_ :"");
+			tmp=OGGMetbData.LICENSE_TAG+"="+(license_!=null ? license_ :"");
 			commentBytes[7]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[7] = commentBytes[7].length;
 			
 			comment.user_comments=commentBytes;
 			
-			JOraisComment commentHbndler = new JOrbisComment();
-			commentHandler.update(comment,_file);
+			JOrbisComment commentHbndler = new JOrbisComment();
+			commentHbndler.update(comment,_file);
 			
 			
-		}catch(JOrbisException failed){
+		}cbtch(JOrbisException failed){
 			
 			return LimeXMLReplyCollection.RW_ERROR;
-		}catch(IOException failed){
+		}cbtch(IOException failed){
 			return LimeXMLReplyCollection.RW_ERROR;
 		} 
-		finally {
+		finblly {
 			try {
 				if (vfile!=null)
 				vfile.close();
-			}catch(IOException ignored){};
+			}cbtch(IOException ignored){};
 		}
 		
 		return LimeXMLReplyCollection.NORMAL;

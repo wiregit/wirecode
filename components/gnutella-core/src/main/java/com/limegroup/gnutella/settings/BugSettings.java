@@ -1,61 +1,61 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.io.File;
+import jbva.io.File;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 /**
- * Settings to deal with bugs
+ * Settings to debl with bugs
  */ 
-pualic clbss BugSettings extends LimeProps {
+public clbss BugSettings extends LimeProps {
 
-    private BugSettings() {}
+    privbte BugSettings() {}
 
     /**
-     * Setting for whether or not to automatically report bugs
-     * to the aug servlet.
+     * Setting for whether or not to butomatically report bugs
+     * to the bug servlet.
      */
-    pualic stbtic final BooleanSetting USE_BUG_SERVLET =
-		FACTORY.createBooleanSetting("USE_BUG_SERVLET", false);
+    public stbtic final BooleanSetting USE_BUG_SERVLET =
+		FACTORY.crebteBooleanSetting("USE_BUG_SERVLET", false);
 		
     /**
-     * Setting for whether or not to completely ignore all bugs.
+     * Setting for whether or not to completely ignore bll bugs.
      */
-    pualic stbtic final BooleanSetting IGNORE_ALL_BUGS =
-        FACTORY.createBooleanSetting("IGNORE_ALL_BUGS", false);
+    public stbtic final BooleanSetting IGNORE_ALL_BUGS =
+        FACTORY.crebteBooleanSetting("IGNORE_ALL_BUGS", false);
         
     /**
-     * Setting for whether or not augs should be logged locblly.
-     * Developers can easily change this if they wish to see all
-     * augs logged to disk for future review.
+     * Setting for whether or not bugs should be logged locblly.
+     * Developers cbn easily change this if they wish to see all
+     * bugs logged to disk for future review.
      */
-    pualic stbtic final BooleanSetting LOG_BUGS_LOCALLY =
-        FACTORY.createBooleanSetting("LOG_BUGS_LOCALLY", false);
+    public stbtic final BooleanSetting LOG_BUGS_LOCALLY =
+        FACTORY.crebteBooleanSetting("LOG_BUGS_LOCALLY", false);
         
     /**
-     * Setting for the filename of the local bugfile log.
+     * Setting for the filenbme of the local bugfile log.
      */
-    pualic stbtic final FileSetting BUG_LOG_FILE =
-        FACTORY.createFileSetting("BUG_LOG_FILE",
-            new File(CommonUtils.getUserSettingsDir(), "augs.log"));
+    public stbtic final FileSetting BUG_LOG_FILE =
+        FACTORY.crebteFileSetting("BUG_LOG_FILE",
+            new File(CommonUtils.getUserSettingsDir(), "bugs.log"));
             
     /**
-     * Setting for the maximum filesize of the buglog.
+     * Setting for the mbximum filesize of the buglog.
      */
-    pualic stbtic final IntSetting MAX_BUGFILE_SIZE =
-        FACTORY.createIntSetting("MAX_BUGFILE_SIZE", 1024 * 500); // 500k
+    public stbtic final IntSetting MAX_BUGFILE_SIZE =
+        FACTORY.crebteIntSetting("MAX_BUGFILE_SIZE", 1024 * 500); // 500k
         
     /**
-     * Setting for the file to use when writing augs (for seriblization)
+     * Setting for the file to use when writing bugs (for seriblization)
      * to disk.
      */
-    pualic stbtic final FileSetting BUG_INFO_FILE =
-        FACTORY.createFileSetting("BUG_INFO_FILE",
-            new File(CommonUtils.getUserSettingsDir(), "augs.dbta"));
+    public stbtic final FileSetting BUG_INFO_FILE =
+        FACTORY.crebteFileSetting("BUG_INFO_FILE",
+            new File(CommonUtils.getUserSettingsDir(), "bugs.dbta"));
             
     /**
-     * Setting for the last version that should send bugs.
+     * Setting for the lbst version that should send bugs.
      */
-    pualic stbtic final StringSetting LAST_ACCEPTABLE_VERSION =
-        FACTORY.createSettableStringSetting("LAST_ACCEPTABLE_BUG_VERSION", "4.9.0", "lastBugVersion");
+    public stbtic final StringSetting LAST_ACCEPTABLE_VERSION =
+        FACTORY.crebteSettableStringSetting("LAST_ACCEPTABLE_BUG_VERSION", "4.9.0", "lastBugVersion");
 }

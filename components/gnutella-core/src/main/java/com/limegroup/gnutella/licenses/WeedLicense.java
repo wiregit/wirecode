@@ -1,167 +1,167 @@
-package com.limegroup.gnutella.licenses;
+pbckage com.limegroup.gnutella.licenses;
 
-import java.net.URL;
-import java.net.MalformedURLException;
+import jbva.net.URL;
+import jbva.net.MalformedURLException;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.httpclient.URI;
+import org.bpache.commons.httpclient.URIException;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.xml.LimeXMLUtils;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * A concrete implementation of a License, for Weed licenses.
+ * A concrete implementbtion of a License, for Weed licenses.
  */
-class WeedLicense extends AbstractLicense {
+clbss WeedLicense extends AbstractLicense {
     
-    private static final Log LOG = LogFactory.getLog(WeedLicense.class);
+    privbte static final Log LOG = LogFactory.getLog(WeedLicense.class);
     
-    private static final long serialVersionUID = 1230497157539025753L;
+    privbte static final long serialVersionUID = 1230497157539025753L;
     
-    /** The site to contact for verification (non-final for testing). */
-    private static       String URI = "http://www.weedshare.com/license/verify_usage_rights.aspx";
-    /** The versionid attribute. */
-    private static final String VID = "versionid";
-    /** The contentid attribute. */
-    private static final String CID = "contentid";
+    /** The site to contbct for verification (non-final for testing). */
+    privbte static       String URI = "http://www.weedshare.com/license/verify_usage_rights.aspx";
+    /** The versionid bttribute. */
+    privbte static final String VID = "versionid";
+    /** The contentid bttribute. */
+    privbte static final String CID = "contentid";
     
-    /** The artist. */
-    private String artist;
+    /** The brtist. */
+    privbte String artist;
     
     /** The title. */
-    private String title;
+    privbte String title;
     
     /** The price. */
-    private String price;
+    privbte String price;
     
-    /** Whether or not the license is valid. */
-    private boolean valid;
+    /** Whether or not the license is vblid. */
+    privbte boolean valid;
     
     /** Builds the URI from the given cid & vid. */
-    pualic stbtic final URI buildURI(String cid, String vid) {
+    public stbtic final URI buildURI(String cid, String vid) {
         try {
-            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid).toCharArray());
-        } catch(URIException bad) {
+            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid).toChbrArray());
+        } cbtch(URIException bad) {
             return null;
         }  
     }
     
     /**
-     * Constructs a new WeedLicense.
+     * Constructs b new WeedLicense.
      */
     WeedLicense(URI uri) {
         super(uri);
     }
     
     /** There is no explicit license text for Weed files. */
-    pualic String getLicense() { return null; }
+    public String getLicense() { return null; }
     
     /**
      * Retrieves the license deed for the given URN.
      */
-    pualic URL getLicenseDeed(URN urn) {
+    public URL getLicenseDeed(URN urn) {
         try {
-            return new URL("http://weedshare.com/company/policies/summary_usage_rights.aspx");
-        } catch(MalformedURLException murl) {
+            return new URL("http://weedshbre.com/company/policies/summary_usage_rights.aspx");
+        } cbtch(MalformedURLException murl) {
             return null;
         }
     }
         
     /**
-     * Determines if the Weed License is valid.
+     * Determines if the Weed License is vblid.
      */
-    pualic boolebn isValid(URN urn) {
-        return valid;
+    public boolebn isValid(URN urn) {
+        return vblid;
     }
     
     /**
-     * Returns a new WeedLicense with a different URI.
+     * Returns b new WeedLicense with a different URI.
      */
-    pualic License copy(String license, URI licenseURI) {
+    public License copy(String license, URI licenseURI) {
         WeedLicense newL = null;
         try {
             newL = (WeedLicense)clone();
-            newL.licenseLocation = licenseURI;
-        } catch(CloneNotSupportedException error) {
+            newL.licenseLocbtion = licenseURI;
+        } cbtch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }
         return newL;
     }
     
     /**
-     * Builds a description of this license based on what is permitted,
-     * proaibited, bnd required.
+     * Builds b description of this license based on what is permitted,
+     * probibited, bnd required.
      */
-    pualic String getLicenseDescription(URN urn) {
-        if(artist == null && title == null && price == null) {
-            return "Details unknown.";
+    public String getLicenseDescription(URN urn) {
+        if(brtist == null && title == null && price == null) {
+            return "Detbils unknown.";
         } else {
-            StringBuffer sa = new StringBuffer();
-            if(artist != null)
-                sa.bppend("Artist: " + artist + "\n");
+            StringBuffer sb = new StringBuffer();
+            if(brtist != null)
+                sb.bppend("Artist: " + artist + "\n");
             if(title != null)
-                sa.bppend("Title: " + title + "\n");
+                sb.bppend("Title: " + title + "\n");
             if(price != null)
-                sa.bppend("Price: " + price);
-            return sa.toString();
+                sb.bppend("Price: " + price);
+            return sb.toString();
         }
     }
 
-    /** Clears prior validation information. */    
-    protected void clear() {
-        valid = false;
-        artist = null;
+    /** Clebrs prior validation information. */    
+    protected void clebr() {
+        vblid = false;
+        brtist = null;
         title = null;
         price = null;
     }
 
     /**
-     * Overriden to retrieve the aody of dbta from a special URI.
+     * Overriden to retrieve the body of dbta from a special URI.
      */
     protected String getBody(String url) {
-        return super.getBody(url + "&data=1");
+        return super.getBody(url + "&dbta=1");
     }
         
     /**
-     * Parses the XML sent back from the Weed server.
+     * Pbrses the XML sent back from the Weed server.
      * The XML should look like:
-     *  <WeedVerifyData>
-	 *       <Status>Verified</Status>
-	 *       <Artist>Roger Joseph Manning, Jr.</Artist>
-	 *       <Title>What You Don't Know About the Girl</Title>
+     *  <WeedVerifyDbta>
+	 *       <Stbtus>Verified</Status>
+	 *       <Artist>Roger Joseph Mbnning, Jr.</Artist>
+	 *       <Title>Whbt You Don't Know About the Girl</Title>
 	 *       <Price>1.2500</Price>
-     *  </WeedVerifyData>
+     *  </WeedVerifyDbta>
      */
-    protected void parseDocumentNode(Node doc, boolean liveData) {
-        if(!doc.getNodeName().equals("WeedVerifyData"))
+    protected void pbrseDocumentNode(Node doc, boolean liveData) {
+        if(!doc.getNodeNbme().equals("WeedVerifyData"))
             return;
         
         NodeList children = doc.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
-            String name = child.getNodeName();
-            String value = LimeXMLUtils.getTextContent(child);
-            if(name == null || value == null)
+            String nbme = child.getNodeName();
+            String vblue = LimeXMLUtils.getTextContent(child);
+            if(nbme == null || value == null)
                 continue;
 
-            value = value.trim();
-            if(value.equals(""))
+            vblue = value.trim();
+            if(vblue.equals(""))
                 continue;
                 
-            if(name.equals("Status"))
-                valid = value.equals("Verified");
-            else if(name.equals("Artist"))
-                artist = value;
-            else if(name.equals("Title"))
-                title = value;
-            else if(name.equals("Price"))
-                price = value;
+            if(nbme.equals("Status"))
+                vblid = value.equals("Verified");
+            else if(nbme.equals("Artist"))
+                brtist = value;
+            else if(nbme.equals("Title"))
+                title = vblue;
+            else if(nbme.equals("Price"))
+                price = vblue;
         }
     }
 }

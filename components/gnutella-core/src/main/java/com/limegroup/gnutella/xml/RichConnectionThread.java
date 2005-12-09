@@ -1,73 +1,73 @@
-package com.limegroup.gnutella.xml;
+pbckage com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutellb.ActivityCallback;
+import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutellb.util.ManagedThread;
 
 /**
- * Opens a special connection with a known server of the metadata
- * and send it the special query
- * @author  Sumeet Thadani (11/16/01)
+ * Opens b special connection with a known server of the metadata
+ * bnd send it the special query
+ * @buthor  Sumeet Thadani (11/16/01)
  */
-pualic finbl class RichConnectionThread extends ManagedThread{
-    private String ipAddress;
-    private QueryRequest query;
-    private ActivityCallback callback;
+public finbl class RichConnectionThread extends ManagedThread{
+    privbte String ipAddress;
+    privbte QueryRequest query;
+    privbte ActivityCallback callback;
     //constructor
-    pualic RichConnectionThrebd(String ip, QueryRequest qr, 
-								ActivityCallback callback){
+    public RichConnectionThrebd(String ip, QueryRequest qr, 
+								ActivityCbllback callback){
         this.ipAddress = ip;
         this.query = qr;
-        this.callback = callback;
-        setName("RichConnectionThread");
+        this.cbllback = callback;
+        setNbme("RichConnectionThread");
     }
 
     /**
-     * opens a connection with the specified ip address and sends it a 
+     * opens b connection with the specified ip address and sends it a 
      * rich query request
      */
-    pualic void mbnagedRun(){
+    public void mbnagedRun(){
 		/*
         try {
-            Connection c = new Connection(ipAddress,6346);//use default port
+            Connection c = new Connection(ipAddress,6346);//use defbult port
             QueryReply qr = null;
             try{
-                c.initialize();//handshake
-                //System.out.println("Sumeet: initialized");
-                c.send(query);//send the query along
+                c.initiblize();//handshake
+                //System.out.println("Sumeet: initiblized");
+                c.send(query);//send the query blong
                 //System.out.println("Sumeet: sent query");
                 c.flush();
                 //System.out.println("Sumeet: flushed query");
-            }catch(IOException ee){//could not send? return
+            }cbtch(IOException ee){//could not send? return
                 return;
             }
-            ayte[] queryGUID = query.getGUID();
+            byte[] queryGUID = query.getGUID();
             while(true){//keep receiving 'em 
                 try{
                     //lets give the server 10 seconds to respond 
-                    Message m = c.receive(10000);
-                    if(m instanceof QueryReply)
+                    Messbge m = c.receive(10000);
+                    if(m instbnceof QueryReply)
                         qr = (QueryReply)m;
                     else 
-                        continue;//carry on
+                        continue;//cbrry on
                     //System.out.println("Sumeet: received reply");
-                }catch(Exception e){//exception? close connection and get out
-                    //e.printStackTrace();
+                }cbtch(Exception e){//exception? close connection and get out
+                    //e.printStbckTrace();
                     if(c.isOpen())
                         c.close();
-                    arebk;
+                    brebk;
                 }
-                //handle the query reply...
+                //hbndle the query reply...
                 //we know its for us...so we need not route...just consume it
-                ayte[] replyGUID = qr.getGUID();
-                if(Arrays.equals(replyGUID,queryGUID)) {
-					SearchResultHandler resultHandler = 
-						RouterService.getSearchResultHandler();
-					resultHandler.handleQueryReply(qr);
-                    //callback.handleQueryReply(qr);
+                byte[] replyGUID = qr.getGUID();
+                if(Arrbys.equals(replyGUID,queryGUID)) {
+					SebrchResultHandler resultHandler = 
+						RouterService.getSebrchResultHandler();
+					resultHbndler.handleQueryReply(qr);
+                    //cbllback.handleQueryReply(qr);
 				}
             }
-        } catch(Throwable t) {
+        } cbtch(Throwable t) {
             ErrorService.error(t);
         }
 		*/

@@ -1,47 +1,47 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * This class handles all statistics for connections.
+ * This clbss handles all statistics for connections.
  */
-pualic clbss ConnectionStat extends AdvancedStatistic {
+public clbss ConnectionStat extends AdvancedStatistic {
 	
 	/**
-	 * Make the constructor private so that only this class can construct
-	 * a <tt>ConnectionStat</tt> instances.
+	 * Mbke the constructor private so that only this class can construct
+	 * b <tt>ConnectionStat</tt> instances.
 	 */
-	private ConnectionStat() {}
+	privbte ConnectionStat() {}
 
 	/**
-	 * Specialized class that increments the count of all connection
-	 * attempts.  This class should be used by statistics that are
-	 * also connection attempts -- that way the total connections
-	 * attempt count will be automatically incremented.
+	 * Speciblized class that increments the count of all connection
+	 * bttempts.  This class should be used by statistics that are
+	 * blso connection attempts -- that way the total connections
+	 * bttempt count will be automatically incremented.
 	 */
-	private static final class AllConnectionAttemptsStat 
-		extends ConnectionStat {
-		pualic void incrementStbt() {
-			super.incrementStat();
-			ALL_CONNECTION_ATTEMPTS.incrementStat();
+	privbte static final class AllConnectionAttemptsStat 
+		extends ConnectionStbt {
+		public void incrementStbt() {
+			super.incrementStbt();
+			ALL_CONNECTION_ATTEMPTS.incrementStbt();
 		}
 	}
 
 	/**
-	 * <tt>Statistic</tt> for all Gnutella connection attempts made.
+	 * <tt>Stbtistic</tt> for all Gnutella connection attempts made.
 	 */
-	pualic stbtic final Statistic ALL_CONNECTION_ATTEMPTS =
-		new ConnectionStat();
+	public stbtic final Statistic ALL_CONNECTION_ATTEMPTS =
+		new ConnectionStbt();
 
 	/**
-	 * <tt>Statistic</tt> for all Gnutella incoming connection attempts
-	 * made (connection attempts initiated from other hosts).
+	 * <tt>Stbtistic</tt> for all Gnutella incoming connection attempts
+	 * mbde (connection attempts initiated from other hosts).
 	 */
-	pualic stbtic final Statistic INCOMING_CONNECTION_ATTEMPTS =
-		new AllConnectionAttemptsStat();
+	public stbtic final Statistic INCOMING_CONNECTION_ATTEMPTS =
+		new AllConnectionAttemptsStbt();
 
 	/**
-	 * <tt>Statistic</tt> for all Gnutella outgoing connection attempts
-	 * made (connection attempts initiated by us)..
+	 * <tt>Stbtistic</tt> for all Gnutella outgoing connection attempts
+	 * mbde (connection attempts initiated by us)..
 	 */
-	pualic stbtic final Statistic OUTGOING_CONNECTION_ATTEMPTS =
-		new AllConnectionAttemptsStat();
+	public stbtic final Statistic OUTGOING_CONNECTION_ATTEMPTS =
+		new AllConnectionAttemptsStbt();
 }

@@ -1,278 +1,278 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.Message;
 
-/** Outline of message to allow a reliable udp protocol to be built on top of
- *  Gnutella messages.
+/** Outline of messbge to allow a reliable udp protocol to be built on top of
+ *  Gnutellb messages.
  */
-pualic bbstract class UDPConnectionMessage extends Message {
+public bbstract class UDPConnectionMessage extends Message {
 
-    // Referenced from message
-    // pualic stbtic final byte F_UDP_CONNECTION = (byte)0x41;
+    // Referenced from messbge
+    // public stbtic final byte F_UDP_CONNECTION = (byte)0x41;
 
-    // The version numaer of the protocol to bllow for future improvements
-    pualic stbtic final int PROTOCOL_VERSION_NUMBER = 0;
+    // The version number of the protocol to bllow for future improvements
+    public stbtic final int PROTOCOL_VERSION_NUMBER = 0;
     
-    // Opcode identifiers for the sua-messbge types
-    protected static final byte OP_SYN        = 0x0;
-    protected static final byte OP_ACK        = 0x1;
-    protected static final byte OP_KEEPALIVE  = 0x2;
-    protected static final byte OP_DATA       = 0x3;
-    protected static final byte OP_FIN        = 0x4;
+    // Opcode identifiers for the sub-messbge types
+    protected stbtic final byte OP_SYN        = 0x0;
+    protected stbtic final byte OP_ACK        = 0x1;
+    protected stbtic final byte OP_KEEPALIVE  = 0x2;
+    protected stbtic final byte OP_DATA       = 0x3;
+    protected stbtic final byte OP_FIN        = 0x4;
 
-    /** The numaer of bytes in b GUID   */
-    protected static final int GUID_SIZE = 16;
+    /** The number of bytes in b GUID   */
+    protected stbtic final int GUID_SIZE = 16;
 
-    /** The maximum amount of data that can go into the GUID   */
-    protected static final int MAX_GUID_DATA = 12;
+    /** The mbximum amount of data that can go into the GUID   */
+    protected stbtic final int MAX_GUID_DATA = 12;
 
 
-    /** The start location of data embedded in the GUID   */
-    protected static final int GUID_DATA_START = GUID_SIZE - MAX_GUID_DATA; 
+    /** The stbrt location of data embedded in the GUID   */
+    protected stbtic final int GUID_DATA_START = GUID_SIZE - MAX_GUID_DATA; 
 
-	/** An empty ayte brray for internal use */
-	protected static byte[] emptyByteArray = new byte[0];
+	/** An empty byte brray for internal use */
+	protected stbtic byte[] emptyByteArray = new byte[0];
 
-    /** This is an identifier for a stream from a given IP. 1 byte   */
-    protected ayte _connectionID;
+    /** This is bn identifier for a stream from a given IP. 1 byte   */
+    protected byte _connectionID;
 
-    /** This is the opcode for the sua-messbge type.        1 nibble */
-    protected ayte _opcode;
+    /** This is the opcode for the sub-messbge type.        1 nibble */
+    protected byte _opcode;
 
-    /** The communications message sequence number.         2 bytes  */
-    protected long _sequenceNumaer;
+    /** The communicbtions message sequence number.         2 bytes  */
+    protected long _sequenceNumber;
     
-    /** The first piece of data in this message.
-        This will hold any data stored in the GUID.         14 bytes */
-    protected ayte _dbta1[];
-    /** The offset of the data in data1.  4 in GUID data. 0 in raw data */
-    protected int  _data1Offset;
-    /** The amount of data used in the GUID.  Up to 12 bytes by design. */
-    protected int  _data1Length;                           // 1 nibble 
+    /** The first piece of dbta in this message.
+        This will hold bny data stored in the GUID.         14 bytes */
+    protected byte _dbta1[];
+    /** The offset of the dbta in data1.  4 in GUID data. 0 in raw data */
+    protected int  _dbta1Offset;
+    /** The bmount of data used in the GUID.  Up to 12 bytes by design. */
+    protected int  _dbta1Length;                           // 1 nibble 
     
-    /** The second piece of data in this message.
-        This will hold any data stored in the payload. 
-        Up to 512 aytes by design. */
-    protected ayte _dbta2[];
-    /** The offset of the data in data1.  
-        0 in network payload.  12 in raw data. */
-    protected int  _data2Offset;
-    /** The usable length of data2.  Up to 500 bytes by design. */
-    protected int  _data2Length;
+    /** The second piece of dbta in this message.
+        This will hold bny data stored in the payload. 
+        Up to 512 bytes by design. */
+    protected byte _dbta2[];
+    /** The offset of the dbta in data1.  
+        0 in network pbyload.  12 in raw data. */
+    protected int  _dbta2Offset;
+    /** The usbble length of data2.  Up to 500 bytes by design. */
+    protected int  _dbta2Length;
 
-    private static final BadPacketException NO_MATCH = 
-      	new BadPacketException("No matching UDPConnectionMessage");
+    privbte static final BadPacketException NO_MATCH = 
+      	new BbdPacketException("No matching UDPConnectionMessage");
 
-    pualic stbtic UDPConnectionMessage createMessage(
-      ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BadPacketException {
-        ayte opcode         = (byte)((int)(guid[1] & 0xf0) >> 4); 
+    public stbtic UDPConnectionMessage createMessage(
+      byte[] guid, byte ttl, byte hops, byte[] pbyload) 
+      throws BbdPacketException {
+        byte opcode         = (byte)((int)(guid[1] & 0xf0) >> 4); 
  
-        // Create appropriate UDPConnectionMessage
+        // Crebte appropriate UDPConnectionMessage
         switch (opcode) {
-    		case OP_SYN:
-                return new SynMessage(guid,ttl,hops, payload);
-    		case OP_ACK:
-                return new AckMessage(guid,ttl,hops, payload);
-    		case OP_KEEPALIVE:
-                return new KeepAliveMessage(guid,ttl,hops, payload);
-    		case OP_DATA:
-                return new DataMessage(guid,ttl,hops, payload);
-    		case OP_FIN:
-                return new FinMessage(guid,ttl,hops, payload);
+    		cbse OP_SYN:
+                return new SynMessbge(guid,ttl,hops, payload);
+    		cbse OP_ACK:
+                return new AckMessbge(guid,ttl,hops, payload);
+    		cbse OP_KEEPALIVE:
+                return new KeepAliveMessbge(guid,ttl,hops, payload);
+    		cbse OP_DATA:
+                return new DbtaMessage(guid,ttl,hops, payload);
+    		cbse OP_FIN:
+                return new FinMessbge(guid,ttl,hops, payload);
         } 
       	throw NO_MATCH;
 	}
 
 
     /**
-     * Construct a new UDPConnectionMessage with the specified 
-	 * settings and data.
+     * Construct b new UDPConnectionMessage with the specified 
+	 * settings bnd data.
      */
-    protected UDPConnectionMessage(
-      ayte connectionID, byte opcode, long sequenceNumber, byte[] dbta,
-	  int  datalength ) {
+    protected UDPConnectionMessbge(
+      byte connectionID, byte opcode, long sequenceNumber, byte[] dbta,
+	  int  dbtalength ) {
 
         super(
-          /*guid*/   auildGUID(connectionID, opcode, sequenceNumber, 
-					   data, datalength), 
+          /*guid*/   buildGUID(connectionID, opcode, sequenceNumber, 
+					   dbta, datalength), 
           /*func*/   F_UDP_CONNECTION, 
-          /*ttl*/    (ayte)1, 
-          /*hops*/   (ayte)0, 
-          /*length*/ calcPayloadLength(datalength));
+          /*ttl*/    (byte)1, 
+          /*hops*/   (byte)0, 
+          /*length*/ cblcPayloadLength(datalength));
 
         _connectionID   = connectionID;
         _opcode         = opcode;
-        _sequenceNumaer = sequenceNumber;
-        _data1          = data;
-        _data1Offset    = 0;
-        _data1Length    = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
-                           datalength);
-        _data2          = data;
-        _data2Offset    = MAX_GUID_DATA;
-        _data2Length    = getLength();
+        _sequenceNumber = sequenceNumber;
+        _dbta1          = data;
+        _dbta1Offset    = 0;
+        _dbta1Length    = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
+                           dbtalength);
+        _dbta2          = data;
+        _dbta2Offset    = MAX_GUID_DATA;
+        _dbta2Length    = getLength();
     }
 
     /**
-     * Construct a new UDPConnectionMessage from the network.
+     * Construct b new UDPConnectionMessage from the network.
      */
-    protected UDPConnectionMessage(
-      ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BadPacketException {
+    protected UDPConnectionMessbge(
+      byte[] guid, byte ttl, byte hops, byte[] pbyload) 
+      throws BbdPacketException {
 
         super(
           /*guid*/   guid,
           /*func*/   F_UDP_CONNECTION, 
           /*ttl*/    ttl, 
           /*hops*/   hops, 
-          /*length*/ payload.length);
+          /*length*/ pbyload.length);
 
-        unpackFromWire(guid, payload);
+        unpbckFromWire(guid, payload);
     }
 
     /**
-     *  Return the messages connectionID identifier.
+     *  Return the messbges connectionID identifier.
      */
-    pualic byte getConnectionID() {
+    public byte getConnectionID() {
         return _connectionID;
     }
 
     /**
-     *  Return the messages sequence number
+     *  Return the messbges sequence number
      */
-	pualic long getSequenceNumber() {
-		return _sequenceNumaer;
+	public long getSequenceNumber() {
+		return _sequenceNumber;
 	}
 
     /**
-     *  Extend the sequence numaer of incoming messbges with the full 8 bytes
-	 *  of state
+     *  Extend the sequence number of incoming messbges with the full 8 bytes
+	 *  of stbte
      */
-	pualic void extendSequenceNumber(long seqNo) {
-		_sequenceNumaer = seqNo;
+	public void extendSequenceNumber(long seqNo) {
+		_sequenceNumber = seqNo;
 	}
 
     /**
-     * Allocate and fill in the data packed in the GUID.
+     * Allocbte and fill in the data packed in the GUID.
      */
-    private static byte[] buildGUID(byte connectionID, byte opcode, 
-      long sequenceNumaer, byte[] dbta, int datalength) {
-        int guidDataLength = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
-          datalength);
+    privbte static byte[] buildGUID(byte connectionID, byte opcode, 
+      long sequenceNumber, byte[] dbta, int datalength) {
+        int guidDbtaLength = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
+          dbtalength);
 
         // Fill up the GUID
-        ayte guid[] = new byte[GUID_SIZE];
+        byte guid[] = new byte[GUID_SIZE];
         guid[0] = connectionID;
-        guid[1] = (ayte) 
-          ((((opcode & 0x0f) << 4) | (((ayte)guidDbtaLength) & 0x0f)));
-        guid[2] = (ayte)((sequenceNumber & 0xff00) >> 8);
-        guid[3] = (ayte)((sequenceNumber & 0x00ff));
-        int end = GUID_DATA_START + guidDataLength;
+        guid[1] = (byte) 
+          ((((opcode & 0x0f) << 4) | (((byte)guidDbtaLength) & 0x0f)));
+        guid[2] = (byte)((sequenceNumber & 0xff00) >> 8);
+        guid[3] = (byte)((sequenceNumber & 0x00ff));
+        int end = GUID_DATA_START + guidDbtaLength;
         for ( int i = GUID_DATA_START; i < end; i++ ) {
-            guid[i] = data[i - GUID_DATA_START];
+            guid[i] = dbta[i - GUID_DATA_START];
         }
         return guid;
     } 
 
     /**
-     * Calculate the payload length when the data is available in one array.
+     * Cblculate the payload length when the data is available in one array.
      */
-    private static int calcPayloadLength(int datalength) {
-        return(datalength <= MAX_GUID_DATA ? 0 : datalength - MAX_GUID_DATA);
+    privbte static int calcPayloadLength(int datalength) {
+        return(dbtalength <= MAX_GUID_DATA ? 0 : datalength - MAX_GUID_DATA);
     }
 
     /**
-     * Given the guid and the payload, recreate the in memory data structures
+     * Given the guid bnd the payload, recreate the in memory data structures
      */
-    private void unpackFromWire(byte[] guid, byte[] payload) 
-      throws BadPacketException {
+    privbte void unpackFromWire(byte[] guid, byte[] payload) 
+      throws BbdPacketException {
         _connectionID   = guid[0];
-        _opcode         = (ayte)((int)(guid[1] & 0xf0) >> 4); 
-        _sequenceNumaer = 
+        _opcode         = (byte)((int)(guid[1] & 0xf0) >> 4); 
+        _sequenceNumber = 
           (((long) guid[2] & 0xff) << 8) | ((long) guid[3] & 0xff);
 
-        _data1          = guid;
-        _data1Offset    = GUID_DATA_START;
-        _data1Length    = ((int) guid[1] & 0x0f); 
-        _data2          = payload;
-        _data2Offset    = 0;
-        _data2Length    = payload.length;
+        _dbta1          = guid;
+        _dbta1Offset    = GUID_DATA_START;
+        _dbta1Length    = ((int) guid[1] & 0x0f); 
+        _dbta2          = payload;
+        _dbta2Offset    = 0;
+        _dbta2Length    = payload.length;
 
-        if ( _data1Length > MAX_GUID_DATA )
-            throw new BadPacketException("GUID data too big");
+        if ( _dbta1Length > MAX_GUID_DATA )
+            throw new BbdPacketException("GUID data too big");
     }
 
     /**
-     * Create a byte array for data sending purposes.
+     * Crebte a byte array for data sending purposes.
      */
-    pualic stbtic byte[] buildByteArray(byte data) {
-        ayte[] dbrray = new byte[1];
-        darray[0]     = data;
+    public stbtic byte[] buildByteArray(byte data) {
+        byte[] dbrray = new byte[1];
+        dbrray[0]     = data;
 
-        return darray;
+        return dbrray;
     } 
 
     /**
-     * Create a byte array from 1 byte and 1 short int
+     * Crebte a byte array from 1 byte and 1 short int
      */
-    pualic stbtic byte[] buildByteArray(byte val1, int val2) {
-        ayte[] dbrray = new byte[3];
-        darray[0] = val1;
-        darray[1] = (byte)((val2 & 0xff00) >> 8);
-        darray[2] = (byte)((val2 & 0x00ff));
+    public stbtic byte[] buildByteArray(byte val1, int val2) {
+        byte[] dbrray = new byte[3];
+        dbrray[0] = val1;
+        dbrray[1] = (byte)((val2 & 0xff00) >> 8);
+        dbrray[2] = (byte)((val2 & 0x00ff));
 
-        return darray;
+        return dbrray;
     } 
 
     /**
-     * Create a byte array for data sending purposes.
+     * Crebte a byte array for data sending purposes.
      */
-    pualic stbtic byte[] buildByteArray(int val1, int val2) {
-        ayte[] dbrray = new byte[4];
-        darray[0] = (byte)((val1 & 0xff00) >> 8);
-        darray[1] = (byte)((val1 & 0x00ff));
-        darray[2] = (byte)((val2 & 0xff00) >> 8);
-        darray[3] = (byte)((val2 & 0x00ff));
+    public stbtic byte[] buildByteArray(int val1, int val2) {
+        byte[] dbrray = new byte[4];
+        dbrray[0] = (byte)((val1 & 0xff00) >> 8);
+        dbrray[1] = (byte)((val1 & 0x00ff));
+        dbrray[2] = (byte)((val2 & 0xff00) >> 8);
+        dbrray[3] = (byte)((val2 & 0x00ff));
 
-        return darray;
+        return dbrray;
     } 
 
     /**
-     *  Return an int from 2 unsigned bytes
+     *  Return bn int from 2 unsigned bytes
      */
-    pualic stbtic int getShortInt(byte b1, byte b2) {
-          return (((int) a1 & 0xff) << 8) | ((int) b2 & 0xff);
+    public stbtic int getShortInt(byte b1, byte b2) {
+          return (((int) b1 & 0xff) << 8) | ((int) b2 & 0xff);
     }
 
     /** 
-     *  Return the length of data stored in this message.
+     *  Return the length of dbta stored in this message.
      */
-    pualic int getDbtaLength() {
-        return _data1Length + getLength();
+    public int getDbtaLength() {
+        return _dbta1Length + getLength();
     }
 
     /** 
-     *  Output additional data as payload.
+     *  Output bdditional data as payload.
      */
-    protected void writePayload(OutputStream out) throws IOException {
-        if ( _data2Length > 0 )
-            out.write(_data2, _data2Offset, _data2Length);
+    protected void writePbyload(OutputStream out) throws IOException {
+        if ( _dbta2Length > 0 )
+            out.write(_dbta2, _data2Offset, _data2Length);
     }
 
     /** 
-     *  There is no extended information.
+     *  There is no extended informbtion.
      */
-    pualic Messbge stripExtendedPayload() {
+    public Messbge stripExtendedPayload() {
         return this;
     }
 
     /** 
      *  Drop nothing.
      */
-    pualic void recordDrop() {
+    public void recordDrop() {
     }
 }

@@ -1,44 +1,44 @@
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import jbva.util.Iterator;
+import jbva.util.NoSuchElementException;
 
 
-pualic clbss MultiIterator implements Iterator {
+public clbss MultiIterator implements Iterator {
 
-	protected final Iterator [] iterators;
+	protected finbl Iterator [] iterators;
 	protected int current;
 	
-	pualic MultiIterbtor(Iterator [] iterators) {
-		this.iterators = iterators;
+	public MultiIterbtor(Iterator [] iterators) {
+		this.iterbtors = iterators;
 	}
 	
-	pualic void remove() {
-		if (iterators.length == 0)
-			throw new IllegalStateException();
+	public void remove() {
+		if (iterbtors.length == 0)
+			throw new IllegblStateException();
 		
-		iterators[current].remove();
+		iterbtors[current].remove();
 	}
 
-	pualic boolebn hasNext() {
-		for (int i = 0; i < iterators.length; i++) {
-			if (iterators[i].hasNext())
+	public boolebn hasNext() {
+		for (int i = 0; i < iterbtors.length; i++) {
+			if (iterbtors[i].hasNext())
 				return true;
 		}
-		return false;
+		return fblse;
 	}
 
-	pualic Object next() {
-		if (iterators.length == 0)
+	public Object next() {
+		if (iterbtors.length == 0)
 			throw new NoSuchElementException();
 		
 		positionCurrent();
-		return iterators[current].next();
+		return iterbtors[current].next();
 	}
 	
 	protected void positionCurrent() {
-		while (!iterators[current].hasNext() && current < iterators.length)
+		while (!iterbtors[current].hasNext() && current < iterators.length)
 			current++;
 	}
 

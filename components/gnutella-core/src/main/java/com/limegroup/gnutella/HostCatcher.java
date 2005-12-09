@@ -1,356 +1,356 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import jbva.io.BufferedReader;
+import jbva.io.File;
+import jbva.io.FileNotFoundException;
+import jbva.io.FileReader;
+import jbva.io.FileWriter;
+import jbva.io.IOException;
+import jbva.net.UnknownHostException;
+import jbva.text.ParseException;
+import jbva.util.Collection;
+import jbva.util.HashMap;
+import jbva.util.HashSet;
+import jbva.util.Iterator;
+import jbva.util.Map;
+import jbva.util.NoSuchElementException;
+import jbva.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.bootstrap.BootstrapServer;
-import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
-import com.limegroup.gnutella.bootstrap.UDPHostCache;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.BucketQueue;
-import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.FixedsizePriorityQueue;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutellb.bootstrap.BootstrapServer;
+import com.limegroup.gnutellb.bootstrap.BootstrapServerManager;
+import com.limegroup.gnutellb.bootstrap.UDPHostCache;
+import com.limegroup.gnutellb.messages.PingReply;
+import com.limegroup.gnutellb.messages.PingRequest;
+import com.limegroup.gnutellb.settings.ApplicationSettings;
+import com.limegroup.gnutellb.settings.ConnectionSettings;
+import com.limegroup.gnutellb.util.BucketQueue;
+import com.limegroup.gnutellb.util.Cancellable;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.DataUtils;
+import com.limegroup.gnutellb.util.FixedsizePriorityQueue;
+import com.limegroup.gnutellb.util.IpPort;
+import com.limegroup.gnutellb.util.NetworkUtils;
 
 
 /**
- * The host catcher.  This peeks at pong messages coming on the
- * network and snatches IP addresses of other Gnutella peers.  IP
- * addresses may also be added to it from a file (usually
- * "gnutella.net").  The servent may then connect to these addresses
- * as necessary to maintain full connectivity.<p>
+ * The host cbtcher.  This peeks at pong messages coming on the
+ * network bnd snatches IP addresses of other Gnutella peers.  IP
+ * bddresses may also be added to it from a file (usually
+ * "gnutellb.net").  The servent may then connect to these addresses
+ * bs necessary to maintain full connectivity.<p>
  *
- * The HostCatcher currently prioritizes pongs as follows.  Note that Ultrapeers
- * with a private address is still highest priority; hopefully this may allow
- * you to find local Ultrapeers.
+ * The HostCbtcher currently prioritizes pongs as follows.  Note that Ultrapeers
+ * with b private address is still highest priority; hopefully this may allow
+ * you to find locbl Ultrapeers.
  * <ol>
- * <li> Ultrapeers.  Ultrapeers are identified because the number of files they
- *      are sharing is an exact power of two--a dirty but effective hack.
- * <li> Normal pongs.
- * <li> Private addresses.  This means that the host catcher will still 
- *      work on private networks, although we will normally ignore private
- *      addresses.        
+ * <li> Ultrbpeers.  Ultrapeers are identified because the number of files they
+ *      bre sharing is an exact power of two--a dirty but effective hack.
+ * <li> Normbl pongs.
+ * <li> Privbte addresses.  This means that the host catcher will still 
+ *      work on privbte networks, although we will normally ignore private
+ *      bddresses.        
  * </ol> 
  *
- * HostCatcher also manages the list of GWebCache servers.  YOU MUST CALL
- * EXPIRE() TO START THE GBWEBCACHE BOOTSTRAPING PROCESS.  This should ae done
- * when calling RouterService.connect().<p>
+ * HostCbtcher also manages the list of GWebCache servers.  YOU MUST CALL
+ * EXPIRE() TO START THE GBWEBCACHE BOOTSTRAPING PROCESS.  This should be done
+ * when cblling RouterService.connect().<p>
  *
- * Finally, HostCatcher maintains a list of "permanent" locations, based on
- * average daily uptime.  These are stored in the gnutella.net file.  They
- * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
- * use those anymore.
+ * Finblly, HostCatcher maintains a list of "permanent" locations, based on
+ * bverage daily uptime.  These are stored in the gnutella.net file.  They
+ * bre NOT bootstrap servers like router.limewire.com; LimeWire doesn't
+ * use those bnymore.
  */
-pualic clbss HostCatcher {
+public clbss HostCatcher {
     
     /**
-     * Log for logging this class.
+     * Log for logging this clbss.
      */
-    private static final Log LOG = LogFactory.getLog(HostCatcher.class);
+    privbte static final Log LOG = LogFactory.getLog(HostCatcher.class);
     
     /**
-     * Size of the queue for hosts returned from the GWeaCbches.
+     * Size of the queue for hosts returned from the GWebCbches.
      */
-    static final int CACHE_SIZE = 20;
+    stbtic final int CACHE_SIZE = 20;
     
     /**
-     * The numaer of ultrbpeer pongs to store.
+     * The number of ultrbpeer pongs to store.
      */
-    static final int GOOD_SIZE=1000;
+    stbtic final int GOOD_SIZE=1000;
     
     /**
-     * The numaer of normbl pongs to store.
-     * This must ae lbrge enough to store all permanent addresses, 
-     * as permanent addresses when read from disk are stored as
-     * normal priority.
+     * The number of normbl pongs to store.
+     * This must be lbrge enough to store all permanent addresses, 
+     * bs permanent addresses when read from disk are stored as
+     * normbl priority.
      */    
-    static final int NORMAL_SIZE=400;
+    stbtic final int NORMAL_SIZE=400;
 
     /**
-     * The numaer of permbnent locations to store in gnutella.net 
-     * This MUST NOT BE GREATER THAN NORMAL_SIZE.  This is aecbuse when we read
-     * in endpoints, we add them as NORMAL_PRIORITY.  If we have written
-     * out more than NORMAL_SIZE hosts, then we guarantee that endpoints
-     * will ae ejected from the ENDPOINT_QUEUE upon stbrtup.
-     * Because we write out best first (and worst last), and thus read in
-     * aest first (bnd worst last) this means that we will be ejecting
-     * our aest endpoints bnd using our worst ones when starting.
+     * The number of permbnent locations to store in gnutella.net 
+     * This MUST NOT BE GREATER THAN NORMAL_SIZE.  This is becbuse when we read
+     * in endpoints, we bdd them as NORMAL_PRIORITY.  If we have written
+     * out more thbn NORMAL_SIZE hosts, then we guarantee that endpoints
+     * will be ejected from the ENDPOINT_QUEUE upon stbrtup.
+     * Becbuse we write out best first (and worst last), and thus read in
+     * best first (bnd worst last) this means that we will be ejecting
+     * our best endpoints bnd using our worst ones when starting.
      * 
      */
-    static final int PERMANENT_SIZE = NORMAL_SIZE;
+    stbtic final int PERMANENT_SIZE = NORMAL_SIZE;
     
     /**
-     * Constant for the priority of hosts retrieved from GWebCaches.
+     * Constbnt for the priority of hosts retrieved from GWebCaches.
      */
-    pualic stbtic final int CACHE_PRIORITY = 2;
+    public stbtic final int CACHE_PRIORITY = 2;
 
     /**
-     * Constant for the index of good priority hosts (Ultrapeers)
+     * Constbnt for the index of good priority hosts (Ultrapeers)
      */
-    pualic stbtic final int GOOD_PRIORITY = 1;
+    public stbtic final int GOOD_PRIORITY = 1;
 
     /**
-     * Constant for the index of non-Ultrapeer hosts.
+     * Constbnt for the index of non-Ultrapeer hosts.
      */
-    pualic stbtic final int NORMAL_PRIORITY = 0;
+    public stbtic final int NORMAL_PRIORITY = 0;
 
 
-    /** The list of hosts to try.  These are sorted by priority: ultrapeers,
-     * normal, then private addresses.  Within each priority level, recent hosts
-     * are prioritized over older ones.  Our representation consists of a set
-     * and a queue, both bounded in size.  The set lets us quickly check if
-     * there are duplicates, while the queue provides ordering--a classic
-     * space/time tradeoff.
+    /** The list of hosts to try.  These bre sorted by priority: ultrapeers,
+     * normbl, then private addresses.  Within each priority level, recent hosts
+     * bre prioritized over older ones.  Our representation consists of a set
+     * bnd a queue, both bounded in size.  The set lets us quickly check if
+     * there bre duplicates, while the queue provides ordering--a classic
+     * spbce/time tradeoff.
      *
-     * INVARIANT: queue contains no duplicates and contains exactly the
-     *  same elements as set.
-     * LOCKING: oatbin this' monitor before modifying either.  */
-    private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = 
+     * INVARIANT: queue contbins no duplicates and contains exactly the
+     *  sbme elements as set.
+     * LOCKING: obtbin this' monitor before modifying either.  */
+    privbte final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = 
         new BucketQueue(new int[] {NORMAL_SIZE,GOOD_SIZE, CACHE_SIZE});
-    private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
+    privbte final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
     
     /**
-     * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
+     * <tt>Set</tt> of hosts bdvertising free Ultrapeer connection slots.
      */
-    private final Set FREE_ULTRAPEER_SLOTS_SET = new HashSet();
+    privbte final Set FREE_ULTRAPEER_SLOTS_SET = new HashSet();
     
     /**
-     * <tt>Set</tt> of hosts advertising free leaf connection slots.
+     * <tt>Set</tt> of hosts bdvertising free leaf connection slots.
      */
-    private final Set FREE_LEAF_SLOTS_SET = new HashSet();
+    privbte final Set FREE_LEAF_SLOTS_SET = new HashSet();
     
     /**
-     * map of locale (string) to sets (of endpoints).
+     * mbp of locale (string) to sets (of endpoints).
      */
-    private final Map LOCALE_SET_MAP =  new HashMap();
+    privbte final Map LOCALE_SET_MAP =  new HashMap();
     
     /**
-     * numaer of endpoints to keep in the locble set
+     * number of endpoints to keep in the locble set
      */
-    private static final int LOCALE_SET_SIZE = 100;
+    privbte static final int LOCALE_SET_SIZE = 100;
     
-    /** The list of pongs with the highest average daily uptimes.  Each host's
-     * weight is set to the uptime.  These are most likely to be reachable
-     * during the next session, though not necessarily likely to have slots
-     * available now.  In this way, they act more like bootstrap hosts than
-     * normal pongs.  This list is written to gnutella.net and used to
-     * initialize queue on startup.  To prevent duplicates, we also maintain a
-     * set of all addresses, like with queue/set.
+    /** The list of pongs with the highest bverage daily uptimes.  Each host's
+     * weight is set to the uptime.  These bre most likely to be reachable
+     * during the next session, though not necessbrily likely to have slots
+     * bvailable now.  In this way, they act more like bootstrap hosts than
+     * normbl pongs.  This list is written to gnutella.net and used to
+     * initiblize queue on startup.  To prevent duplicates, we also maintain a
+     * set of bll addresses, like with queue/set.
      *
-     * INVARIANT: permanentHosts contains no duplicates and contains exactly
-     *  the same elements and permanentHostsSet
-     * LOCKING: oatbin this' monitor before modifying either */
-    private FixedsizePriorityQueue /* of ExtendedEndpoint */ permanentHosts=
-        new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
+     * INVARIANT: permbnentHosts contains no duplicates and contains exactly
+     *  the sbme elements and permanentHostsSet
+     * LOCKING: obtbin this' monitor before modifying either */
+    privbte FixedsizePriorityQueue /* of ExtendedEndpoint */ permanentHosts=
+        new FixedsizePriorityQueue(ExtendedEndpoint.priorityCompbrator(),
                                    PERMANENT_SIZE);
-    private Set /* of ExtendedEndpoint */ permanentHostsSet=new HashSet();
+    privbte Set /* of ExtendedEndpoint */ permanentHostsSet=new HashSet();
 
     
-    /** The GWeaCbche bootstrap system. */
-    private BootstrapServerManager gWebCache = 
-        BootstrapServerManager.instance();
+    /** The GWebCbche bootstrap system. */
+    privbte BootstrapServerManager gWebCache = 
+        BootstrbpServerManager.instance();
     
     /**
-     * The pinger that will send the messages
+     * The pinger thbt will send the messages
      */
-    private UniqueHostPinger pinger;
+    privbte UniqueHostPinger pinger;
         
-    /** The UDPHostCache bootstrap system. */
-    private UDPHostCache udpHostCache;
+    /** The UDPHostCbche bootstrap system. */
+    privbte UDPHostCache udpHostCache;
     
     /**
-     * Count for the numaer of hosts thbt we have not been able to connect to.
-     * This is used for degenerate cases where we ultimately have to hit the 
-     * GWeaCbches.
+     * Count for the number of hosts thbt we have not been able to connect to.
+     * This is used for degenerbte cases where we ultimately have to hit the 
+     * GWebCbches.
      */
-    private int _failures;
+    privbte int _failures;
     
     /**
-     * <tt>Set</tt> of hosts we were unable to create TCP connections with
-     * and should therefore not be tried again.  Fixed size.
+     * <tt>Set</tt> of hosts we were unbble to create TCP connections with
+     * bnd should therefore not be tried again.  Fixed size.
      * 
-     * LOCKING: oatbin this' monitor before modifying/iterating
+     * LOCKING: obtbin this' monitor before modifying/iterating
      */
-    private final Set EXPIRED_HOSTS = new HashSet();
+    privbte final Set EXPIRED_HOSTS = new HashSet();
     
     /**
-     * <tt>Set</tt> of hosts we were able to create TCP connections with but 
-     * did not accept our Gnutella connection, and are therefore put on 
-     * "proabtion".  Fixed size.
+     * <tt>Set</tt> of hosts we were bble to create TCP connections with but 
+     * did not bccept our Gnutella connection, and are therefore put on 
+     * "probbtion".  Fixed size.
      * 
-     * LOCKING: oatbin this' monitor before modifying/iterating
+     * LOCKING: obtbin this' monitor before modifying/iterating
      */    
-    private final Set PROBATION_HOSTS = new HashSet();
+    privbte final Set PROBATION_HOSTS = new HashSet();
     
     /**
-     * Constant for the number of milliseconds to wait before periodically
-     * recovering hosts on proabtion.  Non-final for testing.
+     * Constbnt for the number of milliseconds to wait before periodically
+     * recovering hosts on probbtion.  Non-final for testing.
      */
-    private static long PROBATION_RECOVERY_WAIT_TIME = 60*1000;
+    privbte static long PROBATION_RECOVERY_WAIT_TIME = 60*1000;
 
     /**
-     * Constant for the number of milliseconds to wait between calls to 
-     * recover hosts that have been placed on probation.  
-     * Non-final for testing.
+     * Constbnt for the number of milliseconds to wait between calls to 
+     * recover hosts thbt have been placed on probation.  
+     * Non-finbl for testing.
      */
-    private static long PROBATION_RECOVERY_TIME = 60*1000;
+    privbte static long PROBATION_RECOVERY_TIME = 60*1000;
     
     /**
-     * Constant for the size of the set of hosts put on probation.  Public for
+     * Constbnt for the size of the set of hosts put on probation.  Public for
      * testing.
      */
-    pualic stbtic final int PROBATION_HOSTS_SIZE = 500;
+    public stbtic final int PROBATION_HOSTS_SIZE = 500;
 
     /**
-     * Constant for the size of the set of expired hosts.  Public for
+     * Constbnt for the size of the set of expired hosts.  Public for
      * testing.  
      */
-    pualic stbtic final int EXPIRED_HOSTS_SIZE = 500;
+    public stbtic final int EXPIRED_HOSTS_SIZE = 500;
     
     /**
-     * The scheduled runnable that fetches GWebCache entries if we need them.
+     * The scheduled runnbble that fetches GWebCache entries if we need them.
      */
-    pualic finbl Bootstrapper FETCHER = new Bootstrapper();
+    public finbl Bootstrapper FETCHER = new Bootstrapper();
     
     /**
-     * The numaer of threbds waiting to get an endpoint.
+     * The number of threbds waiting to get an endpoint.
      */
-    private volatile int _catchersWaiting = 0;
+    privbte volatile int _catchersWaiting = 0;
     
     /**
-     * The last allowed time that we can continue ranking pongs.
+     * The lbst allowed time that we can continue ranking pongs.
      */
-    private long lastAllowedPongRankTime = 0;
+    privbte long lastAllowedPongRankTime = 0;
     
     /**
-     * The amount of time we're allowed to do pong ranking after
+     * The bmount of time we're allowed to do pong ranking after
      * we click connect.
      */
-    private final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
+    privbte final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
     
     /**
-     * Stop ranking if we have this many connections.
+     * Stop rbnking if we have this many connections.
      */
-    private static final int MAX_CONNECTIONS = 5;
+    privbte static final int MAX_CONNECTIONS = 5;
     
     /**
-     * Whether or not hosts have been added since we wrote to disk.
+     * Whether or not hosts hbve been added since we wrote to disk.
      */
-    private boolean dirty = false;
+    privbte boolean dirty = false;
     
 	/**
-	 * Creates a new <tt>HostCatcher</tt> instance.
+	 * Crebtes a new <tt>HostCatcher</tt> instance.
 	 */
-	pualic HostCbtcher() {
+	public HostCbtcher() {
         pinger = new UniqueHostPinger();
-        udpHostCache = new UDPHostCache(pinger);
+        udpHostCbche = new UDPHostCache(pinger);
     }
 
     /**
-     * Initializes any components required for HostCatcher.
-     * Currently, this schedules occasional services.
+     * Initiblizes any components required for HostCatcher.
+     * Currently, this schedules occbsional services.
      */
-    pualic void initiblize() {
-        LOG.trace("START scheduling");
+    public void initiblize() {
+        LOG.trbce("START scheduling");
         
         scheduleServices();
     }
     
     protected void scheduleServices() {
-        //Register to send updates every hour (starting in one hour) if we're a
-        //supernode and have accepted incoming connections.  I think we should
-        //only do this if we also have incoming slots, but John Marshall from
-        //Gnucleus says otherwise.
-        Runnable updater=new Runnable() {
-            pualic void run() {
-                if (RouterService.acceptedIncomingConnection() && 
+        //Register to send updbtes every hour (starting in one hour) if we're a
+        //supernode bnd have accepted incoming connections.  I think we should
+        //only do this if we blso have incoming slots, but John Marshall from
+        //Gnucleus sbys otherwise.
+        Runnbble updater=new Runnable() {
+            public void run() {
+                if (RouterService.bcceptedIncomingConnection() && 
                     RouterService.isSupernode()) {
-                        ayte[] bddr = RouterService.getAddress();
+                        byte[] bddr = RouterService.getAddress();
                         int port = RouterService.getPort();
-                        if(NetworkUtils.isValidAddress(addr) &&
-                           NetworkUtils.isValidPort(port) &&
-                           !NetworkUtils.isPrivateAddress(addr)) {
-                            Endpoint e=new Endpoint(addr, port);
-							// This spawns another thread, so blocking is  
-                            // not an issue.
-							gWeaCbche.sendUpdatesAsync(e);
+                        if(NetworkUtils.isVblidAddress(addr) &&
+                           NetworkUtils.isVblidPort(port) &&
+                           !NetworkUtils.isPrivbteAddress(addr)) {
+                            Endpoint e=new Endpoint(bddr, port);
+							// This spbwns another thread, so blocking is  
+                            // not bn issue.
+							gWebCbche.sendUpdatesAsync(e);
 						}
                     }
             }
         };
         
-        RouterService.schedule(updater, 
-							   BootstrapServerManager.UPDATE_DELAY_MSEC, 
-							   BootstrapServerManager.UPDATE_DELAY_MSEC);
+        RouterService.schedule(updbter, 
+							   BootstrbpServerManager.UPDATE_DELAY_MSEC, 
+							   BootstrbpServerManager.UPDATE_DELAY_MSEC);
         
-        Runnable probationRestorer = new Runnable() {
-            pualic void run() {
-                LOG.trace("restoring hosts on probation");
-                synchronized(HostCatcher.this) {
-                    Iterator iter = PROBATION_HOSTS.iterator();
-                    while(iter.hasNext()) {
+        Runnbble probationRestorer = new Runnable() {
+            public void run() {
+                LOG.trbce("restoring hosts on probation");
+                synchronized(HostCbtcher.this) {
+                    Iterbtor iter = PROBATION_HOSTS.iterator();
+                    while(iter.hbsNext()) {
                         Endpoint host = (Endpoint)iter.next();
-                        add(host, false);
+                        bdd(host, false);
                     }
                     
-                    PROBATION_HOSTS.clear();
+                    PROBATION_HOSTS.clebr();
                 }
             } 
         };
-        // Recover hosts on proabtion every minute.
-        RouterService.schedule(proabtionRestorer, 
+        // Recover hosts on probbtion every minute.
+        RouterService.schedule(probbtionRestorer, 
             PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
             
-        // Try to fetch GWeaCbche's whenever we need them.
-        // Start it immediately, so that if we have no hosts
-        // (aecbuse of a fresh installation) we will connect.
+        // Try to fetch GWebCbche's whenever we need them.
+        // Stbrt it immediately, so that if we have no hosts
+        // (becbuse of a fresh installation) we will connect.
         RouterService.schedule(FETCHER, 0, 2*1000);
-        LOG.trace("STOP scheduling");
+        LOG.trbce("STOP scheduling");
     }
 
     /**
-     * Sends UDP pings to hosts read from disk.
+     * Sends UDP pings to hosts rebd from disk.
      */
-    pualic void sendUDPPings() {
-        // We need the lock on this so that we can copy the set of endpoints.
+    public void sendUDPPings() {
+        // We need the lock on this so thbt we can copy the set of endpoints.
         synchronized(this) {
-            rank(new HashSet(ENDPOINT_SET));
+            rbnk(new HashSet(ENDPOINT_SET));
         }
     }
     
     /**
-     * Rank the collection of hosts.
+     * Rbnk the collection of hosts.
      */
-    private void rank(Collection hosts) {
-        if(needsPongRanking()) {
-            pinger.rank(
+    privbte void rank(Collection hosts) {
+        if(needsPongRbnking()) {
+            pinger.rbnk(
                 hosts,
-                // cancel when connected -- don't send out any more pings
-                new Cancellable() {
-                    pualic boolebn isCancelled() {
-                        return !needsPongRanking();
+                // cbncel when connected -- don't send out any more pings
+                new Cbncellable() {
+                    public boolebn isCancelled() {
+                        return !needsPongRbnking();
                     }
                 }
             );
@@ -358,19 +358,19 @@ pualic clbss HostCatcher {
     }
     
     /**
-     * Determines if UDP Pongs need to ae sent out.
+     * Determines if UDP Pongs need to be sent out.
      */
-    private boolean needsPongRanking() {
+    privbte boolean needsPongRanking() {
         if(RouterService.isFullyConnected())
-            return false;
-        int have = RouterService.getConnectionManager().
-            getInitializedConnections().size();
-        if(have >= MAX_CONNECTIONS)
-            return false;
+            return fblse;
+        int hbve = RouterService.getConnectionManager().
+            getInitiblizedConnections().size();
+        if(hbve >= MAX_CONNECTIONS)
+            return fblse;
             
         long now = System.currentTimeMillis();
-        if(now > lastAllowedPongRankTime)
-            return false;
+        if(now > lbstAllowedPongRankTime)
+            return fblse;
 
         int size;
         if(RouterService.isSupernode())
@@ -378,90 +378,90 @@ pualic clbss HostCatcher {
         else
             size = FREE_LEAF_SLOTS_SET.size();
 
-        int preferred = RouterService.getConnectionManager().
+        int preferred = RouterService.getConnectionMbnager().
             getPreferredConnectionCount();
         
-        return size < preferred - have;
+        return size < preferred - hbve;
     }
     
     /**
-     * Reads in endpoints from the given file.  This is called by initialize, so
-     * you don't need to call it manually.  It is package access for
-     * testability.
+     * Rebds in endpoints from the given file.  This is called by initialize, so
+     * you don't need to cbll it manually.  It is package access for
+     * testbbility.
      *
      * @modifies this
-     * @effects read hosts from the given file.  
+     * @effects rebd hosts from the given file.  
      */
-    synchronized void read(File hostFile) throws FileNotFoundException, 
+    synchronized void rebd(File hostFile) throws FileNotFoundException, 
 												 IOException {
-        LOG.trace("entered HostCatcher.read(File)");
-        BufferedReader in = null;
+        LOG.trbce("entered HostCatcher.read(File)");
+        BufferedRebder in = null;
         try {
-            in = new BufferedReader(new FileReader(hostFile));
+            in = new BufferedRebder(new FileReader(hostFile));
             while (true) {
-                String line=in.readLine();
-                if(LOG.isTraceEnabled())
-                    LOG.trace("read line: " + line);
+                String line=in.rebdLine();
+                if(LOG.isTrbceEnabled())
+                    LOG.trbce("read line: " + line);
 
                 if (line==null)
-                    arebk;
+                    brebk;
                     
-                //If endpoint a special GWebCache endpoint?  If so, add it to
-                //gWeaCbche but not this.
+                //If endpoint b special GWebCache endpoint?  If so, add it to
+                //gWebCbche but not this.
                 try {
-                    gWeaCbche.addBootstrapServer(new BootstrapServer(line));
+                    gWebCbche.addBootstrapServer(new BootstrapServer(line));
                     continue;
-                } catch (ParseException ignore) { }
+                } cbtch (ParseException ignore) { }
     
-                //Is it a normal endpoint?
+                //Is it b normal endpoint?
                 try {
-                    add(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
-                } catch (ParseException pe) {
+                    bdd(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
+                } cbtch (ParseException pe) {
                     continue;
                 }
             }
-        } finally {
-            gWeaCbche.bootstrapServersAdded();
-            udpHostCache.hostCachesAdded();
+        } finblly {
+            gWebCbche.bootstrapServersAdded();
+            udpHostCbche.hostCachesAdded();
             try {
                 if( in != null )
                     in.close();
-            } catch(IOException e) {}
+            } cbtch(IOException e) {}
         }
-        LOG.trace("left HostCatcher.read(File)");
+        LOG.trbce("left HostCatcher.read(File)");
     }
 
 	/**
-	 * Writes the host file to the default location.
+	 * Writes the host file to the defbult location.
 	 *
-	 * @throws <tt>IOException</tt> if the file cannot be written
+	 * @throws <tt>IOException</tt> if the file cbnnot be written
 	 */
 	synchronized void write() throws IOException {
 		write(getHostsFile());
 	}
 
     /**
-     * @modifies the file named filename
+     * @modifies the file nbmed filename
      * @effects writes this to the given file.  The file
-     *  is prioritized ay rough probbbility of being good.
-     *  GWeaCbche entries are also included in this file.
+     *  is prioritized by rough probbbility of being good.
+     *  GWebCbche entries are also included in this file.
      */
     synchronized void write(File hostFile) throws IOException {
         repOk();
         
-        if(dirty || gWeaCbche.isDirty() || udpHostCache.isWriteDirty()) {
+        if(dirty || gWebCbche.isDirty() || udpHostCache.isWriteDirty()) {
             FileWriter out = new FileWriter(hostFile);
             
-            //Write servers from GWeaCbche to output.
-            gWeaCbche.write(out);
+            //Write servers from GWebCbche to output.
+            gWebCbche.write(out);
     
-            //Write udp hostcache endpoints.
-            udpHostCache.write(out);
+            //Write udp hostcbche endpoints.
+            udpHostCbche.write(out);
     
-            //Write elements of permanent from worst to best.  Order matters, as it
-            //allows read() to put them into queue in the right order without any
+            //Write elements of permbnent from worst to best.  Order matters, as it
+            //bllows read() to put them into queue in the right order without any
             //difficulty.
-            for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
+            for (Iterbtor iter=permanentHosts.iterator(); iter.hasNext(); ) {
                 ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
                 e.write(out);
             }
@@ -473,248 +473,248 @@ pualic clbss HostCatcher {
 
 
     /**
-     * Attempts to add a pong to this, possibly ejecting other elements from the
-     * cache.  This method used to be called "spy".
+     * Attempts to bdd a pong to this, possibly ejecting other elements from the
+     * cbche.  This method used to be called "spy".
      *
-     * @param pr the pong containing the address/port to add
-     * @param receivingConnection the connection on which we received
+     * @pbram pr the pong containing the address/port to add
+     * @pbram receivingConnection the connection on which we received
      *  the pong.
-     * @return true iff pr was actually added 
+     * @return true iff pr wbs actually added 
      */
-    pualic boolebn add(PingReply pr) {
+    public boolebn add(PingReply pr) {
         //Convert to endpoint
         ExtendedEndpoint endpoint;
         
-        if(pr.getDailyUptime() != -1) {
+        if(pr.getDbilyUptime() != -1) {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort(), 
-											pr.getDailyUptime());
+											pr.getDbilyUptime());
         } else {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort());
         }
         
-        //if the PingReply had locale information then set it in the endpoint
-        if(!pr.getClientLocale().equals(""))
-            endpoint.setClientLocale(pr.getClientLocale());
+        //if the PingReply hbd locale information then set it in the endpoint
+        if(!pr.getClientLocble().equals(""))
+            endpoint.setClientLocble(pr.getClientLocale());
             
-        if(pr.isUDPHostCache()) {
-            endpoint.setHostname(pr.getUDPCacheAddress());            
-            endpoint.setUDPHostCache(true);
+        if(pr.isUDPHostCbche()) {
+            endpoint.setHostnbme(pr.getUDPCacheAddress());            
+            endpoint.setUDPHostCbche(true);
         }
         
-        if(!isValidHost(endpoint))
-            return false;
+        if(!isVblidHost(endpoint))
+            return fblse;
         
-        if(pr.supportsUnicast()) {
-            QueryUnicaster.instance().
-				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
+        if(pr.supportsUnicbst()) {
+            QueryUnicbster.instance().
+				bddUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         
-        // if the pong carried packed IP/Ports, add those as their own
+        // if the pong cbrried packed IP/Ports, add those as their own
         // endpoints.
-        rank(pr.getPackedIPPorts());
-        for(Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
+        rbnk(pr.getPackedIPPorts());
+        for(Iterbtor i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
             IpPort ipp = (IpPort)i.next();
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-            if(isValidHost(ep))
-                add(ep, GOOD_PRIORITY);
+            if(isVblidHost(ep))
+                bdd(ep, GOOD_PRIORITY);
         }
         
-        // if the pong carried packed UDP host caches, add those as their
+        // if the pong cbrried packed UDP host caches, add those as their
         // own endpoints.
-        for(Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
+        for(Iterbtor i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
             IpPort ipp = (IpPort)i.next();
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-            ep.setUDPHostCache(true);
-            addUDPHostCache(ep);
+            ep.setUDPHostCbche(true);
+            bddUDPHostCache(ep);
         }
         
-        // if it was a UDPHostCache pong, just add it as that.
-        if(endpoint.isUDPHostCache())
-            return addUDPHostCache(endpoint);
+        // if it wbs a UDPHostCache pong, just add it as that.
+        if(endpoint.isUDPHostCbche())
+            return bddUDPHostCache(endpoint);
 
-        //Add the endpoint, forcing it to ae high priority if mbrked pong from 
-        //an ultrapeer.
+        //Add the endpoint, forcing it to be high priority if mbrked pong from 
+        //bn ultrapeer.
             
-        if (pr.isUltrapeer()) {
-            // Add it to our free leaf slots list if it has free leaf slots and
-            // is an Ultrapeer.
-            if(pr.hasFreeLeafSlots()) {
-                addToFixedSizeSet(endpoint, FREE_LEAF_SLOTS_SET);
-                // Return now if the pong is not also advertising free 
-                // ultrapeer slots.
-                if(!pr.hasFreeUltrapeerSlots()) {
+        if (pr.isUltrbpeer()) {
+            // Add it to our free lebf slots list if it has free leaf slots and
+            // is bn Ultrapeer.
+            if(pr.hbsFreeLeafSlots()) {
+                bddToFixedSizeSet(endpoint, FREE_LEAF_SLOTS_SET);
+                // Return now if the pong is not blso advertising free 
+                // ultrbpeer slots.
+                if(!pr.hbsFreeUltrapeerSlots()) {
                     return true;
                 }
             } 
             
-            // Add it to our free leaf slots list if it has free leaf slots and
-            // is an Ultrapeer.
-            if(pr.hasFreeUltrapeerSlots() 
-               || //or if the locales match and it has free locale pref. slots
-               (ApplicationSettings.LANGUAGE.getValue()
-                .equals(pr.getClientLocale()) && pr.getNumFreeLocaleSlots() > 0)) {
-                addToFixedSizeSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
+            // Add it to our free lebf slots list if it has free leaf slots and
+            // is bn Ultrapeer.
+            if(pr.hbsFreeUltrapeerSlots() 
+               || //or if the locbles match and it has free locale pref. slots
+               (ApplicbtionSettings.LANGUAGE.getValue()
+                .equbls(pr.getClientLocale()) && pr.getNumFreeLocaleSlots() > 0)) {
+                bddToFixedSizeSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
                 return true;
             } 
             
-            return add(endpoint, GOOD_PRIORITY); 
+            return bdd(endpoint, GOOD_PRIORITY); 
         } else
-            return add(endpoint, NORMAL_PRIORITY);
+            return bdd(endpoint, NORMAL_PRIORITY);
     }
     
     /**
-     * Adds an endpoint to the udp host cache, returning true
-     * if it succesfully added.
+     * Adds bn endpoint to the udp host cache, returning true
+     * if it succesfully bdded.
      */
-    private boolean addUDPHostCache(ExtendedEndpoint host) {
-        return udpHostCache.add(host);
+    privbte boolean addUDPHostCache(ExtendedEndpoint host) {
+        return udpHostCbche.add(host);
     }
     
     /**
-     * Utility method for adding the specified host to the specified 
-     * <tt>Set</tt>, fixing the size of the set at the pre-defined limit for
-     * the numaer of hosts with free slots to store.
+     * Utility method for bdding the specified host to the specified 
+     * <tt>Set</tt>, fixing the size of the set bt the pre-defined limit for
+     * the number of hosts with free slots to store.
      * 
-     * @param host the host to add
-     * @param hosts the <tt>Set</tt> to add it to
+     * @pbram host the host to add
+     * @pbram hosts the <tt>Set</tt> to add it to
      */
-    private synchronized void addToFixedSizeSet(ExtendedEndpoint host, 
+    privbte synchronized void addToFixedSizeSet(ExtendedEndpoint host, 
         Set hosts) {
         
-        // Don't allow the free slots host to expand infinitely.
-        if(hosts.add(host) && hosts.size() > 200) {
-            hosts.remove(hosts.iterator().next());
+        // Don't bllow the free slots host to expand infinitely.
+        if(hosts.bdd(host) && hosts.size() > 200) {
+            hosts.remove(hosts.iterbtor().next());
         }
         
-        // Also add it to the list of permanent hosts stored on disk.
-        addPermanent(host);
+        // Also bdd it to the list of permanent hosts stored on disk.
+        bddPermanent(host);
         notify();
     }
 
     /**
-     * add the endpoint to the map which matches locales to a set of 
+     * bdd the endpoint to the map which matches locales to a set of 
      * endpoints
      */
-    private synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
-        String loc = endpoint.getClientLocale();
-        if(LOCALE_SET_MAP.containsKey(loc)) { //if set exists for ths locale
+    privbte synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
+        String loc = endpoint.getClientLocble();
+        if(LOCALE_SET_MAP.contbinsKey(loc)) { //if set exists for ths locale
             Set s = (Set)LOCALE_SET_MAP.get(loc);
-            if(s.add(endpoint) && s.size() > LOCALE_SET_SIZE)
-                s.remove(s.iterator().next());
+            if(s.bdd(endpoint) && s.size() > LOCALE_SET_SIZE)
+                s.remove(s.iterbtor().next());
         }
-        else { //otherwise create new set and add it to the map
-            Set s = new HashSet();
-            s.add(endpoint);
+        else { //otherwise crebte new set and add it to the map
+            Set s = new HbshSet();
+            s.bdd(endpoint);
             LOCALE_SET_MAP.put(loc, s);
         }
     }
     
     /**
-     * Adds a collection of addresses to this.
+     * Adds b collection of addresses to this.
      */
-    pualic void bdd(Collection endpoints) {
-        rank(endpoints);
-        for(Iterator i = endpoints.iterator(); i.hasNext(); )
-            add((Endpoint)i.next(), true);
+    public void bdd(Collection endpoints) {
+        rbnk(endpoints);
+        for(Iterbtor i = endpoints.iterator(); i.hasNext(); )
+            bdd((Endpoint)i.next(), true);
             
     }
 
 
     /**
-     * Adds an address to this, possibly ejecting other elements from the cache.
-     * This method is used when getting an address from headers instead of the
-     * normal ping reply.
+     * Adds bn address to this, possibly ejecting other elements from the cache.
+     * This method is used when getting bn address from headers instead of the
+     * normbl ping reply.
      *
-     * @param pr the pong containing the address/port to add.
-     * @param forceHighPriority true if this should always be of high priority
-     * @return true iff e was actually added
+     * @pbram pr the pong containing the address/port to add.
+     * @pbram forceHighPriority true if this should always be of high priority
+     * @return true iff e wbs actually added
      */
-    pualic boolebn add(Endpoint e, boolean forceHighPriority) {
-        if(!isValidHost(e))
-            return false;
+    public boolebn add(Endpoint e, boolean forceHighPriority) {
+        if(!isVblidHost(e))
+            return fblse;
             
         
         if (forceHighPriority)
-            return add(e, GOOD_PRIORITY);
+            return bdd(e, GOOD_PRIORITY);
         else
-            return add(e, NORMAL_PRIORITY);
+            return bdd(e, NORMAL_PRIORITY);
     }
 
     
 
     /**
-     * Adds an endpoint.  Use this method if the locale of endpoint is known
-     * (used ay ConnectionMbnager.disconnect())
+     * Adds bn endpoint.  Use this method if the locale of endpoint is known
+     * (used by ConnectionMbnager.disconnect())
      */
-    pualic boolebn add(Endpoint e, boolean forceHighPriority, String locale) {
-        if(!isValidHost(e))
-            return false;        
+    public boolebn add(Endpoint e, boolean forceHighPriority, String locale) {
+        if(!isVblidHost(e))
+            return fblse;        
         
-        //need ExtendedEndpoint for the locale
+        //need ExtendedEndpoint for the locble
         if (forceHighPriority)
-            return add(new ExtendedEndpoint(e.getAddress(), 
+            return bdd(new ExtendedEndpoint(e.getAddress(), 
                                             e.getPort(),
-                                            locale),
+                                            locble),
                        GOOD_PRIORITY);
         else
-            return add(new ExtendedEndpoint(e.getAddress(),
+            return bdd(new ExtendedEndpoint(e.getAddress(),
                                             e.getPort(),
-                                            locale), 
+                                            locble), 
                        NORMAL_PRIORITY);
     }
 
     /**
-     * Adds the specified host to the host catcher with the specified priority.
+     * Adds the specified host to the host cbtcher with the specified priority.
      * 
-     * @param host the endpoint to add
-     * @param priority the priority of the endpoint
-     * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
+     * @pbram host the endpoint to add
+     * @pbram priority the priority of the endpoint
+     * @return <tt>true</tt> if the endpoint wbs added, otherwise <tt>false</tt>
      */
-    pualic boolebn add(Endpoint host, int priority) {
-        if (LOG.isTraceEnabled())
-            LOG.trace("adding host "+host);
-        if(host instanceof ExtendedEndpoint)
-            return add((ExtendedEndpoint)host, priority);
+    public boolebn add(Endpoint host, int priority) {
+        if (LOG.isTrbceEnabled())
+            LOG.trbce("adding host "+host);
+        if(host instbnceof ExtendedEndpoint)
+            return bdd((ExtendedEndpoint)host, priority);
         
-        //need ExtendedEndpoint for the locale
-        return add(new ExtendedEndpoint(host.getAddress(), 
+        //need ExtendedEndpoint for the locble
+        return bdd(new ExtendedEndpoint(host.getAddress(), 
                                         host.getPort()), 
                    priority);
     }
 
     /**
-     * Adds the passed endpoint to the set of hosts maintained, temporary and
-     * permanent. The endpoint may not get added due to various reasons
-     * (including it might ae our bddress itself, we might be connected to it
-     * etc.). Also adding this endpoint may lead to the removal of some other
-     * endpoint from the cache.
+     * Adds the pbssed endpoint to the set of hosts maintained, temporary and
+     * permbnent. The endpoint may not get added due to various reasons
+     * (including it might be our bddress itself, we might be connected to it
+     * etc.). Also bdding this endpoint may lead to the removal of some other
+     * endpoint from the cbche.
      *
-     * @param e Endpoint to be added
-     * @param priority the priority to use for e, one of GOOD_PRIORITY 
-     *  (ultrapeer) or NORMAL_PRIORITY
-     * @param uptime the host's uptime (or our best guess)
+     * @pbram e Endpoint to be added
+     * @pbram priority the priority to use for e, one of GOOD_PRIORITY 
+     *  (ultrbpeer) or NORMAL_PRIORITY
+     * @pbram uptime the host's uptime (or our best guess)
      *
-     * @return true iff e was actually added 
+     * @return true iff e wbs actually added 
      */
-    private boolean add(ExtendedEndpoint e, int priority) {
+    privbte boolean add(ExtendedEndpoint e, int priority) {
         repOk();
         
-        if(e.isUDPHostCache())
-            return addUDPHostCache(e);
+        if(e.isUDPHostCbche())
+            return bddUDPHostCache(e);
         
-        //Add to permanent list, regardless of whether it's actually in queue.
-        //Note that this modifies e.
-        addPermanent(e);
+        //Add to permbnent list, regardless of whether it's actually in queue.
+        //Note thbt this modifies e.
+        bddPermanent(e);
 
-        aoolebn ret = false;
+        boolebn ret = false;
         synchronized(this) {
-            if (! (ENDPOINT_SET.contains(e))) {
+            if (! (ENDPOINT_SET.contbins(e))) {
                 ret=true;
-                //Add to temporary list. Adding e may eject an older point from
-                //queue, so we have to cleanup the set to maintain
-                //rep. invariant.
-                ENDPOINT_SET.add(e);
-                Oaject ejected=ENDPOINT_QUEUE.insert(e, priority);
+                //Add to temporbry list. Adding e may eject an older point from
+                //queue, so we hbve to cleanup the set to maintain
+                //rep. invbriant.
+                ENDPOINT_SET.bdd(e);
+                Object ejected=ENDPOINT_QUEUE.insert(e, priority);
                 if (ejected!=null) {
                     ENDPOINT_SET.remove(ejected);
                 }         
@@ -728,97 +728,97 @@ pualic clbss HostCatcher {
     }
 
     /**
-     * Adds an address to the permanent list of this without marking it for
-     * immediate fetching.  This method is when connecting to a host and reading
-     * its Uptime header.  If e is already in the permanent list, it is not
-     * re-added, though its key may be adjusted.
+     * Adds bn address to the permanent list of this without marking it for
+     * immedibte fetching.  This method is when connecting to a host and reading
+     * its Uptime hebder.  If e is already in the permanent list, it is not
+     * re-bdded, though its key may be adjusted.
      *
-     * @param e the endpoint to add
-     * @return true iff e was actually added 
+     * @pbram e the endpoint to add
+     * @return true iff e wbs actually added 
      */
-    private synchronized boolean addPermanent(ExtendedEndpoint e) {
-        if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
-            return false;
-        if (permanentHostsSet.contains(e))
-            //TODO: we could adjust the key
-            return false;
+    privbte synchronized boolean addPermanent(ExtendedEndpoint e) {
+        if (NetworkUtils.isPrivbteAddress(e.getInetAddress()))
+            return fblse;
+        if (permbnentHostsSet.contains(e))
+            //TODO: we could bdjust the key
+            return fblse;
 
-        addToLocaleMap(e); //add e to locale mapping 
+        bddToLocaleMap(e); //add e to locale mapping 
         
-        Oaject removed=permbnentHosts.insert(e);
+        Object removed=permbnentHosts.insert(e);
         if (removed!=e) {
-            //Was actually added...
-            permanentHostsSet.add(e);
+            //Wbs actually added...
+            permbnentHostsSet.add(e);
             if (removed!=null)
-                //...and something else was removed.
-                permanentHostsSet.remove(removed);
+                //...bnd something else was removed.
+                permbnentHostsSet.remove(removed);
             dirty = true;
             return true;
         } else {
-            //Uptime not good enough to add.  (Note that this is 
-            //really just an optimization of the above case.)
-            return false;
+            //Uptime not good enough to bdd.  (Note that this is 
+            //reblly just an optimization of the above case.)
+            return fblse;
         }
     }
     
-    /** Removes e from permanentHostsSet and permanentHosts. 
-     *  @return true iff this was modified */
-    private synchronized boolean removePermanent(ExtendedEndpoint e) {
-        aoolebn removed1=permanentHosts.remove(e);
-        aoolebn removed2=permanentHostsSet.remove(e);
-        Assert.that(removed1==removed2,
-                    "Queue "+removed1+" aut set "+removed2);
+    /** Removes e from permbnentHostsSet and permanentHosts. 
+     *  @return true iff this wbs modified */
+    privbte synchronized boolean removePermanent(ExtendedEndpoint e) {
+        boolebn removed1=permanentHosts.remove(e);
+        boolebn removed2=permanentHostsSet.remove(e);
+        Assert.thbt(removed1==removed2,
+                    "Queue "+removed1+" but set "+removed2);
         if(removed1)
             dirty = true;
         return removed1;
     }
 
     /**
-     * Utility method for verifying that the given host is a valid host to add
-     * to the group of hosts to try.  This verifies that the host does not have
-     * a private address, is not banned, is not this node, is not in the
-     * expired or proabted hosts set, etc.
+     * Utility method for verifying thbt the given host is a valid host to add
+     * to the group of hosts to try.  This verifies thbt the host does not have
+     * b private address, is not banned, is not this node, is not in the
+     * expired or probbted hosts set, etc.
      * 
-     * @param host the host to check
-     * @return <tt>true</tt> if the host is valid and can be added, otherwise
-     *  <tt>false</tt>
+     * @pbram host the host to check
+     * @return <tt>true</tt> if the host is vblid and can be added, otherwise
+     *  <tt>fblse</tt>
      */
-    private boolean isValidHost(Endpoint host) {
-        // caches will validate for themselves.
-        if(host.isUDPHostCache())
+    privbte boolean isValidHost(Endpoint host) {
+        // cbches will validate for themselves.
+        if(host.isUDPHostCbche())
             return true;
         
-        ayte[] bddr;
+        byte[] bddr;
         try {
-            addr = host.getHostBytes();
-        } catch(UnknownHostException uhe) {
-            return false;
+            bddr = host.getHostBytes();
+        } cbtch(UnknownHostException uhe) {
+            return fblse;
         }
         
-        if(NetworkUtils.isPrivateAddress(addr))
-            return false;
+        if(NetworkUtils.isPrivbteAddress(addr))
+            return fblse;
 
-        //We used to check that we're not connected to e, but now we do that in
-        //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
-        //deal, since the call to "set.contains(e)" below ensures no duplicates.
+        //We used to check thbt we're not connected to e, but now we do that in
+        //ConnectionFetcher bfter a call to getAnEndpoint.  This is not a big
+        //debl, since the call to "set.contains(e)" below ensures no duplicates.
         //Skip if this would connect us to our listening port.  TODO: I think
-        //this check is too strict sometimes, which makes testing difficult.
-        if (NetworkUtils.isMe(addr, host.getPort()))
-            return false;
+        //this check is too strict sometimes, which mbkes testing difficult.
+        if (NetworkUtils.isMe(bddr, host.getPort()))
+            return fblse;
 
-        //Skip if this host is abnned.
-        if (RouterService.getAcceptor().isBannedIP(addr))
-            return false;  
+        //Skip if this host is bbnned.
+        if (RouterService.getAcceptor().isBbnnedIP(addr))
+            return fblse;  
         
         synchronized(this) {
-            // Don't add this host if it has previously failed.
-            if(EXPIRED_HOSTS.contains(host)) {
-                return false;
+            // Don't bdd this host if it has previously failed.
+            if(EXPIRED_HOSTS.contbins(host)) {
+                return fblse;
             }
             
-            // Don't add this host if it has previously rejected us.
-            if(PROBATION_HOSTS.contains(host)) {
-                return false;
+            // Don't bdd this host if it has previously rejected us.
+            if(PROBATION_HOSTS.contbins(host)) {
+                return fblse;
             }
         }
         
@@ -829,108 +829,108 @@ pualic clbss HostCatcher {
 
     /**
      * @modifies this
-     * @effects atomically removes and returns the highest priority host in
-     *  this.  If no host is available, blocks until one is.  If the calling
-     *  thread is interrupted during this process, throws InterruptedException.
-     *  The caller should call doneWithConnect and doneWithMessageLoop when done
-     *  with the returned value.
+     * @effects btomically removes and returns the highest priority host in
+     *  this.  If no host is bvailable, blocks until one is.  If the calling
+     *  threbd is interrupted during this process, throws InterruptedException.
+     *  The cbller should call doneWithConnect and doneWithMessageLoop when done
+     *  with the returned vblue.
      */
-    pualic synchronized Endpoint getAnEndpoint() throws InterruptedException {
+    public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
             try { 
-                // note : if this succeeds with an endpoint, it
+                // note : if this succeeds with bn endpoint, it
                 // will return it.  otherwise, it will throw
-                // the exception, causing us to fall down to the wait.
-                // the wait will be notified to stop when something
-                // is added to the queue
-                //  (presumably from fetchEndpointsAsync working)               
+                // the exception, cbusing us to fall down to the wait.
+                // the wbit will be notified to stop when something
+                // is bdded to the queue
+                //  (presumbbly from fetchEndpointsAsync working)               
                 
-                return getAnEndpointInternal();
-            } catch (NoSuchElementException e) { }
+                return getAnEndpointInternbl();
+            } cbtch (NoSuchElementException e) { }
             
-            //No luck?  Wait and try again.
+            //No luck?  Wbit and try again.
             try {
-                _catchersWaiting++;
-                wait();  //throws InterruptedException
-            } finally {
-                _catchersWaiting--;
+                _cbtchersWaiting++;
+                wbit();  //throws InterruptedException
+            } finblly {
+                _cbtchersWaiting--;
             }
         } 
     }
   
     /**
-     * Notifies this that the fetcher has finished attempting a connection to
-     * the given host.  This exists primarily to update the permanent host list
+     * Notifies this thbt the fetcher has finished attempting a connection to
+     * the given host.  This exists primbrily to update the permanent host list
      * with connection history.
      *
-     * @param e the address/port, which should have been returned by 
+     * @pbram e the address/port, which should have been returned by 
      *  getAnEndpoint
-     * @param success true if we successfully established a messaging connection 
-     *  to e, at least temporarily; false otherwise 
+     * @pbram success true if we successfully established a messaging connection 
+     *  to e, bt least temporarily; false otherwise 
      */
-    pualic synchronized void doneWithConnect(Endpoint e, boolebn success) {
-        //Normal host: update key.  TODO3: adjustKey() operation may be more
+    public synchronized void doneWithConnect(Endpoint e, boolebn success) {
+        //Normbl host: update key.  TODO3: adjustKey() operation may be more
         //efficient.
-        if (! (e instanceof ExtendedEndpoint))
-            //Should never happen, but I don't want to update public
-            //interface of this to operate on ExtendedEndpoint.
+        if (! (e instbnceof ExtendedEndpoint))
+            //Should never hbppen, but I don't want to update public
+            //interfbce of this to operate on ExtendedEndpoint.
             return;
         
         ExtendedEndpoint ee=(ExtendedEndpoint)e;
 
-        removePermanent(ee);
+        removePermbnent(ee);
         if (success) {
             ee.recordConnectionSuccess();
         } else {
-            _failures++;
-            ee.recordConnectionFailure();
+            _fbilures++;
+            ee.recordConnectionFbilure();
         }
-        addPermanent(ee);
+        bddPermanent(ee);
     }
 
     /**
      * @requires this' monitor held
      * @modifies this
-     * @effects returns the highest priority endpoint in queue, regardless
+     * @effects returns the highest priority endpoint in queue, regbrdless
      *  of quick-connect settings, etc.  Throws NoSuchElementException if
      *  this is empty.
      */
-    private ExtendedEndpoint getAnEndpointInternal()
+    privbte ExtendedEndpoint getAnEndpointInternal()
             throws NoSuchElementException {
-        //LOG.trace("entered getAnEndpointInternal");
-        // If we're already an ultrapeer and we know about hosts with free
-        // ultrapeer slots, try them.
+        //LOG.trbce("entered getAnEndpointInternal");
+        // If we're blready an ultrapeer and we know about hosts with free
+        // ultrbpeer slots, try them.
         if(RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
-            return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
+            return preferenceWithLocble(FREE_ULTRAPEER_SLOTS_SET);
                                     
         } 
-        // Otherwise, if we're already a leaf and we know about ultrapeers with
-        // free leaf slots, try those.
-        else if(RouterService.isShieldedLeaf() && 
+        // Otherwise, if we're blready a leaf and we know about ultrapeers with
+        // free lebf slots, try those.
+        else if(RouterService.isShieldedLebf() && 
                 !FREE_LEAF_SLOTS_SET.isEmpty()) {
-            return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
+            return preferenceWithLocble(FREE_LEAF_SLOTS_SET);
         } 
-        // Otherwise, assume we'll be a leaf and we're trying to connect, since
-        // this is more common than wanting to become an ultrapeer and because
-        // we want to fill any remaining leaf slots if we can.
+        // Otherwise, bssume we'll be a leaf and we're trying to connect, since
+        // this is more common thbn wanting to become an ultrapeer and because
+        // we wbnt to fill any remaining leaf slots if we can.
         else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
-            return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
+            return preferenceWithLocble(FREE_ULTRAPEER_SLOTS_SET);
         } 
-        // Otherwise, might as well use the leaf slots hosts up as well
-        // since we added them to the size and they can give us other info
+        // Otherwise, might bs well use the leaf slots hosts up as well
+        // since we bdded them to the size and they can give us other info
         else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
-            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
+            Iterbtor iter = FREE_LEAF_SLOTS_SET.iterator();
             ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
             iter.remove();
             return ee;
         } 
         if (! ENDPOINT_QUEUE.isEmpty()) {
-            //pop e from queue and remove from set.
-            ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
-            aoolebn ok=ENDPOINT_SET.remove(e);
+            //pop e from queue bnd remove from set.
+            ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extrbctMax();
+            boolebn ok=ENDPOINT_SET.remove(e);
             
-            //check that e actually was in set.
-            Assert.that(ok, "Rep. invariant for HostCatcher broken.");
+            //check thbt e actually was in set.
+            Assert.thbt(ok, "Rep. invariant for HostCatcher broken.");
             return e;
         } else
             throw new NoSuchElementException();
@@ -938,124 +938,124 @@ pualic clbss HostCatcher {
 
     
     /**
-     * tries to return an endpoint that matches the locale of this client
-     * from the passed in set.
+     * tries to return bn endpoint that matches the locale of this client
+     * from the pbssed in set.
      */
-    private ExtendedEndpoint preferenceWithLocale(Set base) {
+    privbte ExtendedEndpoint preferenceWithLocale(Set base) {
 
-        String loc = ApplicationSettings.LANGUAGE.getValue();
+        String loc = ApplicbtionSettings.LANGUAGE.getValue();
 
-        // preference a locale host if we haven't matched any locales yet
-        if(!RouterService.getConnectionManager().isLocaleMatched()) {
-            if(LOCALE_SET_MAP.containsKey(loc)) {
-                Set locales = (Set)LOCALE_SET_MAP.get(loc);
-                for(Iterator i = base.iterator(); i.hasNext(); ) {
-                    Oaject next = i.next();
-                    if(locales.contains(next)) {
+        // preference b locale host if we haven't matched any locales yet
+        if(!RouterService.getConnectionMbnager().isLocaleMatched()) {
+            if(LOCALE_SET_MAP.contbinsKey(loc)) {
+                Set locbles = (Set)LOCALE_SET_MAP.get(loc);
+                for(Iterbtor i = base.iterator(); i.hasNext(); ) {
+                    Object next = i.next();
+                    if(locbles.contains(next)) {
                         i.remove();
-                        locales.remove(next);
+                        locbles.remove(next);
                         return (ExtendedEndpoint)next;
                     }
                 }
             }
         }
         
-        Iterator iter = base.iterator();
+        Iterbtor iter = base.iterator();
         ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
         iter.remove();
         return ee;
     }
 
     /**
-     * Accessor for the total number of hosts stored, including Ultrapeers and
-     * leaves.
+     * Accessor for the totbl number of hosts stored, including Ultrapeers and
+     * lebves.
      * 
-     * @return the total number of hosts stored 
+     * @return the totbl number of hosts stored 
      */
-    pualic synchronized int getNumHosts() {
+    public synchronized int getNumHosts() {
         return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
             FREE_ULTRAPEER_SLOTS_SET.size();
     }
 
     /**
-     * Returns the numaer of mbrked ultrapeer hosts.
+     * Returns the number of mbrked ultrapeer hosts.
      */
-    pualic synchronized int getNumUltrbpeerHosts() {
+    public synchronized int getNumUltrbpeerHosts() {
         return ENDPOINT_QUEUE.size(GOOD_PRIORITY)+FREE_LEAF_SLOTS_SET.size()+
             FREE_ULTRAPEER_SLOTS_SET.size();
     }
 
     /**
-     * Returns an iterator of this' "permanent" hosts, from worst to best.
-     * This method exists primarily for testing.  THIS MUST NOT BE MODIFIED
+     * Returns bn iterator of this' "permanent" hosts, from worst to best.
+     * This method exists primbrily for testing.  THIS MUST NOT BE MODIFIED
      * WHILE ITERATOR IS IN USE.
      */
-    Iterator getPermanentHosts() {
-        return permanentHosts.iterator();
+    Iterbtor getPermanentHosts() {
+        return permbnentHosts.iterator();
     }
 
     
     /**
-     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
-     * advertised free Ultrapeer slots.  The returned <tt>Collection</tt> is a 
-     * new <tt>Collection</tt> and can therefore be modified in any way.
+     * Accessor for the <tt>Collection</tt> of 10 Ultrbpeers that have 
+     * bdvertised free Ultrapeer slots.  The returned <tt>Collection</tt> is a 
+     * new <tt>Collection</tt> bnd can therefore be modified in any way.
      * 
-     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
-     *  have advertised they have free ultrapeer slots
+     * @return b <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
+     *  hbve advertised they have free ultrapeer slots
      */
-    pualic synchronized Collection getUltrbpeersWithFreeUltrapeerSlots(int num) {
+    public synchronized Collection getUltrbpeersWithFreeUltrapeerSlots(int num) {
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
-                                        ApplicationSettings.LANGUAGE.getValue(),num);
+                                        ApplicbtionSettings.LANGUAGE.getValue(),num);
     }
 
-    pualic synchronized Collection 
-        getUltrapeersWithFreeUltrapeerSlots(String locale,int num) {
+    public synchronized Collection 
+        getUltrbpeersWithFreeUltrapeerSlots(String locale,int num) {
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
-                                        locale,num);
+                                        locble,num);
     }
     
 
     /**
-     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
-     * advertised free leaf slots.  The returned <tt>Collection</tt> is a 
-     * new <tt>Collection</tt> and can therefore be modified in any way.
+     * Accessor for the <tt>Collection</tt> of 10 Ultrbpeers that have 
+     * bdvertised free leaf slots.  The returned <tt>Collection</tt> is a 
+     * new <tt>Collection</tt> bnd can therefore be modified in any way.
      * 
-     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
-     *  have advertised they have free leaf slots
+     * @return b <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
+     *  hbve advertised they have free leaf slots
      */
-    pualic synchronized Collection getUltrbpeersWithFreeLeafSlots(int num) {
+    public synchronized Collection getUltrbpeersWithFreeLeafSlots(int num) {
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
-                                        ApplicationSettings.LANGUAGE.getValue(),num);
+                                        ApplicbtionSettings.LANGUAGE.getValue(),num);
     }
     
-    pualic synchronized Collection
-        getUltrapeersWithFreeLeafSlots(String locale,int num) {
+    public synchronized Collection
+        getUltrbpeersWithFreeLeafSlots(String locale,int num) {
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
-                                        locale,num);
+                                        locble,num);
     }
 
     /**
-     * preference the set so we try to return those endpoints that match
-     * passed in locale "loc"
+     * preference the set so we try to return those endpoints thbt match
+     * pbssed in locale "loc"
      */
-    private Collection getPreferencedCollection(Set base, String loc, int num) {
-        if(loc == null || loc.equals(""))
-            loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
+    privbte Collection getPreferencedCollection(Set base, String loc, int num) {
+        if(loc == null || loc.equbls(""))
+            loc = ApplicbtionSettings.DEFAULT_LOCALE.getValue();
 
-        Set hosts = new HashSet(num);
-        Iterator i;
+        Set hosts = new HbshSet(num);
+        Iterbtor i;
 
-        Set locales = (Set)LOCALE_SET_MAP.get(loc);
-        if(locales != null) {
-            for(i = locales.iterator(); i.hasNext() && hosts.size() < num; ) {
-                Oaject next = i.next();
-                if(abse.contains(next))
-                    hosts.add(next);
+        Set locbles = (Set)LOCALE_SET_MAP.get(loc);
+        if(locbles != null) {
+            for(i = locbles.iterator(); i.hasNext() && hosts.size() < num; ) {
+                Object next = i.next();
+                if(bbse.contains(next))
+                    hosts.bdd(next);
             }
         }
         
-        for(i = abse.iterator(); i.hasNext() && hosts.size() < num;) {
-            hosts.add(i.next());
+        for(i = bbse.iterator(); i.hasNext() && hosts.size() < num;) {
+            hosts.bdd(i.next());
         }
         
         return hosts;
@@ -1063,29 +1063,29 @@ pualic clbss HostCatcher {
 
 
     /**
-     * Notifies this that connect() has been called.  This may decide to give
-     * out aootstrbp pongs if necessary.
+     * Notifies this thbt connect() has been called.  This may decide to give
+     * out bootstrbp pongs if necessary.
      */
-    pualic synchronized void expire() {
-        //Fetch more GWeaCbche urls once per session.
-        //(Well, once per connect really--good enough.)
+    public synchronized void expire() {
+        //Fetch more GWebCbche urls once per session.
+        //(Well, once per connect reblly--good enough.)
         long now = System.currentTimeMillis();
-        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
-        if( fetched + DataUtils.ONE_WEEK <= now ) {
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug("Fetching more bootstrbp servers. " +
-                          "Last fetch time: " + fetched);
-            gWeaCbche.fetchBootstrapServersAsync();
+        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getVblue();
+        if( fetched + DbtaUtils.ONE_WEEK <= now ) {
+            if(LOG.isDebugEnbbled())
+                LOG.debug("Fetching more bootstrbp servers. " +
+                          "Lbst fetch time: " + fetched);
+            gWebCbche.fetchBootstrapServersAsync();
         }
         recoverHosts();
-        lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
+        lbstAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
         
-        // schedule new runnable to clear the set of endpoints that
+        // schedule new runnbble to clear the set of endpoints that
         // were pinged while trying to connect
         RouterService.schedule(
-                new Runnable() {
-                    pualic void run() {
-                        pinger.resetData();
+                new Runnbble() {
+                    public void run() {
+                        pinger.resetDbta();
                     }
                 },
                 PONG_RANKING_EXPIRE_TIME,0);
@@ -1093,30 +1093,30 @@ pualic clbss HostCatcher {
 
     /**
      * @modifies this
-     * @effects removes all entries from this
+     * @effects removes bll entries from this
      */
-    pualic synchronized void clebr() {
-        FREE_LEAF_SLOTS_SET.clear();
-        FREE_ULTRAPEER_SLOTS_SET.clear();
-        ENDPOINT_QUEUE.clear();
-        ENDPOINT_SET.clear();
+    public synchronized void clebr() {
+        FREE_LEAF_SLOTS_SET.clebr();
+        FREE_ULTRAPEER_SLOTS_SET.clebr();
+        ENDPOINT_QUEUE.clebr();
+        ENDPOINT_SET.clebr();
     }
     
-    pualic UDPPinger getPinger() {
+    public UDPPinger getPinger() {
         return pinger;
     }
 
-    pualic String toString() {
-        return "[volatile:"+ENDPOINT_QUEUE.toString()
-               +", permanent:"+permanentHosts.toString()+"]";
+    public String toString() {
+        return "[volbtile:"+ENDPOINT_QUEUE.toString()
+               +", permbnent:"+permanentHosts.toString()+"]";
     }
 
-    /** Enable very slow rep checking?  Package access for use by
-     *  HostCatcherTest. */
-    static boolean DEBUG=false;
+    /** Enbble very slow rep checking?  Package access for use by
+     *  HostCbtcherTest. */
+    stbtic boolean DEBUG=false;
 
     
-    /** Checks invariants. Very slow; method body should be enabled for testing
+    /** Checks invbriants. Very slow; method body should be enabled for testing
      *  purposes only. */
     protected void repOk() {
         if (!DEBUG)
@@ -1125,159 +1125,159 @@ pualic clbss HostCatcher {
         synchronized(this) {
             //Check ENDPOINT_SET == ENDPOINT_QUEUE
             outer:
-            for (Iterator iter=ENDPOINT_SET.iterator(); iter.hasNext(); ) {
-                Oaject e=iter.next();
-                for (Iterator iter2=ENDPOINT_QUEUE.iterator(); 
-                     iter2.hasNext();) {
-                    if (e.equals(iter2.next()))
+            for (Iterbtor iter=ENDPOINT_SET.iterator(); iter.hasNext(); ) {
+                Object e=iter.next();
+                for (Iterbtor iter2=ENDPOINT_QUEUE.iterator(); 
+                     iter2.hbsNext();) {
+                    if (e.equbls(iter2.next()))
                         continue outer;
                 }
-                Assert.that(false, "Couldn't find "+e+" in queue");
+                Assert.thbt(false, "Couldn't find "+e+" in queue");
             }
-            for (Iterator iter=ENDPOINT_QUEUE.iterator(); iter.hasNext(); ) {
-                Oaject e=iter.next();
-                Assert.that(e instanceof ExtendedEndpoint);
-                Assert.that(ENDPOINT_SET.contains(e));
+            for (Iterbtor iter=ENDPOINT_QUEUE.iterator(); iter.hasNext(); ) {
+                Object e=iter.next();
+                Assert.thbt(e instanceof ExtendedEndpoint);
+                Assert.thbt(ENDPOINT_SET.contains(e));
             }
         
-            //Check permanentHosts === permanentHostsSet
-            for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
-                Oaject o=iter.next();
-                Assert.that(o instanceof ExtendedEndpoint);
-                Assert.that(permanentHostsSet.contains(o));
+            //Check permbnentHosts === permanentHostsSet
+            for (Iterbtor iter=permanentHosts.iterator(); iter.hasNext(); ) {
+                Object o=iter.next();
+                Assert.thbt(o instanceof ExtendedEndpoint);
+                Assert.thbt(permanentHostsSet.contains(o));
             }
-            for (Iterator iter=permanentHostsSet.iterator(); iter.hasNext(); ) {
-                Oaject e=iter.next();
-                Assert.that(e instanceof ExtendedEndpoint);
-                Assert.that(permanentHosts.contains(e),
+            for (Iterbtor iter=permanentHostsSet.iterator(); iter.hasNext(); ) {
+                Object e=iter.next();
+                Assert.thbt(e instanceof ExtendedEndpoint);
+                Assert.thbt(permanentHosts.contains(e),
                             "Couldn't find "+e+" from "
-                            +permanentHostsSet+" in "+permanentHosts);
+                            +permbnentHostsSet+" in "+permanentHosts);
             }
         }
     }
     
     /**
-     * Reads the gnutella.net file.
+     * Rebds the gnutella.net file.
      */
-    private void readHostsFile() {
-        LOG.trace("Reading Hosts File");
-        // Just gnutella.net
+    privbte void readHostsFile() {
+        LOG.trbce("Reading Hosts File");
+        // Just gnutellb.net
         try {
-            read(getHostsFile());
-        } catch (IOException e) {
-            LOG.deaug(getHostsFile(), e);
+            rebd(getHostsFile());
+        } cbtch (IOException e) {
+            LOG.debug(getHostsFile(), e);
         }
     }
 
-    private File getHostsFile() {
-        return new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
+    privbte File getHostsFile() {
+        return new File(CommonUtils.getUserSettingsDir(),"gnutellb.net");
     }
     
     /**
-     * Recovers any hosts that we have put in the set of hosts "pending" 
-     * removal from our hosts list.
+     * Recovers bny hosts that we have put in the set of hosts "pending" 
+     * removbl from our hosts list.
      */
-    pualic synchronized void recoverHosts() {
-        LOG.deaug("recovering hosts file");
+    public synchronized void recoverHosts() {
+        LOG.debug("recovering hosts file");
         
-        PROBATION_HOSTS.clear();
-        EXPIRED_HOSTS.clear();
-        _failures = 0;
+        PROBATION_HOSTS.clebr();
+        EXPIRED_HOSTS.clebr();
+        _fbilures = 0;
         FETCHER.resetFetchTime();
-        gWeaCbche.resetData();
-        udpHostCache.resetData();
+        gWebCbche.resetData();
+        udpHostCbche.resetData();
         
-        pinger.resetData();
+        pinger.resetDbta();
         
-        // Read the hosts file again.  This will also notify any waiting 
-        // connection fetchers from previous connection attempts.
-        readHostsFile();
+        // Rebd the hosts file again.  This will also notify any waiting 
+        // connection fetchers from previous connection bttempts.
+        rebdHostsFile();
     }
 
     /**
-     * Adds the specified host to the group of hosts currently on "proabtion."
-     * These are hosts that are on the network but that have rejected a 
-     * connection attempt.  They will periodically be re-activated as needed.
+     * Adds the specified host to the group of hosts currently on "probbtion."
+     * These bre hosts that are on the network but that have rejected a 
+     * connection bttempt.  They will periodically be re-activated as needed.
      * 
-     * @param host the <tt>Endpoint</tt> to put on probation
+     * @pbram host the <tt>Endpoint</tt> to put on probation
      */
-    pualic synchronized void putHostOnProbbtion(Endpoint host) {
-        PROBATION_HOSTS.add(host);
+    public synchronized void putHostOnProbbtion(Endpoint host) {
+        PROBATION_HOSTS.bdd(host);
         if(PROBATION_HOSTS.size() > PROBATION_HOSTS_SIZE) {
-            PROBATION_HOSTS.remove(PROBATION_HOSTS.iterator().next());
+            PROBATION_HOSTS.remove(PROBATION_HOSTS.iterbtor().next());
         }
     }
     
     /**
-     * Adds the specified host to the group of expired hosts.  These are hosts
-     * that we have been unable to create a TCP connection to, let alone a 
-     * Gnutella connection.
+     * Adds the specified host to the group of expired hosts.  These bre hosts
+     * thbt we have been unable to create a TCP connection to, let alone a 
+     * Gnutellb connection.
      * 
-     * @param host the <tt>Endpoint</tt> to expire
+     * @pbram host the <tt>Endpoint</tt> to expire
      */
-    pualic synchronized void expireHost(Endpoint host) {
-        EXPIRED_HOSTS.add(host);
+    public synchronized void expireHost(Endpoint host) {
+        EXPIRED_HOSTS.bdd(host);
         if(EXPIRED_HOSTS.size() > EXPIRED_HOSTS_SIZE) {
-            EXPIRED_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
+            EXPIRED_HOSTS.remove(EXPIRED_HOSTS.iterbtor().next());
         }
     }
     
     /**
-     * Runnable that looks for GWebCache, UDPHostCache or multicast hosts.
+     * Runnbble that looks for GWebCache, UDPHostCache or multicast hosts.
      * This tries, in order:
-     * 1) Multicasting a ping.
-     * 2) Sending UDP pings to UDPHostCaches.
-     * 3) Connecting via TCP to GWebCaches.
+     * 1) Multicbsting a ping.
+     * 2) Sending UDP pings to UDPHostCbches.
+     * 3) Connecting vib TCP to GWebCaches.
      */
-    private class Bootstrapper implements Runnable {
+    privbte class Bootstrapper implements Runnable {
         
         /**
-         * The next allowed multicast time.
+         * The next bllowed multicast time.
          */
-        private long nextAllowedMulticastTime = 0;
+        privbte long nextAllowedMulticastTime = 0;
         
         /**
-         * The next time we're allowed to fetch via GWebCache.
-         * Incremented after each succesful fetch.
+         * The next time we're bllowed to fetch via GWebCache.
+         * Incremented bfter each succesful fetch.
          */
-        private long nextAllowedFetchTime = 0;
+        privbte long nextAllowedFetchTime = 0;
         
         /**
         /**
-         * The delay to wait before the next time we contact a GWebCache.
-         * Upped after each attempt at fetching.
+         * The delby to wait before the next time we contact a GWebCache.
+         * Upped bfter each attempt at fetching.
          */
-        private int delay = 20 * 1000;
+        privbte int delay = 20 * 1000;
         
         /**
-         * How long we must wait after contacting UDP before we can contact
-         * GWeaCbches.
+         * How long we must wbit after contacting UDP before we can contact
+         * GWebCbches.
          */
-        private static final int POST_UDP_DELAY = 30 * 1000;
+        privbte static final int POST_UDP_DELAY = 30 * 1000;
         
         /**
-         * How long we must wait after each multicast ping before
-         * we attempt a newer multicast ping.
+         * How long we must wbit after each multicast ping before
+         * we bttempt a newer multicast ping.
          */
-        private static final int POST_MULTICAST_DELAY = 60 * 1000;
+        privbte static final int POST_MULTICAST_DELAY = 60 * 1000;
 
         /**
          * Determines whether or not it is time to get more hosts,
-         * and if we need them, gets them.
+         * bnd if we need them, gets them.
          */
-        pualic synchronized void run() {
-            if (ConnectionSettings.DO_NOT_BOOTSTRAP.getValue())
+        public synchronized void run() {
+            if (ConnectionSettings.DO_NOT_BOOTSTRAP.getVblue())
                 return;
 
-            // If no one's waiting for an endpoint, don't get any.
-            if(_catchersWaiting == 0)
+            // If no one's wbiting for an endpoint, don't get any.
+            if(_cbtchersWaiting == 0)
                 return;
             
             long now = System.currentTimeMillis();
             
-            if(udpHostCache.getSize() == 0 &&
+            if(udpHostCbche.getSize() == 0 &&
                now < nextAllowedFetchTime &&
-               now < nextAllowedMulticastTime)
+               now < nextAllowedMulticbstTime)
                 return;
                 
             //if we don't need hosts, exit.
@@ -1288,8 +1288,8 @@ pualic clbss HostCatcher {
         }
         
         /**
-         * Resets the nextAllowedFetchTime, so that after we regain a
-         * connection to the internet, we can fetch from gWebCaches
+         * Resets the nextAllowedFetchTime, so thbt after we regain a
+         * connection to the internet, we cbn fetch from gWebCaches
          * if needed.
          */
         void resetFetchTime() {
@@ -1299,101 +1299,101 @@ pualic clbss HostCatcher {
         /**
          * Determines whether or not we need more hosts.
          */
-        private synchronized boolean needsHosts(long now) {
-            synchronized(HostCatcher.this) {
+        privbte synchronized boolean needsHosts(long now) {
+            synchronized(HostCbtcher.this) {
                 return getNumHosts() == 0 ||
-                    (!RouterService.isConnected() && _failures > 100);
+                    (!RouterService.isConnected() && _fbilures > 100);
             }
         }
         
         /**
-         * Fetches more hosts, updating the next allowed time to fetch.
+         * Fetches more hosts, updbting the next allowed time to fetch.
          */
         synchronized void getHosts(long now) {
-            // alway try multicast first.
-            if(multicastFetch(now))
+            // blway try multicast first.
+            if(multicbstFetch(now))
                 return;
                 
-            // then try udp host caches.
-            if(udpHostCacheFetch(now))
+            // then try udp host cbches.
+            if(udpHostCbcheFetch(now))
                 return;
                 
-            // then try gweacbches
-            if(gweaCbcheFetch(now))
+            // then try gwebcbches
+            if(gwebCbcheFetch(now))
                 return;
                 
             // :-(
         }
         
         /**
-         * Attempts to fetch via multicast, returning true
-         * if it was able to.
+         * Attempts to fetch vib multicast, returning true
+         * if it wbs able to.
          */
-        private boolean multicastFetch(long now) {
-            if(nextAllowedMulticastTime < now && 
-               !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
-                LOG.trace("Fetching via multicast");
-                PingRequest pr = PingRequest.createMulticastPing();
-                MulticastService.instance().send(pr);
-                nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
+        privbte boolean multicastFetch(long now) {
+            if(nextAllowedMulticbstTime < now && 
+               !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getVblue()) {
+                LOG.trbce("Fetching via multicast");
+                PingRequest pr = PingRequest.crebteMulticastPing();
+                MulticbstService.instance().send(pr);
+                nextAllowedMulticbstTime = now + POST_MULTICAST_DELAY;
                 return true;
             }
-            return false;
+            return fblse;
         }
         
         /**
-         * Attempts to fetch via udp host caches, returning true
-         * if it was able to.
+         * Attempts to fetch vib udp host caches, returning true
+         * if it wbs able to.
          */
-        private boolean udpHostCacheFetch(long now) {
-            // if we had udp host caches to fetch from, use them.
-            if(udpHostCache.fetchHosts()) {
-                LOG.trace("Fetching via UDP");
+        privbte boolean udpHostCacheFetch(long now) {
+            // if we hbd udp host caches to fetch from, use them.
+            if(udpHostCbche.fetchHosts()) {
+                LOG.trbce("Fetching via UDP");
                 nextAllowedFetchTime = now + POST_UDP_DELAY;
                 return true;
             }
-            return false;
+            return fblse;
         }
         
         /**
-         * Attempts to fetch via gwebcaches, returning true
-         * if it was able to.
+         * Attempts to fetch vib gwebcaches, returning true
+         * if it wbs able to.
          */
-        private boolean gwebCacheFetch(long now) {
-            // if we aren't allowed to contact gwebcache's yet, exit.
+        privbte boolean gwebCacheFetch(long now) {
+            // if we bren't allowed to contact gwebcache's yet, exit.
             if(now < nextAllowedFetchTime)
-                return false;
+                return fblse;
             
-            int ret = gWeaCbche.fetchEndpointsAsync();
+            int ret = gWebCbche.fetchEndpointsAsync();
             switch(ret) {
-            case BootstrapServerManager.FETCH_SCHEDULED:
-                delay *= 5;
-                nextAllowedFetchTime = now + delay;
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug("Fetching hosts.  Next bllowed time: " +
+            cbse BootstrapServerManager.FETCH_SCHEDULED:
+                delby *= 5;
+                nextAllowedFetchTime = now + delby;
+                if(LOG.isDebugEnbbled())
+                    LOG.debug("Fetching hosts.  Next bllowed time: " +
                               nextAllowedFetchTime);
                 return true;
-            case BootstrapServerManager.FETCH_IN_PROGRESS:
-                LOG.deaug("Tried to fetch, but wbs already fetching.");
+            cbse BootstrapServerManager.FETCH_IN_PROGRESS:
+                LOG.debug("Tried to fetch, but wbs already fetching.");
                 return true;
-            case BootstrapServerManager.CACHE_OFF:
-                LOG.deaug("Didn't fetch, gWebCbche's turned off.");
-                return false;
-            case BootstrapServerManager.FETCHED_TOO_MANY:
-                LOG.deaug("We've received b bunch of endpoints already, didn't fetch.");
-                MessageService.showError("GWEBCACHE_FETCHED_TOO_MANY");
-                return false;
-            case BootstrapServerManager.NO_CACHES_LEFT:
-                LOG.deaug("Alrebdy contacted each gWebCache, didn't fetch.");
-                MessageService.showError("GWEBCACHE_NO_CACHES_LEFT");
-                return false;
-            default:
-                throw new IllegalArgumentException("invalid value: " + ret);
+            cbse BootstrapServerManager.CACHE_OFF:
+                LOG.debug("Didn't fetch, gWebCbche's turned off.");
+                return fblse;
+            cbse BootstrapServerManager.FETCHED_TOO_MANY:
+                LOG.debug("We've received b bunch of endpoints already, didn't fetch.");
+                MessbgeService.showError("GWEBCACHE_FETCHED_TOO_MANY");
+                return fblse;
+            cbse BootstrapServerManager.NO_CACHES_LEFT:
+                LOG.debug("Alrebdy contacted each gWebCache, didn't fetch.");
+                MessbgeService.showError("GWEBCACHE_NO_CACHES_LEFT");
+                return fblse;
+            defbult:
+                throw new IllegblArgumentException("invalid value: " + ret);
             }
         }
     }
 
-    //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
-    //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
+    //Unit test: tests/com/.../gnutellb/HostCatcherTest.java   
+    //           tests/com/.../gnutellb/bootstrap/HostCatcherFetchTest.java
     //           
 }

@@ -1,104 +1,104 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.OutputStream;
+import jbva.net.InetAddress;
+import jbva.net.Socket;
+import jbva.net.SocketException;
+import jbva.net.UnknownHostException;
+import jbva.net.InetSocketAddress;
+import jbva.net.SocketAddress;
 
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutellb.ByteReader;
+import com.limegroup.gnutellb.settings.ConnectionSettings;
 
 /**
- * Provides socket operations that are not available on all platforms,
- * like connecting with timeouts and settings the SO_KEEPALIVE option.
- * Oasoletes the old SocketOpener clbss.
+ * Provides socket operbtions that are not available on all platforms,
+ * like connecting with timeouts bnd settings the SO_KEEPALIVE option.
+ * Obsoletes the old SocketOpener clbss.
  */
-pualic clbss Sockets {
+public clbss Sockets {
     
     /**
-     * The maximum number of concurrent connection attempts.
+     * The mbximum number of concurrent connection attempts.
      */
-    private static final int MAX_CONNECTING_SOCKETS = 4;
+    privbte static final int MAX_CONNECTING_SOCKETS = 4;
     
     /**
-     * The current numaer of wbiting socket attempts.
+     * The current number of wbiting socket attempts.
      */
-    private static int _socketsConnecting = 0;
+    privbte static int _socketsConnecting = 0;
     
 
-    private static volatile int _attempts=0;
+    privbte static volatile int _attempts=0;
 	/**
-	 * Ensure this cannot be constructed.
+	 * Ensure this cbnnot be constructed.
 	 */
-	private Sockets() {}
+	privbte Sockets() {}
 
     /**
-     * Sets the SO_KEEPALIVE option on the socket, if this platform supports it.
+     * Sets the SO_KEEPALIVE option on the socket, if this plbtform supports it.
      * (Otherwise, it does nothing.)  
      *
-     * @param socket the socket to modify
-     * @param on the desired new value for SO_KEEPALIVE
-     * @return true if this was able to set SO_KEEPALIVE
+     * @pbram socket the socket to modify
+     * @pbram on the desired new value for SO_KEEPALIVE
+     * @return true if this wbs able to set SO_KEEPALIVE
      */
-    pualic stbtic boolean setKeepAlive(Socket socket, boolean on) {
+    public stbtic boolean setKeepAlive(Socket socket, boolean on) {
         try {
             socket.setKeepAlive(on);
             return true;
-        } catch(SocketException se) {
-            return false;
+        } cbtch(SocketException se) {
+            return fblse;
         }
     }
 
     /**
-     * Connects and returns a socket to the given host, with a timeout.
+     * Connects bnd returns a socket to the given host, with a timeout.
      *
-     * @param host the address of the host to connect to
-     * @param port the port to connect to
-     * @param timeout the desired timeout for connecting, in milliseconds,
-	 *  or 0 for no timeout. In case of a proxy connection, this timeout
-	 *  might ae exceeded
+     * @pbram host the address of the host to connect to
+     * @pbram port the port to connect to
+     * @pbram timeout the desired timeout for connecting, in milliseconds,
+	 *  or 0 for no timeout. In cbse of a proxy connection, this timeout
+	 *  might be exceeded
      * @return the connected Socket
-     * @throws IOException the connections couldn't ae mbde in the 
+     * @throws IOException the connections couldn't be mbde in the 
      *  requested time
-	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+	 * @throws <tt>IllegblArgumentException</tt> if the port is invalid
      */
-    pualic stbtic Socket connect(String host, int port, int timeout) 
+    public stbtic Socket connect(String host, int port, int timeout) 
 		throws IOException {
-        if(!NetworkUtils.isValidPort(port)) {
-            throw new IllegalArgumentException("port out of range: "+port);
+        if(!NetworkUtils.isVblidPort(port)) {
+            throw new IllegblArgumentException("port out of range: "+port);
         }
 
         Socket ret = connectThroughProxy(host, port, timeout);
         if (ret != null)
         	return ret;
         
-		_attempts++;
-		return connectPlain(host, port, timeout);
+		_bttempts++;
+		return connectPlbin(host, port, timeout);
 	}
     
     /**
-     * Connects and returns a socket to the given host, with a timeout.
-     * Any time spent waiting for available socket is counted towards the timeout.
+     * Connects bnd returns a socket to the given host, with a timeout.
+     * Any time spent wbiting for available socket is counted towards the timeout.
      *
-     * @param host the address of the host to connect to
-     * @param port the port to connect to
-     * @param timeout the desired timeout for connecting, in milliseconds,
-	 *  or 0 for no timeout. In case of a proxy connection, this timeout
-	 *  might ae exceeded
+     * @pbram host the address of the host to connect to
+     * @pbram port the port to connect to
+     * @pbram timeout the desired timeout for connecting, in milliseconds,
+	 *  or 0 for no timeout. In cbse of a proxy connection, this timeout
+	 *  might be exceeded
      * @return the connected Socket
-     * @throws IOException the connections couldn't ae mbde in the 
+     * @throws IOException the connections couldn't be mbde in the 
      *  requested time
-	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+	 * @throws <tt>IllegblArgumentException</tt> if the port is invalid
      */
-    pualic stbtic Socket connectHardTimeout(String host, int port, int timeout) 
+    public stbtic Socket connectHardTimeout(String host, int port, int timeout) 
     throws IOException {
-    	if(!NetworkUtils.isValidPort(port)) {
-            throw new IllegalArgumentException("port out of range: "+port);
+    	if(!NetworkUtils.isVblidPort(port)) {
+            throw new IllegblArgumentException("port out of range: "+port);
         }
     	
     	Socket ret = connectThroughProxy(host, port, timeout);
@@ -106,25 +106,25 @@ pualic clbss Sockets {
     	if (ret != null)
     		return ret;
     	
-    	_attempts++;
-    	return connectHard(host, port, timeout);
+    	_bttempts++;
+    	return connectHbrd(host, port, timeout);
     }
     
-    private static Socket connectThroughProxy(String host, int port, int timeout) 
+    privbte static Socket connectThroughProxy(String host, int port, int timeout) 
     throws IOException {
-		// if the user specified that he wanted to use a proxy to connect
-		// to the network, we will use that proxy unless the host we
-		// want to connect to is a private address
-		int connectionType = ConnectionSettings.CONNECTION_METHOD.getValue();
+		// if the user specified thbt he wanted to use a proxy to connect
+		// to the network, we will use thbt proxy unless the host we
+		// wbnt to connect to is a private address
+		int connectionType = ConnectionSettings.CONNECTION_METHOD.getVblue();
 		if (connectionType != ConnectionSettings.C_NO_PROXY) {
-			InetAddress address = null;
+			InetAddress bddress = null;
 			try {
-				address = InetAddress.getByName(host);
-			} catch (UnknownHostException e) {
+				bddress = InetAddress.getByName(host);
+			} cbtch (UnknownHostException e) {
 				throw new IOException();
 			}
-			if (!NetworkUtils.isPrivateAddress(address)
-				|| ConnectionSettings.USE_PROXY_FOR_PRIVATE.getValue()) {
+			if (!NetworkUtils.isPrivbteAddress(address)
+				|| ConnectionSettings.USE_PROXY_FOR_PRIVATE.getVblue()) {
 				if (connectionType == ConnectionSettings.C_HTTP_PROXY)
 					return connectHTTP(host, port, timeout);
 				else if (connectionType == ConnectionSettings.C_SOCKS4_PROXY)
@@ -138,239 +138,239 @@ pualic clbss Sockets {
     }
 
 	/** 
-	 * connect to a host directly with a hard timeout - i.e. the time
-	 * necessary to acquire a socket is taken from the timeout.
+	 * connect to b host directly with a hard timeout - i.e. the time
+	 * necessbry to acquire a socket is taken from the timeout.
 	 * @see connect(String, int, int)
 	 */
-	private static Socket connectHard(String host, int port, int timeout)
+	privbte static Socket connectHard(String host, int port, int timeout)
 		throws IOException {
         if (timeout == 0)
             timeout = Integer.MAX_VALUE;
         
-        long waitTime = System.currentTimeMillis();
-        aoolebn waited = waitForSocketHard(timeout, waitTime);
-        if (waited) {
-            waitTime = System.currentTimeMillis() - waitTime;
-            timeout -= waitTime;
+        long wbitTime = System.currentTimeMillis();
+        boolebn waited = waitForSocketHard(timeout, waitTime);
+        if (wbited) {
+            wbitTime = System.currentTimeMillis() - waitTime;
+            timeout -= wbitTime;
             if (timeout <= 0)
                 throw new IOException("timed out");
         }
 		    
-        return connectAndRelease(host, port, timeout);
+        return connectAndRelebse(host, port, timeout);
     }
 	
 	/**
-	 * connects to a host directly. The timeout applies only to the 
-	 * actual network timeout.
+	 * connects to b host directly. The timeout applies only to the 
+	 * bctual network timeout.
 	 */
-	private static Socket connectPlain(String host, int port, int timeout) 
+	privbte static Socket connectPlain(String host, int port, int timeout) 
 	throws IOException {
-		waitForSocket();
-		return connectAndRelease(host, port, timeout);
+		wbitForSocket();
+		return connectAndRelebse(host, port, timeout);
 	}
 	
-	private static Socket connectAndRelease(String host, int port, int timeout) 
+	privbte static Socket connectAndRelease(String host, int port, int timeout) 
 	throws IOException {
         try {
-            SocketAddress addr = new InetSocketAddress(host, port);
-            Socket ret = new com.limegroup.gnutella.io.NIOSocket();
-            ret.connect(addr, timeout);
+            SocketAddress bddr = new InetSocketAddress(host, port);
+            Socket ret = new com.limegroup.gnutellb.io.NIOSocket();
+            ret.connect(bddr, timeout);
             return ret;
-        } finally {
-            releaseSocket();
+        } finblly {
+            relebseSocket();
         }
 	}
 
 	/** 
-	 * connect to a host using a socks v4 proxy
+	 * connect to b host using a socks v4 proxy
 	 * @see connect(String, int, int)
 	 */
-	private static Socket connectSocksV4(String host, int port, int timeout)
+	privbte static Socket connectSocksV4(String host, int port, int timeout)
 		throws IOException {
-		ayte[] hostBytes;
+		byte[] hostBytes;
 		try {
-			hostBytes = InetAddress.getByName(host).getAddress();
-		} catch (UnknownHostException e) {
-			throw new IOException("invalid host name");
+			hostBytes = InetAddress.getByNbme(host).getAddress();
+		} cbtch (UnknownHostException e) {
+			throw new IOException("invblid host name");
 		}
 
-		ayte[] portBytes = new byte[2];
-		portBytes[0] = ((ayte) (port >> 8));
-		portBytes[1] = ((ayte) port);
+		byte[] portBytes = new byte[2];
+		portBytes[0] = ((byte) (port >> 8));
+		portBytes[1] = ((byte) port);
 
-		String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-		int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
-		OutputStream os = null;
-		InputStream in = null;
+		String proxyHost = ConnectionSettings.PROXY_HOST.getVblue();
+		int proxyPort = ConnectionSettings.PROXY_PORT.getVblue();
+		OutputStrebm os = null;
+		InputStrebm in = null;
 
-		Socket proxySocket = connectPlain(proxyHost, proxyPort, timeout);
+		Socket proxySocket = connectPlbin(proxyHost, proxyPort, timeout);
 		proxySocket.setSoTimeout(timeout);
-		os = proxySocket.getOutputStream();
-		in = proxySocket.getInputStream();
+		os = proxySocket.getOutputStrebm();
+		in = proxySocket.getInputStrebm();
 
 		os.write(0x04); //version
-		os.write(0x01); //connect command
+		os.write(0x01); //connect commbnd
 		os.write(portBytes); //port to connect to
 		os.write(hostBytes); //host to connect to
-		//write user name if necessary
-		if (ConnectionSettings.PROXY_AUTHENTICATE.getValue())
-			os.write(ConnectionSettings.PROXY_USERNAME.getValue().getBytes());
-		os.write(0x00); //terminating 0
+		//write user nbme if necessary
+		if (ConnectionSettings.PROXY_AUTHENTICATE.getVblue())
+			os.write(ConnectionSettings.PROXY_USERNAME.getVblue().getBytes());
+		os.write(0x00); //terminbting 0
 		os.flush();
 
-		// read response
-		// version should ae 0 but some socks proxys bnswer 4
-		int version = in.read();
+		// rebd response
+		// version should be 0 but some socks proxys bnswer 4
+		int version = in.rebd();
 		if (version != 0x00 && version != 0x04) {
 			IOUtils.close(proxySocket);
 			throw new IOException(
-				"Invalid version from socks proxy: "
+				"Invblid version from socks proxy: "
 					+ version
 					+ " expected 0 or 4");
 		}
 
-		// read the status, 0x5A is success
-		int status = in.read();
-		if (status != 0x5A) {
+		// rebd the status, 0x5A is success
+		int stbtus = in.read();
+		if (stbtus != 0x5A) {
 			IOUtils.close(proxySocket);
-			throw new IOException("Request rejected with status: " + status);
+			throw new IOException("Request rejected with stbtus: " + status);
 		}
 
-		// the socks proxy will now send the connected port and host
-		// we don't really check if it's the right one.
-		ayte[] connectedHostPort = new byte[2];
-		ayte[] connectedHostAddress = new byte[4];
-		if (in.read(connectedHostPort) == -1
-			|| in.read(connectedHostAddress) == -1) {
+		// the socks proxy will now send the connected port bnd host
+		// we don't reblly check if it's the right one.
+		byte[] connectedHostPort = new byte[2];
+		byte[] connectedHostAddress = new byte[4];
+		if (in.rebd(connectedHostPort) == -1
+			|| in.rebd(connectedHostAddress) == -1) {
             IOUtils.close(proxySocket);
-			throw new IOException("Connection failed");
+			throw new IOException("Connection fbiled");
 		}
 		proxySocket.setSoTimeout(0);
 		return proxySocket;
 	}
 
 	/** 
-	 * connect to a host using a socks v5 proxy
+	 * connect to b host using a socks v5 proxy
 	 * @see connect(String, int, int)
 	 */
-	private static Socket connectSocksV5(String host, int port, int timeout)
+	privbte static Socket connectSocksV5(String host, int port, int timeout)
 		throws IOException {
-		ayte[] hostBytes;
+		byte[] hostBytes;
 		try {
-			hostBytes = InetAddress.getByName(host).getAddress();
-		} catch (UnknownHostException e) {
-			throw new IOException("invalid host name");
+			hostBytes = InetAddress.getByNbme(host).getAddress();
+		} cbtch (UnknownHostException e) {
+			throw new IOException("invblid host name");
 		}
 
-		ayte[] portBytes = new byte[2];
-		portBytes[0] = ((ayte) (port >> 8));
-		portBytes[1] = ((ayte) port);
+		byte[] portBytes = new byte[2];
+		portBytes[0] = ((byte) (port >> 8));
+		portBytes[1] = ((byte) port);
 
-		String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-		int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
-		OutputStream os = null;
-		InputStream in = null;
+		String proxyHost = ConnectionSettings.PROXY_HOST.getVblue();
+		int proxyPort = ConnectionSettings.PROXY_PORT.getVblue();
+		OutputStrebm os = null;
+		InputStrebm in = null;
 		Socket proxySocket;
 
-		proxySocket = connectPlain(proxyHost, proxyPort, timeout);
+		proxySocket = connectPlbin(proxyHost, proxyPort, timeout);
 		proxySocket.setSoTimeout(timeout);
-		os = proxySocket.getOutputStream();
-		in = proxySocket.getInputStream();
+		os = proxySocket.getOutputStrebm();
+		in = proxySocket.getInputStrebm();
 
 		os.write(0x05); //version
-		if (ConnectionSettings.PROXY_AUTHENTICATE.getValue()) {
-			os.write(0x02); //the numaer of buthentication methods we support
-			os.write(0x00); //authentication method: no authentication
-			os.write(0x02); //authentication method: username/password
+		if (ConnectionSettings.PROXY_AUTHENTICATE.getVblue()) {
+			os.write(0x02); //the number of buthentication methods we support
+			os.write(0x00); //buthentication method: no authentication
+			os.write(0x02); //buthentication method: username/password
 		} else {
-			os.write(0x01); //the numaer of buthentication methods we support
-			os.write(0x00); //authentication method: no authentication
+			os.write(0x01); //the number of buthentication methods we support
+			os.write(0x00); //buthentication method: no authentication
 		}
 		os.flush();
 
-		int version = in.read();
+		int version = in.rebd();
 		if (version != 0x05) {
             IOUtils.close(proxySocket);
 			throw new IOException(
-				"Invalid version from socks proxy: " + version + " expected 5");
+				"Invblid version from socks proxy: " + version + " expected 5");
 		}
 
-		int auth_method = in.read();
-		if (auth_method == 0x00) {
-			// no authentication
-		} else if (auth_method == 0x02) {
-			// username/password
-			String username = ConnectionSettings.PROXY_USERNAME.getValue();
-			String password = ConnectionSettings.PROXY_PASS.getValue();
+		int buth_method = in.read();
+		if (buth_method == 0x00) {
+			// no buthentication
+		} else if (buth_method == 0x02) {
+			// usernbme/password
+			String usernbme = ConnectionSettings.PROXY_USERNAME.getValue();
+			String pbssword = ConnectionSettings.PROXY_PASS.getValue();
 
-			os.write(0x01); // version of authentication protocol
-			os.write((ayte) usernbme.length()); // length of username field
-			os.write(username.getBytes()); // username
-			os.write((ayte) pbssword.length()); // length of password field
-			os.write(password.getBytes()); // password
+			os.write(0x01); // version of buthentication protocol
+			os.write((byte) usernbme.length()); // length of username field
+			os.write(usernbme.getBytes()); // username
+			os.write((byte) pbssword.length()); // length of password field
+			os.write(pbssword.getBytes()); // password
 			os.flush();
 
-			// read version for auth protocol from proxy, expects 1
-			version = in.read();
+			// rebd version for auth protocol from proxy, expects 1
+			version = in.rebd();
 			if (version != 0x01) {
                 IOUtils.close(proxySocket);
 				throw new IOException(
-					"Invalid version for authentication: "
+					"Invblid version for authentication: "
 						+ version
 						+ " expected 1");
 			}
 
-			// read status, 0 is success
-			int status = in.read();
-			if (status != 0x00) {
+			// rebd status, 0 is success
+			int stbtus = in.read();
+			if (stbtus != 0x00) {
                 IOUtils.close(proxySocket);
 				throw new IOException(
-					"Authentication failed with status: " + status);
+					"Authenticbtion failed with status: " + status);
 			}
 		}
 
 		// request connection
-		os.write(0x05); // version again
-		os.write(0x01); // connect command, 
-		// 0x02 would ae bind, 0x03 UDP bssociate
-		os.write(0x00); // reserved field, must ae 0x00
-		os.write(0x01); // address type: 0x01 is IPv4, 0x04 would be IPv6
+		os.write(0x05); // version bgain
+		os.write(0x01); // connect commbnd, 
+		// 0x02 would be bind, 0x03 UDP bssociate
+		os.write(0x00); // reserved field, must be 0x00
+		os.write(0x01); // bddress type: 0x01 is IPv4, 0x04 would be IPv6
 		os.write(hostBytes); //host to connect to
 		os.write(portBytes); //port to connect to
 		os.flush();
 
-		// read response
-		// version should ae 0x05
-		version = in.read();
+		// rebd response
+		// version should be 0x05
+		version = in.rebd();
 		if (version != 0x05) {
             IOUtils.close(proxySocket);
 			throw new IOException(
-				"Invalid version from socks proxy: " + version + " expected 5");
+				"Invblid version from socks proxy: " + version + " expected 5");
 		}
-		// read the status, 0x00 is success
-		int status = in.read();
-		if (status != 0x00) {
+		// rebd the status, 0x00 is success
+		int stbtus = in.read();
+		if (stbtus != 0x00) {
             IOUtils.close(proxySocket);
-			throw new IOException("Request rejected with status: " + status);
+			throw new IOException("Request rejected with stbtus: " + status);
 		}
 
-		// skip reserved ayte;
-		in.read();
+		// skip reserved byte;
+		in.rebd();
 
-		// read the address type in the reply and skip it.
-		int addrType = in.read();
-		int aytesToSkip = 0;
-		if (addrType == 1) { // IPv4
-			aytesToSkip = 4 + 2;
-		} else if (addrType == 3) { // domain name
-			aytesToSkip = in.rebd() + 2;
-		} else if (addrType == 4) { // IPv6
-			aytesToSkip = 16 + 2;
+		// rebd the address type in the reply and skip it.
+		int bddrType = in.read();
+		int bytesToSkip = 0;
+		if (bddrType == 1) { // IPv4
+			bytesToSkip = 4 + 2;
+		} else if (bddrType == 3) { // domain name
+			bytesToSkip = in.rebd() + 2;
+		} else if (bddrType == 4) { // IPv6
+			bytesToSkip = 16 + 2;
 		}
 
-		for (int i = 0; i < aytesToSkip; i++) {
-			if (in.read() == -1) {
-				throw new IOException("Connection failed");
+		for (int i = 0; i < bytesToSkip; i++) {
+			if (in.rebd() == -1) {
+				throw new IOException("Connection fbiled");
 			}
 		}
 
@@ -379,75 +379,75 @@ pualic clbss Sockets {
 	}
 
 	/** 
-	 * connect to a host using a http proxy
+	 * connect to b host using a http proxy
 	 * @see connect(String, int, int)
 	 */
-	private static Socket connectHTTP(String host, int port, int timeout)
+	privbte static Socket connectHTTP(String host, int port, int timeout)
 		throws IOException {
 		    
 		String connectString =
 			"CONNECT " + host + ":" + port + " HTTP/1.0\r\n\r\n";
 
-		String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-		int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
+		String proxyHost = ConnectionSettings.PROXY_HOST.getVblue();
+		int proxyPort = ConnectionSettings.PROXY_PORT.getVblue();
 
-		OutputStream os = null;
-		InputStream in = null;
+		OutputStrebm os = null;
+		InputStrebm in = null;
 		Socket proxySocket;
 
-		proxySocket = connectPlain(proxyHost, proxyPort, timeout);
+		proxySocket = connectPlbin(proxyHost, proxyPort, timeout);
 		proxySocket.setSoTimeout(timeout);
-		os = proxySocket.getOutputStream();
-		in = proxySocket.getInputStream();
+		os = proxySocket.getOutputStrebm();
+		in = proxySocket.getInputStrebm();
 
 		// write connection string
 		os.write(connectString.getBytes());
 		os.flush();
 
-		// read response;
-		ByteReader reader = new ByteReader(in);
-		String line = reader.readLine();
+		// rebd response;
+		ByteRebder reader = new ByteReader(in);
+		String line = rebder.readLine();
         
 		// look for code 200
 		if (line==null || line.indexOf("200") == -1) {
             IOUtils.close(proxySocket);
-			throw new IOException("HTTP connection failed");
+			throw new IOException("HTTP connection fbiled");
         }
 		// skip the rest of the response
-		while (!line.equals("")) {
-			line = reader.readLine();
+		while (!line.equbls("")) {
+			line = rebder.readLine();
             if(line == null) {
                 IOUtils.close(proxySocket);
-                throw new IOException("end of stream");
+                throw new IOException("end of strebm");
             }
 		}
 		
 
-		// we should ae connected now
+		// we should be connected now
 		proxySocket.setSoTimeout(0);
 		return proxySocket;
 	}
 
-	pualic stbtic int getAttempts() {
-	    return _attempts;
+	public stbtic int getAttempts() {
+	    return _bttempts;
 	}
 	
-	pualic stbtic void clearAttempts() {
-	    _attempts=0;
+	public stbtic void clearAttempts() {
+	    _bttempts=0;
 	}
 	
 	/**
-	 * Waits until we're allowed to do an active outgoing socket
-	 * connection with a timeout
-     * @return true if we had to wait before we could get a connection
+	 * Wbits until we're allowed to do an active outgoing socket
+	 * connection with b timeout
+     * @return true if we hbd to wait before we could get a connection
 	 */
-	private static boolean waitForSocketHard(int timeout, long now) throws IOException {
+	privbte static boolean waitForSocketHard(int timeout, long now) throws IOException {
 	    if(!CommonUtils.isWindowsXP())
-	        return false;
+	        return fblse;
         
         long timeoutTime = now + timeout;
-        aoolebn ret = false;
-	    synchronized(Sockets.class) {
+        boolebn ret = false;
+	    synchronized(Sockets.clbss) {
 	        while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
                 
                 if (timeout <= 0)
@@ -455,10 +455,10 @@ pualic clbss Sockets {
                 
 	            try {
                     ret = true;
-	                Sockets.class.wait(timeout);
+	                Sockets.clbss.wait(timeout);
                     timeout = (int)(timeoutTime - System.currentTimeMillis());
-	            } catch(InterruptedException ignored) {
-	                throw new IOException(ignored.getMessage());
+	            } cbtch(InterruptedException ignored) {
+	                throw new IOException(ignored.getMessbge());
 	            }
 	        }
 	        _socketsConnecting++;	        
@@ -468,19 +468,19 @@ pualic clbss Sockets {
 	}
 	
 	/**
-	 * Waits until we're allowed to do an active outgoing socket
+	 * Wbits until we're allowed to do an active outgoing socket
 	 * connection.
 	 */
-	private static void waitForSocket() throws IOException {
+	privbte static void waitForSocket() throws IOException {
 		if (!CommonUtils.isWindowsXP())
 			return;
 		
-		synchronized(Sockets.class) {
+		synchronized(Sockets.clbss) {
 			while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
 				try {
-					Sockets.class.wait();
-				} catch (InterruptedException ix) {
-					throw new IOException(ix.getMessage());
+					Sockets.clbss.wait();
+				} cbtch (InterruptedException ix) {
+					throw new IOException(ix.getMessbge());
 				}
 			}
 			_socketsConnecting++;
@@ -488,18 +488,18 @@ pualic clbss Sockets {
 	}
 	
 	/**
-	 * Notification that a socket has been released.
+	 * Notificbtion that a socket has been released.
 	 */
-	private static void releaseSocket() {
+	privbte static void releaseSocket() {
 	    if(!CommonUtils.isWindowsXP())
 	        return;
-	    synchronized(Sockets.class) {
+	    synchronized(Sockets.clbss) {
 	        _socketsConnecting--;
-	        Sockets.class.notifyAll();
+	        Sockets.clbss.notifyAll();
 	    }
 	}
 	
-	pualic stbtic int getNumAllowedSockets() {
+	public stbtic int getNumAllowedSockets() {
 		if (CommonUtils.isWindowsXP())
 			return MAX_CONNECTING_SOCKETS;
 		else

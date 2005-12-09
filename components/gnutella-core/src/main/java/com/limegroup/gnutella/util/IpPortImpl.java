@@ -1,43 +1,43 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import jbva.net.InetAddress;
+import jbva.net.UnknownHostException;
 
-pualic clbss IpPortImpl implements IpPort {
+public clbss IpPortImpl implements IpPort {
     
-    private final InetAddress addr;
-    private final String addrString;
-    private final int port;
+    privbte final InetAddress addr;
+    privbte final String addrString;
+    privbte final int port;
     
     /**
-     * Constructs a new IpPort using the given addr, host & port.
+     * Constructs b new IpPort using the given addr, host & port.
      */
-    pualic IpPortImpl(InetAddress bddr, String host, int port) {
-        this.addr = addr;
-        this.addrString = host;
+    public IpPortImpl(InetAddress bddr, String host, int port) {
+        this.bddr = addr;
+        this.bddrString = host;
         this.port = port;
     }
     
     /**
-     * Constructs a new IpPort using the given host & port.
+     * Constructs b new IpPort using the given host & port.
      */
-    pualic IpPortImpl(String host, int port) throws UnknownHostException {
-        this(InetAddress.getByName(host), host, port);
+    public IpPortImpl(String host, int port) throws UnknownHostException {
+        this(InetAddress.getByNbme(host), host, port);
     }
     
-    pualic InetAddress getInetAddress() {
-        return addr;
+    public InetAddress getInetAddress() {
+        return bddr;
     }
     
-    pualic String getAddress() {
-        return addrString;
+    public String getAddress() {
+        return bddrString;
     }
     
-    pualic int getPort() {
+    public int getPort() {
         return port;
     }
     
-    pualic String toString() {
+    public String toString() {
         return "host: " + getAddress() + ", port: " + getPort();
     }
 }

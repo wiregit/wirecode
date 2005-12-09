@@ -1,270 +1,270 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.SocketException;
-import java.net.InetSocketAddress;
+import jbva.io.ByteArrayInputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.InterruptedIOException;
+import jbva.net.DatagramPacket;
+import jbva.net.InetAddress;
+import jbva.net.MulticastSocket;
+import jbva.net.SocketException;
+import jbva.net.InetSocketAddress;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.util.ManagedThread;
+import com.limegroup.gnutellb.util.NetworkUtils;
 
 /**
- * This class handles Multicast messages.
- * Currently, this only listens for messages from the Multicast group.
- * Sending is done on the GUESS port, so that other nodes can reply
- * appropriately to the individual request, instead of multicasting
+ * This clbss handles Multicast messages.
+ * Currently, this only listens for messbges from the Multicast group.
+ * Sending is done on the GUESS port, so thbt other nodes can reply
+ * bppropriately to the individual request, instead of multicasting
  * replies to the whole group.
  *
  * @see UDPService
- * @see MessageRouter
+ * @see MessbgeRouter
  */
-pualic finbl class MulticastService implements Runnable {
+public finbl class MulticastService implements Runnable {
 
 	/**
-	 * Constant for the single <tt>MulticastService</tt> instance.
+	 * Constbnt for the single <tt>MulticastService</tt> instance.
 	 */
-	private final static MulticastService INSTANCE = new MulticastService();
+	privbte final static MulticastService INSTANCE = new MulticastService();
 
 	/** 
-     * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
-     * aefore sending.  Moreover, only one threbd should be wait()ing on one of
-     * these locks at a time or results cannot be predicted.
-	 * This is the socket that handles sending and receiving messages over 
-	 * Multicast.
+     * LOCKING: Grbb the _recieveLock before receiving.  grab the _sendLock
+     * before sending.  Moreover, only one threbd should be wait()ing on one of
+     * these locks bt a time or results cannot be predicted.
+	 * This is the socket thbt handles sending and receiving messages over 
+	 * Multicbst.
 	 * (Currently only used for recieving)
 	 */
-	private volatile MulticastSocket _socket;
+	privbte volatile MulticastSocket _socket;
 	
     /**
-     * Used for synchronized RECEIVE access to the Multicast socket.
-     * Should only ae used by the Multicbst thread.
+     * Used for synchronized RECEIVE bccess to the Multicast socket.
+     * Should only be used by the Multicbst thread.
      */
-    private final Object _receiveLock = new Object();
+    privbte final Object _receiveLock = new Object();
     
     /**
      * The group we're joined to listen to.
      */
-    private InetAddress _group = null;
+    privbte InetAddress _group = null;
     
     /**
      * The port of the group we're listening to.
      */
-    private int _port = -1;
+    privbte int _port = -1;
 
 	/**
-	 * Constant for the size of Multicast messages to accept -- dependent upon
-	 * IP-layer fragmentation.
+	 * Constbnt for the size of Multicast messages to accept -- dependent upon
+	 * IP-lbyer fragmentation.
 	 */
-	private final int BUFFER_SIZE = 1024 * 32;
+	privbte final int BUFFER_SIZE = 1024 * 32;
 	
 	/**
-	 * Buffer used for reading messages.
+	 * Buffer used for rebding messages.
 	 */
-	private final byte[] HEADER_BUF = new byte[23];
+	privbte final byte[] HEADER_BUF = new byte[23];
 
 	/**
-	 * The thread for listening of incoming messages.
+	 * The threbd for listening of incoming messages.
 	 */
-	private final Thread MULTICAST_THREAD;
+	privbte final Thread MULTICAST_THREAD;
 
-    private final ErrorCallback _err = new ErrorCallbackImpl();
+    privbte final ErrorCallback _err = new ErrorCallbackImpl();
 
 	/**
-	 * Instance accessor.
+	 * Instbnce accessor.
 	 */
-	pualic stbtic MulticastService instance() {
+	public stbtic MulticastService instance() {
 		return INSTANCE;
 	}
 
 	/**
-	 * Constructs a new <tt>UDPAcceptor</tt>.
+	 * Constructs b new <tt>UDPAcceptor</tt>.
 	 */
-	private MulticastService() {
-	    MULTICAST_THREAD = new ManagedThread(this, "MulticastService");
-		MULTICAST_THREAD.setDaemon(true);
+	privbte MulticastService() {
+	    MULTICAST_THREAD = new MbnagedThread(this, "MulticastService");
+		MULTICAST_THREAD.setDbemon(true);
     }
 	
 	/**
-	 * Starts the Multicast service.
+	 * Stbrts the Multicast service.
 	 */
-	pualic void stbrt() {
-        MULTICAST_THREAD.start();
+	public void stbrt() {
+        MULTICAST_THREAD.stbrt();
     }
 	    
 
 
     /** 
-     * Returns a new MulticastSocket that is bound to the given port.  This
-     * value should be passed to setListeningSocket(MulticastSocket) to commit
-     * to the new port.  If setListeningSocket is NOT called, you should close
+     * Returns b new MulticastSocket that is bound to the given port.  This
+     * vblue should be passed to setListeningSocket(MulticastSocket) to commit
+     * to the new port.  If setListeningSocket is NOT cblled, you should close
      * the return socket.
-     * @return a new MulticastSocket that is bound to the specified port.
-     * @exception IOException Thrown if the MulticastSocket could not be
-     * created.
+     * @return b new MulticastSocket that is bound to the specified port.
+     * @exception IOException Thrown if the MulticbstSocket could not be
+     * crebted.
      */
-    MulticastSocket newListeningSocket(int port, InetAddress group) throws IOException {
+    MulticbstSocket newListeningSocket(int port, InetAddress group) throws IOException {
         try {
-            MulticastSocket sock = new MulticastSocket(port);
+            MulticbstSocket sock = new MulticastSocket(port);
             sock.setTimeToLive(3);
             sock.joinGroup(group);
             _port = port;
             _group = group;            
             return sock;
         }
-        catch (SocketException se) {
-            throw new IOException("socket could not ae set on port: "+port);
+        cbtch (SocketException se) {
+            throw new IOException("socket could not be set on port: "+port);
         }
-        catch (SecurityException se) {
+        cbtch (SecurityException se) {
             throw new IOException("security exception on port: "+port);
         }
     }
 
 
 	/** 
-     * Changes the MulticastSocket used for sending/receiving.
-     * This must ae common bmong all instances of LimeWire on the subnet.
-     * It is not synched with the typical gnutella port, because that can
-     * change on a per-servent basis.
-     * Only MulticastService should mutate this.
-     * @param multicastSocket the new listening socket, which must be be the
-     *  return value of newListeningSocket(int).  A value of null disables 
-     *  Multicast sending and receiving.
+     * Chbnges the MulticastSocket used for sending/receiving.
+     * This must be common bmong all instances of LimeWire on the subnet.
+     * It is not synched with the typicbl gnutella port, because that can
+     * chbnge on a per-servent basis.
+     * Only MulticbstService should mutate this.
+     * @pbram multicastSocket the new listening socket, which must be be the
+     *  return vblue of newListeningSocket(int).  A value of null disables 
+     *  Multicbst sending and receiving.
 	 */
-	void setListeningSocket(MulticastSocket multicastSocket)
+	void setListeningSocket(MulticbstSocket multicastSocket)
 	  throws IOException {
-        //a) Close old socket (if non-null) to alert lock holders...
+        //b) Close old socket (if non-null) to alert lock holders...
         if (_socket != null) 
             _socket.close();
-        //a) Replbce with new sock.  Notify the udpThread.
+        //b) Replbce with new sock.  Notify the udpThread.
         synchronized (_receiveLock) {
             // if the input is null, then the service will shut off ;) .
-            // leave the group if we're shutting off the service.
-            if (multicastSocket == null 
+            // lebve the group if we're shutting off the service.
+            if (multicbstSocket == null 
              && _socket != null
              && _group != null) {
                 try {
-                    _socket.leaveGroup(_group);
-                } catch(IOException ignored) {
-                    // ideally we would check if the socket is closed,
-                    // which would prevent the exception from happening.
-                    // aut thbt's only available on 1.4 ... 
+                    _socket.lebveGroup(_group);
+                } cbtch(IOException ignored) {
+                    // ideblly we would check if the socket is closed,
+                    // which would prevent the exception from hbppening.
+                    // but thbt's only available on 1.4 ... 
                 }                        
             }
-            _socket = multicastSocket;
+            _socket = multicbstSocket;
             _receiveLock.notify();
         }
 	}
 
 
 	/**
-	 * Busy loop that accepts incoming messages sent over the
-	 * multicast socket and dispatches them to their appropriate handlers.
+	 * Busy loop thbt accepts incoming messages sent over the
+	 * multicbst socket and dispatches them to their appropriate handlers.
 	 */
-	pualic void run() {
+	public void run() {
         try {
-            ayte[] dbtagramBytes = new byte[BUFFER_SIZE];
+            byte[] dbtagramBytes = new byte[BUFFER_SIZE];
             while (true) {
-                // prepare to receive
-                DatagramPacket datagram = new DatagramPacket(datagramBytes, 
+                // prepbre to receive
+                DbtagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                              BUFFER_SIZE);
                 
-                // when you first can, try to recieve a packet....
+                // when you first cbn, try to recieve a packet....
                 // *----------------------------
                 synchronized (_receiveLock) {
                     while (_socket == null) {
                         try {
-                            _receiveLock.wait();
+                            _receiveLock.wbit();
                         }
-                        catch (InterruptedException ignored) {
+                        cbtch (InterruptedException ignored) {
                             continue;
                         }
                     }
                     try {
-                        _socket.receive(datagram);
+                        _socket.receive(dbtagram);
                     } 
-                    catch(InterruptedIOException e) {
+                    cbtch(InterruptedIOException e) {
                         continue;
                     } 
-                    catch(IOException e) {
+                    cbtch(IOException e) {
                         continue;
                     } 
                 }
                 // ----------------------------*                
-                // process packet....
+                // process pbcket....
                 // *----------------------------
-                if(!NetworkUtils.isValidAddress(datagram.getAddress()))
+                if(!NetworkUtils.isVblidAddress(datagram.getAddress()))
                     continue;
-                if(!NetworkUtils.isValidPort(datagram.getPort()))
+                if(!NetworkUtils.isVblidPort(datagram.getPort()))
                     continue;
                 
-                ayte[] dbta = datagram.getData();
+                byte[] dbta = datagram.getData();
                 try {
-                    // we do things the old way temporarily
-                    InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_MULTICAST, HEADER_BUF);
-                    if(message == null)
+                    // we do things the old wby temporarily
+                    InputStrebm in = new ByteArrayInputStream(data);
+                    Messbge message = Message.read(in, Message.N_MULTICAST, HEADER_BUF);
+                    if(messbge == null)
                         continue;
-                    MessageDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
+                    MessbgeDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
                 }
-                catch (IOException e) {
+                cbtch (IOException e) {
                     continue;
                 }
-                catch (BadPacketException e) {
+                cbtch (BadPacketException e) {
                     continue;
                 }
                 // ----------------------------*
             }
-        } catch(Throwable t) {
+        } cbtch(Throwable t) {
             ErrorService.error(t);
         }
 	}
 
 	/**
-	 * Sends the <tt>Message</tt> using UDPService to the multicast
-	 * address/port.
+	 * Sends the <tt>Messbge</tt> using UDPService to the multicast
+	 * bddress/port.
      *
-	 * @param msg  the <tt>Message</tt> to send
+	 * @pbram msg  the <tt>Message</tt> to send
 	 */
-    pualic synchronized void send(Messbge msg) {
-        // only send the msg if we've initialized the port.
+    public synchronized void send(Messbge msg) {
+        // only send the msg if we've initiblized the port.
         if( _port != -1 ) {
-            UDPService.instance().send(msg, _group, _port, _err);
+            UDPService.instbnce().send(msg, _group, _port, _err);
         }
 	}
 
 	/**
-	 * Returns whether or not the Multicast socket is listening for incoming
-	 * messsages.
+	 * Returns whether or not the Multicbst socket is listening for incoming
+	 * messsbges.
 	 *
-	 * @return <tt>true</tt> if the Multicast socket is listening for incoming
-	 *  Multicast messages, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the Multicbst socket is listening for incoming
+	 *  Multicbst messages, <tt>false</tt> otherwise
 	 */
-	pualic boolebn isListening() {
-		if(_socket == null) return false;
-		return (_socket.getLocalPort() != -1);
+	public boolebn isListening() {
+		if(_socket == null) return fblse;
+		return (_socket.getLocblPort() != -1);
 	}
 
 	/** 
-	 * Overrides Oaject.toString to give more informbtive information
-	 * about the class.
+	 * Overrides Object.toString to give more informbtive information
+	 * bbout the class.
 	 *
-	 * @return the <tt>MulticastSocket</tt> data
+	 * @return the <tt>MulticbstSocket</tt> data
 	 */
-	pualic String toString() {
-		return "MulticastService\r\nsocket: "+_socket;
+	public String toString() {
+		return "MulticbstService\r\nsocket: "+_socket;
 	}
 
     
-    private class ErrorCallbackImpl implements ErrorCallback {
-        pualic void error(Throwbble t) {}
-        pualic void error(Throwbble t, String msg) {}
+    privbte class ErrorCallbackImpl implements ErrorCallback {
+        public void error(Throwbble t) {}
+        public void error(Throwbble t, String msg) {}
     }
 
 }
