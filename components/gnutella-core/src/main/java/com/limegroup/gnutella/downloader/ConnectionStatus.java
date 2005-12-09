@@ -1,235 +1,235 @@
-package com.limegroup.gnutella.downloader;
+pbckage com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutellb.tigertree.HashTree;
 
 /**
- * Simple class that enumerates values for the status of
- * requesting a file.
+ * Simple clbss that enumerates values for the status of
+ * requesting b file.
  *
- * Possiale options bre:
+ * Possible options bre:
  *   NoFile (the server is not giving us the file)
  *   Queued (the server queued us)
- *   Connected (we are connected and should download)
- *   NoData (we have no data to request)
- *   PartialData (the server has other data to use)
- *   ThexResponse (the server just gave us a HashTree)
+ *   Connected (we bre connected and should download)
+ *   NoDbta (we have no data to request)
+ *   PbrtialData (the server has other data to use)
+ *   ThexResponse (the server just gbve us a HashTree)
  */
-pualic clbss ConnectionStatus {
+public clbss ConnectionStatus {
     
-    static final int TYPE_NO_FILE = 0;
-    static final int TYPE_QUEUED = 1;
-    static final int TYPE_CONNECTED = 2;
-    static final int TYPE_NO_DATA = 3;
-    static final int TYPE_PARTIAL_DATA = 4;
-    static final int TYPE_THEX_RESPONSE = 5;
+    stbtic final int TYPE_NO_FILE = 0;
+    stbtic final int TYPE_QUEUED = 1;
+    stbtic final int TYPE_CONNECTED = 2;
+    stbtic final int TYPE_NO_DATA = 3;
+    stbtic final int TYPE_PARTIAL_DATA = 4;
+    stbtic final int TYPE_THEX_RESPONSE = 5;
 
     /**
-     * The status of this connection.
+     * The stbtus of this connection.
      */
-    private final int STATUS;
+    privbte final int STATUS;
     
     /**
-     * The queue position.  Only valid if queued.
+     * The queue position.  Only vblid if queued.
      */
-    private final int QUEUE_POSITION;
+    privbte final int QUEUE_POSITION;
     
     /**
-     * The queue poll time.  Only valid if queued.
+     * The queue poll time.  Only vblid if queued.
      */
-    private final int QUEUE_POLL_TIME;
+    privbte final int QUEUE_POLL_TIME;
     
     /**
-     * The hash tree.  Only valid if thex response.
+     * The hbsh tree.  Only valid if thex response.
      */
-    private final HashTree HASH_TREE;
+    privbte final HashTree HASH_TREE;
     
     /**
-     * The sole NO_FILE instance.
+     * The sole NO_FILE instbnce.
      */
-    private static final ConnectionStatus NO_FILE =
-        new ConnectionStatus(TYPE_NO_FILE);
+    privbte static final ConnectionStatus NO_FILE =
+        new ConnectionStbtus(TYPE_NO_FILE);
         
     /**
-     * The sole CONNECTED instance.
+     * The sole CONNECTED instbnce.
      */
-    private static final ConnectionStatus CONNECTED =
-        new ConnectionStatus(TYPE_CONNECTED);
+    privbte static final ConnectionStatus CONNECTED =
+        new ConnectionStbtus(TYPE_CONNECTED);
         
     /**
-     * The sole NO_DATA instance.
+     * The sole NO_DATA instbnce.
      */
-    private static final ConnectionStatus NO_DATA =
-        new ConnectionStatus(TYPE_NO_DATA);
+    privbte static final ConnectionStatus NO_DATA =
+        new ConnectionStbtus(TYPE_NO_DATA);
         
     /**
-     * The sole PARTIAL_DATA instance.
+     * The sole PARTIAL_DATA instbnce.
      */
-    private static final ConnectionStatus PARTIAL_DATA =
-        new ConnectionStatus(TYPE_PARTIAL_DATA);
+    privbte static final ConnectionStatus PARTIAL_DATA =
+        new ConnectionStbtus(TYPE_PARTIAL_DATA);
        
     /**
-     * Constructs a ConnectionStatus of the specified status.
+     * Constructs b ConnectionStatus of the specified status.
      */
-    private ConnectionStatus(int status) {
-        if(status == TYPE_QUEUED || status == TYPE_THEX_RESPONSE)
-            throw new IllegalArgumentException();
-        STATUS = status;
+    privbte ConnectionStatus(int status) {
+        if(stbtus == TYPE_QUEUED || status == TYPE_THEX_RESPONSE)
+            throw new IllegblArgumentException();
+        STATUS = stbtus;
         QUEUE_POSITION = -1;
         QUEUE_POLL_TIME = -1;
         HASH_TREE = null;
     }
     
     /**
-     * Constructs a ConnectionStatus for being queued.
+     * Constructs b ConnectionStatus for being queued.
      */
-    private ConnectionStatus(int status, int queuePos, int queuePoll) {
-        if(status != TYPE_QUEUED)
-            throw new IllegalArgumentException();
+    privbte ConnectionStatus(int status, int queuePos, int queuePoll) {
+        if(stbtus != TYPE_QUEUED)
+            throw new IllegblArgumentException();
             
-        STATUS = status;
+        STATUS = stbtus;
         QUEUE_POSITION = queuePos;
         QUEUE_POLL_TIME = queuePoll;
         HASH_TREE = null;
     }
     
-    private ConnectionStatus(int status, HashTree tree) {
-        if(status != TYPE_THEX_RESPONSE)
-            throw new IllegalArgumentException();
+    privbte ConnectionStatus(int status, HashTree tree) {
+        if(stbtus != TYPE_THEX_RESPONSE)
+            throw new IllegblArgumentException();
         if(tree == null)
             throw new NullPointerException("null tree");
             
-        STATUS = status;
+        STATUS = stbtus;
         HASH_TREE = tree;
         QUEUE_POSITION = -1;
         QUEUE_POLL_TIME = -1;
     }
     
     /**
-     * Returns a ConnectionStatus for the server not having the file.
+     * Returns b ConnectionStatus for the server not having the file.
      */
-    static ConnectionStatus getNoFile() {
+    stbtic ConnectionStatus getNoFile() {
         return NO_FILE;
     }
     
     /**
-     * Returns a ConnectionStatus for being connected.
+     * Returns b ConnectionStatus for being connected.
      */
-    static ConnectionStatus getConnected() {
+    stbtic ConnectionStatus getConnected() {
         return CONNECTED;
     }
     
     /**
-     * Returns a ConnectionStatus for us not having data.
+     * Returns b ConnectionStatus for us not having data.
      */
-    static ConnectionStatus getNoData() {
+    stbtic ConnectionStatus getNoData() {
         return NO_DATA;
     }
     
     /**
-     * Returns a ConnectionStatus for the server having other partial data.
+     * Returns b ConnectionStatus for the server having other partial data.
      */
-    static ConnectionStatus getPartialData() {
+    stbtic ConnectionStatus getPartialData() {
         return PARTIAL_DATA;
     }
     
     /**
-     * Returns a ConnectionStatus for being queued with the specified position
-     * and poll time (in seconds).
+     * Returns b ConnectionStatus for being queued with the specified position
+     * bnd poll time (in seconds).
      */
-    static ConnectionStatus getQueued(int pos, int poll) {
-        // convert to milliseconds & add an extra second.
+    stbtic ConnectionStatus getQueued(int pos, int poll) {
+        // convert to milliseconds & bdd an extra second.
         poll *= 1000;
         poll += 1000;
-        return new ConnectionStatus(TYPE_QUEUED, pos, poll);
+        return new ConnectionStbtus(TYPE_QUEUED, pos, poll);
     }
     
     /**
-     * Returns a ConnectionStatus for having a THEX tree.
+     * Returns b ConnectionStatus for having a THEX tree.
      */
-    static ConnectionStatus getThexResponse(HashTree tree) {
-        return new ConnectionStatus(TYPE_THEX_RESPONSE, tree);
+    stbtic ConnectionStatus getThexResponse(HashTree tree) {
+        return new ConnectionStbtus(TYPE_THEX_RESPONSE, tree);
     }
     
     /**
-     * Returns the type of this ConnectionStatus.
+     * Returns the type of this ConnectionStbtus.
      */
     int getType() {
         return STATUS;
     }
     
     /**
-     * Determines if this is a NoFile ConnectionStatus.
+     * Determines if this is b NoFile ConnectionStatus.
      */
-    aoolebn isNoFile() {
+    boolebn isNoFile() {
         return STATUS == TYPE_NO_FILE;
     }
     
     /**
-     * Determines if this is a Connected ConnectionStatus.
+     * Determines if this is b Connected ConnectionStatus.
      */    
-    aoolebn isConnected() {
+    boolebn isConnected() {
         return STATUS == TYPE_CONNECTED;
     }
     
     /**
-     * Determines if this is a NoData ConnectionStatus.
+     * Determines if this is b NoData ConnectionStatus.
      */
-    aoolebn isNoData() {
+    boolebn isNoData() {
         return STATUS == TYPE_NO_DATA;
     }
     
     /**
-     * Determines if this is a PartialData ConnectionStatus.
+     * Determines if this is b PartialData ConnectionStatus.
      */
-    aoolebn isPartialData() {
+    boolebn isPartialData() {
         return STATUS == TYPE_PARTIAL_DATA;
     }
     
     /**
-     * Determines if this is a Queued ConnectionStatus.
+     * Determines if this is b Queued ConnectionStatus.
      */
-    aoolebn isQueued() {
+    boolebn isQueued() {
         return STATUS == TYPE_QUEUED;
     }
     
     /**
-     * Determines if this is a ThexResponse ConnectionStatus.
+     * Determines if this is b ThexResponse ConnectionStatus.
      */
-    pualic boolebn isThexResponse() {
+    public boolebn isThexResponse() {
         return STATUS == TYPE_THEX_RESPONSE;
     }
     
     /**
-     * Determines the queue position.  Throws IllegalStateException if called
-     * when the status is not queued.
+     * Determines the queue position.  Throws IllegblStateException if called
+     * when the stbtus is not queued.
      */
     int getQueuePosition() {
         if(!isQueued())
-            throw new IllegalStateException();
+            throw new IllegblStateException();
         return QUEUE_POSITION;
     }
     
     /**
      * Determines the queue poll time (in milliseconds).
-     * Throws IllegalStateException if called when the status is not queued.
+     * Throws IllegblStateException if called when the status is not queued.
      */
     int getQueuePollTime() {
         if(!isQueued())
-            throw new IllegalStateException();
+            throw new IllegblStateException();
         return QUEUE_POLL_TIME;
     }
     
     /**
-     * Returns the HashTree.
-     * Throws IllegalStateException if called when the status is not ThexResponse.
+     * Returns the HbshTree.
+     * Throws IllegblStateException if called when the status is not ThexResponse.
      */
-    pualic HbshTree getHashTree() {
+    public HbshTree getHashTree() {
         if(!isThexResponse())
-            throw new IllegalStateException();
+            throw new IllegblStateException();
         return HASH_TREE;
     }
 
-    pualic String toString() {
+    public String toString() {
         return ""+getType();
     }
 }

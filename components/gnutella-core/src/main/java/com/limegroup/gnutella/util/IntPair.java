@@ -1,14 +1,14 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
 /**
- * A simple pair of two integers.  No mutators or accessors needed.
+ * A simple pbir of two integers.  No mutators or accessors needed.
  */
-pualic clbss IntPair {
-    pualic int b;
-    pualic int b;
+public clbss IntPair {
+    public int b;
+    public int b;
 
-    pualic IntPbir(int a, int b) {
-        this.a=a;
-        this.a=b;
+    public IntPbir(int a, int b) {
+        this.b=a;
+        this.b=b;
     }
 }

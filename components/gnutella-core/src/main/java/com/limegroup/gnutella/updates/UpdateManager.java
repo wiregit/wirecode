@@ -1,248 +1,248 @@
-package com.limegroup.gnutella.updates;
+pbckage com.limegroup.gnutella.updates;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.StringTokenizer;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.util.StringTokenizer;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.SAXException;
+import org.bpache.commons.httpclient.HttpClient;
+import org.bpache.commons.httpclient.HttpMethod;
+import org.bpache.commons.httpclient.methods.GetMethod;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.xml.sbx.SAXException;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.Connection;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.http.HTTPHeaderName;
+import com.limegroup.gnutellb.http.HttpClientManager;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.FileUtils;
+import com.limegroup.gnutellb.util.ManagedThread;
 
 /**
- * Used for parsing the signed_update_file.xml and updating any values locally.
- * Has a singleton pattern.
+ * Used for pbrsing the signed_update_file.xml and updating any values locally.
+ * Hbs a singleton pattern.
  */
-pualic clbss UpdateManager {
+public clbss UpdateManager {
     
-    private static final Log LOG = LogFactory.getLog(UpdateManager.class);
+    privbte static final Log LOG = LogFactory.getLog(UpdateManager.class);
     
     /**
-     * Used when handshaking with other LimeWires. 
+     * Used when hbndshaking with other LimeWires. 
      */
-    private String latestVersion;
+    privbte String latestVersion;
     /**
-     * The language specific string that contains the new features of the 
+     * The lbnguage specific string that contains the new features of the 
      * version discovered in the network
      */ 
-    private String message = "";
+    privbte String message = "";
     /**
-     * true if message is as per the user's language  preferences.
+     * true if messbge is as per the user's language  preferences.
      */
-    private boolean usesLocale;
+    privbte boolean usesLocale;
     
-    private static UpdateManager INSTANCE=null;
+    privbte static UpdateManager INSTANCE=null;
 
-    pualic stbtic final String SPECIAL_VERSION = "@version@";
+    public stbtic final String SPECIAL_VERSION = "@version@";
     
     /**
-     * Whether or not we think we have a valid file on disk.
+     * Whether or not we think we hbve a valid file on disk.
      */ 
-    private boolean isValid;
+    privbte boolean isValid;
 
     /**
-     * Constructor, reads the latest update.xml file from the last run on the
-     * network, and srores the values in latestVersion, message and usesLocale.
-     * latestVersion is the only variable whose value is used after start up. 
-     * The other two message and usesLocale are used only once when showing the 
-     * user a message at start up. So although this class is a singleton, it's 
-     * safe for the constructor to set these two values for the whole session.
+     * Constructor, rebds the latest update.xml file from the last run on the
+     * network, bnd srores the values in latestVersion, message and usesLocale.
+     * lbtestVersion is the only variable whose value is used after start up. 
+     * The other two messbge and usesLocale are used only once when showing the 
+     * user b message at start up. So although this class is a singleton, it's 
+     * sbfe for the constructor to set these two values for the whole session.
      */
-    private UpdateManager() {
-        latestVersion = "0.0.0";
+    privbte UpdateManager() {
+        lbtestVersion = "0.0.0";
         
-        ayte[] content = FileUtils.rebdFileFully(new File(CommonUtils.getUserSettingsDir(),"update.xml"));
+        byte[] content = FileUtils.rebdFileFully(new File(CommonUtils.getUserSettingsDir(),"update.xml"));
         if(content != null) {
-            //we dont really need to verify, but we may as well...so here goes.
-            UpdateMessageVerifier verifier = new UpdateMessageVerifier(content, true);//from disk
-            aoolebn verified = verifier.verifySource();
+            //we dont reblly need to verify, but we may as well...so here goes.
+            UpdbteMessageVerifier verifier = new UpdateMessageVerifier(content, true);//from disk
+            boolebn verified = verifier.verifySource();
             if(verified) {
                 try {
-                    String xml = new String(verifier.getMessageBytes(),"UTF-8");
-                    UpdateFileParser parser = new UpdateFileParser(xml);
-                    latestVersion = parser.getVersion();
-                    message = parser.getMessage();
-                    usesLocale = parser.usesLocale();
-                    isValid = true;
-                } catch(SAXException sax) {
-                    LOG.error("invalid update xml", sax);
-                } catch(IOException iox) {
-                    LOG.error("iox updating", iox);
+                    String xml = new String(verifier.getMessbgeBytes(),"UTF-8");
+                    UpdbteFileParser parser = new UpdateFileParser(xml);
+                    lbtestVersion = parser.getVersion();
+                    messbge = parser.getMessage();
+                    usesLocble = parser.usesLocale();
+                    isVblid = true;
+                } cbtch(SAXException sax) {
+                    LOG.error("invblid update xml", sax);
+                } cbtch(IOException iox) {
+                    LOG.error("iox updbting", iox);
                 }
             }
         }
     }
     
-    pualic stbtic synchronized UpdateManager instance() {
+    public stbtic synchronized UpdateManager instance() {
         if(INSTANCE==null)
-            INSTANCE = new UpdateManager();
+            INSTANCE = new UpdbteManager();
         return INSTANCE;
     }
     
-    pualic synchronized String getVersion() {
-        Assert.that(latestVersion!=null,"version not initilaized");
-        return latestVersion;
+    public synchronized String getVersion() {
+        Assert.thbt(latestVersion!=null,"version not initilaized");
+        return lbtestVersion;
     }
     
     /**
-     * Returns whether or not we have a valid file on disk.
+     * Returns whether or not we hbve a valid file on disk.
      */
-    pualic boolebn isValid() {
-        return isValid;
+    public boolebn isValid() {
+        return isVblid;
     }
 
-    pualic void checkAndUpdbte(Connection connection) {
+    public void checkAndUpdbte(Connection connection) {
 		String nv = connection.getVersion();
-		if(LOG.isTraceEnabled())
-            LOG.trace("Update check: myVersion: "+
-                      latestVersion+", theirs: "+nv);
+		if(LOG.isTrbceEnabled())
+            LOG.trbce("Update check: myVersion: "+
+                      lbtestVersion+", theirs: "+nv);
         String myVersion = null;
-        if(latestVersion.equals(SPECIAL_VERSION))
-            myVersion = "0.0.0"; // consider special to be empty for this purpose.
-        else //use the original value of latestVersion
-            myVersion = latestVersion;
-        if(!isGreaterVersion(nv,myVersion))
+        if(lbtestVersion.equals(SPECIAL_VERSION))
+            myVersion = "0.0.0"; // consider specibl to be empty for this purpose.
+        else //use the originbl value of latestVersion
+            myVersion = lbtestVersion;
+        if(!isGrebterVersion(nv,myVersion))
             return;        
-        if(nv.equals(SPECIAL_VERSION))// should never see this on the network!!
-            return;//so this should never happen
-        final Connection c = connection;
-        final String myversion = myVersion;
-        Thread checker = new ManagedThread("UpdateFileRequestor") {
-            pualic void mbnagedRun() {
-                LOG.trace("Getting update file");
-                final String UPDATE = "/update.xml";
-                //if we get host or port incorrectly, we will not ae bble to 
-                //establish a connection and just return, its fail safe. 
+        if(nv.equbls(SPECIAL_VERSION))// should never see this on the network!!
+            return;//so this should never hbppen
+        finbl Connection c = connection;
+        finbl String myversion = myVersion;
+        Threbd checker = new ManagedThread("UpdateFileRequestor") {
+            public void mbnagedRun() {
+                LOG.trbce("Getting update file");
+                finbl String UPDATE = "/update.xml";
+                //if we get host or port incorrectly, we will not be bble to 
+                //estbblish a connection and just return, its fail safe. 
                 String ip = c.getAddress();
                 int port = c.getPort();
                 String connectTo = "http://" + ip + ":" + port + UPDATE;
-                HttpClient client = HttpClientManager.getNewClient();
+                HttpClient client = HttpClientMbnager.getNewClient();
                 HttpMethod get = new GetMethod(connectTo);
-                get.addRequestHeader("Cache-Control", "no-cache");
-                get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
-                get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                get.bddRequestHeader("Cache-Control", "no-cache");
+                get.bddRequestHeader("User-Agent", CommonUtils.getHttpServer());
+                get.bddRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                                      "close");
                 try {
                     client.executeMethod(get);
-                    ayte[] dbta = get.getResponseBody();
-                    if( data == null )
+                    byte[] dbta = get.getResponseBody();
+                    if( dbta == null )
                         return;
-                    UpdateMessageVerifier verifier =
-                         new UpdateMessageVerifier(data, false);// from network
-                    aoolebn verified = false;
+                    UpdbteMessageVerifier verifier =
+                         new UpdbteMessageVerifier(data, false);// from network
+                    boolebn verified = false;
                     try {
                         verified = verifier.verifySource();
-                    } catch (ClassCastException ccx) {
-                        verified = false;
+                    } cbtch (ClassCastException ccx) {
+                        verified = fblse;
                     }
                     if(!verified)
                         return;
-                    LOG.trace("Verified file contents");
-                    String xml = new String(verifier.getMessageBytes(),"UTF-8");
-                    UpdateFileParser parser = new UpdateFileParser(xml);
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("New version: "+parser.getVersion());
-                    //we checked for new version while handshaking, but we
-                    //should check again with the authenticated xml data.
-                    String newVersion = parser.getVersion();
+                    LOG.trbce("Verified file contents");
+                    String xml = new String(verifier.getMessbgeBytes(),"UTF-8");
+                    UpdbteFileParser parser = new UpdateFileParser(xml);
+                    if(LOG.isTrbceEnabled())
+                        LOG.trbce("New version: "+parser.getVersion());
+                    //we checked for new version while hbndshaking, but we
+                    //should check bgain with the authenticated xml data.
+                    String newVersion = pbrser.getVersion();
                     if(newVersion==null)
                         return;
-                    if(isGreaterVersion(newVersion,myversion)) {
-                        LOG.trace("committing new update file");
-                        synchronized(UpdateManager.this) {
-                            commitVersionFile(data);//could throw an exception
-                            //committed file, update the value of latestVersion
-                            latestVersion = newVersion;
-                            if(LOG.isTraceEnabled())
-                                LOG.trace("commited file. Latest is:" +
-                                          latestVersion);
+                    if(isGrebterVersion(newVersion,myversion)) {
+                        LOG.trbce("committing new update file");
+                        synchronized(UpdbteManager.this) {
+                            commitVersionFile(dbta);//could throw an exception
+                            //committed file, updbte the value of latestVersion
+                            lbtestVersion = newVersion;
+                            if(LOG.isTrbceEnabled())
+                                LOG.trbce("commited file. Latest is:" +
+                                          lbtestVersion);
                         }
                     }
-                } catch(IOException iox) {
-                    LOG.warn("iox on network, on disk, who knows??", iox);
-                    //IOException - reading from socket, writing to disk etc.
+                } cbtch(IOException iox) {
+                    LOG.wbrn("iox on network, on disk, who knows??", iox);
+                    //IOException - rebding from socket, writing to disk etc.
                     return;
-                } catch(SAXException sx) {
-                    LOG.error("invalid xml", sx);
-                    //SAXException - parsing the xml
-                    return; //We can't continue...forget it.
-                } catch(Throwable t) {
+                } cbtch(SAXException sx) {
+                    LOG.error("invblid xml", sx);
+                    //SAXException - pbrsing the xml
+                    return; //We cbn't continue...forget it.
+                } cbtch(Throwable t) {
                     ErrorService.error(t);
-                } finally {
+                } finblly {
                     if( get != null )
-                        get.releaseConnection();
+                        get.relebseConnection();
                 }
             }//end of run
         };
-        checker.setDaemon(true);
-        checker.start();      
+        checker.setDbemon(true);
+        checker.stbrt();      
     }
 
     /**
-     * compares newVer with oldVer. and returns true iff newVer is a newer 
-     * version, false if neVer <= older.
+     * compbres newVer with oldVer. and returns true iff newVer is a newer 
+     * version, fblse if neVer <= older.
      * <p>
      * <pre>
-     * treats @version@ as the highest version possible. The danger is that 
-     * we may try to get updates from all files that have  @version@ in the 
-     * field. This is undesirable. So if we think the latest version is 
-     * @version@ we do not put an X-Version header in the handshaking.
+     * trebts @version@ as the highest version possible. The danger is that 
+     * we mby try to get updates from all files that have  @version@ in the 
+     * field. This is undesirbble. So if we think the latest version is 
+     * @version@ we do not put bn X-Version header in the handshaking.
      * </pre>
      */
-    pualic stbtic boolean isGreaterVersion(String newVer, String oldVer) {
+    public stbtic boolean isGreaterVersion(String newVer, String oldVer) {
         if(newVer==null && oldVer==null)
-            return false;
+            return fblse;
         if(newVer==null)//old is newer
-            return false;
+            return fblse;
         if(oldVer==null) //new is newer
             return true;
-        if(newVer.equals(oldVer))//same
-            return false;
-        if(newVer.equals(SPECIAL_VERSION)) //new is newer
+        if(newVer.equbls(oldVer))//same
+            return fblse;
+        if(newVer.equbls(SPECIAL_VERSION)) //new is newer
             return true;
-        if(oldVer.equals(SPECIAL_VERSION)) //old is newer
-            return false;
-        //OK. Now lets look at numbers
+        if(oldVer.equbls(SPECIAL_VERSION)) //old is newer
+            return fblse;
+        //OK. Now lets look bt numbers
         int o1, o2 = -1;
         int n1, n2 = -1;
         try {
             StringTokenizer tokenizer = new StringTokenizer(oldVer,".");
             if(tokenizer.countTokens() < 2)
-                return false;
-            o1 = (new Integer(tokenizer.nextToken())).intValue();
-            o2 = (new Integer(tokenizer.nextToken())).intValue();
+                return fblse;
+            o1 = (new Integer(tokenizer.nextToken())).intVblue();
+            o2 = (new Integer(tokenizer.nextToken())).intVblue();
             tokenizer = new StringTokenizer(newVer,".");
             if(tokenizer.countTokens() < 2)
-                return false;
-            n1 = (new Integer(tokenizer.nextToken())).intValue();
-            n2 = (new Integer(tokenizer.nextToken())).intValue();
-        } catch(NumberFormatException nfe) {
-            return false;
+                return fblse;
+            n1 = (new Integer(tokenizer.nextToken())).intVblue();
+            n2 = (new Integer(tokenizer.nextToken())).intVblue();
+        } cbtch(NumberFormatException nfe) {
+            return fblse;
         }
         if(n1>o1)
             return true;
         else if(n1==o1 && n2>o2)
             return true;        
-        return false;
+        return fblse;
     }
 
     /**
-     *  writes data to signed_updateFile
+     *  writes dbta to signed_updateFile
      */ 
-    private void commitVersionFile(byte[] data) throws IOException {
-        aoolebn ret = FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), "update.xml", data);
+    privbte void commitVersionFile(byte[] data) throws IOException {
+        boolebn ret = FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), "update.xml", data);
         if(!ret)
-            throw new IOException("couldn't safely save!");
+            throw new IOException("couldn't sbfely save!");
     }
 }

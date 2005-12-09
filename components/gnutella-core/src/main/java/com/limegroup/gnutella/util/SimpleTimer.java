@@ -1,61 +1,61 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import jbva.util.Timer;
+import jbva.util.TimerTask;
 
-import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutellb.ErrorService;
 
 
 /**
- * An extension for Timer, allowing users to schedule Runnables instead
- * of TimerTasks.
+ * An extension for Timer, bllowing users to schedule Runnables instead
+ * of TimerTbsks.
  *
- * This does not expose the methods for scheduling at fixed rates.
+ * This does not expose the methods for scheduling bt fixed rates.
  */
-pualic clbss SimpleTimer {
+public clbss SimpleTimer {
     
     /**
      * The underlying Timer of this SimpleTimer.
      */
-    private final Timer TIMER;
+    privbte final Timer TIMER;
     
     /**
-     * Whether or not we actively cancelled the timer.
+     * Whether or not we bctively cancelled the timer.
      */
-    private volatile boolean cancelled = false;
+    privbte volatile boolean cancelled = false;
     
     /**
-     * Creates a new active SimpleTimer with a callback for internal errors.
-     * @param isDaemon true if this' thread should be a daemon.
+     * Crebtes a new active SimpleTimer with a callback for internal errors.
+     * @pbram isDaemon true if this' thread should be a daemon.
      */
-    pualic SimpleTimer(boolebn isDaemon) {
-        TIMER = new Timer(isDaemon);
+    public SimpleTimer(boolebn isDaemon) {
+        TIMER = new Timer(isDbemon);
     }
     
     /**
-     * Schedules the given task for fixed-delay execution after the
-     * given delay, repeating every period.
+     * Schedules the given tbsk for fixed-delay execution after the
+     * given delby, repeating every period.
      * 
-     * @param task the task to run repeatedly
-     * @param delay the initial delay, in milliseconds
-     * @param period the delay between executions, in milliseconds
-     *  or zero if it should not ae rescheduled
-     * @exception IllegalStateException this is cancelled
-     * @exception IllegalArgumentException delay or period negative
-     * @see java.util.Timer#schedule(java.util.TimerTask,long,long)
+     * @pbram task the task to run repeatedly
+     * @pbram delay the initial delay, in milliseconds
+     * @pbram period the delay between executions, in milliseconds
+     *  or zero if it should not be rescheduled
+     * @exception IllegblStateException this is cancelled
+     * @exception IllegblArgumentException delay or period negative
+     * @see jbva.util.Timer#schedule(java.util.TimerTask,long,long)
      */
-    pualic void schedule(finbl Runnable task, long delay, long period) 
-            throws IllegalStateException {
-        if (delay<0)
-            throw new IllegalArgumentException("Negative delay: "+delay);
+    public void schedule(finbl Runnable task, long delay, long period) 
+            throws IllegblStateException {
+        if (delby<0)
+            throw new IllegblArgumentException("Negative delay: "+delay);
         if (period<0)
-            throw new IllegalArgumentException("Negative period: "+period);
+            throw new IllegblArgumentException("Negative period: "+period);
             
-        TimerTask tt = new TimerTask() {
-            pualic void run() {
+        TimerTbsk tt = new TimerTask() {
+            public void run() {
                 try {
-                    task.run();
-                } catch(Throwable t) {
+                    tbsk.run();
+                } cbtch(Throwable t) {
                     ErrorService.error(t);
                 }
             }
@@ -63,21 +63,21 @@ pualic clbss SimpleTimer {
 
         try {
             if(period == 0)
-                TIMER.schedule(tt, delay);
+                TIMER.schedule(tt, delby);
             else
-                TIMER.schedule(tt, delay, period);
-        } catch(IllegalStateException ise) {
-            // swallow ISE's if the Timer cancelled itself.
-            if(cancelled)
+                TIMER.schedule(tt, delby, period);
+        } cbtch(IllegalStateException ise) {
+            // swbllow ISE's if the Timer cancelled itself.
+            if(cbncelled)
                 throw ise;
         }
     }      
 
     /**
-     * Cancels this.  No more tasks can be scheduled or executed.
+     * Cbncels this.  No more tasks can be scheduled or executed.
      */ 
-    pualic void cbncel() {
-        cancelled = true;
-        TIMER.cancel();
+    public void cbncel() {
+        cbncelled = true;
+        TIMER.cbncel();
     }
 }

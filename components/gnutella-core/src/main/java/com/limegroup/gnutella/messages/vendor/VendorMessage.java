@@ -1,87 +1,87 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
+import jbva.io.ByteArrayInputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.util.Arrays;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.statistics.ReceivedErrorStat;
 
-/** Vendor Messages are Gnutella Messages that are NEVER forwarded after
+/** Vendor Messbges are Gnutella Messages that are NEVER forwarded after
  *  recieved.
- *  This message is abstract because it provides common methods for ALL
- *  VendorMessages, but it makes no sense to instantiate a VendorMessage.
+ *  This messbge is abstract because it provides common methods for ALL
+ *  VendorMessbges, but it makes no sense to instantiate a VendorMessage.
  */
-pualic bbstract class VendorMessage extends Message {
+public bbstract class VendorMessage extends Message {
 
-    //Functional IDs defined by Gnutella VendorMessage protocol....
-    protected static final int F_MESSAGES_SUPPORTED = 0;
-    protected static final int F_HOPS_FLOW = 4;
-    protected static final int F_TCP_CONNECT_BACK = 7;
-    protected static final int F_UDP_CONNECT_BACK = 7;
-    protected static final int F_UDP_CONNECT_BACK_REDIR = 8;
-    protected static final int F_CAPABILITIES = 10;
-    protected static final int F_LIME_ACK = 11;
-    protected static final int F_REPLY_NUMBER = 12;
-    protected static final int F_PUSH_PROXY_REQ = 21;
-    protected static final int F_PUSH_PROXY_ACK = 22;
-    protected static final int F_GIVE_STATS = 14;
-    protected static final int F_STATISTICS = 15;
-    protected static final int F_GIVE_ULTRAPEER = 5;
-    protected static final int F_ULTRAPEER_LIST = 6;
-    protected static final int F_SIMPP_REQ = 16;
-    protected static final int F_SIMPP = 17;
-    protected static final int F_UDP_HEAD_PING = 23;
-    protected static final int F_UDP_HEAD_PONG = 24;
-    protected static final int F_HEADER_UPDATE = 25;
-    protected static final int F_UPDATE_REQ = 26;
-    protected static final int F_UPDATE_RESP = 27;
+    //Functionbl IDs defined by Gnutella VendorMessage protocol....
+    protected stbtic final int F_MESSAGES_SUPPORTED = 0;
+    protected stbtic final int F_HOPS_FLOW = 4;
+    protected stbtic final int F_TCP_CONNECT_BACK = 7;
+    protected stbtic final int F_UDP_CONNECT_BACK = 7;
+    protected stbtic final int F_UDP_CONNECT_BACK_REDIR = 8;
+    protected stbtic final int F_CAPABILITIES = 10;
+    protected stbtic final int F_LIME_ACK = 11;
+    protected stbtic final int F_REPLY_NUMBER = 12;
+    protected stbtic final int F_PUSH_PROXY_REQ = 21;
+    protected stbtic final int F_PUSH_PROXY_ACK = 22;
+    protected stbtic final int F_GIVE_STATS = 14;
+    protected stbtic final int F_STATISTICS = 15;
+    protected stbtic final int F_GIVE_ULTRAPEER = 5;
+    protected stbtic final int F_ULTRAPEER_LIST = 6;
+    protected stbtic final int F_SIMPP_REQ = 16;
+    protected stbtic final int F_SIMPP = 17;
+    protected stbtic final int F_UDP_HEAD_PING = 23;
+    protected stbtic final int F_UDP_HEAD_PONG = 24;
+    protected stbtic final int F_HEADER_UPDATE = 25;
+    protected stbtic final int F_UPDATE_REQ = 26;
+    protected stbtic final int F_UPDATE_RESP = 27;
 
 
     
-    protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
-                                                      (ayte) 77, (byte) 69};
-    protected static final byte[] F_BEAR_VENDOR_ID = {(byte) 66, (byte) 69,
-                                                      (ayte) 65, (byte) 82};
-    protected static final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
-                                                      (ayte) 75, (byte) 71};
-    protected static final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
-                                                      (ayte) 0, (byte) 0};
+    protected stbtic final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
+                                                      (byte) 77, (byte) 69};
+    protected stbtic final byte[] F_BEAR_VENDOR_ID = {(byte) 66, (byte) 69,
+                                                      (byte) 65, (byte) 82};
+    protected stbtic final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
+                                                      (byte) 75, (byte) 71};
+    protected stbtic final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
+                                                      (byte) 0, (byte) 0};
 
-    private static final int LENGTH_MINUS_PAYLOAD = 8;
+    privbte static final int LENGTH_MINUS_PAYLOAD = 8;
 
-    private static final BadPacketException UNRECOGNIZED_EXCEPTION =
-        new BadPacketException("Unrecognized Vendor Message");
-
-    /**
-     * Bytes 0-3 of the Vendor Message.  Something like "LIME".getBytes().
-     */
-    private final byte[] _vendorID;
+    privbte static final BadPacketException UNRECOGNIZED_EXCEPTION =
+        new BbdPacketException("Unrecognized Vendor Message");
 
     /**
-     * The Sua-Selector for this messbge.  Bytes 4-5 of the Vendor Message.
+     * Bytes 0-3 of the Vendor Messbge.  Something like "LIME".getBytes().
      */
-    private final int _selector;
+    privbte final byte[] _vendorID;
 
     /**
-     * The Version numaer of the messbge.  Bytes 6-7 of the Vendor Message.
+     * The Sub-Selector for this messbge.  Bytes 4-5 of the Vendor Message.
      */
-    private final int _version;
+    privbte final int _selector;
 
     /**
-     * The payload of this VendorMessage.  This usually holds data that is 
-     * interpreted ay the type of messbge determined by _vendorID, _selector,
-     * and (to a lesser extent) _version.
+     * The Version number of the messbge.  Bytes 6-7 of the Vendor Message.
      */
-    private final byte[] _payload;
+    privbte final int _version;
 
-    /** Cache the hashcode cuz it isn't cheap to compute.
+    /**
+     * The pbyload of this VendorMessage.  This usually holds data that is 
+     * interpreted by the type of messbge determined by _vendorID, _selector,
+     * bnd (to a lesser extent) _version.
      */
-    private final int _hashCode;
+    privbte final byte[] _payload;
+
+    /** Cbche the hashcode cuz it isn't cheap to compute.
+     */
+    privbte final int _hashCode;
 
     //----------------------------------
     // CONSTRUCTORS
@@ -89,117 +89,117 @@ pualic bbstract class VendorMessage extends Message {
 
 
     /**
-     * Constructs a new VendorMessage with the given data.
-     * Each Vendor Message class delegates to this constructor (or the one
-     * also taking a network parameter) to construct new locally generated
+     * Constructs b new VendorMessage with the given data.
+     * Ebch Vendor Message class delegates to this constructor (or the one
+     * blso taking a network parameter) to construct new locally generated
      * VMs.
-     *  @param vendorIDBytes The Vendor ID of this message (bytes).  
-     *  @param selector The selector of the message.
-     *  @param version  The version of this message.
-     *  @param payload  The payload (not including vendorIDBytes, selector, and
+     *  @pbram vendorIDBytes The Vendor ID of this message (bytes).  
+     *  @pbram selector The selector of the message.
+     *  @pbram version  The version of this message.
+     *  @pbram payload  The payload (not including vendorIDBytes, selector, and
      *  version.
-     *  @exception NullPointerException Thrown if payload or vendorIDBytes are
+     *  @exception NullPointerException Thrown if pbyload or vendorIDBytes are
      *  null.
      */
-    protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
-                            ayte[] pbyload) {
-        this(vendorIDBytes, selector, version, payload, Message.N_UNKNOWN);
+    protected VendorMessbge(byte[] vendorIDBytes, int selector, int version, 
+                            byte[] pbyload) {
+        this(vendorIDBytes, selector, version, pbyload, Message.N_UNKNOWN);
     }
     
     /**
-     * Constructs a new VendorMessage with the given data.
-     * Each Vendor Message class delegates to this constructor (or the one that
-     * doesn't take the network parameter) to construct new locally generated
+     * Constructs b new VendorMessage with the given data.
+     * Ebch Vendor Message class delegates to this constructor (or the one that
+     * doesn't tbke the network parameter) to construct new locally generated
      * VMs.
-     *  @param vendorIDBytes The Vendor ID of this message (bytes).  
-     *  @param selector The selector of the message.
-     *  @param version  The version of this message.
-     *  @param payload  The payload (not including vendorIDBytes, selector, and
+     *  @pbram vendorIDBytes The Vendor ID of this message (bytes).  
+     *  @pbram selector The selector of the message.
+     *  @pbram version  The version of this message.
+     *  @pbram payload  The payload (not including vendorIDBytes, selector, and
      *  version.
-     *  @param network The network this VM is to be written on.
-     *  @exception NullPointerException Thrown if payload or vendorIDBytes are
+     *  @pbram network The network this VM is to be written on.
+     *  @exception NullPointerException Thrown if pbyload or vendorIDBytes are
      *  null.
      */
-    protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
-                            ayte[] pbyload, int network) {
-        super(F_VENDOR_MESSAGE, (ayte)1, LENGTH_MINUS_PAYLOAD + pbyload.length,
+    protected VendorMessbge(byte[] vendorIDBytes, int selector, int version, 
+                            byte[] pbyload, int network) {
+        super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + pbyload.length,
               network);
         if ((vendorIDBytes.length != 4))
-            throw new IllegalArgumentException("wrong vendorID length: " +
+            throw new IllegblArgumentException("wrong vendorID length: " +
                                                 vendorIDBytes.length);
         if ((selector & 0xFFFF0000) != 0)
-            throw new IllegalArgumentException("invalid selector: " + selector);
+            throw new IllegblArgumentException("invalid selector: " + selector);
         if ((version & 0xFFFF0000) != 0)
-            throw new IllegalArgumentException("invalid version: " + version);
-        // set the instance params....
+            throw new IllegblArgumentException("invalid version: " + version);
+        // set the instbnce params....
         _vendorID = vendorIDBytes;
         _selector = selector;
         _version = version;
-        _payload = payload;
-        // lastly compute the hash
-        _hashCode = computeHashCode(_version, _selector, _vendorID, _payload);
+        _pbyload = payload;
+        // lbstly compute the hash
+        _hbshCode = computeHashCode(_version, _selector, _vendorID, _payload);
     }
 
     /**
-     * Constructs a new VendorMessage with data from the network.
-     * Primarily built for the convenience of the class Message.
-     * Suaclbsses must extend this (or the below constructor that takes a 
-     * network parameter) and use getPayload() to parse the payload and do
-     * anything else they need to.
+     * Constructs b new VendorMessage with data from the network.
+     * Primbrily built for the convenience of the class Message.
+     * Subclbsses must extend this (or the below constructor that takes a 
+     * network pbrameter) and use getPayload() to parse the payload and do
+     * bnything else they need to.
      */
-    protected VendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID,
-                            int selector, int version, ayte[] pbyload) 
-        throws BadPacketException {
-        this(guid,ttl,hops,vendorID,selector,version,payload,Message.N_UNKNOWN);
+    protected VendorMessbge(byte[] guid, byte ttl, byte hops, byte[] vendorID,
+                            int selector, int version, byte[] pbyload) 
+        throws BbdPacketException {
+        this(guid,ttl,hops,vendorID,selector,version,pbyload,Message.N_UNKNOWN);
     }
 
     /**
-     * Constructs a new VendorMessage with data from the network.
-     * Primarily built for the convenience of the class Message.
-     * Suaclbsses must extend this (or the above constructor that doesn't 
-     * takes a network parameter) and use getPayload() to parse the payload
-     * and do anything else they need to.
+     * Constructs b new VendorMessage with data from the network.
+     * Primbrily built for the convenience of the class Message.
+     * Subclbsses must extend this (or the above constructor that doesn't 
+     * tbkes a network parameter) and use getPayload() to parse the payload
+     * bnd do anything else they need to.
      */
-    protected VendorMessage(byte[] guid, byte ttl, byte hops,byte[] vendorID,
-                            int selector, int version, ayte[] pbyload, 
-                            int network) throws BadPacketException {
-        super(guid, (ayte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+pbyload.length,
+    protected VendorMessbge(byte[] guid, byte ttl, byte hops,byte[] vendorID,
+                            int selector, int version, byte[] pbyload, 
+                            int network) throws BbdPacketException {
+        super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+pbyload.length,
               network);
-        // set the instance params....
+        // set the instbnce params....
         if ((vendorID.length != 4)) {
-            ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();            
-            throw new BadPacketException("Vendor ID Invalid!");
+            ReceivedErrorStbt.VENDOR_INVALID_ID.incrementStat();            
+            throw new BbdPacketException("Vendor ID Invalid!");
         }
         if ((selector & 0xFFFF0000) != 0) {
-            ReceivedErrorStat.VENDOR_INVALID_SELECTOR.incrementStat();
-            throw new BadPacketException("Selector Invalid!");
+            ReceivedErrorStbt.VENDOR_INVALID_SELECTOR.incrementStat();
+            throw new BbdPacketException("Selector Invalid!");
         }
         if ((version & 0xFFFF0000) != 0) {
-            ReceivedErrorStat.VENDOR_INVALID_VERSION.incrementStat();
-            throw new BadPacketException("Version Invalid!");
+            ReceivedErrorStbt.VENDOR_INVALID_VERSION.incrementStat();
+            throw new BbdPacketException("Version Invalid!");
         }        
         _vendorID = vendorID;
         _selector = selector;
         _version = version;
-        _payload = payload;
-        // lastly compute the hash
-        _hashCode = computeHashCode(_version, _selector, _vendorID,
-                                    _payload);
+        _pbyload = payload;
+        // lbstly compute the hash
+        _hbshCode = computeHashCode(_version, _selector, _vendorID,
+                                    _pbyload);
     }
 
     /**
-     * Computes the hash code for a vendor message.
+     * Computes the hbsh code for a vendor message.
      */
-    private static int computeHashCode(int version, int selector, 
-                                       ayte[] vendorID, byte[] pbyload) {
-        int hashCode = 0;
-        hashCode += 17*version;
-        hashCode += 17*selector;
+    privbte static int computeHashCode(int version, int selector, 
+                                       byte[] vendorID, byte[] pbyload) {
+        int hbshCode = 0;
+        hbshCode += 17*version;
+        hbshCode += 17*selector;
         for (int i = 0; i < vendorID.length; i++)
-            hashCode += (int) 17*vendorID[i];
-        for (int i = 0; i < payload.length; i++)
-            hashCode += (int) 17*payload[i];
-        return hashCode;
+            hbshCode += (int) 17*vendorID[i];
+        for (int i = 0; i < pbyload.length; i++)
+            hbshCode += (int) 17*payload[i];
+        return hbshCode;
     }
 
     //----------------------------------
@@ -209,15 +209,15 @@ pualic bbstract class VendorMessage extends Message {
     // ACCESSOR methods
     //----------------------------------
 
-    /** Allows suaclbsses to make changes gain access to the payload.  They 
-     *  can:
-     *  1) change the contents
-     *  2) parse the contents.
-     *  In general, 1) is discouraged, 2) is necessary.  Subclasses CANNOT
-     *  re-init the payload.
+    /** Allows subclbsses to make changes gain access to the payload.  They 
+     *  cbn:
+     *  1) chbnge the contents
+     *  2) pbrse the contents.
+     *  In generbl, 1) is discouraged, 2) is necessary.  Subclasses CANNOT
+     *  re-init the pbyload.
      */
-    protected ayte[] getPbyload() {
-        return _payload;
+    protected byte[] getPbyload() {
+        return _pbyload;
     }
 
     protected int getVersion() {
@@ -227,157 +227,157 @@ pualic bbstract class VendorMessage extends Message {
     //----------------------------------
 
     //----------------------
-    // Methods for all subclasses....
+    // Methods for bll subclasses....
     //----------------------
 
     /**
-     * Constructs a vendor message with the specified network data.
-     * The actual vendor message constructed is determined by the value
-     * of the selector within the message.
+     * Constructs b vendor message with the specified network data.
+     * The bctual vendor message constructed is determined by the value
+     * of the selector within the messbge.
      */
-    pualic stbtic VendorMessage deriveVendorMessage(byte[] guid, byte ttl, 
-                                                    ayte hops,
-                                                    ayte[] fromNetwork,
+    public stbtic VendorMessage deriveVendorMessage(byte[] guid, byte ttl, 
+                                                    byte hops,
+                                                    byte[] fromNetwork,
                                                     int network) 
-        throws BadPacketException {
+        throws BbdPacketException {
     	
-        // sanity check
+        // sbnity check
         if (fromNetwork.length < LENGTH_MINUS_PAYLOAD) {
-            ReceivedErrorStat.VENDOR_INVALID_PAYLOAD.incrementStat();
-            throw new BadPacketException("Not enough bytes for a VM!!");
+            ReceivedErrorStbt.VENDOR_INVALID_PAYLOAD.incrementStat();
+            throw new BbdPacketException("Not enough bytes for a VM!!");
         }
 
-        // get very necessary parameters....
-        ByteArrayInputStream bais = new ByteArrayInputStream(fromNetwork);
-        ayte[] vendorID = null, restOf = null;
+        // get very necessbry parameters....
+        ByteArrbyInputStream bais = new ByteArrayInputStream(fromNetwork);
+        byte[] vendorID = null, restOf = null;
         int selector = -1, version = -1;
         try {
-            // first 4 aytes bre vendor ID
-            vendorID = new ayte[4];
-            abis.read(vendorID, 0, vendorID.length);
+            // first 4 bytes bre vendor ID
+            vendorID = new byte[4];
+            bbis.read(vendorID, 0, vendorID.length);
             // get the selector....
-            selector = ByteOrder.ushort2int(ByteOrder.lea2short(bbis));
+            selector = ByteOrder.ushort2int(ByteOrder.leb2short(bbis));
             // get the version....
-            version = ByteOrder.ushort2int(ByteOrder.lea2short(bbis));
+            version = ByteOrder.ushort2int(ByteOrder.leb2short(bbis));
             // get the rest....
-            restOf = new ayte[bbis.available()];
-            abis.read(restOf, 0, restOf.length);
-        } catch (IOException ioe) {
-            ErrorService.error(ioe); // impossiale.
+            restOf = new byte[bbis.available()];
+            bbis.read(restOf, 0, restOf.length);
+        } cbtch (IOException ioe) {
+            ErrorService.error(ioe); // impossible.
         }
 
 
-        // now switch on them to get the appropriate message....
+        // now switch on them to get the bppropriate message....
         if ((selector == F_HOPS_FLOW) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
+            (Arrbys.equals(vendorID, F_BEAR_VENDOR_ID)))
             // HOPS FLOW MESSAGE
-            return new HopsFlowVendorMessage(guid, ttl, hops, version, 
+            return new HopsFlowVendorMessbge(guid, ttl, hops, version, 
                                              restOf);
         if ((selector == F_LIME_ACK) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
             // LIME ACK MESSAGE
-            return new LimeACKVendorMessage(guid, ttl, hops, version, 
+            return new LimeACKVendorMessbge(guid, ttl, hops, version, 
                                             restOf);
         if ((selector == F_REPLY_NUMBER) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
             // REPLY NUMBER MESSAGE
-            return new ReplyNumaerVendorMessbge(guid, ttl, hops, version, 
+            return new ReplyNumberVendorMessbge(guid, ttl, hops, version, 
                                                 restOf);
         if ((selector == F_TCP_CONNECT_BACK) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
+            (Arrbys.equals(vendorID, F_BEAR_VENDOR_ID)))
             // TCP CONNECT BACK
-            return new TCPConnectBackVendorMessage(guid, ttl, hops, version, 
+            return new TCPConnectBbckVendorMessage(guid, ttl, hops, version, 
                                                    restOf);
         if ((selector == F_MESSAGES_SUPPORTED) && 
-            (Arrays.equals(vendorID, F_NULL_VENDOR_ID)))
-            // Messages Supported Message
-            return new MessagesSupportedVendorMessage(guid, ttl, hops, version,
+            (Arrbys.equals(vendorID, F_NULL_VENDOR_ID)))
+            // Messbges Supported Message
+            return new MessbgesSupportedVendorMessage(guid, ttl, hops, version,
                                                       restOf);            
         if ((selector == F_UDP_CONNECT_BACK) && 
-            (Arrays.equals(vendorID, F_GTKG_VENDOR_ID)))
+            (Arrbys.equals(vendorID, F_GTKG_VENDOR_ID)))
             // UDP CONNECT BACK
-            return new UDPConnectBackVendorMessage(guid, ttl, hops, version, 
+            return new UDPConnectBbckVendorMessage(guid, ttl, hops, version, 
                                                    restOf);
         if ((selector == F_PUSH_PROXY_REQ) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
             // Push Proxy Request
             return new PushProxyRequest(guid, ttl, hops, version, restOf);
         if ((selector == F_PUSH_PROXY_ACK) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
             // Push Proxy Acknowledgement
             return new PushProxyAcknowledgement(guid, ttl, hops, version, 
                                                 restOf);
         if ((selector == F_LIME_ACK) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
-            // Query Status Request
-            return new QueryStatusRequest(guid, ttl, hops, version, restOf);
+            (Arrbys.equals(vendorID, F_BEAR_VENDOR_ID)))
+            // Query Stbtus Request
+            return new QueryStbtusRequest(guid, ttl, hops, version, restOf);
         if ((selector == F_REPLY_NUMBER) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
-            // Query Status Response
-            return new QueryStatusResponse(guid, ttl, hops, version, restOf);
+            (Arrbys.equals(vendorID, F_BEAR_VENDOR_ID)))
+            // Query Stbtus Response
+            return new QueryStbtusResponse(guid, ttl, hops, version, restOf);
         if ((selector == F_TCP_CONNECT_BACK) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new TCPConnectBackRedirect(guid, ttl, hops, version, restOf);
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new TCPConnectBbckRedirect(guid, ttl, hops, version, restOf);
         if ((selector == F_UDP_CONNECT_BACK_REDIR) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new UDPConnectBbckRedirect(guid, ttl, hops, version, restOf);
         if ((selector == F_CAPABILITIES) && 
-            (Arrays.equals(vendorID, F_NULL_VENDOR_ID)))
-            return new CapabilitiesVM(guid, ttl, hops, version, restOf);
+            (Arrbys.equals(vendorID, F_NULL_VENDOR_ID)))
+            return new CbpabilitiesVM(guid, ttl, hops, version, restOf);
         if ((selector == F_GIVE_STATS) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf,
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new GiveStbtsVendorMessage(guid, ttl, hops, version, restOf,
                                               network);
         if ((selector == F_STATISTICS) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
+            (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new StbtisticVendorMessage(guid, ttl, hops, version, restOf);
         if((selector == F_SIMPP_REQ) &&
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+           (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
             return new SimppRequestVM(guid, ttl, hops, version, restOf);
         if((selector == F_SIMPP) && 
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+           (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
             return new SimppVM(guid, ttl, hops, version, restOf);
         if ((selector == F_GIVE_ULTRAPEER) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new UDPCrawlerPing(guid,ttl,hops,version,restOf);
+        		(Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new UDPCrbwlerPing(guid,ttl,hops,version,restOf);
         if ((selector == F_ULTRAPEER_LIST) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new UDPCrawlerPong(guid,ttl,hops,version,restOf);
+        		(Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new UDPCrbwlerPong(guid,ttl,hops,version,restOf);
         if ((selector == F_UDP_HEAD_PING) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new HeadPing(guid,ttl,hops,version,restOf);
+        		(Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new HebdPing(guid,ttl,hops,version,restOf);
         if ((selector == F_UDP_HEAD_PONG) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new HeadPong(guid,ttl,hops,version,restOf);
+        		(Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new HebdPong(guid,ttl,hops,version,restOf);
         if((selector == F_UPDATE_REQ) &&
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new UpdateRequest(guid, ttl, hops, version, restOf);
+           (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new UpdbteRequest(guid, ttl, hops, version, restOf);
         if((selector == F_UPDATE_RESP) && 
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new UpdateResponse(guid, ttl, hops, version, restOf);
+           (Arrbys.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new UpdbteResponse(guid, ttl, hops, version, restOf);
         
-        ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
+        ReceivedErrorStbt.VENDOR_UNRECOGNIZED.incrementStat();
         throw UNRECOGNIZED_EXCEPTION;
     }
     
     /**
-     * @return true if the two VMPs have identical signatures - no more, no 
-     * less.  Does not take version into account, but if different versions
-     * have different payloads, they'll differ.
+     * @return true if the two VMPs hbve identical signatures - no more, no 
+     * less.  Does not tbke version into account, but if different versions
+     * hbve different payloads, they'll differ.
      */
-    pualic boolebn equals(Object other) {
-        if (other instanceof VendorMessage) {
-            VendorMessage vmp = (VendorMessage) other;
+    public boolebn equals(Object other) {
+        if (other instbnceof VendorMessage) {
+            VendorMessbge vmp = (VendorMessage) other;
             return ((_selector == vmp._selector) &&
-                    (Arrays.equals(_vendorID, vmp._vendorID)) &&
-                    (Arrays.equals(_payload, vmp._payload))
+                    (Arrbys.equals(_vendorID, vmp._vendorID)) &&
+                    (Arrbys.equals(_payload, vmp._payload))
                     );
         }
-        return false;
+        return fblse;
     }
    
-    pualic int hbshCode() {
-        return _hashCode;
+    public int hbshCode() {
+        return _hbshCode;
     }
  
     //----------------------
@@ -390,25 +390,25 @@ pualic bbstract class VendorMessage extends Message {
 
 
     //----------------------------------
-    // FULFILL abstract Message methods
+    // FULFILL bbstract Message methods
     //----------------------------------
 
     // INHERIT COMMENT
-    protected void writePayload(OutputStream out) throws IOException {
+    protected void writePbyload(OutputStream out) throws IOException {
         out.write(_vendorID);
-        ByteOrder.short2lea((short)_selector, out);
-        ByteOrder.short2lea((short)_version, out);
-        out.write(getPayload());
+        ByteOrder.short2leb((short)_selector, out);
+        ByteOrder.short2leb((short)_version, out);
+        out.write(getPbyload());
     }
 
     // INHERIT COMMENT
-    pualic Messbge stripExtendedPayload() {
-        // doesn't make sense for VendorMessage to strip anything....
+    public Messbge stripExtendedPayload() {
+        // doesn't mbke sense for VendorMessage to strip anything....
         return this;
     }
 
     // INHERIT COMMENT
-    pualic void recordDrop() {
+    public void recordDrop() {
     }
 
     //----------------------------------

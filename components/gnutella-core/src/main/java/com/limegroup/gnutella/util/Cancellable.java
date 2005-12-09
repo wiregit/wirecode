@@ -1,10 +1,10 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
 /**
- * Interface for operations that can be cancelled.
+ * Interfbce for operations that can be cancelled.
  */
-pualic interfbce Cancellable {
+public interfbce Cancellable {
     
-    pualic boolebn isCancelled();
+    public boolebn isCancelled();
     
 }

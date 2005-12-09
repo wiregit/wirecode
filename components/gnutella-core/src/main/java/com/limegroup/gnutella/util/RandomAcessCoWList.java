@@ -1,14 +1,14 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.RandomAccess;
+import jbva.util.RandomAccess;
 
-pualic clbss RandomAcessCoWList extends CoWList implements RandomAccess {
+public clbss RandomAcessCoWList extends CoWList implements RandomAccess {
 
-    pualic RbndomAcessCoWList() {
+    public RbndomAcessCoWList() {
         this(null);
     }
     
-    pualic RbndomAcessCoWList(Object lock) {
+    public RbndomAcessCoWList(Object lock) {
         super(ARRAY_LIST,lock);
     }
 }

@@ -1,131 +1,131 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import jbva.io.ByteArrayInputStream;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.GUID;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutellb.util.NetworkUtils;
 
-/** In Vendor Message parlance, the "message type" of this VMP is "GTKG/7".
- *  Used to ask a host you connect to do a UDP ConnectBack.
+/** In Vendor Messbge parlance, the "message type" of this VMP is "GTKG/7".
+ *  Used to bsk a host you connect to do a UDP ConnectBack.
  *
  *  VERSIONING INFO:
  *  -------------------------
- *  Version 2 of this message will fold the connect back guid into the guid
- *  of the message.  In order to transition, we should follow a 3 step process:
- *  1) allow this class to accept version 2 format
- *  2) after 1) has been released for a while, start using version 2
- *  3) some time after 2), stop accepting 1) (optional)
+ *  Version 2 of this messbge will fold the connect back guid into the guid
+ *  of the messbge.  In order to transition, we should follow a 3 step process:
+ *  1) bllow this class to accept version 2 format
+ *  2) bfter 1) has been released for a while, start using version 2
+ *  3) some time bfter 2), stop accepting 1) (optional)
  */
-pualic finbl class UDPConnectBackVendorMessage extends VendorMessage {
+public finbl class UDPConnectBackVendorMessage extends VendorMessage {
 
-    pualic stbtic final int VERSION = 2;
+    public stbtic final int VERSION = 2;
 
-    /** The payload has a 16-bit unsigned value - the port - at which one should
-     *  connect abck.
+    /** The pbyload has a 16-bit unsigned value - the port - at which one should
+     *  connect bbck.
      */
-    private final int _port;
+    privbte final int _port;
  
-    /** The GUID that should be used for connect back.
+    /** The GUID thbt should be used for connect back.
      */
-    private final GUID _guid;
+    privbte final GUID _guid;
 
-    /** The encoding of the port and the guid.
+    /** The encoding of the port bnd the guid.
      */
    
     /** The network constructor. */
-    UDPConnectBackVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                                ayte[] pbyload) throws BadPacketException {
+    UDPConnectBbckVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
+                                byte[] pbyload) throws BadPacketException {
         super(guid, ttl, hops, F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK, 
-              version, payload);
+              version, pbyload);
               
         try {
-            payload = getPayload();
-            ByteArrayInputStream bais;
+            pbyload = getPayload();
+            ByteArrbyInputStream bais;
             switch(getVersion()) {
-            case 1:
-                if( payload.length != 18 )
-                    throw new BadPacketException("invalid version1 payload");
-                abis = new ByteArrayInputStream(payload);
-                _port = ByteOrder.ushort2int(ByteOrder.lea2short(bbis));
-                ayte[] guidBytes = new byte[16];
-                int aytesRebd = bais.read(guidBytes, 0, guidBytes.length);
+            cbse 1:
+                if( pbyload.length != 18 )
+                    throw new BbdPacketException("invalid version1 payload");
+                bbis = new ByteArrayInputStream(payload);
+                _port = ByteOrder.ushort2int(ByteOrder.leb2short(bbis));
+                byte[] guidBytes = new byte[16];
+                int bytesRebd = bais.read(guidBytes, 0, guidBytes.length);
                 _guid = new GUID(guidBytes);
-                arebk;
-            case 2:
-                if( payload.length != 2 )
-                    throw new BadPacketException("invalid version2 payload");
-                abis = new ByteArrayInputStream(payload);
-                _port = ByteOrder.ushort2int(ByteOrder.lea2short(bbis));
+                brebk;
+            cbse 2:
+                if( pbyload.length != 2 )
+                    throw new BbdPacketException("invalid version2 payload");
+                bbis = new ByteArrayInputStream(payload);
+                _port = ByteOrder.ushort2int(ByteOrder.leb2short(bbis));
                 _guid = new GUID(super.getGUID());
-                arebk;
-            default:
-                throw new BadPacketException("Unsupported Version");
+                brebk;
+            defbult:
+                throw new BbdPacketException("Unsupported Version");
             }
 
-            if( !NetworkUtils.isValidPort(_port) )
-                throw new BadPacketException("invalid connectback port.");
+            if( !NetworkUtils.isVblidPort(_port) )
+                throw new BbdPacketException("invalid connectback port.");
         }
-        catch (IOException ioe) {
-            throw new BadPacketException("Couldn't read from a ByteStream!!!");
+        cbtch (IOException ioe) {
+            throw new BbdPacketException("Couldn't read from a ByteStream!!!");
         }
     }
 
 
     /**
-     * Constructs a new UDPConnectBackVendorMessage to be sent out.
-     * @param port The port you want people to connect back to.  If you give a
-     *  abd port I don't check so check yourself!
-     *  @param guid The guid you want people to connect back with.  Serves as
-     *  a flag that the connect back is 'unsolicited'.
+     * Constructs b new UDPConnectBackVendorMessage to be sent out.
+     * @pbram port The port you want people to connect back to.  If you give a
+     *  bbd port I don't check so check yourself!
+     *  @pbram guid The guid you want people to connect back with.  Serves as
+     *  b flag that the connect back is 'unsolicited'.
      */
-    pualic UDPConnectBbckVendorMessage(int port, GUID guid) {
+    public UDPConnectBbckVendorMessage(int port, GUID guid) {
         super(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK, 1, 
-              derivePayload(port, guid));
+              derivePbyload(port, guid));
         _port = port;
         _guid = guid;
     }
 
-    pualic int getConnectBbckPort() {
+    public int getConnectBbckPort() {
         return _port;
     }
 
-    pualic GUID getConnectBbckGUID() {
+    public GUID getConnectBbckGUID() {
         return _guid;
     }
 
     /**
-     * Constructs the payload given the desired port & guid.
+     * Constructs the pbyload given the desired port & guid.
      */
-    private static byte[] derivePayload(int port, GUID guid) {
+    privbte static byte[] derivePayload(int port, GUID guid) {
         try {
             // do it during construction....
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2lea((short)port,bbos); // write port
-            abos.write(guid.bytes());
-            return abos.toByteArray();
-        } catch (IOException ioe) {
+            ByteArrbyOutputStream baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)port,bbos); // write port
+            bbos.write(guid.bytes());
+            return bbos.toByteArray();
+        } cbtch (IOException ioe) {
             ErrorService.error(ioe);
             return null;
         }
     }
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
-        super.writePayload(out);
-        SentMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(this);
+    protected void writePbyload(OutputStream out) throws IOException {
+        super.writePbyload(out);
+        SentMessbgeStatHandler.TCP_UDP_CONNECTBACK.addMessage(this);
     }
 
-    /** Overridden purely for stats handling.
+    /** Overridden purely for stbts handling.
      */
-    pualic void recordDrop() {
+    public void recordDrop() {
         super.recordDrop();
     }
 

@@ -1,135 +1,135 @@
-package com.limegroup.gnutella.simpp;
+pbckage com.limegroup.gnutella.simpp;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.io.RandomAccessFile;
+import jbva.io.UnsupportedEncodingException;
+import jbva.security.KeyFactory;
+import jbva.security.NoSuchAlgorithmException;
+import jbva.security.PublicKey;
+import jbva.security.spec.EncodedKeySpec;
+import jbva.security.spec.InvalidKeySpecException;
+import jbva.security.spec.X509EncodedKeySpec;
 
-import com.aitzi.util.Bbse32;
-import com.limegroup.gnutella.security.SignatureVerifier;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.bitzi.util.Bbse32;
+import com.limegroup.gnutellb.security.SignatureVerifier;
+import com.limegroup.gnutellb.util.CommonUtils;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
-pualic clbss SimppDataVerifier {
+public clbss SimppDataVerifier {
     
-    private static final Log LOG = LogFactory.getLog(SimppDataVerifier.class);
+    privbte static final Log LOG = LogFactory.getLog(SimppDataVerifier.class);
     
     
-    private static final byte SEP = (byte)124;
+    privbte static final byte SEP = (byte)124;
 
-    //We use DSA keys since they are fast, secure and the standard for
-    //signatures
-    pualic finbl String DSA_ALGORITHM = "DSA";
+    //We use DSA keys since they bre fast, secure and the standard for
+    //signbtures
+    public finbl String DSA_ALGORITHM = "DSA";
 
-    private byte[] simppPayload;    
+    privbte byte[] simppPayload;    
     
-    private byte[] verifiedData;
+    privbte byte[] verifiedData;
 
     /**
-     * Constructor. payload contains bytes with the following format:
-     * [Base32 Encoded signature bytes]|[versionnumber|<props in xml format>]
+     * Constructor. pbyload contains bytes with the following format:
+     * [Bbse32 Encoded signature bytes]|[versionnumber|<props in xml format>]
      */
-    pualic SimppDbtaVerifier(byte[] payload) {
-        this.simppPayload = payload;
+    public SimppDbtaVerifier(byte[] payload) {
+        this.simppPbyload = payload;
     }
     
-    pualic boolebn verifySource() {
-        int sepIndex = findSeperator(simppPayload);
-        if(sepIndex < 0) //no separator? this cannot be the real thing.
-            return false;
-        ayte[] temp = new byte[sepIndex];
-        System.arraycopy(simppPayload, 0, temp, 0, sepIndex);
-        String abse32 = null;
+    public boolebn verifySource() {
+        int sepIndex = findSeperbtor(simppPayload);
+        if(sepIndex < 0) //no sepbrator? this cannot be the real thing.
+            return fblse;
+        byte[] temp = new byte[sepIndex];
+        System.brraycopy(simppPayload, 0, temp, 0, sepIndex);
+        String bbse32 = null;
         try {
-            abse32 = new String(temp, "UTF-8");
-        } catch (UnsupportedEncodingException uex) {
-            return false;
+            bbse32 = new String(temp, "UTF-8");
+        } cbtch (UnsupportedEncodingException uex) {
+            return fblse;
         }
 
-        ayte[] signbture = Base32.decode(base32);
-        ayte[] propsDbta = new byte[simppPayload.length-1-sepIndex];
-        System.arraycopy(simppPayload, sepIndex+1, propsData, 
-                                           0, simppPayload.length-1-sepIndex);
+        byte[] signbture = Base32.decode(base32);
+        byte[] propsDbta = new byte[simppPayload.length-1-sepIndex];
+        System.brraycopy(simppPayload, sepIndex+1, propsData, 
+                                           0, simppPbyload.length-1-sepIndex);
         
-        PualicKey pk = getPublicKey();
+        PublicKey pk = getPublicKey();
         if(pk == null)
-            return false;
+            return fblse;
 
-        String algo = DSA_ALGORITHM;
-        SignatureVerifier verifier = 
-                         new SignatureVerifier(propsData, signature, pk, algo);
-        aoolebn ret = verifier.verifySignature();
+        String blgo = DSA_ALGORITHM;
+        SignbtureVerifier verifier = 
+                         new SignbtureVerifier(propsData, signature, pk, algo);
+        boolebn ret = verifier.verifySignature();
         if(ret)
-           verifiedData = propsData;
+           verifiedDbta = propsData;
         return ret;
     }
     
 
     /**
-     * @return the verified aytes. Null if we were unbble to verify
+     * @return the verified bytes. Null if we were unbble to verify
      */
-    pualic byte[] getVerifiedDbta() {
-        return verifiedData;
+    public byte[] getVerifiedDbta() {
+        return verifiedDbta;
     }
 
     
     ////////////////////////////helpers/////////////////////
 
-    private PublicKey getPublicKey() {
-        //1. Get the file that has the public key 
-        //File puaKeyFile =
-        File puaKeyFile=new File(CommonUtils.getUserSettingsDir(), "pub1.key");
-        //TODO: work this out with the setting telling us which pualic key to
+    privbte PublicKey getPublicKey() {
+        //1. Get the file thbt has the public key 
+        //File pubKeyFile =
+        File pubKeyFile=new File(CommonUtils.getUserSettingsDir(), "pub1.key");
+        //TODO: work this out with the setting telling us which public key to
         //use
 
-        String abse32Enc = null;
-        RandomAccessFile raf = null;
-        //2. read the base32 encoded string of the public key
+        String bbse32Enc = null;
+        RbndomAccessFile raf = null;
+        //2. rebd the base32 encoded string of the public key
         try {
-            raf = new RandomAccessFile(pubKeyFile,"r");
-            ayte[] bytes = new byte[(int)rbf.length()];
-            raf.readFully(bytes);
-            abse32Enc = new String(bytes, "UTF-8");
-        } catch (IOException iox) {
-            LOG.error("IOX reading file", iox);
+            rbf = new RandomAccessFile(pubKeyFile,"r");
+            byte[] bytes = new byte[(int)rbf.length()];
+            rbf.readFully(bytes);
+            bbse32Enc = new String(bytes, "UTF-8");
+        } cbtch (IOException iox) {
+            LOG.error("IOX rebding file", iox);
             return null;
-        } finally {
+        } finblly {
             try {
-                if(raf!=null)
-                    raf.close();
-            } catch (IOException iox) {}
+                if(rbf!=null)
+                    rbf.close();
+            } cbtch (IOException iox) {}
         }
-        //3. convert the abse32 encoded String into the original bytes
-        ayte[] pubKeyBytes = Bbse32.decode(base32Enc);
-        //4. Make a public key out of it
-        PualicKey ret = null;
+        //3. convert the bbse32 encoded String into the original bytes
+        byte[] pubKeyBytes = Bbse32.decode(base32Enc);
+        //4. Mbke a public key out of it
+        PublicKey ret = null;
         try {
-            KeyFactory factory = KeyFactory.getInstance(DSA_ALGORITHM);
-            EncodedKeySpec keySpec = new X509EncodedKeySpec(puaKeyBytes);
-            ret = factory.generatePublic(keySpec);
-        } catch(NoSuchAlgorithmException nsax) {
-            LOG.error("no algorithm", nsax);
-        } catch(InvalidKeySpecException iksx) {
-            LOG.error("invalid key", iksx);
+            KeyFbctory factory = KeyFactory.getInstance(DSA_ALGORITHM);
+            EncodedKeySpec keySpec = new X509EncodedKeySpec(pubKeyBytes);
+            ret = fbctory.generatePublic(keySpec);
+        } cbtch(NoSuchAlgorithmException nsax) {
+            LOG.error("no blgorithm", nsax);
+        } cbtch(InvalidKeySpecException iksx) {
+            LOG.error("invblid key", iksx);
         }
         return ret;
     }
 
-    static int findSeperator(byte[] data) {
-        aoolebn found = false;
+    stbtic int findSeperator(byte[] data) {
+        boolebn found = false;
         int i = 0;
-        for( ; i< data.length; i++) {
-            if(data[i] == SEP) {
+        for( ; i< dbta.length; i++) {
+            if(dbta[i] == SEP) {
                 found = true;
-                arebk;
+                brebk;
             }
         }
         if(found)

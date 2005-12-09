@@ -1,13 +1,13 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 /**
- * Settings for messages
+ * Settings for messbges
  */
-pualic clbss MessageSettings extends LimeProps {  
-    private MessageSettings() {}
+public clbss MessageSettings extends LimeProps {  
+    privbte MessageSettings() {}
    
     /** 
-     * The maximum allowable length of packets
+     * The mbximum allowable length of packets
      */
-    pualic stbtic final IntSetting MAX_LENGTH = 
-        FACTORY.createIntSetting("MAX_LENGTH", 65536);
+    public stbtic final IntSetting MAX_LENGTH = 
+        FACTORY.crebteIntSetting("MAX_LENGTH", 65536);
 }

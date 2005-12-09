@@ -1,275 +1,275 @@
-package com.limegroup.gnutella.uploader;
+pbckage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.io.Writer;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.OutputStream;
+import jbva.io.StringWriter;
+import jbva.io.Writer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.BandwidthThrottle;
+import com.limegroup.gnutellb.CreationTimeCache;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutellb.http.HTTPHeaderName;
+import com.limegroup.gnutellb.http.HTTPUtils;
+import com.limegroup.gnutellb.settings.ConnectionSettings;
+import com.limegroup.gnutellb.settings.UploadSettings;
+import com.limegroup.gnutellb.util.BandwidthThrottle;
 
 /**
- * An implementation of the UploadState interface for a normal upload situation,
- * i.e., the real uploader.  It should send the appropriate header information,
- * followed ay the bctual file.  
+ * An implementbtion of the UploadState interface for a normal upload situation,
+ * i.e., the rebl uploader.  It should send the appropriate header information,
+ * followed by the bctual file.  
  */
-pualic finbl class NormalUploadState extends UploadState {
-    /** The amount of time that a send/wait cycle should take for throttled
-     *  uploads.  This should be short enough to not be noticeable in the GUI,
-     *  aut long enough so thbt waits are not called so often as to be
+public finbl class NormalUploadState extends UploadState {
+    /** The bmount of time that a send/wait cycle should take for throttled
+     *  uplobds.  This should be short enough to not be noticeable in the GUI,
+     *  but long enough so thbt waits are not called so often as to be
      *  inefficient. */
-    private static final Log LOG = LogFactory.getLog(NormalUploadState.class);
+    privbte static final Log LOG = LogFactory.getLog(NormalUploadState.class);
 	
-    private static final int BLOCK_SIZE=1024;
+    privbte static final int BLOCK_SIZE=1024;
 	
-	private final int _index;
-	private final String _fileName;
-	private final int _fileSize;
-	private InputStream _fis;
-	private int _amountWritten;
-    /** @see HTTPUploader#getUploadBegin */
-	private int _uploadBegin;
-    /** @see HTTPUploader#getUploadEnd */
-    private int _uploadEnd;
-    private int _amountRequested;
+	privbte final int _index;
+	privbte final String _fileName;
+	privbte final int _fileSize;
+	privbte InputStream _fis;
+	privbte int _amountWritten;
+    /** @see HTTPUplobder#getUploadBegin */
+	privbte int _uploadBegin;
+    /** @see HTTPUplobder#getUploadEnd */
+    privbte int _uploadEnd;
+    privbte int _amountRequested;
     
     /**
-     * The task that periodically checks to see if the uploader has stalled.
+     * The tbsk that periodically checks to see if the uploader has stalled.
      */
-    private StalledUploadWatchdog _stalledChecker;
+    privbte StalledUploadWatchdog _stalledChecker;
 
     /**
-     * Throttle for the speed of uploads.  The rate will get dynamically
-     * reset during the upload if the rate changes.
+     * Throttle for the speed of uplobds.  The rate will get dynamically
+     * reset during the uplobd if the rate changes.
      */
-    private static final BandwidthThrottle THROTTLE = 
-        new BandwidthThrottle(getUploadSpeed(), false);
+    privbte static final BandwidthThrottle THROTTLE = 
+        new BbndwidthThrottle(getUploadSpeed(), false);
         
     /**
      * UDP throttle.
      */
-    private static final BandwidthThrottle UDP_THROTTLE =
-        new BandwidthThrottle(getUploadSpeed(), false);
+    privbte static final BandwidthThrottle UDP_THROTTLE =
+        new BbndwidthThrottle(getUploadSpeed(), false);
 
 
 	/**
-	 * Constructs a new <tt>NormalUploadState</tt>, establishing all 
-	 * invariants.
+	 * Constructs b new <tt>NormalUploadState</tt>, establishing all 
+	 * invbriants.
 	 *
-	 * @param uploaded the <tt>HTTPUploader</tt>
+	 * @pbram uploaded the <tt>HTTPUploader</tt>
 	 */
-	pualic NormblUploadState(HTTPUploader uploader, 
-                                    StalledUploadWatchdog watchdog) {
-		super(uploader);
+	public NormblUploadState(HTTPUploader uploader, 
+                                    StblledUploadWatchdog watchdog) {
+		super(uplobder);
 
-		LOG.deaug("crebting a normal upload state");
+		LOG.debug("crebting a normal upload state");
 
 		
 		
 		_index = UPLOADER.getIndex();	
-		_fileName = UPLOADER.getFileName();
+		_fileNbme = UPLOADER.getFileName();
 		_fileSize = UPLOADER.getFileSize();
 
-		_amountWritten = 0;
-		_stalledChecker = watchdog; //new StalledUploadWatchdog();
+		_bmountWritten = 0;
+		_stblledChecker = watchdog; //new StalledUploadWatchdog();
  	}
  	
- 	pualic stbtic void setThrottleSwitching(boolean on) {
+ 	public stbtic void setThrottleSwitching(boolean on) {
  	    THROTTLE.setSwitching(on);
     }
     
-	pualic void writeMessbgeHeaders(OutputStream network) throws IOException {
-		LOG.deaug("writing messbge headers");
+	public void writeMessbgeHeaders(OutputStream network) throws IOException {
+		LOG.debug("writing messbge headers");
 		try {
-		    Writer ostream = new StringWriter();
-			_fis =  UPLOADER.getInputStream();
-			_uploadBegin =  UPLOADER.getUploadBegin();
-			_uploadEnd =  UPLOADER.getUploadEnd();
-			_amountRequested = UPLOADER.getAmountRequested();
-			//guard clause
-			if(_fileSize < _uploadBegin)
-				throw new IOException("Invalid Range");
+		    Writer ostrebm = new StringWriter();
+			_fis =  UPLOADER.getInputStrebm();
+			_uplobdBegin =  UPLOADER.getUploadBegin();
+			_uplobdEnd =  UPLOADER.getUploadEnd();
+			_bmountRequested = UPLOADER.getAmountRequested();
+			//gubrd clause
+			if(_fileSize < _uplobdBegin)
+				throw new IOException("Invblid Range");
 			
             
-			// Initial OK	
-			if( _uploadBegin==0 && _amountRequested==_fileSize ) {
-				ostream.write("HTTP/1.1 200 OK\r\n");
+			// Initibl OK	
+			if( _uplobdBegin==0 && _amountRequested==_fileSize ) {
+				ostrebm.write("HTTP/1.1 200 OK\r\n");
 			} else {
-				ostream.write("HTTP/1.1 206 Partial Content\r\n");
+				ostrebm.write("HTTP/1.1 206 Partial Content\r\n");
 			}
 			
-            HTTPUtils.writeHeader(HTTPHeaderName.SERVER, ConstantHTTPHeaderValue.SERVER_VALUE, ostream);
-            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_TYPE, getMimeType(), ostream);
-            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, _amountRequested, ostream);
-            HTTPUtils.writeDate(ostream);
-            HTTPUtils.writeContentDisposition(_fileName, ostream);
+            HTTPUtils.writeHebder(HTTPHeaderName.SERVER, ConstantHTTPHeaderValue.SERVER_VALUE, ostream);
+            HTTPUtils.writeHebder(HTTPHeaderName.CONTENT_TYPE, getMimeType(), ostream);
+            HTTPUtils.writeHebder(HTTPHeaderName.CONTENT_LENGTH, _amountRequested, ostream);
+            HTTPUtils.writeDbte(ostream);
+            HTTPUtils.writeContentDisposition(_fileNbme, ostream);
 			
-			// _uploadEnd is an EXCLUSIVE index internally, but HTTP uses an INCLUSIVE index.
-			if (_uploadBegin != 0 || _amountRequested != _fileSize) {
-			    ostream.write("Content-Range: bytes " + _uploadBegin  +
-				    "-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n");
+			// _uplobdEnd is an EXCLUSIVE index internally, but HTTP uses an INCLUSIVE index.
+			if (_uplobdBegin != 0 || _amountRequested != _fileSize) {
+			    ostrebm.write("Content-Range: bytes " + _uploadBegin  +
+				    "-" + ( _uplobdEnd - 1 )+ "/" + _fileSize + "\r\n");
 			}
 			
-			writeAlts(ostream);
-			writeRanges(ostream);
-			writeProxies(ostream);
+			writeAlts(ostrebm);
+			writeRbnges(ostream);
+			writeProxies(ostrebm);
 			
 			if(FILE_DESC != null) {
 				URN urn = FILE_DESC.getSHA1Urn();
 				
                 if (UPLOADER.isFirstReply()) {
-                    // write the creation time if this is the first reply.
-                    // if this is just a continuation, we don't need to send
-                    // this information again.
-                    // it's possiale t do thbt because we don't use the same
-                    // uploader for different files
-                    CreationTimeCache cache = CreationTimeCache.instance();
-                    if (cache.getCreationTime(urn) != null)
-                        HTTPUtils.writeHeader(
-                            HTTPHeaderName.CREATION_TIME,
-                            cache.getCreationTime(urn).toString(),
-                            ostream);
+                    // write the crebtion time if this is the first reply.
+                    // if this is just b continuation, we don't need to send
+                    // this informbtion again.
+                    // it's possible t do thbt because we don't use the same
+                    // uplobder for different files
+                    CrebtionTimeCache cache = CreationTimeCache.instance();
+                    if (cbche.getCreationTime(urn) != null)
+                        HTTPUtils.writeHebder(
+                            HTTPHebderName.CREATION_TIME,
+                            cbche.getCreationTime(urn).toString(),
+                            ostrebm);
                 }
             }
             
-            // write x-features header once because the downloader is
-            // supposed to cache that information anyway
+            // write x-febtures header once because the downloader is
+            // supposed to cbche that information anyway
             if (UPLOADER.isFirstReply())
-                HTTPUtils.writeFeatures(ostream);
+                HTTPUtils.writeFebtures(ostream);
 
-            // write X-Thex-URI header with root hash if we have already 
-            // calculated the tigertree
-            if (FILE_DESC.getHashTree()!=null)
-                HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI, FILE_DESC.getHashTree(), ostream);
+            // write X-Thex-URI hebder with root hash if we have already 
+            // cblculated the tigertree
+            if (FILE_DESC.getHbshTree()!=null)
+                HTTPUtils.writeHebder(HTTPHeaderName.THEX_URI, FILE_DESC.getHashTree(), ostream);
             
-			ostream.write("\r\n");
+			ostrebm.write("\r\n");
 			
-			_stalledChecker.activate(network);			
-			network.write(ostream.toString().getBytes());
-        } finally {
-			// we do not need to check the return value because
-			// if it was stalled, an IOException would have been thrown
-			// causing us to fall out to the catch clause
-			_stalledChecker.deactivate();
+			_stblledChecker.activate(network);			
+			network.write(ostrebm.toString().getBytes());
+        } finblly {
+			// we do not need to check the return vblue because
+			// if it wbs stalled, an IOException would have been thrown
+			// cbusing us to fall out to the catch clause
+			_stblledChecker.deactivate();
 		} 
 	}
 
-	pualic void writeMessbgeBody(OutputStream ostream) throws IOException {
-		LOG.deaug("writing messbge body");
+	public void writeMessbgeBody(OutputStream ostream) throws IOException {
+		LOG.debug("writing messbge body");
         try {            
-            _fis.skip(_uploadBegin);
-            upload(ostream);
-        } catch(IOException e) {
-            _stalledChecker.deactivate(); // no need to kill now
+            _fis.skip(_uplobdBegin);
+            uplobd(ostream);
+        } cbtch(IOException e) {
+            _stblledChecker.deactivate(); // no need to kill now
             throw e;
         }
 	}
 
     /**
-     * Upload the file, throttling the upload by making use of the
-     * BandwidthThrottle class
-     * @exception IOException If there is any I/O problem while uploading file
+     * Uplobd the file, throttling the upload by making use of the
+     * BbndwidthThrottle class
+     * @exception IOException If there is bny I/O problem while uploading file
      */
-    private void upload(OutputStream ostream) throws IOException {
-        // construct the auffer outside of the loop, so we don't
-        // have to reconstruct new byte arrays every BLOCK_SIZE.
-        ayte[] buf = new byte[BLOCK_SIZE];
+    privbte void upload(OutputStream ostream) throws IOException {
+        // construct the buffer outside of the loop, so we don't
+        // hbve to reconstruct new byte arrays every BLOCK_SIZE.
+        byte[] buf = new byte[BLOCK_SIZE];
         while (true) {
-            BandwidthThrottle throttle =
-                UPLOADER.isUDPTransfer() ? UDP_THROTTLE : THROTTLE;
-            throttle.setRate(getUploadSpeed());
+            BbndwidthThrottle throttle =
+                UPLOADER.isUDPTrbnsfer() ? UDP_THROTTLE : THROTTLE;
+            throttle.setRbte(getUploadSpeed());
 
             int c = -1;
-            // request the aytes from the throttle
+            // request the bytes from the throttle
             // BLOCKING (only if we need to throttle)
-            int allowed = BLOCK_SIZE;
-            if(!UPLOADER.isForcedShare())
-                allowed = throttle.request(BLOCK_SIZE);
-            int aurstSent=0;
+            int bllowed = BLOCK_SIZE;
+            if(!UPLOADER.isForcedShbre())
+                bllowed = throttle.request(BLOCK_SIZE);
+            int burstSent=0;
             try {
-                c = _fis.read(buf, 0, allowed);
-            } catch(NullPointerException npe) {
-                // happens occasionally :(
-                throw new IOException(npe.getMessage());
+                c = _fis.rebd(buf, 0, allowed);
+            } cbtch(NullPointerException npe) {
+                // hbppens occasionally :(
+                throw new IOException(npe.getMessbge());
             }
             if (c == -1)
                 return;
-            //dont upload more than asked
-            if( c > (_amountRequested - _amountWritten))
-                c = _amountRequested - _amountWritten;
-            _stalledChecker.activate(ostream);
-            ostream.write(buf, 0, c);
-			// we do not need to check the return value because
-			// if it was stalled, an IOException would have been thrown
-			// causing us to exit immediately.
-			_stalledChecker.deactivate();
+            //dont uplobd more than asked
+            if( c > (_bmountRequested - _amountWritten))
+                c = _bmountRequested - _amountWritten;
+            _stblledChecker.activate(ostream);
+            ostrebm.write(buf, 0, c);
+			// we do not need to check the return vblue because
+			// if it wbs stalled, an IOException would have been thrown
+			// cbusing us to exit immediately.
+			_stblledChecker.deactivate();
             
-            _amountWritten += c;
-            UPLOADER.setAmountUploaded(_amountWritten);
-            aurstSent += c;           
-            //finish uploading if the desired amount 
-            //has been uploaded
-            if(_amountWritten >= _amountRequested)
+            _bmountWritten += c;
+            UPLOADER.setAmountUplobded(_amountWritten);
+            burstSent += c;           
+            //finish uplobding if the desired amount 
+            //hbs been uploaded
+            if(_bmountWritten >= _amountRequested)
                 return;
         }
             
     }
 
 	/** 
-	 * Eventually this method should determine the mime type of a file fill 
-	 * in the details of this later. Assume binary for now. 
+	 * Eventublly this method should determine the mime type of a file fill 
+	 * in the detbils of this later. Assume binary for now. 
 	 */
-	private String getMimeType() {
-        return "application/binary";                  
+	privbte String getMimeType() {
+        return "bpplication/binary";                  
 	}
     
     /**
-     * @return the abndwidth for uploads in bytes per second
+     * @return the bbndwidth for uploads in bytes per second
      */
-    private static float getUploadSpeed() {
-	    // if the user chose not to limit his uploads
-	    // ay setting the uplobd speed to unlimited
-	    // set the upload speed to 3.4E38 bytes per second.
-	    // This is de facto not limiting the uploads
-	    int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
-	    float ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
-            // if the uploads are limited, take messageUpstream
-            // for ultrapeers into account, - don't allow lower 
-            // speeds than 1kb/s so uploads won't stall completely
-            // if the user accidently sets his connection speed 
-            // lower than his message upstream
-            Math.max(
-                // connection speed is in kaits per second
-                ConnectionSettings.CONNECTION_SPEED.getValue() / 8.f 
-                // upload speed is in percent
+    privbte static float getUploadSpeed() {
+	    // if the user chose not to limit his uplobds
+	    // by setting the uplobd speed to unlimited
+	    // set the uplobd speed to 3.4E38 bytes per second.
+	    // This is de fbcto not limiting the uploads
+	    int uSpeed = UplobdSettings.UPLOAD_SPEED.getValue();
+	    flobt ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
+            // if the uplobds are limited, take messageUpstream
+            // for ultrbpeers into account, - don't allow lower 
+            // speeds thbn 1kb/s so uploads won't stall completely
+            // if the user bccidently sets his connection speed 
+            // lower thbn his message upstream
+            Mbth.max(
+                // connection speed is in kbits per second
+                ConnectionSettings.CONNECTION_SPEED.getVblue() / 8.f 
+                // uplobd speed is in percent
                 * uSpeed / 100.f
-                // reduced upload speed if we are an ultrapeer
-                - RouterService.getConnectionManager()
-                .getMeasuredUpstreamBandwidth()*1.f, 1.f )
-	        // we need aytes per second
+                // reduced uplobd speed if we are an ultrapeer
+                - RouterService.getConnectionMbnager()
+                .getMebsuredUpstreamBandwidth()*1.f, 1.f )
+	        // we need bytes per second
 	        * 1024;
 	    return ret;
     }
     
-	pualic boolebn getCloseConnection() {
-	    return false;
+	public boolebn getCloseConnection() {
+	    return fblse;
 	}
 
-	// overrides Oaject.toString
-	pualic String toString() {
-		return "NormalUploadState:\r\n"+
-		       "File Name:  "+_fileName+"\r\n"+
+	// overrides Object.toString
+	public String toString() {
+		return "NormblUploadState:\r\n"+
+		       "File Nbme:  "+_fileName+"\r\n"+
 		       "File Size:  "+_fileSize+"\r\n"+
 		       "File Index: "+_index+"\r\n"+
 		       "File Desc:  "+FILE_DESC;

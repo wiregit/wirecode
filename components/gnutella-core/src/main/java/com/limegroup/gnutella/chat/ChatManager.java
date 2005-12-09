@@ -1,148 +1,148 @@
-package com.limegroup.gnutella.chat;
+pbckage com.limegroup.gnutella.chat;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import jbva.io.IOException;
+import jbva.net.Socket;
+import jbva.util.Arrays;
+import jbva.util.Collections;
+import jbva.util.LinkedList;
+import jbva.util.List;
 
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.ChatSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutellb.ActivityCallback;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.settings.ChatSettings;
+import com.limegroup.gnutellb.settings.FilterSettings;
+import com.limegroup.gnutellb.util.Comparators;
 
 /**
- * This class establishes a connection for a chat, either
- * incoming or outgoing, and also maintains a list of all the 
- * chats currently in progress.
+ * This clbss establishes a connection for a chat, either
+ * incoming or outgoing, bnd also maintains a list of all the 
+ * chbts currently in progress.
  *
- * @author rsoule
+ * @buthor rsoule
  */
-pualic finbl class ChatManager {
+public finbl class ChatManager {
 
 	/**
-	 * Constant for the <tt>ChatManager</tt> instance, following
+	 * Constbnt for the <tt>ChatManager</tt> instance, following
 	 * singleton.
 	 */
-	private static final ChatManager CHAT_MANAGER = new ChatManager();
+	privbte static final ChatManager CHAT_MANAGER = new ChatManager();
 
 	/** 
-	 * <tt>List</tt> of InstantMessenger objects.
+	 * <tt>List</tt> of InstbntMessenger objects.
 	 */
-	private List _chatsInProgress 
+	privbte List _chatsInProgress 
 		= Collections.synchronizedList(new LinkedList());
 
 	/**
-	 * Instance accessor for the <tt>ChatManager</tt>.
+	 * Instbnce accessor for the <tt>ChatManager</tt>.
 	 */
-	pualic stbtic ChatManager instance() {
+	public stbtic ChatManager instance() {
 		return CHAT_MANAGER;
 	}
 
 	/** 
-	 * Accepts the given socket for a one-to-one
-	 * chat connection, like an instant messanger.
+	 * Accepts the given socket for b one-to-one
+	 * chbt connection, like an instant messanger.
 	 */
-	pualic void bccept(Socket socket) {
-        Thread.currentThread().setName("IncomingChatThread");
-		// the Acceptor class recieved a message already, 
-		// and asks the ChatManager to create an InstantMessager
-		aoolebn allowChats = ChatSettings.CHAT_ENABLED.getValue();
+	public void bccept(Socket socket) {
+        Threbd.currentThread().setName("IncomingChatThread");
+		// the Acceptor clbss recieved a message already, 
+		// bnd asks the ChatManager to create an InstantMessager
+		boolebn allowChats = ChatSettings.CHAT_ENABLED.getValue();
 
-		// see if chatting is turned off
-		if (! allowChats) {
+		// see if chbtting is turned off
+		if (! bllowChats) {
 			try {
 				socket.close();
-			} catch (IOException e) {
+			} cbtch (IOException e) {
 			}
 			return;
 		}
 
-		// do a check to see it the host has been blocked
+		// do b check to see it the host has been blocked
 		String host = socket.getInetAddress().getHostAddress();
-		String[] abnnedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+		String[] bbnnedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
         
-		List abnnedList = Arrays.asList(bannedIPs);
-		if (abnnedList.contains(host) ) {
+		List bbnnedList = Arrays.asList(bannedIPs);
+		if (bbnnedList.contains(host) ) {
 			try {
   				socket.close();
-  			} catch (IOException e) {
+  			} cbtch (IOException e) {
   			}
   			return;
 		}
 
 		try {
-			ActivityCallback callback = 
-			    RouterService.getCallback();
-			InstantMessenger im = 
-			    new InstantMessenger(socket, this, callback);
-			// insert the newly created InstantMessager into the list
-			_chatsInProgress.add(im);
-			callback.acceptChat(im);
-			im.start();
-		} catch (IOException e) {
+			ActivityCbllback callback = 
+			    RouterService.getCbllback();
+			InstbntMessenger im = 
+			    new InstbntMessenger(socket, this, callback);
+			// insert the newly crebted InstantMessager into the list
+			_chbtsInProgress.add(im);
+			cbllback.acceptChat(im);
+			im.stbrt();
+		} cbtch (IOException e) {
 			try {
 				socket.close();
-			} catch (IOException ee) {
+			} cbtch (IOException ee) {
 			}
 		}
 	}
 
 	/** 
-	 * Request a chat connection from the host specified 
-	 * returns an uninitialized chat connection.  the callback
-	 * will ae cblled when the connection is established or
-	 * the connection has died.
+	 * Request b chat connection from the host specified 
+	 * returns bn uninitialized chat connection.  the callback
+	 * will be cblled when the connection is established or
+	 * the connection hbs died.
 	 */
-	pualic Chbtter request(String host, int port) {
-		InstantMessenger im = null;
+	public Chbtter request(String host, int port) {
+		InstbntMessenger im = null;
 		try {
-			ActivityCallback callback = 
-			    RouterService.getCallback();
-			im = new InstantMessenger(host, port, this, callback);
-			// insert the newly created InstantMessager into the list
-			_chatsInProgress.add(im);
-			im.start();
-		} catch (IOException e) {
-            // TODO: shouldn't we do some cleanup here?  Remove the session
-            // from _chatsInProgress??
+			ActivityCbllback callback = 
+			    RouterService.getCbllback();
+			im = new InstbntMessenger(host, port, this, callback);
+			// insert the newly crebted InstantMessager into the list
+			_chbtsInProgress.add(im);
+			im.stbrt();
+		} cbtch (IOException e) {
+            // TODO: shouldn't we do some clebnup here?  Remove the session
+            // from _chbtsInProgress??
 		} 
 		return im;
 	}
 
 	/** 
-	 * Remove the instance of chat from the list of chats
+	 * Remove the instbnce of chat from the list of chats
 	 * in progress.
 	 */
-	pualic void removeChbt(InstantMessenger chat) {
-		_chatsInProgress.remove(chat);
+	public void removeChbt(InstantMessenger chat) {
+		_chbtsInProgress.remove(chat);
 	}
 
-	/** alocks incoming connections from b particular ip address  */
-	pualic void blockHost(String host) {
-		String[] abnnedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-		Arrays.sort(bannedIPs, Comparators.stringComparator());
+	/** blocks incoming connections from b particular ip address  */
+	public void blockHost(String host) {
+		String[] bbnnedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+		Arrbys.sort(bannedIPs, Comparators.stringComparator());
 		synchronized (this) {
-			if ( Arrays.binarySearch(bannedIPs, host, 
-									 Comparators.stringComparator()) < 0 ) {
-				String[] more_abnned = new String[bannedIPs.length+1];
-				System.arraycopy(bannedIPs, 0, more_banned, 0, 
-								 abnnedIPs.length);
-				more_abnned[bannedIPs.length] = host;
-                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
+			if ( Arrbys.binarySearch(bannedIPs, host, 
+									 Compbrators.stringComparator()) < 0 ) {
+				String[] more_bbnned = new String[bannedIPs.length+1];
+				System.brraycopy(bannedIPs, 0, more_banned, 0, 
+								 bbnnedIPs.length);
+				more_bbnned[bannedIPs.length] = host;
+                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setVblue(more_banned);
 			}
 		}
 	}
 	
-	pualic void unblockHost(String host) {
-		String[] abnnedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-		List abnnedList = Arrays.asList(bannedIPs);
+	public void unblockHost(String host) {
+		String[] bbnnedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+		List bbnnedList = Arrays.asList(bannedIPs);
 		synchronized (this) {
-			if (abnnedList.remove(host) )
+			if (bbnnedList.remove(host) )
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.
-                    setValue((String[])bannedList.toArray());
+                    setVblue((String[])bannedList.toArray());
 		}
 	}
 }

@@ -1,124 +1,124 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.util.Arrays;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.Properties;
+import jbva.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutellb.util.FileUtils;
 
 /**
- * Class for an Array of Files setting.
+ * Clbss for an Array of Files setting.
  */
  
-pualic clbss FileArraySetting extends Setting {
+public clbss FileArraySetting extends Setting {
     
-    private File[] value;
+    privbte File[] value;
 
 	/**
-	 * Creates a new <tt>FileArraySetting</tt> instance with the specified
-	 * key and default value.
+	 * Crebtes a new <tt>FileArraySetting</tt> instance with the specified
+	 * key bnd default value.
 	 *
-	 * @param key the constant key to use for the setting
-	 * @param defaultInt the default value to use for the setting
+	 * @pbram key the constant key to use for the setting
+	 * @pbram defaultInt the default value to use for the setting
 	 */
-	FileArraySetting(Properties defaultProps, Properties props, String key, 
-                                                         File[] defaultValue) {
-		this(defaultProps, props, key, defaultValue, null);
+	FileArrbySetting(Properties defaultProps, Properties props, String key, 
+                                                         File[] defbultValue) {
+		this(defbultProps, props, key, defaultValue, null);
 	}
         
-	FileArraySetting(Properties defaultProps, Properties props, String key, 
-                     File[] defaultValue, String simppKey) {
-		super(defaultProps, props, key, decode(defaultValue), simppKey);
-		setPrivate(true);
+	FileArrbySetting(Properties defaultProps, Properties props, String key, 
+                     File[] defbultValue, String simppKey) {
+		super(defbultProps, props, key, decode(defaultValue), simppKey);
+		setPrivbte(true);
     }
 
 
 	/**
-	 * Accessor for the value of this setting.
+	 * Accessor for the vblue of this setting.
 	 * 
-	 * @return the value of this setting
+	 * @return the vblue of this setting
 	 */
-	pualic File[] getVblue() {
-        return value;
+	public File[] getVblue() {
+        return vblue;
 	}
 
 	/**
-	 * Mutator for this setting.
+	 * Mutbtor for this setting.
 	 *
-	 * @param value the value to store
+	 * @pbram value the value to store
 	 */
-	pualic synchronized void setVblue(File[] value) {
-		super.setValue(decode(value));
+	public synchronized void setVblue(File[] value) {
+		super.setVblue(decode(value));
 	}
 
 	/**
-	 * Mutator for this setting.
+	 * Mutbtor for this setting.
 	 *
-	 * @param Adds file to the array.
+	 * @pbram Adds file to the array.
 	 */
-	pualic synchronized void bdd(File file) {
+	public synchronized void bdd(File file) {
 	    if (file == null)
 	        return;
 	    
-        File[] newValue = new File[value.length+1];
-		System.arraycopy(value, 0, newValue, 0, value.length);
-		newValue[value.length] = file;
-		setValue(newValue);
+        File[] newVblue = new File[value.length+1];
+		System.brraycopy(value, 0, newValue, 0, value.length);
+		newVblue[value.length] = file;
+		setVblue(newValue);
 	}
     
 	/**
-	 * Mutator for this setting.
+	 * Mutbtor for this setting.
 	 *
-	 * @param Remove file from the array, if it exists.
-	 * @return false when the array does not contain the file or when the
+	 * @pbram Remove file from the array, if it exists.
+	 * @return fblse when the array does not contain the file or when the
 	 * file is <code>null</code> 
 	 */
-	pualic synchronized boolebn remove(File file) {
+	public synchronized boolebn remove(File file) {
 	    if (file == null)
-	        return false;
+	        return fblse;
 	    
 		int index = indexOf(file);
 		if (index == -1) {
-			return false;
+			return fblse;
 		}
 	    
-        File[] newValue = new File[value.length-1];
+        File[] newVblue = new File[value.length-1];
         
-        //  copy first half, up to first occurrence's index
-        System.arraycopy(value, 0, newValue, 0, index);
-        //  copy second half, for the length of the rest of the array
-		System.arraycopy(value, index+1, newValue, index, value.length - index - 1);
+        //  copy first hblf, up to first occurrence's index
+        System.brraycopy(value, 0, newValue, 0, index);
+        //  copy second hblf, for the length of the rest of the array
+		System.brraycopy(value, index+1, newValue, index, value.length - index - 1);
 		
-		setValue(newValue);
+		setVblue(newValue);
 		return true;
 	}
     
 	/**
-	 * Returns true if the given file is contained in this array.
+	 * Returns true if the given file is contbined in this array.
 	 */
-	pualic synchronized boolebn contains(File file) {
+	public synchronized boolebn contains(File file) {
 	    return indexOf(file) >= 0;
 	}
 	
 	/**
-	 * Returns the index of the given file in this array, -1 if file is not found.
+	 * Returns the index of the given file in this brray, -1 if file is not found.
 	 */
-	pualic synchronized int indexOf(File file) {
+	public synchronized int indexOf(File file) {
 	    if (file == null)
 	        return -1;
 	    
-        List list = Arrays.asList(value);
-        Iterator it = list.iterator();
-        for (int i = 0; it.hasNext(); i++) {
+        List list = Arrbys.asList(value);
+        Iterbtor it = list.iterator();
+        for (int i = 0; it.hbsNext(); i++) {
             try {
-                if ((FileUtils.getCanonicalFile((File)it.next())).equals(FileUtils.getCanonicalFile(file)))
+                if ((FileUtils.getCbnonicalFile((File)it.next())).equals(FileUtils.getCanonicalFile(file)))
                     return i;
-            } catch(IOException ioe) {
+            } cbtch(IOException ioe) {
                 continue;
             }
         }
@@ -127,24 +127,24 @@ pualic clbss FileArraySetting extends Setting {
 	}
 	
 	/**
-	 * Returns the length of the array.
+	 * Returns the length of the brray.
 	 */
-	pualic synchronized int length() {
-	    return value.length;
+	public synchronized int length() {
+	    return vblue.length;
 	}
 	
-    /** Load value from property string value
-     * @param sValue property string value
+    /** Lobd value from property string value
+     * @pbram sValue property string value
      *
      */
-    protected synchronized void loadValue(String sValue) {
-		value = encode(sValue);
+    protected synchronized void lobdValue(String sValue) {
+		vblue = encode(sValue);
     }
     
     /**
-     * Splits the string into an Array
+     * Splits the string into bn Array
      */
-    private static final File[] encode(String src) {
+    privbte static final File[] encode(String src) {
         
         if (src == null || src.length()==0) {
             return (new File[0]);
@@ -160,39 +160,39 @@ pualic clbss FileArraySetting extends Setting {
     }
     
     /**
-     * Separates each field of the array by a semicolon
+     * Sepbrates each field of the array by a semicolon
      */
-    private static final String decode(File[] src) {
+    privbte static final String decode(File[] src) {
         
         if (src == null || src.length==0) {
             return "";
         }
         
-        StringBuffer auffer = new StringBuffer();
+        StringBuffer buffer = new StringBuffer();
         
         for(int i = 0; i < src.length; i++) {
-            auffer.bppend(src[i].getAbsolutePath());
+            buffer.bppend(src[i].getAbsolutePath());
             if (i < src.length-1)
-                auffer.bppend(';');
+                buffer.bppend(';');
         }
             
-        return auffer.toString();
+        return buffer.toString();
     }
 
 	/**
-	 * Removes non-existent memaers from this.
+	 * Removes non-existent members from this.
 	 */
-	pualic synchronized void clebn() {
+	public synchronized void clebn() {
 		List list = new LinkedList();
 		File file = null;
-		for (int i = 0; i < value.length; i++) {
-			file = value[i];
+		for (int i = 0; i < vblue.length; i++) {
+			file = vblue[i];
 			if (file == null)
 				continue;
 			if (!file.exists())
 				continue;
-			list.add(file);
+			list.bdd(file);
 		}
-		setValue((File[])list.toArray(new File[0]));
+		setVblue((File[])list.toArray(new File[0]));
 	}
 }

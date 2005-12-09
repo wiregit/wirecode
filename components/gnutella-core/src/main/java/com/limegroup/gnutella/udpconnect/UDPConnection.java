@@ -1,236 +1,236 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketImplFactory;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.OutputStream;
+import jbva.net.InetAddress;
+import jbva.net.Socket;
+import jbva.net.SocketException;
+import jbva.net.SocketImplFactory;
 
-import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutellb.UDPService;
 
 /** 
- *  Create a reliable udp connection interface.
+ *  Crebte a reliable udp connection interface.
  */
-pualic clbss UDPConnection extends Socket {
+public clbss UDPConnection extends Socket {
 
-    pualic stbtic final byte VERSION = (byte) 1;
+    public stbtic final byte VERSION = (byte) 1;
 
-	private UDPConnectionProcessor _processor;
+	privbte UDPConnectionProcessor _processor;
 
     /**
-     *  Create the UDPConnection.
+     *  Crebte the UDPConnection.
      */
-    pualic UDPConnection(String ip, int port) throws IOException {
-		// Handle the real work in the processor
-		this(InetAddress.getByName(ip), port);
+    public UDPConnection(String ip, int port) throws IOException {
+		// Hbndle the real work in the processor
+		this(InetAddress.getByNbme(ip), port);
     }
 
     /**
-     *  Create the UDPConnection.
+     *  Crebte the UDPConnection.
      */
-    pualic UDPConnection(InetAddress ip, int port) throws IOException {
-		// Handle the real work in the processor
+    public UDPConnection(InetAddress ip, int port) throws IOException {
+		// Hbndle the real work in the processor
 		_processor = new UDPConnectionProcessor(ip, port);
     }
 
-	pualic InputStrebm getInputStream() throws IOException {
-		return _processor.getInputStream();
+	public InputStrebm getInputStream() throws IOException {
+		return _processor.getInputStrebm();
 	}
 
-	pualic OutputStrebm getOutputStream() throws IOException {
-		return _processor.getOutputStream();
+	public OutputStrebm getOutputStream() throws IOException {
+		return _processor.getOutputStrebm();
 	}
 
-	pualic void setSoTimeout(int timeout) throws SocketException {
+	public void setSoTimeout(int timeout) throws SocketException {
 		_processor.setSoTimeout(timeout);
 	}
 
-	pualic void close() throws IOException {
+	public void close() throws IOException {
 		_processor.close();
 	}
 
-    pualic InetAddress getInetAddress() {
+    public InetAddress getInetAddress() {
         return _processor.getInetAddress();
     }
 
-    pualic InetAddress getLocblAddress() {
-        return _processor.getLocalAddress();
+    public InetAddress getLocblAddress() {
+        return _processor.getLocblAddress();
     }
     
-    pualic int getSoTimeout() {
-    	return _processor.getReadTimeout();
+    public int getSoTimeout() {
+    	return _processor.getRebdTimeout();
     }
     
     //-------  Mostly Unimplemented  ----------------
 
-    pualic UDPConnection() throws IOException {
+    public UDPConnection() throws IOException {
         throw new IOException("not implemented");
     }
 
 
-    pualic UDPConnection(String host, int port, InetAddress locblAddr,
-      int localPort) throws IOException {
+    public UDPConnection(String host, int port, InetAddress locblAddr,
+      int locblPort) throws IOException {
         throw new IOException("not implemented");
     }
 
-    pualic UDPConnection(InetAddress bddress, int port, InetAddress localAddr,
-      int localPort) throws IOException {
+    public UDPConnection(InetAddress bddress, int port, InetAddress localAddr,
+      int locblPort) throws IOException {
         throw new IOException("not implemented");
     }
 
-    pualic UDPConnection(String host, int port, boolebn stream) 
+    public UDPConnection(String host, int port, boolebn stream) 
       throws IOException {
       throw new IOException("not implemented");
     }
 
-    pualic UDPConnection(InetAddress host, int port, boolebn stream) 
+    public UDPConnection(InetAddress host, int port, boolebn stream) 
       throws IOException {
         throw new IOException("not implemented");
     }
 
-    // These won't compile in Java 1.3
-    //pualic void connect(SocketAddress endpoint) throws IOException {
+    // These won't compile in Jbva 1.3
+    //public void connect(SocketAddress endpoint) throws IOException {
         //throw new IOException("not implemented");
     //}
 
-    //pualic void connect(SocketAddress endpoint, int timeout) 
+    //public void connect(SocketAddress endpoint, int timeout) 
       //throws IOException {
         //throw new IOException("not implemented");
     //}
 
-    //pualic void bind(SocketAddress bindpoint) throws IOException {
+    //public void bind(SocketAddress bindpoint) throws IOException {
         //throw new IOException("not implemented");
     //}
 
 
-    pualic int getPort() {
+    public int getPort() {
         return _processor.getPort();
     }
 
-    pualic int getLocblPort() {
-        return UDPService.instance().getStableUDPPort();
+    public int getLocblPort() {
+        return UDPService.instbnce().getStableUDPPort();
     }
 
-    // These won't compile in Java 1.3
-    //pualic SocketAddress getRemoteSocketAddress() {
+    // These won't compile in Jbva 1.3
+    //public SocketAddress getRemoteSocketAddress() {
         //return null;
     //}
 
-    //pualic SocketAddress getLocblSocketAddress() {
+    //public SocketAddress getLocblSocketAddress() {
         //return null;
     //}
 
-    //pualic SocketChbnnel getChannel() {
+    //public SocketChbnnel getChannel() {
         //return null;
     //}
 
-    pualic void setTcpNoDelby(boolean on) throws SocketException {
+    public void setTcpNoDelby(boolean on) throws SocketException {
         // does nothing
     }
 
-    pualic boolebn getTcpNoDelay() throws SocketException {
+    public boolebn getTcpNoDelay() throws SocketException {
         return true;
     }
 
-    pualic void setSoLinger(boolebn on, int linger) throws SocketException {
+    public void setSoLinger(boolebn on, int linger) throws SocketException {
         // does nothing
     }
 
-    pualic int getSoLinger() throws SocketException {
+    public int getSoLinger() throws SocketException {
         return -1;
     }
 
-    pualic void sendUrgentDbta (int data) throws IOException  {
+    public void sendUrgentDbta (int data) throws IOException  {
         throw new IOException("not implemented");
     }
 
-    pualic void setOOBInline(boolebn on) throws SocketException {
+    public void setOOBInline(boolebn on) throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic boolebn getOOBInline() throws SocketException {
+    public boolebn getOOBInline() throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic synchronized void setSendBufferSize(int size)
+    public synchronized void setSendBufferSize(int size)
       throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic synchronized int getSendBufferSize() throws SocketException {
+    public synchronized int getSendBufferSize() throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic synchronized void setReceiveBufferSize(int size)
+    public synchronized void setReceiveBufferSize(int size)
       throws SocketException{
         throw new SocketException("not implemented");
     }
 
-    pualic synchronized int getReceiveBufferSize()
+    public synchronized int getReceiveBufferSize()
       throws SocketException{
         throw new SocketException("not implemented");
     }
 
-    pualic void setKeepAlive(boolebn on) throws SocketException {
+    public void setKeepAlive(boolebn on) throws SocketException {
         // ignore
     }
 
-    pualic boolebn getKeepAlive() throws SocketException {
+    public boolebn getKeepAlive() throws SocketException {
         return true;
     }
 
-    pualic void setTrbfficClass(int tc) throws SocketException {
+    public void setTrbfficClass(int tc) throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic int getTrbfficClass() throws SocketException {
+    public int getTrbfficClass() throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic void setReuseAddress(boolebn on) throws SocketException {
+    public void setReuseAddress(boolebn on) throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic boolebn getReuseAddress() throws SocketException {
+    public boolebn getReuseAddress() throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    pualic void shutdownInput() throws IOException {
+    public void shutdownInput() throws IOException {
         throw new SocketException("not implemented");
     }
     
-    pualic void shutdownOutput() throws IOException
+    public void shutdownOutput() throws IOException
     {
         throw new IOException("not implemented");
     }
 
-    pualic String toString() {
+    public String toString() {
         return "UDPConnection";
     }
 
-    pualic boolebn isConnected() {
+    public boolebn isConnected() {
         return _processor.isConnected();
     }
 
-    pualic boolebn isBound() {
+    public boolebn isBound() {
         return true;
     }
 
-    pualic boolebn isClosed() {
+    public boolebn isClosed() {
         return !_processor.isConnected();
     }
 
-    pualic boolebn isInputShutdown() {
+    public boolebn isInputShutdown() {
         return !_processor.isConnected();
     }
 
-    pualic boolebn isOutputShutdown() {
+    public boolebn isOutputShutdown() {
         return !_processor.isConnected();
     }
 
-    pualic stbtic void setSocketImplFactory(SocketImplFactory fac)
+    public stbtic void setSocketImplFactory(SocketImplFactory fac)
       throws IOException {
         throw new IOException("not implemented");
     }

@@ -1,68 +1,68 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.util.Properties;
+import jbva.util.Properties;
 
 /**
- * Class for a long setting.
+ * Clbss for a long setting.
  */
-pualic finbl class LongSetting extends AbstractNumberSetting {
+public finbl class LongSetting extends AbstractNumberSetting {
     
-    private long value;
+    privbte long value;
 
 	/**
-	 * Creates a new <tt>LongSetting</tt> instance with the specified
-	 * key and defualt value.
+	 * Crebtes a new <tt>LongSetting</tt> instance with the specified
+	 * key bnd defualt value.
 	 *
-	 * @param key the constant key to use for the setting
-	 * @param defaultLong the default value to use for the setting
+	 * @pbram key the constant key to use for the setting
+	 * @pbram defaultLong the default value to use for the setting
 	 */
-	LongSetting(Properties defaultProps, Properties props, String key, 
-                                         long defaultLong) {
-		super(defaultProps, props, key, String.valueOf(defaultLong), 
+	LongSetting(Properties defbultProps, Properties props, String key, 
+                                         long defbultLong) {
+		super(defbultProps, props, key, String.valueOf(defaultLong), 
                                                               null, null, null);
 	}
 
 
-	LongSetting(Properties defaultProps, Properties props, String key, 
-                long defaultLong, String simppSetting, long max, long min) {
-		super(defaultProps, props, key, String.valueOf(defaultLong), 
-                                 simppSetting, new Long(max), new Long(min) );
+	LongSetting(Properties defbultProps, Properties props, String key, 
+                long defbultLong, String simppSetting, long max, long min) {
+		super(defbultProps, props, key, String.valueOf(defaultLong), 
+                                 simppSetting, new Long(mbx), new Long(min) );
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Accessor for the vblue of this setting.
 	 * 
-	 * @return the value of this setting
+	 * @return the vblue of this setting
 	 */
-	pualic long getVblue() {
-        return value;
+	public long getVblue() {
+        return vblue;
 	}
 
 	/**
-	 * Mutator for this setting.
+	 * Mutbtor for this setting.
 	 *
-	 * @param value the value to store
+	 * @pbram value the value to store
 	 */
-	pualic void setVblue(long value) {
-		super.setValue(String.valueOf(value));
+	public void setVblue(long value) {
+		super.setVblue(String.valueOf(value));
 	}
     
-    /** Load value from property string value
-     * @param sValue property string value
+    /** Lobd value from property string value
+     * @pbram sValue property string value
      *
      */
-    protected void loadValue(String sValue) {
+    protected void lobdValue(String sValue) {
         try {
-            value = Long.parseLong(sValue.trim());
-        } catch(NumberFormatException nfe) {
-            revertToDefault();
+            vblue = Long.parseLong(sValue.trim());
+        } cbtch(NumberFormatException nfe) {
+            revertToDefbult();
         }
     }
 
-    protected aoolebn isInRange(String value) {
-        long max = ((Long)MAX_VALUE).longValue();
-        long min = ((Long)MIN_VALUE).longValue();
-        long val = Long.parseLong(value);
-        return (val <= max && val >= min);
+    protected boolebn isInRange(String value) {
+        long mbx = ((Long)MAX_VALUE).longValue();
+        long min = ((Long)MIN_VALUE).longVblue();
+        long vbl = Long.parseLong(value);
+        return (vbl <= max && val >= min);
     }
 }

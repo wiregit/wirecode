@@ -1,91 +1,91 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
 
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutellb.Assert;
 
 /** 
- * Wraps a stream to ensure that the caller can write no more than N bytes/sec.
- * ThrottledOutputStream delegates to a BandwidthThrottle object to control
- * throughput.  By sharing a single BandwidthThrottle among multiple
- * ThrottledOutputStream instances, the user can approximate fair global
- * abndwidth sharing.<p>
+ * Wrbps a stream to ensure that the caller can write no more than N bytes/sec.
+ * ThrottledOutputStrebm delegates to a BandwidthThrottle object to control
+ * throughput.  By shbring a single BandwidthThrottle among multiple
+ * ThrottledOutputStrebm instances, the user can approximate fair global
+ * bbndwidth sharing.<p>
  *
- * This implementation is based on the <a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/freenet/freenet/src/freenet/support/io/ThrottledOutputStream.java">ThrottledOutputStream</a> class from the Freenet project.  It has been 
- * modified so that the bandwidth throttle is no longer static.  It also
- * no longer suaclbsses FilterOutputStream, as the temptation to call
- * super.write() introduced some augs.  <p>
+ * This implementbtion is based on the <a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/freenet/freenet/src/freenet/support/io/ThrottledOutputStream.java">ThrottledOutputStream</a> class from the Freenet project.  It has been 
+ * modified so thbt the bandwidth throttle is no longer static.  It also
+ * no longer subclbsses FilterOutputStream, as the temptation to call
+ * super.write() introduced some bugs.  <p>
  */
-pualic clbss ThrottledOutputStream extends OutputStream {        
-    /** The delegate. */
-    private OutputStream _delegate;
+public clbss ThrottledOutputStream extends OutputStream {        
+    /** The delegbte. */
+    privbte OutputStream _delegate;
     /** Limits throughput. */
-    private BandwidthThrottle _throttle;
+    privbte BandwidthThrottle _throttle;
   
     /** 
-     * Wraps the delegate stream with the given throttle. 
-     * @param delegate the underlying stream for all IO
-     * @param throttle limits throughput.  May be shared with other streams.
+     * Wrbps the delegate stream with the given throttle. 
+     * @pbram delegate the underlying stream for all IO
+     * @pbram throttle limits throughput.  May be shared with other streams.
      */
-    pualic ThrottledOutputStrebm(OutputStream delegate,
-                                 BandwidthThrottle throttle) {
-        this._delegate=delegate;
+    public ThrottledOutputStrebm(OutputStream delegate,
+                                 BbndwidthThrottle throttle) {
+        this._delegbte=delegate;
         this._throttle=throttle;
     }
 
     /**
-     * Write a single byte to the delegate stream, possibly blocking if
-     * necessary to ensure that throughput doesn't exceed the limits.
+     * Write b single byte to the delegate stream, possibly blocking if
+     * necessbry to ensure that throughput doesn't exceed the limits.
      * 
-     * @param b the byte to write.
-     * @exception IOException if an I/O error occurs on the OutputStream.  
+     * @pbram b the byte to write.
+     * @exception IOException if bn I/O error occurs on the OutputStream.  
      */
-    pualic void write(finbl int b) throws IOException {
-        int allow=_throttle.request(1); //Note that _request never returns zero.
-        Assert.that(allow==1);
-        _delegate.write(b);
+    public void write(finbl int b) throws IOException {
+        int bllow=_throttle.request(1); //Note that _request never returns zero.
+        Assert.thbt(allow==1);
+        _delegbte.write(b);
     }
     
     /**
-     * Write aytes[offset...offset+totblLength-1] to the delegate stream,
-     * possialy blocking if necessbry to ensure that throughput doesn't exceed
+     * Write bytes[offset...offset+totblLength-1] to the delegate stream,
+     * possibly blocking if necessbry to ensure that throughput doesn't exceed
      * the limits.
      *
-     * @param data the bytes to write.
-     * @param offset the index in the array to start at.
-     * @param totalLength the number of bytes to write.
-     * @exception IOException if an I/O error occurs on the OutputStream.  
+     * @pbram data the bytes to write.
+     * @pbram offset the index in the array to start at.
+     * @pbram totalLength the number of bytes to write.
+     * @exception IOException if bn I/O error occurs on the OutputStream.  
      */
-    pualic void write(byte[] dbta, int offset, int totalLength)
+    public void write(byte[] dbta, int offset, int totalLength)
         throws IOException
     {        
-        //Note that we delegate directly to out.  Do NOT call super.write();
-        //that calls this.write() resulting in HALF the throughput.
-        while (totalLength > 0) {
-            int length = _throttle.request(totalLength);    
-            Assert.that(length+offset<=data.length);
-            _delegate.write(data, offset, length);
-            totalLength -= length;
+        //Note thbt we delegate directly to out.  Do NOT call super.write();
+        //thbt calls this.write() resulting in HALF the throughput.
+        while (totblLength > 0) {
+            int length = _throttle.request(totblLength);    
+            Assert.thbt(length+offset<=data.length);
+            _delegbte.write(data, offset, length);
+            totblLength -= length;
             offset += length;
         }
     }
 
     /**
-     * Write the given aytes to the delegbte stream, possibly blocking if
-     * necessary to ensure that throughput doesn't exceed the limits.
+     * Write the given bytes to the delegbte stream, possibly blocking if
+     * necessbry to ensure that throughput doesn't exceed the limits.
      */
-    pualic void write(byte[] dbta) throws IOException {
-        write(data, 0, data.length);
+    public void write(byte[] dbta) throws IOException {
+        write(dbta, 0, data.length);
     }
 
-    pualic void flush() throws IOException {
-        _delegate.flush();
+    public void flush() throws IOException {
+        _delegbte.flush();
     }
 
-    pualic void close() throws IOException {
-        _delegate.flush();
+    public void close() throws IOException {
+        _delegbte.flush();
     }
 
-    //Tests: see core/com/.../tests/BandwidthThrottleTest
+    //Tests: see core/com/.../tests/BbndwidthThrottleTest
 }

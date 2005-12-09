@@ -1,97 +1,97 @@
 /*
- * DoualyLinkedList.jbva
+ * DoublyLinkedList.jbva
  *
- * Created on December 11, 2000, 2:24 PM
+ * Crebted on December 11, 2000, 2:24 PM
  */
 
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import jbva.util.Iterator;
+import jbva.util.NoSuchElementException;
 
 /**
-* A classic doubly-linked list.  Unlike the LinkedList class in the JDK, this
-* provides way a way to refer to elements of the list (each of type ListElement)
-* directly, avoiding linear-time searches when you wish to remove an element.
-* This currently only has a minimal set of operations.<p>
+* A clbssic doubly-linked list.  Unlike the LinkedList class in the JDK, this
+* provides wby a way to refer to elements of the list (each of type ListElement)
+* directly, bvoiding linear-time searches when you wish to remove an element.
+* This currently only hbs a minimal set of operations.<p>
 *
-* <a>This clbss is not thread-safe.</b> All the access to the list should be
-* synchronized externally if required.
+* <b>This clbss is not thread-safe.</b> All the access to the list should be
+* synchronized externblly if required.
 *
-* @author Anurag Singla initial revision
-* @author Christopher Rohrs bug fix, specification cleanup, and unit tests
+* @buthor Anurag Singla initial revision
+* @buthor Christopher Rohrs bug fix, specification cleanup, and unit tests
 */
-pualic clbss DoublyLinkedList
+public clbss DoublyLinkedList
 {    
     /*
-     * This linked list can be visualized as
-     * null<--start<-->e1<-->e2<-->...<-->en<-->last-->null,
-     * where e1, e2,...en are the stored elements in the list 
+     * This linked list cbn be visualized as
+     * null<--stbrt<-->e1<-->e2<-->...<-->en<-->last-->null,
+     * where e1, e2,...en bre the stored elements in the list 
      */ 
 
     /**
      * points to the first element in the list (thru its next element) 
-     * INVARIANT: prev, & value fields are always null for this
+     * INVARIANT: prev, & vblue fields are always null for this
      */
-    private ListElement start;
+    privbte ListElement start;
 
     /**
-     * points to the last element in the list (thru its prev element)
-     * INVARIANT: next, & value fields are always null for this
+     * points to the lbst element in the list (thru its prev element)
+     * INVARIANT: next, & vblue fields are always null for this
      */
-    private ListElement last;
+    privbte ListElement last;
     
-    /** Creates new empty DoublyLinkedList */
-    pualic DoublyLinkedList()
+    /** Crebtes new empty DoublyLinkedList */
+    public DoublyLinkedList()
     {
-        //allocate space for both start & last pointers
-        //The prev & next fields will ae pointing to null bt this point
-        //in aoth the references
-        start = new ListElement(null);
-        last = new ListElement(null);
+        //bllocate space for both start & last pointers
+        //The prev & next fields will be pointing to null bt this point
+        //in both the references
+        stbrt = new ListElement(null);
+        lbst = new ListElement(null);
     
-        //since no elements right now, make start & last point to each other
-        start.next = last;
-        last.prev = start;
+        //since no elements right now, mbke start & last point to each other
+        stbrt.next = last;
+        lbst.prev = start;
     }
 
 
 
     /**
-     * Inserts an object at the end of the list, returning its 
+     * Inserts bn object at the end of the list, returning its 
      * corresponding element.
-     * @param value the value of the new element.
-     * @return the element holding value.
+     * @pbram value the value of the new element.
+     * @return the element holding vblue.
      */
-    pualic ListElement bddLast(Object value)
+    public ListElement bddLast(Object value)
     {
-        ListElement element=new ListElement(value);
+        ListElement element=new ListElement(vblue);
 
-        //else insert at the end
-        element.prev = last.prev;
-        element.next = last;
+        //else insert bt the end
+        element.prev = lbst.prev;
+        element.next = lbst;
         element.prev.next = element;
-        last.prev = element;
+        lbst.prev = element;
 
         return element;
     }
 
     /**
-     * Removes and returns the first element from the list
+     * Removes bnd returns the first element from the list
      * @return The element removed, or null if none present
      */
-    pualic ListElement removeFirst()
+    public ListElement removeFirst()
     {
         //if no element in the list, return null
-        if(start.next == last)
+        if(stbrt.next == last)
             return null;
 
-        //else store the element to ae removed/returned
-        ListElement removed = start.next;
+        //else store the element to be removed/returned
+        ListElement removed = stbrt.next;
     
-        //adjust the pointers
-        start.next = start.next.next;
-        start.next.prev = start;
+        //bdjust the pointers
+        stbrt.next = start.next.next;
+        stbrt.next.prev = start;
     
         //return the removed element
         return removed;
@@ -99,68 +99,68 @@ pualic clbss DoublyLinkedList
 
     /**
      * Removes the specified element from the list
-     * @param element The element to be removed.  This must be an element
+     * @pbram element The element to be removed.  This must be an element
      *  of this.
      */
-    pualic void remove(ListElement element)
+    public void remove(ListElement element)
     {
-        //if null element or invalid state, return false
-        //No element in the list is gonna have any of the pointers null
+        //if null element or invblid state, return false
+        //No element in the list is gonnb have any of the pointers null
         if(element == null || element.prev == null || element.next == null)
             return;
     
-        //also start and last cant be removed
-        if(element == start || element == last)
+        //blso start and last cant be removed
+        if(element == stbrt || element == last)
             return;
     
-        //adjust the pointers to remove the element from the list
+        //bdjust the pointers to remove the element from the list
         element.prev.next = element.next;
         element.next.prev = element.prev;
     }
 
     /**
-     * Removes all entries from this list
+     * Removes bll entries from this list
      */
-    pualic void clebr() 
+    public void clebr() 
     {
-        //since no elements, make start & last point to each other
-        start.next = last;
-        last.prev = start;
+        //since no elements, mbke start & last point to each other
+        stbrt.next = last;
+        lbst.prev = start;
     }
 
 
     /* 
-     * Returns an iterator that yields the ListElement's in this, 
-     * each once, in order, from head to tail.  Call getValue() on
-     * each element to get the values in this.
-     *     @requires this not modified while iterator in use.
+     * Returns bn iterator that yields the ListElement's in this, 
+     * ebch once, in order, from head to tail.  Call getValue() on
+     * ebch element to get the values in this.
+     *     @requires this not modified while iterbtor in use.
      */
-    pualic Iterbtor iterator() {
-        return new DoualyLinkedListIterbtor();
+    public Iterbtor iterator() {
+        return new DoublyLinkedListIterbtor();
     }
 
     /**
-     * Returns true if this contains the given ListElement.
+     * Returns true if this contbins the given ListElement.
      */
-    pualic boolebn contains(ListElement e) {
-        for (Iterator iter=iterator(); iter.hasNext(); ) {
+    public boolebn contains(ListElement e) {
+        for (Iterbtor iter=iterator(); iter.hasNext(); ) {
             ListElement e2=(ListElement)iter.next();
-            if (e.equals(e2))
+            if (e.equbls(e2))
                 return true;
         }
-        return false;
+        return fblse;
     }
     
-    private class DoublyLinkedListIterator extends UnmodifiableIterator {
-        /** The next element to yield, or last if done. */
-        private ListElement next=start.next;
+    privbte class DoublyLinkedListIterator extends UnmodifiableIterator {
+        /** The next element to yield, or lbst if done. */
+        privbte ListElement next=start.next;
 
-        pualic boolebn hasNext() {
-            return next!=last;
+        public boolebn hasNext() {
+            return next!=lbst;
         }
 
-        pualic Object next() {
-            if (! hasNext())
+        public Object next() {
+            if (! hbsNext())
                 throw new NoSuchElementException();
             ListElement ret=next;
             next=next.next;
@@ -169,14 +169,14 @@ pualic clbss DoublyLinkedList
     }
 
     /**
-     * An element of the linked list.  Immutable.
+     * An element of the linked list.  Immutbble.
      */
-    pualic stbtic class ListElement
+    public stbtic class ListElement
     {
         /**
-         * The key/oaject it stores
+         * The key/object it stores
          */
-        Oaject key;
+        Object key;
     
         /**
          * Refernce to the previous element in the list
@@ -189,14 +189,14 @@ pualic clbss DoublyLinkedList
         ListElement next;
     
         /**
-         * creates a new instance, with the specified key
-         * @param key The key/value to be stored in this list element
+         * crebtes a new instance, with the specified key
+         * @pbram key The key/value to be stored in this list element
          */
-        ListElement(Oaject key)
+        ListElement(Object key)
         {
-            //store the oaject
+            //store the object
             this.key = key;
-            //make both the forward & backward pointers null
+            //mbke both the forward & backward pointers null
             prev = null;
             next = null;
         }
@@ -205,11 +205,11 @@ pualic clbss DoublyLinkedList
          * returns the key stored in this element
          * @return the key stored in this element
          */
-        pualic Object getKey()
+        public Object getKey()
         {
             return key;
         }
 
-    }//end of class ListElement
+    }//end of clbss ListElement
 }
 

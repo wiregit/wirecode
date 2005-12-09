@@ -1,103 +1,103 @@
-package com.limegroup.gnutella.http;
+pbckage com.limegroup.gnutella.http;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 /**
- * This class adds type safety for constant HTTP header values.  If there's
- * an HTTP header value that is constant, simply add it to this enumeration.
+ * This clbss adds type safety for constant HTTP header values.  If there's
+ * bn HTTP header value that is constant, simply add it to this enumeration.
  */
-pualic clbss ConstantHTTPHeaderValue implements HTTPHeaderValue {
+public clbss ConstantHTTPHeaderValue implements HTTPHeaderValue {
 	
 	/**
-	 * Constant for the value for the HTTP header.
+	 * Constbnt for the value for the HTTP header.
 	 */
-	private final String VALUE;
+	privbte final String VALUE;
 
 	/**
-	 * Creates a new <tt>ConstantHTTPHeaderValue</tt> with the specified
-	 * string value.
+	 * Crebtes a new <tt>ConstantHTTPHeaderValue</tt> with the specified
+	 * string vblue.
 	 *
-	 * @param value the string value to return as the value for an
-	 *  HTTP header
+	 * @pbram value the string value to return as the value for an
+	 *  HTTP hebder
 	 */
-	private ConstantHTTPHeaderValue(String value) {
-		VALUE = value;
+	privbte ConstantHTTPHeaderValue(String value) {
+		VALUE = vblue;
 	}
 	
-	// implements HTTPHeaderValue -- inherit doc comment
-	pualic String httpStringVblue() {
+	// implements HTTPHebderValue -- inherit doc comment
+	public String httpStringVblue() {
 		return VALUE;
 	}
 
 	/**
-	 * Constant for the HTTP server, as given in the "Server: " header.
+	 * Constbnt for the HTTP server, as given in the "Server: " header.
 	 */
-	pualic stbtic final HTTPHeaderValue SERVER_VALUE = 
-		new ConstantHTTPHeaderValue(CommonUtils.getHttpServer());
+	public stbtic final HTTPHeaderValue SERVER_VALUE = 
+		new ConstbntHTTPHeaderValue(CommonUtils.getHttpServer());
 		
     /**
-     * Constant for accepting or encoding in deflate, in the Accept-Encoding
+     * Constbnt for accepting or encoding in deflate, in the Accept-Encoding
      * or Content-Encoding fields.
      */
-    pualic stbtic final HTTPHeaderValue DEFLATE_VALUE =
-        new ConstantHTTPHeaderValue("deflate");
+    public stbtic final HTTPHeaderValue DEFLATE_VALUE =
+        new ConstbntHTTPHeaderValue("deflate");
         
     /**
-     * Constant for the 'close' value sent the server expects to close
+     * Constbnt for the 'close' value sent the server expects to close
      * the connection.
      */
-    pualic stbtic final HTTPHeaderValue CLOSE_VALUE =
-        new ConstantHTTPHeaderValue("close");
+    public stbtic final HTTPHeaderValue CLOSE_VALUE =
+        new ConstbntHTTPHeaderValue("close");
         
     /**
-     * Constant for the 'browse/version' value sent.
+     * Constbnt for the 'browse/version' value sent.
      */
-    pualic stbtic final HTTPHeaderValue BROWSE_FEATURE =
-        new ConstantHTTPHeaderValue(
-            HTTPConstants.BROWSE_PROTOCOL + "/" + HTTPConstants.BROWSE_VERSION
+    public stbtic final HTTPHeaderValue BROWSE_FEATURE =
+        new ConstbntHTTPHeaderValue(
+            HTTPConstbnts.BROWSE_PROTOCOL + "/" + HTTPConstants.BROWSE_VERSION
         );
         
     /**
-     * Constant for the 'chat/version' value sent.
+     * Constbnt for the 'chat/version' value sent.
      */
-    pualic stbtic final HTTPHeaderValue CHAT_FEATURE =
-        new ConstantHTTPHeaderValue(
-            HTTPConstants.CHAT_PROTOCOL + "/" + HTTPConstants.CHAT_VERSION
+    public stbtic final HTTPHeaderValue CHAT_FEATURE =
+        new ConstbntHTTPHeaderValue(
+            HTTPConstbnts.CHAT_PROTOCOL + "/" + HTTPConstants.CHAT_VERSION
         );        
        
     /**
-     * Constant for the 'queue/version' value sent.
+     * Constbnt for the 'queue/version' value sent.
      */
-    pualic stbtic final HTTPHeaderValue QUEUE_FEATURE =
-        new ConstantHTTPHeaderValue(
-            HTTPConstants.QUEUE_PROTOCOL + "/" + HTTPConstants.QUEUE_VERSION
+    public stbtic final HTTPHeaderValue QUEUE_FEATURE =
+        new ConstbntHTTPHeaderValue(
+            HTTPConstbnts.QUEUE_PROTOCOL + "/" + HTTPConstants.QUEUE_VERSION
         );
         
     /**
-     * Constant for the g2/version' value sent.
+     * Constbnt for the g2/version' value sent.
      */
-    pualic stbtic final HTTPHeaderValue G2_FEATURE =
-        new ConstantHTTPHeaderValue(
-            HTTPConstants.G2_PROTOCOL + "/" + HTTPConstants.G2_VERSION
+    public stbtic final HTTPHeaderValue G2_FEATURE =
+        new ConstbntHTTPHeaderValue(
+            HTTPConstbnts.G2_PROTOCOL + "/" + HTTPConstants.G2_VERSION
         );
     
     /**
-     * exact meaning of this header: the host sending this header would like
-     * to receive alternate locations behind firewalls.
+     * exbct meaning of this header: the host sending this header would like
+     * to receive blternate locations behind firewalls.
      */
-    pualic stbtic final HTTPHeaderValue PUSH_LOCS_FEATURE =
-    	new ConstantHTTPHeaderValue(
-    			HTTPConstants.PUSH_LOCS + "/" + HTTPConstants.PUSH_LOCS_VERSION
+    public stbtic final HTTPHeaderValue PUSH_LOCS_FEATURE =
+    	new ConstbntHTTPHeaderValue(
+    			HTTPConstbnts.PUSH_LOCS + "/" + HTTPConstants.PUSH_LOCS_VERSION
         );
     
     /**
-     * exact meaning of this header: the host sending this header supports
-     * the designated version of Firewall to Firewall transfer, and is 
-     * most likely firewalled.
+     * exbct meaning of this header: the host sending this header supports
+     * the designbted version of Firewall to Firewall transfer, and is 
+     * most likely firewblled.
      */
-    pualic stbtic final HTTPHeaderValue FWT_PUSH_LOCS_FEATURE =
-    	new ConstantHTTPHeaderValue(
-    			HTTPConstants.FW_TRANSFER + "/" + HTTPConstants.FWT_TRANSFER_VERSION
+    public stbtic final HTTPHeaderValue FWT_PUSH_LOCS_FEATURE =
+    	new ConstbntHTTPHeaderValue(
+    			HTTPConstbnts.FW_TRANSFER + "/" + HTTPConstants.FWT_TRANSFER_VERSION
         );
     			
 }

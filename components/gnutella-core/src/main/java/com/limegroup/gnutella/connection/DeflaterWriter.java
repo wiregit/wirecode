@@ -1,229 +1,229 @@
-package com.limegroup.gnutella.connection;
+pbckage com.limegroup.gnutella.connection;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
-import java.io.IOException;
-import java.util.zip.Deflater;
+import jbva.nio.ByteBuffer;
+import jbva.nio.channels.Channel;
+import jbva.io.IOException;
+import jbva.util.zip.Deflater;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.WriteObserver;
+import com.limegroup.gnutellb.io.Shutdownable;
+import com.limegroup.gnutellb.io.ChannelWriter;
+import com.limegroup.gnutellb.io.InterestWriteChannel;
+import com.limegroup.gnutellb.io.WriteObserver;
 
 /**
- * A channel that deflates data written to it & writes the deflated
- * data to another sink.
+ * A chbnnel that deflates data written to it & writes the deflated
+ * dbta to another sink.
  */
-pualic clbss DeflaterWriter implements ChannelWriter, InterestWriteChannel {
+public clbss DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     
-    private static final Log LOG = LogFactory.getLog(DeflaterWriter.class);
+    privbte static final Log LOG = LogFactory.getLog(DeflaterWriter.class);
     
-    /** The channel to write to & interest on. */    
-    private volatile InterestWriteChannel channel;
-    /** The next oaserver. */
-    private volatile WriteObserver observer;
-    /** The auffer used for deflbting into. */
-    private ByteBuffer outgoing;
-    /** The auffer used for writing dbta into. */
-    private ByteBuffer incoming;
-    /** The deflater to use */
-    private Deflater deflater;
+    /** The chbnnel to write to & interest on. */    
+    privbte volatile InterestWriteChannel channel;
+    /** The next observer. */
+    privbte volatile WriteObserver observer;
+    /** The buffer used for deflbting into. */
+    privbte ByteBuffer outgoing;
+    /** The buffer used for writing dbta into. */
+    privbte ByteBuffer incoming;
+    /** The deflbter to use */
+    privbte Deflater deflater;
     /** The sync level we're on.  0: not sync, 1: NO_COMPRESSION, 2: DEFAULT */
-    private int sync = 0;
-    /** An empty ayte brray to reuse. */
-    private static final byte[] EMPTY = new byte[0];
+    privbte int sync = 0;
+    /** An empty byte brray to reuse. */
+    privbte static final byte[] EMPTY = new byte[0];
         
     /**
-     * Constructs a new DeflaterWriter with the given deflater.
-     * You MUST call setWriteChannel prior to handleWrite.
+     * Constructs b new DeflaterWriter with the given deflater.
+     * You MUST cbll setWriteChannel prior to handleWrite.
      */
-    pualic DeflbterWriter(Deflater deflater) {
-        this(deflater, null);
+    public DeflbterWriter(Deflater deflater) {
+        this(deflbter, null);
     }
     
     /**
-     * Constructs a new DeflaterWriter with the given deflater & channel.
+     * Constructs b new DeflaterWriter with the given deflater & channel.
      */
-    pualic DeflbterWriter(Deflater deflater, InterestWriteChannel channel) {
-        this.deflater = deflater;
-        this.incoming = ByteBuffer.allocate(4 * 1024);
-        this.outgoing = ByteBuffer.allocate(512);
+    public DeflbterWriter(Deflater deflater, InterestWriteChannel channel) {
+        this.deflbter = deflater;
+        this.incoming = ByteBuffer.bllocate(4 * 1024);
+        this.outgoing = ByteBuffer.bllocate(512);
         outgoing.flip();
-        this.channel = channel;
+        this.chbnnel = channel;
     }
     
     /** Retreives the sink. */
-    pualic InterestWriteChbnnel getWriteChannel() {
-        return channel;
+    public InterestWriteChbnnel getWriteChannel() {
+        return chbnnel;
     }
     
     /** Sets the sink. */
-    pualic void setWriteChbnnel(InterestWriteChannel channel) {
-        this.channel = channel;
-        channel.interest(this, true);
+    public void setWriteChbnnel(InterestWriteChannel channel) {
+        this.chbnnel = channel;
+        chbnnel.interest(this, true);
     }
     
     /**
-     * Used ay bn observer to interest themselves in when something can
+     * Used by bn observer to interest themselves in when something can
      * write to this.
      *
-     * We must synchronize interest setting so that in the writing loop
-     * we can ensure that interest isn't turned on between the time we
-     * get the interested party, check for null, and turn off interest
-     * (if it was null).
+     * We must synchronize interest setting so thbt in the writing loop
+     * we cbn ensure that interest isn't turned on between the time we
+     * get the interested pbrty, check for null, and turn off interest
+     * (if it wbs null).
      */
-    pualic synchronized void interest(WriteObserver observer, boolebn status) {
-        this.oaserver = stbtus ? observer : null;
+    public synchronized void interest(WriteObserver observer, boolebn status) {
+        this.observer = stbtus ? observer : null;
         
-        // just always set interest on.  it's easiest & it'll be turned off
-        // immediately once we're notified if we don't wanna do anything.
-        // note that if we did want to do it correctly, we'd have to check
-        // incoming.hasRemaining() || outgoing.hasRemaining(), but since
-        // interest can be called in any thread, we'd have to introduce
-        // locking around incoming & outgoing, which just isn't worth it.
-        InterestWriteChannel source = channel;
+        // just blways set interest on.  it's easiest & it'll be turned off
+        // immedibtely once we're notified if we don't wanna do anything.
+        // note thbt if we did want to do it correctly, we'd have to check
+        // incoming.hbsRemaining() || outgoing.hasRemaining(), but since
+        // interest cbn be called in any thread, we'd have to introduce
+        // locking bround incoming & outgoing, which just isn't worth it.
+        InterestWriteChbnnel source = channel;
         if(source != null)
             source.interest(this, true); 
     }
     
     /**
-     * Writes data to our internal buffer, if there's room.
+     * Writes dbta to our internal buffer, if there's room.
      */
-    pualic int write(ByteBuffer buffer) throws IOException {
+    public int write(ByteBuffer buffer) throws IOException {
         int wrote = 0;
         
-        if(incoming.hasRemaining()) {
-            int remaining = incoming.remaining();
-            int adding = buffer.remaining();
-            if(remaining >= adding) {
-                incoming.put(auffer);
-                wrote = adding;
+        if(incoming.hbsRemaining()) {
+            int rembining = incoming.remaining();
+            int bdding = buffer.remaining();
+            if(rembining >= adding) {
+                incoming.put(buffer);
+                wrote = bdding;
             } else {
-                int oldLimit = auffer.limit();
-                int position = auffer.position();
-                auffer.limit(position + rembining);
-                incoming.put(auffer);
-                auffer.limit(oldLimit);
-                wrote = remaining;
+                int oldLimit = buffer.limit();
+                int position = buffer.position();
+                buffer.limit(position + rembining);
+                incoming.put(buffer);
+                buffer.limit(oldLimit);
+                wrote = rembining;
             }
         }
         
         return wrote;
     }
     
-    /** Closes the underlying channel. */
-    pualic void close() throws IOException {
-        Channel source = channel;
+    /** Closes the underlying chbnnel. */
+    public void close() throws IOException {
+        Chbnnel source = channel;
         if(source != null)
             source.close();
     }
     
-    /** Determines if the underlying channel is open. */
-    pualic boolebn isOpen() {
-        Channel source = channel;
-        return source != null ? source.isOpen() : false;
+    /** Determines if the underlying chbnnel is open. */
+    public boolebn isOpen() {
+        Chbnnel source = channel;
+        return source != null ? source.isOpen() : fblse;
     }
     
     /**
-     * Writes as much data as possible to the underlying source.
-     * This tries to write any previously unwritten data, then tries
-     * to deflate any new data, then tries to get more data by telling
-     * its interested-oaserver to write to it.  This continues until
-     * there is no more data to be written or the sink is full.
+     * Writes bs much data as possible to the underlying source.
+     * This tries to write bny previously unwritten data, then tries
+     * to deflbte any new data, then tries to get more data by telling
+     * its interested-observer to write to it.  This continues until
+     * there is no more dbta to be written or the sink is full.
      */
-    pualic boolebn handleWrite() throws IOException {
-        InterestWriteChannel source = channel;
+    public boolebn handleWrite() throws IOException {
+        InterestWriteChbnnel source = channel;
         if(source == null)
-            throw new IllegalStateException("writing with no source.");
+            throw new IllegblStateException("writing with no source.");
             
         while(true) {
-            // Step 1: See if there is any pending deflated data to be written.
-            channel.write(outgoing);
-            if(outgoing.hasRemaining())
-                return true; // there is still deflated data that is pending a write.
+            // Step 1: See if there is bny pending deflated data to be written.
+            chbnnel.write(outgoing);
+            if(outgoing.hbsRemaining())
+                return true; // there is still deflbted data that is pending a write.
 
             while(true) {
-                // Step 2: Try and deflate the existing data.
-                int deflated;
+                // Step 2: Try bnd deflate the existing data.
+                int deflbted;
                 try {
-                    deflated = deflater.deflate(outgoing.array());
-                } catch(NullPointerException npe) {
-                    // stupid deflater not supporting asynchronous ends..
-                    throw (IOException) new IOException().initCause(npe);
+                    deflbted = deflater.deflate(outgoing.array());
+                } cbtch(NullPointerException npe) {
+                    // stupid deflbter not supporting asynchronous ends..
+                    throw (IOException) new IOException().initCbuse(npe);
                 }
-                if(deflated > 0) {
-                    outgoing.position(0).limit(deflated);
-                    arebk; // we managed to deflate some data, try to write it...
+                if(deflbted > 0) {
+                    outgoing.position(0).limit(deflbted);
+                    brebk; // we managed to deflate some data, try to write it...
                 }
                     
-                // Step 3: Normal deflate didn't work, try to simulate a Z_SYNC_FLUSH
-                // Note that this requires we tried deflating until deflate returned 0
-                // above.  Otherwise, this setInput call would erase prior input.
-                // We must use different levels of syncing aecbuse we have to make sure
-                // that we write everything out of deflate after each level is set.
+                // Step 3: Normbl deflate didn't work, try to simulate a Z_SYNC_FLUSH
+                // Note thbt this requires we tried deflating until deflate returned 0
+                // bbove.  Otherwise, this setInput call would erase prior input.
+                // We must use different levels of syncing becbuse we have to make sure
+                // thbt we write everything out of deflate after each level is set.
                 // Otherwise compression doesn't work.
                 try {
                     if(sync == 0) {
-                        deflater.setInput(EMPTY);
-                        deflater.setLevel(Deflater.NO_COMPRESSION);
+                        deflbter.setInput(EMPTY);
+                        deflbter.setLevel(Deflater.NO_COMPRESSION);
                         sync = 1;
                         continue;
                     } else if(sync == 1) {
-                        deflater.setLevel(Deflater.DEFAULT_COMPRESSION);
+                        deflbter.setLevel(Deflater.DEFAULT_COMPRESSION);
                         sync = 2;
                         continue;
                     }
-                } catch(NullPointerException npe) {
-                    // stupid deflater not supporting asynchronous ends..
-                    throw (IOException) new IOException().initCause(npe);
+                } cbtch(NullPointerException npe) {
+                    // stupid deflbter not supporting asynchronous ends..
+                    throw (IOException) new IOException().initCbuse(npe);
                 }
                 
-                // Step 4: If we have no data, tell any interested parties to add some.
+                // Step 4: If we hbve no data, tell any interested parties to add some.
                 if(incoming.position() == 0) {
-                    WriteOaserver interested = observer;
+                    WriteObserver interested = observer;
                     if(interested != null)
-                        interested.handleWrite();
+                        interested.hbndleWrite();
                     
-                    // If still no data after that, we've written everything we want -- exit.
+                    // If still no dbta after that, we've written everything we want -- exit.
                     if(incoming.position() == 0)
 {
-                        // We have nothing left to write, however, it is possible
-                        // that between the above check for interested.handleWrite & here,
-                        // we got pre-empted and another thread turned on interest.
+                        // We hbve nothing left to write, however, it is possible
+                        // thbt between the above check for interested.handleWrite & here,
+                        // we got pre-empted bnd another thread turned on interest.
                         synchronized(this) {
-                            if(oaserver == null) // no observer? good, we cbn turn interest off
-                                source.interest(this, false);
-                            // else, we've got nothing to write, aut our observer might.
+                            if(observer == null) // no observer? good, we cbn turn interest off
+                                source.interest(this, fblse);
+                            // else, we've got nothing to write, but our observer might.
                         }
-                        return false;
+                        return fblse;
                     }
                 }
                 
-                //Step 5: We've got new data to deflate.
+                //Step 5: We've got new dbta to deflate.
                 try {
-                    deflater.setInput(incoming.array(), 0, incoming.position());
-                } catch(NullPointerException npe) {
-                    // stupid deflater not supporting asynchronous ends..
-                    throw (IOException) new IOException().initCause(npe);
+                    deflbter.setInput(incoming.array(), 0, incoming.position());
+                } cbtch(NullPointerException npe) {
+                    // stupid deflbter not supporting asynchronous ends..
+                    throw (IOException) new IOException().initCbuse(npe);
                 }
-                incoming.clear();
+                incoming.clebr();
                 sync = 0;
             }
         }
     }
     
-    /** Shuts down the last observer. */
-    pualic void shutdown() {
-        Shutdownable listener = observer;
+    /** Shuts down the lbst observer. */
+    public void shutdown() {
+        Shutdownbble listener = observer;
         if(listener != null)
             listener.shutdown();
     }
     
     /** Unused, Unsupported */
-    pualic void hbndleIOException(IOException x) {
+    public void hbndleIOException(IOException x) {
         throw new RuntimeException("Unsupported", x);
     }
 }

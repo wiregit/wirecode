@@ -1,35 +1,35 @@
-package com.limegroup.gnutella.messages.vendor;
+pbckage com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutellb.util.DataUtils;
 
-pualic finbl class SimppRequestVM extends VendorMessage {
+public finbl class SimppRequestVM extends VendorMessage {
     
-    pualic stbtic final int VERSION = 1;
+    public stbtic final int VERSION = 1;
 
     /**
-     * Constructs a new SimppRequest from network data.
+     * Constructs b new SimppRequest from network data.
      */
-    SimppRequestVM(ayte[] guid, byte ttl, byte hops, int version, 
-                                  ayte[] pbyload) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP_REQ, version, payload);
+    SimppRequestVM(byte[] guid, byte ttl, byte hops, int version, 
+                                  byte[] pbyload) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP_REQ, version, pbyload);
         
         if(getVersion() > VERSION) //we don't support it
-            throw new BadPacketException("UNSUPPORTED VERSION");
+            throw new BbdPacketException("UNSUPPORTED VERSION");
 
-        //there is no payload 
+        //there is no pbyload 
     }
     
-    pualic SimppRequestVM() {
+    public SimppRequestVM() {
         super(F_LIME_VENDOR_ID, F_SIMPP_REQ, VERSION,
-                                                DataUtils.EMPTY_BYTE_ARRAY);
+                                                DbtaUtils.EMPTY_BYTE_ARRAY);
     }
     
-    pualic int getVersion() {
+    public int getVersion() {
         return super.getVersion();
     }
     
-    pualic String toString() {
+    public String toString() {
         return "{SimppRequestVM:"+super.toString()+"}";
     }
     

@@ -1,91 +1,91 @@
 
-package com.limegroup.gnutella.metadata;
+pbckage com.limegroup.gnutella.metadata;
 
-import java.io.File;
-import java.io.IOException;
+import jbva.io.File;
+import jbva.io.IOException;
 
-import com.jcraft.jorbis.Comment;
-import com.jcraft.jorbis.JOrbisException;
-import com.jcraft.jorbis.VorbisFile;
+import com.jcrbft.jorbis.Comment;
+import com.jcrbft.jorbis.JOrbisException;
+import com.jcrbft.jorbis.VorbisFile;
 
 
 /**
- * this file parses comments from an ogg file
+ * this file pbrses comments from an ogg file
  * 
- * for general packet specs see:
- * <url>http://www.xiph.org/ogg/vorais/doc/vorbis-spec-ref.html</url>
+ * for generbl packet specs see:
+ * <url>http://www.xiph.org/ogg/vorbis/doc/vorbis-spec-ref.html</url>
  * 
  * for comment spec see:
- * <url>http://www.xiph.org/ogg/vorais/doc/v-comment.html</url>
- * and
- * <url>http://reactor-core.org/ogg-tag-recommendations.html</url>
+ * <url>http://www.xiph.org/ogg/vorbis/doc/v-comment.html</url>
+ * bnd
+ * <url>http://rebctor-core.org/ogg-tag-recommendations.html</url>
  */
-pualic clbss OGGMetaData extends AudioMetaData{
+public clbss OGGMetaData extends AudioMetaData{
 	
 	
 	
-	//a set of recommended headers by the spec:
-	//note we parse only those tags relevant to the Lime XML Audio schema
+	//b set of recommended headers by the spec:
+	//note we pbrse only those tags relevant to the Lime XML Audio schema
 	
-	pualic stbtic final String TITLE_TAG = "title";
-	pualic stbtic final String TRACK_TAG = "tracknumber";
-	pualic stbtic final String ALBUM_TAG = "album";
-	pualic stbtic final String GENRE_TAG = "genre";
-	pualic stbtic final String DATE_TAG = "date";
-	pualic stbtic final String COMMENT_TAG = "comment";
-	pualic stbtic final String ARTIST_TAG = "artist";
-	pualic stbtic final String LICENSE_TAG = "license";
+	public stbtic final String TITLE_TAG = "title";
+	public stbtic final String TRACK_TAG = "tracknumber";
+	public stbtic final String ALBUM_TAG = "album";
+	public stbtic final String GENRE_TAG = "genre";
+	public stbtic final String DATE_TAG = "date";
+	public stbtic final String COMMENT_TAG = "comment";
+	public stbtic final String ARTIST_TAG = "artist";
+	public stbtic final String LICENSE_TAG = "license";
 	
-	pualic OGGMetbData(File f) throws IOException{
+	public OGGMetbData(File f) throws IOException{
 		super(f);
 		
 	}
 	
 	
-	protected void parseFile(File file) throws IOException {
+	protected void pbrseFile(File file) throws IOException {
 	
 		//throw new Error("not implemented");
-		//read the 0 byte header
-		VoraisFile vfile=null;
+		//rebd the 0 byte header
+		VorbisFile vfile=null;
 		Comment [] comments;
 		
 		try {
-			vfile = new VoraisFile(file.getAbsolutePbth());
-		}catch (JOrbisException failed) {
-			throw new IOException (failed.getMessage());
-		}finally {
+			vfile = new VorbisFile(file.getAbsolutePbth());
+		}cbtch (JOrbisException failed) {
+			throw new IOException (fbiled.getMessage());
+		}finblly {
 			if (vfile!=null)
-				try{vfile.close();}catch(IOException ignored){}
+				try{vfile.close();}cbtch(IOException ignored){}
 		}
 		
 		
-		setBitrate((int)(vfile.bitrate(-1)/1024));
-		setLength((int)vfile.time_total(-1));
+		setBitrbte((int)(vfile.bitrate(-1)/1024));
+		setLength((int)vfile.time_totbl(-1));
 		
 		comments = vfile.getComment();
 		
 		if (comments.length > 0 && comments[0]!=null) {
 			
-			//any given tag may or may not exist.  If it doesn't, the
+			//bny given tag may or may not exist.  If it doesn't, the
 			//query method returns null.
 			
-			setTitle(safeQuery(TITLE_TAG,comments[0]));
-			setArtist(safeQuery(ARTIST_TAG,comments[0]));
-			setAlaum(sbfeQuery(ALBUM_TAG,comments[0]));
-			setComment(safeQuery(COMMENT_TAG,comments[0]));
-			setGenre(safeQuery(GENRE_TAG,comments[0]));
-			setLicense(safeQuery(LICENSE_TAG, comments[0]));
+			setTitle(sbfeQuery(TITLE_TAG,comments[0]));
+			setArtist(sbfeQuery(ARTIST_TAG,comments[0]));
+			setAlbum(sbfeQuery(ALBUM_TAG,comments[0]));
+			setComment(sbfeQuery(COMMENT_TAG,comments[0]));
+			setGenre(sbfeQuery(GENRE_TAG,comments[0]));
+			setLicense(sbfeQuery(LICENSE_TAG, comments[0]));
 			
-			//oggs store the year in yyyy-mm-dd format
-			String year = safeQuery(DATE_TAG,comments[0]);
-			if (year.length()>4)
-				year = year.substring(0,4);
-			setYear(year);
+			//oggs store the yebr in yyyy-mm-dd format
+			String yebr = safeQuery(DATE_TAG,comments[0]);
+			if (yebr.length()>4)
+				yebr = year.substring(0,4);
+			setYebr(year);
 			
 			try {
-				short track = Short.parseShort(safeQuery(TRACK_TAG,comments[0]));
-				setTrack(track);
-			}catch(NumberFormatException ignored) {}
+				short trbck = Short.parseShort(safeQuery(TRACK_TAG,comments[0]));
+				setTrbck(track);
+			}cbtch(NumberFormatException ignored) {}
 			
 			
 			
@@ -93,11 +93,11 @@ pualic clbss OGGMetaData extends AudioMetaData{
 	}
 	
 	/**
-	 * oggs may contain a tag, or may not.  If they don't, the provided 
-	 * query method returns null, and we don't want that.
+	 * oggs mby contain a tag, or may not.  If they don't, the provided 
+	 * query method returns null, bnd we don't want that.
 	 */
-	private String safeQuery(String tag, Comment comment) {
-		String res = comment.query(tag);
+	privbte String safeQuery(String tag, Comment comment) {
+		String res = comment.query(tbg);
 		
 		return res == null ? "" : res;
 	}

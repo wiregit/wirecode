@@ -1,54 +1,54 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.util.Properties;
+import jbva.util.Properties;
 
 /**
- * Class for a string setting.
+ * Clbss for a string setting.
  */
-pualic finbl class StringSetting extends Setting {
+public finbl class StringSetting extends Setting {
     
-    String value;
+    String vblue;
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
-	 * key and defualt value.
+	 * Crebtes a new <tt>SettingBool</tt> instance with the specified
+	 * key bnd defualt value.
 	 *
-	 * @param key the constant key to use for the setting
-	 * @param defaultStr the default value to use for the setting
+	 * @pbram key the constant key to use for the setting
+	 * @pbram defaultStr the default value to use for the setting
 	 */
-	StringSetting(Properties defaultProps, Properties props, String key, 
-                                       String defaultStr) {
-		super(defaultProps, props, key, defaultStr, null);
+	StringSetting(Properties defbultProps, Properties props, String key, 
+                                       String defbultStr) {
+		super(defbultProps, props, key, defaultStr, null);
 	}
 
-	StringSetting(Properties defaultProps, Properties props, String key, 
-                   String defaultStr, String simppKey) {
-		super(defaultProps, props, key, defaultStr, simppKey);
+	StringSetting(Properties defbultProps, Properties props, String key, 
+                   String defbultStr, String simppKey) {
+		super(defbultProps, props, key, defaultStr, simppKey);
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Accessor for the vblue of this setting.
 	 * 
-	 * @return the value of this setting
+	 * @return the vblue of this setting
 	 */
-	pualic String getVblue() {
-        return value;
+	public String getVblue() {
+        return vblue;
 	}
 
 	/**
-	 * Mutator for this setting.
+	 * Mutbtor for this setting.
 	 *
-	 * @param str the <tt>String</tt> to store
+	 * @pbram str the <tt>String</tt> to store
 	 */
-	pualic void setVblue(String str) {
-		super.setValue(str);
+	public void setVblue(String str) {
+		super.setVblue(str);
 	}
     
-    /** Load value from property string value
-     * @param sValue property string value
+    /** Lobd value from property string value
+     * @pbram sValue property string value
      *
      */
-    protected void loadValue(String sValue) {
-        value = sValue;
+    protected void lobdValue(String sValue) {
+        vblue = sValue;
     }
 }

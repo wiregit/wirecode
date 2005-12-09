@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.version;
+pbckage com.limegroup.gnutella.version;
 
-pualic clbss VersionFormatException extends Exception {
+public clbss VersionFormatException extends Exception {
     
-    VersionFormatException() {
+    VersionFormbtException() {
         super();
     }
     
-    VersionFormatException(String s) {
+    VersionFormbtException(String s) {
         super(s);
     }
 }

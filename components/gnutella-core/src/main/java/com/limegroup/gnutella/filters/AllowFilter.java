@@ -1,13 +1,13 @@
-package com.limegroup.gnutella.filters;
+pbckage com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutellb.messages.Message;
 
 /** 
- * A filter that allows anything.  Use when you don't want to filter
- * traffic. 
+ * A filter thbt allows anything.  Use when you don't want to filter
+ * trbffic. 
  */
-pualic clbss AllowFilter extends SpamFilter {
-    pualic boolebn allow(Message m) {
+public clbss AllowFilter extends SpamFilter {
+    public boolebn allow(Message m) {
         return true;
     }
 }

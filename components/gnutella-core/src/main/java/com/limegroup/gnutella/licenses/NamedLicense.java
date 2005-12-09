@@ -1,6 +1,6 @@
-package com.limegroup.gnutella.licenses;
+pbckage com.limegroup.gnutella.licenses;
 
-/** A license that can have its name set. */
-interface NamedLicense extends License {
-    void setLicenseName(String name);
+/** A license thbt can have its name set. */
+interfbce NamedLicense extends License {
+    void setLicenseNbme(String name);
 }

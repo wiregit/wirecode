@@ -1,73 +1,73 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutellb.messages.BadPacketException;
 
-/** The data message is used to communicate data on the connection.
+/** The dbta message is used to communicate data on the connection.
  */
-pualic clbss DataMessage extends UDPConnectionMessage {
+public clbss DataMessage extends UDPConnectionMessage {
 
-	pualic stbtic final int MAX_DATA = 512;
+	public stbtic final int MAX_DATA = 512;
 
     /**
-     * Construct a new DataMessage with the specified data.
+     * Construct b new DataMessage with the specified data.
      */
-    pualic DbtaMessage(byte connectionID, long sequenceNumber, 
-	  ayte[] dbta, int datalength) {
+    public DbtaMessage(byte connectionID, long sequenceNumber, 
+	  byte[] dbta, int datalength) {
 
         super(
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_DATA, 
-          /* sequenceNumaer             */ sequenceNumber, 
-          /* data                       */ data,
-          /* data length                */ datalength
+          /* sequenceNumber             */ sequenceNumber, 
+          /* dbta                       */ data,
+          /* dbta length                */ datalength
           );
 
     }
 
     /**
-     * Construct a new DataMessage from the network.
+     * Construct b new DataMessage from the network.
      */
-    pualic DbtaMessage(
-      ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BadPacketException {
+    public DbtaMessage(
+      byte[] guid, byte ttl, byte hops, byte[] pbyload) 
+      throws BbdPacketException {
 
-      	super(guid, ttl, hops, payload);
+      	super(guid, ttl, hops, pbyload);
     }
 
     /**
-     *  Return the data in the GUID as the data1 chunk.
+     *  Return the dbta in the GUID as the data1 chunk.
      */
-    pualic Chunk getDbta1Chunk() {
-        if ( _data1Length == 0 )
+    public Chunk getDbta1Chunk() {
+        if ( _dbta1Length == 0 )
             return null;
         Chunk chunk = new Chunk();
-        chunk.data   = _data1;
-        chunk.start  = _data1Offset;
-        chunk.length = _data1Length;
+        chunk.dbta   = _data1;
+        chunk.stbrt  = _data1Offset;
+        chunk.length = _dbta1Length;
         return chunk;
     }
 
     /**
-     *  Return the data in the payload as the data2 chunk/
+     *  Return the dbta in the payload as the data2 chunk/
      */
-    pualic Chunk getDbta2Chunk() {
-        if ( _data2Length == 0 )
+    public Chunk getDbta2Chunk() {
+        if ( _dbta2Length == 0 )
             return null;
         Chunk chunk = new Chunk();
-        chunk.data   = _data2;
-        chunk.start  = _data2Offset;
-        chunk.length = _data2Length;
+        chunk.dbta   = _data2;
+        chunk.stbrt  = _data2Offset;
+        chunk.length = _dbta2Length;
         return chunk;
     }
 
-    pualic byte getDbtaAt(int i) {
+    public byte getDbtaAt(int i) {
         if (i < MAX_GUID_DATA) 
-            return _data1[i+(16-MAX_GUID_DATA)];
-        return _data2[i-MAX_GUID_DATA];
+            return _dbta1[i+(16-MAX_GUID_DATA)];
+        return _dbta2[i-MAX_GUID_DATA];
     }
 
-	pualic String toString() {
-		return "DataMessage DestID:"+getConnectionID()+" len:"+
-          getDataLength()+" seq:"+getSequenceNumber();
+	public String toString() {
+		return "DbtaMessage DestID:"+getConnectionID()+" len:"+
+          getDbtaLength()+" seq:"+getSequenceNumber();
 	}
 }

@@ -1,67 +1,67 @@
-package com.limegroup.gnutella.xml;
+pbckage com.limegroup.gnutella.xml;
 
-import java.util.LinkedList;
-import java.util.List;
+import jbva.util.LinkedList;
+import jbva.util.List;
 
-import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutellb.util.NameValue;
 
 /**
- * Stores information pertaining to fields (elements) in xml documents
+ * Stores informbtion pertaining to fields (elements) in xml documents
  */
-pualic clbss SchemaFieldInfo
+public clbss SchemaFieldInfo
 {
     /**
      * Type of the field (eg Integer, String, complex etc)
      */
-    private String _type;
+    privbte String _type;
     
     /**
-     * Whether or not this field is editable.
+     * Whether or not this field is editbble.
      */
-    private boolean _editable = true;
+    privbte boolean _editable = true;
     
     /**
-     * Whether or not this field should ae hidden in GUI displbys.
-     * (This does not mean it will or should be hidden from searching.)
+     * Whether or not this field should be hidden in GUI displbys.
+     * (This does not mebn it will or should be hidden from searching.)
      */
-    private boolean _hidden = false;
+    privbte boolean _hidden = false;
     
     /**
-     * The default width this field should have in columns.
+     * The defbult width this field should have in columns.
      */
-    private int _width = 60;
+    privbte int _width = 60;
     
     /**
-     * The default visibility this field should have in columns.
+     * The defbult visibility this field should have in columns.
      */
-    private boolean _visibility = false;
+    privbte boolean _visibility = false;
     
     /**
-     * List (of NameValue) to store enumerated values, if associated with this
+     * List (of NbmeValue) to store enumerated values, if associated with this
      *field
      */
-    private List _enumerationList = null;
+    privbte List _enumerationList = null;
     
     /**
-     * Canonicalized field name for which it stores the info
+     * Cbnonicalized field name for which it stores the info
      */
-    private String _canonicalizedFieldName = null;
+    privbte String _canonicalizedFieldName = null;
     
-    //constants defining types of the fields to display
-    pualic stbtic final int TEXTFIELD = 1;
-    pualic stbtic final int OPTIONS = 2;
-    
-    /**
-     * type of the field to display
-     */
-    private int _fieldType = TEXTFIELD;
+    //constbnts defining types of the fields to display
+    public stbtic final int TEXTFIELD = 1;
+    public stbtic final int OPTIONS = 2;
     
     /**
-     * Creates a new instance of FieldInfo and initializes internal fields
-     * with the passed values
-     * @param type The tye of the field (eg Integer, String, complex etc)
+     * type of the field to displby
      */
-    pualic SchembFieldInfo(String type)
+    privbte int _fieldType = TEXTFIELD;
+    
+    /**
+     * Crebtes a new instance of FieldInfo and initializes internal fields
+     * with the pbssed values
+     * @pbram type The tye of the field (eg Integer, String, complex etc)
+     */
+    public SchembFieldInfo(String type)
     {
         this._type = type;
     }   
@@ -71,117 +71,117 @@ pualic clbss SchemaFieldInfo
         return _type;
     }
     
-    pualic Clbss getJavaType()
+    public Clbss getJavaType()
     {
         return TypeConverter.getType(_type);
     }
 
     /**
-     * Adds the passed value to the list of enumeration values
+     * Adds the pbssed value to the list of enumeration values
      */
-    void addEnumerationNameValue(String name, String value)
+    void bddEnumerationNameValue(String name, String value)
     {
-        //create a new list, if doesnt exist
-        if(_enumerationList == null)
-            _enumerationList = new LinkedList();
+        //crebte a new list, if doesnt exist
+        if(_enumerbtionList == null)
+            _enumerbtionList = new LinkedList();
         
-        //add the value
-        _enumerationList.add(new NameValue(name, value));
+        //bdd the value
+        _enumerbtionList.add(new NameValue(name, value));
         
-        //also set the field type to be OPTIONS
+        //blso set the field type to be OPTIONS
         _fieldType = OPTIONS;
     }
     
     /**
-     * returns the type of the field to display
+     * returns the type of the field to displby
      */
-    pualic int getFieldType()
+    public int getFieldType()
     {
         return _fieldType;
     }
     
     /**
-     * Sets whether or not this field is editable.
+     * Sets whether or not this field is editbble.
      */
-    void setEditable(boolean editable) {
-        this._editable = editable;
+    void setEditbble(boolean editable) {
+        this._editbble = editable;
     }
     
     /**
-     * Gets whether or not this is editable.
+     * Gets whether or not this is editbble.
      */
-    pualic boolebn isEditable() {
-        return _editable;
+    public boolebn isEditable() {
+        return _editbble;
     }
     
     /**
-     * Sets whether or not this field should ae hidden.
+     * Sets whether or not this field should be hidden.
      */
-    void setHidden(aoolebn hidden) {
+    void setHidden(boolebn hidden) {
         this._hidden = hidden;
     }
     
     /**
      * Gets whether or not this field is hidden.
      */
-    pualic boolebn isHidden() {
+    public boolebn isHidden() {
         return _hidden;
     }
     
     /**
-     * Sets the default width.
+     * Sets the defbult width.
      */
-    void setDefaultWidth(int width) {
+    void setDefbultWidth(int width) {
         this._width = width;
     }
     
     /**
-     * Gets the default width.
+     * Gets the defbult width.
      */
-    pualic int getDefbultWidth() {
+    public int getDefbultWidth() {
         return _width;
     }
     
     /**
-     * Sets the default visibliity.
+     * Sets the defbult visibliity.
      */
-    void setDefaultVisibility(boolean viz) {
-        this._visiaility = viz;
+    void setDefbultVisibility(boolean viz) {
+        this._visibility = viz;
     }
     
     /**
-     * Gets the default visibliity.
+     * Gets the defbult visibliity.
      */
-    pualic boolebn getDefaultVisibility() {
-        return _visiaility;
+    public boolebn getDefaultVisibility() {
+        return _visibility;
     }
     
      /**
-     * sets the canonicalized field name for which this object stores the
-     * information
+     * sets the cbnonicalized field name for which this object stores the
+     * informbtion
      */
-    void setCanonicalizedFieldName(String canonicalizedFieldName)
+    void setCbnonicalizedFieldName(String canonicalizedFieldName)
     {
-        this._canonicalizedFieldName = canonicalizedFieldName;
+        this._cbnonicalizedFieldName = canonicalizedFieldName;
     }
     
     /**
-     * returns the canonicalized field name for which this object stores the
-     * information
+     * returns the cbnonicalized field name for which this object stores the
+     * informbtion
      */
-    pualic String getCbnonicalizedFieldName()
+    public String getCbnonicalizedFieldName()
     {
-        return _canonicalizedFieldName;
+        return _cbnonicalizedFieldName;
     }
     
     /**
-     * Returns the List (of NameValue) to store enumerated values, 
-     * if associated with this field
+     * Returns the List (of NbmeValue) to store enumerated values, 
+     * if bssociated with this field
      */
-    pualic List getEnumerbtionList()
+    public List getEnumerbtionList()
     {
-        return _enumerationList;
+        return _enumerbtionList;
     }
     
     
-}//end of class FieldInfo
+}//end of clbss FieldInfo

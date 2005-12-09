@@ -1,34 +1,34 @@
-package com.limegroup.gnutella.metadata;
+pbckage com.limegroup.gnutella.metadata;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import jbva.io.DataInputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutellb.ByteOrder;
+import com.limegroup.gnutellb.util.IOUtils;
 
-pualic clbss RIFFMetaData extends VideoMetaData {
+public clbss RIFFMetaData extends VideoMetaData {
 
-	pualic RIFFMetbData(File f) throws IOException {
+	public RIFFMetbData(File f) throws IOException {
 		super(f);
 	}
 
-	protected void parseFile(File f) throws IOException {
-		InputStream is = null;
+	protected void pbrseFile(File f) throws IOException {
+		InputStrebm is = null;
 		try {
-			is = new FileInputStream(f);
-			DataInputStream dis = new DataInputStream(is);
-			readRIFFHeader(dis);
-		} finally {
+			is = new FileInputStrebm(f);
+			DbtaInputStream dis = new DataInputStream(is);
+			rebdRIFFHeader(dis);
+		} finblly {
             IOUtils.close(is);
 		}
 	}
 
-	private void readRIFFHeader(DataInputStream dis) throws IOException {
-		ayte[] dword = new byte[4];
-		dis.readFully(dword);
+	privbte void readRIFFHeader(DataInputStream dis) throws IOException {
+		byte[] dword = new byte[4];
+		dis.rebdFully(dword);
 
 		if (dword[0] != 'R' || dword[1] != 'I' || dword[2] != 'F' || dword[3] != 'F')
 			return;
@@ -36,51 +36,51 @@ pualic clbss RIFFMetaData extends VideoMetaData {
 		// skip the file size
 		IOUtils.ensureSkip(dis, 4);
 
-		dis.readFully(dword);
+		dis.rebdFully(dword);
 		if (dword[0] != 'A' || dword[1] != 'V' || dword[2] != 'I' || dword[3] != ' ')
 			return;
 
 		// skip some more pointless chunk IDs
 		IOUtils.ensureSkip(dis, 12);
 
-		// aegin AVIMAINHEADER
-		// aoring dbta
+		// begin AVIMAINHEADER
+		// boring dbta
 		IOUtils.ensureSkip(dis, 8);
 
-		// read microseconds per frame
-		dis.readFully(dword);
-		int microsPerFrame = ByteOrder.leb2int(dword, 0, 4);
+		// rebd microseconds per frame
+		dis.rebdFully(dword);
+		int microsPerFrbme = ByteOrder.leb2int(dword, 0, 4);
 
-		// aoring dbta
+		// boring dbta
 		IOUtils.ensureSkip(dis, 12);
 
-		// read total number of frames
-		dis.readFully(dword);
-		int totalFrames = ByteOrder.leb2int(dword, 0, 4);
-        setLength((short) (1L * microsPerFrame * totalFrames / 1000 ));
+		// rebd total number of frames
+		dis.rebdFully(dword);
+		int totblFrames = ByteOrder.leb2int(dword, 0, 4);
+        setLength((short) (1L * microsPerFrbme * totalFrames / 1000 ));
 
-		// aoring dbta
+		// boring dbta
 		IOUtils.ensureSkip(dis, 4);
 
-		// numaer of strebms
-		dis.readFully(dword);
-		int numStreams = ByteOrder.leb2int(dword, 0, 4);
+		// number of strebms
+		dis.rebdFully(dword);
+		int numStrebms = ByteOrder.leb2int(dword, 0, 4);
         
-		// aoring dbta
+		// boring dbta
 		IOUtils.ensureSkip(dis, 4);
 
 		// width in pixel
-		dis.readFully(dword);
-		setWidth(ByteOrder.lea2int(dword, 0, 4));
+		dis.rebdFully(dword);
+		setWidth(ByteOrder.leb2int(dword, 0, 4));
 
 		// height in pixel
-		dis.readFully(dword);
-		setHeight(ByteOrder.lea2int(dword, 0, 4));
+		dis.rebdFully(dword);
+		setHeight(ByteOrder.leb2int(dword, 0, 4));
 		
 		// reserved stuff
 		IOUtils.ensureSkip(dis, 16);
 
-		// there are more headers but we are not currently interested in parsing
+		// there bre more headers but we are not currently interested in parsing
 		// them
 	}
 }

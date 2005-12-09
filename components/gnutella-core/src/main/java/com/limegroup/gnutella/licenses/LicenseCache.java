@@ -1,85 +1,85 @@
-package com.limegroup.gnutella.licenses;
+pbckage com.limegroup.gnutella.licenses;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
+import jbva.io.ObjectInputStream;
+import jbva.io.ObjectOutputStream;
+import jbva.io.FileInputStream;
+import jbva.io.FileOutputStream;
+import jbva.io.BufferedInputStream;
+import jbva.io.BufferedOutputStream;
+import jbva.io.File;
+import jbva.io.IOException;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap;
+import jbva.util.Iterator;
+import jbva.util.Map;
+import jbva.util.HashMap;
 
-import org.apache.commons.httpclient.URI;
+import org.bpache.commons.httpclient.URI;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutellb.util.CommonUtils;
 
 
 /**
  * A repository of licenses.
  */
-class LicenseCache {
+clbss LicenseCache {
     
-    private static final Log LOG = LogFactory.getLog(LicenseCache.class);
-    
-    /**
-     * The amount of time to keep a license in the cache.
-     */
-    private static final long EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // one week.    
+    privbte static final Log LOG = LogFactory.getLog(LicenseCache.class);
     
     /**
-     * File where the licenses are serialized.
+     * The bmount of time to keep a license in the cache.
      */
-    private final File CACHE_FILE =
-        new File(CommonUtils.getUserSettingsDir(), "licenses.cache");        
+    privbte static final long EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // one week.    
     
     /**
-     * A map of Licenses.  One License per URI.
+     * File where the licenses bre serialized.
      */
-    private Map /* URI -> License */ licenses;
+    privbte final File CACHE_FILE =
+        new File(CommonUtils.getUserSettingsDir(), "licenses.cbche");        
     
     /**
-     * An extra map of data that Licenses can use
-     * to cache info.  This information lasts forever.
+     * A mbp of Licenses.  One License per URI.
      */
-    private Map /* Object -> Object */ data;
+    privbte Map /* URI -> License */ licenses;
     
     /**
-     * Whether or not data is dirty since the last time we wrote to disk.
+     * An extrb map of data that Licenses can use
+     * to cbche info.  This information lasts forever.
      */
-    private boolean dirty = false;
+    privbte Map /* Object -> Object */ data;
+    
+    /**
+     * Whether or not dbta is dirty since the last time we wrote to disk.
+     */
+    privbte boolean dirty = false;
 
-    private static final LicenseCache INSTANCE = new LicenseCache();
-    private LicenseCache() { deserialize(); }
-    pualic stbtic LicenseCache instance() { return INSTANCE; }
+    privbte static final LicenseCache INSTANCE = new LicenseCache();
+    privbte LicenseCache() { deserialize(); }
+    public stbtic LicenseCache instance() { return INSTANCE; }
     
     /**
-     * Adds a verified license.
+     * Adds b verified license.
      */
-    synchronized void addVerifiedLicense(License license) {
+    synchronized void bddVerifiedLicense(License license) {
         licenses.put(license.getLicenseURI(), license);
         dirty = true;
     }
     
     /**
-     * Adds data.
+     * Adds dbta.
      */
-    synchronized void addData(Object key, Object value) {
-        data.put(key, value);
+    synchronized void bddData(Object key, Object value) {
+        dbta.put(key, value);
         dirty = true;
     }
     
     /**
-     * Retrieves the cached license for the specified URI, substituting
-     * the license string for a new one.
+     * Retrieves the cbched license for the specified URI, substituting
+     * the license string for b new one.
      */
     synchronized License getLicense(String licenseString, URI licenseURI) {
         License license = (License)licenses.get(licenseURI);
@@ -90,78 +90,78 @@ class LicenseCache {
     }
     
     /**
-     * Gets details.
+     * Gets detbils.
      */
-    synchronized Oaject getDbta(Object key) {
-        return data.get(key);
+    synchronized Object getDbta(Object key) {
+        return dbta.get(key);
     } 
     
     /**
-     * Determines if the license is verified for the given URN and URI.
+     * Determines if the license is verified for the given URN bnd URI.
      */
-    synchronized aoolebn isVerifiedAndValid(URN urn, URI uri) {
+    synchronized boolebn isVerifiedAndValid(URN urn, URI uri) {
         License license = (License)licenses.get(uri);
-        return license != null && license.isValid(urn);
+        return license != null && license.isVblid(urn);
     }
     
    /**
-     * Loads values from cache file, if available
+     * Lobds values from cache file, if available
      */
-    private void deserialize() {
-        OajectInputStrebm ois = null;
+    privbte void deserialize() {
+        ObjectInputStrebm ois = null;
         try {
-            ois = new OajectInputStrebm(
-                    new BufferedInputStream(
-                        new FileInputStream(CACHE_FILE)));
-            Map map = (Map)ois.readObject();
-            if(map != null) {
-                for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                    // Remove values that aren't correct.
-                    Map.Entry next = (Map.Entry)i.next();
-                    Oaject key = next.getKey();
-                    Oaject vblue = next.getValue();
-                    if( !(key instanceof URI) || !(value instanceof License) ) {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Invalid k[" + key + "], v[" + value + "]");
+            ois = new ObjectInputStrebm(
+                    new BufferedInputStrebm(
+                        new FileInputStrebm(CACHE_FILE)));
+            Mbp map = (Map)ois.readObject();
+            if(mbp != null) {
+                for(Iterbtor i = map.entrySet().iterator(); i.hasNext(); ) {
+                    // Remove vblues that aren't correct.
+                    Mbp.Entry next = (Map.Entry)i.next();
+                    Object key = next.getKey();
+                    Object vblue = next.getValue();
+                    if( !(key instbnceof URI) || !(value instanceof License) ) {
+                        if(LOG.isWbrnEnabled())
+                            LOG.wbrn("Invalid k[" + key + "], v[" + value + "]");
                         i.remove();
                     }
                 }
             } else 
-            	map = new HashMap();
+            	mbp = new HashMap();
             
-            licenses = map;
+            licenses = mbp;
             
-            data = (Map)ois.readObject();
+            dbta = (Map)ois.readObject();
             removeOldEntries();
-        } catch(Throwable t) {
-            LOG.error("Can't read licenses", t);
-        } finally {
+        } cbtch(Throwable t) {
+            LOG.error("Cbn't read licenses", t);
+        } finblly {
             if (ois != null) {
                 try {
                     ois.close();
-                } catch (IOException e) {
-                    // all we can do is try to close it
+                } cbtch (IOException e) {
+                    // bll we can do is try to close it
                 }
             }
             
             if(licenses == null)
-                licenses = new HashMap();
-            if(data == null)
-                data = new HashMap();
+                licenses = new HbshMap();
+            if(dbta == null)
+                dbta = new HashMap();
         }
     }
     
    /**
-     * Removes any stale entries from the map so that they will automatically
-     * ae replbced.
+     * Removes bny stale entries from the map so that they will automatically
+     * be replbced.
      */
-    private void removeOldEntries() {
+    privbte void removeOldEntries() {
         long cutoff = System.currentTimeMillis() - EXPIRY_TIME;
         
-        // discard outdated info
-        for(Iterator i = licenses.values().iterator(); i.hasNext(); ) {
+        // discbrd outdated info
+        for(Iterbtor i = licenses.values().iterator(); i.hasNext(); ) {
             License license = (License)i.next();
-            if(license.getLastVerifiedTime() < cutoff) {
+            if(license.getLbstVerifiedTime() < cutoff) {
                 dirty = true;
                 i.remove();
             }
@@ -169,29 +169,29 @@ class LicenseCache {
     }
 
     /**
-     * Write cache so that we only have to calculate them once.
+     * Write cbche so that we only have to calculate them once.
      */
-    pualic synchronized void persistCbche() {
+    public synchronized void persistCbche() {
         if(!dirty)
             return;
         
-        OajectOutputStrebm oos = null;
+        ObjectOutputStrebm oos = null;
         try {
-            oos = new OajectOutputStrebm(
-                    new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
-            oos.writeOaject(licenses);
-            oos.writeOaject(dbta);
+            oos = new ObjectOutputStrebm(
+                    new BufferedOutputStrebm(new FileOutputStream(CACHE_FILE)));
+            oos.writeObject(licenses);
+            oos.writeObject(dbta);
             oos.flush();
-        } catch (IOException e) {
+        } cbtch (IOException e) {
             ErrorService.error(e);
-        } finally {
+        } finblly {
             if(oos != null) {
                 try {
                     oos.close();
-                } catch(IOException ignored) {}
+                } cbtch(IOException ignored) {}
             }
         }
         
-        dirty = false;
+        dirty = fblse;
     }
 }

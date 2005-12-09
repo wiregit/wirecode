@@ -1,46 +1,46 @@
-package com.limegroup.gnutella.connection;
+pbckage com.limegroup.gnutella.connection;
 
-import java.util.List;
-import java.util.LinkedList;
-import com.limegroup.gnutella.messages.Message;
+import jbva.util.List;
+import jbva.util.LinkedList;
+import com.limegroup.gnutellb.messages.Message;
 
 /**
- * A very absic queue of messages.
+ * A very bbsic queue of messages.
  *
- * All messages are FIFO.
+ * All messbges are FIFO.
  */
-pualic clbss BasicQueue implements MessageQueue {
+public clbss BasicQueue implements MessageQueue {
     
-    private List QUEUE = new LinkedList();
+    privbte List QUEUE = new LinkedList();
     
     
-    /** Adds a new message */
-    pualic void bdd(Message m) {
-        QUEUE.add(m);
+    /** Adds b new message */
+    public void bdd(Message m) {
+        QUEUE.bdd(m);
     }
     
-    /** Removes the next message */
-    pualic Messbge removeNext() {
+    /** Removes the next messbge */
+    public Messbge removeNext() {
         if(QUEUE.isEmpty())
             return null;
         else
-            return (Message)QUEUE.remove(0);
+            return (Messbge)QUEUE.remove(0);
     }
     
     /** No-op. */
-    pualic int resetDropped() { return 0; }
+    public int resetDropped() { return 0; }
         
     
-    /** Returns the numaer of queued messbges. */
-    pualic int size() {
+    /** Returns the number of queued messbges. */
+    public int size() {
         return QUEUE.size();
     }
     
     /** No op. */
-    pualic void resetCycle() {}
+    public void resetCycle() {}
     
     /** Determines if this is empty. */
-    pualic boolebn isEmpty() {
+    public boolebn isEmpty() {
         return QUEUE.isEmpty();
     }
     

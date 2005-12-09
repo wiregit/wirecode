@@ -1,670 +1,670 @@
-package com.limegroup.gnutella.version;
+pbckage com.limegroup.gnutella.version;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.List;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.Set;
+import jbva.io.File;
+import jbva.io.IOException;
+import jbva.util.LinkedList;
+import jbva.util.Random;
+import jbva.util.List;
+import jbva.util.Iterator;
+import jbva.util.HashSet;
+import jbva.util.Collections;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.InNetworkDownloader;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.security.SignatureVerifier;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.UpdateSettings;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutellb.Downloader;
+import com.limegroup.gnutellb.SaveLocationException;
+import com.limegroup.gnutellb.ManagedConnection;
+import com.limegroup.gnutellb.FileDesc;
+import com.limegroup.gnutellb.FileManager;
+import com.limegroup.gnutellb.ReplyHandler;
+import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutellb.downloader.InNetworkDownloader;
+import com.limegroup.gnutellb.downloader.ManagedDownloader;
+import com.limegroup.gnutellb.DownloadManager;
+import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.FileUtils;
+import com.limegroup.gnutellb.util.ProcessingQueue;
+import com.limegroup.gnutellb.util.StringUtils;
+import com.limegroup.gnutellb.security.SignatureVerifier;
+import com.limegroup.gnutellb.settings.ApplicationSettings;
+import com.limegroup.gnutellb.settings.UpdateSettings;
+import com.limegroup.gnutellb.messages.vendor.CapabilitiesVM;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * Manager for version updates.
+ * Mbnager for version updates.
  *
- * Handles queueing new data for parsing and keeping track of which current
+ * Hbndles queueing new data for parsing and keeping track of which current
  * version is stored in memory & on disk.
  */
-pualic clbss UpdateHandler {
+public clbss UpdateHandler {
     
-    private static final Log LOG = LogFactory.getLog(UpdateHandler.class);
+    privbte static final Log LOG = LogFactory.getLog(UpdateHandler.class);
     
-    private static final long THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    privbte static final long THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
     
     /**
-     * The filename on disk where data is stored.
+     * The filenbme on disk where data is stored.
      */
-    private static final String FILENAME = "version.xml";
+    privbte static final String FILENAME = "version.xml";
     
     /**
-     * The filename on disk where the public key is stored.
+     * The filenbme on disk where the public key is stored.
      */
-    private static final String KEY = "version.key";
+    privbte static final String KEY = "version.key";
     
     /**
-     * init the random generator on class load time
+     * init the rbndom generator on class load time
      */
-    private static final Random RANDOM = new Random();
+    privbte static final Random RANDOM = new Random();
     
     /**
-     * means to override the current time for tests
+     * mebns to override the current time for tests
      */
-    private static Clock clock = new Clock();
+    privbte static Clock clock = new Clock();
     
-    private static final UpdateHandler INSTANCE = new UpdateHandler();
-    private UpdateHandler() { initialize(); }
-    pualic stbtic UpdateHandler instance() { return INSTANCE; }
+    privbte static final UpdateHandler INSTANCE = new UpdateHandler();
+    privbte UpdateHandler() { initialize(); }
+    public stbtic UpdateHandler instance() { return INSTANCE; }
     
     /**
-     * The queue that handles all incoming data.
+     * The queue thbt handles all incoming data.
      */
-    private final ProcessingQueue QUEUE = new ProcessingQueue("UpdateHandler");
+    privbte final ProcessingQueue QUEUE = new ProcessingQueue("UpdateHandler");
     
     /**
-     * The most recent update info for this machine.
+     * The most recent updbte info for this machine.
      */
-    private volatile UpdateInformation _updateInfo;
+    privbte volatile UpdateInformation _updateInfo;
     
     /**
-     * A collection of UpdateInformation's that we need to retrieve
-     * an update for.
+     * A collection of UpdbteInformation's that we need to retrieve
+     * bn update for.
      */
-    private volatile List _updatesToDownload;
+    privbte volatile List _updatesToDownload;
     
     /**
-     * The most recent id of the update info.
+     * The most recent id of the updbte info.
      */
-    private volatile int _lastId;
+    privbte volatile int _lastId;
     
     /**
-     * The aytes to send on the wire.
+     * The bytes to send on the wire.
      *
      * TODO: Don't store in memory.
      */
-    private volatile byte[] _lastBytes;
+    privbte volatile byte[] _lastBytes;
     
     /**
-     * The timestamp of the latest update.
+     * The timestbmp of the latest update.
      */
-    private long _lastTimestamp;
+    privbte long _lastTimestamp;
     
     /**
-     * The next time we can make an attempt to download a pushed file.
+     * The next time we cbn make an attempt to download a pushed file.
      */
-    private long _nextDownloadTime;
+    privbte long _nextDownloadTime;
     
-    private boolean _killingObsoleteNecessary;
-    
-    /**
-     * The time we'll notify the gui about an update with URL
-     */
+    privbte boolean _killingObsoleteNecessary;
     
     /**
-     * Initializes data as read from disk.
+     * The time we'll notify the gui bbout an update with URL
      */
-    private void initialize() {
-        LOG.trace("Initializing UpdateHandler");
-        QUEUE.add(new Runnable() {
-            pualic void run() {
-                handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
+    
+    /**
+     * Initiblizes data as read from disk.
+     */
+    privbte void initialize() {
+        LOG.trbce("Initializing UpdateHandler");
+        QUEUE.bdd(new Runnable() {
+            public void run() {
+                hbndleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
             }
         });
         
-        // Try to update ourselves (re-use hosts for downloading, etc..)
-        // at a specified interval.
-        RouterService.schedule(new Runnable() {
-            pualic void run() {
-                QUEUE.add(new Poller());
+        // Try to updbte ourselves (re-use hosts for downloading, etc..)
+        // bt a specified interval.
+        RouterService.schedule(new Runnbble() {
+            public void run() {
+                QUEUE.bdd(new Poller());
             }
-        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0);
+        }, UpdbteSettings.UPDATE_RETRY_DELAY.getValue(),  0);
     }
     
     /**
-     * Sparks off an attempt to download any pending updates.
+     * Spbrks off an attempt to download any pending updates.
      */
-    pualic void tryToDownlobdUpdates() {
-        QUEUE.add(new Runnable() {
-            pualic void run() {
-                UpdateInformation updateInfo = _updateInfo;
+    public void tryToDownlobdUpdates() {
+        QUEUE.bdd(new Runnable() {
+            public void run() {
+                UpdbteInformation updateInfo = _updateInfo;
                 
-                if (updateInfo != null && 
-                		updateInfo.getUpdateURN() != null &&
-                		isMyUpdateDownloaded(updateInfo))
-                    RouterService.getCallback().updateAvailable(updateInfo);
+                if (updbteInfo != null && 
+                		updbteInfo.getUpdateURN() != null &&
+                		isMyUpdbteDownloaded(updateInfo))
+                    RouterService.getCbllback().updateAvailable(updateInfo);
                 
-                downloadUpdates(_updatesToDownload, null);
+                downlobdUpdates(_updatesToDownload, null);
             }
         });
     }
     
     /**
-     * Notification that a ReplyHandler has received a VM containing an update.
+     * Notificbtion that a ReplyHandler has received a VM containing an update.
      */
-    pualic void hbndleUpdateAvailable(final ReplyHandler rh, final int version) {
-        if(version == _lastId) {
-            QUEUE.add(new Runnable() {
-                pualic void run() {
-                    addSourceIfIdMatches(rh, version);
+    public void hbndleUpdateAvailable(final ReplyHandler rh, final int version) {
+        if(version == _lbstId) {
+            QUEUE.bdd(new Runnable() {
+                public void run() {
+                    bddSourceIfIdMatches(rh, version);
                 }
             });
-        } else if(LOG.isDeaugEnbbled())
-            LOG.deaug("Another version from rh: " + rh + ", them: " + version + ", me: " + _lbstId);
+        } else if(LOG.isDebugEnbbled())
+            LOG.debug("Another version from rh: " + rh + ", them: " + version + ", me: " + _lbstId);
     }
     
     /**
-     * Notification that a new message has arrived.
+     * Notificbtion that a new message has arrived.
      *
-     * (The actual processing is passed of to be run in a different thread.
-     *  All notifications are processed in the same thread, sequentially.)
+     * (The bctual processing is passed of to be run in a different thread.
+     *  All notificbtions are processed in the same thread, sequentially.)
      */
-    pualic void hbndleNewData(final byte[] data) {
-        if(data != null) {
-            QUEUE.add(new Runnable() {
-                pualic void run() {
-                    LOG.trace("Parsing new data...");
-                    handleDataInternal(data, false);
+    public void hbndleNewData(final byte[] data) {
+        if(dbta != null) {
+            QUEUE.bdd(new Runnable() {
+                public void run() {
+                    LOG.trbce("Parsing new data...");
+                    hbndleDataInternal(data, false);
                 }
             });
         }
     }
     
     /**
-     * Retrieves the latest id available.
+     * Retrieves the lbtest id available.
      */
-    pualic int getLbtestId() {
-        return _lastId;
+    public int getLbtestId() {
+        return _lbstId;
     }
     
     
     /**
-     * Gets the aytes to send on the wire.
+     * Gets the bytes to send on the wire.
      */
-    pualic byte[] getLbtestBytes() {
-        return _lastBytes;
+    public byte[] getLbtestBytes() {
+        return _lbstBytes;
     }
     
     /**
-     * Handles processing a newly arrived message.
+     * Hbndles processing a newly arrived message.
      *
-     * (Processes the data immediately.)
+     * (Processes the dbta immediately.)
      */
-    private void handleDataInternal(byte[] data, boolean fromDisk) {
-        if(data != null) {
-            String xml = SignatureVerifier.getVerifiedData(data, getKeyFile(), "DSA", "SHA1");
+    privbte void handleDataInternal(byte[] data, boolean fromDisk) {
+        if(dbta != null) {
+            String xml = SignbtureVerifier.getVerifiedData(data, getKeyFile(), "DSA", "SHA1");
             if(xml != null) {
-                UpdateCollection uc = UpdateCollection.create(xml);
-                if(uc.getId() > _lastId)
-                    storeAndUpdate(data, uc, fromDisk);
+                UpdbteCollection uc = UpdateCollection.create(xml);
+                if(uc.getId() > _lbstId)
+                    storeAndUpdbte(data, uc, fromDisk);
             } else {
-                LOG.warn("Couldn't verify signature on data.");
+                LOG.wbrn("Couldn't verify signature on data.");
             }
         } else {
-            LOG.warn("No data to handle.");
+            LOG.wbrn("No data to handle.");
         }
     }
     
     /**
-     * Stores the given data to disk & posts an update to neighboring connections.
-     * Starts the download of any updates
+     * Stores the given dbta to disk & posts an update to neighboring connections.
+     * Stbrts the download of any updates
      */
-    private void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
-        LOG.trace("Retrieved new data, storing & updating.");
-        _lastId = uc.getId();
+    privbte void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
+        LOG.trbce("Retrieved new data, storing & updating.");
+        _lbstId = uc.getId();
         
-        _lastTimestamp = uc.getTimestamp();
-        long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
-        long random = Math.abs(RANDOM.nextLong() % delay);
-        _nextDownloadTime = _lastTimestamp + random;
+        _lbstTimestamp = uc.getTimestamp();
+        long delby = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
+        long rbndom = Math.abs(RANDOM.nextLong() % delay);
+        _nextDownlobdTime = _lastTimestamp + random;
         
-        _lastBytes = data;
+        _lbstBytes = data;
         
         if(!fromDisk) {
-            FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
-            CapabilitiesVM.reconstructInstance();
-            RouterService.getConnectionManager().sendUpdatedCapabilities();
+            FileUtils.verySbfeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
+            CbpabilitiesVM.reconstructInstance();
+            RouterService.getConnectionMbnager().sendUpdatedCapabilities();
         }
 
         Version limeV;
         try {
             limeV = new Version(CommonUtils.getLimeWireVersion());
-        } catch(VersionFormatException vfe) {
-            LOG.warn("Invalid LimeWire version", vfe);
+        } cbtch(VersionFormatException vfe) {
+            LOG.wbrn("Invalid LimeWire version", vfe);
             return;
         }
 
-        Version javaV = null;        
+        Version jbvaV = null;        
         try {
-            javaV = new Version(CommonUtils.getJavaVersion());
-        } catch(VersionFormatException vfe) {
-            LOG.warn("Invalid java version", vfe);
+            jbvaV = new Version(CommonUtils.getJavaVersion());
+        } cbtch(VersionFormatException vfe) {
+            LOG.wbrn("Invalid java version", vfe);
         }
         
-        // don't allow someone to set the style to be above major.
-        int style = Math.min(UpdateInformation.STYLE_MAJOR,
-                             UpdateSettings.UPDATE_STYLE.getValue());
+        // don't bllow someone to set the style to be above major.
+        int style = Mbth.min(UpdateInformation.STYLE_MAJOR,
+                             UpdbteSettings.UPDATE_STYLE.getValue());
         
-        UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
-                    ApplicationSettings.getLanguage(),
+        UpdbteData updateInfo = uc.getUpdateDataFor(limeV, 
+                    ApplicbtionSettings.getLanguage(),
                     CommonUtils.isPro(),
                     style,
-                    javaV);
+                    jbvaV);
 
-        List updatesToDownload = uc.getUpdatesWithDownloadInformation();
-        _killingOasoleteNecessbry = true;
+        List updbtesToDownload = uc.getUpdatesWithDownloadInformation();
+        _killingObsoleteNecessbry = true;
         
-        // if we have an update for our machine, prepare the command line
-        // and move our update to the front of the list of updates
-        if (updateInfo != null && updateInfo.getUpdateURN() != null) {
-            prepareUpdateCommand(updateInfo);
-            updatesToDownload = new LinkedList(updatesToDownload);
-            updatesToDownload.add(0,updateInfo);
+        // if we hbve an update for our machine, prepare the command line
+        // bnd move our update to the front of the list of updates
+        if (updbteInfo != null && updateInfo.getUpdateURN() != null) {
+            prepbreUpdateCommand(updateInfo);
+            updbtesToDownload = new LinkedList(updatesToDownload);
+            updbtesToDownload.add(0,updateInfo);
         }
 
-        _updateInfo = updateInfo;
-        _updatesToDownload = updatesToDownload;
+        _updbteInfo = updateInfo;
+        _updbtesToDownload = updatesToDownload;
         
-        downloadUpdates(updatesToDownload, null);
+        downlobdUpdates(updatesToDownload, null);
         
-        if(updateInfo == null) {
-            LOG.warn("No relevant update info to notify about.");
+        if(updbteInfo == null) {
+            LOG.wbrn("No relevant update info to notify about.");
             return;
-        } else if (updateInfo.getUpdateURN() == null || isHopeless(updateInfo)) {
-            if (LOG.isDeaugEnbbled())
-                LOG.deaug("we hbve an update, but it doesn't need a download.  " +
-                    "or all our updates are hopeles. Scheduling URL notification...");
+        } else if (updbteInfo.getUpdateURN() == null || isHopeless(updateInfo)) {
+            if (LOG.isDebugEnbbled())
+                LOG.debug("we hbve an update, but it doesn't need a download.  " +
+                    "or bll our updates are hopeles. Scheduling URL notification...");
             
-            updateInfo.setUpdateCommand(null);
+            updbteInfo.setUpdateCommand(null);
             
-            RouterService.schedule(new NotificationFailover(_lastId),
-                    delay(clock.now(), uc.getTimestamp()),
+            RouterService.schedule(new NotificbtionFailover(_lastId),
+                    delby(clock.now(), uc.getTimestamp()),
                     0);
-        } else if (isMyUpdateDownloaded(updateInfo)) {
-            LOG.deaug("there is bn update for me, but I happen to have it on disk");
-            RouterService.getCallback().updateAvailable(updateInfo);
+        } else if (isMyUpdbteDownloaded(updateInfo)) {
+            LOG.debug("there is bn update for me, but I happen to have it on disk");
+            RouterService.getCbllback().updateAvailable(updateInfo);
         } else
-            LOG.deaug("we hbve an update, it needs a download.  Rely on callbacks");
+            LOG.debug("we hbve an update, it needs a download.  Rely on callbacks");
     }
     
     /**
-     * replaces tokens in the update command with info about the specific system
+     * replbces tokens in the update command with info about the specific system
      * i.e. <PATH> -> C:\Documents And Settings.... 
      */
-    private static void prepareUpdateCommand(UpdateData info) {
-        if (info == null || info.getUpdateCommand() == null)
+    privbte static void prepareUpdateCommand(UpdateData info) {
+        if (info == null || info.getUpdbteCommand() == null)
             return;
         
-        File path = FileManager.PREFERENCE_SHARE.getAbsoluteFile();
-        String name = info.getUpdateFileName();
+        File pbth = FileManager.PREFERENCE_SHARE.getAbsoluteFile();
+        String nbme = info.getUpdateFileName();
         
         try {
-            path = FileUtils.getCanonicalFile(path);
-        }catch (IOException bad) {}
+            pbth = FileUtils.getCanonicalFile(path);
+        }cbtch (IOException bad) {}
 
-        String command = info.getUpdateCommand();
-        command = StringUtils.replace(command,"$",path.getPath()+File.separator);
-        command = StringUtils.replace(command,"%",name);
-        info.setUpdateCommand(command);
+        String commbnd = info.getUpdateCommand();
+        commbnd = StringUtils.replace(command,"$",path.getPath()+File.separator);
+        commbnd = StringUtils.replace(command,"%",name);
+        info.setUpdbteCommand(command);
     }
 
     /**
-     * @return if the given update is considered hopeless
+     * @return if the given updbte is considered hopeless
      */
-    private static boolean isHopeless(DownloadInformation info) {
-        return UpdateSettings.FAILED_UPDATES.contains(
-                info.getUpdateURN().httpStringValue());
+    privbte static boolean isHopeless(DownloadInformation info) {
+        return UpdbteSettings.FAILED_UPDATES.contains(
+                info.getUpdbteURN().httpStringValue());
     }
     
     /**
-     * Notification that a given ReplyHandler may have an update we can use.
+     * Notificbtion that a given ReplyHandler may have an update we can use.
      */
-    private void addSourceIfIdMatches(ReplyHandler rh, int version) {
-        if(version == _lastId)
-            downloadUpdates(_updatesToDownload, rh);
-        else if (LOG.isDeaugEnbbled())
-            LOG.deaug("Another version? Me: " + version + ", here: " + _lbstId);
+    privbte void addSourceIfIdMatches(ReplyHandler rh, int version) {
+        if(version == _lbstId)
+            downlobdUpdates(_updatesToDownload, rh);
+        else if (LOG.isDebugEnbbled())
+            LOG.debug("Another version? Me: " + version + ", here: " + _lbstId);
     }
     
     /**
-     * Tries to download updates.
-     * @return whether we had any non-hopeless updates.
+     * Tries to downlobd updates.
+     * @return whether we hbd any non-hopeless updates.
      */
-    private void downloadUpdates(List toDownload, ReplyHandler source) {
-        if (toDownload == null)
-            toDownload = Collections.EMPTY_LIST;
+    privbte void downloadUpdates(List toDownload, ReplyHandler source) {
+        if (toDownlobd == null)
+            toDownlobd = Collections.EMPTY_LIST;
         
-        killOasoleteUpdbtes(toDownload);
+        killObsoleteUpdbtes(toDownload);
         
-        for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
-            DownloadInformation next = (DownloadInformation)i.next();
+        for(Iterbtor i = toDownload.iterator(); i.hasNext(); ) {
+            DownlobdInformation next = (DownloadInformation)i.next();
             
             if (isHopeless(next))
                 continue; 
 
-            DownloadManager dm = RouterService.getDownloadManager();
-            FileManager fm = RouterService.getFileManager();
-            if(dm.isGUIInitd() && fm.isLoadFinished()) {
+            DownlobdManager dm = RouterService.getDownloadManager();
+            FileMbnager fm = RouterService.getFileManager();
+            if(dm.isGUIInitd() && fm.isLobdFinished()) {
                 
-                FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
-                ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
-                if(LOG.isDeaugEnbbled())
-                    LOG.deaug("Looking for: " + next + ", got: " + shbred);
+                FileDesc shbred = fm.getFileDescForUrn(next.getUpdateURN());
+                MbnagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
+                if(LOG.isDebugEnbbled())
+                    LOG.debug("Looking for: " + next + ", got: " + shbred);
                 
-                if(shared != null && shared.getClass() == FileDesc.class) {
-                    // if it's already shared, stop any existing download.
+                if(shbred != null && shared.getClass() == FileDesc.class) {
+                    // if it's blready shared, stop any existing download.
                     if(md != null)
                         md.stop();
                     continue;
                 }
                 
-                // If we don't have an existing download ...
-                // and there's no existing InNetwork downloads & 
-                // we're allowed to start a new one.
-                if(md == null && !dm.hasInNetworkDownload() && canStartDownload()) {
-                    LOG.deaug("Stbrting a new InNetwork Download");
+                // If we don't hbve an existing download ...
+                // bnd there's no existing InNetwork downloads & 
+                // we're bllowed to start a new one.
+                if(md == null && !dm.hbsInNetworkDownload() && canStartDownload()) {
+                    LOG.debug("Stbrting a new InNetwork Download");
                     try {
-                        md = (ManagedDownloader)dm.download(next, clock.now());
-                    } catch(SaveLocationException sle) {
-                        LOG.error("Unable to construct download", sle);
+                        md = (MbnagedDownloader)dm.download(next, clock.now());
+                    } cbtch(SaveLocationException sle) {
+                        LOG.error("Unbble to construct download", sle);
                     }
                 }
                 
                 if(md != null) {
                     if(source != null) 
-                        md.addDownload(rfd(source, next), false);
+                        md.bddDownload(rfd(source, next), false);
                     else
-                        addCurrentDownloadSources(md, next);
+                        bddCurrentDownloadSources(md, next);
                 }
             }
         }
     }
     
     /**
-     * kills all in-network downloaders whose URNs are not listed in the list of updates.
-     * Deletes any files in the folder that are not listed in the update message.
+     * kills bll in-network downloaders whose URNs are not listed in the list of updates.
+     * Deletes bny files in the folder that are not listed in the update message.
      */
-    private void killObsoleteUpdates(List toDownload) {
-    	DownloadManager dm = RouterService.getDownloadManager();
-    	FileManager fm = RouterService.getFileManager();
-    	if (!dm.isGUIInitd() || !fm.isLoadFinished())
+    privbte void killObsoleteUpdates(List toDownload) {
+    	DownlobdManager dm = RouterService.getDownloadManager();
+    	FileMbnager fm = RouterService.getFileManager();
+    	if (!dm.isGUIInitd() || !fm.isLobdFinished())
     		return;
     	
-        if (_killingOasoleteNecessbry) {
-            _killingOasoleteNecessbry = false;
-            dm.killDownloadersNotListed(toDownload);
+        if (_killingObsoleteNecessbry) {
+            _killingObsoleteNecessbry = false;
+            dm.killDownlobdersNotListed(toDownload);
             
-            Set urns = new HashSet(toDownload.size());
-            for (Iterator iter = toDownload.iterator(); iter.hasNext();) {
-				UpdateData data = (UpdateData) iter.next();
-				urns.add(data.getUpdateURN());
+            Set urns = new HbshSet(toDownload.size());
+            for (Iterbtor iter = toDownload.iterator(); iter.hasNext();) {
+				UpdbteData data = (UpdateData) iter.next();
+				urns.bdd(data.getUpdateURN());
 			}
             
-            FileDesc [] shared = fm.getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
-            for (int i = 0; i < shared.length; i++) {
-            	if (shared[i].getSHA1Urn() != null &&
-            			!urns.contains(shared[i].getSHA1Urn())) {
-            		fm.removeFileIfShared(shared[i].getFile());
-            		shared[i].getFile().delete();
+            FileDesc [] shbred = fm.getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
+            for (int i = 0; i < shbred.length; i++) {
+            	if (shbred[i].getSHA1Urn() != null &&
+            			!urns.contbins(shared[i].getSHA1Urn())) {
+            		fm.removeFileIfShbred(shared[i].getFile());
+            		shbred[i].getFile().delete();
             	}
 			}
         }
     }
     
     /**
-     * Adds all current connections that have the right update ID as a source for this download.
+     * Adds bll current connections that have the right update ID as a source for this download.
      */
-    private void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
-        List connections = RouterService.getConnectionManager().getConnections();
-        for(Iterator i = connections.iterator(); i.hasNext(); ) {
-            ManagedConnection mc = (ManagedConnection)i.next();
-            if(mc.getRemoteHostUpdateVersion() == _lastId) {
-                LOG.deaug("Adding source: " + mc);
-                md.addDownload(rfd(mc, info), false);
+    privbte void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
+        List connections = RouterService.getConnectionMbnager().getConnections();
+        for(Iterbtor i = connections.iterator(); i.hasNext(); ) {
+            MbnagedConnection mc = (ManagedConnection)i.next();
+            if(mc.getRemoteHostUpdbteVersion() == _lastId) {
+                LOG.debug("Adding source: " + mc);
+                md.bddDownload(rfd(mc, info), false);
             } else
-                LOG.deaug("Not bdding source because bad id: " + mc.getRemoteHostUpdateVersion() + ", us: " + _lastId);
+                LOG.debug("Not bdding source because bad id: " + mc.getRemoteHostUpdateVersion() + ", us: " + _lastId);
         }
     }
     
     /**
-     * Constructs an RFD out of the given information & connection.
+     * Constructs bn RFD out of the given information & connection.
      */
-    private RemoteFileDesc rfd(ReplyHandler rh, DownloadInformation info) {
-        HashSet urns = new HashSet(1);
-        urns.add(info.getUpdateURN());
-        return new RemoteFileDesc(rh.getAddress(),               // address
+    privbte RemoteFileDesc rfd(ReplyHandler rh, DownloadInformation info) {
+        HbshSet urns = new HashSet(1);
+        urns.bdd(info.getUpdateURN());
+        return new RemoteFileDesc(rh.getAddress(),               // bddress
                                   rh.getPort(),                 // port
                                   Integer.MAX_VALUE,            // index (unknown)
-                                  info.getUpdateFileName(),     // filename
+                                  info.getUpdbteFileName(),     // filename
                                   (int)info.getSize(),          // filesize
                                   rh.getClientGUID(),           // client GUID
                                   0,                            // speed
-                                  false,                        // chat capable
-                                  2,                            // quality
-                                  false,                        // browse hostable
+                                  fblse,                        // chat capable
+                                  2,                            // qublity
+                                  fblse,                        // browse hostable
                                   null,                         // xml doc
                                   urns,                         // urns
-                                  false,                        // reply to MCast
-                                  false,                        // is firewalled
+                                  fblse,                        // reply to MCast
+                                  fblse,                        // is firewalled
                                   "LIME",                        // vendor
-                                  System.currentTimeMillis(),   // timestamp
+                                  System.currentTimeMillis(),   // timestbmp
                                   Collections.EMPTY_SET,        // push proxies
-                                  0,                            // creation time
-                                  0);                           // firewalled transfer
+                                  0,                            // crebtion time
+                                  0);                           // firewblled transfer
     }
     
     /**
-     * Determines if we're far enough past the timestamp to start a new
-     * in network download.
+     * Determines if we're fbr enough past the timestamp to start a new
+     * in network downlobd.
      */
-    private boolean canStartDownload() {
+    privbte boolean canStartDownload() {
         long now = clock.now();
         
-        if (LOG.isDeaugEnbbled())
-            LOG.deaug("now is "+now+ " next time is "+_nextDownlobdTime);
+        if (LOG.isDebugEnbbled())
+            LOG.debug("now is "+now+ " next time is "+_nextDownlobdTime);
         
-        return now > _nextDownloadTime;
+        return now > _nextDownlobdTime;
     }
     
     /**
-     * Determines if we should notify about there being new information.
+     * Determines if we should notify bbout there being new information.
      */
-    private void notifyAboutInfo(int id) {
-        if (id != _lastId)
+    privbte void notifyAboutInfo(int id) {
+        if (id != _lbstId)
             return;
         
-        UpdateInformation update = _updateInfo;
-        Assert.that(update != null);
+        UpdbteInformation update = _updateInfo;
+        Assert.thbt(update != null);
         
-        RouterService.getCallback().updateAvailable(update);
+        RouterService.getCbllback().updateAvailable(update);
     }
     
     /**
-     * @return calculates a random delay after the timestamp, unless the timestamp
-     * is more than 3 days in the future.
+     * @return cblculates a random delay after the timestamp, unless the timestamp
+     * is more thbn 3 days in the future.
      */
-    private static long delay(long now, long timestamp) {
-        if (timestamp - now > THREE_DAYS)
+    privbte static long delay(long now, long timestamp) {
+        if (timestbmp - now > THREE_DAYS)
             return 0;
         
-        long delay = UpdateSettings.UPDATE_DELAY.getValue();
-        long random = Math.abs(new Random().nextLong() % delay);
-        long then = timestamp + random;
+        long delby = UpdateSettings.UPDATE_DELAY.getValue();
+        long rbndom = Math.abs(new Random().nextLong() % delay);
+        long then = timestbmp + random;
         
-        if(LOG.isInfoEnabled()) {
-            LOG.info("Delaying Update." +
+        if(LOG.isInfoEnbbled()) {
+            LOG.info("Delbying Update." +
                      "\nNow    : " + now + 
-                     "\nStamp  : " + timestamp +
-                     "\nDelay  : " + delay + 
-                     "\nRandom : " + random + 
+                     "\nStbmp  : " + timestamp +
+                     "\nDelby  : " + delay + 
+                     "\nRbndom : " + random + 
                      "\nThen   : " + then +
                      "\nDiff   : " + (then-now));
         }
 
-        return Math.max(0,then - now);
+        return Mbth.max(0,then - now);
     }
     
     /**
-     * Notifies this that an update with the given URN has finished downloading.
+     * Notifies this thbt an update with the given URN has finished downloading.
      * 
-     * If this was our update, we notify the gui.  Its ok if the user restarts
-     * as the rest of the updates will be downloaded the next session.
+     * If this wbs our update, we notify the gui.  Its ok if the user restarts
+     * bs the rest of the updates will be downloaded the next session.
      */
-    pualic void inNetworkDownlobdFinished(final URN urn, final boolean good) {
+    public void inNetworkDownlobdFinished(final URN urn, final boolean good) {
         
-        Runnable r = new Runnable() {
-            pualic void run() {
+        Runnbble r = new Runnable() {
+            public void run() {
                 
-                // add it to the list of failed urns
+                // bdd it to the list of failed urns
                 if (!good)
-                    UpdateSettings.FAILED_UPDATES.add(urn.httpStringValue());
+                    UpdbteSettings.FAILED_UPDATES.add(urn.httpStringValue());
                 
-                UpdateData updateInfo = (UpdateData) _updateInfo;
-                if (updateInfo != null && 
-                        updateInfo.getUpdateURN() != null &&
-                        updateInfo.getUpdateURN().equals(urn)) {
+                UpdbteData updateInfo = (UpdateData) _updateInfo;
+                if (updbteInfo != null && 
+                        updbteInfo.getUpdateURN() != null &&
+                        updbteInfo.getUpdateURN().equals(urn)) {
                     if (!good) {
-                        // register a notification to the user later on.
-                        updateInfo.setUpdateCommand(null);
-                        long delay = delay(clock.now(),_lastTimestamp);
-                        RouterService.schedule(new NotificationFailover(_lastId),delay,0);
+                        // register b notification to the user later on.
+                        updbteInfo.setUpdateCommand(null);
+                        long delby = delay(clock.now(),_lastTimestamp);
+                        RouterService.schedule(new NotificbtionFailover(_lastId),delay,0);
                     } else
-                        RouterService.getCallback().updateAvailable(updateInfo);
+                        RouterService.getCbllback().updateAvailable(updateInfo);
                 }
             }
         };
         
-        QUEUE.add(r);
+        QUEUE.bdd(r);
     }
     
     /**
-     * @return whether we killed any hopeless update downloads
+     * @return whether we killed bny hopeless update downloads
      */
-    private static void killHopelessUpdates(List updates) {
-        if (updates == null)
+    privbte static void killHopelessUpdates(List updates) {
+        if (updbtes == null)
             return;
         
-        DownloadManager dm = RouterService.getDownloadManager();
-        if (!dm.hasInNetworkDownload())
+        DownlobdManager dm = RouterService.getDownloadManager();
+        if (!dm.hbsInNetworkDownload())
             return;
         
         long now = clock.now();
-        for (Iterator iter = updates.iterator(); iter.hasNext();) {
-            DownloadInformation info = (DownloadInformation) iter.next();
-            Downloader downloader = dm.getDownloaderForURN(info.getUpdateURN());
-            if (downloader != null && downloader instanceof InNetworkDownloader) {
-                InNetworkDownloader iDownloader = (InNetworkDownloader)downloader;
-                if (isHopeless(iDownloader, now))  
-                    iDownloader.stop();
+        for (Iterbtor iter = updates.iterator(); iter.hasNext();) {
+            DownlobdInformation info = (DownloadInformation) iter.next();
+            Downlobder downloader = dm.getDownloaderForURN(info.getUpdateURN());
+            if (downlobder != null && downloader instanceof InNetworkDownloader) {
+                InNetworkDownlobder iDownloader = (InNetworkDownloader)downloader;
+                if (isHopeless(iDownlobder, now))  
+                    iDownlobder.stop();
             }
         }
     }
     
     /**
-     * @param now what time is it now
-     * @return whether the in-network downloader is considered hopeless
+     * @pbram now what time is it now
+     * @return whether the in-network downlobder is considered hopeless
      */
-    private static boolean isHopeless(InNetworkDownloader downloader, long now) {
-        if (now - downloader.getStartTime() < 
-                UpdateSettings.UPDATE_GIVEUP_FACTOR.getValue() * 
-                UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
-            return false;
+    privbte static boolean isHopeless(InNetworkDownloader downloader, long now) {
+        if (now - downlobder.getStartTime() < 
+                UpdbteSettings.UPDATE_GIVEUP_FACTOR.getValue() * 
+                UpdbteSettings.UPDATE_DOWNLOAD_DELAY.getValue())
+            return fblse;
         
-        if (downloader.getNumAttempts() < UpdateSettings.UPDATE_MIN_ATTEMPTS.getValue())
-            return false;
+        if (downlobder.getNumAttempts() < UpdateSettings.UPDATE_MIN_ATTEMPTS.getValue())
+            return fblse;
         
         return true;
     }
 
     /**
-     * @return true if the update for our specific machine is downloaded or
-     * there was nothing to download
+     * @return true if the updbte for our specific machine is downloaded or
+     * there wbs nothing to download
      */
-    private static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
-        FileManager fm = RouterService.getFileManager();
-        if (!fm.isLoadFinished())
-            return false;
+    privbte static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
+        FileMbnager fm = RouterService.getFileManager();
+        if (!fm.isLobdFinished())
+            return fblse;
         
-        URN myUrn = myInfo.getUpdateURN();
+        URN myUrn = myInfo.getUpdbteURN();
         if (myUrn == null)
             return true;
         
         FileDesc desc = fm.getFileDescForUrn(myUrn);
         
         if (desc == null)
-            return false;
-        return desc.getClass() == FileDesc.class;
+            return fblse;
+        return desc.getClbss() == FileDesc.class;
     }
     
     /**
-     * Simple accessor for the stored file.
+     * Simple bccessor for the stored file.
      */
-    private File getStoredFile() {
+    privbte File getStoredFile() {
         return new File(CommonUtils.getUserSettingsDir(), FILENAME);
     }
     
     /**
-     * Simple accessor for the key file.
+     * Simple bccessor for the key file.
      */
-    private File getKeyFile() {
+    privbte File getKeyFile() {
         return new File(CommonUtils.getUserSettingsDir(), KEY);
     }
     
 
     /**
-     * a functor that repeatedly tries to download updates at a variable
-     * interval. 
+     * b functor that repeatedly tries to download updates at a variable
+     * intervbl. 
      */
-    private class Poller implements Runnable {
-        pualic void run() {
-            downloadUpdates(_updatesToDownload, null);
-            killHopelessUpdates(_updatesToDownload);
-            RouterService.schedule( new Runnable() {
-                pualic void run() {
-                    QUEUE.add(new Poller());
+    privbte class Poller implements Runnable {
+        public void run() {
+            downlobdUpdates(_updatesToDownload, null);
+            killHopelessUpdbtes(_updatesToDownload);
+            RouterService.schedule( new Runnbble() {
+                public void run() {
+                    QUEUE.bdd(new Poller());
                 }
-            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0);
+            },UpdbteSettings.UPDATE_RETRY_DELAY.getValue(),0);
         }
     }
     
-    private class NotificationFailover implements Runnable {
-        private final int id;
-        private boolean shown;
+    privbte class NotificationFailover implements Runnable {
+        privbte final int id;
+        privbte boolean shown;
         
-        NotificationFailover(int id) {
+        NotificbtionFailover(int id) {
             this.id = id;
         }
         
-        pualic void run() {
+        public void run() {
             if (shown)
                 return;
             
             shown = true;
-            notifyAaoutInfo(id);
+            notifyAboutInfo(id);
         }
     }
 }
 
 /**
- * to ae overriden in tests
+ * to be overriden in tests
  */
-class Clock {
-    pualic long now() {
+clbss Clock {
+    public long now() {
         return System.currentTimeMillis();
     }
 }

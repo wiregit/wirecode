@@ -1,227 +1,227 @@
-package com.limegroup.gnutella.statistics;
+pbckage com.limegroup.gnutella.statistics;
 
 /**
- * This class contains a type-safe enumeration of statistics for uploads.
+ * This clbss contains a type-safe enumeration of statistics for uploads.
  */
-pualic clbss UploadStat extends AdvancedStatistic {
+public clbss UploadStat extends AdvancedStatistic {
 
 	/**
-	 * Make the constructor private so that only this class can construct
-	 * an <tt>UploadStat</tt> instances.
+	 * Mbke the constructor private so that only this class can construct
+	 * bn <tt>UploadStat</tt> instances.
 	 */
-	private UploadStat() {}
+	privbte UploadStat() {}
 	
 	/**
-	 * Statistic for attempted uploads.  This is incremented once per
+	 * Stbtistic for attempted uploads.  This is incremented once per
 	 * connection, not once per chunk.
 	 */
-	pualic stbtic final Statistic ATTEMPTED =
-	    new UploadStat();
+	public stbtic final Statistic ATTEMPTED =
+	    new UplobdStat();
 	
 	/**
-	 * Statistic for the number of BANNED replies that were sent
+	 * Stbtistic for the number of BANNED replies that were sent
 	 */
-	pualic stbtic final Statistic BANNED =
-		new UploadStat();
+	public stbtic final Statistic BANNED =
+		new UplobdStat();
 
 	/**
-	 * Statistic for completed uploads.  This is incremented once per
+	 * Stbtistic for completed uploads.  This is incremented once per
 	 * connection, not once per chunk.
 	 */
-	pualic stbtic final Statistic COMPLETED =
-	    new UploadStat();
+	public stbtic final Statistic COMPLETED =
+	    new UplobdStat();
 	    
     /**
-     * Statstics for completed file transfers.  This is incremented once per
+     * Stbtstics for completed file transfers.  This is incremented once per
      * connection, not once per chunk.
      */
-    pualic stbtic final Statistic COMPLETED_FILE =
-        new UploadStat();
+    public stbtic final Statistic COMPLETED_FILE =
+        new UplobdStat();
 	    
     /**
-     * Statistic for interrupted uploads.  This is incremented once per
+     * Stbtistic for interrupted uploads.  This is incremented once per
      * connection, not once per chunk.
      */
-    pualic stbtic final Statistic INTERRUPTED =
-        new UploadStat();
+    public stbtic final Statistic INTERRUPTED =
+        new UplobdStat();
     
     /**
-     * Statistic for GET requests that are accumulated AFTER the initial
+     * Stbtistic for GET requests that are accumulated AFTER the initial
      * incoming HTTP connection.
      */ 
-    pualic stbtic final Statistic SUBSEQUENT_GET =
-        new UploadStat();
+    public stbtic final Statistic SUBSEQUENT_GET =
+        new UplobdStat();
        
     /**
-     * Statistic for HEAD requests that are accumulated AFTER the initial
+     * Stbtistic for HEAD requests that are accumulated AFTER the initial
      * incoming HTTP connection.
      */ 
-    pualic stbtic final Statistic SUBSEQUENT_HEAD =
-        new UploadStat();
+    public stbtic final Statistic SUBSEQUENT_HEAD =
+        new UplobdStat();
 
     /**
-     * Statistic for unknown requests that are accumulated AFTER the initial
+     * Stbtistic for unknown requests that are accumulated AFTER the initial
      * incoming HTTP connection.
      */ 
-    pualic stbtic final Statistic SUBSEQUENT_UNKNOWN =
-        new UploadStat();
+    public stbtic final Statistic SUBSEQUENT_UNKNOWN =
+        new UplobdStat();
         
     /**
-     * Statistic for uploads whose status is FILE_NOT_FOUND.
+     * Stbtistic for uploads whose status is FILE_NOT_FOUND.
      */ 
-    pualic stbtic final Statistic FILE_NOT_FOUND =
-        new UploadStat();
+    public stbtic final Statistic FILE_NOT_FOUND =
+        new UplobdStat();
 
     /**
-     * Statistic for uploads whose status is LIMIT_REACHED.
+     * Stbtistic for uploads whose status is LIMIT_REACHED.
      */ 
-    pualic stbtic final Statistic LIMIT_REACHED =
-        new UploadStat();
+    public stbtic final Statistic LIMIT_REACHED =
+        new UplobdStat();
         
     /**
-	 * Statistic for uploads whose status is LIMIT_REACHED
-	 * and who did not read our Retry-After header.
+	 * Stbtistic for uploads whose status is LIMIT_REACHED
+	 * bnd who did not read our Retry-After header.
 	 */ 
-	pualic stbtic final Statistic LIMIT_REACHED_GREEDY =
-		new UploadStat();
+	public stbtic final Statistic LIMIT_REACHED_GREEDY =
+		new UplobdStat();
         
     /**
-     * Statistic for uploads whose status is UNAVAILABLE_RANGE.
+     * Stbtistic for uploads whose status is UNAVAILABLE_RANGE.
      */
-    pualic stbtic final Statistic UNAVAILABLE_RANGE =
-        new UploadStat();
+    public stbtic final Statistic UNAVAILABLE_RANGE =
+        new UplobdStat();
 
     /**
-     * Statistic for uploads whose status is FREELOADER
+     * Stbtistic for uploads whose status is FREELOADER
      */ 
-    pualic stbtic final Statistic FREELOADER =
-        new UploadStat();
+    public stbtic final Statistic FREELOADER =
+        new UplobdStat();
         
     /**
-     * Statistic for uploads who send THEX trees
+     * Stbtistic for uploads who send THEX trees
      */ 
-    pualic stbtic final Statistic THEX =
-        new UploadStat();
+    public stbtic final Statistic THEX =
+        new UplobdStat();
         
     /**
-     * Statistic for uploads whose status is queued.  This is incremented
-     * after every request in which we queue the uploader.
+     * Stbtistic for uploads whose status is queued.  This is incremented
+     * bfter every request in which we queue the uploader.
      */ 
-    pualic stbtic final Statistic QUEUED =
-        new UploadStat();
+    public stbtic final Statistic QUEUED =
+        new UplobdStat();
         
     /**
-     * Statistic for uploads that will actually upload a portion of the file.
-     * This is incremented every chunk of the upload.
+     * Stbtistic for uploads that will actually upload a portion of the file.
+     * This is incremented every chunk of the uplobd.
      */
-    pualic stbtic final Statistic UPLOADING =
-        new UploadStat();
+    public stbtic final Statistic UPLOADING =
+        new UplobdStat();
 
     /**
-     * Statistic for a GET request after we push a GIV.
+     * Stbtistic for a GET request after we push a GIV.
      */ 
-    pualic stbtic final Statistic PUSHED_GET =
-        new UploadStat();
+    public stbtic final Statistic PUSHED_GET =
+        new UplobdStat();
         
     /**
-     * Statistic for a HEAD request after we push a GIV.
+     * Stbtistic for a HEAD request after we push a GIV.
      */
-    pualic stbtic final Statistic PUSHED_HEAD =
-        new UploadStat();
+    public stbtic final Statistic PUSHED_HEAD =
+        new UplobdStat();
 
     /**
-     * Statistic for an unknown request after we push a GIV.
+     * Stbtistic for an unknown request after we push a GIV.
      */
-    pualic stbtic final Statistic PUSHED_UNKNOWN =
-        new UploadStat();
+    public stbtic final Statistic PUSHED_UNKNOWN =
+        new UplobdStat();
         
     /**
-     * Statistic for failed push requests.  This is incremented
-     * every time we send a GIV and do not receive a response or
-     * if we were unable to connect to send the GIV.
+     * Stbtistic for failed push requests.  This is incremented
+     * every time we send b GIV and do not receive a response or
+     * if we were unbble to connect to send the GIV.
      */
-    pualic stbtic final Statistic PUSH_FAILED =
-        new UploadStat();
+    public stbtic final Statistic PUSH_FAILED =
+        new UplobdStat();
         
     /**
-     * Statistic for a succesful FW-FW upload connection.
+     * Stbtistic for a succesful FW-FW upload connection.
      */
-    pualic stbtic final Statistic FW_FW_SUCCESS =
-        new UploadStat();
+    public stbtic final Statistic FW_FW_SUCCESS =
+        new UplobdStat();
         
     /**
-     * Statistic for a failed FW-FW upload connection.
+     * Stbtistic for a failed FW-FW upload connection.
      */
-    pualic stbtic final Statistic FW_FW_FAILURE =
-        new UploadStat();
+    public stbtic final Statistic FW_FW_FAILURE =
+        new UplobdStat();
 
     /**
-     * Statistic for the number malformed requests we receive.
+     * Stbtistic for the number malformed requests we receive.
      */
-    pualic stbtic final Statistic MALFORMED_REQUEST =
-        new UploadStat();
+    public stbtic final Statistic MALFORMED_REQUEST =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of browse host requests we receive.
+     * Stbtistic for the number of browse host requests we receive.
      */
-    pualic stbtic final Statistic BROWSE_HOST =
-        new UploadStat();
+    public stbtic final Statistic BROWSE_HOST =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of push proxy requests we receive.
+     * Stbtistic for the number of push proxy requests we receive.
      */
-    pualic stbtic final Statistic PUSH_PROXY =
-        new UploadStat();
+    public stbtic final Statistic PUSH_PROXY =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of push proxy requests we successfully process.
+     * Stbtistic for the number of push proxy requests we successfully process.
      */
-    pualic stbtic final Statistic PUSH_PROXY_REQ_SUCCESS =
-        new UploadStat();
+    public stbtic final Statistic PUSH_PROXY_REQ_SUCCESS =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of push proxy requests that are malformed.
+     * Stbtistic for the number of push proxy requests that are malformed.
      */
-    pualic stbtic final Statistic PUSH_PROXY_REQ_BAD =
-        new UploadStat();
+    public stbtic final Statistic PUSH_PROXY_REQ_BAD =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of push proxy requests that failed (leaf was
+     * Stbtistic for the number of push proxy requests that failed (leaf was
      * gone).
      */
-    pualic stbtic final Statistic PUSH_PROXY_REQ_FAILED =
-        new UploadStat();
+    public stbtic final Statistic PUSH_PROXY_REQ_FAILED =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of update file requests we receive.
+     * Stbtistic for the number of update file requests we receive.
      */
-    pualic stbtic final Statistic UPDATE_FILE =
-        new UploadStat();
+    public stbtic final Statistic UPDATE_FILE =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of traditional get requests we receive,
-     * such as /get/#/filename 
+     * Stbtistic for the number of traditional get requests we receive,
+     * such bs /get/#/filename 
      */
-    pualic stbtic final Statistic TRADITIONAL_GET =
-        new UploadStat();
+    public stbtic final Statistic TRADITIONAL_GET =
+        new UplobdStat();
        
     /**
-     * Statistic for the number of URN get requests we receive whose URN
-     * we do not have in our library.
+     * Stbtistic for the number of URN get requests we receive whose URN
+     * we do not hbve in our library.
      */ 
-    pualic stbtic final Statistic UNKNOWN_URN_GET =
-        new UploadStat();
+    public stbtic final Statistic UNKNOWN_URN_GET =
+        new UplobdStat();
         
     /**
-     * Statistic for the number of URN get requests we receive where we
-     * do have this URN in our library.
+     * Stbtistic for the number of URN get requests we receive where we
+     * do hbve this URN in our library.
      */
-    pualic stbtic final Statistic URN_GET =
-        new UploadStat();
+    public stbtic final Statistic URN_GET =
+        new UplobdStat();
        
     /**
-     * Statistic for the number of uploads we have killed because they stalled.
+     * Stbtistic for the number of uploads we have killed because they stalled.
      */ 
-    pualic stbtic final Statistic STALLED =
-        new UploadStat();
+    public stbtic final Statistic STALLED =
+        new UplobdStat();
 }

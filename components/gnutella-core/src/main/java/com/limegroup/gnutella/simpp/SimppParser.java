@@ -1,82 +1,82 @@
-package com.limegroup.gnutella.simpp;
+pbckage com.limegroup.gnutella.simpp;
 
-import java.io.IOException;
-import java.io.StringReader;
+import jbva.io.IOException;
+import jbva.io.StringReader;
 
-import org.apache.xerces.parsers.DOMParser;
+import org.bpache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sbx.InputSource;
+import org.xml.sbx.SAXException;
 
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import com.limegroup.gnutellb.xml.LimeXMLUtils;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
-pualic clbss SimppParser {
+public clbss SimppParser {
     
-    private static final Log LOG = LogFactory.getLog(SimppParser.class);
+    privbte static final Log LOG = LogFactory.getLog(SimppParser.class);
 
-    private static DOMParser parser = new DOMParser();
+    privbte static DOMParser parser = new DOMParser();
     
-    private static final String VERSION = "version";
+    privbte static final String VERSION = "version";
     
-    private static final String PROPS = "props";
+    privbte static final String PROPS = "props";
 
-    private int _version;
-    private String _propsData;    
+    privbte int _version;
+    privbte String _propsData;    
 
-    //Format of dataBytes:
-    //<xml for version related info with one tag containing all the props data>
-    //TODO1: Change the way this is parsed as per the format described above. 
-    pualic SimppPbrser(byte[] dataBytes) throws SAXException, IOException {
-        parseInfo(new String(dataBytes, "UTF-8"));
+    //Formbt of dataBytes:
+    //<xml for version relbted info with one tag containing all the props data>
+    //TODO1: Chbnge the way this is parsed as per the format described above. 
+    public SimppPbrser(byte[] dataBytes) throws SAXException, IOException {
+        pbrseInfo(new String(dataBytes, "UTF-8"));
     }
     
-    pualic int getVersion() {
+    public int getVersion() {
         return _version;
     }
 
-    pualic String getPropsDbta() {
-        return _propsData;
+    public String getPropsDbta() {
+        return _propsDbta;
     }
 
-    ///////////////////////////private helpers////////////////////////
+    ///////////////////////////privbte helpers////////////////////////
 
-    private void parseInfo(String xmlStr) throws SAXException, IOException {
-        if(xmlStr == null || xmlStr.equals(""))
+    privbte void parseInfo(String xmlStr) throws SAXException, IOException {
+        if(xmlStr == null || xmlStr.equbls(""))
             throw new SAXException("null xml for version info");
-        InputSource inputSource = new InputSource(new StringReader(xmlStr));
+        InputSource inputSource = new InputSource(new StringRebder(xmlStr));
         Document d = null;
-        synchronized(SimppParser.parser) {
-            parser.parse(inputSource);
-            d = parser.getDocument();
+        synchronized(SimppPbrser.parser) {
+            pbrser.parse(inputSource);
+            d = pbrser.getDocument();
         }
         if(d == null)
-            throw new SAXException("parsed documemt is null");
+            throw new SAXException("pbrsed documemt is null");
         Element docElement = d.getDocumentElement();
         NodeList children = docElement.getChildNodes();
         int len = children.getLength();
         for(int i= 0; i< len; i++) {
             Node node = children.item(i);
-            String nodeName = node.getNodeName().toLowerCase().trim();
-            String value = LimeXMLUtils.getText(node.getChildNodes());
-            if(nodeName.equals(VERSION)) {
-                String ver = value;
+            String nodeNbme = node.getNodeName().toLowerCase().trim();
+            String vblue = LimeXMLUtils.getText(node.getChildNodes());
+            if(nodeNbme.equals(VERSION)) {
+                String ver = vblue;
                 try {
-                    _version = Integer.parseInt(ver);
-                } catch(NumberFormatException nfx) {
-                    LOG.error("Unable to parse version number: " + nfx);
+                    _version = Integer.pbrseInt(ver);
+                } cbtch(NumberFormatException nfx) {
+                    LOG.error("Unbble to parse version number: " + nfx);
                     _version = -1;
                 }
             }
-            else if(nodeName.equals(PROPS)) {
-                _propsData = value;
+            else if(nodeNbme.equals(PROPS)) {
+                _propsDbta = value;
             }
-        }//end of for -- done all child nodes
+        }//end of for -- done bll child nodes
     }
     
 }

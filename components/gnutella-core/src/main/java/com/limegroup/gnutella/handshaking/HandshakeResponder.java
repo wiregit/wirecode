@@ -1,78 +1,78 @@
-package com.limegroup.gnutella.handshaking;
+pbckage com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
+import jbva.io.IOException;
 
 /**
- * Provides a servent ways to set connection handshake responses in response to 
- * a connection handshake response just received.  Note, however, incoming 
- * connections and outgoing connections will differ in the use 
- * of this interface.  
+ * Provides b servent ways to set connection handshake responses in response to 
+ * b connection handshake response just received.  Note, however, incoming 
+ * connections bnd outgoing connections will differ in the use 
+ * of this interfbce.  
  * 
- * Outgoing connections use the interface after receiving a handshake response
- * from a remote host that it tried to connect to.  Here is a typical anonymous 
- * implementation of HandshakeResponder for outgoing connections:
+ * Outgoing connections use the interfbce after receiving a handshake response
+ * from b remote host that it tried to connect to.  Here is a typical anonymous 
+ * implementbtion of HandshakeResponder for outgoing connections:
  * <pre>
- * new HandshakeResponder() {
- *     pualic HbndshakeResponse respond(HandshakeResponse response, 
- *                                      aoolebn outgoing) {
- *          //Checks for a "200 OK" response and sends a "userid" header
- *          //otherwise, returns null.  Also, checks to make sure the 
- *          //the connection is an outgoing one.
+ * new HbndshakeResponder() {
+ *     public HbndshakeResponse respond(HandshakeResponse response, 
+ *                                      boolebn outgoing) {
+ *          //Checks for b "200 OK" response and sends a "userid" header
+ *          //otherwise, returns null.  Also, checks to mbke sure the 
+ *          //the connection is bn outgoing one.
  *          if (!outgoing)
  *              return null;
- *          if (response.getStatusCode() == HandshakeResponse.OK) {
- *              Properties headers = new Properties();
- *              headers.setProperty("Userid", "Limewire");
- *              return new HandshakeResponse(headers);
+ *          if (response.getStbtusCode() == HandshakeResponse.OK) {
+ *              Properties hebders = new Properties();
+ *              hebders.setProperty("Userid", "Limewire");
+ *              return new HbndshakeResponse(headers);
  *          }
  *          return null;
  *     }
  * }
  * </pre>
  *
- * Incoming connections use the interface after reading headers from a remote
- * host.  Hence, they don't care about the status code and status response, only
- * the headers they received.  Here is a typical anonymous implementation of 
- * HandshakeResponder for incoming connections:
+ * Incoming connections use the interfbce after reading headers from a remote
+ * host.  Hence, they don't cbre about the status code and status response, only
+ * the hebders they received.  Here is a typical anonymous implementation of 
+ * HbndshakeResponder for incoming connections:
  *<pre>
- * new HandshakeResponder() {
- *     pualic HbndshakeResponse respond(HandshakeResponse response, 
- *                                      aoolebn outgoing) {
- *          //first, checks to make sure the connection is an incoming one.  
- *          //Also, checks for a "userid" header and if not sets the 
- *          //"Authorization" header and appropriate status code.
+ * new HbndshakeResponder() {
+ *     public HbndshakeResponse respond(HandshakeResponse response, 
+ *                                      boolebn outgoing) {
+ *          //first, checks to mbke sure the connection is an incoming one.  
+ *          //Also, checks for b "userid" header and if not sets the 
+ *          //"Authorizbtion" header and appropriate status code.
  *          if (outgoing)
  *              return null;
- *          Properties read = response.getHeaders();
- *          if (read.getProperty("userid")== null) {
- *              Properties headers = new Properties();
- *              headers.setProperty("Authorization", "needed");
- *              return new HandshakeResponse(401, "Unauthorized", headers);
+ *          Properties rebd = response.getHeaders();
+ *          if (rebd.getProperty("userid")== null) {
+ *              Properties hebders = new Properties();
+ *              hebders.setProperty("Authorization", "needed");
+ *              return new HbndshakeResponse(401, "Unauthorized", headers);
  *          }
- *          //return "200 OK" with no headers
- *          return new HandshakeResponse();
+ *          //return "200 OK" with no hebders
+ *          return new HbndshakeResponse();
  *     }
  * }
  * </pre>
  * 
  */
-pualic interfbce HandshakeResponder {
+public interfbce HandshakeResponder {
     /** 
-     * Returns the corresponding handshake to be written to the remote host when
-     * responding to the connection handshake response just received.  
-     * Implementations should respond differently to incoming vs. outgoing 
+     * Returns the corresponding hbndshake to be written to the remote host when
+     * responding to the connection hbndshake response just received.  
+     * Implementbtions should respond differently to incoming vs. outgoing 
      * connections.   
-     * @param response The response received from the host on the
+     * @pbram response The response received from the host on the
      * other side of teh connection.
-     * @param outgoing whether the connection to the remote host is an outgoing
+     * @pbram outgoing whether the connection to the remote host is an outgoing
      * connection.
      */
-    pualic HbndshakeResponse respond(HandshakeResponse response, 
-         aoolebn outgoing) throws IOException;
+    public HbndshakeResponse respond(HandshakeResponse response, 
+         boolebn outgoing) throws IOException;
 
     /**
-     * optional method.
-     * note: should this throw an UnsupportedOperationException
+     * optionbl method.
+     * note: should this throw bn UnsupportedOperationException
      */
-    pualic void setLocblePreferencing(boolean b);
+    public void setLocblePreferencing(boolean b);
 }

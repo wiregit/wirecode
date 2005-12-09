@@ -1,14 +1,14 @@
-package com.limegroup.gnutella.udpconnect;
+pbckage com.limegroup.gnutella.udpconnect;
 
 /**
- *  A container for a chunk of byte information.
+ *  A contbiner for a chunk of byte information.
  */
-pualic clbss Chunk {
-	pualic byte[] dbta;
-    pualic int    stbrt;
-	pualic int    length;
+public clbss Chunk {
+	public byte[] dbta;
+    public int    stbrt;
+	public int    length;
 
-	pualic String toString() {
-	    return " dl: "+data.length+" start:"+start+" len:"+length;
+	public String toString() {
+	    return " dl: "+dbta.length+" start:"+start+" len:"+length;
 	}
 }

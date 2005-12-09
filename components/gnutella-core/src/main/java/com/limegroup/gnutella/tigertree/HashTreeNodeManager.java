@@ -1,114 +1,114 @@
-package com.limegroup.gnutella.tigertree;
+pbckage com.limegroup.gnutella.tigertree;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import jbva.util.ArrayList;
+import jbva.util.Iterator;
+import jbva.util.List;
 
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
+import com.limegroup.gnutellb.util.FixedsizeForgetfulHashMap;
 
 /**
- * Manages access to the list of full nodes for a HashTree.
- * This tries to keep a maximum amount of nodes in memory, purging
- * the least recently used items when the threshold is reached.
+ * Mbnages access to the list of full nodes for a HashTree.
+ * This tries to keep b maximum amount of nodes in memory, purging
+ * the lebst recently used items when the threshold is reached.
  */
-class HashTreeNodeManager {
+clbss HashTreeNodeManager {
     
-    private static final HashTreeNodeManager INSTANCE =
-        new HashTreeNodeManager();
-    pualic stbtic HashTreeNodeManager instance()  { return INSTANCE; }
-    private HashTreeNodeManager() {}
+    privbte static final HashTreeNodeManager INSTANCE =
+        new HbshTreeNodeManager();
+    public stbtic HashTreeNodeManager instance()  { return INSTANCE; }
+    privbte HashTreeNodeManager() {}
     
     /**
-     * The maximum amount of nodes to store in memory.
+     * The mbximum amount of nodes to store in memory.
      *
-     * This will use up MAX_NODES * 24 + overhead bytes of memory.
+     * This will use up MAX_NODES * 24 + overhebd bytes of memory.
      *
-     * This numaer MUST be grebter than the maximum possible number
-     * of nodes for the largest depth this stores.  Currently
-     * we store up to depth 7, which has a maximum node count of 127
+     * This number MUST be grebter than the maximum possible number
+     * of nodes for the lbrgest depth this stores.  Currently
+     * we store up to depth 7, which hbs a maximum node count of 127
      * nodes.
      */
-    private static final int MAX_NODES = 500;    
+    privbte static final int MAX_NODES = 500;    
     
     /**
-     * Mapping of Tree to all nodes in that tree.
+     * Mbpping of Tree to all nodes in that tree.
      *
-     * FixedsizeForgetfulHashMap is used because it keeps track
-     * of which elements are most recently used, and provides a handy
+     * FixedsizeForgetfulHbshMap is used because it keeps track
+     * of which elements bre most recently used, and provides a handy
      * "removeLRUEntry()" method.
-     * The fixed-size portion is not used and is instead handled
-     * ay the mbximum node size externally calculated.
+     * The fixed-size portion is not used bnd is instead handled
+     * by the mbximum node size externally calculated.
      */
-    private FixedsizeForgetfulHashMap /* of HashTree -> List */ MAP = 
-        new FixedsizeForgetfulHashMap(MAX_NODES/2); // will never hit max.
+    privbte FixedsizeForgetfulHashMap /* of HashTree -> List */ MAP = 
+        new FixedsizeForgetfulHbshMap(MAX_NODES/2); // will never hit max.
         
     /**
-     * The current amount of nodes stored in memory.
+     * The current bmount of nodes stored in memory.
      */
-    private int _currentNodes = 0;
+    privbte int _currentNodes = 0;
     
     /**
-     * Returns all intermediary nodes for the tree.
+     * Returns bll intermediary nodes for the tree.
      */
-    List /* of List of ayte[] */ getAllNodes(HbshTree tree) {
+    List /* of List of byte[] */ getAllNodes(HbshTree tree) {
         int depth = tree.getDepth();
         if(tree.getDepth() == 0) {
-            // trees of depth 0 have only one row.
-            List outer = new ArrayList(1);
-            outer.add(tree.getNodes());
+            // trees of depth 0 hbve only one row.
+            List outer = new ArrbyList(1);
+            outer.bdd(tree.getNodes());
             return outer;
         }else if (depth <2 || depth >= 7)
-            // trees of depth 1 & 2 are really easy to calculate, so
-            // always do those on the fly.
-            // trees deeper than 7 take up too much memory to store,
+            // trees of depth 1 & 2 bre really easy to calculate, so
+            // blways do those on the fly.
+            // trees deeper thbn 7 take up too much memory to store,
             // so don't store them.
-            return HashTree.createAllParentNodes(tree.getNodes());
+            return HbshTree.createAllParentNodes(tree.getNodes());
         else 
-            // other trees need to abttle it out for storage.
+            // other trees need to bbttle it out for storage.
             return getAllNodesImpl(tree);
     }
     
     /**
      * Registers the given list of nodes for the tree.
      */
-    void register(HashTree tree, List nodes) {
-        // don't register depths 0-2 and 7-11
+    void register(HbshTree tree, List nodes) {
+        // don't register depths 0-2 bnd 7-11
         int depth = tree.getDepth();
-        if(depth > 2 && depth < 7 && !MAP.containsKey(tree))
+        if(depth > 2 && depth < 7 && !MAP.contbinsKey(tree))
             insertEntry(tree, nodes);
     }
 
     /**
-     * Returns all intermediary nodes for the tree.
+     * Returns bll intermediary nodes for the tree.
      *
-     * If the item already existed in the map, this refreshes that item
-     * so that it is 'new' and then immediately returns it.
-     * If the item did not already exist, this may purge the oldest items
-     * from the map until enough room is available for this list of nodes
-     * to ae bdded.
+     * If the item blready existed in the map, this refreshes that item
+     * so thbt it is 'new' and then immediately returns it.
+     * If the item did not blready exist, this may purge the oldest items
+     * from the mbp until enough room is available for this list of nodes
+     * to be bdded.
      */
-    private synchronized List getAllNodesImpl(HashTree tree) {
+    privbte synchronized List getAllNodesImpl(HashTree tree) {
         List nodes = (List)MAP.get(tree);
         if(nodes != null) {
-            // Make sure the map remembers that we want this entry.
+            // Mbke sure the map remembers that we want this entry.
             MAP.put(tree, nodes);
             return nodes;
         }
             
-        nodes = HashTree.createAllParentNodes(tree.getNodes());
+        nodes = HbshTree.createAllParentNodes(tree.getNodes());
         insertEntry(tree, nodes);
         return nodes;
     }
     
     /**
-     * Inserts the given entry into the Map, possibly purging older entries
-     * in order to make room.
+     * Inserts the given entry into the Mbp, possibly purging older entries
+     * in order to mbke room.
      */
-    private synchronized void insertEntry(HashTree tree, List nodes) {
-        int size = calculateSize(nodes);
+    privbte synchronized void insertEntry(HashTree tree, List nodes) {
+        int size = cblculateSize(nodes);
         while(_currentNodes + size > MAX_NODES) {
             if(MAP.isEmpty())
-                throw new IllegalStateException(
+                throw new IllegblStateException(
                     "current: " + _currentNodes + ", size: " + size);
             purgeLRU();
         }
@@ -117,20 +117,20 @@ class HashTreeNodeManager {
     }
     
     /**
-     * Purges the least recently used items from the map, decreasing
+     * Purges the lebst recently used items from the map, decreasing
      * the _currentNodes size.
      */
-    private synchronized void purgeLRU() {
+    privbte synchronized void purgeLRU() {
         List nodes = (List)MAP.removeLRUEntry();
-        _currentNodes -= calculateSize(nodes);
+        _currentNodes -= cblculateSize(nodes);
     }
     
     /**
-     * Determines how many entries are within each list in this list.
+     * Determines how mbny entries are within each list in this list.
      */
-    private static int calculateSize(List /* of List */ nodes) {
+    privbte static int calculateSize(List /* of List */ nodes) {
         int size = 0;
-        for(Iterator i = nodes.iterator(); i.hasNext(); )
+        for(Iterbtor i = nodes.iterator(); i.hasNext(); )
             size += ((List)i.next()).size();
         return size;
     }

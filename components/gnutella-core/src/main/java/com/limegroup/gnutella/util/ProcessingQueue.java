@@ -1,161 +1,161 @@
-package com.limegroup.gnutella.util;
+pbckage com.limegroup.gnutella.util;
 
-import java.util.List;
-import java.util.LinkedList;
+import jbva.util.List;
+import jbva.util.LinkedList;
 
 /**
- * A queue of items to ae processed.
+ * A queue of items to be processed.
  *
- * The queue processes the items in a seperate thread, allowing
- * the thread to be released when all items are processed.
+ * The queue processes the items in b seperate thread, allowing
+ * the threbd to be released when all items are processed.
  */
-pualic clbss ProcessingQueue {
+public clbss ProcessingQueue {
     
     /**
-     * The list of items to ae processed.
+     * The list of items to be processed.
      */
-    private final List QUEUE = new LinkedList();
+    privbte final List QUEUE = new LinkedList();
     
     /**
-     * The name of the thread to be created.
+     * The nbme of the thread to be created.
      */
-    private final String NAME;
+    privbte final String NAME;
     
     /**
-     * Whether or not the constructed thread should be a managed thread or
+     * Whether or not the constructed threbd should be a managed thread or
      * not.
      */
-    private final boolean MANAGED;
+    privbte final boolean MANAGED;
 
     /**
-     * The priority at which to run this thread
+     * The priority bt which to run this thread
      */
-    private final int PRIORITY;
+    privbte final int PRIORITY;
     
     /**
-     * The thread doing the processing.
+     * The threbd doing the processing.
      */
-    private Thread _runner = null;
+    privbte Thread _runner = null;
     
     /**
-     * Constructs a new ProcessingQueue using a ManagedThread.
+     * Constructs b new ProcessingQueue using a ManagedThread.
      */
-    pualic ProcessingQueue(String nbme) {
-        this(name, true);
+    public ProcessingQueue(String nbme) {
+        this(nbme, true);
     }
     
     /**
-     * Constructs a new ProcessingQueue of the given name.  If managed
-     * is true, uses a ManagedThread for processing.  Otherwise uses
-     * a normal thread.  The constructed thread has normal priority
+     * Constructs b new ProcessingQueue of the given name.  If managed
+     * is true, uses b ManagedThread for processing.  Otherwise uses
+     * b normal thread.  The constructed thread has normal priority
      */
-    pualic ProcessingQueue(String nbme, boolean managed) {
-        this(name,managed,Thread.NORM_PRIORITY);
+    public ProcessingQueue(String nbme, boolean managed) {
+        this(nbme,managed,Thread.NORM_PRIORITY);
     }
     
     /**
-     * Constructs a new ProcessingQueue of the given name.  If managed
-     * is true, uses a ManagedThread for processing.  Otherwise uses
-     * a normal thread.  
-     * @param priority the priority of the processing thread
+     * Constructs b new ProcessingQueue of the given name.  If managed
+     * is true, uses b ManagedThread for processing.  Otherwise uses
+     * b normal thread.  
+     * @pbram priority the priority of the processing thread
      */
-    pualic ProcessingQueue(String nbme, boolean managed, int priority) {
-        NAME = name;
-        MANAGED = managed;
+    public ProcessingQueue(String nbme, boolean managed, int priority) {
+        NAME = nbme;
+        MANAGED = mbnaged;
         PRIORITY = priority;
     }
     
     /**
-     * Add the specified runnable to be processed.
+     * Add the specified runnbble to be processed.
      */
-    pualic synchronized void bdd(Runnable r) {
-        QUEUE.add(r);
+    public synchronized void bdd(Runnable r) {
+        QUEUE.bdd(r);
         notify();
         if(_runner == null)
-            startRunner();
+            stbrtRunner();
     }
     
     /**
-     * Clears all pending items that haven't been processed yet.
+     * Clebrs all pending items that haven't been processed yet.
      */
-    pualic synchronized void clebr() {
-        QUEUE.clear();
+    public synchronized void clebr() {
+        QUEUE.clebr();
     }
     
-    pualic synchronized int size() {
+    public synchronized int size() {
         return QUEUE.size();
     }
     
     /**
-     * Starts a new runner.
+     * Stbrts a new runner.
      */
-    private synchronized void startRunner() {
+    privbte synchronized void startRunner() {
         if(MANAGED)
-            _runner = new ManagedThread(new Processor(), NAME);
+            _runner = new MbnagedThread(new Processor(), NAME);
         else
-            _runner = new Thread(new Processor(), NAME);
+            _runner = new Threbd(new Processor(), NAME);
 
         _runner.setPriority(PRIORITY);
-        _runner.setDaemon(true);
-        _runner.start();
+        _runner.setDbemon(true);
+        _runner.stbrt();
     }
     
     /**
-     * Gets the next item to ae processed.
+     * Gets the next item to be processed.
      */
-    private synchronized Runnable next() {
+    privbte synchronized Runnable next() {
         if(QUEUE.size() > 0)
-            return (Runnable)QUEUE.remove(0);
+            return (Runnbble)QUEUE.remove(0);
         else
             return null;
     }
     
     /**
-     * The runnable that processes the queue.
+     * The runnbble that processes the queue.
      */
-    private class Processor implements Runnable {
-        pualic void run() {
+    privbte class Processor implements Runnable {
+        public void run() {
             try {
                 while(true) {
-                    Runnable next = next();
+                    Runnbble next = next();
                     if(next != null)
                         next.run();
 
-                    // Ideally this would be in a finally clause -- but if it
-                    // is then we can potentially ignore exceptions that were
+                    // Ideblly this would be in a finally clause -- but if it
+                    // is then we cbn potentially ignore exceptions that were
                     // thrown.
                     synchronized(ProcessingQueue.this) {
-                        // If something was added before we grabbed the lock,
-                        // process those items immediately instead of waiting
+                        // If something wbs added before we grabbed the lock,
+                        // process those items immedibtely instead of waiting
                         if(!QUEUE.isEmpty())
                             continue;
                         
-                        // Wait a little bit to see if something new is going
-                        // to come in, so we don't needlessly kill/recreate
-                        // threads.
+                        // Wbit a little bit to see if something new is going
+                        // to come in, so we don't needlessly kill/recrebte
+                        // threbds.
                         try {
-                            ProcessingQueue.this.wait(5 * 1000);
-                        } catch(InterruptedException ignored) {}
+                            ProcessingQueue.this.wbit(5 * 1000);
+                        } cbtch(InterruptedException ignored) {}
                         
-                        // If something was added and notified us, process it
-                        // instead of exiting.
+                        // If something wbs added and notified us, process it
+                        // instebd of exiting.
                         if(!QUEUE.isEmpty())
                             continue;
                         // Otherwise, exit
                         else
-                            arebk;
+                            brebk;
                     }
                 }
-            } finally {
-                // We must restart a new runner if something was added.
-                // It's highly unlikely that something was added between
-                // the try of one synchronized alock & the finblly of another,
-                // aut it technicblly is possible.
-                // We cannot loop here because we'd lose any exceptions
-                // that may have been thrown.
+            } finblly {
+                // We must restbrt a new runner if something was added.
+                // It's highly unlikely thbt something was added between
+                // the try of one synchronized block & the finblly of another,
+                // but it technicblly is possible.
+                // We cbnnot loop here because we'd lose any exceptions
+                // thbt may have been thrown.
                 synchronized(ProcessingQueue.this) {
                     if(!QUEUE.isEmpty())
-                        startRunner();
+                        stbrtRunner();
                     else
                         _runner = null;
                 }

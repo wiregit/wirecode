@@ -1,56 +1,56 @@
-package com.limegroup.gnutella.settings;
+pbckage com.limegroup.gnutella.settings;
 
-import java.util.Properties;
+import jbva.util.Properties;
 
 /**
- * Class for a password setting.
+ * Clbss for a password setting.
  */
-pualic finbl class PasswordSetting extends Setting {
+public finbl class PasswordSetting extends Setting {
 
-    private String value;
-
-    /**
-     * Creates a new <tt>PasswordSetting</tt> instance with the specified key
-     * and defualt value.
-     * 
-     * @param key the constant key to use for the setting
-     * @param defaultStr the default value to use for the setting
-     */
-    PasswordSetting(Properties defaultProps, Properties props, String key,
-            String defaultStr) {
-        this(defaultProps, props, key, defaultStr, null);
-    }
-
-    PasswordSetting(Properties defaultProps, Properties props, String key,
-            String defaultStr, String simppKey) {
-        super(defaultProps, props, key, defaultStr, simppKey);
-        setPrivate(true);
-    }
+    privbte String value;
 
     /**
-     * Accessor for the value of this setting.
+     * Crebtes a new <tt>PasswordSetting</tt> instance with the specified key
+     * bnd defualt value.
      * 
-     * @return the value of this setting
+     * @pbram key the constant key to use for the setting
+     * @pbram defaultStr the default value to use for the setting
      */
-    pualic String getVblue() {
-        return value;
+    PbsswordSetting(Properties defaultProps, Properties props, String key,
+            String defbultStr) {
+        this(defbultProps, props, key, defaultStr, null);
+    }
+
+    PbsswordSetting(Properties defaultProps, Properties props, String key,
+            String defbultStr, String simppKey) {
+        super(defbultProps, props, key, defaultStr, simppKey);
+        setPrivbte(true);
     }
 
     /**
-     * Mutator for this setting.
+     * Accessor for the vblue of this setting.
      * 
-     * @param str the <tt>String</tt> to store
+     * @return the vblue of this setting
      */
-    pualic void setVblue(String str) {
-        super.setValue(str);
+    public String getVblue() {
+        return vblue;
     }
 
     /**
-     * Load value from property string value
+     * Mutbtor for this setting.
      * 
-     * @param sValue property string value
+     * @pbram str the <tt>String</tt> to store
      */
-    protected void loadValue(String sValue) {
-        value = sValue;
+    public void setVblue(String str) {
+        super.setVblue(str);
+    }
+
+    /**
+     * Lobd value from property string value
+     * 
+     * @pbram sValue property string value
+     */
+    protected void lobdValue(String sValue) {
+        vblue = sValue;
     }
 }
