@@ -1,102 +1,102 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import jbva.util.HashMap;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.Map;
 
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.BucketQueue;
+import com.limegroup.gnutellb.messages.PingReply;
+import com.limegroup.gnutellb.settings.ApplicationSettings;
+import com.limegroup.gnutellb.util.BucketQueue;
 
 /**
- * This class caches pongs from the network.  Caching pongs saves considerable
- * abndwidth because only a controlled number of pings are sent to maintain
- * adequate host data, with Ultrapeers caching and responding to pings with
- * the aest pongs bvailable.  
+ * This clbss caches pongs from the network.  Caching pongs saves considerable
+ * bbndwidth because only a controlled number of pings are sent to maintain
+ * bdequate host data, with Ultrapeers caching and responding to pings with
+ * the best pongs bvailable.  
  */
-pualic finbl class PongCacher {
+public finbl class PongCacher {
 
     /**
-     * Single <tt>PongCacher</tt> instance, following the singleton pattern.
+     * Single <tt>PongCbcher</tt> instance, following the singleton pattern.
      */
-    private static final PongCacher INSTANCE = new PongCacher();    
+    privbte static final PongCacher INSTANCE = new PongCacher();    
 
     /**
-     * Constant for the number of pongs to store per hop.  Public to make
-     * testing easier.
+     * Constbnt for the number of pongs to store per hop.  Public to make
+     * testing ebsier.
      */
-    pualic stbtic final int NUM_PONGS_PER_HOP = 1;
+    public stbtic final int NUM_PONGS_PER_HOP = 1;
 
     /**
-     * Constant for the number of hops to keep track of in our pong cache.
+     * Constbnt for the number of hops to keep track of in our pong cache.
      */
-    pualic stbtic final int NUM_HOPS = 6;
+    public stbtic final int NUM_HOPS = 6;
     
     /**
-     * Constant for the number of seconds to wait before expiring cached pongs.
+     * Constbnt for the number of seconds to wait before expiring cached pongs.
      */
-    pualic stbtic final int EXPIRE_TIME = 6000;
+    public stbtic final int EXPIRE_TIME = 6000;
 
     /**
-     * Constant for expiring locale specific pongs
+     * Constbnt for expiring locale specific pongs
      */
-    pualic stbtic final int EXPIRE_TIME_LOC = 15*EXPIRE_TIME;
+    public stbtic final int EXPIRE_TIME_LOC = 15*EXPIRE_TIME;
 
     /**
-     * <tt>BucketQueue</tt> holding pongs separated by hops.
-     * The map is of String (locale) to BucketQueue (Pongs per Hop)
+     * <tt>BucketQueue</tt> holding pongs sepbrated by hops.
+     * The mbp is of String (locale) to BucketQueue (Pongs per Hop)
      */
-    private static final Map /* String -> BucketQueue */ PONGS = new HashMap();
+    privbte static final Map /* String -> BucketQueue */ PONGS = new HashMap();
 
     /**
-     * Returns the single <tt>PongCacher</tt> instance.
+     * Returns the single <tt>PongCbcher</tt> instance.
      */
-    pualic stbtic PongCacher instance() {
+    public stbtic PongCacher instance() {
         return INSTANCE;
     }    
 
     /**
-     * Private constructor to ensure only one instance is created.
+     * Privbte constructor to ensure only one instance is created.
      */
-    private PongCacher() {}
+    privbte PongCacher() {}
 
 
     /**
-     * Accessor for the <tt>Set</tt> of cached pongs.  This <tt>List</tt>
-     * is unmodifiable and will throw <tt>IllegalOperationException</tt> if
+     * Accessor for the <tt>Set</tt> of cbched pongs.  This <tt>List</tt>
+     * is unmodifibble and will throw <tt>IllegalOperationException</tt> if
      * it is modified.
      *
-     * @return the <tt>List</tt> of cached pongs -- continually updated
+     * @return the <tt>List</tt> of cbched pongs -- continually updated
      */
-    pualic List getBestPongs(String loc) {
+    public List getBestPongs(String loc) {
         synchronized(PONGS) { 
             List pongs = new LinkedList(); //list to return
             long curTime = System.currentTimeMillis();
-            //first we try to populate "pongs" with those pongs
-            //that match the locale 
+            //first we try to populbte "pongs" with those pongs
+            //thbt match the locale 
             List removeList = 
-                addBestPongs(loc, pongs, curTime, 0);
-            //remove all stale pongs that were reported for the
-            //locale
+                bddBestPongs(loc, pongs, curTime, 0);
+            //remove bll stale pongs that were reported for the
+            //locble
             removePongs(loc, removeList);
 
-            //if the locale that we were searching for was not the default
-            //"en" locale and we do not have enough pongs in the list
-            //then populate the list "pongs" with the default locale pongs
-            if(!ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc)
+            //if the locble that we were searching for was not the default
+            //"en" locble and we do not have enough pongs in the list
+            //then populbte the list "pongs" with the default locale pongs
+            if(!ApplicbtionSettings.DEFAULT_LOCALE.getValue().equals(loc)
                && pongs.size() < NUM_HOPS) {
 
-                //get the aest pongs for defbult locale
+                //get the best pongs for defbult locale
                 removeList = 
-                    addBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
+                    bddBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
                                  pongs,
                                  curTime,
                                  pongs.size());
                 
-                //remove any pongs that were reported as stale pongs
-                removePongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
+                //remove bny pongs that were reported as stale pongs
+                removePongs(ApplicbtionSettings.DEFAULT_LOCALE.getValue(),
                             removeList);
             }
 
@@ -105,43 +105,43 @@ pualic finbl class PongCacher {
     }
     
     /** 
-     * adds good pongs to the passed in list "pongs" and
-     * return a list of pongs that should be removed.
+     * bdds good pongs to the passed in list "pongs" and
+     * return b list of pongs that should be removed.
      */
-    private List addBestPongs(String loc, List pongs, 
+    privbte List addBestPongs(String loc, List pongs, 
                               long curTime, int i) {
-        //set the expire time to ae used.
-        //if the locale that is passed in is "en" then just use the
-        //normal expire time otherwise use the longer expire time
-        //so we can have some memory of non english locales
+        //set the expire time to be used.
+        //if the locble that is passed in is "en" then just use the
+        //normbl expire time otherwise use the longer expire time
+        //so we cbn have some memory of non english locales
         int exp_time = 
-            (ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc))?
+            (ApplicbtionSettings.DEFAULT_LOCALE.getValue().equals(loc))?
             EXPIRE_TIME :
             EXPIRE_TIME_LOC;
         
-        //check if there are any pongs of the specific locale stored
+        //check if there bre any pongs of the specific locale stored
         //in PONGS.
         List remove = null;
-        if(PONGS.containsKey(loc)) { 
-            //get all the pongs that are of the specific locale and
-            //make sure that they are not stale
-            BucketQueue aq = (BucketQueue)PONGS.get(loc);
-            Iterator iter = bq.iterator();
-            for(;iter.hasNext() && i < NUM_HOPS; i++) {
+        if(PONGS.contbinsKey(loc)) { 
+            //get bll the pongs that are of the specific locale and
+            //mbke sure that they are not stale
+            BucketQueue bq = (BucketQueue)PONGS.get(loc);
+            Iterbtor iter = bq.iterator();
+            for(;iter.hbsNext() && i < NUM_HOPS; i++) {
                 PingReply pr = (PingReply)iter.next();
                 
-                //if the pongs are stale put into the remove list
-                //to ae returned.  Didn't pbss in the remove list
-                //into this function aecbuse we may never see stale
-                //pongs so we won't need to new a linkedlist
-                //this may be a premature and unnecessary opt.
-                if(curTime - pr.getCreationTime() > exp_time) {
+                //if the pongs bre stale put into the remove list
+                //to be returned.  Didn't pbss in the remove list
+                //into this function becbuse we may never see stale
+                //pongs so we won't need to new b linkedlist
+                //this mby be a premature and unnecessary opt.
+                if(curTime - pr.getCrebtionTime() > exp_time) {
                     if(remove == null) 
                         remove = new LinkedList();
-                    remove.add(pr);
+                    remove.bdd(pr);
                 }
                 else {
-                    pongs.add(pr);
+                    pongs.bdd(pr);
                 }
             }
         }
@@ -151,45 +151,45 @@ pualic finbl class PongCacher {
 
     
     /**
-     * removes the pongs with the specified locale and those
-     * that are in the passed in list l
+     * removes the pongs with the specified locble and those
+     * thbt are in the passed in list l
      */
-    private void removePongs(String loc, List l) {
+    privbte void removePongs(String loc, List l) {
         if(l != null) {
-            BucketQueue aq = (BucketQueue)PONGS.get(loc);
-            Iterator iter = l.iterator();
-            while(iter.hasNext()) {
+            BucketQueue bq = (BucketQueue)PONGS.get(loc);
+            Iterbtor iter = l.iterator();
+            while(iter.hbsNext()) {
                 PingReply pr = (PingReply)iter.next();
-                aq.removeAll(pr);
+                bq.removeAll(pr);
             }
         }
     }                             
 
 
     /**
-     * Adds the specified <tt>PingReply</tt> instance to the cache of pongs.
+     * Adds the specified <tt>PingReply</tt> instbnce to the cache of pongs.
      *
-     * @param pr the <tt>PingReply</tt> to add
+     * @pbram pr the <tt>PingReply</tt> to add
      */
-    pualic void bddPong(PingReply pr) {
-        // if we're not an Ultrapeer, we don't care about caching the pong
+    public void bddPong(PingReply pr) {
+        // if we're not bn Ultrapeer, we don't care about caching the pong
         if(!RouterService.isSupernode()) return;
 
-        // Make sure we don't cache pongs that aren't from Ultrapeers.
-        if(!pr.isUltrapeer()) return;      
+        // Mbke sure we don't cache pongs that aren't from Ultrapeers.
+        if(!pr.isUltrbpeer()) return;      
         
-        // if the hops are too high, ignore it
+        // if the hops bre too high, ignore it
         if(pr.getHops() >= NUM_HOPS) return;
         synchronized(PONGS) {
-            //check the map for the locale and create or retrieve the set
-            if(PONGS.containsKey(pr.getClientLocale())) {
-                BucketQueue aq = (BucketQueue)PONGS.get(pr.getClientLocble());
-                aq.insert(pr, pr.getHops());
+            //check the mbp for the locale and create or retrieve the set
+            if(PONGS.contbinsKey(pr.getClientLocale())) {
+                BucketQueue bq = (BucketQueue)PONGS.get(pr.getClientLocble());
+                bq.insert(pr, pr.getHops());
             }
             else {
-                BucketQueue aq = new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
-                aq.insert(pr, pr.getHops());
-                PONGS.put(pr.getClientLocale(), bq);
+                BucketQueue bq = new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+                bq.insert(pr, pr.getHops());
+                PONGS.put(pr.getClientLocble(), bq);
             }
         }
     }

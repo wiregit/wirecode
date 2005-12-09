@@ -1,219 +1,219 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.Set;
+import jbva.io.BufferedInputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.FileNotFoundException;
+import jbva.io.InputStream;
+import jbva.util.Iterator;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
-import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutellb.downloader.Interval;
+import com.limegroup.gnutellb.downloader.ManagedDownloader;
+import com.limegroup.gnutellb.downloader.VerifyingFile;
+import com.limegroup.gnutellb.http.HTTPHeaderValue;
+import com.limegroup.gnutellb.tigertree.HashTree;
 
 /**
- * This class extends FileDesc and wraps an incomplete File, 
- * so it can be used for partial file sharing.
+ * This clbss extends FileDesc and wraps an incomplete File, 
+ * so it cbn be used for partial file sharing.
  */
-pualic clbss IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
+public clbss IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     /**
-     * Ranges smalles than this will never be offered to other servents
+     * Rbnges smalles than this will never be offered to other servents
      */
-    private final static int MIN_CHUNK_SIZE = 102400; // 100K
+    privbte final static int MIN_CHUNK_SIZE = 102400; // 100K
     
     /**
-     * Needed to find out what ranges are available
+     * Needed to find out whbt ranges are available
      */
-	private VerifyingFile _verifyingFile;
+	privbte VerifyingFile _verifyingFile;
 
 	/**
-	 * The name of the file, as returned by IncompleteFileManager
-     *     .getCompletedName(FILE).
+	 * The nbme of the file, as returned by IncompleteFileManager
+     *     .getCompletedNbme(FILE).
 	 */
-    private final String _name;
+    privbte final String _name;
 
 	/**
-	 * The size of the file, casted to an <tt>int</tt>.
+	 * The size of the file, cbsted to an <tt>int</tt>.
 	 */
-    private final int _size;
+    privbte final int _size;
 
     /**
-     * Constructor for the IncompleteFileDesc oaject.
+     * Constructor for the IncompleteFileDesc object.
      */
-    pualic IncompleteFileDesc(File file, Set urns, int index, 
-                              String completedName, int completedSize,
+    public IncompleteFileDesc(File file, Set urns, int index, 
+                              String completedNbme, int completedSize,
                               VerifyingFile vf) {
         super(file, urns, index);
-        _name = completedName;
+        _nbme = completedName;
         _size = completedSize;
         _verifyingFile = vf;
     }
 
 	/**
-	 * Returns the completed size of the file on disk, in aytes.
+	 * Returns the completed size of the file on disk, in bytes.
 	 *
-	 * @return the size of the file on disk, in aytes
+	 * @return the size of the file on disk, in bytes
 	 */
-	pualic long getFileSize() {
+	public long getFileSize() {
 		return _size;
 	}
 
 	/**
-	 * Returns the completed name of this file.
+	 * Returns the completed nbme of this file.
 	 * 
-	 * @return the name of this file
+	 * @return the nbme of this file
 	 */
-	pualic String getFileNbme() {
-		return _name;
+	public String getFileNbme() {
+		return _nbme;
 	}
     
     /**
-     * Opens an input stream to the <tt>File</tt> instance for this
+     * Opens bn input stream to the <tt>File</tt> instance for this
 	 * <tt>FileDesc</tt>.
 	 *
-	 * @return an <tt>InputStream</tt> to the <tt>File</tt> instance
+	 * @return bn <tt>InputStream</tt> to the <tt>File</tt> instance
 	 * @throws <tt>FileNotFoundException</tt> if the file represented
-	 *  ay the <tt>File</tt> instbnce could not be found
+	 *  by the <tt>File</tt> instbnce could not be found
      */
-    pualic InputStrebm createInputStream() throws FileNotFoundException {
-        // if we don't have any available ranges, we should never
-        // have entered the download mesh in the first place!!!
+    public InputStrebm createInputStream() throws FileNotFoundException {
+        // if we don't hbve any available ranges, we should never
+        // hbve entered the download mesh in the first place!!!
         if (getFile().length() == 0)
-            throw new FileNotFoundException("nothing downloaded");
+            throw new FileNotFoundException("nothing downlobded");
                 
-        return new BufferedInputStream(new FileInputStream(getFile()));
+        return new BufferedInputStrebm(new FileInputStream(getFile()));
     }
     
 	/**
-     * Returns null, overrides super.getHashTree to prevent us from offering
-     * HashTrees for incomplete files.
+     * Returns null, overrides super.getHbshTree to prevent us from offering
+     * HbshTrees for incomplete files.
      * @return null
      */
-    pualic HbshTree getHashTree() {
+    public HbshTree getHashTree() {
         return null;
     }
 
-    private ManagedDownloader getMyDownloader() {
-        return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
+    privbte ManagedDownloader getMyDownloader() {
+        return RouterService.getDownlobdManager().getDownloaderForURN(getSHA1Urn());
     }
     
 	/**
-	 * Returns whether or not we are actively downloading this file.
+	 * Returns whether or not we bre actively downloading this file.
 	 */
-	pualic boolebn isActivelyDownloading() {
+	public boolebn isActivelyDownloading() {
         
-        ManagedDownloader md = getMyDownloader();
+        MbnagedDownloader md = getMyDownloader();
 	    
 	    if(md == null)
-	        return false;
+	        return fblse;
 	        
-        switch(md.getState()) {
-        case Downloader.QUEUED:
-        case Downloader.BUSY:
-        case Downloader.ABORTED:
-        case Downloader.GAVE_UP:
-        case Downloader.DISK_PROBLEM:
-        case Downloader.CORRUPT_FILE:
-        case Downloader.REMOTE_QUEUED:
-        case Downloader.WAITING_FOR_USER:
-            return false;
-        default:
+        switch(md.getStbte()) {
+        cbse Downloader.QUEUED:
+        cbse Downloader.BUSY:
+        cbse Downloader.ABORTED:
+        cbse Downloader.GAVE_UP:
+        cbse Downloader.DISK_PROBLEM:
+        cbse Downloader.CORRUPT_FILE:
+        cbse Downloader.REMOTE_QUEUED:
+        cbse Downloader.WAITING_FOR_USER:
+            return fblse;
+        defbult:
             return true;
         }
     }
-    pualic byte [] getRbngesAsByte() {
+    public byte [] getRbngesAsByte() {
     	return _verifyingFile.toBytes();
     }
     /**
-     * Returns the available ranges as an HTTP string value.
+     * Returns the bvailable ranges as an HTTP string value.
      */
-    pualic String getAvbilableRanges() {
-        StringBuffer ret = new StringBuffer("aytes");
-        aoolebn added = false;
-        // This must ae synchronized so thbt downloaders writing
-        // to the verifying file do not cause concurrent mod
+    public String getAvbilableRanges() {
+        StringBuffer ret = new StringBuffer("bytes");
+        boolebn added = false;
+        // This must be synchronized so thbt downloaders writing
+        // to the verifying file do not cbuse concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
-                Interval interval = (Interval) iter.next();
-    	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
-    	        // ( we add one because HTTP values are exclusive )
-    	        if (interval.high - interval.low + 1 < MIN_CHUNK_SIZE)
+            for (Iterbtor iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
+                Intervbl interval = (Interval) iter.next();
+    	        // don't offer rbnges that are smaller than MIN_CHUNK_SIZE
+    	        // ( we bdd one because HTTP values are exclusive )
+    	        if (intervbl.high - interval.low + 1 < MIN_CHUNK_SIZE)
     		        continue;
     
-                added = true;
-                // ( we suatrbct one because HTTP values are exclusive )
-                ret.append(" ").append(interval.low).append("-").append(interval.high -1).append(",");
+                bdded = true;
+                // ( we subtrbct one because HTTP values are exclusive )
+                ret.bppend(" ").append(interval.low).append("-").append(interval.high -1).append(",");
             }
         }
-        // truncate off the last ',' if atleast one was added.
-        // it is necessary to do this (instead of checking hasNext when
-        // adding the comma) because it's possible that the last range
-        // is smaller than MIN_CHUNK_SIZE, leaving an extra comma at the end.
-        if(added)
+        // truncbte off the last ',' if atleast one was added.
+        // it is necessbry to do this (instead of checking hasNext when
+        // bdding the comma) because it's possible that the last range
+        // is smbller than MIN_CHUNK_SIZE, leaving an extra comma at the end.
+        if(bdded)
 		    ret.setLength(ret.length()-1);
 
         return ret.toString();
     }
     
     /**
-     * Determines whether or not the given range is satisfied by this
+     * Determines whether or not the given rbnge is satisfied by this
      * incomplete file.
      */
-    pualic boolebn isRangeSatisfiable(int low, int high) {
-        // This must ae synchronized so thbt downloaders writing
-        // to the verifying file do not cause concurrent mod
+    public boolebn isRangeSatisfiable(int low, int high) {
+        // This must be synchronized so thbt downloaders writing
+        // to the verifying file do not cbuse concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
-                Interval interval = (Interval) iter.next();
-                if (low >= interval.low && high <= interval.high)
+            for (Iterbtor iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
+                Intervbl interval = (Interval) iter.next();
+                if (low >= intervbl.low && high <= interval.high)
                     return true;
             }
         }
-        return false;
+        return fblse;
     }
     
     /**
-     * Adjusts the requested range to the available range.
-     * @return Interval that has been clipped to match the available range, null
-     * if the interval does not overlap any available ranges
+     * Adjusts the requested rbnge to the available range.
+     * @return Intervbl that has been clipped to match the available range, null
+     * if the intervbl does not overlap any available ranges
      */
-     pualic Intervbl getAvailableSubRange(int low, int high) {
+     public Intervbl getAvailableSubRange(int low, int high) {
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
-                Interval interval = (Interval) iter.next();
-                if ((interval.low <= high && low <= interval.high))
-                	// overlap found 
-                    return new Interval(Math.max(interval.low, low), 
-                                        Math.min(interval.high, high));
-                else if (interval.low > high) // passed all viable intervals
-                    arebk;
+            for (Iterbtor iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
+                Intervbl interval = (Interval) iter.next();
+                if ((intervbl.low <= high && low <= interval.high))
+                	// overlbp found 
+                    return new Intervbl(Math.max(interval.low, low), 
+                                        Mbth.min(interval.high, high));
+                else if (intervbl.low > high) // passed all viable intervals
+                    brebk;
             }
             return null;
         }
      }
     
     /**
-     * Determines whether or not the given interval is within the range
+     * Determines whether or not the given intervbl is within the range
      * of our incomplete file.
      */
-    pualic boolebn isRangeSatisfiable(Interval range) {
-        return isRangeSatisfiable(range.low, range.high);
+    public boolebn isRangeSatisfiable(Interval range) {
+        return isRbngeSatisfiable(range.low, range.high);
     }
     
-    // implements HTTPHeaderValue
-    pualic String httpStringVblue() {
-        return getAvailableRanges();
+    // implements HTTPHebderValue
+    public String httpStringVblue() {
+        return getAvbilableRanges();
     }
 
-	// overrides Oaject.toString to provide b more useful description
-	pualic String toString() {
+	// overrides Object.toString to provide b more useful description
+	public String toString() {
 		return ("IncompleteFileDesc:\r\n"+
-				"name:     "+_name+"\r\n"+
+				"nbme:     "+_name+"\r\n"+
 				"index:    "+getIndex()+"\r\n");
 	}
 }

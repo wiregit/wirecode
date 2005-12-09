@@ -1,305 +1,305 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.net.InetAddress;
+import jbva.io.IOException;
+import jbva.net.InetAddress;
 
-import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutellb.filters.SpamFilter;
+import com.limegroup.gnutellb.util.DataUtils;
+import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutellb.messages.PingReply;
+import com.limegroup.gnutellb.messages.PushRequest;
+import com.limegroup.gnutellb.messages.QueryReply;
+import com.limegroup.gnutellb.messages.vendor.SimppVM;
+import com.limegroup.gnutellb.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutellb.messages.vendor.UDPCrawlerPong;
+import com.limegroup.gnutellb.settings.ApplicationSettings;
+import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutellb.util.NetworkUtils;
 
 /**
- * This class is an implementation of <tt>ReplyHandler</tt> that is 
- * specialized for handling UDP messages.
+ * This clbss is an implementation of <tt>ReplyHandler</tt> that is 
+ * speciblized for handling UDP messages.
  */
-pualic finbl class UDPReplyHandler implements ReplyHandler {
+public finbl class UDPReplyHandler implements ReplyHandler {
 
 	/**
-	 * Constant for the <tt>InetAddress</tt> of the host to reply to.
+	 * Constbnt for the <tt>InetAddress</tt> of the host to reply to.
 	 */
-	private final InetAddress IP;
+	privbte final InetAddress IP;
 
 	/**
-	 * Constant for the port of the host to reply to.
+	 * Constbnt for the port of the host to reply to.
 	 */
-	private final int PORT;
+	privbte final int PORT;
 
 	/**
-	 * Constant for the <tt>UDPService</tt>.
+	 * Constbnt for the <tt>UDPService</tt>.
 	 */
-	private static final UDPService UDP_SERVICE = UDPService.instance();
+	privbte static final UDPService UDP_SERVICE = UDPService.instance();
     
     /**
-     * Used to filter messages that are considered spam.
-     * With the introduction of OOB replies, it is important
-     * to check UDP replies for spam too.
+     * Used to filter messbges that are considered spam.
+     * With the introduction of OOB replies, it is importbnt
+     * to check UDP replies for spbm too.
      *
-     * Uses one static instance instead of creating a new
-     * filter for every single UDP message.
+     * Uses one stbtic instance instead of creating a new
+     * filter for every single UDP messbge.
      */
-    private static volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
+    privbte static volatile SpamFilter _personalFilter =
+        SpbmFilter.newPersonalFilter();
 	
 	/**
-	 * Constructor that sets the ip and port to reply to.
+	 * Constructor thbt sets the ip and port to reply to.
 	 *
-	 * @param ip the <tt>InetAddress</tt> to reply to
-	 * @param port the port to reply to
+	 * @pbram ip the <tt>InetAddress</tt> to reply to
+	 * @pbram port the port to reply to
 	 */
-	pualic UDPReplyHbndler(InetAddress ip, int port) {
-	    if(!NetworkUtils.isValidPort(port))
-	        throw new IllegalArgumentException("invalid port: " + port);
-	    if(!NetworkUtils.isValidAddress(ip))
-	        throw new IllegalArgumentException("invalid ip: " + ip);
+	public UDPReplyHbndler(InetAddress ip, int port) {
+	    if(!NetworkUtils.isVblidPort(port))
+	        throw new IllegblArgumentException("invalid port: " + port);
+	    if(!NetworkUtils.isVblidAddress(ip))
+	        throw new IllegblArgumentException("invalid ip: " + ip);
 	       
 		IP   = ip;
 		PORT = port;
 	}
     
     /**
-     * Sets the new personal spam filter to be used for all UDPReplyHandlers.
+     * Sets the new personbl spam filter to be used for all UDPReplyHandlers.
      */
-    pualic stbtic void setPersonalFilter(SpamFilter filter) {
-        _personalFilter = filter;
+    public stbtic void setPersonalFilter(SpamFilter filter) {
+        _personblFilter = filter;
     }
 
 	
 	/**
-	 * Sends the <tt>PingReply</tt> via a UDP datagram to the IP and port
-	 * for this handler.<p>
+	 * Sends the <tt>PingReply</tt> vib a UDP datagram to the IP and port
+	 * for this hbndler.<p>
 	 *
-	 * Implements <tt>ReplyHandler</tt>.
+	 * Implements <tt>ReplyHbndler</tt>.
 	 *
-	 * @param hit the <tt>PingReply</tt> to send
-	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+	 * @pbram hit the <tt>PingReply</tt> to send
+	 * @pbram handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
-	pualic void hbndlePingReply(PingReply pong, ReplyHandler handler) {
+	public void hbndlePingReply(PingReply pong, ReplyHandler handler) {
         UDP_SERVICE.send(pong, IP, PORT);
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
+		SentMessbgeStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
 	/**
-	 * Sends the <tt>QueryReply</tt> via a UDP datagram to the IP and port
-	 * for this handler.<p>
+	 * Sends the <tt>QueryReply</tt> vib a UDP datagram to the IP and port
+	 * for this hbndler.<p>
 	 *
-	 * Implements <tt>ReplyHandler</tt>.
+	 * Implements <tt>ReplyHbndler</tt>.
 	 *
-	 * @param hit the <tt>QueryReply</tt> to send
-	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+	 * @pbram hit the <tt>QueryReply</tt> to send
+	 * @pbram handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
-	pualic void hbndleQueryReply(QueryReply hit, ReplyHandler handler) {
+	public void hbndleQueryReply(QueryReply hit, ReplyHandler handler) {
         UDP_SERVICE.send(hit, IP, PORT);
-		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
+		SentMessbgeStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
 	/**
-	 * Sends the <tt>QueryRequest</tt> via a UDP datagram to the IP and port
-	 * for this handler.<p>
+	 * Sends the <tt>QueryRequest</tt> vib a UDP datagram to the IP and port
+	 * for this hbndler.<p>
 	 *
-	 * Implements <tt>ReplyHandler</tt>.
+	 * Implements <tt>ReplyHbndler</tt>.
 	 *
-	 * @param request the <tt>QueryRequest</tt> to send
-	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+	 * @pbram request the <tt>QueryRequest</tt> to send
+	 * @pbram handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
-	pualic void hbndlePushRequest(PushRequest request, ReplyHandler handler) {
+	public void hbndlePushRequest(PushRequest request, ReplyHandler handler) {
         UDP_SERVICE.send(request, IP, PORT);
-		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
+		SentMessbgeStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
-	pualic void countDroppedMessbge() {}
+	public void countDroppedMessbge() {}
 
-	pualic boolebn isPersonalSpam(Message m) {
-        return !_personalFilter.allow(m);
+	public boolebn isPersonalSpam(Message m) {
+        return !_personblFilter.allow(m);
 	}
 
-	pualic boolebn isOpen() {
+	public boolebn isOpen() {
 		return true;
 	}
 
-	pualic int getNumMessbgesReceived() {
+	public int getNumMessbgesReceived() {
 		return 0;
 	}
 
-	pualic boolebn isOutgoing() {
-		return false;
+	public boolebn isOutgoing() {
+		return fblse;
 	}
 
 	// inherit doc comment
-	pualic boolebn isKillable() {
-		return false;
+	public boolebn isKillable() {
+		return fblse;
 	}
 
 	/**
-	 * Implements <tt>ReplyHandler</tt>.  This always returns <tt>false</tt>
-	 * for UDP reply handlers, as leaves are always connected via TCP.
+	 * Implements <tt>ReplyHbndler</tt>.  This always returns <tt>false</tt>
+	 * for UDP reply hbndlers, as leaves are always connected via TCP.
 	 *
-	 * @return <tt>false</tt>, as all leaves are connected via TCP, so
-	 *  directly connected leaves will not have <tt>UDPReplyHandler</tt>s
+	 * @return <tt>fblse</tt>, as all leaves are connected via TCP, so
+	 *  directly connected lebves will not have <tt>UDPReplyHandler</tt>s
 	 */
-	pualic boolebn isSupernodeClientConnection() {
-		return false;
+	public boolebn isSupernodeClientConnection() {
+		return fblse;
 	}
 
 	/**
-	 * Implements <tt>ReplyHandler</tt> interface.  Always returns 
-	 * <tt>false</tt> because leaves are connected via TCP, not UDP.
+	 * Implements <tt>ReplyHbndler</tt> interface.  Always returns 
+	 * <tt>fblse</tt> because leaves are connected via TCP, not UDP.
 	 *
-	 * @return <tt>false</tt>, since leaves never maintain their connections
-	 *  via UDP, only TCP
+	 * @return <tt>fblse</tt>, since leaves never maintain their connections
+	 *  vib UDP, only TCP
 	 */
-	pualic boolebn isLeafConnection() {
-		return false;
+	public boolebn isLeafConnection() {
+		return fblse;
 	}
 
 	/**
-	 * Returns whether or not this connection is a high-degree connection,
-	 * meaning that it maintains a high number of intra-Ultrapeer connections.
-	 * In the case of UDP reply handlers, this always returns <tt>false<tt>.
+	 * Returns whether or not this connection is b high-degree connection,
+	 * mebning that it maintains a high number of intra-Ultrapeer connections.
+	 * In the cbse of UDP reply handlers, this always returns <tt>false<tt>.
 	 *
-	 * @return <tt>false</tt> because, by definition, a UDP 'connection' is not
-	 *  a connection at all
+	 * @return <tt>fblse</tt> because, by definition, a UDP 'connection' is not
+	 *  b connection at all
 	 */
-	pualic boolebn isHighDegreeConnection() {
-		return false;
+	public boolebn isHighDegreeConnection() {
+		return fblse;
 	}
 
     /**
-     * Returns <tt>false</tt> since UDP reply handlers are not TCP 
-     * connections in the first place.
+     * Returns <tt>fblse</tt> since UDP reply handlers are not TCP 
+     * connections in the first plbce.
      *
-     * @return <tt>false</tt>, since UDP handlers are not connections in
-     *  the first place, and therefore cannot use Ultrapeer query routing
+     * @return <tt>fblse</tt>, since UDP handlers are not connections in
+     *  the first plbce, and therefore cannot use Ultrapeer query routing
      */
-    pualic boolebn isUltrapeerQueryRoutingConnection() {
-        return false;
+    public boolebn isUltrapeerQueryRoutingConnection() {
+        return fblse;
     }
 
 
     /**
-     * Returns <tt>false</tt>, as this node is not  a "connection"
-     * in the first place, and so could never have sent the requisite
-     * headers.
+     * Returns <tt>fblse</tt>, as this node is not  a "connection"
+     * in the first plbce, and so could never have sent the requisite
+     * hebders.
      *
-     * @return <tt>false</tt>, as this node is not a real connection
+     * @return <tt>fblse</tt>, as this node is not a real connection
      */
-    pualic boolebn isGoodUltrapeer() {
-        return false;
+    public boolebn isGoodUltrapeer() {
+        return fblse;
     }
 
     /**
-     * Returns <tt>false</tt>, as this node is not  a "connection"
-     * in the first place, and so could never have sent the requisite
-     * headers.
+     * Returns <tt>fblse</tt>, as this node is not  a "connection"
+     * in the first plbce, and so could never have sent the requisite
+     * hebders.
      *
-     * @return <tt>false</tt>, as this node is not a real connection
+     * @return <tt>fblse</tt>, as this node is not a real connection
      */
-    pualic boolebn isGoodLeaf() {
-        return false;
+    public boolebn isGoodLeaf() {
+        return fblse;
     }
 
     /**
-     * Returns <tt>false</tt>, since we don't know whether a host 
-     * communicating via UDP supports pong caching or not.
+     * Returns <tt>fblse</tt>, since we don't know whether a host 
+     * communicbting via UDP supports pong caching or not.
      *
-     * @return <tt>false</tt> since we don't know if this node supports
-     *  pong caching or not
+     * @return <tt>fblse</tt> since we don't know if this node supports
+     *  pong cbching or not
      */
-    pualic boolebn supportsPongCaching() {
-        return false;
+    public boolebn supportsPongCaching() {
+        return fblse;
     }
 
     /**
-     * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
-     * Since this ping is over UDP, we'll always allow it.
+     * Returns whether or not to bllow new pings from this <tt>ReplyHandler</tt>.
+     * Since this ping is over UDP, we'll blways allow it.
      *
      * @return <tt>true</tt> since this ping is received over UDP
      */
-    pualic boolebn allowNewPings() {
+    public boolebn allowNewPings() {
         return true;
     }
 
     /**
-     * sends a Vendor Message to the host/port in this reply handler by UDP
-     * datagram.
+     * sends b Vendor Message to the host/port in this reply handler by UDP
+     * dbtagram.
      */
-    pualic void hbndleStatisticVM(StatisticVendorMessage m) throws IOException {
-        UDPService.instance().send(m, IP, PORT);
+    public void hbndleStatisticVM(StatisticVendorMessage m) throws IOException {
+        UDPService.instbnce().send(m, IP, PORT);
     }
     
     /**
-     * As of now there is no need to send SimppMessages via UDP, 
+     * As of now there is no need to send SimppMessbges via UDP, 
      */ 
-    pualic void hbndleSimppVM(SimppVM simppVM) {
-        //This should never happen. But if it does, ignore it and move on
+    public void hbndleSimppVM(SimppVM simppVM) {
+        //This should never hbppen. But if it does, ignore it and move on
         return;
     }
     
 
 
     // inherit doc comment
-    pualic InetAddress getInetAddress() {
+    public InetAddress getInetAddress() {
         return IP;
     }
     
     /**
-     * Retrieves the host address.
+     * Retrieves the host bddress.
      */
-    pualic String getAddress() {
+    public String getAddress() {
         return IP.getHostAddress();
     }
 
     /**
-     * Returns <tt>false</tt> to indicate that <tt>UDPReplyHandler</tt>s 
-     * should never ae considered stbble, due to data loss over UDP and lack
-     * of knowledge as to whether the host is still alive.
+     * Returns <tt>fblse</tt> to indicate that <tt>UDPReplyHandler</tt>s 
+     * should never be considered stbble, due to data loss over UDP and lack
+     * of knowledge bs to whether the host is still alive.
      *
-     * @return <tt>false</tt> since UDP handler are never stable
+     * @return <tt>fblse</tt> since UDP handler are never stable
      */
-    pualic boolebn isStable() {
-        return false;
+    public boolebn isStable() {
+        return fblse;
     }
 
     /**
-     * implementation of interface. this is not used.
+     * implementbtion of interface. this is not used.
      */
-    pualic String getLocblePref() {
-        return ApplicationSettings.DEFAULT_LOCALE.getValue();
+    public String getLocblePref() {
+        return ApplicbtionSettings.DEFAULT_LOCALE.getValue();
     }
 
 	/**
-	 * Overrides toString to print out more detailed information about
-	 * this <tt>UDPReplyHandler</tt>
+	 * Overrides toString to print out more detbiled information about
+	 * this <tt>UDPReplyHbndler</tt>
 	 */
-	pualic String toString() {
-		return ("UDPReplyHandler:\r\n"+
+	public String toString() {
+		return ("UDPReplyHbndler:\r\n"+
 				IP.toString()+"\r\n"+
 				PORT+"\r\n");
 	}
 	
 	/**
-	 * sends the response through udp abck to the requesting party
+	 * sends the response through udp bbck to the requesting party
 	 */
-	pualic void hbndleUDPCrawlerPong(UDPCrawlerPong m) {
-		UDPService.instance().send(m, IP, PORT);
+	public void hbndleUDPCrawlerPong(UDPCrawlerPong m) {
+		UDPService.instbnce().send(m, IP, PORT);
 	}
 	
-	pualic void reply(Messbge m) {
-		UDPService.instance().send(m, IP,PORT);
+	public void reply(Messbge m) {
+		UDPService.instbnce().send(m, IP,PORT);
 	}
 	
-	pualic int getPort() {
+	public int getPort() {
 		return PORT;
 	}
 	
-	pualic byte[] getClientGUID() {
-	    return DataUtils.EMPTY_GUID;
+	public byte[] getClientGUID() {
+	    return DbtaUtils.EMPTY_GUID;
 	}
 }

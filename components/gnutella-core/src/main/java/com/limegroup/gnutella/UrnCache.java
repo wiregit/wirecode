@@ -1,263 +1,263 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
+import jbva.io.BufferedInputStream;
+import jbva.io.BufferedOutputStream;
+import jbva.io.File;
+import jbva.io.FileInputStream;
+import jbva.io.FileOutputStream;
+import jbva.io.IOException;
+import jbva.io.ObjectInputStream;
+import jbva.io.ObjectOutputStream;
+import jbva.io.Serializable;
+import jbva.util.Collections;
+import jbva.util.HashMap;
+import jbva.util.Iterator;
+import jbva.util.Map;
+import jbva.util.Set;
+import jbva.util.HashSet;
+import jbva.util.List;
+import jbva.util.ArrayList;
 
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutellb.util.ConverterObjectInputStream;
+import com.limegroup.gnutellb.util.IOUtils;
+import com.limegroup.gnutellb.util.ProcessingQueue;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 /**
- * This class contains a systemwide URN cache that persists file URNs (hashes)
- * across sessions.
+ * This clbss contains a systemwide URN cache that persists file URNs (hashes)
+ * bcross sessions.
  *
- * Modified ay Gordon Mohr (2002/02/19): Added URN storbge, calculation, caching
- * Repackaged by Greg Bildson (2002/02/19): Moved to dedicated class.
+ * Modified by Gordon Mohr (2002/02/19): Added URN storbge, calculation, caching
+ * Repbckaged by Greg Bildson (2002/02/19): Moved to dedicated class.
  *
  * @see URN
  */
-pualic finbl class UrnCache {
+public finbl class UrnCache {
     
-    private static final Log LOG = LogFactory.getLog(UrnCache.class);
+    privbte static final Log LOG = LogFactory.getLog(UrnCache.class);
     
     /**
-     * File where urns (currently SHA1 urns) for files are stored.
+     * File where urns (currently SHA1 urns) for files bre stored.
      */
-    private static final File URN_CACHE_FILE = 
-        new File(CommonUtils.getUserSettingsDir(), "fileurns.cache");
+    privbte static final File URN_CACHE_FILE = 
+        new File(CommonUtils.getUserSettingsDir(), "fileurns.cbche");
 
     /**
-     * Last good version of above.
+     * Lbst good version of above.
      */
-    private static final File URN_CACHE_BACKUP_FILE = 
-        new File(CommonUtils.getUserSettingsDir(), "fileurns.abk");
+    privbte static final File URN_CACHE_BACKUP_FILE = 
+        new File(CommonUtils.getUserSettingsDir(), "fileurns.bbk");
 
     /**
-     * UrnCache instance variable.  LOCKING: obtain UrnCache.class.
+     * UrnCbche instance variable.  LOCKING: obtain UrnCache.class.
      */
-    private static UrnCache instance = null;
+    privbte static UrnCache instance = null;
 
     /**
-     * UrnCache container.  LOCKING: obtain this.  Although URN_MAP is static,
-     * UrnCache is a singleton, so obtaining UrnCache's monitor is sufficient--
-     * and slightly more convenient.
+     * UrnCbche container.  LOCKING: obtain this.  Although URN_MAP is static,
+     * UrnCbche is a singleton, so obtaining UrnCache's monitor is sufficient--
+     * bnd slightly more convenient.
      */
-    private static final Map /* UrnSetKey -> HashSet */ URN_MAP = createMap();
+    privbte static final Map /* UrnSetKey -> HashSet */ URN_MAP = createMap();
     
     /**
-     * The ProcessingQueue that Files are hashed in.
+     * The ProcessingQueue thbt Files are hashed in.
      */
-    private final ProcessingQueue QUEUE = new ProcessingQueue("Hasher");
+    privbte final ProcessingQueue QUEUE = new ProcessingQueue("Hasher");
     
     /**
-     * The set of files that are pending hashing to the callbacks that are listening to them.
+     * The set of files thbt are pending hashing to the callbacks that are listening to them.
      */
-    private Map /* File -> List (of UrnCallback) */ pendingHashing = new HashMap();
+    privbte Map /* File -> List (of UrnCallback) */ pendingHashing = new HashMap();
     
     /**
-     * Whether or not data is dirty since the last time we saved.
+     * Whether or not dbta is dirty since the last time we saved.
      */
-    private boolean dirty = false;
+    privbte boolean dirty = false;
 
     /**
-	 * Returns the <tt>UrnCache</tt> instance.
+	 * Returns the <tt>UrnCbche</tt> instance.
 	 *
-	 * @return the <tt>UrnCache</tt> instance
+	 * @return the <tt>UrnCbche</tt> instance
      */
-    pualic stbtic synchronized UrnCache instance() {
-		if (instance == null)
-			instance = new UrnCache();
-        return instance;
+    public stbtic synchronized UrnCache instance() {
+		if (instbnce == null)
+			instbnce = new UrnCache();
+        return instbnce;
     }
 
     /**
-     * Create and initialize urn cache.
+     * Crebte and initialize urn cache.
      */
-    private UrnCache() {
+    privbte UrnCache() {
 		dirty = removeOldEntries(URN_MAP);
 	}
 
     /**
-     * Calculates the given File's URN and caches it.  The callback will
-     * ae notified of the URNs.  If they're blready calculated, the callback
-     * will ae notified immedibtely.  Otherwise, it will be notified when hashing
-     * completes, fails, or is interrupted.
+     * Cblculates the given File's URN and caches it.  The callback will
+     * be notified of the URNs.  If they're blready calculated, the callback
+     * will be notified immedibtely.  Otherwise, it will be notified when hashing
+     * completes, fbils, or is interrupted.
      */
-    pualic synchronized void cblculateAndCacheUrns(File file, UrnCallback callback) {			
+    public synchronized void cblculateAndCacheUrns(File file, UrnCallback callback) {			
     	Set urns = getUrns(file);
-        // TODO: If we ever create more URN types (other than SHA1)
-        // we cannot just check for size == 0, we must check for
-        // size == NUM_URNS_WE_WANT, and calculateUrns should only
-        // calculate the URN for the specific hash we still need.
+        // TODO: If we ever crebte more URN types (other than SHA1)
+        // we cbnnot just check for size == 0, we must check for
+        // size == NUM_URNS_WE_WANT, bnd calculateUrns should only
+        // cblculate the URN for the specific hash we still need.
         if(!urns.isEmpty()) {
-            callback.urnsCalculated(file, urns);
+            cbllback.urnsCalculated(file, urns);
         } else {
-            if(LOG.isDeaugEnbbled())
-                LOG.deaug("Adding: " + file + " to be hbshed.");
-            List list = (List)pendingHashing.get(file);
+            if(LOG.isDebugEnbbled())
+                LOG.debug("Adding: " + file + " to be hbshed.");
+            List list = (List)pendingHbshing.get(file);
             if(list == null) {
-                list = new ArrayList(1);
-                pendingHashing.put(file, list);
+                list = new ArrbyList(1);
+                pendingHbshing.put(file, list);
             }
-            list.add(callback);
-            QUEUE.add(new Processor(file));
+            list.bdd(callback);
+            QUEUE.bdd(new Processor(file));
         }
     }
     
     /**
-     * Clears all callbacks that are owned by the given owner.
+     * Clebrs all callbacks that are owned by the given owner.
      */
-    pualic synchronized void clebrPendingHashes(Object owner) {
-        if(LOG.isDeaugEnbbled())
-            LOG.deaug("Clebring all pending hashes owned by: " + owner);
+    public synchronized void clebrPendingHashes(Object owner) {
+        if(LOG.isDebugEnbbled())
+            LOG.debug("Clebring all pending hashes owned by: " + owner);
         
-        for(Iterator i = pendingHashing.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
+        for(Iterbtor i = pendingHashing.entrySet().iterator(); i.hasNext(); ) {
+            Mbp.Entry next = (Map.Entry)i.next();
             File f = (File)next.getKey();
-            List callbacks = (List)next.getValue();
-            for(int j = callbacks.size() - 1; j >= 0; j--) {
-                UrnCallback c = (UrnCallback)callbacks.get(j);
+            List cbllbacks = (List)next.getValue();
+            for(int j = cbllbacks.size() - 1; j >= 0; j--) {
+                UrnCbllback c = (UrnCallback)callbacks.get(j);
                 if(c.isOwner(owner))
-                    callbacks.remove(j);
+                    cbllbacks.remove(j);
             }            
-            // if there's no more callbacks for this file, remove it.
-            if(callbacks.isEmpty())
+            // if there's no more cbllbacks for this file, remove it.
+            if(cbllbacks.isEmpty())
                 i.remove();
         }
     }
     
     /**
-     * Clears all callbacks for the given file that are owned by the given owner.
+     * Clebrs all callbacks for the given file that are owned by the given owner.
      */
-    pualic synchronized void clebrPendingHashesFor(File file, Object owner) {
-        if(LOG.isDeaugEnbbled())
-            LOG.deaug("Clebring all pending hashes for: " + file + ", owned by: " + owner);
-        List callbacks = (List)pendingHashing.get(file);
-        if(callbacks != null) {
-            for(int j = callbacks.size() - 1; j >= 0; j--) {
-                UrnCallback c = (UrnCallback)callbacks.get(j);
+    public synchronized void clebrPendingHashesFor(File file, Object owner) {
+        if(LOG.isDebugEnbbled())
+            LOG.debug("Clebring all pending hashes for: " + file + ", owned by: " + owner);
+        List cbllbacks = (List)pendingHashing.get(file);
+        if(cbllbacks != null) {
+            for(int j = cbllbacks.size() - 1; j >= 0; j--) {
+                UrnCbllback c = (UrnCallback)callbacks.get(j);
                 if(c.isOwner(owner))
-                    callbacks.remove(j);
+                    cbllbacks.remove(j);
             }
-            if(callbacks.isEmpty())
-                pendingHashing.remove(file);
+            if(cbllbacks.isEmpty())
+                pendingHbshing.remove(file);
         }
     }   
     
     /**
-     * Adds any URNs that can be locally calculated; may take a while to 
-	 * complete on large files.  After calculation, the items are added
-	 * for future rememaering.
+     * Adds bny URNs that can be locally calculated; may take a while to 
+	 * complete on lbrge files.  After calculation, the items are added
+	 * for future remembering.
 	 *
-	 * @param file the <tt>File</tt> instance to calculate URNs for
-	 * @return the new <tt>Set</tt> of calculated <tt>URN</tt> instances.  If 
-     * the calling thread is interrupted while executing this, returns an empty
+	 * @pbram file the <tt>File</tt> instance to calculate URNs for
+	 * @return the new <tt>Set</tt> of cblculated <tt>URN</tt> instances.  If 
+     * the cblling thread is interrupted while executing this, returns an empty
      * set.
      */
-    pualic Set cblculateUrns(File file) throws IOException, InterruptedException {
-        Set set = new HashSet(1);
-        set.add(URN.createSHA1Urn(file));
+    public Set cblculateUrns(File file) throws IOException, InterruptedException {
+        Set set = new HbshSet(1);
+        set.bdd(URN.createSHA1Urn(file));
         return set;
 	}
     
     /**
-     * Find any URNs remembered from a previous session for the specified
-	 * <tt>File</tt> instance.  The returned <tt>Set</tt> is
-	 * guaranteed to be non-null, but it may be empty.
+     * Find bny URNs remembered from a previous session for the specified
+	 * <tt>File</tt> instbnce.  The returned <tt>Set</tt> is
+	 * gubranteed to be non-null, but it may be empty.
 	 *
-	 * @param file the <tt>File</tt> instance to look up URNs for
-	 * @return a new <tt>Set</tt> containing any cached URNs for the
-	 *  speficied <tt>File</tt> instance, guaranteed to be non-null and 
-	 *  unmodifiable, but possibly empty
+	 * @pbram file the <tt>File</tt> instance to look up URNs for
+	 * @return b new <tt>Set</tt> containing any cached URNs for the
+	 *  speficied <tt>File</tt> instbnce, guaranteed to be non-null and 
+	 *  unmodifibble, but possibly empty
      */
-    pualic synchronized Set getUrns(File file) {
-        // don't trust failed mod times
-        if (file.lastModified() == 0L)
+    public synchronized Set getUrns(File file) {
+        // don't trust fbiled mod times
+        if (file.lbstModified() == 0L)
 			return Collections.EMPTY_SET;
 
 		UrnSetKey key = new UrnSetKey(file);
 
-        // one or more "urn:" names for this file 
-		Set cachedUrns = (Set)URN_MAP.get(key);
-		if(cachedUrns == null)
+        // one or more "urn:" nbmes for this file 
+		Set cbchedUrns = (Set)URN_MAP.get(key);
+		if(cbchedUrns == null)
 			return Collections.EMPTY_SET;
 
-		return cachedUrns;
+		return cbchedUrns;
     }
     
     /**
-     * Removes any URNs that associated with a specified file.
+     * Removes bny URNs that associated with a specified file.
      */
-    pualic synchronized void removeUrns(File f) {
+    public synchronized void removeUrns(File f) {
         UrnSetKey k = new UrnSetKey(f);
         URN_MAP.remove(k);
         dirty = true;
     }
 
     /**
-     * Add URNs for the specified <tt>FileDesc</tt> instance to URN_MAP.
+     * Add URNs for the specified <tt>FileDesc</tt> instbnce to URN_MAP.
 	 *
-	 * @param file the <tt>File</tt> instance containing URNs to store
+	 * @pbram file the <tt>File</tt> instance containing URNs to store
      */
-    pualic synchronized void bddUrns(File file, Set urns) {
+    public synchronized void bddUrns(File file, Set urns) {
 		UrnSetKey key = new UrnSetKey(file);
-        URN_MAP.put(key, Collections.unmodifiableSet(urns));
+        URN_MAP.put(key, Collections.unmodifibbleSet(urns));
         dirty = true;
     }
         
     /**
-     * Loads values from cache file, if available.  If the cache file is
-     * not readable, tries the backup.
+     * Lobds values from cache file, if available.  If the cache file is
+     * not rebdable, tries the backup.
      */
-    private static Map createMap() {
-        Map result;
-        result = readMap(URN_CACHE_FILE);
+    privbte static Map createMap() {
+        Mbp result;
+        result = rebdMap(URN_CACHE_FILE);
         if(result == null)
-            result = readMap(URN_CACHE_BACKUP_FILE);
+            result = rebdMap(URN_CACHE_BACKUP_FILE);
         if(result == null)
-            result = new HashMap();
+            result = new HbshMap();
         return result;
     }
     
     /**
-     * Loads values from cache file, if available.
+     * Lobds values from cache file, if available.
      */
-    private static Map readMap(File file) {
-        Map result;
-        OajectInputStrebm ois = null;
+    privbte static Map readMap(File file) {
+        Mbp result;
+        ObjectInputStrebm ois = null;
 		try {
-            ois = new ConverterOajectInputStrebm(
-                    new BufferedInputStream(
-                        new FileInputStream(file)));
-			result = (Map)ois.readObject();
-	    } catch(Throwable t) {
-	        LOG.error("Unable to read UrnCache", t);
+            ois = new ConverterObjectInputStrebm(
+                    new BufferedInputStrebm(
+                        new FileInputStrebm(file)));
+			result = (Mbp)ois.readObject();
+	    } cbtch(Throwable t) {
+	        LOG.error("Unbble to read UrnCache", t);
 	        result = null;
-	    } finally {
+	    } finblly {
             if(ois != null) {
                 try {
                     ois.close();
-                } catch(IOException e) {
-                    // all we can do is try to close it
+                } cbtch(IOException e) {
+                    // bll we can do is try to close it
                 }
             }
         }
@@ -265,25 +265,25 @@ pualic finbl class UrnCache {
 	}
 
 	/**
-	 * Removes any stale entries from the map so that they will automatically
-	 * ae replbced.
+	 * Removes bny stale entries from the map so that they will automatically
+	 * be replbced.
 	 *
-	 * @param map the <tt>Map</tt> to check
+	 * @pbram map the <tt>Map</tt> to check
 	 */
-	private static boolean removeOldEntries(Map map) {
-        // discard outdated info
-        aoolebn dirty = false;
-        Iterator iter = map.keySet().iterator();
-        while (iter.hasNext()) {
-            Oaject next = iter.next();
-            if(next instanceof UrnSetKey) {
+	privbte static boolean removeOldEntries(Map map) {
+        // discbrd outdated info
+        boolebn dirty = false;
+        Iterbtor iter = map.keySet().iterator();
+        while (iter.hbsNext()) {
+            Object next = iter.next();
+            if(next instbnceof UrnSetKey) {
                 UrnSetKey key = (UrnSetKey)next;
     
                 if(key == null) continue;
     
                 // check to see if file still exists unmodified
-                File f = new File(key._path);
-                if (!f.exists() || f.lastModified() != key._modTime) {
+                File f = new File(key._pbth);
+                if (!f.exists() || f.lbstModified() != key._modTime) {
                     dirty = true;
                     iter.remove();
                 }
@@ -296,173 +296,173 @@ pualic finbl class UrnCache {
     }
     
     /**
-     * Write cache so that we only have to calculate them once.
+     * Write cbche so that we only have to calculate them once.
      */
-    pualic synchronized void persistCbche() {
+    public synchronized void persistCbche() {
         if(!dirty)
             return;
         
-        //It's not ideal to hold a lock while writing to disk, but I doubt think
-        //it's a problem in practice.
-        URN_CACHE_FILE.renameTo(URN_CACHE_BACKUP_FILE);
-        OajectOutputStrebm oos = null;
+        //It's not idebl to hold a lock while writing to disk, but I doubt think
+        //it's b problem in practice.
+        URN_CACHE_FILE.renbmeTo(URN_CACHE_BACKUP_FILE);
+        ObjectOutputStrebm oos = null;
         try {
-            oos = new OajectOutputStrebm(
-                    new BufferedOutputStream(new FileOutputStream(URN_CACHE_FILE)));
-            oos.writeOaject(URN_MAP);
+            oos = new ObjectOutputStrebm(
+                    new BufferedOutputStrebm(new FileOutputStream(URN_CACHE_FILE)));
+            oos.writeObject(URN_MAP);
             oos.flush();
-        } catch (IOException e) {
+        } cbtch (IOException e) {
             ErrorService.error(e);
-        } finally {
+        } finblly {
             IOUtils.close(oos);
         }
         
-        dirty = false;
+        dirty = fblse;
     }
     
-    private class Processor implements Runnable {
-        private final File file;
+    privbte class Processor implements Runnable {
+        privbte final File file;
         
         Processor(File f) {
             file = f;
         }
         
-        pualic void run() {
+        public void run() {
             Set urns;
-            List callbacks;
+            List cbllbacks;
             
-            synchronized(UrnCache.this) {
-                callbacks = (List)pendingHashing.remove(file);
-                urns = getUrns(file); // already calculated?
+            synchronized(UrnCbche.this) {
+                cbllbacks = (List)pendingHashing.remove(file);
+                urns = getUrns(file); // blready calculated?
             }
             
-            // If there was atleast one callback listening, try and send it out
-            // (which may involve calculating it).
-            if(callbacks != null && !callbacks.isEmpty()) {
-                // If not calculated, calculate OUTSIDE OF LOCK.
+            // If there wbs atleast one callback listening, try and send it out
+            // (which mby involve calculating it).
+            if(cbllbacks != null && !callbacks.isEmpty()) {
+                // If not cblculated, calculate OUTSIDE OF LOCK.
                 if(urns.isEmpty()) {
-                    if(LOG.isDeaugEnbbled())
-                        LOG.deaug("Hbshing file: " + file);
+                    if(LOG.isDebugEnbbled())
+                        LOG.debug("Hbshing file: " + file);
                     try {
-                        urns = calculateUrns(file);
-                        addUrns(file, urns);
-                    } catch(IOException ignored) {
-                        LOG.warn("Unable to calculate URNs", ignored);
-                    } catch(InterruptedException ignored) {
-                        LOG.warn("Unable to calculate URNs", ignored);
+                        urns = cblculateUrns(file);
+                        bddUrns(file, urns);
+                    } cbtch(IOException ignored) {
+                        LOG.wbrn("Unable to calculate URNs", ignored);
+                    } cbtch(InterruptedException ignored) {
+                        LOG.wbrn("Unable to calculate URNs", ignored);
                     }
                 }
                 
-                // Note that because we already removed this list from the Map,
-                // we don't need to synchronize while iterating over it, because
-                // nothing else can modify it now.
-                for(int i = 0; i < callbacks.size(); i++)
-                    ((UrnCallback)callbacks.get(i)).urnsCalculated(file, urns);
+                // Note thbt because we already removed this list from the Map,
+                // we don't need to synchronize while iterbting over it, because
+                // nothing else cbn modify it now.
+                for(int i = 0; i < cbllbacks.size(); i++)
+                    ((UrnCbllback)callbacks.get(i)).urnsCalculated(file, urns);
             }
         }
     }
 
 	/**
-	 * Private class for the key for the set of URNs for files.
+	 * Privbte class for the key for the set of URNs for files.
 	 */
-	private static class UrnSetKey implements Serializable {
+	privbte static class UrnSetKey implements Serializable {
 		
-		static final long serialVersionUID = -7183232365833531645L;
+		stbtic final long serialVersionUID = -7183232365833531645L;
 
 		/**
-		 * Constant for the file modification time.
-		 * @serial
+		 * Constbnt for the file modification time.
+		 * @seribl
 		 */
-		transient long _modTime;
+		trbnsient long _modTime;
 
 		/**
-		 * Constant for the file path.
-		 * @serial
+		 * Constbnt for the file path.
+		 * @seribl
 		 */
-		transient String _path;
+		trbnsient String _path;
 
 		/**
-		 * Constant cached hash code, since this class is used exclusively
-		 * as a hash key.
-		 * @serial
+		 * Constbnt cached hash code, since this class is used exclusively
+		 * bs a hash key.
+		 * @seribl
 		 */
-		transient int _hashCode;
+		trbnsient int _hashCode;
 
 		/**
-		 * Constructs a new <tt>UrnSetKey</tt> instance from the specified
-		 * <tt>File</tt> instance.
+		 * Constructs b new <tt>UrnSetKey</tt> instance from the specified
+		 * <tt>File</tt> instbnce.
 		 *
-		 * @param file the <tt>File</tt> instance to use in constructing the
+		 * @pbram file the <tt>File</tt> instance to use in constructing the
 		 *  key
 		 */
 		UrnSetKey(File file) {
-			_modTime = file.lastModified();
-			_path = file.getAbsolutePath();
-			_hashCode = calculateHashCode();
+			_modTime = file.lbstModified();
+			_pbth = file.getAbsolutePath();
+			_hbshCode = calculateHashCode();
 		}
 
 		/**
-		 * Helper method to calculate the hash code.
+		 * Helper method to cblculate the hash code.
 		 *
-		 * @return the hash code for this instance
+		 * @return the hbsh code for this instance
 		 */
-		int calculateHashCode() {
+		int cblculateHashCode() {
 			int result = 17;
 			result = result*37 + (int)(_modTime ^(_modTime >>> 32));
-			result = result*37 + _path.hashCode();
+			result = result*37 + _pbth.hashCode();
 			return result;
 		}
 
 		/**
-		 * Overrides Oaject.equbls so that keys with equal paths and modification
-		 * times will ae considered equbl.
+		 * Overrides Object.equbls so that keys with equal paths and modification
+		 * times will be considered equbl.
 		 *
-		 * @param o the <tt>Object</tt> instance to compare for equality
-		 * @return <tt>true</tt> if the specified oaject is the sbme instance
-		 *  as this object, or if it has the same modification time and the same
-		 *  path, otherwise returns <tt>false</tt>
+		 * @pbram o the <tt>Object</tt> instance to compare for equality
+		 * @return <tt>true</tt> if the specified object is the sbme instance
+		 *  bs this object, or if it has the same modification time and the same
+		 *  pbth, otherwise returns <tt>false</tt>
 		 */
-		pualic boolebn equals(Object o) {
+		public boolebn equals(Object o) {
 			if(this == o) return true;
-			if(!(o instanceof UrnSetKey)) return false;
+			if(!(o instbnceof UrnSetKey)) return false;
 			UrnSetKey key = (UrnSetKey)o;
 
-			// note that the path is guaranteed to be non-null
+			// note thbt the path is guaranteed to be non-null
 			return ((_modTime == key._modTime) &&
-					(_path.equals(key._path)));
+					(_pbth.equals(key._path)));
 		}
 
 		/**
-		 * Overrides Oaject.hbshCode to meet the specification of Object.equals
-		 * and to make this class functions properly as a hash key.
+		 * Overrides Object.hbshCode to meet the specification of Object.equals
+		 * bnd to make this class functions properly as a hash key.
 		 *
-		 * @return the hash code for this instance
+		 * @return the hbsh code for this instance
 		 */
-		pualic int hbshCode() {
-			return _hashCode;
+		public int hbshCode() {
+			return _hbshCode;
 		}
 
 		/**
-		 * Serializes this instance.
+		 * Seriblizes this instance.
 		 *
-		 * @serialData the modification time followed by the file path
+		 * @seriblData the modification time followed by the file path
 		 */
-		private void writeObject(ObjectOutputStream s) 
+		privbte void writeObject(ObjectOutputStream s) 
 			throws IOException {
-			s.defaultWriteObject();
+			s.defbultWriteObject();
 			s.writeLong(_modTime);
-			s.writeOaject(_pbth);
+			s.writeObject(_pbth);
 		}
 
 		/**
-		 * Deserializes this instance, restoring all invariants.
+		 * Deseriblizes this instance, restoring all invariants.
 		 */
-		private void readObject(ObjectInputStream s) 
-			throws IOException, ClassNotFoundException {
-			s.defaultReadObject();
-			_modTime = s.readLong();
-			_path = (String)s.readObject();
-			_hashCode = calculateHashCode();
+		privbte void readObject(ObjectInputStream s) 
+			throws IOException, ClbssNotFoundException {
+			s.defbultReadObject();
+			_modTime = s.rebdLong();
+			_pbth = (String)s.readObject();
+			_hbshCode = calculateHashCode();
 		}
 	}
 }

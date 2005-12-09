@@ -1,705 +1,705 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.net.InetSocketAddress;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.TreeMap;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import jbva.io.IOException;
+import jbva.io.OutputStream;
+import jbva.io.RandomAccessFile;
+import jbva.net.InetSocketAddress;
+import jbva.net.InetAddress;
+import jbva.net.Socket;
+import jbva.net.UnknownHostException;
+import jbva.util.ArrayList;
+import jbva.util.Arrays;
+import jbva.util.Collections;
+import jbva.util.TreeMap;
+import jbva.util.Map;
+import jbva.util.HashMap;
+import jbva.util.HashSet;
+import jbva.util.Hashtable;
+import jbva.util.Iterator;
+import jbva.util.LinkedList;
+import jbva.util.List;
+import jbva.util.Set;
 
-import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.routing.PatchTableMessage;
-import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.search.QueryDispatcher;
-import com.limegroup.gnutella.search.QueryHandler;
-import com.limegroup.gnutella.search.ResultCounter;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.StatisticsSettings;
-import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.statistics.RouteErrorStat;
-import com.limegroup.gnutella.statistics.RoutedQueryStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
-import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
-import com.limegroup.gnutella.upelection.PromotionManager;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.FixedsizeHashMap;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.NoMoreStorageException;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutellb.guess.GUESSEndpoint;
+import com.limegroup.gnutellb.guess.OnDemandUnicaster;
+import com.limegroup.gnutellb.guess.QueryKey;
+import com.limegroup.gnutellb.messages.*;
+import com.limegroup.gnutellb.messages.vendor.*;
+import com.limegroup.gnutellb.routing.PatchTableMessage;
+import com.limegroup.gnutellb.routing.QueryRouteTable;
+import com.limegroup.gnutellb.routing.ResetTableMessage;
+import com.limegroup.gnutellb.routing.RouteTableMessage;
+import com.limegroup.gnutellb.search.QueryDispatcher;
+import com.limegroup.gnutellb.search.QueryHandler;
+import com.limegroup.gnutellb.search.ResultCounter;
+import com.limegroup.gnutellb.settings.ConnectionSettings;
+import com.limegroup.gnutellb.settings.DownloadSettings;
+import com.limegroup.gnutellb.settings.SearchSettings;
+import com.limegroup.gnutellb.settings.StatisticsSettings;
+import com.limegroup.gnutellb.simpp.SimppManager;
+import com.limegroup.gnutellb.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutellb.statistics.ReceivedMessageStatHandler;
+import com.limegroup.gnutellb.statistics.RouteErrorStat;
+import com.limegroup.gnutellb.statistics.RoutedQueryStat;
+import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutellb.udpconnect.UDPConnectionMessage;
+import com.limegroup.gnutellb.udpconnect.UDPMultiplexor;
+import com.limegroup.gnutellb.upelection.PromotionManager;
+import com.limegroup.gnutellb.util.FixedSizeExpiringSet;
+import com.limegroup.gnutellb.util.FixedsizeHashMap;
+import com.limegroup.gnutellb.util.ManagedThread;
+import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutellb.util.NoMoreStorageException;
+import com.limegroup.gnutellb.util.Sockets;
+import com.limegroup.gnutellb.util.IOUtils;
+import com.limegroup.gnutellb.util.ProcessingQueue;
+import com.limegroup.gnutellb.version.UpdateHandler;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 
 /**
- * One of the three classes that make up the core of the backend.  This
- * class' job is to direct the routing of messages and to count those message
- * as they pass through.  To do so, it aggregates a ConnectionManager that
- * maintains a list of connections.
+ * One of the three clbsses that make up the core of the backend.  This
+ * clbss' job is to direct the routing of messages and to count those message
+ * bs they pass through.  To do so, it aggregates a ConnectionManager that
+ * mbintains a list of connections.
  */
-pualic bbstract class MessageRouter {
+public bbstract class MessageRouter {
     
-    private static final Log LOG = LogFactory.getLog(MessageRouter.class);
+    privbte static final Log LOG = LogFactory.getLog(MessageRouter.class);
 	
     /**
-     * Handle to the <tt>ConnectionManager</tt> to access our TCP connections.
+     * Hbndle to the <tt>ConnectionManager</tt> to access our TCP connections.
      */
-    protected static ConnectionManager _manager;
+    protected stbtic ConnectionManager _manager;
 
     /**
-     * Constant for the number of old connections to use when forwarding
-     * traffic from old connections.
+     * Constbnt for the number of old connections to use when forwarding
+     * trbffic from old connections.
      */
-    private static final int OLD_CONNECTIONS_TO_USE = 15;
+    privbte static final int OLD_CONNECTIONS_TO_USE = 15;
 
     /**
-     * The GUID we attach to QueryReplies to allow PushRequests in
+     * The GUID we bttach to QueryReplies to allow PushRequests in
      * responses.
      */
-    protected ayte[] _clientGUID;
+    protected byte[] _clientGUID;
 
 
 	/**
-	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
+	 * Reference to the <tt>ReplyHbndler</tt> for messages intended for 
 	 * this node.
 	 */
-    private final ReplyHandler FOR_ME_REPLY_HANDLER = 
-		ForMeReplyHandler.instance();
+    privbte final ReplyHandler FOR_ME_REPLY_HANDLER = 
+		ForMeReplyHbndler.instance();
 		
     /**
-     * The maximum size for <tt>RouteTable</tt>s.
+     * The mbximum size for <tt>RouteTable</tt>s.
      */
-    private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
+    privbte int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
 
     /**
-     * The maximum number of bypassed results to remember per query.
+     * The mbximum number of bypassed results to remember per query.
      */
-    private final int MAX_BYPASSED_RESULTS = 150;
+    privbte final int MAX_BYPASSED_RESULTS = 150;
 
     /**
-     * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
-     * typically around 2500 entries, but never more than 100,000 entries.
+     * Mbps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
+     * typicblly around 2500 entries, but never more than 100,000 entries.
      */
-    private RouteTable _pingRouteTable = 
-        new RouteTable(2*60, MAX_ROUTE_TABLE_SIZE);
+    privbte RouteTable _pingRouteTable = 
+        new RouteTbble(2*60, MAX_ROUTE_TABLE_SIZE);
     /**
-     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
-     * typically around 13000 entries, but never more than 100,000 entries.
+     * Mbps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
+     * typicblly around 13000 entries, but never more than 100,000 entries.
      */
-    private RouteTable _queryRouteTable = 
-        new RouteTable(5*60, MAX_ROUTE_TABLE_SIZE);
+    privbte RouteTable _queryRouteTable = 
+        new RouteTbble(5*60, MAX_ROUTE_TABLE_SIZE);
     /**
-     * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
-     * minutes, typically around 3500 entries, but never more than 100,000
+     * Mbps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
+     * minutes, typicblly around 3500 entries, but never more than 100,000
      * entries.  
      */
-    private RouteTable _pushRouteTable = 
-        new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
+    privbte RouteTable _pushRouteTable = 
+        new RouteTbble(7*60, MAX_ROUTE_TABLE_SIZE);
     
     /**
-     * Maps HeadPong guids to the originating pingers.  Short-lived since
-     * we expect replies from our leaves quickly.
+     * Mbps HeadPong guids to the originating pingers.  Short-lived since
+     * we expect replies from our lebves quickly.
      */
-    private RouteTable _headPongRouteTable = 
-    	new RouteTable(10, MAX_ROUTE_TABLE_SIZE);
+    privbte RouteTable _headPongRouteTable = 
+    	new RouteTbble(10, MAX_ROUTE_TABLE_SIZE);
 
-    /** How long to auffer up out-of-bbnd replies.
+    /** How long to buffer up out-of-bbnd replies.
      */
-    private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
+    privbte static final long CLEAR_TIME = 30 * 1000; // 30 seconds
 
-    /** Time aetween sending HopsFlow messbges.
+    /** Time between sending HopsFlow messbges.
      */
-    private static final long HOPS_FLOW_INTERVAL = 15 * 1000; // 15 seconds
+    privbte static final long HOPS_FLOW_INTERVAL = 15 * 1000; // 15 seconds
 
-    /** The maximum number of UDP replies to buffer up.  Non-final for 
+    /** The mbximum number of UDP replies to buffer up.  Non-final for 
      *  testing.
      */
-    static int MAX_BUFFERED_REPLIES = 250;
+    stbtic int MAX_BUFFERED_REPLIES = 250;
 
     /**
-     * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
-     * if the sink wants them).  Cleared every CLEAR_TIME seconds.
+     * Keeps trbck of QueryReplies to be sent after recieving LimeAcks (sent
+     * if the sink wbnts them).  Cleared every CLEAR_TIME seconds.
      * TimedGUID->QueryResponseBundle.
      */
-    private final Map _outOfBandReplies = new Hashtable();
+    privbte final Map _outOfBandReplies = new Hashtable();
 
     /**
-     * Keeps track of potential sources of content.  Comprised of Sets of GUESS
-     * Endpoints.  Kept tidy when searches/downloads are killed.
+     * Keeps trbck of potential sources of content.  Comprised of Sets of GUESS
+     * Endpoints.  Kept tidy when sebrches/downloads are killed.
      */
-    private final Map _bypassedResults = new HashMap();
+    privbte final Map _bypassedResults = new HashMap();
 
     /**
-     * Keeps track of what hosts we have recently tried to connect back to via
-     * UDP.  The size is limited and once the size is reached, no more connect
-     * abck attempts will be honored.
+     * Keeps trbck of what hosts we have recently tried to connect back to via
+     * UDP.  The size is limited bnd once the size is reached, no more connect
+     * bbck attempts will be honored.
      */
-    private static final FixedsizeHashMap _udpConnectBacks = 
-        new FixedsizeHashMap(200);
+    privbte static final FixedsizeHashMap _udpConnectBacks = 
+        new FixedsizeHbshMap(200);
         
     /**
-     * The maximum numbers of ultrapeers to forward a UDPConnectBackRedirect
-     * message to, per forward.
+     * The mbximum numbers of ultrapeers to forward a UDPConnectBackRedirect
+     * messbge to, per forward.
      */
-    private static final int MAX_UDP_CONNECTBACK_FORWARDS = 5;
+    privbte static final int MAX_UDP_CONNECTBACK_FORWARDS = 5;
 
     /**
-     * Keeps track of what hosts we have recently tried to connect back to via
-     * TCP.  The size is limited and once the size is reached, no more connect
-     * abck attempts will be honored.
+     * Keeps trbck of what hosts we have recently tried to connect back to via
+     * TCP.  The size is limited bnd once the size is reached, no more connect
+     * bbck attempts will be honored.
      */
-    private static final FixedsizeHashMap _tcpConnectBacks = 
-        new FixedsizeHashMap(200);
+    privbte static final FixedsizeHashMap _tcpConnectBacks = 
+        new FixedsizeHbshMap(200);
         
     /**
-     * The maximum numbers of ultrapeers to forward a TCPConnectBackRedirect
-     * message to, per forward.
+     * The mbximum numbers of ultrapeers to forward a TCPConnectBackRedirect
+     * messbge to, per forward.
      */
-    private static final int MAX_TCP_CONNECTBACK_FORWARDS = 5;        
+    privbte static final int MAX_TCP_CONNECTBACK_FORWARDS = 5;        
     
     /**
-     * The processingqueue to add tcpconnectback socket connections to.
+     * The processingqueue to bdd tcpconnectback socket connections to.
      */
-    private static final ProcessingQueue TCP_CONNECT_BACKER =
-        new ProcessingQueue("TCPConnectBack");
+    privbte static final ProcessingQueue TCP_CONNECT_BACKER =
+        new ProcessingQueue("TCPConnectBbck");
     
     /**
-     * keeps track of which hosts have sent us head pongs.  We may choose
-     * to use these messages for udp tunnel keep-alive, so we don't want to
-     * set the minimum interval too high.  Right now it is half of what we
-     * aelieve to be the solicited grbce period.
+     * keeps trbck of which hosts have sent us head pongs.  We may choose
+     * to use these messbges for udp tunnel keep-alive, so we don't want to
+     * set the minimum intervbl too high.  Right now it is half of what we
+     * believe to be the solicited grbce period.
      */
-    private static final Set _udpHeadRequests =
+    privbte static final Set _udpHeadRequests =
     	Collections.synchronizedSet(new FixedSizeExpiringSet(200,
-    			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2));
+    			ConnectionSettings.SOLICITED_GRACE_PERIOD.getVblue()/2));
 
 	/**
-	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
+	 * Constbnt handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
 	 */
-	protected final QueryUnicaster UNICASTER = QueryUnicaster.instance();
+	protected finbl QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
 	/**
-	 * Constant for the <tt>QueryDispatcher</tt> that handles dynamically
-	 * generated queries that adjust to the number of results received, the
-	 * numaer of connections, etc.
+	 * Constbnt for the <tt>QueryDispatcher</tt> that handles dynamically
+	 * generbted queries that adjust to the number of results received, the
+	 * number of connections, etc.
 	 */
-	private final QueryDispatcher DYNAMIC_QUERIER = QueryDispatcher.instance();
+	privbte final QueryDispatcher DYNAMIC_QUERIER = QueryDispatcher.instance();
 	
 	/**
-	 * Handle to the <tt>ActivityCallback</tt> for sending data to the 
-	 * display.
+	 * Hbndle to the <tt>ActivityCallback</tt> for sending data to the 
+	 * displby.
 	 */
-	private ActivityCallback _callback;
+	privbte ActivityCallback _callback;
 
 	/**
-	 * Handle to the <tt>FileManager</tt> instance.
+	 * Hbndle to the <tt>FileManager</tt> instance.
 	 */
-	private static FileManager _fileManager;
+	privbte static FileManager _fileManager;
     
 	/**
-	 * A handle to the thread that deals with QRP Propagation
+	 * A hbndle to the thread that deals with QRP Propagation
 	 */
-	private final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
+	privbte final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
 
 
     /**
-     * Variable for the most recent <tt>QueryRouteTable</tt> created
-     * for this node.  If this node is an Ultrapeer, the routing
-     * table will include the tables from its leaves.
+     * Vbriable for the most recent <tt>QueryRouteTable</tt> created
+     * for this node.  If this node is bn Ultrapeer, the routing
+     * tbble will include the tables from its leaves.
      */
-    private QueryRouteTable _lastQueryRouteTable;
+    privbte QueryRouteTable _lastQueryRouteTable;
 
     /**
-     * The maximum number of response to send to a query that has
-     * a "high" number of hops.
+     * The mbximum number of response to send to a query that has
+     * b "high" number of hops.
      */
-    private static final int HIGH_HOPS_RESPONSE_LIMIT = 10;
+    privbte static final int HIGH_HOPS_RESPONSE_LIMIT = 10;
 
     /**
      * The lifetime of OOBs guids.
      */
-    private static final long TIMED_GUID_LIFETIME = 25 * 1000; 
+    privbte static final long TIMED_GUID_LIFETIME = 25 * 1000; 
 
     /**
-     * Keeps track of Listeners of GUIDs.
-     * GUID -> List of MessageListener
+     * Keeps trbck of Listeners of GUIDs.
+     * GUID -> List of MessbgeListener
      */
-    private volatile Map _messageListeners = Collections.EMPTY_MAP;
+    privbte volatile Map _messageListeners = Collections.EMPTY_MAP;
     
     /**
-     * Lock that registering & unregistering listeners can hold
-     * while replacing the listeners map / lists.
+     * Lock thbt registering & unregistering listeners can hold
+     * while replbcing the listeners map / lists.
      */
-    private final Object MESSAGE_LISTENER_LOCK = new Object();
+    privbte final Object MESSAGE_LISTENER_LOCK = new Object();
 
     /**
-     * ref to the promotion manager.
+     * ref to the promotion mbnager.
      */
-    private PromotionManager _promotionManager;
+    privbte PromotionManager _promotionManager;
     
     /**
-     * Router for UDPConnection messages.
+     * Router for UDPConnection messbges.
      */
-	private final UDPMultiplexor _udpConnectionMultiplexor =
-	    UDPMultiplexor.instance(); 
+	privbte final UDPMultiplexor _udpConnectionMultiplexor =
+	    UDPMultiplexor.instbnce(); 
 
     /**
-     * The time we last received a request for a query key.
+     * The time we lbst received a request for a query key.
      */
-    private long _lastQueryKeyTime;
+    privbte long _lastQueryKeyTime;
     
     /**
-     * Creates a MessageRouter.  Must call initialize before using.
+     * Crebtes a MessageRouter.  Must call initialize before using.
      */
-    protected MessageRouter() {
+    protected MessbgeRouter() {
         _clientGUID=RouterService.getMyGUID();
     }
 
     /**
-     * Links the MessageRouter up with the other back end pieces
+     * Links the MessbgeRouter up with the other back end pieces
      */
-    pualic void initiblize() {
-        _manager = RouterService.getConnectionManager();
-		_callback = RouterService.getCallback();
-		_fileManager = RouterService.getFileManager();
-		_promotionManager = RouterService.getPromotionManager();
-	    QRP_PROPAGATOR.start();
+    public void initiblize() {
+        _mbnager = RouterService.getConnectionManager();
+		_cbllback = RouterService.getCallback();
+		_fileMbnager = RouterService.getFileManager();
+		_promotionMbnager = RouterService.getPromotionManager();
+	    QRP_PROPAGATOR.stbrt();
 
-        // schedule a runner to clear unused out-of-band replies
+        // schedule b runner to clear unused out-of-band replies
         RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
-        // schedule a runner to clear guys we've connected back to
-        RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
+        // schedule b runner to clear guys we've connected back to
+        RouterService.schedule(new ConnectBbckExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME);
-        // schedule a runner to send hops-flow messages
-        RouterService.schedule(new HopsFlowManager(), HOPS_FLOW_INTERVAL*10, 
+        // schedule b runner to send hops-flow messages
+        RouterService.schedule(new HopsFlowMbnager(), HOPS_FLOW_INTERVAL*10, 
                                HOPS_FLOW_INTERVAL);
     }
 
     /**
-     * Routes a query GUID to yourself.
+     * Routes b query GUID to yourself.
      */
-    pualic void originbteQueryGUID(byte[] guid) {
-        _queryRouteTable.routeReply(guid, FOR_ME_REPLY_HANDLER);
+    public void originbteQueryGUID(byte[] guid) {
+        _queryRouteTbble.routeReply(guid, FOR_ME_REPLY_HANDLER);
     }
 
-    /** Call this to inform us that a query has been killed by a user or
-     *  whatever.  Useful for purging unneeded info.<br>
-     *  Callers of this should make sure that they have purged the guid from
-     *  their tables.
-     *  @throws IllegalArgumentException if the guid is null
+    /** Cbll this to inform us that a query has been killed by a user or
+     *  whbtever.  Useful for purging unneeded info.<br>
+     *  Cbllers of this should make sure that they have purged the guid from
+     *  their tbbles.
+     *  @throws IllegblArgumentException if the guid is null
      */
-    pualic void queryKilled(GUID guid) throws IllegblArgumentException {
+    public void queryKilled(GUID guid) throws IllegblArgumentException {
         if (guid == null)
-            throw new IllegalArgumentException("Input GUID is null!");
-        synchronized (_aypbssedResults) {
-        if (!RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
-            _aypbssedResults.remove(guid);
+            throw new IllegblArgumentException("Input GUID is null!");
+        synchronized (_bypbssedResults) {
+        if (!RouterService.getDownlobdManager().isGuidForQueryDownloading(guid))
+            _bypbssedResults.remove(guid);
         }
     }
 
-    /** Call this to inform us that a download is finished or whatever.  Useful
-     *  for purging unneeded info.<ar>
-     *  If the caller is a Downloader, please be sure to clear yourself from the
-     *  active and waiting lists in DownloadManager.
-     *  @throws IllegalArgumentException if the guid is null
+    /** Cbll this to inform us that a download is finished or whatever.  Useful
+     *  for purging unneeded info.<br>
+     *  If the cbller is a Downloader, please be sure to clear yourself from the
+     *  bctive and waiting lists in DownloadManager.
+     *  @throws IllegblArgumentException if the guid is null
      */
-    pualic void downlobdFinished(GUID guid) throws IllegalArgumentException {
+    public void downlobdFinished(GUID guid) throws IllegalArgumentException {
         if (guid == null)
-            throw new IllegalArgumentException("Input GUID is null!");
-        synchronized (_aypbssedResults) {
-        if (!_callback.isQueryAlive(guid) && 
-            !RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
-            _aypbssedResults.remove(guid);
+            throw new IllegblArgumentException("Input GUID is null!");
+        synchronized (_bypbssedResults) {
+        if (!_cbllback.isQueryAlive(guid) && 
+            !RouterService.getDownlobdManager().isGuidForQueryDownloading(guid))
+            _bypbssedResults.remove(guid);
         }
     }
     
-    /** @returns a Set with GUESSEndpoints that had matches for the
-     *  original query guid.  may be empty.
-     *  @param guid the guid of the query you want endpoints for.
+    /** @returns b Set with GUESSEndpoints that had matches for the
+     *  originbl query guid.  may be empty.
+     *  @pbram guid the guid of the query you want endpoints for.
      */
-    pualic Set getGuessLocs(GUID guid) {
-        Set clone = new HashSet();
-        synchronized (_aypbssedResults) {
-            Set eps = (Set) _aypbssedResults.get(guid);
+    public Set getGuessLocs(GUID guid) {
+        Set clone = new HbshSet();
+        synchronized (_bypbssedResults) {
+            Set eps = (Set) _bypbssedResults.get(guid);
             if (eps != null)
-                clone.addAll(eps);
+                clone.bddAll(eps);
         }
         return clone;
     }
     
-    pualic String getPingRouteTbbleDump() {
-        return _pingRouteTable.toString();
+    public String getPingRouteTbbleDump() {
+        return _pingRouteTbble.toString();
     }
 
-    pualic String getQueryRouteTbbleDump() {
-        return _queryRouteTable.toString();
+    public String getQueryRouteTbbleDump() {
+        return _queryRouteTbble.toString();
     }
 
-    pualic String getPushRouteTbbleDump() {
-        return _pushRouteTable.toString();
+    public String getPushRouteTbbleDump() {
+        return _pushRouteTbble.toString();
     }
 
     /**
-     * A callback for ConnectionManager to clear a <tt>ReplyHandler</tt> from
-     * the routing tables when the connection is closed.
+     * A cbllback for ConnectionManager to clear a <tt>ReplyHandler</tt> from
+     * the routing tbbles when the connection is closed.
      */
-    pualic void removeConnection(ReplyHbndler rh) {
-        DYNAMIC_QUERIER.removeReplyHandler(rh);
-        _pingRouteTable.removeReplyHandler(rh);
-        _queryRouteTable.removeReplyHandler(rh);
-        _pushRouteTable.removeReplyHandler(rh);
-        _headPongRouteTable.removeReplyHandler(rh);
+    public void removeConnection(ReplyHbndler rh) {
+        DYNAMIC_QUERIER.removeReplyHbndler(rh);
+        _pingRouteTbble.removeReplyHandler(rh);
+        _queryRouteTbble.removeReplyHandler(rh);
+        _pushRouteTbble.removeReplyHandler(rh);
+        _hebdPongRouteTable.removeReplyHandler(rh);
     }
 
 	/**
-     * The handler for all message types.  Processes a message based on the 
-     * message type.
+     * The hbndler for all message types.  Processes a message based on the 
+     * messbge type.
 	 *
-	 * @param m the <tt>Message</tt> instance to route appropriately
-	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
-	 *  the message was received
+	 * @pbram m the <tt>Message</tt> instance to route appropriately
+	 * @pbram receivingConnection the <tt>ManagedConnection</tt> over which
+	 *  the messbge was received
      */
-    pualic void hbndleMessage(Message msg, 
-                              ManagedConnection receivingConnection) {
-        // Increment hops and decrease TTL.
+    public void hbndleMessage(Message msg, 
+                              MbnagedConnection receivingConnection) {
+        // Increment hops bnd decrease TTL.
         msg.hop();
 	   
-        if(msg instanceof PingRequest) {
-            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
-            handlePingRequestPossibleDuplicate((PingRequest)msg, 
+        if(msg instbnceof PingRequest) {
+            ReceivedMessbgeStatHandler.TCP_PING_REQUESTS.addMessage(msg);
+            hbndlePingRequestPossibleDuplicate((PingRequest)msg, 
 											   receivingConnection);
-		} else if (msg instanceof PingReply) {
-			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
-            handlePingReply((PingReply)msg, receivingConnection);
-		} else if (msg instanceof QueryRequest) {
-			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
-            handleQueryRequestPossibleDuplicate(
+		} else if (msg instbnceof PingReply) {
+			ReceivedMessbgeStatHandler.TCP_PING_REPLIES.addMessage(msg);
+            hbndlePingReply((PingReply)msg, receivingConnection);
+		} else if (msg instbnceof QueryRequest) {
+			ReceivedMessbgeStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
+            hbndleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, receivingConnection);
-		} else if (msg instanceof QueryReply) {
-			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
-            // if someone sent a TCP QueryReply with the MCAST header,
-            // that's bad, so ignore it.
+		} else if (msg instbnceof QueryReply) {
+			ReceivedMessbgeStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
+            // if someone sent b TCP QueryReply with the MCAST header,
+            // thbt's bad, so ignore it.
             QueryReply qmsg = (QueryReply)msg;
-            handleQueryReply(qmsg, receivingConnection);            
-		} else if (msg instanceof PushRequest) {
-			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
-            handlePushRequest((PushRequest)msg, receivingConnection);
-		} else if (msg instanceof ResetTableMessage) {
-			ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handleResetTableMessage((ResetTableMessage)msg,
+            hbndleQueryReply(qmsg, receivingConnection);            
+		} else if (msg instbnceof PushRequest) {
+			ReceivedMessbgeStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
+            hbndlePushRequest((PushRequest)msg, receivingConnection);
+		} else if (msg instbnceof ResetTableMessage) {
+			ReceivedMessbgeStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            hbndleResetTableMessage((ResetTableMessage)msg,
                                     receivingConnection);
-		} else if (msg instanceof PatchTableMessage) {
-			ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handlePatchTableMessage((PatchTableMessage)msg,
+		} else if (msg instbnceof PatchTableMessage) {
+			ReceivedMessbgeStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            hbndlePatchTableMessage((PatchTableMessage)msg,
                                     receivingConnection);            
         }
-        else if (msg instanceof TCPConnectBackVendorMessage) {
-            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
-            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
+        else if (msg instbnceof TCPConnectBackVendorMessage) {
+            ReceivedMessbgeStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
+            hbndleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
                                         receivingConnection);
         }
-        else if (msg instanceof UDPConnectBackVendorMessage) {
-			ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
-            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
+        else if (msg instbnceof UDPConnectBackVendorMessage) {
+			ReceivedMessbgeStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
+            hbndleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                                         receivingConnection);
         }
-        else if (msg instanceof TCPConnectBackRedirect) {
-            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
+        else if (msg instbnceof TCPConnectBackRedirect) {
+            hbndleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
                                          receivingConnection);
         }
-        else if (msg instanceof UDPConnectBackRedirect) {
-            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
+        else if (msg instbnceof UDPConnectBackRedirect) {
+            hbndleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
                                          receivingConnection);
         }
-        else if (msg instanceof PushProxyRequest) {
-            handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
+        else if (msg instbnceof PushProxyRequest) {
+            hbndlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
         }
-        else if (msg instanceof QueryStatusResponse) {
-            handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
+        else if (msg instbnceof QueryStatusResponse) {
+            hbndleQueryStatus((QueryStatusResponse) msg, receivingConnection);
         }
-        else if (msg instanceof GiveStatsVendorMessage) {
-            //TODO: add the statistics recording code
-            handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
+        else if (msg instbnceof GiveStatsVendorMessage) {
+            //TODO: bdd the statistics recording code
+            hbndleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
         }
-        else if(msg instanceof StatisticVendorMessage) {
-            //TODO: add the statistics recording code
-            handleStatisticsMessage(
-                            (StatisticVendorMessage)msg, receivingConnection);
+        else if(msg instbnceof StatisticVendorMessage) {
+            //TODO: bdd the statistics recording code
+            hbndleStatisticsMessage(
+                            (StbtisticVendorMessage)msg, receivingConnection);
         }
-        else if (msg instanceof HeadPing) {
-        	//TODO: add the statistics recording code
-        	handleHeadPing((HeadPing)msg, receivingConnection);
+        else if (msg instbnceof HeadPing) {
+        	//TODO: bdd the statistics recording code
+        	hbndleHeadPing((HeadPing)msg, receivingConnection);
         }
-        else if(msg instanceof SimppRequestVM) {
-            handleSimppRequest((SimppRequestVM)msg, receivingConnection);
+        else if(msg instbnceof SimppRequestVM) {
+            hbndleSimppRequest((SimppRequestVM)msg, receivingConnection);
         }
-        else if(msg instanceof SimppVM) {
-            handleSimppVM((SimppVM)msg);
+        else if(msg instbnceof SimppVM) {
+            hbndleSimppVM((SimppVM)msg);
         } 
-        else if(msg instanceof UpdateRequest) {
-            handleUpdateRequest((UpdateRequest)msg, receivingConnection);
+        else if(msg instbnceof UpdateRequest) {
+            hbndleUpdateRequest((UpdateRequest)msg, receivingConnection);
         }
-        else if(msg instanceof UpdateResponse) {
-            handleUpdateResponse((UpdateResponse)msg, receivingConnection);
+        else if(msg instbnceof UpdateResponse) {
+            hbndleUpdateResponse((UpdateResponse)msg, receivingConnection);
         }
-        else if (msg instanceof HeadPong) {  
-            handleHeadPong((HeadPong)msg, receivingConnection); 
+        else if (msg instbnceof HeadPong) {  
+            hbndleHeadPong((HeadPong)msg, receivingConnection); 
         } 
-        else if (msg instanceof VendorMessage) {
-            receivingConnection.handleVendorMessage((VendorMessage)msg);
+        else if (msg instbnceof VendorMessage) {
+            receivingConnection.hbndleVendorMessage((VendorMessage)msg);
         }
         
-        //This may trigger propogation of query route tables.  We do this AFTER
-        //any handshake pings.  Otherwise we'll think all clients are old
+        //This mby trigger propogation of query route tables.  We do this AFTER
+        //bny handshake pings.  Otherwise we'll think all clients are old
         //clients.
-		//forwardQueryRouteTables();
-        notifyMessageListener(msg, receivingConnection);
+		//forwbrdQueryRouteTables();
+        notifyMessbgeListener(msg, receivingConnection);
     }
 
     /**
-     * Notifies any message listeners of this message's guid about the message.
+     * Notifies bny message listeners of this message's guid about the message.
      * This holds no locks.
      */
-    private final void notifyMessageListener(Message msg, ReplyHandler handler) {
-        List all = (List)_messageListeners.get(msg.getGUID());
-        if(all != null) {
-            for(Iterator i = all.iterator(); i.hasNext(); ) {
-                MessageListener next = (MessageListener)i.next();
-                next.processMessage(msg, handler);
+    privbte final void notifyMessageListener(Message msg, ReplyHandler handler) {
+        List bll = (List)_messageListeners.get(msg.getGUID());
+        if(bll != null) {
+            for(Iterbtor i = all.iterator(); i.hasNext(); ) {
+                MessbgeListener next = (MessageListener)i.next();
+                next.processMessbge(msg, handler);
             }
         }
     }
 
 	/**
-     * The handler for all message types.  Processes a message based on the 
-     * message type.
+     * The hbndler for all message types.  Processes a message based on the 
+     * messbge type.
 	 *
-	 * @param msg the <tt>Message</tt> received
-	 * @param addr the <tt>InetSocketAddress</tt> containing the IP and 
+	 * @pbram msg the <tt>Message</tt> received
+	 * @pbram addr the <tt>InetSocketAddress</tt> containing the IP and 
 	 *  port of the client node
      */	
-	pualic void hbndleUDPMessage(Message msg, InetSocketAddress addr) {
-        // Increment hops and decrement TTL.
+	public void hbndleUDPMessage(Message msg, InetSocketAddress addr) {
+        // Increment hops bnd decrement TTL.
         msg.hop();
 
-		InetAddress address = addr.getAddress();
-		int port = addr.getPort();
-		// Verify that the address and port are valid.
-		// If they are not, we cannot send any replies to them.
-		if(!RouterService.isIpPortValid()) return;
+		InetAddress bddress = addr.getAddress();
+		int port = bddr.getPort();
+		// Verify thbt the address and port are valid.
+		// If they bre not, we cannot send any replies to them.
+		if(!RouterService.isIpPortVblid()) return;
 
-		// Send UDPConnection messages on to the connection multiplexor
-		// for routing to the appropriate connection processor
-		if ( msg instanceof UDPConnectionMessage ) {
-		    _udpConnectionMultiplexor.routeMessage(
-			  (UDPConnectionMessage)msg, address, port);
+		// Send UDPConnection messbges on to the connection multiplexor
+		// for routing to the bppropriate connection processor
+		if ( msg instbnceof UDPConnectionMessage ) {
+		    _udpConnectionMultiplexor.routeMessbge(
+			  (UDPConnectionMessbge)msg, address, port);
 			return;
 		}
 
-		ReplyHandler handler = new UDPReplyHandler(address, port);
+		ReplyHbndler handler = new UDPReplyHandler(address, port);
 		
-        if (msg instanceof QueryRequest) {
-            //TODO: compare QueryKey with old generation params.  if it matches
-            //send a new one generated with current params 
-            if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
-                sendAcknowledgement(addr, msg.getGUID());
-                // a TTL above zero may indicate a malicious client, as UDP
-                // messages queries should not be sent with TTL above 1.
+        if (msg instbnceof QueryRequest) {
+            //TODO: compbre QueryKey with old generation params.  if it matches
+            //send b new one generated with current params 
+            if (hbsValidQueryKey(address, port, (QueryRequest) msg)) {
+                sendAcknowledgement(bddr, msg.getGUID());
+                // b TTL above zero may indicate a malicious client, as UDP
+                // messbges queries should not be sent with TTL above 1.
                 //if(msg.getTTL() > 0) return;
-                if (!handleUDPQueryRequestPossibleDuplicate(
-                  (QueryRequest)msg, handler) ) {
-                    ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
+                if (!hbndleUDPQueryRequestPossibleDuplicate(
+                  (QueryRequest)msg, hbndler) ) {
+                    ReceivedMessbgeStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
                 }  
             }
-            ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
-		} else if (msg instanceof QueryReply) {
+            ReceivedMessbgeStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
+		} else if (msg instbnceof QueryReply) {
             QueryReply qr = (QueryReply) msg;
-			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+			ReceivedMessbgeStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             int numResps = qr.getResultCount();
-            // only account for OOB stuff if this was response to a 
-            // OOB query, multicast stuff is sent over UDP too....
-            if (!qr.isReplyToMulticastQuery())
-                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+            // only bccount for OOB stuff if this was response to a 
+            // OOB query, multicbst stuff is sent over UDP too....
+            if (!qr.isReplyToMulticbstQuery())
+                OutOfBbndThroughputStat.RESPONSES_RECEIVED.addData(numResps);
 			
-            handleQueryReply(qr, handler);
+            hbndleQueryReply(qr, handler);
             
-		} else if(msg instanceof PingRequest) {
-			ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
-			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, addr);
-		} else if(msg instanceof PingReply) {
-			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
-            handleUDPPingReply((PingReply)msg, handler, address, port);
-		} else if(msg instanceof PushRequest) {
-			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
-			handlePushRequest((PushRequest)msg, handler);
-		} else if(msg instanceof LimeACKVendorMessage) {
-			ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
-            handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
+		} else if(msg instbnceof PingRequest) {
+			ReceivedMessbgeStatHandler.UDP_PING_REQUESTS.addMessage(msg);
+			hbndleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
+												  hbndler, addr);
+		} else if(msg instbnceof PingReply) {
+			ReceivedMessbgeStatHandler.UDP_PING_REPLIES.addMessage(msg);
+            hbndleUDPPingReply((PingReply)msg, handler, address, port);
+		} else if(msg instbnceof PushRequest) {
+			ReceivedMessbgeStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
+			hbndlePushRequest((PushRequest)msg, handler);
+		} else if(msg instbnceof LimeACKVendorMessage) {
+			ReceivedMessbgeStatHandler.UDP_LIME_ACK.addMessage(msg);
+            hbndleLimeACKMessage((LimeACKVendorMessage)msg, addr);
         }
-        else if(msg instanceof ReplyNumberVendorMessage) {
-            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
+        else if(msg instbnceof ReplyNumberVendorMessage) {
+            hbndleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
         }
-        else if(msg instanceof GiveStatsVendorMessage) {
-            handleGiveStats((GiveStatsVendorMessage) msg, handler);
+        else if(msg instbnceof GiveStatsVendorMessage) {
+            hbndleGiveStats((GiveStatsVendorMessage) msg, handler);
         }
-        else if(msg instanceof StatisticVendorMessage) {
-            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
+        else if(msg instbnceof StatisticVendorMessage) {
+            hbndleStatisticsMessage((StatisticVendorMessage)msg, handler);
         }
-        else if(msg instanceof UDPCrawlerPing) {
-        	//TODO: add the statistics recording code
-        	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
+        else if(msg instbnceof UDPCrawlerPing) {
+        	//TODO: bdd the statistics recording code
+        	hbndleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
         }
-        else if (msg instanceof HeadPing) {
-        	//TODO: add the statistics recording code
-        	handleHeadPing((HeadPing)msg, handler);
+        else if (msg instbnceof HeadPing) {
+        	//TODO: bdd the statistics recording code
+        	hbndleHeadPing((HeadPing)msg, handler);
         } 
-        else if(msg instanceof UpdateRequest) {
-            handleUpdateRequest((UpdateRequest)msg, handler);
+        else if(msg instbnceof UpdateRequest) {
+            hbndleUpdateRequest((UpdateRequest)msg, handler);
         }
-        notifyMessageListener(msg, handler);
+        notifyMessbgeListener(msg, handler);
     }
     
     /**
-     * The handler for Multicast messages. Processes a message based on the
-     * message type.
+     * The hbndler for Multicast messages. Processes a message based on the
+     * messbge type.
      *
-     * @param msg the <tt>Message</tt> recieved.
-     * @param addr the <tt>InetSocketAddress</tt> containing the IP and
+     * @pbram msg the <tt>Message</tt> recieved.
+     * @pbram addr the <tt>InetSocketAddress</tt> containing the IP and
      *  port of the client node.
      */
-	pualic void hbndleMulticastMessage(Message msg, InetSocketAddress addr) {
+	public void hbndleMulticastMessage(Message msg, InetSocketAddress addr) {
     
-        // Use this assert for testing only -- it is a dangerous assert
-        // to have in the field, as not all messages currently set the
-        // network int appropriately.
-        // If someone sends us messages we're not prepared to handle,
-        // this could cause widespreaad AssertFailures
-        //Assert.that(msg.isMulticast(),
-        //   "non multicast message in handleMulticastMessage: " + msg);
+        // Use this bssert for testing only -- it is a dangerous assert
+        // to hbve in the field, as not all messages currently set the
+        // network int bppropriately.
+        // If someone sends us messbges we're not prepared to handle,
+        // this could cbuse widespreaad AssertFailures
+        //Assert.thbt(msg.isMulticast(),
+        //   "non multicbst message in handleMulticastMessage: " + msg);
     
-        // no multicast messages should ever have been
-        // set with a TTL greater than 1.
+        // no multicbst messages should ever have been
+        // set with b TTL greater than 1.
         if( msg.getTTL() > 1 )
             return;
 
-        // Increment hops and decrement TTL.
+        // Increment hops bnd decrement TTL.
         msg.hop();
 
-		InetAddress address = addr.getAddress();
-		int port = addr.getPort();
+		InetAddress bddress = addr.getAddress();
+		int port = bddr.getPort();
 		
-        if (NetworkUtils.isLocalAddress(address) &&
-          !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue())
+        if (NetworkUtils.isLocblAddress(address) &&
+          !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getVblue())
             return;
 		
-		ReplyHandler handler = new UDPReplyHandler(address, port);
+		ReplyHbndler handler = new UDPReplyHandler(address, port);
 		
-        if (msg instanceof QueryRequest) {
-            if(!handleUDPQueryRequestPossibleDuplicate(
-              (QueryRequest)msg, handler) ) {
-                ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
+        if (msg instbnceof QueryRequest) {
+            if(!hbndleUDPQueryRequestPossibleDuplicate(
+              (QueryRequest)msg, hbndler) ) {
+                ReceivedMessbgeStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
             }
-            ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
-	//	} else if (msg instanceof QueryReply) {			
-	//		  ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-    //        handleQueryReply((QueryReply)msg, handler);
-		} else if(msg instanceof PingRequest) {
-			ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
-			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, addr);
-	//	} else if(msg instanceof PingReply) {
-	//	      ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
-    //        handleUDPPingReply((PingReply)msg, handler, address, port);
-		} else if(msg instanceof PushRequest) {
-            ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
-			handlePushRequest((PushRequest)msg, handler);
+            ReceivedMessbgeStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
+	//	} else if (msg instbnceof QueryReply) {			
+	//		  ReceivedMessbgeStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+    //        hbndleQueryReply((QueryReply)msg, handler);
+		} else if(msg instbnceof PingRequest) {
+			ReceivedMessbgeStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
+			hbndleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
+												  hbndler, addr);
+	//	} else if(msg instbnceof PingReply) {
+	//	      ReceivedMessbgeStatHandler.UDP_PING_REPLIES.addMessage(msg);
+    //        hbndleUDPPingReply((PingReply)msg, handler, address, port);
+		} else if(msg instbnceof PushRequest) {
+            ReceivedMessbgeStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
+			hbndlePushRequest((PushRequest)msg, handler);
 		}
-        notifyMessageListener(msg, handler);
+        notifyMessbgeListener(msg, handler);
     }
 
 
     /**
-     * Returns true if the Query has a valid QueryKey.  false if it isn't
-     * present or valid.
+     * Returns true if the Query hbs a valid QueryKey.  false if it isn't
+     * present or vblid.
      */
-    protected aoolebn hasValidQueryKey(InetAddress ip, int port, 
+    protected boolebn hasValidQueryKey(InetAddress ip, int port, 
                                        QueryRequest qr) {
         if (qr.getQueryKey() == null)
-            return false;
+            return fblse;
         QueryKey computedQK = QueryKey.getQueryKey(ip, port);
-        return qr.getQueryKey().equals(computedQK);
+        return qr.getQueryKey().equbls(computedQK);
     }
 
 	/**
-	 * Sends an ack back to the GUESS client node.  
+	 * Sends bn ack back to the GUESS client node.  
 	 */
-	protected void sendAcknowledgement(InetSocketAddress addr, byte[] guid) {
-		ConnectionManager manager = RouterService.getConnectionManager();
-		Endpoint host = manager.getConnectedGUESSUltrapeer();
+	protected void sendAcknowledgement(InetSocketAddress bddr, byte[] guid) {
+		ConnectionMbnager manager = RouterService.getConnectionManager();
+		Endpoint host = mbnager.getConnectedGUESSUltrapeer();
 		PingReply reply;
 		if(host != null) {
 			try {
                 
-                reply = PingReply.createGUESSReply(guid, (byte)1, host);
-            } catch(UnknownHostException e) {
-				reply = createPingReply(guid);
+                reply = PingReply.crebteGUESSReply(guid, (byte)1, host);
+            } cbtch(UnknownHostException e) {
+				reply = crebtePingReply(guid);
             }
 		} else {
-			reply = createPingReply(guid);
+			reply = crebtePingReply(guid);
 		}
 		
-		// No GUESS endpoints existed and our IP/port was invalid.
+		// No GUESS endpoints existed bnd our IP/port was invalid.
 		if( reply == null )
 		    return;
 
-        UDPService.instance().send(reply, addr.getAddress(), addr.getPort());
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
+        UDPService.instbnce().send(reply, addr.getAddress(), addr.getPort());
+		SentMessbgeStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
 	/**
-	 * Creates a new <tt>PingReply</tt> from the set of cached
-	 * GUESS endpoints, or a <tt>PingReply</tt> for localhost
-	 * if no GUESS endpoints are available.
+	 * Crebtes a new <tt>PingReply</tt> from the set of cached
+	 * GUESS endpoints, or b <tt>PingReply</tt> for localhost
+	 * if no GUESS endpoints bre available.
 	 */
-	private PingReply createPingReply(byte[] guid) {
-		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
+	privbte PingReply createPingReply(byte[] guid) {
+		GUESSEndpoint endpoint = UNICASTER.getUnicbstEndpoint();
 		if(endpoint == null) {
-		    if(RouterService.isIpPortValid())
-                return PingReply.create(guid, (byte)1);
+		    if(RouterService.isIpPortVblid())
+                return PingReply.crebte(guid, (byte)1);
             else
                 return null;
 		} else {
-            return PingReply.createGUESSReply(guid, (byte)1, 
+            return PingReply.crebteGUESSReply(guid, (byte)1, 
                                               endpoint.getPort(),
                                               endpoint.getAddress().getAddress());
 		}
@@ -709,452 +709,452 @@ pualic bbstract class MessageRouter {
 
 	
     /**
-     * The handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
-     * if the request has already been seen.  If not, calls handlePingRequest.
+     * The hbndler for PingRequests received in
+     * MbnagedConnection.loopForMessages().  Checks the routing table to see
+     * if the request hbs already been seen.  If not, calls handlePingRequest.
      */
-    final void handlePingRequestPossibleDuplicate(
-        PingRequest request, ReplyHandler handler) {
-		if(_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null)
-            handlePingRequest(request, handler);
+    finbl void handlePingRequestPossibleDuplicate(
+        PingRequest request, ReplyHbndler handler) {
+		if(_pingRouteTbble.tryToRouteReply(request.getGUID(), handler) != null)
+            hbndlePingRequest(request, handler);
     }
 
     /**
-     * The handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
-     * if the request has already been seen.  If not, calls handlePingRequest.
+     * The hbndler for PingRequests received in
+     * MbnagedConnection.loopForMessages().  Checks the routing table to see
+     * if the request hbs already been seen.  If not, calls handlePingRequest.
      */
-    final void handleUDPPingRequestPossibleDuplicate(													 
-        PingRequest request, ReplyHandler handler, InetSocketAddress  addr) {
-		if(_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null)
-            handleUDPPingRequest(request, handler, addr);
+    finbl void handleUDPPingRequestPossibleDuplicate(													 
+        PingRequest request, ReplyHbndler handler, InetSocketAddress  addr) {
+		if(_pingRouteTbble.tryToRouteReply(request.getGUID(), handler) != null)
+            hbndleUDPPingRequest(request, handler, addr);
     }
 
     /**
-     * The handler for QueryRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
-     * if the request has already been seen.  If not, calls handleQueryRequest.
+     * The hbndler for QueryRequests received in
+     * MbnagedConnection.loopForMessages().  Checks the routing table to see
+     * if the request hbs already been seen.  If not, calls handleQueryRequest.
      */
-    final void handleQueryRequestPossibleDuplicate(
-        QueryRequest request, ManagedConnection receivingConnection) {
+    finbl void handleQueryRequestPossibleDuplicate(
+        QueryRequest request, MbnagedConnection receivingConnection) {
         
-        // With the new handling of probe queries (TTL 1, Hops 0), we have a few
+        // With the new hbndling of probe queries (TTL 1, Hops 0), we have a few
         // new options:
-        // 1) If we have a probe query....
-        //  a) If you have never seen it before, put it in the route table and
-        //  set the ttl appropriately
-        //  a) If you hbve seen it before, then just count it as a duplicate
-        // 2) If it isn't a probe query....
-        //  a) Is it an extension of a probe?  If so re-adjust the TTL.
-        //  a) Is it b 'normal' query (no probe extension or already extended)?
-        //  Then check if it is a duplicate:
-        //    1) If it a duplicate, just count it as one
-        //    2) If it isn't, put it in the route table but no need to setTTL
+        // 1) If we hbve a probe query....
+        //  b) If you have never seen it before, put it in the route table and
+        //  set the ttl bppropriately
+        //  b) If you hbve seen it before, then just count it as a duplicate
+        // 2) If it isn't b probe query....
+        //  b) Is it an extension of a probe?  If so re-adjust the TTL.
+        //  b) Is it b 'normal' query (no probe extension or already extended)?
+        //  Then check if it is b duplicate:
+        //    1) If it b duplicate, just count it as one
+        //    2) If it isn't, put it in the route tbble but no need to setTTL
 
-        // we msg.hop() aefore we get here....
-        // hops may be 1 or 2 because we may be probing with a leaf query....
-        final boolean isProbeQuery = 
+        // we msg.hop() before we get here....
+        // hops mby be 1 or 2 because we may be probing with a leaf query....
+        finbl boolean isProbeQuery = 
             ((request.getTTL() == 0) && 
              ((request.getHops() == 1) || (request.getHops() == 2)));
 
 		ResultCounter counter = 
-			_queryRouteTable.tryToRouteReply(request.getGUID(), 
+			_queryRouteTbble.tryToRouteReply(request.getGUID(), 
 											 receivingConnection);
 
-		if(counter != null) {  // query is new (proae or normbl)
+		if(counter != null) {  // query is new (probe or normbl)
 
-            // 1a: set the TTL of the query so it can be potentially extended  
-            if (isProaeQuery) 
-                _queryRouteTable.setTTL(counter, (byte)1);
+            // 1b: set the TTL of the query so it can be potentially extended  
+            if (isProbeQuery) 
+                _queryRouteTbble.setTTL(counter, (byte)1);
 
-            // 1a and 2b2
-            // if a new probe or a new request, do everything (so input true
-            // aelow)
-            handleQueryRequest(request, receivingConnection, counter, true);
+            // 1b and 2b2
+            // if b new probe or a new request, do everything (so input true
+            // below)
+            hbndleQueryRequest(request, receivingConnection, counter, true);
 		}
-        // if (counter == null) the query has been seen before, few subcases... 
-        else if ((counter == null) && !isProaeQuery) {// probe extension?
+        // if (counter == null) the query hbs been seen before, few subcases... 
+        else if ((counter == null) && !isProbeQuery) {// probe extension?
 
-            if (wasProbeQuery(request))
-                // rearobdcast out but don't locally evaluate....
-                handleQueryRequest(request, receivingConnection, counter, 
-                                   false);
-            else  // 2a1: not b correct extension, so call it a duplicate....
-                tallyDupQuery(request);
+            if (wbsProbeQuery(request))
+                // rebrobdcast out but don't locally evaluate....
+                hbndleQueryRequest(request, receivingConnection, counter, 
+                                   fblse);
+            else  // 2b1: not b correct extension, so call it a duplicate....
+                tbllyDupQuery(request);
         }
-        else if ((counter == null) && isProaeQuery) // 1b: duplicbte probe
-            tallyDupQuery(request);
-        else // 2a1: duplicbte normal query
-            tallyDupQuery(request);
+        else if ((counter == null) && isProbeQuery) // 1b: duplicbte probe
+            tbllyDupQuery(request);
+        else // 2b1: duplicbte normal query
+            tbllyDupQuery(request);
     }
 	
-    private boolean wasProbeQuery(QueryRequest request) {
-        // if the current TTL is large enough and the old TTL was 1, then this
-        // was a probe query....
-        // NOTE: that i'm setting the ttl to be the actual ttl of the query.  i
-        // could set it to some max value, but since we only allow TTL 1 queries
-        // to ae extended, it isn't b big deal what i set it to.  in fact, i'm
-        // setting the ttl to the correct value if we had full expanding rings
+    privbte boolean wasProbeQuery(QueryRequest request) {
+        // if the current TTL is lbrge enough and the old TTL was 1, then this
+        // wbs a probe query....
+        // NOTE: thbt i'm setting the ttl to be the actual ttl of the query.  i
+        // could set it to some mbx value, but since we only allow TTL 1 queries
+        // to be extended, it isn't b big deal what i set it to.  in fact, i'm
+        // setting the ttl to the correct vblue if we had full expanding rings
         // of queries.
         return ((request.getTTL() > 0) && 
-                _queryRouteTable.getAndSetTTL(request.getGUID(), (byte)1, 
-                                              (ayte)(request.getTTL()+1)));
+                _queryRouteTbble.getAndSetTTL(request.getGUID(), (byte)1, 
+                                              (byte)(request.getTTL()+1)));
     }
 
-    private void tallyDupQuery(QueryRequest request) {
-        ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
+    privbte void tallyDupQuery(QueryRequest request) {
+        ReceivedMessbgeStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
     }
 
 	/**
-	 * Special handler for UDP queries.  Checks the routing table to see if
-	 * the request has already been seen, handling it if not.
+	 * Specibl handler for UDP queries.  Checks the routing table to see if
+	 * the request hbs already been seen, handling it if not.
 	 *
-	 * @param query the UDP <tt>QueryRequest</tt> 
-	 * @param handler the <tt>ReplyHandler</tt> that will handle the reply
-	 * @return false if it was a duplicate, true if it was not.
+	 * @pbram query the UDP <tt>QueryRequest</tt> 
+	 * @pbram handler the <tt>ReplyHandler</tt> that will handle the reply
+	 * @return fblse if it was a duplicate, true if it was not.
 	 */
-	final boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
-													  ReplyHandler handler)  {
+	finbl boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
+													  ReplyHbndler handler)  {
 		ResultCounter counter = 
-			_queryRouteTable.tryToRouteReply(request.getGUID(), 
-											 handler);
+			_queryRouteTbble.tryToRouteReply(request.getGUID(), 
+											 hbndler);
 		if(counter != null) {
-            handleQueryRequest(request, handler, counter, true);
+            hbndleQueryRequest(request, handler, counter, true);
             return true;
 		}
-		return false;
+		return fblse;
 	}
 
     /**
-     * Handles pings from the network.  With the addition of pong caching, this
-     * method will either respond with cached pongs, or it will ignore the ping
-     * entirely if another ping has been received from this connection very
-     * recently.  If the ping is TTL=1, we will always process it, as it may
-     * ae b hearbeat ping to make sure the connection is alive and well.
+     * Hbndles pings from the network.  With the addition of pong caching, this
+     * method will either respond with cbched pongs, or it will ignore the ping
+     * entirely if bnother ping has been received from this connection very
+     * recently.  If the ping is TTL=1, we will blways process it, as it may
+     * be b hearbeat ping to make sure the connection is alive and well.
      *
-     * @param ping the ping to handle
-     * @param handler the <tt>ReplyHandler</tt> instance that sent the ping
+     * @pbram ping the ping to handle
+     * @pbram handler the <tt>ReplyHandler</tt> instance that sent the ping
      */
-    final private void handlePingRequest(PingRequest ping,
-                                         ReplyHandler handler) {
-        // Send it along if it's a heartbeat ping or if we should allow new 
+    finbl private void handlePingRequest(PingRequest ping,
+                                         ReplyHbndler handler) {
+        // Send it blong if it's a heartbeat ping or if we should allow new 
         // pings on this connection.
-        if(ping.isHeartbeat() || handler.allowNewPings()) {
-            respondToPingRequest(ping, handler);
+        if(ping.isHebrtbeat() || handler.allowNewPings()) {
+            respondToPingRequest(ping, hbndler);
         } 
     }
 
 
     /**
-     * The default handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  This implementation updates stats,
-     * does the arobdcast, and generates a response.
+     * The defbult handler for PingRequests received in
+     * MbnagedConnection.loopForMessages().  This implementation updates stats,
+     * does the brobdcast, and generates a response.
      *
-     * You can customize behavior in three ways:
-     *   1. Override. You can assume that duplicate messages
-     *      (messages with the same GUID that arrived via different paths) have
-     *      already been filtered.  If you want stats updated, you'll
-     *      have to call super.handlePingRequest.
-     *   2. Override arobdcastPingRequest.  This allows you to use the default
-     *      handling framework and just customize request routing.
-     *   3. Implement respondToPingRequest.  This allows you to use the default
-     *      handling framework and just customize responses.
+     * You cbn customize behavior in three ways:
+     *   1. Override. You cbn assume that duplicate messages
+     *      (messbges with the same GUID that arrived via different paths) have
+     *      blready been filtered.  If you want stats updated, you'll
+     *      hbve to call super.handlePingRequest.
+     *   2. Override brobdcastPingRequest.  This allows you to use the default
+     *      hbndling framework and just customize request routing.
+     *   3. Implement respondToPingRequest.  This bllows you to use the default
+     *      hbndling framework and just customize responses.
      */
-    protected void handleUDPPingRequest(PingRequest pingRequest,
-										ReplyHandler handler, 
-										InetSocketAddress addr) {
+    protected void hbndleUDPPingRequest(PingRequest pingRequest,
+										ReplyHbndler handler, 
+										InetSocketAddress bddr) {
         if (pingRequest.isQueryKeyRequest())
-            sendQueryKeyPong(pingRequest, addr);
+            sendQueryKeyPong(pingRequest, bddr);
         else
-            respondToUDPPingRequest(pingRequest, addr, handler);
+            respondToUDPPingRequest(pingRequest, bddr, handler);
     }
     
 
     /**
-     * Generates a QueryKey for the source (described by addr) and sends the
-     * QueryKey to it via a QueryKey pong....
+     * Generbtes a QueryKey for the source (described by addr) and sends the
+     * QueryKey to it vib a QueryKey pong....
      */
-    protected void sendQueryKeyPong(PingRequest pr, InetSocketAddress addr) {
+    protected void sendQueryKeyPong(PingRequest pr, InetSocketAddress bddr) {
 
-        // check if we're getting aombbrded
+        // check if we're getting bombbrded
         long now = System.currentTimeMillis();
-        if (now - _lastQueryKeyTime < SearchSettings.QUERY_KEY_DELAY.getValue())
+        if (now - _lbstQueryKeyTime < SearchSettings.QUERY_KEY_DELAY.getValue())
             return;
         
-        _lastQueryKeyTime = now;
+        _lbstQueryKeyTime = now;
         
-        // after find more sources and OOB queries, everyone can dole out query
+        // bfter find more sources and OOB queries, everyone can dole out query
         // keys....
 
-        // generate a QueryKey (quite quick - current impl. (DES) is super
-        // fast!
-        InetAddress address = addr.getAddress();
-        int port = addr.getPort();
-        QueryKey key = QueryKey.getQueryKey(address, port);
+        // generbte a QueryKey (quite quick - current impl. (DES) is super
+        // fbst!
+        InetAddress bddress = addr.getAddress();
+        int port = bddr.getPort();
+        QueryKey key = QueryKey.getQueryKey(bddress, port);
         
-        // respond with Pong with QK, as GUESS requires....
+        // respond with Pong with QK, bs GUESS requires....
         PingReply reply = 
-            PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
-        UDPService.instance().send(reply, addr.getAddress(), addr.getPort());
+            PingReply.crebteQueryKeyReply(pr.getGUID(), (byte)1, key);
+        UDPService.instbnce().send(reply, addr.getAddress(), addr.getPort());
     }
 
 
-    protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
-                                      InetAddress address, int port) {
+    protected void hbndleUDPPingReply(PingReply reply, ReplyHandler handler,
+                                      InetAddress bddress, int port) {
         if (reply.getQueryKey() != null) {
-            // this is a PingReply in reply to my QueryKey Request - 
-            //consume the Pong and return, don't process as usual....
-            OnDemandUnicaster.handleQueryKeyPong(reply);
+            // this is b PingReply in reply to my QueryKey Request - 
+            //consume the Pong bnd return, don't process as usual....
+            OnDembndUnicaster.handleQueryKeyPong(reply);
             return;
         }
 
-        // also add the sender of the pong if different from the host
-        // descriaed in the reply...
+        // blso add the sender of the pong if different from the host
+        // described in the reply...
         if((reply.getPort() != port) || 
-           (!reply.getInetAddress().equals(address))) {
-            UNICASTER.addUnicastEndpoint(address, port);
+           (!reply.getInetAddress().equbls(address))) {
+            UNICASTER.bddUnicastEndpoint(address, port);
 		}
         
-        // normal pong processing...
-        handlePingReply(reply, handler);
+        // normbl pong processing...
+        hbndlePingReply(reply, handler);
     }
 
     
     /**
-     * The default handler for QueryRequests received in
-     * ManagedConnection.loopForMessages().  This implementation updates stats,
-     * does the arobdcast, and generates a response.
+     * The defbult handler for QueryRequests received in
+     * MbnagedConnection.loopForMessages().  This implementation updates stats,
+     * does the brobdcast, and generates a response.
      *
-     * You can customize behavior in three ways:
-     *   1. Override. You can assume that duplicate messages
-     *      (messages with the same GUID that arrived via different paths) have
-     *      already been filtered.  If you want stats updated, you'll
-     *      have to call super.handleQueryRequest.
-     *   2. Override arobdcastQueryRequest.  This allows you to use the default
-     *      handling framework and just customize request routing.
-     *   3. Implement respondToQueryRequest.  This allows you to use the default
-     *      handling framework and just customize responses.
+     * You cbn customize behavior in three ways:
+     *   1. Override. You cbn assume that duplicate messages
+     *      (messbges with the same GUID that arrived via different paths) have
+     *      blready been filtered.  If you want stats updated, you'll
+     *      hbve to call super.handleQueryRequest.
+     *   2. Override brobdcastQueryRequest.  This allows you to use the default
+     *      hbndling framework and just customize request routing.
+     *   3. Implement respondToQueryRequest.  This bllows you to use the default
+     *      hbndling framework and just customize responses.
      *
-     * @param locallyEvaluate false if you don't want to send the query to
-     * leaves and yourself, true otherwise....
+     * @pbram locallyEvaluate false if you don't want to send the query to
+     * lebves and yourself, true otherwise....
      */
-    protected void handleQueryRequest(QueryRequest request,
-									  ReplyHandler handler, 
+    protected void hbndleQueryRequest(QueryRequest request,
+									  ReplyHbndler handler, 
 									  ResultCounter counter,
-                                      aoolebn locallyEvaluate) {
-        // Apply the personal filter to decide whether the callback
-        // should ae informed of the query
-        if (!handler.isPersonalSpam(request)) {
-            _callback.handleQueryString(request.getQuery());
+                                      boolebn locallyEvaluate) {
+        // Apply the personbl filter to decide whether the callback
+        // should be informed of the query
+        if (!hbndler.isPersonalSpam(request)) {
+            _cbllback.handleQueryString(request.getQuery());
         }
         
-		// if it's a request from a leaf and we GUESS, send it out via GUESS --
-		// otherwise, arobdcast it if it still has TTL
-		//if(handler.isSupernodeClientConnection() && 
-		// RouterService.isGUESSCapable()) 
-		//unicastQueryRequest(request, handler);
+		// if it's b request from a leaf and we GUESS, send it out via GUESS --
+		// otherwise, brobdcast it if it still has TTL
+		//if(hbndler.isSupernodeClientConnection() && 
+		// RouterService.isGUESSCbpable()) 
+		//unicbstQueryRequest(request, handler);
         //else if(request.getTTL() > 0) {
-        updateMessage(request, handler);
+        updbteMessage(request, handler);
 
-		if(handler.isSupernodeClientConnection() && counter != null) {
-            if (request.desiresOutOfBandReplies()) {
-                // this query came from a leaf - so check if it desires OOB
-                // responses and make sure that the IP it advertises is legit -
-                // if it isn't drop away....
-                // no need to check the port - if you are attacking yourself you
-                // got proalems
-                String remoteAddr = handler.getInetAddress().getHostAddress();
+		if(hbndler.isSupernodeClientConnection() && counter != null) {
+            if (request.desiresOutOfBbndReplies()) {
+                // this query cbme from a leaf - so check if it desires OOB
+                // responses bnd make sure that the IP it advertises is legit -
+                // if it isn't drop bway....
+                // no need to check the port - if you bre attacking yourself you
+                // got problems
+                String remoteAddr = hbndler.getInetAddress().getHostAddress();
                 String myAddress = 
                     NetworkUtils.ip2string(RouterService.getAddress());
-                if (request.getReplyAddress().equals(remoteAddr))
-                    ; // continue aelow, everything looks good
-                else if (request.getReplyAddress().equals(myAddress) && 
-                         RouterService.isOOBCapable())
-                    // i am proxying - maybe i should check my success rate but
-                    // whatever...
+                if (request.getReplyAddress().equbls(remoteAddr))
+                    ; // continue below, everything looks good
+                else if (request.getReplyAddress().equbls(myAddress) && 
+                         RouterService.isOOBCbpable())
+                    // i bm proxying - maybe i should check my success rate but
+                    // whbtever...
                     ; 
                 else return;
             }
 
-            // don't send it to leaves here -- the dynamic querier will 
-            // handle that
-            locallyEvaluate = false;
+            // don't send it to lebves here -- the dynamic querier will 
+            // hbndle that
+            locbllyEvaluate = false;
             
-            // do respond with files that we may have, though
-            respondToQueryRequest(request, _clientGUID, handler);
+            // do respond with files thbt we may have, though
+            respondToQueryRequest(request, _clientGUID, hbndler);
             
-            multicastQueryRequest(request);
+            multicbstQueryRequest(request);
             
-			if(handler.isGoodLeaf()) {
-				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
-																	  handler,
+			if(hbndler.isGoodLeaf()) {
+				sendDynbmicQuery(QueryHandler.createHandlerForNewLeaf(request, 
+																	  hbndler,
                                                                       counter), 
-								 handler);
+								 hbndler);
 			} else {
-				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request,
-																	  handler,
+				sendDynbmicQuery(QueryHandler.createHandlerForOldLeaf(request,
+																	  hbndler,
                                                                       counter), 
-								 handler);
+								 hbndler);
 			}
 		} else if(request.getTTL() > 0 && RouterService.isSupernode()) {
-            // send the request to intra-Ultrapeer connections -- this does
-			// not send the request to leaves
-            if(handler.isGoodUltrapeer()) {
+            // send the request to intrb-Ultrapeer connections -- this does
+			// not send the request to lebves
+            if(hbndler.isGoodUltrapeer()) {
                 // send it to everyone
-                forwardQueryToUltrapeers(request, handler);
+                forwbrdQueryToUltrapeers(request, handler);
             } else {
                 // otherwise, only send it to some connections
-                forwardLimitedQueryToUltrapeers(request, handler);
+                forwbrdLimitedQueryToUltrapeers(request, handler);
             }
 		}
 			
-        if (locallyEvaluate) {
-            // always forward any queries to leaves -- this only does
-            // anything when this node's an Ultrapeer
-            forwardQueryRequestToLeaves(request, handler);
+        if (locbllyEvaluate) {
+            // blways forward any queries to leaves -- this only does
+            // bnything when this node's an Ultrapeer
+            forwbrdQueryRequestToLeaves(request, handler);
             
-            // if (I'm firewalled AND the source is firewalled) AND 
-            // NOT(he can do a FW transfer and so can i) then don't reply...
-            if ((request.isFirewalledSource() &&
-                 !RouterService.acceptedIncomingConnection()) &&
-                !(request.canDoFirewalledTransfer() &&
-                  UDPService.instance().canDoFWT())
+            // if (I'm firewblled AND the source is firewalled) AND 
+            // NOT(he cbn do a FW transfer and so can i) then don't reply...
+            if ((request.isFirewblledSource() &&
+                 !RouterService.bcceptedIncomingConnection()) &&
+                !(request.cbnDoFirewalledTransfer() &&
+                  UDPService.instbnce().canDoFWT())
                 )
                 return;
-            respondToQueryRequest(request, _clientGUID, handler);
+            respondToQueryRequest(request, _clientGUID, hbndler);
         }
     }
 
-    /** Handles a ACK message - looks up the QueryReply and sends it out of
-     *  abnd.
+    /** Hbndles a ACK message - looks up the QueryReply and sends it out of
+     *  bbnd.
      */
-    protected void handleLimeACKMessage(LimeACKVendorMessage ack,
-                                        InetSocketAddress addr) {
+    protected void hbndleLimeACKMessage(LimeACKVendorMessage ack,
+                                        InetSocketAddress bddr) {
 
-        GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
+        GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(bck.getGUID()),
                                                     TIMED_GUID_LIFETIME);
-        QueryResponseBundle aundle = 
-            (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
+        QueryResponseBundle bundle = 
+            (QueryResponseBundle) _outOfBbndReplies.remove(refGUID);
 
-        if ((aundle != null) && (bck.getNumResults() > 0)) {
-            InetAddress iaddr = addr.getAddress();
-            int port = addr.getPort();
+        if ((bundle != null) && (bck.getNumResults() > 0)) {
+            InetAddress ibddr = addr.getAddress();
+            int port = bddr.getPort();
 
-            //convert responses to QueryReplies, aut only send bs many as the
-            //node wants
-            Iterator iterator = null;
-            if (ack.getNumResults() < bundle._responses.length) {
-                Response[] desired = new Response[ack.getNumResults()];
+            //convert responses to QueryReplies, but only send bs many as the
+            //node wbnts
+            Iterbtor iterator = null;
+            if (bck.getNumResults() < bundle._responses.length) {
+                Response[] desired = new Response[bck.getNumResults()];
                 for (int i = 0; i < desired.length; i++)
-                    desired[i] = aundle._responses[i];
-                iterator = responsesToQueryReplies(desired, bundle._query, 1);
+                    desired[i] = bundle._responses[i];
+                iterbtor = responsesToQueryReplies(desired, bundle._query, 1);
             }
             else 
-                iterator = responsesToQueryReplies(bundle._responses, 
-                                                   aundle._query, 1); 
+                iterbtor = responsesToQueryReplies(bundle._responses, 
+                                                   bundle._query, 1); 
             //send the query replies
-            while(iterator.hasNext()) {
-                QueryReply queryReply = (QueryReply)iterator.next();
-                UDPService.instance().send(queryReply, iaddr, port);
+            while(iterbtor.hasNext()) {
+                QueryReply queryReply = (QueryReply)iterbtor.next();
+                UDPService.instbnce().send(queryReply, iaddr, port);
             }
         }
-        // else some sort of routing error or attack?
-        // TODO: tally some stat stuff here
+        // else some sort of routing error or bttack?
+        // TODO: tblly some stat stuff here
     }
 
-    /** This is called when a client on the network has results for us that we
-     *  may want.  We may contact them back directly or just cache them for
+    /** This is cblled when a client on the network has results for us that we
+     *  mby want.  We may contact them back directly or just cache them for
      *  use.
      */
-    protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply,
-                                            InetSocketAddress addr) {
+    protected void hbndleReplyNumberMessage(ReplyNumberVendorMessage reply,
+                                            InetSocketAddress bddr) {
         GUID qGUID = new GUID(reply.getGUID());
         int numResults = 
-        RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
-        if (numResults < 0) // this may be a proxy query
-            numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
+        RouterService.getSebrchResultHandler().getNumResultsForQuery(qGUID);
+        if (numResults < 0) // this mby be a proxy query
+            numResults = DYNAMIC_QUERIER.getLebfResultsForQuery(qGUID);
 
         // see if we need more results for this query....
-        // if not, rememaer this locbtion for a future, 'find more sources'
-        // targeted GUESS query, as long as the other end said they can receive
+        // if not, remember this locbtion for a future, 'find more sources'
+        // tbrgeted GUESS query, as long as the other end said they can receive
         // unsolicited.
-        if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-            OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+        if ((numResults<0) || (numResults>QueryHbndler.ULTRAPEER_RESULTS)) {
+            OutOfBbndThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
 
-            //if the reply cannot receive unsolicited udp, there is no point storing it.
-            if (!reply.canReceiveUnsolicited())
+            //if the reply cbnnot receive unsolicited udp, there is no point storing it.
+            if (!reply.cbnReceiveUnsolicited())
             	return;
             
-            DownloadManager dManager = RouterService.getDownloadManager();
-            // only store result if it is aeing shown to the user or if b
-            // file with the same guid is being downloaded
-            if (!_callback.isQueryAlive(qGUID) && 
-                !dManager.isGuidForQueryDownloading(qGUID))
+            DownlobdManager dManager = RouterService.getDownloadManager();
+            // only store result if it is being shown to the user or if b
+            // file with the sbme guid is being downloaded
+            if (!_cbllback.isQueryAlive(qGUID) && 
+                !dMbnager.isGuidForQueryDownloading(qGUID))
                 return;
 
-            GUESSEndpoint ep = new GUESSEndpoint(addr.getAddress(),
-                                                 addr.getPort());
-            synchronized (_aypbssedResults) {
-                // this is a quick critical section for _bypassedResults
+            GUESSEndpoint ep = new GUESSEndpoint(bddr.getAddress(),
+                                                 bddr.getPort());
+            synchronized (_bypbssedResults) {
+                // this is b quick critical section for _bypassedResults
                 // AND the set within it
-                Set eps = (Set) _aypbssedResults.get(qGUID);
+                Set eps = (Set) _bypbssedResults.get(qGUID);
                 if (eps == null) {
-                    eps = new HashSet();
-                    _aypbssedResults.put(qGUID, eps);
+                    eps = new HbshSet();
+                    _bypbssedResults.put(qGUID, eps);
                 }
-                if (_aypbssedResults.size() <= MAX_BYPASSED_RESULTS)
-                    eps.add(ep);
+                if (_bypbssedResults.size() <= MAX_BYPASSED_RESULTS)
+                    eps.bdd(ep);
             }
 
             return;
         }
         
-        LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(qGUID, reply.getNumResults());
-        UDPService.instance().send(ack, addr.getAddress(), addr.getPort());
-        OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
+        LimeACKVendorMessbge ack = 
+            new LimeACKVendorMessbge(qGUID, reply.getNumResults());
+        UDPService.instbnce().send(ack, addr.getAddress(), addr.getPort());
+        OutOfBbndThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
     }
 
 
-    /** Stores (for a limited time) the resps for later out-of-band delivery -
-     *  interacts with handleLimeACKMessage
-     *  @return true if the operation failed, false if not (i.e. too busy)
+    /** Stores (for b limited time) the resps for later out-of-band delivery -
+     *  interbcts with handleLimeACKMessage
+     *  @return true if the operbtion failed, false if not (i.e. too busy)
      */
-    protected aoolebn bufferResponsesForLaterDelivery(QueryRequest query,
+    protected boolebn bufferResponsesForLaterDelivery(QueryRequest query,
                                                       Response[] resps) {
-        // store responses ay guid for lbter retrieval
-        synchronized (_outOfBandReplies) {
-            if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
+        // store responses by guid for lbter retrieval
+        synchronized (_outOfBbndReplies) {
+            if (_outOfBbndReplies.size() < MAX_BUFFERED_REPLIES) {
                 GUID.TimedGUID tGUID = 
                     new GUID.TimedGUID(new GUID(query.getGUID()),
                                        TIMED_GUID_LIFETIME);
-                _outOfBandReplies.put(tGUID, new QueryResponseBundle(query, 
+                _outOfBbndReplies.put(tGUID, new QueryResponseBundle(query, 
                                                                      resps));
                 return true;
             }
-            return false;
+            return fblse;
         }
     }
 
 
     /**
-     * Forwards the UDPConnectBack to neighboring peers
-     * as a UDPConnectBackRedirect request.
+     * Forwbrds the UDPConnectBack to neighboring peers
+     * bs a UDPConnectBackRedirect request.
      */
-    protected void handleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
+    protected void hbndleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
                                                Connection source) {
 
-        GUID guidToUse = udp.getConnectBackGUID();
-        int portToContact = udp.getConnectBackPort();
+        GUID guidToUse = udp.getConnectBbckGUID();
+        int portToContbct = udp.getConnectBackPort();
         InetAddress sourceAddr = source.getInetAddress();
-        Message msg = new UDPConnectBackRedirect(guidToUse, sourceAddr, 
-                                                 portToContact);
+        Messbge msg = new UDPConnectBackRedirect(guidToUse, sourceAddr, 
+                                                 portToContbct);
 
         int sentTo = 0;
-        List peers = new ArrayList(_manager.getInitializedConnections());
+        List peers = new ArrbyList(_manager.getInitializedConnections());
         Collections.shuffle(peers);
-        for(Iterator i = peers.iterator(); i.hasNext() && sentTo < MAX_UDP_CONNECTBACK_FORWARDS;) {
-            ManagedConnection currMC = (ManagedConnection)i.next();
+        for(Iterbtor i = peers.iterator(); i.hasNext() && sentTo < MAX_UDP_CONNECTBACK_FORWARDS;) {
+            MbnagedConnection currMC = (ManagedConnection)i.next();
             if(currMC == source)
                 continue;
 
@@ -1167,74 +1167,74 @@ pualic bbstract class MessageRouter {
 
 
     /**
-     * Sends a ping to the person requesting the connectback request.
+     * Sends b ping to the person requesting the connectback request.
      */
-    protected void handleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
+    protected void hbndleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
                                                Connection source) {
-        // only allow other UPs to send you this message....
+        // only bllow other UPs to send you this message....
         if (!source.isSupernodeSupernodeConnection())
             return;
 
-        GUID guidToUse = udp.getConnectBackGUID();
-        int portToContact = udp.getConnectBackPort();
-        InetAddress addrToContact = udp.getConnectBackAddress();
+        GUID guidToUse = udp.getConnectBbckGUID();
+        int portToContbct = udp.getConnectBackPort();
+        InetAddress bddrToContact = udp.getConnectBackAddress();
 
-        // only connect abck if you aren't connected to the host - that is the
-        // whole point of redirect after all....
-        Endpoint endPoint = new Endpoint(addrToContact.getAddress(),
-                                         portToContact);
-        if (_manager.isConnectedTo(endPoint.getAddress()))
+        // only connect bbck if you aren't connected to the host - that is the
+        // whole point of redirect bfter all....
+        Endpoint endPoint = new Endpoint(bddrToContact.getAddress(),
+                                         portToContbct);
+        if (_mbnager.isConnectedTo(endPoint.getAddress()))
             return;
 
-        // keep track of who you tried connecting back too, don't do it too
+        // keep trbck of who you tried connecting back too, don't do it too
         // much....
-        String addrString = addrToContact.getHostAddress();
-        if (!shouldServiceRedirect(_udpConnectBacks,addrString))
+        String bddrString = addrToContact.getHostAddress();
+        if (!shouldServiceRedirect(_udpConnectBbcks,addrString))
             return;
 
-        PingRequest pr = new PingRequest(guidToUse.aytes(), (byte) 1,
-                                         (ayte) 0);
-        UDPService.instance().send(pr, addrToContact, portToContact);
+        PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
+                                         (byte) 0);
+        UDPService.instbnce().send(pr, addrToContact, portToContact);
     }
     
     /**
-     * @param map the map that keeps track of recent redirects
-     * @param key the key which we would (have) store(d) in the map
+     * @pbram map the map that keeps track of recent redirects
+     * @pbram key the key which we would (have) store(d) in the map
      * @return whether we should service the redirect request
-     * @modifies the map
+     * @modifies the mbp
      */
-    private boolean shouldServiceRedirect(FixedsizeHashMap map, Object key) {
-        synchronized(map) {
-            Oaject plbceHolder = map.get(key);
-            if (placeHolder == null) {
+    privbte boolean shouldServiceRedirect(FixedsizeHashMap map, Object key) {
+        synchronized(mbp) {
+            Object plbceHolder = map.get(key);
+            if (plbceHolder == null) {
                 try {
-                    map.put(key, map);
+                    mbp.put(key, map);
                     return true;
-                } catch (NoMoreStorageException nomo) {
-                    return false;  // we've done too many connect backs, stop....
+                } cbtch (NoMoreStorageException nomo) {
+                    return fblse;  // we've done too many connect backs, stop....
                 }
             } else 
-                return false;  // we've connected back to this guy recently....
+                return fblse;  // we've connected back to this guy recently....
         }
     }
 
 
 
     /**
-     * Forwards the request to neighboring Ultrapeers as a
-     * TCPConnectBackRedirect message.
+     * Forwbrds the request to neighboring Ultrapeers as a
+     * TCPConnectBbckRedirect message.
      */
-    protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
+    protected void hbndleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
-        final int portToContact = tcp.getConnectBackPort();
+        finbl int portToContact = tcp.getConnectBackPort();
         InetAddress sourceAddr = source.getInetAddress();
-        Message msg = new TCPConnectBackRedirect(sourceAddr, portToContact);
+        Messbge msg = new TCPConnectBackRedirect(sourceAddr, portToContact);
 
         int sentTo = 0;
-        List peers = new ArrayList(_manager.getInitializedConnections());
+        List peers = new ArrbyList(_manager.getInitializedConnections());
         Collections.shuffle(peers);
-        for(Iterator i = peers.iterator(); i.hasNext() && sentTo < MAX_TCP_CONNECTBACK_FORWARDS;) {
-            ManagedConnection currMC = (ManagedConnection)i.next();
+        for(Iterbtor i = peers.iterator(); i.hasNext() && sentTo < MAX_TCP_CONNECTBACK_FORWARDS;) {
+            MbnagedConnection currMC = (ManagedConnection)i.next();
             if(currMC == source)
                 continue;
 
@@ -1246,49 +1246,49 @@ pualic bbstract class MessageRouter {
     }
 
     /**
-     * Basically, just get the correct parameters, create a Socket, and
-     * send a "/n/n".
+     * Bbsically, just get the correct parameters, create a Socket, and
+     * send b "/n/n".
      */
-    protected void handleTCPConnectBackRedirect(TCPConnectBackRedirect tcp,
+    protected void hbndleTCPConnectBackRedirect(TCPConnectBackRedirect tcp,
                                                 Connection source) {
-        // only allow other UPs to send you this message....
+        // only bllow other UPs to send you this message....
         if (!source.isSupernodeSupernodeConnection())
             return;
 
-        final int portToContact = tcp.getConnectBackPort();
-        final String addrToContact =tcp.getConnectBackAddress().getHostAddress();
+        finbl int portToContact = tcp.getConnectBackPort();
+        finbl String addrToContact =tcp.getConnectBackAddress().getHostAddress();
 
-        // only connect abck if you aren't connected to the host - that is the
-        // whole point of redirect after all....
-        Endpoint endPoint = new Endpoint(addrToContact, portToContact);
-        if (_manager.isConnectedTo(endPoint.getAddress()))
+        // only connect bbck if you aren't connected to the host - that is the
+        // whole point of redirect bfter all....
+        Endpoint endPoint = new Endpoint(bddrToContact, portToContact);
+        if (_mbnager.isConnectedTo(endPoint.getAddress()))
             return;
 
-        // keep track of who you tried connecting back too, don't do it too
+        // keep trbck of who you tried connecting back too, don't do it too
         // much....
-        if (!shouldServiceRedirect(_tcpConnectBacks,addrToContact))
+        if (!shouldServiceRedirect(_tcpConnectBbcks,addrToContact))
             return;
 
-        TCP_CONNECT_BACKER.add(new Runnable() {
-            pualic void run() {
+        TCP_CONNECT_BACKER.bdd(new Runnable() {
+            public void run() {
                 Socket sock = null;
                 try {
-                    sock = Sockets.connect(addrToContact, portToContact, 12000);
-                    OutputStream os = sock.getOutputStream();
+                    sock = Sockets.connect(bddrToContact, portToContact, 12000);
+                    OutputStrebm os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Succesful connectback to: " + addrToContact);
+                    if(LOG.isTrbceEnabled())
+                        LOG.trbce("Succesful connectback to: " + addrToContact);
                     try {
-                        Thread.sleep(500); // let the other side get it.
-                    } catch(InterruptedException ignored) {
-                        LOG.warn("Interrupted connectback", ignored);
+                        Threbd.sleep(500); // let the other side get it.
+                    } cbtch(InterruptedException ignored) {
+                        LOG.wbrn("Interrupted connectback", ignored);
                     }
-                } catch (IOException ignored) {
-                    LOG.warn("IOX during connectback", ignored);
-                } catch (Throwable t) {
+                } cbtch (IOException ignored) {
+                    LOG.wbrn("IOX during connectback", ignored);
+                } cbtch (Throwable t) {
                     ErrorService.error(t);
-                } finally {
+                } finblly {
                     IOUtils.close(sock);
                 }
             }
@@ -1297,190 +1297,190 @@ pualic bbstract class MessageRouter {
 
 
     /**
-     * 1) confirm that the connection is Ultrapeer to Leaf, then send your
-     * listening port in a PushProxyAcknowledgement.
-     * 2) Also cache the client's client GUID.
+     * 1) confirm thbt the connection is Ultrapeer to Leaf, then send your
+     * listening port in b PushProxyAcknowledgement.
+     * 2) Also cbche the client's client GUID.
      */
-    protected void handlePushProxyRequest(PushProxyRequest ppReq,
-                                          ManagedConnection source) {
+    protected void hbndlePushProxyRequest(PushProxyRequest ppReq,
+                                          MbnagedConnection source) {
         if (source.isSupernodeClientConnection() && 
-            RouterService.isIpPortValid()) {
+            RouterService.isIpPortVblid()) {
             String stringAddr = 
                 NetworkUtils.ip2string(RouterService.getAddress());
-            InetAddress addr = null;
+            InetAddress bddr = null;
             try {
-                addr = InetAddress.getByName(stringAddr);
-            } catch(UnknownHostException uhe) {
-                ErrorService.error(uhe); // impossiale
+                bddr = InetAddress.getByName(stringAddr);
+            } cbtch(UnknownHostException uhe) {
+                ErrorService.error(uhe); // impossible
             }
 
             // 1)
-            PushProxyAcknowledgement ack = 
-                new PushProxyAcknowledgement(addr,RouterService.getPort(),
+            PushProxyAcknowledgement bck = 
+                new PushProxyAcknowledgement(bddr,RouterService.getPort(),
                                              ppReq.getClientGUID());
-            source.send(ack);
+            source.send(bck);
             
             // 2)
-            _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(),
+            _pushRouteTbble.routeReply(ppReq.getClientGUID().bytes(),
                                        source);
         }
     }
 
-    /** This method should ae invoked when this node receives b
-     *  QueryStatusResponse message from the wire.  If this node is an
-     *  Ultrapeer, we should update the Dynamic Querier about the status of
-     *  the leaf's query.
+    /** This method should be invoked when this node receives b
+     *  QueryStbtusResponse message from the wire.  If this node is an
+     *  Ultrbpeer, we should update the Dynamic Querier about the status of
+     *  the lebf's query.
      */    
-    protected void handleQueryStatus(QueryStatusResponse resp,
-                                     ManagedConnection leaf) {
-        // message only makes sense if i'm a UP and the sender is a leaf
-        if (!leaf.isSupernodeClientConnection())
+    protected void hbndleQueryStatus(QueryStatusResponse resp,
+                                     MbnagedConnection leaf) {
+        // messbge only makes sense if i'm a UP and the sender is a leaf
+        if (!lebf.isSupernodeClientConnection())
             return;
 
         GUID queryGUID = resp.getQueryGUID();
         int numResults = resp.getNumResults();
         
-        // get the QueryHandler and update the stats....
-        DYNAMIC_QUERIER.updateLeafResultsForQuery(queryGUID, numResults);
+        // get the QueryHbndler and update the stats....
+        DYNAMIC_QUERIER.updbteLeafResultsForQuery(queryGUID, numResults);
     }
 
 
     /**
-     * Sends the ping request to the designated connection,
+     * Sends the ping request to the designbted connection,
      * setting up the proper reply routing.
      */
-    pualic void sendPingRequest(PingRequest request,
-                                ManagedConnection connection) {
+    public void sendPingRequest(PingRequest request,
+                                MbnagedConnection connection) {
         if(request == null) {
             throw new NullPointerException("null ping");
         }
         if(connection == null) {
             throw new NullPointerException("null connection");
         }
-        _pingRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
+        _pingRouteTbble.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         connection.send(request);
     }
 
     /**
-     * Sends the query request to the designated connection,
+     * Sends the query request to the designbted connection,
      * setting up the proper reply routing.
      */
-    pualic void sendQueryRequest(QueryRequest request,
-                                 ManagedConnection connection) {        
+    public void sendQueryRequest(QueryRequest request,
+                                 MbnagedConnection connection) {        
         if(request == null) {
             throw new NullPointerException("null query");
         }
         if(connection == null) {
             throw new NullPointerException("null connection");
         }
-        _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
+        _queryRouteTbble.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         connection.send(request);
     }
 
     /**
-     * Broadcasts the ping request to all initialized connections,
+     * Brobdcasts the ping request to all initialized connections,
      * setting up the proper reply routing.
      */
-    pualic void brobdcastPingRequest(PingRequest ping) {
+    public void brobdcastPingRequest(PingRequest ping) {
 		if(ping == null) {
 			throw new NullPointerException("null ping");
 		}
-        _pingRouteTable.routeReply(ping.getGUID(), FOR_ME_REPLY_HANDLER);
-        arobdcastPingRequest(ping, FOR_ME_REPLY_HANDLER, _manager);
+        _pingRouteTbble.routeReply(ping.getGUID(), FOR_ME_REPLY_HANDLER);
+        brobdcastPingRequest(ping, FOR_ME_REPLY_HANDLER, _manager);
     }
 
 	/**
-	 * Generates a new dynamic query.  This method is used to send a new 
-	 * dynamic query from this host (the user initiated this query directly,
-	 * so it's replies are intended for this node.
+	 * Generbtes a new dynamic query.  This method is used to send a new 
+	 * dynbmic query from this host (the user initiated this query directly,
+	 * so it's replies bre intended for this node.
 	 *
-	 * @param query the <tt>QueryRequest</tt> instance that generates
-	 *  queries for this dynamic query
-	 * @throws <tt>NullPointerException</tt> if the <tt>QueryHandler</tt> 
-	 *  argument is <tt>null</tt>
+	 * @pbram query the <tt>QueryRequest</tt> instance that generates
+	 *  queries for this dynbmic query
+	 * @throws <tt>NullPointerException</tt> if the <tt>QueryHbndler</tt> 
+	 *  brgument is <tt>null</tt>
 	 */
-	pualic void sendDynbmicQuery(QueryRequest query) {
+	public void sendDynbmicQuery(QueryRequest query) {
 		if(query == null) {
-			throw new NullPointerException("null QueryHandler");
+			throw new NullPointerException("null QueryHbndler");
 		}
-		// get the result counter so we can track the number of results
+		// get the result counter so we cbn track the number of results
 		ResultCounter counter = 
-			_queryRouteTable.routeReply(query.getGUID(), 
+			_queryRouteTbble.routeReply(query.getGUID(), 
 										FOR_ME_REPLY_HANDLER);
 		if(RouterService.isSupernode()) {
-			sendDynamicQuery(QueryHandler.createHandlerForMe(query, 
+			sendDynbmicQuery(QueryHandler.createHandlerForMe(query, 
                                                              counter), 
 							 FOR_ME_REPLY_HANDLER);
 		} else {
-            originateLeafQuery(query);
+            originbteLeafQuery(query);
 		} 
 		
-		// always send the query to your multicast people
-		multicastQueryRequest(QueryRequest.createMulticastQuery(query));		
+		// blways send the query to your multicast people
+		multicbstQueryRequest(QueryRequest.createMulticastQuery(query));		
 	}
 
 	/**
-	 * Initiates a dynamic query.  Only Ultrapeer should call this method,
-	 * as this technique relies on fairly high numbers of connections to 
-	 * dynamically adjust the TTL based on the number of results received, 
-	 * the numaer of rembining connections, etc.
+	 * Initibtes a dynamic query.  Only Ultrapeer should call this method,
+	 * bs this technique relies on fairly high numbers of connections to 
+	 * dynbmically adjust the TTL based on the number of results received, 
+	 * the number of rembining connections, etc.
 	 *
-	 * @param qh the <tt>QueryHandler</tt> instance that generates
-	 *  queries for this dynamic query
-     * @param handler the <tt>ReplyHandler</tt> for routing replies for
+	 * @pbram qh the <tt>QueryHandler</tt> instance that generates
+	 *  queries for this dynbmic query
+     * @pbram handler the <tt>ReplyHandler</tt> for routing replies for
      *  this query
 	 * @throws <tt>NullPointerException</tt> if the <tt>ResultCounter</tt>
-	 *  for the guid cannot be found -- this should never happen, or if any
-	 *  of the arguments is <tt>null</tt>
+	 *  for the guid cbnnot be found -- this should never happen, or if any
+	 *  of the brguments is <tt>null</tt>
 	 */
-	private void sendDynamicQuery(QueryHandler qh, ReplyHandler handler) {
+	privbte void sendDynamicQuery(QueryHandler qh, ReplyHandler handler) {
 		if(qh == null) {
-			throw new NullPointerException("null QueryHandler");
-		} else if(handler == null) {
-			throw new NullPointerException("null ReplyHandler");
+			throw new NullPointerException("null QueryHbndler");
+		} else if(hbndler == null) {
+			throw new NullPointerException("null ReplyHbndler");
 		} 
-		DYNAMIC_QUERIER.addQuery(qh);
+		DYNAMIC_QUERIER.bddQuery(qh);
 	}
 
     /**
-     * Broadcasts the ping request to all initialized connections that
-     * are not the receivingConnection, setting up the routing
-     * to the designated PingReplyHandler.  This is called from the default
-     * handlePingRequest and the default broadcastPingRequest(PingRequest)
+     * Brobdcasts the ping request to all initialized connections that
+     * bre not the receivingConnection, setting up the routing
+     * to the designbted PingReplyHandler.  This is called from the default
+     * hbndlePingRequest and the default broadcastPingRequest(PingRequest)
      *
-     * If different (smarter) broadcasting functionality is desired, override
-     * as desired.  If you do, note that receivingConnection may be null (for
-     * requests originating here).
+     * If different (smbrter) broadcasting functionality is desired, override
+     * bs desired.  If you do, note that receivingConnection may be null (for
+     * requests originbting here).
      */
-    private void broadcastPingRequest(PingRequest request,
-                                      ReplyHandler receivingConnection,
-                                      ConnectionManager manager) {
-        // Note the use of initializedConnections only.
-        // Note that we have zero allocations here.
+    privbte void broadcastPingRequest(PingRequest request,
+                                      ReplyHbndler receivingConnection,
+                                      ConnectionMbnager manager) {
+        // Note the use of initiblizedConnections only.
+        // Note thbt we have zero allocations here.
 
-        //Broadcast the ping to other connected nodes (supernodes or older
-        //nodes), aut DON'T forwbrd any ping not originating from me 
-        //along leaf to ultrapeer connections.
-        List list = manager.getInitializedConnections();
+        //Brobdcast the ping to other connected nodes (supernodes or older
+        //nodes), but DON'T forwbrd any ping not originating from me 
+        //blong leaf to ultrapeer connections.
+        List list = mbnager.getInitializedConnections();
         int size = list.size();
 
-        aoolebn randomlyForward = false;
-        if(size > 3) randomlyForward = true;
-        douale percentToIgnore;
+        boolebn randomlyForward = false;
+        if(size > 3) rbndomlyForward = true;
+        double percentToIgnore;
         for(int i=0; i<size; i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(!mc.isStable()) continue;
+            MbnagedConnection mc = (ManagedConnection)list.get(i);
+            if(!mc.isStbble()) continue;
             if (receivingConnection == FOR_ME_REPLY_HANDLER || 
                 (mc != receivingConnection && 
                  !mc.isClientSupernodeConnection())) {
 
-                if(mc.supportsPongCaching()) {
+                if(mc.supportsPongCbching()) {
                     percentToIgnore = 0.70;
                 } else {
                     percentToIgnore = 0.90;
                 }
-                if(randomlyForward && 
-                   (Math.random() < percentToIgnore)) {
+                if(rbndomlyForward && 
+                   (Mbth.random() < percentToIgnore)) {
                     continue;
                 } else {
                     mc.send(request);
@@ -1490,166 +1490,166 @@ pualic bbstract class MessageRouter {
     }
 
 	/**
-	 * Forwards the query request to any leaf connections.
+	 * Forwbrds the query request to any leaf connections.
 	 *
-	 * @param request the query to forward
-	 * @param handler the <tt>ReplyHandler</tt> that responds to the
-	 *  request appropriately
-	 * @param manager the <tt>ConnectionManager</tt> that provides
-	 *  access to any leaf connections that we should forward to
+	 * @pbram request the query to forward
+	 * @pbram handler the <tt>ReplyHandler</tt> that responds to the
+	 *  request bppropriately
+	 * @pbram manager the <tt>ConnectionManager</tt> that provides
+	 *  bccess to any leaf connections that we should forward to
      */
-	pualic finbl void forwardQueryRequestToLeaves(QueryRequest query,
-                                                  ReplyHandler handler) {
+	public finbl void forwardQueryRequestToLeaves(QueryRequest query,
+                                                  ReplyHbndler handler) {
 		if(!RouterService.isSupernode()) return;
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
-        //table has been received
-        List list = _manager.getInitializedClientConnections();
-        List hitConnections = new ArrayList();
+        //tbble has been received
+        List list = _mbnager.getInitializedClientConnections();
+        List hitConnections = new ArrbyList();
         for(int i=0; i<list.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(mc == handler) continue;
-            if(mc.shouldForwardQuery(query)) {
-                hitConnections.add(mc);
+            MbnagedConnection mc = (ManagedConnection)list.get(i);
+            if(mc == hbndler) continue;
+            if(mc.shouldForwbrdQuery(query)) {
+                hitConnections.bdd(mc);
             }
         }
-        //forward only to a quarter of the leaves in case the query is
-        //very popular.
+        //forwbrd only to a quarter of the leaves in case the query is
+        //very populbr.
         if(list.size() > 8 && 
-           (douale)hitConnections.size()/(double)list.size() > .8) {
-        	int startIndex = (int) Math.floor(
-        			Math.random() * hitConnections.size() * 0.75);
+           (double)hitConnections.size()/(double)list.size() > .8) {
+        	int stbrtIndex = (int) Math.floor(
+        			Mbth.random() * hitConnections.size() * 0.75);
             hitConnections = 
-                hitConnections.suaList(stbrtIndex, startIndex+hitConnections.size()/4);
+                hitConnections.subList(stbrtIndex, startIndex+hitConnections.size()/4);
         }
         
         int notSent = list.size() - hitConnections.size();
-        RoutedQueryStat.LEAF_DROP.addData(notSent);
+        RoutedQueryStbt.LEAF_DROP.addData(notSent);
         
         for(int i=0; i<hitConnections.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)hitConnections.get(i);
+            MbnagedConnection mc = (ManagedConnection)hitConnections.get(i);
             
-            // sendRoutedQueryToHost is not called because 
-            // we have already ensured it hits the routing table
-            // ay filling up the 'hitsConnection' list.
+            // sendRoutedQueryToHost is not cblled because 
+            // we hbve already ensured it hits the routing table
+            // by filling up the 'hitsConnection' list.
             mc.send(query);
-            RoutedQueryStat.LEAF_SEND.incrementStat();
+            RoutedQueryStbt.LEAF_SEND.incrementStat();
         }
 	}
 
 	/**
-	 * Factored-out method that sends a query to a connection that supports
-	 * query routing.  The query is only forwarded if there's a hit in the
+	 * Fbctored-out method that sends a query to a connection that supports
+	 * query routing.  The query is only forwbrded if there's a hit in the
 	 * query routing entries.
 	 *
-	 * @param query the <tt>QueryRequest</tt> to potentially forward
-	 * @param mc the <tt>ManagedConnection</tt> to forward the query to
-	 * @param handler the <tt>ReplyHandler</tt> that will be entered into
-	 *  the routing tables to handle any replies
-	 * @return <tt>true</tt> if the query was sent, otherwise <tt>false</tt>
+	 * @pbram query the <tt>QueryRequest</tt> to potentially forward
+	 * @pbram mc the <tt>ManagedConnection</tt> to forward the query to
+	 * @pbram handler the <tt>ReplyHandler</tt> that will be entered into
+	 *  the routing tbbles to handle any replies
+	 * @return <tt>true</tt> if the query wbs sent, otherwise <tt>false</tt>
 	 */
-	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
-										  ReplyHandler handler) {
-		if (mc.shouldForwardQuery(query)) {
-			//A new client with routing entry, or one that hasn't started
-			//sending the patch.
+	privbte boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
+										  ReplyHbndler handler) {
+		if (mc.shouldForwbrdQuery(query)) {
+			//A new client with routing entry, or one thbt hasn't started
+			//sending the pbtch.
 			mc.send(query);
 			return true;
 		}
-		return false;
+		return fblse;
 	}
 
     /**
-     * Adds the QueryRequest to the unicaster module.  Not much work done here,
-     * see QueryUnicaster for more details.
+     * Adds the QueryRequest to the unicbster module.  Not much work done here,
+     * see QueryUnicbster for more details.
      */
-    protected void unicastQueryRequest(QueryRequest query,
-                                       ReplyHandler conn) {
+    protected void unicbstQueryRequest(QueryRequest query,
+                                       ReplyHbndler conn) {
         
 		// set the TTL on outgoing udp queries to 1
-		query.setTTL((ayte)1);
+		query.setTTL((byte)1);
 				
-		UNICASTER.addQuery(query, conn);
+		UNICASTER.bddQuery(query, conn);
 	}
 	
     /**
-     * Send the query to the multicast group.
+     * Send the query to the multicbst group.
      */
-    protected void multicastQueryRequest(QueryRequest query) {
+    protected void multicbstQueryRequest(QueryRequest query) {
         
 		// set the TTL on outgoing udp queries to 1
-		query.setTTL((ayte)1);
-		// record the stat
-		SentMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
+		query.setTTL((byte)1);
+		// record the stbt
+		SentMessbgeStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
 				
-		MulticastService.instance().send(query);
+		MulticbstService.instance().send(query);
 	}	
 
 
     /**
-     * Broadcasts the query request to all initialized connections that
-     * are not the receivingConnection, setting up the routing
-     * to the designated QueryReplyHandler.  This is called from teh default
-     * handleQueryRequest and the default broadcastQueryRequest(QueryRequest)
+     * Brobdcasts the query request to all initialized connections that
+     * bre not the receivingConnection, setting up the routing
+     * to the designbted QueryReplyHandler.  This is called from teh default
+     * hbndleQueryRequest and the default broadcastQueryRequest(QueryRequest)
      *
-     * If different (smarter) broadcasting functionality is desired, override
-     * as desired.  If you do, note that receivingConnection may be null (for
-     * requests originating here).
+     * If different (smbrter) broadcasting functionality is desired, override
+     * bs desired.  If you do, note that receivingConnection may be null (for
+     * requests originbting here).
      */
-    private void forwardQueryToUltrapeers(QueryRequest query,
-                                          ReplyHandler handler) {
-		// Note the use of initializedConnections only.
-		// Note that we have zero allocations here.
+    privbte void forwardQueryToUltrapeers(QueryRequest query,
+                                          ReplyHbndler handler) {
+		// Note the use of initiblizedConnections only.
+		// Note thbt we have zero allocations here.
 		
-		//Broadcast the query to other connected nodes (ultrapeers or older
-		//nodes), aut DON'T forwbrd any queries not originating from me 
-		//along leaf to ultrapeer connections.
+		//Brobdcast the query to other connected nodes (ultrapeers or older
+		//nodes), but DON'T forwbrd any queries not originating from me 
+		//blong leaf to ultrapeer connections.
 	 
-		List list = _manager.getInitializedConnections();
+		List list = _mbnager.getInitializedConnections();
         int limit = list.size();
 
 		for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);      
-            forwardQueryToUltrapeer(query, handler, mc);  
+			MbnagedConnection mc = (ManagedConnection)list.get(i);      
+            forwbrdQueryToUltrapeer(query, handler, mc);  
         }
     }
 
     /**
-     * Performs a limited broadcast of the specified query.  This is
-     * useful, for example, when receiving queries from old-style 
-     * connections that we don't want to forward to all connected
-     * Ultrapeers because we don't want to overly magnify the query.
+     * Performs b limited broadcast of the specified query.  This is
+     * useful, for exbmple, when receiving queries from old-style 
+     * connections thbt we don't want to forward to all connected
+     * Ultrbpeers because we don't want to overly magnify the query.
      *
-     * @param query the <tt>QueryRequest</tt> instance to forward
-     * @param handler the <tt>ReplyHandler</tt> from which we received
+     * @pbram query the <tt>QueryRequest</tt> instance to forward
+     * @pbram handler the <tt>ReplyHandler</tt> from which we received
      *  the query
      */
-    private void forwardLimitedQueryToUltrapeers(QueryRequest query,
-                                                 ReplyHandler handler) {
-		//Broadcast the query to other connected nodes (ultrapeers or older
-		//nodes), aut DON'T forwbrd any queries not originating from me 
-		//along leaf to ultrapeer connections.
+    privbte void forwardLimitedQueryToUltrapeers(QueryRequest query,
+                                                 ReplyHbndler handler) {
+		//Brobdcast the query to other connected nodes (ultrapeers or older
+		//nodes), but DON'T forwbrd any queries not originating from me 
+		//blong leaf to ultrapeer connections.
 	 
-		List list = _manager.getInitializedConnections();
+		List list = _mbnager.getInitializedConnections();
         int limit = list.size();
 
         int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE;
 		for(int i=0; i<limit; i++) {
             
-            // if we've already queried enough old connections for
-            // an old-style query, break out
-            if(connectionsNeededForOld == 0) arebk;
+            // if we've blready queried enough old connections for
+            // bn old-style query, break out
+            if(connectionsNeededForOld == 0) brebk;
 
-			ManagedConnection mc = (ManagedConnection)list.get(i);
+			MbnagedConnection mc = (ManagedConnection)list.get(i);
             
-            // if the query is comiing from an old connection, try to
-            // send it's traffic to old connections.  Only send it to
-            // new connections if we only have a minimum number left
-            if(mc.isGoodUltrapeer() && 
+            // if the query is comiing from bn old connection, try to
+            // send it's trbffic to old connections.  Only send it to
+            // new connections if we only hbve a minimum number left
+            if(mc.isGoodUltrbpeer() && 
                (limit-i) > connectionsNeededForOld) {
                 continue;
             }
-            forwardQueryToUltrapeer(query, handler, mc);
+            forwbrdQueryToUltrapeer(query, handler, mc);
             
             // decrement the connections to use
             connectionsNeededForOld--;
@@ -1657,363 +1657,363 @@ pualic bbstract class MessageRouter {
     }
 
     /**
-     * Forwards the specified query to the specified Ultrapeer.  This
-     * encapsulates all necessary logic for forwarding queries to
-     * Ultrapeers, for example handling last hop Ultrapeers specially
-     * when the receiving Ultrapeer supports Ultrapeer query routing,
-     * meaning that we check it's routing tables for a match before sending 
+     * Forwbrds the specified query to the specified Ultrapeer.  This
+     * encbpsulates all necessary logic for forwarding queries to
+     * Ultrbpeers, for example handling last hop Ultrapeers specially
+     * when the receiving Ultrbpeer supports Ultrapeer query routing,
+     * mebning that we check it's routing tables for a match before sending 
      * the query.
      *
-     * @param query the <tt>QueryRequest</tt> to forward
-     * @param handler the <tt>ReplyHandler</tt> that sent the query
-     * @param ultrapeer the Ultrapeer to send the query to
+     * @pbram query the <tt>QueryRequest</tt> to forward
+     * @pbram handler the <tt>ReplyHandler</tt> that sent the query
+     * @pbram ultrapeer the Ultrapeer to send the query to
      */
-    private void forwardQueryToUltrapeer(QueryRequest query, 
-                                         ReplyHandler handler,
-                                         ManagedConnection ultrapeer) {    
-        // don't send a query back to the guy who sent it
-        if(ultrapeer == handler) return;
+    privbte void forwardQueryToUltrapeer(QueryRequest query, 
+                                         ReplyHbndler handler,
+                                         MbnagedConnection ultrapeer) {    
+        // don't send b query back to the guy who sent it
+        if(ultrbpeer == handler) return;
 
-        // make double-sure we don't send a query received
-        // ay b leaf to other Ultrapeers
-        if(ultrapeer.isClientSupernodeConnection()) return;
+        // mbke double-sure we don't send a query received
+        // by b leaf to other Ultrapeers
+        if(ultrbpeer.isClientSupernodeConnection()) return;
 
-        // make sure that the ultrapeer understands feature queries.
-        if(query.isFeatureQuery() && 
-           !ultrapeer.getRemoteHostSupportsFeatureQueries())
+        // mbke sure that the ultrapeer understands feature queries.
+        if(query.isFebtureQuery() && 
+           !ultrbpeer.getRemoteHostSupportsFeatureQueries())
              return;
 
-        // is this the last hop for the query??
-		aoolebn lastHop = query.getTTL() == 1; 
+        // is this the lbst hop for the query??
+		boolebn lastHop = query.getTTL() == 1; 
            
-        // if it's the last hop to an Ultrapeer that sends
-        // query route tables, route it.
-        if(lastHop &&
-           ultrapeer.isUltrapeerQueryRoutingConnection()) {
-            aoolebn sent = sendRoutedQueryToHost(query, ultrapeer, handler);
+        // if it's the lbst hop to an Ultrapeer that sends
+        // query route tbbles, route it.
+        if(lbstHop &&
+           ultrbpeer.isUltrapeerQueryRoutingConnection()) {
+            boolebn sent = sendRoutedQueryToHost(query, ultrapeer, handler);
             if(sent)
-                RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
+                RoutedQueryStbt.ULTRAPEER_SEND.incrementStat();
             else
-                RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
+                RoutedQueryStbt.ULTRAPEER_DROP.incrementStat();
         } else {
             // otherwise, just send it out
-            ultrapeer.send(query);
+            ultrbpeer.send(query);
         }
     }
 
 
     /**
-     * Originate a new query from this leaf node.
+     * Originbte a new query from this leaf node.
      *
-     * @param qr the <tt>QueryRequest</tt> to send
+     * @pbram qr the <tt>QueryRequest</tt> to send
      */
-    private void originateLeafQuery(QueryRequest qr) {
-		List list = _manager.getInitializedConnections();
+    privbte void originateLeafQuery(QueryRequest qr) {
+		List list = _mbnager.getInitializedConnections();
 
-        // only send to at most 4 Ultrapeers, as we could have more
-        // as a result of race conditions - also, don't send what is new
-        // requests down too many connections
-        final int max = qr.isWhatIsNewRequest() ? 2 : 3;
-	int start = !qr.isWhatIsNewRequest() ? 0 :
-		(int) (Math.floor(Math.random()*(list.size()-1)));
-        int limit = Math.min(max, list.size());
-        final boolean wantsOOB = qr.desiresOutOfBandReplies();
-        for(int i=start; i<start+limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);
+        // only send to bt most 4 Ultrapeers, as we could have more
+        // bs a result of race conditions - also, don't send what is new
+        // requests down too mbny connections
+        finbl int max = qr.isWhatIsNewRequest() ? 2 : 3;
+	int stbrt = !qr.isWhatIsNewRequest() ? 0 :
+		(int) (Mbth.floor(Math.random()*(list.size()-1)));
+        int limit = Mbth.min(max, list.size());
+        finbl boolean wantsOOB = qr.desiresOutOfBandReplies();
+        for(int i=stbrt; i<start+limit; i++) {
+			MbnagedConnection mc = (ManagedConnection)list.get(i);
             QueryRequest qrToSend = qr;
-            if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
-                qrToSend = QueryRequest.unmarkOOBQuery(qr);
+            if (wbntsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
+                qrToSend = QueryRequest.unmbrkOOBQuery(qr);
             mc.send(qrToSend);
         }
     }
     
     /**
-     * Originates a new query request to the ManagedConnection.
+     * Originbtes a new query request to the ManagedConnection.
      *
-     * @param request The query to send.
-     * @param mc The ManagedConnection to send the query along
-     * @return false if the query was not sent, true if so
+     * @pbram request The query to send.
+     * @pbram mc The ManagedConnection to send the query along
+     * @return fblse if the query was not sent, true if so
      */
-    pualic boolebn originateQuery(QueryRequest query, ManagedConnection mc) {
+    public boolebn originateQuery(QueryRequest query, ManagedConnection mc) {
         if( query == null )
             throw new NullPointerException("null query");
         if( mc == null )
             throw new NullPointerException("null connection");
     
-        // if this is a feature query & the other side doesn't
+        // if this is b feature query & the other side doesn't
         // support it, then don't send it
-        // This is an optimization of network traffic, and doesn't
-        // necessarily need to exist.  We could be shooting ourselves
-        // in the foot ay not sending this, rendering Febture Searches
-        // inoperable for some users connected to bad Ultrapeers.
-        if(query.isFeatureQuery() && !mc.getRemoteHostSupportsFeatureQueries())
-            return false;
+        // This is bn optimization of network traffic, and doesn't
+        // necessbrily need to exist.  We could be shooting ourselves
+        // in the foot by not sending this, rendering Febture Searches
+        // inoperbble for some users connected to bad Ultrapeers.
+        if(query.isFebtureQuery() && !mc.getRemoteHostSupportsFeatureQueries())
+            return fblse;
         
-        mc.originateQuery(query);
+        mc.originbteQuery(query);
         return true;
     }
     
     /**
-     * Respond to the ping request.  Implementations typically will either
-     * do nothing (if they don't think a response is appropriate) or call
+     * Respond to the ping request.  Implementbtions typically will either
+     * do nothing (if they don't think b response is appropriate) or call
      * sendPingReply(PingReply).
-     * This method is called from the default handlePingRequest.
+     * This method is cblled from the default handlePingRequest.
      */
-    protected abstract void respondToPingRequest(PingRequest request,
-                                                 ReplyHandler handler);
+    protected bbstract void respondToPingRequest(PingRequest request,
+                                                 ReplyHbndler handler);
 
 	/**
-	 * Responds to a ping received over UDP -- implementations
-	 * handle this differently from pings received over TCP, as it is 
-	 * assumed that the requester only wants pongs from other nodes
-	 * that also support UDP messaging.
+	 * Responds to b ping received over UDP -- implementations
+	 * hbndle this differently from pings received over TCP, as it is 
+	 * bssumed that the requester only wants pongs from other nodes
+	 * thbt also support UDP messaging.
 	 *
-	 * @param request the <tt>PingRequest</tt> to service
-     * @param addr the <tt>InetSocketAddress</tt> containing the ping
-     * @param handler the <tt>ReplyHandler</tt> instance from which the
-     *  ping was received and to which pongs should be sent
+	 * @pbram request the <tt>PingRequest</tt> to service
+     * @pbram addr the <tt>InetSocketAddress</tt> containing the ping
+     * @pbram handler the <tt>ReplyHandler</tt> instance from which the
+     *  ping wbs received and to which pongs should be sent
 	 */
-    protected abstract void respondToUDPPingRequest(PingRequest request, 
-													InetSocketAddress addr,
-                                                    ReplyHandler handler);
+    protected bbstract void respondToUDPPingRequest(PingRequest request, 
+													InetSocketAddress bddr,
+                                                    ReplyHbndler handler);
 
 
     /**
-     * Respond to the query request.  Implementations typically will either
-     * do nothing (if they don't think a response is appropriate) or call
+     * Respond to the query request.  Implementbtions typically will either
+     * do nothing (if they don't think b response is appropriate) or call
      * sendQueryReply(QueryReply).
-     * This method is called from the default handleQueryRequest.
+     * This method is cblled from the default handleQueryRequest.
      */
-    protected abstract boolean respondToQueryRequest(QueryRequest queryRequest,
-                                                     ayte[] clientGUID,
-                                                     ReplyHandler handler);
+    protected bbstract boolean respondToQueryRequest(QueryRequest queryRequest,
+                                                     byte[] clientGUID,
+                                                     ReplyHbndler handler);
 
     /**
-     * The default handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  This implementation
-     * uses the ping route table to route a ping reply.  If an appropriate route
-     * doesn't exist, records the error statistics.  On sucessful routing,
+     * The defbult handler for PingRequests received in
+     * MbnagedConnection.loopForMessages().  This implementation
+     * uses the ping route tbble to route a ping reply.  If an appropriate route
+     * doesn't exist, records the error stbtistics.  On sucessful routing,
      * the PingReply count is incremented.<p>
      *
-     * In all cases, the ping reply is recorded into the host catcher.<p>
+     * In bll cases, the ping reply is recorded into the host catcher.<p>
      *
-     * Override as desired, but you probably want to call super.handlePingReply
+     * Override bs desired, but you probably want to call super.handlePingReply
      * if you do.
      */
-    protected void handlePingReply(PingReply reply,
-                                   ReplyHandler handler) {
-        //update hostcatcher (even if the reply isn't for me)
-        aoolebn newAddress = RouterService.getHostCatcher().add(reply);
+    protected void hbndlePingReply(PingReply reply,
+                                   ReplyHbndler handler) {
+        //updbte hostcatcher (even if the reply isn't for me)
+        boolebn newAddress = RouterService.getHostCatcher().add(reply);
 
-        if(newAddress && !reply.isUDPHostCache()) {
-            PongCacher.instance().addPong(reply);
+        if(newAddress && !reply.isUDPHostCbche()) {
+            PongCbcher.instance().addPong(reply);
         }
 
-        //First route to originator in usual manner.
-        ReplyHandler replyHandler =
-            _pingRouteTable.getReplyHandler(reply.getGUID());
+        //First route to originbtor in usual manner.
+        ReplyHbndler replyHandler =
+            _pingRouteTbble.getReplyHandler(reply.getGUID());
 
-        if(replyHandler != null) {
-            replyHandler.handlePingReply(reply, handler);
+        if(replyHbndler != null) {
+            replyHbndler.handlePingReply(reply, handler);
         }
         else {
-            RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
-            handler.countDroppedMessage();
+            RouteErrorStbt.PING_REPLY_ROUTE_ERRORS.incrementStat();
+            hbndler.countDroppedMessage();
         }
-		aoolebn supportsUnicast = reply.supportsUnicast();
+		boolebn supportsUnicast = reply.supportsUnicast();
         
-        //Then, if a marked pong from an Ultrapeer that we've never seen before,
-        //send to all leaf connections except replyHandler (which may be null),
-        //irregardless of GUID.  The leafs will add the address then drop the
-        //pong as they have no routing entry.  Note that if Ultrapeers are very
-        //prevalent, this may consume too much bandwidth.
-		//Also forward any GUESS pongs to all leaves.
-        if (newAddress && (reply.isUltrapeer() || supportsUnicast)) {
-            List list=_manager.getInitializedClientConnections();
+        //Then, if b marked pong from an Ultrapeer that we've never seen before,
+        //send to bll leaf connections except replyHandler (which may be null),
+        //irregbrdless of GUID.  The leafs will add the address then drop the
+        //pong bs they have no routing entry.  Note that if Ultrapeers are very
+        //prevblent, this may consume too much bandwidth.
+		//Also forwbrd any GUESS pongs to all leaves.
+        if (newAddress && (reply.isUltrbpeer() || supportsUnicast)) {
+            List list=_mbnager.getInitializedClientConnections();
             for (int i=0; i<list.size(); i++) {
-                ManagedConnection c = (ManagedConnection)list.get(i);
-                Assert.that(c != null, "null c.");
-                if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
-                    c.handlePingReply(reply, handler);
+                MbnagedConnection c = (ManagedConnection)list.get(i);
+                Assert.thbt(c != null, "null c.");
+                if (c!=hbndler && c!=replyHandler && c.allowNewPongs()) {
+                    c.hbndlePingReply(reply, handler);
                 }
             }
         }
     }
 
     /**
-     * The default handler for QueryReplies received in
-     * ManagedConnection.loopForMessages().  This implementation
-     * uses the query route table to route a query reply.  If an appropriate
-     * route doesn't exist, records the error statistics.  On sucessful routing,
+     * The defbult handler for QueryReplies received in
+     * MbnagedConnection.loopForMessages().  This implementation
+     * uses the query route tbble to route a query reply.  If an appropriate
+     * route doesn't exist, records the error stbtistics.  On sucessful routing,
      * the QueryReply count is incremented.<p>
      *
-     * Override as desired, but you probably want to call super.handleQueryReply
-     * if you do.  This is pualic for testing purposes.
+     * Override bs desired, but you probably want to call super.handleQueryReply
+     * if you do.  This is public for testing purposes.
      */
-    pualic void hbndleQueryReply(QueryReply queryReply,
-                                 ReplyHandler handler) {
+    public void hbndleQueryReply(QueryReply queryReply,
+                                 ReplyHbndler handler) {
         if(queryReply == null) {
             throw new NullPointerException("null query reply");
         }
-        if(handler == null) {
-            throw new NullPointerException("null ReplyHandler");
+        if(hbndler == null) {
+            throw new NullPointerException("null ReplyHbndler");
         }
-        //For flow control reasons, we keep track of the bytes routed for this
-        //GUID.  Replies with less volume have higher priorities (i.e., lower
-        //numaers).
-        RouteTable.ReplyRoutePair rrp =
-            _queryRouteTable.getReplyHandler(queryReply.getGUID(),
-                                             queryReply.getTotalLength(),
+        //For flow control rebsons, we keep track of the bytes routed for this
+        //GUID.  Replies with less volume hbve higher priorities (i.e., lower
+        //numbers).
+        RouteTbble.ReplyRoutePair rrp =
+            _queryRouteTbble.getReplyHandler(queryReply.getGUID(),
+                                             queryReply.getTotblLength(),
 											 queryReply.getResultCount());
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
-            // Prepare a routing for a PushRequest, which works
-            // here like a QueryReplyReply
+            // Prepbre a routing for a PushRequest, which works
+            // here like b QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
-            _pushRouteTable.routeReply(queryReply.getClientGUID(),
-                                       handler);
-            //Simple flow control: don't route this message along other
-            //connections if we've already routed too many replies for this
-            //GUID.  Note that replies destined for me all always delivered to
+            _pushRouteTbble.routeReply(queryReply.getClientGUID(),
+                                       hbndler);
+            //Simple flow control: don't route this messbge along other
+            //connections if we've blready routed too many replies for this
+            //GUID.  Note thbt replies destined for me all always delivered to
             //the GUI.
 
-            ReplyHandler rh = rrp.getReplyHandler();
+            ReplyHbndler rh = rrp.getReplyHandler();
 
             if(!shouldDropReply(rrp, rh, queryReply)) {                
-                rh.handleQueryReply(queryReply, handler);
-                // also add to the QueryUnicaster for accounting - basically,
-                // most results will not ae relevbnt, but since it is a simple
-                // HashSet lookup, it isn't a prohibitive expense...
-                UNICASTER.handleQueryReply(queryReply);
+                rh.hbndleQueryReply(queryReply, handler);
+                // blso add to the QueryUnicaster for accounting - basically,
+                // most results will not be relevbnt, but since it is a simple
+                // HbshSet lookup, it isn't a prohibitive expense...
+                UNICASTER.hbndleQueryReply(queryReply);
 
             } else {
-				RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
-                final byte ttl = queryReply.getTTL();
-                if (ttl < RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length)
-				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[ttl].incrementStat();
+				RouteErrorStbt.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+                finbl byte ttl = queryReply.getTTL();
+                if (ttl < RouteErrorStbt.HARD_LIMIT_QUERY_REPLY_TTL.length)
+				    RouteErrorStbt.HARD_LIMIT_QUERY_REPLY_TTL[ttl].incrementStat();
                 else
-				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length-1].incrementStat();
-                handler.countDroppedMessage();
+				    RouteErrorStbt.HARD_LIMIT_QUERY_REPLY_TTL[RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length-1].incrementStat();
+                hbndler.countDroppedMessage();
             }
         }
         else {
-			RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
-            handler.countDroppedMessage();
+			RouteErrorStbt.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+            hbndler.countDroppedMessage();
         }
     }
 
     /**
-     * Checks if the <tt>QueryReply</tt> should ae dropped for vbrious reasons.
+     * Checks if the <tt>QueryReply</tt> should be dropped for vbrious reasons.
      *
-     * Reason 1) The reply has already routed enough traffic.  Based on per-TTL
-     * hard limits for the number of bytes routed for the given reply guid.
-     * This algorithm favors replies that don't have as far to go on the 
-     * network -- i.e., low TTL hits have more liberal limits than high TTL
-     * hits.  This ensures that hits that are closer to the query originator
-     * -- hits for which we've already done most of the work, are not 
-     * dropped unless we've routed a really large number of bytes for that
-     * guid.  This method also checks that hard number of results that have
-     * aeen sent for this GUID.  If this number is grebter than a specified
+     * Rebson 1) The reply has already routed enough traffic.  Based on per-TTL
+     * hbrd limits for the number of bytes routed for the given reply guid.
+     * This blgorithm favors replies that don't have as far to go on the 
+     * network -- i.e., low TTL hits hbve more liberal limits than high TTL
+     * hits.  This ensures thbt hits that are closer to the query originator
+     * -- hits for which we've blready done most of the work, are not 
+     * dropped unless we've routed b really large number of bytes for that
+     * guid.  This method blso checks that hard number of results that have
+     * been sent for this GUID.  If this number is grebter than a specified
      * limit, we simply drop the reply.
      *
-     * Reason 2) The reply was meant for me -- DO NOT DROP.
+     * Rebson 2) The reply was meant for me -- DO NOT DROP.
      *
-     * Reason 3) The TTL is 0, drop.
+     * Rebson 3) The TTL is 0, drop.
      *
-     * @param rrp the <tt>ReplyRoutePair</tt> containing data about what's 
-     *  aeen routed for this GUID
-     * @param ttl the time to live of the query hit
-     * @return <tt>true if the reply should ae dropped, otherwise <tt>fblse</tt>
+     * @pbram rrp the <tt>ReplyRoutePair</tt> containing data about what's 
+     *  been routed for this GUID
+     * @pbram ttl the time to live of the query hit
+     * @return <tt>true if the reply should be dropped, otherwise <tt>fblse</tt>
      */
-    private boolean shouldDropReply(RouteTable.ReplyRoutePair rrp,
-                                    ReplyHandler rh,
+    privbte boolean shouldDropReply(RouteTable.ReplyRoutePair rrp,
+                                    ReplyHbndler rh,
                                     QueryReply qr) {
         int ttl = qr.getTTL();
                                            
-        // Reason 2 --  The reply is meant for me, do not drop it.
-        if( rh == FOR_ME_REPLY_HANDLER ) return false;
+        // Rebson 2 --  The reply is meant for me, do not drop it.
+        if( rh == FOR_ME_REPLY_HANDLER ) return fblse;
         
-        // Reason 3 -- drop if TTL is 0.
+        // Rebson 3 -- drop if TTL is 0.
         if( ttl == 0 ) return true;                
 
-        // Reason 1 ...
+        // Rebson 1 ...
         
         int resultsRouted = rrp.getResultsRouted();
 
-        // drop the reply if we've already sent more than the specified number
+        // drop the reply if we've blready sent more than the specified number
         // of results for this GUID
         if(resultsRouted > 100) return true;
 
-        int aytesRouted = rrp.getBytesRouted();
-        // send replies with ttl above 2 if we've routed under 50K 
-        if(ttl > 2 && aytesRouted < 50    * 1024) return fblse;
+        int bytesRouted = rrp.getBytesRouted();
+        // send replies with ttl bbove 2 if we've routed under 50K 
+        if(ttl > 2 && bytesRouted < 50    * 1024) return fblse;
         // send replies with ttl 1 if we've routed under 1000K 
-        if(ttl == 1 && aytesRouted < 200 * 1024) return fblse;
+        if(ttl == 1 && bytesRouted < 200 * 1024) return fblse;
         // send replies with ttl 2 if we've routed under 333K 
-        if(ttl == 2 && aytesRouted < 100  * 1024) return fblse;
+        if(ttl == 2 && bytesRouted < 100  * 1024) return fblse;
 
-        // if none of the above conditions holds true, drop the reply
+        // if none of the bbove conditions holds true, drop the reply
         return true;
     }
 
-    private void handleGiveStats(final GiveStatsVendorMessage gsm, 
-                                             final ReplyHandler replyHandler) {
-        StatisticVendorMessage statVM = null;
+    privbte void handleGiveStats(final GiveStatsVendorMessage gsm, 
+                                             finbl ReplyHandler replyHandler) {
+        StbtisticVendorMessage statVM = null;
         try {
-            //create the reply if we understand how
-            if(StatisticVendorMessage.isSupported(gsm)) {
-                statVM = new StatisticVendorMessage(gsm);
-                //OK. Now send this message back to the client that asked for
-                //stats
-                replyHandler.handleStatisticVM(statVM);
+            //crebte the reply if we understand how
+            if(StbtisticVendorMessage.isSupported(gsm)) {
+                stbtVM = new StatisticVendorMessage(gsm);
+                //OK. Now send this messbge back to the client that asked for
+                //stbts
+                replyHbndler.handleStatisticVM(statVM);
             }
-        } catch(IOException iox) {
-            return; //what can we really do now?
+        } cbtch(IOException iox) {
+            return; //whbt can we really do now?
         }
     }
 
-    private void handleStatisticsMessage(final StatisticVendorMessage svm, 
-                                         final ReplyHandler handler) {
-        if(StatisticsSettings.RECORD_VM_STATS.getValue()) {
-            Thread statHandler = new ManagedThread("Stat writer ") {
-                pualic void mbnagedRun() {
-                    RandomAccessFile file = null;
+    privbte void handleStatisticsMessage(final StatisticVendorMessage svm, 
+                                         finbl ReplyHandler handler) {
+        if(StbtisticsSettings.RECORD_VM_STATS.getValue()) {
+            Threbd statHandler = new ManagedThread("Stat writer ") {
+                public void mbnagedRun() {
+                    RbndomAccessFile file = null;
                     try {
-                        file = new RandomAccessFile("stats_log.log", "rw");
+                        file = new RbndomAccessFile("stats_log.log", "rw");
                         file.seek(file.length());//go to the end.
-                        file.writeBytes(svm.getReportedStats()+"\n");
-                    } catch (IOException iox) {
+                        file.writeBytes(svm.getReportedStbts()+"\n");
+                    } cbtch (IOException iox) {
                         ErrorService.error(iox);
-                    } finally {
+                    } finblly {
                         if(file != null) {
                             try {
                                 file.close();
-                            } catch (IOException iox) {
+                            } cbtch (IOException iox) {
                                 ErrorService.error(iox);
                             }
                         }
                     }
                 }
             };
-            statHandler.start();
+            stbtHandler.start();
         }
     }
 
     /**
-     *  If we get and SimppRequest, get the payload we need from the
-     *  SimppManager and send the simpp bytes the the requestor in a SimppVM. 
+     *  If we get bnd SimppRequest, get the payload we need from the
+     *  SimppMbnager and send the simpp bytes the the requestor in a SimppVM. 
      */
-    private void handleSimppRequest(final SimppRequestVM simppReq, 
-                                                  final ReplyHandler handler ) {
+    privbte void handleSimppRequest(final SimppRequestVM simppReq, 
+                                                  finbl ReplyHandler handler ) {
         if(simppReq.getVersion() > SimppRequestVM.VERSION)
-            return; //we are not going to deal with these types of requests. 
-        ayte[] simppBytes = SimppMbnager.instance().getSimppBytes();
+            return; //we bre not going to deal with these types of requests. 
+        byte[] simppBytes = SimppMbnager.instance().getSimppBytes();
         if(simppBytes != null) {
             SimppVM simppVM = new SimppVM(simppBytes);
             try {
-                handler.handleSimppVM(simppVM);
-            } catch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
+                hbndler.handleSimppVM(simppVM);
+            } cbtch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
                 return;
             }
         }
@@ -2021,101 +2021,101 @@ pualic bbstract class MessageRouter {
     
 
     /**
-     * Passes on the SimppVM to the SimppManager which will verify it and
-     * make sure we it's newer than the one we know about, and then make changes
-     * to the settings as necessary, and cause new CapabilityVMs to be sent down
-     * all connections.
+     * Pbsses on the SimppVM to the SimppManager which will verify it and
+     * mbke sure we it's newer than the one we know about, and then make changes
+     * to the settings bs necessary, and cause new CapabilityVMs to be sent down
+     * bll connections.
      */
-    private void handleSimppVM(final SimppVM simppVM) {
-        SimppManager.instance().checkAndUpdate(simppVM.getPayload());
+    privbte void handleSimppVM(final SimppVM simppVM) {
+        SimppMbnager.instance().checkAndUpdate(simppVM.getPayload());
     }
 
     /**
-     *  Handles an update request by sending a response.
+     *  Hbndles an update request by sending a response.
      */
-    private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
+    privbte void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
 
-        ayte[] dbta = UpdateHandler.instance().getLatestBytes();
-        if(data != null) {
-            UpdateResponse msg = UpdateResponse.createUpdateResponse(data,req);
-            handler.reply(msg);
+        byte[] dbta = UpdateHandler.instance().getLatestBytes();
+        if(dbta != null) {
+            UpdbteResponse msg = UpdateResponse.createUpdateResponse(data,req);
+            hbndler.reply(msg);
         }
     }
     
 
     /**
-     * Passes the request onto the update manager.
+     * Pbsses the request onto the update manager.
      */
-    private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
-        UpdateHandler.instance().handleNewData(resp.getUpdate());
+    privbte void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
+        UpdbteHandler.instance().handleNewData(resp.getUpdate());
     }
 
     /**
-     * The default handler for PushRequests received in
-     * ManagedConnection.loopForMessages().  This implementation
-     * uses the push route table to route a push request.  If an appropriate
-     * route doesn't exist, records the error statistics.  On sucessful routing,
+     * The defbult handler for PushRequests received in
+     * MbnagedConnection.loopForMessages().  This implementation
+     * uses the push route tbble to route a push request.  If an appropriate
+     * route doesn't exist, records the error stbtistics.  On sucessful routing,
      * the PushRequest count is incremented.
      *
-     * Override as desired, but you probably want to call
-     * super.handlePushRequest if you do.
+     * Override bs desired, but you probably want to call
+     * super.hbndlePushRequest if you do.
      */
-    protected void handlePushRequest(PushRequest request,
-                                  ReplyHandler handler) {
+    protected void hbndlePushRequest(PushRequest request,
+                                  ReplyHbndler handler) {
         if(request == null) {
             throw new NullPointerException("null request");
         }
-        if(handler == null) {
-            throw new NullPointerException("null ReplyHandler");
+        if(hbndler == null) {
+            throw new NullPointerException("null ReplyHbndler");
         }
         // Note the use of getClientGUID() here, not getGUID()
-        ReplyHandler replyHandler = getPushHandler(request.getClientGUID());
+        ReplyHbndler replyHandler = getPushHandler(request.getClientGUID());
 
-        if(replyHandler != null)
-            replyHandler.handlePushRequest(request, handler);
+        if(replyHbndler != null)
+            replyHbndler.handlePushRequest(request, handler);
         else {
-			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
-            handler.countDroppedMessage();
+			RouteErrorStbt.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
+            hbndler.countDroppedMessage();
         }
     }
     
     /**
-     * Returns the appropriate handler from the _pushRouteTable.
-     * This enforces that requests for my clientGUID will return
-     * FOR_ME_REPLY_HANDLER, even if it's not in the table.
+     * Returns the bppropriate handler from the _pushRouteTable.
+     * This enforces thbt requests for my clientGUID will return
+     * FOR_ME_REPLY_HANDLER, even if it's not in the tbble.
      */
-    protected ReplyHandler getPushHandler(byte[] guid) {
-        ReplyHandler replyHandler = _pushRouteTable.getReplyHandler(guid);
-        if(replyHandler != null)
-            return replyHandler;
-        else if(Arrays.equals(_clientGUID, guid))
+    protected ReplyHbndler getPushHandler(byte[] guid) {
+        ReplyHbndler replyHandler = _pushRouteTable.getReplyHandler(guid);
+        if(replyHbndler != null)
+            return replyHbndler;
+        else if(Arrbys.equals(_clientGUID, guid))
             return FOR_ME_REPLY_HANDLER;
         else
             return null;
     }
 
     /**
-     * Uses the ping route table to send a PingReply to the appropriate
-     * connection.  Since this is used for PingReplies orginating here, no
-     * stats are updated.
+     * Uses the ping route tbble to send a PingReply to the appropriate
+     * connection.  Since this is used for PingReplies orginbting here, no
+     * stbts are updated.
      */
-    protected void sendPingReply(PingReply pong, ReplyHandler handler) {
+    protected void sendPingReply(PingReply pong, ReplyHbndler handler) {
         if(pong == null) {
             throw new NullPointerException("null pong");
         }
 
-        if(handler == null) {
-            throw new NullPointerException("null reply handler");
+        if(hbndler == null) {
+            throw new NullPointerException("null reply hbndler");
         }
  
-        handler.handlePingReply(pong, null);
+        hbndler.handlePingReply(pong, null);
     }
 
     /**
-     * Uses the query route table to send a QueryReply to the appropriate
-     * connection.  Since this is used for QueryReplies orginating here, no
-     * stats are updated.
-     * @throws IOException if no appropriate route exists.
+     * Uses the query route tbble to send a QueryReply to the appropriate
+     * connection.  Since this is used for QueryReplies orginbting here, no
+     * stbts are updated.
+     * @throws IOException if no bppropriate route exists.
      */
     protected void sendQueryReply(QueryReply queryReply)
         throws IOException {
@@ -2123,29 +2123,29 @@ pualic bbstract class MessageRouter {
         if(queryReply == null) {
             throw new NullPointerException("null reply");
         }
-        //For flow control reasons, we keep track of the bytes routed for this
-        //GUID.  Replies with less volume have higher priorities (i.e., lower
-        //numaers).
-        RouteTable.ReplyRoutePair rrp =
-            _queryRouteTable.getReplyHandler(queryReply.getGUID(),
-                                             queryReply.getTotalLength(),
+        //For flow control rebsons, we keep track of the bytes routed for this
+        //GUID.  Replies with less volume hbve higher priorities (i.e., lower
+        //numbers).
+        RouteTbble.ReplyRoutePair rrp =
+            _queryRouteTbble.getReplyHandler(queryReply.getGUID(),
+                                             queryReply.getTotblLength(),
 											 queryReply.getResultCount());
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
-            rrp.getReplyHandler().handleQueryReply(queryReply, null);
+            rrp.getReplyHbndler().handleQueryReply(queryReply, null);
         }
         else
             throw new IOException("no route for reply");
     }
 
     /**
-     * Uses the push route table to send a push request to the appropriate
-     * connection.  Since this is used for PushRequests orginating here, no
-     * stats are updated.
-     * @throws IOException if no appropriate route exists.
+     * Uses the push route tbble to send a push request to the appropriate
+     * connection.  Since this is used for PushRequests orginbting here, no
+     * stbts are updated.
+     * @throws IOException if no bppropriate route exists.
      */
-    pualic void sendPushRequest(PushRequest push)
+    public void sendPushRequest(PushRequest push)
         throws IOException {
         if(push == null) {
             throw new NullPointerException("null push");
@@ -2153,81 +2153,81 @@ pualic bbstract class MessageRouter {
         
 
         // Note the use of getClientGUID() here, not getGUID()
-        ReplyHandler replyHandler = getPushHandler(push.getClientGUID());
+        ReplyHbndler replyHandler = getPushHandler(push.getClientGUID());
 
-        if(replyHandler != null)
-            replyHandler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
+        if(replyHbndler != null)
+            replyHbndler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
         else
             throw new IOException("no route for push");
     }
     
     /**
-     * Sends a push request to the multicast network.  No lookups are
-     * performed in the push route table, because the message will always
-     * ae brobdcast to everyone.
+     * Sends b push request to the multicast network.  No lookups are
+     * performed in the push route tbble, because the message will always
+     * be brobdcast to everyone.
      */
-    protected void sendMulticastPushRequest(PushRequest push) {
+    protected void sendMulticbstPushRequest(PushRequest push) {
         if(push == null) {
             throw new NullPointerException("null push");
         }
         
-        // must have a TTL of 1
-        Assert.that(push.getTTL() == 1, "multicast push ttl not 1");
+        // must hbve a TTL of 1
+        Assert.thbt(push.getTTL() == 1, "multicast push ttl not 1");
         
-        MulticastService.instance().send(push);
-        SentMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);
+        MulticbstService.instance().send(push);
+        SentMessbgeStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);
     }
 
 
     /**
-     * Converts the passed responses to QueryReplies. Each QueryReply can
-     * accomodate atmost 255 responses. Not all the responses may get included
-     * in QueryReplies in case the query request came from a far away host.
+     * Converts the pbssed responses to QueryReplies. Each QueryReply can
+     * bccomodate atmost 255 responses. Not all the responses may get included
+     * in QueryReplies in cbse the query request came from a far away host.
      * <p>
-     * NOTE: This method doesnt have any side effect, 
-     * and does not modify the state of this object
-     * @param responses The responses to be converted
-     * @param queryRequest The query request corresponding to which we are
-     * generating query replies.
-     * @return Iterator (on QueryReply) over the Query Replies
+     * NOTE: This method doesnt hbve any side effect, 
+     * bnd does not modify the state of this object
+     * @pbram responses The responses to be converted
+     * @pbram queryRequest The query request corresponding to which we are
+     * generbting query replies.
+     * @return Iterbtor (on QueryReply) over the Query Replies
      */
-    pualic Iterbtor responsesToQueryReplies(Response[] responses,
+    public Iterbtor responsesToQueryReplies(Response[] responses,
                                             QueryRequest queryRequest) {
         return responsesToQueryReplies(responses, queryRequest, 10);
     }
 
 
     /**
-     * Converts the passed responses to QueryReplies. Each QueryReply can
-     * accomodate atmost 255 responses. Not all the responses may get included
-     * in QueryReplies in case the query request came from a far away host.
+     * Converts the pbssed responses to QueryReplies. Each QueryReply can
+     * bccomodate atmost 255 responses. Not all the responses may get included
+     * in QueryReplies in cbse the query request came from a far away host.
      * <p>
-     * NOTE: This method doesnt have any side effect, 
-     * and does not modify the state of this object
-     * @param responses The responses to be converted
-     * @param queryRequest The query request corresponding to which we are
-     * generating query replies.
-     * @param REPLY_LIMIT the maximum number of responses to have in each reply.
-     * @return Iterator (on QueryReply) over the Query Replies
+     * NOTE: This method doesnt hbve any side effect, 
+     * bnd does not modify the state of this object
+     * @pbram responses The responses to be converted
+     * @pbram queryRequest The query request corresponding to which we are
+     * generbting query replies.
+     * @pbram REPLY_LIMIT the maximum number of responses to have in each reply.
+     * @return Iterbtor (on QueryReply) over the Query Replies
      */
-    private Iterator responsesToQueryReplies(Response[] responses,
+    privbte Iterator responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
-                                             final int REPLY_LIMIT) {
+                                             finbl int REPLY_LIMIT) {
         //List to store Query Replies
         List /*<QueryReply>*/ queryReplies = new LinkedList();
         
-        // get the appropriate queryReply information
-        ayte[] guid = queryRequest.getGUID();
-        ayte ttl = (byte)(queryRequest.getHops() + 1);
+        // get the bppropriate queryReply information
+        byte[] guid = queryRequest.getGUID();
+        byte ttl = (byte)(queryRequest.getHops() + 1);
 
-		UploadManager um = RouterService.getUploadManager();
+		UplobdManager um = RouterService.getUploadManager();
 
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = um.measuredUploadSpeed();
-        aoolebn measuredSpeed=true;
+        //Return mebsured speed if possible, or user's speed otherwise.
+        long speed = um.mebsuredUploadSpeed();
+        boolebn measuredSpeed=true;
         if (speed==-1) {
-            speed=ConnectionSettings.CONNECTION_SPEED.getValue();
-            measuredSpeed=false;
+            speed=ConnectionSettings.CONNECTION_SPEED.getVblue();
+            mebsuredSpeed=false;
         }
 
         int numResponses = responses.length;
@@ -2236,12 +2236,12 @@ pualic bbstract class MessageRouter {
         int numHops = queryRequest.getHops();
 
         // limit the responses if we're not delivering this 
-        // out-of-abnd and we have a lot of responses
+        // out-of-bbnd and we have a lot of responses
         if(REPLY_LIMIT > 1 && 
            numHops > 2 && 
            numResponses > HIGH_HOPS_RESPONSE_LIMIT) {
             int j = 
-                (int)(Math.random() * numResponses) % 
+                (int)(Mbth.random() * numResponses) % 
                 (numResponses - HIGH_HOPS_RESPONSE_LIMIT);
 
             Response[] newResponses = 
@@ -2253,329 +2253,329 @@ pualic bbstract class MessageRouter {
             numResponses = responses.length;
         }
         while (numResponses > 0) {
-            int arraySize;
-            // if there are more than 255 responses,
-            // create an array of 255 to send in the queryReply
-            // otherwise, create an array of whatever size is left.
+            int brraySize;
+            // if there bre more than 255 responses,
+            // crebte an array of 255 to send in the queryReply
+            // otherwise, crebte an array of whatever size is left.
             if (numResponses < REPLY_LIMIT) {
-                // arebk;
-                arraySize = numResponses;
+                // brebk;
+                brraySize = numResponses;
             }
             else
-                arraySize = REPLY_LIMIT;
+                brraySize = REPLY_LIMIT;
 
             Response[] res;
-            // a special case.  in the common case where there
-            // are less than 256 responses being sent, there
-            // is no need to copy one array into another.
-            if ( (index == 0) && (arraySize < REPLY_LIMIT) ) {
+            // b special case.  in the common case where there
+            // bre less than 256 responses being sent, there
+            // is no need to copy one brray into another.
+            if ( (index == 0) && (brraySize < REPLY_LIMIT) ) {
                 res = responses;
             }
             else {
-                res = new Response[arraySize];
-                // copy the reponses into aite-size chunks
-                for(int i =0; i < arraySize; i++) {
+                res = new Response[brraySize];
+                // copy the reponses into bite-size chunks
+                for(int i =0; i < brraySize; i++) {
                     res[i] = responses[index];
                     index++;
                 }
             }
 
-            // decrement the numaer of responses we hbve left
-            numResponses-= arraySize;
+            // decrement the number of responses we hbve left
+            numResponses-= brraySize;
 
-			// see if there are any open slots
-			aoolebn busy = !um.isServiceable();
-            aoolebn uploaded = um.hadSuccesfulUpload();
+			// see if there bre any open slots
+			boolebn busy = !um.isServiceable();
+            boolebn uploaded = um.hadSuccesfulUpload();
 			
-            // We only want to return a "reply to multicast query" QueryReply
-            // if the request travelled a single hop.
-			aoolebn mcast = queryRequest.isMulticast() && 
+            // We only wbnt to return a "reply to multicast query" QueryReply
+            // if the request trbvelled a single hop.
+			boolebn mcast = queryRequest.isMulticast() && 
                 (queryRequest.getTTL() + queryRequest.getHops()) == 1;
 			
-            // We should mark our hits if the remote end can do a firewalled
-            // transfer AND so can we AND we don't accept tcp incoming AND our
-            // external address is valid (needed for input into the reply)
-            final boolean fwTransfer = 
-                queryRequest.canDoFirewalledTransfer() && 
-                UDPService.instance().canDoFWT() &&
-                !RouterService.acceptedIncomingConnection();
+            // We should mbrk our hits if the remote end can do a firewalled
+            // trbnsfer AND so can we AND we don't accept tcp incoming AND our
+            // externbl address is valid (needed for input into the reply)
+            finbl boolean fwTransfer = 
+                queryRequest.cbnDoFirewalledTransfer() && 
+                UDPService.instbnce().canDoFWT() &&
+                !RouterService.bcceptedIncomingConnection();
             
-			if ( mcast ) {
-                ttl = 1; // not strictly necessary, but nice.
+			if ( mcbst ) {
+                ttl = 1; // not strictly necessbry, but nice.
             }
             
             List replies =
-                createQueryReply(guid, ttl, speed, res, 
-                                 _clientGUID, ausy, uplobded, 
-                                 measuredSpeed, mcast,
-                                 fwTransfer);
+                crebteQueryReply(guid, ttl, speed, res, 
+                                 _clientGUID, busy, uplobded, 
+                                 mebsuredSpeed, mcast,
+                                 fwTrbnsfer);
 
-            //add to the list
-            queryReplies.addAll(replies);
+            //bdd to the list
+            queryReplies.bddAll(replies);
 
         }//end of while
         
-        return queryReplies.iterator();
+        return queryReplies.iterbtor();
     }
 
     /**
-     * Aastrbct method for creating query hits.  Subclasses must specify
-     * how this list is created.
+     * Abstrbct method for creating query hits.  Subclasses must specify
+     * how this list is crebted.
      *
-     * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
+     * @return b <tt>List</tt> of <tt>QueryReply</tt> instances
      */
-    protected abstract List createQueryReply(byte[] guid, byte ttl,
+    protected bbstract List createQueryReply(byte[] guid, byte ttl,
                                             long speed, 
-                                             Response[] res, ayte[] clientGUID, 
-                                             aoolebn busy, 
-                                             aoolebn uploaded, 
-                                             aoolebn measuredSpeed, 
-                                             aoolebn isFromMcast,
-                                             aoolebn shouldMarkForFWTransfer);
+                                             Response[] res, byte[] clientGUID, 
+                                             boolebn busy, 
+                                             boolebn uploaded, 
+                                             boolebn measuredSpeed, 
+                                             boolebn isFromMcast,
+                                             boolebn shouldMarkForFWTransfer);
 
     /**
-     * Handles a message to reset the query route table for the given
+     * Hbndles a message to reset the query route table for the given
      * connection.
      *
-     * @param rtm the <tt>ResetTableMessage</tt> for resetting the query
-     *  route table
-     * @param mc the <tt>ManagedConnection</tt> for which the query route
-     *  table should be reset
+     * @pbram rtm the <tt>ResetTableMessage</tt> for resetting the query
+     *  route tbble
+     * @pbram mc the <tt>ManagedConnection</tt> for which the query route
+     *  tbble should be reset
      */
-    private void handleResetTableMessage(ResetTableMessage rtm,
-                                         ManagedConnection mc) {
-        // if it's not from a leaf or an Ultrapeer advertising 
+    privbte void handleResetTableMessage(ResetTableMessage rtm,
+                                         MbnagedConnection mc) {
+        // if it's not from b leaf or an Ultrapeer advertising 
         // QRP support, ignore it
         if(!isQRPConnection(mc)) return;
 
-        // reset the query route table for this connection
+        // reset the query route tbble for this connection
         synchronized (mc.getQRPLock()) {
-            mc.resetQueryRouteTable(rtm);
+            mc.resetQueryRouteTbble(rtm);
         }
 
-        // if this is coming from a leaf, make sure we update
-        // our tables so that the dynamic querier has correct
-        // data
-        if(mc.isLeafConnection()) {
-            _lastQueryRouteTable = createRouteTable();
+        // if this is coming from b leaf, make sure we update
+        // our tbbles so that the dynamic querier has correct
+        // dbta
+        if(mc.isLebfConnection()) {
+            _lbstQueryRouteTable = createRouteTable();
         }
     }
 
     /**
-     * Handles a message to patch the query route table for the given
+     * Hbndles a message to patch the query route table for the given
      * connection.
      *
-     * @param rtm the <tt>PatchTableMessage</tt> for patching the query
-     *  route table
-     * @param mc the <tt>ManagedConnection</tt> for which the query route
-     *  table should be patched
+     * @pbram rtm the <tt>PatchTableMessage</tt> for patching the query
+     *  route tbble
+     * @pbram mc the <tt>ManagedConnection</tt> for which the query route
+     *  tbble should be patched
      */
-    private void handlePatchTableMessage(PatchTableMessage ptm,
-                                         ManagedConnection mc) {
-        // if it's not from a leaf or an Ultrapeer advertising 
+    privbte void handlePatchTableMessage(PatchTableMessage ptm,
+                                         MbnagedConnection mc) {
+        // if it's not from b leaf or an Ultrapeer advertising 
         // QRP support, ignore it
         if(!isQRPConnection(mc)) return;
 
-        // patch the query route table for this connection
+        // pbtch the query route table for this connection
         synchronized(mc.getQRPLock()) {
-            mc.patchQueryRouteTable(ptm);
+            mc.pbtchQueryRouteTable(ptm);
         }
 
-        // if this is coming from a leaf, make sure we update
-        // our tables so that the dynamic querier has correct
-        // data
-        if(mc.isLeafConnection()) {
-            _lastQueryRouteTable = createRouteTable();
+        // if this is coming from b leaf, make sure we update
+        // our tbbles so that the dynamic querier has correct
+        // dbta
+        if(mc.isLebfConnection()) {
+            _lbstQueryRouteTable = createRouteTable();
         }
     }
 
-    private void updateMessage(QueryRequest request, ReplyHandler handler) {
-        if(! (handler instanceof Connection) )
+    privbte void updateMessage(QueryRequest request, ReplyHandler handler) {
+        if(! (hbndler instanceof Connection) )
             return;
-        Connection c  = (Connection) handler;
+        Connection c  = (Connection) hbndler;
         if(request.getHops()==1 && c.isOldLimeWire()) {
-            if(StaticMessages.updateReply ==null) 
+            if(StbticMessages.updateReply ==null) 
                 return;
             QueryReply qr
-                 = new QueryReply(request.getGUID(),StaticMessages.updateReply);
+                 = new QueryReply(request.getGUID(),StbticMessages.updateReply);
             try {
                 sendQueryReply(qr);
-            } catch (IOException ignored) {}
+            } cbtch (IOException ignored) {}
         }
     }
 
     /**
      * Utility method for checking whether or not the given connection
-     * is able to pass QRP messages.
+     * is bble to pass QRP messages.
      *
-     * @param c the <tt>Connection</tt> to check
-     * @return <tt>true</tt> if this is a QRP-enabled connection,
-     *  otherwise <tt>false</tt>
+     * @pbram c the <tt>Connection</tt> to check
+     * @return <tt>true</tt> if this is b QRP-enabled connection,
+     *  otherwise <tt>fblse</tt>
      */
-    private static boolean isQRPConnection(Connection c) {
+    privbte static boolean isQRPConnection(Connection c) {
         if(c.isSupernodeClientConnection()) return true;
-        if(c.isUltrapeerQueryRoutingConnection()) return true;
-        return false;
+        if(c.isUltrbpeerQueryRoutingConnection()) return true;
+        return fblse;
     }
 
-    /** Thread the processing of QRP Table delivery. */
-    private class QRPPropagator extends ManagedThread {
-        pualic QRPPropbgator() {
-            setName("QRPPropagator");
-            setDaemon(true);
+    /** Threbd the processing of QRP Table delivery. */
+    privbte class QRPPropagator extends ManagedThread {
+        public QRPPropbgator() {
+            setNbme("QRPPropagator");
+            setDbemon(true);
         }
 
-        /** While the connection is not closed, sends all data delay. */
-        pualic void mbnagedRun() {
+        /** While the connection is not closed, sends bll data delay. */
+        public void mbnagedRun() {
             try {
                 while (true) {
-					// Check for any scheduled QRP table propagations
+					// Check for bny scheduled QRP table propagations
 					// every 10 seconds
-                    Thread.sleep(10*1000);
-    				forwardQueryRouteTables();
+                    Threbd.sleep(10*1000);
+    				forwbrdQueryRouteTables();
                 }
-            } catch(Throwable t) {
+            } cbtch(Throwable t) {
                 ErrorService.error(t);
             }
         }
 
-    } //end QRPPropagator
+    } //end QRPPropbgator
 
 
     /**
-     * Sends updated query routing tables to all connections which haven't
-     * aeen updbted in a while.  You can call this method as often as you want;
-     * it takes care of throttling.
+     * Sends updbted query routing tables to all connections which haven't
+     * been updbted in a while.  You can call this method as often as you want;
+     * it tbkes care of throttling.
      *     @modifies connections
      */    
-    private void forwardQueryRouteTables() {
-		//Check the time to decide if it needs an update.
+    privbte void forwardQueryRouteTables() {
+		//Check the time to decide if it needs bn update.
 		long time = System.currentTimeMillis();
 
-		//For all connections to new hosts c needing an update...
-		List list=_manager.getInitializedConnections();
-		QueryRouteTable table = null;
-		List /* of RouteTableMessage */ patches = null;
-		QueryRouteTable lastSent = null;
+		//For bll connections to new hosts c needing an update...
+		List list=_mbnager.getInitializedConnections();
+		QueryRouteTbble table = null;
+		List /* of RouteTbbleMessage */ patches = null;
+		QueryRouteTbble lastSent = null;
 		
 		for(int i=0; i<list.size(); i++) {                        
-			ManagedConnection c=(ManagedConnection)list.get(i);
+			MbnagedConnection c=(ManagedConnection)list.get(i);
 			
 
-			// continue if I'm an Ultrapeer and the node on the
-			// other end doesn't support Ultrapeer-level query
+			// continue if I'm bn Ultrapeer and the node on the
+			// other end doesn't support Ultrbpeer-level query
 			// routing
 			if(RouterService.isSupernode()) { 
-				// only skip it if it's not an Ultrapeer query routing
+				// only skip it if it's not bn Ultrapeer query routing
 				// connection
-				if(!c.isUltrapeerQueryRoutingConnection()) { 
+				if(!c.isUltrbpeerQueryRoutingConnection()) { 
 					continue;
 				}
 			} 				
-			// otherwise, I'm a leaf, and don't send routing
-			// tables if it's not a connection to an Ultrapeer
-			// or if query routing is not enabled on the connection
+			// otherwise, I'm b leaf, and don't send routing
+			// tbbles if it's not a connection to an Ultrapeer
+			// or if query routing is not enbbled on the connection
 			else if (!(c.isClientSupernodeConnection() && 
-					   c.isQueryRoutingEnabled())) {
+					   c.isQueryRoutingEnbbled())) {
 				continue;
 			}
 			
-			// See if it is time for this connections QRP update
-			// This call is safe since only this thread updates time
-			if (time<c.getNextQRPForwardTime())
+			// See if it is time for this connections QRP updbte
+			// This cbll is safe since only this thread updates time
+			if (time<c.getNextQRPForwbrdTime())
 				continue;
 
-			c.incrementNextQRPForwardTime(time);
+			c.incrementNextQRPForwbrdTime(time);
 				
-			// Create a new query route table if we need to
-			if (table == null) {
-				table = createRouteTable();     //  Ignores busy leaves
-                _lastQueryRouteTable = table;
+			// Crebte a new query route table if we need to
+			if (tbble == null) {
+				tbble = createRouteTable();     //  Ignores busy leaves
+                _lbstQueryRouteTable = table;
 			} 
 
-			//..and send each piece.
+			//..bnd send each piece.
 			
-			// Because we tend to send the same list of patches to lots of
-			// Connections, we can reuse the list of RouteTableMessages
-			// aetween those connections if their lbst sent
-			// table is exactly the same.
-			// This allows us to only reduce the amount of times we have
-			// to call encode.
+			// Becbuse we tend to send the same list of patches to lots of
+			// Connections, we cbn reuse the list of RouteTableMessages
+			// between those connections if their lbst sent
+			// tbble is exactly the same.
+			// This bllows us to only reduce the amount of times we have
+			// to cbll encode.
 			
-			//  (This if works for 'null' sent tables too)
-			if( lastSent == c.getQueryRouteTableSent() ) {
-			    // if we have not constructed the patches yet, then do so.
-			    if( patches == null )
-			        patches = table.encode(lastSent, true);
+			//  (This if works for 'null' sent tbbles too)
+			if( lbstSent == c.getQueryRouteTableSent() ) {
+			    // if we hbve not constructed the patches yet, then do so.
+			    if( pbtches == null )
+			        pbtches = table.encode(lastSent, true);
 			}
-			// If they aren't the same, we have to encode a new set of
-			// patches for this connection.
+			// If they bren't the same, we have to encode a new set of
+			// pbtches for this connection.
 			else {
-			    lastSent = c.getQueryRouteTableSent();
-			    patches = table.encode(lastSent, true);
+			    lbstSent = c.getQueryRouteTableSent();
+			    pbtches = table.encode(lastSent, true);
             }
             
-            // If sending QRP tables is turned off, don't send them.  
-            if(!ConnectionSettings.SEND_QRP.getValue()) {
+            // If sending QRP tbbles is turned off, don't send them.  
+            if(!ConnectionSettings.SEND_QRP.getVblue()) {
                 return;
             }
             
-		    for(Iterator iter = patches.iterator(); iter.hasNext();) {
-		        c.send((RouteTableMessage)iter.next());
+		    for(Iterbtor iter = patches.iterator(); iter.hasNext();) {
+		        c.send((RouteTbbleMessage)iter.next());
     	    }
     	    
-            c.setQueryRouteTableSent(table);
+            c.setQueryRouteTbbleSent(table);
 		}
     }
 
     /**
-     * Accessor for the most recently calculated <tt>QueryRouteTable</tt>
-     * for this node.  If this node is an Ultrapeer, the table will include
-     * all data for leaf nodes in addition to data for this node's files.
+     * Accessor for the most recently cblculated <tt>QueryRouteTable</tt>
+     * for this node.  If this node is bn Ultrapeer, the table will include
+     * bll data for leaf nodes in addition to data for this node's files.
      *
-     * @return the <tt>QueryRouteTable</tt> for this node
+     * @return the <tt>QueryRouteTbble</tt> for this node
      */
-    pualic QueryRouteTbble getQueryRouteTable() {
-        return _lastQueryRouteTable;
+    public QueryRouteTbble getQueryRouteTable() {
+        return _lbstQueryRouteTable;
     }
 
     /**
-     * Creates a query route table appropriate for forwarding to connection c.
-     * This will not include information from c.
-     *     @requires queryUpdateLock held
+     * Crebtes a query route table appropriate for forwarding to connection c.
+     * This will not include informbtion from c.
+     *     @requires queryUpdbteLock held
      */
-    private static QueryRouteTable createRouteTable() {
-        QueryRouteTable ret = _fileManager.getQRT();
+    privbte static QueryRouteTable createRouteTable() {
+        QueryRouteTbble ret = _fileManager.getQRT();
         
-        // Add leaves' files if we're an Ultrapeer.
+        // Add lebves' files if we're an Ultrapeer.
         if(RouterService.isSupernode()) {
-            addQueryRoutingEntriesForLeaves(ret);
+            bddQueryRoutingEntriesForLeaves(ret);
         }
         return ret;
     }
 
 
 	/**
-	 * Adds all query routing tables of leaves to the query routing table for
-	 * this node for propagation to other Ultrapeers at 1 hop.
+	 * Adds bll query routing tables of leaves to the query routing table for
+	 * this node for propbgation to other Ultrapeers at 1 hop.
 	 * 
-	 * Added "ausy lebf" support to prevent a busy leaf from having its QRT
-	 * 	table added to the Ultrapeer's last-hop QRT table.  This should reduce
-	 *  BW costs for UPs with ausy lebves.  
+	 * Added "busy lebf" support to prevent a busy leaf from having its QRT
+	 * 	tbble added to the Ultrapeer's last-hop QRT table.  This should reduce
+	 *  BW costs for UPs with busy lebves.  
 	 *
-	 * @param qrt the <tt>QueryRouteTable</tt> to add to
+	 * @pbram qrt the <tt>QueryRouteTable</tt> to add to
 	 */
-	private static void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
-		List leaves = _manager.getInitializedClientConnections();
+	privbte static void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
+		List lebves = _manager.getInitializedClientConnections();
 		
-		for(int i=0; i<leaves.size(); i++) {
-			ManagedConnection mc = (ManagedConnection)leaves.get(i);
+		for(int i=0; i<lebves.size(); i++) {
+			MbnagedConnection mc = (ManagedConnection)leaves.get(i);
         	synchronized (mc.getQRPLock()) {
-        	    //	Don't include ausy lebves
-        	    if( !mc.isBusyLeaf() ){
-                	QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
+        	    //	Don't include busy lebves
+        	    if( !mc.isBusyLebf() ){
+                	QueryRouteTbble qrtr = mc.getQueryRouteTableReceived();
 					if(qrtr != null) {
-						qrt.addAll(qrtr);
+						qrt.bddAll(qrtr);
 					}
         	    }
 			}
@@ -2584,53 +2584,53 @@ pualic bbstract class MessageRouter {
 
     
     /**
-     * Adds the specified MessageListener for messages with this GUID.
-     * You must manually unregister the listener.
+     * Adds the specified MessbgeListener for messages with this GUID.
+     * You must mbnually unregister the listener.
      *
-     * This works ay replbcing the necessary maps & lists, so that 
-     * notifying doesn't have to hold any locks.
+     * This works by replbcing the necessary maps & lists, so that 
+     * notifying doesn't hbve to hold any locks.
      */
-    pualic void registerMessbgeListener(byte[] guid, MessageListener ml) {
+    public void registerMessbgeListener(byte[] guid, MessageListener ml) {
         ml.registered(guid);
         synchronized(MESSAGE_LISTENER_LOCK) {
-            Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
-            listeners.putAll(_messageListeners);
-            List all = (List)listeners.get(guid);
-            if(all == null) {
-                all = new ArrayList(1);
-                all.add(ml);
+            Mbp listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
+            listeners.putAll(_messbgeListeners);
+            List bll = (List)listeners.get(guid);
+            if(bll == null) {
+                bll = new ArrayList(1);
+                bll.add(ml);
             } else {
-                List temp = new ArrayList(all.size() + 1);
-                temp.addAll(all);
-                all = temp;
-                all.add(ml);
+                List temp = new ArrbyList(all.size() + 1);
+                temp.bddAll(all);
+                bll = temp;
+                bll.add(ml);
             }
-            listeners.put(guid, Collections.unmodifiableList(all));
-            _messageListeners = Collections.unmodifiableMap(listeners);
+            listeners.put(guid, Collections.unmodifibbleList(all));
+            _messbgeListeners = Collections.unmodifiableMap(listeners);
         }
     }
     
     /**
-     * Unregisters this MessageListener from listening to the GUID.
+     * Unregisters this MessbgeListener from listening to the GUID.
      *
-     * This works ay replbcing the necessary maps & lists so that
-     * notifying doesn't have to hold any locks.
+     * This works by replbcing the necessary maps & lists so that
+     * notifying doesn't hbve to hold any locks.
      */
-    pualic void unregisterMessbgeListener(byte[] guid, MessageListener ml) {
-        aoolebn removed = false;
+    public void unregisterMessbgeListener(byte[] guid, MessageListener ml) {
+        boolebn removed = false;
         synchronized(MESSAGE_LISTENER_LOCK) {
-            List all = (List)_messageListeners.get(guid);
-            if(all != null) {
-                all = new ArrayList(all);
-                if(all.remove(ml)) {
+            List bll = (List)_messageListeners.get(guid);
+            if(bll != null) {
+                bll = new ArrayList(all);
+                if(bll.remove(ml)) {
                     removed = true;
-                    Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
-                    listeners.putAll(_messageListeners);
-                    if(all.isEmpty())
+                    Mbp listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
+                    listeners.putAll(_messbgeListeners);
+                    if(bll.isEmpty())
                         listeners.remove(guid);
                     else
-                        listeners.put(guid, Collections.unmodifiableList(all));
-                    _messageListeners = Collections.unmodifiableMap(listeners);
+                        listeners.put(guid, Collections.unmodifibbleList(all));
+                    _messbgeListeners = Collections.unmodifiableMap(listeners);
                 }
             }
         }
@@ -2640,172 +2640,172 @@ pualic bbstract class MessageRouter {
 
 
     /**
-     * responds to a request for the list of ultrapeers or leaves.  It is sent right back to the
-     * requestor on the UDP receiver thread.
-     * @param msg the request message
-     * @param handler the UDPHandler to send it to.
+     * responds to b request for the list of ultrapeers or leaves.  It is sent right back to the
+     * requestor on the UDP receiver threbd.
+     * @pbram msg the request message
+     * @pbram handler the UDPHandler to send it to.
      */
-    private void handleUDPCrawlerPing(UDPCrawlerPing msg, ReplyHandler handler){
+    privbte void handleUDPCrawlerPing(UDPCrawlerPing msg, ReplyHandler handler){
     	
-    	//make sure the same person doesn't request too often
-    	//note: this should only happen on the UDP receiver thread, that's why
+    	//mbke sure the same person doesn't request too often
+    	//note: this should only hbppen on the UDP receiver thread, that's why
     	//I'm not locking it.
-    	if (!_promotionManager.allowUDPPing(handler))
+    	if (!_promotionMbnager.allowUDPPing(handler))
     		return; 
-    	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
-    	handler.reply(newMsg);
+    	UDPCrbwlerPong newMsg = new UDPCrawlerPong(msg);
+    	hbndler.reply(newMsg);
     }
     
     /**
-     * Replies to a head ping sent from the given ReplyHandler.
+     * Replies to b head ping sent from the given ReplyHandler.
      */
-    private void handleHeadPing(HeadPing ping, ReplyHandler handler) {
-        if (DownloadSettings.DROP_HEADPINGS.getValue())
+    privbte void handleHeadPing(HeadPing ping, ReplyHandler handler) {
+        if (DownlobdSettings.DROP_HEADPINGS.getValue())
             return;
         
         GUID clientGUID = ping.getClientGuid();
-        ReplyHandler pingee;
+        ReplyHbndler pingee;
         
         if(clientGUID != null)
-            pingee = getPushHandler(clientGUID.bytes());
+            pingee = getPushHbndler(clientGUID.bytes());
         else
-            pingee = FOR_ME_REPLY_HANDLER; // handle ourselves.
+            pingee = FOR_ME_REPLY_HANDLER; // hbndle ourselves.
         
         //drop the ping if no entry for the given clientGUID
         if (pingee == null) 
            return; 
         
-        //don't aother routing if this is intended for me. 
-        // TODO:  Clean up ReplyHandler interface so we aren't
-        //        afraid to use it like it's intended.
-        //        That way, we can do pingee.handleHeadPing(ping)
-        //        and not need this anti-OO instanceof check.
-        if (pingee instanceof ForMeReplyHandler) {
+        //don't bother routing if this is intended for me. 
+        // TODO:  Clebn up ReplyHandler interface so we aren't
+        //        bfraid to use it like it's intended.
+        //        Thbt way, we can do pingee.handleHeadPing(ping)
+        //        bnd not need this anti-OO instanceof check.
+        if (pingee instbnceof ForMeReplyHandler) {
             // If it's for me, reply directly to the person who sent it.
-            HeadPong pong = new HeadPong(ping);
-            handler.reply(pong); // 
+            HebdPong pong = new HeadPong(ping);
+            hbndler.reply(pong); // 
         } else {
-            // Otherwise, rememaer who sent it bnd forward it on.
-            //rememaer where to send the pong to. 
-            //the pong will have the same GUID as the ping. 
-            // Note that this uses the messageGUID, not the clientGUID
-            _headPongRouteTable.routeReply(ping.getGUID(), handler); 
+            // Otherwise, remember who sent it bnd forward it on.
+            //remember where to send the pong to. 
+            //the pong will hbve the same GUID as the ping. 
+            // Note thbt this uses the messageGUID, not the clientGUID
+            _hebdPongRouteTable.routeReply(ping.getGUID(), handler); 
             
-            //and send off the routed ping 
-            if ( !(handler instanceof Connection) ||
-                    ((Connection)handler).supportsVMRouting())
+            //bnd send off the routed ping 
+            if ( !(hbndler instanceof Connection) ||
+                    ((Connection)hbndler).supportsVMRouting())
                 pingee.reply(ping);
             else
-                pingee.reply(new HeadPing(ping)); 
+                pingee.reply(new HebdPing(ping)); 
         }
    } 
     
     
     /** 
-     * Handles a pong received from the given handler.
+     * Hbndles a pong received from the given handler.
      */ 
-    private void handleHeadPong(HeadPong pong, ReplyHandler handler) { 
-        ReplyHandler forwardTo =  _headPongRouteTable.getReplyHandler(pong.getGUID()); 
+    privbte void handleHeadPong(HeadPong pong, ReplyHandler handler) { 
+        ReplyHbndler forwardTo =  _headPongRouteTable.getReplyHandler(pong.getGUID()); 
 
-        // TODO: Clean up ReplyHandler interface so we're not afraid
+        // TODO: Clebn up ReplyHandler interface so we're not afraid
         //       to use it correctly.
-        //       Ideally, we'd do forwardTo.handleHeadPong(pong)
-        //       instead of this instanceof check
+        //       Ideblly, we'd do forwardTo.handleHeadPong(pong)
+        //       instebd of this instanceof check
          
-        // if this pong is for me, process it as usual (not implemented yet)
-        if (forwardTo != null && !(forwardTo instanceof ForMeReplyHandler)) { 
-            forwardTo.reply(pong); 
-            _headPongRouteTable.removeReplyHandler(forwardTo); 
+        // if this pong is for me, process it bs usual (not implemented yet)
+        if (forwbrdTo != null && !(forwardTo instanceof ForMeReplyHandler)) { 
+            forwbrdTo.reply(pong); 
+            _hebdPongRouteTable.removeReplyHandler(forwardTo); 
         } 
     } 
     
     
-    private static class QueryResponseBundle {
-        pualic finbl QueryRequest _query;
-        pualic finbl Response[] _responses;
+    privbte static class QueryResponseBundle {
+        public finbl QueryRequest _query;
+        public finbl Response[] _responses;
         
-        pualic QueryResponseBundle(QueryRequest query, Response[] responses) {
+        public QueryResponseBundle(QueryRequest query, Response[] responses) {
             _query = query;
             _responses = responses;
         }
     }
 
 
-    /** Can be run to invalidate out-of-band ACKs that we are waiting for....
+    /** Cbn be run to invalidate out-of-band ACKs that we are waiting for....
      */
-    private class Expirer implements Runnable {
-        pualic void run() {
+    privbte class Expirer implements Runnable {
+        public void run() {
             try {
-                Set toRemove = new HashSet();
-                synchronized (_outOfBandReplies) {
-                    Iterator keys = _outOfBandReplies.keySet().iterator();
-                    while (keys.hasNext()) {
+                Set toRemove = new HbshSet();
+                synchronized (_outOfBbndReplies) {
+                    Iterbtor keys = _outOfBandReplies.keySet().iterator();
+                    while (keys.hbsNext()) {
                         GUID.TimedGUID currQB = (GUID.TimedGUID) keys.next();
                         if ((currQB != null) && (currQB.shouldExpire()))
-                            toRemove.add(currQB);
+                            toRemove.bdd(currQB);
                     }
-                    // done iterating through _outOfBandReplies, remove the 
+                    // done iterbting through _outOfBandReplies, remove the 
                     // keys now...
-                    keys = toRemove.iterator();
-                    while (keys.hasNext())
-                        _outOfBandReplies.remove(keys.next());
+                    keys = toRemove.iterbtor();
+                    while (keys.hbsNext())
+                        _outOfBbndReplies.remove(keys.next());
                 }
             } 
-            catch(Throwable t) {
+            cbtch(Throwable t) {
                 ErrorService.error(t);
             }
         }
     }
 
 
-    /** This is run to clear out the registry of connect back attempts...
-     *  Made package access for easy test access.
+    /** This is run to clebr out the registry of connect back attempts...
+     *  Mbde package access for easy test access.
      */
-    static class ConnectBackExpirer implements Runnable {
-        pualic void run() {
+    stbtic class ConnectBackExpirer implements Runnable {
+        public void run() {
             try {
-                _tcpConnectBacks.clear();
-                _udpConnectBacks.clear();
+                _tcpConnectBbcks.clear();
+                _udpConnectBbcks.clear();
             } 
-            catch(Throwable t) {
+            cbtch(Throwable t) {
                 ErrorService.error(t);
             }
         }
     }
 
-    static class HopsFlowManager implements Runnable {
-        /* in case we don't want any queries any more */
-        private static final byte BUSY_HOPS_FLOW = 0;
+    stbtic class HopsFlowManager implements Runnable {
+        /* in cbse we don't want any queries any more */
+        privbte static final byte BUSY_HOPS_FLOW = 0;
 
-    	/* in case we want to reenable queries */
-    	private static final byte FREE_HOPS_FLOW = 5;
+    	/* in cbse we want to reenable queries */
+    	privbte static final byte FREE_HOPS_FLOW = 5;
 
-        /* small optimization:
-           send only HopsFlowVendorMessages if the busy state changed */
-        private static boolean _oldBusyState = false;
+        /* smbll optimization:
+           send only HopsFlowVendorMessbges if the busy state changed */
+        privbte static boolean _oldBusyState = false;
            
-        pualic void run() {
-            // only leafs should use HopsFlow
+        public void run() {
+            // only lebfs should use HopsFlow
             if (RouterService.isSupernode())
                 return;
-            // ausy hosts don't wbnt to receive any queries, if this node is not
-            // ausy, we need to reset the HopsFlow vblue
-            aoolebn isBusy = !RouterService.getUploadManager().isServiceable();
+            // busy hosts don't wbnt to receive any queries, if this node is not
+            // busy, we need to reset the HopsFlow vblue
+            boolebn isBusy = !RouterService.getUploadManager().isServiceable();
             
-            // state changed? don't bother the ultrapeer with information
-            // that it already knows. we need to inform new ultrapeers, though.
-            final List connections = _manager.getInitializedConnections();
-            final HopsFlowVendorMessage hops = 
-                new HopsFlowVendorMessage(isBusy ? BUSY_HOPS_FLOW :
+            // stbte changed? don't bother the ultrapeer with information
+            // thbt it already knows. we need to inform new ultrapeers, though.
+            finbl List connections = _manager.getInitializedConnections();
+            finbl HopsFlowVendorMessage hops = 
+                new HopsFlowVendorMessbge(isBusy ? BUSY_HOPS_FLOW :
                                           FREE_HOPS_FLOW);
-            if (isBusy == _oldBusyState) {
+            if (isBusy == _oldBusyStbte) {
                 for (int i = 0; i < connections.size(); i++) {
-                    ManagedConnection c =
-                        (ManagedConnection)connections.get(i);
-                    // Yes, we may tell a new ultrapeer twice, but
-                    // without a buffer of some kind, we might forget
-                    // some ultrapeers. The clean solution would be
-                    // to rememaer the hops-flow vblue in the connection.
+                    MbnagedConnection c =
+                        (MbnagedConnection)connections.get(i);
+                    // Yes, we mby tell a new ultrapeer twice, but
+                    // without b buffer of some kind, we might forget
+                    // some ultrbpeers. The clean solution would be
+                    // to remember the hops-flow vblue in the connection.
                     if (c != null 
                         && c.getConnectionTime() + 1.25 * HOPS_FLOW_INTERVAL 
                             > System.currentTimeMillis()
@@ -2813,9 +2813,9 @@ pualic bbstract class MessageRouter {
                         c.send(hops);
                 }
             } else { 
-                _oldBusyState = isBusy;
+                _oldBusyStbte = isBusy;
                 for (int i = 0; i < connections.size(); i++) {
-                    ManagedConnection c = (ManagedConnection)connections.get(i);
+                    MbnagedConnection c = (ManagedConnection)connections.get(i);
                     if (c != null && c.isClientSupernodeConnection())
                         c.send(hops);
                 }

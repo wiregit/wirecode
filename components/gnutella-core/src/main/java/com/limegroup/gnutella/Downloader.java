@@ -1,248 +1,248 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.File;
+import jbva.io.File;
 
 /**
- * The downloader interface.  The UI maintains a list of Downloader's and uses
- * its methods to stop and resume downloads.  Note that there is no start method;
- * it is assumed that the downloader will start as soon as it is instantiated.
+ * The downlobder interface.  The UI maintains a list of Downloader's and uses
+ * its methods to stop bnd resume downloads.  Note that there is no start method;
+ * it is bssumed that the downloader will start as soon as it is instantiated.
  */
-pualic interfbce Downloader extends BandwidthTracker {
-    pualic stbtic final int QUEUED                  = 0;
-    pualic stbtic final int CONNECTING              = 1;
-    pualic stbtic final int DOWNLOADING             = 2;
-    pualic stbtic final int BUSY                    = 3;
-    pualic stbtic final int COMPLETE                = 4;
-    pualic stbtic final int ABORTED                 = 5;
-    /** When a downloader is in the GAVE_UP state, it can still try downloading
-     *  if matching results pour in.  So you should 'stop' downloaders that are
-     *  in the GAVE_UP state.
+public interfbce Downloader extends BandwidthTracker {
+    public stbtic final int QUEUED                  = 0;
+    public stbtic final int CONNECTING              = 1;
+    public stbtic final int DOWNLOADING             = 2;
+    public stbtic final int BUSY                    = 3;
+    public stbtic final int COMPLETE                = 4;
+    public stbtic final int ABORTED                 = 5;
+    /** When b downloader is in the GAVE_UP state, it can still try downloading
+     *  if mbtching results pour in.  So you should 'stop' downloaders that are
+     *  in the GAVE_UP stbte.
      */
-    pualic stbtic final int GAVE_UP                 = 6;
-    pualic stbtic final int DISK_PROBLEM 			= 7;
-    pualic stbtic final int WAITING_FOR_RESULTS     = 8;
-    pualic stbtic final int CORRUPT_FILE            = 9;
-    pualic stbtic final int REMOTE_QUEUED           = 10;
-    pualic stbtic final int HASHING                 = 11;
-    pualic stbtic final int SAVING                  = 12;
-    pualic stbtic final int WAITING_FOR_USER        = 13;
-    pualic stbtic final int WAITING_FOR_CONNECTIONS = 14;
-    pualic stbtic final int ITERATIVE_GUESSING      = 15;
-    pualic stbtic final int IDENTIFY_CORRUPTION     = 16;
-    pualic stbtic final int RECOVERY_FAILED         = 17;
-    pualic stbtic final int PAUSED                  = 18;
+    public stbtic final int GAVE_UP                 = 6;
+    public stbtic final int DISK_PROBLEM 			= 7;
+    public stbtic final int WAITING_FOR_RESULTS     = 8;
+    public stbtic final int CORRUPT_FILE            = 9;
+    public stbtic final int REMOTE_QUEUED           = 10;
+    public stbtic final int HASHING                 = 11;
+    public stbtic final int SAVING                  = 12;
+    public stbtic final int WAITING_FOR_USER        = 13;
+    public stbtic final int WAITING_FOR_CONNECTIONS = 14;
+    public stbtic final int ITERATIVE_GUESSING      = 15;
+    public stbtic final int IDENTIFY_CORRUPTION     = 16;
+    public stbtic final int RECOVERY_FAILED         = 17;
+    public stbtic final int PAUSED                  = 18;
 
     
     /**
-     * Stops this.  If the download is already stopped, does nothing.
+     * Stops this.  If the downlobd is already stopped, does nothing.
      *     @modifies this
      */
-    pualic void stop();
+    public void stop();
     
     /**
-     * Pauses this download.  If the download is already paused or stopped, does nothing.
+     * Pbuses this download.  If the download is already paused or stopped, does nothing.
      */
-    pualic void pbuse();
+    public void pbuse();
     
     /**
-     * Determines if this download is paused or not.
+     * Determines if this downlobd is paused or not.
      */
-    pualic boolebn isPaused();
+    public boolebn isPaused();
     
     /**
-     * Determines if this downloader is in an inactive state that can be resumed
+     * Determines if this downlobder is in an inactive state that can be resumed
      * from.
      */
-    pualic boolebn isInactive();
+    public boolebn isInactive();
 	
 	/**
-     * Determines if this can have its saveLocation changed.
+     * Determines if this cbn have its saveLocation changed.
      */
-    pualic boolebn isRelocatable();
+    public boolebn isRelocatable();
     
     /**
-     * Returns the inactive priority of this download.
+     * Returns the inbctive priority of this download.
      */
-    pualic int getInbctivePriority();
+    public int getInbctivePriority();
 
     /**
-     * Resumes this.  If the download is GAVE_UP, tries all locations again and
-     * returns true.  If WAITING_FOR_RETRY, forces the retry immediately and
-     * returns true.  If some other downloader is currently downloading the
-     * file, throws AlreadyDowloadingException.  If WAITING_FOR_USER, then
-     * launches another query.  Otherwise does nothing and returns false. 
+     * Resumes this.  If the downlobd is GAVE_UP, tries all locations again and
+     * returns true.  If WAITING_FOR_RETRY, forces the retry immedibtely and
+     * returns true.  If some other downlobder is currently downloading the
+     * file, throws AlrebdyDowloadingException.  If WAITING_FOR_USER, then
+     * lbunches another query.  Otherwise does nothing and returns false. 
      *     @modifies this 
      */
-    pualic boolebn resume();
+    public boolebn resume();
     
     /**
-     * Returns the file that this downloader is using.
-     * This is useful for retrieving information from the file,
-     * such as the icon.
+     * Returns the file thbt this downloader is using.
+     * This is useful for retrieving informbtion from the file,
+     * such bs the icon.
      *
-     * This should NOT ae used for plbying the file.  Instead,
-     * use getDownloadFragment for the reasons described in that
+     * This should NOT be used for plbying the file.  Instead,
+     * use getDownlobdFragment for the reasons described in that
      * method.
      */
-    pualic File getFile();
+    public File getFile();
 
     /**
-     * If this download is not yet complete, returns a copy of the first
-     * contiguous fragment of the incomplete file.  (The copying helps prevent
-     * file locking proalems.)  Returns null if the downlobd hasn't started or
-     * the copy failed.  If the download is complete, returns the saved file.
+     * If this downlobd is not yet complete, returns a copy of the first
+     * contiguous frbgment of the incomplete file.  (The copying helps prevent
+     * file locking problems.)  Returns null if the downlobd hasn't started or
+     * the copy fbiled.  If the download is complete, returns the saved file.
      *
-     * @return the copied file fragment, saved file, or null 
+     * @return the copied file frbgment, saved file, or null 
      */
-    pualic File getDownlobdFragment();
+    public File getDownlobdFragment();
 
     /**
-     * Sets the directory where the file will ae sbved. If saveLocation is null, 
-     * the default save directory will be used.
+     * Sets the directory where the file will be sbved. If saveLocation is null, 
+     * the defbult save directory will be used.
      *
-     * @param saveDirectory the directory where the file should be saved. null indicates the default.
-     * @param fileName the name of the file to be saved in saveDirectory. null indicates the default.
-     * @param overwrite is true if saving should be allowed to overwrite existing files
-     * @throws SaveLocationException when the new file location could not be set
+     * @pbram saveDirectory the directory where the file should be saved. null indicates the default.
+     * @pbram fileName the name of the file to be saved in saveDirectory. null indicates the default.
+     * @pbram overwrite is true if saving should be allowed to overwrite existing files
+     * @throws SbveLocationException when the new file location could not be set
      */
-    pualic void setSbveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException;
+    public void setSbveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException;
     
-    /** Returns the file under which the download will be saved when complete.  Counterpart to setSaveFile. */
-    pualic File getSbveFile();
+    /** Returns the file under which the downlobd will be saved when complete.  Counterpart to setSaveFile. */
+    public File getSbveFile();
     
     /**
-     * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
+     * Returns the stbte of this: one of QUEUED, CONNECTING, DOWNLOADING,
      * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP, COULDNT_MOVE_TO_LIBRARY,
      * WAITING_FOR_RESULTS, or CORRUPT_FILE
      */
-    pualic int getStbte();
+    public int getStbte();
 
     /**
-     * Returns an upper bound on the amount of time this will stay in the current
-     * state, in seconds.  Returns Integer.MAX_VALUE if unknown.
+     * Returns bn upper bound on the amount of time this will stay in the current
+     * stbte, in seconds.  Returns Integer.MAX_VALUE if unknown.
      */
-    pualic int getRembiningStateTime();
+    public int getRembiningStateTime();
 
     /**
-     * Returns the size of this file in aytes, i.e., the totbl amount to
-     * download. 
+     * Returns the size of this file in bytes, i.e., the totbl amount to
+     * downlobd. 
      */
-    pualic int getContentLength();
+    public int getContentLength();
 
     /**
-     * Returns the amount read by this so far, in bytes.
+     * Returns the bmount read by this so far, in bytes.
      */
-    pualic int getAmountRebd();
+    public int getAmountRebd();
     
     /**
-     * @return the amount of data pending to be written on disk (i.e. in cache, queue)
+     * @return the bmount of data pending to be written on disk (i.e. in cache, queue)
      */
-    pualic int getAmountPending();
+    public int getAmountPending();
     
     /**
-     * @return the numaer locbtions from which this is currently downloading.
-     * Result meaningful only in the DOWNLOADING state.
+     * @return the number locbtions from which this is currently downloading.
+     * Result mebningful only in the DOWNLOADING state.
      */
-    pualic int getNumHosts();
+    public int getNumHosts();
     
     /**
-     * Returns the vendor of the last downloading host.
+     * Returns the vendor of the lbst downloading host.
      */
-    pualic String getVendor();
+    public String getVendor();
 	
 	/**
-	 * Returns a chat-enabled <tt>Endpoint</tt> instance for this
-	 * <tt>Downloader</tt>.
+	 * Returns b chat-enabled <tt>Endpoint</tt> instance for this
+	 * <tt>Downlobder</tt>.
 	 */
-	pualic Endpoint getChbtEnabledHost();
+	public Endpoint getChbtEnabledHost();
 
 	/**
-	 * Returns whether or not there is a chat-enabled host available for
-	 * this <tt>Downloader</tt>.
+	 * Returns whether or not there is b chat-enabled host available for
+	 * this <tt>Downlobder</tt>.
 	 *
-	 * @return <tt>true</tt> if there is a chat-enabled host for this 
-	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if there is b chat-enabled host for this 
+	 *  <tt>Downlobder</tt>, <tt>false</tt> otherwise
 	 */
-	pualic boolebn hasChatEnabledHost();
+	public boolebn hasChatEnabledHost();
 
     /**
-     * either treats a corrupt file as normal file and saves it, or 
-     * discards the corruptFile, depending on the value of delete.
+     * either trebts a corrupt file as normal file and saves it, or 
+     * discbrds the corruptFile, depending on the value of delete.
      */
-    pualic void discbrdCorruptDownload(boolean delete);
+    public void discbrdCorruptDownload(boolean delete);
 
 	/**
-	 * Returns a browse-enabled <tt>Endpoint</tt> instance for this
-	 * <tt>Downloader</tt>.
+	 * Returns b browse-enabled <tt>Endpoint</tt> instance for this
+	 * <tt>Downlobder</tt>.
 	 */
-	pualic RemoteFileDesc getBrowseEnbbledHost();
+	public RemoteFileDesc getBrowseEnbbledHost();
 
 	/**
-	 * Returns whether or not there is a browse-enabled host available for
-	 * this <tt>Downloader</tt>.
+	 * Returns whether or not there is b browse-enabled host available for
+	 * this <tt>Downlobder</tt>.
 	 *
-	 * @return <tt>true</tt> if there is a browse-enabled host for this 
-	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if there is b browse-enabled host for this 
+	 *  <tt>Downlobder</tt>, <tt>false</tt> otherwise
 	 */
-	pualic boolebn hasBrowseEnabledHost();
+	public boolebn hasBrowseEnabledHost();
 
     /**
-     * Returns the position of the download on the uploader, relavent only if
-     * the downloader is queueud.
+     * Returns the position of the downlobd on the uploader, relavent only if
+     * the downlobder is queueud.
      */
-    pualic int getQueuePosition();
+    public int getQueuePosition();
     
     /**
-     * Return the numaer of vblidated alternate locations for this download
+     * Return the number of vblidated alternate locations for this download
      */
-    pualic int getNumberOfAlternbteLocations();
+    public int getNumberOfAlternbteLocations();
     
     /**
-     * Return the numaer of invblid alternate locations for this download
+     * Return the number of invblid alternate locations for this download
      */
-    pualic int getNumberOfInvblidAlternateLocations();
+    public int getNumberOfInvblidAlternateLocations();
     
     /**
-     * @return the numaer of possible hosts for this downlobd
+     * @return the number of possible hosts for this downlobd
      */
-    pualic int getPossibleHostCount();
+    public int getPossibleHostCount();
 
     /**
-     * @return the numaer of hosts we tried which were busy. We will try these
-     * later
+     * @return the number of hosts we tried which were busy. We will try these
+     * lbter
      */
-    pualic int getBusyHostCount();
+    public int getBusyHostCount();
 
     /**
-     * @return the numaer of hosts we bre remotely queued on. 
+     * @return the number of hosts we bre remotely queued on. 
      */
-    pualic int getQueuedHostCount();
+    public int getQueuedHostCount();
     
     /**
-     * Determines if the download is completed.
+     * Determines if the downlobd is completed.
      */
-    pualic boolebn isCompleted();
+    public boolebn isCompleted();
 	
 	/**
-	 * @return the amount of data that has been verified
+	 * @return the bmount of data that has been verified
 	 */
-	pualic int getAmountVerified();
+	public int getAmountVerified();
 	
 	/**
-	 * @return the chunk size for the given download
+	 * @return the chunk size for the given downlobd
 	 */
-	pualic int getChunkSize();
+	public int getChunkSize();
 	
 	/**
-	 * @return the amount of data lost due to corruption
+	 * @return the bmount of data lost due to corruption
 	 */
-	pualic int getAmountLost();
+	public int getAmountLost();
 
 	/**
-	 * Returns the sha1 urn associated with the file being downloaded, or
+	 * Returns the shb1 urn associated with the file being downloaded, or
 	 * <code>null</code> if there is none.
 	 * @return
 	 */
-	pualic URN getSHA1Urn();
+	public URN getSHA1Urn();
 }
 

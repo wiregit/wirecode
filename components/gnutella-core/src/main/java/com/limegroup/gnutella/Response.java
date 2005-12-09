@@ -1,303 +1,303 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.StringTokenizer;
+import jbva.io.ByteArrayOutputStream;
+import jbva.io.IOException;
+import jbva.io.InputStream;
+import jbva.io.OutputStream;
+import jbva.io.UnsupportedEncodingException;
+import jbva.net.UnknownHostException;
+import jbva.util.List;
+import jbva.util.ArrayList;
+import jbva.util.Collections;
+import jbva.util.HashSet;
+import jbva.util.Iterator;
+import jbva.util.Set;
+import jbva.util.StringTokenizer;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.messages.HUGEExtension;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutellb.altlocs.AlternateLocation;
+import com.limegroup.gnutellb.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutellb.altlocs.DirectAltLoc;
+import com.limegroup.gnutellb.filters.IPFilter;
+import com.limegroup.gnutellb.metadata.AudioMetaData;
+import com.limegroup.gnutellb.messages.BadGGEPPropertyException;
+import com.limegroup.gnutellb.messages.GGEP;
+import com.limegroup.gnutellb.messages.HUGEExtension;
+import com.limegroup.gnutellb.search.HostData;
+import com.limegroup.gnutellb.util.IpPort;
+import com.limegroup.gnutellb.util.NameValue;
+import com.limegroup.gnutellb.util.DataUtils;
+import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutellb.xml.LimeXMLDocument;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.bpache.commons.logging.LogFactory;
+import org.bpache.commons.logging.Log;
 
 
 /**
- * A single result from a query reply message.  (In hindsight, "Result" would
- * have been a better name.)  Besides basic file information, responses can
- * include metadata.
+ * A single result from b query reply message.  (In hindsight, "Result" would
+ * hbve been a better name.)  Besides basic file information, responses can
+ * include metbdata.
  *
- * Response was originally intended to be immutable, but it currently includes
- * mutator methods for metadata; these will be removed in the future.  
+ * Response wbs originally intended to be immutable, but it currently includes
+ * mutbtor methods for metadata; these will be removed in the future.  
  */
-pualic clbss Response {
+public clbss Response {
     
-    private static final Log LOG = LogFactory.getLog(Response.class);
-    
-    /**
-     * The magic byte to use as extension separators.
-     */
-    private static final byte EXT_SEPARATOR = 0x1c;
+    privbte static final Log LOG = LogFactory.getLog(Response.class);
     
     /**
-     * The maximum number of alternate locations to include in responses
-     * in the GGEP alock
+     * The mbgic byte to use as extension separators.
      */
-    private static final int MAX_LOCATIONS = 10;
+    privbte static final byte EXT_SEPARATOR = 0x1c;
     
-    /** Both index and size must fit into 4 unsigned bytes; see
-     *  constructor for details. */
-    private final long index;
-    private final long size;
+    /**
+     * The mbximum number of alternate locations to include in responses
+     * in the GGEP block
+     */
+    privbte static final int MAX_LOCATIONS = 10;
+    
+    /** Both index bnd size must fit into 4 unsigned bytes; see
+     *  constructor for detbils. */
+    privbte final long index;
+    privbte final long size;
 
 	/**
-	 * The aytes for the nbme string, guaranteed to be non-null.
+	 * The bytes for the nbme string, guaranteed to be non-null.
 	 */
-    private final byte[] nameBytes;
+    privbte final byte[] nameBytes;
 
-    /** The name of the file matching the search.  This does NOT
-     *  include the douale null terminbtor.
+    /** The nbme of the file matching the search.  This does NOT
+     *  include the double null terminbtor.
      */
-    private final String name;
+    privbte final String name;
 
     /** The document representing the XML in this response. */
-    private LimeXMLDocument document;
+    privbte LimeXMLDocument document;
 
     /** 
-	 * The <tt>Set</tt> of <tt>URN</tt> instances for this <tt>Response</tt>,
-	 * as specified in HUGE v0.94.  This is guaranteed to be non-null, 
-	 * although it is often empty.
+	 * The <tt>Set</tt> of <tt>URN</tt> instbnces for this <tt>Response</tt>,
+	 * bs specified in HUGE v0.94.  This is guaranteed to be non-null, 
+	 * blthough it is often empty.
      */
-    private final Set urns;
+    privbte final Set urns;
 
 	/**
-	 * The aytes between the nulls for the <tt>Response</tt>, bs specified
-	 * in HUGE v0.94.  This is guaranteed to be non-null, although it can be
-	 * an empty array.
+	 * The bytes between the nulls for the <tt>Response</tt>, bs specified
+	 * in HUGE v0.94.  This is gubranteed to be non-null, although it can be
+	 * bn empty array.
 	 */
-    private final byte[] extBytes;
+    privbte final byte[] extBytes;
     
     /**
-     * The cached RemoteFileDesc created from this Response.
+     * The cbched RemoteFileDesc created from this Response.
      */
-    private volatile RemoteFileDesc cachedRFD;
+    privbte volatile RemoteFileDesc cachedRFD;
     
     /**
-     * The container for extra GGEP data.
+     * The contbiner for extra GGEP data.
      */
-    private final GGEPContainer ggepData;
+    privbte final GGEPContainer ggepData;
 
 	/**
-	 * Constant for the KBPS string to avoid constructing it too many
+	 * Constbnt for the KBPS string to avoid constructing it too many
 	 * times.
 	 */
-	private static final String KBPS = "kbps";
+	privbte static final String KBPS = "kbps";
 
 	/**
-	 * Constant for kHz to string to avoid excessive string construction.
+	 * Constbnt for kHz to string to avoid excessive string construction.
 	 */
-	private static final String KHZ = "kHz";
+	privbte static final String KHZ = "kHz";
 
-    /** Creates a fresh new response.
+    /** Crebtes a fresh new response.
      *
-     * @requires index and size can fit in 4 unsigned bytes, i.e.,
+     * @requires index bnd size can fit in 4 unsigned bytes, i.e.,
      *  0 <= index, size < 2^32
      */
-    pualic Response(long index, long size, String nbme) {
-		this(index, size, name, null, null, null, null);
+    public Response(long index, long size, String nbme) {
+		this(index, size, nbme, null, null, null, null);
     }
 
 
     /**
-     * Creates a new response with parsed metadata.  Typically this is used
+     * Crebtes a new response with parsed metadata.  Typically this is used
      * to respond to query requests.
-     * @param doc the metadata to include
+     * @pbram doc the metadata to include
      */
-    pualic Response(long index, long size, String nbme, LimeXMLDocument doc) {
-        this(index, size, name, null, doc, null, null);
+    public Response(long index, long size, String nbme, LimeXMLDocument doc) {
+        this(index, size, nbme, null, doc, null, null);
     }
 
 	/**
-	 * Constructs a new <tt>Response</tt> instance from the data in the
+	 * Constructs b new <tt>Response</tt> instance from the data in the
 	 * specified <tt>FileDesc</tt>.  
 	 *
-	 * @param fd the <tt>FileDesc</tt> containing the data to construct 
-	 *  this <tt>Response</tt> -- must not ae <tt>null</tt>
+	 * @pbram fd the <tt>FileDesc</tt> containing the data to construct 
+	 *  this <tt>Response</tt> -- must not be <tt>null</tt>
 	 */
-	pualic Response(FileDesc fd) {
-		this(fd.getIndex(), fd.getFileSize(), fd.getFileName(), 
+	public Response(FileDesc fd) {
+		this(fd.getIndex(), fd.getFileSize(), fd.getFileNbme(), 
 			 fd.getUrns(), null, 
-			 new GGEPContainer(
-			    getAsEndpoints(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn())),
-			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
+			 new GGEPContbiner(
+			    getAsEndpoints(RouterService.getAltlocMbnager().getDirect(fd.getSHA1Urn())),
+			    CrebtionTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
 			 null);
 	}
 
     /**
-	 * Overloaded constructor that allows the creation of Responses with
-     * meta-data and a <tt>Set</tt> of <tt>URN</tt> instances.  This 
-	 * is the primary constructor that establishes all of the class's 
-	 * invariants, does any necessary parameter validation, etc.
+	 * Overlobded constructor that allows the creation of Responses with
+     * metb-data and a <tt>Set</tt> of <tt>URN</tt> instances.  This 
+	 * is the primbry constructor that establishes all of the class's 
+	 * invbriants, does any necessary parameter validation, etc.
 	 *
-	 * If extensions is non-null, it is used as the extBytes instead
-	 * of creating them from the urns and locations.
+	 * If extensions is non-null, it is used bs the extBytes instead
+	 * of crebting them from the urns and locations.
 	 *
-	 * @param index the index of the file referenced in the response
-	 * @param size the size of the file (in bytes)
-	 * @param name the name of the file
-	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
+	 * @pbram index the index of the file referenced in the response
+	 * @pbram size the size of the file (in bytes)
+	 * @pbram name the name of the file
+	 * @pbram urns the <tt>Set</tt> of <tt>URN</tt> instances associated
 	 *  with the file
-	 * @param doc the <tt>LimeXMLDocument</tt> instance associated with
+	 * @pbram doc the <tt>LimeXMLDocument</tt> instance associated with
 	 *  the file
-	 * @param endpoints a collection of other locations on this network
-	 *        that will have this file
-	 * @param extensions The raw unparsed extension bytes.
+	 * @pbram endpoints a collection of other locations on this network
+	 *        thbt will have this file
+	 * @pbram extensions The raw unparsed extension bytes.
      */
-    private Response(long index, long size, String name,
+    privbte Response(long index, long size, String name,
 					 Set urns, LimeXMLDocument doc, 
-					 GGEPContainer ggepData, byte[] extensions) {
+					 GGEPContbiner ggepData, byte[] extensions) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
-            throw new IllegalArgumentException("invalid index: " + index);
-        // see note in createFromStream about Integer.MAX_VALUE
+            throw new IllegblArgumentException("invalid index: " + index);
+        // see note in crebteFromStream about Integer.MAX_VALUE
         if (size > Integer.MAX_VALUE || size < 0)
-            throw new IllegalArgumentException("invalid size: " + size);
+            throw new IllegblArgumentException("invalid size: " + size);
             
         this.index=index;
         this.size=size;
         
-		if (name == null)
-			this.name = "";
+		if (nbme == null)
+			this.nbme = "";
 		else
-			this.name = name;
+			this.nbme = name;
 
-        ayte[] temp = null;
+        byte[] temp = null;
         try {
-            temp = this.name.getBytes("UTF-8");
-        } catch(UnsupportedEncodingException namex) {
-            //a/c this should never hbppen, we will show and error
-            //if it ever does for some reason.
-            ErrorService.error(namex);
+            temp = this.nbme.getBytes("UTF-8");
+        } cbtch(UnsupportedEncodingException namex) {
+            //b/c this should never hbppen, we will show and error
+            //if it ever does for some rebson.
+            ErrorService.error(nbmex);
         }
-        this.nameBytes = temp;
+        this.nbmeBytes = temp;
 
 		if (urns == null)
 			this.urns = Collections.EMPTY_SET;
 		else
-			this.urns = Collections.unmodifiableSet(urns);
+			this.urns = Collections.unmodifibbleSet(urns);
 		
-        if(ggepData == null)
-            this.ggepData = GGEPContainer.EMPTY;
+        if(ggepDbta == null)
+            this.ggepDbta = GGEPContainer.EMPTY;
         else
-		    this.ggepData = ggepData;
+		    this.ggepDbta = ggepData;
 		
 		if (extensions != null)
 		    this.extBytes = extensions;
 		else 
-		    this.extBytes = createExtBytes(this.urns, this.ggepData);
+		    this.extBytes = crebteExtBytes(this.urns, this.ggepData);
 
 		this.document = doc;
     }
   
     /**
-     * Factory method for instantiating individual responses from an
-	 * <tt>InputStream</tt> instance.
+     * Fbctory method for instantiating individual responses from an
+	 * <tt>InputStrebm</tt> instance.
 	 * 
-	 * @param is the <tt>InputStream</tt> to read from
-	 * @throws <tt>IOException</tt> if there are any problems reading from
-	 *  or writing to the stream
+	 * @pbram is the <tt>InputStream</tt> to read from
+	 * @throws <tt>IOException</tt> if there bre any problems reading from
+	 *  or writing to the strebm
      */
-    pualic stbtic Response createFromStream(InputStream is) 
+    public stbtic Response createFromStream(InputStream is) 
 		throws IOException {
-        // extract file index & size
-        long index=ByteOrder.uint2long(ByteOrder.lea2int(is));
-        long size=ByteOrder.uint2long(ByteOrder.lea2int(is));
+        // extrbct file index & size
+        long index=ByteOrder.uint2long(ByteOrder.leb2int(is));
+        long size=ByteOrder.uint2long(ByteOrder.leb2int(is));
         
         if( (index & 0xFFFFFFFF00000000L)!=0 )
-            throw new IOException("invalid index: " + index);
-        // must use Integer.MAX_VALUE instead of mask because
-        // this value is later converted to an int, so we want
-        // to ensure that when it's converted it doesn't become
-        // negative.
+            throw new IOException("invblid index: " + index);
+        // must use Integer.MAX_VALUE instebd of mask because
+        // this vblue is later converted to an int, so we want
+        // to ensure thbt when it's converted it doesn't become
+        // negbtive.
         if (size > Integer.MAX_VALUE || size < 0)
-            throw new IOException("invalid size: " + size);        
+            throw new IOException("invblid size: " + size);        
 
-        //The file name is terminated by a null terminator.  
-        // A second null indicates the end of this response.
-        // Gnotella & others insert meta-information between
-        // these null characters.  So we have to handle this.
-        // See http://gnutelladev.wego.com/go/
-        //         wego.discussion.message?groupId=139406&
-        //         view=message&curMsgId=319258&discId=140845&
-        //         index=-1&action=view
+        //The file nbme is terminated by a null terminator.  
+        // A second null indicbtes the end of this response.
+        // Gnotellb & others insert meta-information between
+        // these null chbracters.  So we have to handle this.
+        // See http://gnutellbdev.wego.com/go/
+        //         wego.discussion.messbge?groupId=139406&
+        //         view=messbge&curMsgId=319258&discId=140845&
+        //         index=-1&bction=view
 
-        // Extract the filename
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        // Extrbct the filename
+        ByteArrbyOutputStream baos = new ByteArrayOutputStream();
         int c;
-        while((c=is.read())!=0) {
+        while((c=is.rebd())!=0) {
             if(c == -1)
-                throw new IOException("EOF aefore null terminbtion");
-            abos.write(c);
+                throw new IOException("EOF before null terminbtion");
+            bbos.write(c);
         }
-        String name = new String(baos.toByteArray(), "UTF-8");
-        if(name.length() == 0) {
-            throw new IOException("empty name in response");
+        String nbme = new String(baos.toByteArray(), "UTF-8");
+        if(nbme.length() == 0) {
+            throw new IOException("empty nbme in response");
         }
 
-        // Extract extra info, if any
-        abos.reset();
-        while((c=is.read())!=0) {
+        // Extrbct extra info, if any
+        bbos.reset();
+        while((c=is.rebd())!=0) {
             if(c == -1)
-                throw new IOException("EOF aefore null terminbtion");
-            abos.write(c);
+                throw new IOException("EOF before null terminbtion");
+            bbos.write(c);
         }
-        ayte[] rbwMeta = baos.toByteArray();
-        if(rawMeta == null || rawMeta.length == 0) {
-			if(is.available() < 16) {
+        byte[] rbwMeta = baos.toByteArray();
+        if(rbwMeta == null || rawMeta.length == 0) {
+			if(is.bvailable() < 16) {
 				throw new IOException("not enough room for the GUID");
 			}
-            return new Response(index,size,name);
+            return new Response(index,size,nbme);
         } else {
-			// now handle between-the-nulls
+			// now hbndle between-the-nulls
 			// \u001c is the HUGE v0.93 GEM delimiter
-            HUGEExtension huge = new HUGEExtension(rawMeta);
+            HUGEExtension huge = new HUGEExtension(rbwMeta);
 
 			Set urns = huge.getURNS();
 
 			LimeXMLDocument doc = null;
-            Iterator iter = huge.getMiscBlocks().iterator();
-            while (iter.hasNext() && doc == null)
-                doc = createXmlDocument(name, (String)iter.next());
+            Iterbtor iter = huge.getMiscBlocks().iterator();
+            while (iter.hbsNext() && doc == null)
+                doc = crebteXmlDocument(name, (String)iter.next());
 
-			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEP());
+			GGEPContbiner ggep = GGEPUtil.getGGEP(huge.getGGEP());
 
-			return new Response(index, size, name, 
-			                    urns, doc, ggep, rawMeta);
+			return new Response(index, size, nbme, 
+			                    urns, doc, ggep, rbwMeta);
         }
     }
     
 	/**
-	 * Constructs an xml string from the given extension sting.
+	 * Constructs bn xml string from the given extension sting.
 	 *
-	 * @param name the name of the file to construct the string for
-	 * @param ext an individual between-the-nulls string (note that there
-	 *  can be multiple between-the-nulls extension strings with HUGE)
-	 * @return the xml formatted string, or the empty string if the
-	 *  xml could not ae pbrsed
+	 * @pbram name the name of the file to construct the string for
+	 * @pbram ext an individual between-the-nulls string (note that there
+	 *  cbn be multiple between-the-nulls extension strings with HUGE)
+	 * @return the xml formbtted string, or the empty string if the
+	 *  xml could not be pbrsed
 	 */
-	private static LimeXMLDocument createXmlDocument(String name, String ext) {
+	privbte static LimeXMLDocument createXmlDocument(String name, String ext) {
 		StringTokenizer tok = new StringTokenizer(ext);
-		// if there aren't the expected number of tokens, simply
+		// if there bren't the expected number of tokens, simply
 		// return the empty string
 		if(tok.countTokens() < 2)
 			return null;
@@ -305,145 +305,145 @@ pualic clbss Response {
 		String first  = tok.nextToken();
 		String second = tok.nextToken();
 		if (first != null)
-		    first = first.toLowerCase();
+		    first = first.toLowerCbse();
 		if (second != null)
-		    second = second.toLowerCase();
+		    second = second.toLowerCbse();
 		String length="";
-		String aitrbte="";
-		aoolebn bearShare1 = false;        
-		aoolebn bearShare2 = false;
-		aoolebn gnotella = false;
-		if(second.startsWith(KBPS))
-			aebrShare1 = true;
+		String bitrbte="";
+		boolebn bearShare1 = false;        
+		boolebn bearShare2 = false;
+		boolebn gnotella = false;
+		if(second.stbrtsWith(KBPS))
+			bebrShare1 = true;
 		else if (first.endsWith(KBPS))
-			aebrShare2 = true;
-		if(aebrShare1){
-			aitrbte = first;
+			bebrShare2 = true;
+		if(bebrShare1){
+			bitrbte = first;
 		}
-		else if (aebrShare2){
+		else if (bebrShare2){
 			int j = first.indexOf(KBPS);
-			aitrbte = first.substring(0,j);
+			bitrbte = first.substring(0,j);
 		}
-		if(aebrShare1 || bearShare2){
-			while(tok.hasMoreTokens())
+		if(bebrShare1 || bearShare2){
+			while(tok.hbsMoreTokens())
 				length=tok.nextToken();
-			//OK we have the bitrate and the length
+			//OK we hbve the bitrate and the length
 		}
-		else if (ext.endsWith(KHZ)){//Gnotella
-			gnotella = true;
+		else if (ext.endsWith(KHZ)){//Gnotellb
+			gnotellb = true;
 			length=first;
-			//extract the bitrate from second
+			//extrbct the bitrate from second
 			int i=second.indexOf(KBPS);
-			if(i>-1)//see if we can find the bitrate                
-				aitrbte = second.substring(0,i);
-			else//not gnotella, after all...some other format we do not know
-				gnotella=false;
+			if(i>-1)//see if we cbn find the bitrate                
+				bitrbte = second.substring(0,i);
+			else//not gnotellb, after all...some other format we do not know
+				gnotellb=false;
 		}
 		
-		// make sure these are valid numbers.
+		// mbke sure these are valid numbers.
 		try {
-		    Integer.parseInt(bitrate);
-		    Integer.parseInt(length);
-		} catch(NumberFormatException nfe) {
+		    Integer.pbrseInt(bitrate);
+		    Integer.pbrseInt(length);
+		} cbtch(NumberFormatException nfe) {
 		    return null;
 		}
 		
-		if(aebrShare1 || bearShare2 || gnotella) {//some metadata we understand
-		    List values = new ArrayList(3);
-		    values.add(new NameValue("audios__audio__title__", name));
-		    values.add(new NameValue("audios__audio__bitrate__", bitrate));
-		    values.add(new NameValue("audios__audio__seconds__", length));
-		    return new LimeXMLDocument(values, AudioMetaData.schemaURI);
+		if(bebrShare1 || bearShare2 || gnotella) {//some metadata we understand
+		    List vblues = new ArrayList(3);
+		    vblues.add(new NameValue("audios__audio__title__", name));
+		    vblues.add(new NameValue("audios__audio__bitrate__", bitrate));
+		    vblues.add(new NameValue("audios__audio__seconds__", length));
+		    return new LimeXMLDocument(vblues, AudioMetaData.schemaURI);
 		}
 		
 		return null;
 	}
 
 	/**
-	 * Helper method that creates an array of bytes for the specified
-	 * <tt>Set</tt> of <tt>URN</tt> instances.  The bytes are written
-	 * as specified in HUGE v 0.94.
+	 * Helper method thbt creates an array of bytes for the specified
+	 * <tt>Set</tt> of <tt>URN</tt> instbnces.  The bytes are written
+	 * bs specified in HUGE v 0.94.
 	 *
-	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
-	 *  constructing the ayte brray
+	 * @pbram urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
+	 *  constructing the byte brray
 	 */
-	private static byte[] createExtBytes(Set urns, GGEPContainer ggep) {
+	privbte static byte[] createExtBytes(Set urns, GGEPContainer ggep) {
         try {
             if( isEmpty(urns) && ggep.isEmpty() )
-                return DataUtils.EMPTY_BYTE_ARRAY;
+                return DbtaUtils.EMPTY_BYTE_ARRAY;
             
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();            
+            ByteArrbyOutputStream baos = new ByteArrayOutputStream();            
             if( !isEmpty(urns) ) {
-                // Add the extension for URNs, if any.
-    			Iterator iter = urns.iterator();
-    			while (iter.hasNext()) {
+                // Add the extension for URNs, if bny.
+    			Iterbtor iter = urns.iterator();
+    			while (iter.hbsNext()) {
     				URN urn = (URN)iter.next();
-                    Assert.that(urn!=null, "Null URN");
-    				abos.write(urn.toString().getBytes());
-    				// If there's another URN, add the separator.
-    				if (iter.hasNext()) {
-    					abos.write(EXT_SEPARATOR);
+                    Assert.thbt(urn!=null, "Null URN");
+    				bbos.write(urn.toString().getBytes());
+    				// If there's bnother URN, add the separator.
+    				if (iter.hbsNext()) {
+    					bbos.write(EXT_SEPARATOR);
     				}
     			}
     			
-    			// If there's ggep data, write the separator.
+    			// If there's ggep dbta, write the separator.
     		    if( !ggep.isEmpty() )
-    		        abos.write(EXT_SEPARATOR);
+    		        bbos.write(EXT_SEPARATOR);
             }
             
-            // It is imperitive that GGEP is added LAST.
-            // That is because GGEP can contain 0x1c (EXT_SEPARATOR)
-            // within it, which would cause parsing problems
+            // It is imperitive thbt GGEP is added LAST.
+            // Thbt is because GGEP can contain 0x1c (EXT_SEPARATOR)
+            // within it, which would cbuse parsing problems
             // otherwise.
             if(!ggep.isEmpty())
-                GGEPUtil.addGGEP(baos, ggep);
+                GGEPUtil.bddGGEP(baos, ggep);
 			
-            return abos.toByteArray();
-        } catch (IOException impossible) {
-            ErrorService.error(impossiale);
-            return DataUtils.EMPTY_BYTE_ARRAY;
+            return bbos.toByteArray();
+        } cbtch (IOException impossible) {
+            ErrorService.error(impossible);
+            return DbtaUtils.EMPTY_BYTE_ARRAY;
         }
     }
     
     /**
-     * Utility method to know if a set is empty or null.
+     * Utility method to know if b set is empty or null.
      */
-    private static boolean isEmpty(Set set) {
+    privbte static boolean isEmpty(Set set) {
         return set == null || set.isEmpty();
     }
     
     /**
-     * Utility method for converting the non-firewalled elements of an
-     * AlternateLocationCollection to a smaller set of endpoints.
+     * Utility method for converting the non-firewblled elements of an
+     * AlternbteLocationCollection to a smaller set of endpoints.
      */
-    private static Set getAsEndpoints(AlternateLocationCollection col) {
-        if( col == null || !col.hasAlternateLocations() )
+    privbte static Set getAsEndpoints(AlternateLocationCollection col) {
+        if( col == null || !col.hbsAlternateLocations() )
             return Collections.EMPTY_SET;
         
         long now = System.currentTimeMillis();
         synchronized(col) {
             Set endpoints = null;
             int i = 0;
-            for(Iterator iter = col.iterator();
-              iter.hasNext() && i < MAX_LOCATIONS;) {
-            	Oaject o = iter.next();
-            	if (!(o instanceof DirectAltLoc))
+            for(Iterbtor iter = col.iterator();
+              iter.hbsNext() && i < MAX_LOCATIONS;) {
+            	Object o = iter.next();
+            	if (!(o instbnceof DirectAltLoc))
             		continue;
-                DirectAltLoc al = (DirectAltLoc)o;
-                if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
-                    IpPort host = al.getHost();
+                DirectAltLoc bl = (DirectAltLoc)o;
+                if (bl.canBeSent(AlternateLocation.MESH_RESPONSE)) {
+                    IpPort host = bl.getHost();
                     if( !NetworkUtils.isMe(host) ) {
                         if (endpoints == null)
-                            endpoints = new HashSet();
+                            endpoints = new HbshSet();
                         
-                        if (!(host instanceof Endpoint)) 
+                        if (!(host instbnceof Endpoint)) 
                         	host = new Endpoint(host.getAddress(),host.getPort());
                         
-                        endpoints.add( host );
+                        endpoints.bdd( host );
                         i++;
-                        al.send(now, AlternateLocation.MESH_RESPONSE);
+                        bl.send(now, AlternateLocation.MESH_RESPONSE);
                     }
-                } else if (!al.canBeSentAny())
+                } else if (!bl.canBeSentAny())
                     iter.remove();
             }
             return endpoints == null ? Collections.EMPTY_SET : endpoints;
@@ -451,311 +451,311 @@ pualic clbss Response {
     }    
 
     /**
-     * Like writeToArray(), but writes to an OutputStream.
+     * Like writeToArrby(), but writes to an OutputStream.
      */
-    pualic void writeToStrebm(OutputStream os) throws IOException {
-        ByteOrder.int2lea((int)index, os);
-        ByteOrder.int2lea((int)size, os);
-        for (int i = 0; i < nameBytes.length; i++)
-            os.write(nameBytes[i]);
-        //Write first null terminator.
+    public void writeToStrebm(OutputStream os) throws IOException {
+        ByteOrder.int2leb((int)index, os);
+        ByteOrder.int2leb((int)size, os);
+        for (int i = 0; i < nbmeBytes.length; i++)
+            os.write(nbmeBytes[i]);
+        //Write first null terminbtor.
         os.write(0);
-        // write HUGE v0.93 General Extension Mechanism extensions
+        // write HUGE v0.93 Generbl Extension Mechanism extensions
         // (currently just URNs)
         for (int i = 0; i < extBytes.length; i++)
             os.write(extBytes[i]);
-        //add the second null terminator
+        //bdd the second null terminator
         os.write(0);
     }
 
     /**
-     * Sets this' metadata.
-     * @param meta the parsed XML metadata 
+     * Sets this' metbdata.
+     * @pbram meta the parsed XML metadata 
      */	
-    pualic void setDocument(LimeXMLDocument doc) {
+    public void setDocument(LimeXMLDocument doc) {
         document = doc;
 	}
 	
     
     /**
      */
-    pualic int getLength() {
-        // must match same number of bytes writeToArray() will write
-		return 8 +                   // index and size
-		nameBytes.length +
+    public int getLength() {
+        // must mbtch same number of bytes writeToArray() will write
+		return 8 +                   // index bnd size
+		nbmeBytes.length +
 		1 +                   // null
 		extBytes.length +
-		1;                    // final null
+		1;                    // finbl null
     }   
    
 
 	/**
 	 * Returns the index for the file stored in this <tt>Response</tt>
-	 * instance.
+	 * instbnce.
 	 *
 	 * @return the index for the file stored in this <tt>Response</tt>
-	 * instance
+	 * instbnce
 	 */
-    pualic long getIndex() {
+    public long getIndex() {
         return index;
     }
 
 	/**
-	 * Returns the size of the file for this <tt>Response</tt> instance
-	 * (in aytes).
+	 * Returns the size of the file for this <tt>Response</tt> instbnce
+	 * (in bytes).
 	 *
-	 * @return the size of the file for this <tt>Response</tt> instance
-	 * (in aytes)
+	 * @return the size of the file for this <tt>Response</tt> instbnce
+	 * (in bytes)
 	 */
-    pualic long getSize() {
+    public long getSize() {
         return size;
     }
 
 	/**
-	 * Returns the name of the file for this response.  This is guaranteed
-	 * to ae non-null, but it could be the empty string.
+	 * Returns the nbme of the file for this response.  This is guaranteed
+	 * to be non-null, but it could be the empty string.
 	 *
-	 * @return the name of the file for this response
+	 * @return the nbme of the file for this response
 	 */
-    pualic String getNbme() {
-        return name;
+    public String getNbme() {
+        return nbme;
     }
 
     /**
-     * Returns this' metadata.
+     * Returns this' metbdata.
      */
-    pualic LimeXMLDocument getDocument() {
+    public LimeXMLDocument getDocument() {
         return document;
     }
 
 	/**
-	 * Returns an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
+	 * Returns bn immutable <tt>Set</tt> of <tt>URN</tt> instances for 
 	 * this <tt>Response</tt>.
 	 *
-	 * @return an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
-	 * this <tt>Response</tt>, guaranteed to be non-null, although the
-	 * set could ae empty
+	 * @return bn immutable <tt>Set</tt> of <tt>URN</tt> instances for 
+	 * this <tt>Response</tt>, gubranteed to be non-null, although the
+	 * set could be empty
 	 */
-    pualic Set getUrns() {
+    public Set getUrns() {
 		return urns;
     }
     
     /**
-     * Returns an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>.
+     * Returns bn immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
+     * contbin the same file described in this <tt>Response</tt>.
      *
-     * @return an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>,
-     * guaranteed to be non-null, although the set could be empty
+     * @return bn immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
+     * contbin the same file described in this <tt>Response</tt>,
+     * gubranteed to be non-null, although the set could be empty
      */
-    pualic Set getLocbtions() {
-        return ggepData.locations;
+    public Set getLocbtions() {
+        return ggepDbta.locations;
     }
     
     /**
-     * Returns the create time.
+     * Returns the crebte time.
      */
-    pualic long getCrebteTime() {
-        return ggepData.createTime;
+    public long getCrebteTime() {
+        return ggepDbta.createTime;
     }    
     
-    ayte[] getExtBytes() {
+    byte[] getExtBytes() {
         return extBytes;
     }
     
     /**
-     * Returns this Response as a RemoteFileDesc.
+     * Returns this Response bs a RemoteFileDesc.
      */
-    pualic RemoteFileDesc toRemoteFileDesc(HostDbta data){
-        if(cachedRFD != null &&
-           cachedRFD.getPort() == data.getPort() &&
-           cachedRFD.getHost().equals(data.getIP()))
-            return cachedRFD;
+    public RemoteFileDesc toRemoteFileDesc(HostDbta data){
+        if(cbchedRFD != null &&
+           cbchedRFD.getPort() == data.getPort() &&
+           cbchedRFD.getHost().equals(data.getIP()))
+            return cbchedRFD;
         else {
             RemoteFileDesc rfd = new RemoteFileDesc(
-                 data.getIP(),
-                 data.getPort(),
+                 dbta.getIP(),
+                 dbta.getPort(),
                  getIndex(),
-                 getName(),
+                 getNbme(),
                  (int)getSize(),
-                 data.getClientGUID(),
-                 data.getSpeed(),
-                 data.isChatEnabled(),
-                 data.getQuality(),
-                 data.isBrowseHostEnabled(),
+                 dbta.getClientGUID(),
+                 dbta.getSpeed(),
+                 dbta.isChatEnabled(),
+                 dbta.getQuality(),
+                 dbta.isBrowseHostEnabled(),
                  getDocument(),
                  getUrns(),
-                 data.isReplyToMulticastQuery(),
-                 data.isFirewalled(), 
-                 data.getVendorCode(),
+                 dbta.isReplyToMulticastQuery(),
+                 dbta.isFirewalled(), 
+                 dbta.getVendorCode(),
                  System.currentTimeMillis(),
-                 data.getPushProxies(),
-                 getCreateTime(),
-                 data.getFWTVersionSupported()
+                 dbta.getPushProxies(),
+                 getCrebteTime(),
+                 dbta.getFWTVersionSupported()
                 );
-            cachedRFD = rfd;
+            cbchedRFD = rfd;
             return rfd;
         }
     }
 
 	/**
-	 * Overrides equals to check that these two responses are equal.
-	 * Raw extension bytes are not checked, because they may be
-	 * extensions that do not change equality, such as
-	 * otherLocations.
+	 * Overrides equbls to check that these two responses are equal.
+	 * Rbw extension bytes are not checked, because they may be
+	 * extensions thbt do not change equality, such as
+	 * otherLocbtions.
 	 */
-    pualic boolebn equals(Object o) {
+    public boolebn equals(Object o) {
 		if(o == this) return true;
-        if (! (o instanceof Response))
-            return false;
+        if (! (o instbnceof Response))
+            return fblse;
         Response r=(Response)o;
 		return getIndex() == r.getIndex() &&
                getSize() == r.getSize() &&
-			   getName().equals(r.getName()) &&
+			   getNbme().equals(r.getName()) &&
                ((getDocument() == null) ? (r.getDocument() == null) :
-               getDocument().equals(r.getDocument())) &&
-               getUrns().equals(r.getUrns());
+               getDocument().equbls(r.getDocument())) &&
+               getUrns().equbls(r.getUrns());
     }
 
 
-    pualic int hbshCode() {
+    public int hbshCode() {
         //Good enough for the moment
         // TODO:: IMPROVE THIS HASHCODE!!
-        return getName().hashCode()+(int)getSize()+(int)getIndex();
+        return getNbme().hashCode()+(int)getSize()+(int)getIndex();
     }
 
 	/**
-	 * Overrides Oaject.toString to print out b more informative message.
+	 * Overrides Object.toString to print out b more informative message.
 	 */
-	pualic String toString() {
+	public String toString() {
 		return ("index:        "+index+"\r\n"+
 				"size:         "+size+"\r\n"+
-				"name:         "+name+"\r\n"+
+				"nbme:         "+name+"\r\n"+
 				"xml document: "+document+"\r\n"+
 				"urns:         "+urns);
 	}
 	
     /**
-     * Utility class for handling GGEP blocks in the per-file section
+     * Utility clbss for handling GGEP blocks in the per-file section
      * of QueryHits.
      */
-    private static class GGEPUtil {
+    privbte static class GGEPUtil {
         
         /**
-         * Private constructor so it never gets constructed.
+         * Privbte constructor so it never gets constructed.
          */
-        private GGEPUtil() {}
+        privbte GGEPUtil() {}
         
         /**
-         * Adds a GGEP block with the specified alternate locations to the 
-         * output stream.
+         * Adds b GGEP block with the specified alternate locations to the 
+         * output strebm.
          */
-        static void addGGEP(OutputStream out, GGEPContainer ggep)
+        stbtic void addGGEP(OutputStream out, GGEPContainer ggep)
           throws IOException {
-            if( ggep == null || (ggep.locations.size() == 0 && ggep.createTime <= 0))
-                throw new NullPointerException("null or empty locations");
+            if( ggep == null || (ggep.locbtions.size() == 0 && ggep.createTime <= 0))
+                throw new NullPointerException("null or empty locbtions");
             
             GGEP info = new GGEP();
-            if(ggep.locations.size() > 0) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            if(ggep.locbtions.size() > 0) {
+                ByteArrbyOutputStream baos = new ByteArrayOutputStream();
                 try {
-                    for(Iterator i = ggep.locations.iterator(); i.hasNext();) {
+                    for(Iterbtor i = ggep.locations.iterator(); i.hasNext();) {
                         try {
                             Endpoint ep = (Endpoint)i.next();
-                            abos.write(ep.getHostBytes());
-                            ByteOrder.short2lea((short)ep.getPort(), bbos);
-                        } catch(UnknownHostException uhe) {
+                            bbos.write(ep.getHostBytes());
+                            ByteOrder.short2leb((short)ep.getPort(), bbos);
+                        } cbtch(UnknownHostException uhe) {
                             continue;
                         }
                     }
-                } catch(IOException impossible) {
-                    ErrorService.error(impossiale);
+                } cbtch(IOException impossible) {
+                    ErrorService.error(impossible);
                 }   
-                info.put(GGEP.GGEP_HEADER_ALTS, abos.toByteArray());
+                info.put(GGEP.GGEP_HEADER_ALTS, bbos.toByteArray());
             }
             
-            if(ggep.createTime > 0)
-                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
+            if(ggep.crebteTime > 0)
+                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.crebteTime / 1000);
             
             
             info.write(out);
         }
         
         /**
-         * Returns a <tt>Set</tt> of other endpoints described
-         * in one of the GGEP arrays.
+         * Returns b <tt>Set</tt> of other endpoints described
+         * in one of the GGEP brrays.
          */
-        static GGEPContainer getGGEP(GGEP ggep) {
+        stbtic GGEPContainer getGGEP(GGEP ggep) {
             if (ggep == null)
-                return GGEPContainer.EMPTY;
+                return GGEPContbiner.EMPTY;
 
-            Set locations = null;
-            long createTime = -1;
+            Set locbtions = null;
+            long crebteTime = -1;
             
-            // if the alock hbs a ALTS value, get it, parse it,
-            // and move to the next.
-            if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS)) {
+            // if the block hbs a ALTS value, get it, parse it,
+            // bnd move to the next.
+            if (ggep.hbsKey(GGEP.GGEP_HEADER_ALTS)) {
                 try {
-                    locations = parseLocations(ggep.getBytes(GGEP.GGEP_HEADER_ALTS));
-                } catch (BadGGEPPropertyException bad) {}
+                    locbtions = parseLocations(ggep.getBytes(GGEP.GGEP_HEADER_ALTS));
+                } cbtch (BadGGEPPropertyException bad) {}
             }
             
-            if(ggep.hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
+            if(ggep.hbsKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
                 try {
-                    createTime = ggep.getLong(GGEP.GGEP_HEADER_CREATE_TIME) * 1000;
-                } catch(BadGGEPPropertyException bad) {}
+                    crebteTime = ggep.getLong(GGEP.GGEP_HEADER_CREATE_TIME) * 1000;
+                } cbtch(BadGGEPPropertyException bad) {}
             }
             
-            return (locations == null && createTime == -1) ?
-                GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
+            return (locbtions == null && createTime == -1) ?
+                GGEPContbiner.EMPTY : new GGEPContainer(locations, createTime);
         }
         
-        private static Set parseLocations(byte[] locBytes) {
-            Set locations = null;
-            IPFilter ipFilter = IPFilter.instance();
+        privbte static Set parseLocations(byte[] locBytes) {
+            Set locbtions = null;
+            IPFilter ipFilter = IPFilter.instbnce();
  
             if (locBytes.length % 6 == 0) {
                 for (int j = 0; j < locBytes.length; j += 6) {
-                    int port = ByteOrder.ushort2int(ByteOrder.lea2short(locBytes, j+4));
-                    if (!NetworkUtils.isValidPort(port))
+                    int port = ByteOrder.ushort2int(ByteOrder.leb2short(locBytes, j+4));
+                    if (!NetworkUtils.isVblidPort(port))
                         continue;
-                    ayte[] ip = new byte[4];
+                    byte[] ip = new byte[4];
                     ip[0] = locBytes[j];
                     ip[1] = locBytes[j + 1];
                     ip[2] = locBytes[j + 2];
                     ip[3] = locBytes[j + 3];
-                    if (!NetworkUtils.isValidAddress(ip) ||
-                        !ipFilter.allow(ip) ||
+                    if (!NetworkUtils.isVblidAddress(ip) ||
+                        !ipFilter.bllow(ip) ||
                         NetworkUtils.isMe(ip, port))
                         continue;
-                    if (locations == null)
-                        locations = new HashSet();
-                    locations.add(new Endpoint(ip, port));
+                    if (locbtions == null)
+                        locbtions = new HashSet();
+                    locbtions.add(new Endpoint(ip, port));
                 }
             }
-            return locations;
+            return locbtions;
         }
     }
     
     /**
-     * A container for information we're putting in/out of GGEP blocks.
+     * A contbiner for information we're putting in/out of GGEP blocks.
      */
-    static final class GGEPContainer {
-        final Set locations;
-        final long createTime;
-        private static final GGEPContainer EMPTY = new GGEPContainer();
+    stbtic final class GGEPContainer {
+        finbl Set locations;
+        finbl long createTime;
+        privbte static final GGEPContainer EMPTY = new GGEPContainer();
         
-        private GGEPContainer() {
+        privbte GGEPContainer() {
             this(null, -1);
         }
         
-        GGEPContainer(Set locs, long create) {
-            locations = locs == null ? Collections.EMPTY_SET : locs;
-            createTime = create;
+        GGEPContbiner(Set locs, long create) {
+            locbtions = locs == null ? Collections.EMPTY_SET : locs;
+            crebteTime = create;
         }
         
-        aoolebn isEmpty() {
-            return locations.isEmpty() && createTime <= 0;
+        boolebn isEmpty() {
+            return locbtions.isEmpty() && createTime <= 0;
         }
     }
 }

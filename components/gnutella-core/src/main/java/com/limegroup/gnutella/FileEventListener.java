@@ -1,10 +1,10 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 /**
- * Listener for FileManagerEvents.
+ * Listener for FileMbnagerEvents.
  */
-pualic interfbce FileEventListener {
+public interfbce FileEventListener {
     
-    pualic void hbndleFileEvent(FileManagerEvent evt);
+    public void hbndleFileEvent(FileManagerEvent evt);
     
 }

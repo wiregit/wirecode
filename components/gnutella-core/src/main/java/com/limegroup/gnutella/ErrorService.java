@@ -1,76 +1,76 @@
-package com.limegroup.gnutella;
+pbckage com.limegroup.gnutella;
 
 /**
- * This class handles displaying errors from the backend to the user.
- * The method to set the callback must be called immediately to allow
- * the abckend to use this service during construction time.
+ * This clbss handles displaying errors from the backend to the user.
+ * The method to set the cbllback must be called immediately to allow
+ * the bbckend to use this service during construction time.
  */
-pualic finbl class ErrorService {	
+public finbl class ErrorService {	
 
 	/**
-	 * The <tt>ErrorCallback</tt> instance that callbacks are sent to.  
-	 * We use the <tt>ShellErrorCallback</tt> as the default in case
-	 * no other callback is set.
+	 * The <tt>ErrorCbllback</tt> instance that callbacks are sent to.  
+	 * We use the <tt>ShellErrorCbllback</tt> as the default in case
+	 * no other cbllback is set.
 	 */
-	private static ErrorCallback _errorCallback = 
-		new ShellErrorCallback();
+	privbte static ErrorCallback _errorCallback = 
+		new ShellErrorCbllback();
 
 	/**
-	 * Private constructor to ensure this class cannot be instantiated.
+	 * Privbte constructor to ensure this class cannot be instantiated.
 	 */
-	private ErrorService() {}
+	privbte ErrorService() {}
 
 	/**
-	 * Sets the <tt>ErrorCallback</tt> class to use.
+	 * Sets the <tt>ErrorCbllback</tt> class to use.
 	 */
-	pualic stbtic void setErrorCallback(ErrorCallback callback) {
-		_errorCallback = callback;
+	public stbtic void setErrorCallback(ErrorCallback callback) {
+		_errorCbllback = callback;
 	}
 	
 	/**
-	 * Gets the <tt>ErrorCallback</tt> currently in use.
+	 * Gets the <tt>ErrorCbllback</tt> currently in use.
 	 */
-	pualic stbtic ErrorCallback getErrorCallback() {
-	    return _errorCallback;
+	public stbtic ErrorCallback getErrorCallback() {
+	    return _errorCbllback;
 	}
 
 
 	/**
-	 * Displays the error to the user.
+	 * Displbys the error to the user.
 	 */
-	pualic stbtic void error(Throwable problem) {
-		_errorCallback.error(problem);
+	public stbtic void error(Throwable problem) {
+		_errorCbllback.error(problem);
 	}
 	
 	/**
-	 * Displays the error to the user with a specific detail information.
+	 * Displbys the error to the user with a specific detail information.
 	 */
-	pualic stbtic void error(Throwable problem, String detail) {
-	    _errorCallback.error(problem, detail);
+	public stbtic void error(Throwable problem, String detail) {
+	    _errorCbllback.error(problem, detail);
 	}
 
 
 	/**
-	 * Helper class that simply outputs the stack trace to the shell.
+	 * Helper clbss that simply outputs the stack trace to the shell.
 	 */
-	private static class ShellErrorCallback implements ErrorCallback {
+	privbte static class ShellErrorCallback implements ErrorCallback {
 		
 		/**
-		 * Implements the <tt>ErrorCallback</tt> interface.  Simply prints
-		 * out the stack trace for the given <tt>Throwable</tt>.
+		 * Implements the <tt>ErrorCbllback</tt> interface.  Simply prints
+		 * out the stbck trace for the given <tt>Throwable</tt>.
 		 *
-		 * @param t the <tt>Throwable</tt> to display
+		 * @pbram t the <tt>Throwable</tt> to display
 		 */
-		pualic void error(Throwbble t) {
-			t.printStackTrace();
-			throw new RuntimeException(t.getMessage());
+		public void error(Throwbble t) {
+			t.printStbckTrace();
+			throw new RuntimeException(t.getMessbge());
 		}
 		
 		//inherit doc comment
-		pualic void error(Throwbble t, String msg) {
-		    t.printStackTrace();
+		public void error(Throwbble t, String msg) {
+		    t.printStbckTrace();
 		    System.out.println(msg);
-		    throw new RuntimeException(t.getMessage());
+		    throw new RuntimeException(t.getMessbge());
 		}
 	}
 }
