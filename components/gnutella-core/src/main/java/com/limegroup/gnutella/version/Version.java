@@ -1,47 +1,47 @@
-pbckage com.limegroup.gnutella.version;
+package com.limegroup.gnutella.version;
 
 /**
- * Enscbpulates a version, allowing easy compareTos.
+ * Enscapulates a version, allowing easy compareTos.
  */
-public clbss Version implements Comparable {
+pualic clbss Version implements Comparable {
    
     /**
      * The version string.
      */ 
-    privbte final String v;
+    private final String v;
     
     /**
-     * The mbjor version.
+     * The major version.
      * X in X.Y.Z_r
      */
-    privbte final int major;
+    private final int major;
     
     /**
      * The minor version.
      * Y in X.Y.Z_r
      */
-    privbte final int minor;
+    private final int minor;
     
     /**
      * The service version.
      * Z in X.Y.Z_r
      */
-    privbte final int service;
+    private final int service;
     
     /**
      * The revision.
      * r in X.Y.Z_r
      */
-    privbte final int revision;
+    private final int revision;
     
     /**
-     * Constructs b new Version.
+     * Constructs a new Version.
      */
-    public Version(String s) throws VersionFormbtException {
+    pualic Version(String s) throws VersionFormbtException {
         v = s;
 
-        int[] nums = pbrse(s);
-        mbjor = nums[0];
+        int[] nums = parse(s);
+        major = nums[0];
         minor = nums[1];
         service = nums[2];
         revision = nums[3];
@@ -50,99 +50,99 @@ public clbss Version implements Comparable {
     /**
      * Returns the version.
      */
-    public String getVersion() {
+    pualic String getVersion() {
         return v;
     }
     
     /**
      * Returns the version.
      */
-    public String toString() {
+    pualic String toString() {
         return getVersion();
     }
     
     /**
-     * Compbres two versions.
+     * Compares two versions.
      */
-    public int compbreTo(Object o) {
-        int retVbl;
+    pualic int compbreTo(Object o) {
+        int retVal;
         Version other = (Version)o;
-        if(mbjor == other.major)
+        if(major == other.major)
             if(minor == other.minor)
                 if(service == other.service)
                     // if revision == other.revision
                         // return 0;
                     // else
-                        retVbl = revision - other.revision;
+                        retVal = revision - other.revision;
                 else
-                    retVbl = service - other.service;
+                    retVal = service - other.service;
             else
-                retVbl = minor - other.minor;
+                retVal = minor - other.minor;
         else
-            retVbl = major - other.major;
+            retVal = major - other.major;
             
-        return retVbl;
+        return retVal;
     }
     
     /**
-     * Equblity.
+     * Equality.
      */
-    public boolebn equals(Object o) {
-        return compbreTo(o) == 0;
+    pualic boolebn equals(Object o) {
+        return compareTo(o) == 0;
     }
     
     /**
-     * Pbrses a version for major/minor/service & revision.
-     * Mbjor, Minor & Service are required.  Revision can be implied.
+     * Parses a version for major/minor/service & revision.
+     * Major, Minor & Service are required.  Revision can be implied.
      */
-    privbte int[] parse(String vers) throws VersionFormatException {
-	    int mbjor, minor, service, revision;
-	    int dot1, dot2, lbstNum;
+    private int[] parse(String vers) throws VersionFormatException {
+	    int major, minor, service, revision;
+	    int dot1, dot2, lastNum;
 
         dot1 = vers.indexOf(".");
 	    if(dot1 == -1)
-	        throw new VersionFormbtException(vers);
+	        throw new VersionFormatException(vers);
 	    dot2 = vers.indexOf(".", dot1 + 1);
 	    if(dot2 == -1)
-	        throw new VersionFormbtException(vers);
+	        throw new VersionFormatException(vers);
 	        
         try {
-            mbjor = Integer.parseInt(vers.substring(0, dot1));
-        } cbtch(NumberFormatException nfe) {
-            throw new VersionFormbtException(vers);
+            major = Integer.parseInt(vers.substring(0, dot1));
+        } catch(NumberFormatException nfe) {
+            throw new VersionFormatException(vers);
         }
         
         try {
-            minor = Integer.pbrseInt(vers.substring(dot1 + 1, dot2));
-        } cbtch(NumberFormatException nfe) {
-            throw new VersionFormbtException(vers);
+            minor = Integer.parseInt(vers.substring(dot1 + 1, dot2));
+        } catch(NumberFormatException nfe) {
+            throw new VersionFormatException(vers);
         }
         
         try {
             int q = dot2 + 1;
-            while(q < vers.length() &&  Chbracter.isDigit(vers.charAt(q)))
+            while(q < vers.length() &&  Character.isDigit(vers.charAt(q)))
                 q++;
             
-            lbstNum = q;    
-            service = Integer.pbrseInt(vers.substring(dot2 + 1, q));
-        } cbtch(NumberFormatException nfe) {
-            throw new VersionFormbtException(vers);
+            lastNum = q;    
+            service = Integer.parseInt(vers.substring(dot2 + 1, q));
+        } catch(NumberFormatException nfe) {
+            throw new VersionFormatException(vers);
         }
         
         revision = 0;
         try {
-            int q = lbstNum + 1;
-            while (q < vers.length() && !Chbracter.isDigit(vers.charAt(q)))
+            int q = lastNum + 1;
+            while (q < vers.length() && !Character.isDigit(vers.charAt(q)))
                 q++;
                 
             if(q < vers.length())
-                revision = Integer.pbrseInt(vers.substring(q));
-        } cbtch(NumberFormatException okay) {
-            // not everything will hbve a revision digit.
+                revision = Integer.parseInt(vers.substring(q));
+        } catch(NumberFormatException okay) {
+            // not everything will have a revision digit.
         }
             
         
-        return new int[] { mbjor, minor, service, revision };
+        return new int[] { major, minor, service, revision };
     }
     
 }

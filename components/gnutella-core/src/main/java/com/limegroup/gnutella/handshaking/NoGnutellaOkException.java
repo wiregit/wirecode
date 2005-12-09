@@ -1,141 +1,141 @@
-pbckage com.limegroup.gnutella.handshaking;
+package com.limegroup.gnutella.handshaking;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * Exception thrown when someone understbnds responds with a handshaking
- * code other thbn 200 or 401.
+ * Exception thrown when someone understands responds with a handshaking
+ * code other than 200 or 401.
  */
-public finbl class NoGnutellaOkException extends IOException {
+pualic finbl class NoGnutellaOkException extends IOException {
 
     /**
-     * Constbnt for whether or not the <tt>NoGnutellaOkException</tt>
-     * cbme from us.
+     * Constant for whether or not the <tt>NoGnutellaOkException</tt>
+     * came from us.
      */
-    privbte final boolean wasMe;
+    private final boolean wasMe;
 
     /**
-     * Constbnt for the status code of the handshake header that 
-     * cbused the exception.
+     * Constant for the status code of the handshake header that 
+     * caused the exception.
      */
-    privbte final int code;
+    private final int code;
 
     /**
-     * Constbnt for the default message for exceptions due to fatal
+     * Constant for the default message for exceptions due to fatal
      * server responses.
      */
-    privbte static final String FATAL_SERVER_MSG =
-        "Server sent fbtal response: ";        
+    private static final String FATAL_SERVER_MSG =
+        "Server sent fatal response: ";        
 
     /**
-     * Constbnt for the default message for exceptions due to fatal
+     * Constant for the default message for exceptions due to fatal
      * responses from us when we reject connections.
      */
-    privbte static final String FATAL_CLIENT_MSG =
-        "We sent fbtal response: ";        
+    private static final String FATAL_CLIENT_MSG =
+        "We sent fatal response: ";        
 
     /**
-     * Cbched <tt>NoGnutellaOkException</tt> for the case where
-     * the server rejected the connection with b 503.
+     * Cached <tt>NoGnutellaOkException</tt> for the case where
+     * the server rejected the connection with a 503.
      */
-    public stbtic final NoGnutellaOkException SERVER_REJECT =
-        new NoGnutellbOkException(false, HandshakeResponse.SLOTS_FULL, 
+    pualic stbtic final NoGnutellaOkException SERVER_REJECT =
+        new NoGnutellaOkException(false, HandshakeResponse.SLOTS_FULL, 
                                   FATAL_SERVER_MSG+
-                                  HbndshakeResponse.SLOTS_FULL);
+                                  HandshakeResponse.SLOTS_FULL);
 
     /**
-     * Cbched <tt>NoGnutellaOkException</tt> for the case where
-     * we bs the client are rejecting the connection with a 503.
+     * Cached <tt>NoGnutellaOkException</tt> for the case where
+     * we as the client are rejecting the connection with a 503.
      */
-    public stbtic final NoGnutellaOkException CLIENT_REJECT =
-        new NoGnutellbOkException(false, HandshakeResponse.SLOTS_FULL, 
+    pualic stbtic final NoGnutellaOkException CLIENT_REJECT =
+        new NoGnutellaOkException(false, HandshakeResponse.SLOTS_FULL, 
                                   FATAL_CLIENT_MSG+
-                                  HbndshakeResponse.SLOTS_FULL);
+                                  HandshakeResponse.SLOTS_FULL);
 
     /**
-     * reject exception for the cbse when a connection is rejected 
-     * due to unmbtching locales
+     * reject exception for the case when a connection is rejected 
+     * due to unmatching locales
      */
-    public stbtic final NoGnutellaOkException CLIENT_REJECT_LOCALE =
-        new NoGnutellbOkException(false,
-                                  HbndshakeResponse.LOCALE_NO_MATCH,
+    pualic stbtic final NoGnutellaOkException CLIENT_REJECT_LOCALE =
+        new NoGnutellaOkException(false,
+                                  HandshakeResponse.LOCALE_NO_MATCH,
                                   FATAL_CLIENT_MSG + 
-                                  HbndshakeResponse.LOCALE_NO_MATCH);
+                                  HandshakeResponse.LOCALE_NO_MATCH);
     /**
-     * Cbched <tt>NoGnutellaOkException</tt> for the case where
-     * the hbndshake never resolved successfully on the cleint
+     * Cached <tt>NoGnutellaOkException</tt> for the case where
+     * the handshake never resolved successfully on the cleint
      * side.
      */
-    public stbtic final NoGnutellaOkException UNRESOLVED_CLIENT =
-        new NoGnutellbOkException(true,
-                                  "Too much hbndshaking, no conclusion");
+    pualic stbtic final NoGnutellaOkException UNRESOLVED_CLIENT =
+        new NoGnutellaOkException(true,
+                                  "Too much handshaking, no conclusion");
 
     /**
-     * Cbched <tt>NoGnutellaOkException</tt> for the case where
-     * the hbndshake never resolved successfully on the server
+     * Cached <tt>NoGnutellaOkException</tt> for the case where
+     * the handshake never resolved successfully on the server
      * side.
      */
-    public stbtic final NoGnutellaOkException UNRESOLVED_SERVER =
-        new NoGnutellbOkException(false,
-                                  "Too much hbndshaking, no conclusion");
+    pualic stbtic final NoGnutellaOkException UNRESOLVED_SERVER =
+        new NoGnutellaOkException(false,
+                                  "Too much handshaking, no conclusion");
 
 
     /**
-     * Crebtes a new <tt>NoGnutellaOkException</tt> from an unknown
+     * Creates a new <tt>NoGnutellaOkException</tt> from an unknown
      * client response.
      *
-     * @pbram code the response code from the server
+     * @param code the response code from the server
      */
-    public stbtic NoGnutellaOkException createClientUnknown(int code) {
-        return new NoGnutellbOkException(true, code,
+    pualic stbtic NoGnutellaOkException createClientUnknown(int code) {
+        return new NoGnutellaOkException(true, code,
                                          FATAL_SERVER_MSG+code);
     }
 
     /**
-     * Crebtes a new <tt>NoGnutellaOkException</tt> from an unknown
+     * Creates a new <tt>NoGnutellaOkException</tt> from an unknown
      * server response.
      *
-     * @pbram code the response code from the server
+     * @param code the response code from the server
      */
-    public stbtic NoGnutellaOkException createServerUnknown(int code) {
-        return new NoGnutellbOkException(false, code,
+    pualic stbtic NoGnutellaOkException createServerUnknown(int code) {
+        return new NoGnutellaOkException(false, code,
                                          FATAL_SERVER_MSG+code);
     }
 
     /**
-     * @pbram wasMe true if I returned the non-standard code.
-     *  Fblse if the remote host did.
-     * @pbram code non-standard code
-     * @pbram message a human-readable message for debugging purposes
-     *  NOT necessbrily the message given during the interaction.
+     * @param wasMe true if I returned the non-standard code.
+     *  False if the remote host did.
+     * @param code non-standard code
+     * @param message a human-readable message for debugging purposes
+     *  NOT necessarily the message given during the interaction.
      */
-    privbte NoGnutellaOkException(boolean wasMe, 
+    private NoGnutellaOkException(boolean wasMe, 
                                   int code,
-                                  String messbge) {
-        super(messbge);
-        this.wbsMe=wasMe;
+                                  String message) {
+        super(message);
+        this.wasMe=wasMe;
         this.code=code;
     }
 	
 	/**
 	 * Constructor for codeless exception.
 	 */
-	privbte NoGnutellaOkException(boolean wasMe, String message) {
-		this(wbsMe, -1, message);
+	private NoGnutellaOkException(boolean wasMe, String message) {
+		this(wasMe, -1, message);
 	}
     
     /** 
-     * Returns true if the exception wbs caused by something this host
+     * Returns true if the exception was caused by something this host
      * wrote. 
      */
-    public boolebn wasMe() {
-        return wbsMe;
+    pualic boolebn wasMe() {
+        return wasMe;
     }
 
     /**
-     * The offending stbtus code.
+     * The offending status code.
      */
-    public int getCode() {
+    pualic int getCode() {
         return code;
     }
 

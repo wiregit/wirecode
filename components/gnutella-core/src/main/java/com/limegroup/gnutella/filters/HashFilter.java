@@ -1,20 +1,20 @@
 
-pbckage com.limegroup.gnutella.filters;
+package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
 /**
- * filters out queries contbining hash urns. 
+ * filters out queries containing hash urns. 
  */
-public clbss HashFilter extends SpamFilter {
+pualic clbss HashFilter extends SpamFilter {
 
-    public boolebn allow(Message m) {
-        if (! (m instbnceof QueryRequest))
+    pualic boolebn allow(Message m) {
+        if (! (m instanceof QueryRequest))
             return true;
 
 		QueryRequest qr = (QueryRequest)m;
 		
-        return !qr.hbsQueryUrns();
+        return !qr.hasQueryUrns();
     }
 
 }

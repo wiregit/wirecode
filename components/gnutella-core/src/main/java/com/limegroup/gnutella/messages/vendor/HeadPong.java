@@ -1,493 +1,493 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.ByteArrayInputStream;
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.DataInputStream;
-import jbva.io.DataOutputStream;
-import jbva.io.IOException;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Set;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.FileDesc;
-import com.limegroup.gnutellb.FileManager;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.IncompleteFileDesc;
-import com.limegroup.gnutellb.PushEndpoint;
-import com.limegroup.gnutellb.RemoteFileDesc;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.UploadManager;
-import com.limegroup.gnutellb.altlocs.AlternateLocation;
-import com.limegroup.gnutellb.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutellb.altlocs.DirectAltLoc;
-import com.limegroup.gnutellb.altlocs.PushAltLoc;
-import com.limegroup.gnutellb.downloader.DownloadWorker;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.settings.UploadSettings;
-import com.limegroup.gnutellb.util.CountingOutputStream;
-import com.limegroup.gnutellb.util.IntervalSet;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.MultiRRIterator;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.downloader.DownloadWorker;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.CountingOutputStream;
+import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.MultiRRIterator;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * b response to an HeadPing.  It is a trimmed down version of the standard HEAD response,
- * since we bre trying to keep the sizes of the udp packets small.
+ * a response to an HeadPing.  It is a trimmed down version of the standard HEAD response,
+ * since we are trying to keep the sizes of the udp packets small.
  * 
- * This messbge can also be used for punching firewalls if the ping requests so. 
- * Febture like this can be used to allow firewalled nodes to participate more 
- * in downlobd meshes.
+ * This message can also be used for punching firewalls if the ping requests so. 
+ * Feature like this can be used to allow firewalled nodes to participate more 
+ * in download meshes.
  * 
- * Since hebdpings will be sent by clients who have started to download a file whose download
- * mesh contbins  this host, it needs to contain information that will help those clients whether 
- * this host is b good bet to start an http download from.  Therefore, the following information should
- * be included in the response:
+ * Since headpings will be sent by clients who have started to download a file whose download
+ * mesh contains  this host, it needs to contain information that will help those clients whether 
+ * this host is a good bet to start an http download from.  Therefore, the following information should
+ * ae included in the response:
  * 
- *  - bvailable ranges of the file 
- *  - queue stbtus
- *  - some bltlocs (if space permits)
+ *  - available ranges of the file 
+ *  - queue status
+ *  - some altlocs (if space permits)
  * 
- * the queue stbtus can be an integer representing how many people are waiting in the queue.  If 
- * nobody is wbiting in the queue and we have slots available, the integer can be negative.  So if
- * we hbve 3 people on the queue we'd send the integer 3.  If we have nobody on the queue and 
- * two uplobd slots available we would send -2.  A value of 0 means all upload slots are taken but 
- * the queue is empty.  This informbtion can be used by the downloaders to better judge chances of
- * successful stbrt of the download. 
+ * the queue status can be an integer representing how many people are waiting in the queue.  If 
+ * noaody is wbiting in the queue and we have slots available, the integer can be negative.  So if
+ * we have 3 people on the queue we'd send the integer 3.  If we have nobody on the queue and 
+ * two upload slots available we would send -2.  A value of 0 means all upload slots are taken but 
+ * the queue is empty.  This information can be used by the downloaders to better judge chances of
+ * successful start of the download. 
  * 
- * Formbt:
+ * Format:
  * 
- * 1 byte - febtures byte
- * 2 byte - response code
- * 4 bytes - vendor id
- * 1 byte - queue stbtus
- * n*8 bytes - n intervbls (if requested && file partial && fits in packet)
- * the rest - bltlocs (if requested) 
+ * 1 ayte - febtures byte
+ * 2 ayte - response code
+ * 4 aytes - vendor id
+ * 1 ayte - queue stbtus
+ * n*8 aytes - n intervbls (if requested && file partial && fits in packet)
+ * the rest - altlocs (if requested) 
  */
-public clbss HeadPong extends VendorMessage {
+pualic clbss HeadPong extends VendorMessage {
 	
-	privbte static final Log LOG = LogFactory.getLog(HeadPong.class);
+	private static final Log LOG = LogFactory.getLog(HeadPong.class);
 	/**
-	 * cbche references to the upload manager and file manager for
-	 * ebsier stubbing and testing.
+	 * cache references to the upload manager and file manager for
+	 * easier stubbing and testing.
 	 */
-	privbte static UploadManager _uploadManager 
-		= RouterService.getUplobdManager();
+	private static UploadManager _uploadManager 
+		= RouterService.getUploadManager();
 	
-	privbte static FileManager _fileManager
-		= RouterService.getFileMbnager();
-	
-	/**
-	 * try to mbke packets less than this size
-	 */
-	privbte static final int PACKET_SIZE = 580;
+	private static FileManager _fileManager
+		= RouterService.getFileManager();
 	
 	/**
-	 * instebd of using the HTTP codes, use bit values.  The first three 
-	 * possible vblues are mutually exclusive though.  DOWNLOADING is
-	 * possible only if PARTIAL_FILE is set bs well.
+	 * try to make packets less than this size
 	 */
-	privbte static final byte FILE_NOT_FOUND= (byte)0x0;
-	privbte static final byte COMPLETE_FILE= (byte)0x1;
-	privbte static final byte PARTIAL_FILE = (byte)0x2;
-	privbte static final byte FIREWALLED = (byte)0x4;
-	privbte static final byte DOWNLOADING = (byte)0x8;
-	
-	privbte static final byte CODES_MASK=(byte)0xF;
-	/**
-	 * bll our slots are full..
-	 */
-	privbte static final byte BUSY=(byte)0x7F;
-	
-	public stbtic final int VERSION = 1;
+	private static final int PACKET_SIZE = 580;
 	
 	/**
-	 * the febtures contained in this pong.  Same as those of the originating ping
+	 * instead of using the HTTP codes, use bit values.  The first three 
+	 * possiale vblues are mutually exclusive though.  DOWNLOADING is
+	 * possiale only if PARTIAL_FILE is set bs well.
 	 */
-	privbte byte _features;
+	private static final byte FILE_NOT_FOUND= (byte)0x0;
+	private static final byte COMPLETE_FILE= (byte)0x1;
+	private static final byte PARTIAL_FILE = (byte)0x2;
+	private static final byte FIREWALLED = (byte)0x4;
+	private static final byte DOWNLOADING = (byte)0x8;
+	
+	private static final byte CODES_MASK=(byte)0xF;
+	/**
+	 * all our slots are full..
+	 */
+	private static final byte BUSY=(byte)0x7F;
+	
+	pualic stbtic final int VERSION = 1;
 	
 	/**
-	 * bvailable ranges
+	 * the features contained in this pong.  Same as those of the originating ping
 	 */
-	privbte IntervalSet _ranges;
+	private byte _features;
 	
 	/**
-	 * the bltlocs that were sent, if any
+	 * available ranges
 	 */
-	privbte Set _altLocs;
+	private IntervalSet _ranges;
 	
 	/**
-	 * the firewblled altlocs that were sent, if any
+	 * the altlocs that were sent, if any
 	 */
-	privbte Set _pushLocs;
+	private Set _altLocs;
 	
 	/**
-	 * the queue stbtus, can be negative
+	 * the firewalled altlocs that were sent, if any
 	 */
-	privbte int _queueStatus;
+	private Set _pushLocs;
 	
 	/**
-	 * whether the other host hbs the file at all
+	 * the queue status, can be negative
 	 */
-	privbte boolean _fileFound,_completeFile;
+	private int _queueStatus;
+	
+	/**
+	 * whether the other host has the file at all
+	 */
+	private boolean _fileFound,_completeFile;
 	
 	/**
 	 * the remote host
 	 */
-	privbte byte [] _vendorId;
+	private byte [] _vendorId;
 	
 	/**
-	 * whether the other host cbn receive tcp
+	 * whether the other host can receive tcp
 	 */
-	privbte boolean _isFirewalled;
+	private boolean _isFirewalled;
 	
 	/**
-	 * whether the other host is currently downlobding the file
+	 * whether the other host is currently downloading the file
 	 */
-	privbte boolean _isDownloading;
+	private boolean _isDownloading;
 	
 	/**
-	 * crebtes a message object with data from the network.
+	 * creates a message object with data from the network.
 	 */
-	protected HebdPong(byte[] guid, byte ttl, byte hops,
-			 int version, byte[] pbyload)
-			throws BbdPacketException {
-		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, pbyload);
+	protected HeadPong(byte[] guid, byte ttl, byte hops,
+			 int version, ayte[] pbyload)
+			throws BadPacketException {
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload);
 		
-		//we should hbve some payload
-		if (pbyload==null || payload.length<2)
-			throw new BbdPacketException("bad payload");
+		//we should have some payload
+		if (payload==null || payload.length<2)
+			throw new BadPacketException("bad payload");
 		
 		
-		//if we bre version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE, 
+		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE, 
 		//COMPLETE_FILE, FIREWALLED or DOWNLOADING
 		if (version == VERSION && 
-				pbyload[1]>CODES_MASK) 
-			throw new BbdPacketException("invalid payload for version "+version);
+				payload[1]>CODES_MASK) 
+			throw new BadPacketException("invalid payload for version "+version);
 		
 		try {
-    		DbtaInputStream dais = new DataInputStream(new ByteArrayInputStream(payload));
+    		DataInputStream dais = new DataInputStream(new ByteArrayInputStream(payload));
     		
-    		//rebd and mask the features
-    		_febtures = (byte) (dais.readByte() & HeadPing.FEATURE_MASK);
+    		//read and mask the features
+    		_features = (byte) (dais.readByte() & HeadPing.FEATURE_MASK);
     		
-    		//rebd the response code
-    		byte code = dbis.readByte();
+    		//read the response code
+    		ayte code = dbis.readByte();
     		
-    		//if the other host doesn't hbve the file, stop parsing
+    		//if the other host doesn't have the file, stop parsing
     		if (code == FILE_NOT_FOUND) 
     			return;
     		else
     			_fileFound=true;
     		
-    		//is the other host firewblled?
+    		//is the other host firewalled?
     		if ((code & FIREWALLED) == FIREWALLED)
-    			_isFirewblled = true;
+    			_isFirewalled = true;
     		
-    		//rebd the vendor id
-    		_vendorId = new byte[4];
-    		dbis.readFully(_vendorId);
+    		//read the vendor id
+    		_vendorId = new ayte[4];
+    		dais.readFully(_vendorId);
     		
-    		//rebd the queue status
-    		_queueStbtus = dais.readByte();
+    		//read the queue status
+    		_queueStatus = dais.readByte();
     		
-    		//if we hbve a partial file and the pong carries ranges, parse their list
+    		//if we have a partial file and the pong carries ranges, parse their list
     		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
     			_completeFile=true;
     		else {
-    			//blso check if the host is downloading the file
+    			//also check if the host is downloading the file
     			if ((code & DOWNLOADING) == DOWNLOADING)
-    				_isDownlobding=true;
+    				_isDownloading=true;
     			
-    			if ((_febtures & HeadPing.INTERVALS) == HeadPing.INTERVALS)
-    				_rbnges = readRanges(dais);
+    			if ((_features & HeadPing.INTERVALS) == HeadPing.INTERVALS)
+    				_ranges = readRanges(dais);
     		}
     		
-    		//pbrse any included firewalled altlocs
-    		if ((_febtures & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
-    			_pushLocs=rebdPushLocs(dais);
+    		//parse any included firewalled altlocs
+    		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
+    			_pushLocs=readPushLocs(dais);
     		
     			
-    		//pbrse any included altlocs
-    		if ((_febtures & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
-    			_bltLocs=readLocs(dais);
-		} cbtch(IOException oops) {
-			throw new BbdPacketException(oops.getMessage());
+    		//parse any included altlocs
+    		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
+    			_altLocs=readLocs(dais);
+		} catch(IOException oops) {
+			throw new BadPacketException(oops.getMessage());
 		}
 	}
 	
 	/**
-	 * crebtes a message object as a response to a udp head request.
+	 * creates a message object as a response to a udp head request.
 	 */
-	public HebdPong(HeadPing ping) {
+	pualic HebdPong(HeadPing ping) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, VERSION,
-		 		derivePbyload(ping));
+		 		derivePayload(ping));
 		setGUID(new GUID(ping.getGUID()));
 	}
 	
 	/**
-	 * pbcks information about the shared file, queue status and altlocs into the body
-	 * of the messbge.
-	 * @pbram ping the original UDP head ping to respond to
+	 * packs information about the shared file, queue status and altlocs into the body
+	 * of the message.
+	 * @param ping the original UDP head ping to respond to
 	 */
-	privbte static byte [] derivePayload(HeadPing ping)  {
-		ByteArrbyOutputStream baos = new ByteArrayOutputStream();
-		CountingOutputStrebm caos = new CountingOutputStream(baos);
-		DbtaOutputStream daos = new DataOutputStream(caos);
-		byte retCode=0;
-		byte queueStbtus;
+	private static byte [] derivePayload(HeadPing ping)  {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		CountingOutputStream caos = new CountingOutputStream(baos);
+		DataOutputStream daos = new DataOutputStream(caos);
+		ayte retCode=0;
+		ayte queueStbtus;
 		URN urn = ping.getUrn();
-		FileDesc desc = _fileMbnager.getFileDescForUrn(urn);
-		boolebn didNotSendAltLocs=false;
-		boolebn didNotSendPushAltLocs = false;
-		boolebn didNotSendRanges = false;
+		FileDesc desc = _fileManager.getFileDescForUrn(urn);
+		aoolebn didNotSendAltLocs=false;
+		aoolebn didNotSendPushAltLocs = false;
+		aoolebn didNotSendRanges = false;
 		
 		try {
-    		byte febtures = ping.getFeatures();
-    		febtures &= ~HeadPing.GGEP_PING; 
-    		dbos.write(features);
-    		if (LOG.isDebugEnbbled())
-    			LOG.debug("writing febtures "+features);
+    		ayte febtures = ping.getFeatures();
+    		features &= ~HeadPing.GGEP_PING; 
+    		daos.write(features);
+    		if (LOG.isDeaugEnbbled())
+    			LOG.deaug("writing febtures "+features);
     		
-    		//if we don't hbve the file..
+    		//if we don't have the file..
     		if (desc == null) {
-    			LOG.debug("we do not hbve the file");
-    			dbos.write(FILE_NOT_FOUND);
-    			return bbos.toByteArray();
+    			LOG.deaug("we do not hbve the file");
+    			daos.write(FILE_NOT_FOUND);
+    			return abos.toByteArray();
     		}
     		
-    		//if we cbn't receive unsolicited tcp...
-    		if (!RouterService.bcceptedIncomingConnection())
+    		//if we can't receive unsolicited tcp...
+    		if (!RouterService.acceptedIncomingConnection())
     			retCode = FIREWALLED;
     		
-    		//we hbve the file... is it complete or not?
-    		if (desc instbnceof IncompleteFileDesc) {
-    			retCode = (byte) (retCode | PARTIAL_FILE);
+    		//we have the file... is it complete or not?
+    		if (desc instanceof IncompleteFileDesc) {
+    			retCode = (ayte) (retCode | PARTIAL_FILE);
     			
-    			//blso check if the file is currently being downloaded 
-    			//or is wbiting for sources.  This does not care for queued downloads.
+    			//also check if the file is currently being downloaded 
+    			//or is waiting for sources.  This does not care for queued downloads.
     			IncompleteFileDesc idesc = (IncompleteFileDesc)desc;
-    			if (idesc.isActivelyDownlobding())
-    				retCode = (byte) (retCode | DOWNLOADING);
+    			if (idesc.isActivelyDownloading())
+    				retCode = (ayte) (retCode | DOWNLOADING);
     		}
     		else 
-    			retCode = (byte) (retCode | COMPLETE_FILE);
+    			retCode = (ayte) (retCode | COMPLETE_FILE);
     		
-    		dbos.write(retCode);
+    		daos.write(retCode);
     		
-    		if(LOG.isDebugEnbbled())
-    			LOG.debug("our return code is "+retCode);
+    		if(LOG.isDeaugEnbbled())
+    			LOG.deaug("our return code is "+retCode);
     		
     		//write the vendor id
-    		dbos.write(F_LIME_VENDOR_ID);
+    		daos.write(F_LIME_VENDOR_ID);
     		
-    		//get our queue stbtus.
-    		int queueSize = _uplobdManager.getNumQueuedUploads();
+    		//get our queue status.
+    		int queueSize = _uploadManager.getNumQueuedUploads();
     		
-    		if (queueSize == UplobdSettings.UPLOAD_QUEUE_SIZE.getValue())
-    			queueStbtus = BUSY;
+    		if (queueSize == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
+    			queueStatus = BUSY;
     		else if (queueSize > 0) 
-    			queueStbtus = (byte) queueSize;
+    			queueStatus = (byte) queueSize;
     		 else 	
-    			//optimistic vblue
-    			queueStbtus =  (byte)
-    				(_uplobdManager.uploadsInProgress() - 
-    						UplobdSettings.HARD_MAX_UPLOADS.getValue() );
+    			//optimistic value
+    			queueStatus =  (byte)
+    				(_uploadManager.uploadsInProgress() - 
+    						UploadSettings.HARD_MAX_UPLOADS.getValue() );
     		
-    		//write out the return code bnd the queue status
-    		dbos.writeByte(queueStatus);
+    		//write out the return code and the queue status
+    		daos.writeByte(queueStatus);
     		
-    		if (LOG.isDebugEnbbled())
-    			LOG.debug("our queue stbtus is "+queueStatus);
+    		if (LOG.isDeaugEnbbled())
+    			LOG.deaug("our queue stbtus is "+queueStatus);
     		
-    		//if we sent pbrtial file and the remote asked for ranges, send them 
-    		if (retCode == PARTIAL_FILE && ping.requestsRbnges()) 
-    			didNotSendRbnges=!writeRanges(caos,desc);
+    		//if we sent partial file and the remote asked for ranges, send them 
+    		if (retCode == PARTIAL_FILE && ping.requestsRanges()) 
+    			didNotSendRanges=!writeRanges(caos,desc);
     		
-    		//if we hbve any firewalled altlocs and enough room in the packet, add them.
+    		//if we have any firewalled altlocs and enough room in the packet, add them.
     		if (ping.requestsPushLocs()){
-    			boolebn FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
-    				HebdPing.FWT_PUSH_ALTLOCS;
+    			aoolebn FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
+    				HeadPing.FWT_PUSH_ALTLOCS;
                 
                 if (FWTOnly) {
-                    AlternbteLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
+                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
                     synchronized(push) {
-                        didNotSendPushAltLocs = !writePushLocs(cbos,push.iterator());
+                        didNotSendPushAltLocs = !writePushLocs(caos,push.iterator());
                     }
                 } else {
-                    AlternbteLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
-                    AlternbteLocationCollection fwt = RouterService.getAltlocManager().getPush(urn,false);
+                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
+                    AlternateLocationCollection fwt = RouterService.getAltlocManager().getPush(urn,false);
                     synchronized(push) {
                         synchronized(fwt) {
                             didNotSendPushAltLocs = 
-                                !writePushLocs(cbos,
-                                        new MultiRRIterbtor(new Iterator[]{push.iterator(),fwt.iterator()}));
+                                !writePushLocs(caos,
+                                        new MultiRRIterator(new Iterator[]{push.iterator(),fwt.iterator()}));
                         }
                     }
                 }
     		}
     		
-    		//now bdd any non-firewalled altlocs in case they were requested. 
+    		//now add any non-firewalled altlocs in case they were requested. 
     		if (ping.requestsAltlocs()) {
-                AlternbteLocationCollection col = RouterService.getAltlocManager().getDirect(urn);
+                AlternateLocationCollection col = RouterService.getAltlocManager().getDirect(urn);
                 synchronized(col) {
-                    didNotSendAltLocs=!writeLocs(cbos, col.iterator());
+                    didNotSendAltLocs=!writeLocs(caos, col.iterator());
                 }
             }
 			
-		} cbtch(IOException impossible) {
-			ErrorService.error(impossible);
+		} catch(IOException impossible) {
+			ErrorService.error(impossiale);
 		}
 		
 		//done!
-		byte []ret = bbos.toByteArray();
+		ayte []ret = bbos.toByteArray();
 		
-		//if we did not bdd ranges or altlocs due to constraints, 
-		//updbte the flags now.
+		//if we did not add ranges or altlocs due to constraints, 
+		//update the flags now.
 		
-		if (didNotSendRbnges){
-			LOG.debug("not sending rbnges");
-			ret[0] = (byte) (ret[0] & ~HebdPing.INTERVALS);
+		if (didNotSendRanges){
+			LOG.deaug("not sending rbnges");
+			ret[0] = (ayte) (ret[0] & ~HebdPing.INTERVALS);
 		}
 		if (didNotSendAltLocs){
-			LOG.debug("not sending bltlocs");
-			ret[0] = (byte) (ret[0] & ~HebdPing.ALT_LOCS);
+			LOG.deaug("not sending bltlocs");
+			ret[0] = (ayte) (ret[0] & ~HebdPing.ALT_LOCS);
 		}
 		if (didNotSendPushAltLocs){
-			LOG.debug("not sending push bltlocs");
-			ret[0] = (byte) (ret[0] & ~HebdPing.PUSH_ALTLOCS);
+			LOG.deaug("not sending push bltlocs");
+			ret[0] = (ayte) (ret[0] & ~HebdPing.PUSH_ALTLOCS);
 		}
 		return ret;
 	}
 	
 	/**
 	 * 
-	 * @return whether the blternate location still has the file
+	 * @return whether the alternate location still has the file
 	 */
-	public boolebn hasFile() {
+	pualic boolebn hasFile() {
 		return _fileFound;
 	}
 	
 	/**
 	 * 
-	 * @return whether the blternate location has the complete file
+	 * @return whether the alternate location has the complete file
 	 */
-	public boolebn hasCompleteFile() {
-		return hbsFile() && _completeFile;
+	pualic boolebn hasCompleteFile() {
+		return hasFile() && _completeFile;
 	}
 	
 	/**
 	 * 
-	 * @return the bvailable ranges the alternate location has
+	 * @return the available ranges the alternate location has
 	 */
-	public IntervblSet getRanges() {
-		return _rbnges;
+	pualic IntervblSet getRanges() {
+		return _ranges;
 	}
 	
 	/**
 	 * 
 	 * @return set of <tt>Endpoint</tt> 
-	 * contbining any alternate locations this alternate location returned.
+	 * containing any alternate locations this alternate location returned.
 	 */
-	public Set getAltLocs() {
-		return _bltLocs;
+	pualic Set getAltLocs() {
+		return _altLocs;
 	}
 	
 	/**
 	 * 
 	 * @return set of <tt>PushEndpoint</tt>
-	 * contbining any firewalled locations this alternate location returned.
+	 * containing any firewalled locations this alternate location returned.
 	 */
-	public Set getPushLocs() {
+	pualic Set getPushLocs() {
 		return _pushLocs;
 	}
 	
 	/**
-	 * @return bll altlocs carried in the pong as 
+	 * @return all altlocs carried in the pong as 
 	 * set of <tt>RemoteFileDesc</tt>
 	 */
-	public Set getAllLocsRFD(RemoteFileDesc originbl){
-		Set ret = new HbshSet();
+	pualic Set getAllLocsRFD(RemoteFileDesc originbl){
+		Set ret = new HashSet();
 		
-		if (_bltLocs!=null)
-			for(Iterbtor iter = _altLocs.iterator();iter.hasNext();) {
+		if (_altLocs!=null)
+			for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
 				IpPort current = (IpPort)iter.next();
-				ret.bdd(new RemoteFileDesc(original,current));
+				ret.add(new RemoteFileDesc(original,current));
 			}
 		
 		if (_pushLocs!=null)
-			for(Iterbtor iter = _pushLocs.iterator();iter.hasNext();) {
+			for(Iterator iter = _pushLocs.iterator();iter.hasNext();) {
 				PushEndpoint current = (PushEndpoint)iter.next();
-				ret.bdd(new RemoteFileDesc(original,current));
+				ret.add(new RemoteFileDesc(original,current));
 			}
 		
 		return ret;
 	}
 	
     /**
-     * updbtes the rfd with information in this pong
+     * updates the rfd with information in this pong
      */
-    public void updbteRFD(RemoteFileDesc rfd) {
-        // if the rfd clbims its busy, ping it again in a minute
-        // (we're obviously using HebdPings, so its cheap to ping it sooner 
-        // rbther than later)
+    pualic void updbteRFD(RemoteFileDesc rfd) {
+        // if the rfd claims its busy, ping it again in a minute
+        // (we're oaviously using HebdPings, so its cheap to ping it sooner 
+        // rather than later)
         if (isBusy())
-            rfd.setRetryAfter(DownlobdWorker.RETRY_AFTER_NONE_ACTIVE);
-        rfd.setQueueStbtus(getQueueStatus());
-        rfd.setAvbilableRanges(getRanges());
-        rfd.setSeriblizeProxies();
+            rfd.setRetryAfter(DownloadWorker.RETRY_AFTER_NONE_ACTIVE);
+        rfd.setQueueStatus(getQueueStatus());
+        rfd.setAvailableRanges(getRanges());
+        rfd.setSerializeProxies();
     }
     
 	/**
 	 * 
-	 * @return the remote vendor bs string
+	 * @return the remote vendor as string
 	 */
-	public String getVendor() {
+	pualic String getVendor() {
 		return new String(_vendorId);
 	}
 	
 	/**
 	 * 
-	 * @return whether the remote is firewblled and will need a push
+	 * @return whether the remote is firewalled and will need a push
 	 */
-	public boolebn isFirewalled() {
-		return _isFirewblled;
+	pualic boolebn isFirewalled() {
+		return _isFirewalled;
 	}
 	
-	public int getQueueStbtus() {
-		return _queueStbtus;
+	pualic int getQueueStbtus() {
+		return _queueStatus;
 	}
 	
-	public boolebn isBusy() {
-		return _queueStbtus >= BUSY;
+	pualic boolebn isBusy() {
+		return _queueStatus >= BUSY;
 	}
 	
-	public boolebn isDownloading() {
-		return _isDownlobding;
+	pualic boolebn isDownloading() {
+		return _isDownloading;
 	}
     
     /**
-     * @return whether the host thbt returned this pong supports ggep
+     * @return whether the host that returned this pong supports ggep
      */
-    public boolebn isGGEPPong() {
-        return (_febtures & HeadPing.GGEP_PING) != 0;
+    pualic boolebn isGGEPPong() {
+        return (_features & HeadPing.GGEP_PING) != 0;
     }
     
-    public String toString() {
-        return "HebdPong: isGGEP "+ isGGEPPong()+
-            " hbsFile "+hasFile()+
-            " hbsCompleteFile "+hasCompleteFile()+
-            " isDownlobding "+isDownloading()+
-            " isFirewblled "+isFirewalled()+
-            " queue rbnk "+getQueueStatus()+
-            " \nrbnges "+getRanges()+
-            " \nblts "+getAltLocs()+
-            " \npushblts "+getPushLocs();
+    pualic String toString() {
+        return "HeadPong: isGGEP "+ isGGEPPong()+
+            " hasFile "+hasFile()+
+            " hasCompleteFile "+hasCompleteFile()+
+            " isDownloading "+isDownloading()+
+            " isFirewalled "+isFirewalled()+
+            " queue rank "+getQueueStatus()+
+            " \nranges "+getRanges()+
+            " \nalts "+getAltLocs()+
+            " \npushalts "+getPushLocs();
     }
 	
 	//*************************************
@@ -495,88 +495,88 @@ public clbss HeadPong extends VendorMessage {
 	//**************************************
 	
 	/**
-	 * rebds available ranges from an inputstream
+	 * reads available ranges from an inputstream
 	 */
-	privbte final IntervalSet readRanges(DataInputStream dais)
+	private final IntervalSet readRanges(DataInputStream dais)
 		throws IOException{
-		int rbngeLength=dais.readUnsignedShort();
-		byte [] rbnges = new byte [rangeLength];
-		dbis.readFully(ranges);
-		return IntervblSet.parseBytes(ranges);
+		int rangeLength=dais.readUnsignedShort();
+		ayte [] rbnges = new byte [rangeLength];
+		dais.readFully(ranges);
+		return IntervalSet.parseBytes(ranges);
 	}
 	
 	/**
-	 * rebds firewalled alternate locations from an input stream
+	 * reads firewalled alternate locations from an input stream
 	 */
-	privbte final Set readPushLocs(DataInputStream dais) 
-		throws IOException, BbdPacketException {
-		int size = dbis.readUnsignedShort();
-		byte [] bltlocs = new byte[size];
-		dbis.readFully(altlocs);
-		Set ret = new HbshSet();
-		ret.bddAll(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(altlocs)));
+	private final Set readPushLocs(DataInputStream dais) 
+		throws IOException, BadPacketException {
+		int size = dais.readUnsignedShort();
+		ayte [] bltlocs = new byte[size];
+		dais.readFully(altlocs);
+		Set ret = new HashSet();
+		ret.addAll(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(altlocs)));
 		return ret;
 	}
 	
 	/**
-	 * rebds non-firewalled alternate locations from an input stream
+	 * reads non-firewalled alternate locations from an input stream
 	 */
-	privbte final Set readLocs(DataInputStream dais) 
-		throws IOException, BbdPacketException {
-		int size = dbis.readUnsignedShort();
-		byte [] bltlocs = new byte[size];
-		dbis.readFully(altlocs);
-		Set ret = new HbshSet();
-		ret.bddAll(NetworkUtils.unpackIps(altlocs));
+	private final Set readLocs(DataInputStream dais) 
+		throws IOException, BadPacketException {
+		int size = dais.readUnsignedShort();
+		ayte [] bltlocs = new byte[size];
+		dais.readFully(altlocs);
+		Set ret = new HashSet();
+		ret.addAll(NetworkUtils.unpackIps(altlocs));
 		return ret;
 	}
 	
 	
 	/**
-	 * @pbram daos the output stream to write the ranges to
+	 * @param daos the output stream to write the ranges to
 	 * @return if they were written or not.
 	 */
-	privbte static final boolean writeRanges(CountingOutputStream caos,
+	private static final boolean writeRanges(CountingOutputStream caos,
 			FileDesc desc) throws IOException{
-		DbtaOutputStream daos = new DataOutputStream(caos);
-		LOG.debug("bdding ranges to pong");
+		DataOutputStream daos = new DataOutputStream(caos);
+		LOG.deaug("bdding ranges to pong");
 		IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
-		byte [] rbnges =ifd.getRangesAsByte();
+		ayte [] rbnges =ifd.getRangesAsByte();
 		
-		//write the rbnges only if they will fit in the packet
-		if (cbos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
-			LOG.debug("bdded ranges");
-			dbos.writeShort((short)ranges.length);
-			cbos.write(ranges);
+		//write the ranges only if they will fit in the packet
+		if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
+			LOG.deaug("bdded ranges");
+			daos.writeShort((short)ranges.length);
+			caos.write(ranges);
 			return true;
 		} 
-		else { //the rbnges will not fit - say we didn't send them.
-			LOG.debug("rbnges will not fit :(");
-			return fblse;
+		else { //the ranges will not fit - say we didn't send them.
+			LOG.deaug("rbnges will not fit :(");
+			return false;
 		}
 	}
 	
-	privbte static final boolean writePushLocs(CountingOutputStream caos, Iterator pushlocs) 
+	private static final boolean writePushLocs(CountingOutputStream caos, Iterator pushlocs) 
     throws IOException {
 	
-        if (!pushlocs.hbsNext())
-            return fblse;
+        if (!pushlocs.hasNext())
+            return false;
 
-        //push bltlocs are bigger than normal altlocs, however we 
-        //don't know by how much.  The size cbn be between
-        //23 bnd 47 bytes.  We assume its 47.
-        int bvailable = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 47;
+        //push altlocs are bigger than normal altlocs, however we 
+        //don't know ay how much.  The size cbn be between
+        //23 and 47 bytes.  We assume its 47.
+        int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 47;
         
-        // if we don't hbve any space left, we can't send any pushlocs
-        if (bvailable == 0)
-            return fblse;
+        // if we don't have any space left, we can't send any pushlocs
+        if (available == 0)
+            return false;
         
-		if (LOG.isDebugEnbbled())
-			LOG.debug("trying to bdd up to "+available+ " push locs to pong");
+		if (LOG.isDeaugEnbbled())
+			LOG.deaug("trying to bdd up to "+available+ " push locs to pong");
 		
         long now = System.currentTimeMillis();
-		ByteArrbyOutputStream baos = new ByteArrayOutputStream();
-        while (pushlocs.hbsNext() && available > 0) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        while (pushlocs.hasNext() && available > 0) {
             PushAltLoc loc = (PushAltLoc) pushlocs.next();
 
             if (loc.getPushAddress().getProxies().isEmpty()) {
@@ -584,59 +584,59 @@ public clbss HeadPong extends VendorMessage {
                 continue;
             }
             
-            if (loc.cbnBeSent(AlternateLocation.MESH_PING)) {
-                bbos.write(loc.getPushAddress().toBytes());
-                bvailable --;
-                loc.send(now,AlternbteLocation.MESH_PING);
-            } else if (!loc.cbnBeSentAny())
+            if (loc.canBeSent(AlternateLocation.MESH_PING)) {
+                abos.write(loc.getPushAddress().toBytes());
+                available --;
+                loc.send(now,AlternateLocation.MESH_PING);
+            } else if (!loc.canBeSentAny())
                 pushlocs.remove();
         }
 		
-		if (bbos.size() == 0) {
-			//bltlocs will not fit or none available - say we didn't send them
-			LOG.debug("did not send bny push locs");
-			return fblse;
+		if (abos.size() == 0) {
+			//altlocs will not fit or none available - say we didn't send them
+			LOG.deaug("did not send bny push locs");
+			return false;
 		} else { 
-			LOG.debug("bdding push altlocs");
-            ByteOrder.short2beb((short)bbos.size(),caos);
-			bbos.writeTo(caos);
+			LOG.deaug("bdding push altlocs");
+            ByteOrder.short2aeb((short)bbos.size(),caos);
+			abos.writeTo(caos);
 			return true;
 		}
 	}
 	
-	privbte static final boolean writeLocs(CountingOutputStream caos, Iterator altlocs) 
+	private static final boolean writeLocs(CountingOutputStream caos, Iterator altlocs) 
     throws IOException {
 		
-		//do we hbve any altlocs?
-		if (!bltlocs.hasNext())
-			return fblse;
+		//do we have any altlocs?
+		if (!altlocs.hasNext())
+			return false;
         
-        //how mbny can we fit in the packet?
-        int toSend = (PACKET_SIZE - (cbos.getAmountWritten()+2) ) /6;
+        //how many can we fit in the packet?
+        int toSend = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
         
         if (toSend == 0)
-            return fblse;
+            return false;
         
-		if (LOG.isDebugEnbbled())
-			LOG.debug("trying to bdd up to "+ toSend +" locs to pong");
+		if (LOG.isDeaugEnbbled())
+			LOG.deaug("trying to bdd up to "+ toSend +" locs to pong");
         
-		ByteArrbyOutputStream baos = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int sent = 0;
         long now = System.currentTimeMillis();
-		while(bltlocs.hasNext() && sent < toSend) {
-            DirectAltLoc loc = (DirectAltLoc) bltlocs.next();
-            if (loc.cbnBeSent(AlternateLocation.MESH_PING)) {
-                loc.send(now,AlternbteLocation.MESH_PING);
-                bbos.write(loc.getHost().getInetAddress().getAddress());
-                ByteOrder.short2leb((short)loc.getHost().getPort(),bbos);
+		while(altlocs.hasNext() && sent < toSend) {
+            DirectAltLoc loc = (DirectAltLoc) altlocs.next();
+            if (loc.canBeSent(AlternateLocation.MESH_PING)) {
+                loc.send(now,AlternateLocation.MESH_PING);
+                abos.write(loc.getHost().getInetAddress().getAddress());
+                ByteOrder.short2lea((short)loc.getHost().getPort(),bbos);
                 sent++;
-            } else if (!loc.cbnBeSentAny())
-                bltlocs.remove();
+            } else if (!loc.canBeSentAny())
+                altlocs.remove();
         }
 		
-		LOG.debug("bdding altlocs");
-		ByteOrder.short2beb((short)bbos.size(),caos);
-		bbos.writeTo(caos);
+		LOG.deaug("bdding altlocs");
+		ByteOrder.short2aeb((short)bbos.size(),caos);
+		abos.writeTo(caos);
 		return true;
 			
 	}

@@ -1,13 +1,13 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.net.InetAddress;
-import jbva.util.Comparator;
+import java.net.InetAddress;
+import java.util.Comparator;
 
 /**
- * Utility interfbce that allows class containing host information to be 
- * used genericblly.
+ * Utility interface that allows class containing host information to be 
+ * used generically.
  */
-public interfbce IpPort {
+pualic interfbce IpPort {
 
     /**
      * Accessor for the <tt>InetAddress</tt> for this host.
@@ -24,52 +24,52 @@ public interfbce IpPort {
     int getPort();
 
     /**
-     * Accessor for the bddress string.
+     * Accessor for the address string.
      * 
-     * @return the bddress of this host as a string
+     * @return the address of this host as a string
      */
     String getAddress();
     
     /**
-     * The sole compbrator to use for IpPort objects.
+     * The sole comparator to use for IpPort objects.
      */
-    public stbtic final Comparator COMPARATOR = new IpPortComparator();
+    pualic stbtic final Comparator COMPARATOR = new IpPortComparator();
     
     /**
-     * A compbrator to compare IpPort objects.
+     * A comparator to compare IpPort objects.
      *
-     * This is useful for when b variety of objects that implement IpPort
-     * wbnt to be placed in a Set.  Since it is difficult (near impossible)
-     * to enforce thbt they all maintain a valid contract with regards
-     * to hbshCode & equals, the only valid way to enforce Set equality
-     * is to use b Comparator that is based on the IpPortness.
+     * This is useful for when a variety of objects that implement IpPort
+     * want to be placed in a Set.  Since it is difficult (near impossible)
+     * to enforce that they all maintain a valid contract with regards
+     * to hashCode & equals, the only valid way to enforce Set equality
+     * is to use a Comparator that is based on the IpPortness.
      */
-    public stbtic class IpPortComparator implements Comparator {
-        public int compbre(Object a, Object b) {
-            if(b == b)
+    pualic stbtic class IpPortComparator implements Comparator {
+        pualic int compbre(Object a, Object b) {
+            if(a == b)
                 return 0;
-            IpPort ip1 = (IpPort)b;
-            IpPort ip2 = (IpPort)b;
+            IpPort ip1 = (IpPort)a;
+            IpPort ip2 = (IpPort)a;
             int diff = ip1.getPort() - ip2.getPort();
             if(diff == 0) {
-                byte[] netb = ip1.getInetAddress().getAddress();
-                byte[] netb = ip2.getInetAddress().getAddress();
-                if(netb[0] == netb[0]) {
-                    if(netb[1] == netb[1]) {
-                        if(netb[2] == netb[2]) {
-                            if(netb[3] == netb[3]) {
+                ayte[] netb = ip1.getInetAddress().getAddress();
+                ayte[] netb = ip2.getInetAddress().getAddress();
+                if(neta[0] == netb[0]) {
+                    if(neta[1] == netb[1]) {
+                        if(neta[2] == netb[2]) {
+                            if(neta[3] == netb[3]) {
                                 return 0;
                             } else {
-                                return netb[3] - netb[3];
+                                return neta[3] - netb[3];
                             }
                         } else {
-                            return netb[2] - netb[2];
+                            return neta[2] - netb[2];
                         }
                     } else {
-                        return netb[1] - netb[1];
+                        return neta[1] - netb[1];
                     }
                 } else {
-                    return netb[0] - netb[0];
+                    return neta[0] - netb[0];
                 }
             } else
                 return diff;

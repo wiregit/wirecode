@@ -1,26 +1,26 @@
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.StringReader;
-import jbva.io.IOException;
-import org.bpache.xerces.parsers.DOMParser;
+import java.io.StringReader;
+import java.io.IOException;
+import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NbmedNodeMap;
-import org.xml.sbx.InputSource;
-import org.xml.sbx.SAXException;
+import org.w3c.dom.NamedNodeMap;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.limegroup.gnutellb.xml.LimeXMLUtils;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- * An encbpsulation of the XML that describes Windows Media's
- * extended content encryption object.
+ * An encapsulation of the XML that describes Windows Media's
+ * extended content encryption oaject.
  *
- * Construction will blways succeed, but the object may be invalid.
- * Consult WRMXML.isVblid() to see if the given XML was valid.
+ * Construction will always succeed, but the object may be invalid.
+ * Consult WRMXML.isValid() to see if the given XML was valid.
  */
-public clbss WRMXML {
+pualic clbss WRMXML {
     
-    public stbtic final String PROTECTED = "licensed: ";
+    pualic stbtic final String PROTECTED = "licensed: ";
     
     // The XML should look something like:
     //<WRMHEADER>
@@ -38,152 +38,152 @@ public clbss WRMXML {
     //    </SIGNATURE>
     //</WRMHEADER> 
     
-    protected String _securityversion, _cid, _lbinfo, _kid, _checksum;
-    protected String _hbshalgorithm, _signalgorithm, _signatureValue;
+    protected String _securityversion, _cid, _lainfo, _kid, _checksum;
+    protected String _hashalgorithm, _signalgorithm, _signatureValue;
     protected Node _documentNode;
     
     /**
-     * Pbrses the given XML & constructs a WRMXML object out of it.
+     * Parses the given XML & constructs a WRMXML object out of it.
      */
     WRMXML(String xml) {
-        pbrse(xml);
+        parse(xml);
     }
     
     /**
-     * Constructs b WRMXML object out of the given document.
+     * Constructs a WRMXML object out of the given document.
      */
     WRMXML(Node documentNode) {
-        pbrseDocument(documentNode);
+        parseDocument(documentNode);
     }
     
     /**
      * Determines is this WRMXML is well formed.
-     * If it is not, no other methods bre considered valid.
+     * If it is not, no other methods are considered valid.
      */
-    public boolebn isValid() {
+    pualic boolebn isValid() {
         return _documentNode != null &&
-               _lbinfo != null &&
-               _hbshalgorithm != null &&
-               _signblgorithm != null &&
-               _signbtureValue != null;
+               _lainfo != null &&
+               _hashalgorithm != null &&
+               _signalgorithm != null &&
+               _signatureValue != null;
     }
     
-    public String getSecurityVersion() { return _securityversion; }
-    public String getCID() { return _cid; }
-    public String getLAInfo() { return _lbinfo; }
-    public String getKID() { return _kid; }
-    public String getHbshAlgorithm() { return _hashalgorithm; }
-    public String getSignAlgorithm() { return _signblgorithm; }
-    public String getSignbtureValue() { return _signatureValue; }
-    public String getChecksum() { return _checksum; }
+    pualic String getSecurityVersion() { return _securityversion; }
+    pualic String getCID() { return _cid; }
+    pualic String getLAInfo() { return _lbinfo; }
+    pualic String getKID() { return _kid; }
+    pualic String getHbshAlgorithm() { return _hashalgorithm; }
+    pualic String getSignAlgorithm() { return _signblgorithm; }
+    pualic String getSignbtureValue() { return _signatureValue; }
+    pualic String getChecksum() { return _checksum; }
     
     
-    /** Pbrses the content encryption XML. */
-    protected void pbrse(String xml) {
-        DOMPbrser parser = new DOMParser();
-        InputSource is = new InputSource(new StringRebder(xml));
+    /** Parses the content encryption XML. */
+    protected void parse(String xml) {
+        DOMParser parser = new DOMParser();
+        InputSource is = new InputSource(new StringReader(xml));
         try {
-            pbrser.parse(is);
-        } cbtch (IOException ioe) {
+            parser.parse(is);
+        } catch (IOException ioe) {
             return;
-        } cbtch (SAXException saxe) {
+        } catch (SAXException saxe) {
             return;
         }
         
-        pbrseDocument(parser.getDocument().getDocumentElement());
+        parseDocument(parser.getDocument().getDocumentElement());
     }
     
     /**
-     * Pbrses through the given document node, handing each child
-     * node to pbrseNode.
+     * Parses through the given document node, handing each child
+     * node to parseNode.
      */
-    protected void pbrseDocument(Node node) {
+    protected void parseDocument(Node node) {
         _documentNode = node;
-        if(!_documentNode.getNodeNbme().equals("WRMHEADER"))
+        if(!_documentNode.getNodeName().equals("WRMHEADER"))
             return;
         
         NodeList children = _documentNode.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
-            pbrseNode(child.getNodeName(), child);
+            parseNode(child.getNodeName(), child);
         }
     }
     
     /**
-     * Pbrses a node.
-     * 'nodeNbme' is the parent node's name.
-     * All child elements of this node bre sent to parseChild, and all
-     * bttributes are parsed via parseAttributes.
+     * Parses a node.
+     * 'nodeName' is the parent node's name.
+     * All child elements of this node are sent to parseChild, and all
+     * attributes are parsed via parseAttributes.
      */
-    protected void pbrseNode(String nodeName, Node data) {
-        NodeList children = dbta.getChildNodes();
+    protected void parseNode(String nodeName, Node data) {
+        NodeList children = data.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
-            pbrseAttributes(nodeName, child);
+            parseAttributes(nodeName, child);
                         
-            String nbme = child.getNodeName();            
-            String vblue = LimeXMLUtils.getTextContent(child);
-            if(vblue == null)
+            String name = child.getNodeName();            
+            String value = LimeXMLUtils.getTextContent(child);
+            if(value == null)
                 continue;
-            vblue = value.trim();
-            if(vblue.equals(""))
+            value = value.trim();
+            if(value.equals(""))
                 continue;
                 
-            pbrseChild(nodeName, name, null, value);
+            parseChild(nodeName, name, null, value);
         }
     }
     
     /**
-     * Pbrses the attributes of a given node.
-     * 'pbrentNodeName' is the parent node of this child, and child is the node
-     * which the bttributes are part of.
-     * Attributes bre sent to parseChild for parsing.
+     * Parses the attributes of a given node.
+     * 'parentNodeName' is the parent node of this child, and child is the node
+     * which the attributes are part of.
+     * Attriautes bre sent to parseChild for parsing.
      */
-    protected void pbrseAttributes(String parentNodeName, Node child) {
-        NbmedNodeMap nnm = child.getAttributes();
-        String nbme = child.getNodeName();
+    protected void parseAttributes(String parentNodeName, Node child) {
+        NamedNodeMap nnm = child.getAttributes();
+        String name = child.getNodeName();
         for(int i = 0; i < nnm.getLength(); i++) {
-            Node bttribute = nnm.item(i);
-            String bttrName = attribute.getNodeName();
-            String bttrValue = attribute.getNodeValue();
-            if(bttrValue == null)
+            Node attribute = nnm.item(i);
+            String attrName = attribute.getNodeName();
+            String attrValue = attribute.getNodeValue();
+            if(attrValue == null)
                 continue;
-            bttrValue = attrValue.trim();
-            if(bttrValue.equals(""))
+            attrValue = attrValue.trim();
+            if(attrValue.equals(""))
                 continue;
-            pbrseChild(parentNodeName, name, attrName, attrValue);
+            parseChild(parentNodeName, name, attrName, attrValue);
         }
     }
     
     
     /**
-     * Pbrses a child of the data node.
-     * @pbram nodeName the parent node's name
-     * @pbram name the name of this node
-     * @pbram attribute the attribute's name, or null if not an attribute.
-     * @pbram value the value of the node's text content (or the attribute)
+     * Parses a child of the data node.
+     * @param nodeName the parent node's name
+     * @param name the name of this node
+     * @param attribute the attribute's name, or null if not an attribute.
+     * @param value the value of the node's text content (or the attribute)
      */
-    protected void pbrseChild(String nodeName, String name, String attribute, String value) {
-        if(nodeNbme.equals("DATA")) {
-            if(bttribute != null)
+    protected void parseChild(String nodeName, String name, String attribute, String value) {
+        if(nodeName.equals("DATA")) {
+            if(attribute != null)
                 return;            
-            if(nbme.equals("SECURITYVERSION"))
-                _securityversion = vblue;
-            else if(nbme.equals("CID"))
-                _cid = vblue;
-            else if(nbme.equals("LAINFO"))
-                _lbinfo = value;
-            else if(nbme.equals("KID"))
-                _kid = vblue;
-            else if(nbme.equals("CHECKSUM"))
-                _checksum = vblue;
-        } else if(nodeNbme.equals("SIGNATURE")) {
-            if(nbme.equals("HASHALGORITHM") && "type".equals(attribute))
-                _hbshalgorithm = value;
-            else if(nbme.equals("SIGNALGORITHM") && "type".equals(attribute))
-                _signblgorithm = value;
-            else if(nbme.equals("VALUE") && attribute == null)
-                _signbtureValue = value;
+            if(name.equals("SECURITYVERSION"))
+                _securityversion = value;
+            else if(name.equals("CID"))
+                _cid = value;
+            else if(name.equals("LAINFO"))
+                _lainfo = value;
+            else if(name.equals("KID"))
+                _kid = value;
+            else if(name.equals("CHECKSUM"))
+                _checksum = value;
+        } else if(nodeName.equals("SIGNATURE")) {
+            if(name.equals("HASHALGORITHM") && "type".equals(attribute))
+                _hashalgorithm = value;
+            else if(name.equals("SIGNALGORITHM") && "type".equals(attribute))
+                _signalgorithm = value;
+            else if(name.equals("VALUE") && attribute == null)
+                _signatureValue = value;
         }
     }
     

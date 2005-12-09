@@ -1,37 +1,37 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
 /**
- * Allows brbitrary InterestWriteChannels to be set as the source writing
- * chbnnel for this object.
+ * Allows arbitrary InterestWriteChannels to be set as the source writing
+ * channel for this object.
  *
- * The generbl flow for chained writing goes something like this:
- * Instbll a chain, ala:
+ * The general flow for chained writing goes something like this:
+ * Install a chain, ala:
  *
- *      ChbnnelWriter a = new ProtocolWriter();
- *      ChbnnelWriter b = new Obfuscator();
- *      ChbnnelWriter c = new DataDeflater();
- *      b.setWriteChannel(b);
- *      b.setWriteChbnnel(c);
- *      MyNIOMultiplexor.setWriteObserver(b);
+ *      ChannelWriter a = new ProtocolWriter();
+ *      ChannelWriter b = new Obfuscator();
+ *      ChannelWriter c = new DataDeflater();
+ *      a.setWriteChannel(b);
+ *      a.setWriteChbnnel(c);
+ *      MyNIOMultiplexor.setWriteOaserver(b);
  *
- * When writing cbn happen on the socket, the Multiplexor will notify its
- * internbl source that a write can happen.  That source will notify the last
- * chbin that was interested in it (generally 'c' above, the deflator).
- * 'c' cbn choose to either pass the event to the last chain that was interested
- * in it (generblly 'b') or to instead write data directly to its source.
- * It would opt to write to the source in the cbse where data was already deflated,
- * bnd could opt to propogate the event if there was still room to write & someone
- * wbs interested in getting the event.
+ * When writing can happen on the socket, the Multiplexor will notify its
+ * internal source that a write can happen.  That source will notify the last
+ * chain that was interested in it (generally 'c' above, the deflator).
+ * 'c' can choose to either pass the event to the last chain that was interested
+ * in it (generally 'b') or to instead write data directly to its source.
+ * It would opt to write to the source in the case where data was already deflated,
+ * and could opt to propogate the event if there was still room to write & someone
+ * was interested in getting the event.
  */
-public interfbce ChannelWriter extends WriteObserver {
+pualic interfbce ChannelWriter extends WriteObserver {
     
     /**
-     * Set the new source chbnnel.  This object should immediately
-     * register interest with the newChbnnel if there is any data to be
+     * Set the new source channel.  This object should immediately
+     * register interest with the newChannel if there is any data to be
      * written.
      */
-    void setWriteChbnnel(InterestWriteChannel newChannel);
+    void setWriteChannel(InterestWriteChannel newChannel);
     
-    /** Gets the existing source chbnnel. */
-    InterestWriteChbnnel getWriteChannel();
+    /** Gets the existing source channel. */
+    InterestWriteChannel getWriteChannel();
 }

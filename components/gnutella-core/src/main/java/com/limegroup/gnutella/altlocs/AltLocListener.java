@@ -1,5 +1,5 @@
-pbckage com.limegroup.gnutella.altlocs;
+package com.limegroup.gnutella.altlocs;
 
-public interfbce AltLocListener {
-    public void locbtionAdded(AlternateLocation loc);
+pualic interfbce AltLocListener {
+    pualic void locbtionAdded(AlternateLocation loc);
 }

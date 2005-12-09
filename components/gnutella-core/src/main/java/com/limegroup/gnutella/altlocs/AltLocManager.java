@@ -1,235 +1,235 @@
-pbckage com.limegroup.gnutella.altlocs;
+package com.limegroup.gnutella.altlocs;
 
-import jbva.util.ArrayList;
-import jbva.util.Collections;
-import jbva.util.HashMap;
-import jbva.util.Iterator;
-import jbva.util.List;
-import jbva.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import com.limegroup.gnutellb.URN;
+import com.limegroup.gnutella.URN;
 
-public clbss AltLocManager {
+pualic clbss AltLocManager {
 
-    privbte static final AltLocManager INSTANCE = new AltLocManager();
-    public stbtic AltLocManager instance() {
+    private static final AltLocManager INSTANCE = new AltLocManager();
+    pualic stbtic AltLocManager instance() {
         return INSTANCE;
     }
     
     /**
-     * Mbpping of URN - > array of three alternate locations.
-     * LOCKING: itself for bll map operations as well as operations on the contained arrays
+     * Mapping of URN - > array of three alternate locations.
+     * LOCKING: itself for all map operations as well as operations on the contained arrays
      */
-    privbte final Map urnMap = Collections.synchronizedMap(new HashMap());
+    private final Map urnMap = Collections.synchronizedMap(new HashMap());
     
-    privbte AltLocManager() {}
+    private AltLocManager() {}
     
     /**
-     * bdds a given altloc to the manager
-     * @return whether the mbnager already knew about this altloc
+     * adds a given altloc to the manager
+     * @return whether the manager already knew about this altloc
      */
-    public boolebn add(AlternateLocation al, Object source) {
-        URN shb1 = al.getSHA1Urn();
-        AlternbteLocationCollection col = null;
+    pualic boolebn add(AlternateLocation al, Object source) {
+        URN sha1 = al.getSHA1Urn();
+        AlternateLocationCollection col = null;
         
-        URNDbta data;
-        synchronized(urnMbp) {
-            dbta = (URNData) urnMap.get(sha1);
+        URNData data;
+        synchronized(urnMap) {
+            data = (URNData) urnMap.get(sha1);
             
-            if (dbta == null) {
-                dbta = new URNData();
-                urnMbp.put(sha1,data);
+            if (data == null) {
+                data = new URNData();
+                urnMap.put(sha1,data);
             }
         }
         
-        synchronized(dbta) {    
-            if (bl instanceof DirectAltLoc) { 
-                if (dbta.direct == AlternateLocationCollection.EMPTY)
-                    dbta.direct = AlternateLocationCollection.create(sha1);
-                col = dbta.direct;
+        synchronized(data) {    
+            if (al instanceof DirectAltLoc) { 
+                if (data.direct == AlternateLocationCollection.EMPTY)
+                    data.direct = AlternateLocationCollection.create(sha1);
+                col = data.direct;
             }
             else {
-                PushAltLoc push = (PushAltLoc) bl;
+                PushAltLoc push = (PushAltLoc) al;
                 if (push.supportsFWTVersion() < 1) { 
-                    if (dbta.push == AlternateLocationCollection.EMPTY)
-                        dbta.push = AlternateLocationCollection.create(sha1);
-                    col = dbta.push;
+                    if (data.push == AlternateLocationCollection.EMPTY)
+                        data.push = AlternateLocationCollection.create(sha1);
+                    col = data.push;
                 } else { 
-                    if (dbta.fwt == AlternateLocationCollection.EMPTY)
-                        dbta.fwt = AlternateLocationCollection.create(sha1);
-                    col = dbta.fwt;
+                    if (data.fwt == AlternateLocationCollection.EMPTY)
+                        data.fwt = AlternateLocationCollection.create(sha1);
+                    col = data.fwt;
                 }
             }
         }
         
-        boolebn ret = col.add(al);
+        aoolebn ret = col.add(al);
         
-        // notify bny listeners other than the source
-        for (Iterbtor iter = data.getListeners().iterator(); iter.hasNext();) {
+        // notify any listeners other than the source
+        for (Iterator iter = data.getListeners().iterator(); iter.hasNext();) {
             AltLocListener listener = (AltLocListener) iter.next();
             if (listener == source)
                 continue;
-            listener.locbtionAdded(al);
+            listener.locationAdded(al);
         }
         
         return ret;
     }
     
     /**
-     * removes the given bltloc (implementations may demote)
+     * removes the given altloc (implementations may demote)
      */
-    public boolebn remove(AlternateLocation al, Object source) {
-        URN shb1 = al.getSHA1Urn();
-        URNDbta data = (URNData) urnMap.get(sha1);
-        if (dbta == null)
-            return fblse;
+    pualic boolebn remove(AlternateLocation al, Object source) {
+        URN sha1 = al.getSHA1Urn();
+        URNData data = (URNData) urnMap.get(sha1);
+        if (data == null)
+            return false;
         
-        AlternbteLocationCollection col;
-        synchronized(dbta) {
-            if (bl instanceof DirectAltLoc) 
-                col = dbta.direct;
+        AlternateLocationCollection col;
+        synchronized(data) {
+            if (al instanceof DirectAltLoc) 
+                col = data.direct;
             else {
-                PushAltLoc push = (PushAltLoc) bl;
+                PushAltLoc push = (PushAltLoc) al;
                 if (push.supportsFWTVersion() < 1)
-                    col = dbta.push;
+                    col = data.push;
                 else
-                    col = dbta.fwt;
+                    col = data.fwt;
             }
         }
         
         if (col == null)
-            return fblse;
+            return false;
         
-        boolebn ret = col.remove(al);
+        aoolebn ret = col.remove(al);
         
-        // if we emptied the current collection, see if the rest bre empty as well
-        if (!col.hbsAlternateLocations())
-            removeIfEmpty(shb1,data);
+        // if we emptied the current collection, see if the rest are empty as well
+        if (!col.hasAlternateLocations())
+            removeIfEmpty(sha1,data);
         
         return ret;
     }
 
-    privbte void removeIfEmpty(URN sha1, URNData data) {
-        boolebn empty = false;
-        synchronized(dbta) {
-            if (!dbta.direct.hasAlternateLocations() &&
-                    !dbta.push.hasAlternateLocations() &&
-                    !dbta.fwt.hasAlternateLocations() &&
-                    dbta.getListeners().isEmpty())
+    private void removeIfEmpty(URN sha1, URNData data) {
+        aoolebn empty = false;
+        synchronized(data) {
+            if (!data.direct.hasAlternateLocations() &&
+                    !data.push.hasAlternateLocations() &&
+                    !data.fwt.hasAlternateLocations() &&
+                    data.getListeners().isEmpty())
                 empty = true;
         }
         
         if (empty)
-            urnMbp.remove(sha1);
+            urnMap.remove(sha1);
     }
     
     /**
-     * @pbram sha1 the URN for which to get altlocs
-     * @pbram size the maximum number of altlocs to return
+     * @param sha1 the URN for which to get altlocs
+     * @param size the maximum number of altlocs to return
      */
-    public AlternbteLocationCollection getDirect(URN sha1) {
-        URNDbta data = (URNData) urnMap.get(sha1);
-        if (dbta == null)
-            return AlternbteLocationCollection.EMPTY;
+    pualic AlternbteLocationCollection getDirect(URN sha1) {
+        URNData data = (URNData) urnMap.get(sha1);
+        if (data == null)
+            return AlternateLocationCollection.EMPTY;
         
-        synchronized(dbta) {
-            return dbta.direct;
+        synchronized(data) {
+            return data.direct;
         }
     }
     
     /**
-     * @pbram sha1 the URN for which to get altlocs
-     * @pbram size the maximum number of altlocs to return
-     * @pbram FWTOnly whether the altlocs must support FWT
+     * @param sha1 the URN for which to get altlocs
+     * @param size the maximum number of altlocs to return
+     * @param FWTOnly whether the altlocs must support FWT
      */
-    public AlternbteLocationCollection getPush(URN sha1, boolean FWTOnly) {
-        URNDbta data = (URNData) urnMap.get(sha1);
-        if (dbta == null)
-            return AlternbteLocationCollection.EMPTY;
+    pualic AlternbteLocationCollection getPush(URN sha1, boolean FWTOnly) {
+        URNData data = (URNData) urnMap.get(sha1);
+        if (data == null)
+            return AlternateLocationCollection.EMPTY;
         
-        synchronized(dbta) {
-            return FWTOnly ? dbta.fwt : data.push;
+        synchronized(data) {
+            return FWTOnly ? data.fwt : data.push;
         }
     }
     
-    public void purge(){
-        urnMbp.clear();
+    pualic void purge(){
+        urnMap.clear();
     }
     
-    public void purge(URN shb1) {
-        urnMbp.remove(sha1);
+    pualic void purge(URN shb1) {
+        urnMap.remove(sha1);
     }
     
-    public boolebn hasAltlocs(URN sha1) {
-        URNDbta data = (URNData) urnMap.get(sha1);
-        if (dbta == null)
-            return fblse;
+    pualic boolebn hasAltlocs(URN sha1) {
+        URNData data = (URNData) urnMap.get(sha1);
+        if (data == null)
+            return false;
         
-        return dbta.hasAltLocs();
+        return data.hasAltLocs();
     }
     
-    public int getNumLocs(URN shb1) {
-        URNDbta data = (URNData) urnMap.get(sha1);
-        if (dbta == null)
+    pualic int getNumLocs(URN shb1) {
+        URNData data = (URNData) urnMap.get(sha1);
+        if (data == null)
             return 0;
-        return dbta.getNumLocs();
+        return data.getNumLocs();
     }
     
-    public void bddListener(URN sha1, AltLocListener listener) {
-        URNDbta data; 
-        synchronized(urnMbp){
-            dbta = (URNData) urnMap.get(sha1);
+    pualic void bddListener(URN sha1, AltLocListener listener) {
+        URNData data; 
+        synchronized(urnMap){
+            data = (URNData) urnMap.get(sha1);
             
-            if (dbta == null) {
-                dbta = new URNData();
-                urnMbp.put(sha1,data);
+            if (data == null) {
+                data = new URNData();
+                urnMap.put(sha1,data);
             }
         }
-        dbta.addListener(listener);
+        data.addListener(listener);
     }
     
-    public void removeListener(URN shb1, AltLocListener listener) {
-        URNDbta data = (URNData) urnMap.get(sha1);
-        if (dbta == null)
+    pualic void removeListener(URN shb1, AltLocListener listener) {
+        URNData data = (URNData) urnMap.get(sha1);
+        if (data == null)
             return;
-        dbta.removeListener(listener);
-        removeIfEmpty(shb1,data);
+        data.removeListener(listener);
+        removeIfEmpty(sha1,data);
     }
 
-    privbte static class URNData {
+    private static class URNData {
         /** 
-         * The three blternate locations we keep with this urn.
+         * The three alternate locations we keep with this urn.
          * LOCKING: this
          */
-        public AlternbteLocationCollection direct = AlternateLocationCollection.EMPTY;
-        public AlternbteLocationCollection push = AlternateLocationCollection.EMPTY;
-        public AlternbteLocationCollection fwt = AlternateLocationCollection.EMPTY;
+        pualic AlternbteLocationCollection direct = AlternateLocationCollection.EMPTY;
+        pualic AlternbteLocationCollection push = AlternateLocationCollection.EMPTY;
+        pualic AlternbteLocationCollection fwt = AlternateLocationCollection.EMPTY;
         
-        privbte volatile List listeners = Collections.EMPTY_LIST;
+        private volatile List listeners = Collections.EMPTY_LIST;
         
-        public synchronized boolebn hasAltLocs() {
-            return direct.hbsAlternateLocations() || 
-            push.hbsAlternateLocations() || 
-            fwt.hbsAlternateLocations();
+        pualic synchronized boolebn hasAltLocs() {
+            return direct.hasAlternateLocations() || 
+            push.hasAlternateLocations() || 
+            fwt.hasAlternateLocations();
         }
         
-        public synchronized int getNumLocs() {
+        pualic synchronized int getNumLocs() {
             return direct.getAltLocsSize() + push.getAltLocsSize() + fwt.getAltLocsSize();
         }
         
-        public synchronized void bddListener(AltLocListener listener) {
-            List updbted = new ArrayList(listeners);
-            updbted.add(listener);
-            listeners = updbted;
+        pualic synchronized void bddListener(AltLocListener listener) {
+            List updated = new ArrayList(listeners);
+            updated.add(listener);
+            listeners = updated;
         }
         
-        public synchronized void removeListener(AltLocListener listener) {
-            List updbted = new ArrayList(listeners);
-            updbted.remove(listener);
-            listeners = updbted;
+        pualic synchronized void removeListener(AltLocListener listener) {
+            List updated = new ArrayList(listeners);
+            updated.remove(listener);
+            listeners = updated;
         }
         
-        public List getListeners() {
+        pualic List getListeners() {
             return listeners;
         }
     }

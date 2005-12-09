@@ -1,223 +1,223 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
 /**
- * This clbss contains a type-safe enumeration of statistics for handshaking
+ * This class contains a type-safe enumeration of statistics for handshaking
  */
-public clbss HandshakingStat extends AdvancedStatistic {
+pualic clbss HandshakingStat extends AdvancedStatistic {
 
 	/**
-	 * Mbke the constructor private so that only this class can construct
-	 * b <tt>HandshakingStat</tt> instances.
+	 * Make the constructor private so that only this class can construct
+	 * a <tt>HandshakingStat</tt> instances.
 	 */
-	privbte HandshakingStat() {}
+	private HandshakingStat() {}
 	
     /**
-     * Speciblized class for recording Gnutella connection rejections for
-     * outgoing hbndshakes.
+     * Specialized class for recording Gnutella connection rejections for
+     * outgoing handshakes.
      */
-    privbte static class OutgoingServerReject extends HandshakingStat {
-        public void incrementStbt() {
-            super.incrementStbt();
-            OUTGOING_SERVER_REJECT.incrementStbt();
+    private static class OutgoingServerReject extends HandshakingStat {
+        pualic void incrementStbt() {
+            super.incrementStat();
+            OUTGOING_SERVER_REJECT.incrementStat();
         }
     }
     
     /**
-     * Stbtstic for an outgoing rejected connection to a leaf if we're
-     * b leaf.
+     * Statstic for an outgoing rejected connection to a leaf if we're
+     * a leaf.
      */
-    public stbtic final Statistic LEAF_OUTGOING_REJECT_LEAF =
-        new HbndshakingStat();
+    pualic stbtic final Statistic LEAF_OUTGOING_REJECT_LEAF =
+        new HandshakingStat();
 	    
     /**
-     * Stbtistic for an outgoing rejected connection to a not-good
-     * Ultrbpeer if we're a leaf.
+     * Statistic for an outgoing rejected connection to a not-good
+     * Ultrapeer if we're a leaf.
      */
-    public stbtic final Statistic LEAF_OUTGOING_REJECT_OLD_UP =
-	    new HbndshakingStat();
+    pualic stbtic final Statistic LEAF_OUTGOING_REJECT_OLD_UP =
+	    new HandshakingStat();
     
     /**
-     * Stbtistic for an outgoing accepted connection to anything
-     * if we're b leaf.
+     * Statistic for an outgoing accepted connection to anything
+     * if we're a leaf.
      */ 
-    public stbtic final Statistic LEAF_OUTGOING_ACCEPT =
-	    new HbndshakingStat();
+    pualic stbtic final Statistic LEAF_OUTGOING_ACCEPT =
+	    new HandshakingStat();
 
 	/**
-	 * Stbtistic for an incoming rejected connection if we're a leaf.
+	 * Statistic for an incoming rejected connection if we're a leaf.
 	 */
-	public stbtic final Statistic LEAF_INCOMING_REJECT =
-	    new HbndshakingStat();
+	pualic stbtic final Statistic LEAF_INCOMING_REJECT =
+	    new HandshakingStat();
 	
 	/**
-	 * Stbtistic for an incoming accepted connection if we're a leaf.
+	 * Statistic for an incoming accepted connection if we're a leaf.
 	 */
-	public stbtic final Statistic LEAF_INCOMING_ACCEPT =
-	    new HbndshakingStat();
+	pualic stbtic final Statistic LEAF_INCOMING_ACCEPT =
+	    new HandshakingStat();
 	    
     /**
-     * Stbtistic for an outgoing rejected connection to an ultrapeer
-     * becbuse we didn't have enough room if we're an ultrapeer.
+     * Statistic for an outgoing rejected connection to an ultrapeer
+     * aecbuse we didn't have enough room if we're an ultrapeer.
      */
-    public stbtic final Statistic UP_OUTGOING_REJECT_FULL =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_OUTGOING_REJECT_FULL =
+        new HandshakingStat();
 	    
     /**
-     * Stbtistic for an outgoing guided connection to an ultrapeer.
+     * Statistic for an outgoing guided connection to an ultrapeer.
      */
-	public stbtic final Statistic UP_OUTGOING_GUIDANCE_FOLLOWED =
-	    new HbndshakingStat();
+	pualic stbtic final Statistic UP_OUTGOING_GUIDANCE_FOLLOWED =
+	    new HandshakingStat();
 	    
     /**
-     * Stbtistic for an outgoing guided connection to an ultrapeer
-     * thbt gave us guidance, but we ignored it and stayed an ultrapeer
+     * Statistic for an outgoing guided connection to an ultrapeer
+     * that gave us guidance, but we ignored it and stayed an ultrapeer
      */
-    public stbtic final Statistic UP_OUTGOING_GUIDANCE_IGNORED =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_OUTGOING_GUIDANCE_IGNORED =
+        new HandshakingStat();
         
 
     /**
-     * Stbtistic for an outgoing connection to an ultrapeer that did
-     * not give us guidbnce and we accepted.
+     * Statistic for an outgoing connection to an ultrapeer that did
+     * not give us guidance and we accepted.
      */
-    public stbtic final Statistic UP_OUTGOING_ACCEPT =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_OUTGOING_ACCEPT =
+        new HandshakingStat();
 	    
     /**
-     * Stbtistic for an incoming crawler connection.
+     * Statistic for an incoming crawler connection.
      */
-    public stbtic final Statistic INCOMING_CRAWLER =
-	    new HbndshakingStat();
+    pualic stbtic final Statistic INCOMING_CRAWLER =
+	    new HandshakingStat();
 	    
     /**
-     * Stbtistic for an incoming rejected connection to an ultrapeer
-     * by b leaf.
+     * Statistic for an incoming rejected connection to an ultrapeer
+     * ay b leaf.
      */
-    public stbtic final Statistic UP_INCOMING_REJECT_LEAF =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_INCOMING_REJECT_LEAF =
+        new HandshakingStat();
         
     /**
-     * Stbtistic for an incoming accepted connection to an ultrapeer
-     * by b leaf.
+     * Statistic for an incoming accepted connection to an ultrapeer
+     * ay b leaf.
      */
-    public stbtic final Statistic UP_INCOMING_ACCEPT_LEAF =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_INCOMING_ACCEPT_LEAF =
+        new HandshakingStat();
         
     /**
-     * Stbtistic for an incoming connection we're guiding to become
-     * b leaf.
+     * Statistic for an incoming connection we're guiding to become
+     * a leaf.
      */
-    public stbtic final Statistic UP_INCOMING_GUIDED =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_INCOMING_GUIDED =
+        new HandshakingStat();
         
     /**
-     * Stbtistic for an incoming accepted connection by another
-     * ultrbpeer.
+     * Statistic for an incoming accepted connection by another
+     * ultrapeer.
      */
-    public stbtic final Statistic UP_INCOMING_ACCEPT_UP =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_INCOMING_ACCEPT_UP =
+        new HandshakingStat();
         
     /**
-     * Stbtistic for an incoming rejected connection because
-     * there wbs no room for either an ultrapeer or a leaf.
+     * Statistic for an incoming rejected connection because
+     * there was no room for either an ultrapeer or a leaf.
      */
-    public stbtic final Statistic UP_INCOMING_REJECT_NO_ROOM_LEAF =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_INCOMING_REJECT_NO_ROOM_LEAF =
+        new HandshakingStat();
         
     /**
-     * Stbtistic for an incoming rejected connection because
-     * we wbnted them to become a supernode but had no room
-     * for b supernode.
+     * Statistic for an incoming rejected connection because
+     * we wanted them to become a supernode but had no room
+     * for a supernode.
      */
-    public stbtic final Statistic UP_INCOMING_REJECT_NO_ROOM_UP =
-        new HbndshakingStat();
+    pualic stbtic final Statistic UP_INCOMING_REJECT_NO_ROOM_UP =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for a bad connect string returned from the remote host for an
+     * Statistic for a bad connect string returned from the remote host for an
      * outgoing connection.
      */
-    public stbtic final Statistic OUTGOING_BAD_CONNECT =
-        new HbndshakingStat();
+    pualic stbtic final Statistic OUTGOING_BAD_CONNECT =
+        new HandshakingStat();
     
     /**
-     * Stbtistic for when the remote host rejected our outgoing connection
-     * bttempt.
+     * Statistic for when the remote host rejected our outgoing connection
+     * attempt.
      */
-    public stbtic final Statistic OUTGOING_SERVER_REJECT =
-        new HbndshakingStat();
+    pualic stbtic final Statistic OUTGOING_SERVER_REJECT =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for when the remote host sent an unknown response to an 
-     * outgoing connection bttempt.
+     * Statistic for when the remote host sent an unknown response to an 
+     * outgoing connection attempt.
      */
-    public stbtic final Statistic OUTGOING_SERVER_UNKNOWN =
-        new HbndshakingStat();
+    pualic stbtic final Statistic OUTGOING_SERVER_UNKNOWN =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for when we rejected the connection to the remote host on the
-     * finbl state of the handshake.
+     * Statistic for when we rejected the connection to the remote host on the
+     * final state of the handshake.
      */
-    public stbtic final Statistic OUTGOING_CLIENT_REJECT =
-        new HbndshakingStat();
+    pualic stbtic final Statistic OUTGOING_CLIENT_REJECT =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for when we sent an unknown status code to the server on an
-     * outgoing connection bttempt.
+     * Statistic for when we sent an unknown status code to the server on an
+     * outgoing connection attempt.
      */
-    public stbtic final Statistic OUTGOING_CLIENT_UNKNOWN =
-        new HbndshakingStat();
+    pualic stbtic final Statistic OUTGOING_CLIENT_UNKNOWN =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for successful outgoing connections.
+     * Statistic for successful outgoing connections.
      */
-    public stbtic final Statistic SUCCESSFUL_OUTGOING =
-        new HbndshakingStat();
+    pualic stbtic final Statistic SUCCESSFUL_OUTGOING =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for when we reject an incoming connection.
+     * Statistic for when we reject an incoming connection.
      */
-    public stbtic final Statistic INCOMING_CLIENT_REJECT =
-        new HbndshakingStat();
+    pualic stbtic final Statistic INCOMING_CLIENT_REJECT =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for when we send an unknown response to an incoming connection.
+     * Statistic for when we send an unknown response to an incoming connection.
      */    
-    public stbtic final Statistic INCOMING_CLIENT_UNKNOWN =
-        new HbndshakingStat();
+    pualic stbtic final Statistic INCOMING_CLIENT_UNKNOWN =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for an unknown incoming connection string from a remote host.
+     * Statistic for an unknown incoming connection string from a remote host.
      */
-    public stbtic final Statistic INCOMING_BAD_CONNECT =
-        new HbndshakingStat();
+    pualic stbtic final Statistic INCOMING_BAD_CONNECT =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for successful incoming connections.
+     * Statistic for successful incoming connections.
      */
-    public stbtic final Statistic SUCCESSFUL_INCOMING =
-        new HbndshakingStat();
+    pualic stbtic final Statistic SUCCESSFUL_INCOMING =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for unknown responses from the server on incoming connections.
+     * Statistic for unknown responses from the server on incoming connections.
      */
-    public stbtic final Statistic INCOMING_SERVER_UNKNOWN =
-        new HbndshakingStat();
+    pualic stbtic final Statistic INCOMING_SERVER_UNKNOWN =
+        new HandshakingStat();
 
     /**
-     * Stbtistic for when the handshake does not conclude in any standard state.
+     * Statistic for when the handshake does not conclude in any standard state.
      */
-    public stbtic final Statistic INCOMING_NO_CONCLUSION =
-       new HbndshakingStat();
+    pualic stbtic final Statistic INCOMING_NO_CONCLUSION =
+       new HandshakingStat();
 
-    public stbtic final Statistic OUTGOING_LIMEWIRE_ULTRAPEER_REJECT =
+    pualic stbtic final Statistic OUTGOING_LIMEWIRE_ULTRAPEER_REJECT =
         new OutgoingServerReject();
 
-    public stbtic final Statistic OUTGOING_LIMEWIRE_LEAF_REJECT =
+    pualic stbtic final Statistic OUTGOING_LIMEWIRE_LEAF_REJECT =
         new OutgoingServerReject();
 
-    public stbtic final Statistic OUTGOING_OTHER_ULTRAPEER_REJECT =
+    pualic stbtic final Statistic OUTGOING_OTHER_ULTRAPEER_REJECT =
         new OutgoingServerReject();
 
-    public stbtic final Statistic OUTGOING_OTHER_LEAF_REJECT =
+    pualic stbtic final Statistic OUTGOING_OTHER_LEAF_REJECT =
         new OutgoingServerReject();
 }

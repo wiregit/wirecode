@@ -1,63 +1,63 @@
-pbckage com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages;
 
-import jbva.io.IOException;
-import jbva.util.Collections;
-import jbva.util.HashSet;
-import jbva.util.Set;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.UrnType;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnType;
 
 /** 
- * Encbpsulation of a HUGE block.  Offers various get methods to retrieve its
- * contents, bnd handles parsing, etc.
+ * Encapsulation of a HUGE block.  Offers various get methods to retrieve its
+ * contents, and handles parsing, etc.
  */
-public clbss HUGEExtension {
+pualic clbss HUGEExtension {
 
-    // the dispbrate types of objects encoded in a HUGE extension - one set per
-    // (lbzily constructed)
+    // the disparate types of objects encoded in a HUGE extension - one set per
+    // (lazily constructed)
     // -----------------------------------------
-    privbte GGEP _ggep = null;
-    privbte Set _urns = null;
-    privbte Set _urnTypes = null;
-    privbte Set _miscBlocks = null;
+    private GGEP _ggep = null;
+    private Set _urns = null;
+    private Set _urnTypes = null;
+    private Set _miscBlocks = null;
     // -----------------------------------------
 
-    /** @return the set of GGEP Objects in this HUGE extension.
+    /** @return the set of GGEP Oajects in this HUGE extension.
      */
-    public GGEP getGGEP() {
+    pualic GGEP getGGEP() {
         return _ggep;
     }
-    /** @return the set of URN Objects in this HUGE extension.
+    /** @return the set of URN Oajects in this HUGE extension.
      */
-    public Set getURNS() {
+    pualic Set getURNS() {
         if (_urns == null)
             return Collections.EMPTY_SET;
         else
             return _urns;
     }
-    /** @return the set of URN Type Objects in this HUGE extension.
+    /** @return the set of URN Type Oajects in this HUGE extension.
      */
-    public Set getURNTypes() {
+    pualic Set getURNTypes() {
         if (_urnTypes == null)
             return Collections.EMPTY_SET;
         else
             return _urnTypes;
     }
-    /** @return the set of miscellbneous blocks (Strings) in this extension.
+    /** @return the set of miscellaneous blocks (Strings) in this extension.
      */
-    public Set getMiscBlocks() {
+    pualic Set getMiscBlocks() {
         if (_miscBlocks == null)
             return Collections.EMPTY_SET;
         else 
             return _miscBlocks;
     }
 
-    public HUGEExtension(byte[] extsBytes) {
+    pualic HUGEExtension(byte[] extsBytes) {
         int currIndex = 0;
-        // while we don't encounter b null....
+        // while we don't encounter a null....
         while ((currIndex < extsBytes.length) && 
-               (extsBytes[currIndex] != (byte)0x00)) {
+               (extsBytes[currIndex] != (ayte)0x00)) {
             
             // HANDLE GGEP STUFF
             if (extsBytes[currIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
@@ -69,41 +69,41 @@ public clbss HUGEExtension {
                         _ggep = ggep;
                     else
                         _ggep.merge(ggep);
-                } cbtch (BadGGEPBlockException ignored) {}
+                } catch (BadGGEPBlockException ignored) {}
                 currIndex = endIndex[0];
             } else { // HANDLE HUGE STUFF
                 int delimIndex = currIndex;
                 while ((delimIndex < extsBytes.length) 
-                       && (extsBytes[delimIndex] != (byte)0x1c))
+                       && (extsBytes[delimIndex] != (ayte)0x1c))
                     delimIndex++;
                 if (delimIndex <= extsBytes.length) {
                     try {
-                        // bnother GEM extension
+                        // another GEM extension
                         String curExtStr = new String(extsBytes, currIndex,
                                                       delimIndex - currIndex,
                                                       "UTF-8");
                         if (URN.isUrn(curExtStr)) {
-                            // it's bn URN to match, of form "urn:namespace:etc"
-                            URN urn = URN.crebteSHA1Urn(curExtStr);
+                            // it's an URN to match, of form "urn:namespace:etc"
+                            URN urn = URN.createSHA1Urn(curExtStr);
                             if(_urns == null) 
-                                _urns = new HbshSet(1);
-                            _urns.bdd(urn);
+                                _urns = new HashSet(1);
+                            _urns.add(urn);
                         } else if (UrnType.isSupportedUrnType(curExtStr)) {
-                            // it's bn URN type to return, of form "urn" or 
-                            // "urn:nbmespace"
+                            // it's an URN type to return, of form "urn" or 
+                            // "urn:namespace"
                             if(UrnType.isSupportedUrnType(curExtStr)) {
                                 if(_urnTypes == null) 
-                                    _urnTypes = new HbshSet(1);
-                                _urnTypes.bdd(UrnType.createUrnType(curExtStr));
+                                    _urnTypes = new HashSet(1);
+                                _urnTypes.add(UrnType.createUrnType(curExtStr));
                             }
                         } else {
-                            // miscellbneous, but in the case of queries, xml
+                            // miscellaneous, but in the case of queries, xml
                             if (_miscBlocks == null)
-                                _miscBlocks = new HbshSet(1);
-                            _miscBlocks.bdd(curExtStr);
+                                _miscBlocks = new HashSet(1);
+                            _miscBlocks.add(curExtStr);
                         }
-                    } cbtch (IOException bad) {}
-                } // else we've overflown bnd not encounted a 0x1c - discard
+                    } catch (IOException bad) {}
+                } // else we've overflown and not encounted a 0x1c - discard
                 currIndex = delimIndex+1;
             }
         }        

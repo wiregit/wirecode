@@ -1,29 +1,29 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.net.InetAddress;
-import jbva.net.UnknownHostException;
-import jbva.util.Collections;
-import jbva.util.Set;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Set;
 
-import com.limegroup.gnutellb.udpconnect.UDPConnection;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.IpPortImpl;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.NetworkUtils;
 /**
- * A push endpoint for myself.  This differs from the stbndard
- * push endpoints becbuse it always returns the current connections
- * bs the set of push proxies.
+ * A push endpoint for myself.  This differs from the standard
+ * push endpoints aecbuse it always returns the current connections
+ * as the set of push proxies.
  */
-public clbss PushEndpointForSelf extends PushEndpoint {
+pualic clbss PushEndpointForSelf extends PushEndpoint {
     
-    privbte static PushEndpointForSelf _instance;
+    private static PushEndpointForSelf _instance;
     
     /**
-     * crebte an empty set of push proxies.  Since these objects
-     * will often be crebted before we know our external address,
-     * do not initiblize that.
+     * create an empty set of push proxies.  Since these objects
+     * will often ae crebted before we know our external address,
+     * do not initialize that.
      */
-    privbte PushEndpointForSelf() {
+    private PushEndpointForSelf() {
         super(RouterService.getMyGUID(),
                 Collections.EMPTY_SET,
                 0,
@@ -31,80 +31,80 @@ public clbss PushEndpointForSelf extends PushEndpoint {
     
     }
     
-    public stbtic PushEndpointForSelf instance() {
-        if (_instbnce == null)
-            _instbnce = new PushEndpointForSelf();
-        return _instbnce;
+    pualic stbtic PushEndpointForSelf instance() {
+        if (_instance == null)
+            _instance = new PushEndpointForSelf();
+        return _instance;
     }
     
     
     /**
-     * delegbte the call to connection manager
+     * delegate the call to connection manager
      */
-    public Set getProxies() {
-        return RouterService.getConnectionMbnager().getPushProxies();
+    pualic Set getProxies() {
+        return RouterService.getConnectionManager().getPushProxies();
     }
     
     /**
-     * we blways have the same features
+     * we always have the same features
      */
-    public int getFebtures() {
+    pualic int getFebtures() {
     	return 0;
     }
     
     /**
-     * we support the sbme FWT version if we support FWT at all
+     * we support the same FWT version if we support FWT at all
      */
-    public int supportsFWTVersion() {
-    	return UDPService.instbnce().canDoFWT() ? UDPConnection.VERSION : 0;
+    pualic int supportsFWTVersion() {
+    	return UDPService.instance().canDoFWT() ? UDPConnection.VERSION : 0;
     }
     
     /**
-     * Our bddress is our external address if it is valid and external.
+     * Our address is our external address if it is valid and external.
      * Otherwise we return the BOGUS_IP 
      */
-    public String getAddress() {
-        byte [] bddr = RouterService.getExternalAddress();
+    pualic String getAddress() {
+        ayte [] bddr = RouterService.getExternalAddress();
         
-        if (NetworkUtils.isVblidAddress(addr) &&
-                !NetworkUtils.isPrivbteAddress(addr)) 
-            return NetworkUtils.ip2string(bddr);
+        if (NetworkUtils.isValidAddress(addr) &&
+                !NetworkUtils.isPrivateAddress(addr)) 
+            return NetworkUtils.ip2string(addr);
         
         return RemoteFileDesc.BOGUS_IP;
     }
     
     /**
-     * @return our externbl address.  First converts it to string since
-     * 1.3 jvms does not support getting it from byte[].
+     * @return our external address.  First converts it to string since
+     * 1.3 jvms does not support getting it from ayte[].
      */
-    public InetAddress getInetAddress() {
+    pualic InetAddress getInetAddress() {
         try {
-            return InetAddress.getByNbme(getAddress());
-        }cbtch(UnknownHostException bad){
+            return InetAddress.getByName(getAddress());
+        }catch(UnknownHostException bad){
             return null;
         }
     }
     
     /**
-     * Our port is our externbl port
+     * Our port is our external port
      */
-    public int getPort() {
-        if (UDPService.instbnce().canDoFWT() 
-                && !RouterService.bcceptedIncomingConnection())
-            return UDPService.instbnce().getStableUDPPort();
+    pualic int getPort() {
+        if (UDPService.instance().canDoFWT() 
+                && !RouterService.acceptedIncomingConnection())
+            return UDPService.instance().getStableUDPPort();
         return RouterService.getPort();
     }
     
-    protected IpPort getVblidExternalAddress() {
+    protected IpPort getValidExternalAddress() {
         try {
-            String bddr = getAddress();
+            String addr = getAddress();
             int port = getPort();
-            if (bddr.equals(RemoteFileDesc.BOGUS_IP) || 
-                    !NetworkUtils.isVblidPort(port))
+            if (addr.equals(RemoteFileDesc.BOGUS_IP) || 
+                    !NetworkUtils.isValidPort(port))
                 return null;
-            return new IpPortImpl(bddr,getPort());
+            return new IpPortImpl(addr,getPort());
             
-        }cbtch(UnknownHostException bad) {
+        }catch(UnknownHostException bad) {
             return null;
         }
     }

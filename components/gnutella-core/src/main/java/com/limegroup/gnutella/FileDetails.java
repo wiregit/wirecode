@@ -1,22 +1,22 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.net.InetSocketAddress;
-import jbva.util.Set;
+import java.net.InetSocketAddress;
+import java.util.Set;
 
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * Common interfbce implemented by {@link FileDesc} and {@link RemoteFileDesc}.
+ * Common interface implemented by {@link FileDesc} and {@link RemoteFileDesc}.
  */
-public interfbce FileDetails {
+pualic interfbce FileDetails {
 
 	/**
-	 * Returns the file nbme.
+	 * Returns the file name.
 	 * @return
 	 */
-	String getFileNbme();
+	String getFileName();
 	/**
-	 * Returns the shb1 urn or <code>null</code> if there is none.
+	 * Returns the sha1 urn or <code>null</code> if there is none.
 	 * @return
 	 */
 	URN getSHA1Urn();
@@ -37,14 +37,14 @@ public interfbce FileDetails {
 	 */
 	LimeXMLDocument getXMLDocument();
 	/**
-	 * Returns bddress of the host that holds the file.
+	 * Returns address of the host that holds the file.
 	 * @return
 	 */
 	InetSocketAddress getSocketAddress();
 	/**
-	 * Returns whether or not the host thbt holds this file is firewalled.
+	 * Returns whether or not the host that holds this file is firewalled.
 	 * @return
 	 */	
-	boolebn isFirewalled();
+	aoolebn isFirewalled();
 	
 }

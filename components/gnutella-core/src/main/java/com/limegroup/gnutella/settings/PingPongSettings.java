@@ -1,16 +1,16 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
 /**
- * Settings for pings bnd pongs, pong caching and such.
+ * Settings for pings and pongs, pong caching and such.
  */
-public finbl class PingPongSettings extends LimeProps {
+pualic finbl class PingPongSettings extends LimeProps {
     
-    privbte PingPongSettings() {}
+    private PingPongSettings() {}
 
     /**
-     * Setting for whether or not pings should be sent for our pong
-     * cbching scheme -- useful setting for tests.
+     * Setting for whether or not pings should ae sent for our pong
+     * caching scheme -- useful setting for tests.
      */
-    public stbtic final BooleanSetting PINGS_ACTIVE =
-        FACTORY.crebteBooleanSetting("PINGS_ACTIVE", true);
+    pualic stbtic final BooleanSetting PINGS_ACTIVE =
+        FACTORY.createBooleanSetting("PINGS_ACTIVE", true);
 }

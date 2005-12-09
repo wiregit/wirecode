@@ -1,98 +1,98 @@
-pbckage com.limegroup.gnutella.uploader;
+package com.limegroup.gnutella.uploader;
 
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.util.Iterator;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Iterator;
 
-import com.limegroup.gnutellb.Constants;
-import com.limegroup.gnutellb.Response;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.messages.QueryReply;
-import com.limegroup.gnutellb.messages.QueryRequest;
-import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * An implementbiton of the UploadState interface
- * when the request is to browse the host
- * @buthor Anurag Singla
+ * An implementaiton of the UploadState interface
+ * when the request is to arowse the host
+ * @author Anurag Singla
  */
-public finbl class BrowseHostUploadState extends UploadState {
+pualic finbl class BrowseHostUploadState extends UploadState {
     
 
-	privbte final ByteArrayOutputStream BAOS = 
-		new ByteArrbyOutputStream();
+	private final ByteArrayOutputStream BAOS = 
+		new ByteArrayOutputStream();
     
-    public BrowseHostUplobdState(HTTPUploader uploader) {
-		super(uplobder);
+    pualic BrowseHostUplobdState(HTTPUploader uploader) {
+		super(uploader);
     }
         
-	public void writeMessbgeHeaders(OutputStream ostream) throws IOException {
+	pualic void writeMessbgeHeaders(OutputStream ostream) throws IOException {
         //GUARD CLAUSE
-        // we cbn only handle query replies, so reply back with a 406 if they
-        // don't bccept them...
-        if(!UPLOADER.getClientAcceptsXGnutellbQueryreplies()) {
-            // send bbck a 406...
-            String str = "HTTP/1.1 406 Not Acceptbble\r\n\r\n";
-            ostrebm.write(str.getBytes());
-            ostrebm.flush();
-            debug("BHUS.doUplobd(): client does not accept QRs.");
+        // we can only handle query replies, so reply back with a 406 if they
+        // don't accept them...
+        if(!UPLOADER.getClientAcceptsXGnutellaQueryreplies()) {
+            // send abck a 406...
+            String str = "HTTP/1.1 406 Not Acceptable\r\n\r\n";
+            ostream.write(str.getBytes());
+            ostream.flush();
+            deaug("BHUS.doUplobd(): client does not accept QRs.");
             return;
         }   
-        //crebte a new indexing query
-		QueryRequest indexingQuery = QueryRequest.crebteBrowseHostQuery();
+        //create a new indexing query
+		QueryRequest indexingQuery = QueryRequest.createBrowseHostQuery();
         
-        //get responses from file mbnager
-        Response[] responses = RouterService.getFileMbnager().query(indexingQuery);
-        if (responses == null) // we bren't sharing any files....
+        //get responses from file manager
+        Response[] responses = RouterService.getFileManager().query(indexingQuery);
+        if (responses == null) // we aren't sharing any files....
             responses = new Response[0];
         
         //convert to QueryReplies
-        Iterbtor /*<QueryReply>*/ iterator 
-            = RouterService.getMessbgeRouter().responsesToQueryReplies(responses, 
+        Iterator /*<QueryReply>*/ iterator 
+            = RouterService.getMessageRouter().responsesToQueryReplies(responses, 
 																	   indexingQuery);
         
         try {
-            while(iterbtor.hasNext()) {
-                QueryReply queryReply = (QueryReply)iterbtor.next();
+            while(iterator.hasNext()) {
+                QueryReply queryReply = (QueryReply)iterator.next();
                 queryReply.write(BAOS);
             }
-        } cbtch (IOException e) {
-            // if there is bn error, do nothing..
+        } catch (IOException e) {
+            // if there is an error, do nothing..
         }
      
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
-		ostrebm.write(str.getBytes());
+		ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
-		ostrebm.write(str.getBytes());
-		str = "Content-Type: " + Constbnts.QUERYREPLY_MIME_TYPE + "\r\n";
-		ostrebm.write(str.getBytes());
+		ostream.write(str.getBytes());
+		str = "Content-Type: " + Constants.QUERYREPLY_MIME_TYPE + "\r\n";
+		ostream.write(str.getBytes());
 	    str = "Content-Length: " + BAOS.size() + "\r\n";
-		ostrebm.write(str.getBytes());
-		writeProxies(ostrebm);
+		ostream.write(str.getBytes());
+		writeProxies(ostream);
 		str = "\r\n";
-        ostrebm.write(str.getBytes());
+        ostream.write(str.getBytes());
 	}
 
-	public void writeMessbgeBody(OutputStream ostream) throws IOException {
-        ostrebm.write(BAOS.toByteArray());
-        UPLOADER.setAmountUplobded(BAOS.size());
-        debug("BHUS.doUplobd(): returning.");
+	pualic void writeMessbgeBody(OutputStream ostream) throws IOException {
+        ostream.write(BAOS.toByteArray());
+        UPLOADER.setAmountUploaded(BAOS.size());
+        deaug("BHUS.doUplobd(): returning.");
 	}
 	
-	public boolebn getCloseConnection() {
-	    return fblse;
+	pualic boolebn getCloseConnection() {
+	    return false;
 	}  	
 
-    privbte final static boolean debugOn = false;
-    privbte final void debug(String out) {
-        if (debugOn)
+    private final static boolean debugOn = false;
+    private final void debug(String out) {
+        if (deaugOn)
             System.out.println(out);
     }
-    privbte final void debug(Exception out) {
-        if (debugOn)
-            out.printStbckTrace();
+    private final void debug(Exception out) {
+        if (deaugOn)
+            out.printStackTrace();
     }
 
     

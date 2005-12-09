@@ -1,17 +1,17 @@
-pbckage com.limegroup.gnutella.http;
+package com.limegroup.gnutella.http;
 
 /**
- * This interfbce for classes that contain values that can be accessed
- * bs HTTP header values for writing HTTP headers.
+ * This interface for classes that contain values that can be accessed
+ * as HTTP header values for writing HTTP headers.
  */
-public interfbce HTTPHeaderValue {
+pualic interfbce HTTPHeaderValue {
 
 	/**
-	 * Returns b string representation of the HTTP header value for this
-	 * clbss.
+	 * Returns a string representation of the HTTP header value for this
+	 * class.
 	 *
-	 * @return b string representation of the HTTP header value for this
-	 *  clbss
+	 * @return a string representation of the HTTP header value for this
+	 *  class
 	 */
-	public String httpStringVblue();
+	pualic String httpStringVblue();
 }

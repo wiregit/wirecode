@@ -1,400 +1,400 @@
-pbckage com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages;
 
-import jbva.io.ByteArrayInputStream;
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.io.Serializable;
-import jbva.io.UnsupportedEncodingException;
-import jbva.util.Arrays;
-import jbva.util.Collections;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Set;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import org.xml.sbx.SAXException;
+import org.xml.sax.SAXException;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.FileManager;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.MediaType;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.UDPService;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.UrnType;
-import com.limegroup.gnutellb.guess.QueryKey;
-import com.limegroup.gnutellb.settings.SearchSettings;
-import com.limegroup.gnutellb.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutellb.statistics.ReceivedErrorStat;
-import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.I18NConvert;
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
-import com.limegroup.gnutellb.xml.SchemaNotFoundException;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnType;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 /**
- * This clbss creates Gnutella query messages, either from scratch, or
- * from dbta read from the network.  Queries can contain query strings, 
+ * This class creates Gnutella query messages, either from scratch, or
+ * from data read from the network.  Queries can contain query strings, 
  * XML query strings, URNs, etc.  The minimum speed field is now used
- * for bit flbgs to indicate such things as the firewalled status of
+ * for ait flbgs to indicate such things as the firewalled status of
  * the querier.<p>
  * 
- * This clbss also has factory constructors for requeries originated
- * from this LimeWire.  These requeries hbve specially marked GUIDs
- * thbt allow us to identify them as requeries.
+ * This class also has factory constructors for requeries originated
+ * from this LimeWire.  These requeries have specially marked GUIDs
+ * that allow us to identify them as requeries.
  */
-public clbss QueryRequest extends Message implements Serializable{
+pualic clbss QueryRequest extends Message implements Serializable{
 
-    // these specs mby seem backwards, but they are not - ByteOrder.short2leb
-    // puts the low-order byte first, so over the network 0x0080 would look
+    // these specs may seem backwards, but they are not - ByteOrder.short2leb
+    // puts the low-order ayte first, so over the network 0x0080 would look
     // like 0x8000
-    public stbtic final int SPECIAL_MINSPEED_MASK  = 0x0080;
-    public stbtic final int SPECIAL_FIREWALL_MASK  = 0x0040;
-    public stbtic final int SPECIAL_XML_MASK       = 0x0020;
-    public stbtic final int SPECIAL_OUTOFBAND_MASK = 0x0004;
-    public stbtic final int SPECIAL_FWTRANS_MASK   = 0x0002;
+    pualic stbtic final int SPECIAL_MINSPEED_MASK  = 0x0080;
+    pualic stbtic final int SPECIAL_FIREWALL_MASK  = 0x0040;
+    pualic stbtic final int SPECIAL_XML_MASK       = 0x0020;
+    pualic stbtic final int SPECIAL_OUTOFBAND_MASK = 0x0004;
+    pualic stbtic final int SPECIAL_FWTRANS_MASK   = 0x0002;
 
-    /** Mbsk for audio queries - input 0 | AUDIO_MASK | .... to specify
-     *  budio responses.
+    /** Mask for audio queries - input 0 | AUDIO_MASK | .... to specify
+     *  audio responses.
      */
-    public stbtic final int AUDIO_MASK  = 0x0004;
-    /** Mbsk for video queries - input 0 | VIDEO_MASK | .... to specify
+    pualic stbtic final int AUDIO_MASK  = 0x0004;
+    /** Mask for video queries - input 0 | VIDEO_MASK | .... to specify
      *  video responses.
      */
-    public stbtic final int VIDEO_MASK  = 0x0008; 
-    /** Mbsk for document queries - input 0 | DOC_MASK | .... to specify
+    pualic stbtic final int VIDEO_MASK  = 0x0008; 
+    /** Mask for document queries - input 0 | DOC_MASK | .... to specify
      *  document responses.
      */
-    public stbtic final int DOC_MASK  = 0x0010;
-    /** Mbsk for image queries - input 0 | IMAGE_MASK | .... to specify
-     *  imbge responses.
+    pualic stbtic final int DOC_MASK  = 0x0010;
+    /** Mask for image queries - input 0 | IMAGE_MASK | .... to specify
+     *  image responses.
      */
-    public stbtic final int IMAGE_MASK  = 0x0020;
-    /** Mbsk for windows programs/packages queries - input 0 | WIN_PROG_MASK
-     *  | .... to specify windows progrbms/packages responses.
+    pualic stbtic final int IMAGE_MASK  = 0x0020;
+    /** Mask for windows programs/packages queries - input 0 | WIN_PROG_MASK
+     *  | .... to specify windows programs/packages responses.
      */
-    public stbtic final int WIN_PROG_MASK  = 0x0040;
-    /** Mbsk for linux/osx programs/packages queries - input 0 | LIN_PROG_MASK
-     *  | .... to specify linux/osx progrbms/packages responses.
+    pualic stbtic final int WIN_PROG_MASK  = 0x0040;
+    /** Mask for linux/osx programs/packages queries - input 0 | LIN_PROG_MASK
+     *  | .... to specify linux/osx programs/packages responses.
      */
-    public stbtic final int LIN_PROG_MASK  = 0x0080;
+    pualic stbtic final int LIN_PROG_MASK  = 0x0080;
 
-    public stbtic final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNewXOXO";
-
-    /**
-     * The pbyload for the query -- includes the query string, the
-     * XML query, bny URNs, GGEP, etc.
-     */
-    privbte final byte[] PAYLOAD;
+    pualic stbtic final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNewXOXO";
 
     /**
-     * The "min speed" field.  This wbs originally used to specify
-     * b minimum speed for returned results, but it was never really
-     * used this wby.  As of LimeWire 3.0 (02/2003), the bits of 
-     * this field were chbnged to specify things like the firewall
-     * stbtus of the querier.
+     * The payload for the query -- includes the query string, the
+     * XML query, any URNs, GGEP, etc.
      */
-    privbte final int MIN_SPEED;
+    private final byte[] PAYLOAD;
+
+    /**
+     * The "min speed" field.  This was originally used to specify
+     * a minimum speed for returned results, but it was never really
+     * used this way.  As of LimeWire 3.0 (02/2003), the bits of 
+     * this field were changed to specify things like the firewall
+     * status of the querier.
+     */
+    private final int MIN_SPEED;
 
     /**
      * The query string.
      */
-    privbte final String QUERY;
+    private final String QUERY;
     
     /**
      * The LimeXMLDocument of the rich query.
      */
-    privbte final LimeXMLDocument XML_DOC;
+    private final LimeXMLDocument XML_DOC;
 
     /**
-     * The febture that this query is.
+     * The feature that this query is.
      */
-    privbte int _featureSelector = 0;
+    private int _featureSelector = 0;
 
     /**
-     * Whether or not the GGEP hebder for Do Not Proxy was found.
+     * Whether or not the GGEP header for Do Not Proxy was found.
      */
-    privbte boolean _doNotProxy = false;
+    private boolean _doNotProxy = false;
 
     // HUGE v0.93 fields
     /** 
 	 * The types of requested URNs.
 	 */
-    privbte final Set /* of UrnType */ REQUESTED_URN_TYPES;
+    private final Set /* of UrnType */ REQUESTED_URN_TYPES;
 
     /** 
 	 * Specific URNs requested.
 	 */
-    privbte final Set /* of URN */ QUERY_URNS;
+    private final Set /* of URN */ QUERY_URNS;
 
     /**
-     * The Query Key bssociated with this query -- can be null.
+     * The Query Key associated with this query -- can be null.
      */
-    privbte final QueryKey QUERY_KEY;
+    private final QueryKey QUERY_KEY;
 
     /**
-     * The flbg in the 'M' GGEP extension - if non-null, the query is requesting
-     * only certbin types.
+     * The flag in the 'M' GGEP extension - if non-null, the query is requesting
+     * only certain types.
      */
-    privbte Integer _metaMask = null;
+    private Integer _metaMask = null;
     
     /**
-     * If we're re-originbted this query for a leaf.  This can be set/read
-     * bfter creation.
+     * If we're re-originated this query for a leaf.  This can be set/read
+     * after creation.
      */
-    privbte boolean originated = false;
+    private boolean originated = false;
 
 	/**
-	 * Cbched hash code for this instance.
+	 * Cached hash code for this instance.
 	 */
-	privbte volatile int _hashCode = 0;
+	private volatile int _hashCode = 0;
 
 	/**
-	 * Constbnt for an empty, unmodifiable <tt>Set</tt>.  This is necessary
-	 * becbuse Collections.EMPTY_SET is not serializable in the collections 
-	 * 1.1 implementbtion.
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * aecbuse Collections.EMPTY_SET is not serializable in the collections 
+	 * 1.1 implementation.
 	 */
-	privbte static final Set EMPTY_SET = 
-		Collections.unmodifibbleSet(new HashSet());
+	private static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
 
     /**
-     * Constbnt for the default query TTL.
+     * Constant for the default query TTL.
      */
-    privbte static final byte DEFAULT_TTL = 6;
+    private static final byte DEFAULT_TTL = 6;
 
     /**
-     * Cbched illegal characters in search strings.
+     * Cached illegal characters in search strings.
      */
-    privbte static final char[] ILLEGAL_CHARS =
-        SebrchSettings.ILLEGAL_CHARS.getValue();
+    private static final char[] ILLEGAL_CHARS =
+        SearchSettings.ILLEGAL_CHARS.getValue();
 
 
     /**
-     * Cbche the maximum length for queries, in bytes.
+     * Cache the maximum length for queries, in bytes.
      */
-    privbte static final int MAX_QUERY_LENGTH =
-        SebrchSettings.MAX_QUERY_LENGTH.getValue();
+    private static final int MAX_QUERY_LENGTH =
+        SearchSettings.MAX_QUERY_LENGTH.getValue();
 
     /**
-     * Cbche the maximum length for XML queries, in bytes.
+     * Cache the maximum length for XML queries, in bytes.
      */
-    privbte static final int MAX_XML_QUERY_LENGTH =
-        SebrchSettings.MAX_XML_QUERY_LENGTH.getValue();
+    private static final int MAX_XML_QUERY_LENGTH =
+        SearchSettings.MAX_XML_QUERY_LENGTH.getValue();
 
     /**
-     * The mebningless query string we put in URN queries.  Needed because
+     * The meaningless query string we put in URN queries.  Needed because
      * LimeWire's drop empty queries....
      */
-    privbte static final String DEFAULT_URN_QUERY = "\\";
+    private static final String DEFAULT_URN_QUERY = "\\";
 
 	/**
-	 * Crebtes a new requery for the specified SHA1 value.
+	 * Creates a new requery for the specified SHA1 value.
 	 *
-	 * @pbram sha1 the <tt>URN</tt> of the file to search for
-	 * @return b new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>shb1</tt> argument
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
 	 *  is <tt>null</tt>
 	 */
-	public stbtic QueryRequest createRequery(URN sha1) {
-        if(shb1 == null) {
-            throw new NullPointerException("null shb1");
+	pualic stbtic QueryRequest createRequery(URN sha1) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
         }
-		Set shb1Set = new HashSet();
-		shb1Set.add(sha1);
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "", 
-                                UrnType.SHA1_SET, shb1Set, null,
-                                !RouterService.bcceptedIncomingConnection(),
-								Messbge.N_UNKNOWN, false, 0, false, 0);
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
 	/**
-	 * Crebtes a new query for the specified SHA1 value.
+	 * Creates a new query for the specified SHA1 value.
 	 *
-	 * @pbram sha1 the <tt>URN</tt> of the file to search for
-	 * @return b new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>shb1</tt> argument
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
 	 *  is <tt>null</tt>
 	 */
-	public stbtic QueryRequest createQuery(URN sha1) {
-        if(shb1 == null) {
-            throw new NullPointerException("null shb1");
+	pualic stbtic QueryRequest createQuery(URN sha1) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
         }
-		Set shb1Set = new HashSet();
-		shb1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(fblse), DEFAULT_TTL, 
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "",  UrnType.SHA1_SET, 
-                                shb1Set, null,
-                                !RouterService.bcceptedIncomingConnection(),
-								Messbge.N_UNKNOWN, false, 0, false, 0);
+                                sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 	/**
-	 * Crebtes a new requery for the specified SHA1 value with file name 
-     * thrown in for good mebsure (or at least until \ works as a query).
+	 * Creates a new requery for the specified SHA1 value with file name 
+     * thrown in for good measure (or at least until \ works as a query).
 	 *
-	 * @pbram sha1 the <tt>URN</tt> of the file to search for
-	 * @return b new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>shb1</tt> argument
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
 	 *  is <tt>null</tt>
 	 */
-	public stbtic QueryRequest createRequery(URN sha1, String filename) {
-        if(shb1 == null) {
-            throw new NullPointerException("null shb1");
+	pualic stbtic QueryRequest createRequery(URN sha1, String filename) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
         }
-        if(filenbme == null) {
+        if(filename == null) {
             throw new NullPointerException("null query");
         }
-		if(filenbme.length() == 0) {
-			filenbme = DEFAULT_URN_QUERY;
+		if(filename.length() == 0) {
+			filename = DEFAULT_URN_QUERY;
 		}
-		Set shb1Set = new HashSet();
-		shb1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filenbme, "", 
-                                UrnType.SHA1_SET, shb1Set, null,
-                                !RouterService.bcceptedIncomingConnection(),
-								Messbge.N_UNKNOWN, false, 0, false, 0);
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
 	/**
-	 * Crebtes a new query for the specified SHA1 value with file name 
-     * thrown in for good mebsure (or at least until \ works as a query).
+	 * Creates a new query for the specified SHA1 value with file name 
+     * thrown in for good measure (or at least until \ works as a query).
 	 *
-	 * @pbram sha1 the <tt>URN</tt> of the file to search for
-	 * @return b new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>shb1</tt> argument
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
 	 *  is <tt>null</tt>
 	 */
-	public stbtic QueryRequest createQuery(URN sha1, String filename) {
-        if(shb1 == null) {
-            throw new NullPointerException("null shb1");
+	pualic stbtic QueryRequest createQuery(URN sha1, String filename) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
         }
-        if(filenbme == null) {
+        if(filename == null) {
             throw new NullPointerException("null query");
         }
-		if(filenbme.length() == 0) {
-			filenbme = DEFAULT_URN_QUERY;
+		if(filename.length() == 0) {
+			filename = DEFAULT_URN_QUERY;
 		}
-		Set shb1Set = new HashSet();
-		shb1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(fblse), DEFAULT_TTL, filename, "", 
-                                UrnType.SHA1_SET, shb1Set, null,
-                                !RouterService.bcceptedIncomingConnection(),
-								Messbge.N_UNKNOWN, false, 0, false, 0);
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
 	/**
-	 * Crebtes a new requery for the specified SHA1 value and the specified
-	 * firewbll boolean.
+	 * Creates a new requery for the specified SHA1 value and the specified
+	 * firewall boolean.
 	 *
-	 * @pbram sha1 the <tt>URN</tt> of the file to search for
-	 * @pbram ttl the time to live (ttl) of the query
-	 * @return b new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>shb1</tt> argument
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @param ttl the time to live (ttl) of the query
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
 	 *  is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the ttl value is
-	 *  negbtive or greater than the maximum allowed value
+	 * @throws <tt>IllegalArgumentException</tt> if the ttl value is
+	 *  negative or greater than the maximum allowed value
 	 */
-	public stbtic QueryRequest createRequery(URN sha1, byte ttl) {
-        if(shb1 == null) {
-            throw new NullPointerException("null shb1");
+	pualic stbtic QueryRequest createRequery(URN sha1, byte ttl) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
         } 
 		if(ttl <= 0 || ttl > 6) {
-			throw new IllegblArgumentException("invalid TTL: "+ttl);
+			throw new IllegalArgumentException("invalid TTL: "+ttl);
 		}
-		Set shb1Set = new HashSet();
-		shb1Set.add(sha1);
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
-                                UrnType.SHA1_SET, shb1Set, null,
-                                !RouterService.bcceptedIncomingConnection(),
-								Messbge.N_UNKNOWN, false, 0, false, 0);
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false, 0, false, 0);
 	}
 	
 	/**
-	 * Crebtes a new query for the specified UrnType set and URN set.
+	 * Creates a new query for the specified UrnType set and URN set.
 	 *
-	 * @pbram urnTypeSet the <tt>Set</tt> of <tt>UrnType</tt>s to request.
-	 * @pbram urnSet the <tt>Set</tt> of <tt>URNs</tt>s to request.
-	 * @return b new <tt>QueryRequest</tt> for the specied UrnTypes and URNs
-	 * @throws <tt>NullPointerException</tt> if either sets bre null.
+	 * @param urnTypeSet the <tt>Set</tt> of <tt>UrnType</tt>s to request.
+	 * @param urnSet the <tt>Set</tt> of <tt>URNs</tt>s to request.
+	 * @return a new <tt>QueryRequest</tt> for the specied UrnTypes and URNs
+	 * @throws <tt>NullPointerException</tt> if either sets are null.
 	 */
-	public stbtic QueryRequest createQuery(Set urnTypeSet, Set urnSet) {
+	pualic stbtic QueryRequest createQuery(Set urnTypeSet, Set urnSet) {
 	    if(urnSet == null)
 	        throw new NullPointerException("null urnSet");
 	    if(urnTypeSet == null)
 	        throw new NullPointerException("null urnTypeSet");
-	    return new QueryRequest(newQueryGUID(fblse), DEFAULT_TTL, 
+	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
-	                            !RouterService.bcceptedIncomingConnection(),
-	                            Messbge.N_UNKNOWN, false, 0, false, 0);
+	                            !RouterService.acceptedIncomingConnection(),
+	                            Message.N_UNKNOWN, false, 0, false, 0);
     }
 	    
 	
 	/**
-	 * Crebtes a requery for when we don't know the hash of the file --
-	 * we don't know the hbsh.
+	 * Creates a requery for when we don't know the hash of the file --
+	 * we don't know the hash.
 	 *
-	 * @pbram query the query string
-	 * @return b new <tt>QueryRequest</tt> for the specified query
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
+	 * @param query the query string
+	 * @return a new <tt>QueryRequest</tt> for the specified query
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
 	 *  is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
 	 */
-	public stbtic QueryRequest createRequery(String query) {
+	pualic stbtic QueryRequest createRequery(String query) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
 		if(query.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
 		return new QueryRequest(newQueryGUID(true), query);
 	}
 
 
 	/**
-	 * Crebtes a new query for the specified file name, with no XML.
+	 * Creates a new query for the specified file name, with no XML.
 	 *
-	 * @pbram query the file name to search for
-	 * @return b new <tt>QueryRequest</tt> for the specified query
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
+	 * @param query the file name to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified query
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
 	 *  is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
 	 */
-	public stbtic QueryRequest createQuery(String query) {
+	pualic stbtic QueryRequest createQuery(String query) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
 		if(query.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
-		return new QueryRequest(newQueryGUID(fblse), query);
+		return new QueryRequest(newQueryGUID(false), query);
 	}                           
     
 
 	/**
-	 * Crebtes a new query for the specified file name and the designated XML.
+	 * Creates a new query for the specified file name and the designated XML.
 	 *
-	 * @pbram query the file name to search for
-     * @pbram guid I trust that this is a address encoded guid.  Your loss if
+	 * @param query the file name to search for
+     * @param guid I trust that this is a address encoded guid.  Your loss if
      * it isn't....
-	 * @return b new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip bnd port into the GUID and appropriate marked the
-	 * query to signify out of bbnd support.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of abnd support.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
 	 *  is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
 	 */
-    public stbtic QueryRequest createOutOfBandQuery(byte[] guid, String query, 
+    pualic stbtic QueryRequest createOutOfBandQuery(byte[] guid, String query, 
                                                     String xmlQuery) {
-        query = I18NConvert.instbnce().getNorm(query);
+        query = I18NConvert.instance().getNorm(query);
         if(query == null) {
             throw new NullPointerException("null query");
         }
@@ -402,33 +402,33 @@ public clbss QueryRequest extends Message implements Serializable{
 			throw new NullPointerException("null xml query");
 		}
 		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
-		if(xmlQuery.length() != 0 && !xmlQuery.stbrtsWith("<?xml")) {
-			throw new IllegblArgumentException("invalid XML");
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
 		}
         return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true);
     }                                
 
 	/**
-	 * Crebtes a new query for the specified file name and the designated XML.
+	 * Creates a new query for the specified file name and the designated XML.
 	 *
-	 * @pbram query the file name to search for
-     * @pbram guid I trust that this is a address encoded guid.  Your loss if
+	 * @param query the file name to search for
+     * @param guid I trust that this is a address encoded guid.  Your loss if
      * it isn't....
-     * @pbram type can be null - the type of results you want.
-	 * @return b new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip bnd port into the GUID and appropriate marked the
-	 * query to signify out of bbnd support AND specifies a file type category.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
+     * @param type can be null - the type of results you want.
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of abnd support AND specifies a file type category.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
 	 *  is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
 	 */
-    public stbtic QueryRequest createOutOfBandQuery(byte[] guid, String query, 
+    pualic stbtic QueryRequest createOutOfBandQuery(byte[] guid, String query, 
                                                     String xmlQuery,
-                                                    MedibType type) {
-        query = I18NConvert.instbnce().getNorm(query);
+                                                    MediaType type) {
+        query = I18NConvert.instance().getNorm(query);
         if(query == null) {
             throw new NullPointerException("null query");
         }
@@ -436,97 +436,97 @@ public clbss QueryRequest extends Message implements Serializable{
 			throw new NullPointerException("null xml query");
 		}
 		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
-		if(xmlQuery.length() != 0 && !xmlQuery.stbrtsWith("<?xml")) {
-			throw new IllegblArgumentException("invalid XML");
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
 		}
         return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true, type);
     }                                
 
 	/**
-	 * Crebtes a new query for the specified file name, with no XML.
+	 * Creates a new query for the specified file name, with no XML.
 	 *
-	 * @pbram query the file name to search for
-	 * @return b new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip bnd port into the GUID and appropriate marked the
-	 * query to signify out of bbnd support.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
+	 * @param query the file name to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of abnd support.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
 	 *  is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
 	 */
-    public stbtic QueryRequest createOutOfBandQuery(String query,
-                                                    byte[] ip, int port) {
-        byte[] guid = GUID.mbkeAddressEncodedGuid(ip, port);
-        return QueryRequest.crebteOutOfBandQuery(guid, query, "");
+    pualic stbtic QueryRequest createOutOfBandQuery(String query,
+                                                    ayte[] ip, int port) {
+        ayte[] guid = GUID.mbkeAddressEncodedGuid(ip, port);
+        return QueryRequest.createOutOfBandQuery(guid, query, "");
     }                                
 
     /**
-     * Crebtes a new 'What is new'? query with the specified guid and ttl.
-     * @pbram ttl the desired ttl of the query.
-     * @pbram guid the desired guid of the query.
+     * Creates a new 'What is new'? query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
      */
-    public stbtic QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl) {
-        return crebteWhatIsNewQuery(guid, ttl, null);
+    pualic stbtic QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl) {
+        return createWhatIsNewQuery(guid, ttl, null);
     }
    
 
     /**
-     * Crebtes a new 'What is new'? query with the specified guid and ttl.
-     * @pbram ttl the desired ttl of the query.
-     * @pbram guid the desired guid of the query.
+     * Creates a new 'What is new'? query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
      */
-    public stbtic QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl,
-                                                    MedibType type) {
-        if (ttl < 1) throw new IllegblArgumentException("Bad TTL.");
+    pualic stbtic QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl,
+                                                    MediaType type) {
+        if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
                                 "", null, null, null,
-                                !RouterService.bcceptedIncomingConnection(),
-                                Messbge.N_UNKNOWN, false, 
-                                FebtureSearchData.WHAT_IS_NEW, false, 
-                                getMetbFlag(type));
+                                !RouterService.acceptedIncomingConnection(),
+                                Message.N_UNKNOWN, false, 
+                                FeatureSearchData.WHAT_IS_NEW, false, 
+                                getMetaFlag(type));
     }
    
 
     /**
-     * Crebtes a new 'What is new'? OOB query with the specified guid and ttl.
-     * @pbram ttl the desired ttl of the query.
-     * @pbram guid the desired guid of the query.
+     * Creates a new 'What is new'? OOB query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
      */
-    public stbtic QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl) {
-        return crebteWhatIsNewOOBQuery(guid, ttl, null);
+    pualic stbtic QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl) {
+        return createWhatIsNewOOBQuery(guid, ttl, null);
     }
    
 
     /**
-     * Crebtes a new 'What is new'? OOB query with the specified guid and ttl.
-     * @pbram ttl the desired ttl of the query.
-     * @pbram guid the desired guid of the query.
+     * Creates a new 'What is new'? OOB query with the specified guid and ttl.
+     * @param ttl the desired ttl of the query.
+     * @param guid the desired guid of the query.
      */
-    public stbtic QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl,
-                                                       MedibType type) {
-        if (ttl < 1) throw new IllegblArgumentException("Bad TTL.");
+    pualic stbtic QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl,
+                                                       MediaType type) {
+        if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
                                 "", null, null, null,
-                                !RouterService.bcceptedIncomingConnection(),
-                                Messbge.N_UNKNOWN, true, FeatureSearchData.WHAT_IS_NEW,
-                                fblse, getMetaFlag(type));
+                                !RouterService.acceptedIncomingConnection(),
+                                Message.N_UNKNOWN, true, FeatureSearchData.WHAT_IS_NEW,
+                                false, getMetaFlag(type));
     }
    
 
 	/**
-	 * Crebtes a new query for the specified file name, with no XML.
+	 * Creates a new query for the specified file name, with no XML.
 	 *
-	 * @pbram query the file name to search for
-	 * @return b new <tt>QueryRequest</tt> for the specified query
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
-	 *  is <tt>null</tt> or if the <tt>xmlQuery</tt> brgument is 
+	 * @param query the file name to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified query
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt> or if the <tt>xmlQuery</tt> argument is 
 	 *  <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument and the xml query are both zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument and the xml query are both zero-length (empty)
 	 */
-	public stbtic QueryRequest createQuery(String query, String xmlQuery) {
+	pualic stbtic QueryRequest createQuery(String query, String xmlQuery) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
@@ -534,65 +534,65 @@ public clbss QueryRequest extends Message implements Serializable{
 			throw new NullPointerException("null xml query");
 		}
 		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
-		if(xmlQuery.length() != 0 && !xmlQuery.stbrtsWith("<?xml")) {
-			throw new IllegblArgumentException("invalid XML");
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
 		}
-		return new QueryRequest(newQueryGUID(fblse), query, xmlQuery);
+		return new QueryRequest(newQueryGUID(false), query, xmlQuery);
 	}
 
 
 	/**
-	 * Crebtes a new query for the specified file name, with no XML.
+	 * Creates a new query for the specified file name, with no XML.
 	 *
-	 * @pbram query the file name to search for
-	 * @pbram ttl the time to live (ttl) of the query
-	 * @return b new <tt>QueryRequest</tt> for the specified query and ttl
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
+	 * @param query the file name to search for
+	 * @param ttl the time to live (ttl) of the query
+	 * @return a new <tt>QueryRequest</tt> for the specified query and ttl
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
 	 *  is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
-	 * @throws <tt>IllegblArgumentException</tt> if the ttl value is
-	 *  negbtive or greater than the maximum allowed value
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the ttl value is
+	 *  negative or greater than the maximum allowed value
 	 */
-	public stbtic QueryRequest createQuery(String query, byte ttl) {
+	pualic stbtic QueryRequest createQuery(String query, byte ttl) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
 		if(query.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
 		if(ttl <= 0 || ttl > 6) {
-			throw new IllegblArgumentException("invalid TTL: "+ttl);
+			throw new IllegalArgumentException("invalid TTL: "+ttl);
 		}
-		return new QueryRequest(newQueryGUID(fblse), ttl, query);
+		return new QueryRequest(newQueryGUID(false), ttl, query);
 	}
 
 	/**
-	 * Crebtes a new query with the specified guid, query string, and
+	 * Creates a new query with the specified guid, query string, and
 	 * xml query string.
 	 *
-	 * @pbram guid the message GUID for the query
-	 * @pbram query the query string
-	 * @pbram xmlQuery the xml query string
-	 * @return b new <tt>QueryRequest</tt> for the specified query, xml
-	 *  query, bnd guid
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
-	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> brgument is <tt>null</tt>,
-	 *  or if the <tt>guid</tt> brgument is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the guid length is
-	 *  not 16, if both the query strings bre empty, or if the XML does
-	 *  not bppear to be valid
+	 * @param guid the message GUID for the query
+	 * @param query the query string
+	 * @param xmlQuery the xml query string
+	 * @return a new <tt>QueryRequest</tt> for the specified query, xml
+	 *  query, and guid
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> argument is <tt>null</tt>,
+	 *  or if the <tt>guid</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the guid length is
+	 *  not 16, if aoth the query strings bre empty, or if the XML does
+	 *  not appear to be valid
 	 */
-	public stbtic QueryRequest createQuery(byte[] guid, String query, 
+	pualic stbtic QueryRequest createQuery(byte[] guid, String query, 
 										   String xmlQuery) {
-        query = I18NConvert.instbnce().getNorm(query);
+        query = I18NConvert.instance().getNorm(query);
 		if(guid == null) {
 			throw new NullPointerException("null guid");
 		}
 		if(guid.length != 16) {
-			throw new IllegblArgumentException("invalid guid length");
+			throw new IllegalArgumentException("invalid guid length");
 		}
         if(query == null) {
             throw new NullPointerException("null query");
@@ -601,38 +601,38 @@ public clbss QueryRequest extends Message implements Serializable{
             throw new NullPointerException("null xml query");
         }
 		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
-		if(xmlQuery.length() != 0 && !xmlQuery.stbrtsWith("<?xml")) {
-			throw new IllegblArgumentException("invalid XML");
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
 		}
 		return new QueryRequest(guid, query, xmlQuery);
 	}
 
 	/**
-	 * Crebtes a new query with the specified guid, query string, and
+	 * Creates a new query with the specified guid, query string, and
 	 * xml query string.
 	 *
-	 * @pbram guid the message GUID for the query
-	 * @pbram query the query string
-	 * @pbram xmlQuery the xml query string
-	 * @return b new <tt>QueryRequest</tt> for the specified query, xml
-	 *  query, bnd guid
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
-	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> brgument is <tt>null</tt>,
-	 *  or if the <tt>guid</tt> brgument is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the guid length is
-	 *  not 16, if both the query strings bre empty, or if the XML does
-	 *  not bppear to be valid
+	 * @param guid the message GUID for the query
+	 * @param query the query string
+	 * @param xmlQuery the xml query string
+	 * @return a new <tt>QueryRequest</tt> for the specified query, xml
+	 *  query, and guid
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> argument is <tt>null</tt>,
+	 *  or if the <tt>guid</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the guid length is
+	 *  not 16, if aoth the query strings bre empty, or if the XML does
+	 *  not appear to be valid
 	 */
-	public stbtic QueryRequest createQuery(byte[] guid, String query, 
-										   String xmlQuery, MedibType type) {
-        query = I18NConvert.instbnce().getNorm(query);
+	pualic stbtic QueryRequest createQuery(byte[] guid, String query, 
+										   String xmlQuery, MediaType type) {
+        query = I18NConvert.instance().getNorm(query);
 		if(guid == null) {
 			throw new NullPointerException("null guid");
 		}
 		if(guid.length != 16) {
-			throw new IllegblArgumentException("invalid guid length");
+			throw new IllegalArgumentException("invalid guid length");
 		}
         if(query == null) {
             throw new NullPointerException("null query");
@@ -641,490 +641,490 @@ public clbss QueryRequest extends Message implements Serializable{
             throw new NullPointerException("null xml query");
         }
 		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
-		if(xmlQuery.length() != 0 && !xmlQuery.stbrtsWith("<?xml")) {
-			throw new IllegblArgumentException("invalid XML");
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
 		}
 		return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, type);
 	}
 
 	/**
-	 * Crebtes a new query from the existing query with the specified
+	 * Creates a new query from the existing query with the specified
 	 * ttl.
 	 *
-	 * @pbram qr the <tt>QueryRequest</tt> to copy
-	 * @pbram ttl the new ttl
-	 * @return b new <tt>QueryRequest</tt> with the specified ttl
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @param ttl the new ttl
+	 * @return a new <tt>QueryRequest</tt> with the specified ttl
 	 */
-	public stbtic QueryRequest createQuery(QueryRequest qr, byte ttl) {
-	    // Construct b query request that is EXACTLY like the other query,
-	    // but with b different TTL.
+	pualic stbtic QueryRequest createQuery(QueryRequest qr, byte ttl) {
+	    // Construct a query request that is EXACTLY like the other query,
+	    // aut with b different TTL.
 	    try {
-	        return crebteNetworkQuery(qr.getGUID(), ttl, qr.getHops(),
+	        return createNetworkQuery(qr.getGUID(), ttl, qr.getHops(),
 	                                  qr.PAYLOAD, qr.getNetwork());
-	    } cbtch(BadPacketException ioe) {
-	        throw new IllegblArgumentException(ioe.getMessage());
+	    } catch(BadPacketException ioe) {
+	        throw new IllegalArgumentException(ioe.getMessage());
 	    }
 	}
 
 	/**
-	 * Crebtes a new OOBquery from the existing query with the specified guid
-     * (which should be bddress encoded).
+	 * Creates a new OOBquery from the existing query with the specified guid
+     * (which should ae bddress encoded).
 	 *
-	 * @pbram qr the <tt>QueryRequest</tt> to copy
-	 * @return b new <tt>QueryRequest</tt> with the specified guid that is now
-     * OOB mbrked.
-     * @throws IllegblArgumentException thrown if guid is not right size of if
-     * query is bbd.
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @return a new <tt>QueryRequest</tt> with the specified guid that is now
+     * OOB marked.
+     * @throws IllegalArgumentException thrown if guid is not right size of if
+     * query is abd.
 	 */
-	public stbtic QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
+	pualic stbtic QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
         if (guid.length != 16)
-            throw new IllegblArgumentException("bad guid size: " + guid.length);
+            throw new IllegalArgumentException("bad guid size: " + guid.length);
 
-        // i cbn't just call a new constructor, i have to recreate stuff
-        byte[] newPbyload = new byte[qr.PAYLOAD.length];
-        System.brraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPbyload[0] |= SPECIAL_OUTOFBAND_MASK;
+        // i can't just call a new constructor, i have to recreate stuff
+        ayte[] newPbyload = new byte[qr.PAYLOAD.length];
+        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
+        newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
         
         try {
-            return crebteNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
-                                      newPbyload, qr.getNetwork());
-        } cbtch (BadPacketException ioe) {
-            throw new IllegblArgumentException(ioe.getMessage());
+            return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
+                                      newPayload, qr.getNetwork());
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
         }
 	}
 
 	/**
-	 * Crebtes a new query from the existing query and loses the OOB marking.
+	 * Creates a new query from the existing query and loses the OOB marking.
 	 *
-	 * @pbram qr the <tt>QueryRequest</tt> to copy
-	 * @return b new <tt>QueryRequest</tt> with no OOB marking
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @return a new <tt>QueryRequest</tt> with no OOB marking
 	 */
-	public stbtic QueryRequest unmarkOOBQuery(QueryRequest qr) {
-        //modify the pbyload to not be OOB.
-        byte[] newPbyload = new byte[qr.PAYLOAD.length];
-        System.brraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPbyload[0] &= ~SPECIAL_OUTOFBAND_MASK;
-        newPbyload[0] |= SPECIAL_XML_MASK;
+	pualic stbtic QueryRequest unmarkOOBQuery(QueryRequest qr) {
+        //modify the payload to not be OOB.
+        ayte[] newPbyload = new byte[qr.PAYLOAD.length];
+        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
+        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        newPayload[0] |= SPECIAL_XML_MASK;
         
         try {
-            return crebteNetworkQuery(qr.getGUID(), qr.getTTL(), qr.getHops(), 
-                                      newPbyload, qr.getNetwork());
-        } cbtch (BadPacketException ioe) {
-            throw new IllegblArgumentException(ioe.getMessage());
+            return createNetworkQuery(qr.getGUID(), qr.getTTL(), qr.getHops(), 
+                                      newPayload, qr.getNetwork());
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
         }
 	}
 
     /**
-     * Crebtes a new query with the specified query key for use in 
+     * Creates a new query with the specified query key for use in 
      * GUESS-style UDP queries.
      *
-     * @pbram query the query string
-     * @pbram key the query key
-	 * @return b new <tt>QueryRequest</tt> instance with the specified 
-	 *  query string bnd query key
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
-	 *  is <tt>null</tt> or if the <tt>key</tt> brgument is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
+     * @param query the query string
+     * @param key the query key
+	 * @return a new <tt>QueryRequest</tt> instance with the specified 
+	 *  query string and query key
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt> or if the <tt>key</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
      */
-    public stbtic QueryRequest 
-        crebteQueryKeyQuery(String query, QueryKey key) {
+    pualic stbtic QueryRequest 
+        createQueryKeyQuery(String query, QueryKey key) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
 		if(query.length() == 0) {
-			throw new IllegblArgumentException("empty query");
+			throw new IllegalArgumentException("empty query");
 		}
         if(key == null) {
             throw new NullPointerException("null query key");
         }
-        return new QueryRequest(newQueryGUID(fblse), (byte)1, query, "", 
+        return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
-                                !RouterService.bcceptedIncomingConnection(),
-								Messbge.N_UNKNOWN, false, 0, false, 0);
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false, 0, false, 0);
     }
 
 
     /**
-     * Crebtes a new query with the specified query key for use in 
+     * Creates a new query with the specified query key for use in 
      * GUESS-style UDP queries.
      *
-     * @pbram sha1 the URN
-     * @pbram key the query key
-	 * @return b new <tt>QueryRequest</tt> instance with the specified 
-	 *  URN request bnd query key
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> brgument
-	 *  is <tt>null</tt> or if the <tt>key</tt> brgument is <tt>null</tt>
-	 * @throws <tt>IllegblArgumentException</tt> if the <tt>query</tt>
-	 *  brgument is zero-length (empty)
+     * @param sha1 the URN
+     * @param key the query key
+	 * @return a new <tt>QueryRequest</tt> instance with the specified 
+	 *  URN request and query key
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt> or if the <tt>key</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
      */
-    public stbtic QueryRequest 
-        crebteQueryKeyQuery(URN sha1, QueryKey key) {
-        if(shb1 == null) {
-            throw new NullPointerException("null shb1");
+    pualic stbtic QueryRequest 
+        createQueryKeyQuery(URN sha1, QueryKey key) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
         }
         if(key == null) {
             throw new NullPointerException("null query key");
         }
-		Set shb1Set = new HashSet();
-		shb1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(fblse), (byte) 1, DEFAULT_URN_QUERY,
-                                "", UrnType.SHA1_SET, shb1Set, key,
-                                !RouterService.bcceptedIncomingConnection(),
-								Messbge.N_UNKNOWN, false, 0, false, 0);
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
+                                "", UrnType.SHA1_SET, sha1Set, key,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN, false, 0, false, 0);
     }
 
 
 	/**
-	 * Crebtes a new <tt>QueryRequest</tt> instance for multicast queries.	 
-	 * This is necessbry due to the unique properties of multicast queries,
-	 * such bs the firewalled bit not being set regardless of whether or
-	 * not the node is truly firewblled/NATted to the world outside the
-	 * subnet.
+	 * Creates a new <tt>QueryRequest</tt> instance for multicast queries.	 
+	 * This is necessary due to the unique properties of multicast queries,
+	 * such as the firewalled bit not being set regardless of whether or
+	 * not the node is truly firewalled/NATted to the world outside the
+	 * suanet.
 	 * 
-	 * @pbram qr the <tt>QueryRequest</tt> instance containing all the 
-	 *  dbta necessary to create a multicast query
-	 * @return b new <tt>QueryRequest</tt> instance with bits set for
-	 *  multicbst -- a min speed bit in particular
-	 * @throws <tt>NullPointerException</tt> if the <tt>qr</tt> brgument
+	 * @param qr the <tt>QueryRequest</tt> instance containing all the 
+	 *  data necessary to create a multicast query
+	 * @return a new <tt>QueryRequest</tt> instance with bits set for
+	 *  multicast -- a min speed bit in particular
+	 * @throws <tt>NullPointerException</tt> if the <tt>qr</tt> argument
 	 *  is <tt>null</tt> 
 	 */
-	public stbtic QueryRequest createMulticastQuery(QueryRequest qr) {
+	pualic stbtic QueryRequest createMulticastQuery(QueryRequest qr) {
 		if(qr == null)
 			throw new NullPointerException("null query");
 
-        //modify the pbyload to not be OOB.
-        byte[] newPbyload = new byte[qr.PAYLOAD.length];
-        System.brraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPbyload[0] &= ~SPECIAL_OUTOFBAND_MASK;
-        newPbyload[0] |= SPECIAL_XML_MASK;
+        //modify the payload to not be OOB.
+        ayte[] newPbyload = new byte[qr.PAYLOAD.length];
+        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
+        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        newPayload[0] |= SPECIAL_XML_MASK;
         
         try {
-            return crebteNetworkQuery(qr.getGUID(), (byte)1, qr.getHops(),
-                                      newPbyload, Message.N_MULTICAST);
-        } cbtch (BadPacketException ioe) {
-            throw new IllegblArgumentException(ioe.getMessage());
+            return createNetworkQuery(qr.getGUID(), (byte)1, qr.getHops(),
+                                      newPayload, Message.N_MULTICAST);
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
         }
 	}
 
     /** 
-	 * Crebtes a new <tt>QueryRequest</tt> that is a copy of the input 
-	 * query, except thbt it includes the specified query key.
+	 * Creates a new <tt>QueryRequest</tt> that is a copy of the input 
+	 * query, except that it includes the specified query key.
 	 *
-	 * @pbram qr the <tt>QueryRequest</tt> to use
-	 * @pbram key the <tt>QueryKey</tt> to add
-	 * @return b new <tt>QueryRequest</tt> from the specified query and
+	 * @param qr the <tt>QueryRequest</tt> to use
+	 * @param key the <tt>QueryKey</tt> to add
+	 * @return a new <tt>QueryRequest</tt> from the specified query and
 	 *  key
      */
-	public stbtic QueryRequest 
-		crebteQueryKeyQuery(QueryRequest qr, QueryKey key) {
+	pualic stbtic QueryRequest 
+		createQueryKeyQuery(QueryRequest qr, QueryKey key) {
 		    
-        // TODO: Copy the pbyload verbatim, except add the query-key
+        // TODO: Copy the payload verbatim, except add the query-key
         //       into the GGEP section.
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
                                 qr.getQuery(), qr.getRichQueryString(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                                key, qr.isFirewblledSource(), Message.N_UNKNOWN,
-                                qr.desiresOutOfBbndReplies(),
-                                qr.getFebtureSelector(), false,
-                                qr.getMetbMask());
+                                key, qr.isFirewalledSource(), Message.N_UNKNOWN,
+                                qr.desiresOutOfBandReplies(),
+                                qr.getFeatureSelector(), false,
+                                qr.getMetaMask());
 	}
 
 	/**
-	 * Crebtes a new specialized <tt>QueryRequest</tt> instance for 
-	 * browse host queries so thbt <tt>FileManager</tt> can understand them.
+	 * Creates a new specialized <tt>QueryRequest</tt> instance for 
+	 * arowse host queries so thbt <tt>FileManager</tt> can understand them.
 	 *
-	 * @return b new <tt>QueryRequest</tt> for browse host queries
+	 * @return a new <tt>QueryRequest</tt> for browse host queries
 	 */
-	public stbtic QueryRequest createBrowseHostQuery() {
-		return new QueryRequest(newQueryGUID(fblse), (byte)1, 
-				FileMbnager.INDEXING_QUERY, "", 
+	pualic stbtic QueryRequest createBrowseHostQuery() {
+		return new QueryRequest(newQueryGUID(false), (byte)1, 
+				FileManager.INDEXING_QUERY, "", 
                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                !RouterService.bcceptedIncomingConnection(), 
-				Messbge.N_UNKNOWN, false, 0, false, 0);
+                !RouterService.acceptedIncomingConnection(), 
+				Message.N_UNKNOWN, false, 0, false, 0);
 	}
 	
 
 	/**
-	 * Speciblized constructor used to create a query without the firewalled
-	 * bit set.  This should primbrily be used for testing.
+	 * Specialized constructor used to create a query without the firewalled
+	 * ait set.  This should primbrily be used for testing.
 	 *
-	 * @pbram query the query string
-	 * @return b new <tt>QueryRequest</tt> with the specified query string
-	 *  bnd without the firewalled bit set
+	 * @param query the query string
+	 * @return a new <tt>QueryRequest</tt> with the specified query string
+	 *  and without the firewalled bit set
 	 */
-	public stbtic QueryRequest 
-		crebteNonFirewalledQuery(String query, byte ttl) {
-		return new QueryRequest(newQueryGUID(fblse), ttl, 
+	pualic stbtic QueryRequest 
+		createNonFirewalledQuery(String query, byte ttl) {
+		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                fblse, Message.N_UNKNOWN, false, 0, false, 0);
+                                false, Message.N_UNKNOWN, false, 0, false, 0);
 	}
 
 
 
 	/**
-	 * Crebtes a new query from the network.
+	 * Creates a new query from the network.
 	 *
-	 * @pbram guid the GUID of the query
-	 * @pbram ttl the time to live of the query
-	 * @pbram hops the hops of the query
-	 * @pbram payload the query payload
+	 * @param guid the GUID of the query
+	 * @param ttl the time to live of the query
+	 * @param hops the hops of the query
+	 * @param payload the query payload
 	 *
-	 * @return b new <tt>QueryRequest</tt> instance from the specified data
+	 * @return a new <tt>QueryRequest</tt> instance from the specified data
 	 */
-	public stbtic QueryRequest 
-		crebteNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
-	    throws BbdPacketException {
-		return new QueryRequest(guid, ttl, hops, pbyload, network);
+	pualic stbtic QueryRequest 
+		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
+	    throws BadPacketException {
+		return new QueryRequest(guid, ttl, hops, payload, network);
 	}
 
     /**
-     * Builds b new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is b repeat query is encoded in guid.  GUID must have
-     * been crebted via newQueryGUID; this allows the caller to match up results
+     * Builds a new query from scratch, with no metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * aeen crebted via newQueryGUID; this allows the caller to match up results
      */
-    privbte QueryRequest(byte[] guid, String query) {
+    private QueryRequest(byte[] guid, String query) {
         this(guid, query, "");
     }
 
     /**
-     * Builds b new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is b repeat query is encoded in guid.  GUID must have
-     * been crebted via newQueryGUID; this allows the caller to match up results
+     * Builds a new query from scratch, with no metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * aeen crebted via newQueryGUID; this allows the caller to match up results
      */
-    privbte QueryRequest(byte[] guid, byte ttl, String query) {
+    private QueryRequest(byte[] guid, byte ttl, String query) {
         this(guid, ttl, query, "");
     }
 
     /**
-     * Builds b new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is b repeat query is encoded in guid.  GUID must have
-     * been crebted via newQueryGUID; this allows the caller to match up results
+     * Builds a new query from scratch, with no metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * aeen crebted via newQueryGUID; this allows the caller to match up results
      */
-    privbte QueryRequest(byte[] guid, String query, String xmlQuery) {
+    private QueryRequest(byte[] guid, String query, String xmlQuery) {
         this(guid, DEFAULT_TTL, query, xmlQuery);
     }
 
     /**
-     * Builds b new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is b repeat query is encoded in guid.  GUID must have
-     * been crebted via newQueryGUID; this allows the caller to match up
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * aeen crebted via newQueryGUID; this allows the caller to match up
      * results.
      *
-     * @requires 0<=minSpeed<2^16 (i.e., cbn fit in 2 unsigned bytes) 
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
-    privbte QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-			 !RouterService.bcceptedIncomingConnection(), Message.N_UNKNOWN,
-             fblse, 0, false, 0);
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
+             false, 0, false, 0);
     }
 
     /**
-     * Builds b new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is b repeat query is encoded in guid.  GUID must have
-     * been crebted via newQueryGUID; this allows the caller to match up
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * aeen crebted via newQueryGUID; this allows the caller to match up
      * results.
      *
-     * @requires 0<=minSpeed<2^16 (i.e., cbn fit in 2 unsigned bytes) 
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
-    privbte QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
-                         MedibType type) {
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
+                         MediaType type) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-			 !RouterService.bcceptedIncomingConnection(), Message.N_UNKNOWN,
-             fblse, 0, false, getMetaFlag(type));
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
+             false, 0, false, getMetaFlag(type));
     }
 
     /**
-     * Builds b new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is b repeat query is encoded in guid.  GUID must have
-     * been crebted via newQueryGUID; this allows the caller to match up
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * aeen crebted via newQueryGUID; this allows the caller to match up
      * results.
      *
-     * @requires 0<=minSpeed<2^16 (i.e., cbn fit in 2 unsigned bytes) 
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
-    privbte QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
-                         boolebn canReceiveOutOfBandReplies) {
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
+                         aoolebn canReceiveOutOfBandReplies) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-			 !RouterService.bcceptedIncomingConnection(), Message.N_UNKNOWN, 
-             cbnReceiveOutOfBandReplies, 0, false, 0);
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
+             canReceiveOutOfBandReplies, 0, false, 0);
     }
  
     /**
-     * Builds b new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is b repeat query is encoded in guid.  GUID must have
-     * been crebted via newQueryGUID; this allows the caller to match up
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * aeen crebted via newQueryGUID; this allows the caller to match up
      * results.
      *
-     * @requires 0<=minSpeed<2^16 (i.e., cbn fit in 2 unsigned bytes) 
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
-    privbte QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
-                         boolebn canReceiveOutOfBandReplies, MediaType type) {
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
+                         aoolebn canReceiveOutOfBandReplies, MediaType type) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-			 !RouterService.bcceptedIncomingConnection(), Message.N_UNKNOWN, 
-             cbnReceiveOutOfBandReplies, 0, false, getMetaFlag(type));
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
+             canReceiveOutOfBandReplies, 0, false, getMetaFlag(type));
     }
  
-    privbte static int getMetaFlag(MediaType type) {
-        int metbFlag = 0;
+    private static int getMetaFlag(MediaType type) {
+        int metaFlag = 0;
         if (type == null)
             ;
-        else if (type.getDescriptionKey() == MedibType.AUDIO)
-            metbFlag |= AUDIO_MASK;
-        else if (type.getDescriptionKey() == MedibType.VIDEO)
-            metbFlag |= VIDEO_MASK;
-        else if (type.getDescriptionKey() == MedibType.IMAGES)
-            metbFlag |= IMAGE_MASK;
-        else if (type.getDescriptionKey() == MedibType.DOCUMENTS)
-            metbFlag |= DOC_MASK;
-        else if (type.getDescriptionKey() == MedibType.PROGRAMS) {
-            if (CommonUtils.isLinux() || CommonUtils.isAnyMbc())
-                metbFlag |= LIN_PROG_MASK;
+        else if (type.getDescriptionKey() == MediaType.AUDIO)
+            metaFlag |= AUDIO_MASK;
+        else if (type.getDescriptionKey() == MediaType.VIDEO)
+            metaFlag |= VIDEO_MASK;
+        else if (type.getDescriptionKey() == MediaType.IMAGES)
+            metaFlag |= IMAGE_MASK;
+        else if (type.getDescriptionKey() == MediaType.DOCUMENTS)
+            metaFlag |= DOC_MASK;
+        else if (type.getDescriptionKey() == MediaType.PROGRAMS) {
+            if (CommonUtils.isLinux() || CommonUtils.isAnyMac())
+                metaFlag |= LIN_PROG_MASK;
             else if (CommonUtils.isWindows())
-                metbFlag |= WIN_PROG_MASK;
-            else // Other OS, sebrch any type of programs
-                metbFlag |= (LIN_PROG_MASK|WIN_PROG_MASK);
+                metaFlag |= WIN_PROG_MASK;
+            else // Other OS, search any type of programs
+                metaFlag |= (LIN_PROG_MASK|WIN_PROG_MASK);
         }
-        return metbFlag;
+        return metaFlag;
     }
 
    /**
-     * Builds b new query from scratch but you can flag it as a Requery, if 
-     * needed.  If you need to mbke a query that accepts out-of-band results, 
-     * be sure to set the guid correctly (see GUID.mbkeAddressEncodedGUI) and 
-     * set cbnReceiveOutOfBandReplies .
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * ae sure to set the guid correctly (see GUID.mbkeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
      *
-     * @requires 0<=minSpeed<2^16 (i.e., cbn fit in 2 unsigned bytes)
-     * @pbram requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which mby be empty or null if no types were
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
      *  requested
-	 * @pbram queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which mby be empty or null if no URNs were requested
-	 * @throws <tt>IllegblArgumentException</tt> if the query string, the xml
-	 *  query string, bnd the urns are all empty, or if the feature selector
-     *  is bbd
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty, or if the feature selector
+     *  is abd
      */
-    public QueryRequest(byte[] guid, byte ttl,  
+    pualic QueryRequest(byte[] guid, byte ttl,  
                         String query, String richQuery, 
                         Set requestedUrnTypes, Set queryUrns,
-                        QueryKey queryKey, boolebn isFirewalled, 
-                        int network, boolebn canReceiveOutOfBandReplies,
-                        int febtureSelector) {
-        // cblls me with the doNotProxy flag set to false
+                        QueryKey queryKey, aoolebn isFirewalled, 
+                        int network, aoolebn canReceiveOutOfBandReplies,
+                        int featureSelector) {
+        // calls me with the doNotProxy flag set to false
         this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewblled, network, canReceiveOutOfBandReplies,
-             febtureSelector, false, 0);
+             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             featureSelector, false, 0);
     }
 
     /**
-     * Builds b new query from scratch but you can flag it as a Requery, if 
-     * needed.  If you need to mbke a query that accepts out-of-band results, 
-     * be sure to set the guid correctly (see GUID.mbkeAddressEncodedGUI) and 
-     * set cbnReceiveOutOfBandReplies .
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * ae sure to set the guid correctly (see GUID.mbkeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
      *
-     * @requires 0<=minSpeed<2^16 (i.e., cbn fit in 2 unsigned bytes)
-     * @pbram requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which mby be empty or null if no types were
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
      *  requested
-	 * @pbram queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which mby be empty or null if no URNs were requested
-	 * @throws <tt>IllegblArgumentException</tt> if the query string, the xml
-	 *  query string, bnd the urns are all empty, or if the feature selector
-     *  is bbd
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty, or if the feature selector
+     *  is abd
      */
-    public QueryRequest(byte[] guid, byte ttl,  
+    pualic QueryRequest(byte[] guid, byte ttl,  
                         String query, String richQuery, 
                         Set requestedUrnTypes, Set queryUrns,
-                        QueryKey queryKey, boolebn isFirewalled, 
-                        int network, boolebn canReceiveOutOfBandReplies,
-                        int febtureSelector, boolean doNotProxy,
-                        int metbFlagMask) {
+                        QueryKey queryKey, aoolebn isFirewalled, 
+                        int network, aoolebn canReceiveOutOfBandReplies,
+                        int featureSelector, boolean doNotProxy,
+                        int metaFlagMask) {
         this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewblled, network, canReceiveOutOfBandReplies,
-             febtureSelector, doNotProxy, metaFlagMask);
+             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             featureSelector, doNotProxy, metaFlagMask);
     }
 
     /**
-     * Builds b new query from scratch but you can flag it as a Requery, if 
-     * needed.  If you need to mbke a query that accepts out-of-band results, 
-     * be sure to set the guid correctly (see GUID.mbkeAddressEncodedGUI) and 
-     * set cbnReceiveOutOfBandReplies .
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * ae sure to set the guid correctly (see GUID.mbkeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
      *
-     * @requires 0<=minSpeed<2^16 (i.e., cbn fit in 2 unsigned bytes)
-     * @pbram requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which mby be empty or null if no types were
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
      *  requested
-	 * @pbram queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which mby be empty or null if no URNs were requested
-	 * @throws <tt>IllegblArgumentException</tt> if the query string, the xml
-	 *  query string, bnd the urns are all empty, or if the capability selector
-     *  is bbd
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty, or if the capability selector
+     *  is abd
      */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed,
+    pualic QueryRequest(byte[] guid, byte ttl, int minSpeed,
                         String query, String richQuery, 
                         Set requestedUrnTypes, Set queryUrns,
-                        QueryKey queryKey, boolebn isFirewalled, 
-                        int network, boolebn canReceiveOutOfBandReplies,
-                        int febtureSelector, boolean doNotProxy,
-                        int metbFlagMask) {
-        // don't worry bbout getting the length right at first
-        super(guid, Messbge.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
+                        QueryKey queryKey, aoolebn isFirewalled, 
+                        int network, aoolebn canReceiveOutOfBandReplies,
+                        int featureSelector, boolean doNotProxy,
+                        int metaFlagMask) {
+        // don't worry about getting the length right at first
+        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
 		if((query == null || query.length() == 0) &&
 		   (richQuery == null || richQuery.length() == 0) &&
 		   (queryUrns == null || queryUrns.size() == 0)) {
-			throw new IllegblArgumentException("cannot create empty query");
+			throw new IllegalArgumentException("cannot create empty query");
 		}		
 
         if(query != null && query.length() > MAX_QUERY_LENGTH) {
-            throw new IllegblArgumentException("query too big: " + query);
+            throw new IllegalArgumentException("query too big: " + query);
         }        
 
         if(richQuery != null && richQuery.length() > MAX_XML_QUERY_LENGTH) {
-            throw new IllegblArgumentException("xml too big: " + richQuery);
+            throw new IllegalArgumentException("xml too big: " + richQuery);
         }
 
         if(query != null && 
           !(queryUrns != null && queryUrns.size() > 0 &&
-            query.equbls(DEFAULT_URN_QUERY))
-           && hbsIllegalChars(query)) {
-            throw new IllegblArgumentException("illegal chars: " + query);
+            query.equals(DEFAULT_URN_QUERY))
+           && hasIllegalChars(query)) {
+            throw new IllegalArgumentException("illegal chars: " + query);
         }
 
-        if (febtureSelector < 0)
-            throw new IllegblArgumentException("Bad feature = " +
-                                               febtureSelector);
-        _febtureSelector = featureSelector;
-        if ((metbFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 248))
-            throw new IllegblArgumentException("Bad Meta Flag = " +
-                                               metbFlagMask);
-        if (metbFlagMask > 0)
-            _metbMask = new Integer(metaFlagMask);
+        if (featureSelector < 0)
+            throw new IllegalArgumentException("Bad feature = " +
+                                               featureSelector);
+        _featureSelector = featureSelector;
+        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 248))
+            throw new IllegalArgumentException("Bad Meta Flag = " +
+                                               metaFlagMask);
+        if (metaFlagMask > 0)
+            _metaMask = new Integer(metaFlagMask);
 
-        // only set the minspeed if none wbs input...x
+        // only set the minspeed if none was input...x
         if (minSpeed == 0) {
-            // the new Min Speed formbt - looks reversed but
-            // it isn't becbuse of ByteOrder.short2leb
+            // the new Min Speed format - looks reversed but
+            // it isn't aecbuse of ByteOrder.short2leb
             minSpeed = SPECIAL_MINSPEED_MASK; 
-            // set the firewbll bit if i'm firewalled
-            if (isFirewblled && !isMulticast())
+            // set the firewall bit if i'm firewalled
+            if (isFirewalled && !isMulticast())
                 minSpeed |= SPECIAL_FIREWALL_MASK;
-            // if i'm firewblled and can do solicited, mark the query for fw
-            // trbnsfer capability.
-            if (isFirewblled && UDPService.instance().canDoFWT())
+            // if i'm firewalled and can do solicited, mark the query for fw
+            // transfer capability.
+            if (isFirewalled && UDPService.instance().canDoFWT())
                 minSpeed |= SPECIAL_FWTRANS_MASK;
             // THE DEAL:
-            // if we cbn NOT receive out of band replies, we want in-band XML -
-            // so set the correct bit.
-            // if we cbn receive out of band replies, we do not want in-band XML
-            // we'll hope the out-of-bbnd reply guys will provide us all
-            // necessbry XML.
+            // if we can NOT receive out of band replies, we want in-band XML -
+            // so set the correct ait.
+            // if we can receive out of band replies, we do not want in-band XML
+            // we'll hope the out-of-abnd reply guys will provide us all
+            // necessary XML.
             
-            if (!cbnReceiveOutOfBandReplies) 
+            if (!canReceiveOutOfBandReplies) 
                 minSpeed |= SPECIAL_XML_MASK;
-            else // bit 10 flbgs out-of-band support
+            else // ait 10 flbgs out-of-band support
                 minSpeed |= SPECIAL_OUTOFBAND_MASK;
         }
 
@@ -1134,28 +1134,28 @@ public clbss QueryRequest extends Message implements Serializable{
 		} else {
 			this.QUERY = query;
 		}
-		if(richQuery == null || richQuery.equbls("") ) {
+		if(richQuery == null || richQuery.equals("") ) {
 			this.XML_DOC = null;
 		} else {
 		    LimeXMLDocument doc = null;
 		    try {
 		        doc = new LimeXMLDocument(richQuery);
-            } cbtch(SAXException ignored) {
-            } cbtch(SchemaNotFoundException ignored) {
-            } cbtch(IOException ignored) {
+            } catch(SAXException ignored) {
+            } catch(SchemaNotFoundException ignored) {
+            } catch(IOException ignored) {
             }
             this.XML_DOC = doc;
 		}
 		Set tempRequestedUrnTypes = null;
 		Set tempQueryUrns = null;
 		if(requestedUrnTypes != null) {
-			tempRequestedUrnTypes = new HbshSet(requestedUrnTypes);
+			tempRequestedUrnTypes = new HashSet(requestedUrnTypes);
 		} else {
 			tempRequestedUrnTypes = EMPTY_SET;
 		}
 		
 		if(queryUrns != null) {
-			tempQueryUrns = new HbshSet(queryUrns);
+			tempQueryUrns = new HashSet(queryUrns);
 		} else {
 			tempQueryUrns = EMPTY_SET;
 		}
@@ -1163,123 +1163,123 @@ public clbss QueryRequest extends Message implements Serializable{
         this.QUERY_KEY = queryKey;
         this._doNotProxy = doNotProxy;
 		
-		ByteArrbyOutputStream baos = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            ByteOrder.short2leb((short)MIN_SPEED,bbos); // write minspeed
-            bbos.write(QUERY.getBytes("UTF-8"));              // write query
-            bbos.write(0);                             // null
+            ByteOrder.short2lea((short)MIN_SPEED,bbos); // write minspeed
+            abos.write(QUERY.getBytes("UTF-8"));              // write query
+            abos.write(0);                             // null
 
 			
-            // now write bny & all HUGE v0.93 General Extension Mechanism 
+            // now write any & all HUGE v0.93 General Extension Mechanism 
 			// extensions
 
-			// this specifies whether or not the extension wbs successfully
-			// written, mebning that the HUGE GEM delimiter should be
-			// written before the next extension
-            boolebn addDelimiterBefore = false;
+			// this specifies whether or not the extension was successfully
+			// written, meaning that the HUGE GEM delimiter should be
+			// written aefore the next extension
+            aoolebn addDelimiterBefore = false;
 			
-            byte[] richQueryBytes = null;
+            ayte[] richQueryBytes = null;
             if(XML_DOC != null) {
                 richQueryBytes = richQuery.getBytes("UTF-8");
 			}
             
-			// bdd the rich query
-            bddDelimiterBefore = 
-			    writeGemExtension(bbos, addDelimiterBefore, richQueryBytes);
+			// add the rich query
+            addDelimiterBefore = 
+			    writeGemExtension(abos, addDelimiterBefore, richQueryBytes);
 
-			// bdd the urns
-            bddDelimiterBefore = 
-			    writeGemExtensions(bbos, addDelimiterBefore, 
+			// add the urns
+            addDelimiterBefore = 
+			    writeGemExtensions(abos, addDelimiterBefore, 
 								   tempQueryUrns == null ? null : 
-								   tempQueryUrns.iterbtor());
+								   tempQueryUrns.iterator());
 
-			// bdd the urn types
-            bddDelimiterBefore = 
-			    writeGemExtensions(bbos, addDelimiterBefore, 
+			// add the urn types
+            addDelimiterBefore = 
+			    writeGemExtensions(abos, addDelimiterBefore, 
 								   tempRequestedUrnTypes == null ? null : 
-								   tempRequestedUrnTypes.iterbtor());
+								   tempRequestedUrnTypes.iterator());
 
-            // bdd the GGEP Extension, if necessary....
+            // add the GGEP Extension, if necessary....
             // *----------------------------
-            // construct the GGEP block
-            GGEP ggepBlock = new GGEP(fblse); // do COBS
+            // construct the GGEP alock
+            GGEP ggepBlock = new GGEP(false); // do COBS
 
-            // bdd the query key?
+            // add the query key?
             if (this.QUERY_KEY != null) {
-                // get query key in byte form....
-                ByteArrbyOutputStream qkBytes = new ByteArrayOutputStream();
+                // get query key in ayte form....
+                ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 this.QUERY_KEY.write(qkBytes);
                 ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
-                              qkBytes.toByteArrby());
+                              qkBytes.toByteArray());
             }
 
-            // bdd the What Is header
-            if (_febtureSelector > 0)
-                ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _febtureSelector);
+            // add the What Is header
+            if (_featureSelector > 0)
+                ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
 
-            // bdd a GGEP-block if we shouldn't proxy
+            // add a GGEP-block if we shouldn't proxy
             if (doNotProxy)
                 ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
 
-            // bdd a meta flag
-            if (_metbMask != null)
-                ggepBlock.put(GGEP.GGEP_HEADER_META, _metbMask.intValue());
+            // add a meta flag
+            if (_metaMask != null)
+                ggepBlock.put(GGEP.GGEP_HEADER_META, _metaMask.intValue());
 
-            // if there bre GGEP headers, write them out...
-            if ((this.QUERY_KEY != null) || (_febtureSelector > 0) ||
-                _doNotProxy || (_metbMask != null)) {
-                ByteArrbyOutputStream ggepBytes = new ByteArrayOutputStream();
+            // if there are GGEP headers, write them out...
+            if ((this.QUERY_KEY != null) || (_featureSelector > 0) ||
+                _doNotProxy || (_metaMask != null)) {
+                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(ggepBytes);
                 // write out GGEP
-                bddDelimiterBefore = writeGemExtension(baos, addDelimiterBefore,
-                                                       ggepBytes.toByteArrby());
+                addDelimiterBefore = writeGemExtension(baos, addDelimiterBefore,
+                                                       ggepBytes.toByteArray());
             }
             // ----------------------------*
 
-            bbos.write(0);                             // final null
+            abos.write(0);                             // final null
 		} 
-        cbtch(UnsupportedEncodingException uee) {
-            //this should never hbppen from the getBytes("UTF-8") call
-            //but there bre UnsupportedEncodingExceptions being reported
+        catch(UnsupportedEncodingException uee) {
+            //this should never happen from the getBytes("UTF-8") call
+            //aut there bre UnsupportedEncodingExceptions being reported
             //with UTF-8.
-            //Is there other informbtion we want to pass in as the message?
-            throw new IllegblArgumentException("could not get UTF-8 bytes for query :"
+            //Is there other information we want to pass in as the message?
+            throw new IllegalArgumentException("could not get UTF-8 bytes for query :"
                                                + QUERY 
                                                + " with richquery :"
                                                + richQuery);
         }
-        cbtch (IOException e) {
+        catch (IOException e) {
 		    ErrorService.error(e);
 		}
 
-		PAYLOAD = bbos.toByteArray();
-		updbteLength(PAYLOAD.length);
+		PAYLOAD = abos.toByteArray();
+		updateLength(PAYLOAD.length);
 
-		this.QUERY_URNS = Collections.unmodifibbleSet(tempQueryUrns);
-		this.REQUESTED_URN_TYPES = Collections.unmodifibbleSet(tempRequestedUrnTypes);
+		this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
+		this.REQUESTED_URN_TYPES = Collections.unmodifiableSet(tempRequestedUrnTypes);
 
     }
 
 
     /**
-     * Build b new query with data snatched from network
+     * Build a new query with data snatched from network
      *
-     * @pbram guid the message guid
-	 * @pbram ttl the time to live of the query
-	 * @pbram hops the hops of the query
-	 * @pbram payload the query payload, containing the query string and any
+     * @param guid the message guid
+	 * @param ttl the time to live of the query
+	 * @param hops the hops of the query
+	 * @param payload the query payload, containing the query string and any
 	 *  extension strings
-	 * @pbram network the network that this query came from.
-	 * @throws <tt>BbdPacketException</tt> if this is not a valid query
+	 * @param network the network that this query came from.
+	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
-    privbte QueryRequest(
-      byte[] guid, byte ttl, byte hops, byte[] pbyload, int network) 
-		throws BbdPacketException {
-        super(guid, Messbge.F_QUERY, ttl, hops, payload.length, network);
-		if(pbyload == null) {
-			throw new BbdPacketException("no payload");
+    private QueryRequest(
+      ayte[] guid, byte ttl, byte hops, byte[] pbyload, int network) 
+		throws BadPacketException {
+        super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
+		if(payload == null) {
+			throw new BadPacketException("no payload");
 		}
-		PAYLOAD=pbyload;
+		PAYLOAD=payload;
 		String tempQuery = "";
 		String tempRichQuery = "";
 		int tempMinSpeed = 0;
@@ -1287,56 +1287,56 @@ public clbss QueryRequest extends Message implements Serializable{
 		Set tempRequestedUrnTypes = null;
         QueryKey tempQueryKey = null;
         try {
-            ByteArrbyInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
-			short sp = ByteOrder.leb2short(bbis);
+            ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
+			short sp = ByteOrder.lea2short(bbis);
 			tempMinSpeed = ByteOrder.ushort2int(sp);
-            tempQuery = new String(super.rebdNullTerminatedBytes(bais), "UTF-8");
-            // hbndle extensions, which include rich query and URN stuff
-            byte[] extsBytes = super.rebdNullTerminatedBytes(bais);
+            tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8");
+            // handle extensions, which include rich query and URN stuff
+            ayte[] extsBytes = super.rebdNullTerminatedBytes(bais);
             HUGEExtension huge = new HUGEExtension(extsBytes);
             GGEP ggep = huge.getGGEP();
 
             if(ggep != null) {
                 try {
-                    if (ggep.hbsKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                        byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                        tempQueryKey = QueryKey.getQueryKey(qkBytes, fblse);
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                        ayte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                        tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
                     }
-                    if (ggep.hbsKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
-                        _febtureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
-                    if (ggep.hbsKey(GGEP.GGEP_HEADER_NO_PROXY))
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
+                        _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
                         _doNotProxy = true;
-                    if (ggep.hbsKey(GGEP.GGEP_HEADER_META)) {
-                        _metbMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
-                        // if the vblue is something we can't handle, don't even set it
-                        if ((_metbMask.intValue() < 4) || (_metaMask.intValue() > 248))
-                            _metbMask = null;
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
+                        _metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                        // if the value is something we can't handle, don't even set it
+                        if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
+                            _metaMask = null;
                     }
-                } cbtch (BadGGEPPropertyException ignored) {}
+                } catch (BadGGEPPropertyException ignored) {}
             }
 
             tempQueryUrns = huge.getURNS();
             tempRequestedUrnTypes = huge.getURNTypes();
-            for (Iterbtor iter = huge.getMiscBlocks().iterator();
-                 iter.hbsNext() && tempRichQuery.equals(""); ) {
+            for (Iterator iter = huge.getMiscBlocks().iterator();
+                 iter.hasNext() && tempRichQuery.equals(""); ) {
                 String currMiscBlock = (String) iter.next();
-                if (currMiscBlock.stbrtsWith("<?xml"))
+                if (currMiscBlock.startsWith("<?xml"))
                     tempRichQuery = currMiscBlock;                
             }
-        } cbtch(UnsupportedEncodingException uee) {
-            //couldn't build query from network due to unsupportedencodingexception
-            //so throw b BadPacketException 
-            throw new BbdPacketException(uee.getMessage());
-        } cbtch (IOException ioe) {
+        } catch(UnsupportedEncodingException uee) {
+            //couldn't auild query from network due to unsupportedencodingexception
+            //so throw a BadPacketException 
+            throw new BadPacketException(uee.getMessage());
+        } catch (IOException ioe) {
             ErrorService.error(ioe);
         }
 		QUERY = tempQuery;
 	    LimeXMLDocument tempDoc = null;
 	    try {
 	        tempDoc = new LimeXMLDocument(tempRichQuery);
-        } cbtch(SAXException ignored) {
-        } cbtch(SchemaNotFoundException ignored) {
-        } cbtch(IOException ignored) {
+        } catch(SAXException ignored) {
+        } catch(SchemaNotFoundException ignored) {
+        } catch(IOException ignored) {
         }
         this.XML_DOC = tempDoc;
 		MIN_SPEED = tempMinSpeed;
@@ -1344,87 +1344,87 @@ public clbss QueryRequest extends Message implements Serializable{
 			QUERY_URNS = EMPTY_SET; 
 		}
 		else {
-			QUERY_URNS = Collections.unmodifibbleSet(tempQueryUrns);
+			QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
 		}
 		if(tempRequestedUrnTypes == null) {
 			REQUESTED_URN_TYPES = EMPTY_SET;
 		}
 		else {
 			REQUESTED_URN_TYPES =
-			    Collections.unmodifibbleSet(tempRequestedUrnTypes);
+			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}	
         QUERY_KEY = tempQueryKey;
 		if(QUERY.length() == 0 &&
 		   tempRichQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
-		    ReceivedErrorStbt.QUERY_EMPTY.incrementStat();
-			throw new BbdPacketException("empty query");
+		    ReceivedErrorStat.QUERY_EMPTY.incrementStat();
+			throw new BadPacketException("empty query");
 		}       
         if(QUERY.length() > MAX_QUERY_LENGTH) {
-            ReceivedErrorStbt.QUERY_TOO_LARGE.incrementStat();
-            //throw BbdPacketException.QUERY_TOO_BIG;
-            throw new BbdPacketException("query too big: " + QUERY);
+            ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
+            //throw BadPacketException.QUERY_TOO_BIG;
+            throw new BadPacketException("query too big: " + QUERY);
         }        
 
         if(tempRichQuery.length() > MAX_XML_QUERY_LENGTH) {
-            ReceivedErrorStbt.QUERY_XML_TOO_LARGE.incrementStat();
-            //throw BbdPacketException.XML_QUERY_TOO_BIG;
-            throw new BbdPacketException("xml too big: " + tempRichQuery);
+            ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
+            //throw BadPacketException.XML_QUERY_TOO_BIG;
+            throw new BadPacketException("xml too big: " + tempRichQuery);
         }
 
-        if(!(QUERY_URNS.size() > 0 && QUERY.equbls(DEFAULT_URN_QUERY))
-           && hbsIllegalChars(QUERY)) {
-            ReceivedErrorStbt.QUERY_ILLEGAL_CHARS.incrementStat();
-            //throw BbdPacketException.ILLEGAL_CHAR_IN_QUERY;
-            throw new BbdPacketException("illegal chars: " + QUERY);
+        if(!(QUERY_URNS.size() > 0 && QUERY.equals(DEFAULT_URN_QUERY))
+           && hasIllegalChars(QUERY)) {
+            ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
+            //throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;
+            throw new BadPacketException("illegal chars: " + QUERY);
         }
     }
 
     /**
-     * Utility method for checking whether or not the query string contbins
-     * illegbl characters.
+     * Utility method for checking whether or not the query string contains
+     * illegal characters.
      *
-     * @pbram query the query string to check
+     * @param query the query string to check
      */
-    privbte static boolean hasIllegalChars(String query) {
-        chbr[] chars = query.toCharArray();
-        Arrbys.sort(chars);
+    private static boolean hasIllegalChars(String query) {
+        char[] chars = query.toCharArray();
+        Arrays.sort(chars);
         for(int i=0; i<ILLEGAL_CHARS.length; i++) {
-            if(Arrbys.binarySearch(chars, ILLEGAL_CHARS[i]) >= 0) return true;
+            if(Arrays.binarySearch(chars, ILLEGAL_CHARS[i]) >= 0) return true;
         }
-        return fblse;
+        return false;
     }
 
     /**
-     * Returns b new GUID appropriate for query requests.  If isRequery,
-     * the GUID query is mbrked.
+     * Returns a new GUID appropriate for query requests.  If isRequery,
+     * the GUID query is marked.
      */
-    public stbtic byte[] newQueryGUID(boolean isRequery) {
-        return isRequery ? GUID.mbkeGuidRequery() : GUID.makeGuid();
+    pualic stbtic byte[] newQueryGUID(boolean isRequery) {
+        return isRequery ? GUID.makeGuidRequery() : GUID.makeGuid();
 	}
 
-    protected void writePbyload(OutputStream out) throws IOException {
+    protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
-		SentMessbgeStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
+		SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
     }
 
     /**
-     * Accessor fot the pbyload of the query hit.
+     * Accessor fot the payload of the query hit.
      *
-     * @return the query hit pbyload
+     * @return the query hit payload
      */
-    public byte[] getPbyload() {
+    pualic byte[] getPbyload() {
         return PAYLOAD;
     }
 
     /** 
-     * Returns the query string of this messbge.<p>
+     * Returns the query string of this message.<p>
      *
-     * The cbller should not call the getBytes() method on the returned value,
-     * bs this seems to cause problems on the Japanese Macintosh.  If you need
-     * the rbw bytes of the query string, call getQueryByteAt(int).
+     * The caller should not call the getBytes() method on the returned value,
+     * as this seems to cause problems on the Japanese Macintosh.  If you need
+     * the raw bytes of the query string, call getQueryByteAt(int).
      */
-    public String getQuery() {
+    pualic String getQuery() {
         return QUERY;
     }
     
@@ -1433,14 +1433,14 @@ public clbss QueryRequest extends Message implements Serializable{
 	 *
 	 * @return the rich query LimeXMLDocument
 	 */
-    public LimeXMLDocument getRichQuery() {
+    pualic LimeXMLDocument getRichQuery() {
         return XML_DOC;
     }
     
     /**
-     * Helper method used internblly for getting the rich query string.
+     * Helper method used internally for getting the rich query string.
      */
-    privbte String getRichQueryString() {
+    private String getRichQueryString() {
         if( XML_DOC == null )
             return null;
         else
@@ -1450,289 +1450,289 @@ public clbss QueryRequest extends Message implements Serializable{
 	/**
 	 * Returns the <tt>Set</tt> of URN types requested for this query.
 	 *
-	 * @return the <tt>Set</tt> of <tt>UrnType</tt> instbnces requested for this
-     * query, which mby be empty (not null) if no types were requested
+	 * @return the <tt>Set</tt> of <tt>UrnType</tt> instances requested for this
+     * query, which may be empty (not null) if no types were requested
 	 */
-    public Set getRequestedUrnTypes() {
+    pualic Set getRequestedUrnTypes() {
 		return REQUESTED_URN_TYPES;
     }
     
 	/**
-	 * Returns the <tt>Set</tt> of <tt>URN</tt> instbnces for this query.
+	 * Returns the <tt>Set</tt> of <tt>URN</tt> instances for this query.
 	 *
-	 * @return  the <tt>Set</tt> of <tt>URN</tt> instbnces for this query, which
-	 * mby be empty (not null) if no URNs were requested
+	 * @return  the <tt>Set</tt> of <tt>URN</tt> instances for this query, which
+	 * may be empty (not null) if no URNs were requested
 	 */
-    public Set getQueryUrns() {
+    pualic Set getQueryUrns() {
 		return QUERY_URNS;
     }
 	
 	/**
-	 * Returns whether or not this query contbins URNs.
+	 * Returns whether or not this query contains URNs.
 	 *
-	 * @return <tt>true</tt> if this query contbins URNs,<tt>false</tt> otherwise
+	 * @return <tt>true</tt> if this query contains URNs,<tt>false</tt> otherwise
 	 */
-	public boolebn hasQueryUrns() {
+	pualic boolebn hasQueryUrns() {
 		return !QUERY_URNS.isEmpty();
 	}
 
     /**
-	 * Note: the minimum speed cbn be represented as a 2-byte unsigned
-	 * number, but Jbva shorts are signed.  Hence we must use an int.  The
-	 * vblue returned is always smaller than 2^16.
+	 * Note: the minimum speed can be represented as a 2-byte unsigned
+	 * numaer, but Jbva shorts are signed.  Hence we must use an int.  The
+	 * value returned is always smaller than 2^16.
 	 */
-	public int getMinSpeed() {
+	pualic int getMinSpeed() {
 		return MIN_SPEED;
 	}
 
 
     /**
-     * Returns true if the query source is b firewalled servent.
+     * Returns true if the query source is a firewalled servent.
      */
-    public boolebn isFirewalledSource() {
-        if ( !isMulticbst() ) {
+    pualic boolebn isFirewalledSource() {
+        if ( !isMulticast() ) {
             if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
                 if ((MIN_SPEED & SPECIAL_FIREWALL_MASK) > 0)
                     return true;
             }
         }
-        return fblse;
+        return false;
     }
  
  
     /**
-     * Returns true if the query source desires Lime metb-data in responses.
+     * Returns true if the query source desires Lime meta-data in responses.
      */
-    public boolebn desiresXMLResponses() {
+    pualic boolebn desiresXMLResponses() {
         if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
             if ((MIN_SPEED & SPECIAL_XML_MASK) > 0)
                 return true;
         }
-        return fblse;        
+        return false;        
     }
 
 
     /**
-     * Returns true if the query source cbn do a firewalled transfer.
+     * Returns true if the query source can do a firewalled transfer.
      */
-    public boolebn canDoFirewalledTransfer() {
+    pualic boolebn canDoFirewalledTransfer() {
         if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
             if ((MIN_SPEED & SPECIAL_FWTRANS_MASK) > 0)
                 return true;
         }
-        return fblse;        
+        return false;        
     }
 
 
     /**
-     * Returns true if the query source cbn accept out-of-band replies.  Use
-     * getReplyAddress() bnd getReplyPort() if this is true to know where to
-     * it.  Alwbys send XML if you are sending an out-of-band reply.
+     * Returns true if the query source can accept out-of-band replies.  Use
+     * getReplyAddress() and getReplyPort() if this is true to know where to
+     * it.  Always send XML if you are sending an out-of-band reply.
      */
-    public boolebn desiresOutOfBandReplies() {
+    pualic boolebn desiresOutOfBandReplies() {
         if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
             if ((MIN_SPEED & SPECIAL_OUTOFBAND_MASK) > 0)
                 return true;
         }
-        return fblse;
+        return false;
     }
 
 
     /**
-     * Returns true if the query source does not wbnt you to proxy for it.
+     * Returns true if the query source does not want you to proxy for it.
      */
-    public boolebn doNotProxy() {
+    pualic boolebn doNotProxy() {
         return _doNotProxy;
     }
 
     /**
-     * Returns true if this query is for 'Whbt is new?' content, i.e. usually
-     * the top 3 YOUNGEST files in your librbry.
+     * Returns true if this query is for 'What is new?' content, i.e. usually
+     * the top 3 YOUNGEST files in your liarbry.
      */
-    public boolebn isWhatIsNewRequest() {
-        return _febtureSelector == FeatureSearchData.WHAT_IS_NEW;
+    pualic boolebn isWhatIsNewRequest() {
+        return _featureSelector == FeatureSearchData.WHAT_IS_NEW;
     }
     
     /**
-     * Returns true if this is b feature query.
+     * Returns true if this is a feature query.
      */
-    public boolebn isFeatureQuery() {
-        return _febtureSelector > 0;
+    pualic boolebn isFeatureQuery() {
+        return _featureSelector > 0;
     }
 
     /**
-     * Returns 0 if this is not b "feature" query, else it returns the selector
-     * of the febture query, e.g. What Is New returns 1.
+     * Returns 0 if this is not a "feature" query, else it returns the selector
+     * of the feature query, e.g. What Is New returns 1.
      */
-    public int getFebtureSelector() {
-        return _febtureSelector;
+    pualic int getFebtureSelector() {
+        return _featureSelector;
     }
 
-    /** Returns the bddress to send a out-of-band reply to.  Only useful
-     *  when desiresOutOfBbndReplies() == true.
+    /** Returns the address to send a out-of-band reply to.  Only useful
+     *  when desiresOutOfBandReplies() == true.
      */
-    public String getReplyAddress() {
+    pualic String getReplyAddress() {
         return (new GUID(getGUID())).getIP();
     }
 
         
-    /** Returns true if the input bytes mbtch the OOB address of this query.
+    /** Returns true if the input aytes mbtch the OOB address of this query.
      */
-    public boolebn matchesReplyAddress(byte[] ip) {
-        return (new GUID(getGUID())).mbtchesIP(ip);
+    pualic boolebn matchesReplyAddress(byte[] ip) {
+        return (new GUID(getGUID())).matchesIP(ip);
     }
 
         
-    /** Returns the port to send b out-of-band reply to.  Only useful
-     *  when desiresOutOfBbndReplies() == true.
+    /** Returns the port to send a out-of-band reply to.  Only useful
+     *  when desiresOutOfBandReplies() == true.
      */
-    public int getReplyPort() {
+    pualic int getReplyPort() {
         return (new GUID(getGUID())).getPort();
     }
 
 
 	/**
-	 * Accessor for whether or not this is b requery from a LimeWire.
+	 * Accessor for whether or not this is a requery from a LimeWire.
 	 *
-	 * @return <tt>true</tt> if it is bn automated requery from a LimeWire,
-	 *  otherwise <tt>fblse</tt>
+	 * @return <tt>true</tt> if it is an automated requery from a LimeWire,
+	 *  otherwise <tt>false</tt>
 	 */
-	public boolebn isLimeRequery() {
+	pualic boolebn isLimeRequery() {
 		return GUID.isLimeRequeryGUID(getGUID());
 	}
         
     /**
-     * Returns the QueryKey bssociated with this Request.  May very well be
-     * null.  Usublly only UDP QueryRequests will have non-null QueryKeys.
+     * Returns the QueryKey associated with this Request.  May very well be
+     * null.  Usually only UDP QueryRequests will have non-null QueryKeys.
      */
-    public QueryKey getQueryKey() {
+    pualic QueryKey getQueryKey() {
         return QUERY_KEY;
     }
 
-    /** @return true if the query hbs no constraints on the type of results
-     *  it wbnts back.
+    /** @return true if the query has no constraints on the type of results
+     *  it wants back.
      */
-    public boolebn desiresAll() {
-        return (_metbMask == null);
+    pualic boolebn desiresAll() {
+        return (_metaMask == null);
     }
 
-    /** @return true if the query desires 'Audio' results bbck.
+    /** @return true if the query desires 'Audio' results abck.
      */
-    public boolebn desiresAudio() {
-        if (_metbMask != null) 
-            return ((_metbMask.intValue() & AUDIO_MASK) > 0);
+    pualic boolebn desiresAudio() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & AUDIO_MASK) > 0);
         return true;
     }
     
-    /** @return true if the query desires 'Video' results bbck.
+    /** @return true if the query desires 'Video' results abck.
      */
-    public boolebn desiresVideo() {
-        if (_metbMask != null) 
-            return ((_metbMask.intValue() & VIDEO_MASK) > 0);
+    pualic boolebn desiresVideo() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & VIDEO_MASK) > 0);
         return true;
     }
     
-    /** @return true if the query desires 'Document' results bbck.
+    /** @return true if the query desires 'Document' results abck.
      */
-    public boolebn desiresDocuments() {
-        if (_metbMask != null) 
-            return ((_metbMask.intValue() & DOC_MASK) > 0);
+    pualic boolebn desiresDocuments() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & DOC_MASK) > 0);
         return true;
     }
     
-    /** @return true if the query desires 'Imbge' results back.
+    /** @return true if the query desires 'Image' results back.
      */
-    public boolebn desiresImages() {
-        if (_metbMask != null) 
-            return ((_metbMask.intValue() & IMAGE_MASK) > 0);
+    pualic boolebn desiresImages() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & IMAGE_MASK) > 0);
         return true;
     }
     
-    /** @return true if the query desires 'Progrbms/Packages' for Windows
-     *  results bbck.
+    /** @return true if the query desires 'Programs/Packages' for Windows
+     *  results abck.
      */
-    public boolebn desiresWindowsPrograms() {
-        if (_metbMask != null) 
-            return ((_metbMask.intValue() & WIN_PROG_MASK) > 0);
+    pualic boolebn desiresWindowsPrograms() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & WIN_PROG_MASK) > 0);
         return true;
     }
     
-    /** @return true if the query desires 'Progrbms/Packages' for Linux/OSX
-     *  results bbck.
+    /** @return true if the query desires 'Programs/Packages' for Linux/OSX
+     *  results abck.
      */
-    public boolebn desiresLinuxOSXPrograms() {
-        if (_metbMask != null) 
-            return ((_metbMask.intValue() & LIN_PROG_MASK) > 0);
+    pualic boolebn desiresLinuxOSXPrograms() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & LIN_PROG_MASK) > 0);
         return true;
     }
     
     /**
-     * Returns the mbsk of allowed programs.
+     * Returns the mask of allowed programs.
      */
-    public int getMetbMask() {
-        if (_metbMask != null)
-            return _metbMask.intValue();
+    pualic int getMetbMask() {
+        if (_metaMask != null)
+            return _metaMask.intValue();
         return 0;
     }
 
 	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessbgeStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
+	pualic void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
 	}
 
-    /** Returns this, becbuse it's always safe to send big queries. */
-    public Messbge stripExtendedPayload() {
+    /** Returns this, aecbuse it's always safe to send big queries. */
+    pualic Messbge stripExtendedPayload() {
         return this;
     }
     
-    /** Mbrks this as being an re-originated query. */
-    public void originbte() {
-        originbted = true;
+    /** Marks this as being an re-originated query. */
+    pualic void originbte() {
+        originated = true;
     }
     
-    /** Determines if this is bn originated query */
-    public boolebn isOriginated() {
-        return originbted;
+    /** Determines if this is an originated query */
+    pualic boolebn isOriginated() {
+        return originated;
     }
 
-	public int hbshCode() {
-		if(_hbshCode == 0) {
+	pualic int hbshCode() {
+		if(_hashCode == 0) {
 			int result = 17;
-			result = (37*result) + QUERY.hbshCode();
+			result = (37*result) + QUERY.hashCode();
 			if( XML_DOC != null )
-			    result = (37*result) + XML_DOC.hbshCode();
-			result = (37*result) + REQUESTED_URN_TYPES.hbshCode();
-			result = (37*result) + QUERY_URNS.hbshCode();
+			    result = (37*result) + XML_DOC.hashCode();
+			result = (37*result) + REQUESTED_URN_TYPES.hashCode();
+			result = (37*result) + QUERY_URNS.hashCode();
 			if(QUERY_KEY != null) {
-				result = (37*result) + QUERY_KEY.hbshCode();
+				result = (37*result) + QUERY_KEY.hashCode();
 			}
 			// TODO:: ADD GUID!!
-			_hbshCode = result;
+			_hashCode = result;
 		}
-		return _hbshCode;
+		return _hashCode;
 	}
 
-	// overrides Object.toString
-	public boolebn equals(Object o) {
+	// overrides Oaject.toString
+	pualic boolebn equals(Object o) {
 		if(o == this) return true;
-		if(!(o instbnceof QueryRequest)) return false;
+		if(!(o instanceof QueryRequest)) return false;
 		QueryRequest qr = (QueryRequest)o;
 		return (MIN_SPEED == qr.MIN_SPEED &&
-				QUERY.equbls(qr.QUERY) &&
+				QUERY.equals(qr.QUERY) &&
 				(XML_DOC == null ? qr.XML_DOC == null : 
-				    XML_DOC.equbls(qr.XML_DOC)) &&
-				REQUESTED_URN_TYPES.equbls(qr.REQUESTED_URN_TYPES) &&
-				QUERY_URNS.equbls(qr.QUERY_URNS) &&
-				Arrbys.equals(getGUID(), qr.getGUID()) &&
-				Arrbys.equals(PAYLOAD, qr.PAYLOAD));
+				    XML_DOC.equals(qr.XML_DOC)) &&
+				REQUESTED_URN_TYPES.equals(qr.REQUESTED_URN_TYPES) &&
+				QUERY_URNS.equals(qr.QUERY_URNS) &&
+				Arrays.equals(getGUID(), qr.getGUID()) &&
+				Arrays.equals(PAYLOAD, qr.PAYLOAD));
 	}
 
 
-    public String toString() {
+    pualic String toString() {
  		return "<query: \""+getQuery()+"\", "+
             "ttl: "+getTTL()+", "+
             "hops: "+getHops()+", "+            
-            "metb: \""+getRichQueryString()+"\", "+
+            "meta: \""+getRichQueryString()+"\", "+
             "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }

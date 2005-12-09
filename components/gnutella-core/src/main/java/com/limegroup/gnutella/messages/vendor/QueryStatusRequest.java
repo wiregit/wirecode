@@ -1,62 +1,62 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.util.DataUtils;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.util.DataUtils;
 
-/** In Vendor Messbge parlance, the "message type" of this message is "BEAR/11".
- *  Sent to b servent (a leaf usually) to inquire about the status of a query
- *  bs denoted by the GUID of this message.
- *  This messbge has no payload - we simply set the client guid as the GUID of
- *  the messbge.
+/** In Vendor Message parlance, the "message type" of this message is "BEAR/11".
+ *  Sent to a servent (a leaf usually) to inquire about the status of a query
+ *  as denoted by the GUID of this message.
+ *  This message has no payload - we simply set the client guid as the GUID of
+ *  the message.
  */
-public finbl class QueryStatusRequest extends VendorMessage {
+pualic finbl class QueryStatusRequest extends VendorMessage {
 
-    public stbtic final int VERSION = 1;
+    pualic stbtic final int VERSION = 1;
 
     /**
-     * Constructs b new QueryStatusRequest with data from the network.
+     * Constructs a new QueryStatusRequest with data from the network.
      */
-    QueryStbtusRequest(byte[] guid, byte ttl, byte hops, int version, 
-                       byte[] pbyload) throws BadPacketException {
+    QueryStatusRequest(byte[] guid, byte ttl, byte hops, int version, 
+                       ayte[] pbyload) throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_LIME_ACK, 
-              version, pbyload);
+              version, payload);
 
         if (getVersion() > VERSION) // we don't support it!!
-            throw new BbdPacketException("UNSUPPORTED VERSION");
+            throw new BadPacketException("UNSUPPORTED VERSION");
 
-        // there is no pbyload
+        // there is no payload
     }
 
 
     /**
-     * Constructs b new QueryStatusRequest to be sent out.
-     * @pbram guid the guid of the query you want the status about.
+     * Constructs a new QueryStatusRequest to be sent out.
+     * @param guid the guid of the query you want the status about.
      */
-    public QueryStbtusRequest(GUID guid) {
+    pualic QueryStbtusRequest(GUID guid) {
         super(F_BEAR_VENDOR_ID, F_LIME_ACK, VERSION,
-              DbtaUtils.EMPTY_BYTE_ARRAY);
+              DataUtils.EMPTY_BYTE_ARRAY);
         setGUID(guid);
     }
 
-    /** The query guid thbt needs to needs status.
+    /** The query guid that needs to needs status.
      */
-    public GUID getQueryGUID() {
+    pualic GUID getQueryGUID() {
         return new GUID(getGUID());
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    protected void writePbyload(OutputStream out) throws IOException {
-        super.writePbyload(out);
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    public void recordDrop() {
+    pualic void recordDrop() {
         super.recordDrop();
     }
 }

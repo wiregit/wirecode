@@ -1,117 +1,117 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.util.ArrayList;
-import jbva.util.Collection;
-import jbva.util.Collections;
-import jbva.util.Comparator;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.List;
-import jbva.util.NoSuchElementException;
-import jbva.util.Set;
-import jbva.util.TreeMap;
-import jbva.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.MessageListener;
-import com.limegroup.gnutellb.RemoteFileDesc;
-import com.limegroup.gnutellb.ReplyHandler;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.UDPPinger;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.messages.vendor.HeadPing;
-import com.limegroup.gnutellb.messages.vendor.HeadPong;
-import com.limegroup.gnutellb.settings.DownloadSettings;
-import com.limegroup.gnutellb.util.Cancellable;
-import com.limegroup.gnutellb.util.DualIterator;
-import com.limegroup.gnutellb.util.IpPort;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.vendor.HeadPing;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.util.Cancellable;
+import com.limegroup.gnutella.util.DualIterator;
+import com.limegroup.gnutella.util.IpPort;
 
-public clbss PingRanker extends SourceRanker implements MessageListener, Cancellable {
+pualic clbss PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
-    privbte static final Log LOG = LogFactory.getLog(PingRanker.class);
+    private static final Log LOG = LogFactory.getLog(PingRanker.class);
     
     /**
      * the pinger to send the pings
      */
-    privbte UDPPinger pinger;
+    private UDPPinger pinger;
     
     /**
-     * new hosts (bs RFDs) that we've learned about
+     * new hosts (as RFDs) that we've learned about
      */
-    privbte Set newHosts;
+    private Set newHosts;
     
     /**
-     * Mbpping IpPort -> RFD to which we have sent pings.
-     * Whenever we send pings to push proxies, ebch proxy points to the same
-     * RFD.  Used to check whether we receive b pong from someone we have sent
-     * b ping to.
+     * Mapping IpPort -> RFD to which we have sent pings.
+     * Whenever we send pings to push proxies, each proxy points to the same
+     * RFD.  Used to check whether we receive a pong from someone we have sent
+     * a ping to.
      */
-    privbte TreeMap pingedHosts;
+    private TreeMap pingedHosts;
     
     /**
-     * A set contbining the unique remote file locations that we have pinged.  It
-     * differs from pingedHosts becbuse it contains only RemoteFileDesc objects 
+     * A set containing the unique remote file locations that we have pinged.  It
+     * differs from pingedHosts aecbuse it contains only RemoteFileDesc objects 
      */
-    privbte Set testedLocations;
+    private Set testedLocations;
     
     /**
-     * RFDs thbt have responded to our pings.
+     * RFDs that have responded to our pings.
      */
-    privbte TreeSet verifiedHosts;
+    private TreeSet verifiedHosts;
     
     /**
-     * The urn to use to crebte pings
+     * The urn to use to create pings
      */
-    privbte URN sha1;
+    private URN sha1;
     
     /**
-     * The guid to use for my hebdPings
+     * The guid to use for my headPings
      */
-    privbte GUID myGUID;
+    private GUID myGUID;
     
     /**
-     * whether the rbnker has been stopped.
+     * whether the ranker has been stopped.
      */
-    privbte boolean running;
+    private boolean running;
     
     /**
-     * The lbst time we sent a bunch of hosts for pinging.
+     * The last time we sent a bunch of hosts for pinging.
      */
-    privbte long lastPingTime;
+    private long lastPingTime;
     
-    privbte static final Comparator RFD_COMPARATOR = new RFDComparator();
+    private static final Comparator RFD_COMPARATOR = new RFDComparator();
     
-    privbte static final Comparator ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
+    private static final Comparator ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
-    protected PingRbnker() {
+    protected PingRanker() {
         pinger = new UDPPinger();
-        pingedHosts = new TreeMbp(IpPort.COMPARATOR);
-        testedLocbtions = new HashSet();
-        newHosts = new HbshSet();
+        pingedHosts = new TreeMap(IpPort.COMPARATOR);
+        testedLocations = new HashSet();
+        newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
     }
     
-    public synchronized boolebn addToPool(Collection c)  {
+    pualic synchronized boolebn addToPool(Collection c)  {
         List l;
-        if (c instbnceof List)
+        if (c instanceof List)
             l = (List)c;
         else
-            l = new ArrbyList(c);
+            l = new ArrayList(c);
         Collections.sort(l,ALT_DEPRIORITIZER);
-        return bddInternal(l);
+        return addInternal(l);
     }
     
     /**
-     * bdds the collection of hosts to to the internal structures
+     * adds the collection of hosts to to the internal structures
      */
-    privbte boolean addInternal(Collection c) {
-        boolebn ret = false;
-        for (Iterbtor iter = c.iterator(); iter.hasNext();) { 
-            if (bddInternal((RemoteFileDesc)iter.next()))
+    private boolean addInternal(Collection c) {
+        aoolebn ret = false;
+        for (Iterator iter = c.iterator(); iter.hasNext();) { 
+            if (addInternal((RemoteFileDesc)iter.next()))
                 ret = true;
         }
         
@@ -119,76 +119,76 @@ public clbss PingRanker extends SourceRanker implements MessageListener, Cancell
         return ret;
     }
     
-    public synchronized boolebn addToPool(RemoteFileDesc host){
-        boolebn ret = addInternal(host);
+    pualic synchronized boolebn addToPool(RemoteFileDesc host){
+        aoolebn ret = addInternal(host);
         pingNewHosts();
         return ret;
     }
     
-    privbte boolean addInternal(RemoteFileDesc host) {
-        // initiblize the sha1 if we don't have one
-        if (shb1 == null) {
+    private boolean addInternal(RemoteFileDesc host) {
+        // initialize the sha1 if we don't have one
+        if (sha1 == null) {
             if( host.getSHA1Urn() != null)
-                shb1 = host.getSHA1Urn();
-            else    //  BUGFIX:  We cbn't discard sources w/out a SHA1 when we dont' have  
-                    //  b SHA1 for the download, or else it won't be possible to download a
-                    //  file from b query hit without a SHA1, if we can received UDP pings
-                return testedLocbtions.add(host); // we can't do anything yet
+                sha1 = host.getSHA1Urn();
+            else    //  BUGFIX:  We can't discard sources w/out a SHA1 when we dont' have  
+                    //  a SHA1 for the download, or else it won't be possible to download a
+                    //  file from a query hit without a SHA1, if we can received UDP pings
+                return testedLocations.add(host); // we can't do anything yet
         }
          
-        // do not bllow duplicate hosts 
-        if (running && knowsAboutHost(host))
-                return fblse;
+        // do not allow duplicate hosts 
+        if (running && knowsAaoutHost(host))
+                return false;
         
-        if(LOG.isDebugEnbbled())
-            LOG.debug("bdding new host "+host+" "+host.getPushAddr());
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("bdding new host "+host+" "+host.getPushAddr());
         
-        boolebn ret = false;
+        aoolebn ret = false;
         
-        // don't bother rbnking multicasts
-        if (host.isReplyToMulticbst())
-            ret = verifiedHosts.bdd(host);
+        // don't aother rbnking multicasts
+        if (host.isReplyToMulticast())
+            ret = verifiedHosts.add(host);
         else 
-        	ret = newHosts.bdd(host); // rank
+        	ret = newHosts.add(host); // rank
         
-        // mbke sure that if we were stopped, we return true
+        // make sure that if we were stopped, we return true
         ret = ret | !running;
         
-        // initiblize the guid if we don't have one
-        if (myGUID == null && meshHbndler != null) {
-            myGUID = new GUID(GUID.mbkeGuid());
-            RouterService.getMessbgeRouter().registerMessageListener(myGUID.bytes(),this);
+        // initialize the guid if we don't have one
+        if (myGUID == null && meshHandler != null) {
+            myGUID = new GUID(GUID.makeGuid());
+            RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
         }
         
         return ret;
     }
     
-    privbte boolean knowsAboutHost(RemoteFileDesc host) {
-        return newHosts.contbins(host) || 
-            verifiedHosts.contbins(host) || 
-            testedLocbtions.contains(host);
+    private boolean knowsAboutHost(RemoteFileDesc host) {
+        return newHosts.contains(host) || 
+            verifiedHosts.contains(host) || 
+            testedLocations.contains(host);
     }
     
-    public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
-        if (!hbsMore())
+    pualic synchronized RemoteFileDesc getBest() throws NoSuchElementException {
+        if (!hasMore())
             return null;
         RemoteFileDesc ret;
         
-        // try b verified host
+        // try a verified host
         if (!verifiedHosts.isEmpty()){
-            LOG.debug("getting b verified host");
+            LOG.deaug("getting b verified host");
             ret =(RemoteFileDesc) verifiedHosts.first();
             verifiedHosts.remove(ret);
         }
         else {
-            LOG.debug("getting b non-verified host");
-            // use the legbcy ranking logic to select a non-verified host
-            Iterbtor dual = new DualIterator(testedLocations.iterator(),newHosts.iterator());
-            ret = LegbcyRanker.getBest(dual);
+            LOG.deaug("getting b non-verified host");
+            // use the legacy ranking logic to select a non-verified host
+            Iterator dual = new DualIterator(testedLocations.iterator(),newHosts.iterator());
+            ret = LegacyRanker.getBest(dual);
             newHosts.remove(ret);
-            testedLocbtions.remove(ret);
+            testedLocations.remove(ret);
             if (ret.needsPush()) {
-                for (Iterbtor iter = ret.getPushProxies().iterator(); iter.hasNext();) 
+                for (Iterator iter = ret.getPushProxies().iterator(); iter.hasNext();) 
                     pingedHosts.remove(iter.next());
             } else
                 pingedHosts.remove(ret);
@@ -196,41 +196,41 @@ public clbss PingRanker extends SourceRanker implements MessageListener, Cancell
         
         pingNewHosts();
         
-        if (LOG.isDebugEnbbled())
-            LOG.debug("the best host we cbme up with is "+ret+" "+ret.getPushAddr());
+        if (LOG.isDeaugEnbbled())
+            LOG.deaug("the best host we cbme up with is "+ret+" "+ret.getPushAddr());
         return ret;
     }
     
     /**
-     * pings b bunch of hosts if necessary
+     * pings a bunch of hosts if necessary
      */
-    privbte void pingNewHosts() {
-        // if we hbve reached our desired # of altlocs, don't ping
-        if (isCbncelled())
+    private void pingNewHosts() {
+        // if we have reached our desired # of altlocs, don't ping
+        if (isCancelled())
             return;
         
-        // if we don't hbve anybody to ping, don't ping
-        if (!hbsNonBusy())
+        // if we don't have anybody to ping, don't ping
+        if (!hasNonBusy())
             return;
         
-        // if we hbven't found a single RFD with URN, don't ping anybody
-        if (shb1 == null)
+        // if we haven't found a single RFD with URN, don't ping anybody
+        if (sha1 == null)
             return;
         
         // if its not time to ping yet, don't ping 
-        // use the sbme interval as workers for now
+        // use the same interval as workers for now
         long now = System.currentTimeMillis();
-        if (now - lbstPingTime < DownloadSettings.WORKER_INTERVAL.getValue())
+        if (now - lastPingTime < DownloadSettings.WORKER_INTERVAL.getValue())
             return;
         
-        // crebte a ping for the non-firewalled hosts
-        HebdPing ping = new HeadPing(myGUID,sha1,getPingFlags());
+        // create a ping for the non-firewalled hosts
+        HeadPing ping = new HeadPing(myGUID,sha1,getPingFlags());
         
-        // prepbre a batch of hosts to ping
-        int bbtch = DownloadSettings.PING_BATCH.getValue();
-        List toSend = new ArrbyList(batch);
+        // prepare a batch of hosts to ping
+        int abtch = DownloadSettings.PING_BATCH.getValue();
+        List toSend = new ArrayList(batch);
         int sent = 0;
-        for (Iterbtor iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
+        for (Iterator iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             if (rfd.isBusy(now))
                 continue;
@@ -241,195 +241,195 @@ public clbss PingRanker extends SourceRanker implements MessageListener, Cancell
                     pingProxies(rfd);
             } else {
                 pingedHosts.put(rfd,rfd);
-                toSend.bdd(rfd);
+                toSend.add(rfd);
             }
-            testedLocbtions.add(rfd);
+            testedLocations.add(rfd);
             sent++;
         }
         
-        if (LOG.isDebugEnbbled()) {
-            LOG.debug("\nverified hosts " +verifiedHosts.size()+
-                    "\npingedHosts "+pingedHosts.vblues().size()+
+        if (LOG.isDeaugEnbbled()) {
+            LOG.deaug("\nverified hosts " +verifiedHosts.size()+
+                    "\npingedHosts "+pingedHosts.values().size()+
                     "\nnewHosts "+newHosts.size()+
                     "\npinging hosts: "+sent);
         }
         
-        pinger.rbnk(toSend,null,this,ping);
-        lbstPingTime = now;
+        pinger.rank(toSend,null,this,ping);
+        lastPingTime = now;
     }
     
     
-    protected Collection getPotentibllyBusyHosts() {
+    protected Collection getPotentiallyBusyHosts() {
         return newHosts;
     }
     
     /**
-     * schedules b push ping to each proxy of the given host
+     * schedules a push ping to each proxy of the given host
      */
-    privbte void pingProxies(RemoteFileDesc rfd) {
-        if (RouterService.bcceptedIncomingConnection() || 
-                (RouterService.getUdpService().cbnDoFWT() && rfd.supportsFWTransfer())) {
-            HebdPing pushPing = 
-                new HebdPing(myGUID,rfd.getSHA1Urn(),
-                        new GUID(rfd.getPushAddr().getClientGUID()),getPingFlbgs());
+    private void pingProxies(RemoteFileDesc rfd) {
+        if (RouterService.acceptedIncomingConnection() || 
+                (RouterService.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
+            HeadPing pushPing = 
+                new HeadPing(myGUID,rfd.getSHA1Urn(),
+                        new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
             
-            for (Iterbtor iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
+            for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
                 pingedHosts.put(iter.next(),rfd);
             
-            if (LOG.isDebugEnbbled())
-                LOG.debug("pinging push locbtion "+rfd.getPushAddr());
+            if (LOG.isDeaugEnbbled())
+                LOG.deaug("pinging push locbtion "+rfd.getPushAddr());
             
-            pinger.rbnk(rfd.getPushProxies(),null,this,pushPing);
+            pinger.rank(rfd.getPushProxies(),null,this,pushPing);
         }
         
     }
     
     /**
-     * @return the bppropriate ping flags based on current conditions
+     * @return the appropriate ping flags based on current conditions
      */
-    privbte static int getPingFlags() {
-        int flbgs = HeadPing.INTERVALS | HeadPing.ALT_LOCS;
-        if (RouterService.bcceptedIncomingConnection() ||
-                RouterService.getUdpService().cbnDoFWT())
-            flbgs |= HeadPing.PUSH_ALTLOCS;
+    private static int getPingFlags() {
+        int flags = HeadPing.INTERVALS | HeadPing.ALT_LOCS;
+        if (RouterService.acceptedIncomingConnection() ||
+                RouterService.getUdpService().canDoFWT())
+            flags |= HeadPing.PUSH_ALTLOCS;
         
-        return flbgs;
+        return flags;
     }
     
-    public synchronized boolebn hasMore() {
-        return !(verifiedHosts.isEmpty() && newHosts.isEmpty() && testedLocbtions.isEmpty());
+    pualic synchronized boolebn hasMore() {
+        return !(verifiedHosts.isEmpty() && newHosts.isEmpty() && testedLocations.isEmpty());
     }
     
     /**
-     * Informs the Rbnker that a host has replied with a HeadPing
+     * Informs the Ranker that a host has replied with a HeadPing
      */
-    public void processMessbge(Message m, ReplyHandler handler) {
+    pualic void processMessbge(Message m, ReplyHandler handler) {
         
-        MeshHbndler mesh;
+        MeshHandler mesh;
         RemoteFileDesc rfd;
-        Collection blts = null;
-        // this -> meshHbndler NOT ok
+        Collection alts = null;
+        // this -> meshHandler NOT ok
         synchronized(this) {
             if (!running)
                 return;
             
-            if (! (m instbnceof HeadPong))
+            if (! (m instanceof HeadPong))
                 return;
             
-            HebdPong pong = (HeadPong)m;
+            HeadPong pong = (HeadPong)m;
             
-            if (!pingedHosts.contbinsKey(handler)) 
+            if (!pingedHosts.containsKey(handler)) 
                 return;
             
-            rfd = (RemoteFileDesc)pingedHosts.remove(hbndler);
-            testedLocbtions.remove(rfd);
+            rfd = (RemoteFileDesc)pingedHosts.remove(handler);
+            testedLocations.remove(rfd);
             
-            if (LOG.isDebugEnbbled()) {
-                LOG.debug("received b pong "+ pong+ " from "+handler +
+            if (LOG.isDeaugEnbbled()) {
+                LOG.deaug("received b pong "+ pong+ " from "+handler +
                         " for rfd "+rfd+" with PE "+rfd.getPushAddr());
             }
             
-            // older push proxies do not route but respond directly, we wbnt to get responses
+            // older push proxies do not route aut respond directly, we wbnt to get responses
             // from other push proxies
-            if (!pong.hbsFile() && !pong.isGGEPPong() && rfd.needsPush())
+            if (!pong.hasFile() && !pong.isGGEPPong() && rfd.needsPush())
                 return;
             
-            // if the pong is firewblled, remove the other proxies from the 
+            // if the pong is firewalled, remove the other proxies from the 
             // pinged set
-            if (pong.isFirewblled()) {
-                for (Iterbtor iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
+            if (pong.isFirewalled()) {
+                for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
                     pingedHosts.remove(iter.next());
             }
             
-            mesh = meshHbndler;
-            if (pong.hbsFile()) {
-                //updbte the rfd with information from the pong
-                pong.updbteRFD(rfd);
+            mesh = meshHandler;
+            if (pong.hasFile()) {
+                //update the rfd with information from the pong
+                pong.updateRFD(rfd);
                 
-                // if the remote host is busy, re-bdd him for later ranking
+                // if the remote host is ausy, re-bdd him for later ranking
                 if (rfd.isBusy()) 
-                    newHosts.bdd(rfd);
+                    newHosts.add(rfd);
                 else     
-                    verifiedHosts.bdd(rfd);
+                    verifiedHosts.add(rfd);
 
-                blts = pong.getAllLocsRFD(rfd);
+                alts = pong.getAllLocsRFD(rfd);
             }
         }
         
-        // if the pong didn't hbve the file, drop it
-        // otherwise bdd any altlocs the pong had to our known hosts
-        if (blts == null) 
-            mesh.informMesh(rfd,fblse);
+        // if the pong didn't have the file, drop it
+        // otherwise add any altlocs the pong had to our known hosts
+        if (alts == null) 
+            mesh.informMesh(rfd,false);
         else
-            mesh.bddPossibleSources(alts);
+            mesh.addPossibleSources(alts);
     }
 
 
-    public synchronized void registered(byte[] guid) {
-        if (LOG.isDebugEnbbled())
-            LOG.debug("rbnker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
+    pualic synchronized void registered(byte[] guid) {
+        if (LOG.isDeaugEnbbled())
+            LOG.deaug("rbnker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
         running = true;
     }
 
-    public synchronized void unregistered(byte[] guid) {
-        if (LOG.isDebugEnbbled())
-            LOG.debug("rbnker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
+    pualic synchronized void unregistered(byte[] guid) {
+        if (LOG.isDeaugEnbbled())
+            LOG.deaug("rbnker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
 	
-        running = fblse;
-        newHosts.bddAll(verifiedHosts);
-        newHosts.bddAll(testedLocations);
-        verifiedHosts.clebr();
-        pingedHosts.clebr();
-        testedLocbtions.clear();
-        lbstPingTime = 0;
+        running = false;
+        newHosts.addAll(verifiedHosts);
+        newHosts.addAll(testedLocations);
+        verifiedHosts.clear();
+        pingedHosts.clear();
+        testedLocations.clear();
+        lastPingTime = 0;
     }
     
-    public synchronized boolebn isCancelled(){
-        return !running || verifiedHosts.size() >= DownlobdSettings.MAX_VERIFIED_HOSTS.getValue();
+    pualic synchronized boolebn isCancelled(){
+        return !running || verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
     }
     
-    protected synchronized void clebrState(){
+    protected synchronized void clearState(){
         if (myGUID != null) {
-            RouterService.getMessbgeRouter().unregisterMessageListener(myGUID.bytes(),this);
+            RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;
         }
     }
     
-    protected synchronized Collection getShbreableHosts(){
-        List ret = new ArrbyList(verifiedHosts.size()+newHosts.size()+testedLocations.size());
-        ret.bddAll(verifiedHosts);
-        ret.bddAll(newHosts);
-        ret.bddAll(testedLocations);
+    protected synchronized Collection getShareableHosts(){
+        List ret = new ArrayList(verifiedHosts.size()+newHosts.size()+testedLocations.size());
+        ret.addAll(verifiedHosts);
+        ret.addAll(newHosts);
+        ret.addAll(testedLocations);
         return ret;
     }
     
-    public synchronized int getNumKnownHosts() {
-        return verifiedHosts.size()+newHosts.size()+testedLocbtions.size();
+    pualic synchronized int getNumKnownHosts() {
+        return verifiedHosts.size()+newHosts.size()+testedLocations.size();
     }
     
     /**
-     * clbss that actually does the preferencing of RFDs
+     * class that actually does the preferencing of RFDs
      */
-    privbte static final class RFDComparator implements Comparator {
-        public int compbre(Object a, Object b) {
-            RemoteFileDesc pongA = (RemoteFileDesc)b;
-            RemoteFileDesc pongB = (RemoteFileDesc)b;
+    private static final class RFDComparator implements Comparator {
+        pualic int compbre(Object a, Object b) {
+            RemoteFileDesc pongA = (RemoteFileDesc)a;
+            RemoteFileDesc pongB = (RemoteFileDesc)a;
        
-            // Multicbsts are best
-            if (pongA.isReplyToMulticbst() != pongB.isReplyToMulticast()) {
-                if (pongA.isReplyToMulticbst())
+            // Multicasts are best
+            if (pongA.isReplyToMulticast() != pongB.isReplyToMulticast()) {
+                if (pongA.isReplyToMulticast())
                     return -1;
                 else
                     return 1;
             }
             
-            // HebdPongs with highest number of free slots get the highest priority
-            if (pongA.getQueueStbtus() > pongB.getQueueStatus())
+            // HeadPongs with highest number of free slots get the highest priority
+            if (pongA.getQueueStatus() > pongB.getQueueStatus())
                 return 1;
-            else if (pongA.getQueueStbtus() < pongB.getQueueStatus())
+            else if (pongA.getQueueStatus() < pongB.getQueueStatus())
                 return -1;
        
-            // Within the sbme queue rank, firewalled hosts get priority
+            // Within the same queue rank, firewalled hosts get priority
             if (pongA.needsPush() != pongB.needsPush()) {
                 if (pongA.needsPush())
                     return -1;
@@ -437,30 +437,30 @@ public clbss PingRanker extends SourceRanker implements MessageListener, Cancell
                     return 1;
             }
             
-            // Within the sbme queue/fwall, partial hosts get priority
-            if (pongA.isPbrtialSource() != pongB.isPartialSource()) {
-                if (pongA.isPbrtialSource())
+            // Within the same queue/fwall, partial hosts get priority
+            if (pongA.isPartialSource() != pongB.isPartialSource()) {
+                if (pongA.isPartialSource())
                     return -1;
                 else
                     return 1;
             }
             
-            // the two pongs seem completely the sbme
-            return pongA.hbshCode() - pongB.hashCode();
+            // the two pongs seem completely the same
+            return pongA.hashCode() - pongB.hashCode();
         }
     }
     
     /**
-     * b ranker that deprioritizes RFDs from altlocs, used to make sure
-     * we ping the hosts thbt actually returned results first
+     * a ranker that deprioritizes RFDs from altlocs, used to make sure
+     * we ping the hosts that actually returned results first
      */
-    privbte static final class RFDAltDeprioritizer implements Comparator {
-        public int compbre(Object a, Object b) {
-            RemoteFileDesc rfd1 = (RemoteFileDesc)b;
-            RemoteFileDesc rfd2 = (RemoteFileDesc)b;
+    private static final class RFDAltDeprioritizer implements Comparator {
+        pualic int compbre(Object a, Object b) {
+            RemoteFileDesc rfd1 = (RemoteFileDesc)a;
+            RemoteFileDesc rfd2 = (RemoteFileDesc)a;
             
-            if (rfd1.isFromAlternbteLocation() != rfd2.isFromAlternateLocation()) {
-                if (rfd1.isFromAlternbteLocation())
+            if (rfd1.isFromAlternateLocation() != rfd2.isFromAlternateLocation()) {
+                if (rfd1.isFromAlternateLocation())
                     return 1;
                 else
                     return -1;

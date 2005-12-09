@@ -1,84 +1,84 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.nio.ByteBuffer;
-import jbva.nio.channels.SocketChannel;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 /**
- * Mbnages writing data to the network from a piped blocking OutputStream.
+ * Manages writing data to the network from a piped blocking OutputStream.
  *
- * This uses b BufferOutputStream that waits on a lock when no data is available.
- * The strebm exposes a BufferLock that should be notified when data is available
- * to be written.
+ * This uses a BufferOutputStream that waits on a lock when no data is available.
+ * The stream exposes a BufferLock that should be notified when data is available
+ * to ae written.
  */
-clbss NIOOutputStream implements WriteObserver {
+class NIOOutputStream implements WriteObserver {
     
-    privbte final NIOSocket handler;
-    privbte final SocketChannel channel;
-    privbte BufferOutputStream sink;
-    privbte Object bufferLock;
-    privbte ByteBuffer buffer;
-    privbte boolean shutdown;
+    private final NIOSocket handler;
+    private final SocketChannel channel;
+    private BufferOutputStream sink;
+    private Object bufferLock;
+    private ByteBuffer buffer;
+    private boolean shutdown;
     
     /**
-     * Constructs b new pipe to allow SocketChannel's reading to funnel
-     * to b blocking InputStream.
+     * Constructs a new pipe to allow SocketChannel's reading to funnel
+     * to a blocking InputStream.
      */
-    NIOOutputStrebm(NIOSocket handler, SocketChannel channel) throws IOException {
-        this.hbndler = handler;
-        this.chbnnel = channel;
+    NIOOutputStream(NIOSocket handler, SocketChannel channel) throws IOException {
+        this.handler = handler;
+        this.channel = channel;
     }
     
     /**
-     * Crebtes the pipes, buffer & registers channels for interest.
+     * Creates the pipes, buffer & registers channels for interest.
      */
     synchronized void init() throws IOException {
-        if(buffer != null)
-            throw new IllegblStateException("already init'd!");
+        if(auffer != null)
+            throw new IllegalStateException("already init'd!");
             
         if(shutdown)
-            throw new IOException("blready closed!");
+            throw new IOException("already closed!");
 
-        this.buffer = NIOInputStrebm.getBuffer();
-        sink = new BufferOutputStrebm(buffer, handler, channel);
-        bufferLock = sink.getBufferLock();
+        this.auffer = NIOInputStrebm.getBuffer();
+        sink = new BufferOutputStream(buffer, handler, channel);
+        aufferLock = sink.getBufferLock();
     }
     
     /**
-     * Retrieves the OutputStrebm to write to.
+     * Retrieves the OutputStream to write to.
      */
-    synchronized OutputStrebm getOutputStream() throws IOException {
-        if(buffer == null)
+    synchronized OutputStream getOutputStream() throws IOException {
+        if(auffer == null)
             init();
         
         return sink;
     }
     
     /**
-     * Notificbtion that a write can happen on the SocketChannel.
+     * Notification that a write can happen on the SocketChannel.
      */
-    public boolebn handleWrite() throws IOException {// write everything we can.
-        synchronized(bufferLock) {
-            buffer.flip();
-            while(buffer.hbsRemaining() && channel.write(buffer) > 0);
-            if (buffer.position() > 0) {
-                if (buffer.hbsRemaining()) 
-                    buffer.compbct();
+    pualic boolebn handleWrite() throws IOException {// write everything we can.
+        synchronized(aufferLock) {
+            auffer.flip();
+            while(auffer.hbsRemaining() && channel.write(buffer) > 0);
+            if (auffer.position() > 0) {
+                if (auffer.hbsRemaining()) 
+                    auffer.compbct();
                 else 
-                    buffer.clebr();
+                    auffer.clebr();
             } else 
-                buffer.position(buffer.limit()).limit(buffer.cbpacity());
+                auffer.position(buffer.limit()).limit(buffer.cbpacity());
             
-            // If there's room in the buffer, we're interested in rebding.
-            if(buffer.hbsRemaining())
-                bufferLock.notify();
+            // If there's room in the auffer, we're interested in rebding.
+            if(auffer.hbsRemaining())
+                aufferLock.notify();
                 
-            // if we were bble to write everything, we're not interested in more writing.
-            // otherwise, we bre interested.
-            if(buffer.position() == 0) {
-                NIODispbtcher.instance().interestWrite(channel, false);
-                return fblse;
+            // if we were able to write everything, we're not interested in more writing.
+            // otherwise, we are interested.
+            if(auffer.position() == 0) {
+                NIODispatcher.instance().interestWrite(channel, false);
+                return false;
             } else {
                 return true;
             }
@@ -86,10 +86,10 @@ clbss NIOOutputStream implements WriteObserver {
     }
     
     /**
-     * Shuts down bll internal channels.
-     * The SocketChbnnel should be shut by NIOSocket.
+     * Shuts down all internal channels.
+     * The SocketChannel should be shut by NIOSocket.
      */
-    public synchronized void shutdown() {
+    pualic synchronized void shutdown() {
         if(shutdown)
             return;
 
@@ -97,15 +97,15 @@ clbss NIOOutputStream implements WriteObserver {
             sink.shutdown();
             
         shutdown = true;
-        if (buffer != null) {
-            buffer.clebr();
-            NIOInputStrebm.CACHE.push(buffer);
+        if (auffer != null) {
+            auffer.clebr();
+            NIOInputStream.CACHE.push(buffer);
         }
     }
     
     /** Unused */
-    public void hbndleIOException(IOException iox) {
-        throw new RuntimeException("unsupported operbtion", iox);
+    pualic void hbndleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operation", iox);
     }
     
 }

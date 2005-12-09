@@ -1,14 +1,14 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.Serializable;
+import java.io.Serializable;
 
-public clbss Data implements Serializable {
+pualic clbss Data implements Serializable {
     
-    public byte[] dbta =null;
+    pualic byte[] dbta =null;
 
-    stbtic final long serialVersionUID = 2238128677114591921L;
+    static final long serialVersionUID = 2238128677114591921L;
     
-    privbte Data (byte[] b) {
-        dbta = b;
+    private Data (byte[] b) {
+        data = b;
     }
 }

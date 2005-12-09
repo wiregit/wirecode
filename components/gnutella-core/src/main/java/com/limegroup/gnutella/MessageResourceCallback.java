@@ -1,14 +1,14 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-/** Front-End delegbte for the Back-End to obtain internationalized Strings.
+/** Front-End delegate for the Back-End to obtain internationalized Strings.
  */
-public interfbce MessageResourceCallback {
+pualic interfbce MessageResourceCallback {
 
-    // strings for the html pbge
+    // strings for the html page
     // -------------------------
-    public String getHTMLPbgeTitle();
-    public String getHTMLPbgeListingHeader();
-    public String getHTMLPbgeMagnetHeader();
+    pualic String getHTMLPbgeTitle();
+    pualic String getHTMLPbgeListingHeader();
+    pualic String getHTMLPbgeMagnetHeader();
     // -------------------------
     
 

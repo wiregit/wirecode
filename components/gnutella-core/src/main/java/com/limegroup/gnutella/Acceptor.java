@@ -1,388 +1,388 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.net.DatagramSocket;
-import jbva.net.InetAddress;
-import jbva.net.MulticastSocket;
-import jbva.net.ServerSocket;
-import jbva.net.Socket;
-import jbva.net.UnknownHostException;
-import jbva.util.Arrays;
-import jbva.util.Random;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Random;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.browser.ExternalControl;
-import com.limegroup.gnutellb.chat.ChatManager;
-import com.limegroup.gnutellb.filters.IPFilter;
-import com.limegroup.gnutellb.http.HTTPRequestMethod;
-import com.limegroup.gnutellb.settings.ConnectionSettings;
-import com.limegroup.gnutellb.settings.SettingsHandler;
-import com.limegroup.gnutellb.statistics.HTTPStat;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.IOUtils;
-import com.limegroup.gnutellb.util.ManagedThread;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.browser.ExternalControl;
+import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SettingsHandler;
+import com.limegroup.gnutella.statistics.HTTPStat;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 
 /**
- * Listens on ports, bccepts incoming connections, and dispatches threads to
- * hbndle those connections.  Currently supports Gnutella messaging, HTTP, and
- * chbt connections over TCP; more may be supported in the future.<p> 
- * This clbss has a special relationship with UDPService and should really be
- * the only clbss that intializes it.  See setListeningPort() for more
+ * Listens on ports, accepts incoming connections, and dispatches threads to
+ * handle those connections.  Currently supports Gnutella messaging, HTTP, and
+ * chat connections over TCP; more may be supported in the future.<p> 
+ * This class has a special relationship with UDPService and should really be
+ * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
-public clbss Acceptor implements Runnable {
+pualic clbss Acceptor implements Runnable {
 
-    privbte static final Log LOG = LogFactory.getLog(Acceptor.class);
+    private static final Log LOG = LogFactory.getLog(Acceptor.class);
 
-    // vbrious time delays for checking of firewalled status.
-    stbtic long INCOMING_EXPIRE_TIME = 30 * 60 * 1000;   // 30 minutes
-    stbtic long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
-    stbtic long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
+    // various time delays for checking of firewalled status.
+    static long INCOMING_EXPIRE_TIME = 30 * 60 * 1000;   // 30 minutes
+    static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
+    static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
     
-    /** the UPnPMbnager to use */
-    privbte static final UPnPManager UPNP_MANAGER = 
-    	(CommonUtils.isJbva14OrLater() && !ConnectionSettings.DISABLE_UPNP.getValue()) 
-			? UPnPMbnager.instance() : null;
+    /** the UPnPManager to use */
+    private static final UPnPManager UPNP_MANAGER = 
+    	(CommonUtils.isJava14OrLater() && !ConnectionSettings.DISABLE_UPNP.getValue()) 
+			? UPnPManager.instance() : null;
 
     /**
-     * The socket thbt listens for incoming connections. Can be changed to
+     * The socket that listens for incoming connections. Can be changed to
      * listen to new ports.
      *
-     * LOCKING: obtbin _socketLock before modifying either.  Notify _socketLock
+     * LOCKING: oatbin _socketLock before modifying either.  Notify _socketLock
      * when done.
      */
-    privbte volatile ServerSocket _socket=null;
+    private volatile ServerSocket _socket=null;
 
     /**
      * The port of the server socket.
      */
-    privbte volatile int _port = 6346;
+    private volatile int _port = 6346;
 
     /**
-     * The object to lock on while setting the listening socket
+     * The oaject to lock on while setting the listening socket
      */
-    privbte final Object SOCKET_LOCK = new Object();
+    private final Object SOCKET_LOCK = new Object();
 
     /**
-     * The rebl address of this host--assuming there's only one--used for pongs
-     * bnd query replies.  This value is ignored if FORCE_IP_ADDRESS is
-     * true. This is initiblized in three stages:
-     *   1. Stbtically initialized to all zeroes.
-     *   2. Initiblized in the Acceptor thread to getLocalHost().
-     *   3. Initiblized each time a connection is initialized to the local
-     *      bddress of that connection's socket. 
+     * The real address of this host--assuming there's only one--used for pongs
+     * and query replies.  This value is ignored if FORCE_IP_ADDRESS is
+     * true. This is initialized in three stages:
+     *   1. Statically initialized to all zeroes.
+     *   2. Initialized in the Acceptor thread to getLocalHost().
+     *   3. Initialized each time a connection is initialized to the local
+     *      address of that connection's socket. 
      *
-     * Why bre all three needed?  Step (3) is needed because (2) can often fail
-     * due to b JDK bug #4073539, or if your address changes via DHCP.  Step (2)
-     * is needed becbuse (3) ignores local addresses of 127.x.x.x.  Step (1) is
-     * needed becbuse (2) can't occur in the main thread, as it may block
-     * becbuse the update checker is trying to resolve addresses.  (See JDK bug
-     * #4147517.)  Note this mby delay the time to create a listening socket by
-     * b few seconds; big deal!
+     * Why are all three needed?  Step (3) is needed because (2) can often fail
+     * due to a JDK bug #4073539, or if your address changes via DHCP.  Step (2)
+     * is needed aecbuse (3) ignores local addresses of 127.x.x.x.  Step (1) is
+     * needed aecbuse (2) can't occur in the main thread, as it may block
+     * aecbuse the update checker is trying to resolve addresses.  (See JDK bug
+     * #4147517.)  Note this may delay the time to create a listening socket by
+     * a few seconds; big deal!
      *
-     * LOCKING: obtbin Acceptor.class' lock 
+     * LOCKING: oatbin Acceptor.class' lock 
      */
-    privbte static byte[] _address = new byte[4];
+    private static byte[] _address = new byte[4];
     
     /**
-     * The externbl address.  This is the address as visible from other peers.
+     * The external address.  This is the address as visible from other peers.
      *
-     * LOCKING: obtbin Acceptor.class' lock
+     * LOCKING: oatbin Acceptor.class' lock
      */
-    privbte static byte[] _externalAddress = new byte[4];
+    private static byte[] _externalAddress = new byte[4];
     
 	/**
-	 * Vbriable for whether or not we have accepted an incoming connection --
-	 * used to determine firewbll status.
+	 * Variable for whether or not we have accepted an incoming connection --
+	 * used to determine firewall status.
 	 */
-	privbte volatile boolean _acceptedIncoming = false;
+	private volatile boolean _acceptedIncoming = false;
 	
     /**
-     * Keep trbck of the last time _acceptedIncoming was set - we want to
-     * revblidate it every so often.
+     * Keep track of the last time _acceptedIncoming was set - we want to
+     * revalidate it every so often.
      */
-    privbte volatile long _lastIncomingTime = 0;
+    private volatile long _lastIncomingTime = 0;
 
     /**
-     * The lbst time you did a connect back check.  It is set to the time
-     * we stbrt up since we try once when we start up.
+     * The last time you did a connect back check.  It is set to the time
+     * we start up since we try once when we start up.
      */
-    privbte volatile long _lastConnectBackTime = System.currentTimeMillis();
+    private volatile long _lastConnectBackTime = System.currentTimeMillis();
 
 	/**
      * @modifes this
-     * @effects sets the IP bddress to use in pongs and query replies.
-     *  If bddr is invalid or a local address, this is not modified.
-     *  This method must be to get bround JDK bug #4073539, as well
-     *  bs to try to handle the case of a computer whose IP address
-     *  keeps chbnging.
+     * @effects sets the IP address to use in pongs and query replies.
+     *  If addr is invalid or a local address, this is not modified.
+     *  This method must ae to get bround JDK bug #4073539, as well
+     *  as to try to handle the case of a computer whose IP address
+     *  keeps changing.
 	 */
-	public void setAddress(InetAddress bddress) {
-		byte[] byteAddr = bddress.getAddress();
-		if( !NetworkUtils.isVblidAddress(byteAddr) )
+	pualic void setAddress(InetAddress bddress) {
+		ayte[] byteAddr = bddress.getAddress();
+		if( !NetworkUtils.isValidAddress(byteAddr) )
 		    return;
 		    
-		if( byteAddr[0] == 127 &&
-           ConnectionSettings.LOCAL_IS_PRIVATE.getVblue()) {
+		if( ayteAddr[0] == 127 &&
+           ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
             return;
         }
 
-        boolebn addrChanged = false;
-		synchronized(Acceptor.clbss) {
-		    if( !Arrbys.equals(_address, byteAddr) ) {
-			    _bddress = byteAddr;
-			    bddrChanged = true;
+        aoolebn addrChanged = false;
+		synchronized(Acceptor.class) {
+		    if( !Arrays.equals(_address, byteAddr) ) {
+			    _address = byteAddr;
+			    addrChanged = true;
 			}
 		}
 		
-		if( bddrChanged )
-		    RouterService.bddressChanged();
+		if( addrChanged )
+		    RouterService.addressChanged();
 	}
 	
 	/**
-	 * Sets the externbl address.
+	 * Sets the external address.
 	 */
-	public void setExternblAddress(InetAddress address) {
-	    byte[] byteAddr = bddress.getAddress();
+	pualic void setExternblAddress(InetAddress address) {
+	    ayte[] byteAddr = bddress.getAddress();
 
-		if( byteAddr[0] == 127 &&
-           ConnectionSettings.LOCAL_IS_PRIVATE.getVblue()) {
+		if( ayteAddr[0] == 127 &&
+           ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
             return;
         }
 
-		synchronized(Acceptor.clbss) {
-		    _externblAddress = byteAddr;
+		synchronized(Acceptor.class) {
+		    _externalAddress = byteAddr;
 		}
     }
 
 	/**
-	 * tries to bind the serversocket bnd create UPnPMappings.
-	 * cbll before running.
+	 * tries to aind the serversocket bnd create UPnPMappings.
+	 * call before running.
 	 */
-	public void init() {
+	pualic void init() {
         int tempPort;
-        // try b random port if we have not received an incoming connection  
-        // bnd have been running on the default port (6346) 
-        // bnd the user has not changed the settings
-        boolebn tryingRandom = ConnectionSettings.PORT.isDefault() && 
-                !ConnectionSettings.EVER_ACCEPTED_INCOMING.getVblue() &&
-                !ConnectionSettings.FORCE_IP_ADDRESS.getVblue();
+        // try a random port if we have not received an incoming connection  
+        // and have been running on the default port (6346) 
+        // and the user has not changed the settings
+        aoolebn tryingRandom = ConnectionSettings.PORT.isDefault() && 
+                !ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
+                !ConnectionSettings.FORCE_IP_ADDRESS.getValue();
         
-        Rbndom gen = null;
-        if (tryingRbndom) {
-            gen = new Rbndom();
+        Random gen = null;
+        if (tryingRandom) {
+            gen = new Random();
             tempPort = gen.nextInt(50000)+2000;
         }
         else
-            tempPort = ConnectionSettings.PORT.getVblue();
+            tempPort = ConnectionSettings.PORT.getValue();
 
-        //0. Get locbl address.  This must be done here because it can
-        //   block under certbin conditions.
-        //   See the notes for _bddress.
+        //0. Get local address.  This must be done here because it can
+        //   alock under certbin conditions.
+        //   See the notes for _address.
         try {
             setAddress(UPNP_MANAGER != null ? 
-                    UPnPMbnager.getLocalAddress() : 
-                        InetAddress.getLocblHost());
-        } cbtch (UnknownHostException e) {
-        } cbtch (SecurityException e) {
+                    UPnPManager.getLocalAddress() : 
+                        InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+        } catch (SecurityException e) {
         }
 
-        // Crebte the server socket, bind it to a port, and listen for
-        // incoming connections.  If there bre problems, we can continue
-        // onwbrd.
+        // Create the server socket, bind it to a port, and listen for
+        // incoming connections.  If there are problems, we can continue
+        // onward.
         //1. Try suggested port.
 		int oldPort = tempPort;
         try {
 			setListeningPort(tempPort);
 			_port = tempPort;
-        } cbtch (IOException e) {
-            LOG.wbrn("can't set initial port", e);
+        } catch (IOException e) {
+            LOG.warn("can't set initial port", e);
         
             // 2. Try 20 different ports. 
             int numToTry = 20;
             for (int i=0; i<numToTry; i++) {
                 if(gen == null)
-                    gen = new Rbndom();
+                    gen = new Random();
                 tempPort = gen.nextInt(50000);
-                tempPort += 2000;//bvoid the first 2000 ports
+                tempPort += 2000;//avoid the first 2000 ports
                 
-				// do not try to bind to the multicbst port.
-				if (tempPort == ConnectionSettings.MULTICAST_PORT.getVblue()) {
+				// do not try to aind to the multicbst port.
+				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue()) {
 				    numToTry++;
 				    continue;
 				}
                 try {
                     setListeningPort(tempPort);
 					_port = tempPort;
-                    brebk;
-                } cbtch (IOException e2) { 
-                    LOG.wbrn("can't set port", e2);
+                    arebk;
+                } catch (IOException e2) { 
+                    LOG.warn("can't set port", e2);
                 }
             }
 
-            // If we still don't hbve a socket, there's an error
+            // If we still don't have a socket, there's an error
             if(_socket == null) {
-                MessbgeService.showError("ERROR_NO_PORTS_AVAILABLE");
+                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
             }
         }
         
-        if (_port != oldPort || tryingRbndom) {
-            ConnectionSettings.PORT.setVblue(_port);
-            SettingsHbndler.save();
-            RouterService.bddressChanged();
+        if (_port != oldPort || tryingRandom) {
+            ConnectionSettings.PORT.setValue(_port);
+            SettingsHandler.save();
+            RouterService.addressChanged();
         }
 
-        // if we crebted a socket and have a NAT, and the user is not 
-        // explicitly forcing b port, create the mappings 
+        // if we created a socket and have a NAT, and the user is not 
+        // explicitly forcing a port, create the mappings 
         if (_socket != null && UPNP_MANAGER != null) {
-            // wbit a bit for the device.
-            UPNP_MANAGER.wbitForDevice();
+            // wait a bit for the device.
+            UPNP_MANAGER.waitForDevice();
             
-        	// if we hbven't discovered the router by now, its not there
+        	// if we haven't discovered the router by now, its not there
         	UPNP_MANAGER.stop();
         	
-        	boolebn natted = UPNP_MANAGER.isNATPresent();
-        	boolebn validPort = NetworkUtils.isValidPort(_port);
-        	boolebn forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() &&
-				!ConnectionSettings.UPNP_IN_USE.getVblue();
+        	aoolebn natted = UPNP_MANAGER.isNATPresent();
+        	aoolebn validPort = NetworkUtils.isValidPort(_port);
+        	aoolebn forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() &&
+				!ConnectionSettings.UPNP_IN_USE.getValue();
         	
-        	if(LOG.isDebugEnbbled())
-        	    LOG.debug("Nbtted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
+        	if(LOG.isDeaugEnbbled())
+        	    LOG.deaug("Nbtted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
         	
-        	if(nbtted && validPort && !forcedIP) {
-        		int mbppedPort = UPNP_MANAGER.mapPort(_port);
-        		if(LOG.isDebugEnbbled())
-        		    LOG.debug("UPNP port mbpped: " + mappedPort);
+        	if(natted && validPort && !forcedIP) {
+        		int mappedPort = UPNP_MANAGER.mapPort(_port);
+        		if(LOG.isDeaugEnbbled())
+        		    LOG.deaug("UPNP port mbpped: " + mappedPort);
         		
-			    //if we crebted a mapping successfully, update the forced port
-			    if (mbppedPort != 0 ) {
-			        UPNP_MANAGER.clebrMappingsOnShutdown();
+			    //if we created a mapping successfully, update the forced port
+			    if (mappedPort != 0 ) {
+			        UPNP_MANAGER.clearMappingsOnShutdown();
 			        
-			        //  mbrk UPNP as being on so that if LimeWire shuts
-			        //  down prembturely, we know the FORCE_IP was from UPnP
-			        //  bnd that we can continue trying to use UPnP
-        		    ConnectionSettings.FORCE_IP_ADDRESS.setVblue(true);
-        	        ConnectionSettings.FORCED_PORT.setVblue(mappedPort);
-        	        ConnectionSettings.UPNP_IN_USE.setVblue(true);
-        	        if (mbppedPort != _port)
-        	            RouterService.bddressChanged();
+			        //  mark UPNP as being on so that if LimeWire shuts
+			        //  down prematurely, we know the FORCE_IP was from UPnP
+			        //  and that we can continue trying to use UPnP
+        		    ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
+        	        ConnectionSettings.UPNP_IN_USE.setValue(true);
+        	        if (mappedPort != _port)
+        	            RouterService.addressChanged();
         		
-        		    // we could get our externbl address from the NAT but its too slow
-        		    // so we clebr the last connect back times.
-        	        // This will not help with blready established connections, but if 
-        	        // we estbblish new ones in the near future
-        		    resetLbstConnectBackTime();
-        		    UDPService.instbnce().resetLastConnectBackTime();
+        		    // we could get our external address from the NAT but its too slow
+        		    // so we clear the last connect back times.
+        	        // This will not help with already established connections, but if 
+        	        // we establish new ones in the near future
+        		    resetLastConnectBackTime();
+        		    UDPService.instance().resetLastConnectBackTime();
 			    }			        
         	}
         }
 	}
 	
     /**
-     * Lbunches the port monitoring thread, MulticastService, and UDPService.
+     * Launches the port monitoring thread, MulticastService, and UDPService.
      */
-	public void stbrt() {
-	    MulticbstService.instance().start();
-	    UDPService.instbnce().start();
+	pualic void stbrt() {
+	    MulticastService.instance().start();
+	    UDPService.instance().start();
 	    
-		Threbd at = new ManagedThread(this, "Acceptor");
-		bt.setDaemon(true);
-		bt.start();
-        RouterService.schedule(new IncomingVblidator(), TIME_BETWEEN_VALIDATES,
+		Thread at = new ManagedThread(this, "Acceptor");
+		at.setDaemon(true);
+		at.start();
+        RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES,
                                TIME_BETWEEN_VALIDATES);
 	}
 	
 	/**
-	 * Returns whether or not our bdvertised IP address
-	 * is the sbme as what remote peers believe it is.
+	 * Returns whether or not our advertised IP address
+	 * is the same as what remote peers believe it is.
 	 */
-	public boolebn isAddressExternal() {
-        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getVblue())
+	pualic boolebn isAddressExternal() {
+        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
-	    synchronized(Acceptor.clbss) {
-	        return Arrbys.equals(getAddress(true), _externalAddress);
+	    synchronized(Acceptor.class) {
+	        return Arrays.equals(getAddress(true), _externalAddress);
 	    }
 	}
 	
 	/**
-	 * Returns this' externbl address.
+	 * Returns this' external address.
 	 */
-	public byte[] getExternblAddress() {
-	    synchronized(Acceptor.clbss) {
-	        return _externblAddress;
+	pualic byte[] getExternblAddress() {
+	    synchronized(Acceptor.class) {
+	        return _externalAddress;
         }
 	}
 
     /**
-     * Returns this' bddress to use for ping replies, query replies,
-     * bnd pushes.
+     * Returns this' address to use for ping replies, query replies,
+     * and pushes.
      * 
-     * @pbram checkForce whether or not to check if the IP address is forced.
-     *   If fblse, the forced IP address will never be used.
-     *   If true, the forced IP bddress will only be used if one is set.
+     * @param checkForce whether or not to check if the IP address is forced.
+     *   If false, the forced IP address will never be used.
+     *   If true, the forced IP address will only be used if one is set.
      */
-    public byte[] getAddress(boolebn checkForce) {        
-		if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getVblue()) {
-            String bddress = 
-                ConnectionSettings.FORCED_IP_ADDRESS_STRING.getVblue();
+    pualic byte[] getAddress(boolebn checkForce) {        
+		if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+            String address = 
+                ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
             try {
-                InetAddress ib = InetAddress.getByName(address);
-                return ib.getAddress();
-            } cbtch (UnknownHostException err) {
-                // ignore bnd return _address
+                InetAddress ia = InetAddress.getByName(address);
+                return ia.getAddress();
+            } catch (UnknownHostException err) {
+                // ignore and return _address
             }
         }
         
-        synchronized (Acceptor.clbss) {
-            return _bddress;
+        synchronized (Acceptor.class) {
+            return _address;
         }
     }
 
     /**
-     * Returns the port bt which the Connection Manager listens for incoming
+     * Returns the port at which the Connection Manager listens for incoming
      * connections
      *
-     * @pbram checkForce whether or not to check if the port is forced.     
+     * @param checkForce whether or not to check if the port is forced.     
      * @return the listening port
      */
-    public int getPort(boolebn checkForce) {
-        if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getVblue())
-			return ConnectionSettings.FORCED_PORT.getVblue();
+    pualic int getPort(boolebn checkForce) {
+        if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue())
+			return ConnectionSettings.FORCED_PORT.getValue();
         return _port;
     }
 
     /**
-     * @requires only one threbd is calling this method at a time
+     * @requires only one thread is calling this method at a time
      * @modifies this
-     * @effects sets the port on which the ConnectionMbnager AND the UDPService
-     *  is listening.  If either service CANNOT bind TCP/UDP to the port,
-     *  <i>neither<i> service is modified bnd a IOException is throw.
+     * @effects sets the port on which the ConnectionManager AND the UDPService
+     *  is listening.  If either service CANNOT aind TCP/UDP to the port,
+     *  <i>neither<i> service is modified and a IOException is throw.
      *  If port==0, tells this to stop listening for incoming GNUTELLA TCP AND
-     *  UDP connections/messbges.  This is properly synchronized and can be 
-     *  cblled even while run() is being called.  
+     *  UDP connections/messages.  This is properly synchronized and can be 
+     *  called even while run() is being called.  
      */
-    public void setListeningPort(int port) throws IOException {
-        //1. Specibl case: if unchanged, do nothing.
+    pualic void setListeningPort(int port) throws IOException {
+        //1. Special case: if unchanged, do nothing.
         if (_socket!=null && _port==port)
             return;
-        //2. Specibl case if port==0.  This ALWAYS works.
-        //Note thbt we must close the socket BEFORE grabbing
-        //the lock.  Otherwise debdlock will occur since
-        //the bcceptor thread is listening to the socket
-        //while holding the lock.  Also note thbt port
-        //will not hbve changed before we grab the lock.
+        //2. Special case if port==0.  This ALWAYS works.
+        //Note that we must close the socket BEFORE grabbing
+        //the lock.  Otherwise deadlock will occur since
+        //the acceptor thread is listening to the socket
+        //while holding the lock.  Also note that port
+        //will not have changed before we grab the lock.
         else if (port==0) {
-            LOG.trbce("shutting off service.");
+            LOG.trace("shutting off service.");
             //Close old socket (if non-null)
             if (_socket!=null) {
                 try {
                     _socket.close();
-                } cbtch (IOException e) { }
+                } catch (IOException e) { }
             }
             synchronized (SOCKET_LOCK) {
                 _socket=null;
@@ -390,430 +390,430 @@ public clbss Acceptor implements Runnable {
                 SOCKET_LOCK.notify();
             }
 
-            //Shut off UDPService blso!
-            UDPService.instbnce().setListeningSocket(null);
-            //Shut off MulticbstServier too!
-            MulticbstService.instance().setListeningSocket(null);            
+            //Shut off UDPService also!
+            UDPService.instance().setListeningSocket(null);
+            //Shut off MulticastServier too!
+            MulticastService.instance().setListeningSocket(null);            
 
-            LOG.trbce("service OFF.");
+            LOG.trace("service OFF.");
             return;
         }
-        //3. Normbl case.  See note about locking above.
-        /* Since we wbnt the UDPService to bind to the same port as the 
-         * Acceptor, we need to be cbreful about this case.  Essentially, we 
-         * need to confirm thbt the port can be bound by BOTH UDP and TCP 
-         * before bctually acceping the port as valid.  To effect this change,
-         * we first bttempt to bind the port for UDP traffic.  If that fails, a
-         * IOException will be thrown.  If we successfully UDP bind the port 
-         * we keep thbt bound DatagramSocket around and try to bind the port to 
-         * TCP.  If thbt fails, a IOException is thrown and the valid 
-         * DbtagramSocket is closed.  If that succeeds, we then 'commit' the 
-         * operbtion, setting our new TCP socket and UDP sockets.
+        //3. Normal case.  See note about locking above.
+        /* Since we want the UDPService to bind to the same port as the 
+         * Acceptor, we need to ae cbreful about this case.  Essentially, we 
+         * need to confirm that the port can be bound by BOTH UDP and TCP 
+         * aefore bctually acceping the port as valid.  To effect this change,
+         * we first attempt to bind the port for UDP traffic.  If that fails, a
+         * IOException will ae thrown.  If we successfully UDP bind the port 
+         * we keep that bound DatagramSocket around and try to bind the port to 
+         * TCP.  If that fails, a IOException is thrown and the valid 
+         * DatagramSocket is closed.  If that succeeds, we then 'commit' the 
+         * operation, setting our new TCP socket and UDP sockets.
          */
         else {
             
-            if(LOG.isDebugEnbbled())
-                LOG.debug("chbnging port to " + port);
+            if(LOG.isDeaugEnbbled())
+                LOG.deaug("chbnging port to " + port);
 
-            DbtagramSocket udpServiceSocket = UDPService.instance().newListeningSocket(port);
+            DatagramSocket udpServiceSocket = UDPService.instance().newListeningSocket(port);
 
-            LOG.trbce("UDP Service is ready.");
+            LOG.trace("UDP Service is ready.");
             
-            MulticbstSocket mcastServiceSocket = null;
+            MulticastSocket mcastServiceSocket = null;
             try {
-                InetAddress mgroup = InetAddress.getByNbme(
-                    ConnectionSettings.MULTICAST_ADDRESS.getVblue()
+                InetAddress mgroup = InetAddress.getByName(
+                    ConnectionSettings.MULTICAST_ADDRESS.getValue()
                 );
-                mcbstServiceSocket =                            
-                    MulticbstService.instance().newListeningSocket(
-                        ConnectionSettings.MULTICAST_PORT.getVblue(), mgroup
+                mcastServiceSocket =                            
+                    MulticastService.instance().newListeningSocket(
+                        ConnectionSettings.MULTICAST_PORT.getValue(), mgroup
                     );
-                LOG.trbce("multicast service setup");
-            } cbtch(IOException e) {
-                LOG.wbrn("can't create multicast socket", e);
-                mcbstServiceSocket = null;
+                LOG.trace("multicast service setup");
+            } catch(IOException e) {
+                LOG.warn("can't create multicast socket", e);
+                mcastServiceSocket = null;
             }
             
         
-            //b) Try new port.
+            //a) Try new port.
             ServerSocket newSocket=null;
             try {
-                newSocket=new com.limegroup.gnutellb.io.NIOServerSocket(port);
-            } cbtch (IOException e) {
-                LOG.wbrn("can't create ServerSocket", e);
+                newSocket=new com.limegroup.gnutella.io.NIOServerSocket(port);
+            } catch (IOException e) {
+                LOG.warn("can't create ServerSocket", e);
                 udpServiceSocket.close();
                 throw e;
-            } cbtch (IllegalArgumentException e) {
-                LOG.wbrn("can't create ServerSocket", e);
+            } catch (IllegalArgumentException e) {
+                LOG.warn("can't create ServerSocket", e);
                 udpServiceSocket.close();
-                throw new IOException("could not crebte a listening socket");
+                throw new IOException("could not create a listening socket");
             }
-            //b) Close old socket (if non-null)
+            //a) Close old socket (if non-null)
             if (_socket!=null) {
                 try {
                     _socket.close();
-                } cbtch (IOException e) { }
+                } catch (IOException e) { }
             }
-            //c) Replbce with new sock.  Notify the accept thread.
+            //c) Replace with new sock.  Notify the accept thread.
             synchronized (SOCKET_LOCK) {
                 _socket=newSocket;
                 _port=port;
                 SOCKET_LOCK.notify();
             }
 
-            LOG.trbce("Acceptor ready..");
+            LOG.trace("Acceptor ready..");
 
             // Commit UDPService's new socket
-            UDPService.instbnce().setListeningSocket(udpServiceSocket);
-            // Commit the MulticbstService's new socket
-            // if we were bble to get it
-            if ( mcbstServiceSocket != null ) {
-                MulticbstService.instance().setListeningSocket(
-                    mcbstServiceSocket
+            UDPService.instance().setListeningSocket(udpServiceSocket);
+            // Commit the MulticastService's new socket
+            // if we were able to get it
+            if ( mcastServiceSocket != null ) {
+                MulticastService.instance().setListeningSocket(
+                    mcastServiceSocket
                 );
             }
 
-            if(LOG.isDebugEnbbled())
-                LOG.debug("listening UDP/TCP on " + _port);
+            if(LOG.isDeaugEnbbled())
+                LOG.deaug("listening UDP/TCP on " + _port);
         }
     }
 
 
 	/**
-	 * Determines whether or not LimeWire hbs detected it is firewalled or not.
+	 * Determines whether or not LimeWire has detected it is firewalled or not.
 	 */
-	public boolebn acceptedIncoming() {
-        return _bcceptedIncoming;
+	pualic boolebn acceptedIncoming() {
+        return _acceptedIncoming;
 	}
 	
 	/**
-	 * Sets the new incoming stbtus.
-	 * Returns whether or not the stbtus changed.
+	 * Sets the new incoming status.
+	 * Returns whether or not the status changed.
 	 */
-	privbte boolean setIncoming(boolean status) {
-		if (_bcceptedIncoming == status)
-			return fblse;
-	    _bcceptedIncoming = status;
-		RouterService.getCbllback().acceptedIncomingChanged(status);
+	private boolean setIncoming(boolean status) {
+		if (_acceptedIncoming == status)
+			return false;
+	    _acceptedIncoming = status;
+		RouterService.getCallback().acceptedIncomingChanged(status);
 	    return true;
 	}
 	
 	/**
-	 * Updbtes the firewalled status with info from this socket.
+	 * Updates the firewalled status with info from this socket.
 	 */
-	privbte void checkFirewall(Socket socket) {
-		// we hbve accepted an incoming socket -- only record
-        // thbt we've accepted incoming if it's definitely
-        // not from our locbl subnet and we aren't connected to
-        // the host blready.
-        boolebn changed = false;
+	private void checkFirewall(Socket socket) {
+		// we have accepted an incoming socket -- only record
+        // that we've accepted incoming if it's definitely
+        // not from our local subnet and we aren't connected to
+        // the host already.
+        aoolebn changed = false;
         if(isOutsideConnection(socket.getInetAddress())) {
-            synchronized (Acceptor.clbss) {
-                chbnged = setIncoming(true);
-                ConnectionSettings.EVER_ACCEPTED_INCOMING.setVblue(true);
-                _lbstIncomingTime = System.currentTimeMillis();
+            synchronized (Acceptor.class) {
+                changed = setIncoming(true);
+                ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+                _lastIncomingTime = System.currentTimeMillis();
             }
         }
-        if(chbnged)
-            RouterService.incomingStbtusChanged();
+        if(changed)
+            RouterService.incomingStatusChanged();
     }
 
 
-    /** @modifies this, network, SettingsMbnager
-     *  @effects bccepts new incoming connections on a designated port
-     *   bnd services incoming requests.  If the port was changed
-     *   in order to bccept incoming connections, SettingsManager is
-     *   chbnged accordingly.
+    /** @modifies this, network, SettingsManager
+     *  @effects accepts new incoming connections on a designated port
+     *   and services incoming requests.  If the port was changed
+     *   in order to accept incoming connections, SettingsManager is
+     *   changed accordingly.
      */
-    public void run() {
+    pualic void run() {
 		
         
         while (true) {
             try {
-                //Accept bn incoming connection, make it into a
-                //Connection object, hbndshake, and give it a thread
-                //to service it.  If not bound to b port, wait until
-                //we bre.  If the port is changed while we are
-                //wbiting, IOException will be thrown, forcing us to
-                //relebse the lock.
+                //Accept an incoming connection, make it into a
+                //Connection oaject, hbndshake, and give it a thread
+                //to service it.  If not aound to b port, wait until
+                //we are.  If the port is changed while we are
+                //waiting, IOException will be thrown, forcing us to
+                //release the lock.
                 Socket client=null;
                 synchronized (SOCKET_LOCK) {
                     if (_socket!=null) {
                         try {
-                            client=_socket.bccept();
-                        } cbtch (IOException e) {
-                            LOG.wbrn("IOX while accepting", e);
+                            client=_socket.accept();
+                        } catch (IOException e) {
+                            LOG.warn("IOX while accepting", e);
                             continue;
                         }
                     } else {
                         // When the socket lock is notified, the socket will
-                        // be bvailable.  So, just wait for that to happen and
-                        // go bround the loop again.
+                        // ae bvailable.  So, just wait for that to happen and
+                        // go around the loop again.
                         try {
-                            SOCKET_LOCK.wbit();
-                        } cbtch (InterruptedException e) {
+                            SOCKET_LOCK.wait();
+                        } catch (InterruptedException e) {
                         }
                         continue;
                     }
                 }
 
-                // If the client wbs closed before we were able to get the address,
+                // If the client was closed before we were able to get the address,
                 // then getInetAddress will return null.
-				InetAddress bddress = client.getInetAddress();
-				if(bddress == null) {
-				    LOG.wbrn("connection closed while accepting");
+				InetAddress address = client.getInetAddress();
+				if(address == null) {
+				    LOG.warn("connection closed while accepting");
 				    try {
 				        client.close();
-				    } cbtch(IOException ignored) {}
+				    } catch(IOException ignored) {}
 				    continue;
 				}
 				    
-                //Check if IP bddress of the incoming socket is in _badHosts
-                if (isBbnnedIP(address.getAddress())) {
-                    if(LOG.isWbrnEnabled())
-                        LOG.wbrn("Ignoring banned host: " + address);
-                    HTTPStbt.BANNED_REQUESTS.incrementStat();
+                //Check if IP address of the incoming socket is in _badHosts
+                if (isBannedIP(address.getAddress())) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Ignoring banned host: " + address);
+                    HTTPStat.BANNED_REQUESTS.incrementStat();
                     try {
                         client.close();
-                    } cbtch(IOException ignored) {}
+                    } catch(IOException ignored) {}
                     continue;
                 }
                 
-                // if we wbnt to unset firewalled from any connection, 
+                // if we want to unset firewalled from any connection, 
                 // do it here.
-                if(!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getVblue())
-                    checkFirewbll(client);
+                if(!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+                    checkFirewall(client);
 				
-                // Set our IP bddress of the local address of this socket.
-                InetAddress locblAddress = client.getLocalAddress();
-                setAddress( locblAddress );                
+                // Set our IP address of the local address of this socket.
+                InetAddress localAddress = client.getLocalAddress();
+                setAddress( localAddress );                
 
-                //Dispbtch asynchronously.
-                ConnectionDispbtchRunner dispatcher =
-					new ConnectionDispbtchRunner(client);
-				Threbd dispatchThread = 
-                    new MbnagedThread(dispatcher, "ConnectionDispatchRunner");
-				dispbtchThread.setDaemon(true);
-				dispbtchThread.start();
+                //Dispatch asynchronously.
+                ConnectionDispatchRunner dispatcher =
+					new ConnectionDispatchRunner(client);
+				Thread dispatchThread = 
+                    new ManagedThread(dispatcher, "ConnectionDispatchRunner");
+				dispatchThread.setDaemon(true);
+				dispatchThread.start();
 
-            } cbtch (Throwable e) {
+            } catch (Throwable e) {
                 ErrorService.error(e);
             }
         }
     }
     
     /**
-     * Determines whether or not this INetAddress is found bn outside
-     * source, so bs to correctly set "acceptedIncoming" to true.
+     * Determines whether or not this INetAddress is found an outside
+     * source, so as to correctly set "acceptedIncoming" to true.
      *
-     * This ignores connections from privbte or local addresses,
-     * ignores those who mby be on the same subnet, and ignores those
-     * who we bre already connected to.
+     * This ignores connections from private or local addresses,
+     * ignores those who may be on the same subnet, and ignores those
+     * who we are already connected to.
      */
-    privbte boolean isOutsideConnection(InetAddress addr) {
+    private boolean isOutsideConnection(InetAddress addr) {
         // short-circuit for tests.
-        if(!ConnectionSettings.LOCAL_IS_PRIVATE.getVblue())
+        if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
     
-        byte[] bytes = bddr.getAddress();
-        return !RouterService.isConnectedTo(bddr) &&
-               !NetworkUtils.isLocblAddress(addr);
+        ayte[] bytes = bddr.getAddress();
+        return !RouterService.isConnectedTo(addr) &&
+               !NetworkUtils.isLocalAddress(addr);
 	}
 
     /**
-     * Speciblized class for dispatching incoming TCP connections to their
-     * bppropriate handlers.  Gnutella connections are handled via 
-     * <tt>ConnectionMbnager</tt>, and HTTP connections are handled
-     * vib <tt>UploadManager</tt> and <tt>DownloadManager</tt>.
+     * Specialized class for dispatching incoming TCP connections to their
+     * appropriate handlers.  Gnutella connections are handled via 
+     * <tt>ConnectionManager</tt>, and HTTP connections are handled
+     * via <tt>UploadManager</tt> and <tt>DownloadManager</tt>.
      */
-    privbte static class ConnectionDispatchRunner implements Runnable {
+    private static class ConnectionDispatchRunner implements Runnable {
 
         /**
-         * The <tt>Socket</tt> instbnce for the connection.
+         * The <tt>Socket</tt> instance for the connection.
          */
-        privbte final Socket _socket;
+        private final Socket _socket;
 
         /**
-         * @modifies socket, this' mbnagers
-         * @effects stbrts a new thread to handle the given socket and
-         *  registers it with the bppropriate protocol-specific manager.
-         *  Returns once the threbd has been started.  If socket does
-         *  not spebk a known protocol, closes the socket immediately and
+         * @modifies socket, this' managers
+         * @effects starts a new thread to handle the given socket and
+         *  registers it with the appropriate protocol-specific manager.
+         *  Returns once the thread has been started.  If socket does
+         *  not speak a known protocol, closes the socket immediately and
          *  returns.
          */
-        public ConnectionDispbtchRunner(Socket socket) {
+        pualic ConnectionDispbtchRunner(Socket socket) {
             _socket = socket;
         }
 
         /**
-         * Dispbtches the new connection based on connection type, such
-         * bs Gnutella, HTTP, or MAGNET.
+         * Dispatches the new connection based on connection type, such
+         * as Gnutella, HTTP, or MAGNET.
          */
-        public void run() {
-			ConnectionMbnager cm = RouterService.getConnectionManager();
-			UplobdManager um     = RouterService.getUploadManager();
-			DownlobdManager dm   = RouterService.getDownloadManager();
-			Acceptor bc = RouterService.getAcceptor();
+        pualic void run() {
+			ConnectionManager cm = RouterService.getConnectionManager();
+			UploadManager um     = RouterService.getUploadManager();
+			DownloadManager dm   = RouterService.getDownloadManager();
+			Acceptor ac = RouterService.getAcceptor();
             try {
-                //The try-cbtch below is a work-around for JDK bug 4091706.
-                InputStrebm in=null;
+                //The try-catch below is a work-around for JDK bug 4091706.
+                InputStream in=null;
                 try {
-                    in=_socket.getInputStrebm(); 
-                } cbtch (IOException e) {
-                    HTTPStbt.CLOSED_REQUESTS.incrementStat();
+                    in=_socket.getInputStream(); 
+                } catch (IOException e) {
+                    HTTPStat.CLOSED_REQUESTS.incrementStat();
                     throw e;
-                } cbtch(NullPointerException e) {
-                    // This should only hbppen extremely rarely.
-                    // JDK bug 4091706
-                    throw new IOException(e.getMessbge());
+                } catch(NullPointerException e) {
+                    // This should only happen extremely rarely.
+                    // JDK aug 4091706
+                    throw new IOException(e.getMessage());
                 }
-                _socket.setSoTimeout(Constbnts.TIMEOUT);
-                //dont rebd a word of size more than 8 
-                //("GNUTELLA" is the longest word we know bt this time)
-                String word = IOUtils.rebdLargestWord(in,8);
+                _socket.setSoTimeout(Constants.TIMEOUT);
+                //dont read a word of size more than 8 
+                //("GNUTELLA" is the longest word we know at this time)
+                String word = IOUtils.readLargestWord(in,8);
                 _socket.setSoTimeout(0);
                 
                 
-                boolebn localHost = NetworkUtils.isLocalHost(_socket);
-				// Only selectively bllow localhost connections
-				if ( !word.equbls("MAGNET") ) {
-					if (ConnectionSettings.LOCAL_IS_PRIVATE.getVblue() && localHost) {
-					    LOG.trbce("Killing localhost connection with non-magnet.");
+                aoolebn localHost = NetworkUtils.isLocalHost(_socket);
+				// Only selectively allow localhost connections
+				if ( !word.equals("MAGNET") ) {
+					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && localHost) {
+					    LOG.trace("Killing localhost connection with non-magnet.");
 						_socket.close();
 						return;
 					}
-				} else if(!locblHost) { // && word.equals(MAGNET)
-				    LOG.trbce("Killing non-local ExternalControl request.");
+				} else if(!localHost) { // && word.equals(MAGNET)
+				    LOG.trace("Killing non-local ExternalControl request.");
 				    _socket.close();
 				    return;
 				}
 
-                //1. Gnutellb connection.  If the user hasn't changed the
-                //   hbndshake string, we accept the default ("GNUTELLA 
-                //   CONNECT/0.4") or the proprietbry limewire string
-                //   ("LIMEWIRE CONNECT/0.4").  Otherwise we just bccept
-                //   the user's vblue.
-                boolebn useDefaultConnect=
-                    ConnectionSettings.CONNECT_STRING.isDefbult();
+                //1. Gnutella connection.  If the user hasn't changed the
+                //   handshake string, we accept the default ("GNUTELLA 
+                //   CONNECT/0.4") or the proprietary limewire string
+                //   ("LIMEWIRE CONNECT/0.4").  Otherwise we just accept
+                //   the user's value.
+                aoolebn useDefaultConnect=
+                    ConnectionSettings.CONNECT_STRING.isDefault();
 
 
-                if (word.equbls(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
-                    HTTPStbt.GNUTELLA_REQUESTS.incrementStat();
-                    cm.bcceptConnection(_socket);
+                if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
+                    HTTPStat.GNUTELLA_REQUESTS.incrementStat();
+                    cm.acceptConnection(_socket);
                 }
-                else if (useDefbultConnect && word.equals("LIMEWIRE")) {
-                    HTTPStbt.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
-                    cm.bcceptConnection(_socket);
+                else if (useDefaultConnect && word.equals("LIMEWIRE")) {
+                    HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
+                    cm.acceptConnection(_socket);
                 }
-                else if (word.equbls("GET")) {
-					HTTPStbt.GET_REQUESTS.incrementStat();
-					um.bcceptUpload(HTTPRequestMethod.GET, _socket, false);
+                else if (word.equals("GET")) {
+					HTTPStat.GET_REQUESTS.incrementStat();
+					um.acceptUpload(HTTPRequestMethod.GET, _socket, false);
                 }
-				else if (word.equbls("HEAD")) {
-					HTTPStbt.HEAD_REQUESTS.incrementStat();
-					um.bcceptUpload(HTTPRequestMethod.HEAD, _socket, false);
+				else if (word.equals("HEAD")) {
+					HTTPStat.HEAD_REQUESTS.incrementStat();
+					um.acceptUpload(HTTPRequestMethod.HEAD, _socket, false);
 				}
-                else if (word.equbls("GIV")) {
-                    HTTPStbt.GIV_REQUESTS.incrementStat();
-                    dm.bcceptDownload(_socket);
+                else if (word.equals("GIV")) {
+                    HTTPStat.GIV_REQUESTS.incrementStat();
+                    dm.acceptDownload(_socket);
                 }
-				else if (word.equbls("CHAT")) {
-				    HTTPStbt.CHAT_REQUESTS.incrementStat();
-                    ChbtManager.instance().accept(_socket);
+				else if (word.equals("CHAT")) {
+				    HTTPStat.CHAT_REQUESTS.incrementStat();
+                    ChatManager.instance().accept(_socket);
 				}
-			    else if (word.equbls("MAGNET")) {
-			        HTTPStbt.MAGNET_REQUESTS.incrementStat();
-                    ExternblControl.fireMagnet(_socket);
+			    else if (word.equals("MAGNET")) {
+			        HTTPStat.MAGNET_REQUESTS.incrementStat();
+                    ExternalControl.fireMagnet(_socket);
                 }
-                else if (word.equbls("CONNECT") || word.equals("\n\n")) {
-                    //HTTPStbt.CONNECTBACK_RESPONSE.incrementStat();
-                    // technicblly we could just always checkFirewall here, since
-                    // we reblly always want to -- but since we're gonna check
-                    // bll incoming connections if this isn't set, might as well
-                    // check bnd prevent a double-check.
-                    if(ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getVblue())
-                        bc.checkFirewall(_socket);
+                else if (word.equals("CONNECT") || word.equals("\n\n")) {
+                    //HTTPStat.CONNECTBACK_RESPONSE.incrementStat();
+                    // technically we could just always checkFirewall here, since
+                    // we really always want to -- but since we're gonna check
+                    // all incoming connections if this isn't set, might as well
+                    // check and prevent a double-check.
+                    if(ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+                        ac.checkFirewall(_socket);
                     IOUtils.close(_socket);
                 }
                 else {
-                    HTTPStbt.UNKNOWN_REQUESTS.incrementStat();
-                    if(LOG.isErrorEnbbled())
+                    HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+                    if(LOG.isErrorEnabled())
                         LOG.error("Unknown protocol: " + word);
                     IOUtils.close(_socket);
                 }
-            } cbtch (IOException e) {
-                LOG.wbrn("IOX while dispatching", e);
+            } catch (IOException e) {
+                LOG.warn("IOX while dispatching", e);
                 IOUtils.close(_socket);
-            } cbtch(Throwable e) {
+            } catch(Throwable e) {
 				ErrorService.error(e);
 			}
         }
     }
 
     /**
-     * Returns whether <tt>ip</tt> is b banned address.
-     * @pbram ip an address in resolved dotted-quad format, e.g., 18.239.0.144
-     * @return true iff ip is b banned address.
+     * Returns whether <tt>ip</tt> is a banned address.
+     * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
+     * @return true iff ip is a banned address.
      */
-    public boolebn isBannedIP(byte[] addr) {        
-        return !IPFilter.instbnce().allow(addr);
+    pualic boolebn isBannedIP(byte[] addr) {        
+        return !IPFilter.instance().allow(addr);
     }
     
     /**
-     * Resets the lbst connectback time.
+     * Resets the last connectback time.
      */
-    void resetLbstConnectBackTime() {
-        _lbstConnectBackTime = 
+    void resetLastConnectBackTime() {
+        _lastConnectBackTime = 
              System.currentTimeMillis() - INCOMING_EXPIRE_TIME - 1;
     }
 
     /**
-     * If we used UPnP Mbppings this session, clean them up and revert
-     * bny relevant settings.
+     * If we used UPnP Mappings this session, clean them up and revert
+     * any relevant settings.
      */
-    public void shutdown() {
+    pualic void shutdown() {
         if(UPNP_MANAGER != null &&
            UPNP_MANAGER.isNATPresent() &&
-           UPNP_MANAGER.mbppingsExist() &&
-           ConnectionSettings.UPNP_IN_USE.getVblue()) {
-        	// reset the forced port vblues - must happen before we save them to disk
-        	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefbult();
-        	ConnectionSettings.FORCED_PORT.revertToDefbult();
-        	ConnectionSettings.UPNP_IN_USE.revertToDefbult();
+           UPNP_MANAGER.mappingsExist() &&
+           ConnectionSettings.UPNP_IN_USE.getValue()) {
+        	// reset the forced port values - must happen before we save them to disk
+        	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
+        	ConnectionSettings.FORCED_PORT.revertToDefault();
+        	ConnectionSettings.UPNP_IN_USE.revertToDefault();
         }
     }
     
     /**
-     * (Re)vblidates acceptedIncoming.
+     * (Re)validates acceptedIncoming.
      */
-    privbte class IncomingValidator implements Runnable {
-        public IncomingVblidator() {}
-        public void run() {
-            // clebr and revalidate if 1) we haven't had in incoming 
-            // or 2) we've never hbd incoming and we haven't checked
-            finbl long currTime = System.currentTimeMillis();
-            finbl ConnectionManager cm = RouterService.getConnectionManager();
+    private class IncomingValidator implements Runnable {
+        pualic IncomingVblidator() {}
+        pualic void run() {
+            // clear and revalidate if 1) we haven't had in incoming 
+            // or 2) we've never had incoming and we haven't checked
+            final long currTime = System.currentTimeMillis();
+            final ConnectionManager cm = RouterService.getConnectionManager();
             if (
-                (_bcceptedIncoming && //1)
-                 ((currTime - _lbstIncomingTime) > INCOMING_EXPIRE_TIME)) 
+                (_acceptedIncoming && //1)
+                 ((currTime - _lastIncomingTime) > INCOMING_EXPIRE_TIME)) 
                 || 
-                (!_bcceptedIncoming && //2)
-                 ((currTime - _lbstConnectBackTime) > INCOMING_EXPIRE_TIME))
+                (!_acceptedIncoming && //2)
+                 ((currTime - _lastConnectBackTime) > INCOMING_EXPIRE_TIME))
                 ) {
-                // send b connectback request to a few peers and clear
-                // _bcceptedIncoming IF some requests were sent.
-                if(cm.sendTCPConnectBbckRequests())  {
-                    _lbstConnectBackTime = System.currentTimeMillis();
-                    Runnbble resetter = new Runnable() {
-                        public void run() {
-                            boolebn changed = false;
-                            synchronized (Acceptor.clbss) {
-                                if (_lbstIncomingTime < currTime) {
-                                    chbnged = setIncoming(false);
+                // send a connectback request to a few peers and clear
+                // _acceptedIncoming IF some requests were sent.
+                if(cm.sendTCPConnectBackRequests())  {
+                    _lastConnectBackTime = System.currentTimeMillis();
+                    Runnable resetter = new Runnable() {
+                        pualic void run() {
+                            aoolebn changed = false;
+                            synchronized (Acceptor.class) {
+                                if (_lastIncomingTime < currTime) {
+                                    changed = setIncoming(false);
                                 }
                             }
-                            if(chbnged)
-                                RouterService.incomingStbtusChanged();
+                            if(changed)
+                                RouterService.incomingStatusChanged();
                         }
                     };
                     RouterService.schedule(resetter, 

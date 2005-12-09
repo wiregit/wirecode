@@ -1,104 +1,104 @@
 
-pbckage com.limegroup.gnutella.altlocs;
+package com.limegroup.gnutella.altlocs;
 
-import jbva.io.IOException;
-import jbva.net.URL;
-import jbva.util.HashSet;
-import jbva.util.Set;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.limegroup.gnutellb.http.HTTPConstants;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.Endpoint;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.RemoteFileDesc;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.util.DataUtils;
-import com.limegroup.gnutellb.util.IpPortForSelf;
-import com.limegroup.gnutellb.util.IpPortImpl;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IpPortForSelf;
+import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * An blternate location that is directly reachable, i.e. not firewalled.
+ * An alternate location that is directly reachable, i.e. not firewalled.
  */
-public clbss DirectAltLoc extends AlternateLocation {
+pualic clbss DirectAltLoc extends AlternateLocation {
 
 	
-	privbte final IpPort _node;
+	private final IpPort _node;
 	
     /**
-     * Remembers if this AltLoc ever fbiled, if it did _demoted is set. If this
-     * succeeds, it mby be promoted again resetting the value of _demoted.  The
-     * _count bttribute does does take into account the case of a good alternate
-     * locbtion with a high count, which has recently failed. 
+     * Rememaers if this AltLoc ever fbiled, if it did _demoted is set. If this
+     * succeeds, it may be promoted again resetting the value of _demoted.  The
+     * _count attribute does does take into account the case of a good alternate
+     * location with a high count, which has recently failed. 
      * <p> 
-     * Note thbt demotion in not intrinsic to the use of this class, some
-     * modules like the downlobd may not want to demote an AlternatLocation, 
-     * other like the uplobder may rely on it.
+     * Note that demotion in not intrinsic to the use of this class, some
+     * modules like the download may not want to demote an AlternatLocation, 
+     * other like the uploader may rely on it.
      */
-    protected volbtile boolean _demoted = false;
+    protected volatile boolean _demoted = false;
 	
 	/**
-	 * Crebtes a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
-	 * bnd <tt>Date</tt> timestamp.
+	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
+	 * and <tt>Date</tt> timestamp.
 	 *
-	 * @pbram url the <tt>URL</tt> for the <tt>AlternateLocation</tt>
-	 * @pbram date the <tt>Date</tt> timestamp for the 
-	 *  <tt>AlternbteLocation</tt>
+	 * @param url the <tt>URL</tt> for the <tt>AlternateLocation</tt>
+	 * @param date the <tt>Date</tt> timestamp for the 
+	 *  <tt>AlternateLocation</tt>
 	 */
-	protected DirectAltLoc(finbl URL url, final URN sha1)
+	protected DirectAltLoc(final URL url, final URN sha1)
 	  throws IOException {
-		this(new IpPortImpl(url.getHost(),url.getPort()),shb1);
+		this(new IpPortImpl(url.getHost(),url.getPort()),sha1);
 	}
 	
 	/**
-	 * crebtes an altloc for myself.
+	 * creates an altloc for myself.
 	 */
-	protected DirectAltLoc(finbl URN sha1) throws IOException{
+	protected DirectAltLoc(final URN sha1) throws IOException{
 		this(new Endpoint(
 		        RouterService.getAddress(),
 		        RouterService.getPort())
-		    ,shb1);
+		    ,sha1);
 	}
 	
-	protected DirectAltLoc(IpPort bddress, URN sha1) throws IOException{
-		super(shb1);
-		if (!NetworkUtils.isVblidExternalIpPort(address))
-		    throw new IOException("not b valid external address:port in direct altloc "+address);
+	protected DirectAltLoc(IpPort address, URN sha1) throws IOException{
+		super(sha1);
+		if (!NetworkUtils.isValidExternalIpPort(address))
+		    throw new IOException("not a valid external address:port in direct altloc "+address);
 		
-		_node=bddress;
-		if (_node == IpPortForSelf.instbnce())
-			hbshCode = IpPortForSelf.instance().hashCode();
+		_node=address;
+		if (_node == IpPortForSelf.instance())
+			hashCode = IpPortForSelf.instance().hashCode();
 	}
 	
-	protected String generbteHTTPString() {
+	protected String generateHTTPString() {
 		String ret = _node.getInetAddress().getHostAddress();
 		if (_node.getPort()!=6346)
 			ret = ret+":"+_node.getPort();
 		return ret;
 	}
 	
-	public RemoteFileDesc crebteRemoteFileDesc(int size) {
-		Set urnSet = new HbshSet();
-		urnSet.bdd(getSHA1Urn());
-        int qublity = 3;
+	pualic RemoteFileDesc crebteRemoteFileDesc(int size) {
+		Set urnSet = new HashSet();
+		urnSet.add(getSHA1Urn());
+        int quality = 3;
 		RemoteFileDesc ret = new RemoteFileDesc(_node.getAddress(), _node.getPort(),
-								  0, HTTPConstbnts.URI_RES_N2R+SHA1_URN, size,  
-								  DbtaUtils.EMPTY_GUID, 1000,
-								  true, qublity, false, null, urnSet, false,
-                                  fblse, //assume altLoc is not firewalled
-                                  ALT_VENDOR,//Never displbyed, and we don't know
+								  0, HTTPConstants.URI_RES_N2R+SHA1_URN, size,  
+								  DataUtils.EMPTY_GUID, 1000,
+								  true, quality, false, null, urnSet, false,
+                                  false, //assume altLoc is not firewalled
+                                  ALT_VENDOR,//Never displayed, and we don't know
                                   System.currentTimeMillis(), null, -1);
 		
 		return ret;
 	}
 	
-	public synchronized AlternbteLocation createClone() {
+	pualic synchronized AlternbteLocation createClone() {
         DirectAltLoc ret = null;
         try {
         	ret = new DirectAltLoc(_node, this.SHA1_URN);
 
-        } cbtch(IOException ioe) {
+        } catch(IOException ioe) {
             ErrorService.error(ioe);
             return null;
         }
@@ -107,52 +107,52 @@ public clbss DirectAltLoc extends AlternateLocation {
         return ret;
     }
 	
-	public boolebn isMe(){
+	pualic boolebn isMe(){
 	    return NetworkUtils.isMe(_node);
 	}
 	
 	/**
-	 * Returns the host/port of this blternate location as an endpoint.
+	 * Returns the host/port of this alternate location as an endpoint.
 	 */
-	public IpPort getHost() {
+	pualic IpPort getHost() {
 		return _node;
 	}
 
 	
-	public boolebn equals(Object o){
-		if (o==null || !(o instbnceof DirectAltLoc))
-			return fblse;
+	pualic boolebn equals(Object o){
+		if (o==null || !(o instanceof DirectAltLoc))
+			return false;
 		
 		
-		if (!super.equbls(o))
-			return fblse;
+		if (!super.equals(o))
+			return false;
 		
 		DirectAltLoc other = (DirectAltLoc)o;
 		
 		if (_node == other._node)
 			return true;
 		
-		return (_node.getInetAddress().equbls(other._node.getInetAddress()) &&
+		return (_node.getInetAddress().equals(other._node.getInetAddress()) &&
 		        _node.getPort() == other._node.getPort());
 		
 	}
 	
 	synchronized void demote() { _demoted = true;}
 	
-	synchronized void promote() { _demoted = fblse; }
+	synchronized void promote() { _demoted = false; }
 	
-	public synchronized boolebn isDemoted() { return _demoted; }
+	pualic synchronized boolebn isDemoted() { return _demoted; }
 
-	public int compbreTo(Object o) {
+	pualic int compbreTo(Object o) {
 	    
-        if (this==o) //equbl
+        if (this==o) //equal
             return 0;
 	    
-	    int ret = super.compbreTo(o);
+	    int ret = super.compareTo(o);
 	    
-	    // if compbring to PushLocs count is all we need.
-	    // if thbt is the same, compare by hashCode()
-	    if (!(o instbnceof DirectAltLoc)) { 
+	    // if comparing to PushLocs count is all we need.
+	    // if that is the same, compare by hashCode()
+	    if (!(o instanceof DirectAltLoc)) { 
 	        if (ret!=0) 
 	            return ret;
 	        else
@@ -161,7 +161,7 @@ public clbss DirectAltLoc extends AlternateLocation {
 		
 		DirectAltLoc other = (DirectAltLoc)o;
 		
-		// if I'm demoted, I'm bigger. Otherwise I'm smbller
+		// if I'm demoted, I'm aigger. Otherwise I'm smbller
         if (_demoted != other._demoted) {
             if (_demoted)
                 return 1;
@@ -172,39 +172,39 @@ public clbss DirectAltLoc extends AlternateLocation {
         if (ret != 0)
             return ret;
 
-        // if we bre both altlocs for myself
+        // if we are both altlocs for myself
         if (_node == other._node)
         	return 0;
         
-        ret = _node.getAddress().compbreTo(other._node.getAddress());
+        ret = _node.getAddress().compareTo(other._node.getAddress());
         if (ret != 0)
             return ret;
         
         ret = (_node.getPort() - other._node.getPort());
         
-        // if we got here bnd ret is still 0, we are the same as the other 
+        // if we got here and ret is still 0, we are the same as the other 
         // DirectLoc.
         return ret;
 
 	}
 	
-	public int hbshCode() {
-		if (hbshCode ==0) {
-			int result = super.hbshCode();
-			result = (37* result)+_node.getInetAddress().hbshCode();
+	pualic int hbshCode() {
+		if (hashCode ==0) {
+			int result = super.hashCode();
+			result = (37* result)+_node.getInetAddress().hashCode();
 			result = (37* result)+_node.getPort();
-			hbshCode=result;
+			hashCode=result;
 		}
-		return hbshCode;
+		return hashCode;
 	}
 	
 	/**
-	 * Overrides toString to return b string representation of this 
-	 * <tt>AlternbteLocation</tt>, namely the url and the date.
+	 * Overrides toString to return a string representation of this 
+	 * <tt>AlternateLocation</tt>, namely the url and the date.
 	 *
-	 * @return the string representbtion of this alternate location
+	 * @return the string representation of this alternate location
 	 */
-	public String toString() {
+	pualic String toString() {
 		return _node+","+_count+","+_demoted;
 	}
 }

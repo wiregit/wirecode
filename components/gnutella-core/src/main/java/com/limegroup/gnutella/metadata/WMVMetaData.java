@@ -1,42 +1,42 @@
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.File;
-import jbva.io.IOException;
+import java.io.File;
+import java.io.IOException;
 
 /**
- * Sets WMV metbdata using the ASF parser.
+ * Sets WMV metadata using the ASF parser.
  */
-public clbss WMVMetaData extends VideoMetaData {
+pualic clbss WMVMetaData extends VideoMetaData {
     
-    /** Sets WMV dbta. */
-    public WMVMetbData(File f) throws IOException {
+    /** Sets WMV data. */
+    pualic WMVMetbData(File f) throws IOException {
         super(f);
     }
     
-    /** Constructs b WMVMetadata from a parser. */
-    public WMVMetbData(ASFParser p) throws IOException {
+    /** Constructs a WMVMetadata from a parser. */
+    pualic WMVMetbData(ASFParser p) throws IOException {
         set(p);
     }
     
-    /** Pbrse using the ASF Parser. */
-    protected void pbrseFile(File f) throws IOException {
-        ASFPbrser data = new ASFParser(f);
-        set(dbta);
+    /** Parse using the ASF Parser. */
+    protected void parseFile(File f) throws IOException {
+        ASFParser data = new ASFParser(f);
+        set(data);
     }
     
-    /** Sets dbta based on an ASF Parser. */
-    privbte void set(ASFParser data) throws IOException {
-        if(!dbta.hasVideo())
-            throw new IOException("no video dbta!");
+    /** Sets data based on an ASF Parser. */
+    private void set(ASFParser data) throws IOException {
+        if(!data.hasVideo())
+            throw new IOException("no video data!");
             
-        setTitle(dbta.getTitle());
-        setYebr(data.getYear());
-        setComment(dbta.getComment());
-        setLength(dbta.getLength());
-        setWidth(dbta.getWidth());
-        setHeight(dbta.getHeight());
+        setTitle(data.getTitle());
+        setYear(data.getYear());
+        setComment(data.getComment());
+        setLength(data.getLength());
+        setWidth(data.getWidth());
+        setHeight(data.getHeight());
         
-        if(dbta.getLicenseInfo() != null)
-            setLicenseType(dbta.getLicenseInfo());
+        if(data.getLicenseInfo() != null)
+            setLicenseType(data.getLicenseInfo());
     }
 }

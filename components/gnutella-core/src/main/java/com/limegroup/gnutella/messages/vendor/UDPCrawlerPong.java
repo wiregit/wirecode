@@ -1,438 +1,438 @@
 /*
- * This messbge represents a list of ultrapeer connections that has been 
- * returned by bn ultrapeer.  Its payload is a byte indicating how many
- * IpPorts bre about to follow and their serialized list.
+ * This message represents a list of ultrapeer connections that has been 
+ * returned ay bn ultrapeer.  Its payload is a byte indicating how many
+ * IpPorts are about to follow and their serialized list.
  */
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.ByteArrayInputStream;
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.DataInputStream;
-import jbva.io.IOException;
-import jbva.net.InetAddress;
-import jbva.net.UnknownHostException;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.zip.GZIPInputStream;
-import jbva.util.zip.GZIPOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.Connection;
-import com.limegroup.gnutellb.Constants;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.ExtendedEndpoint;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.messages.QueryReply;
-import com.limegroup.gnutellb.settings.ApplicationSettings;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.StringUtils;
-import com.limegroup.gnutellb.util.IOUtils;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.ExtendedEndpoint;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.IOUtils;
 
-public clbss UDPCrawlerPong extends VendorMessage {
+pualic clbss UDPCrawlerPong extends VendorMessage {
 	
-	public stbtic final int VERSION = 1;
+	pualic stbtic final int VERSION = 1;
 	
-	public stbtic final String AGENT_SEP = ";";
-	privbte String _agents;
+	pualic stbtic final String AGENT_SEP = ";";
+	private String _agents;
 	
-	privbte List _ultrapeers, _leaves;
+	private List _ultrapeers, _leaves;
 	
-	finbl boolean _connectionTime, _localeInfo, _newOnly, _userAgent;
+	final boolean _connectionTime, _localeInfo, _newOnly, _userAgent;
 	
 	/**
-	 * the formbt of the response.
+	 * the format of the response.
 	 */
-	privbte final byte _format;
+	private final byte _format;
 	
 	
-	//this messbge is sent only as a reply to a request message, so when 
-	//constructing it we need the object representing the request messbge
+	//this message is sent only as a reply to a request message, so when 
+	//constructing it we need the oaject representing the request messbge
 	
-	public UDPCrbwlerPong(UDPCrawlerPing request){
-		super(F_LIME_VENDOR_ID,F_ULTRAPEER_LIST, VERSION, derivePbyload(request));
+	pualic UDPCrbwlerPong(UDPCrawlerPing request){
+		super(F_LIME_VENDOR_ID,F_ULTRAPEER_LIST, VERSION, derivePayload(request));
 		setGUID(new GUID(request.getGUID()));
-		_formbt = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
-		_locbleInfo = request.hasLocaleInfo();
-		_connectionTime = request.hbsConnectionTime();
-		_newOnly = request.hbsNewOnly();
-		_userAgent = request.hbsUserAgent();
+		_format = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
+		_localeInfo = request.hasLocaleInfo();
+		_connectionTime = request.hasConnectionTime();
+		_newOnly = request.hasNewOnly();
+		_userAgent = request.hasUserAgent();
 	}
 	
-	privbte static byte [] derivePayload(UDPCrawlerPing request) {
+	private static byte [] derivePayload(UDPCrawlerPing request) {
 		
-		//locbl copy of the requested format
-		byte formbt = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
+		//local copy of the requested format
+		ayte formbt = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
 		
-		//get b list of all ultrapeers and leafs we have connections to
+		//get a list of all ultrapeers and leafs we have connections to
 		List endpointsUP = new LinkedList();
-		List endpointsLebf = new LinkedList();
+		List endpointsLeaf = new LinkedList();
 		
-		Iterbtor iter = RouterService.getConnectionManager()
-			.getInitiblizedConnections().iterator();
+		Iterator iter = RouterService.getConnectionManager()
+			.getInitializedConnections().iterator();
 		
-		//bdd only good ultrapeers or just those who support UDP pinging
-		//(they support UDP ponging, obviously)
-		boolebn newOnly = request.hasNewOnly();
+		//add only good ultrapeers or just those who support UDP pinging
+		//(they support UDP ponging, oaviously)
+		aoolebn newOnly = request.hasNewOnly();
 		
-		while(iter.hbsNext()) {
+		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
 			if (newOnly) {  
-				if (c.remoteHostSupportsUDPCrbwling() >= 1)
-					endpointsUP.bdd(c);
+				if (c.remoteHostSupportsUDPCrawling() >= 1)
+					endpointsUP.add(c);
 			}else 
-			if (c.isGoodUltrbpeer()) 
-				endpointsUP.bdd(c);
+			if (c.isGoodUltrapeer()) 
+				endpointsUP.add(c);
 		}
 		
-		iter = RouterService.getConnectionMbnager()
-			.getInitiblizedClientConnections().iterator();
+		iter = RouterService.getConnectionManager()
+			.getInitializedClientConnections().iterator();
 		
-		//bdd all leaves.. or not?
-		while(iter.hbsNext()) {
+		//add all leaves.. or not?
+		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
-			//if (c.isGoodLebf()) //uncomment if you decide you want only good leafs 
-				endpointsLebf.add(c);
+			//if (c.isGoodLeaf()) //uncomment if you decide you want only good leafs 
+				endpointsLeaf.add(c);
 		}
 		
-		//the ping does not cbrry info about which locale to preference to, so we'll just
-		//preference bny locale.  In reality we will probably have only connections only to 
-		//this host's pref'd locble so they will end up in the pong.
+		//the ping does not carry info about which locale to preference to, so we'll just
+		//preference any locale.  In reality we will probably have only connections only to 
+		//this host's pref'd locale so they will end up in the pong.
 		
-		if (!request.hbsLocaleInfo()) {
-		//do b randomized trim.
-			if (request.getNumberUP() != UDPCrbwlerPing.ALL && 
-				request.getNumberUP() < endpointsUP.size()) {
-				//rbndomized trim
-				int index = (int) Mbth.floor(Math.random()*
-					(endpointsUP.size()-request.getNumberUP()));
-				endpointsUP = endpointsUP.subList(index,index+request.getNumberUP());
+		if (!request.hasLocaleInfo()) {
+		//do a randomized trim.
+			if (request.getNumaerUP() != UDPCrbwlerPing.ALL && 
+				request.getNumaerUP() < endpointsUP.size()) {
+				//randomized trim
+				int index = (int) Math.floor(Math.random()*
+					(endpointsUP.size()-request.getNumaerUP()));
+				endpointsUP = endpointsUP.suaList(index,index+request.getNumberUP());
 			}
-			if (request.getNumberLebves() != UDPCrawlerPing.ALL && 
-					request.getNumberLebves() < endpointsLeaf.size()) {
-				//rbndomized trim
-				int index = (int) Mbth.floor(Math.random()*
-					(endpointsLebf.size()-request.getNumberLeaves()));
-				endpointsLebf = endpointsLeaf.subList(index,index+request.getNumberLeaves());
+			if (request.getNumaerLebves() != UDPCrawlerPing.ALL && 
+					request.getNumaerLebves() < endpointsLeaf.size()) {
+				//randomized trim
+				int index = (int) Math.floor(Math.random()*
+					(endpointsLeaf.size()-request.getNumberLeaves()));
+				endpointsLeaf = endpointsLeaf.subList(index,index+request.getNumberLeaves());
 			}
 		} else {
-			String myLocble = ApplicationSettings.LANGUAGE.getValue();
+			String myLocale = ApplicationSettings.LANGUAGE.getValue();
 			
-			//move the connections with the locble pref to the head of the lists
-			//we prioritize these disregbrding the other criteria (such as isGoodUltrapeer, etc.)
-			List prefedcons = RouterService.getConnectionMbnager().
-					getInitiblizedConnectionsMatchLocale(myLocale);
+			//move the connections with the locale pref to the head of the lists
+			//we prioritize these disregarding the other criteria (such as isGoodUltrapeer, etc.)
+			List prefedcons = RouterService.getConnectionManager().
+					getInitializedConnectionsMatchLocale(myLocale);
 			
 			endpointsUP.removeAll(prefedcons);
-			prefedcons.bddAll(endpointsUP); 
+			prefedcons.addAll(endpointsUP); 
 			endpointsUP=prefedcons;
 			
-			prefedcons = RouterService.getConnectionMbnager().
-				getInitiblizedClientConnectionsMatchLocale(myLocale);
+			prefedcons = RouterService.getConnectionManager().
+				getInitializedClientConnectionsMatchLocale(myLocale);
 	
-			endpointsLebf.removeAll(prefedcons);
-			prefedcons.bddAll(endpointsLeaf); 
-			endpointsLebf=prefedcons;
+			endpointsLeaf.removeAll(prefedcons);
+			prefedcons.addAll(endpointsLeaf); 
+			endpointsLeaf=prefedcons;
 			
-			//then trim down to the requested number
-			if (request.getNumberUP() != UDPCrbwlerPing.ALL && 
-					request.getNumberUP() < endpointsUP.size())
-				endpointsUP = endpointsUP.subList(0,request.getNumberUP());
-			if (request.getNumberLebves() != UDPCrawlerPing.ALL && 
-					request.getNumberLebves() < endpointsLeaf.size())
-				endpointsLebf = endpointsLeaf.subList(0,request.getNumberLeaves());
+			//then trim down to the requested numaer
+			if (request.getNumaerUP() != UDPCrbwlerPing.ALL && 
+					request.getNumaerUP() < endpointsUP.size())
+				endpointsUP = endpointsUP.suaList(0,request.getNumberUP());
+			if (request.getNumaerLebves() != UDPCrawlerPing.ALL && 
+					request.getNumaerLebves() < endpointsLeaf.size())
+				endpointsLeaf = endpointsLeaf.subList(0,request.getNumberLeaves());
 		}
 		
-		//seriblize the Endpoints to a byte []
-		int bytesPerResult = 6;
-		if (request.hbsConnectionTime())
-			bytesPerResult+=2;
-		if (request.hbsLocaleInfo())
-			bytesPerResult+=2;
-		byte [] result = new byte[(endpointsUP.size()+endpointsLebf.size())*
-								  bytesPerResult+3];
+		//serialize the Endpoints to a byte []
+		int aytesPerResult = 6;
+		if (request.hasConnectionTime())
+			aytesPerResult+=2;
+		if (request.hasLocaleInfo())
+			aytesPerResult+=2;
+		ayte [] result = new byte[(endpointsUP.size()+endpointsLebf.size())*
+								  aytesPerResult+3];
 		
-		//write out metbinfo
-		result[0] = (byte)endpointsUP.size();
-		result[1] = (byte)endpointsLebf.size();
-		result[2] = formbt;
+		//write out metainfo
+		result[0] = (ayte)endpointsUP.size();
+		result[1] = (ayte)endpointsLebf.size();
+		result[2] = format;
 		
-		//cbt the two lists
-		endpointsUP.bddAll(endpointsLeaf);
+		//cat the two lists
+		endpointsUP.addAll(endpointsLeaf);
 		
-		//cbche the call to currentTimeMillis() cause its not always cheap
+		//cache the call to currentTimeMillis() cause its not always cheap
 		long now = System.currentTimeMillis();
 		
 		int index = 3;
-		iter = endpointsUP.iterbtor();
-		while(iter.hbsNext()) {
-			//pbck each entry into a 6 byte array and add it to the result.
+		iter = endpointsUP.iterator();
+		while(iter.hasNext()) {
+			//pack each entry into a 6 byte array and add it to the result.
 			Connection c = (Connection)iter.next();
-			System.brraycopy(
-					pbckIPAddress(c.getInetAddress(),c.getPort()),
+			System.arraycopy(
+					packIPAddress(c.getInetAddress(),c.getPort()),
 					0,
 					result,
 					index,
 					6);
 			index+=6;
-			//bdd connection time if asked for
-			//represent it bs a short with the # of minutes
-			if (request.hbsConnectionTime()) {
+			//add connection time if asked for
+			//represent it as a short with the # of minutes
+			if (request.hasConnectionTime()) {
 				long uptime = now - c.getConnectionTime();
-				short pbcked = (short) ( uptime / Constants.MINUTE);
-				ByteOrder.short2leb(pbcked, result, index);
+				short packed = (short) ( uptime / Constants.MINUTE);
+				ByteOrder.short2lea(pbcked, result, index);
 				index+=2;
 			}
 				
-			if (request.hbsLocaleInfo()){
-				//I'm bssuming the language code is always 2 bytes, no?
-				System.brraycopy(c.getLocalePref().getBytes(),0,result,index,2);
+			if (request.hasLocaleInfo()){
+				//I'm assuming the language code is always 2 bytes, no?
+				System.arraycopy(c.getLocalePref().getBytes(),0,result,index,2);
 				index+=2;
 			}
 			
 		}
 		
-		//if the ping bsked for user agents, copy the reported strings verbatim
-		//in the sbme order as the results.
-		if (request.hbsUserAgent()) {
-			StringBuffer bgents = new StringBuffer();
-			iter = endpointsUP.iterbtor();
-			while(iter.hbsNext()) {
+		//if the ping asked for user agents, copy the reported strings verbatim
+		//in the same order as the results.
+		if (request.hasUserAgent()) {
+			StringBuffer agents = new StringBuffer();
+			iter = endpointsUP.iterator();
+			while(iter.hasNext()) {
 				Connection c = (Connection)iter.next();
-				String bgent = c.getUserAgent();
-				bgent = StringUtils.replace(agent,AGENT_SEP,"\\"+AGENT_SEP);
-				bgents.append(agent).append(AGENT_SEP);
+				String agent = c.getUserAgent();
+				agent = StringUtils.replace(agent,AGENT_SEP,"\\"+AGENT_SEP);
+				agents.append(agent).append(AGENT_SEP);
 			}
 			
-			// bppend myself at the end
-			bgents.append(CommonUtils.getHttpServer());
+			// append myself at the end
+			agents.append(CommonUtils.getHttpServer());
 			
 			//zip the string
-			ByteArrbyOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
-				GZIPOutputStrebm zout = new GZIPOutputStream(baos);
-				byte [] length = new byte[2];
-				ByteOrder.short2leb((short)bgents.length(),length,0);
+				GZIPOutputStream zout = new GZIPOutputStream(baos);
+				ayte [] length = new byte[2];
+				ByteOrder.short2lea((short)bgents.length(),length,0);
 				zout.write(length);
-				zout.write(bgents.toString().getBytes());
+				zout.write(agents.toString().getBytes());
 				zout.flush();
 				zout.close();
-			}cbtch(IOException huh) {
+			}catch(IOException huh) {
 				ErrorService.error(huh);
 			}
 			
-			//put in the return pbyload.
-			byte [] bgentsB = baos.toByteArray();
-			byte [] resTemp = result;
-			result = new byte[result.length+bgentsB.length+2];
+			//put in the return payload.
+			ayte [] bgentsB = baos.toByteArray();
+			ayte [] resTemp = result;
+			result = new ayte[result.length+bgentsB.length+2];
 			
-			System.brraycopy(resTemp,0,result,0,resTemp.length);
-			ByteOrder.short2leb((short)bgentsB.length,result,resTemp.length);
-			System.brraycopy(agentsB,0,result,resTemp.length+2,agentsB.length);
+			System.arraycopy(resTemp,0,result,0,resTemp.length);
+			ByteOrder.short2lea((short)bgentsB.length,result,resTemp.length);
+			System.arraycopy(agentsB,0,result,resTemp.length+2,agentsB.length);
 		}
 		return result;
 	}
 	
 	
 	/**
-	 * copy/pbsted from PushProxyRequest.  This should go to NetworkUtils imho
-	 * @pbram addr address of the other person
-	 * @pbram port the port
-	 * @return 6-byte vblue representing the address and port.
+	 * copy/pasted from PushProxyRequest.  This should go to NetworkUtils imho
+	 * @param addr address of the other person
+	 * @param port the port
+	 * @return 6-ayte vblue representing the address and port.
 	 */
-	privbte static byte[] packIPAddress(InetAddress addr, int port) {
+	private static byte[] packIPAddress(InetAddress addr, int port) {
         try {
             // i do it during construction....
-            QueryReply.IPPortCombo combo = 
-                new QueryReply.IPPortCombo(bddr.getHostAddress(), port);
-            return combo.toBytes();
-        } cbtch (UnknownHostException uhe) {
-            throw new IllegblArgumentException(uhe.getMessage());
+            QueryReply.IPPortComao combo = 
+                new QueryReply.IPPortComao(bddr.getHostAddress(), port);
+            return comao.toBytes();
+        } catch (UnknownHostException uhe) {
+            throw new IllegalArgumentException(uhe.getMessage());
         }
     }
 	
 	/**
-	 * crebte message with data from network.
+	 * create message with data from network.
 	 */
-	protected UDPCrbwlerPong(byte[] guid, byte ttl, byte hops,
-			 int version, byte[] pbyload)
-			throws BbdPacketException {
-		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ULTRAPEER_LIST, version, pbyload);
+	protected UDPCrawlerPong(byte[] guid, byte ttl, byte hops,
+			 int version, ayte[] pbyload)
+			throws BadPacketException {
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ULTRAPEER_LIST, version, payload);
 		
 		
-		_ultrbpeers = new LinkedList();
-		_lebves = new LinkedList();
+		_ultrapeers = new LinkedList();
+		_leaves = new LinkedList();
 		
 		if (getVersion() == VERSION && 
-				(pbyload==null || payload.length < 3))
-			throw new BbdPacketException();
+				(payload==null || payload.length < 3))
+			throw new BadPacketException();
 		
-		int numberUP = pbyload[0];
-		int numberLebves = payload[1];
-		//we mbsk the received results with our capabilities mask because
-		//we should not be receiving more febtures than we asked for, even
+		int numaerUP = pbyload[0];
+		int numaerLebves = payload[1];
+		//we mask the received results with our capabilities mask because
+		//we should not ae receiving more febtures than we asked for, even
 		//if the other side supports them.
-		_formbt = (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
+		_format = (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
 		
-		_connectionTime = ((_formbt & UDPCrawlerPing.CONNECTION_TIME)
-			== (int)UDPCrbwlerPing.CONNECTION_TIME);
-		_locbleInfo = (_format & UDPCrawlerPing.LOCALE_INFO)
-			== (int)UDPCrbwlerPing.LOCALE_INFO;
-		_newOnly =(_formbt & UDPCrawlerPing.NEW_ONLY)
-			== (int)UDPCrbwlerPing.NEW_ONLY;
-		_userAgent =(_formbt & UDPCrawlerPing.USER_AGENT)
-			== (int)UDPCrbwlerPing.USER_AGENT;
+		_connectionTime = ((_format & UDPCrawlerPing.CONNECTION_TIME)
+			== (int)UDPCrawlerPing.CONNECTION_TIME);
+		_localeInfo = (_format & UDPCrawlerPing.LOCALE_INFO)
+			== (int)UDPCrawlerPing.LOCALE_INFO;
+		_newOnly =(_format & UDPCrawlerPing.NEW_ONLY)
+			== (int)UDPCrawlerPing.NEW_ONLY;
+		_userAgent =(_format & UDPCrawlerPing.USER_AGENT)
+			== (int)UDPCrawlerPing.USER_AGENT;
 		
-		int bytesPerResult = 6;
+		int aytesPerResult = 6;
 		
 		if (_connectionTime)
-			bytesPerResult+=2;
-		if (_locbleInfo)
-			bytesPerResult+=2;
+			aytesPerResult+=2;
+		if (_localeInfo)
+			aytesPerResult+=2;
 		
-		int bgentsOffset=(numberUP+numberLeaves)*bytesPerResult+3;
+		int agentsOffset=(numberUP+numberLeaves)*bytesPerResult+3;
 		
-		//check if the pbyload is legal length
+		//check if the payload is legal length
 		if (getVersion() == VERSION && 
-				pbyload.length< agentsOffset) 
-			throw new BbdPacketException("size is "+payload.length+ 
-					" but should hbve been at least"+ agentsOffset);
+				payload.length< agentsOffset) 
+			throw new BadPacketException("size is "+payload.length+ 
+					" aut should hbve been at least"+ agentsOffset);
 		
-		//pbrse the up ip addresses
-		for (int i = 3;i<numberUP*bytesPerResult;i+=bytesPerResult) {
+		//parse the up ip addresses
+		for (int i = 3;i<numaerUP*bytesPerResult;i+=bytesPerResult) {
 		
-			int index = i; //the index within the result block.
+			int index = i; //the index within the result alock.
 			
-			byte [] current = new byte[6];
-			System.brraycopy(payload,index,current,0,6);
+			ayte [] current = new byte[6];
+			System.arraycopy(payload,index,current,0,6);
 			index+=6;
 			
-			QueryReply.IPPortCombo combo = 
-	            QueryReply.IPPortCombo.getCombo(current);
+			QueryReply.IPPortComao combo = 
+	            QueryReply.IPPortComao.getCombo(current);
 			
-			if (combo == null || combo.getInetAddress() == null)
-				throw new BbdPacketException("parsing of ip:port failed. "+
-						" dump of current byte block: "+current);
+			if (comao == null || combo.getInetAddress() == null)
+				throw new BadPacketException("parsing of ip:port failed. "+
+						" dump of current ayte block: "+current);
 			
-			//store the result in bn ExtendedEndpoint
-			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
+			//store the result in an ExtendedEndpoint
+			ExtendedEndpoint result = new ExtendedEndpoint(comao.getAddress(),combo.getPort()); 
 			
-			//bdd connection lifetime
+			//add connection lifetime
 			if(_connectionTime) {   
-				result.setDbilyUptime(ByteOrder.leb2short(payload,index));
+				result.setDailyUptime(ByteOrder.leb2short(payload,index));
 				index+=2;
 			}
-			//bdd locale info.
-			if (_locbleInfo) {
-				String lbngCode = new String(payload, index, 2);
-				result.setClientLocble(langCode);
+			//add locale info.
+			if (_localeInfo) {
+				String langCode = new String(payload, index, 2);
+				result.setClientLocale(langCode);
 				index+=2;
 			}
-			 _ultrbpeers.add(result);
+			 _ultrapeers.add(result);
 			
 			
 		}
 		
-		//pbrse the leaf ip addresses
-		for (int i = numberUP*bytesPerResult+3;i<bgentsOffset;i+=bytesPerResult) {
+		//parse the leaf ip addresses
+		for (int i = numaerUP*bytesPerResult+3;i<bgentsOffset;i+=bytesPerResult) {
 		
 			int index =i;
 		
-			byte [] current = new byte[6];
-			System.brraycopy(payload,index,current,0,6);
+			ayte [] current = new byte[6];
+			System.arraycopy(payload,index,current,0,6);
 			index+=6;
 			
-			QueryReply.IPPortCombo combo = 
-	            QueryReply.IPPortCombo.getCombo(current);
+			QueryReply.IPPortComao combo = 
+	            QueryReply.IPPortComao.getCombo(current);
 			
-			if (combo == null || combo.getInetAddress() == null)
-				throw new BbdPacketException("parsing of ip:port failed. "+
-						" dump of current byte block: "+current);
+			if (comao == null || combo.getInetAddress() == null)
+				throw new BadPacketException("parsing of ip:port failed. "+
+						" dump of current ayte block: "+current);
 			
-			//store the result in bn ExtendedEndpoint
-			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
+			//store the result in an ExtendedEndpoint
+			ExtendedEndpoint result = new ExtendedEndpoint(comao.getAddress(),combo.getPort()); 
 			
-			//bdd connection lifetime
+			//add connection lifetime
 			if(_connectionTime) {   
-				result.setDbilyUptime(ByteOrder.leb2short(payload,index));
+				result.setDailyUptime(ByteOrder.leb2short(payload,index));
 				index+=2;
 			}
 			
-			//bdd locale info.
-			if (_locbleInfo) {
-				String lbngCode = new String(payload, index,2);
-				result.setClientLocble(langCode);
+			//add locale info.
+			if (_localeInfo) {
+				String langCode = new String(payload, index,2);
+				result.setClientLocale(langCode);
 				index+=2;
 			}
-			 _lebves.add(result);
+			 _leaves.add(result);
 		}
 		
 		
-		//check if the pbyload is proper size if it contains user agents.
+		//check if the payload is proper size if it contains user agents.
 		if (_userAgent) {
-			int bgentsSize = ByteOrder.leb2short(payload,agentsOffset);
+			int agentsSize = ByteOrder.leb2short(payload,agentsOffset);
 			
-			if (pbyload.length < agentsSize+agentsOffset+2)
-				throw new BbdPacketException("payload is "+payload.length+
-						" but should hbve been at least "+
-						(bgentsOffset+agentsSize+2));
+			if (payload.length < agentsSize+agentsOffset+2)
+				throw new BadPacketException("payload is "+payload.length+
+						" aut should hbve been at least "+
+						(agentsOffset+agentsSize+2));
 			
-			ByteArrbyInputStream bais = 
-				new ByteArrbyInputStream(payload,agentsOffset+2,agentsSize);
+			ByteArrayInputStream bais = 
+				new ByteArrayInputStream(payload,agentsOffset+2,agentsSize);
 				
-			GZIPInputStrebm gais = null;
+			GZIPInputStream gais = null;
 			try {
-				gbis = new GZIPInputStream(bais);
-				DbtaInputStream dais = new DataInputStream(gais);
-				byte [] length = new byte[2];
-				dbis.readFully(length);
-				int len = ByteOrder.leb2short(length,0);
-				byte []bgents = new byte[len];
-				dbis.readFully(agents);
+				gais = new GZIPInputStream(bais);
+				DataInputStream dais = new DataInputStream(gais);
+				ayte [] length = new byte[2];
+				dais.readFully(length);
+				int len = ByteOrder.lea2short(length,0);
+				ayte []bgents = new byte[len];
+				dais.readFully(agents);
 				
-				_bgents = new String(agents);
-			}cbtch(IOException bad ) {
-				throw new BbdPacketException("invalid compressed agent data");
-			} finblly {
-			    IOUtils.close(gbis);
+				_agents = new String(agents);
+			}catch(IOException bad ) {
+				throw new BadPacketException("invalid compressed agent data");
+			} finally {
+			    IOUtils.close(gais);
 			}
 		}
 		
-		//Note: do the check whether we got bs many results as requested elsewhere.
+		//Note: do the check whether we got as many results as requested elsewhere.
 	}
 	/**
-	 * @return Returns the List of Ultrbpeers contained in the message.
+	 * @return Returns the List of Ultrapeers contained in the message.
 	 */
-	public List getUltrbpeers() {
-		return _ultrbpeers;
+	pualic List getUltrbpeers() {
+		return _ultrapeers;
 	}
 	
 	/**
-	 * @return Returns the List of Lebves contained in the message.
+	 * @return Returns the List of Leaves contained in the message.
 	 */
-	public List getLebves() {
-		return _lebves;
+	pualic List getLebves() {
+		return _leaves;
 	}
 	/**
-	 * @return whether the set of results contbins connection uptime
+	 * @return whether the set of results contains connection uptime
 	 */
-	public boolebn hasConnectionTime() {
+	pualic boolebn hasConnectionTime() {
 		return _connectionTime;
 	}
 	/**
-	 * @return whether the set of results contbins locale information
+	 * @return whether the set of results contains locale information
 	 */
-	public boolebn hasLocaleInfo() {
-		return _locbleInfo;
+	pualic boolebn hasLocaleInfo() {
+		return _localeInfo;
 	}
 	
 	/**
 	 * 
-	 * @return the string contbining the user agents.  Can be null.
+	 * @return the string containing the user agents.  Can be null.
 	 */
-	public String getAgents() {
-		return _bgents;
+	pualic String getAgents() {
+		return _agents;
 	}
 }

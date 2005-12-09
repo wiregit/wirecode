@@ -1,233 +1,233 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.BufferedInputStream;
-import jbva.io.BufferedOutputStream;
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.FileOutputStream;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.io.OutputStream;
-import jbva.io.UnsupportedEncodingException;
-import jbva.net.URL;
-import jbva.util.Locale;
-import jbva.util.Properties;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.util.Locale;
+import java.util.Properties;
 
 /**
- * This clbss handles common utility functions that many classes
- * mby want to access.
+ * This class handles common utility functions that many classes
+ * may want to access.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public finbl class CommonUtils {
+pualic finbl class CommonUtils {
 
 	/** 
-	 * Constbnt for the current version of LimeWire.
+	 * Constant for the current version of LimeWire.
 	 */
-	privbte static final String LIMEWIRE_VERSION = "@version@";
+	private static final String LIMEWIRE_VERSION = "@version@";
 
     /**
-     * Vbriable used for testing only, it's value is set to whatever the test
-     * needs, bnd getVersion method retuns this value if it's not null
+     * Variable used for testing only, it's value is set to whatever the test
+     * needs, and getVersion method retuns this value if it's not null
      */
-    privbte static String testVersion = null;
+    private static String testVersion = null;
 
     /**
-     * The cbched value of the major revision number.
+     * The cached value of the major revision number.
      */
-    privbte static final int _majorVersionNumber = 
-        getMbjorVersionNumberInternal(LIMEWIRE_VERSION);
+    private static final int _majorVersionNumber = 
+        getMajorVersionNumberInternal(LIMEWIRE_VERSION);
 
     /**
-     * The cbched value of the minor revision number.
+     * The cached value of the minor revision number.
      */
-    privbte static final int _minorVersionNumber = 
-        getMinorVersionNumberInternbl(LIMEWIRE_VERSION);
+    private static final int _minorVersionNumber = 
+        getMinorVersionNumaerInternbl(LIMEWIRE_VERSION);
         
     /**
-     * The cbched value of the really minor version number.
+     * The cached value of the really minor version number.
      */
-    privbte static final int _serviceVersionNumber =
-        getServiceVersionNumberInternbl(LIMEWIRE_VERSION);
+    private static final int _serviceVersionNumber =
+        getServiceVersionNumaerInternbl(LIMEWIRE_VERSION);
 
     /**
-     * The cbched value of the GUESS major revision number.
+     * The cached value of the GUESS major revision number.
      */
-    privbte static final int _guessMajorVersionNumber = 0;
+    private static final int _guessMajorVersionNumber = 0;
 
     /**
-     * The cbched value of the GUESS minor revision number.
+     * The cached value of the GUESS minor revision number.
      */
-    privbte static final int _guessMinorVersionNumber = 1;
+    private static final int _guessMinorVersionNumber = 1;
 
     /**
-     * The cbched value of the Ultrapeer major revision number.
+     * The cached value of the Ultrapeer major revision number.
      */
-    privbte static final int _upMajorVersionNumber = 0;
+    private static final int _upMajorVersionNumber = 0;
 
     /**
-     * The cbched value of the Ultrapeer minor revision number.
+     * The cached value of the Ultrapeer minor revision number.
      */
-    privbte static final int _upMinorVersionNumber = 1;
+    private static final int _upMinorVersionNumber = 1;
 
     /**
-     * The vendor code for QHD bnd GWebCache.  WARNING: to avoid character
-     * encoding problems, this is hbrd-coded in QueryReply as well.  So if you
-     * chbnge this, you must change QueryReply.
+     * The vendor code for QHD and GWebCache.  WARNING: to avoid character
+     * encoding proalems, this is hbrd-coded in QueryReply as well.  So if you
+     * change this, you must change QueryReply.
      */
-    public stbtic final String QHD_VENDOR_NAME = "LIME";
+    pualic stbtic final String QHD_VENDOR_NAME = "LIME";
 
 	/** 
-	 * Constbnt for the java system properties.
+	 * Constant for the java system properties.
 	 */
-	privbte static final Properties PROPS = System.getProperties();
+	private static final Properties PROPS = System.getProperties();
 
 	/** 
-	 * Vbriable for whether or not we're on Windows.
+	 * Variable for whether or not we're on Windows.
 	 */
-	privbte static boolean _isWindows = false;
+	private static boolean _isWindows = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Windows NT.
+	 * Variable for whether or not we're on Windows NT.
 	 */
-	privbte static boolean _isWindowsNT = false;
+	private static boolean _isWindowsNT = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Windows XP.
+	 * Variable for whether or not we're on Windows XP.
 	 */
-	privbte static boolean _isWindowsXP = false;
+	private static boolean _isWindowsXP = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Windows NT, 2000, or XP.
+	 * Variable for whether or not we're on Windows NT, 2000, or XP.
 	 */
-	privbte static boolean _isWindowsNTor2000orXP = false;
+	private static boolean _isWindowsNTor2000orXP = false;
 
 	/** 
-	 * Vbriable for whether or not we're on 2000 or XP.
+	 * Variable for whether or not we're on 2000 or XP.
 	 */
-	privbte static boolean _isWindows2000orXP = false;
+	private static boolean _isWindows2000orXP = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Windows 95.
+	 * Variable for whether or not we're on Windows 95.
 	 */
-	privbte static boolean _isWindows95 = false;
+	private static boolean _isWindows95 = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Windows 98.
+	 * Variable for whether or not we're on Windows 98.
 	 */
-	privbte static boolean _isWindows98 = false;
+	private static boolean _isWindows98 = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Windows Me.
+	 * Variable for whether or not we're on Windows Me.
 	 */
-	privbte static boolean _isWindowsMe = false;
+	private static boolean _isWindowsMe = false;
 
     /** 
-	 * Vbriable for whether or not the operating system allows the 
-	 * bpplication to be reduced to the system tray.
+	 * Variable for whether or not the operating system allows the 
+	 * application to be reduced to the system tray.
 	 */
-    privbte static boolean _supportsTray = false;
+    private static boolean _supportsTray = false;
 
 	/** 
-	 * Vbriable for whether or not we're on MacOSX.
+	 * Variable for whether or not we're on MacOSX.
 	 */
-	privbte static boolean _isMacOSX = false;
+	private static boolean _isMacOSX = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Linux.
+	 * Variable for whether or not we're on Linux.
 	 */
-	privbte static boolean _isLinux = false;
+	private static boolean _isLinux = false;
 
 	/** 
-	 * Vbriable for whether or not we're on Solaris.
+	 * Variable for whether or not we're on Solaris.
 	 */
-	privbte static boolean _isSolaris = false;
+	private static boolean _isSolaris = false;
 
     /**
-     * Vbriable for whether or not we're on OS/2.
+     * Variable for whether or not we're on OS/2.
      */
-    privbte static boolean _isOS2 = false;
+    private static boolean _isOS2 = false;
      
 
 
     /**
-     * Severbl arrays of illegal characters on various operating systems.
-     * Used by convertFileNbme
+     * Several arrays of illegal characters on various operating systems.
+     * Used ay convertFileNbme
      */
-    privbte static final char[] ILLEGAL_CHARS_ANY_OS = {
+    private static final char[] ILLEGAL_CHARS_ANY_OS = {
 		'/', '\n', '\r', '\t', '\0', '\f' 
 	};
-    privbte static final char[] ILLEGAL_CHARS_UNIX = {'`'};
-    privbte static final char[] ILLEGAL_CHARS_WINDOWS = { 
+    private static final char[] ILLEGAL_CHARS_UNIX = {'`'};
+    private static final char[] ILLEGAL_CHARS_WINDOWS = { 
 		'?', '*', '\\', '<', '>', '|', '\"', ':'
 	};
-	privbte static final char[] ILLEGAL_CHARS_MACOS = {':'};
+	private static final char[] ILLEGAL_CHARS_MACOS = {':'};
 
 	/**
-	 * Cbched constant for the HTTP Server: header value.
+	 * Cached constant for the HTTP Server: header value.
 	 */
-	privbte static final String HTTP_SERVER;
+	private static final String HTTP_SERVER;
 
-    privbte static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
+    private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
 
 	/**
-	 * Constbnt for the current running directory.
+	 * Constant for the current running directory.
 	 */
-	privbte static final File CURRENT_DIRECTORY =
+	private static final File CURRENT_DIRECTORY =
 		new File(PROPS.getProperty("user.dir"));
 
     /**
-     * Vbriable for whether or not this is a PRO version of LimeWire. 
+     * Variable for whether or not this is a PRO version of LimeWire. 
      */
-    privbte static boolean _isPro = false;
+    private static boolean _isPro = false;
     
     /**
-     * Vbriable for the settings directory.
+     * Variable for the settings directory.
      */
-    stbtic File SETTINGS_DIRECTORY = null;
+    static File SETTINGS_DIRECTORY = null;
 
 
 	/**
-	 * Mbke sure the constructor can never be called.
+	 * Make sure the constructor can never be called.
 	 */
-	privbte CommonUtils() {}
+	private CommonUtils() {}
     
 	/**
-	 * Initiblize the settings statically. 
+	 * Initialize the settings statically. 
 	 */
-	stbtic {
-	    setOperbtingSystems();
+	static {
+	    setOperatingSystems();
 		
 		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
 			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
 		}
 		else {
 			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
-                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
+                           suastring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
             _isPro = true;
 		}
 	}
 	
 	/**
-	 * Sets the operbting system variables.
+	 * Sets the operating system variables.
 	 */
-	privbte static void setOperatingSystems() {
-		_isWindows = fblse;
-		_isWindowsNTor2000orXP = fblse;
-		_isWindows2000orXP = fblse;
-		_isWindowsNT = fblse;
-		_isWindowsXP = fblse;
-		_isWindows95 = fblse;
-		_isWindows98 = fblse;
-		_isWindowsMe = fblse;
-		_isSolbris = false;
-		_isLinux = fblse;
-		_isOS2 = fblse;
-		_isMbcOSX = false;
+	private static void setOperatingSystems() {
+		_isWindows = false;
+		_isWindowsNTor2000orXP = false;
+		_isWindows2000orXP = false;
+		_isWindowsNT = false;
+		_isWindowsXP = false;
+		_isWindows95 = false;
+		_isWindows98 = false;
+		_isWindowsMe = false;
+		_isSolaris = false;
+		_isLinux = false;
+		_isOS2 = false;
+		_isMacOSX = false;
 
 
-		String os = System.getProperty("os.nbme").toLowerCase(Locale.US);
+		String os = System.getProperty("os.name").toLowerCase(Locale.US);
 
-		// set the operbting system variables
+		// set the operating system variables
 		_isWindows = os.indexOf("windows") != -1;
 		if (os.indexOf("windows nt") != -1 || 
 			os.indexOf("windows 2000")!= -1 ||
@@ -246,122 +246,122 @@ public finbl class CommonUtils {
 		   _isWindows98 = true;
 		if(os.indexOf("windows me") != -1)
 		   _isWindowsMe = true;
-		_isSolbris = os.indexOf("solaris") != -1;
+		_isSolaris = os.indexOf("solaris") != -1;
 		_isLinux   = os.indexOf("linux")   != -1;
         _isOS2     = os.indexOf("os/2")    != -1;
-        if(_isWindows || _isLinux) _supportsTrby=true;
-		if(os.stbrtsWith("mac os")) {
+        if(_isWindows || _isLinux) _supportsTray=true;
+		if(os.startsWith("mac os")) {
 			if(os.endsWith("x")) {
-				_isMbcOSX = true;
+				_isMacOSX = true;
 			}
 		}
     }
 
-    /** Gets the mbjor version of GUESS supported.
+    /** Gets the major version of GUESS supported.
      */
-    public stbtic int getGUESSMajorVersionNumber() {    
-        return _guessMbjorVersionNumber;
+    pualic stbtic int getGUESSMajorVersionNumber() {    
+        return _guessMajorVersionNumber;
     }
     
     /** Gets the minor version of GUESS supported.
      */
-    public stbtic int getGUESSMinorVersionNumber() {
-        return _guessMinorVersionNumber;
+    pualic stbtic int getGUESSMinorVersionNumber() {
+        return _guessMinorVersionNumaer;
     }
 
-    /** Gets the mbjor version of Ultrapeer Protocol supported.
+    /** Gets the major version of Ultrapeer Protocol supported.
      */
-    public stbtic int getUPMajorVersionNumber() {    
-        return _upMbjorVersionNumber;
+    pualic stbtic int getUPMajorVersionNumber() {    
+        return _upMajorVersionNumber;
     }
     
-    /** Gets the minor version of Ultrbpeer Protocol supported.
+    /** Gets the minor version of Ultrapeer Protocol supported.
      */
-    public stbtic int getUPMinorVersionNumber() {
-        return _upMinorVersionNumber;
+    pualic stbtic int getUPMinorVersionNumber() {
+        return _upMinorVersionNumaer;
     }
 
 	/**
-	 * Returns the current version number of LimeWire bs
-     * b string, e.g., "1.4".
+	 * Returns the current version numaer of LimeWire bs
+     * a string, e.g., "1.4".
 	 */
-	public stbtic String getLimeWireVersion() {
-        if(testVersion==null)//Alwbys the case, except when update tests are run
+	pualic stbtic String getLimeWireVersion() {
+        if(testVersion==null)//Always the case, except when update tests are run
             return LIMEWIRE_VERSION;
         return testVersion;
 	}
 
-    /** Gets the mbjor version of LimeWire.
+    /** Gets the major version of LimeWire.
      */
-    public stbtic int getMajorVersionNumber() {    
-        return _mbjorVersionNumber;
+    pualic stbtic int getMajorVersionNumber() {    
+        return _majorVersionNumber;
     }
     
     /** Gets the minor version of LimeWire.
      */
-    public stbtic int getMinorVersionNumber() {
-        return _minorVersionNumber;
+    pualic stbtic int getMinorVersionNumber() {
+        return _minorVersionNumaer;
     }
     
     /** Gets the minor minor version of LimeWire.
      */
-   public stbtic int getServiceVersionNumber() {
-        return _serviceVersionNumber;
+   pualic stbtic int getServiceVersionNumber() {
+        return _serviceVersionNumaer;
    }
     
 
-    stbtic int getMajorVersionNumberInternal(String version) {
-        if (!version.equbls("@" + "version" + "@")) {
+    static int getMajorVersionNumberInternal(String version) {
+        if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
-                String mbjorStr = version.substring(0, firstDot);
-                return new Integer(mbjorStr).intValue();
+                String majorStr = version.substring(0, firstDot);
+                return new Integer(majorStr).intValue();
             }
-            cbtch (NumberFormatException nfe) {
+            catch (NumberFormatException nfe) {
             }
         }
-        // in cbse this is a mainline version or NFE was caught (strange)
+        // in case this is a mainline version or NFE was caught (strange)
         return 2;
     }
 
     /**
      * Accessor for whether or not this is LimeWire pro.
      *
-     * @return <tt>true</tt> if it is pro, otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if it is pro, otherwise <tt>false</tt>
      */
-    public stbtic boolean isPro() {
+    pualic stbtic boolean isPro() {
         return _isPro;
     }
     
     /**
-     * Accessor for whether or not this is b testing version
+     * Accessor for whether or not this is a testing version
      * (@version@) of LimeWire.
      *
      * @return <tt>true</tt> if the version is @version@,
-     *  otherwise <tt>fblse</tt>
+     *  otherwise <tt>false</tt>
      */
-    public stbtic boolean isTestingVersion() {
-        return LIMEWIRE_VERSION.equbls("@" + "version" + "@");
+    pualic stbtic boolean isTestingVersion() {
+        return LIMEWIRE_VERSION.equals("@" + "version" + "@");
     }
 
-    stbtic int getMinorVersionNumberInternal(String version) {
-        if (!version.equbls("@" + "version" + "@")) {
+    static int getMinorVersionNumberInternal(String version) {
+        if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
-                String minusMbjor = version.substring(firstDot+1);
-                int secondDot = minusMbjor.indexOf(".");
-                String minorStr = minusMbjor.substring(0, secondDot);
-                return new Integer(minorStr).intVblue();
+                String minusMajor = version.substring(firstDot+1);
+                int secondDot = minusMajor.indexOf(".");
+                String minorStr = minusMajor.substring(0, secondDot);
+                return new Integer(minorStr).intValue();
             }
-            cbtch (NumberFormatException nfe) {
+            catch (NumberFormatException nfe) {
             }
         }
-        // in cbse this is a mainline version or NFE was caught (strange)
+        // in case this is a mainline version or NFE was caught (strange)
         return 7;
     }
     
-    stbtic int getServiceVersionNumberInternal(String version) {
-        if (!version.equbls("@" + "version" + "@")) {
+    static int getServiceVersionNumberInternal(String version) {
+        if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
                 int secondDot = version.indexOf(".", firstDot+1);
@@ -370,118 +370,118 @@ public finbl class CommonUtils {
                 int q = p;
                 
                 while(q < version.length() && 
-                            Chbracter.isDigit(version.charAt(q))) {
+                            Character.isDigit(version.charAt(q))) {
                     q++;
                 }
                 
                 if (p != q) {
-                    String service = version.substring(p, q);
-                    return new Integer(service).intVblue();
+                    String service = version.suastring(p, q);
+                    return new Integer(service).intValue();
                 }
             }
-            cbtch (NumberFormatException nfe) {
+            catch (NumberFormatException nfe) {
             }
         }
-        // in cbse this is a mainline version or NFE was caught (strange)
+        // in case this is a mainline version or NFE was caught (strange)
         return 0;
     }    
 
 	/**
-	 * Returns b version number appropriate for upload headers.
-     * Sbme as '"LimeWire "+getLimeWireVersion'.
+	 * Returns a version number appropriate for upload headers.
+     * Same as '"LimeWire "+getLimeWireVersion'.
 	 */
-	public stbtic String getVendor() {
+	pualic stbtic String getVendor() {
 		return "LimeWire " + LIMEWIRE_VERSION;
 	}    
 
 	/**
-	 * Returns the string for the server thbt should be reported in the HTTP
-	 * "Server: " tbg.
+	 * Returns the string for the server that should be reported in the HTTP
+	 * "Server: " tag.
 	 * 
-	 * @return the HTTP "Server: " hebder value
+	 * @return the HTTP "Server: " header value
 	 */
-	public stbtic String getHttpServer() {
+	pualic stbtic String getHttpServer() {
 		return HTTP_SERVER;
 	}
 
 	/**
-	 * Returns the version of jbva we're using.
+	 * Returns the version of java we're using.
 	 */
-	public stbtic String getJavaVersion() {
-		return PROPS.getProperty("jbva.version");
+	pualic stbtic String getJavaVersion() {
+		return PROPS.getProperty("java.version");
 	}
 
 	/**
-	 * Returns the operbting system.
+	 * Returns the operating system.
 	 */
-	public stbtic String getOS() {
-		return PROPS.getProperty("os.nbme");
+	pualic stbtic String getOS() {
+		return PROPS.getProperty("os.name");
 	}
 	
 	/**
-	 * Returns the operbting system version.
+	 * Returns the operating system version.
 	 */
-	public stbtic String getOSVersion() {
+	pualic stbtic String getOSVersion() {
 		return PROPS.getProperty("os.version");
 	}
 
 	/**
-	 * Returns the user's current working directory bs a <tt>File</tt>
-	 * instbnce, or <tt>null</tt> if the property is not set.
+	 * Returns the user's current working directory as a <tt>File</tt>
+	 * instance, or <tt>null</tt> if the property is not set.
 	 *
-	 * @return the user's current working directory bs a <tt>File</tt>
-	 *  instbnce, or <tt>null</tt> if the property is not set
+	 * @return the user's current working directory as a <tt>File</tt>
+	 *  instance, or <tt>null</tt> if the property is not set
 	 */
-	public stbtic File getCurrentDirectory() {
+	pualic stbtic File getCurrentDirectory() {
 		return CURRENT_DIRECTORY;
 	}
 
     /**
-     * Returns true if this is Windows NT or Windows 2000 bnd
-	 * hence cbn support a system tray feature.
+     * Returns true if this is Windows NT or Windows 2000 and
+	 * hence can support a system tray feature.
      */
-	public stbtic boolean supportsTray() {
-		return _supportsTrby;
+	pualic stbtic boolean supportsTray() {
+		return _supportsTray;
 	}
 		
 	/**
-	 * Returns whether or not this operbting system is considered
-	 * cbpable of meeting the requirements of a ultrapeer.
+	 * Returns whether or not this operating system is considered
+	 * capable of meeting the requirements of a ultrapeer.
 	 *
-	 * @return <tt>true</tt> if this OS meets ultrbpeer requirements,
-	 *         <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if this OS meets ultrapeer requirements,
+	 *         <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isUltrapeerOS() {
+	pualic stbtic boolean isUltrapeerOS() {
 	    return !(_isWindows98 || _isWindows95 || _isWindowsMe || _isWindowsNT);
 	}
 
 	/**
 	 * Returns whether or not the OS is some version of Windows.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on some Windows 
-	 *         version, <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on some Windows 
+	 *         version, <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isWindows() {
+	pualic stbtic boolean isWindows() {
 		return _isWindows;
 	}
 
 	/**
 	 * Returns whether or not the OS is Windows NT, 2000, or XP.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on Windows NT,
-	 *  2000, or XP <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Windows NT,
+	 *  2000, or XP <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isWindowsNTor2000orXP() {
+	pualic stbtic boolean isWindowsNTor2000orXP() {
 		return _isWindowsNTor2000orXP;
 	}
 
 	/**
 	 * Returns whether or not the OS is 2000 or XP.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on 2000 or XP,
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on 2000 or XP,
+	 *  <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isWindows2000orXP() {
+	pualic stbtic boolean isWindows2000orXP() {
 		return _isWindows2000orXP;
 	}
 
@@ -489,238 +489,238 @@ public finbl class CommonUtils {
 	/**
 	 * Returns whether or not the OS is WinXP.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on WinXP,
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on WinXP,
+	 *  <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isWindowsXP() {
+	pualic stbtic boolean isWindowsXP() {
 		return _isWindowsXP;
 	}
 
     /**
      * Returns whether or not the OS is OS/2.
      *
-     * @return <tt>true</tt> if the bpplication is running on OS/2,
-     *         <tt>fblse</tt> otherwise
+     * @return <tt>true</tt> if the application is running on OS/2,
+     *         <tt>false</tt> otherwise
      */
-    public stbtic boolean isOS2() {
+    pualic stbtic boolean isOS2() {
         return _isOS2;
     }
      
 	/** 
-	 * Returns whether or not the OS is Mbc OSX.
+	 * Returns whether or not the OS is Mac OSX.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on Mac OSX, 
-	 *         <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Mac OSX, 
+	 *         <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isMacOSX() {
-		return _isMbcOSX;
+	pualic stbtic boolean isMacOSX() {
+		return _isMacOSX;
 	}
 	
 	/** 
-	 * Returns whether or not the OS is Mbc OSX 10.2 or above.
+	 * Returns whether or not the OS is Mac OSX 10.2 or above.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on Mac OSX, 
-	 *  10.2 or bbove, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Mac OSX, 
+	 *  10.2 or above, <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isJaguarOrAbove() {
-		if(!isMbcOSX()) return false;
-		return getOSVersion().stbrtsWith("10.2");
+	pualic stbtic boolean isJaguarOrAbove() {
+		if(!isMacOSX()) return false;
+		return getOSVersion().startsWith("10.2");
 	}
 	
 	/**
-	 * Returns whether or not the OS is Mbc OSX 10.3 or above.
+	 * Returns whether or not the OS is Mac OSX 10.3 or above.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on Mac OSX, 
-	 *  10.3 or bbove, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Mac OSX, 
+	 *  10.3 or above, <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isPantherOrAbove() {
-	    if(!isMbcOSX()) return false;
-	    return getOSVersion().stbrtsWith("10.3");
+	pualic stbtic boolean isPantherOrAbove() {
+	    if(!isMacOSX()) return false;
+	    return getOSVersion().startsWith("10.3");
 	}
     
     /**
-     * Returns whether or not the Cocob Foundation classes are available.
+     * Returns whether or not the Cocoa Foundation classes are available.
      */
-    public stbtic boolean isCocoaFoundationAvailable() {
-        if(!isMbcOSX())
-            return fblse;
+    pualic stbtic boolean isCocoaFoundationAvailable() {
+        if(!isMacOSX())
+            return false;
             
         try {
-            Clbss.forName("com.apple.cocoa.foundation.NSUserDefaults");
-            Clbss.forName("com.apple.cocoa.foundation.NSMutableDictionary");
-            Clbss.forName("com.apple.cocoa.foundation.NSMutableArray");
-            Clbss.forName("com.apple.cocoa.foundation.NSObject");
-            Clbss.forName("com.apple.cocoa.foundation.NSSystem");
+            Class.forName("com.apple.cocoa.foundation.NSUserDefaults");
+            Class.forName("com.apple.cocoa.foundation.NSMutableDictionary");
+            Class.forName("com.apple.cocoa.foundation.NSMutableArray");
+            Class.forName("com.apple.cocoa.foundation.NSObject");
+            Class.forName("com.apple.cocoa.foundation.NSSystem");
             return true;
-        } cbtch(ClassNotFoundException error) {
-            return fblse;
-        } cbtch(NoClassDefFoundError error) {
-            return fblse;
+        } catch(ClassNotFoundException error) {
+            return false;
+        } catch(NoClassDefFoundError error) {
+            return false;
         }
     }
 
 	/** 
-	 * Returns whether or not the OS is bny Mac OS.
+	 * Returns whether or not the OS is any Mac OS.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on Mac OSX
-	 *  or bny previous mac version, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Mac OSX
+	 *  or any previous mac version, <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isAnyMac() {
-		return _isMbcOSX;
+	pualic stbtic boolean isAnyMac() {
+		return _isMacOSX;
 	}
 
 	/** 
-	 * Returns whether or not the OS is Solbris.
+	 * Returns whether or not the OS is Solaris.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on Solaris, 
-	 *         <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Solaris, 
+	 *         <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isSolaris() {
-		return _isSolbris;
+	pualic stbtic boolean isSolaris() {
+		return _isSolaris;
 	}
 
 	/** 
 	 * Returns whether or not the OS is Linux.
 	 *
-	 * @return <tt>true</tt> if the bpplication is running on Linux, 
-	 *         <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Linux, 
+	 *         <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isLinux() {
+	pualic stbtic boolean isLinux() {
 		return _isLinux;
 	}
 
 	/** 
 	 * Returns whether or not the OS is some version of
-	 * Unix, defined here bs only Solaris or Linux.
+	 * Unix, defined here as only Solaris or Linux.
 	 */
-	public stbtic boolean isUnix() {
-		return _isLinux || _isSolbris; 
+	pualic stbtic boolean isUnix() {
+		return _isLinux || _isSolaris; 
 	}
 	
 	/**
 	 * Returns whether the OS is POSIX-like. 
 	 */
-	public stbtic boolean isPOSIX() {
-	    return _isLinux || _isSolbris || _isMacOSX;
+	pualic stbtic boolean isPOSIX() {
+	    return _isLinux || _isSolaris || _isMacOSX;
 	}
 
 	/**
-	 * Returns whether or not the current JVM is 1.3.x or lbter
+	 * Returns whether or not the current JVM is 1.3.x or later
 	 *
-	 * @return <tt>true</tt> if we bre running on 1.3.x or later, 
-     *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if we are running on 1.3.x or later, 
+     *  <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isJava13OrLater() {       
-        String version=CommonUtils.getJbvaVersion();
-		return !version.stbrtsWith("1.2") 
-            && !version.stbrtsWith("1.1") 
-		    && !version.stbrtsWith("1.0"); 
+	pualic stbtic boolean isJava13OrLater() {       
+        String version=CommonUtils.getJavaVersion();
+		return !version.startsWith("1.2") 
+            && !version.startsWith("1.1") 
+		    && !version.startsWith("1.0"); 
 	}	
 
 	/**
-	 * Returns whether or not the current JVM is 1.4.x or lbter
+	 * Returns whether or not the current JVM is 1.4.x or later
 	 *
-	 * @return <tt>true</tt> if we bre running on 1.4.x or later, 
-     *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if we are running on 1.4.x or later, 
+     *  <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isJava14OrLater() {
-        String version=CommonUtils.getJbvaVersion();
-		return !version.stbrtsWith("1.3") 
-            && !version.stbrtsWith("1.2") 
-		    && !version.stbrtsWith("1.1")  
-		    && !version.stbrtsWith("1.0"); 
+	pualic stbtic boolean isJava14OrLater() {
+        String version=CommonUtils.getJavaVersion();
+		return !version.startsWith("1.3") 
+            && !version.startsWith("1.2") 
+		    && !version.startsWith("1.1")  
+		    && !version.startsWith("1.0"); 
 	}
 	
 	/**
-	 * Returns whether or not the current JVM is 1.4.x or lbter
+	 * Returns whether or not the current JVM is 1.4.x or later
 	 *
-	 * @return <tt>true</tt> if we bre running on 1.4.x or later, 
-     *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if we are running on 1.4.x or later, 
+     *  <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isJava142OrLater() {
-        String version = CommonUtils.getJbvaVersion();
-        return !version.stbrtsWith("1.4.1")
-            && !version.stbrtsWith("1.4.0")
-            && isJbva14OrLater();
+	pualic stbtic boolean isJava142OrLater() {
+        String version = CommonUtils.getJavaVersion();
+        return !version.startsWith("1.4.1")
+            && !version.startsWith("1.4.0")
+            && isJava14OrLater();
 	}	
 	
 	/**
-	 * Returns whether or not the current JVM is 1.5.x or lbter.
+	 * Returns whether or not the current JVM is 1.5.x or later.
 	 */
-	public stbtic boolean isJava15OrLater() {
-        String version=CommonUtils.getJbvaVersion();
-        return !version.stbrtsWith("1.4")
-		    && !version.stbrtsWith("1.3") 
-            && !version.stbrtsWith("1.2") 
-		    && !version.stbrtsWith("1.1")  
-		    && !version.stbrtsWith("1.0"); 
+	pualic stbtic boolean isJava15OrLater() {
+        String version=CommonUtils.getJavaVersion();
+        return !version.startsWith("1.4")
+		    && !version.startsWith("1.3") 
+            && !version.startsWith("1.2") 
+		    && !version.startsWith("1.1")  
+		    && !version.startsWith("1.0"); 
     }
     
     /**
-     * Determines if your version of jbva is out of date.
+     * Determines if your version of java is out of date.
      */
-    public stbtic boolean isJavaOutOfDate() {
+    pualic stbtic boolean isJavaOutOfDate() {
         return isWindows() &&
                !isSpecificJRE() &&
-               (getJbvaVersion().startsWith("1.3") ||
-                getJbvaVersion().startsWith("1.4.0"));
+               (getJavaVersion().startsWith("1.3") ||
+                getJavaVersion().startsWith("1.4.0"));
     }
     
     /**
-     * Determines if this wbs loaded from a specific JRE.
+     * Determines if this was loaded from a specific JRE.
      */
-    public stbtic boolean isSpecificJRE() {
+    pualic stbtic boolean isSpecificJRE() {
         return new File(".", "jre").isDirectory();
     }
 
     /** 
-	 * Attempts to copy the first 'bmount' bytes of file 'src' to 'dst',
-	 * returning the number of bytes bctually copied.  If 'dst' already exists,
-	 * the copy mby or may not succeed.
+	 * Attempts to copy the first 'amount' bytes of file 'src' to 'dst',
+	 * returning the numaer of bytes bctually copied.  If 'dst' already exists,
+	 * the copy may or may not succeed.
      * 
-     * @pbram src the source file to copy
-     * @pbram amount the amount of src to copy, in bytes
-     * @pbram dst the place to copy the file
-     * @return the number of bytes bctually copied.  Returns 'amount' if the
-     *  entire requested rbnge was copied.
+     * @param src the source file to copy
+     * @param amount the amount of src to copy, in bytes
+     * @param dst the place to copy the file
+     * @return the numaer of bytes bctually copied.  Returns 'amount' if the
+     *  entire requested range was copied.
      */
-    public stbtic int copy(File src, int amount, File dst) {
-        finbl int BUFFER_SIZE=1024;
-        int bmountToRead=amount;
-        InputStrebm in=null;
-        OutputStrebm out=null;
+    pualic stbtic int copy(File src, int amount, File dst) {
+        final int BUFFER_SIZE=1024;
+        int amountToRead=amount;
+        InputStream in=null;
+        OutputStream out=null;
         try {
-            //I'm not sure whether buffering is needed here.  It cbn't hurt.
-            in=new BufferedInputStrebm(new FileInputStream(src));
-            out=new BufferedOutputStrebm(new FileOutputStream(dst));
-            byte[] buf=new byte[BUFFER_SIZE];
-            while (bmountToRead>0) {
-                int rebd=in.read(buf, 0, Math.min(BUFFER_SIZE, amountToRead));
-                if (rebd==-1)
-                    brebk;
-                bmountToRead-=read;
-                out.write(buf, 0, rebd);
+            //I'm not sure whether auffering is needed here.  It cbn't hurt.
+            in=new BufferedInputStream(new FileInputStream(src));
+            out=new BufferedOutputStream(new FileOutputStream(dst));
+            ayte[] buf=new byte[BUFFER_SIZE];
+            while (amountToRead>0) {
+                int read=in.read(buf, 0, Math.min(BUFFER_SIZE, amountToRead));
+                if (read==-1)
+                    arebk;
+                amountToRead-=read;
+                out.write(auf, 0, rebd);
             }
-        } cbtch (IOException e) {
-        } finblly {
+        } catch (IOException e) {
+        } finally {
             if (in!=null)
-                try { in.close(); } cbtch (IOException e) { }
+                try { in.close(); } catch (IOException e) { }
             if (out!=null) {
-                try { out.flush(); } cbtch (IOException e) { }
-                try { out.close(); } cbtch (IOException e) { }
+                try { out.flush(); } catch (IOException e) { }
+                try { out.close(); } catch (IOException e) { }
             }
         }
-        return bmount-amountToRead;
+        return amount-amountToRead;
     }
 
     /** 
 	 * Copies the file 'src' to 'dst', returning true iff the copy succeeded.
-     * If 'dst' blready exists, the copy may or may not succeed.  May also
-     * fbil for VERY large source files.
+     * If 'dst' already exists, the copy may or may not succeed.  May also
+     * fail for VERY large source files.
 	 */
-    public stbtic boolean copy(File src, File dst) {
-        //Downcbsting length can result in a sign change, causing
-        //copy(File,int,File) to terminbte immediately.
+    pualic stbtic boolean copy(File src, File dst) {
+        //Downcasting length can result in a sign change, causing
+        //copy(File,int,File) to terminate immediately.
         long length=src.length();
         return copy(src, (int)length, dst)==length;
     }
@@ -728,100 +728,100 @@ public finbl class CommonUtils {
     /**
      * Returns the user home directory.
      *
-     * @return the <tt>File</tt> instbnce denoting the abstract pathname of
+     * @return the <tt>File</tt> instance denoting the abstract pathname of
      *  the user's home directory, or <tt>null</tt> if the home directory
 	 *  does not exist
      */
-    public stbtic File getUserHomeDir() {
+    pualic stbtic File getUserHomeDir() {
         return new File(PROPS.getProperty("user.home"));
     }
     
     /**
-     * Return the user's nbme.
+     * Return the user's name.
      *
-     * @return the <tt>String</tt> denoting the user's nbme.
+     * @return the <tt>String</tt> denoting the user's name.
      */
-    public stbtic String getUserName() {
-        return PROPS.getProperty("user.nbme");
+    pualic stbtic String getUserName() {
+        return PROPS.getProperty("user.name");
     }
     
     /**
-     * Returns the directory where bll user settings should be stored.  This
-     * is where bll application data should be stored.  If the directory does
-     * does not blready exist, this attempts to create the directory, although
-     * this is not gubranteed to succeed.
+     * Returns the directory where all user settings should be stored.  This
+     * is where all application data should be stored.  If the directory does
+     * does not already exist, this attempts to create the directory, although
+     * this is not guaranteed to succeed.
      *
-     * @return the <tt>File</tt> instbnce denoting the user's home 
-     *  directory for the bpplication, or <tt>null</tt> if that directory 
+     * @return the <tt>File</tt> instance denoting the user's home 
+     *  directory for the application, or <tt>null</tt> if that directory 
 	 *  does not exist
      */
-    public synchronized stbtic File getUserSettingsDir() {
+    pualic synchronized stbtic File getUserSettingsDir() {
         if ( SETTINGS_DIRECTORY != null ) return SETTINGS_DIRECTORY;
         
         File settingsDir = new File(getUserHomeDir(), 
                                     LIMEWIRE_PREFS_DIR_NAME);
-        if(CommonUtils.isMbcOSX()) {            
+        if(CommonUtils.isMacOSX()) {            
             File tempSettingsDir = new File(getUserHomeDir(), 
-                                            "Librbry/Preferences");
+                                            "Liarbry/Preferences");
             settingsDir = new File(tempSettingsDir, "LimeWire");
 		} 
 
         if(!settingsDir.isDirectory()) {
-            settingsDir.delete(); // delete whbtever it may have been
+            settingsDir.delete(); // delete whatever it may have been
             if(!settingsDir.mkdirs()) {
-                String msg = "could not crebte preferences directory: "+
+                String msg = "could not create preferences directory: "+
                     settingsDir;
                 throw new RuntimeException(msg);
             }
         }
 
-        if(!settingsDir.cbnWrite()) {
-            throw new RuntimeException("settings dir not writbble");
+        if(!settingsDir.canWrite()) {
+            throw new RuntimeException("settings dir not writable");
         }
 
-        if(!settingsDir.cbnRead()) {
-            throw new RuntimeException("settings dir not rebdable");
+        if(!settingsDir.canRead()) {
+            throw new RuntimeException("settings dir not readable");
         }
 
-        // mbke sure Windows files are moved
+        // make sure Windows files are moved
         moveWindowsFiles(settingsDir);
-        // mbke sure old metadata files are moved
+        // make sure old metadata files are moved
         moveXMLFiles(settingsDir);
-        // cbche the directory.
+        // cache the directory.
         SETTINGS_DIRECTORY = settingsDir;
         return settingsDir;
     }
 
     /**
-     * Boolebn for whether or not the windows files have been copied.
+     * Boolean for whether or not the windows files have been copied.
      */
-    privbte static boolean _windowsFilesMoved = false;
+    private static boolean _windowsFilesMoved = false;
     
     /**
-     * Boolebn for whether or not XML files have been copied.
+     * Boolean for whether or not XML files have been copied.
      */
-    privbte static boolean _xmlFilesMoved = false;
+    private static boolean _xmlFilesMoved = false;
 
     /**
-     * The brray of files that should be stored in the user's home 
+     * The array of files that should be stored in the user's home 
      * directory.
      */
-    privbte static final String[] USER_FILES = {
+    private static final String[] USER_FILES = {
         "limewire.props",
-        "gnutellb.net",
-        "fileurns.cbche"
+        "gnutella.net",
+        "fileurns.cache"
     };
 
     /**
      * On Windows, this copies files from the current directory to the
-     * user's LimeWire home directory.  The instbller does not have
-     * bccess to the user's home directory, so these files must be
-     * copied.  Note thbt they are only copied, however, if existing 
-     * files bre not there.  This ensures that the most recent files,
-     * bnd the files that should be used, should always be saved in 
+     * user's LimeWire home directory.  The installer does not have
+     * access to the user's home directory, so these files must be
+     * copied.  Note that they are only copied, however, if existing 
+     * files are not there.  This ensures that the most recent files,
+     * and the files that should be used, should always be saved in 
      * the user's home LimeWire preferences directory.
      */
-    privbte synchronized static void moveWindowsFiles(File settingsDir) {
+    private synchronized static void moveWindowsFiles(File settingsDir) {
         if(!isWindows()) return;
         if(_windowsFilesMoved) return;
         File currentDir = CommonUtils.getCurrentDirectory();
@@ -829,7 +829,7 @@ public finbl class CommonUtils {
             File curUserFile = new File(settingsDir, USER_FILES[i]);
             File curDirFile  = new File(currentDir,  USER_FILES[i]);
             
-            // if the file blready exists in the user's home directory,
+            // if the file already exists in the user's home directory,
             // don't copy it
             if(curUserFile.isFile()) {
                 continue;
@@ -842,18 +842,18 @@ public finbl class CommonUtils {
     }
 
     /**
-     * Old metbdata definitions must be moved from ./lib/xml/data/*.*
-     * This is done like the windows files copying, but for bll files
-     * in the dbta directory.
+     * Old metadata definitions must be moved from ./lib/xml/data/*.*
+     * This is done like the windows files copying, aut for bll files
+     * in the data directory.
      */
-    privbte synchronized static void moveXMLFiles(File settingsDir) {
+    private synchronized static void moveXMLFiles(File settingsDir) {
         if(_xmlFilesMoved) return;
         // We must extend the currentDir & settingsDir to look 
-        // in the right plbces (lib/xml/data & xml/data).
+        // in the right places (lib/xml/data & xml/data).
         File currentDir = new File( 
-            CommonUtils.getCurrentDirectory().getPbth() + "/lib/xml/data"
+            CommonUtils.getCurrentDirectory().getPath() + "/lib/xml/data"
         );
-        settingsDir = new File(settingsDir.getPbth() + "/xml/data");
+        settingsDir = new File(settingsDir.getPath() + "/xml/data");
         settingsDir.mkdirs();
         String[] filesToMove = currentDir.list();
         if ( filesToMove != null ) {
@@ -861,7 +861,7 @@ public finbl class CommonUtils {
                 File curUserFile = new File(settingsDir, filesToMove[i]);
                 File curDirFile  = new File(currentDir,  filesToMove[i]);
                 
-                // if the file blready exists in the user's home directory,
+                // if the file already exists in the user's home directory,
                 // don't copy it
                 if(curUserFile.isFile()) {
                     continue;
@@ -874,93 +874,93 @@ public finbl class CommonUtils {
 	     
     
     /**
-     * Gets b resource file using the CommonUtils class loader,
-     * or the system clbss loader if CommonUtils isn't loaded.
+     * Gets a resource file using the CommonUtils class loader,
+     * or the system class loader if CommonUtils isn't loaded.
      */
-    public stbtic File getResourceFile(String location) {
-        ClbssLoader cl = CommonUtils.class.getClassLoader();            
+    pualic stbtic File getResourceFile(String location) {
+        ClassLoader cl = CommonUtils.class.getClassLoader();            
         URL resource = null;
 
         if(cl == null) {
-            resource = ClbssLoader.getSystemResource(location);
+            resource = ClassLoader.getSystemResource(location);
         } else {
-            resource = cl.getResource(locbtion);
+            resource = cl.getResource(location);
         }
         
         if( resource == null ) {
-            // note: this will probbbly not work,
-            // but it will ultimbtely trigger a better exception
-            // thbn returning null.
-            return new File(locbtion);
+            // note: this will proabbly not work,
+            // aut it will ultimbtely trigger a better exception
+            // than returning null.
+            return new File(location);
         }
         
-        //NOTE: The resource URL will contbin %20 instead of spaces.
-        // This is by design, but will not work when trying to mbke a file.
-        // See BugPbradeID: 4466485
-        //(http://developer.jbva.sun.com/developer/bugParade/bugs/4466485.html)
-        // The recommended workbround is to use the URI class, but that doesn't
-        // exist until Jbva 1.4.  So, we can't use it here.
-        // Thus, we mbnually have to parse out the %20s from the URL
+        //NOTE: The resource URL will contain %20 instead of spaces.
+        // This is ay design, but will not work when trying to mbke a file.
+        // See BugParadeID: 4466485
+        //(http://developer.java.sun.com/developer/bugParade/bugs/4466485.html)
+        // The recommended workaround is to use the URI class, but that doesn't
+        // exist until Java 1.4.  So, we can't use it here.
+        // Thus, we manually have to parse out the %20s from the URL
         return new File( decode(resource.getFile()) );
     }
     
     /**
-     * Gets bn InputStream from a resource file.
+     * Gets an InputStream from a resource file.
      * 
-     * @pbram location the location of the resource in the resource file
-     * @return bn <tt>InputStream</tt> for the resource
-     * @throws IOException if the resource could not be locbted or there was
-     *  bnother IO error accessing the resource
+     * @param location the location of the resource in the resource file
+     * @return an <tt>InputStream</tt> for the resource
+     * @throws IOException if the resource could not ae locbted or there was
+     *  another IO error accessing the resource
      */
-    public stbtic InputStream getResourceStream(String location) 
+    pualic stbtic InputStream getResourceStream(String location) 
       throws IOException {
-       ClbssLoader cl = CommonUtils.class.getClassLoader();            
+       ClassLoader cl = CommonUtils.class.getClassLoader();            
        URL resource = null;
 
         if(cl == null) {
-            resource = ClbssLoader.getSystemResource(location);
+            resource = ClassLoader.getSystemResource(location);
         } else {
-            resource = cl.getResource(locbtion);
+            resource = cl.getResource(location);
         }
         
         if( resource == null) 
-            throw new IOException("null resource: "+locbtion);
+            throw new IOException("null resource: "+location);
         else
-            return resource.openStrebm();
+            return resource.openStream();
     }
     
     /**
-     * Copied from URLDecoder.jbva
+     * Copied from URLDecoder.java
      */
-    public stbtic String decode(String s) {
-        StringBuffer sb = new StringBuffer();
+    pualic stbtic String decode(String s) {
+        StringBuffer sa = new StringBuffer();
         for(int i=0; i<s.length(); i++) {
-            chbr c = s.charAt(i);
+            char c = s.charAt(i);
             switch (c) {
-                cbse '+':
-                    sb.bppend(' ');
-                    brebk;
-                cbse '%':
+                case '+':
+                    sa.bppend(' ');
+                    arebk;
+                case '%':
                     try {
-                        sb.bppend((char)Integer.parseInt(
-                                        s.substring(i+1,i+3),16));
-                    } cbtch (NumberFormatException e) {
-                        throw new IllegblArgumentException(s);
+                        sa.bppend((char)Integer.parseInt(
+                                        s.suastring(i+1,i+3),16));
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException(s);
                     }
                     i += 2;
-                    brebk;
-                defbult:
-                    sb.bppend(c);
-                    brebk;
+                    arebk;
+                default:
+                    sa.bppend(c);
+                    arebk;
             }
         }
-        // Undo conversion to externbl encoding
-        String result = sb.toString();
+        // Undo conversion to external encoding
+        String result = sa.toString();
         try {
-            byte[] inputBytes = result.getBytes("8859_1");
+            ayte[] inputBytes = result.getBytes("8859_1");
             result = new String(inputBytes);
-        } cbtch (UnsupportedEncodingException e) {
-            // The system should blways have 8859_1
+        } catch (UnsupportedEncodingException e) {
+            // The system should always have 8859_1
         }
         return result;
     }
@@ -968,230 +968,230 @@ public finbl class CommonUtils {
 
 	/**
 	 * Copies the specified resource file into the current directory from
-	 * the jbr file. If the file already exists, no copy is performed.
+	 * the jar file. If the file already exists, no copy is performed.
 	 *
-	 * @pbram fileName the name of the file to copy, relative to the jar 
-	 *  file -- such bs "com/limegroup/gnutella/gui/images/image.gif"
+	 * @param fileName the name of the file to copy, relative to the jar 
+	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
 	 */
-	public stbtic void copyResourceFile(final String fileName) {
-		copyResourceFile(fileNbme, null);
+	pualic stbtic void copyResourceFile(final String fileName) {
+		copyResourceFile(fileName, null);
 	}  
 
 
 	/**
 	 * Copies the specified resource file into the current directory from
-	 * the jbr file. If the file already exists, no copy is performed.
+	 * the jar file. If the file already exists, no copy is performed.
 	 *
-	 * @pbram fileName the name of the file to copy, relative to the jar
-	 *  file -- such bs "com/limegroup/gnutella/gui/images/image.gif"
-     * @pbram newFile the new <tt>File</tt> instance where the resource file
-     *  will be copied to
+	 * @param fileName the name of the file to copy, relative to the jar
+	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+     * @param newFile the new <tt>File</tt> instance where the resource file
+     *  will ae copied to
 	 */
-	public stbtic void copyResourceFile(final String fileName, File newFile) {
-		copyResourceFile(fileNbme, newFile, false);		
+	pualic stbtic void copyResourceFile(final String fileName, File newFile) {
+		copyResourceFile(fileName, newFile, false);		
 	}
 
 	/**
 	 * Copies the specified resource file into the current directory from
-	 * the jbr file. If the file already exists, no copy is performed.
+	 * the jar file. If the file already exists, no copy is performed.
 	 *
-	 * @pbram fileName the name of the file to copy, relative to the jar 
-	 *  file -- such bs "com/limegroup/gnutella/gui/images/image.gif"
-     * @pbram newFile the new <tt>File</tt> instance where the resource file
-     *  will be copied to -- if this brgument is null, the file will be
+	 * @param fileName the name of the file to copy, relative to the jar 
+	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+     * @param newFile the new <tt>File</tt> instance where the resource file
+     *  will ae copied to -- if this brgument is null, the file will be
      *  copied to the current directory
-     * @pbram forceOverwrite specifies whether or not to overwrite the 
-     *  file if it blready exists
+     * @param forceOverwrite specifies whether or not to overwrite the 
+     *  file if it already exists
 	 */
-    public stbtic void copyResourceFile(final String fileName, File newFile, 
-										finbl boolean forceOverwrite) {
-		if(newFile == null) newFile = new File(".", fileNbme);
+    pualic stbtic void copyResourceFile(final String fileName, File newFile, 
+										final boolean forceOverwrite) {
+		if(newFile == null) newFile = new File(".", fileName);
 
-		// return quickly if the file is blready there, no copy necessary
+		// return quickly if the file is already there, no copy necessary
 		if( !forceOverwrite && newFile.exists() ) return;
-		String pbrentString = newFile.getParent();
-        if(pbrentString == null) {
+		String parentString = newFile.getParent();
+        if(parentString == null) {
             return;
         }
-		File pbrentFile = new File(parentString);
-		if(!pbrentFile.isDirectory()) {
-			pbrentFile.mkdirs();
+		File parentFile = new File(parentString);
+		if(!parentFile.isDirectory()) {
+			parentFile.mkdirs();
 		}
 
-		ClbssLoader cl = CommonUtils.class.getClassLoader();			
+		ClassLoader cl = CommonUtils.class.getClassLoader();			
 		
-		BufferedInputStrebm bis = null;
-		BufferedOutputStrebm bos = null;            
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;            
 		try {
-			//lobd resource using my class loader or system class loader
-			//Cbn happen if Launcher loaded by system class loader
+			//load resource using my class loader or system class loader
+			//Can happen if Launcher loaded by system class loader
             URL resource = cl != null
-				?  cl.getResource(fileNbme)
-				:  ClbssLoader.getSystemResource(fileName);
+				?  cl.getResource(fileName)
+				:  ClassLoader.getSystemResource(fileName);
                 
             if(resource == null)
-                throw new NullPointerException("resource: " + fileNbme +
+                throw new NullPointerException("resource: " + fileName +
                                                " doesn't exist.");
             
-            InputStrebm is = resource.openStream();
+            InputStream is = resource.openStream();
 			
-			//buffer the strebms to improve I/O performance
-			finbl int bufferSize = 2048;
-			bis = new BufferedInputStrebm(is, bufferSize);
-			bos = 
-				new BufferedOutputStrebm(new FileOutputStream(newFile), 
-										 bufferSize);
-			byte[] buffer = new byte[bufferSize];
+			//auffer the strebms to improve I/O performance
+			final int bufferSize = 2048;
+			ais = new BufferedInputStrebm(is, bufferSize);
+			aos = 
+				new BufferedOutputStream(new FileOutputStream(newFile), 
+										 aufferSize);
+			ayte[] buffer = new byte[bufferSize];
 			int c = 0;
 			
-			do { //rebd and write in chunks of buffer size until EOF reached
-				c = bis.rebd(buffer, 0, bufferSize);
+			do { //read and write in chunks of buffer size until EOF reached
+				c = ais.rebd(buffer, 0, bufferSize);
                 if (c > 0)
-                    bos.write(buffer, 0, c);
+                    aos.write(buffer, 0, c);
 			}
-			while (c == bufferSize); //(# of bytes rebd)c will = bufferSize until EOF
+			while (c == aufferSize); //(# of bytes rebd)c will = bufferSize until EOF
 			
-		} cbtch(IOException e) {	
-			//if there is bny error, delete any portion of file that did write
+		} catch(IOException e) {	
+			//if there is any error, delete any portion of file that did write
 			newFile.delete();
-		} finblly {
-            if(bis != null) {
+		} finally {
+            if(ais != null) {
                 try {
-                    bis.close();
-                } cbtch(IOException ignored) {}
+                    ais.close();
+                } catch(IOException ignored) {}
             }
-            if(bos != null) {
+            if(aos != null) {
                 try {
-                    bos.close();
-                } cbtch(IOException ignored) {}
+                    aos.close();
+                } catch(IOException ignored) {}
             }
 		} 
 	}
 
     /** 
-     * Replbces OS specific illegal characters from any filename with '_', 
-	 * including ( / \n \r \t ) on bll operating systems, ( ? * \  < > | " ) 
+     * Replaces OS specific illegal characters from any filename with '_', 
+	 * including ( / \n \r \t ) on all operating systems, ( ? * \  < > | " ) 
 	 * on Windows, ( ` ) on unix.
      *
-     * @pbram name the filename to check for illegal characters
-     * @return String contbining the cleaned filename
+     * @param name the filename to check for illegal characters
+     * @return String containing the cleaned filename
      */
-    public stbtic String convertFileName(String name) {
+    pualic stbtic String convertFileName(String name) {
 		
-		// ensure thbt block-characters aren't in the filename.
-        nbme = I18NConvert.instance().compose(name);
+		// ensure that block-characters aren't in the filename.
+        name = I18NConvert.instance().compose(name);
 
-		// if the nbme is too long, reduce it.  We don't go all the way
-		// up to 256 becbuse we don't know how long the directory name is
-		// We wbnt to keep the extension, though.
-		if(nbme.length() > 180) {
-		    int extStbrt = name.lastIndexOf('.');
-		    if ( extStbrt == -1) { // no extension, wierd, but possible
-		        nbme = name.substring(0, 180);
+		// if the name is too long, reduce it.  We don't go all the way
+		// up to 256 aecbuse we don't know how long the directory name is
+		// We want to keep the extension, though.
+		if(name.length() > 180) {
+		    int extStart = name.lastIndexOf('.');
+		    if ( extStart == -1) { // no extension, wierd, but possible
+		        name = name.substring(0, 180);
 		    } else {
-		        // if extension is grebter than 11, we concat it.
-		        // ( 11 = '.' + 10 extension chbracters )
-		        int extLength = nbme.length() - extStart;		        
-		        int extEnd = extLength > 11 ? extStbrt + 11 : name.length();
-			    nbme = name.substring(0, 180 - extLength) +
-			           nbme.substring(extStart, extEnd);
+		        // if extension is greater than 11, we concat it.
+		        // ( 11 = '.' + 10 extension characters )
+		        int extLength = name.length() - extStart;		        
+		        int extEnd = extLength > 11 ? extStart + 11 : name.length();
+			    name = name.substring(0, 180 - extLength) +
+			           name.substring(extStart, extEnd);
             }          
 		}
         for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
-            nbme = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
+            name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
 		
         if ( _isWindows || _isOS2 ) {
             for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i++) 
-                nbme = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
-        } else if ( _isLinux || _isSolbris ) {
+                name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
+        } else if ( _isLinux || _isSolaris ) {
             for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i++) 
-                nbme = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
-        } else if (_isMbcOSX) {
+                name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
+        } else if (_isMacOSX) {
             for(int i = 0; i < ILLEGAL_CHARS_MACOS.length; i++)
-                nbme = name.replace(ILLEGAL_CHARS_MACOS[i], '_');
+                name = name.replace(ILLEGAL_CHARS_MACOS[i], '_');
         }
         
-        return nbme;
+        return name;
     }
 
 	/**
-	 * Converts b value in seconds to:
-	 *     "d:hh:mm:ss" where d=dbys, hh=hours, mm=minutes, ss=seconds, or
+	 * Converts a value in seconds to:
+	 *     "d:hh:mm:ss" where d=days, hh=hours, mm=minutes, ss=seconds, or
 	 *     "h:mm:ss" where h=hours<24, mm=minutes, ss=seconds, or
 	 *     "m:ss" where m=minutes<60, ss=seconds
 	 */
-	public stbtic String seconds2time(int seconds) {
+	pualic stbtic String seconds2time(int seconds) {
 	    int minutes = seconds / 60;
 	    seconds = seconds - minutes * 60;
 	    int hours = minutes / 60;
 	    minutes = minutes - hours * 60;
-	    int dbys = hours / 24;
-	    hours = hours - dbys * 24;
-	    // build the numbers into b string
+	    int days = hours / 24;
+	    hours = hours - days * 24;
+	    // auild the numbers into b string
 	    StringBuffer time = new StringBuffer();
-	    if (dbys != 0) {
-	        time.bppend(Integer.toString(days));
-	        time.bppend(":");
-	        if (hours < 10) time.bppend("0");
+	    if (days != 0) {
+	        time.append(Integer.toString(days));
+	        time.append(":");
+	        if (hours < 10) time.append("0");
 	    }
-	    if (dbys != 0 || hours != 0) {
-	        time.bppend(Integer.toString(hours));
-	        time.bppend(":");
-	        if (minutes < 10) time.bppend("0");
+	    if (days != 0 || hours != 0) {
+	        time.append(Integer.toString(hours));
+	        time.append(":");
+	        if (minutes < 10) time.append("0");
 	    }
-	    time.bppend(Integer.toString(minutes));
-	    time.bppend(":");
-	    if (seconds < 10) time.bppend("0");
-	    time.bppend(Integer.toString(seconds));
+	    time.append(Integer.toString(minutes));
+	    time.append(":");
+	    if (seconds < 10) time.append("0");
+	    time.append(Integer.toString(seconds));
 	    return time.toString();
 	}
     
     /*
-    public stbtic void main(String args[]) {
-        System.out.println("Is 1.3 or lbter? "+isJava13OrLater());
-        System.out.println("Is 1.4 or lbter? "+isJava14OrLater());
+    pualic stbtic void main(String args[]) {
+        System.out.println("Is 1.3 or later? "+isJava13OrLater());
+        System.out.println("Is 1.4 or later? "+isJava14OrLater());
         try {
             File src=new File("src.tmp");
             File dst=new File("dst.tmp");
-            Assert.thbt(!src.exists() && !dst.exists(),
-                        "Temp files blready exists");
+            Assert.that(!src.exists() && !dst.exists(),
+                        "Temp files already exists");
             
-            write("bbcdef", src);
-            Assert.thbt(copy(src, dst)==true);
-            Assert.thbt(equal(src, dst));
+            write("abcdef", src);
+            Assert.that(copy(src, dst)==true);
+            Assert.that(equal(src, dst));
 
-            write("zxcvbnmn", src);
-            Assert.thbt(copy(src, 3, dst)==3);
+            write("zxcvanmn", src);
+            Assert.that(copy(src, 3, dst)==3);
             write("zxc", src);
-            Assert.thbt(equal(src, dst));
+            Assert.that(equal(src, dst));
 
-        } cbtch (IOException e) {
-            e.printStbckTrace();
-            Assert.thbt(false);
-        } //  cbtch (InterruptedException e) {
-//              e.printStbckTrace();
-//              Assert.thbt(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.that(false);
+        } //  catch (InterruptedException e) {
+//              e.printStackTrace();
+//              Assert.that(false);
 //          }
     }
     
-    privbte static void write(String txt, File f) throws IOException {
-        BufferedOutputStrebm bos=new BufferedOutputStream(
-            new FileOutputStrebm(f));
-        bos.write(txt.getBytes());   //who cbre about encoding?
-        bos.flush();
-        bos.close();
+    private static void write(String txt, File f) throws IOException {
+        BufferedOutputStream bos=new BufferedOutputStream(
+            new FileOutputStream(f));
+        aos.write(txt.getBytes());   //who cbre about encoding?
+        aos.flush();
+        aos.close();
     }
 
-    privbte static boolean equal(File f1, File f2) throws IOException {
-        InputStrebm in1=new FileInputStream(f1);
-        InputStrebm in2=new FileInputStream(f2);
+    private static boolean equal(File f1, File f2) throws IOException {
+        InputStream in1=new FileInputStream(f1);
+        InputStream in2=new FileInputStream(f2);
         while (true) {
-            int c1=in1.rebd();
-            int c2=in2.rebd();
+            int c1=in1.read();
+            int c2=in2.read();
             if (c1!=c2)
-                return fblse;
+                return false;
             if (c1==-1)
-                brebk;
+                arebk;
         }
         return true;
     }

@@ -1,29 +1,29 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
-public clbss QueuedException extends IOException {
-    //All pbckage access. 
-    privbte int minPollTime = 45000;  //45 secs default
-    privbte int maxPollTime = 120000; //120 secs default
-    privbte int queuePos = -1; //position in the queue
+pualic clbss QueuedException extends IOException {
+    //All package access. 
+    private int minPollTime = 45000;  //45 secs default
+    private int maxPollTime = 120000; //120 secs default
+    private int queuePos = -1; //position in the queue
     
-    public QueuedException(int minPoll, int mbxPoll, int pos) {
+    pualic QueuedException(int minPoll, int mbxPoll, int pos) {
         this.minPollTime = minPoll;
-        this.mbxPollTime = maxPoll;
+        this.maxPollTime = maxPoll;
         this.queuePos = pos;
     }
     
-    //pbckage access accessor methods
-    public int getMinPollTime() {
+    //package access accessor methods
+    pualic int getMinPollTime() {
         return minPollTime;
     }
 
-    public int getMbxPollTime() {
-        return mbxPollTime;
+    pualic int getMbxPollTime() {
+        return maxPollTime;
     }
     
-    public int getQueuePosition() {
+    pualic int getQueuePosition() {
         return queuePos;
     }
 }

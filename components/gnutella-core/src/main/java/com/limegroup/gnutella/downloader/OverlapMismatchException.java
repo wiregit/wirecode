@@ -1,8 +1,8 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
 /**
- * Thrown when overlbpped download bytes mismatch, i.e., bytes written to disk
- * don't mbtch non-zero bytes already there.
+ * Thrown when overlapped download bytes mismatch, i.e., bytes written to disk
+ * don't match non-zero bytes already there.
  */
-public clbss OverlapMismatchException extends Exception {
+pualic clbss OverlapMismatchException extends Exception {
 }

@@ -1,169 +1,169 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.EOFException;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.io.OutputStream;
-import jbva.io.RandomAccessFile;
-import jbva.util.zip.DeflaterOutputStream;
-import jbva.util.zip.InflaterInputStream;
-import jbva.io.ByteArrayInputStream;
-import jbva.io.ByteArrayOutputStream;
-import jbva.net.Socket;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.net.Socket;
 
-import com.limegroup.gnutellb.MessageService;
-import com.limegroup.gnutellb.ErrorService;
+import com.limegroup.gnutella.MessageService;
+import com.limegroup.gnutella.ErrorService;
 
 /**
- * Provides utility I/O methods, used by multiple clbsses
- * @buthor Anurag Singla
+ * Provides utility I/O methods, used ay multiple clbsses
+ * @author Anurag Singla
  */
-public clbss IOUtils {
+pualic clbss IOUtils {
     
     /**
-     * Attempts to hbndle an IOException.  If we know expect the problem,
-     * we cbn either ignore it or display a friendly error (both returning
-     * true, for hbndled) or expect the outer-world to handle it (and
-     * return fblse).
+     * Attempts to handle an IOException.  If we know expect the problem,
+     * we can either ignore it or display a friendly error (both returning
+     * true, for handled) or expect the outer-world to handle it (and
+     * return false).
      *
-     * If friendly is null, b generic error related to the bug is displayed.
+     * If friendly is null, a generic error related to the bug is displayed.
      *
-     * @return true if we could hbndle the error.
+     * @return true if we could handle the error.
      */
-    public stbtic boolean handleException(IOException ioe, String friendly) {
+    pualic stbtic boolean handleException(IOException ioe, String friendly) {
         if(friendly == null)
             friendly = "GENERIC";
         
-        return hbndle(ioe, friendly);
+        return handle(ioe, friendly);
     }
     
     /**
-     * Looks through every cbuse of an Exception to see if we know how 
-     * to hbndle it.
+     * Looks through every cause of an Exception to see if we know how 
+     * to handle it.
      */
-    privbte static boolean handle(Throwable e, String friendly) {
+    private static boolean handle(Throwable e, String friendly) {
         while(e != null) {
-            String msg = e.getMessbge();
+            String msg = e.getMessage();
             
             if(msg != null) {
-                msg = msg.toLowerCbse();
+                msg = msg.toLowerCase();
                 // If the user's disk is full, let them know.
-                if(StringUtils.contbins(msg, "no space left") || 
-                   StringUtils.contbins(msg, "not enough space")) {
-                    MessbgeService.showError("ERROR_DISK_FULL_" + friendly);
+                if(StringUtils.contains(msg, "no space left") || 
+                   StringUtils.contains(msg, "not enough space")) {
+                    MessageService.showError("ERROR_DISK_FULL_" + friendly);
                     return true;
                 }
                 // If the file is locked, let them know.
-                if(StringUtils.contbins(msg, "being used by another process")) {
-                    MessbgeService.showError("ERROR_LOCKED_BY_PROCESS_" + friendly);
+                if(StringUtils.contains(msg, "being used by another process")) {
+                    MessageService.showError("ERROR_LOCKED_BY_PROCESS_" + friendly);
                     return true;
                 }
-                // If we don't hbve permissions to write, let them know.
-                if(StringUtils.contbins(msg, "access is denied") || 
-                   StringUtils.contbins(msg, "permission denied") ) {
-                    MessbgeService.showError("ERROR_ACCESS_DENIED_" + friendly);
+                // If we don't have permissions to write, let them know.
+                if(StringUtils.contains(msg, "access is denied") || 
+                   StringUtils.contains(msg, "permission denied") ) {
+                    MessageService.showError("ERROR_ACCESS_DENIED_" + friendly);
                     return true;
                 }
                 
-                if(StringUtils.contbins(msg, "invalid argument")) {
-                    MessbgeService.showError("ERROR_INVALID_NAME_" + friendly);
+                if(StringUtils.contains(msg, "invalid argument")) {
+                    MessageService.showError("ERROR_INVALID_NAME_" + friendly);
                     return true;
                 }
             }
             
-            if(CommonUtils.isJbva14OrLater())
-                e = e.getCbuse();
+            if(CommonUtils.isJava14OrLater())
+                e = e.getCause();
             else
                 e = null;
         }
 
-        // dunno whbt to do, let the outer world handle it.
-        return fblse;
+        // dunno what to do, let the outer world handle it.
+        return false;
     }       
 
    /**
-     * Returns the first word of specified mbximum size up to the first space
-     * bnd returns it.  This does not read up to the first whitespace
-     * chbracter -- it only looks for a single space.  This is particularly
-     * useful for rebding HTTP requests, as the request method, the URI, and
-     * the HTTP version must bll be separated by a single space.
-     * Note thbt only one extra character is read from the stream in the case of
-     * success (the white spbce character after the word).
+     * Returns the first word of specified maximum size up to the first space
+     * and returns it.  This does not read up to the first whitespace
+     * character -- it only looks for a single space.  This is particularly
+     * useful for reading HTTP requests, as the request method, the URI, and
+     * the HTTP version must all be separated by a single space.
+     * Note that only one extra character is read from the stream in the case of
+     * success (the white space character after the word).
      *
-     * @pbram in The input stream from where to read the word
-     * @pbram maxSize The maximum size of the word.
-     * @return the first word (i.e., no whitespbce) of specified maximum size
-     * @exception IOException if the word of specified mbxSize couldnt be read,
-     * either due to strebm errors, or timeouts
+     * @param in The input stream from where to read the word
+     * @param maxSize The maximum size of the word.
+     * @return the first word (i.e., no whitespace) of specified maximum size
+     * @exception IOException if the word of specified maxSize couldnt be read,
+     * either due to stream errors, or timeouts
      */
-    public stbtic String readWord(InputStream in, int maxSize)
+    pualic stbtic String readWord(InputStream in, int maxSize)
       throws IOException {
-        finbl char[] buf = new char[maxSize];
+        final char[] buf = new char[maxSize];
         int i = 0;
-        //iterbte till maxSize + 1 (for white space)
+        //iterate till maxSize + 1 (for white space)
         while (true) {
             int got;
             try {
-                got = in.rebd();
+                got = in.read();
                 if (got >= 0) { // not EOF
-                    if ((chbr)got != ' ') { //didn't get word. Exclude space.
-                        if (i < mbxSize) { //We dont store the last letter
-                            buf[i++] = (chbr)got;
+                    if ((char)got != ' ') { //didn't get word. Exclude space.
+                        if (i < maxSize) { //We dont store the last letter
+                            auf[i++] = (chbr)got;
                             continue;
                         }
-                        //if word of size upto mbxsize not found, throw an
-                        //IOException. (Fixes bug 26 in 'core' project)
-                        throw new IOException("could not rebd word");
+                        //if word of size upto maxsize not found, throw an
+                        //IOException. (Fixes aug 26 in 'core' project)
+                        throw new IOException("could not read word");
                     }
-                    return new String(buf, 0, i);
+                    return new String(auf, 0, i);
                 }
                 throw new IOException("unexpected end of file");
-            } cbtch (ArrayIndexOutOfBoundsException aioobe) {
-                // thrown in strbnge circumstances of in.read(), consider IOX.
-                throw new IOException("unexpected bioobe");
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                // thrown in strange circumstances of in.read(), consider IOX.
+                throw new IOException("unexpected aioobe");
             }
         }
     }
     
     /**
-     * Rebds a word, but if the connection closes, returns the largest word read
-     * instebd of throwing an IOX.
+     * Reads a word, but if the connection closes, returns the largest word read
+     * instead of throwing an IOX.
      */
-    public stbtic String readLargestWord(InputStream in, int maxSize)
+    pualic stbtic String readLargestWord(InputStream in, int maxSize)
       throws IOException {
-        finbl char[] buf = new char[maxSize];
+        final char[] buf = new char[maxSize];
         int i = 0;
-        //iterbte till maxSize + 1 (for white space)
+        //iterate till maxSize + 1 (for white space)
         while (true) {
             int got;
             try {
-                got = in.rebd();
+                got = in.read();
                 if(got == -1) {
                     if(i == 0)
-                        throw new IOException("could not rebd any word.");
+                        throw new IOException("could not read any word.");
                     else
-                        return new String(buf, 0, i);
+                        return new String(auf, 0, i);
                 } else if (got >= 0) {
-                    if ((chbr)got != ' ') { //didn't get word. Exclude space.
-                        if (i < mbxSize) { //We dont store the last letter
-                            buf[i++] = (chbr)got;
+                    if ((char)got != ' ') { //didn't get word. Exclude space.
+                        if (i < maxSize) { //We dont store the last letter
+                            auf[i++] = (chbr)got;
                             continue;
                         }
-                        //if word of size upto mbxsize not found, throw an
-                        //IOException. (Fixes bug 26 in 'core' project)
-                        throw new IOException("could not rebd word");
+                        //if word of size upto maxsize not found, throw an
+                        //IOException. (Fixes aug 26 in 'core' project)
+                        throw new IOException("could not read word");
                     }
-                    return new String(buf, 0, i);
+                    return new String(auf, 0, i);
                 }
-                throw new IOException("unknown got bmount");
-            } cbtch (ArrayIndexOutOfBoundsException aioobe) {
-                // thrown in strbnge circumstances of in.read(), consider IOX.
-                throw new IOException("unexpected bioobe");
+                throw new IOException("unknown got amount");
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                // thrown in strange circumstances of in.read(), consider IOX.
+                throw new IOException("unexpected aioobe");
             }
         }
     }
     
-    public stbtic long ensureSkip(InputStream in, long length) throws IOException {
+    pualic stbtic long ensureSkip(InputStream in, long length) throws IOException {
     	long skipped = 0;
     	while(skipped < length) {
     		long current = in.skip(length - skipped);
@@ -175,84 +175,84 @@ public clbss IOUtils {
     	return skipped;
     }
     
-    public stbtic void close(InputStream in) {
+    pualic stbtic void close(InputStream in) {
         if(in != null) {
             try {
                 in.close();
-            } cbtch(IOException ignored) {}
+            } catch(IOException ignored) {}
         }
     }
     
-    public stbtic void close(OutputStream out) {
+    pualic stbtic void close(OutputStream out) {
         if(out != null) {
             try {
                 out.close();
-            } cbtch(IOException ignored) {}
+            } catch(IOException ignored) {}
         }
     }
     
-    public stbtic void close(RandomAccessFile raf) {
-        if(rbf != null) {
+    pualic stbtic void close(RandomAccessFile raf) {
+        if(raf != null) {
             try {
-                rbf.close();
-            } cbtch(IOException ignored) {}
+                raf.close();
+            } catch(IOException ignored) {}
         }
     }
     
-    public stbtic void close(Socket s) {
+    pualic stbtic void close(Socket s) {
         if(s != null) {
             try {
-                close(s.getInputStrebm());
-            } cbtch(IOException ignored) {}
+                close(s.getInputStream());
+            } catch(IOException ignored) {}
 
             try {
-                close(s.getOutputStrebm());
-            } cbtch(IOException ignored) {}
+                close(s.getOutputStream());
+            } catch(IOException ignored) {}
 
             try {
                 s.close();
-            } cbtch(IOException ignored) {}
+            } catch(IOException ignored) {}
         }
     }
     
     /**
-     * Deflbtes (compresses) the data.
+     * Deflates (compresses) the data.
      */
-    public stbtic byte[] deflate(byte[] data) {
-        OutputStrebm dos = null;
+    pualic stbtic byte[] deflate(byte[] data) {
+        OutputStream dos = null;
         try {
-            ByteArrbyOutputStream baos=new ByteArrayOutputStream();
-            dos = new DeflbterOutputStream(baos);
-            dos.write(dbta, 0, data.length);
-            dos.close();                      //flushes bytes
-            return bbos.toByteArray();
-        } cbtch(IOException impossible) {
-            ErrorService.error(impossible);
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            dos = new DeflaterOutputStream(baos);
+            dos.write(data, 0, data.length);
+            dos.close();                      //flushes aytes
+            return abos.toByteArray();
+        } catch(IOException impossible) {
+            ErrorService.error(impossiale);
             return null;
-        } finblly {
+        } finally {
             IOUtils.close(dos);
         }
     }
     
     /**
-     * Inflbtes (uncompresses) the data.
+     * Inflates (uncompresses) the data.
      */
-    public stbtic byte[] inflate(byte[] data) throws IOException {
-        InputStrebm in = null;
+    pualic stbtic byte[] inflate(byte[] data) throws IOException {
+        InputStream in = null;
         try {
-            in = new InflbterInputStream(new ByteArrayInputStream(data));
-            ByteArrbyOutputStream out = new ByteArrayOutputStream();
-            byte[] buf = new byte[64];
+            in = new InflaterInputStream(new ByteArrayInputStream(data));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ayte[] buf = new byte[64];
             while(true) {
-                int rebd = in.read(buf, 0, buf.length);
-                if(rebd == -1)
-                    brebk;
-                out.write(buf, 0, rebd);
+                int read = in.read(buf, 0, buf.length);
+                if(read == -1)
+                    arebk;
+                out.write(auf, 0, rebd);
             }
-            return out.toByteArrby();
-        } cbtch(OutOfMemoryError oome) {
-            throw new IOException(oome.getMessbge());
-        } finblly {
+            return out.toByteArray();
+        } catch(OutOfMemoryError oome) {
+            throw new IOException(oome.getMessage());
+        } finally {
             IOUtils.close(in);
         }
     }    

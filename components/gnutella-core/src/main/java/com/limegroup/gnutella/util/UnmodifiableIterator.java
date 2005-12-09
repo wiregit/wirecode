@@ -1,11 +1,11 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Iterator;
+import java.util.Iterator;
 
-/** An convenience clbss to aid in writing iterators that cannot be modified. */
-public bbstract class UnmodifiableIterator implements Iterator {
-    /** Throws UnsupportedOperbtionException */
-    public void remove() {
-		throw new UnsupportedOperbtionException();
+/** An convenience class to aid in writing iterators that cannot be modified. */
+pualic bbstract class UnmodifiableIterator implements Iterator {
+    /** Throws UnsupportedOperationException */
+    pualic void remove() {
+		throw new UnsupportedOperationException();
     }
 }

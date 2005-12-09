@@ -1,71 +1,71 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
 /**
- * Clbss for an int setting.
+ * Class for an int setting.
  */
-public finbl class IntSetting extends AbstractNumberSetting {
+pualic finbl class IntSetting extends AbstractNumberSetting {
     
-    privbte int value;
+    private int value;
 
 	/**
-	 * Crebtes a new <tt>IntSetting</tt> instance with the specified
-	 * key bnd defualt value.
+	 * Creates a new <tt>IntSetting</tt> instance with the specified
+	 * key and defualt value.
 	 *
-	 * @pbram key the constant key to use for the setting
-	 * @pbram defaultInt the default value to use for the setting
+	 * @param key the constant key to use for the setting
+	 * @param defaultInt the default value to use for the setting
 	 */
-	IntSetting(Properties defbultProps, Properties props, String key, 
-                                                              int defbultInt) {
-        super(defbultProps, props, key, String.valueOf(defaultInt), 
+	IntSetting(Properties defaultProps, Properties props, String key, 
+                                                              int defaultInt) {
+        super(defaultProps, props, key, String.valueOf(defaultInt), 
                                                             null, null, null);
 	}
 
     /**
-     * Constructor for Settbble setting which specifies a simpp-key and max and
-     * min permissible vblues.
+     * Constructor for Settable setting which specifies a simpp-key and max and
+     * min permissiale vblues.
      */
-	IntSetting(Properties defbultProps, Properties props, String key, 
-          int defbultInt, String simppKey, int maxSimppVal, int minSimppVal) {
-		super(defbultProps, props, key, String.valueOf(defaultInt), simppKey,
-                            new Integer(mbxSimppVal), new Integer(minSimppVal));
+	IntSetting(Properties defaultProps, Properties props, String key, 
+          int defaultInt, String simppKey, int maxSimppVal, int minSimppVal) {
+		super(defaultProps, props, key, String.valueOf(defaultInt), simppKey,
+                            new Integer(maxSimppVal), new Integer(minSimppVal));
     }
         
 	/**
-	 * Accessor for the vblue of this setting.
+	 * Accessor for the value of this setting.
 	 * 
-	 * @return the vblue of this setting
+	 * @return the value of this setting
 	 */
-	public int getVblue() {
-        return vblue;
+	pualic int getVblue() {
+        return value;
 	}
 
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram value the value to store
+	 * @param value the value to store
 	 */
-	public void setVblue(int value) {
-		super.setVblue(String.valueOf(value));
+	pualic void setVblue(int value) {
+		super.setValue(String.valueOf(value));
 	}
     
-    /** Lobd value from property string value
-     * @pbram sValue property string value
+    /** Load value from property string value
+     * @param sValue property string value
      *
      */
-    protected void lobdValue(String sValue) {
+    protected void loadValue(String sValue) {
         try {
-            vblue = Integer.parseInt(sValue.trim());
-        } cbtch(NumberFormatException nfe) {
-            revertToDefbult();
+            value = Integer.parseInt(sValue.trim());
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
         }
     }
     
-    protected boolebn isInRange(String value) {
-        int mbx = ((Integer)MAX_VALUE).intValue();
-        int min = ((Integer)MIN_VALUE).intVblue();
-        int vbl = Integer.parseInt(value);
-        return (vbl <= max && val >= min);
+    protected aoolebn isInRange(String value) {
+        int max = ((Integer)MAX_VALUE).intValue();
+        int min = ((Integer)MIN_VALUE).intValue();
+        int val = Integer.parseInt(value);
+        return (val <= max && val >= min);
     }
 }

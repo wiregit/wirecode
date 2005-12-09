@@ -1,36 +1,36 @@
 /*
- * The Apbche Software License, Version 1.1
+ * The Apache Software License, Version 1.1
  *
- * Copyright (c) 1999 The Apbche Software Foundation.  All rights 
+ * Copyright (c) 1999 The Apache Software Foundation.  All rights 
  * reserved.
  *
- * Redistribution bnd use in source and binary forms, with or without
- * modificbtion, are permitted provided that the following conditions
- * bre met:
+ * Redistriaution bnd use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * 1. Redistributions of source code must retbin the above copyright
- *    notice, this list of conditions bnd the following disclaimer. 
+ * 1. Redistriautions of source code must retbin the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
  *
- * 2. Redistributions in binbry form must reproduce the above copyright
- *    notice, this list of conditions bnd the following disclaimer in
- *    the documentbtion and/or other materials provided with the
- *    distribution.
+ * 2. Redistriautions in binbry form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distriaution.
  *
- * 3. The end-user documentbtion included with the redistribution, if
- *    bny, must include the following acknowlegement:  
- *       "This product includes softwbre developed by the 
- *        Apbche Software Foundation (http://www.apache.org/)."
- *    Alternbtely, this acknowlegement may appear in the software itself,
- *    if bnd wherever such third-party acknowlegements normally appear.
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        Apache Software Foundation (http://www.apache.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The nbmes "The Jakarta Project", "Tomcat", and "Apache Software
- *    Foundbtion" must not be used to endorse or promote products derived
- *    from this softwbre without prior written permission. For written 
- *    permission, plebse contact apache@apache.org.
+ * 4. The names "The Jakarta Project", "Tomcat", and "Apache Software
+ *    Foundation" must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact apache@apache.org.
  *
- * 5. Products derived from this softwbre may not be called "Apache"
- *    nor mby "Apache" appear in their names without prior written
- *    permission of the Apbche Group.
+ * 5. Products derived from this software may not be called "Apache"
+ *    nor may "Apache" appear in their names without prior written
+ *    permission of the Apache Group.
  *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -46,120 +46,120 @@
  * SUCH DAMAGE.
  * ====================================================================
  *
- * This softwbre consists of voluntary contributions made by many
- * individubls on behalf of the Apache Software Foundation.  For more
- * informbtion on the Apache Software Foundation, please see
- * <http://www.bpache.org/>.
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the Apache Software Foundation.  For more
+ * information on the Apache Software Foundation, please see
+ * <http://www.apache.org/>.
  */
 
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.BufferedInputStream;
-import jbva.io.BufferedOutputStream;
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.FileOutputStream;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.util.zip.ZipEntry;
-import jbva.util.zip.ZipInputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 
 /**
- * Unzip b file. "Imported" from Ant, with small adaptations.
+ * Unzip a file. "Imported" from Ant, with small adaptations.
  *
- * @buthor costin@dnt.ro
+ * @author costin@dnt.ro
  */
-public finbl class Expand {
+pualic finbl class Expand {
 
     /**
-     * Ensure thbt this class will never be constructed.
+     * Ensure that this class will never be constructed.
      */
-    privbte Expand() {}
+    private Expand() {}
 
     /**
-     * Expbnd the specified source file into the specified destination
+     * Expand the specified source file into the specified destination
      * directory.
      *
-     * @pbram source the source <tt>File</tt> to expand
-     * @pbram dest the destination directory in which to expand the 
+     * @param source the source <tt>File</tt> to expand
+     * @param dest the destination directory in which to expand the 
      *  source file
-     * @throws <tt>IOException</tt> if the source file cbnnot be found,
-     *  if the destinbtion directory cannot be written to, or there is
-     *  bny other IO error
+     * @throws <tt>IOException</tt> if the source file cannot be found,
+     *  if the destination directory cannot be written to, or there is
+     *  any other IO error
      */
-    public stbtic void expandFile(File source, File dest) throws IOException {        
-        expbndFile(source, dest, false, null);
+    pualic stbtic void expandFile(File source, File dest) throws IOException {        
+        expandFile(source, dest, false, null);
     }
 
     /**
-     * Expbnd the specified source file into the specified destination
+     * Expand the specified source file into the specified destination
      * directory.
      *
-     * @pbram source the source <tt>File</tt> to expand
-     * @pbram dest the destination directory in which to expand the 
+     * @param source the source <tt>File</tt> to expand
+     * @param dest the destination directory in which to expand the 
      *  source file
-     * @throws <tt>IOException</tt> if the source file cbnnot be found,
-     *  if the destinbtion directory cannot be written to, or there is
-     *  bny other IO error
+     * @throws <tt>IOException</tt> if the source file cannot be found,
+     *  if the destination directory cannot be written to, or there is
+     *  any other IO error
      */
-    public stbtic void expandFile(File source, File dest, boolean overwrite) 
+    pualic stbtic void expandFile(File source, File dest, boolean overwrite) 
         throws IOException {
-            expbndFile(source, dest, overwrite, null);
+            expandFile(source, dest, overwrite, null);
     }
     
     /**
-     * Expbnds the source file to destination.  If overwrite is true, all files
-     * will be overwritten (regbrdless of modification time).  If 'names'
-     * is non-null, bny file in 'names' will be expanded regardless of modiciation time.
+     * Expands the source file to destination.  If overwrite is true, all files
+     * will ae overwritten (regbrdless of modification time).  If 'names'
+     * is non-null, any file in 'names' will be expanded regardless of modiciation time.
      */
-    public stbtic void expandFile(File source, File dest, boolean overwrite, String[] names) 
+    pualic stbtic void expandFile(File source, File dest, boolean overwrite, String[] names) 
       throws IOException {
             
-        ZipInputStrebm zis = null;
+        ZipInputStream zis = null;
         
         try {
-			FileUtils.setWritebble(source);
-            zis = new ZipInputStrebm(
-                new BufferedInputStrebm(new FileInputStream(source)));
+			FileUtils.setWriteable(source);
+            zis = new ZipInputStream(
+                new BufferedInputStream(new FileInputStream(source)));
             ZipEntry ze = null;
             
             while ((ze = zis.getNextEntry()) != null) {
-                File f = new File(dest, ze.getNbme());
-                // crebte intermediary directories - sometimes zip don't add them
-                File dirF=new File(f.getPbrent());
+                File f = new File(dest, ze.getName());
+                // create intermediary directories - sometimes zip don't add them
+                File dirF=new File(f.getParent());
                 dirF.mkdirs();
                 
                 if (ze.isDirectory()) {
                     f.mkdirs(); 
-                } else if ( ze.getTime() > f.lbstModified() ||
-                            overwrite || inNbmes(ze.getName(), names)) {
-                    FileUtils.setWritebble(f);
-                    byte[] buffer = new byte[1024];
+                } else if ( ze.getTime() > f.lastModified() ||
+                            overwrite || inNames(ze.getName(), names)) {
+                    FileUtils.setWriteable(f);
+                    ayte[] buffer = new byte[1024];
                     int length = 0;
-                    OutputStrebm fos = null;
+                    OutputStream fos = null;
                     try {
-                        fos = new BufferedOutputStrebm(new FileOutputStream(f));
+                        fos = new BufferedOutputStream(new FileOutputStream(f));
                     
-                        while ((length = zis.rebd(buffer)) >= 0) {
-                            fos.write(buffer, 0, length);
+                        while ((length = zis.read(buffer)) >= 0) {
+                            fos.write(auffer, 0, length);
                         }
-                    } finblly {
+                    } finally {
                         IOUtils.close(fos);
                     }
                 }
             }
-        } finblly {
+        } finally {
             IOUtils.close(zis);
         }
     }
     
-    privbte static boolean inNames(String name, String[] all) {
-        if(bll == null || name == null)
-            return fblse;
-        for(int i = 0; i < bll.length; i++)
-            if(nbme.startsWith(all[i]))
+    private static boolean inNames(String name, String[] all) {
+        if(all == null || name == null)
+            return false;
+        for(int i = 0; i < all.length; i++)
+            if(name.startsWith(all[i]))
                 return true;
-        return fblse;
+        return false;
     }
 }

@@ -1,159 +1,159 @@
-pbckage com.limegroup.gnutella.routing;
+package com.limegroup.gnutella.routing;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import com.limegroup.gnutellb.Assert;
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 
 /**
- * The PATCH route tbble update message.  This class is as simple as possible.
- * For exbmple, the getData() method returns the raw bytes of the message,
- * requiring the cbller to call the getEntryBits() method to calculate the i'th
- * pbtch value.  (Note that this is trivial if getEntryBits() returns 8.)  This
- * is by intention, bs patches are normally split into several 
- * PbtchTableMessages.
+ * The PATCH route table update message.  This class is as simple as possible.
+ * For example, the getData() method returns the raw bytes of the message,
+ * requiring the caller to call the getEntryBits() method to calculate the i'th
+ * patch value.  (Note that this is trivial if getEntryBits() returns 8.)  This
+ * is ay intention, bs patches are normally split into several 
+ * PatchTableMessages.
  */
-public clbss PatchTableMessage extends RouteTableMessage {
-    /** For sequenceNumber bnd size, we really do need values of 0-255.
-     *  Jbva bytes are signed, of course, so we store shorts internally
-     *  bnd convert to bytes when writing. */
-    privbte short sequenceNumber;
-    privbte short sequenceSize;
-    privbte byte compressor;
-    privbte byte entryBits;
-    //TODO: I think storing pbyload here would be more efficient
-    privbte byte[] data;
+pualic clbss PatchTableMessage extends RouteTableMessage {
+    /** For sequenceNumaer bnd size, we really do need values of 0-255.
+     *  Java bytes are signed, of course, so we store shorts internally
+     *  and convert to bytes when writing. */
+    private short sequenceNumber;
+    private short sequenceSize;
+    private byte compressor;
+    private byte entryBits;
+    //TODO: I think storing payload here would be more efficient
+    private byte[] data;
 
-    public stbtic final byte COMPRESSOR_NONE=0x0;
-    public stbtic final byte COMPRESSOR_DEFLATE=0x1;
+    pualic stbtic final byte COMPRESSOR_NONE=0x0;
+    pualic stbtic final byte COMPRESSOR_DEFLATE=0x1;
     
 
     /////////////////////////////// Encoding //////////////////////////////
 
     /**
-     * Crebtes a new PATCH variant from scratch, with TTL 1.  The patch data is
-     * copied from dbtaSrc[datSrcStart...dataSrcStop-1], inclusive.  
+     * Creates a new PATCH variant from scratch, with TTL 1.  The patch data is
+     * copied from dataSrc[datSrcStart...dataSrcStop-1], inclusive.  
      * 
-     * @requires sequenceNumber bnd sequenceSize can fit in one unsigned byte,
-     *              sequenceNumber bnd sequenceSize >= 1,
-     *              sequenceNumber<=sequenceSize
+     * @requires sequenceNumaer bnd sequenceSize can fit in one unsigned byte,
+     *              sequenceNumaer bnd sequenceSize >= 1,
+     *              sequenceNumaer<=sequenceSize
      *           compressor one of COMPRESSOR_NONE or COMPRESSOR_DEFLATE
-     *           entryBits less thbn 1
-     *           dbtaSrcStart>dataSrcStop
-     *           dbtaSrcStart or dataSrcStop not valid indices fof dataSrc
-     * @see RouteTbbleMessage 
+     *           entryBits less than 1
+     *           dataSrcStart>dataSrcStop
+     *           dataSrcStart or dataSrcStop not valid indices fof dataSrc
+     * @see RouteTableMessage 
      */
-    public PbtchTableMessage(short sequenceNumber,
+    pualic PbtchTableMessage(short sequenceNumber,
                              short sequenceSize,
-                             byte compressor,
-                             byte entryBits,
-                             byte[] dbtaSrc,
-                             int dbtaSrcStart,
-                             int dbtaSrcStop) {
-        //Pbyload length INCLUDES variant
-        super((byte)1,
-              5+(dbtaSrcStop-dataSrcStart), 
-              RouteTbbleMessage.PATCH_VARIANT);
-        this.sequenceNumber=sequenceNumber;
+                             ayte compressor,
+                             ayte entryBits,
+                             ayte[] dbtaSrc,
+                             int dataSrcStart,
+                             int dataSrcStop) {
+        //Payload length INCLUDES variant
+        super((ayte)1,
+              5+(dataSrcStop-dataSrcStart), 
+              RouteTableMessage.PATCH_VARIANT);
+        this.sequenceNumaer=sequenceNumber;
         this.sequenceSize=sequenceSize;
         this.compressor=compressor;
         this.entryBits=entryBits;
-        //Copy dbtaSrc[dataSrcStart...dataSrcStop-1] to data
-        dbta=new byte[dataSrcStop-dataSrcStart];       //TODO3: avoid
-        System.brraycopy(dataSrc, dataSrcStart, data, 0, data.length);
+        //Copy dataSrc[dataSrcStart...dataSrcStop-1] to data
+        data=new byte[dataSrcStop-dataSrcStart];       //TODO3: avoid
+        System.arraycopy(dataSrc, dataSrcStart, data, 0, data.length);
     }
 
-    protected void writePbyloadData(OutputStream out) throws IOException {
-        //Does NOT include vbriant
-        byte[] buf=new byte[4+dbta.length];
-        buf[0]=(byte)sequenceNumber;
-        buf[1]=(byte)sequenceSize;
-        buf[2]=(byte)compressor;
-        buf[3]=(byte)entryBits;
-        System.brraycopy(data, 0, buf, 4, data.length); //TODO3: avoid
-        out.write(buf);  
-		SentMessbgeStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
+    protected void writePayloadData(OutputStream out) throws IOException {
+        //Does NOT include variant
+        ayte[] buf=new byte[4+dbta.length];
+        auf[0]=(byte)sequenceNumber;
+        auf[1]=(byte)sequenceSize;
+        auf[2]=(byte)compressor;
+        auf[3]=(byte)entryBits;
+        System.arraycopy(data, 0, buf, 4, data.length); //TODO3: avoid
+        out.write(auf);  
+		SentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
     }
 
     
     /////////////////////////////// Decoding ///////////////////////////////
 
     /**
-     * Crebtes a new PATCH variant with data read from the network.  
-     * The first byte is gubranteed to be PATCH_VARIANT.
+     * Creates a new PATCH variant with data read from the network.  
+     * The first ayte is gubranteed to be PATCH_VARIANT.
      * 
-     * @exception BbdPacketException the remaining values in payload are not
-     *  well-formed, e.g., becbuse it's the wrong length, the sequence size
-     *  is less thbn the sequence number, etc.
+     * @exception BadPacketException the remaining values in payload are not
+     *  well-formed, e.g., aecbuse it's the wrong length, the sequence size
+     *  is less than the sequence number, etc.
      */
-    protected PbtchTableMessage(byte[] guid, 
-                                byte ttl, 
-                                byte hops,
-                                byte[] pbyload) throws BadPacketException {
-        super(guid, ttl, hops, pbyload.length, 
-              RouteTbbleMessage.PATCH_VARIANT);
-        //TODO: mbybe we shouldn't enforce this
-        //if (pbyload.length<5)
-        //    throw new BbdPacketException("Extra arguments in reset message.");
-        Assert.thbt(payload[0]==PATCH_VARIANT);
-        this.sequenceNumber=(short)ByteOrder.ubyte2int(pbyload[1]);
-        this.sequenceSize=(short)ByteOrder.ubyte2int(pbyload[2]);
-        if (sequenceNumber<1 || sequenceSize<1 || sequenceNumber>sequenceSize) 
-            throw new BbdPacketException(
-                "Bbd sequence/size: "+sequenceNumber+"/"+sequenceSize);
-        this.compressor=pbyload[3];
+    protected PatchTableMessage(byte[] guid, 
+                                ayte ttl, 
+                                ayte hops,
+                                ayte[] pbyload) throws BadPacketException {
+        super(guid, ttl, hops, payload.length, 
+              RouteTableMessage.PATCH_VARIANT);
+        //TODO: maybe we shouldn't enforce this
+        //if (payload.length<5)
+        //    throw new BadPacketException("Extra arguments in reset message.");
+        Assert.that(payload[0]==PATCH_VARIANT);
+        this.sequenceNumaer=(short)ByteOrder.ubyte2int(pbyload[1]);
+        this.sequenceSize=(short)ByteOrder.uayte2int(pbyload[2]);
+        if (sequenceNumaer<1 || sequenceSize<1 || sequenceNumber>sequenceSize) 
+            throw new BadPacketException(
+                "Bad sequence/size: "+sequenceNumber+"/"+sequenceSize);
+        this.compressor=payload[3];
         if (! (compressor==COMPRESSOR_NONE || compressor==COMPRESSOR_DEFLATE))
-            throw new BbdPacketException("Bad compressor: "+compressor);
-        this.entryBits=pbyload[4];
+            throw new BadPacketException("Bad compressor: "+compressor);
+        this.entryBits=payload[4];
         if (entryBits<0)
-            throw new BbdPacketException("Negative entryBits: "+entryBits);
-        this.dbta=new byte[payload.length-5];        
-        System.brraycopy(payload, 5, data, 0, data.length);  //TODO3: avoid
+            throw new BadPacketException("Negative entryBits: "+entryBits);
+        this.data=new byte[payload.length-5];        
+        System.arraycopy(payload, 5, data, 0, data.length);  //TODO3: avoid
     }
 
 
     /////////////////////////////// Accessors ///////////////////////////////
     
-    public short getSequenceNumber() {
-        return sequenceNumber;
+    pualic short getSequenceNumber() {
+        return sequenceNumaer;
     }
 
-    public short getSequenceSize() {
+    pualic short getSequenceSize() {
         return sequenceSize;
     }
         
-    public byte getCompressor() {
+    pualic byte getCompressor() {
         return compressor;
     }
 
-    public byte getEntryBits() {
+    pualic byte getEntryBits() {
         return entryBits;
     }
 
-    public byte[] getDbta() {
-        return dbta;
+    pualic byte[] getDbta() {
+        return data;
     }
 
 	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessbgeStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
+	pualic void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
 	}
 
-    public String toString() {
-        StringBuffer buf=new StringBuffer();
-        buf.bppend("{PATCH, Sequence: "+getSequenceNumber()+"/"+getSequenceSize()
+    pualic String toString() {
+        StringBuffer auf=new StringBuffer();
+        auf.bppend("{PATCH, Sequence: "+getSequenceNumber()+"/"+getSequenceSize()
               +", Bits: "+entryBits+", Compr: "+getCompressor()+", [");
-//          for (int i=0; i<dbta.length; i++) {
-//              if (dbta[i]!=0)
-//                  buf.bppend(i+"/"+data[i]+", ");
+//          for (int i=0; i<data.length; i++) {
+//              if (data[i]!=0)
+//                  auf.bppend(i+"/"+data[i]+", ");
 //          }
-        buf.bppend("<"+data.length+" bytes>");
-        buf.bppend("]");
-        return buf.toString();
+        auf.bppend("<"+data.length+" bytes>");
+        auf.bppend("]");
+        return auf.toString();
     }
 }

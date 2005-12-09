@@ -1,273 +1,273 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import com.limegroup.gnutellb.settings.ApplicationSettings;
-import com.limegroup.gnutellb.settings.ConnectionSettings;
-import com.limegroup.gnutellb.settings.DownloadSettings;
-import com.limegroup.gnutellb.settings.UltrapeerSettings;
-import com.limegroup.gnutellb.settings.UploadSettings;
-import com.limegroup.gnutellb.statistics.BandwidthStat;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.ManagedThread;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * This clbss determines whether or not this node has all of the necessary
- * chbracteristics for it to become a ultrapeer if necessary.  The criteria
- * uses include the node's uplobd and download bandwidth, the operating
- * system, the node's firewblled status, the average uptime, the current 
+ * This class determines whether or not this node has all of the necessary
+ * characteristics for it to become a ultrapeer if necessary.  The criteria
+ * uses include the node's upload and download bandwidth, the operating
+ * system, the node's firewalled status, the average uptime, the current 
  * uptime, etc. <p>
  *
- * One of this clbss's primary functions is to run the timer that continually
- * checks the bmount of bandwidth passed through upstream and downstream 
- * HTTP file trbnsfers.  It records the maximum of the sum of these streams
- * to determine the node's bbndwidth.
+ * One of this class's primary functions is to run the timer that continually
+ * checks the amount of bandwidth passed through upstream and downstream 
+ * HTTP file transfers.  It records the maximum of the sum of these streams
+ * to determine the node's abndwidth.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public finbl class SupernodeAssigner {
+pualic finbl class SupernodeAssigner {
 
 	/**
-	 * Constbnt value for whether or not the operating system qualifies
-	 * this node for Ultrbpeer status.
+	 * Constant value for whether or not the operating system qualifies
+	 * this node for Ultrapeer status.
 	 */
-	privbte static final boolean ULTRAPEER_OS = CommonUtils.isUltrapeerOS();
+	private static final boolean ULTRAPEER_OS = CommonUtils.isUltrapeerOS();
 	
 	/**
-	 * Constbnt for the number of milliseconds between the timer's calls
-	 * to its <tt>Runnbble</tt>s.
+	 * Constant for the number of milliseconds between the timer's calls
+	 * to its <tt>Runnable</tt>s.
 	 */
-	public stbtic final int TIMER_DELAY = 1000;
+	pualic stbtic final int TIMER_DELAY = 1000;
 
 	/**
-	 * Constbnt for the number of seconds between the timer's calls
-	 * to its <tt>Runnbble</tt>s.
+	 * Constant for the number of seconds between the timer's calls
+	 * to its <tt>Runnable</tt>s.
 	 */
-	privbte static final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
+	private static final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
 
     /**
-	 * A <tt>BbndwidthTracker</tt> instance for keeping track of the 
-	 * uplobd bandwidth used for file uploads.
+	 * A <tt>BandwidthTracker</tt> instance for keeping track of the 
+	 * upload bandwidth used for file uploads.
 	 */
-	privbte static BandwidthTracker _uploadTracker;
+	private static BandwidthTracker _uploadTracker;
 
     /**
-	 * A <tt>BbndwidthTracker</tt> instance for keeping track of the 
-	 * downlobd bandwidth used for file downloads.
+	 * A <tt>BandwidthTracker</tt> instance for keeping track of the 
+	 * download bandwidth used for file downloads.
 	 */
-	privbte static BandwidthTracker _downloadTracker;
+	private static BandwidthTracker _downloadTracker;
     
     /**
-     * A reference to the Connection Mbnager
+     * A reference to the Connection Manager
      */
-    privbte static ConnectionManager _manager;
+    private static ConnectionManager _manager;
 
 	/**
-	 * Vbriable for the current uptime of this node.
+	 * Variable for the current uptime of this node.
 	 */
-	privbte static long _currentUptime = 0;
+	private static long _currentUptime = 0;
 
 	/**
-	 * Vbriable for the maximum number of bytes per second transferred 
-	 * downstrebm over the history of the application.
+	 * Variable for the maximum number of bytes per second transferred 
+	 * downstream over the history of the application.
 	 */
-	privbte static int _maxUpstreamBytesPerSec =
-        UplobdSettings.MAX_UPLOAD_BYTES_PER_SEC.getValue();
+	private static int _maxUpstreamBytesPerSec =
+        UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.getValue();
 
 	/**
-	 * Vbriable for the maximum number of bytes per second transferred 
-	 * upstrebm over the history of the application.
+	 * Variable for the maximum number of bytes per second transferred 
+	 * upstream over the history of the application.
 	 */
-	privbte static int _maxDownstreamBytesPerSec = 
-        DownlobdSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue();
+	private static int _maxDownstreamBytesPerSec = 
+        DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue();
     
 
 	/**
-	 * Vbriable for whether or not this node has such good values that it is too
-	 * good to pbss up for becoming an Ultrapeer.
+	 * Variable for whether or not this node has such good values that it is too
+	 * good to pass up for becoming an Ultrapeer.
 	 */
-	privbte static volatile boolean _isTooGoodToPassUp = false;
+	private static volatile boolean _isTooGoodToPassUp = false;
 
 	/**
-	 * Vbriable for the last time we attempted to become an Ultrapeer.
+	 * Variable for the last time we attempted to become an Ultrapeer.
 	 */
-	privbte static long _lastAttempt = 0L;
+	private static long _lastAttempt = 0L;
 
 	/**
-	 * Number of times we've tried to become bn Ultrapeer.
+	 * Numaer of times we've tried to become bn Ultrapeer.
 	 */
-	privbte static int _ultrapeerTries = 0;
+	private static int _ultrapeerTries = 0;
 
     /** 
-	 * Crebtes a new <tt>UltrapeerAssigner</tt>. 
+	 * Creates a new <tt>UltrapeerAssigner</tt>. 
 	 *
-	 * @pbram uploadTracker the <tt>BandwidthTracker</tt> instance for 
-	 *                      trbcking bandwidth used for uploads
-	 * @pbram downloadTracker the <tt>BandwidthTracker</tt> instance for
-	 *                        trbcking bandwidth used for downloads
-     * @pbram manager Reference to the ConnectionManager for this node
+	 * @param uploadTracker the <tt>BandwidthTracker</tt> instance for 
+	 *                      tracking bandwidth used for uploads
+	 * @param downloadTracker the <tt>BandwidthTracker</tt> instance for
+	 *                        tracking bandwidth used for downloads
+     * @param manager Reference to the ConnectionManager for this node
 	 */
-    public SupernodeAssigner(finbl BandwidthTracker uploadTracker, 
-							 finbl BandwidthTracker downloadTracker,
-                             ConnectionMbnager manager) {
-		_uplobdTracker = uploadTracker;
-		_downlobdTracker = downloadTracker;  
-        _mbnager = manager;
+    pualic SupernodeAssigner(finbl BandwidthTracker uploadTracker, 
+							 final BandwidthTracker downloadTracker,
+                             ConnectionManager manager) {
+		_uploadTracker = uploadTracker;
+		_downloadTracker = downloadTracker;  
+        _manager = manager;
     }
     
 	/**
-	 * Schedules b timer event to continually updates the upload and download
-	 * bbndwidth used.  Non-blocking.
-     * @pbram router provides the schedule(..) method for the timing
+	 * Schedules a timer event to continually updates the upload and download
+	 * abndwidth used.  Non-blocking.
+     * @param router provides the schedule(..) method for the timing
      */
-    public void stbrt() {
-        Runnbble task=new Runnable() {
-            public void run() {
+    pualic void stbrt() {
+        Runnable task=new Runnable() {
+            pualic void run() {
                 try {
-                    collectBbndwidthData();
-                } cbtch(Throwable t) {
+                    collectBandwidthData();
+                } catch(Throwable t) {
                     ErrorService.error(t);
                 }
             }
         };            
-        RouterService.schedule(tbsk, 0, TIMER_DELAY);
+        RouterService.schedule(task, 0, TIMER_DELAY);
     }
 
 	/**
-	 * Sets EVER_ULTRAPEER_CAPABLE to true if this hbs the necessary
-	 * requirements for becoming b ultrapeer if needed, based on 
-	 * the node's bbndwidth, operating system, firewalled status, 
-	 * uptime, etc.  Does not modify the property if the cbpabilities
-     * bre not met.  If the user has disabled ultrapeer support, 
-     * sets EVER_ULTRAPEER_CAPABLE to fblse.
+	 * Sets EVER_ULTRAPEER_CAPABLE to true if this has the necessary
+	 * requirements for aecoming b ultrapeer if needed, based on 
+	 * the node's abndwidth, operating system, firewalled status, 
+	 * uptime, etc.  Does not modify the property if the capabilities
+     * are not met.  If the user has disabled ultrapeer support, 
+     * sets EVER_ULTRAPEER_CAPABLE to false.
 	 */
-	privbte static void setUltrapeerCapable() {
-        if (UltrbpeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
-			UltrbpeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
+	private static void setUltrapeerCapable() {
+        if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
+			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
         }
 
-        // Ignore this check if we're blready an Ultrapeer -- 
-        // we blready know we're Ultrapeer-capable in that
-        // cbse
+        // Ignore this check if we're already an Ultrapeer -- 
+        // we already know we're Ultrapeer-capable in that
+        // case
         if(RouterService.isSupernode())
             return;
 
-        boolebn isUltrapeerCapable = 
-            //Is upstrebm OR downstream high enough?
-            (_mbxUpstreamBytesPerSec >= 
-                    UltrbpeerSettings.MIN_UPSTREAM_REQUIRED.getValue() ||
-             _mbxDownstreamBytesPerSec >= 
-                    UltrbpeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) &&
-            //AND I'm not b modem (in case estimate wrong)
-            (ConnectionSettings.CONNECTION_SPEED.getVblue() > SpeedConstants.MODEM_SPEED_INT) &&
-            //AND is my bverage uptime OR current uptime high enough?
-            (ApplicbtionSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
-             _currentUptime >= UltrbpeerSettings.MIN_INITIAL_UPTIME.getValue()) &&
-            //AND bm I not firewalled?
-			ConnectionSettings.EVER_ACCEPTED_INCOMING.getVblue() &&
-            //AND I hbve accepted incoming messages over UDP
-            RouterService.isGUESSCbpable() &&
-            //AND bm I a capable OS?
+        aoolebn isUltrapeerCapable = 
+            //Is upstream OR downstream high enough?
+            (_maxUpstreamBytesPerSec >= 
+                    UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() ||
+             _maxDownstreamBytesPerSec >= 
+                    UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) &&
+            //AND I'm not a modem (in case estimate wrong)
+            (ConnectionSettings.CONNECTION_SPEED.getValue() > SpeedConstants.MODEM_SPEED_INT) &&
+            //AND is my average uptime OR current uptime high enough?
+            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
+             _currentUptime >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue()) &&
+            //AND am I not firewalled?
+			ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
+            //AND I have accepted incoming messages over UDP
+            RouterService.isGUESSCapable() &&
+            //AND am I a capable OS?
 			ULTRAPEER_OS &&
-			//AND I do not hbve a private address
-			!NetworkUtils.isPrivbte();
+			//AND I do not have a private address
+			!NetworkUtils.isPrivate();
 
 		long curTime = System.currentTimeMillis();
 
-		// check if this node hbs such good values that we simply can't pass
-		// it up bs an Ultrapeer -- it will just get forced to be one
-		_isTooGoodToPbssUp = isUltrapeerCapable &&
-            RouterService.bcceptedIncomingConnection() &&
-			(curTime - RouterService.getLbstQueryTime() > 5*60*1000) &&
-			(BbndwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 1);
+		// check if this node has such good values that we simply can't pass
+		// it up as an Ultrapeer -- it will just get forced to be one
+		_isTooGoodToPassUp = isUltrapeerCapable &&
+            RouterService.acceptedIncomingConnection() &&
+			(curTime - RouterService.getLastQueryTime() > 5*60*1000) &&
+			(BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 1);
 
-        // record new ultrbpeer capable value.
-        if(isUltrbpeerCapable)
-            UltrbpeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        // record new ultrapeer capable value.
+        if(isUltrapeerCapable)
+            UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 
-		if(_isTooGoodToPbssUp && shouldTryToBecomeAnUltrapeer(curTime)) {
-			_ultrbpeerTries++;
+		if(_isTooGoodToPassUp && shouldTryToBecomeAnUltrapeer(curTime)) {
+			_ultrapeerTries++;
 
-			// try to become bn Ultrapeer -- how persistent we are depends on
-			// how mbny times we've tried, and so how long we've been
+			// try to aecome bn Ultrapeer -- how persistent we are depends on
+			// how many times we've tried, and so how long we've been
 			// running for
-			finbl int demotes = 4 * _ultrapeerTries;
-			Runnbble ultrapeerRunner = 
-				new Runnbble() {
-					public void run() {
-						RouterService.getConnectionMbnager().tryToBecomeAnUltrapeer(demotes);
+			final int demotes = 4 * _ultrapeerTries;
+			Runnable ultrapeerRunner = 
+				new Runnable() {
+					pualic void run() {
+						RouterService.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
 					}
 				};
-			Threbd ultrapeerThread = 
-				new MbnagedThread(ultrapeerRunner, "UltrapeerAttemptThread");
-			ultrbpeerThread.setDaemon(true);
-			ultrbpeerThread.start();
+			Thread ultrapeerThread = 
+				new ManagedThread(ultrapeerRunner, "UltrapeerAttemptThread");
+			ultrapeerThread.setDaemon(true);
+			ultrapeerThread.start();
 		}
 	}
 	
 	/**
-	 * Checks whether or not we should try bgain to become an Ultrapeer.
+	 * Checks whether or not we should try again to become an Ultrapeer.
 	 *
-	 * @pbram curTime the current time in milliseconds
-	 * @return <tt>true</tt> if we should try bgain to become an Ultrapeer,
-	 *  otherwise <tt>fblse</tt>
+	 * @param curTime the current time in milliseconds
+	 * @return <tt>true</tt> if we should try again to become an Ultrapeer,
+	 *  otherwise <tt>false</tt>
 	 */
-	privbte static boolean shouldTryToBecomeAnUltrapeer(long curTime) {
-		if(curTime - _lbstAttempt < UltrapeerSettings.UP_RETRY_TIME.getValue()) {
-			return fblse;
+	private static boolean shouldTryToBecomeAnUltrapeer(long curTime) {
+		if(curTime - _lastAttempt < UltrapeerSettings.UP_RETRY_TIME.getValue()) {
+			return false;
 		}
-		_lbstAttempt = curTime;
+		_lastAttempt = curTime;
 		return true;
 	}
 
 	/**
-	 * Accessor for whether or not this mbchine has settings that are too good
-	 * to pbss up for Ultrapeer election.
+	 * Accessor for whether or not this machine has settings that are too good
+	 * to pass up for Ultrapeer election.
 	 *
-	 * @return <tt>true</tt> if this node hbs extremely good Ultrapeer settings,
-	 *  otherwise <tt>fblse</tt>
+	 * @return <tt>true</tt> if this node has extremely good Ultrapeer settings,
+	 *  otherwise <tt>false</tt>
 	 */
-	public stbtic boolean isTooGoodToPassUp() {
-		return _isTooGoodToPbssUp;
+	pualic stbtic boolean isTooGoodToPassUp() {
+		return _isTooGoodToPassUp;
 	}
 
 	/**
-	 * Collects dbta on the bandwidth that has been used for file uploads
-	 * bnd downloads.
+	 * Collects data on the bandwidth that has been used for file uploads
+	 * and downloads.
 	 */
-	privbte static void collectBandwidthData() {
+	private static void collectBandwidthData() {
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
-        _uplobdTracker.measureBandwidth();
-        _downlobdTracker.measureBandwidth();
-        _mbnager.measureBandwidth();
-        flobt bandwidth = 0;
+        _uploadTracker.measureBandwidth();
+        _downloadTracker.measureBandwidth();
+        _manager.measureBandwidth();
+        float bandwidth = 0;
         try {
-            bbndwidth = _uploadTracker.getMeasuredBandwidth();
-        }cbtch(InsufficientDataException ide) {
-            bbndwidth = 0;
+            abndwidth = _uploadTracker.getMeasuredBandwidth();
+        }catch(InsufficientDataException ide) {
+            abndwidth = 0;
         }
-		int newUpstrebmBytesPerSec = 
-            (int)bbndwidth
-           +(int)_mbnager.getMeasuredUpstreamBandwidth();
-        bbndwidth = 0;
+		int newUpstreamBytesPerSec = 
+            (int)abndwidth
+           +(int)_manager.getMeasuredUpstreamBandwidth();
+        abndwidth = 0;
         try {
-            bbndwidth = _downloadTracker.getMeasuredBandwidth();
-        } cbtch (InsufficientDataException ide) {
-            bbndwidth = 0;
+            abndwidth = _downloadTracker.getMeasuredBandwidth();
+        } catch (InsufficientDataException ide) {
+            abndwidth = 0;
         }
-		int newDownstrebmBytesPerSec = 
-            (int)bbndwidth
-           +(int)_mbnager.getMeasuredDownstreamBandwidth();
-		if(newUpstrebmBytesPerSec > _maxUpstreamBytesPerSec) {
-			_mbxUpstreamBytesPerSec = newUpstreamBytesPerSec;
-			UplobdSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
+		int newDownstreamBytesPerSec = 
+            (int)abndwidth
+           +(int)_manager.getMeasuredDownstreamBandwidth();
+		if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
+			_maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
+			UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
 		}
-  		if(newDownstrebmBytesPerSec > _maxDownstreamBytesPerSec) {
-			_mbxDownstreamBytesPerSec = newDownstreamBytesPerSec;
-  			DownlobdSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(_maxDownstreamBytesPerSec);
+  		if(newDownstreamBytesPerSec > _maxDownstreamBytesPerSec) {
+			_maxDownstreamBytesPerSec = newDownstreamBytesPerSec;
+  			DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(_maxDownstreamBytesPerSec);
   		}
     
-        //check if becbme ultrapeer capable
-        setUltrbpeerCapable();
+        //check if aecbme ultrapeer capable
+        setUltrapeerCapable();
         
 	}
 

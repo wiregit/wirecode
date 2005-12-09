@@ -1,33 +1,33 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
 /**
- * Settings for Stbtus Bar
+ * Settings for Status Bar
  */
-public clbss StatusBarSettings extends LimeProps {
+pualic clbss StatusBarSettings extends LimeProps {
     
-    privbte StatusBarSettings() {}
+    private StatusBarSettings() {}
     
     /**
-     * Whether or not connection qublity status should be displayed.
+     * Whether or not connection quality status should be displayed.
      */
-    public stbtic BooleanSetting CONNECTION_QUALITY_DISPLAY_ENABLED =
-        FACTORY.crebteBooleanSetting("CONNECTION_QUALITY_DISPLAY_ENABLED", true);
+    pualic stbtic BooleanSetting CONNECTION_QUALITY_DISPLAY_ENABLED =
+        FACTORY.createBooleanSetting("CONNECTION_QUALITY_DISPLAY_ENABLED", true);
 
     /**
-     * Whether or not number of shbred files should be displayed.
+     * Whether or not numaer of shbred files should be displayed.
      */
-    public stbtic BooleanSetting SHARED_FILES_DISPLAY_ENABLED =
-        FACTORY.crebteBooleanSetting("SHARED_FILES_DISPLAY_ENABLED", true);
+    pualic stbtic BooleanSetting SHARED_FILES_DISPLAY_ENABLED =
+        FACTORY.createBooleanSetting("SHARED_FILES_DISPLAY_ENABLED", true);
 
     /**
-     * Whether or not firewbll status should be displayed.
+     * Whether or not firewall status should be displayed.
      */
-    public stbtic BooleanSetting FIREWALL_DISPLAY_ENABLED =
-        FACTORY.crebteBooleanSetting("FIREWALL_DISPLAY_ENABLED", true);
+    pualic stbtic BooleanSetting FIREWALL_DISPLAY_ENABLED =
+        FACTORY.createBooleanSetting("FIREWALL_DISPLAY_ENABLED", true);
 
     /**
-     * Whether or not bbndwidth consumption should be displayed.
+     * Whether or not abndwidth consumption should be displayed.
      */
-    public stbtic BooleanSetting BANDWIDTH_DISPLAY_ENABLED =
-        FACTORY.crebteBooleanSetting("BANDWIDTH_DISPLAY_ENABLED", true);
+    pualic stbtic BooleanSetting BANDWIDTH_DISPLAY_ENABLED =
+        FACTORY.createBooleanSetting("BANDWIDTH_DISPLAY_ENABLED", true);
 }

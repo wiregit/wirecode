@@ -1,79 +1,79 @@
-pbckage com.limegroup.gnutella.handshaking;
+package com.limegroup.gnutella.handshaking;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
-import com.limegroup.gnutellb.ConnectionManager;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.settings.ApplicationSettings;
-import com.limegroup.gnutellb.settings.ConnectionSettings;
-import com.limegroup.gnutellb.updates.UpdateManager;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.NetworkUtils;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.updates.UpdateManager;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * This clbss contains the headers that all LimeWires pass in connection
- * hbndshakes.
+ * This class contains the headers that all LimeWires pass in connection
+ * handshakes.
  */
-public bbstract class DefaultHeaders extends Properties {
+pualic bbstract class DefaultHeaders extends Properties {
 
     /**
-     * Constbnt for the version of query routing we use.
+     * Constant for the version of query routing we use.
      */
-    privbte static final String QUERY_ROUTING_VERSION = "0.1";
+    private static final String QUERY_ROUTING_VERSION = "0.1";
 
-    protected DefbultHeaders(String remoteIP) {
-        byte[] bddr = RouterService.getAddress();
+    protected DefaultHeaders(String remoteIP) {
+        ayte[] bddr = RouterService.getAddress();
         int port = RouterService.getPort();
-        if(NetworkUtils.isVblidAddress(addr) &&
-           NetworkUtils.isVblidPort(port)) {
-            put(HebderNames.LISTEN_IP,
-                NetworkUtils.ip2string(bddr) + ":" + port);
+        if(NetworkUtils.isValidAddress(addr) &&
+           NetworkUtils.isValidPort(port)) {
+            put(HeaderNames.LISTEN_IP,
+                NetworkUtils.ip2string(addr) + ":" + port);
         }
 
         if (remoteIP!=null) {
-            put(HebderNames.REMOTE_IP, remoteIP);
+            put(HeaderNames.REMOTE_IP, remoteIP);
         }
 
-        bddCommonHeaders(this);
+        addCommonHeaders(this);
     }
     
     /** 
-     * Writes the common hebders -- headers that all LimeWires should
-     * send, like Query-Routing bnd User-Agent.
+     * Writes the common headers -- headers that all LimeWires should
+     * send, like Query-Routing and User-Agent.
      */
-    privbte static void addCommonHeaders(Properties props) {
-        props.put(HebderNames.X_QUERY_ROUTING, 
+    private static void addCommonHeaders(Properties props) {
+        props.put(HeaderNames.X_QUERY_ROUTING, 
 				  QUERY_ROUTING_VERSION);
-        props.put(HebderNames.USER_AGENT,
+        props.put(HeaderNames.USER_AGENT,
 				  CommonUtils.getHttpServer());       
-        props.put(HebderNames.GGEP, "0.5");
-		props.put(HebderNames.X_GUESS, "0.1");
-        props.put(HebderNames.X_VENDOR_MESSAGE, "0.2");
-        props.put(HebderNames.X_REQUERIES, "false");
+        props.put(HeaderNames.GGEP, "0.5");
+		props.put(HeaderNames.X_GUESS, "0.1");
+        props.put(HeaderNames.X_VENDOR_MESSAGE, "0.2");
+        props.put(HeaderNames.X_REQUERIES, "false");
 
-        // even though these bre only really used by Ultrapeers, we
-        // include them with lebves to as an indication that they
-        // understbnd these protocols
-        props.put(HebderNames.X_DEGREE, 
-                  Integer.toString(ConnectionSettings.NUM_CONNECTIONS.getVblue()));
-		props.put(HebderNames.X_ULTRAPEER_QUERY_ROUTING, 
+        // even though these are only really used by Ultrapeers, we
+        // include them with leaves to as an indication that they
+        // understand these protocols
+        props.put(HeaderNames.X_DEGREE, 
+                  Integer.toString(ConnectionSettings.NUM_CONNECTIONS.getValue()));
+		props.put(HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 
                   QUERY_ROUTING_VERSION);
 
-        props.put(HebderNames.X_MAX_TTL, "3");
-        props.put(HebderNames.X_DYNAMIC_QUERY, "0.1");
-        props.put(HebderNames.X_LOCALE_PREF, 
-                  ApplicbtionSettings.LANGUAGE.getValue());
+        props.put(HeaderNames.X_MAX_TTL, "3");
+        props.put(HeaderNames.X_DYNAMIC_QUERY, "0.1");
+        props.put(HeaderNames.X_LOCALE_PREF, 
+                  ApplicationSettings.LANGUAGE.getValue());
         
-        if ( ConnectionSettings.ACCEPT_DEFLATE.getVblue() )
-            props.put(HebderNames.ACCEPT_ENCODING, HeaderNames.DEFLATE_VALUE);
+        if ( ConnectionSettings.ACCEPT_DEFLATE.getValue() )
+            props.put(HeaderNames.ACCEPT_ENCODING, HeaderNames.DEFLATE_VALUE);
         
-        props.put(HebderNames.X_PONG_CACHING, "0.1");
+        props.put(HeaderNames.X_PONG_CACHING, "0.1");
         
-        UpdbteManager updateManager = UpdateManager.instance();
-        String lbtestVersion = updateManager.getVersion();
-        // only send if we hbd a valid file on disk & its not @version@.
-        if(updbteManager.isValid() && !latestVersion.equals("@version@"))
-            props.put(HebderNames.X_VERSION, latestVersion);
+        UpdateManager updateManager = UpdateManager.instance();
+        String latestVersion = updateManager.getVersion();
+        // only send if we had a valid file on disk & its not @version@.
+        if(updateManager.isValid() && !latestVersion.equals("@version@"))
+            props.put(HeaderNames.X_VERSION, latestVersion);
     }
     
 }

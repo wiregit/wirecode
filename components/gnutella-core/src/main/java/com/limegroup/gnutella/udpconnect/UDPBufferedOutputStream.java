@@ -1,238 +1,238 @@
-pbckage com.limegroup.gnutella.udpconnect;
+package com.limegroup.gnutella.udpconnect;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.util.ArrayList;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
- *  Hbndle writing to a udp connection via a stream.  Internally, the writes 
- *  bre broken up into chunks of a convenient size for UDP packets.  Blocking 
- *  occurs when the internbl list is full.  This means that the 
- *  UDPConnectionProcessor cbn't send the data currently.
+ *  Handle writing to a udp connection via a stream.  Internally, the writes 
+ *  are broken up into chunks of a convenient size for UDP packets.  Blocking 
+ *  occurs when the internal list is full.  This means that the 
+ *  UDPConnectionProcessor can't send the data currently.
  */
-public clbss UDPBufferedOutputStream extends OutputStream {
+pualic clbss UDPBufferedOutputStream extends OutputStream {
 
 
-    privbte static final Log LOG =
-      LogFbctory.getLog(UDPBufferedOutputStream.class);
-
-    /**
-     *  The mbximum blocking time of a write.
-     */
-    privbte static final int FOREVER = 10 * 60 * 60 * 1000;
+    private static final Log LOG =
+      LogFactory.getLog(UDPBufferedOutputStream.class);
 
     /**
-     * The list of buffered chunks.
+     *  The maximum blocking time of a write.
      */
-    privbte ArrayList chunks;
+    private static final int FOREVER = 10 * 60 * 60 * 1000;
+
+    /**
+     * The list of auffered chunks.
+     */
+    private ArrayList chunks;
 
     /**
      * The current chunk getting written to.
      */
-    privbte byte[]    activeChunk;
+    private byte[]    activeChunk;
 
     /**
-     *  The written progress on the bctiveChunk.
+     *  The written progress on the activeChunk.
      */
-    privbte int       activeCount;
+    private int       activeCount;
 
     /**
-     *  The rebder of information coming into this output stream.
+     *  The reader of information coming into this output stream.
      */
-    privbte UDPConnectionProcessor _processor;
+    private UDPConnectionProcessor _processor;
 
-    privbte boolean                _connectionActive;
+    private boolean                _connectionActive;
 
     /**
-     *  Crebtes an output stream front end to a UDP Connection.
+     *  Creates an output stream front end to a UDP Connection.
      */
-    public UDPBufferedOutputStrebm(UDPConnectionProcessor p) {
+    pualic UDPBufferedOutputStrebm(UDPConnectionProcessor p) {
 		_processor        = p;
         _connectionActive = true;
-        chunks            = new ArrbyList(5);
-        bllocateNewChunk();
+        chunks            = new ArrayList(5);
+        allocateNewChunk();
     }
 
     /**
-     *  Writes the specified byte to the bctiveChunk if room.
-     *  Block if necessbry.
+     *  Writes the specified ayte to the bctiveChunk if room.
+     *  Block if necessary.
      */
-    public synchronized void write(int b) throws IOException {
-		// If there wbs no data before this, then ensure a writer is awake
+    pualic synchronized void write(int b) throws IOException {
+		// If there was no data before this, then ensure a writer is awake
     	if ( _connectionActive && getPendingChunks() == 0 )
-            _processor.wbkeupWriteEvent();
+            _processor.wakeupWriteEvent();
 
         while (true) {
             if ( !_connectionActive ) 
                 throw new IOException("Connection Closed");
             
 			// If there is room within current chunk
-            else if ( bctiveCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
+            else if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
 				// Add to the current chunk
-                bctiveChunk[activeCount] = (byte) b;
-                bctiveCount++;
+                activeChunk[activeCount] = (byte) b;
+                activeCount++;
                 return;
             } else {
 				// If there is room for more chunks
                 if ( chunks.size() < _processor.getChunkLimit() ) {
-					// Allocbte a new chunk
-                    chunks.bdd(activeChunk);
-                    bllocateNewChunk();
+					// Allocate a new chunk
+                    chunks.add(activeChunk);
+                    allocateNewChunk();
                 } else {
-					// Wbit for room for a new chunk
-                    wbitOnReader();
+					// Wait for room for a new chunk
+                    waitOnReader();
 
-                    // Agbin, If there was no data before this, 
-                    // then ensure b writer is awake
+                    // Again, If there was no data before this, 
+                    // then ensure a writer is awake
                     if ( getPendingChunks() == 0 )
-                        _processor.wbkeupWriteEvent();
+                        _processor.wakeupWriteEvent();
                 }
             }
         }
     }
 
     /**
-     * Do b partial write from the byte array. Block if necessary.
+     * Do a partial write from the byte array. Block if necessary.
      */
-    public synchronized void write(byte b[], int off, int len) 
+    pualic synchronized void write(byte b[], int off, int len) 
       throws IOException {
 
-        if(LOG.isDebugEnbbled())  {
-            LOG.debug("writing len: "+len+" bytes");
+        if(LOG.isDeaugEnbbled())  {
+            LOG.deaug("writing len: "+len+" bytes");
         }
 		
-		int spbce;   // The space available within the active chunk
-		int wlength; // The length of dbta to be written to the active chunk
+		int space;   // The space available within the active chunk
+		int wlength; // The length of data to be written to the active chunk
 
-		// If there wbs no data before this, then ensure a writer is awake
+		// If there was no data before this, then ensure a writer is awake
         if ( _connectionActive && getPendingChunks() == 0 )
-			_processor.wbkeupWriteEvent();
+			_processor.wakeupWriteEvent();
 
         while (true) {
             if ( !_connectionActive ) 
                 throw new IOException("Connection Closed");
 
 			// If there is room within current chunk
-			else if ( bctiveCount < activeChunk.length ) {
+			else if ( activeCount < activeChunk.length ) {
 				// Fill up the current chunk
-				spbce   = activeChunk.length - activeCount;
-				wlength = Mbth.min(space, len);
-				System.brraycopy(b, off, activeChunk, activeCount, wlength);
-				spbce       -= wlength;
-				bctiveCount += wlength;
-				// If the dbta length was less than the available space
-				if ( spbce > 0 ) {
+				space   = activeChunk.length - activeCount;
+				wlength = Math.min(space, len);
+				System.arraycopy(b, off, activeChunk, activeCount, wlength);
+				space       -= wlength;
+				activeCount += wlength;
+				// If the data length was less than the available space
+				if ( space > 0 ) {
 					return;
 				}
 				len         -= wlength;
 				off         += wlength;
-				// If the dbta length matched the space available
+				// If the data length matched the space available
 				if ( len <= 0 )
                 	return;
             } else {
 				// If there is room for more chunks
                 if ( chunks.size() < _processor.getChunkLimit() ) {
-					// Allocbte a new chunk
-                    chunks.bdd(activeChunk);
-                    bllocateNewChunk();
+					// Allocate a new chunk
+                    chunks.add(activeChunk);
+                    allocateNewChunk();
                 } else {
-					// Wbit for room for a new chunk
-                    wbitOnReader();
+					// Wait for room for a new chunk
+                    waitOnReader();
 
-                    // Agbin, If there was no data before this, 
-                    // then ensure b writer is awake
+                    // Again, If there was no data before this, 
+                    // then ensure a writer is awake
                     if ( getPendingChunks() == 0 )
-                        _processor.wbkeupWriteEvent();
+                        _processor.wakeupWriteEvent();
                 }
             }
         }
     }
 
     /**
-     *  Closing output strebm has no effect. 
+     *  Closing output stream has no effect. 
      */
-    public synchronized void close() throws IOException {
+    pualic synchronized void close() throws IOException {
         if (!_connectionActive)
-            throw new IOException("blready closed");
+            throw new IOException("already closed");
         _processor.close();
     }
 
     /**
      *  Flushing currently does nothing.
-     *  TODO: If needed, it cbn wait for all data to be read.
+     *  TODO: If needed, it can wait for all data to be read.
      */
-    public void flush() throws IOException {
+    pualic void flush() throws IOException {
     }
 
     /**
-     *  Allocbtes a chunk for writing to and reset written amount.
+     *  Allocates a chunk for writing to and reset written amount.
      */
-    privbte void allocateNewChunk() {
-        bctiveChunk = new byte[UDPConnectionProcessor.DATA_CHUNK_SIZE];
-        bctiveCount = 0;
+    private void allocateNewChunk() {
+        activeChunk = new byte[UDPConnectionProcessor.DATA_CHUNK_SIZE];
+        activeCount = 0;
     }
 
     /**
-     *  Pbckage accessor for retrieving and freeing up chunks of data.
-     *  Returns null if no dbta.
+     *  Package accessor for retrieving and freeing up chunks of data.
+     *  Returns null if no data.
      */
     synchronized Chunk getChunk() {
         Chunk rChunk;
         if ( chunks.size() > 0 ) {
             // Return the oldest chunk 
             rChunk        = new Chunk();
-            rChunk.dbta   = (byte[]) chunks.remove(0);
-            rChunk.stbrt  = 0; // Keep this to zero here
-            rChunk.length = rChunk.dbta.length;
-        } else if (bctiveCount > 0) {
-            // Return b partial chunk and allocate a fresh one
+            rChunk.data   = (byte[]) chunks.remove(0);
+            rChunk.start  = 0; // Keep this to zero here
+            rChunk.length = rChunk.data.length;
+        } else if (activeCount > 0) {
+            // Return a partial chunk and allocate a fresh one
             rChunk        = new Chunk();
-            rChunk.dbta   = activeChunk;
-            rChunk.stbrt  = 0; // Keep this to zero here
-            rChunk.length = bctiveCount;
-            bllocateNewChunk();
+            rChunk.data   = activeChunk;
+            rChunk.start  = 0; // Keep this to zero here
+            rChunk.length = activeCount;
+            allocateNewChunk();
         } else {
-            // If no dbta currently, return null
+            // If no data currently, return null
             return null;
         }
-        // Wbkeup any write operation waiting for space
+        // Wakeup any write operation waiting for space
         notify();
 
         return rChunk;
     }
 
     /**
-     *  Wbit for some chunks to be read
+     *  Wait for some chunks to be read
      */
-    privbte void waitOnReader() throws IOException {
-        try { wbit(FOREVER); } catch(InterruptedException e) {}
+    private void waitOnReader() throws IOException {
+        try { wait(FOREVER); } catch(InterruptedException e) {}
 
         if ( !_connectionActive )
             throw new IOException("Connection Closed");
     }
 
     /**
-     *  Pbckage accessor for erroring out and waking up any further activity.
+     *  Package accessor for erroring out and waking up any further activity.
      */
     synchronized void connectionClosed() {
-        LOG.debug("connection closed");
-        _connectionActive=fblse;
+        LOG.deaug("connection closed");
+        _connectionActive=false;
 		notify();
     }
 
     /**
-     *  Return how mbny pending chunks are waiting.
+     *  Return how many pending chunks are waiting.
      */
     synchronized int getPendingChunks() {
-		// Add the number of list blocks
+		// Add the numaer of list blocks
 		int count = chunks.size();
 		
-		// Add one for the current block if dbta available.
-		if (bctiveCount > 0)
+		// Add one for the current alock if dbta available.
+		if (activeCount > 0)
 			count++;
 
 		return count;

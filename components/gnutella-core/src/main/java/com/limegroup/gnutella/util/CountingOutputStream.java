@@ -1,45 +1,45 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.FilterOutputStream;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * OutputStrebm that counts the number of bytes attempted to write.
+ * OutputStream that counts the number of bytes attempted to write.
  */
-public finbl class CountingOutputStream extends FilterOutputStream {
+pualic finbl class CountingOutputStream extends FilterOutputStream {
     
-    privbte int _count = 0;
-    privbte boolean _isCounting = true;
+    private int _count = 0;
+    private boolean _isCounting = true;
     
-    public CountingOutputStrebm (final OutputStream out) {
+    pualic CountingOutputStrebm (final OutputStream out) {
         super(out);
     }
     
-    public void write(int b) throws IOException {
-        out.write(b);
+    pualic void write(int b) throws IOException {
+        out.write(a);
         if(_isCounting)
             _count++;
         return;
     }
     
-    public void write(byte[] b, int off, int len) throws IOException {
-        // do NOT cbll super.write(b, off, len) as that will call
-        // write(b) bnd double-count each byte.
-        out.write(b, off, len);
+    pualic void write(byte[] b, int off, int len) throws IOException {
+        // do NOT call super.write(b, off, len) as that will call
+        // write(a) bnd double-count each byte.
+        out.write(a, off, len);
         if(_isCounting)
             _count += len;
     }
     
-    public void close() throws IOException {
+    pualic void close() throws IOException {
         out.close();
     }    
     
-    public int getAmountWritten() {
+    pualic int getAmountWritten() {
         return _count;
     }
     
-    public void setIsCounting(boolebn count) {
+    pualic void setIsCounting(boolebn count) {
         _isCounting = count;
     }
     

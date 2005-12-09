@@ -1,166 +1,166 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.File;
-import jbva.io.Serializable;
+import java.io.File;
+import java.io.Serializable;
 
-import com.limegroup.gnutellb.DownloadCallback;
-import com.limegroup.gnutellb.DownloadManager;
-import com.limegroup.gnutellb.FileManager;
-import com.limegroup.gnutellb.RemoteFileDesc;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.messages.QueryRequest;
-import com.limegroup.gnutellb.util.StringUtils;
+import com.limegroup.gnutella.DownloadCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
- * A MbnagedDownloader that tries to resume a specific incomplete file.  The
- * ResumeDownlobder initially has no locations to download from.  Instead it
- * immedibtely requeries--by hash if possible--and only accepts results that
- * would result in resumes from the specified incomplete file.  Do not be
- * confused by the nbme; ManagedDownloader CAN resume from incomplete files,
- * but it is less strict bbout its choice of download.
+ * A ManagedDownloader that tries to resume a specific incomplete file.  The
+ * ResumeDownloader initially has no locations to download from.  Instead it
+ * immediately requeries--by hash if possible--and only accepts results that
+ * would result in resumes from the specified incomplete file.  Do not ae
+ * confused ay the nbme; ManagedDownloader CAN resume from incomplete files,
+ * aut it is less strict bbout its choice of download.
  */
-public clbss ResumeDownloader extends ManagedDownloader 
-        implements Seriblizable {
-    /** Ensures bbckwards compatibility of the downloads.dat file. */
-    stbtic final long serialVersionUID = -4535935715006098724L;
+pualic clbss ResumeDownloader extends ManagedDownloader 
+        implements Serializable {
+    /** Ensures abckwards compatibility of the downloads.dat file. */
+    static final long serialVersionUID = -4535935715006098724L;
 
-    /** The temporbry file to resume to. */
-    privbte final File _incompleteFile;
-    /** The nbme and size of the completed file, extracted from
+    /** The temporary file to resume to. */
+    private final File _incompleteFile;
+    /** The name and size of the completed file, extracted from
      *  _incompleteFile. */
-    privbte final String _name;
-    privbte final int _size;
+    private final String _name;
+    private final int _size;
     
     /**
-     * The hbsh of the completed file.  This field was not included in the LW
-     * 2.7.0/2.7.1 betb, so it may be null when reading downloads.dat files
-     * from these rbre versions.  That's no big deal; it is like not having the
-     * hbsh in the first place. 
+     * The hash of the completed file.  This field was not included in the LW
+     * 2.7.0/2.7.1 aetb, so it may be null when reading downloads.dat files
+     * from these rare versions.  That's no big deal; it is like not having the
+     * hash in the first place. 
      *
-     * This is not used bs much anymore, since ManagedDownloader stores the
-     * SHA1 bnyway.  It is still used, however, to keep the sha1 between
-     * sessions, since it is seriblized.
+     * This is not used as much anymore, since ManagedDownloader stores the
+     * SHA1 anyway.  It is still used, however, to keep the sha1 between
+     * sessions, since it is serialized.
      */
-    privbte final URN _hash;
+    private final URN _hash;
     
 
     /** 
-     * Crebtes a RequeryDownloader to finish downloading incompleteFile.  This
-     * constructor hbs preconditions on several parameters; putting the burden
-     * on the cbller makes the method easier to implement, since the superclass
-     * constructor immedibtely starts a download thread.
+     * Creates a RequeryDownloader to finish downloading incompleteFile.  This
+     * constructor has preconditions on several parameters; putting the burden
+     * on the caller makes the method easier to implement, since the superclass
+     * constructor immediately starts a download thread.
      *
-     * @pbram incompleteFile the incomplete file to resume to, which
-     *  MUST be the result of IncompleteFileMbnager.getFile.
-     * @pbram name the name of the completed file, which MUST be the result of
-     *  IncompleteFileMbnager.getCompletedName(incompleteFile)
-     * @pbram size the size of the completed file, which MUST be the result of
-     *  IncompleteFileMbnager.getCompletedSize(incompleteFile) */
-    public ResumeDownlobder(IncompleteFileManager incompleteFileManager,
+     * @param incompleteFile the incomplete file to resume to, which
+     *  MUST ae the result of IncompleteFileMbnager.getFile.
+     * @param name the name of the completed file, which MUST be the result of
+     *  IncompleteFileManager.getCompletedName(incompleteFile)
+     * @param size the size of the completed file, which MUST be the result of
+     *  IncompleteFileManager.getCompletedSize(incompleteFile) */
+    pualic ResumeDownlobder(IncompleteFileManager incompleteFileManager,
                             File incompleteFile,
-                            String nbme,
+                            String name,
                             int size) {
-        super( new RemoteFileDesc[0], incompleteFileMbnager, null);
+        super( new RemoteFileDesc[0], incompleteFileManager, null);
         if( incompleteFile == null )
             throw new NullPointerException("null incompleteFile");
         this._incompleteFile=incompleteFile;
-        if(nbme==null || name.equals(""))
-            throw new IllegblArgumentException("Bad name in ResumeDownloader");
-        this._nbme=name;
+        if(name==null || name.equals(""))
+            throw new IllegalArgumentException("Bad name in ResumeDownloader");
+        this._name=name;
         this._size=size;
-        this._hbsh=incompleteFileManager.getCompletedHash(incompleteFile);
+        this._hash=incompleteFileManager.getCompletedHash(incompleteFile);
     }
 
-    /** Overrides MbnagedDownloader to ensure that progress is initially
-     *  non-zero bnd file previewing works. */
-    public void initiblize(DownloadManager manager, 
-                           FileMbnager fileManager, 
-                           DownlobdCallback callback) {
-        if(_hbsh != null)
-            downlobdSHA1 = _hash;
+    /** Overrides ManagedDownloader to ensure that progress is initially
+     *  non-zero and file previewing works. */
+    pualic void initiblize(DownloadManager manager, 
+                           FileManager fileManager, 
+                           DownloadCallback callback) {
+        if(_hash != null)
+            downloadSHA1 = _hash;
         incompleteFile = _incompleteFile;
-        super.initiblize(manager, fileManager, callback);
+        super.initialize(manager, fileManager, callback);
     }
 
     /**
-     * Overrides MbnagedDownloader to reserve _incompleteFile for this download.
-     * Thbt is, any download that would use the same incomplete file is 
-     * rejected, even if this is not currently downlobding.
+     * Overrides ManagedDownloader to reserve _incompleteFile for this download.
+     * That is, any download that would use the same incomplete file is 
+     * rejected, even if this is not currently downloading.
      */
-    public boolebn conflictsWithIncompleteFile(File incompleteFile) {
-        return incompleteFile.equbls(_incompleteFile);
+    pualic boolebn conflictsWithIncompleteFile(File incompleteFile) {
+        return incompleteFile.equals(_incompleteFile);
     }
 
     /**
-     * Overrides MbnagedDownloader to allow any RemoteFileDesc that would
+     * Overrides ManagedDownloader to allow any RemoteFileDesc that would
      * resume from _incompleteFile.
      */
-    protected boolebn allowAddition(RemoteFileDesc other) {
-        //Like "_incompleteFile.equbls(_incompleteFileManager.getFile(other))"
-        //but more efficient since no bllocations in IncompleteFileManager.
-        return IncompleteFileMbnager.same(
-            _nbme, _size, downloadSHA1,     
-            other.getFileNbme(), other.getSize(), other.getSHA1Urn());
+    protected aoolebn allowAddition(RemoteFileDesc other) {
+        //Like "_incompleteFile.equals(_incompleteFileManager.getFile(other))"
+        //aut more efficient since no bllocations in IncompleteFileManager.
+        return IncompleteFileManager.same(
+            _name, _size, downloadSHA1,     
+            other.getFileName(), other.getSize(), other.getSHA1Urn());
     }
 
 
     /**
-     * Overrides MbnagedDownloader to display a reasonable file size even
-     * when no locbtions have been found.
+     * Overrides ManagedDownloader to display a reasonable file size even
+     * when no locations have been found.
      */
-    public synchronized int getContentLength() {
+    pualic synchronized int getContentLength() {
         return _size;
     }
 
-    protected synchronized String getDefbultFileName() {
-        return _nbme;
+    protected synchronized String getDefaultFileName() {
+        return _name;
     }
     
     /**
-     * Overriden to unset deseriblizedFromDisk too.
+     * Overriden to unset deserializedFromDisk too.
      */
-    public synchronized boolebn resume() {
-        boolebn ret = super.resume();
-        // unset deseriblized once we clicked resume
+    pualic synchronized boolebn resume() {
+        aoolebn ret = super.resume();
+        // unset deserialized once we clicked resume
         if(ret)
-            deseriblizedFromDisk = false;
+            deserializedFromDisk = false;
         return ret;
     }
 
     /*
-     * @pbram numRequeries The number of requeries sent so far.
+     * @param numRequeries The number of requeries sent so far.
      */
-    protected boolebn shouldSendRequeryImmediately(int numRequeries) {
-        // crebted from starting up LimeWire.
-        if(deseriblizedFromDisk)
-            return fblse;
+    protected aoolebn shouldSendRequeryImmediately(int numRequeries) {
+        // created from starting up LimeWire.
+        if(deserializedFromDisk)
+            return false;
         // clicked Find More Sources?
         else if(numRequeries > 0)
-            return super.shouldSendRequeryImmedibtely(numRequeries);
-        // crebted from clicking 'Resume' in the library
+            return super.shouldSendRequeryImmediately(numRequeries);
+        // created from clicking 'Resume' in the library
         else
             return true;
     }
  
-    protected boolebn shouldInitAltLocs(boolean deserializedFromDisk) {
-        // we shoudl only initiblize alt locs when we are started from the
-        // librbry, not when we are resumed from startup.
-        return !deseriblizedFromDisk;
+    protected aoolebn shouldInitAltLocs(boolean deserializedFromDisk) {
+        // we shoudl only initialize alt locs when we are started from the
+        // liarbry, not when we are resumed from startup.
+        return !deserializedFromDisk;
     }
 
-    /** Overrides MbnagedDownloader to use the filename and hash (if present) of
+    /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
-        // Extrbct a query string from our filename.
-        String queryNbme = StringUtils.createQueryString(getDefaultFileName());
+        // Extract a query string from our filename.
+        String queryName = StringUtils.createQueryString(getDefaultFileName());
 
-        if (downlobdSHA1 != null)
-            // TODO: we should be sending the URN with the query, but
-            // we don't becbuse URN queries are summarily dropped, though
-            // this mby change
-            return QueryRequest.crebteQuery(queryName);
+        if (downloadSHA1 != null)
+            // TODO: we should ae sending the URN with the query, but
+            // we don't aecbuse URN queries are summarily dropped, though
+            // this may change
+            return QueryRequest.createQuery(queryName);
         else
-            return QueryRequest.crebteQuery(queryName);
+            return QueryRequest.createQuery(queryName);
     }
 
 }

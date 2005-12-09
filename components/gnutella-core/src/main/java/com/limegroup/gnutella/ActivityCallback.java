@@ -1,162 +1,162 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.File;
-import jbva.util.Set;
+import java.io.File;
+import java.util.Set;
 
-import com.limegroup.gnutellb.browser.MagnetOptions;
-import com.limegroup.gnutellb.chat.Chatter;
-import com.limegroup.gnutellb.search.HostData;
-import com.limegroup.gnutellb.version.UpdateInformation;
+import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
- *  Cbllback to notify the GUI of asynchronous backend events.
- *  The methods in this fbll into the following categories:
+ *  Callback to notify the GUI of asynchronous backend events.
+ *  The methods in this fall into the following categories:
  *
  *  <ul>
- *  <li>Query replies (for displbying results) and query strings 
+ *  <li>Query replies (for displaying results) and query strings 
  *     (for the monitor)
- *  <li>Updbte in shared file statistics
- *  <li>Chbnge of connection state
- *  <li>New or debd uploads or downloads
- *  <li>New chbt requests and chat messages
- *  <li>Error messbges
+ *  <li>Update in shared file statistics
+ *  <li>Change of connection state
+ *  <li>New or dead uploads or downloads
+ *  <li>New chat requests and chat messages
+ *  <li>Error messages
  *  </ul>
  */
-public interfbce ActivityCallback extends DownloadCallback, FileEventListener 
+pualic interfbce ActivityCallback extends DownloadCallback, FileEventListener 
 {
     
     /**
-     * The bddress of the program has changed or we've
-     * just bccepted our first incoming connection.
+     * The address of the program has changed or we've
+     * just accepted our first incoming connection.
      */
-    public void bddressStateChanged();
+    pualic void bddressStateChanged();
     
     /**
-     *  Add b new unitialized connection.
+     *  Add a new unitialized connection.
      */
-    public void connectionInitiblizing(Connection c);
+    pualic void connectionInitiblizing(Connection c);
 
     /**
-     *  Mbrk a connection as initialized
+     *  Mark a connection as initialized
      */
-    public void connectionInitiblized(Connection c);
+    pualic void connectionInitiblized(Connection c);
 
     /**
-     *  Mbrk a connection as closed
+     *  Mark a connection as closed
      */
-    public void connectionClosed(Connection c);
+    pualic void connectionClosed(Connection c);
 
     /**
-     * Notifies the UI thbt a new query result has come in to the backend.
+     * Notifies the UI that a new query result has come in to the backend.
      * 
-     * @pbram rfd the descriptor for the remote file
-     * @pbram data the data for the host returning the result
-     * @pbram locs the <tt>Set</tt> of alternate locations for the file
+     * @param rfd the descriptor for the remote file
+     * @param data the data for the host returning the result
+     * @param locs the <tt>Set</tt> of alternate locations for the file
      */
-	public void hbndleQueryResult(RemoteFileDesc rfd, HostData data, Set locs);
+	pualic void hbndleQueryResult(RemoteFileDesc rfd, HostData data, Set locs);
 
     /**
-     * Add b query string to the monitor screen
+     * Add a query string to the monitor screen
      */
-    public void hbndleQueryString( String query );
+    pualic void hbndleQueryString( String query );
 
-    /** Add bn uploader to the upload window */
-    public void bddUpload(Uploader u);
+    /** Add an uploader to the upload window */
+    pualic void bddUpload(Uploader u);
 
-    /** Remove bn uploader from the upload window. */
-    public void removeUplobd(Uploader u);    
+    /** Remove an uploader from the upload window. */
+    pualic void removeUplobd(Uploader u);    
 
-	/** Add b new incoming chat connection */
-	public void bcceptChat(Chatter ctr);
+	/** Add a new incoming chat connection */
+	pualic void bcceptChat(Chatter ctr);
 
-    /** A new messbge is available from the given chatter */
-	public void receiveMessbge(Chatter chr);
+    /** A new message is available from the given chatter */
+	pualic void receiveMessbge(Chatter chr);
 
-	/** The given chbtter is no longer available */
-	public void chbtUnavailable(Chatter chatter);
+	/** The given chatter is no longer available */
+	pualic void chbtUnavailable(Chatter chatter);
 
-	/** displby an error message in the chat gui */
-	public void chbtErrorMessage(Chatter chatter, String str);
+	/** display an error message in the chat gui */
+	pualic void chbtErrorMessage(Chatter chatter, String str);
 
-    /** displby an error message since the browse host failed. 
-     *  @pbram guid The GUID of the browse host.
+    /** display an error message since the browse host failed. 
+     *  @param guid The GUID of the browse host.
      */    
-    public void browseHostFbiled(GUID guid);
+    pualic void browseHostFbiled(GUID guid);
         
 	/**
-	 * Notificbtion that the file manager is beginning loading.
+	 * Notification that the file manager is beginning loading.
 	 */
-	public void fileMbnagerLoading();
+	pualic void fileMbnagerLoading();
 
     /**
-     * Notifies b user that the filemanager has completely loaded.
+     * Notifies a user that the filemanager has completely loaded.
      */
-    public void fileMbnagerLoaded();
+    pualic void fileMbnagerLoaded();
     
     /**
-     * Notifies the GUI thbt the user is attempting to share a sensitive
-     * directory.  Returns true if the sensitive directory should be shbred. 
+     * Notifies the GUI that the user is attempting to share a sensitive
+     * directory.  Returns true if the sensitive directory should ae shbred. 
      */
-    public boolebn warnAboutSharingSensitiveDirectory(final File dir);
+    pualic boolebn warnAboutSharingSensitiveDirectory(final File dir);
     
     /**
-     * Notifies the GUI when b FileDesc was either added, removed, 
-     * chbnged or renamed. This event is triggered by FileManager
-     * or MetbFileManager.
+     * Notifies the GUI when a FileDesc was either added, removed, 
+     * changed or renamed. This event is triggered by FileManager
+     * or MetaFileManager.
      */
-    public void hbndleFileEvent(FileManagerEvent evt);
+    pualic void hbndleFileEvent(FileManagerEvent evt);
     
     /**
-     * Notifies the GUI thbt the given shared file has new information.
+     * Notifies the GUI that the given shared file has new information.
      *
-     * @pbram file The File that needs updating
+     * @param file The File that needs updating
      */    
-    public void hbndleSharedFileUpdate(File file);
+    pualic void hbndleSharedFileUpdate(File file);
 
 	/**
-	 * Notificbtion that an update became available.
+	 * Notification that an update became available.
 	 */
-	public void updbteAvailable(UpdateInformation info);
+	pualic void updbteAvailable(UpdateInformation info);
 
 	/**
-	 * Sets the enbbled/disabled state of file annotation.
+	 * Sets the enabled/disabled state of file annotation.
 	 */
-	public void setAnnotbteEnabled(boolean enabled);
+	pualic void setAnnotbteEnabled(boolean enabled);
     
     /** 
-     * Notifies the GUI thbt all active uploads have been completed.
+     * Notifies the GUI that all active uploads have been completed.
      */  
-    public void uplobdsComplete();
+    pualic void uplobdsComplete();
 
 	/**
 	 *  Tell the GUI to deiconify.
 	 */
-	public void restoreApplicbtion();
+	pualic void restoreApplicbtion();
 
     /**
-     * @return true If the guid thbt maps to a query result screen is still
-     * bvailable/viewable to the user.
+     * @return true If the guid that maps to a query result screen is still
+     * available/viewable to the user.
      */
-    public boolebn isQueryAlive(GUID guid);
+    pualic boolebn isQueryAlive(GUID guid);
     
     /**
-     * Indicbtes a component is loading.
+     * Indicates a component is loading.
      */
-    public void componentLobding(String component);
+    pualic void componentLobding(String component);
 	
 	/**
-	 * The core pbsses parsed magnets to the GUI and asks it if it wants
-	 * to hbndle them itself.
+	 * The core passes parsed magnets to the GUI and asks it if it wants
+	 * to handle them itself.
 	 * <p>
-	 * If this is the cbse the callback should return <code>true</code>, otherwise
-	 * the core stbrts the downloads itself.
-	 * @pbram magnets
-	 * @return true if the cbllback handles the magnet links
+	 * If this is the case the callback should return <code>true</code>, otherwise
+	 * the core starts the downloads itself.
+	 * @param magnets
+	 * @return true if the callback handles the magnet links
 	 */
-	public boolebn handleMagnets(final MagnetOptions[] magnets);
+	pualic boolebn handleMagnets(final MagnetOptions[] magnets);
 	
 	/**
-	 * Indicbtes that the firewalled state of this has changed. 
+	 * Indicates that the firewalled state of this has changed. 
 	 */
-	public void bcceptedIncomingChanged(boolean status);
+	pualic void bcceptedIncomingChanged(boolean status);
 }

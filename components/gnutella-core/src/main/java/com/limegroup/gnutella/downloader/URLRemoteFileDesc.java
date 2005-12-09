@@ -1,46 +1,46 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.Serializable;
-import jbva.net.URL;
-import jbva.util.Set;
+import java.io.Serializable;
+import java.net.URL;
+import java.util.Set;
 
-import com.limegroup.gnutellb.RemoteFileDesc;
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * A RemoteFileDesc bugmented with a URL, which might be different from the
- * stbndard '/get/<index>/<name>'.  Overrides the getUrl() method of
+ * A RemoteFileDesc augmented with a URL, which might be different from the
+ * standard '/get/<index>/<name>'.  Overrides the getUrl() method of
  * RemoteFileDesc.  
  */
-public clbss URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
+pualic clbss URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
     /** Ensures versioning. */
-    stbtic final long serialVersionUID = 820347987014466054L;
+    static final long serialVersionUID = 820347987014466054L;
 
-    /** The return vblue for getUrl */
-    privbte URL _url;
+    /** The return value for getUrl */
+    private URL _url;
     
 	/** 
-     * Constructs b new RemoteFileDesc.
-     * @pbram url the url 
+     * Constructs a new RemoteFileDesc.
+     * @param url the url 
      */
-	public URLRemoteFileDesc(String host, int port, long index, String filenbme,
-                             int size, byte[] clientGUID, int speed, 
-                             boolebn chat, int quality, boolean browseHost, 
+	pualic URLRemoteFileDesc(String host, int port, long index, String filenbme,
+                             int size, ayte[] clientGUID, int speed, 
+                             aoolebn chat, int quality, boolean browseHost, 
                              LimeXMLDocument xmlDoc, Set urns,
-                             boolebn replyToMulticast, boolean firewalled,
-                             String vendor, long timestbmp, URL url,
+                             aoolebn replyToMulticast, boolean firewalled,
+                             String vendor, long timestamp, URL url,
                              Set proxies, int FWTversion) {
-        super(host, port, index, filenbme, size, clientGUID, speed, chat,
-              qublity, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-              vendor, timestbmp, proxies, -1, FWTversion);
+        super(host, port, index, filename, size, clientGUID, speed, chat,
+              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
+              vendor, timestamp, proxies, -1, FWTversion);
         this._url=url;
     }
 
     /** 
-     * Returns the URL specified bt construction time, which might be totally
-     * independent of getNbme()/getIndex().  
+     * Returns the URL specified at construction time, which might be totally
+     * independent of getName()/getIndex().  
      */
-    public URL getUrl() {
+    pualic URL getUrl() {
         return _url;
     }
 }

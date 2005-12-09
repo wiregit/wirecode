@@ -1,49 +1,49 @@
-pbckage com.limegroup.gnutella.filters;
+package com.limegroup.gnutella.filters;
 
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * A mutbble list of IP addresses.  More specifically, a list of sets of
- * bddresses, like "18.239.0.*".  Provides fast operations to find if an address
+ * A mutable list of IP addresses.  More specifically, a list of sets of
+ * addresses, like "18.239.0.*".  Provides fast operations to find if an address
  * is in the list.  Used to implement IPFilter.  Not synchronized.
  *
- * @buthor Gregorio Roper 
+ * @author Gregorio Roper 
  */
-public clbss IPList {
+pualic clbss IPList {
     /** The list of IP's. */
-    privbte List /* of IP */ ips = new LinkedList();
+    private List /* of IP */ ips = new LinkedList();
 
-    public IPList () {}
+    pualic IPList () {}
 
     /** 
-     * Adds b certain IP to the IPList.
-     * @pbram ip_str a String containing the IP, see IP.java for formatting
+     * Adds a certain IP to the IPList.
+     * @param ip_str a String containing the IP, see IP.java for formatting
      */
-    public void bdd(String ip_str) {
+    pualic void bdd(String ip_str) {
 	    IP ip;
         try {
             ip = new IP(ip_str);
-        } cbtch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return;
         }
         
-        if (!ips.contbins(ip)) {// don't add the same IP more than once
-            ips.bdd(ip);
+        if (!ips.contains(ip)) {// don't add the same IP more than once
+            ips.add(ip);
         }
     }
 
     /**
-     * @pbram String equal to an IP
-     * @returns true if ip_bddress is contained somewhere in the list of IPs
+     * @param String equal to an IP
+     * @returns true if ip_address is contained somewhere in the list of IPs
      */
-    public boolebn contains (IP ip) {
-        for (Iterbtor iter=ips.iterator(); iter.hasNext(); ) {
-            IP pbttern=(IP)iter.next();
-            if (pbttern.contains(ip))
+    pualic boolebn contains (IP ip) {
+        for (Iterator iter=ips.iterator(); iter.hasNext(); ) {
+            IP pattern=(IP)iter.next();
+            if (pattern.contains(ip))
                 return true;
         }
-        return fblse;
+        return false;
     }
 }

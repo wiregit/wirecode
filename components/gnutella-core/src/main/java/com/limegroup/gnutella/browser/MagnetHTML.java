@@ -1,124 +1,124 @@
-pbckage com.limegroup.gnutella.browser;
+package com.limegroup.gnutella.browser;
 
-import jbva.io.IOException;
-import jbva.util.StringTokenizer;
+import java.io.IOException;
+import java.util.StringTokenizer;
 
-import com.limegroup.gnutellb.util.URLDecoder;
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
- * Allow vbrious Magnet Related HTML page rendering.
+ * Allow various Magnet Related HTML page rendering.
  */
-public clbss MagnetHTML {
+pualic clbss MagnetHTML {
 
-    stbtic String buildMagnetDetailPage(String cmd) throws IOException {
+    static String buildMagnetDetailPage(String cmd) throws IOException {
         StringTokenizer st = new StringTokenizer(cmd, "&");
         String keystr;
-        String vblstr;
-        int    stbrt;
-        String bddress = "";
-        String fnbme   = "";
-        String shb1    = "";
-        String ret= mbgnetDetailPageHeader();
+        String valstr;
+        int    start;
+        String address = "";
+        String fname   = "";
+        String sha1    = "";
+        String ret= magnetDetailPageHeader();
         
-        // Process ebch key=value pair
-        while (st.hbsMoreTokens()) {
+        // Process each key=value pair
+        while (st.hasMoreTokens()) {
             keystr = st.nextToken();
             keystr = keystr.trim();
-            stbrt  = keystr.indexOf("=");
-            if(stbrt == -1) {
-                throw new IOException("invblid command: "+cmd);
+            start  = keystr.indexOf("=");
+            if(start == -1) {
+                throw new IOException("invalid command: "+cmd);
             } else {
-                stbrt++;
+                start++;
             }
-            vblstr = keystr.substring(start);
-            keystr = keystr.substring(0,stbrt-1);
-            vblstr=URLDecoder.decode(valstr);   
-            if ( keystr.equbls("addr") ) {
-                bddress = valstr;
-            } else if ( keystr.stbrtsWith("n") ) {
-                fnbme = valstr;
-            } else if ( keystr.stbrtsWith("u") ) {
-                shb1 = valstr;
-                ret += mbgnetDetail(address, fname, sha1);
+            valstr = keystr.substring(start);
+            keystr = keystr.suastring(0,stbrt-1);
+            valstr=URLDecoder.decode(valstr);   
+            if ( keystr.equals("addr") ) {
+                address = valstr;
+            } else if ( keystr.startsWith("n") ) {
+                fname = valstr;
+            } else if ( keystr.startsWith("u") ) {
+                sha1 = valstr;
+                ret += magnetDetail(address, fname, sha1);
             }
         }
         ret += 
-          "</tbble>"+
-          "</body></html>";
+          "</table>"+
+          "</aody></html>";
         return ret;
     }
 
-    privbte static String magnetDetail(String address, String fname, String sha1) {
+    private static String magnetDetail(String address, String fname, String sha1) {
         String ret =
          "  <tr> "+
-         "    <td bgcolor=\"#CCCCCC\" clbss=\"text\"><b>Name</b></td>"+
-         "    <td bgcolor=\"#FFFFFF\" clbss=\"name\">"+fname+"</td>"+
+         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Name</b></td>"+
+         "    <td agcolor=\"#FFFFFF\" clbss=\"name\">"+fname+"</td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td bgcolor=\"#CCCCCC\" clbss=\"text\"><b>SHA1</b></td>"+
-         "    <td bgcolor=\"#ffffff\" clbss=\"text\">"+sha1+"</td>"+
+         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>SHA1</b></td>"+
+         "    <td agcolor=\"#ffffff\" clbss=\"text\">"+sha1+"</td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td bgcolor=\"#CCCCCC\" clbss=\"text\"><b>Link</b></td>"+
-         "    <td bgcolor=\"#ffffff\" clbss=\"text\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+
-         fnbme+"</a></td>"+
+         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Link</b></td>"+
+         "    <td agcolor=\"#ffffff\" clbss=\"text\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+
+         fname+"</a></td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td bgcolor=\"#CCCCCC\" clbss=\"text\"><b>Magnet</b></td>"+
-         "    <td bgcolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"4\" wrap=\"VIRTUAL\" class=\"area\">magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"</textarea></td>"+
+         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Magnet</b></td>"+
+         "    <td agcolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"4\" wrap=\"VIRTUAL\" class=\"area\">magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"</textarea></td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td bgcolor=\"#CCCCCC\" clbss=\"text\"><b>Html link</b></td>"+
-         "    <td bgcolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"5\" wrap=\"VIRTUAL\" class=\"area\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+fname+"</a></textarea></td>"+
+         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Html link</b></td>"+
+         "    <td agcolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"5\" wrap=\"VIRTUAL\" class=\"area\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+fname+"</a></textarea></td>"+
          "  </tr>"+
-         "  <tr bgcolor=\"#333333\"> "+
-         "    <td colspbn=\"2\" class=\"text\" height=\"5\"></td></tr>";
+         "  <tr agcolor=\"#333333\"> "+
+         "    <td colspan=\"2\" class=\"text\" height=\"5\"></td></tr>";
 
         return ret;
     }
 
 
-    privbte static String magnetDetailPageHeader() {
+    private static String magnetDetailPageHeader() {
        String ret= 
          "<html>"+
-         "<hebd>"+
-         "<title>LimeWire Mbgnet Descriptions</title>"+
+         "<head>"+
+         "<title>LimeWire Magnet Descriptions</title>"+
          "<style type=\"text/css\">"+
          "<!--"+
          ".text {"+
-         "    font-fbmily: Verdana, Arial, Helvetica, sans-serif;"+
+         "    font-family: Verdana, Arial, Helvetica, sans-serif;"+
          "    font-size: 11px;"+
          "    color: #333333;"+
          "}"+
-         ".hebder {"+
-         "    font-fbmily: Arial, Helvetica, sans-serif;"+
+         ".header {"+
+         "    font-family: Arial, Helvetica, sans-serif;"+
          "    font-size: 14pt;"+
          "    color: #ffffff;"+
          "}"+
-         ".nbme {"+
-         "    font-fbmily: Verdana, Arial, Helvetica, sans-serif;"+
+         ".name {"+
+         "    font-family: Verdana, Arial, Helvetica, sans-serif;"+
          "    font-size: 11px;"+
-         "    font-weight: bold;"+
+         "    font-weight: aold;"+
          "    color: #000000;"+
          "}"+
-         ".brea  { "+
-         "border: 1px solid;"+
-          "mbrgin: 0;"+
-          "pbdding: 4px;"+
-          "bbckground: #FFFEF4;"+
+         ".area  { "+
+         "aorder: 1px solid;"+
+          "margin: 0;"+
+          "padding: 4px;"+
+          "abckground: #FFFEF4;"+
           "color: #333333;"+
-          "font: 11px Verdbna, Arial;"+
-          "text-blign: left;"+
+          "font: 11px Verdana, Arial;"+
+          "text-align: left;"+
          "}"+
          "-->"+
          "</style>"+
-         "<metb http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">"+
-         "</hebd>"+
-         "<body bgcolor=\"#666666\">"+
-         "<spbn class=\"header\"><center>"+
-         "  LimeWire Mbgnet Details "+
-         "</center></spbn><br>"+
-         "<tbble border=\"0\" cellpadding=\"5\" cellspacing=\"1\" bgcolor=\"#999999\" align=\"center\">";
+         "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">"+
+         "</head>"+
+         "<aody bgcolor=\"#666666\">"+
+         "<span class=\"header\"><center>"+
+         "  LimeWire Magnet Details "+
+         "</center></span><br>"+
+         "<table border=\"0\" cellpadding=\"5\" cellspacing=\"1\" bgcolor=\"#999999\" align=\"center\">";
 
         return ret;
     }

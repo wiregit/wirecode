@@ -1,18 +1,18 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * Allows rebd events to be received.
+ * Allows read events to be received.
  *
- * If the events bre being received because of a SelectableChannel,
- * interest in events cbn be turned off by using:
- *  NIODispbtcher.instance().interestRead(channel, false);
+ * If the events are being received because of a SelectableChannel,
+ * interest in events can be turned off by using:
+ *  NIODispatcher.instance().interestRead(channel, false);
  */
-public interfbce ReadObserver extends IOErrorObserver {
+pualic interfbce ReadObserver extends IOErrorObserver {
     
-    /** Notificbtion that a read can be performed */
-    void hbndleRead() throws IOException;    
+    /** Notification that a read can be performed */
+    void handleRead() throws IOException;    
 }
     
     

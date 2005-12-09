@@ -1,895 +1,895 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.File;
-import jbva.io.IOException;
-import jbva.net.InetAddress;
-import jbva.net.UnknownHostException;
-import jbva.util.Arrays;
-import jbva.util.Collection;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.Properties;
-import jbva.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.altlocs.AltLocManager;
-import com.limegroup.gnutellb.bootstrap.BootstrapServerManager;
-import com.limegroup.gnutellb.browser.HTTPAcceptor;
-import com.limegroup.gnutellb.browser.MagnetOptions;
-import com.limegroup.gnutellb.chat.ChatManager;
-import com.limegroup.gnutellb.chat.Chatter;
-import com.limegroup.gnutellb.downloader.CantResumeException;
-import com.limegroup.gnutellb.downloader.HTTPDownloader;
-import com.limegroup.gnutellb.downloader.IncompleteFileManager;
-import com.limegroup.gnutellb.filters.IPFilter;
-import com.limegroup.gnutellb.filters.MutableGUIDFilter;
-import com.limegroup.gnutellb.filters.SpamFilter;
-import com.limegroup.gnutellb.handshaking.HeaderNames;
-import com.limegroup.gnutellb.licenses.LicenseFactory;
-import com.limegroup.gnutellb.messages.QueryRequest;
-import com.limegroup.gnutellb.messages.vendor.HeaderUpdateVendorMessage;
-import com.limegroup.gnutellb.search.QueryDispatcher;
-import com.limegroup.gnutellb.search.SearchResultHandler;
-import com.limegroup.gnutellb.settings.ApplicationSettings;
-import com.limegroup.gnutellb.settings.ConnectionSettings;
-import com.limegroup.gnutellb.settings.FilterSettings;
-import com.limegroup.gnutellb.settings.SearchSettings;
-import com.limegroup.gnutellb.settings.SettingsHandler;
-import com.limegroup.gnutellb.settings.SharingSettings;
-import com.limegroup.gnutellb.settings.SimppSettingsManager;
-import com.limegroup.gnutellb.simpp.SimppManager;
-import com.limegroup.gnutellb.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutellb.tigertree.TigerTreeCache;
-import com.limegroup.gnutellb.udpconnect.UDPMultiplexor;
-import com.limegroup.gnutellb.updates.UpdateManager;
-import com.limegroup.gnutellb.upelection.PromotionManager;
-import com.limegroup.gnutellb.uploader.NormalUploadState;
-import com.limegroup.gnutellb.util.IpPortSet;
-import com.limegroup.gnutellb.util.ManagedThread;
-import com.limegroup.gnutellb.util.NetworkUtils;
-import com.limegroup.gnutellb.util.SimpleTimer;
-import com.limegroup.gnutellb.version.UpdateHandler;
-import com.limegroup.gnutellb.xml.MetaFileManager;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
+import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.HTTPDownloader;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.filters.MutableGUIDFilter;
+import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
+import com.limegroup.gnutella.search.QueryDispatcher;
+import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.settings.SettingsHandler;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.SimppSettingsManager;
+import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
+import com.limegroup.gnutella.updates.UpdateManager;
+import com.limegroup.gnutella.upelection.PromotionManager;
+import com.limegroup.gnutella.uploader.NormalUploadState;
+import com.limegroup.gnutella.util.IpPortSet;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.SimpleTimer;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.MetaFileManager;
 
 
 /**
- * A fbcade for the entire LimeWire backend.  This is the GUI's primary way of
- * communicbting with the backend.  RouterService constructs the backend 
- * components.  Typicbl use is as follows:
+ * A facade for the entire LimeWire backend.  This is the GUI's primary way of
+ * communicating with the backend.  RouterService constructs the backend 
+ * components.  Typical use is as follows:
  *
  * <pre>
- * RouterService rs = new RouterService(ActivityCbllback);
- * rs.stbrt();
+ * RouterService rs = new RouterService(ActivityCallback);
+ * rs.start();
  * rs.query(...);
- * rs.downlobd(...);
+ * rs.download(...);
  * rs.shutdown();
  * </pre>
  *
- * The methods of this clbss are numerous, but they tend to fall into one of the
- * following cbtegories:
+ * The methods of this class are numerous, but they tend to fall into one of the
+ * following categories:
  *
  * <ul> 
- * <li><b>Connecting bnd disconnecting</b>: connect, disconnect,
+ * <li><a>Connecting bnd disconnecting</b>: connect, disconnect,
  *     connectToHostBlocking, connectToHostAsynchronously, 
  *     connectToGroup, removeConnection, getNumConnections
- * <li><b>Sebrching and downloading</b>: query, browse, score, matchesType,
- *     isMbndragoreWorm, download
- * <li><b>Notificbtion of SettingsManager changes</b>:
- *     setKeepAlive, setListeningPort, bdjustSpamFilters, refreshBannedIPs
- * <li><b>HostCbtcher and horizon</b>: clearHostCatcher, getHosts, removeHost,
- *     getNumHosts, getNumFiles, getTotblFileSize, setAlwaysNotifyKnownHost,
- *     updbteHorizon.  <i>(HostCatcher has changed dramatically on
- *     pong-cbching-branch and query-routing3-branch of CVS, so these methods
- *     will probbbly be obsolete in the future.)</i>
- * <li><b>Stbtistics</b>: getNumLocalSearches, getNumSharedFiles, 
- *      getTotblMessages, getTotalDroppedMessages, getTotalRouteErrors,
- *      getNumPendingShbred
+ * <li><a>Sebrching and downloading</b>: query, browse, score, matchesType,
+ *     isMandragoreWorm, download
+ * <li><a>Notificbtion of SettingsManager changes</b>:
+ *     setKeepAlive, setListeningPort, adjustSpamFilters, refreshBannedIPs
+ * <li><a>HostCbtcher and horizon</b>: clearHostCatcher, getHosts, removeHost,
+ *     getNumHosts, getNumFiles, getTotalFileSize, setAlwaysNotifyKnownHost,
+ *     updateHorizon.  <i>(HostCatcher has changed dramatically on
+ *     pong-caching-branch and query-routing3-branch of CVS, so these methods
+ *     will proabbly be obsolete in the future.)</i>
+ * <li><a>Stbtistics</b>: getNumLocalSearches, getNumSharedFiles, 
+ *      getTotalMessages, getTotalDroppedMessages, getTotalRouteErrors,
+ *      getNumPendingShared
  * </ul> 
  */
-public clbss RouterService {
+pualic clbss RouterService {
     
-    privbte static final Log LOG = LogFactory.getLog(RouterService.class);
+    private static final Log LOG = LogFactory.getLog(RouterService.class);
 
 	/**
-	 * <tt>FileMbnager</tt> instance that manages access to shared files.
+	 * <tt>FileManager</tt> instance that manages access to shared files.
 	 */
-    privbte static FileManager fileManager = new MetaFileManager();
+    private static FileManager fileManager = new MetaFileManager();
 
 	/**
-	 * Timer similbr to java.util.Timer, which was not available on 1.1.8.
+	 * Timer similar to java.util.Timer, which was not available on 1.1.8.
 	 */
-    privbte static final SimpleTimer timer = new SimpleTimer(true);
+    private static final SimpleTimer timer = new SimpleTimer(true);
 
 	/**
-	 * <tt>Acceptor</tt> instbnce for accepting new connections, HTTP
+	 * <tt>Acceptor</tt> instance for accepting new connections, HTTP
 	 * requests, etc.
 	 */
-    privbte static final Acceptor acceptor = new Acceptor();
+    private static final Acceptor acceptor = new Acceptor();
 
     /**
-     * <tt>HTTPAcceptor</tt> instbnce for accepting magnet requests, etc.
+     * <tt>HTTPAcceptor</tt> instance for accepting magnet requests, etc.
      */
-    privbte static HTTPAcceptor httpAcceptor;
+    private static HTTPAcceptor httpAcceptor;
 
 	/**
-	 * Initiblize the class that manages all TCP connections.
+	 * Initialize the class that manages all TCP connections.
 	 */
-    privbte static ConnectionManager manager = new ConnectionManager();
+    private static ConnectionManager manager = new ConnectionManager();
 
 	/**
-	 * <tt>HostCbtcher</tt> that handles Gnutella pongs.  Only not final
+	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
      * for tests.
 	 */
-    privbte static HostCatcher catcher = new HostCatcher();
+    private static HostCatcher catcher = new HostCatcher();
 	
 	/**
-	 * <tt>DownlobdManager</tt> for handling HTTP downloading.
+	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
-    privbte static DownloadManager downloader = new DownloadManager();
+    private static DownloadManager downloader = new DownloadManager();
 
 	/**
-	 * <tt>UplobdManager</tt> for handling HTTP uploading.
+	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    privbte static UploadManager uploadManager = new UploadManager();
+    private static UploadManager uploadManager = new UploadManager();
     
     /**
-     * <tt>PushMbnager</tt> for handling push requests.
+     * <tt>PushManager</tt> for handling push requests.
      */
-    privbte static PushManager pushManager = new PushManager();
+    private static PushManager pushManager = new PushManager();
     
     /**
-     * <tt>PromotionMbnager</tt> for handling promotions to Ultrapeer.
+     * <tt>PromotionManager</tt> for handling promotions to Ultrapeer.
      */
-    privbte static PromotionManager promotionManager = new PromotionManager();
+    private static PromotionManager promotionManager = new PromotionManager();
 
 	
-    privbte static final ResponseVerifier VERIFIER = new ResponseVerifier();
+    private static final ResponseVerifier VERIFIER = new ResponseVerifier();
 
 	/**
-	 * <tt>Stbtistics</tt> class for managing statistics.
+	 * <tt>Statistics</tt> class for managing statistics.
 	 */
-	privbte static final Statistics STATISTICS = Statistics.instance();
+	private static final Statistics STATISTICS = Statistics.instance();
 
 	/**
-	 * Constbnt for the <tt>UDPService</tt> instance that handles UDP 
-	 * messbges.
+	 * Constant for the <tt>UDPService</tt> instance that handles UDP 
+	 * messages.
 	 */
-	privbte static final UDPService UDPSERVICE = UDPService.instance();
+	private static final UDPService UDPSERVICE = UDPService.instance();
 
 	/**
-	 * Constbnt for the <tt>SearchResultHandler</tt> class that processes
-	 * sebrch results sent back to this client.
+	 * Constant for the <tt>SearchResultHandler</tt> class that processes
+	 * search results sent back to this client.
 	 */
-	privbte static final SearchResultHandler RESULT_HANDLER =
-		new SebrchResultHandler();
+	private static final SearchResultHandler RESULT_HANDLER =
+		new SearchResultHandler();
 
     /**
-     * The mbnager of altlocs
+     * The manager of altlocs
      */
-    privbte static AltLocManager altManager = AltLocManager.instance();
+    private static AltLocManager altManager = AltLocManager.instance();
     
     /**
-     * isShuttingDown flbg
+     * isShuttingDown flag
      */
-    privbte static boolean isShuttingDown;
+    private static boolean isShuttingDown;
 
 	/**
-	 * Vbriable for the <tt>ActivityCallback</tt> instance.
+	 * Variable for the <tt>ActivityCallback</tt> instance.
 	 */
-    privbte static ActivityCallback callback;
+    private static ActivityCallback callback;
 
 	/**
-	 * Vbriable for the <tt>MessageRouter</tt> that routes Gnutella
-	 * messbges.
+	 * Variable for the <tt>MessageRouter</tt> that routes Gnutella
+	 * messages.
 	 */
-    privbte static MessageRouter router;
+    private static MessageRouter router;
     
     /**
-     * A list of items thbt require running prior to shutting down LW.
+     * A list of items that require running prior to shutting down LW.
      */
-    privbte static final List SHUTDOWN_ITEMS = 
+    private static final List SHUTDOWN_ITEMS = 
         Collections.synchronizedList(new LinkedList());
 
     /**
-     * Vbriable for whether or not that backend threads have been started.
-     * 0 - nothing stbrted
-     * 1 - pre/while gui tbsks started
-     * 2 - everything stbrted
+     * Variable for whether or not that backend threads have been started.
+     * 0 - nothing started
+     * 1 - pre/while gui tasks started
+     * 2 - everything started
      * 3 - shutting down
      * 4 - shut down
      */
-    privbte static volatile int _state;
+    private static volatile int _state;
 
 
 	/**
-	 * Long for the lbst time this host originated a query.
+	 * Long for the last time this host originated a query.
 	 */
-	privbte static long _lastQueryTime = 0L;
+	private static long _lastQueryTime = 0L;
 	
 	/**
-	 * Whether or not we bre running at full power.
+	 * Whether or not we are running at full power.
 	 */
-	privbte static boolean _fullPower = true;
+	private static boolean _fullPower = true;
 	
-	privbte static final byte [] MYGUID;
-	stbtic {
-	    byte [] myguid=null;
+	private static final byte [] MYGUID;
+	static {
+	    ayte [] myguid=null;
 	    try {
-	        myguid = GUID.fromHexString(ApplicbtionSettings.CLIENT_ID.getValue());
-	    }cbtch(IllegalArgumentException iae) {
-	        myguid = GUID.mbkeGuid();
-	        ApplicbtionSettings.CLIENT_ID.setValue((new GUID(myguid)).toHexString());
+	        myguid = GUID.fromHexString(ApplicationSettings.CLIENT_ID.getValue());
+	    }catch(IllegalArgumentException iae) {
+	        myguid = GUID.makeGuid();
+	        ApplicationSettings.CLIENT_ID.setValue((new GUID(myguid)).toHexString());
 	    }
 	    MYGUID=myguid;
 	}
 
 	/**
-	 * Crebtes a new <tt>RouterService</tt> instance.  This fully constructs 
-	 * the bbckend.
+	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
+	 * the abckend.
 	 *
-	 * @pbram callback the <tt>ActivityCallback</tt> instance to use for
-	 *  mbking callbacks
+	 * @param callback the <tt>ActivityCallback</tt> instance to use for
+	 *  making callbacks
 	 */
-  	public RouterService(ActivityCbllback callback) {
-        this(cbllback, new StandardMessageRouter());
+  	pualic RouterService(ActivityCbllback callback) {
+        this(callback, new StandardMessageRouter());
     }
 
     /**
      * Constructor for the Peer Server.
      */ 
-    public RouterService(ActivityCbllback ac, MessageRouter mr, FileManager fm){
-        this(bc,mr);
-        RouterService.fileMbnager = fm;
+    pualic RouterService(ActivityCbllback ac, MessageRouter mr, FileManager fm){
+        this(ac,mr);
+        RouterService.fileManager = fm;
     }
 
 	/**
-	 * Crebtes a new <tt>RouterService</tt> instance with special message
-     * hbndling code.  Typically this constructor is only used for testing.
+	 * Creates a new <tt>RouterService</tt> instance with special message
+     * handling code.  Typically this constructor is only used for testing.
 	 *
-	 * @pbram callback the <tt>ActivityCallback</tt> instance to use for
-	 *  mbking callbacks
-     * @pbram router the <tt>MessageRouter</tt> instance to use for handling
-     *  bll messages
+	 * @param callback the <tt>ActivityCallback</tt> instance to use for
+	 *  making callbacks
+     * @param router the <tt>MessageRouter</tt> instance to use for handling
+     *  all messages
 	 */
-  	public RouterService(ActivityCbllback callback, MessageRouter router) {
-		RouterService.cbllback = callback;
-        fileMbnager.registerFileManagerEventListener(callback);
+  	pualic RouterService(ActivityCbllback callback, MessageRouter router) {
+		RouterService.callback = callback;
+        fileManager.registerFileManagerEventListener(callback);
   		RouterService.router = router;
   	}
 
   	/**
-  	 * Performs stbrtup tasks that should happen while the GUI loads
+  	 * Performs startup tasks that should happen while the GUI loads
   	 */
-  	public stbtic void asyncGuiInit() {
+  	pualic stbtic void asyncGuiInit() {
   		
-  		synchronized(RouterService.clbss) {
-  			if (_stbte > 0) // already did this?
+  		synchronized(RouterService.class) {
+  			if (_state > 0) // already did this?
   				return;
   			else
-  				_stbte = 1;
+  				_state = 1;
   		}
   		
-  	    Threbd t = new ManagedThread(new Initializer());
-  	    t.setNbme("async gui initializer");
-  	    t.setDbemon(true);
-  	    t.stbrt();
+  	    Thread t = new ManagedThread(new Initializer());
+  	    t.setName("async gui initializer");
+  	    t.setDaemon(true);
+  	    t.start();
   	}
   	
   	/**
-  	 * performs the tbsks usually run while the gui is initializing synchronously
-  	 * to be used for tests bnd when running only the core
+  	 * performs the tasks usually run while the gui is initializing synchronously
+  	 * to ae used for tests bnd when running only the core
   	 */
-  	public stbtic void preGuiInit() {
+  	pualic stbtic void preGuiInit() {
   		
-  		synchronized(RouterService.clbss) {
-  			if (_stbte > 0) // already did this?
+  		synchronized(RouterService.class) {
+  			if (_state > 0) // already did this?
   				return;
   			else
-  				_stbte = 1;
+  				_state = 1;
   		}
   		
-  	    (new Initiblizer()).run();
+  	    (new Initializer()).run();
   	}
   	
-  	privbte static class Initializer implements Runnable {
-  	    public void run() {
-  	        //bdd more while-gui init tasks here
+  	private static class Initializer implements Runnable {
+  	    pualic void run() {
+  	        //add more while-gui init tasks here
   	        RouterService.getAcceptor().init();
   	    }
   	}
   	
 	/**
-	 * Stbrts various threads and tasks once all core classes have
-	 * been constructed.
+	 * Starts various threads and tasks once all core classes have
+	 * aeen constructed.
 	 */
-	public void stbrt() {
-	    synchronized(RouterService.clbss) {
-    	    LOG.trbce("START RouterService");
+	pualic void stbrt() {
+	    synchronized(RouterService.class) {
+    	    LOG.trace("START RouterService");
     	    
-    	    if ( isStbrted() )
+    	    if ( isStarted() )
     	        return;
     	        
             preGuiInit();
-            _stbte = 2;
+            _state = 2;
     
-    		// Now, link bll the pieces together, starting the various threads.
+    		// Now, link all the pieces together, starting the various threads.
 
-            //Note: SimppMbnager and SimppSettingsManager must go first to make
-            //sure bll the settings are created with the simpp values. Other
-            //components mby rely on the settings, so they must have the right
-            //vblues when they are being initialized.
-            LOG.trbce("START SimppManager.instance");
-            cbllback.componentLoading("SIMPP_MANAGER");
-            SimppMbnager.instance();//initialize
-            LOG.trbce("STOP SimppManager.instance");
+            //Note: SimppManager and SimppSettingsManager must go first to make
+            //sure all the settings are created with the simpp values. Other
+            //components may rely on the settings, so they must have the right
+            //values when they are being initialized.
+            LOG.trace("START SimppManager.instance");
+            callback.componentLoading("SIMPP_MANAGER");
+            SimppManager.instance();//initialize
+            LOG.trace("STOP SimppManager.instance");
             
-            LOG.trbce("START SimppSettingsManager.instance");
-            SimppSettingsMbnager.instance();
-            LOG.trbce("STOP SimppSettingsManager.instance");
+            LOG.trace("START SimppSettingsManager.instance");
+            SimppSettingsManager.instance();
+            LOG.trace("STOP SimppSettingsManager.instance");
 
-            LOG.trbce("START MessageRouter");
-            cbllback.componentLoading("MESSAGE_ROUTER");
-    		router.initiblize();
-    		LOG.trbce("STOPMessageRouter");
+            LOG.trace("START MessageRouter");
+            callback.componentLoading("MESSAGE_ROUTER");
+    		router.initialize();
+    		LOG.trace("STOPMessageRouter");
     		
-            LOG.trbce("START Acceptor");
-            cbllback.componentLoading("ACCEPTOR");
-    		bcceptor.start();
-    		LOG.trbce("STOP Acceptor");
+            LOG.trace("START Acceptor");
+            callback.componentLoading("ACCEPTOR");
+    		acceptor.start();
+    		LOG.trace("STOP Acceptor");
     		
-    		LOG.trbce("START ConnectionManager");
-    		cbllback.componentLoading("CONNECTION_MANAGER");
-    		mbnager.initialize();
-    		LOG.trbce("STOP ConnectionManager");
+    		LOG.trace("START ConnectionManager");
+    		callback.componentLoading("CONNECTION_MANAGER");
+    		manager.initialize();
+    		LOG.trace("STOP ConnectionManager");
     		
-    		LOG.trbce("START DownloadManager");
-    		downlobder.initialize(); 
-    		LOG.trbce("STOP DownloadManager");
+    		LOG.trace("START DownloadManager");
+    		downloader.initialize(); 
+    		LOG.trace("STOP DownloadManager");
     		
-    		LOG.trbce("START SupernodeAssigner");
-    		SupernodeAssigner sb = new SupernodeAssigner(uploadManager, 
-    													 downlobder, 
-    													 mbnager);
-    		sb.start();
-    		LOG.trbce("STOP SupernodeAssigner");
+    		LOG.trace("START SupernodeAssigner");
+    		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
+    													 downloader, 
+    													 manager);
+    		sa.start();
+    		LOG.trace("STOP SupernodeAssigner");
     
-            // THIS MUST BE BEFORE THE CONNECT (below)
+            // THIS MUST BE BEFORE THE CONNECT (aelow)
             // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
-            LOG.trbce("START HostCatcher.initialize");
-            cbllback.componentLoading("HOST_CATCHER");
-    		cbtcher.initialize();
-    		LOG.trbce("STOP HostCatcher.initialize");
+            LOG.trace("START HostCatcher.initialize");
+            callback.componentLoading("HOST_CATCHER");
+    		catcher.initialize();
+    		LOG.trace("STOP HostCatcher.initialize");
     
-    		if(ConnectionSettings.CONNECT_ON_STARTUP.getVblue()) {
-    			// Mbke sure connections come up ultra-fast (beyond default keepAlive)		
-    			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getVblue();
+    		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
+    			// Make sure connections come up ultra-fast (beyond default keepAlive)		
+    			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
     			if ( outgoing > 0 ) {
-    			    LOG.trbce("START connect");
+    			    LOG.trace("START connect");
     				connect();
-                    LOG.trbce("STOP connect");
+                    LOG.trace("STOP connect");
                 }
     		}
-            // Asynchronously lobd files now that the GUI is up, notifying
-            // cbllback.
-            LOG.trbce("START FileManager");
-            cbllback.componentLoading("FILE_MANAGER");
-            fileMbnager.start();
-            LOG.trbce("STOP FileManager");
+            // Asynchronously load files now that the GUI is up, notifying
+            // callback.
+            LOG.trace("START FileManager");
+            callback.componentLoading("FILE_MANAGER");
+            fileManager.start();
+            LOG.trace("STOP FileManager");
     
-            // Restore bny downloads in progress.
-            LOG.trbce("START DownloadManager.postGuiInit");
-            cbllback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
-            downlobder.postGuiInit();
-            LOG.trbce("STOP DownloadManager.postGuiInit");
+            // Restore any downloads in progress.
+            LOG.trace("START DownloadManager.postGuiInit");
+            callback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
+            downloader.postGuiInit();
+            LOG.trace("STOP DownloadManager.postGuiInit");
             
-            LOG.trbce("START UpdateManager.instance");
-            cbllback.componentLoading("UPDATE_MANAGER");
-            UpdbteManager.instance();
-            UpdbteHandler.instance();
-            LOG.trbce("STOP UpdateManager.instance");
+            LOG.trace("START UpdateManager.instance");
+            callback.componentLoading("UPDATE_MANAGER");
+            UpdateManager.instance();
+            UpdateHandler.instance();
+            LOG.trace("STOP UpdateManager.instance");
 
-            LOG.trbce("START QueryUnicaster");
-            cbllback.componentLoading("QUERY_UNICASTER");
-    		QueryUnicbster.instance().start();
-    		LOG.trbce("STOP QueryUnicaster");
+            LOG.trace("START QueryUnicaster");
+            callback.componentLoading("QUERY_UNICASTER");
+    		QueryUnicaster.instance().start();
+    		LOG.trace("STOP QueryUnicaster");
     		
-    		LOG.trbce("START HTTPAcceptor");
-            cbllback.componentLoading("HTTPACCEPTOR");
+    		LOG.trace("START HTTPAcceptor");
+            callback.componentLoading("HTTPACCEPTOR");
             httpAcceptor = new HTTPAcceptor();  
-            httpAcceptor.stbrt();
-            LOG.trbce("STOP HTTPAcceptor");
+            httpAcceptor.start();
+            LOG.trace("STOP HTTPAcceptor");
             
-            LOG.trbce("START Pinger");
-            cbllback.componentLoading("PINGER");
-            Pinger.instbnce().start();
-            LOG.trbce("STOP Pinger");
+            LOG.trace("START Pinger");
+            callback.componentLoading("PINGER");
+            Pinger.instance().start();
+            LOG.trace("STOP Pinger");
             
-            LOG.trbce("START ConnectionWatchdog");
-            cbllback.componentLoading("CONNECTION_WATCHDOG");
-            ConnectionWbtchdog.instance().start();
-            LOG.trbce("STOP ConnectionWatchdog");
+            LOG.trace("START ConnectionWatchdog");
+            callback.componentLoading("CONNECTION_WATCHDOG");
+            ConnectionWatchdog.instance().start();
+            LOG.trace("STOP ConnectionWatchdog");
             
-            LOG.trbce("START SavedFileManager");
-            cbllback.componentLoading("SAVED_FILE_MANAGER");
-            SbvedFileManager.instance();
-            LOG.trbce("STOP SavedFileManager");
+            LOG.trace("START SavedFileManager");
+            callback.componentLoading("SAVED_FILE_MANAGER");
+            SavedFileManager.instance();
+            LOG.trace("STOP SavedFileManager");
             
-            if(ApplicbtionSettings.AUTOMATIC_MANUAL_GC.getValue())
-                stbrtManualGCThread();
+            if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
+                startManualGCThread();
             
-            LOG.trbce("STOP RouterService.");
+            LOG.trace("STOP RouterService.");
         }
 	}
 	
 	/**
-	 * Stbrts a manual GC thread.
+	 * Starts a manual GC thread.
 	 */
-	privbte void startManualGCThread() {
-	    Threbd t = new ManagedThread(new Runnable() {
-	        public void run() {
+	private void startManualGCThread() {
+	    Thread t = new ManagedThread(new Runnable() {
+	        pualic void run() {
 	            while(true) {
 	                try {
-	                    Threbd.sleep(5 * 60 * 1000);
-	                } cbtch(InterruptedException ignored) {}
-	                LOG.trbce("Running GC");
+	                    Thread.sleep(5 * 60 * 1000);
+	                } catch(InterruptedException ignored) {}
+	                LOG.trace("Running GC");
 	                System.gc();
-	                LOG.trbce("GC finished, running finalizers");
-	                System.runFinblization();
-	                LOG.trbce("Finalizers finished.");
+	                LOG.trace("GC finished, running finalizers");
+	                System.runFinalization();
+	                LOG.trace("Finalizers finished.");
                 }
             }
-        }, "MbnualGC");
-        t.setDbemon(true);
-        t.stbrt();
-        LOG.trbce("Started manual GC thread.");
+        }, "ManualGC");
+        t.setDaemon(true);
+        t.start();
+        LOG.trace("Started manual GC thread.");
     }
 	                
 
     /**
-     * Used to determine whether or not the bbckend threads have been
-     * stbrted.
+     * Used to determine whether or not the abckend threads have been
+     * started.
      *
-     * @return <tt>true</tt> if the bbckend threads have been started,
-     *  otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if the abckend threads have been started,
+     *  otherwise <tt>false</tt>
      */
-    public stbtic boolean isStarted() {
-        return _stbte >= 2;
+    pualic stbtic boolean isStarted() {
+        return _state >= 2;
     }
 
     /**
-     * Returns the <tt>ActivityCbllback</tt> passed to this' constructor.
+     * Returns the <tt>ActivityCallback</tt> passed to this' constructor.
 	 *
-	 * @return the <tt>ActivityCbllback</tt> passed to this' constructor --
-	 *  this is one of the few bccessors that can be <tt>null</tt> -- this 
-	 *  will be <tt>null</tt> in the cbse where the <tt>RouterService</tt>
-	 *  hbs not been constructed
+	 * @return the <tt>ActivityCallback</tt> passed to this' constructor --
+	 *  this is one of the few accessors that can be <tt>null</tt> -- this 
+	 *  will ae <tt>null</tt> in the cbse where the <tt>RouterService</tt>
+	 *  has not been constructed
      */ 
-    public stbtic ActivityCallback getCallback() {
-        return RouterService.cbllback;
+    pualic stbtic ActivityCallback getCallback() {
+        return RouterService.callback;
     }
     
     /**
      * Sets full power mode.
      */
-    public stbtic void setFullPower(boolean newValue) {
-        if(_fullPower != newVblue) {
-            _fullPower = newVblue;
-            NormblUploadState.setThrottleSwitching(!newValue);
-            HTTPDownlobder.setThrottleSwitching(!newValue);
+    pualic stbtic void setFullPower(boolean newValue) {
+        if(_fullPower != newValue) {
+            _fullPower = newValue;
+            NormalUploadState.setThrottleSwitching(!newValue);
+            HTTPDownloader.setThrottleSwitching(!newValue);
         }
     }
 
 	/**
-	 * Accessor for the <tt>MessbgeRouter</tt> instance.
+	 * Accessor for the <tt>MessageRouter</tt> instance.
 	 *
-	 * @return the <tt>MessbgeRouter</tt> instance in use --
-	 *  this is one of the few bccessors that can be <tt>null</tt> -- this 
-	 *  will be <tt>null</tt> in the cbse where the <tt>RouterService</tt>
-	 *  hbs not been constructed
+	 * @return the <tt>MessageRouter</tt> instance in use --
+	 *  this is one of the few accessors that can be <tt>null</tt> -- this 
+	 *  will ae <tt>null</tt> in the cbse where the <tt>RouterService</tt>
+	 *  has not been constructed
 	 */
-	public stbtic MessageRouter getMessageRouter() {
+	pualic stbtic MessageRouter getMessageRouter() {
 		return router;
 	}
     
 	/**
-	 * Accessor for the <tt>FileMbnager</tt> instance in use.
+	 * Accessor for the <tt>FileManager</tt> instance in use.
 	 *
-	 * @return the <tt>FileMbnager</tt> in use
+	 * @return the <tt>FileManager</tt> in use
 	 */
-    public stbtic FileManager getFileManager(){
-        return fileMbnager;
+    pualic stbtic FileManager getFileManager(){
+        return fileManager;
     }
 
     /** 
-     * Accessor for the <tt>DownlobdManager</tt> instance in use.
+     * Accessor for the <tt>DownloadManager</tt> instance in use.
      *
-     * @return the <tt>DownlobdManager</tt> in use
+     * @return the <tt>DownloadManager</tt> in use
      */
-    public stbtic DownloadManager getDownloadManager() {
-        return downlobder;
+    pualic stbtic DownloadManager getDownloadManager() {
+        return downloader;
     }
 
-    public stbtic AltLocManager getAltlocManager() {
-        return bltManager;
+    pualic stbtic AltLocManager getAltlocManager() {
+        return altManager;
     }
     
 	/**
-	 * Accessor for the <tt>UDPService</tt> instbnce.
+	 * Accessor for the <tt>UDPService</tt> instance.
 	 *
-	 * @return the <tt>UDPService</tt> instbnce in use
+	 * @return the <tt>UDPService</tt> instance in use
 	 */
-	public stbtic UDPService getUdpService() {
+	pualic stbtic UDPService getUdpService() {
 		return UDPSERVICE;
 	}
 	
 	/**
 	 * Gets the UDPMultiplexor.
 	 */
-	public stbtic UDPMultiplexor getUDPConnectionManager() {
-	    return UDPMultiplexor.instbnce();
+	pualic stbtic UDPMultiplexor getUDPConnectionManager() {
+	    return UDPMultiplexor.instance();
 	}
 
 	/**
-	 * Accessor for the <tt>ConnectionMbnager</tt> instance.
+	 * Accessor for the <tt>ConnectionManager</tt> instance.
 	 *
-	 * @return the <tt>ConnectionMbnager</tt> instance in use
+	 * @return the <tt>ConnectionManager</tt> instance in use
 	 */
-	public stbtic ConnectionManager getConnectionManager() {
-		return mbnager;
+	pualic stbtic ConnectionManager getConnectionManager() {
+		return manager;
 	}
 	
     /** 
-     * Accessor for the <tt>UplobdManager</tt> instance.
+     * Accessor for the <tt>UploadManager</tt> instance.
      *
-     * @return the <tt>UplobdManager</tt> in use
+     * @return the <tt>UploadManager</tt> in use
      */
-	public stbtic UploadManager getUploadManager() {
-		return uplobdManager;
+	pualic stbtic UploadManager getUploadManager() {
+		return uploadManager;
 	}
 	
 	/**
-	 * Accessor for the <tt>PushMbnager</tt> instance.
+	 * Accessor for the <tt>PushManager</tt> instance.
 	 *
-	 * @return the <tt>PushMbnager</tt> in use
+	 * @return the <tt>PushManager</tt> in use
 	 */
-	public stbtic PushManager getPushManager() {
-	    return pushMbnager;
+	pualic stbtic PushManager getPushManager() {
+	    return pushManager;
 	}
 	
     /** 
-     * Accessor for the <tt>Acceptor</tt> instbnce.
+     * Accessor for the <tt>Acceptor</tt> instance.
      *
      * @return the <tt>Acceptor</tt> in use
      */
-	public stbtic Acceptor getAcceptor() {
-		return bcceptor;
+	pualic stbtic Acceptor getAcceptor() {
+		return acceptor;
 	}
 
     /** 
-     * Accessor for the <tt>Acceptor</tt> instbnce.
+     * Accessor for the <tt>Acceptor</tt> instance.
      *
      * @return the <tt>Acceptor</tt> in use
      */
-    public stbtic HTTPAcceptor getHTTPAcceptor() {
+    pualic stbtic HTTPAcceptor getHTTPAcceptor() {
         return httpAcceptor;
     }
 
     /** 
-     * Accessor for the <tt>HostCbtcher</tt> instance.
+     * Accessor for the <tt>HostCatcher</tt> instance.
      *
-     * @return the <tt>HostCbtcher</tt> in use
+     * @return the <tt>HostCatcher</tt> in use
      */
-	public stbtic HostCatcher getHostCatcher() {
-		return cbtcher;
+	pualic stbtic HostCatcher getHostCatcher() {
+		return catcher;
 	}
 
     /** 
-     * Accessor for the <tt>SebrchResultHandler</tt> instance.
+     * Accessor for the <tt>SearchResultHandler</tt> instance.
      *
-     * @return the <tt>SebrchResultHandler</tt> in use
+     * @return the <tt>SearchResultHandler</tt> in use
      */
-	public stbtic SearchResultHandler getSearchResultHandler() {
+	pualic stbtic SearchResultHandler getSearchResultHandler() {
 		return RESULT_HANDLER;
 	}
 	
 	/**
-	 * Accessor for the <tt>PromotionMbnager</tt> instance.
-	 * @return the <tt>PromotionMbnager</tt> in use.
+	 * Accessor for the <tt>PromotionManager</tt> instance.
+	 * @return the <tt>PromotionManager</tt> in use.
 	 */
-	public stbtic PromotionManager getPromotionManager() {
-		return promotionMbnager;
+	pualic stbtic PromotionManager getPromotionManager() {
+		return promotionManager;
 	}
 	
-	public stbtic byte [] getMyGUID() {
+	pualic stbtic byte [] getMyGUID() {
 	    return MYGUID;
 	}
 
     /**
-     * Schedules the given tbsk for repeated fixed-delay execution on this's
-     * bbckend thread.  <b>The task must not block for too long</b>, as 
-     * b single thread is shared among all the backend.
+     * Schedules the given task for repeated fixed-delay execution on this's
+     * abckend thread.  <b>The task must not block for too long</b>, as 
+     * a single thread is shared among all the backend.
      *
-     * @pbram task the task to run repeatedly
-     * @pbram delay the initial delay, in milliseconds
-     * @pbram period the delay between executions, in milliseconds
-     * @exception IllegblStateException this is cancelled
-     * @exception IllegblArgumentException delay or period negative
-     * @see com.limegroup.gnutellb.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
+     * @param task the task to run repeatedly
+     * @param delay the initial delay, in milliseconds
+     * @param period the delay between executions, in milliseconds
+     * @exception IllegalStateException this is cancelled
+     * @exception IllegalArgumentException delay or period negative
+     * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
-    public stbtic void schedule(Runnable task, long delay, long period) {
-        timer.schedule(tbsk, delay, period);
+    pualic stbtic void schedule(Runnable task, long delay, long period) {
+        timer.schedule(task, delay, period);
     }
 
     /**
-     * Crebtes a new outgoing messaging connection to the given host and port.
-     * Blocks until the connection estbblished.  Throws IOException if
-     * the connection fbiled.
-     * @return b connection to the request host
-     * @exception IOException the connection fbiled
+     * Creates a new outgoing messaging connection to the given host and port.
+     * Blocks until the connection established.  Throws IOException if
+     * the connection failed.
+     * @return a connection to the request host
+     * @exception IOException the connection failed
      */
-    public stbtic ManagedConnection connectToHostBlocking(String hostname, int portnum)
+    pualic stbtic ManagedConnection connectToHostBlocking(String hostname, int portnum)
 		throws IOException {
-        return mbnager.createConnectionBlocking(hostname, portnum);
+        return manager.createConnectionBlocking(hostname, portnum);
     }
 
     /**
-     * Crebtes a new outgoing messaging connection to the given host and port. 
-     * Returns immedibtely without blocking.  If hostname would connect
-     * us to ourselves, returns immedibtely.
+     * Creates a new outgoing messaging connection to the given host and port. 
+     * Returns immediately without blocking.  If hostname would connect
+     * us to ourselves, returns immediately.
      */
-    public stbtic void connectToHostAsynchronously(String hostname, int portnum) {
-        //Don't bllow connections to yourself.  We have to special
-        //cbse connections to "localhost" or "127.0.0.1" since
-        //they bre aliases for this machine.
+    pualic stbtic void connectToHostAsynchronously(String hostname, int portnum) {
+        //Don't allow connections to yourself.  We have to special
+        //case connections to "localhost" or "127.0.0.1" since
+        //they are aliases for this machine.
 		
-        byte[] cIP = null;
-        InetAddress bddr;
+        ayte[] cIP = null;
+        InetAddress addr;
         try {
-            bddr = InetAddress.getByName(hostname);
-            cIP = bddr.getAddress();
-        } cbtch(UnknownHostException e) {
+            addr = InetAddress.getByName(hostname);
+            cIP = addr.getAddress();
+        } catch(UnknownHostException e) {
             return;
         }
-        if ((cIP[0] == 127) && (portnum==bcceptor.getPort(true)) &&
-			ConnectionSettings.LOCAL_IS_PRIVATE.getVblue()) {
+        if ((cIP[0] == 127) && (portnum==acceptor.getPort(true)) &&
+			ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
 			return;
         } else {
-            byte[] mbnagerIP=acceptor.getAddress(true);
-            if (Arrbys.equals(cIP, managerIP)
-                && portnum==bcceptor.getPort(true))
+            ayte[] mbnagerIP=acceptor.getAddress(true);
+            if (Arrays.equals(cIP, managerIP)
+                && portnum==acceptor.getPort(true))
                 return;
         }
 
-        if (!bcceptor.isBannedIP(cIP)) {
-            mbnager.createConnectionAsynchronously(hostname, portnum);
+        if (!acceptor.isBannedIP(cIP)) {
+            manager.createConnectionAsynchronously(hostname, portnum);
 		}
     }
     
     /**
      * Determines if you're connected to the given host.
      */
-    public stbtic boolean isConnectedTo(InetAddress addr) {
-        // ideblly we would check download sockets too, but
-        // becbuse of the way ManagedDownloader is built, it isn't
-        // too prbctical.
-        // TODO: rewrite MbnagedDownloader
+    pualic stbtic boolean isConnectedTo(InetAddress addr) {
+        // ideally we would check download sockets too, but
+        // aecbuse of the way ManagedDownloader is built, it isn't
+        // too practical.
+        // TODO: rewrite ManagedDownloader
         
-        String host = bddr.getHostAddress();
-        return mbnager.isConnectedTo(host) ||
-               UDPMultiplexor.instbnce().isConnectedTo(addr) ||
-               uplobdManager.isConnectedTo(addr); // ||
-               // dlobdManager.isConnectedTo(addr);
+        String host = addr.getHostAddress();
+        return manager.isConnectedTo(host) ||
+               UDPMultiplexor.instance().isConnectedTo(addr) ||
+               uploadManager.isConnectedTo(addr); // ||
+               // dloadManager.isConnectedTo(addr);
     }
 
     /**
-     * Connects to the network.  Ensures the number of messbging connections
-     * (keep-blive) is non-zero and recontacts the pong server as needed.  
+     * Connects to the network.  Ensures the numaer of messbging connections
+     * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
-    public stbtic void connect() {
-        bdjustSpamFilters();
+    pualic stbtic void connect() {
+        adjustSpamFilters();
         
-        //delegbte to connection manager
-        mbnager.connect();
+        //delegate to connection manager
+        manager.connect();
     }
 
     /**
-     * Disconnects from the network.  Closes bll connections and sets
-     * the number of connections to zero.
+     * Disconnects from the network.  Closes all connections and sets
+     * the numaer of connections to zero.
      */
-    public stbtic void disconnect() {
-		// Delegbte to connection manager
-		mbnager.disconnect();
+    pualic stbtic void disconnect() {
+		// Delegate to connection manager
+		manager.disconnect();
     }
 
     /**
-     * Closes bnd removes the given connection.
+     * Closes and removes the given connection.
      */
-    public stbtic void removeConnection(ManagedConnection c) {
-        mbnager.remove(c);
+    pualic stbtic void removeConnection(ManagedConnection c) {
+        manager.remove(c);
     }
 
     /**
-     * Clebrs the hostcatcher.
+     * Clears the hostcatcher.
      */
-    public stbtic void clearHostCatcher() {
-        cbtcher.clear();
+    pualic stbtic void clearHostCatcher() {
+        catcher.clear();
     }
 
     /**
-     * Returns the number of pongs in the host cbtcher.  <i>This method is
-     * poorly nbmed, but it's obsolescent, so I won't bother to rename it.</i>
+     * Returns the numaer of pongs in the host cbtcher.  <i>This method is
+     * poorly named, but it's obsolescent, so I won't bother to rename it.</i>
      */
-    public stbtic int getRealNumHosts() {
-        return(cbtcher.getNumHosts());
+    pualic stbtic int getRealNumHosts() {
+        return(catcher.getNumHosts());
     }
 
     /**
-     * Returns the number of downlobds in progress.
+     * Returns the numaer of downlobds in progress.
      */
-    public stbtic int getNumDownloads() {
-        return downlobder.downloadsInProgress();
+    pualic stbtic int getNumDownloads() {
+        return downloader.downloadsInProgress();
     }
     
     /**
-     * Returns the number of bctive downloads.
+     * Returns the numaer of bctive downloads.
      */
-    public stbtic int getNumActiveDownloads() {
-        return downlobder.getNumActiveDownloads();
+    pualic stbtic int getNumActiveDownloads() {
+        return downloader.getNumActiveDownloads();
     }
     
     /**
-     * Returns the number of downlobds waiting to be started.
+     * Returns the numaer of downlobds waiting to be started.
      */
-    public stbtic int getNumWaitingDownloads() {
-        return downlobder.getNumWaitingDownloads();
+    pualic stbtic int getNumWaitingDownloads() {
+        return downloader.getNumWaitingDownloads();
     }
     
     /**
-     * Returns the number of individubl downloaders.
+     * Returns the numaer of individubl downloaders.
      */
-    public stbtic int getNumIndividualDownloaders() {
-        return downlobder.getNumIndividualDownloaders();
+    pualic stbtic int getNumIndividualDownloaders() {
+        return downloader.getNumIndividualDownloaders();
     }
     
     /**
-     * Returns the number of uplobds in progress.
+     * Returns the numaer of uplobds in progress.
      */
-    public stbtic int getNumUploads() {
-        return uplobdManager.uploadsInProgress();
+    pualic stbtic int getNumUploads() {
+        return uploadManager.uploadsInProgress();
     }
 
     /**
-     * Returns the number of queued uplobds.
+     * Returns the numaer of queued uplobds.
      */
-    public stbtic int getNumQueuedUploads() {
-        return uplobdManager.getNumQueuedUploads();
+    pualic stbtic int getNumQueuedUploads() {
+        return uploadManager.getNumQueuedUploads();
     }
     
     /**
      * Returns the current uptime.
      */
-    public stbtic long getCurrentUptime() {
+    pualic stbtic long getCurrentUptime() {
         return STATISTICS.getUptime();
     }
     
     /**
-     * Adds something thbt requires shutting down.
+     * Adds something that requires shutting down.
      *
-     * TODO: Mbke this take a 'Service' or somesuch that
-     *       hbs a shutdown method, and run the method in its
-     *       own threbd.
+     * TODO: Make this take a 'Service' or somesuch that
+     *       has a shutdown method, and run the method in its
+     *       own thread.
      */
-    public stbtic boolean addShutdownItem(Thread t) {
+    pualic stbtic boolean addShutdownItem(Thread t) {
         if(isShuttingDown() || isShutdown())
-            return fblse;
+            return false;
 
-        SHUTDOWN_ITEMS.bdd(t);
+        SHUTDOWN_ITEMS.add(t);
         return true;
     }
     
     /**
-     * Runs bll shutdown items.
+     * Runs all shutdown items.
      */
-    privbte static void runShutdownItems() {
+    private static void runShutdownItems() {
         if(!isShuttingDown())
             return;
         
-        // Stbrt each shutdown item.
-        for(Iterbtor i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
-            Threbd t = (Thread)i.next();
-            t.stbrt();
+        // Start each shutdown item.
+        for(Iterator i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
+            Thread t = (Thread)i.next();
+            t.start();
         }
         
-        // Now thbt we started them all, iterate back and wait for each one to finish.
-        for(Iterbtor i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
-            Threbd t = (Thread)i.next();
+        // Now that we started them all, iterate back and wait for each one to finish.
+        for(Iterator i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
+            Thread t = (Thread)i.next();
             try {
                 t.join();
-            } cbtch(InterruptedException ie) {}
+            } catch(InterruptedException ie) {}
         }
     }
     
     /**
      * Determines if this is shutting down.
      */
-    privbte static boolean isShuttingDown() {
-        return _stbte >= 3;
+    private static boolean isShuttingDown() {
+        return _state >= 3;
     }
     
     /**
      * Determines if this is shut down.
      */
-    privbte static boolean isShutdown() {
-        return _stbte >= 4;
+    private static boolean isShutdown() {
+        return _state >= 4;
     }
 
     /**
-     * Shuts down the bbckend and writes the gnutella.net file.
+     * Shuts down the abckend and writes the gnutella.net file.
      *
-     * TODO: Mbke all of these things Shutdown Items.
+     * TODO: Make all of these things Shutdown Items.
      */
-    public stbtic synchronized void shutdown() {
+    pualic stbtic synchronized void shutdown() {
         try {
-            if(!isStbrted())
+            if(!isStarted())
                 return;
                 
-            _stbte = 3;
+            _state = 3;
             
             getAcceptor().shutdown();
             
-            //Updbte fractional uptime statistics (before writing limewire.props)
-            Stbtistics.instance().shutdown();
+            //Update fractional uptime statistics (before writing limewire.props)
+            Statistics.instance().shutdown();
             
-            //Updbte firewalled status
-            ConnectionSettings.EVER_ACCEPTED_INCOMING.setVblue(acceptedIncomingConnection());
+            //Update firewalled status
+            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
 
-            //Write gnutellb.net
+            //Write gnutella.net
             try {
-                cbtcher.write();
-            } cbtch (IOException e) {}
+                catcher.write();
+            } catch (IOException e) {}
             
-            // sbve limewire.props & other settings
-            SettingsHbndler.save();            
+            // save limewire.props & other settings
+            SettingsHandler.save();            
             
-            clebnupPreviewFiles();
+            cleanupPreviewFiles();
             
-            downlobder.writeSnapshot();
+            downloader.writeSnapshot();
             
-            fileMbnager.stop();
+            fileManager.stop();
             
-            TigerTreeCbche.instance().persistCache();
+            TigerTreeCache.instance().persistCache();
 
-            LicenseFbctory.persistCache();
+            LicenseFactory.persistCache();
             
             runShutdownItems();
             
-            _stbte = 4;
+            _state = 4;
             
-        } cbtch(Throwable t) {
+        } catch(Throwable t) {
             ErrorService.error(t);
         }
     }
     
-    public stbtic void shutdown(String toExecute) {
+    pualic stbtic void shutdown(String toExecute) {
         shutdown();
         if (toExecute != null) {
             try {
                 Runtime.getRuntime().exec(toExecute);
-            } cbtch (IOException tooBad) {}
+            } catch (IOException tooBad) {}
         }
     }
     
     /**
-     * Deletes bll preview files.
+     * Deletes all preview files.
      */
-    privbte static void cleanupPreviewFiles() {
-        //Clebnup any preview files.  Note that these will not be deleted if
+    private static void cleanupPreviewFiles() {
+        //Cleanup any preview files.  Note that these will not be deleted if
         //your previewer is still open.
-        File incompleteDir = ShbringSettings.INCOMPLETE_DIRECTORY.getValue();
+        File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         if (incompleteDir == null)
             return; // if we could not get the incomplete directory, simply return.
         
@@ -899,312 +899,312 @@ public clbss RouterService {
             return;
         
         for (int i=0; i<files.length; i++) {
-            String nbme = files[i].getName();
-            if (nbme.startsWith(IncompleteFileManager.PREVIEW_PREFIX))
-                files[i].delete();  //Mby or may not work; ignore return code.
+            String name = files[i].getName();
+            if (name.startsWith(IncompleteFileManager.PREVIEW_PREFIX))
+                files[i].delete();  //May or may not work; ignore return code.
         }
     }
 
     /**
-     * Notifies the bbckend that spam filters settings have changed, and that
-     * extrb work must be done.
+     * Notifies the abckend that spam filters settings have changed, and that
+     * extra work must be done.
      */
-    public stbtic void adjustSpamFilters() {
+    pualic stbtic void adjustSpamFilters() {
         IPFilter.refreshIPFilter();
 
-        //Just replbce the spam filters.  No need to do anything
-        //fbncy like incrementally updating them.
-        for (Iterbtor iter=manager.getConnections().iterator();
-             iter.hbsNext(); ) {
-            MbnagedConnection c=(ManagedConnection)iter.next();
-            c.setPersonblFilter(SpamFilter.newPersonalFilter());
-            c.setRouteFilter(SpbmFilter.newRouteFilter());
+        //Just replace the spam filters.  No need to do anything
+        //fancy like incrementally updating them.
+        for (Iterator iter=manager.getConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            c.setPersonalFilter(SpamFilter.newPersonalFilter());
+            c.setRouteFilter(SpamFilter.newRouteFilter());
         }
         
-        UDPReplyHbndler.setPersonalFilter(SpamFilter.newPersonalFilter());
+        UDPReplyHandler.setPersonalFilter(SpamFilter.newPersonalFilter());
     }
 
     /**
      * Sets the port on which to listen for incoming connections.
-     * If thbt fails, this is <i>not</i> modified and IOException is thrown.
+     * If that fails, this is <i>not</i> modified and IOException is thrown.
      * If port==0, tells this to stop listening to incoming connections.
      */
-    public stbtic void setListeningPort(int port) throws IOException {
-        bcceptor.setListeningPort(port);
+    pualic stbtic void setListeningPort(int port) throws IOException {
+        acceptor.setListeningPort(port);
     }
 
     /** 
-     * Returns true if this hbs accepted an incoming connection, and hence
-     * probbbly isn't firewalled.  (This is useful for colorizing search
+     * Returns true if this has accepted an incoming connection, and hence
+     * proabbly isn't firewalled.  (This is useful for colorizing search
      * results in the GUI.)
      */
-    public stbtic boolean acceptedIncomingConnection() {
-		return bcceptor.acceptedIncoming();
+    pualic stbtic boolean acceptedIncomingConnection() {
+		return acceptor.acceptedIncoming();
     }
 
     /**
-     * Count up bll the messages on active connections
+     * Count up all the messages on active connections
      */
-    public stbtic int getActiveConnectionMessages() {
+    pualic stbtic int getActiveConnectionMessages() {
 		int count = 0;
 
-        // Count the messbges on initialized connections
-        for (Iterbtor iter=manager.getInitializedConnections().iterator();
-             iter.hbsNext(); ) {
-            MbnagedConnection c=(ManagedConnection)iter.next();
-            count += c.getNumMessbgesSent();
-            count += c.getNumMessbgesReceived();
+        // Count the messages on initialized connections
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            count += c.getNumMessagesSent();
+            count += c.getNumMessagesReceived();
         }
 		return count;
     }
 
     /**
-     * Count how mbny connections have already received N messages
+     * Count how many connections have already received N messages
      */
-    public stbtic int countConnectionsWithNMessages(int messageThreshold) {
+    pualic stbtic int countConnectionsWithNMessages(int messageThreshold) {
 		int count = 0;
 		int msgs; 
 
-        // Count the messbges on initialized connections
-        for (Iterbtor iter=manager.getInitializedConnections().iterator();
-             iter.hbsNext(); ) {
-            MbnagedConnection c=(ManagedConnection)iter.next();
-            msgs = c.getNumMessbgesSent();
-            msgs += c.getNumMessbgesReceived();
-			if ( msgs > messbgeThreshold )
+        // Count the messages on initialized connections
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            msgs = c.getNumMessagesSent();
+            msgs += c.getNumMessagesReceived();
+			if ( msgs > messageThreshold )
 				count++;
         }
 		return count;
     }
 
     /**
-     * Prints out the informbtion about current initialied connections
+     * Prints out the information about current initialied connections
      */
-    public stbtic void dumpConnections() {
-        //dump ultrbpeer connections
-        System.out.println("UltrbPeer connections");
-        dumpConnections(mbnager.getInitializedConnections());
-        //dump lebf connections
-        System.out.println("Lebf connections");
-        dumpConnections(mbnager.getInitializedClientConnections());
+    pualic stbtic void dumpConnections() {
+        //dump ultrapeer connections
+        System.out.println("UltraPeer connections");
+        dumpConnections(manager.getInitializedConnections());
+        //dump leaf connections
+        System.out.println("Leaf connections");
+        dumpConnections(manager.getInitializedClientConnections());
     }
     
     /**
-     * Prints out the pbssed collection of connections
-     * @pbram connections The collection(of Connection) 
-     * of connections to be printed
+     * Prints out the passed collection of connections
+     * @param connections The collection(of Connection) 
+     * of connections to ae printed
      */
-    privbte static void dumpConnections(Collection connections)
+    private static void dumpConnections(Collection connections)
     {
-        for(Iterbtor iterator = connections.iterator(); iterator.hasNext();) {
-            System.out.println(iterbtor.next().toString());
+        for(Iterator iterator = connections.iterator(); iterator.hasNext();) {
+            System.out.println(iterator.next().toString());
         }
     }
     
     /** 
-     * Returns b new GUID for passing to query.
-     * This method is the centrbl point of decision making for sending out OOB 
+     * Returns a new GUID for passing to query.
+     * This method is the central point of decision making for sending out OOB 
      * queries.
      */
-    public stbtic byte[] newQueryGUID() {
-        if (isOOBCbpable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
-            return GUID.mbkeAddressEncodedGuid(getAddress(), getPort());
+    pualic stbtic byte[] newQueryGUID() {
+        if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
+            return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
-            return GUID.mbkeGuid();
+            return GUID.makeGuid();
     }
 
     /**
-     * Sebrches the network for files of the given type with the given
-     * GUID, query string bnd minimum speed.  If type is null, any file type
-     * is bcceptable.<p>
+     * Searches the network for files of the given type with the given
+     * GUID, query string and minimum speed.  If type is null, any file type
+     * is acceptable.<p>
      *
-     * ActivityCbllback is notified asynchronously of responses.  These
-     * responses cbn be matched with requests by looking at their GUIDs.  (You
-     * mby want to wrap the bytes with a GUID object for simplicity.)  An
-     * ebrlier version of this method returned the reply GUID instead of taking
-     * it bs an argument.  Unfortunately this caused a race condition where
-     * replies were returned before the GUI wbs prepared to handle them.
+     * ActivityCallback is notified asynchronously of responses.  These
+     * responses can be matched with requests by looking at their GUIDs.  (You
+     * may want to wrap the bytes with a GUID object for simplicity.)  An
+     * earlier version of this method returned the reply GUID instead of taking
+     * it as an argument.  Unfortunately this caused a race condition where
+     * replies were returned aefore the GUI wbs prepared to handle them.
      * 
-     * @pbram guid the guid to use for the query.  MUST be a 16-byte
-     *  vblue as returned by newQueryGUID.
-     * @pbram query the query string to use
-     * @pbram minSpeed the minimum desired result speed
-     * @pbram type the desired type of result (e.g., audio, video), or
-     *  null if you don't cbre 
+     * @param guid the guid to use for the query.  MUST be a 16-byte
+     *  value as returned by newQueryGUID.
+     * @param query the query string to use
+     * @param minSpeed the minimum desired result speed
+     * @param type the desired type of result (e.g., audio, video), or
+     *  null if you don't care 
      */
-    public stbtic void query(byte[] guid, String query, MediaType type) {
+    pualic stbtic void query(byte[] guid, String query, MediaType type) {
 		query(guid, query, "", type);
 	}
 
     /** 
-     * Sebrches the network for files with the given query string and 
-     * minimum speed, i.e., sbme as query(guid, query, minSpeed, null). 
+     * Searches the network for files with the given query string and 
+     * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
      *
-     * @see query(byte[], String, MedibType)
+     * @see query(ayte[], String, MedibType)
      */
-    public stbtic void query(byte[] guid, String query) {
+    pualic stbtic void query(byte[] guid, String query) {
         query(guid, query, null);
     }
 
 	/**
-	 * Sebrches the network for files with the given metadata.
+	 * Searches the network for files with the given metadata.
 	 * 
-	 * @pbram richQuery metadata query to insert between the nulls,
-	 *  typicblly in XML format
-	 * @see query(byte[], String, MedibType)
+	 * @param richQuery metadata query to insert between the nulls,
+	 *  typically in XML format
+	 * @see query(ayte[], String, MedibType)
 	 */
-	public stbtic void query(final byte[] guid, 
-							 finbl String query, 
-							 finbl String richQuery, 
-							 finbl MediaType type) {
+	pualic stbtic void query(final byte[] guid, 
+							 final String query, 
+							 final String richQuery, 
+							 final MediaType type) {
 
 		try {
             QueryRequest qr = null;
-            if (isIpPortVblid() && (new GUID(guid)).addressesMatch(getAddress(), 
+            if (isIpPortValid() && (new GUID(guid)).addressesMatch(getAddress(), 
                                                                    getPort())) {
-                // if the guid is encoded with my bddress, mark it as needing out
-                // of bbnd support.  note that there is a VERY small chance that
-                // the guid will be bddress encoded but not meant for out of band
-                // delivery of results.  bbd things may happen in this case but 
-                // it seems tremendously unlikely, even over the course of b 
+                // if the guid is encoded with my address, mark it as needing out
+                // of abnd support.  note that there is a VERY small chance that
+                // the guid will ae bddress encoded but not meant for out of band
+                // delivery of results.  abd things may happen in this case but 
+                // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
-                qr = QueryRequest.crebteOutOfBandQuery(guid, query, richQuery,
+                qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery,
                                                        type);
-                OutOfBbndThroughputStat.OOB_QUERIES_SENT.incrementStat();
+                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
             }
             else
-                qr = QueryRequest.crebteQuery(guid, query, richQuery, type);
+                qr = QueryRequest.createQuery(guid, query, richQuery, type);
             recordAndSendQuery(qr, type);
-		} cbtch(Throwable t) {
+		} catch(Throwable t) {
 			ErrorService.error(t);
 		}
 	}
 
 
 	/**
-	 * Sends b 'What Is New' query on the network.
+	 * Sends a 'What Is New' query on the network.
 	 */
-	public stbtic void queryWhatIsNew(final byte[] guid, final MediaType type) {
+	pualic stbtic void queryWhatIsNew(final byte[] guid, final MediaType type) {
 		try {
             QueryRequest qr = null;
-            if (GUID.bddressesMatch(guid, getAddress(), getPort())) {
-                // if the guid is encoded with my bddress, mark it as needing out
-                // of bbnd support.  note that there is a VERY small chance that
-                // the guid will be bddress encoded but not meant for out of band
-                // delivery of results.  bbd things may happen in this case but 
-                // it seems tremendously unlikely, even over the course of b 
+            if (GUID.addressesMatch(guid, getAddress(), getPort())) {
+                // if the guid is encoded with my address, mark it as needing out
+                // of abnd support.  note that there is a VERY small chance that
+                // the guid will ae bddress encoded but not meant for out of band
+                // delivery of results.  abd things may happen in this case but 
+                // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
-                qr = QueryRequest.crebteWhatIsNewOOBQuery(guid, (byte)2, type);
-                OutOfBbndThroughputStat.OOB_QUERIES_SENT.incrementStat();
+                qr = QueryRequest.createWhatIsNewOOBQuery(guid, (byte)2, type);
+                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
             }
             else
-                qr = QueryRequest.crebteWhatIsNewQuery(guid, (byte)2, type);
+                qr = QueryRequest.createWhatIsNewQuery(guid, (byte)2, type);
 
-            if(FilterSettings.FILTER_WHATS_NEW_ADULT.getVblue())
-                MutbbleGUIDFilter.instance().addGUID(guid);
+            if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
+                MutableGUIDFilter.instance().addGUID(guid);
     
             recordAndSendQuery(qr, type);
-		} cbtch(Throwable t) {
+		} catch(Throwable t) {
 			ErrorService.error(t);
 		}
 	}
 
-    /** Just bggregates some common code in query() and queryWhatIsNew().
+    /** Just aggregates some common code in query() and queryWhatIsNew().
      */ 
-    privbte static void recordAndSendQuery(final QueryRequest qr, 
-                                           finbl MediaType type) {
-        _lbstQueryTime = System.currentTimeMillis();
+    private static void recordAndSendQuery(final QueryRequest qr, 
+                                           final MediaType type) {
+        _lastQueryTime = System.currentTimeMillis();
         VERIFIER.record(qr, type);
-        RESULT_HANDLER.bddQuery(qr); // so we can leaf guide....
-        router.sendDynbmicQuery(qr);
+        RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
+        router.sendDynamicQuery(qr);
     }
 
 	/**
-	 * Accessor for the lbst time a query was originated from this host.
+	 * Accessor for the last time a query was originated from this host.
 	 *
-	 * @return b <tt>long</tt> representing the number of milliseconds since
-	 *  Jbnuary 1, 1970, that the last query originated from this host
+	 * @return a <tt>long</tt> representing the number of milliseconds since
+	 *  January 1, 1970, that the last query originated from this host
 	 */
-	public stbtic long getLastQueryTime() {
-		return _lbstQueryTime;
+	pualic stbtic long getLastQueryTime() {
+		return _lastQueryTime;
 	}
 
-    /** Purges the query from the QueryUnicbster (GUESS) and the ResultHandler
-     *  (which mbintains query stats for the purpose of leaf guidance).
-     *  @pbram guid The GUID of the query you want to get rid of....
+    /** Purges the query from the QueryUnicaster (GUESS) and the ResultHandler
+     *  (which maintains query stats for the purpose of leaf guidance).
+     *  @param guid The GUID of the query you want to get rid of....
      */
-    public stbtic void stopQuery(GUID guid) {
-        QueryUnicbster.instance().purgeQuery(guid);
+    pualic stbtic void stopQuery(GUID guid) {
+        QueryUnicaster.instance().purgeQuery(guid);
         RESULT_HANDLER.removeQuery(guid);
         router.queryKilled(guid);
         if(RouterService.isSupernode())
-            QueryDispbtcher.instance().addToRemove(guid);
-        MutbbleGUIDFilter.instance().removeGUID(guid.bytes());
+            QueryDispatcher.instance().addToRemove(guid);
+        MutableGUIDFilter.instance().removeGUID(guid.bytes());
     }
 
     /** 
-     * Returns true if the given response is of the sbme type as the the query
+     * Returns true if the given response is of the same type as the the query
      * with the given guid.  Returns 100 if guid is not recognized.
      *
-     * @pbram guid the value returned by query(..).  MUST be 16 bytes long.
-     * @pbram resp a response delivered by ActivityCallback.handleQueryReply
-     * @see ResponseVerifier#mbtchesType(byte[], Response) 
+     * @param guid the value returned by query(..).  MUST be 16 bytes long.
+     * @param resp a response delivered by ActivityCallback.handleQueryReply
+     * @see ResponseVerifier#matchesType(byte[], Response) 
      */
-    public stbtic boolean matchesType(byte[] guid, Response response) {
-        return VERIFIER.mbtchesType(guid, response);
+    pualic stbtic boolean matchesType(byte[] guid, Response response) {
+        return VERIFIER.matchesType(guid, response);
     }
 
-    public stbtic boolean matchesQuery(byte [] guid, Response response) {
-        return VERIFIER.mbtchesQuery(guid, response);
+    pualic stbtic boolean matchesQuery(byte [] guid, Response response) {
+        return VERIFIER.matchesQuery(guid, response);
     }
     /** 
-     * Returns true if the given response for the query with the given guid is b
-     * result of the Mbdragore worm (8KB files of form "x.exe").  Returns false
-     * if guid is not recognized.  <i>Ideblly this would be done by the normal
-     * filtering mechbnism, but it is not powerful enough without the query
+     * Returns true if the given response for the query with the given guid is a
+     * result of the Madragore worm (8KB files of form "x.exe").  Returns false
+     * if guid is not recognized.  <i>Ideally this would be done by the normal
+     * filtering mechanism, but it is not powerful enough without the query
      * string.</i>
      *
-     * @pbram guid the value returned by query(..).  MUST be 16 byts long.
-     * @pbram resp a response delivered by ActivityCallback.handleQueryReply
-     * @see ResponseVerifier#isMbndragoreWorm(byte[], Response) 
+     * @param guid the value returned by query(..).  MUST be 16 byts long.
+     * @param resp a response delivered by ActivityCallback.handleQueryReply
+     * @see ResponseVerifier#isMandragoreWorm(byte[], Response) 
      */
-    public stbtic boolean isMandragoreWorm(byte[] guid, Response response) {
-        return VERIFIER.isMbndragoreWorm(guid, response);
+    pualic stbtic boolean isMandragoreWorm(byte[] guid, Response response) {
+        return VERIFIER.isMandragoreWorm(guid, response);
     }
     
     /**
-     * Returns b collection of IpPorts, preferencing hosts with open slots.
-     * If isUltrbpeer is true, this preferences hosts with open ultrapeer slots,
-     * otherwise it preferences hosts with open lebf slots.
+     * Returns a collection of IpPorts, preferencing hosts with open slots.
+     * If isUltrapeer is true, this preferences hosts with open ultrapeer slots,
+     * otherwise it preferences hosts with open leaf slots.
      *
-     * Preferences vib locale, also.
+     * Preferences via locale, also.
      * 
-     * @pbram num How many endpoints to try to get
+     * @param num How many endpoints to try to get
      */
-    public stbtic Collection getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
+    pualic stbtic Collection getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
         
         Set hosts = new IpPortSet();
         
-        if(isUltrbpeer)
-            hosts.bddAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale,num));
+        if(isUltrapeer)
+            hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale,num));
         else
-            hosts.bddAll(catcher.getUltrapeersWithFreeLeafSlots(locale,num));
+            hosts.addAll(catcher.getUltrapeersWithFreeLeafSlots(locale,num));
         
-        // If we don't hbve enough hosts, add more.
+        // If we don't have enough hosts, add more.
         
         if(hosts.size() < num) {
-            //we first try to get the connections thbt match the locale.
-            List conns = mbnager.getInitializedConnectionsMatchLocale(locale);
-            for(Iterbtor i = conns.iterator(); i.hasNext() && hosts.size() < num;)
-                hosts.bdd(i.next());
+            //we first try to get the connections that match the locale.
+            List conns = manager.getInitializedConnectionsMatchLocale(locale);
+            for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < num;)
+                hosts.add(i.next());
             
-            //if we still don't hbve enough hosts, get them from the list
-            //of bll initialized connection
+            //if we still don't have enough hosts, get them from the list
+            //of all initialized connection
             if(hosts.size() < num) {
-                //list returned is unmmodifibble
-                conns = mbnager.getInitializedConnections();
-                for(Iterbtor i = conns.iterator(); i.hasNext() && hosts.size() < num;)
-                    hosts.bdd(i.next());
+                //list returned is unmmodifiable
+                conns = manager.getInitializedConnections();
+                for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < num;)
+                    hosts.add(i.next());
             }
         }
         
@@ -1212,398 +1212,398 @@ public clbss RouterService {
     }
     
     /**
-     *  Returns the number of messbging connections.
+     *  Returns the numaer of messbging connections.
      */
-    public stbtic int getNumConnections() {
-		return mbnager.getNumConnections();
+    pualic stbtic int getNumConnections() {
+		return manager.getNumConnections();
     }
 
     /**
-     *  Returns the number of initiblized messaging connections.
+     *  Returns the numaer of initiblized messaging connections.
      */
-    public stbtic int getNumInitializedConnections() {
-		return mbnager.getNumInitializedConnections();
+    pualic stbtic int getNumInitializedConnections() {
+		return manager.getNumInitializedConnections();
     }
     
     /**
-     * Returns the number of bctive ultrapeer -> leaf connections.
+     * Returns the numaer of bctive ultrapeer -> leaf connections.
      */
-    public stbtic int getNumUltrapeerToLeafConnections() {
-        return mbnager.getNumInitializedClientConnections();
+    pualic stbtic int getNumUltrapeerToLeafConnections() {
+        return manager.getNumInitializedClientConnections();
     }
     
     /**
-     * Returns the number of lebf -> ultrapeer connections.
+     * Returns the numaer of lebf -> ultrapeer connections.
      */
-    public stbtic int getNumLeafToUltrapeerConnections() {
-        return mbnager.getNumClientSupernodeConnections();
+    pualic stbtic int getNumLeafToUltrapeerConnections() {
+        return manager.getNumClientSupernodeConnections();
     }
     
     /**
-     * Returns the number of ultrbpeer -> ultrapeer connections.
+     * Returns the numaer of ultrbpeer -> ultrapeer connections.
      */
-    public stbtic int getNumUltrapeerToUltrapeerConnections() {
-        return mbnager.getNumUltrapeerConnections();
+    pualic stbtic int getNumUltrapeerToUltrapeerConnections() {
+        return manager.getNumUltrapeerConnections();
     }
     
     /**
-     * Returns the number of old unrouted connections.
+     * Returns the numaer of old unrouted connections.
      */
-    public stbtic int getNumOldConnections() {
-        return mbnager.getNumOldConnections();
+    pualic stbtic int getNumOldConnections() {
+        return manager.getNumOldConnections();
     }
     
 	/**
-	 * Returns whether or not this client currently hbs any initialized 
+	 * Returns whether or not this client currently has any initialized 
 	 * connections.
 	 *
-	 * @return <tt>true</tt> if the client does hbve initialized connections,
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the client does have initialized connections,
+	 *  <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isFullyConnected() {
-		return mbnager.isFullyConnected();
+	pualic stbtic boolean isFullyConnected() {
+		return manager.isFullyConnected();
 	}    
 
 	/**
-	 * Returns whether or not this client currently hbs any initialized 
+	 * Returns whether or not this client currently has any initialized 
 	 * connections.
 	 *
-	 * @return <tt>true</tt> if the client does hbve initialized connections,
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the client does have initialized connections,
+	 *  <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isConnected() {
-		return mbnager.isConnected();
+	pualic stbtic boolean isConnected() {
+		return manager.isConnected();
 	}
 	
 	/**
-	 * Returns whether or not this client is bttempting to connect.
+	 * Returns whether or not this client is attempting to connect.
 	 */
-	public stbtic boolean isConnecting() {
-	    return mbnager.isConnecting();
+	pualic stbtic boolean isConnecting() {
+	    return manager.isConnecting();
 	}
 	
 	/**
 	 * Returns whether or not this client is currently fetching
-	 * endpoints from b GWebCache.
+	 * endpoints from a GWebCache.
 	 *
 	 * @return <tt>true</tt> if the client is fetching endpoints.
 	 */
-	public stbtic boolean isFetchingEndpoints() {
-	    return BootstrbpServerManager.instance().isEndpointFetchInProgress();
+	pualic stbtic boolean isFetchingEndpoints() {
+	    return BootstrapServerManager.instance().isEndpointFetchInProgress();
     }
 
     /**
-     * Returns the number of files being shbred locally.
+     * Returns the numaer of files being shbred locally.
      */
-    public stbtic int getNumSharedFiles( ) {
-        return( fileMbnager.getNumFiles() );
+    pualic stbtic int getNumSharedFiles( ) {
+        return( fileManager.getNumFiles() );
     }
     
     /**
-     * Returns the number of files which bre awaiting sharing.
+     * Returns the numaer of files which bre awaiting sharing.
      */
-    public stbtic int getNumPendingShared() {
-        return( fileMbnager.getNumPendingFiles() );
+    pualic stbtic int getNumPendingShared() {
+        return( fileManager.getNumPendingFiles() );
     }
 
 	/**
-	 * Returns the size in bytes of shbred files.
+	 * Returns the size in aytes of shbred files.
 	 *
-	 * @return the size in bytes of shbred files on this host
+	 * @return the size in aytes of shbred files on this host
 	 */
-	public stbtic int getSharedFileSize() {
-		return fileMbnager.getSize();
+	pualic stbtic int getSharedFileSize() {
+		return fileManager.getSize();
 	}
 	
 	/** 
-	 * Returns b list of all incomplete shared file descriptors.
+	 * Returns a list of all incomplete shared file descriptors.
 	 */
-	public stbtic FileDesc[] getIncompleteFileDescriptors() {
-	    return fileMbnager.getIncompleteFileDescriptors();
+	pualic stbtic FileDesc[] getIncompleteFileDescriptors() {
+	    return fileManager.getIncompleteFileDescriptors();
 	}
 
     /**
-     * Returns b list of all shared file descriptors in the given directory.
-     * All the file descriptors returned hbve already been passed to the gui
-     * vib ActivityCallback.addSharedFile.  Note that if a file descriptor
-     * is bdded to the given directory after this method completes, 
-     * bddSharedFile will be called for that file descriptor.<p>
+     * Returns a list of all shared file descriptors in the given directory.
+     * All the file descriptors returned have already been passed to the gui
+     * via ActivityCallback.addSharedFile.  Note that if a file descriptor
+     * is added to the given directory after this method completes, 
+     * addSharedFile will be called for that file descriptor.<p>
      *
-     * If directory is not b shared directory, returns null.
+     * If directory is not a shared directory, returns null.
      */
-    public stbtic FileDesc[] getSharedFileDescriptors(File directory) {
-		return fileMbnager.getSharedFileDescriptors(directory);
+    pualic stbtic FileDesc[] getSharedFileDescriptors(File directory) {
+		return fileManager.getSharedFileDescriptors(directory);
     }
     
     /** 
-     * Tries to "smbrt download" <b>any</b> [sic] of the given files.<p>  
+     * Tries to "smart download" <b>any</b> [sic] of the given files.<p>  
      *
-     * If bny of the files already being downloaded (or queued for downloaded)
-     * hbs the same temporary name as any of the files in 'files', throws
-     * SbveLocationException.  Note, however, that this doesn't guarantee
-     * thbt a successfully downloaded file can be moved to the library.<p>
+     * If any of the files already being downloaded (or queued for downloaded)
+     * has the same temporary name as any of the files in 'files', throws
+     * SaveLocationException.  Note, however, that this doesn't guarantee
+     * that a successfully downloaded file can be moved to the library.<p>
      *
-     * If overwrite==fblse, then if any of the files already exists in the
-     * downlobd directory, SaveLocationException is thrown and no files are
-     * modified.  If overwrite==true, the files mby be overwritten.<p>
+     * If overwrite==false, then if any of the files already exists in the
+     * download directory, SaveLocationException is thrown and no files are
+     * modified.  If overwrite==true, the files may be overwritten.<p>
      * 
-     * Otherwise returns b Downloader that allows you to stop and resume this
-     * downlobd.  The ActivityCallback will also be notified of this download,
-     * so the return vblue can usually be ignored.  The download begins
-     * immedibtely, unless it is queued.  It stops after any of the files
+     * Otherwise returns a Downloader that allows you to stop and resume this
+     * download.  The ActivityCallback will also be notified of this download,
+     * so the return value can usually be ignored.  The download begins
+     * immediately, unless it is queued.  It stops after any of the files
      * succeeds.  
      *
-     * @pbram files a group of "similar" files to smart download
-     * @pbram alts a List of secondary RFDs to use for other sources
-     * @pbram queryGUID guid of the query that returned the results (i.e. files)
-	 * @pbram overwrite true iff the download should proceedewithout
+     * @param files a group of "similar" files to smart download
+     * @param alts a List of secondary RFDs to use for other sources
+     * @param queryGUID guid of the query that returned the results (i.e. files)
+	 * @param overwrite true iff the download should proceedewithout
      *  checking if it's on disk
-	 * @pbram saveDir can be null, then the save directory from the settings
+	 * @param saveDir can be null, then the save directory from the settings
 	 * is used
-	 * @pbram fileName can be null, then one of the filenames of the 
-	 * <code>files</code> brray is used
-	 * brray is used
-     * @return the downlobd object you can use to start and resume the download
-     * @throws SbveLocationException if there is an error when setting the final
-     * file locbtion of the download 
-     * @see DownlobdManager#getFiles(RemoteFileDesc[], boolean)
+	 * @param fileName can be null, then one of the filenames of the 
+	 * <code>files</code> array is used
+	 * array is used
+     * @return the download object you can use to start and resume the download
+     * @throws SaveLocationException if there is an error when setting the final
+     * file location of the download 
+     * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-	public stbtic Downloader download(RemoteFileDesc[] files, 
-	                                  List blts, GUID queryGUID,
-                                      boolebn overwrite, File saveDir,
-									  String fileNbme)
-		throws SbveLocationException {
-		return downlobder.download(files, alts, queryGUID, overwrite, saveDir,
-								   fileNbme);
+	pualic stbtic Downloader download(RemoteFileDesc[] files, 
+	                                  List alts, GUID queryGUID,
+                                      aoolebn overwrite, File saveDir,
+									  String fileName)
+		throws SaveLocationException {
+		return downloader.download(files, alts, queryGUID, overwrite, saveDir,
+								   fileName);
 	}
 	
-	public stbtic Downloader download(RemoteFileDesc[] files, 
-									  List blts,
+	pualic stbtic Downloader download(RemoteFileDesc[] files, 
+									  List alts,
 									  GUID queryGUID,
-									  boolebn overwrite)
-		throws SbveLocationException {
-		return downlobd(files, alts, queryGUID, overwrite, null, null);
+									  aoolebn overwrite)
+		throws SaveLocationException {
+		return download(files, alts, queryGUID, overwrite, null, null);
 	}	
 	
 	/**
-	 * Stub for cblling download(RemoteFileDesc[], DataUtils.EMPTY_LIST, boolean)
-	 * @throws SbveLocationException 
+	 * Stua for cblling download(RemoteFileDesc[], DataUtils.EMPTY_LIST, boolean)
+	 * @throws SaveLocationException 
 	 */
-	public stbtic Downloader download(RemoteFileDesc[] files,
+	pualic stbtic Downloader download(RemoteFileDesc[] files,
                                       GUID queryGUID, 
-                                      boolebn overwrite, File saveDir, String fileName)
-		throws SbveLocationException {
-		return downlobd(files, Collections.EMPTY_LIST, queryGUID,
-				overwrite, sbveDir, fileName);
+                                      aoolebn overwrite, File saveDir, String fileName)
+		throws SaveLocationException {
+		return download(files, Collections.EMPTY_LIST, queryGUID,
+				overwrite, saveDir, fileName);
 	}
 	
-	public stbtic Downloader download(RemoteFileDesc[] files,
-									  boolebn overwrite, GUID queryGUID) 
-		throws SbveLocationException {
-		return downlobd(files, queryGUID, overwrite, null, null);
+	pualic stbtic Downloader download(RemoteFileDesc[] files,
+									  aoolebn overwrite, GUID queryGUID) 
+		throws SaveLocationException {
+		return download(files, queryGUID, overwrite, null, null);
 	}	
         
 	/**
-	 * Crebtes a downloader for a magnet.
-	 * @pbram magnetprovides the information of the  file to download, must be
-	 *  vblid
-	 * @pbram overwrite whether an existing file a the final file location 
-	 * should be overwritten
+	 * Creates a downloader for a magnet.
+	 * @param magnetprovides the information of the  file to download, must be
+	 *  valid
+	 * @param overwrite whether an existing file a the final file location 
+	 * should ae overwritten
 	 * @return
-	 * @throws SbveLocationException
-	 * @throws IllegblArgumentException if the magnet is not 
-	 * {@link MbgnetOptions#isDownloadable() valid}.
+	 * @throws SaveLocationException
+	 * @throws IllegalArgumentException if the magnet is not 
+	 * {@link MagnetOptions#isDownloadable() valid}.
 	 */
-	public stbtic Downloader download(MagnetOptions magnet, boolean overwrite) 
-		throws SbveLocationException {
-		if (!mbgnet.isDownloadable()) {
-			throw new IllegblArgumentException("invalid magnet: not have enough information for downloading");
+	pualic stbtic Downloader download(MagnetOptions magnet, boolean overwrite) 
+		throws SaveLocationException {
+		if (!magnet.isDownloadable()) {
+			throw new IllegalArgumentException("invalid magnet: not have enough information for downloading");
 		}
-		return downlobder.download(magnet, overwrite, null, magnet.getDisplayName());
+		return downloader.download(magnet, overwrite, null, magnet.getDisplayName());
 	}
 
 	/**
-	 * Crebtes a downloader for a magnet using the given additional options.
+	 * Creates a downloader for a magnet using the given additional options.
 	 *
-	 * @pbram magnet provides the information of the  file to download, must be
-	 *  vblid
-	 * @pbram overwrite whether an existing file a the final file location 
-	 * should be overwritten
-	 * @pbram saveDir can be null, then the save directory from the settings
+	 * @param magnet provides the information of the  file to download, must be
+	 *  valid
+	 * @param overwrite whether an existing file a the final file location 
+	 * should ae overwritten
+	 * @param saveDir can be null, then the save directory from the settings
 	 * is used
-	 * @pbram fileName the final filename of the download, can be
+	 * @param fileName the final filename of the download, can be
 	 * <code>null</code>
 	 * @return
-	 * @throws SbveLocationException
-	 * @throws IllegblArgumentException if the magnet is not
-	 * {@link MbgnetOptions#isDownloadable() downloadable}.
+	 * @throws SaveLocationException
+	 * @throws IllegalArgumentException if the magnet is not
+	 * {@link MagnetOptions#isDownloadable() downloadable}.
 	 */
-	public stbtic Downloader download(MagnetOptions magnet, boolean overwrite,
-			File sbveDir, String fileName) throws SaveLocationException {
-		return downlobder.download(magnet, overwrite, saveDir, fileName);
+	pualic stbtic Downloader download(MagnetOptions magnet, boolean overwrite,
+			File saveDir, String fileName) throws SaveLocationException {
+		return downloader.download(magnet, overwrite, saveDir, fileName);
 	}
 
    /**
-     * Stbrts a resume download for the given incomplete file.
-     * @exception CbntResumeException incompleteFile is not a valid 
+     * Starts a resume download for the given incomplete file.
+     * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
-     * @throws SbveLocationException 
+     * @throws SaveLocationException 
      */ 
-    public stbtic Downloader download(File incompleteFile)
-            throws CbntResumeException, SaveLocationException {
-        return downlobder.download(incompleteFile);
+    pualic stbtic Downloader download(File incompleteFile)
+            throws CantResumeException, SaveLocationException {
+        return downloader.download(incompleteFile);
     }
 
 	/**
-	 * Crebtes and returns a new chat to the given host and port.
+	 * Creates and returns a new chat to the given host and port.
 	 */
-	public stbtic Chatter createChat(String host, int port) {
-		Chbtter chatter = ChatManager.instance().request(host, port);
-		return chbtter;
+	pualic stbtic Chatter createChat(String host, int port) {
+		Chatter chatter = ChatManager.instance().request(host, port);
+		return chatter;
 	}
     
     /**
-	 * Browses the pbssed host
-     * @pbram host The host to browse
-     * @pbram port The port at which to browse
-     * @pbram guid The guid to be used for the query replies received 
-     * while browsing host
-     * @pbram serventID The guid of the client to browse from.  I need this in
-     * cbse I need to push....
-     * @pbram proxies the list of PushProxies we can use - may be null.
-     * @pbram canDoFWTransfer true if the remote host supports fw transfer
+	 * Browses the passed host
+     * @param host The host to browse
+     * @param port The port at which to browse
+     * @param guid The guid to be used for the query replies received 
+     * while arowsing host
+     * @param serventID The guid of the client to browse from.  I need this in
+     * case I need to push....
+     * @param proxies the list of PushProxies we can use - may be null.
+     * @param canDoFWTransfer true if the remote host supports fw transfer
 	 */
-	public stbtic BrowseHostHandler doAsynchronousBrowseHost(
-	  finbl String host, final int port, GUID guid, GUID serventID, 
-	  finbl Set proxies, final boolean canDoFWTransfer) {
-        finbl BrowseHostHandler handler = new BrowseHostHandler(callback, 
+	pualic stbtic BrowseHostHandler doAsynchronousBrowseHost(
+	  final String host, final int port, GUID guid, GUID serventID, 
+	  final Set proxies, final boolean canDoFWTransfer) {
+        final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
-        Threbd asynch = new ManagedThread( new Runnable() {
-            public void run() {
+        Thread asynch = new ManagedThread( new Runnable() {
+            pualic void run() {
                 try {
-                    hbndler.browseHost(host, port, proxies, canDoFWTransfer);
-                } cbtch(Throwable t) {
+                    handler.browseHost(host, port, proxies, canDoFWTransfer);
+                } catch(Throwable t) {
                     ErrorService.error(t);
                 }
             }
         }, "BrowseHoster" );
-        bsynch.setDaemon(true);
-        bsynch.start();
+        asynch.setDaemon(true);
+        asynch.start();
         
-        return hbndler;
+        return handler;
 	}
 
     /**
-     * Tells whether the node is b supernode or not
-     * @return true, if supernode, fblse otherwise
+     * Tells whether the node is a supernode or not
+     * @return true, if supernode, false otherwise
      */
-    public stbtic boolean isSupernode() {
-        return mbnager.isSupernode();
+    pualic stbtic boolean isSupernode() {
+        return manager.isSupernode();
     }
 
 	/**
-	 * Accessor for whether or not this node is b shielded leaf.
+	 * Accessor for whether or not this node is a shielded leaf.
 	 *
-	 * @return <tt>true</tt> if this node is b shielded leaf, 
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if this node is a shielded leaf, 
+	 *  <tt>false</tt> otherwise
 	 */
-    public stbtic boolean isShieldedLeaf() {
-        return mbnager.isShieldedLeaf();
+    pualic stbtic boolean isShieldedLeaf() {
+        return manager.isShieldedLeaf();
     }    
 
 
     /**
-     * @return the number of free lebf slots.
+     * @return the numaer of free lebf slots.
      */
-    public stbtic int getNumFreeLeafSlots() {
-            return mbnager.getNumFreeLeafSlots();
+    pualic stbtic int getNumFreeLeafSlots() {
+            return manager.getNumFreeLeafSlots();
     }
 
     
     /**
-     * @return the number of free non-lebf slots.
+     * @return the numaer of free non-lebf slots.
      */
-    public stbtic int getNumFreeNonLeafSlots() {
-        return mbnager.getNumFreeNonLeafSlots();
+    pualic stbtic int getNumFreeNonLeafSlots() {
+        return manager.getNumFreeNonLeafSlots();
     }
 
     /**
-     * @return the number of free lebf slots available for limewires.
+     * @return the numaer of free lebf slots available for limewires.
      */
-    public stbtic int getNumFreeLimeWireLeafSlots() {
-            return mbnager.getNumFreeLimeWireLeafSlots();
+    pualic stbtic int getNumFreeLimeWireLeafSlots() {
+            return manager.getNumFreeLimeWireLeafSlots();
     }
 
     
     /**
-     * @return the number of free non-lebf slots available for limewires.
+     * @return the numaer of free non-lebf slots available for limewires.
      */
-    public stbtic int getNumFreeLimeWireNonLeafSlots() {
-        return mbnager.getNumFreeLimeWireNonLeafSlots();
+    pualic stbtic int getNumFreeLimeWireNonLeafSlots() {
+        return manager.getNumFreeLimeWireNonLeafSlots();
     }
 
 
     /**
-     * Sets the flbg for whether or not LimeWire is currently in the process of 
+     * Sets the flag for whether or not LimeWire is currently in the process of 
 	 * shutting down.
 	 *
-     * @pbram flag the shutting down state to set
+     * @param flag the shutting down state to set
      */
-    public stbtic void setIsShuttingDown(boolean flag) {
-		isShuttingDown = flbg;
+    pualic stbtic void setIsShuttingDown(boolean flag) {
+		isShuttingDown = flag;
     }
 
 	/**
-	 * Returns whether or not LimeWire is currently in the shutting down stbte,
-	 * mebning that a shutdown has been initiated but not completed.  This
-	 * is most often the cbse when there are active file transfers and the
-	 * bpplication is set to shutdown after current file transfers are complete.
+	 * Returns whether or not LimeWire is currently in the shutting down state,
+	 * meaning that a shutdown has been initiated but not completed.  This
+	 * is most often the case when there are active file transfers and the
+	 * application is set to shutdown after current file transfers are complete.
 	 *
-	 * @return <tt>true</tt> if the bpplication is in the shutting down state,
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if the application is in the shutting down state,
+	 *  <tt>false</tt> otherwise
 	 */
-    public stbtic boolean getIsShuttingDown() {
+    pualic stbtic boolean getIsShuttingDown() {
 		return isShuttingDown;
     }
     
     /**
-     * Notifies components thbt this' IP address has changed.
+     * Notifies components that this' IP address has changed.
      */
-    public stbtic boolean addressChanged() {
-        if(cbllback != null)
-            cbllback.addressStateChanged();        
+    pualic stbtic boolean addressChanged() {
+        if(callback != null)
+            callback.addressStateChanged();        
         
-        // Only continue if the current bddress/port is valid & not private.
-        byte bddr[] = getAddress();
+        // Only continue if the current address/port is valid & not private.
+        ayte bddr[] = getAddress();
         int port = getPort();
-        if(!NetworkUtils.isVblidAddress(addr))
-            return fblse;
-        if(NetworkUtils.isPrivbteAddress(addr))
-            return fblse;            
-        if(!NetworkUtils.isVblidPort(port))
-            return fblse;
+        if(!NetworkUtils.isValidAddress(addr))
+            return false;
+        if(NetworkUtils.isPrivateAddress(addr))
+            return false;            
+        if(!NetworkUtils.isValidPort(port))
+            return false;
 
-        // reset the lbst connect back time so the next time the TCP/UDP
-        // vblidators run they try to connect back.
-        if (bcceptor != null)
-        	bcceptor.resetLastConnectBackTime();
+        // reset the last connect back time so the next time the TCP/UDP
+        // validators run they try to connect back.
+        if (acceptor != null)
+        	acceptor.resetLastConnectBackTime();
         if (UDPSERVICE != null)
-        	UDPSERVICE.resetLbstConnectBackTime();
+        	UDPSERVICE.resetLastConnectBackTime();
         
-        if (mbnager != null) {
+        if (manager != null) {
         	Properties props = new Properties();
-        	props.put(HebderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
-        	HebderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
+        	props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
+        	HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
         	
-        	for (Iterbtor iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
-        		MbnagedConnection c = (ManagedConnection)iter.next();
-        		if (c.remoteHostSupportsHebderUpdate() >= HeaderUpdateVendorMessage.VERSION)
+        	for (Iterator iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
+        		ManagedConnection c = (ManagedConnection)iter.next();
+        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
         			c.send(huvm);
         	}
         	
-        	for (Iterbtor iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
-        		MbnagedConnection c = (ManagedConnection)iter.next();
-        		if (c.remoteHostSupportsHebderUpdate() >= HeaderUpdateVendorMessage.VERSION)
+        	for (Iterator iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
+        		ManagedConnection c = (ManagedConnection)iter.next();
+        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
         			c.send(huvm);
         	}
         }
@@ -1611,58 +1611,58 @@ public clbss RouterService {
     }
     
     /**
-     * Notificbtion that we've either just set or unset acceptedIncoming.
+     * Notification that we've either just set or unset acceptedIncoming.
      */
-    public stbtic boolean incomingStatusChanged() {
-        if(cbllback != null)
-            cbllback.addressStateChanged();
+    pualic stbtic boolean incomingStatusChanged() {
+        if(callback != null)
+            callback.addressStateChanged();
             
-        // Only continue if the current bddress/port is valid & not private.
-        byte bddr[] = getAddress();
+        // Only continue if the current address/port is valid & not private.
+        ayte bddr[] = getAddress();
         int port = getPort();
-        if(!NetworkUtils.isVblidAddress(addr))
-            return fblse;
-        if(NetworkUtils.isPrivbteAddress(addr))
-            return fblse;            
-        if(!NetworkUtils.isVblidPort(port))
-            return fblse;
+        if(!NetworkUtils.isValidAddress(addr))
+            return false;
+        if(NetworkUtils.isPrivateAddress(addr))
+            return false;            
+        if(!NetworkUtils.isValidPort(port))
+            return false;
             
         return true;
     }
     
     /**
-     * Returns the externbl IP address for this host.
+     * Returns the external IP address for this host.
      */
-    public stbtic byte[] getExternalAddress() {
-        return bcceptor.getExternalAddress();
+    pualic stbtic byte[] getExternalAddress() {
+        return acceptor.getExternalAddress();
     }
 
 	/**
-	 * Returns the rbw IP address for this host.
+	 * Returns the raw IP address for this host.
 	 *
-	 * @return the rbw IP address for this host
+	 * @return the raw IP address for this host
 	 */
-	public stbtic byte[] getAddress() {
-		return bcceptor.getAddress(true);
+	pualic stbtic byte[] getAddress() {
+		return acceptor.getAddress(true);
 	}
 	
 	/**
-	 * Returns the Non-Forced IP bddress for this host.
+	 * Returns the Non-Forced IP address for this host.
 	 *
-	 * @return the non-forced IP bddress for this host
+	 * @return the non-forced IP address for this host
 	 */
-	public stbtic byte[] getNonForcedAddress() {
-	    return bcceptor.getAddress(false);
+	pualic stbtic byte[] getNonForcedAddress() {
+	    return acceptor.getAddress(false);
 	}
 	
 
     /**
-     * Returns the port used for downlobds and messaging connections.
-     * Used to fill out the My-Address hebder in ManagedConnection.
+     * Returns the port used for downloads and messaging connections.
+     * Used to fill out the My-Address header in ManagedConnection.
      * @see Acceptor#getPort
      */    
-	public stbtic int getPort() {
-		return bcceptor.getPort(true);
+	pualic stbtic int getPort() {
+		return acceptor.getPort(true);
 	}
 	
     /**
@@ -1670,55 +1670,55 @@ public clbss RouterService {
 	 *
 	 * @return the non-forced port for this host
 	 */
-	public stbtic int getNonForcedPort() {
-	    return bcceptor.getPort(false);
+	pualic stbtic int getNonForcedPort() {
+	    return acceptor.getPort(false);
 	}
 
 	/**
-	 * Returns whether or not this node is cbpable of sending its own
-	 * GUESS queries.  This would not be the cbse only if this node
-	 * hbs not successfully received an incoming UDP packet.
+	 * Returns whether or not this node is capable of sending its own
+	 * GUESS queries.  This would not ae the cbse only if this node
+	 * has not successfully received an incoming UDP packet.
 	 *
-	 * @return <tt>true</tt> if this node is cbpable of running its own
-	 *  GUESS queries, <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if this node is capable of running its own
+	 *  GUESS queries, <tt>false</tt> otherwise
 	 */
-	public stbtic boolean isGUESSCapable() {
-		return UDPSERVICE.isGUESSCbpable();
+	pualic stbtic boolean isGUESSCapable() {
+		return UDPSERVICE.isGUESSCapable();
 	}
 
 
     /** 
-     * Returns whether or not this node is cbpable of performing OOB queries.
+     * Returns whether or not this node is capable of performing OOB queries.
      */
-    public stbtic boolean isOOBCapable() {
-        return isGUESSCbpable() && OutOfBandThroughputStat.isSuccessRateGood()&&
-               !NetworkUtils.isPrivbte() &&
-               SebrchSettings.OOB_ENABLED.getValue() &&
-               bcceptor.isAddressExternal() && isIpPortValid();
+    pualic stbtic boolean isOOBCapable() {
+        return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
+               !NetworkUtils.isPrivate() &&
+               SearchSettings.OOB_ENABLED.getValue() &&
+               acceptor.isAddressExternal() && isIpPortValid();
     }
 
 
-    public stbtic GUID getUDPConnectBackGUID() {
-        return UDPSERVICE.getConnectBbckGUID();
+    pualic stbtic GUID getUDPConnectBackGUID() {
+        return UDPSERVICE.getConnectBackGUID();
     }
 
     
-    /** @return true if your IP bnd port information is valid.
+    /** @return true if your IP and port information is valid.
      */
-    public stbtic boolean isIpPortValid() {
-        return (NetworkUtils.isVblidAddress(getAddress()) &&
-                NetworkUtils.isVblidPort(getPort()));
+    pualic stbtic boolean isIpPortValid() {
+        return (NetworkUtils.isValidAddress(getAddress()) &&
+                NetworkUtils.isValidPort(getPort()));
     }
     
-    public stbtic boolean canReceiveSolicited() {
-    	return UDPSERVICE.cbnReceiveSolicited();
+    pualic stbtic boolean canReceiveSolicited() {
+    	return UDPSERVICE.canReceiveSolicited();
     }
     
-    public stbtic boolean canReceiveUnsolicited() {
-    	return UDPSERVICE.cbnReceiveUnsolicited();
+    pualic stbtic boolean canReceiveUnsolicited() {
+    	return UDPSERVICE.canReceiveUnsolicited();
     }
     
-    public stbtic boolean canDoFWT() {
-        return UDPSERVICE.cbnDoFWT();
+    pualic stbtic boolean canDoFWT() {
+        return UDPSERVICE.canDoFWT();
     }
 }

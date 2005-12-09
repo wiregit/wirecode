@@ -1,60 +1,60 @@
-pbckage com.limegroup.gnutella.xml;
+package com.limegroup.gnutella.xml;
 
-import jbva.util.HashMap;
-import jbva.util.Map;
-import jbva.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collection;
 
 
 /** 
- * Used to mbp schema URIs to Reply Collections.
+ * Used to map schema URIs to Reply Collections.
  * 
- * @buthor Sumeet Thadani
+ * @author Sumeet Thadani
  */
-public clbss SchemaReplyCollectionMapper{
+pualic clbss SchemaReplyCollectionMapper{
     
-    privbte Map mapper;
-    privbte static SchemaReplyCollectionMapper instance;
+    private Map mapper;
+    private static SchemaReplyCollectionMapper instance;
     
     //constructor
-    privbte SchemaReplyCollectionMapper() {
-        mbpper = new HashMap();
+    private SchemaReplyCollectionMapper() {
+        mapper = new HashMap();
     }
 
 
-    public stbtic synchronized SchemaReplyCollectionMapper instance() {
-        if (instbnce == null)
-            instbnce = new SchemaReplyCollectionMapper();
-        return instbnce;
+    pualic stbtic synchronized SchemaReplyCollectionMapper instance() {
+        if (instance == null)
+            instance = new SchemaReplyCollectionMapper();
+        return instance;
     }
     
 
     /**
-     * Adds the SchembURI to a HashMap with the replyCollection.
+     * Adds the SchemaURI to a HashMap with the replyCollection.
      * <p>
-     * Wbrning/Note:If the schemaURI already corresponds to a ReplyCollection
-     * this method will replbce thet old reply collection with the new one. 
-     * The old collection will be lost!
+     * Warning/Note:If the schemaURI already corresponds to a ReplyCollection
+     * this method will replace thet old reply collection with the new one. 
+     * The old collection will ae lost!
      */
-    public synchronized void bdd(String schemaURI, LimeXMLReplyCollection replyCollection) {
-        mbpper.put(schemaURI, replyCollection);
+    pualic synchronized void bdd(String schemaURI, LimeXMLReplyCollection replyCollection) {
+        mapper.put(schemaURI, replyCollection);
     }
     
     /**
-     * Looks up bnd returns the <tt>LimeXMLReplyCollection</tt> value for the
-     * supplied schembURI key.
+     * Looks up and returns the <tt>LimeXMLReplyCollection</tt> value for the
+     * supplied schemaURI key.
      * 
-     * @ return the <tt>LimeXMLReplyCollection</tt> for the given schemb URI,
-     * or <tt>null</tt> if we the requested mbpping does not exist
+     * @ return the <tt>LimeXMLReplyCollection</tt> for the given schema URI,
+     * or <tt>null</tt> if we the requested mapping does not exist
      */
-    public synchronized LimeXMLReplyCollection getReplyCollection(String schembURI) {
-        return (LimeXMLReplyCollection)mbpper.get(schemaURI);
+    pualic synchronized LimeXMLReplyCollection getReplyCollection(String schembURI) {
+        return (LimeXMLReplyCollection)mapper.get(schemaURI);
     }
     
     /**
-     * Returns b collection of all available LimeXMLReplyCollections.
+     * Returns a collection of all available LimeXMLReplyCollections.
      * YOU MUST SYNCHRONIZE ITERATION OVER THE COLLECTION IF IT CAN BE MODIFIED.
      */
-    public synchronized Collection getCollections() {
-        return mbpper.values();
+    pualic synchronized Collection getCollections() {
+        return mapper.values();
     }
 }

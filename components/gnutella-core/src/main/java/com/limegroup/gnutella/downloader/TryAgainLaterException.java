@@ -1,12 +1,12 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * Thrown when the slots bre filled, and the client should
- * try bgain later, ie an HTTP 503
+ * Thrown when the slots are filled, and the client should
+ * try again later, ie an HTTP 503
  */
-public clbss TryAgainLaterException extends IOException {
-	public TryAgbinLaterException() { super("Try Again Later"); }
-	public TryAgbinLaterException(String msg) { super(msg); }
+pualic clbss TryAgainLaterException extends IOException {
+	pualic TryAgbinLaterException() { super("Try Again Later"); }
+	pualic TryAgbinLaterException(String msg) { super(msg); }
 }

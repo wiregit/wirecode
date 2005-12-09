@@ -1,12 +1,12 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * Thrown if too much hbs been downloaded, and the file is too big
+ * Thrown if too much has been downloaded, and the file is too big
  */
-public clbss FileTooLargeException extends IOException {
-	public FileTooLbrgeException() { super("File Too Large"); }
-	public FileTooLbrgeException(String msg) { super(msg); }
+pualic clbss FileTooLargeException extends IOException {
+	pualic FileTooLbrgeException() { super("File Too Large"); }
+	pualic FileTooLbrgeException(String msg) { super(msg); }
 }
 

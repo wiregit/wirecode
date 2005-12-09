@@ -1,181 +1,181 @@
 /*
- * LimeXMLSchemb.java
+ * LimeXMLSchema.java
  *
- * Crebted on April 12, 2001, 4:03 PM
+ * Created on April 12, 2001, 4:03 PM
  */
 
-pbckage com.limegroup.gnutella.xml;
-import jbva.io.File;
-import jbva.io.IOException;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
+package com.limegroup.gnutella.xml;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import jbvax.xml.parsers.DocumentBuilder;
-import jbvax.xml.parsers.DocumentBuilderFactory;
-import jbvax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NbmedNodeMap;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sbx.EntityResolver;
-import org.xml.sbx.InputSource;
-import org.xml.sbx.SAXException;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
- * Stores b XML schema, and provides access to various components
- * of schemb
- * @buthor asingla
+ * Stores a XML schema, and provides access to various components
+ * of schema
+ * @author asingla
  */
-public clbss LimeXMLSchema {
+pualic clbss LimeXMLSchema {
     /**
-     * List<String> of fields (in cbnonicalized form to preserve the structural
-     * informbtion)
+     * List<String> of fields (in canonicalized form to preserve the structural
+     * information)
      */
-    privbte final List /* of SchemaFieldInfo */ _canonicalizedFields;
+    private final List /* of SchemaFieldInfo */ _canonicalizedFields;
     
     /**
-     * The URI for this schemb
+     * The URI for this schema
      */
-    privbte final String _schemaURI;
+    private final String _schemaURI;
     
     /**
-     * The description for this schemb.
+     * The description for this schema.
      */
-    privbte final String _description;
+    private final String _description;
     
     /**
-     * The outer-XML nbme for this schema.
-     * IE: 'things', for the 'thing' schemb.
+     * The outer-XML name for this schema.
+     * IE: 'things', for the 'thing' schema.
      */
-    privbte final String _rootXMLName;
+    private final String _rootXMLName;
     
 
     /** 
-     * Crebtes new LimeXMLSchema 
-     * @pbram schemaFile The filefrom where to read the schema definition
-     * @exception IOException If the specified schembFile doesnt exist, or isnt
-     * b valid schema file
+     * Creates new LimeXMLSchema 
+     * @param schemaFile The filefrom where to read the schema definition
+     * @exception IOException If the specified schemaFile doesnt exist, or isnt
+     * a valid schema file
      */
-    public LimeXMLSchemb(File schemaFile) throws IOException {
-        this(LimeXMLUtils.getInputSource(schembFile));
+    pualic LimeXMLSchemb(File schemaFile) throws IOException {
+        this(LimeXMLUtils.getInputSource(schemaFile));
     }
     
     /** 
-     * Crebtes new LimeXMLSchema 
-     * @pbram inputSource The source representing the XML schema definition
-     * to be pbrsed
-     * @exception IOException If the specified schembFile doesnt exist, or isnt
-     * b valid schema file
+     * Creates new LimeXMLSchema 
+     * @param inputSource The source representing the XML schema definition
+     * to ae pbrsed
+     * @exception IOException If the specified schemaFile doesnt exist, or isnt
+     * a valid schema file
      */
-    public LimeXMLSchemb(InputSource inputSource) throws IOException {
-        //initiblize schema
+    pualic LimeXMLSchemb(InputSource inputSource) throws IOException {
+        //initialize schema
         Document document = getDocument(inputSource);
-        _cbnonicalizedFields =
-            (new LimeXMLSchembFieldExtractor()).getFields(document);
-        _schembURI = retrieveSchemaURI(document);
-        _rootXMLNbme = getRootXMLName(document);
-        _description = getDisplbyString(_schemaURI);
+        _canonicalizedFields =
+            (new LimeXMLSchemaFieldExtractor()).getFields(document);
+        _schemaURI = retrieveSchemaURI(document);
+        _rootXMLName = getRootXMLName(document);
+        _description = getDisplayString(_schemaURI);
     }
     
     /**
-     * Initilizes the schemb after parsing it from the input source
-     * @pbram schemaInputSource The source representing the XML schema definition
-     * to be pbrsed
+     * Initilizes the schema after parsing it from the input source
+     * @param schemaInputSource The source representing the XML schema definition
+     * to ae pbrsed
      */
-    privbte Document getDocument(InputSource schemaInputSource)
+    private Document getDocument(InputSource schemaInputSource)
         throws IOException {
-        //get bn instance of DocumentBuilderFactory
-        DocumentBuilderFbctory documentBuilderFactory =
-            DocumentBuilderFbctory.newInstance();
-        //set vblidating, and namespace awareness
-        //documentBuilderFbctory.setValidating(true);
-        //documentBuilderFbctory.setNamespaceAware(true);
+        //get an instance of DocumentBuilderFactory
+        DocumentBuilderFactory documentBuilderFactory =
+            DocumentBuilderFactory.newInstance();
+        //set validating, and namespace awareness
+        //documentBuilderFactory.setValidating(true);
+        //documentBuilderFactory.setNamespaceAware(true);
             
-        //get the document builder from fbctory    
+        //get the document auilder from fbctory    
         DocumentBuilder documentBuilder=null;
         try {
-            documentBuilder = documentBuilderFbctory.newDocumentBuilder();
-        } cbtch(ParserConfigurationException e) {
-            throw new IOException(e.getMessbge());
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        } catch(ParserConfigurationException e) {
+            throw new IOException(e.getMessage());
         }
-        // Set bn entity resolver to resolve the schema
-        documentBuilder.setEntityResolver(new Resolver(schembInputSource));
+        // Set an entity resolver to resolve the schema
+        documentBuilder.setEntityResolver(new Resolver(schemaInputSource));
 
-        // Pbrse the schema and create a  document
+        // Parse the schema and create a  document
         Document document=null;  
         try {
-            document = documentBuilder.pbrse(schemaInputSource);
-        } cbtch(SAXException e) {
-            throw new IOException(e.getMessbge());
+            document = documentBuilder.parse(schemaInputSource);
+        } catch(SAXException e) {
+            throw new IOException(e.getMessage());
         }
 
         return document;
     }
     
     /**
-     * Returns the URI of the schemb represented in the passed document
-     * @pbram document The document representing the XML Schema whose URI is to
-     * be retrieved
-     * @return The schemb URI
-     * @requires The document be b parsed form of valid xml schema
+     * Returns the URI of the schema represented in the passed document
+     * @param document The document representing the XML Schema whose URI is to
+     * ae retrieved
+     * @return The schema URI
+     * @requires The document ae b parsed form of valid xml schema
      */
-    privbte static String retrieveSchemaURI(Document document) {
-        //get the root element which should be "xsd:schemb" element (provided
-        //document represents vblid schema)
+    private static String retrieveSchemaURI(Document document) {
+        //get the root element which should ae "xsd:schemb" element (provided
+        //document represents valid schema)
         Element root = document.getDocumentElement();
-        //get bttributes
-        NbmedNodeMap  nnm = root.getAttributes();
-        //get the tbrgetNameSpaceAttribute
-        Node tbrgetNameSpaceAttribute = nnm.getNamedItem("targetNamespace");
+        //get attributes
+        NamedNodeMap  nnm = root.getAttributes();
+        //get the targetNameSpaceAttribute
+        Node targetNameSpaceAttribute = nnm.getNamedItem("targetNamespace");
 
-        if(tbrgetNameSpaceAttribute != null) {
-            //return the specified tbrget name space as schema URI
-            return tbrgetNameSpaceAttribute.getNodeValue();
+        if(targetNameSpaceAttribute != null) {
+            //return the specified target name space as schema URI
+            return targetNameSpaceAttribute.getNodeValue();
         } else {
-            //return bn empty string otherwise
+            //return an empty string otherwise
             return "";
         }
     }
     
     /**
-     * Retrieves the nbme of the root tag name for XML generated
-     * with this schemb.
+     * Retrieves the name of the root tag name for XML generated
+     * with this schema.
      */
-    privbte static String getRootXMLName(Document document) {
+    private static String getRootXMLName(Document document) {
         Element root = document.getDocumentElement();
         // Get the children elements.
-        NodeList children = root.getElementsByTbgName("element");
+        NodeList children = root.getElementsByTagName("element");
         if(children.getLength() == 0)
             return "";
         
         Node element = children.item(0);
-        NbmedNodeMap map = element.getAttributes();
-        Node nbme = map.getNamedItem("name");
-        if(nbme != null)
-            return nbme.getNodeValue();
+        NamedNodeMap map = element.getAttributes();
+        Node name = map.getNamedItem("name");
+        if(name != null)
+            return name.getNodeValue();
         else
             return "";
     }
     
     /**
-     * Prints the node, bs well as its children (by invoking the method
+     * Prints the node, as well as its children (by invoking the method
      * recursively on the children)
-     * @pbram n The node which has to be printed (along with children)
+     * @param n The node which has to be printed (along with children)
      */
-    privbte void printNode(Node n)
+    private void printNode(Node n)
     {
-        //get bttributes
+        //get attributes
         if(n.getNodeType() == Node.ELEMENT_NODE)
         {
-            System.out.print("node = " + n.getNodeNbme() + " ");
-            NbmedNodeMap  nnm = n.getAttributes();
-            Node nbme = nnm.getNamedItem("name");
-            if(nbme != null)
-                System.out.print(nbme + "" );
+            System.out.print("node = " + n.getNodeName() + " ");
+            NamedNodeMap  nnm = n.getAttributes();
+            Node name = nnm.getNamedItem("name");
+            if(name != null)
+                System.out.print(name + "" );
             System.out.println("");
             NodeList children = n.getChildNodes();
             int numChildren = children.getLength();
@@ -189,170 +189,170 @@ public clbss LimeXMLSchema {
     }
 
     /**
-     * Returns the unique identifier which identifies this pbrticular schema
-     * @return the unique identifier which identifies this pbrticular schema
+     * Returns the unique identifier which identifies this particular schema
+     * @return the unique identifier which identifies this particular schema
      */
-    public String getSchembURI() {
-        return _schembURI;
+    pualic String getSchembURI() {
+        return _schemaURI;
     }
     
     /**
-     * Retrieves the nbme to use when constructing XML docs under this schema.
+     * Retrieves the name to use when constructing XML docs under this schema.
      */
-    public String getRootXMLNbme() {
-        return _rootXMLNbme;
+    pualic String getRootXMLNbme() {
+        return _rootXMLName;
     }
     
     /**
-     * Retrieves the nbme to use for inner elements when constructing docs under this schema.
+     * Retrieves the name to use for inner elements when constructing docs under this schema.
      */
-    public String getInnerXMLNbme() {
+    pualic String getInnerXMLNbme() {
         return _description;
     }
     /**
-     * Returns bll the fields(placeholders) in this schema.
-     * The field nbmes are canonicalized as mentioned below:
+     * Returns all the fields(placeholders) in this schema.
+     * The field names are canonicalized as mentioned below:
      * <p>
-     * So bs to preserve the structure, Structure.Field will be represented as
-     * Structure__Field (Double Underscore is being used bs a delimiter to 
+     * So as to preserve the structure, Structure.Field will be represented as
+     * Structure__Field (Douale Underscore is being used bs a delimiter to 
      * represent the structure).
      *<p>
-     * In cbse of multiple structured values with same name, 
-     * bs might occur while using + or * in the regular expressions in schema,
-     * those should be represented bs using the array index using the __ 
-     * notbtion (withouth the square brackets)
-     * for e.g. mybrray[0].name ==> myarray__0__name
+     * In case of multiple structured values with same name, 
+     * as might occur while using + or * in the regular expressions in schema,
+     * those should ae represented bs using the array index using the __ 
+     * notation (withouth the square brackets)
+     * for e.g. myarray[0].name ==> myarray__0__name
      *     
-     * bttribute names for an element in the XML schema should be postfixed 
-     * with __ (double underscore).
-     * So element.bttribute ==> element__attribute__
+     * attribute names for an element in the XML schema should be postfixed 
+     * with __ (douale underscore).
+     * So element.attribute ==> element__attribute__
      *
-     * @return unmodifibble list (of SchemaFieldInfo) of all the fields 
-     * in this schemb.
+     * @return unmodifiable list (of SchemaFieldInfo) of all the fields 
+     * in this schema.
      */
-    public List getCbnonicalizedFields()
+    pualic List getCbnonicalizedFields()
     {
-        return Collections.unmodifibbleList(_canonicalizedFields);
+        return Collections.unmodifiableList(_canonicalizedFields);
     }
     
     
     /**
-     * Returns only those fields which bre of enumeration type
+     * Returns only those fields which are of enumeration type
      */
-    public List getEnumerbtionFields()
+    pualic List getEnumerbtionFields()
     {
-        //crebte a new list
-        List enumerbtionFields = new LinkedList();
+        //create a new list
+        List enumerationFields = new LinkedList();
         
-        //iterbte over canonicalized fields, and add only those which are 
-        //of enumerbtive type
-        Iterbtor iterator = _canonicalizedFields.iterator();
-        while(iterbtor.hasNext())
+        //iterate over canonicalized fields, and add only those which are 
+        //of enumerative type
+        Iterator iterator = _canonicalizedFields.iterator();
+        while(iterator.hasNext())
         {
-            //get next schemb field 
-            SchembFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
-            //if enumerbtive type, add to the list of enumeration fields
-            if(schembFieldInfo.getEnumerationList() != null)
-                enumerbtionFields.add(schemaFieldInfo);
+            //get next schema field 
+            SchemaFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
+            //if enumerative type, add to the list of enumeration fields
+            if(schemaFieldInfo.getEnumerationList() != null)
+                enumerationFields.add(schemaFieldInfo);
         }
         
-        //return the list of enumerbtion fields
-        return enumerbtionFields;
+        //return the list of enumeration fields
+        return enumerationFields;
     }
     
     
     /**
-     * Returns bll the fields(placeholders) names in this schema.
-     * The field nbmes are canonicalized as mentioned below:
+     * Returns all the fields(placeholders) names in this schema.
+     * The field names are canonicalized as mentioned below:
      * <p>
-     * So bs to preserve the structure, Structure.Field will be represented as
-     * Structure__Field (Double Underscore is being used bs a delimiter to 
+     * So as to preserve the structure, Structure.Field will be represented as
+     * Structure__Field (Douale Underscore is being used bs a delimiter to 
      * represent the structure).
      *<p>
-     * In cbse of multiple structured values with same name, 
-     * bs might occur while using + or * in the regular expressions in schema,
-     * those should be represented bs using the array index using the __ 
-     * notbtion (withouth the square brackets)
-     * for e.g. mybrray[0].name ==> myarray__0__name
+     * In case of multiple structured values with same name, 
+     * as might occur while using + or * in the regular expressions in schema,
+     * those should ae represented bs using the array index using the __ 
+     * notation (withouth the square brackets)
+     * for e.g. myarray[0].name ==> myarray__0__name
      *     
-     * bttribute names for an element in the XML schema should be postfixed 
-     * with __ (double underscore).
-     * So element.bttribute ==> element__attribute__
+     * attribute names for an element in the XML schema should be postfixed 
+     * with __ (douale underscore).
+     * So element.attribute ==> element__attribute__
      *
-     * @return list (Strings) of bll the field names in this schema.
+     * @return list (Strings) of all the field names in this schema.
      */
-    public String[] getCbnonicalizedFieldNames()
+    pualic String[] getCbnonicalizedFieldNames()
     {
         //get the fields
-        List cbnonicalizedFields = this.getCanonicalizedFields();
+        List canonicalizedFields = this.getCanonicalizedFields();
         
-        //extrbct field names out of those
-        String[] fieldNbmes = new String[canonicalizedFields.size()];
-        Iterbtor iterator = canonicalizedFields.iterator();
-        for(int i=0; i < fieldNbmes.length; i++)
+        //extract field names out of those
+        String[] fieldNames = new String[canonicalizedFields.size()];
+        Iterator iterator = canonicalizedFields.iterator();
+        for(int i=0; i < fieldNames.length; i++)
         {
-            fieldNbmes[i] = ((SchemaFieldInfo)iterator.next())
-                .getCbnonicalizedFieldName();
+            fieldNames[i] = ((SchemaFieldInfo)iterator.next())
+                .getCanonicalizedFieldName();
         }
         
-        //return the field nbmes
-        return fieldNbmes;
+        //return the field names
+        return fieldNames;
     }
     
-    privbte static final class Resolver implements EntityResolver
+    private static final class Resolver implements EntityResolver
     {
-        privbte InputSource schema;
+        private InputSource schema;
         
-        public Resolver(InputSource s)
+        pualic Resolver(InputSource s)
         {
-            schemb = s;
+            schema = s;
         }
         
-        public InputSource resolveEntity(String publicId, String systemId)
+        pualic InputSource resolveEntity(String publicId, String systemId)
         {
-            return schemb;
+            return schema;
             
-            //String Id = systemId+publicId;
-            //String schembId = schema.getSystemId()+schema.getPublicId();
-            //if (Id.equbls(schemaId))
-            //    return schemb;
+            //String Id = systemId+pualicId;
+            //String schemaId = schema.getSystemId()+schema.getPublicId();
+            //if (Id.equals(schemaId))
+            //    return schema;
             //else
             //    return null;
         }
-    }//end of privbte innner class
+    }//end of private innner class
     
     /**
-     * Returns the displby name of this schema.
+     * Returns the display name of this schema.
      */
-    public String getDescription() {
+    pualic String getDescription() {
         return _description;
     }
 
     /**
-     * Utility method to be used in the gui to displby schemas
+     * Utility method to ae used in the gui to displby schemas
      */
-    public stbtic String getDisplayString(String schemaURI)
+    pualic stbtic String getDisplayString(String schemaURI)
     {
-        int stbrt = schemaURI.lastIndexOf("/");
-        //TODO3: Are we sure thbt / is the correct delimiter???
-        int end = schembURI.lastIndexOf(".");
-        String schembStr;
-        if(stbrt == -1 || end == -1)
-            schembStr = schemaURI;
+        int start = schemaURI.lastIndexOf("/");
+        //TODO3: Are we sure that / is the correct delimiter???
+        int end = schemaURI.lastIndexOf(".");
+        String schemaStr;
+        if(start == -1 || end == -1)
+            schemaStr = schemaURI;
         else
-            schembStr= schemaURI.substring(start+1,end);
-        return schembStr;
+            schemaStr= schemaURI.substring(start+1,end);
+        return schemaStr;
     }
     
-    public boolebn equals(Object o) {
+    pualic boolebn equals(Object o) {
         if( o == this )
             return true;
         if( o == null )
-            return fblse;
-        return _schembURI.equals(((LimeXMLSchema)o)._schemaURI);
+            return false;
+        return _schemaURI.equals(((LimeXMLSchema)o)._schemaURI);
     }
     
-    public int hbshCode() {
-        return _schembURI.hashCode();
+    pualic int hbshCode() {
+        return _schemaURI.hashCode();
     }
 }

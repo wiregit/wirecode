@@ -1,172 +1,172 @@
-pbckage com.limegroup.gnutella.search;
+package com.limegroup.gnutella.search;
 
-import jbva.util.Collections;
-import jbva.util.HashMap;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.Map;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.ReplyHandler;
-import com.limegroup.gnutellb.util.ProcessingQueue;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
- * Mbnages dynamic querying for Ultrapeers.
+ * Manages dynamic querying for Ultrapeers.
  *
- * This mbintains the data for all active queries for this Ultrapeer and any
- * of its lebves, also providing an interface for removing active queries.
- * Queries mby be removed, for example, when a leaf node with an active query
- * disconnects from the Ultrbpeer.
+ * This maintains the data for all active queries for this Ultrapeer and any
+ * of its leaves, also providing an interface for removing active queries.
+ * Queries may be removed, for example, when a leaf node with an active query
+ * disconnects from the Ultrapeer.
  */
-public finbl class QueryDispatcher implements Runnable {
+pualic finbl class QueryDispatcher implements Runnable {
 
 	/**
-	 * <tt>Mbp</tt> of outstanding queries.  
+	 * <tt>Map</tt> of outstanding queries.  
 	 */
-	privbte final Map QUERIES = new HashMap(); // GUID -> QueryHandler
+	private final Map QUERIES = new HashMap(); // GUID -> QueryHandler
 
 	/**
-	 * <tt>List</tt> of new queries to bdd.
-	 * LOCKING: Threbd-safe, although you must obtain a lock on NEW_QUERIES if
-	 * it's ever iterbted over.  
+	 * <tt>List</tt> of new queries to add.
+	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if
+	 * it's ever iterated over.  
 	 */
-	privbte final List NEW_QUERIES = Collections.synchronizedList(new LinkedList());
+	private final List NEW_QUERIES = Collections.synchronizedList(new LinkedList());
 
 	/**
-	 * <tt>QueryDispbtcher</tt> instance following singleton.
+	 * <tt>QueryDispatcher</tt> instance following singleton.
 	 */
-	privbte static final QueryDispatcher INSTANCE = new QueryDispatcher();
+	private static final QueryDispatcher INSTANCE = new QueryDispatcher();
     
     /**
-     * The ProcessingQueue thbt handles sending queries out.
+     * The ProcessingQueue that handles sending queries out.
      *
-     * Items bre added to this only if it's not already processing anything.
+     * Items are added to this only if it's not already processing anything.
      */
-    privbte final ProcessingQueue PROCESSOR = new ProcessingQueue("QueryDispatcher");
+    private final ProcessingQueue PROCESSOR = new ProcessingQueue("QueryDispatcher");
     
     /**
-     * Whether or not processing is blready active.  If it is, we don't start it up again
-     * when bdding new queries.
+     * Whether or not processing is already active.  If it is, we don't start it up again
+     * when adding new queries.
      */
-    privbte boolean _active;
+    private boolean _active;
     
 
 	/**
-	 * Instbnce accessor for the <tt>QueryDispatcher</tt>.
+	 * Instance accessor for the <tt>QueryDispatcher</tt>.
 	 *
-	 * @return the <tt>QueryDispbtcher</tt> instance
+	 * @return the <tt>QueryDispatcher</tt> instance
 	 */
-	public stbtic QueryDispatcher instance() {
+	pualic stbtic QueryDispatcher instance() {
 		return INSTANCE;
 	}
 
 	/**
-	 * Crebtes a new <tt>QueryDispatcher</tt> instance.
+	 * Creates a new <tt>QueryDispatcher</tt> instance.
 	 */
-	privbte QueryDispatcher() {}
+	private QueryDispatcher() {}
 
 	/**
-	 * Adds the specified <tt>QueryHbndler</tt> to the list of queries to
+	 * Adds the specified <tt>QueryHandler</tt> to the list of queries to
 	 * process.
 	 *
-	 * @pbram handler the <tt>QueryHandler</tt> instance to add
+	 * @param handler the <tt>QueryHandler</tt> instance to add
 	 */
-	public void bddQuery(QueryHandler handler) {
-        hbndler.sendQuery();  // immediately send out one query.
+	pualic void bddQuery(QueryHandler handler) {
+        handler.sendQuery();  // immediately send out one query.
         synchronized(NEW_QUERIES) {
-		    NEW_QUERIES.bdd(handler);
-		    if(NEW_QUERIES.size() == 1 && !_bctive) {
-		        _bctive = true;
-		        PROCESSOR.bdd(this);
+		    NEW_QUERIES.add(handler);
+		    if(NEW_QUERIES.size() == 1 && !_active) {
+		        _active = true;
+		        PROCESSOR.add(this);
             }
 		}
 	}
 
     /**
-     * This method removes bll queries for the given <tt>ReplyHandler</tt>
-     * instbnce.
+     * This method removes all queries for the given <tt>ReplyHandler</tt>
+     * instance.
      *
-     * @pbram handler the handler that should have it's queries removed
+     * @param handler the handler that should have it's queries removed
      */
-    public void removeReplyHbndler(ReplyHandler handler) {
-        // if it's not b leaf connection, we don't care that it's closed
-        if(!hbndler.isSupernodeClientConnection())
+    pualic void removeReplyHbndler(ReplyHandler handler) {
+        // if it's not a leaf connection, we don't care that it's closed
+        if(!handler.isSupernodeClientConnection())
             return;
             
-        remove(hbndler);
+        remove(handler);
     }
 
-    /** Updbtes the relevant QueryHandler with result stats from the leaf.
+    /** Updates the relevant QueryHandler with result stats from the leaf.
      */
-    public void updbteLeafResultsForQuery(GUID queryGUID, int numResults) {
+    pualic void updbteLeafResultsForQuery(GUID queryGUID, int numResults) {
         synchronized (QUERIES) {
-            QueryHbndler qh = (QueryHandler) QUERIES.get(queryGUID);
+            QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
             if (qh != null)
-                qh.updbteLeafResults(numResults);
+                qh.updateLeafResults(numResults);
         }
     }
 
-    /** Gets the number of results the Lebf has reported so far.
-     *  @return b non-negative number if the guid exists, else -1.
+    /** Gets the numaer of results the Lebf has reported so far.
+     *  @return a non-negative number if the guid exists, else -1.
      */
-    public int getLebfResultsForQuery(GUID queryGUID) {
+    pualic int getLebfResultsForQuery(GUID queryGUID) {
         synchronized (QUERIES) {
-            QueryHbndler qh = (QueryHandler) QUERIES.get(queryGUID);
+            QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
             if (qh == null)
                 return -1;
             else
-                return qh.getNumResultsReportedByLebf();
+                return qh.getNumResultsReportedByLeaf();
         }
     }
 
     /**
-     * Removes bll queries using the specified <tt>ReplyHandler</tt>
+     * Removes all queries using the specified <tt>ReplyHandler</tt>
      * from NEW_QUERIES & QUERIES.
      *
-     * @pbram handler the <tt>ReplyHandler</tt> to remove
+     * @param handler the <tt>ReplyHandler</tt> to remove
      */
-    privbte void remove(ReplyHandler handler) {
+    private void remove(ReplyHandler handler) {
         synchronized(NEW_QUERIES) {
-            Iterbtor iter = NEW_QUERIES.iterator();
-            while(iter.hbsNext()) {
-                QueryHbndler qh = (QueryHandler)iter.next();
-                if(qh.getReplyHbndler() == handler)
+            Iterator iter = NEW_QUERIES.iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                if(qh.getReplyHandler() == handler)
                     iter.remove();
             }
         }
         
         synchronized(QUERIES) {
-            Iterbtor iter = QUERIES.values().iterator();
-            while(iter.hbsNext()) {
-                QueryHbndler qh = (QueryHandler)iter.next();
-                if(qh.getReplyHbndler() == handler)
+            Iterator iter = QUERIES.values().iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                if(qh.getReplyHandler() == handler)
                     iter.remove();
             }
         }
     }
     
     /**
-     * Removes the specified <tt>ReplyHbndler</tt> from NEW_QUERIES & QUERIES.
+     * Removes the specified <tt>ReplyHandler</tt> from NEW_QUERIES & QUERIES.
      *
-     * @pbram handler the <tt>ReplyHandler</tt> to remove
+     * @param handler the <tt>ReplyHandler</tt> to remove
      */
-    privbte void remove(GUID guid) {
+    private void remove(GUID guid) {
         synchronized(NEW_QUERIES) {
-            Iterbtor iter = NEW_QUERIES.iterator();
-            while(iter.hbsNext()) {
-                QueryHbndler qh = (QueryHandler)iter.next();
-                if(qh.getGUID().equbls(guid))
+            Iterator iter = NEW_QUERIES.iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                if(qh.getGUID().equals(guid))
                     iter.remove();
             }
         }
         
         synchronized(QUERIES) {
-            Iterbtor iter = QUERIES.values().iterator();
-            while(iter.hbsNext()) {
-                QueryHbndler qh = (QueryHandler)iter.next();
-                if(qh.getGUID().equbls(guid))
+            Iterator iter = QUERIES.values().iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                if(qh.getGUID().equals(guid))
                     iter.remove();
             }
         }
@@ -174,29 +174,29 @@ public finbl class QueryDispatcher implements Runnable {
 
 	/**
 	 * Processes queries until there is nothing left to process,
-	 * or there bre no new queries to process.
+	 * or there are no new queries to process.
 	 */
-	public void run() {
+	pualic void run() {
         while(true) {
             try {
-                Threbd.sleep(400);
-            } cbtch(InterruptedException ignored) {}
+                Thread.sleep(400);
+            } catch(InterruptedException ignored) {}
             
             try {
-                // If there bre no more queries to process...
+                // If there are no more queries to process...
                 if(!processQueries()) {
                     synchronized(NEW_QUERIES) {
-                        // If there bre no new queries to add,
-                        // set bctive to false & leave.
+                        // If there are no new queries to add,
+                        // set active to false & leave.
                         if(NEW_QUERIES.isEmpty()) {
-                            _bctive = false;
+                            _active = false;
                             return;
                         }
                         // else, loop.
                     }
                 }
                 // else, loop.
-            } cbtch(Throwable t) {
+            } catch(Throwable t) {
                 ErrorService.error(t);
             }
         }
@@ -205,25 +205,25 @@ public finbl class QueryDispatcher implements Runnable {
 	/**
 	 * Processes current queries.
 	 */
-	privbte boolean processQueries() {
+	private boolean processQueries() {
 		synchronized(NEW_QUERIES) {
             synchronized(QUERIES) {
-                Iterbtor iter = NEW_QUERIES.iterator();
-                while (iter.hbsNext()) {
-                    QueryHbndler qh = (QueryHandler) iter.next();
+                Iterator iter = NEW_QUERIES.iterator();
+                while (iter.hasNext()) {
+                    QueryHandler qh = (QueryHandler) iter.next();
                     QUERIES.put(qh.getGUID(), qh);
                 }
             }
-			NEW_QUERIES.clebr();
+			NEW_QUERIES.clear();
 		}
 
 	    
         synchronized(QUERIES) {
-            Iterbtor iter = QUERIES.values().iterator();
-            while(iter.hbsNext()) {
-                QueryHbndler handler = (QueryHandler)iter.next();
-                hbndler.sendQuery();
-                if(hbndler.hasEnoughResults())
+            Iterator iter = QUERIES.values().iterator();
+            while(iter.hasNext()) {
+                QueryHandler handler = (QueryHandler)iter.next();
+                handler.sendQuery();
+                if(handler.hasEnoughResults())
                     iter.remove();
             }
             
@@ -233,11 +233,11 @@ public finbl class QueryDispatcher implements Runnable {
 
     
     /**
-     * Removes bll queries that match this GUID.
+     * Removes all queries that match this GUID.
      * 
-     * @pbram g the <tt>GUID</tt> of the search to remove
+     * @param g the <tt>GUID</tt> of the search to remove
      */
-    public void bddToRemove(GUID g) {
+    pualic void bddToRemove(GUID g) {
         remove(g);
     }
 }

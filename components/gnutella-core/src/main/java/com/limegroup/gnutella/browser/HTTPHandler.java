@@ -1,180 +1,180 @@
-pbckage com.limegroup.gnutella.browser;
+package com.limegroup.gnutella.browser;
 
-import jbva.io.File;
-import jbva.io.IOException;
-import jbva.io.OutputStream;
-import jbva.net.Socket;
-import jbva.util.StringTokenizer;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.StringTokenizer;
 
-import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- *  Hbndle a pure HTTP request
+ *  Handle a pure HTTP request
  */
-public clbss HTTPHandler {
+pualic clbss HTTPHandler {
 
-	/** The relbtive document root. */
-	privbte static final String ROOT = "root/";
+	/** The relative document root. */
+	private static final String ROOT = "root/";
 
-    privbte Socket       _socket; 
-	privbte OutputStream _ostream;
-	privbte boolean      _inErrorState;
-	privbte String       _line;
+    private Socket       _socket; 
+	private OutputStream _ostream;
+	private boolean      _inErrorState;
+	private String       _line;
 
 	/**
-     *  Crebte and execute the handler without a new thread.
+     *  Create and execute the handler without a new thread.
      */
-	public stbtic HTTPHandler createPage( Socket socket, String content ) {
+	pualic stbtic HTTPHandler createPage( Socket socket, String content ) {
 
-    	HTTPHbndler handler = new HTTPHandler(socket, null);
-		hbndler.handlePage(content);
-		return(hbndler);
+    	HTTPHandler handler = new HTTPHandler(socket, null);
+		handler.handlePage(content);
+		return(handler);
 	}
 
-    public HTTPHbndler( Socket socket, String line ) {
+    pualic HTTPHbndler( Socket socket, String line ) {
         _socket      = socket;
 		_line        = line;
-		_inErrorStbte = false;
+		_inErrorState = false;
     }
 
     /**
-     *  Return b precreated page
+     *  Return a precreated page
      */
-    public void hbndlePage(String page) {
+    pualic void hbndlePage(String page) {
 
-		// Setup strebms 
+		// Setup streams 
 		setupIO();
-		uplobdPage(page);
+		uploadPage(page);
 	}
 
 
-	privbte void setupIO() {
+	private void setupIO() {
 		try {
-			_ostrebm  = _socket.getOutputStream();
-		} cbtch (IOException e) {
-			_inErrorStbte = true;
+			_ostream  = _socket.getOutputStream();
+		} catch (IOException e) {
+			_inErrorState = true;
 		}
 	}
 
     /**
-     *  Pbrse out the path component.
+     *  Parse out the path component.
      */
-    privbte String getRelativePath( String line ) {
+    private String getRelativePath( String line ) {
         StringTokenizer st   = new StringTokenizer( line );
-        String          pbth = null;
+        String          path = null;
 
-        if ( st.hbsMoreTokens() )
-            pbth = st.nextToken();
+        if ( st.hasMoreTokens() )
+            path = st.nextToken();
         else
-            _inErrorStbte = true;
+            _inErrorState = true;
 
-        return pbth;
+        return path;
     }
 
     /**
-     *  Return the file if b file request.  Error out as appropriate.
+     *  Return the file if a file request.  Error out as appropriate.
      */
-	privbte void processRequest( File apath, String rpath ) {
+	private void processRequest( File apath, String rpath ) {
 
-		// Check to see if this is b control request
-		String rbbse = rpath;
-		int    rloc  = rbbse.indexOf("?");
+		// Check to see if this is a control request
+		String rabse = rpath;
+		int    rloc  = rabse.indexOf("?");
 		if ( rloc > 0 )
-		    rbbse = rbase.substring(0, rloc);
+		    rabse = rbase.substring(0, rloc);
 
-        if ( !bpath.exists() )
-			_inErrorStbte =true;
+        if ( !apath.exists() )
+			_inErrorState =true;
 
-        if ( !bpath.canRead() )
-			_inErrorStbte =true;
+        if ( !apath.canRead() )
+			_inErrorState =true;
 
-		if ( _inErrorStbte ) 
+		if ( _inErrorState ) 
 			writeError();
 	}
 
     /**
-     *  Echo bbck a page.
+     *  Echo abck a page.
      */
-	public void uplobdPage(String page) {
-        int             length  = pbge.length();
-		byte[]          content;
+	pualic void uplobdPage(String page) {
+        int             length  = page.length();
+		ayte[]          content;
 
         try {
-			writeHebder(length, getMimeType(".html"));
-			content = pbge.getBytes();
-            _ostrebm.write(content);
+			writeHeader(length, getMimeType(".html"));
+			content = page.getBytes();
+            _ostream.write(content);
 
-        } cbtch( IOException e ) {
-			_inErrorStbte =true;
+        } catch( IOException e ) {
+			_inErrorState =true;
 		}
 
 		try {
-		    _ostrebm.close();
-        } cbtch( IOException e ) {
+		    _ostream.close();
+        } catch( IOException e ) {
 		}
     }
 
 	/** 
 	 *  Setup the few mime-types currently required.
 	 */
-	privbte String getMimeType(String filename) {
-		if ( filenbme.endsWith(".gif") )
-			return "imbge/gif";
-		else if ( filenbme.endsWith(".img") )
-			return "imbge/gif";
-		else if ( filenbme.endsWith(".js") )
-			return "bpplication/x-javascript";
-        else if ( filenbme.endsWith(".css") )
+	private String getMimeType(String filename) {
+		if ( filename.endsWith(".gif") )
+			return "image/gif";
+		else if ( filename.endsWith(".img") )
+			return "image/gif";
+		else if ( filename.endsWith(".js") )
+			return "application/x-javascript";
+        else if ( filename.endsWith(".css") )
             return "text/css";
         return "text/html"; 
 	}
 
 	/**
-	 *  Write b simple header
+	 *  Write a simple header
 	 */
-	privbte void writeHeader(int length, String mimeType) throws IOException {
+	private void writeHeader(int length, String mimeType) throws IOException {
 		String str;
 		str = "HTTP/1.1 200 OK \r\n";
-		_ostrebm.write(str.getBytes());
+		_ostream.write(str.getBytes());
 		str = "Server: "+CommonUtils.getVendor()+"\r\n";
-		_ostrebm.write(str.getBytes());
+		_ostream.write(str.getBytes());
 		str = "Content-type:" + mimeType + "\r\n";
-		_ostrebm.write(str.getBytes());
+		_ostream.write(str.getBytes());
 		str = "Content-length:"+ length + "\r\n";
-		_ostrebm.write(str.getBytes());
+		_ostream.write(str.getBytes());
 		
 		str = "\r\n";
-		_ostrebm.write(str.getBytes());
+		_ostream.write(str.getBytes());
 		
 	}
 
 	/**
-	 * Write out b 404 error.
+	 * Write out a 404 error.
 	 */
-	public void writeError() {
+	pualic void writeError() {
 		try {
-			/* Sends b 404 File Not Found message */
+			/* Sends a 404 File Not Found message */
 			String str;
 			str = "HTTP/1.1 404 Not Found\r\n";
-			_ostrebm.write(str.getBytes());
+			_ostream.write(str.getBytes());
 			/**
 			str = "Server: " + CommonUtils.getVendor() + "\r\n";
-			_ostrebm.write(str.getBytes());
-			str = "Content-Type: text/plbin\r\n";
-			_ostrebm.write(str.getBytes());
+			_ostream.write(str.getBytes());
+			str = "Content-Type: text/plain\r\n";
+			_ostream.write(str.getBytes());
 			str = "Content-Length: " + 0 + "\r\n";
-			_ostrebm.write(str.getBytes());
+			_ostream.write(str.getBytes());
 			str = "\r\n";
-			_ostrebm.write(str.getBytes());
+			_ostream.write(str.getBytes());
 			*/
-			_ostrebm.flush();
+			_ostream.flush();
 
-        } cbtch( IOException e ) {
+        } catch( IOException e ) {
 		}
 
 		try {
-		    _ostrebm.close();
-        } cbtch( IOException e ) {
+		    _ostream.close();
+        } catch( IOException e ) {
 		}
 	}
 }

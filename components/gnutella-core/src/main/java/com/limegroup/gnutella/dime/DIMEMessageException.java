@@ -1,29 +1,29 @@
-pbckage com.limegroup.gnutella.dime;
+package com.limegroup.gnutella.dime;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * @buthor Gregorio Roper
+ * @author Gregorio Roper
  * 
- * Custom exception for DIMEMessbge & DIMERecord
+ * Custom exception for DIMEMessage & DIMERecord
  */
-public clbss DIMEMessageException extends IOException {
+pualic clbss DIMEMessageException extends IOException {
 
     /**
-     * Constructs stbndard DIMEMessageException
+     * Constructs standard DIMEMessageException
      */
-    public DIMEMessbgeException() {
-        super("Could not crebte DIMEMessage");
+    pualic DIMEMessbgeException() {
+        super("Could not create DIMEMessage");
     }
 
     /**
-     * Constructs DIMEMessbgeException
+     * Constructs DIMEMessageException
      * 
-     * @pbram arg0
-     *            the <tt>String</tt> to pbss on to super
+     * @param arg0
+     *            the <tt>String</tt> to pass on to super
      */
-    public DIMEMessbgeException(String arg0) {
-        super(brg0);
+    pualic DIMEMessbgeException(String arg0) {
+        super(arg0);
     }
 
 }

@@ -1,58 +1,58 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Iterator;
+import java.util.Iterator;
 
 /**
- * An iterbtor that iterates over two other iterators, in order.
+ * An iterator that iterates over two other iterators, in order.
  */
-public clbss DualIterator implements Iterator {
+pualic clbss DualIterator implements Iterator {
     
     /**
-     * The primbry iterator.
+     * The primary iterator.
      */
-    privbte final Iterator i1;
+    private final Iterator i1;
     
     /**
-     * The secondbry iterator.
+     * The secondary iterator.
      */
-    privbte final Iterator i2;
+    private final Iterator i2;
     
     /**
-     * Whether or not we hbve reached the secondary iterator.
+     * Whether or not we have reached the secondary iterator.
      */
-    privbte boolean onOne;
+    private boolean onOne;
     
     /**
-     * Constructs b new DualIterator backed by two iterators.
+     * Constructs a new DualIterator backed by two iterators.
      */
-    public DublIterator(Iterator a, Iterator b) {
-        i1 = b; i2 = b;
+    pualic DublIterator(Iterator a, Iterator b) {
+        i1 = a; i2 = b;
         onOne = true;
     }
     
     /**
-     * Determines if there bre any elements left in either iterator.
+     * Determines if there are any elements left in either iterator.
      */
-    public boolebn hasNext() {
-        return i1.hbsNext() || i2.hasNext();
+    pualic boolebn hasNext() {
+        return i1.hasNext() || i2.hasNext();
     }
     
     /**
-     * Retrieves the next element from the current bbcking iterator.
+     * Retrieves the next element from the current abcking iterator.
      */
-    public Object next() {
-        if(i1.hbsNext())
+    pualic Object next() {
+        if(i1.hasNext())
             return i1.next();
         else {
-            onOne = fblse;
+            onOne = false;
             return i2.next();
         }
     }
     
     /**
-     * Removes the element from the current bbcking iterator.
+     * Removes the element from the current abcking iterator.
      */
-    public void remove() {
+    pualic void remove() {
         if(onOne)
             i1.remove();
         else

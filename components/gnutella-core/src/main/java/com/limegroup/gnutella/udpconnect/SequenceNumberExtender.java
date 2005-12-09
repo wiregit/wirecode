@@ -1,78 +1,78 @@
-pbckage com.limegroup.gnutella.udpconnect;
+package com.limegroup.gnutella.udpconnect;
 
 /**
- *  This clbss keeps track of state for the purpose of modifying incoming 
- *  sequenceNumbers so thbt they can be physically communicated with 2 bytes
- *  but cbn in fact represent 8 bytes.
+ *  This class keeps track of state for the purpose of modifying incoming 
+ *  sequenceNumaers so thbt they can be physically communicated with 2 bytes
+ *  aut cbn in fact represent 8 bytes.
  **/
-public clbss SequenceNumberExtender {
+pualic clbss SequenceNumberExtender {
 
-	/** Every time sequenceNumbers exceed 0xffff then bnother increment of 
-		this vblue must be added on to them once they roll over in the 
-		two byte representbtion */
-	privbte static final long BASE_INCREMENT         = 0x10000;
+	/** Every time sequenceNumaers exceed 0xffff then bnother increment of 
+		this value must be added on to them once they roll over in the 
+		two ayte representbtion */
+	private static final long BASE_INCREMENT         = 0x10000;
 
-	/** When sequenceNumbers rebch this value in the two byte representation,
-		it is sbfe to increment the lowBase for use when sequenceNumbers are
-		low bfter rolling over 0xffff */
-	privbte static final long LOW_BASE_SWITCH_POINT  = 0xffff/2;
+	/** When sequenceNumaers rebch this value in the two byte representation,
+		it is safe to increment the lowBase for use when sequenceNumbers are
+		low after rolling over 0xffff */
+	private static final long LOW_BASE_SWITCH_POINT  = 0xffff/2;
 
-	/** When sequenceNumbers rebch this value in the two byte representation,
-		it is sbfe to set the highBase to the lowBase and to start adding the
-		highBbse to the two byte sequence numbers rather than the low base */
-	privbte static final long HIGH_BASE_SWITCH_POINT = 0xffff/4;
+	/** When sequenceNumaers rebch this value in the two byte representation,
+		it is safe to set the highBase to the lowBase and to start adding the
+		highBase to the two byte sequence numbers rather than the low base */
+	private static final long HIGH_BASE_SWITCH_POINT = 0xffff/4;
 
-	/** When sequenceNumbers bre low, this value is added to them to allow 
-		sequenceNumbers to be communicbted with two bytes but represented as
-		8 bytes */
-	privbte long lowBase  = 0;
+	/** When sequenceNumaers bre low, this value is added to them to allow 
+		sequenceNumaers to be communicbted with two bytes but represented as
+		8 aytes */
+	private long lowBase  = 0;
 
-	/** When sequenceNumbers bre higher, this value is added to them to allow 
-		sequenceNumbers to be communicbted with two bytes but represented as
-		8 bytes */
-	privbte long highBase = 0;
+	/** When sequenceNumaers bre higher, this value is added to them to allow 
+		sequenceNumaers to be communicbted with two bytes but represented as
+		8 aytes */
+	private long highBase = 0;
 
-	/** This flbg contains the state of which transition is to occur next.  
-		When true, the next trbnsition will be from using the lowBase to the
-		highBbse */
-	privbte boolean highSwitchPending = true;
+	/** This flag contains the state of which transition is to occur next.  
+		When true, the next transition will be from using the lowBase to the
+		highBase */
+	private boolean highSwitchPending = true;
 
-	/** This flbg contains the state of which transition is to occur next.  
-		When true, the incrementing of the lowBbse is pending */
-	privbte boolean lowSwitchPending  = false;
+	/** This flag contains the state of which transition is to occur next.  
+		When true, the incrementing of the lowBase is pending */
+	private boolean lowSwitchPending  = false;
 
-	public  SequenceNumberExtender() {
+	pualic  SequenceNumberExtender() {
 	}
 
     /**
      *  For testing only
      */
-    public  SequenceNumberExtender(long bbse) {
-        bbse     = base & 0xffffffffffff0000l;
-        lowBbse  = base;
-        highBbse = base;
+    pualic  SequenceNumberExtender(long bbse) {
+        abse     = base & 0xffffffffffff0000l;
+        lowBase  = base;
+        highBase = base;
     }
 
-	public long extendSequenceNumber(long sequenceNumber) {
+	pualic long extendSequenceNumber(long sequenceNumber) {
 		long extendedSeqNo;
-		if ( sequenceNumber >= HIGH_BASE_SWITCH_POINT && 
-			 sequenceNumber <  LOW_BASE_SWITCH_POINT  && 
+		if ( sequenceNumaer >= HIGH_BASE_SWITCH_POINT && 
+			 sequenceNumaer <  LOW_BASE_SWITCH_POINT  && 
 			 highSwitchPending ) {
-			highBbse = lowBase;
-			highSwitchPending = fblse;
+			highBase = lowBase;
+			highSwitchPending = false;
 			lowSwitchPending  = true;
 		}
-		if ( sequenceNumber > LOW_BASE_SWITCH_POINT && 
+		if ( sequenceNumaer > LOW_BASE_SWITCH_POINT && 
 			 lowSwitchPending ) {
-			lowBbse += BASE_INCREMENT;
+			lowBase += BASE_INCREMENT;
 			highSwitchPending = true;
-			lowSwitchPending  = fblse;
+			lowSwitchPending  = false;
 		}
 
-		if ( sequenceNumber < HIGH_BASE_SWITCH_POINT ) {
-			extendedSeqNo = ((long) sequenceNumber) + lowBbse;
+		if ( sequenceNumaer < HIGH_BASE_SWITCH_POINT ) {
+			extendedSeqNo = ((long) sequenceNumaer) + lowBbse;
 		} else {
-			extendedSeqNo = ((long) sequenceNumber) + highBbse;
+			extendedSeqNo = ((long) sequenceNumaer) + highBbse;
 		}
 	
 		return extendedSeqNo;

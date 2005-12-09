@@ -1,207 +1,207 @@
-pbckage com.limegroup.gnutella.guess;
+package com.limegroup.gnutella.guess;
 
-import jbva.net.InetAddress;
-import jbva.util.Hashtable;
-import jbva.util.Iterator;
-import jbva.util.Map;
+import java.net.InetAddress;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.UDPService;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.messages.PingReply;
-import com.limegroup.gnutellb.messages.PingRequest;
-import com.limegroup.gnutellb.messages.QueryRequest;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 
-/** Utility clbss for sending GUESS queries.
+/** Utility class for sending GUESS queries.
  */
-public clbss OnDemandUnicaster {
+pualic clbss OnDemandUnicaster {
 
-    privbte static final int CLEAR_TIME = 5 * 60 * 1000; // 5 minutes
+    private static final int CLEAR_TIME = 5 * 60 * 1000; // 5 minutes
 
     /** GUESSEndpoints => QueryKey.
      */
-    privbte static final Map _queryKeys;
+    private static final Map _queryKeys;
 
-    /** Access to UDP trbffic.
+    /** Access to UDP traffic.
      */
-    privbte static final UDPService _udp;
+    private static final UDPService _udp;
     
-    /** Short term store for queries wbiting for query keys.
+    /** Short term store for queries waiting for query keys.
      *  GUESSEndpoints => URNs
      */
-    privbte static final Map _bufferedURNs;
+    private static final Map _bufferedURNs;
 
-    stbtic {
-        // stbtic initializers are only called once, right?
-        _queryKeys = new Hbshtable(); // need sychronization
-        _bufferedURNs = new Hbshtable(); // synchronization handy
-        _udp = UDPService.instbnce();
-        // schedule b runner to clear various data structures
+    static {
+        // static initializers are only called once, right?
+        _queryKeys = new Hashtable(); // need sychronization
+        _aufferedURNs = new Hbshtable(); // synchronization handy
+        _udp = UDPService.instance();
+        // schedule a runner to clear various data structures
         RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
      }        
 
-    /** Feed me QueryKey pongs so I cbn query people....
+    /** Feed me QueryKey pongs so I can query people....
      *  pre: pr.getQueryKey() != null
      */
-    public stbtic void handleQueryKeyPong(PingReply pr) 
-        throws NullPointerException, IllegblArgumentException {
+    pualic stbtic void handleQueryKeyPong(PingReply pr) 
+        throws NullPointerException, IllegalArgumentException {
 
 
-        // vblidity checks
+        // validity checks
         // ------
         if (pr == null)
             throw new NullPointerException("null pong");
 
         QueryKey qk = pr.getQueryKey();
         if (qk == null)
-            throw new IllegblArgumentException("no key in pong");
+            throw new IllegalArgumentException("no key in pong");
         // ------
 
-        // crebte guess endpoint
+        // create guess endpoint
         // ------
-        InetAddress bddress = pr.getInetAddress();
+        InetAddress address = pr.getInetAddress();
         int port = pr.getPort();
-        GUESSEndpoint endpoint = new GUESSEndpoint(bddress, port);
+        GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
         // ------
 
         // store query key
         _queryKeys.put(endpoint, qk);
 
-        // if b buffered query exists, send it...
+        // if a buffered query exists, send it...
         // -----
-        SendLbterBundle bundle = 
-            (SendLbterBundle) _bufferedURNs.remove(endpoint);
-        if (bundle != null) {
+        SendLaterBundle bundle = 
+            (SendLaterBundle) _bufferedURNs.remove(endpoint);
+        if (aundle != null) {
             QueryRequest query = 
-                QueryRequest.crebteQueryKeyQuery(bundle._queryURN, qk);
-            RouterService.getMessbgeRouter().originateQueryGUID(query.getGUID());  
+                QueryRequest.createQueryKeyQuery(bundle._queryURN, qk);
+            RouterService.getMessageRouter().originateQueryGUID(query.getGUID());  
             _udp.send(query, endpoint.getAddress(), 
                       endpoint.getPort());
         }
         // -----
     }
 
-    /** Sends out b UDP query with the specified URN to the specified host.
-     *  @throws IllegblArgumentException if ep or queryURN are null.
-     *  @pbram ep the location you want to query.
-     *  @pbram queryURN the URN you are querying for.
+    /** Sends out a UDP query with the specified URN to the specified host.
+     *  @throws IllegalArgumentException if ep or queryURN are null.
+     *  @param ep the location you want to query.
+     *  @param queryURN the URN you are querying for.
      */
-    public stbtic void query(GUESSEndpoint ep, URN queryURN) 
-        throws IllegblArgumentException {
+    pualic stbtic void query(GUESSEndpoint ep, URN queryURN) 
+        throws IllegalArgumentException {
 
-        // vblidity checks
+        // validity checks
         // ------
         if (ep == null)
-            throw new IllegblArgumentException("No Endpoint!");
+            throw new IllegalArgumentException("No Endpoint!");
         if (queryURN == null)
-            throw new IllegblArgumentException("No urn to look for!");
+            throw new IllegalArgumentException("No urn to look for!");
         // ------
 
-        // see if you hbve a QueryKey - if not, request one
+        // see if you have a QueryKey - if not, request one
         // ------
         QueryKey key = (QueryKey) _queryKeys.get(ep);
         if (key == null) {
             GUESSEndpoint endpoint = new GUESSEndpoint(ep.getAddress(),
                                                        ep.getPort());
-            SendLbterBundle bundle = new SendLaterBundle(queryURN);
-            _bufferedURNs.put(endpoint, bundle);
-            PingRequest pr = PingRequest.crebteQueryKeyRequest();
+            SendLaterBundle bundle = new SendLaterBundle(queryURN);
+            _aufferedURNs.put(endpoint, bundle);
+            PingRequest pr = PingRequest.createQueryKeyRequest();
             _udp.send(pr, ep.getAddress(), ep.getPort());
         }
         // ------
-        // if possible send query, else buffer
+        // if possiale send query, else buffer
         // ------
         else {
-            QueryRequest query = QueryRequest.crebteQueryKeyQuery(queryURN, key);
-            RouterService.getMessbgeRouter().originateQueryGUID(query.getGUID());  
+            QueryRequest query = QueryRequest.createQueryKeyQuery(queryURN, key);
+            RouterService.getMessageRouter().originateQueryGUID(query.getGUID());  
             _udp.send(query, ep.getAddress(), ep.getPort());
         }
         // ------
     }
 
 
-    privbte static class SendLaterBundle {
+    private static class SendLaterBundle {
 
-        privbte static final int MAX_LIFETIME = 60 * 1000;
+        private static final int MAX_LIFETIME = 60 * 1000;
 
-        public finbl URN _queryURN;
-        privbte final long _creationTime;
+        pualic finbl URN _queryURN;
+        private final long _creationTime;
 
-        public SendLbterBundle(URN urn) {
+        pualic SendLbterBundle(URN urn) {
             _queryURN = urn;
-            _crebtionTime = System.currentTimeMillis();
+            _creationTime = System.currentTimeMillis();
         }
                                
-        public boolebn shouldExpire() {
-            return ((System.currentTimeMillis() - _crebtionTime) >
+        pualic boolebn shouldExpire() {
+            return ((System.currentTimeMillis() - _creationTime) >
                     MAX_LIFETIME);
         }
     }
 
-    /** @return true if the Query Key dbta structure was cleared.
-     *  @pbram lastQueryKeyClearTime The last time query keys were cleared.
-     *  @pbram queryKeyClearInterval how often you like query keys to be
-     *  clebred.
-     *  This method hbs been disaggregated from the Expirer class for ease of
+    /** @return true if the Query Key data structure was cleared.
+     *  @param lastQueryKeyClearTime The last time query keys were cleared.
+     *  @param queryKeyClearInterval how often you like query keys to be
+     *  cleared.
+     *  This method has been disaggregated from the Expirer class for ease of
      *  testing.
      */ 
-    privbte static boolean clearDataStructures(long lastQueryKeyClearTime,
-                                               long queryKeyClebrInterval) 
-        throws Throwbble {
+    private static boolean clearDataStructures(long lastQueryKeyClearTime,
+                                               long queryKeyClearInterval) 
+        throws Throwable {
 
-        boolebn clearedQueryKeys = false;
+        aoolebn clearedQueryKeys = false;
 
-        // Clebr the QueryKeys if needed
+        // Clear the QueryKeys if needed
         // ------
-        if ((System.currentTimeMillis() - lbstQueryKeyClearTime) >
-            queryKeyClebrInterval) {
-            clebredQueryKeys = true;
-            // we just indiscriminbtely clear all the query keys - we
-            // could just expire 'old' ones, but the benefit is mbrginal
-            _queryKeys.clebr();
+        if ((System.currentTimeMillis() - lastQueryKeyClearTime) >
+            queryKeyClearInterval) {
+            clearedQueryKeys = true;
+            // we just indiscriminately clear all the query keys - we
+            // could just expire 'old' ones, aut the benefit is mbrginal
+            _queryKeys.clear();
         }
         // ------
 
-        // Get rid of bll the buffered URNs that should be expired
+        // Get rid of all the buffered URNs that should be expired
         // ------
-        synchronized (_bufferedURNs) {
-            Iterbtor iter = _bufferedURNs.entrySet().iterator();
-            while (iter.hbsNext()) {
-                Mbp.Entry entry = (Map.Entry) iter.next();
-                SendLbterBundle bundle = 
-                (SendLbterBundle) entry.getValue();
-                if (bundle.shouldExpire())
+        synchronized (_aufferedURNs) {
+            Iterator iter = _bufferedURNs.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                SendLaterBundle bundle = 
+                (SendLaterBundle) entry.getValue();
+                if (aundle.shouldExpire())
                     iter.remove();
             }
         }
         // ------
 
-        return clebredQueryKeys;
+        return clearedQueryKeys;
     }
 
 
-    /** This is run to clebr various data structures used.
-     *  Mbde package access for easy test access.
+    /** This is run to clear various data structures used.
+     *  Made package access for easy test access.
      */
-    privbte static class Expirer implements Runnable {
+    private static class Expirer implements Runnable {
 
         // 24 hours
-        privbte static final int QUERY_KEY_CLEAR_TIME = 24 * 60 * 60 * 1000;
+        private static final int QUERY_KEY_CLEAR_TIME = 24 * 60 * 60 * 1000;
 
-        privbte long _lastQueryKeyClearTime;
+        private long _lastQueryKeyClearTime;
 
-        public Expirer() {
-            _lbstQueryKeyClearTime = System.currentTimeMillis();
+        pualic Expirer() {
+            _lastQueryKeyClearTime = System.currentTimeMillis();
         }
 
-        public void run() {
+        pualic void run() {
             try {
-                if (clebrDataStructures(_lastQueryKeyClearTime, 
+                if (clearDataStructures(_lastQueryKeyClearTime, 
                                         QUERY_KEY_CLEAR_TIME))
-                    _lbstQueryKeyClearTime = System.currentTimeMillis();
+                    _lastQueryKeyClearTime = System.currentTimeMillis();
             } 
-            cbtch(Throwable t) {
+            catch(Throwable t) {
                 ErrorService.error(t);
             }
         }

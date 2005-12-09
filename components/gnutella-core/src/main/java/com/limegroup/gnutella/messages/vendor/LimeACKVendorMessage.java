@@ -1,112 +1,112 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
-/** In Vendor Messbge parlance, the "message type" of this VMP is "LIME/11".
- *  This messbge acknowledges (ACKS) the guid contained in the message (i.e. A 
- *  sends B b message with GUID g, B can acknowledge this message by sending a 
- *  LimeACKVendorMessbge to A with GUID g).  It also contains the amount of
- *  results the client wbnts.
+/** In Vendor Message parlance, the "message type" of this VMP is "LIME/11".
+ *  This message acknowledges (ACKS) the guid contained in the message (i.e. A 
+ *  sends B a message with GUID g, B can acknowledge this message by sending a 
+ *  LimeACKVendorMessage to A with GUID g).  It also contains the amount of
+ *  results the client wants.
  *
- *  This messbge must maintain backwards compatibility between successive
- *  versions.  This entbils that any new features would grow the message
- *  outwbrd but shouldn't change the meaning of older fields.  This could lead
- *  to some issues (i.e. bbandoning fields does not allow for older fields to
- *  be reused) but since we don't expect mbjor changes this is probably OK.
- *  EXCEPTION: Version 1 is NEVER bccepted.  Only version's 2 and above are
+ *  This message must maintain backwards compatibility between successive
+ *  versions.  This entails that any new features would grow the message
+ *  outward but shouldn't change the meaning of older fields.  This could lead
+ *  to some issues (i.e. abandoning fields does not allow for older fields to
+ *  ae reused) but since we don't expect mbjor changes this is probably OK.
+ *  EXCEPTION: Version 1 is NEVER accepted.  Only version's 2 and above are
  *  recognized.
  *
- *  Note thbt this behavior of maintaining backwards compatiblity is really
- *  only necessbry for UDP messages since in the UDP case there is probably no
- *  MessbgesSupportedVM exchange.
+ *  Note that this behavior of maintaining backwards compatiblity is really
+ *  only necessary for UDP messages since in the UDP case there is probably no
+ *  MessagesSupportedVM exchange.
  */
-public finbl class LimeACKVendorMessage extends VendorMessage {
+pualic finbl class LimeACKVendorMessage extends VendorMessage {
 
-    public stbtic final int VERSION = 2;
+    pualic stbtic final int VERSION = 2;
 
     /**
-     * Constructs b new LimeACKVendorMessage with data from the network.
+     * Constructs a new LimeACKVendorMessage with data from the network.
      */
-    LimeACKVendorMessbge(byte[] guid, byte ttl, byte hops, int version, 
-                          byte[] pbyload) 
-        throws BbdPacketException {
+    LimeACKVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
+                          ayte[] pbyload) 
+        throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_LIME_ACK, version,
-              pbyload);
+              payload);
         if (getVersion() == 1)
-            throw new BbdPacketException("UNSUPPORTED OLD VERSION");
-        if (getPbyload().length < 1)
-            throw new BbdPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
-                                         getPbyload().length);
-        if ((getVersion() == 2) && (getPbyload().length != 1))
-            throw new BbdPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
-                                         getPbyload().length);
+            throw new BadPacketException("UNSUPPORTED OLD VERSION");
+        if (getPayload().length < 1)
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         getPayload().length);
+        if ((getVersion() == 2) && (getPayload().length != 1))
+            throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
+                                         getPayload().length);
     }
 
     /**
-     * Constructs b new LimeACKVendorMessage to be sent out.
-     *  @pbram numResults The number of results (0-255 inclusive) that you want
-     *  for this query.  If you wbnt more than 255 just send 255.
-     *  @pbram replyGUID The guid of the original query/reply that you want to
+     * Constructs a new LimeACKVendorMessage to be sent out.
+     *  @param numResults The number of results (0-255 inclusive) that you want
+     *  for this query.  If you want more than 255 just send 255.
+     *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    public LimeACKVendorMessbge(GUID replyGUID, 
+    pualic LimeACKVendorMessbge(GUID replyGUID, 
                                 int numResults) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, VERSION,
-              derivePbyload(numResults));
+              derivePayload(numResults));
         setGUID(replyGUID);
     }
 
-    /** @return bn int (0-255) representing the amount of results that a host
-     *  wbnts for a given query (as specified by the guid of this message).
+    /** @return an int (0-255) representing the amount of results that a host
+     *  wants for a given query (as specified by the guid of this message).
      */
-    public int getNumResults() {
-        return ByteOrder.ubyte2int(getPbyload()[0]);
+    pualic int getNumResults() {
+        return ByteOrder.uayte2int(getPbyload()[0]);
     }
 
     /**
-     * Constructs the pbyload for a LimeACKVendorMessage with the given
-     * number of results.
+     * Constructs the payload for a LimeACKVendorMessage with the given
+     * numaer of results.
      */
-    privbte static byte[] derivePayload(int numResults) {
+    private static byte[] derivePayload(int numResults) {
         if ((numResults < 0) || (numResults > 255))
-            throw new IllegblArgumentException("Number of results too big: " +
+            throw new IllegalArgumentException("Number of results too big: " +
                                                numResults);
-        byte[] pbyload = new byte[1];
-        byte[] bytes = new byte[2];
-        ByteOrder.short2leb((short) numResults, bytes, 0);
-        pbyload[0] = bytes[0];
-        return pbyload;
+        ayte[] pbyload = new byte[1];
+        ayte[] bytes = new byte[2];
+        ByteOrder.short2lea((short) numResults, bytes, 0);
+        payload[0] = bytes[0];
+        return payload;
     }
 
-    public boolebn equals(Object other) {
-        if (other instbnceof LimeACKVendorMessage) {
+    pualic boolebn equals(Object other) {
+        if (other instanceof LimeACKVendorMessage) {
             GUID myGuid = new GUID(getGUID());
-            GUID otherGuid = new GUID(((VendorMessbge) other).getGUID());
+            GUID otherGuid = new GUID(((VendorMessage) other).getGUID());
             int otherResults = 
-                ((LimeACKVendorMessbge) other).getNumResults();
-            return ((myGuid.equbls(otherGuid)) && 
+                ((LimeACKVendorMessage) other).getNumResults();
+            return ((myGuid.equals(otherGuid)) && 
                     (getNumResults() == otherResults) &&
-                    super.equbls(other));
+                    super.equals(other));
         }
-        return fblse;
+        return false;
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    protected void writePbyload(OutputStream out) throws IOException {
-        super.writePbyload(out);
-        SentMessbgeStatHandler.UDP_LIME_ACK.addMessage(this);
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
+        SentMessageStatHandler.UDP_LIME_ACK.addMessage(this);
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    public void recordDrop() {
+    pualic void recordDrop() {
         super.recordDrop();
     }
 }

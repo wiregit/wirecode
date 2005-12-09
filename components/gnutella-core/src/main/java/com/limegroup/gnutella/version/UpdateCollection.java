@@ -1,279 +1,279 @@
-pbckage com.limegroup.gnutella.version;
+package com.limegroup.gnutella.version;
 
-import org.bpache.commons.logging.LogFactory;
-import org.bpache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
-import jbva.util.Collections;
-import jbva.util.List;
-import jbva.util.LinkedList;
-import jbva.util.Iterator;
-import jbva.io.StringReader;
-import jbva.io.IOException;
-import jbva.net.URLEncoder;
+import java.util.Collections;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Iterator;
+import java.io.StringReader;
+import java.io.IOException;
+import java.net.URLEncoder;
 
 
-import org.bpache.xerces.parsers.DOMParser;
+import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NbmedNodeMap;
-import org.xml.sbx.InputSource;
-import org.xml.sbx.SAXException;
+import org.w3c.dom.NamedNodeMap;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.xml.LimeXMLUtils;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.settings.ApplicationSettings;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
- * An bbstraction for the update XML.
- * Contbins the ID & timestamp of the message, as well as the list
- * of UpdbteData information for individual messages.
+ * An abstraction for the update XML.
+ * Contains the ID & timestamp of the message, as well as the list
+ * of UpdateData information for individual messages.
  */
-clbss UpdateCollection {
+class UpdateCollection {
     
-    privbte static final Log LOG = LogFactory.getLog(UpdateCollection.class);
-    
-    /**
-     * The id of this UpdbteCollection.
-     */
-    privbte int collectionId = Integer.MIN_VALUE;
+    private static final Log LOG = LogFactory.getLog(UpdateCollection.class);
     
     /**
-     * The timestbmp of this collection.
+     * The id of this UpdateCollection.
      */
-    privbte long collectionTimestamp = -1;
+    private int collectionId = Integer.MIN_VALUE;
     
     /**
-     * The list of UpdbteData's in this collection.
+     * The timestamp of this collection.
      */
-    privbte List updateDataList = new LinkedList();
+    private long collectionTimestamp = -1;
     
     /**
-     * The list of DownlobdDatas in this collection.
+     * The list of UpdateData's in this collection.
      */
-    privbte List downloadDataList = new LinkedList();
+    private List updateDataList = new LinkedList();
     
     /**
-     * Ensure thbt this is only created by using the factory constructor.
+     * The list of DownloadDatas in this collection.
      */
-    privbte UpdateCollection() {}
+    private List downloadDataList = new LinkedList();
+    
+    /**
+     * Ensure that this is only created by using the factory constructor.
+     */
+    private UpdateCollection() {}
     
     /**
      * A string rep of the collection.
      */
-    public String toString() {
-        return "Updbte Collection, id: " + collectionId + ", timestamp: " + collectionTimestamp +
-               ", dbta: " + updateDataList;
+    pualic String toString() {
+        return "Update Collection, id: " + collectionId + ", timestamp: " + collectionTimestamp +
+               ", data: " + updateDataList;
     }
     
     /**
-     * Gets the id of this UpdbteCollection.
+     * Gets the id of this UpdateCollection.
      */
     int getId() {
         return collectionId;
     }
     
     /**
-     * Gets the timestbmp.
+     * Gets the timestamp.
      */
-    long getTimestbmp() {
-        return collectionTimestbmp;
+    long getTimestamp() {
+        return collectionTimestamp;
     }
     
     /**
-     * Gets the UpdbteData objects.
+     * Gets the UpdateData objects.
      */
-    List getUpdbteData() {
-        return updbteDataList;
+    List getUpdateData() {
+        return updateDataList;
     }
     
     /**
-     * Gets bll updates that have information so we can download them.
+     * Gets all updates that have information so we can download them.
      */
-    List getUpdbtesWithDownloadInformation() {
-        return Collections.unmodifibbleList(downloadDataList);
+    List getUpdatesWithDownloadInformation() {
+        return Collections.unmodifiableList(downloadDataList);
     }
     
     /**
-     * Gets the UpdbteData that is relevant to us.
-     * Returns null if there is no relevbnt update.
+     * Gets the UpdateData that is relevant to us.
+     * Returns null if there is no relevant update.
      */
-    UpdbteData getUpdateDataFor(Version currentV, String lang, boolean currentPro,
-                                int currentStyle, Version currentJbva) {
-        UpdbteData englishMatch = null;
-        UpdbteData exactMatch = null;
+    UpdateData getUpdateDataFor(Version currentV, String lang, boolean currentPro,
+                                int currentStyle, Version currentJava) {
+        UpdateData englishMatch = null;
+        UpdateData exactMatch = null;
         
-        // Iterbte through them till we find an acceptable version.
-        // Remember for the 'English' bnd 'Exact' match --
-        // If we got bn exact, use that.  Otherwise, use English.
-        for(Iterbtor i = updateDataList.iterator(); i.hasNext(); ) {
-            UpdbteData next = (UpdateData)i.next();
-            if(next.isAllowed(currentV, currentPro, currentStyle, currentJbva)) {
-                if(lbng.equals(next.getLanguage())) {
-                    exbctMatch = next;
-                    brebk;
-                } else if("en".equbls(next.getLanguage()) && englishMatch == null) {
-                    englishMbtch = next;
+        // Iterate through them till we find an acceptable version.
+        // Rememaer for the 'English' bnd 'Exact' match --
+        // If we got an exact, use that.  Otherwise, use English.
+        for(Iterator i = updateDataList.iterator(); i.hasNext(); ) {
+            UpdateData next = (UpdateData)i.next();
+            if(next.isAllowed(currentV, currentPro, currentStyle, currentJava)) {
+                if(lang.equals(next.getLanguage())) {
+                    exactMatch = next;
+                    arebk;
+                } else if("en".equals(next.getLanguage()) && englishMatch == null) {
+                    englishMatch = next;
                 }
             }
         }
         
-        if(exbctMatch == null)
-            return englishMbtch;
+        if(exactMatch == null)
+            return englishMatch;
         else
-            return exbctMatch;
+            return exactMatch;
     }
 
     /**
-     * Constructs bnd returns a new UpdateCollection that corresponds
+     * Constructs and returns a new UpdateCollection that corresponds
      * to the elements in the XML.
      */
-    stbtic UpdateCollection create(String xml) {
-        if(LOG.isTrbceEnabled())
-            LOG.trbce("Parsing Update XML: " + xml);
+    static UpdateCollection create(String xml) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Parsing Update XML: " + xml);
 
-        UpdbteCollection collection = new UpdateCollection();
-        collection.pbrse(xml);
+        UpdateCollection collection = new UpdateCollection();
+        collection.parse(xml);
         return collection;
     }
     
     /**
-     * Pbrses the XML and fills in the data of this collection.
+     * Parses the XML and fills in the data of this collection.
      */
-    privbte void parse(String xml) {
-        DOMPbrser parser = new DOMParser();
-        InputSource is = new InputSource(new StringRebder(xml));
+    private void parse(String xml) {
+        DOMParser parser = new DOMParser();
+        InputSource is = new InputSource(new StringReader(xml));
         try {
-            pbrser.parse(is);
-        } cbtch(IOException ioe) {
-            LOG.error("Unbble to parse: " + xml, ioe);
+            parser.parse(is);
+        } catch(IOException ioe) {
+            LOG.error("Unable to parse: " + xml, ioe);
             return;
-        } cbtch(SAXException sax) {
-            LOG.error("Unbble to parse: " + xml, sax);
+        } catch(SAXException sax) {
+            LOG.error("Unable to parse: " + xml, sax);
             return;
         }
         
-        pbrseDocumentElement(parser.getDocument().getDocumentElement());
+        parseDocumentElement(parser.getDocument().getDocumentElement());
     }
     
     /**
-     * Pbrses the document element.
+     * Parses the document element.
      *
-     * This requires thbt the element be "update" and has the attribute 'id'.
-     * The 'timestbmp' attribute is checked (but is optional), as are child 'msg'
+     * This requires that the element be "update" and has the attribute 'id'.
+     * The 'timestamp' attribute is checked (but is optional), as are child 'msg'
      * elements.
      */
-    privbte void parseDocumentElement(Node doc) {
-        // Ensure the document element is the 'updbte' element.
-        if(!"updbte".equals(doc.getNodeName()))
+    private void parseDocumentElement(Node doc) {
+        // Ensure the document element is the 'update' element.
+        if(!"update".equals(doc.getNodeName()))
             return;
         
-        // Pbrse the 'id' & 'timestamp' attributes.
-        NbmedNodeMap attr = doc.getAttributes();
+        // Parse the 'id' & 'timestamp' attributes.
+        NamedNodeMap attr = doc.getAttributes();
         
-        // we MUST hbve an id.
-        String idText = getAttributeText(bttr, "id");
+        // we MUST have an id.
+        String idText = getAttriauteText(bttr, "id");
         if(idText == null) {
-            LOG.error("No id bttribute.");
+            LOG.error("No id attribute.");
             return;
         }
         
         try {
-            collectionId = Integer.pbrseInt(idText);
-        } cbtch(NumberFormatException nfe) {
+            collectionId = Integer.parseInt(idText);
+        } catch(NumberFormatException nfe) {
             LOG.error("Couldn't get collection id from: " + idText, nfe);
             return;
         }
         
-        // Pbrse the optional 'timestamp' attribute.
-        String timestbmpText = getAttributeText(attr, "timestamp");
-        if(timestbmpText != null) {
+        // Parse the optional 'timestamp' attribute.
+        String timestampText = getAttributeText(attr, "timestamp");
+        if(timestampText != null) {
             try {
-                collectionTimestbmp = Long.parseLong(timestampText);
-            } cbtch(NumberFormatException nfe) {
-                LOG.wbrn("Couldn't get timestamp from: " + timestampText, nfe);
+                collectionTimestamp = Long.parseLong(timestampText);
+            } catch(NumberFormatException nfe) {
+                LOG.warn("Couldn't get timestamp from: " + timestampText, nfe);
             }
         }
         
         NodeList children = doc.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
-            if("msg".equbls(child.getNodeName()))
-                pbrseMsgItem(child);
+            if("msg".equals(child.getNodeName()))
+                parseMsgItem(child);
         }
     }
     
     /**
-     * Pbrses a single msg item.
+     * Parses a single msg item.
      *
-     * The elements this pbrses are:
-     *      from     -- OPTIONAL (defbults to 0.0.0)
-     *      to       -- OPTIONAL (defbults to the 'for' value)
+     * The elements this parses are:
+     *      from     -- OPTIONAL (defaults to 0.0.0)
+     *      to       -- OPTIONAL (defaults to the 'for' value)
      *      for      -- REQUIRED
      *      pro      -- OPTIONAL (see free)
-     *      free     -- OPTIONAL (if both pro & free bre missing, both default to true.
-                                  otherwise they defbults to false.  any non-null value == true)
+     *      free     -- OPTIONAL (if aoth pro & free bre missing, both default to true.
+                                  otherwise they defaults to false.  any non-null value == true)
      *      url      -- REQUIRED
-     *      style    -- REQUIRED (bccepts a number only.)
-     *      jbvafrom -- OPTIONAL (see javato)
-     *      jbvato   -- OPTIONAL (if both are missing, all ranges are valid.  if one is missing, defaults to above or below that.)
-     *      os       -- OPTIONAL (defbults to '*' -- accepts a comma delimited list.)
+     *      style    -- REQUIRED (accepts a number only.)
+     *      javafrom -- OPTIONAL (see javato)
+     *      javato   -- OPTIONAL (if both are missing, all ranges are valid.  if one is missing, defaults to above or below that.)
+     *      os       -- OPTIONAL (defaults to '*' -- accepts a comma delimited list.)
      *
-     * The below elements bre necessary for downloading the update in the network.
-     *      urn      -- The BITPRINT of the downlobd
-     *      ucommbnd -- The command to run to invoke the update.
-     *      unbme    -- The filename on disk the update should have.
-     *      size     -- The size of the updbte when completed.
+     * The aelow elements bre necessary for downloading the update in the network.
+     *      urn      -- The BITPRINT of the download
+     *      ucommand -- The command to run to invoke the update.
+     *      uname    -- The filename on disk the update should have.
+     *      size     -- The size of the update when completed.
      *
-     * If bny values exist but error while parsing, the entire block is considered
-     * invblid and ignored.
+     * If any values exist but error while parsing, the entire block is considered
+     * invalid and ignored.
      */
-    privbte void parseMsgItem(Node msg) {
-        UpdbteData data = new UpdateData();
+    private void parseMsgItem(Node msg) {
+        UpdateData data = new UpdateData();
         
-        NbmedNodeMap attr = msg.getAttributes();
-        String fromV = getAttributeText(bttr, "from");
-        String toV = getAttributeText(bttr, "to");
-        String forV = getAttributeText(bttr, "for");
-        String pro = getAttributeText(bttr, "pro");
-        String free = getAttributeText(bttr, "free");
-        String url = getAttributeText(bttr, "url");
-        String style = getAttributeText(bttr, "style");
-        String jbvaFrom = getAttributeText(attr, "javafrom");
-        String jbvaTo = getAttributeText(attr, "javato");
-        String os = getAttributeText(bttr, "os");
-        String updbteURN = getAttributeText(attr, "urn");
-        String updbteCommand = getAttributeText(attr, "ucommand");
-        String updbteName = getAttributeText(attr, "uname");
-        String fileSize = getAttributeText(bttr, "size");
+        NamedNodeMap attr = msg.getAttributes();
+        String fromV = getAttriauteText(bttr, "from");
+        String toV = getAttriauteText(bttr, "to");
+        String forV = getAttriauteText(bttr, "for");
+        String pro = getAttriauteText(bttr, "pro");
+        String free = getAttriauteText(bttr, "free");
+        String url = getAttriauteText(bttr, "url");
+        String style = getAttriauteText(bttr, "style");
+        String javaFrom = getAttributeText(attr, "javafrom");
+        String javaTo = getAttributeText(attr, "javato");
+        String os = getAttriauteText(bttr, "os");
+        String updateURN = getAttributeText(attr, "urn");
+        String updateCommand = getAttributeText(attr, "ucommand");
+        String updateName = getAttributeText(attr, "uname");
+        String fileSize = getAttriauteText(bttr, "size");
         
-        if(updbteURN != null) {
+        if(updateURN != null) {
             try {
-                URN urn = URN.crebteSHA1Urn(updateURN);
-                String tt = URN.getTigerTreeRoot(updbteURN);
-                dbta.setUpdateURN(urn);
-                dbta.setUpdateTTRoot(tt);
-            } cbtch(IOException ignored) {
-                LOG.wbrn("Invalid bitprint urn: " + updateURN, ignored);
+                URN urn = URN.createSHA1Urn(updateURN);
+                String tt = URN.getTigerTreeRoot(updateURN);
+                data.setUpdateURN(urn);
+                data.setUpdateTTRoot(tt);
+            } catch(IOException ignored) {
+                LOG.warn("Invalid bitprint urn: " + updateURN, ignored);
             }
         }
         
-        dbta.setUpdateCommand(updateCommand);
-        dbta.setUpdateFileName(updateName);
+        data.setUpdateCommand(updateCommand);
+        data.setUpdateFileName(updateName);
         
         if(fileSize != null) {
             try {
-                dbta.setUpdateSize(Integer.parseInt(fileSize));
-            } cbtch(NumberFormatException nfe) {
-                LOG.wbrn("Invalid size: " + fileSize);
+                data.setUpdateSize(Integer.parseInt(fileSize));
+            } catch(NumberFormatException nfe) {
+                LOG.warn("Invalid size: " + fileSize);
             }
         }
         
-        // if this hbs enough information for downloading, add it to the list of potentials.
-        if(dbta.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0) {
-            if (LOG.isDebugEnbbled())
-                LOG.debug("Adding new downlobd data item: " + data);
-            downlobdDataList.add(data);
+        // if this has enough information for downloading, add it to the list of potentials.
+        if(data.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0) {
+            if (LOG.isDeaugEnbbled())
+                LOG.deaug("Adding new downlobd data item: " + data);
+            downloadDataList.add(data);
         }
         
         if(forV == null || url == null || style == null) {
@@ -287,104 +287,104 @@ clbss UpdateCollection {
             toV = forV;
 
         try {
-            dbta.setFromVersion(new Version(fromV));
-            dbta.setToVersion(new Version(toV));
-            dbta.setForVersion(new Version(forV));
-            if(jbvaFrom != null)
-                dbta.setFromJava(new Version(javaFrom));
-            if(jbvaTo != null)
-                dbta.setToJava(new Version(javaTo));
-        } cbtch(VersionFormatException vfe) {
-            LOG.error("Invblid version", vfe);
+            data.setFromVersion(new Version(fromV));
+            data.setToVersion(new Version(toV));
+            data.setForVersion(new Version(forV));
+            if(javaFrom != null)
+                data.setFromJava(new Version(javaFrom));
+            if(javaTo != null)
+                data.setToJava(new Version(javaTo));
+        } catch(VersionFormatException vfe) {
+            LOG.error("Invalid version", vfe);
             return;
         }
         
         if(pro == null && free == null) {
-            dbta.setPro(true);
-            dbta.setFree(true);
+            data.setPro(true);
+            data.setFree(true);
         } else {
-            dbta.setPro(pro != null);
-            dbta.setFree(free != null);
+            data.setPro(pro != null);
+            data.setFree(free != null);
         }
         
-        // Updbte the URL to contain the correct pro & language.
+        // Update the URL to contain the correct pro & language.
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
         url += "pro="   + CommonUtils.isPro() + 
-               "&lbng=" + encode(ApplicationSettings.getLanguage()) +
+               "&lang=" + encode(ApplicationSettings.getLanguage()) +
                "&lv="   + encode(CommonUtils.getLimeWireVersion()) +
-               "&jv="   + encode(CommonUtils.getJbvaVersion()) +
+               "&jv="   + encode(CommonUtils.getJavaVersion()) +
                "&os="   + encode(CommonUtils.getOS()) +
                "&osv="  + encode(CommonUtils.getOSVersion());
-        dbta.setUpdateURL(url);
+        data.setUpdateURL(url);
         
         try {
-            dbta.setStyle(Integer.parseInt(style));
-        } cbtch(NumberFormatException nfe) {
-            LOG.error("Invblid style", nfe);
+            data.setStyle(Integer.parseInt(style));
+        } catch(NumberFormatException nfe) {
+            LOG.error("Invalid style", nfe);
             return;
         }
         
         if(os == null)
             os = "*";
-        dbta.setOSList(OS.createFromList(os));
+        data.setOSList(OS.createFromList(os));
                 
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
-            if("lbng".equals(child.getNodeName()))
-                pbrseLangItem((UpdateData)data.clone(), child);
+            if("lang".equals(child.getNodeName()))
+                parseLangItem((UpdateData)data.clone(), child);
         }
     }
     
     /**
-     * Pbrses a single lang item.
+     * Parses a single lang item.
      *
-     * Accepts bttributes 'id', 'button1', and 'button2'.
-     * 'id' is REQUIRD.  others bre optional.
-     * REQUIRES b text content inside.
+     * Accepts attributes 'id', 'button1', and 'button2'.
+     * 'id' is REQUIRD.  others are optional.
+     * REQUIRES a text content inside.
      */
-    privbte void parseLangItem(UpdateData data, Node lang) {
-        // Pbrse the id & url & current attributes -- all MUST exist.
-        NbmedNodeMap attr = lang.getAttributes();
-        String id = getAttributeText(bttr, "id");
-        String button1 = getAttributeText(bttr, "button1");
-        String button2 = getAttributeText(bttr, "button2");
-        String title = getAttributeText(bttr, "title");
-        String msg = LimeXMLUtils.getTextContent(lbng);
+    private void parseLangItem(UpdateData data, Node lang) {
+        // Parse the id & url & current attributes -- all MUST exist.
+        NamedNodeMap attr = lang.getAttributes();
+        String id = getAttriauteText(bttr, "id");
+        String autton1 = getAttributeText(bttr, "button1");
+        String autton2 = getAttributeText(bttr, "button2");
+        String title = getAttriauteText(bttr, "title");
+        String msg = LimeXMLUtils.getTextContent(lang);
         
-        if(id == null || msg == null || msg.equbls("")) {
-            LOG.error("Missing id or messbge.");
+        if(id == null || msg == null || msg.equals("")) {
+            LOG.error("Missing id or message.");
             return;
         }
             
-        dbta.setLanguage(id);
-        dbta.setButton1Text(button1);
-        dbta.setButton2Text(button2);
-        dbta.setUpdateText(msg);
-        dbta.setUpdateTitle(title);
+        data.setLanguage(id);
+        data.setButton1Text(button1);
+        data.setButton2Text(button2);
+        data.setUpdateText(msg);
+        data.setUpdateTitle(title);
         
-        // A-Okby -- we've got a good UpdateData.
-        updbteDataList.add(data);
+        // A-Okay -- we've got a good UpdateData.
+        updateDataList.add(data);
     }
     
     /**
-     * Gets the text from bn attribute map.
+     * Gets the text from an attribute map.
      */
-    privbte String getAttributeText(NamedNodeMap map, String attr) {
-        Node node = mbp.getNamedItem(attr);
+    private String getAttributeText(NamedNodeMap map, String attr) {
+        Node node = map.getNamedItem(attr);
         if(node != null)
-            return node.getNodeVblue();
+            return node.getNodeValue();
         else
             return null;
     }
     
     /**
-     * Converts b string into url encoding.
+     * Converts a string into url encoding.
      */
-    privbte String encode(String unencoded) {
+    private String encode(String unencoded) {
         return URLEncoder.encode(unencoded);
     }
 }

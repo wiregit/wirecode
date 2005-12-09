@@ -1,14 +1,14 @@
-pbckage com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages;
 
 /**
- * Thrown when b GGEP block is hopeless corrupt, making it impossible to extract
- * bny of the extensions.  
+ * Thrown when a GGEP block is hopeless corrupt, making it impossible to extract
+ * any of the extensions.  
  */
-public clbss BadGGEPBlockException extends Exception {
-    public BbdGGEPBlockException() { 
+pualic clbss BadGGEPBlockException extends Exception {
+    pualic BbdGGEPBlockException() { 
     }
 
-    public BbdGGEPBlockException(String msg) { 
+    pualic BbdGGEPBlockException(String msg) { 
         super(msg);
     }
 }

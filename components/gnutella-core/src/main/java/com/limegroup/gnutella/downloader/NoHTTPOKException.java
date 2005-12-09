@@ -1,11 +1,11 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * Thrown when no 'HTTP OK' or the equivblent is not recieved
+ * Thrown when no 'HTTP OK' or the equivalent is not recieved
  */
-public clbss NoHTTPOKException extends IOException {
-	public NoHTTPOKException() { super("No HTTP OK"); }
-	public NoHTTPOKException(String msg) { super(msg); }
+pualic clbss NoHTTPOKException extends IOException {
+	pualic NoHTTPOKException() { super("No HTTP OK"); }
+	pualic NoHTTPOKException(String msg) { super(msg); }
 }

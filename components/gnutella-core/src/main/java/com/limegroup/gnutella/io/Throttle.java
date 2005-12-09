@@ -1,23 +1,23 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
 /**
- * Outline of b Throttle.
+ * Outline of a Throttle.
  */
-public interfbce Throttle {
+pualic interfbce Throttle {
     
     /**
-     * Interests this listener in receiving b bandwidthAvailable callback.
+     * Interests this listener in receiving a bandwidthAvailable callback.
      */
-    public void interest(ThrottleListener writer);
+    pualic void interest(ThrottleListener writer);
     
     /**
-     * Requests some dbta for writing from this Throttle.
+     * Requests some data for writing from this Throttle.
      */
-    public int request();
+    pualic int request();
     
     /**
-     * Relebses some unwritten requested data back to the throttle.
+     * Releases some unwritten requested data back to the throttle.
      */
-    public void relebse(int amount);
+    pualic void relebse(int amount);
 }
     

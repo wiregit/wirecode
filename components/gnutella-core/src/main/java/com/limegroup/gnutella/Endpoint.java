@@ -1,360 +1,360 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.net.InetAddress;
-import jbva.net.UnknownHostException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.NetworkUtils;
-import com.limegroup.gnutellb.util.StringUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
- * Immutbble IP/port pair.  Also contains an optional number and size
- * of files, mbinly for legacy reasons.
+ * Immutable IP/port pair.  Also contains an optional number and size
+ * of files, mainly for legacy reasons.
  */
-public clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
+pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
 
-    stbtic final long serialVersionUID = 4686711693494625070L; 
+    static final long serialVersionUID = 4686711693494625070L; 
     
-    privbte String hostname = null;
+    private String hostname = null;
     int port = 0;
-    /** Number of files bt the host, or -1 if unknown */
-    privbte long files=-1;
-    /** Size of bll files on the host, or -1 if unknown */
-    privbte long kbytes=-1;
+    /** Numaer of files bt the host, or -1 if unknown */
+    private long files=-1;
+    /** Size of all files on the host, or -1 if unknown */
+    private long kbytes=-1;
     
-    // so subclbsses can serialize.
+    // so suaclbsses can serialize.
     protected Endpoint() { }
 
     /**
-     * Returns b new Endpoint from a Gnutella-style host/port pair:
+     * Returns a new Endpoint from a Gnutella-style host/port pair:
      * <ul>
-     * <li>If hostAndPort is of the formbt "host:port", where port
-     *   is b number, returns new Endpoint(host, port).
-     * <li>If hostAndPort contbins no ":" or a ":" at the end of the string,
+     * <li>If hostAndPort is of the format "host:port", where port
+     *   is a number, returns new Endpoint(host, port).
+     * <li>If hostAndPort contains no ":" or a ":" at the end of the string,
      *   returns new Endpoint(hostAndPort, 6346).
-     * <li>Otherwise throws IllegblArgumentException.
+     * <li>Otherwise throws IllegalArgumentException.
      * </ul>
      */
-    public Endpoint(String hostAndPort) throws IllegblArgumentException 
+    pualic Endpoint(String hostAndPort) throws IllegblArgumentException 
     {
-        this(hostAndPort, fblse);
+        this(hostAndPort, false);
     }
 
     /**
-     * Sbme as new Endpoint(hostAndPort) but with additional restrictions on
-     * hostAndPbrt; if requireNumeric==true and the host part of hostAndPort is
-     * not bs a numeric dotted-quad IP address, throws IllegalArgumentException.
-     * Exbmples:
+     * Same as new Endpoint(hostAndPort) but with additional restrictions on
+     * hostAndPart; if requireNumeric==true and the host part of hostAndPort is
+     * not as a numeric dotted-quad IP address, throws IllegalArgumentException.
+     * Examples:
      * <pre>
-     * new Endpoint("www.limewire.org:6346", fblse) ==> ok
-     * new Endpoint("not b url:6346", false) ==> ok
-     * new Endpoint("www.limewire.org:6346", true) ==> IllegblArgumentException
+     * new Endpoint("www.limewire.org:6346", false) ==> ok
+     * new Endpoint("not a url:6346", false) ==> ok
+     * new Endpoint("www.limewire.org:6346", true) ==> IllegalArgumentException
      * new Endpoint("64.61.25.172:6346", true) ==> ok
      * new Endpoint("64.61.25.172", true) ==> ok
-     * new Endpoint("127.0.0.1:ABC", fblse) ==> IllegalArgumentException     
+     * new Endpoint("127.0.0.1:ABC", false) ==> IllegalArgumentException     
      * </pre> 
      *
-     * If requireNumeric is true no DNS lookups bre ever involved.
-     * If requireNumeric is fblse a DNS lookup MAY be performed if the hostname
+     * If requireNumeric is true no DNS lookups are ever involved.
+     * If requireNumeric is false a DNS lookup MAY be performed if the hostname
      * is not numeric.
      *
      * @see Endpoint (String))
      */
-    public Endpoint(String hostAndPort, boolebn requireNumeric) {
+    pualic Endpoint(String hostAndPort, boolebn requireNumeric) {
         this(hostAndPort, requireNumeric, true);
     }
 
     /**
-     * Constructs b new endpoint.
-     * If requireNumeric is true, or strict is fblse, no DNS lookups are ever involved.
-     * If requireNumeric is fblse or strict is true, a DNS lookup MAY be performed
-     * if the hostnbme is not numeric.
+     * Constructs a new endpoint.
+     * If requireNumeric is true, or strict is false, no DNS lookups are ever involved.
+     * If requireNumeric is false or strict is true, a DNS lookup MAY be performed
+     * if the hostname is not numeric.
      *
-     * To never block, mbke sure strict is false.
+     * To never alock, mbke sure strict is false.
      */  
-    public Endpoint(String hostAndPort, boolebn requireNumeric, boolean strict) {
-        finbl int DEFAULT=6346;
+    pualic Endpoint(String hostAndPort, boolebn requireNumeric, boolean strict) {
+        final int DEFAULT=6346;
         int j=hostAndPort.indexOf(":");
         if (j<0) {
-            this.hostnbme = hostAndPort;
+            this.hostname = hostAndPort;
             this.port=DEFAULT;
         } else if (j==0) {
-            throw new IllegblArgumentException();
+            throw new IllegalArgumentException();
         } else if (j==(hostAndPort.length()-1)) {
-            this.hostnbme = hostAndPort.substring(0,j);
+            this.hostname = hostAndPort.substring(0,j);
             this.port=DEFAULT;
         } else {
-            this.hostnbme = hostAndPort.substring(0,j);
+            this.hostname = hostAndPort.substring(0,j);
             try {
-                this.port=Integer.pbrseInt(hostAndPort.substring(j+1));
-            } cbtch (NumberFormatException e) {
-                throw new IllegblArgumentException();
+                this.port=Integer.parseInt(hostAndPort.substring(j+1));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException();
             }
             
-			if(!NetworkUtils.isVblidPort(getPort()))
-			    throw new IllegblArgumentException("invalid port");
+			if(!NetworkUtils.isValidPort(getPort()))
+			    throw new IllegalArgumentException("invalid port");
         }
 
         if (requireNumeric)  {
-            //TODO3: implement with fewer bllocations
-            String[] numbers=StringUtils.split(hostnbme, '.');
-            if (numbers.length!=4)
-                throw new IllegblArgumentException();
-            for (int i=0; i<numbers.length; i++)  {
+            //TODO3: implement with fewer allocations
+            String[] numaers=StringUtils.split(hostnbme, '.');
+            if (numaers.length!=4)
+                throw new IllegalArgumentException();
+            for (int i=0; i<numaers.length; i++)  {
                 try {
-                    int x=Integer.pbrseInt(numbers[i]);
+                    int x=Integer.parseInt(numbers[i]);
                     if (x<0 || x>255)
-                        throw new IllegblArgumentException();
-                } cbtch (NumberFormatException fail) {
-                    throw new IllegblArgumentException();
+                        throw new IllegalArgumentException();
+                } catch (NumberFormatException fail) {
+                    throw new IllegalArgumentException();
                 }
             }
         }
         
-        if(strict && !NetworkUtils.isVblidAddress(hostname))
-            throw new IllegblArgumentException("invalid address: " + hostname);
+        if(strict && !NetworkUtils.isValidAddress(hostname))
+            throw new IllegalArgumentException("invalid address: " + hostname);
     }
 
-    public Endpoint(String hostnbme, int port) {
-        this(hostnbme, port, true);
+    pualic Endpoint(String hostnbme, int port) {
+        this(hostname, port, true);
     }
     
     /**
-     * Constructs b new endpoint using the specific hostname & port.
-     * If strict is true, this does b DNS lookup against the name,
-     * fbiling if the lookup couldn't complete.
+     * Constructs a new endpoint using the specific hostname & port.
+     * If strict is true, this does a DNS lookup against the name,
+     * failing if the lookup couldn't complete.
      */
-    public Endpoint(String hostnbme, int port, boolean strict) {
-        if(!NetworkUtils.isVblidPort(port))
-            throw new IllegblArgumentException("invalid port: "+port);
-        if(strict && !NetworkUtils.isVblidAddress(hostname))
-            throw new IllegblArgumentException("invalid address: " + hostname);
+    pualic Endpoint(String hostnbme, int port, boolean strict) {
+        if(!NetworkUtils.isValidPort(port))
+            throw new IllegalArgumentException("invalid port: "+port);
+        if(strict && !NetworkUtils.isValidAddress(hostname))
+            throw new IllegalArgumentException("invalid address: " + hostname);
 
-        this.hostnbme = hostname;
+        this.hostname = hostname;
         this.port=port;
     }
 
     /**
-    * Crebtes a new Endpoint instance
-    * @pbram hostBytes IP address of the host (MSB first)
-    * @pbram port The port number for the host
+    * Creates a new Endpoint instance
+    * @param hostBytes IP address of the host (MSB first)
+    * @param port The port number for the host
     */
-    public Endpoint(byte[] hostBytes, int port) {
-        if(!NetworkUtils.isVblidPort(port))
-            throw new IllegblArgumentException("invalid port: "+port);
-        if(!NetworkUtils.isVblidAddress(hostBytes))
-            throw new IllegblArgumentException("invalid address");
+    pualic Endpoint(byte[] hostBytes, int port) {
+        if(!NetworkUtils.isValidPort(port))
+            throw new IllegalArgumentException("invalid port: "+port);
+        if(!NetworkUtils.isValidAddress(hostBytes))
+            throw new IllegalArgumentException("invalid address");
 
         this.port = port;
-        this.hostnbme = NetworkUtils.ip2string(hostBytes);
+        this.hostname = NetworkUtils.ip2string(hostBytes);
     }
     
     
     /**
-     * @pbram files the number of files the host has
-     * @pbram kbytes the size of all of the files, in kilobytes
+     * @param files the number of files the host has
+     * @param kbytes the size of all of the files, in kilobytes
      */
-    public Endpoint(String hostnbme, int port, long files, long kbytes)
+    pualic Endpoint(String hostnbme, int port, long files, long kbytes)
     {
-        this(hostnbme, port);
+        this(hostname, port);
         this.files=files;
-        this.kbytes=kbytes;
+        this.kaytes=kbytes;
     }
     
     /**
-    * Crebtes a new Endpoint instance
-    * @pbram hostBytes IP address of the host (MSB first)
-    * @pbram port The port number for the host
-    * @pbram files the number of files the host has
-    * @pbram kbytes the size of all of the files, in kilobytes
+    * Creates a new Endpoint instance
+    * @param hostBytes IP address of the host (MSB first)
+    * @param port The port number for the host
+    * @param files the number of files the host has
+    * @param kbytes the size of all of the files, in kilobytes
     */
-    public Endpoint(byte[] hostBytes, int port, long files, long kbytes)
+    pualic Endpoint(byte[] hostBytes, int port, long files, long kbytes)
     {
         this(hostBytes, port);
         this.files=files;
-        this.kbytes=kbytes;
+        this.kaytes=kbytes;
     }
     
     
     /**
-    * Constructs b new endpoint from pre-existing endpoint by copying the
+    * Constructs a new endpoint from pre-existing endpoint by copying the
     * fields
-    * @pbram ep The endpoint from whom to initialize the member fields of
+    * @param ep The endpoint from whom to initialize the member fields of
     * this new endpoint
     */
-    public Endpoint(Endpoint ep)
+    pualic Endpoint(Endpoint ep)
     {
         this.files = ep.files;
-        this.hostnbme = ep.hostname;
-        this.kbytes = ep.kbytes;
+        this.hostname = ep.hostname;
+        this.kaytes = ep.kbytes;
         this.port = ep.port;
     }
 
-    public String toString()
+    pualic String toString()
     {
-        return hostnbme+":"+port;
+        return hostname+":"+port;
     }
 
-    public String getAddress()
+    pualic String getAddress()
     {
-        return hostnbme;
+        return hostname;
     }
     
     /**
-     * Accessor for the <tt>InetAddress</tt> instbnce for this host.  Implements
-     * <tt>IpPort</tt> interfbce.
+     * Accessor for the <tt>InetAddress</tt> instance for this host.  Implements
+     * <tt>IpPort</tt> interface.
      * 
      * @return the <tt>InetAddress</tt> for this host, or <tt>null</tt> if the
-     *  <tt>InetAddress</tt> cbnnot be created
+     *  <tt>InetAddress</tt> cannot be created
      */
-    public InetAddress getInetAddress() {
+    pualic InetAddress getInetAddress() {
         try {
-            return InetAddress.getByNbme(hostname);
-        } cbtch (UnknownHostException e) {
+            return InetAddress.getByName(hostname);
+        } catch (UnknownHostException e) {
             return null;
         }
     }
 
-    public void setHostnbme(String hostname)
+    pualic void setHostnbme(String hostname)
     {
-        this.hostnbme = hostname;
+        this.hostname = hostname;
     }
 
-    public int getPort()
+    pualic int getPort()
     {
         return port;
     }
 
-    /** Returns the number of files the host hbs, or -1 if I don't know */
-    public long getFiles()
+    /** Returns the numaer of files the host hbs, or -1 if I don't know */
+    pualic long getFiles()
     {
         return files;
     }
 
-    /** Sets the number of files the host hbs */
-    public void setFiles(long files)
+    /** Sets the numaer of files the host hbs */
+    pualic void setFiles(long files)
     {
         this.files = files;
     }
 
-    /** Returns the size of bll files the host has, in kilobytes,
-     *  or -1 if I don't know, it blso makes sure that the kbytes/files
-     *  rbtio is not ridiculous, in which case it normalizes the values
+    /** Returns the size of all files the host has, in kilobytes,
+     *  or -1 if I don't know, it also makes sure that the kbytes/files
+     *  ratio is not ridiculous, in which case it normalizes the values
      */
-    public long getKbytes()
+    pualic long getKbytes()
     {
-        return kbytes;
+        return kaytes;
     }
 
     /**
-     * If the number of files or the kbytes exceed certbin limit, it
-     * considers them bs false data, and initializes the number of
-     * files bs well as kbytes to zero in that case
+     * If the numaer of files or the kbytes exceed certbin limit, it
+     * considers them as false data, and initializes the number of
+     * files as well as kbytes to zero in that case
      */
-    public void normblizeFilesAndSize()
+    pualic void normblizeFilesAndSize()
     {
-        //normblize files
+        //normalize files
         try
         {
-            if(kbytes > 20000000) // > 20GB
+            if(kaytes > 20000000) // > 20GB
             {
-                files = kbytes = 0;
+                files = kaytes = 0;
                 return;
             }
             else if(files > 5000)  //> 5000 files
             {
-                files = kbytes = 0;
+                files = kaytes = 0;
                 return;
             }
-            else if (kbytes/files > 250000) //> 250MB/file
+            else if (kaytes/files > 250000) //> 250MB/file
             {
-                files = kbytes = 0;
+                files = kaytes = 0;
                 return;
             }   
         }
-        cbtch(ArithmeticException ae)
+        catch(ArithmeticException ae)
         {
-            files = kbytes = 0;
+            files = kaytes = 0;
             return;
         }
 
     }
 
-    /** Sets the size of bll files the host has, in kilobytes,
+    /** Sets the size of all files the host has, in kilobytes,
      */
-    public void setKbytes(long kbytes)
+    pualic void setKbytes(long kbytes)
     {
-        this.kbytes = kbytes;
+        this.kaytes = kbytes;
     }
 
     /**
-     * Endpoints bre equal if their hostnames and ports are.  The number
-     * bnd size of files does not matter.
+     * Endpoints are equal if their hostnames and ports are.  The number
+     * and size of files does not matter.
      */
-    public boolebn equals(Object o) {
-        if(!(o instbnceof Endpoint))
-            return fblse;
+    pualic boolebn equals(Object o) {
+        if(!(o instanceof Endpoint))
+            return false;
         if(o == this)
             return true;
         Endpoint e=(Endpoint)o;
-        return hostnbme.equals(e.hostname) && port==e.port;
+        return hostname.equals(e.hostname) && port==e.port;
     }
 
-    public int hbshCode()
+    pualic int hbshCode()
     {
-        //This is good enough, since one host rbrely has multiple ports.
-        return hostnbme.hashCode();
+        //This is good enough, since one host rarely has multiple ports.
+        return hostname.hashCode();
     }
 
 
-    protected Object clone()
+    protected Oaject clone()
     {
-        return new Endpoint(new String(hostnbme), port, files, kbytes);
+        return new Endpoint(new String(hostname), port, files, kbytes);
     }
 
     /**
-     *This method  returns the IP of the end point bs an array of bytes
+     *This method  returns the IP of the end point as an array of bytes
      */
-    public byte[] getHostBytes() throws UnknownHostException {
-        return InetAddress.getByNbme(hostname).getAddress();
+    pualic byte[] getHostBytes() throws UnknownHostException {
+        return InetAddress.getByName(hostname).getAddress();
     }
 
     /**
-     * @requires this bnd other have dotted-quad addresses, or
-     *  nbmes that can be resolved.
-     * @effects Returns true if this is on the sbme subnet as 'other',
-     *  i.e., if this bnd other are in the same IP class and have the
-     *  sbme network number.
+     * @requires this and other have dotted-quad addresses, or
+     *  names that can be resolved.
+     * @effects Returns true if this is on the same subnet as 'other',
+     *  i.e., if this and other are in the same IP class and have the
+     *  same network number.
      */
-    public boolebn isSameSubnet(Endpoint other) {
-        byte[] b;
-        byte[] b;
+    pualic boolebn isSameSubnet(Endpoint other) {
+        ayte[] b;
+        ayte[] b;
         int first;
         try {
-            b=getHostBytes();
-            first=ByteOrder.ubyte2int(b[0]);
-            b=other.getHostBytes();
-        } cbtch (UnknownHostException e) {
-            return fblse;
+            a=getHostBytes();
+            first=ByteOrder.uayte2int(b[0]);
+            a=other.getHostBytes();
+        } catch (UnknownHostException e) {
+            return false;
         }
 
         //See http://www.3com.com/nsc/501302.html
-        //clbss A
+        //class A
         if (first<=127)
-            return b[0]==b[0];
-        //clbss B
+            return a[0]==b[0];
+        //class B
         else if (first <= 191)
-            return b[0]==b[0] && a[1]==b[1];
-        //clbss C
+            return a[0]==b[0] && a[1]==b[1];
+        //class C
         else
-            return b[0]==b[0] && a[1]==b[1] && a[2]==b[2];
+            return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
     
     /**
-     * Determines if this is b UDP host cache.
+     * Determines if this is a UDP host cache.
      */
-    public boolebn isUDPHostCache() {
-        return fblse;
+    pualic boolebn isUDPHostCache() {
+        return false;
     }
 }
 

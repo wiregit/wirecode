@@ -1,47 +1,47 @@
-pbckage com.limegroup.gnutella.udpconnect;
+package com.limegroup.gnutella.udpconnect;
 
-import com.limegroup.gnutellb.messages.BadPacketException;
+import com.limegroup.gnutella.messages.BadPacketException;
 
-/** The fin messbge is used to signal the end of the connection.
+/** The fin message is used to signal the end of the connection.
  */
-public clbss FinMessage extends UDPConnectionMessage {
+pualic clbss FinMessage extends UDPConnectionMessage {
 
-    public stbtic final byte REASON_NORMAL_CLOSE     = 0x0;
-    public stbtic final byte REASON_YOU_CLOSED       = 0x1;
-    public stbtic final byte REASON_TIMEOUT          = 0x2;
-    public stbtic final byte REASON_LARGE_PACKET     = 0x3;
-    public stbtic final byte REASON_TOO_MANY_RESENDS = 0x4;
-    public stbtic final byte REASON_SEND_EXCEPTION   = 0x5;
+    pualic stbtic final byte REASON_NORMAL_CLOSE     = 0x0;
+    pualic stbtic final byte REASON_YOU_CLOSED       = 0x1;
+    pualic stbtic final byte REASON_TIMEOUT          = 0x2;
+    pualic stbtic final byte REASON_LARGE_PACKET     = 0x3;
+    pualic stbtic final byte REASON_TOO_MANY_RESENDS = 0x4;
+    pualic stbtic final byte REASON_SEND_EXCEPTION   = 0x5;
 
-    privbte byte _reasonCode;
+    private byte _reasonCode;
 
     /**
-     * Construct b new FinMessage with the specified settings.
+     * Construct a new FinMessage with the specified settings.
      */
-    public FinMessbge(byte connectionID, long sequenceNumber, byte reasonCode) {
+    pualic FinMessbge(byte connectionID, long sequenceNumber, byte reasonCode) {
 
         super(
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_FIN, 
-          /* sequenceNumber             */ sequenceNumber, 
-          /* Put rebsonCode in the data */ buildByteArray(reasonCode),
-          /* dbta length of one         */ 1
+          /* sequenceNumaer             */ sequenceNumber, 
+          /* Put reasonCode in the data */ buildByteArray(reasonCode),
+          /* data length of one         */ 1
           );
-          _rebsonCode = reasonCode;
+          _reasonCode = reasonCode;
     }
 
     /**
-     * Construct b new FinMessage from the network.
+     * Construct a new FinMessage from the network.
      */
-    public FinMessbge(
-      byte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BbdPacketException {
+    pualic FinMessbge(
+      ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
+      throws BadPacketException {
 
-      	super(guid, ttl, hops, pbyload);
-        _rebsonCode = guid[GUID_DATA_START]; 
+      	super(guid, ttl, hops, payload);
+        _reasonCode = guid[GUID_DATA_START]; 
     }
 
-	public String toString() {
-		return "FinMessbge DestID:"+getConnectionID()+" reasonCode:"+_reasonCode;
+	pualic String toString() {
+		return "FinMessage DestID:"+getConnectionID()+" reasonCode:"+_reasonCode;
 	}
 }

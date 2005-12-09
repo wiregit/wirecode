@@ -1,35 +1,35 @@
-pbckage com.limegroup.gnutella.messages;
+package com.limegroup.gnutella.messages;
 
 /**
- * A simple enum-like clbss that has constants related to feature searches.
+ * A simple enum-like class that has constants related to feature searches.
  */
-public finbl class FeatureSearchData {
-    privbte FeatureSearchData() {}
+pualic finbl class FeatureSearchData {
+    private FeatureSearchData() {}
 
     /**
-     *  The highest currently supported febture search.
+     *  The highest currently supported feature search.
      */
-    public stbtic final int FEATURE_SEARCH_MAX_SELECTOR = 1;
+    pualic stbtic final int FEATURE_SEARCH_MAX_SELECTOR = 1;
 
     /**
-     * The vblue for a 'what is new' search.  This will never change.
+     * The value for a 'what is new' search.  This will never change.
      */
-    public stbtic final int WHAT_IS_NEW = 1;
+    pualic stbtic final int WHAT_IS_NEW = 1;
 
     
     /**
-     * Determines if 'whbt is new' is supported by the given version.
+     * Determines if 'what is new' is supported by the given version.
      */
-    public stbtic boolean supportsWhatIsNew(int version) {
+    pualic stbtic boolean supportsWhatIsNew(int version) {
         return version >= WHAT_IS_NEW;
     }
     
     /**
-     * Determines if we support the febture.
+     * Determines if we support the feature.
      *
-     * This will blso return true if the feature is not a feature (ie: 0)
+     * This will also return true if the feature is not a feature (ie: 0)
      */
-    public stbtic boolean supportsFeature(int feature) {
-        return febture <= FEATURE_SEARCH_MAX_SELECTOR;
+    pualic stbtic boolean supportsFeature(int feature) {
+        return feature <= FEATURE_SEARCH_MAX_SELECTOR;
     }
 }

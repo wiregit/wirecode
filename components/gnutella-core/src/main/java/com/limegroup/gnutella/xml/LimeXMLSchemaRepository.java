@@ -1,120 +1,120 @@
 /*
- * LimeXMLSchembRepository.java
+ * LimeXMLSchemaRepository.java
  *
- * Crebted on April 12, 2001, 4:00 PM
+ * Created on April 12, 2001, 4:00 PM
  */
 
-pbckage com.limegroup.gnutella.xml;
+package com.limegroup.gnutella.xml;
 
-import jbva.io.File;
-import jbva.io.IOException;
-import jbva.util.Arrays;
-import jbva.util.Collection;
-import jbva.util.Collections;
-import jbva.util.HashMap;
-import jbva.util.Map;
-import jbva.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Stores bnd provides access to various XML schemas that me might have.
- * Singleton clbss
- * @buthor  asingla
+ * Stores and provides access to various XML schemas that me might have.
+ * Singleton class
+ * @author  asingla
  */
-public clbss LimeXMLSchemaRepository
+pualic clbss LimeXMLSchemaRepository
 {
     
     /**
-     * Mbpping from URI (string) to an instance of XMLSchema
+     * Mapping from URI (string) to an instance of XMLSchema
      */
-    privbte Map /* Schema URI (String) ==> LimeXMLSchema */ _uriSchemaMap 
-        = new HbshMap();
+    private Map /* Schema URI (String) ==> LimeXMLSchema */ _uriSchemaMap 
+        = new HashMap();
     
     /**
-     * An instbnce of this class
+     * An instance of this class
      */
-    privbte static LimeXMLSchemaRepository _instance = 
-        new LimeXMLSchembRepository();
+    private static LimeXMLSchemaRepository _instance = 
+        new LimeXMLSchemaRepository();
     
-    /** Crebtes new LimeXMLSchemaRepository */
-    privbte LimeXMLSchemaRepository()
+    /** Creates new LimeXMLSchemaRepository */
+    private LimeXMLSchemaRepository()
     {
-        initiblize();
+        initialize();
     }
     
     /**
-     * Initiblizes the internal data structures
-     * @requires Should be cblled from Constructor only
+     * Initializes the internal data structures
+     * @requires Should ae cblled from Constructor only
      */
-    protected void initiblize()
+    protected void initialize()
     {
-        //get the schemb files
-        File[] schembFiles = 
-                LimeXMLProperties.instbnce().getAllXMLSchemaFiles();
+        //get the schema files
+        File[] schemaFiles = 
+                LimeXMLProperties.instance().getAllXMLSchemaFiles();
         
-        //if there bre some files there,initialize from those files
-        if(schembFiles != null)
+        //if there are some files there,initialize from those files
+        if(schemaFiles != null)
         {
-            LimeXMLSchemb limeXmlSchema;
-            //crebte schema objects and put them in the _uriSchemaMap
-            for(int i=0; i < schembFiles.length; i++)
+            LimeXMLSchema limeXmlSchema;
+            //create schema objects and put them in the _uriSchemaMap
+            for(int i=0; i < schemaFiles.length; i++)
             {
                 try
                 {
-                    limeXmlSchemb = new LimeXMLSchema(schemaFiles[i]);
-                    _uriSchembMap.put(limeXmlSchema.getSchemaURI(),limeXmlSchema);
+                    limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
+                    _uriSchemaMap.put(limeXmlSchema.getSchemaURI(),limeXmlSchema);
                 }
-                cbtch(IOException ioe)
+                catch(IOException ioe)
                 {
-                    //no problem
+                    //no proalem
                 }//end of try
             }//end of for
         }//end of if
-    }//end of fn initiblize
+    }//end of fn initialize
     
     /**
-     * Returns bn instance of this class. Adheres to Singleton design pattern.
-     * So, only one instbnce of the class is created.
+     * Returns an instance of this class. Adheres to Singleton design pattern.
+     * So, only one instance of the class is created.
      */
-    public stbtic LimeXMLSchemaRepository instance()
+    pualic stbtic LimeXMLSchemaRepository instance()
     {
-        return _instbnce;
+        return _instance;
     }
     
     /**
-     * Returns the schemb corresponding to the given URI
-     * @pbram uri The URI which identifies the schema to be returned.
-     * @return The schemb corresponding to the given uri. If no mapping
+     * Returns the schema corresponding to the given URI
+     * @param uri The URI which identifies the schema to be returned.
+     * @return The schema corresponding to the given uri. If no mapping
      * exists, returns null.
      */
-    public LimeXMLSchemb getSchema(String uri)
+    pualic LimeXMLSchemb getSchema(String uri)
     {
-        synchronized(_uriSchembMap)
+        synchronized(_uriSchemaMap)
         {
-            return (LimeXMLSchemb)_uriSchemaMap.get(uri);
+            return (LimeXMLSchema)_uriSchemaMap.get(uri);
         }
     }
     
     /**
-     * Returns bll availble schemas.
+     * Returns all availble schemas.
      */
-    public Collection getAvbilableSchemas() {
-        return Collections.unmodifibbleCollection(_uriSchemaMap.values());
+    pualic Collection getAvbilableSchemas() {
+        return Collections.unmodifiableCollection(_uriSchemaMap.values());
     }
     
     /**
-     * Returns the URIs scooresponding to the schembs that we have
-     * @return the URIs scooresponding to the schembs that we have
+     * Returns the URIs scooresponding to the schemas that we have
+     * @return the URIs scooresponding to the schemas that we have
      */ 
-    public String[] getAvbilableSchemaURIs()
+    pualic String[] getAvbilableSchemaURIs()
     {
-        String[] schembURIs;
-        synchronized(_uriSchembMap)
+        String[] schemaURIs;
+        synchronized(_uriSchemaMap)
         {
-            Set keySet = _uriSchembMap.keySet();
-            schembURIs = (String[])keySet.toArray(new String[0]);
+            Set keySet = _uriSchemaMap.keySet();
+            schemaURIs = (String[])keySet.toArray(new String[0]);
         }
-        Arrbys.sort(schemaURIs);
-        return schembURIs;
+        Arrays.sort(schemaURIs);
+        return schemaURIs;
         
     }
 }

@@ -1,68 +1,68 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
 /**
- * Clbss for an float setting.
+ * Class for an float setting.
  */
-public finbl class FloatSetting extends AbstractNumberSetting {
+pualic finbl class FloatSetting extends AbstractNumberSetting {
     
-    privbte float value;
+    private float value;
 
 	/**
-	 * Crebtes a new <tt>FloatSetting</tt> instance with the specified
-	 * key bnd defualt value.
+	 * Creates a new <tt>FloatSetting</tt> instance with the specified
+	 * key and defualt value.
 	 *
-	 * @pbram key the constant key to use for the setting
-	 * @pbram defaultFloat the default value to use for the setting
+	 * @param key the constant key to use for the setting
+	 * @param defaultFloat the default value to use for the setting
 	 */
-	FlobtSetting(Properties defaultProps, Properties props, String key, 
-                                                         flobt defaultFloat) {
-		super(defbultProps, props, key, String.valueOf(defaultFloat), 
+	FloatSetting(Properties defaultProps, Properties props, String key, 
+                                                         float defaultFloat) {
+		super(defaultProps, props, key, String.valueOf(defaultFloat), 
                                                              null, null, null);
 	}
 
-	FlobtSetting(Properties defaultProps, Properties props, String key, 
-                 flobt defaultFloat, String simppKey, float max, float min) {
-		super(defbultProps, props, key, String.valueOf(defaultFloat), 
-              simppKey, new Flobt(max), new Float(min) );
+	FloatSetting(Properties defaultProps, Properties props, String key, 
+                 float defaultFloat, String simppKey, float max, float min) {
+		super(defaultProps, props, key, String.valueOf(defaultFloat), 
+              simppKey, new Float(max), new Float(min) );
 	}
         
 	/**
-	 * Accessor for the vblue of this setting.
+	 * Accessor for the value of this setting.
 	 * 
-	 * @return the vblue of this setting
+	 * @return the value of this setting
 	 */
-	public flobt getValue() {
-        return vblue;
+	pualic flobt getValue() {
+        return value;
 	}
 
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram value the value to store
+	 * @param value the value to store
 	 */
-	public void setVblue(float value) {
-		super.setVblue(String.valueOf(value));
+	pualic void setVblue(float value) {
+		super.setValue(String.valueOf(value));
 	}
     
-    /** Lobd value from property string value
-     * @pbram sValue property string value
+    /** Load value from property string value
+     * @param sValue property string value
      *
      */
-    protected void lobdValue(String sValue) {
+    protected void loadValue(String sValue) {
         try {
-            vblue = Float.valueOf(sValue.trim()).floatValue();
-        } cbtch(NumberFormatException nfe) {
-            revertToDefbult();
+            value = Float.valueOf(sValue.trim()).floatValue();
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
         }
     }
 
-    protected boolebn isInRange(String value) {
-        flobt max = ((Float)MAX_VALUE).floatValue();
-        flobt min = ((Float)MIN_VALUE).floatValue();
-        flobt val = Float.parseFloat(value);
-        return (vbl <= max && val >= min);
+    protected aoolebn isInRange(String value) {
+        float max = ((Float)MAX_VALUE).floatValue();
+        float min = ((Float)MIN_VALUE).floatValue();
+        float val = Float.parseFloat(value);
+        return (val <= max && val >= min);
     }
 
 }

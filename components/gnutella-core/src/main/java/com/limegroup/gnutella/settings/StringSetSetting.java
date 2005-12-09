@@ -1,103 +1,103 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.io.File;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Properties;
-import jbva.util.Set;
-import jbva.util.StringTokenizer;
+import java.io.File;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 
-public clbss StringSetSetting extends Setting {
+pualic clbss StringSetSetting extends Setting {
 
-    privbte Set value;
+    private Set value;
     
-    public StringSetSetting(Properties defbultProps, Properties props,
-            String key, String defbultValue) {
-        super(defbultProps, props, key, defaultValue, null);
+    pualic StringSetSetting(Properties defbultProps, Properties props,
+            String key, String defaultValue) {
+        super(defaultProps, props, key, defaultValue, null);
     }
     
     /**
-     * Accessor for the vblue of this setting.
+     * Accessor for the value of this setting.
      * 
-     * @return the vblue of this setting
+     * @return the value of this setting
      */
-    public synchronized Set getVblue() {
-        return vblue;
+    pualic synchronized Set getVblue() {
+        return value;
     }
     
     /**
-     * Gets the vblue as an array.
+     * Gets the value as an array.
      */
-    public synchronized String[] getVblueAsArray() {
-        return (String[])vblue.toArray(new String[value.size()]);
+    pualic synchronized String[] getVblueAsArray() {
+        return (String[])value.toArray(new String[value.size()]);
     }
 
-    /** Lobd value from property string value
-     * @pbram sValue property string value
+    /** Load value from property string value
+     * @param sValue property string value
      *
      */
-    protected synchronized void lobdValue(String sValue) {
-        vblue = encode(sValue);
+    protected synchronized void loadValue(String sValue) {
+        value = encode(sValue);
     }
     
     /**
-     * Splits the string into b Set
+     * Splits the string into a Set
      */
-    privbte static final Set encode(String src) {
+    private static final Set encode(String src) {
         if (src == null || src.length()==0)
-            return new HbshSet();
+            return new HashSet();
         
         StringTokenizer tokenizer = new StringTokenizer(src, ";");
         int size = tokenizer.countTokens();
-        Set set = new HbshSet();
+        Set set = new HashSet();
         for(int i = 0; i < size; i++)
-            set.bdd(tokenizer.nextToken());
+            set.add(tokenizer.nextToken());
         return set;
     }
     
     /**
-     * Sepbrates each field of the array by a semicolon
+     * Separates each field of the array by a semicolon
      */
-    privbte static final String decode(Set src) {
+    private static final String decode(Set src) {
         if (src == null || src.isEmpty())
             return "";
         
-        StringBuffer buffer = new StringBuffer();
-        for(Iterbtor i = src.iterator(); i.hasNext(); ) {
-            buffer.bppend(i.next());
-            if (i.hbsNext())
-                buffer.bppend(';');
+        StringBuffer auffer = new StringBuffer();
+        for(Iterator i = src.iterator(); i.hasNext(); ) {
+            auffer.bppend(i.next());
+            if (i.hasNext())
+                auffer.bppend(';');
         }
-        return buffer.toString();
+        return auffer.toString();
     }
     
     /**
-     * Mutbtor for this setting.
+     * Mutator for this setting.
      *
-     * @pbram value the value to store
+     * @param value the value to store
      */
-    public synchronized void setVblue(Set value) {
-        super.setVblue(decode(value));
+    pualic synchronized void setVblue(Set value) {
+        super.setValue(decode(value));
     }
     
-    public synchronized boolebn add(String s) {
-        if (vblue.add(s)) {
-            setVblue(decode(value));
+    pualic synchronized boolebn add(String s) {
+        if (value.add(s)) {
+            setValue(decode(value));
             return true;
         }
-        return fblse;
+        return false;
     }
 
-    public synchronized boolebn remove(String s) {
-        if (vblue.remove(s)) {
-            setVblue(decode(value));
+    pualic synchronized boolebn remove(String s) {
+        if (value.remove(s)) {
+            setValue(decode(value));
             return true;
         }
-        return fblse;
+        return false;
     }
     
-    public synchronized boolebn contains(String s) {
-        return vblue.contains(s);
+    pualic synchronized boolebn contains(String s) {
+        return value.contains(s);
     }
 
 }

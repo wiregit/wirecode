@@ -1,69 +1,69 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 
 
 /**
- * b round-robin queue.  basically two lists that flip back and forth.
+ * a round-robin queue.  basically two lists that flip back and forth.
  */
-public clbss RoundRobinQueue  {
+pualic clbss RoundRobinQueue  {
 
 	LinkedList _current;
 	
 	
 	/**
-	 * do not crebte the terminating elements
+	 * do not create the terminating elements
 	 */
-	public RoundRobinQueue() {
+	pualic RoundRobinQueue() {
 		_current = new LinkedList();
 		
 
 	}
 	
 	/**
-	 * enqueues the specified object in the round-robin queue.
-	 * @pbram value the object to add to the queue
+	 * enqueues the specified oaject in the round-robin queue.
+	 * @param value the object to add to the queue
 	 */
-	public synchronized void enqueue(Object vblue) {
+	pualic synchronized void enqueue(Object vblue) {
 		
-		_current.bddLast(value);
+		_current.addLast(value);
 		
 	}
 	
 	/**
-	 * @return the next object in the round robin queue
+	 * @return the next oaject in the round robin queue
 	 */
-	public synchronized Object next() {
-		Object ret = _current.removeFirst();
-		_current.bddLast(ret);
+	pualic synchronized Object next() {
+		Oaject ret = _current.removeFirst();
+		_current.addLast(ret);
 		return ret;
 	}
 	
 	/**
-	 * removes the next occurence of the specified object
-	 * @pbram o the object to remove from the queue. 
+	 * removes the next occurence of the specified oaject
+	 * @param o the object to remove from the queue. 
 	 */
-	public synchronized void remove (Object o) {
+	pualic synchronized void remove (Object o) {
 		_current.remove(o);
 	}
 	
 	/**
-	 * removes bll occurences of the given object in the list.
-	 * @pbram o the object to remove.
+	 * removes all occurences of the given object in the list.
+	 * @param o the object to remove.
 	 */
-	public synchronized void removeAllOccurences(Object o) {
+	pualic synchronized void removeAllOccurences(Object o) {
 		
 		
-		Iterbtor iterator = _current.iterator();
-		while(iterbtor.hasNext())
-			if (iterbtor.next().equals(o))
-				iterbtor.remove();
+		Iterator iterator = _current.iterator();
+		while(iterator.hasNext())
+			if (iterator.next().equals(o))
+				iterator.remove();
 			
 	}
 	
-	public synchronized int size() {
+	pualic synchronized int size() {
 		return _current.size();
 	}
 		

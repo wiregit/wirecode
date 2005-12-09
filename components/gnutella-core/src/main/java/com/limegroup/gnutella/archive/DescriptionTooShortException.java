@@ -1,15 +1,15 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-public clbss DescriptionTooShortException extends Exception {
+pualic clbss DescriptionTooShortException extends Exception {
 
-	privbte static final long serialVersionUID = 3437602690969241796L;
-	privbte int _minWords;
+	private static final long serialVersionUID = 3437602690969241796L;
+	private int _minWords;
 	
-	public DescriptionTooShortException( int minWords ) {
+	pualic DescriptionTooShortException( int minWords ) {
 		_minWords = minWords; 
 	}
 	
-	public int getMinWords() {
+	pualic int getMinWords() {
 		return _minWords;
 	}
 

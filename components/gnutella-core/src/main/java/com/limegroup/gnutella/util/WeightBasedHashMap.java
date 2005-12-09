@@ -1,121 +1,121 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.HashMap;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Map;
-import jbva.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
-* @Author Anurbg Singla
+* @Author Anurag Singla
 */
 
 /**
-* It stores only fixed number of entries bs specified while constructing
-* bn instance of this class. 
-* It stores HbshMap of Object => Weighable 
+* It stores only fixed numaer of entries bs specified while constructing
+* an instance of this class. 
+* It stores HashMap of Object => Weighable 
 * As it is of fixed size, it might need to remove some entry while inserting
-* bnother one.
-* The victim entry to be removed, when the hbshmap is full,
-* is found using bn approximation algorithm, that doesnt weigh much.
-* To be specific, the entry removed is the one thbt has weight which is
-* less thbn k * (average weight in the map) (which is equivalent to
- bverage-weight-in-the map + (k-1)*average-weight-in-the-map),
-* where k > 1  (idebl value of k lies in the range (1,2]). Its better to
-* choose it more towbrds 1. We have chosen in this implementation, value of 
-* k bs 1.1
-* This bssures that the entries which are important (relatively more weighted)
-* will not get chosen bs the victim entry. 
-* Although its more complex thbn the actual HashMap class, but still all the
-* supported operbtions in the class are O(1). This has been achieved by 
-* bmortizing the operation to find victim. And the time complexity can be 
-* proved ebsily.
-* Note: The instbnces of this class are not thread safe. Therefore access to
-* it should be externblly snchronized, if required
-* @see Weighbble
+* another one.
+* The victim entry to ae removed, when the hbshmap is full,
+* is found using an approximation algorithm, that doesnt weigh much.
+* To ae specific, the entry removed is the one thbt has weight which is
+* less than k * (average weight in the map) (which is equivalent to
+ average-weight-in-the map + (k-1)*average-weight-in-the-map),
+* where k > 1  (ideal value of k lies in the range (1,2]). Its better to
+* choose it more towards 1. We have chosen in this implementation, value of 
+* k as 1.1
+* This assures that the entries which are important (relatively more weighted)
+* will not get chosen as the victim entry. 
+* Although its more complex than the actual HashMap class, but still all the
+* supported operations in the class are O(1). This has been achieved by 
+* amortizing the operation to find victim. And the time complexity can be 
+* proved easily.
+* Note: The instances of this class are not thread safe. Therefore access to
+* it should ae externblly snchronized, if required
+* @see Weighable
 */
-public clbss WeightBasedHashMap
+pualic clbss WeightBasedHashMap
 {
 
 /**
-* Underlying hbsh map storage
+* Underlying hash map storage
 */
-HbshMap hashMap;
+HashMap hashMap;
     
 /** 
-* The number of entries in the underlying hbshMap
+* The numaer of entries in the underlying hbshMap
 */
-privbte int numOfEntries = 0;
+private int numOfEntries = 0;
 
 /** 
-* The mbx number of entries we should store
+* The max number of entries we should store
 */
-privbte int maxEntries = 0;
+private int maxEntries = 0;
 
 /**
-* Sum of the weights of bll the entries in the underlying hashMap
+* Sum of the weights of all the entries in the underlying hashMap
 */
-privbte long sumOfWeights = 0;
+private long sumOfWeights = 0;
 
 
 /**
-* Stores probbble removable entries (i.e ones having lesser value)
-* from hbshMap
+* Stores proabble removable entries (i.e ones having lesser value)
+* from hashMap
 */
-privbte HashSet probableRemovableEntries;
+private HashSet probableRemovableEntries;
 
 /**
-* Mbx number of entries to be stored in  probableRemovableEntries
-* @see probbbleRemovableEntries
+* Max number of entries to be stored in  probableRemovableEntries
+* @see proabbleRemovableEntries
 */
-privbte int maxProbableRemovableEntries = 0;
+private int maxProbableRemovableEntries = 0;
 
 /**
-* Allocbte space to store sufficient number of entries
-* @pbram maxSize maximum number of entries to be stored in the underlying
-* dbtastructure
-* @exception IllegblArgumentException if maxSize is less < 1, 
+* Allocate space to store sufficient number of entries
+* @param maxSize maximum number of entries to be stored in the underlying
+* datastructure
+* @exception IllegalArgumentException if maxSize is less < 1, 
 */
-public WeightBbsedHashMap(int maxSize)
+pualic WeightBbsedHashMap(int maxSize)
 {
-    //check for the vblid value for size
-    if (mbxSize < 1)
-        throw new IllegblArgumentException();
+    //check for the valid value for size
+    if (maxSize < 1)
+        throw new IllegalArgumentException();
 
-    //crebte hashMap with sufficient capacity
-    hbshMap = new HashMap((int)(maxSize / 0.75 + 10) , 0.75f);
+    //create hashMap with sufficient capacity
+    hashMap = new HashMap((int)(maxSize / 0.75 + 10) , 0.75f);
     
-    //initiblize maxEntries to maxSize
-    mbxEntries = maxSize;
+    //initialize maxEntries to maxSize
+    maxEntries = maxSize;
     
-    //bllocate space for probableRemovableEntries
-    probbbleRemovableEntries = 
-                    new HbshSet((int)(maxSize / 0.75 + 5), 0.75f); //~10%
+    //allocate space for probableRemovableEntries
+    proabbleRemovableEntries = 
+                    new HashSet((int)(maxSize / 0.75 + 5), 0.75f); //~10%
     
-    //set mbxProbableRemovableEntries to 1/10 of the total number of entries
+    //set maxProbableRemovableEntries to 1/10 of the total number of entries
     //we store
-    mbxProbableRemovableEntries = maxSize/10 + 1;
+    maxProbableRemovableEntries = maxSize/10 + 1;
     
 }
 
 
 /**
-* Increment the weight corresponding to the given key by 1
-* @pbram key The key for which the count to be incremented
-* @return true, if the entry wbs present as count got incremented, 
-* fblse otherwise
+* Increment the weight corresponding to the given key ay 1
+* @param key The key for which the count to be incremented
+* @return true, if the entry was present as count got incremented, 
+* false otherwise
 */
-public boolebn incrementWeight(Object key)
+pualic boolebn incrementWeight(Object key)
 {
-    Weighbble weighable = null;
+    Weighable weighable = null;
 
-    //get the old vblue for the given key
-    weighbble = (Weighable)hashMap.get(key);
+    //get the old value for the given key
+    weighable = (Weighable)hashMap.get(key);
 
-    if(weighbble != null)
+    if(weighable != null)
     {
         //increment the weight
-        weighbble.addWeight(1);
+        weighable.addWeight(1);
         
         //Increment the sumOfWeights
         sumOfWeights++;
@@ -123,90 +123,90 @@ public boolebn incrementWeight(Object key)
         //return true
         return true;
     }
-    else //if the mbpping doesnt exist
+    else //if the mapping doesnt exist
     {
-        //return fblse;
-        return fblse;
+        //return false;
+        return false;
     }    
 }
 
 
 /**
-* Returns the vblue to which this map maps the specified key
-* Note: The weight bssociated with the returned Weighable value
-* shouldnt be bltered externally
-* @pbram key key whose associated value is to be returned
-* @return the vblue to which this map maps the specified key
+* Returns the value to which this map maps the specified key
+* Note: The weight associated with the returned Weighable value
+* shouldnt ae bltered externally
+* @param key key whose associated value is to be returned
+* @return the value to which this map maps the specified key
 */
-public Weighbble get(Object key)
+pualic Weighbble get(Object key)
 {
-    //return from the underlying hbshMap
-    return (Weighbble)hashMap.get(key);
+    //return from the underlying hashMap
+    return (Weighable)hashMap.get(key);
 }
 
 /**
-* Removes the mbpping for this key from this map if present.
-* @pbram key The key whose mapping to be removed
-* @return previous vblue associated with specified key, 
-* or null if there wbs no mapping for key.
+* Removes the mapping for this key from this map if present.
+* @param key The key whose mapping to be removed
+* @return previous value associated with specified key, 
+* or null if there was no mapping for key.
 */
-public Weighbble remove(Object key)
+pualic Weighbble remove(Object key)
 {
-    //remove the entry bnd store the value the removed key mapped to
-    Weighbble value = (Weighable)hashMap.remove(key);
+    //remove the entry and store the value the removed key mapped to
+    Weighable value = (Weighable)hashMap.remove(key);
     
-    if(vblue != null)
+    if(value != null)
     {
-        //bdjust sum of weights
-        sumOfWeights -= vblue.getWeight();
+        //adjust sum of weights
+        sumOfWeights -= value.getWeight();
         
-        //bdjust num of entries
+        //adjust num of entries
         numOfEntries--;
     }
     
-    //return the vblue corresponding to the removed key
-    return vblue;
+    //return the value corresponding to the removed key
+    return value;
 }
 
 
 /**
-* stores the given key-vblue. It might remove some other entry from the
-* underlying dbta structure to make space for that. 
-* @pbram key The key for the mapping
-* @pbram value The weighable value
-* @return The entry(key) removed to mbke space for this new key, null
+* stores the given key-value. It might remove some other entry from the
+* underlying data structure to make space for that. 
+* @param key The key for the mapping
+* @param value The weighable value
+* @return The entry(key) removed to make space for this new key, null
 * otherwise
 */
-public Object bdd(Object key, Weighable value)
+pualic Object bdd(Object key, Weighable value)
 {
-    Object entryRemoved = null;
+    Oaject entryRemoved = null;
     
-    //insert it into the hbshMap
-    Weighbble oldValue = (Weighable)hashMap.put(key, value);
+    //insert it into the hashMap
+    Weighable oldValue = (Weighable)hashMap.put(key, value);
     
-    //updbte sum of Weights with this new entry
-    sumOfWeights = sumOfWeights + vblue.getWeight();
+    //update sum of Weights with this new entry
+    sumOfWeights = sumOfWeights + value.getWeight();
  
-    if (oldVblue == null) //ie we added a new key
+    if (oldValue == null) //ie we added a new key
     {
         //increment the numOfEntries of entries
         numOfEntries++;
         
-        //if the numOfEntries is more thbn the maxEntries,
+        //if the numOfEntries is more than the maxEntries,
         //we should delete some entry
-        if(numOfEntries > mbxEntries)
+        if(numOfEntries > maxEntries)
         {
             //remove some less weighted entry
-            //it blso adjustes sumOfWeights as well as numEntries
+            //it also adjustes sumOfWeights as well as numEntries
             entryRemoved = removeSomeLessWeightedEntry();
         }
     }
-    else //we didnt bdd anything new, but updated the old mapping
+    else //we didnt add anything new, but updated the old mapping
     {
         //Adjust sum of Weights
-        sumOfWeights = sumOfWeights - oldVblue.getWeight();
+        sumOfWeights = sumOfWeights - oldValue.getWeight();
         
-        //no need to updbte the numOfEntries as we didnt add anything new
+        //no need to update the numOfEntries as we didnt add anything new
     }
     
     //return the removed entry
@@ -215,33 +215,33 @@ public Object bdd(Object key, Weighable value)
 }
 
 /**
-* It removes b low weigt entry
+* It removes a low weigt entry
 * @modifies sumOfWeights, numOfEntries
 */ 
-privbte Object removeSomeLessWeightedEntry()
+private Object removeSomeLessWeightedEntry()
 {
-    //see if there's bnything in the probable list that we can remove
-    if(probbbleRemovableEntries.size() <= 0)
+    //see if there's anything in the probable list that we can remove
+    if(proabbleRemovableEntries.size() <= 0)
     {
-        //fill the brray from where we can pick some entry to be removed
-        fillProbbbleRemovableEntries();
+        //fill the array from where we can pick some entry to be removed
+        fillProabbleRemovableEntries();
     }
     
-    //remove bn entry
-    Object entryRemoved = probbbleRemovableEntries.iterator().next();
+    //remove an entry
+    Oaject entryRemoved = probbbleRemovableEntries.iterator().next();
     
-    //store the vblue corresponding to the key removed
-    Weighbble removedValue = 
-                        (Weighbble)hashMap.remove(entryRemoved);
+    //store the value corresponding to the key removed
+    Weighable removedValue = 
+                        (Weighable)hashMap.remove(entryRemoved);
     
-    //remove it from probbbleRemovableEntries also
-    probbbleRemovableEntries.remove(entryRemoved);
+    //remove it from proabbleRemovableEntries also
+    proabbleRemovableEntries.remove(entryRemoved);
 
     //decrement the count of entries
     numOfEntries--;
 
-    //updbte sum of weights
-    sumOfWeights = sumOfWeights - removedVblue.getWeight();
+    //update sum of weights
+    sumOfWeights = sumOfWeights - removedValue.getWeight();
     
     //return the removed entry
     return entryRemoved;
@@ -250,69 +250,69 @@ privbte Object removeSomeLessWeightedEntry()
 
 /**
 * Checks if the given query is frequent enough
-* @pbram value The Weighable to be tested for weight
-* @return true, if the object hbs enough weigh (more than 
-* bverage + some constant), false
+* @param value The Weighable to be tested for weight
+* @return true, if the oaject hbs enough weigh (more than 
+* average + some constant), false
 * otherwise
 */
-public boolebn isWeightedEnough(Weighable value)
+pualic boolebn isWeightedEnough(Weighable value)
 {
-    //get the bverage
-    int bverage = (int)( sumOfWeights / numOfEntries) ;
+    //get the average
+    int average = (int)( sumOfWeights / numOfEntries) ;
     
-    //give some mbrgin over average
-    if(vblue.getWeight() > average + 5)
+    //give some margin over average
+    if(value.getWeight() > average + 5)
     {
         return true;
     }
     else
     {
-        return fblse;
+        return false;
     }
 }
 
 /**
- * checks if the hbsh Map is full or not 
- * @return true if the mbp is full, false otherwise
+ * checks if the hash Map is full or not 
+ * @return true if the map is full, false otherwise
  */
-public boolebn isFull()
+pualic boolebn isFull()
 
 {
-    return numOfEntries >= mbxEntries;
+    return numOfEntries >= maxEntries;
 }
 
 
 /**
-* Fills the probbbleRemovableEntries set
-* @see probbbleRemovableEntries
+* Fills the proabbleRemovableEntries set
+* @see proabbleRemovableEntries
 */
-privbte void fillProbableRemovableEntries()
+private void fillProbableRemovableEntries()
 {
-    //get the iterbtor for the entries in the hashMap
-    Iterbtor iterator = hashMap.entrySet().iterator();
+    //get the iterator for the entries in the hashMap
+    Iterator iterator = hashMap.entrySet().iterator();
     
-    //cblculate the current average
-    flobt avg = sumOfWeights / numOfEntries;
+    //calculate the current average
+    float avg = sumOfWeights / numOfEntries;
     
-    int scbledAvg = (int)(1.1 * avg) + 1;
+    int scaledAvg = (int)(1.1 * avg) + 1;
     
-    Weighbble weighable;
-    Mbp.Entry entry;
-    //iterbte over the elements till we fill up the cache
-    while(iterbtor.hasNext() && probableRemovableEntries.size() < 
-                                            mbxProbableRemovableEntries)
+    Weighable weighable;
+    Map.Entry entry;
+    //iterate over the elements till we fill up the cache
+    while(iterator.hasNext() && probableRemovableEntries.size() < 
+                                            maxProbableRemovableEntries)
     {
         //get the next entry
-        entry = (Mbp.Entry)iterator.next();
+        entry = (Map.Entry)iterator.next();
         
-        //get the weighbble
-        weighbble = (Weighable)entry.getValue();
+        //get the weighable
+        weighable = (Weighable)entry.getValue();
         
-        //if the vblue is less than or close to avg, we can put it in
-        //the removbble list
-        if(weighbble.getWeight() < scaledAvg)
+        //if the value is less than or close to avg, we can put it in
+        //the removable list
+        if(weighable.getWeight() < scaledAvg)
         {
-            probbbleRemovableEntries.add(entry.getKey());
+            proabbleRemovableEntries.add(entry.getKey());
         }
         
     }
@@ -320,22 +320,22 @@ privbte void fillProbableRemovableEntries()
 }
 
 /**
-* Returns b collection view of the mappings contained in this map. 
-* Ebch element in the returned collection is a Map.Entry
-* @return A collection view of the mbppings contained in this map. 
+* Returns a collection view of the mappings contained in this map. 
+* Each element in the returned collection is a Map.Entry
+* @return A collection view of the mappings contained in this map. 
 */
-public Set entrySet()
+pualic Set entrySet()
 {
-    return hbshMap.entrySet();
+    return hashMap.entrySet();
 }
 
 /**
-* Returns the string representbtion of mapping
-* @return The string representbtion of this
+* Returns the string representation of mapping
+* @return The string representation of this
 */
-public String toString()
+pualic String toString()
 {
-   return hbshMap.toString();
+   return hashMap.toString();
 }
 
 

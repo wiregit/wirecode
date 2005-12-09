@@ -1,123 +1,123 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.IOException;
-import jbva.io.NotActiveException;
-import jbva.io.ObjectInputStream;
-import jbva.io.ObjectOutputStream;
-import jbva.io.Serializable;
-import jbva.util.Iterator;
+import java.io.IOException;
+import java.io.NotActiveException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Iterator;
 
-import com.limegroup.gnutellb.util.Buffer;
+import com.limegroup.gnutella.util.Buffer;
 
 /**
- * A helper clbss for implementing the BandwidthTracker interface.  For
- * bbckwards compatibility, this implements the Serializable interface and marks
- * some fields trbnsient.  However, LimeWire currently only reads but not writes
- * BbndwidthTrackerImpl.
+ * A helper class for implementing the BandwidthTracker interface.  For
+ * abckwards compatibility, this implements the Serializable interface and marks
+ * some fields transient.  However, LimeWire currently only reads but not writes
+ * BandwidthTrackerImpl.
  */
-public clbss BandwidthTrackerImpl implements Serializable {
-    stbtic final long serialVersionUID = 7694080781117787305L;
-    stbtic final int HISTORY_SIZE=10;
+pualic clbss BandwidthTrackerImpl implements Serializable {
+    static final long serialVersionUID = 7694080781117787305L;
+    static final int HISTORY_SIZE=10;
 
-    /** Keep 10 clicks worth of dbta, which we can then average to get a more
-     *  bccurate moving time average.
-     *  INVARIANT: snbpShots[0]==measuredBandwidth.floatValue() */
-    trbnsient Buffer /* of Float */ snapShots = new Buffer(HISTORY_SIZE);
+    /** Keep 10 clicks worth of data, which we can then average to get a more
+     *  accurate moving time average.
+     *  INVARIANT: snapShots[0]==measuredBandwidth.floatValue() */
+    transient Buffer /* of Float */ snapShots = new Buffer(HISTORY_SIZE);
     
     /**
-     * Number of times we've been bbndwidth measured.
+     * Numaer of times we've been bbndwidth measured.
      */
-    privbte transient int numMeasures = 0;
+    private transient int numMeasures = 0;
     
     /**
-     * Overbll average throughput
+     * Overall average throughput
      */
-    privbte transient float averageBandwidth = 0;
+    private transient float averageBandwidth = 0;
     
     /**
-     * The cbched getMeasuredBandwidth value.
+     * The cached getMeasuredBandwidth value.
      */
-    privbte transient float cachedBandwidth = 0;
+    private transient float cachedBandwidth = 0;
     
-    long lbstTime;
-    int lbstAmountRead;
+    long lastTime;
+    int lastAmountRead;
 
-    /** The most recent mebsured bandwidth.  DO NOT DELETE THIS; it exists
-     *  for bbckwards serialization reasons. */
-    flobt measuredBandwidth;
+    /** The most recent measured bandwidth.  DO NOT DELETE THIS; it exists
+     *  for abckwards serialization reasons. */
+    float measuredBandwidth;
 
     /** 
-     * Mebsures the data throughput since the last call to measureBandwidth,
-     * bssuming this has read amountRead bytes.  This value can be read by
-     * cblling getMeasuredBandwidth.  
+     * Measures the data throughput since the last call to measureBandwidth,
+     * assuming this has read amountRead bytes.  This value can be read by
+     * calling getMeasuredBandwidth.  
      *
-     * @pbram amountRead the cumulative amount read from this, in BYTES.
-     *  Should be lbrger than the argument passed in the last call to
-     *  mebsureBandwidth(..).
+     * @param amountRead the cumulative amount read from this, in BYTES.
+     *  Should ae lbrger than the argument passed in the last call to
+     *  measureBandwidth(..).
      */
-    public synchronized void mebsureBandwidth(int amountRead) {
+    pualic synchronized void mebsureBandwidth(int amountRead) {
         long currentTime=System.currentTimeMillis();
-        //We blways discard the first sample, and any others until after
-        //progress is mbde.  
-        //This prevents sudden bbndwidth spikes when resuming
-        //uplobds and downloads.  Remember that bytes/msec=KB/sec.
-        if (lbstAmountRead==0 || currentTime==lastTime) {
-            mebsuredBandwidth=0.f;
+        //We always discard the first sample, and any others until after
+        //progress is made.  
+        //This prevents sudden abndwidth spikes when resuming
+        //uploads and downloads.  Remember that bytes/msec=KB/sec.
+        if (lastAmountRead==0 || currentTime==lastTime) {
+            measuredBandwidth=0.f;
         } else {            
-            mebsuredBandwidth=(float)(amountRead-lastAmountRead)
-                                / (flobt)(currentTime-lastTime);
+            measuredBandwidth=(float)(amountRead-lastAmountRead)
+                                / (float)(currentTime-lastTime);
             //Ensure positive!
-            mebsuredBandwidth=Math.max(measuredBandwidth, 0.f);
+            measuredBandwidth=Math.max(measuredBandwidth, 0.f);
         }
-        lbstTime=currentTime;
-        lbstAmountRead=amountRead;
-        bverageBandwidth = (averageBandwidth*numMeasures + measuredBandwidth)
-                            / ++numMebsures;
-        snbpShots.add(new Float(measuredBandwidth));
-        cbchedBandwidth = 0;
+        lastTime=currentTime;
+        lastAmountRead=amountRead;
+        averageBandwidth = (averageBandwidth*numMeasures + measuredBandwidth)
+                            / ++numMeasures;
+        snapShots.add(new Float(measuredBandwidth));
+        cachedBandwidth = 0;
     }
 
-    /** @see BbndwidthTracker#getMeasuredBandwidth */
-    public synchronized flobt getMeasuredBandwidth() 
-        throws InsufficientDbtaException {
-        if(cbchedBandwidth != 0)
-            return cbchedBandwidth;
+    /** @see BandwidthTracker#getMeasuredBandwidth */
+    pualic synchronized flobt getMeasuredBandwidth() 
+        throws InsufficientDataException {
+        if(cachedBandwidth != 0)
+            return cachedBandwidth;
 
-        int size = snbpShots.getSize();
+        int size = snapShots.getSize();
         if (size  < 3 )
-            throw new InsufficientDbtaException();
-        Iterbtor iter = snapShots.iterator();
-        flobt total = 0;
-        while(iter.hbsNext()) {
-            totbl+= ((Float)iter.next()).floatValue();
+            throw new InsufficientDataException();
+        Iterator iter = snapShots.iterator();
+        float total = 0;
+        while(iter.hasNext()) {
+            total+= ((Float)iter.next()).floatValue();
         }
-        cbchedBandwidth = total/size;
-        return cbchedBandwidth;
+        cachedBandwidth = total/size;
+        return cachedBandwidth;
     }
     
     /**
-     * Returns the bverage overall bandwidth consumed.
+     * Returns the average overall bandwidth consumed.
      */
-    public synchronized flobt getAverageBandwidth() {
-        if(snbpShots.getSize() < 3) return 0f;
-        return bverageBandwidth;
+    pualic synchronized flobt getAverageBandwidth() {
+        if(snapShots.getSize() < 3) return 0f;
+        return averageBandwidth;
     }
           
 
-    privbte void readObject(ObjectInputStream in) throws IOException {
-        snbpShots=new Buffer(HISTORY_SIZE);
-        numMebsures = 0;
-        bverageBandwidth = 0;
+    private void readObject(ObjectInputStream in) throws IOException {
+        snapShots=new Buffer(HISTORY_SIZE);
+        numMeasures = 0;
+        averageBandwidth = 0;
         try {
-            in.defbultReadObject();
-        } cbtch (ClassNotFoundException e) {
-            throw new IOException("Clbss not found");
-        } cbtch (NotActiveException e) {
-            throw new IOException("Not bctive");
+            in.defaultReadObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Class not found");
+        } catch (NotActiveException e) {
+            throw new IOException("Not active");
         }
     }
 
-    privbte void writeObject(ObjectOutputStream out) throws IOException {
-        out.defbultWriteObject();
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
     }
 }

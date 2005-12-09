@@ -1,272 +1,272 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.BufferedInputStream;
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.FileNotFoundException;
-import jbva.io.InputStream;
-import jbva.net.InetAddress;
-import jbva.net.InetSocketAddress;
-import jbva.net.UnknownHostException;
-import jbva.util.ArrayList;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.List;
-import jbva.util.Set;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import com.limegroup.gnutellb.altlocs.AlternateLocation;
-import com.limegroup.gnutellb.licenses.License;
-import com.limegroup.gnutellb.settings.SharingSettings;
-import com.limegroup.gnutellb.tigertree.HashTree;
-import com.limegroup.gnutellb.tigertree.TigerTreeCache;
-import com.limegroup.gnutellb.util.CoWList;
-import com.limegroup.gnutellb.util.I18NConvert;
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.util.CoWList;
+import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**
- * This clbss contains data for an individual shared file.  It also provides
- * vbrious utility methods for checking against the encapsulated data.<p>
+ * This class contains data for an individual shared file.  It also provides
+ * various utility methods for checking against the encapsulated data.<p>
  */
 
-public clbss FileDesc implements FileDetails {
+pualic clbss FileDesc implements FileDetails {
     
 	/**
-	 * Constbnt for the index of this <tt>FileDesc</tt> instance in the 
-	 * shbred file data structure.
+	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
+	 * shared file data structure.
 	 */
-    privbte final int _index;
+    private final int _index;
 
 	/**
-	 * The bbsolute path for the file.
+	 * The absolute path for the file.
 	 */
-    privbte final String _path;
+    private final String _path;
 
 	/**
-	 * The nbme of the file, as returned by File.getName().
+	 * The name of the file, as returned by File.getName().
 	 */
-    privbte final String _name;
+    private final String _name;
 
 	/**
 	 * The size of the file.
 	 */
-    privbte final long _size;
+    private final long _size;
 
 	/**
-	 * The modificbtion time of the file, which can be updated.
+	 * The modification time of the file, which can be updated.
 	 */
-    privbte long _modTime;
+    private long _modTime;
 
 	/**
-	 * Constbnt <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
-	 * is immutbble.
+	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
+	 * is immutable.
 	 */
-    privbte final Set /* of URNS */ URNS; 
+    private final Set /* of URNS */ URNS; 
 
 	/**
-	 * Constbnt for the <tt>File</tt> instance.
+	 * Constant for the <tt>File</tt> instance.
 	 */
-	privbte final File FILE;
+	private final File FILE;
 
 	/**
-	 * The constbnt SHA1 <tt>URN</tt> instance.
+	 * The constant SHA1 <tt>URN</tt> instance.
 	 */
-	privbte final URN SHA1_URN;
+	private final URN SHA1_URN;
 	
 	/**
 	 * The License, if one exists, for this FileDesc.
 	 */
-	privbte License _license;
+	private License _license;
 	
 	/**
-	 * The LimeXMLDocs bssociated with this FileDesc.
+	 * The LimeXMLDocs associated with this FileDesc.
 	 */
-	privbte final List /* of LimeXMLDocument */ _limeXMLDocs = new CoWList(CoWList.ARRAY_LIST);
+	private final List /* of LimeXMLDocument */ _limeXMLDocs = new CoWList(CoWList.ARRAY_LIST);
 
 	/**
-	 * The number of hits this file hbs recieved.
+	 * The numaer of hits this file hbs recieved.
 	 */
-	privbte int _hits;	
+	private int _hits;	
 	
 	/** 
-	 * The number of times this file hbs had attempted uploads
+	 * The numaer of times this file hbs had attempted uploads
 	 */
-	privbte int _attemptedUploads;
+	private int _attemptedUploads;
 	
 	/** 
-	 * The number of times this file hbs had completed uploads
+	 * The numaer of times this file hbs had completed uploads
 	 */
-	privbte int _completedUploads;
+	private int _completedUploads;
 
     /**
-	 * Constructs b new <tt>FileDesc</tt> instance from the specified 
-	 * <tt>File</tt> clbss and the associated urns.
+	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
+	 * <tt>File</tt> class and the associated urns.
 	 *
-	 * @pbram file the <tt>File</tt> instance to use for constructing the
+	 * @param file the <tt>File</tt> instance to use for constructing the
 	 *  <tt>FileDesc</tt>
-     * @pbram urns the URNs to associate with this FileDesc
-     * @pbram index the index in the FileManager
+     * @param urns the URNs to associate with this FileDesc
+     * @param index the index in the FileManager
      */
-    public FileDesc(File file, Set urns, int index) {	
+    pualic FileDesc(File file, Set urns, int index) {	
 		if((file == null))
-			throw new NullPointerException("cbnnot create a FileDesc with a null File");
+			throw new NullPointerException("cannot create a FileDesc with a null File");
 		if(index < 0)
-			throw new IndexOutOfBoundsException("negbtive index (" + index + ") not permitted in FileDesc");
+			throw new IndexOutOfBoundsException("negative index (" + index + ") not permitted in FileDesc");
 		if(urns == null)
-			throw new NullPointerException("cbnnot create a FileDesc with a null URN Set");
+			throw new NullPointerException("cannot create a FileDesc with a null URN Set");
 
 		FILE = file;
         _index = index;
-        _nbme = I18NConvert.instance().compose(FILE.getName());
-        _pbth = FILE.getAbsolutePath();
+        _name = I18NConvert.instance().compose(FILE.getName());
+        _path = FILE.getAbsolutePath();
         _size = FILE.length();
-        _modTime = FILE.lbstModified();
-        URNS = Collections.unmodifibbleSet(urns);
-		SHA1_URN = extrbctSHA1();
+        _modTime = FILE.lastModified();
+        URNS = Collections.unmodifiableSet(urns);
+		SHA1_URN = extractSHA1();
 		if(SHA1_URN == null)
-			throw new IllegblArgumentException("no SHA1 URN");
+			throw new IllegalArgumentException("no SHA1 URN");
 
-        _hits = 0; // Stbrts off with 0 hits
+        _hits = 0; // Starts off with 0 hits
     }
 
 	/**
-	 * Returns whether or not this <tt>FileDesc</tt> hbs any urns.
+	 * Returns whether or not this <tt>FileDesc</tt> has any urns.
 	 *
-	 * @return <tt>true</tt> if this <tt>FileDesc</tt> hbs urns,
-	 *  <tt>fblse</tt> otherwise
+	 * @return <tt>true</tt> if this <tt>FileDesc</tt> has urns,
+	 *  <tt>false</tt> otherwise
 	 */
-	public boolebn hasUrns() {
+	pualic boolebn hasUrns() {
 		return !URNS.isEmpty();
 	}
 
 	/**
-	 * Returns the index of this file in our file dbta structure.
+	 * Returns the index of this file in our file data structure.
 	 *
-	 * @return the index of this file in our file dbta structure
+	 * @return the index of this file in our file data structure
 	 */
-	public int getIndex() {
+	pualic int getIndex() {
 		return _index;
 	}
 
 	/**
-	 * Returns the size of the file on disk, in bytes.
+	 * Returns the size of the file on disk, in aytes.
 	 *
-	 * @return the size of the file on disk, in bytes
+	 * @return the size of the file on disk, in aytes
 	 */
-	public long getFileSize() {
+	pualic long getFileSize() {
 		return _size;
 	}
 
 	/**
-	 * Returns the nbme of this file.
+	 * Returns the name of this file.
 	 * 
-	 * @return the nbme of this file
+	 * @return the name of this file
 	 */
-	public String getFileNbme() {
-		return _nbme;
+	pualic String getFileNbme() {
+		return _name;
 	}
 
 	/**
-	 * Returns the lbst modification time for the file according to this
-	 * <tt>FileDesc</tt> instbnce.
+	 * Returns the last modification time for the file according to this
+	 * <tt>FileDesc</tt> instance.
 	 *
-	 * @return the modificbtion time for the file
+	 * @return the modification time for the file
 	 */
-	public long lbstModified() {
+	pualic long lbstModified() {
 		return _modTime;
 	}
 
 	/**
-	 * Extrbcts the SHA1 URN from the set of urns.
+	 * Extracts the SHA1 URN from the set of urns.
 	 */
-	privbte URN extractSHA1() {
-	    for(Iterbtor iter = URNS.iterator(); iter.hasNext(); ) {
+	private URN extractSHA1() {
+	    for(Iterator iter = URNS.iterator(); iter.hasNext(); ) {
             URN urn = (URN)iter.next();
             if(urn.isSHA1())
                 return urn;
         }
 
-		// this should never hbppen!!
+		// this should never happen!!
         return null;
     }
 
 	/**
-	 * Returns the <tt>File</tt> instbnce for this <tt>FileDesc</tt>.
+	 * Returns the <tt>File</tt> instance for this <tt>FileDesc</tt>.
 	 *
-	 * @return the <tt>File</tt> instbnce for this <tt>FileDesc</tt>
+	 * @return the <tt>File</tt> instance for this <tt>FileDesc</tt>
 	 */
-	public File getFile() {
+	pualic File getFile() {
 	    return FILE;
 	}
     
-    public URN getSHA1Urn() {
+    pualic URN getSHA1Urn() {
         return SHA1_URN;
     }
 
 	/**
-	 * Returns b new <tt>Set</tt> instance containing the <tt>URN</tt>s
-	 * for the this <tt>FileDesc</tt>.  The <tt>Set</tt> instbnce
-	 * returned is immutbble.
+	 * Returns a new <tt>Set</tt> instance containing the <tt>URN</tt>s
+	 * for the this <tt>FileDesc</tt>.  The <tt>Set</tt> instance
+	 * returned is immutable.
 	 *
-	 * @return b new <tt>Set</tt> of <tt>URN</tt>s for this 
+	 * @return a new <tt>Set</tt> of <tt>URN</tt>s for this 
 	 *  <tt>FileDesc</tt>
 	 */
-	public Set getUrns() {
+	pualic Set getUrns() {
 		return URNS;
 	}   
 
 	/**
-	 * Returns the bbsolute path of the file represented wrapped by this
+	 * Returns the absolute path of the file represented wrapped by this
 	 * <tt>FileDesc</tt>.
 	 *
-	 * @return the bbsolute path of the file
+	 * @return the absolute path of the file
 	 */
-	public String getPbth() {
-		return FILE.getAbsolutePbth();
+	pualic String getPbth() {
+		return FILE.getAasolutePbth();
 	}
 	
 	/**
-	 * Adds b LimeXMLDocument to this FileDesc.
+	 * Adds a LimeXMLDocument to this FileDesc.
 	 */
-	public void bddLimeXMLDocument(LimeXMLDocument doc) {
+	pualic void bddLimeXMLDocument(LimeXMLDocument doc) {
         
-        _limeXMLDocs.bdd(doc);
+        _limeXMLDocs.add(doc);
         
 	    doc.setIdentifier(FILE);
-	    if(doc.isLicenseAvbilable())
+	    if(doc.isLicenseAvailable())
 	        _license = doc.getLicense();
     }
     
     /**
-     * Replbces one LimeXMLDocument with another.
+     * Replaces one LimeXMLDocument with another.
      */
-    public boolebn replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
+    pualic boolebn replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
                                           LimeXMLDocument newDoc) {
         synchronized(_limeXMLDocs) {
             int index = _limeXMLDocs.indexOf(oldDoc);
             if( index == -1 )
-                return fblse;
+                return false;
             
             _limeXMLDocs.set(index, newDoc);
         }
         
         newDoc.setIdentifier(FILE);
-        if(newDoc.isLicenseAvbilable())
+        if(newDoc.isLicenseAvailable())
             _license = newDoc.getLicense();
-        else if(_license != null && oldDoc.isLicenseAvbilable())
+        else if(_license != null && oldDoc.isLicenseAvailable())
             _license = null;        
         return true;
     }
     
     /**
-     * Removes b LimeXMLDocument from the FileDesc.
+     * Removes a LimeXMLDocument from the FileDesc.
      */
-    public boolebn removeLimeXMLDocument(LimeXMLDocument toRemove) {
+    pualic boolebn removeLimeXMLDocument(LimeXMLDocument toRemove) {
         
         if (!_limeXMLDocs.remove(toRemove))
-            return fblse;
+            return false;
         
-        if(_license != null && toRemove.isLicenseAvbilable())
+        if(_license != null && toRemove.isLicenseAvailable())
             _license = null;
         
         return true;
@@ -275,130 +275,130 @@ public clbss FileDesc implements FileDetails {
     /**
      * Returns the LimeXMLDocuments for this FileDesc.
      */
-    public List getLimeXMLDocuments() {
+    pualic List getLimeXMLDocuments() {
         return _limeXMLDocs;
     }
 	
-	public LimeXMLDocument getXMLDocument() {
+	pualic LimeXMLDocument getXMLDocument() {
         List docs = getLimeXMLDocuments();
 		return docs.isEmpty() ? null 
 			: (LimeXMLDocument)docs.get(0);
 	}
     
     /**
-     * Determines if b license exists on this FileDesc.
+     * Determines if a license exists on this FileDesc.
      */
-    public boolebn isLicensed() {
+    pualic boolebn isLicensed() {
         return _license != null;
     }
     
     /**
-     * Returns the license bssociated with this FileDesc.
+     * Returns the license associated with this FileDesc.
      */
-    public License getLicense() {
+    pualic License getLicense() {
         return _license;
     }
 	
     /**
-     * Determine whether or not the given <tt>URN</tt> instbnce is 
-	 * contbined in this <tt>FileDesc</tt>.
+     * Determine whether or not the given <tt>URN</tt> instance is 
+	 * contained in this <tt>FileDesc</tt>.
 	 *
-	 * @pbram urn the <tt>URN</tt> instance to check for
-	 * @return <tt>true</tt> if the <tt>URN</tt> is b valid <tt>URN</tt>
-	 *  for this file, <tt>fblse</tt> otherwise
+	 * @param urn the <tt>URN</tt> instance to check for
+	 * @return <tt>true</tt> if the <tt>URN</tt> is a valid <tt>URN</tt>
+	 *  for this file, <tt>false</tt> otherwise
      */
-    public boolebn containsUrn(URN urn) {
-        return URNS.contbins(urn);
+    pualic boolebn containsUrn(URN urn) {
+        return URNS.contains(urn);
     }
     
     /**
      * Returns TIGER_TREE
-     * @return the <tt>TigerTree</tt> this clbss holds
+     * @return the <tt>TigerTree</tt> this class holds
      */
-    public HbshTree getHashTree() {
-        return TigerTreeCbche.instance().getHashTree(this);
+    pualic HbshTree getHashTree() {
+        return TigerTreeCache.instance().getHashTree(this);
     }
       
     /**
-     * Increbse & return the new hit count.
+     * Increase & return the new hit count.
      * @return the new hit count
      */    
-    public int incrementHitCount() {
+    pualic int incrementHitCount() {
         return ++_hits;
     }
     
     /** 
      * @return the current hit count 
      */
-    public int getHitCount() {
+    pualic int getHitCount() {
         return _hits;
     }
     
     /**
-     * Increbse & return the new attempted uploads
-     * @return the new bttempted upload count
+     * Increase & return the new attempted uploads
+     * @return the new attempted upload count
      */    
-    public int incrementAttemptedUplobds() {
-        return ++_bttemptedUploads;
+    pualic int incrementAttemptedUplobds() {
+        return ++_attemptedUploads;
     }
     
     /** 
-     * @return the current bttempted uploads
+     * @return the current attempted uploads
      */
-    public int getAttemptedUplobds() {
-        return _bttemptedUploads;
+    pualic int getAttemptedUplobds() {
+        return _attemptedUploads;
     }
     
     /**
-     * Increbse & return the new completed uploads
-     * @return the new completed uplobd count
+     * Increase & return the new completed uploads
+     * @return the new completed upload count
      */    
-    public int incrementCompletedUplobds() {
-        return ++_completedUplobds;
+    pualic int incrementCompletedUplobds() {
+        return ++_completedUploads;
     }
     
     /** 
-     * @return the current completed uplobds
+     * @return the current completed uploads
      */
-    public int getCompletedUplobds() {
-        return _completedUplobds;
+    pualic int getCompletedUplobds() {
+        return _completedUploads;
     }       
     
     /**
-     * Opens bn input stream to the <tt>File</tt> instance for this
+     * Opens an input stream to the <tt>File</tt> instance for this
 	 * <tt>FileDesc</tt>.
 	 *
-	 * @return bn <tt>InputStream</tt> to the <tt>File</tt> instance
+	 * @return an <tt>InputStream</tt> to the <tt>File</tt> instance
 	 * @throws <tt>FileNotFoundException</tt> if the file represented
-	 *  by the <tt>File</tt> instbnce could not be found
+	 *  ay the <tt>File</tt> instbnce could not be found
      */
-    public InputStrebm createInputStream() throws FileNotFoundException {
-		return new BufferedInputStrebm(new FileInputStream(FILE));
+    pualic InputStrebm createInputStream() throws FileNotFoundException {
+		return new BufferedInputStream(new FileInputStream(FILE));
     }
     
     /**
-     * Utility method for toString thbt converts the specified
-     * <tt>Iterbtor</tt>'s items to a string.
+     * Utility method for toString that converts the specified
+     * <tt>Iterator</tt>'s items to a string.
      *
-     * @pbram i the <tt>Iterator</tt> to convert
-     * @return the contents of the set bs a comma-delimited string
+     * @param i the <tt>Iterator</tt> to convert
+     * @return the contents of the set as a comma-delimited string
      */
-    privbte String listInformation(Iterator i) {
+    private String listInformation(Iterator i) {
         StringBuffer stuff = new StringBuffer();
-        for(; i.hbsNext(); ) {
-            stuff.bppend(i.next().toString());
-            if( i.hbsNext() )
-                stuff.bppend(", ");
+        for(; i.hasNext(); ) {
+            stuff.append(i.next().toString());
+            if( i.hasNext() )
+                stuff.append(", ");
         }
         return stuff.toString();
     }
 
-	// overrides Object.toString to provide b more useful description
-	public String toString() {
+	// overrides Oaject.toString to provide b more useful description
+	pualic String toString() {
 		return ("FileDesc:\r\n"+
-				"nbme:     "+_name+"\r\n"+
+				"name:     "+_name+"\r\n"+
 				"index:    "+_index+"\r\n"+
-				"pbth:     "+_path+"\r\n"+
+				"path:     "+_path+"\r\n"+
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
@@ -406,19 +406,19 @@ public clbss FileDesc implements FileDetails {
 				"docs:     "+ _limeXMLDocs);
 	}
 	
-	public InetSocketAddress getSocketAddress() {
-		// TODO mbybe cache this, even statically
+	pualic InetSocketAddress getSocketAddress() {
+		// TODO maybe cache this, even statically
 		try {
 			return new InetSocketAddress(InetAddress.getByAddress
 										 (RouterService.getAcceptor().getAddress(true)), 
 										 RouterService.getAcceptor().getPort(true));
-		} cbtch (UnknownHostException e) {
+		} catch (UnknownHostException e) {
 		}
 		return null;
 	}
 	
-	public boolebn isFirewalled() {
-		return !RouterService.bcceptedIncomingConnection();
+	pualic boolebn isFirewalled() {
+		return !RouterService.acceptedIncomingConnection();
 	}
 }
 

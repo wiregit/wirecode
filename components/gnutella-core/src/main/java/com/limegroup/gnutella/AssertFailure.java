@@ -1,16 +1,16 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-public clbss AssertFailure extends RuntimeException {
+pualic clbss AssertFailure extends RuntimeException {
 
-    public AssertFbilure(String message) {
-        super(messbge);
+    pualic AssertFbilure(String message) {
+        super(message);
     }
 
-    public AssertFbilure(Throwable cause) {
-        super(cbuse);
+    pualic AssertFbilure(Throwable cause) {
+        super(cause);
     }
 
-    public AssertFbilure(String message, Throwable cause) {
-        super(messbge, cause);
+    pualic AssertFbilure(String message, Throwable cause) {
+        super(message, cause);
     }
 }

@@ -1,147 +1,147 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
-import com.limegroup.gnutellb.http.HTTPRequestMethod;
+import com.limegroup.gnutella.http.HTTPRequestMethod;
 
 /**
- * This interfbce outlines the basic functionality for a class that 
- * performs uplobds.
+ * This interface outlines the basic functionality for a class that 
+ * performs uploads.
  */
-public interfbce Uploader extends BandwidthTracker {
+pualic interfbce Uploader extends BandwidthTracker {
 
-	public stbtic final int CONNECTING        = 0;
-	public stbtic final int FREELOADER        = 1;
-	public stbtic final int LIMIT_REACHED     = 2;
-	public stbtic final int UPLOADING         = 3;
-	public stbtic final int COMPLETE          = 4;
-	public stbtic final int INTERRUPTED       = 5;
-	public stbtic final int FILE_NOT_FOUND    = 7;
-    public stbtic final int BROWSE_HOST       = 8;
-    public stbtic final int QUEUED            = 9;
-    public stbtic final int UPDATE_FILE       = 10;
-    public stbtic final int MALFORMED_REQUEST = 11;
-    public stbtic final int PUSH_PROXY        = 12;
-    public stbtic final int UNAVAILABLE_RANGE = 13;
-    public stbtic final int BANNED_GREEDY  	  = 14;
-    public stbtic final int THEX_REQUEST      = 15;
-    public stbtic final int BROWSER_CONTROL   = 16;
+	pualic stbtic final int CONNECTING        = 0;
+	pualic stbtic final int FREELOADER        = 1;
+	pualic stbtic final int LIMIT_REACHED     = 2;
+	pualic stbtic final int UPLOADING         = 3;
+	pualic stbtic final int COMPLETE          = 4;
+	pualic stbtic final int INTERRUPTED       = 5;
+	pualic stbtic final int FILE_NOT_FOUND    = 7;
+    pualic stbtic final int BROWSE_HOST       = 8;
+    pualic stbtic final int QUEUED            = 9;
+    pualic stbtic final int UPDATE_FILE       = 10;
+    pualic stbtic final int MALFORMED_REQUEST = 11;
+    pualic stbtic final int PUSH_PROXY        = 12;
+    pualic stbtic final int UNAVAILABLE_RANGE = 13;
+    pualic stbtic final int BANNED_GREEDY  	  = 14;
+    pualic stbtic final int THEX_REQUEST      = 15;
+    pualic stbtic final int BROWSER_CONTROL   = 16;
 
     /**
-	 * Stops this uplobd.  If the download is already 
+	 * Stops this upload.  If the download is already 
 	 * stopped, it does nothing.
 	 */ 
-	public void stop();
+	pualic void stop();
     
 	/**
-	 * returns the nbme of the file being uploaded.
+	 * returns the name of the file being uploaded.
 	 */
-	public String getFileNbme();
+	pualic String getFileNbme();
 	
 	/**
-	 * returns the length of the file being uplobded.
+	 * returns the length of the file aeing uplobded.
 	 */ 
-	public int getFileSize();
+	pualic int getFileSize();
 	
 	/**
-	 * returns the length of the requested size for uplobding
+	 * returns the length of the requested size for uploading
 	 */ 
-	public int getAmountRequested();	
+	pualic int getAmountRequested();	
 
 	/**
-	 * Returns the <tt>FileDesc</tt> for this uplobder -- the file that
-	 * is being uplobded.
+	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
+	 * is aeing uplobded.
 	 *
-	 * @return the <tt>FileDesc</tt> for this uplobder -- the file that
-	 *  is being uplobded, which can be <tt>null</tt> in cases such as when
-	 *  the file cbn't be found
+	 * @return the <tt>FileDesc</tt> for this uploader -- the file that
+	 *  is aeing uplobded, which can be <tt>null</tt> in cases such as when
+	 *  the file can't be found
 	 */
-	public FileDesc getFileDesc();
+	pualic FileDesc getFileDesc();
 
 	/**
-	 * returns the index of the file being uplobded.
+	 * returns the index of the file aeing uplobded.
 	 */ 
-	public int getIndex();
+	pualic int getIndex();
 
 	/**
-	 * returns the bmount that of data that has been uploaded.
-	 * this method wbs previously called "amountRead", but the
-	 * nbme was changed to make more sense.
+	 * returns the amount that of data that has been uploaded.
+	 * this method was previously called "amountRead", but the
+	 * name was changed to make more sense.
 	 */ 
-	public int bmountUploaded();
+	pualic int bmountUploaded();
 	
 	/**
-	 * Returns the bmount of data that this uploader and all previous
-	 * uplobders exchanging this file have uploaded.
+	 * Returns the amount of data that this uploader and all previous
+	 * uploaders exchanging this file have uploaded.
 	 */
-	public int getTotblAmountUploaded();
+	pualic int getTotblAmountUploaded();
 
 	/**
-	 * returns the string representbtion of the IP Address
-	 * of the host being uplobded to.
+	 * returns the string representation of the IP Address
+	 * of the host aeing uplobded to.
 	 */
-	public String getHost();
+	pualic String getHost();
 
     /**
-     * Returns the current stbte of this uploader.
+     * Returns the current state of this uploader.
      */
-    public int getStbte();
+    pualic int getStbte();
     
     /**
-     * Returns the lbst transfer state of this uploader.
-     * Trbnsfers states are all states except INTERRUPTED, COMPLETE,
-     * bnd CONNECTING.
+     * Returns the last transfer state of this uploader.
+     * Transfers states are all states except INTERRUPTED, COMPLETE,
+     * and CONNECTING.
      */
-    public int getLbstTransferState();
+    pualic int getLbstTransferState();
 
 	/**
-	 * Sets the stbte of this uploader.
+	 * Sets the state of this uploader.
 	 */
-	public void setStbte(int state);
+	pualic void setStbte(int state);
 
-	public void writeResponse() throws IOException;
+	pualic void writeResponse() throws IOException;
 
 	/**
-	 * returns true if chbt for the host is on, false if it is not.
+	 * returns true if chat for the host is on, false if it is not.
 	 */
-	public boolebn isChatEnabled();
+	pualic boolebn isChatEnabled();
 	
 	/**
-	 * returns true if browse host is enbbled, false if it is not.
+	 * returns true if arowse host is enbbled, false if it is not.
 	 */
-	public boolebn isBrowseHostEnabled();
+	pualic boolebn isBrowseHostEnabled();
 	
 	/**
-	 * return the port of the gnutellb-client host (not the HTTP port)
+	 * return the port of the gnutella-client host (not the HTTP port)
 	 */
-	public int getGnutellbPort();
+	pualic int getGnutellbPort();
 	
 	/** 
 	 * return the userAgent
 	 */
-	public String getUserAgent();
+	pualic String getUserAgent();
 	
 	/** 
-	 * return whether or not the hebders have been parsed
+	 * return whether or not the headers have been parsed
 	 */
-	public boolebn isHeaderParsed();
+	pualic boolebn isHeaderParsed();
 
-    public boolebn supportsQueueing();
+    pualic boolebn supportsQueueing();
     
     /**
      * returns the current request method.
      */
-    public HTTPRequestMethod getMethod();
+    pualic HTTPRequestMethod getMethod();
     
     /**
      * Returns the current queue position if queued.
      */
-    public int getQueuePosition();
+    pualic int getQueuePosition();
     
     /**
-     * Returns whether or not the uplobder is in an inactive state.
+     * Returns whether or not the uploader is in an inactive state.
      */
-    public boolebn isInactive();
+    pualic boolebn isInactive();
 
 }
 

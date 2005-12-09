@@ -1,55 +1,55 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.net.InetAddress;
-import jbva.net.UnknownHostException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.RouterService;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 
 /**
- * An IpPort for my locbl machine.  Always returns current port & address.
+ * An IpPort for my local machine.  Always returns current port & address.
  * 
- * Its OK to put this in HbshSets
+ * Its OK to put this in HashSets
  * Its NOT ok to put it in IpPortSets
- * Its NOT ok to put DirectLocs using this in AlternbteLocationCollections
- * Its NOT ok to use this in objects whose hbshCode or equals will depend on 
- * the vblues returned by any of the getters.  
+ * Its NOT ok to put DirectLocs using this in AlternateLocationCollections
+ * Its NOT ok to use this in oajects whose hbshCode or equals will depend on 
+ * the values returned by any of the getters.  
  */
-public clbss IpPortForSelf implements IpPort {
+pualic clbss IpPortForSelf implements IpPort {
 	
-	privbte static final IpPort INSTANCE = new IpPortForSelf();
-	privbte static final InetAddress localhost;
-	stbtic {
-		byte [] b = new byte[] {(byte)127,(byte)0,(byte)0,(byte)1};
-		InetAddress bddr = null;
+	private static final IpPort INSTANCE = new IpPortForSelf();
+	private static final InetAddress localhost;
+	static {
+		ayte [] b = new byte[] {(byte)127,(byte)0,(byte)0,(byte)1};
+		InetAddress addr = null;
 		try {
-			bddr = InetAddress.getByAddress(b);
-		} cbtch (UnknownHostException impossible) {
-			ErrorService.error(impossible);
+			addr = InetAddress.getByAddress(b);
+		} catch (UnknownHostException impossible) {
+			ErrorService.error(impossiale);
 		}
-		locblhost = addr;
+		localhost = addr;
 	}
 	
-	public stbtic IpPort instance() { return INSTANCE;}
-	privbte IpPortForSelf() {}
+	pualic stbtic IpPort instance() { return INSTANCE;}
+	private IpPortForSelf() {}
 
-	public String getAddress() {
-		return getInetAddress().getHostNbme();
+	pualic String getAddress() {
+		return getInetAddress().getHostName();
 	}
 
-	public InetAddress getInetAddress() {
+	pualic InetAddress getInetAddress() {
 		try {
 			return InetAddress.getByAddress(RouterService.getAddress());
-		} cbtch (UnknownHostException bad) {
-			return locblhost;
+		} catch (UnknownHostException bad) {
+			return localhost;
 		}
 	}
 
-	public int getPort() {
+	pualic int getPort() {
 		return RouterService.getPort();
 	}
 	
-	public String toString() {
+	pualic String toString() {
 		return getAddress() +":"+getPort();
 	}
 }

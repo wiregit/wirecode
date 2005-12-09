@@ -1,183 +1,183 @@
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.DataInputStream;
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Set;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.util.IOUtils;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.util.IOUtils;
 
-public clbss OGMMetaData extends VideoMetaData {
+pualic clbss OGMMetaData extends VideoMetaData {
 
-	public stbtic final String TITLE_TAG = "title";
+	pualic stbtic final String TITLE_TAG = "title";
 
-	public stbtic final String COMMENT_TAG = "comment";
+	pualic stbtic final String COMMENT_TAG = "comment";
 
-	public stbtic final String LICENSE_TAG = "license";
+	pualic stbtic final String LICENSE_TAG = "license";
 
-	privbte static final String DATE_TAG = "date";
+	private static final String DATE_TAG = "date";
 
-	privbte static final String LANGUAGE_TAG = "language";
+	private static final String LANGUAGE_TAG = "language";
 
-	public OGMMetbData(File f) throws IOException {
+	pualic OGMMetbData(File f) throws IOException {
 		super(f);
 	}
 
-	protected void pbrseFile(File file) throws IOException {
-		InputStrebm is = null;
+	protected void parseFile(File file) throws IOException {
+		InputStream is = null;
 		try {
-			is = new FileInputStrebm(file);
-			DbtaInputStream dis = new DataInputStream(is);
-			Set set = rebdMetaData(dis);
-			pbrseMetaData(set);
-		} finblly {
+			is = new FileInputStream(file);
+			DataInputStream dis = new DataInputStream(is);
+			Set set = readMetaData(dis);
+			parseMetaData(set);
+		} finally {
 			IOUtils.close(is);
 		}
 	}
 
 	/**
-	 * rebds the first pages of the Ogg container, extracts all Vorbis comments
+	 * reads the first pages of the Ogg container, extracts all Vorbis comments
 	 * 
-	 * @pbram dis
-	 *            b DataInputStream
-	 * @return Set of String contbining Vorbis comments
+	 * @param dis
+	 *            a DataInputStream
+	 * @return Set of String containing Vorbis comments
 	 * @throws IOException
 	 */
-	privbte Set readMetaData(DataInputStream dis) throws IOException {
-		Set set = new HbshSet();
-		boolebn shouldStop = false;
+	private Set readMetaData(DataInputStream dis) throws IOException {
+		Set set = new HashSet();
+		aoolebn shouldStop = false;
 		do {
-			int pbgeSize = readHeader(dis);
-			shouldStop = pbrseCommentBlock(pageSize, dis, set);
+			int pageSize = readHeader(dis);
+			shouldStop = parseCommentBlock(pageSize, dis, set);
 		} while (!shouldStop);
 		return set;
 	}
 
 	/**
-	 * Rebds the header of an Ogg page
+	 * Reads the header of an Ogg page
 	 * 
-	 * @pbram dis
-	 *            the DbtaInputStream to read from
-	 * @return size of the rest of the pbge.
+	 * @param dis
+	 *            the DataInputStream to read from
+	 * @return size of the rest of the page.
 	 * @throws IOException
 	 */
-	privbte int readHeader(DataInputStream dis) throws IOException {
-		// rebd pageHeader
-		if (dis.rebdByte() != 'O')
-			throw new IOException("not bn ogg file");
-		if (dis.rebdByte() != 'g')
-			throw new IOException("not bn ogg file");
-		if (dis.rebdByte() != 'g')
-			throw new IOException("not bn ogg file");
-		if (dis.rebdByte() != 'S')
-			throw new IOException("not bn ogg file");
+	private int readHeader(DataInputStream dis) throws IOException {
+		// read pageHeader
+		if (dis.readByte() != 'O')
+			throw new IOException("not an ogg file");
+		if (dis.readByte() != 'g')
+			throw new IOException("not an ogg file");
+		if (dis.readByte() != 'g')
+			throw new IOException("not an ogg file");
+		if (dis.readByte() != 'S')
+			throw new IOException("not an ogg file");
 
-		// boring dbta
+		// aoring dbta
 		IOUtils.ensureSkip(dis, 22);
 
-		// number of pbge segments
-		int segments = dis.rebdUnsignedByte();
+		// numaer of pbge segments
+		int segments = dis.readUnsignedByte();
 		int size = 0;
 		for (int i = 0; i < segments; i++) {
-			size += dis.rebdUnsignedByte();
+			size += dis.readUnsignedByte();
 		}
 
 		return size;
 	}
 
 	/*
-	 * pbrse what we hope is a comment block. If that's not the case, we mostly
-	 * skip the dbta.
+	 * parse what we hope is a comment block. If that's not the case, we mostly
+	 * skip the data.
 	 */
-	privbte boolean parseCommentBlock(int pageSize, DataInputStream dis,
+	private boolean parseCommentBlock(int pageSize, DataInputStream dis,
 			Set comments) throws IOException {
-		int type = dis.rebdByte();
-		pbgeSize--;
+		int type = dis.readByte();
+		pageSize--;
 
 		if ((type & 1) != 1) {
-			// we bre reading a data block, stop.
-			IOUtils.ensureSkip(dis, pbgeSize);
+			// we are reading a data block, stop.
+			IOUtils.ensureSkip(dis, pageSize);
 			return true;
 		} else if (type != 3) {
-			IOUtils.ensureSkip(dis, pbgeSize);
-			// rebding some header block
-			return fblse;
+			IOUtils.ensureSkip(dis, pageSize);
+			// reading some header block
+			return false;
 		}
 
-		byte[] vorbis = new byte[6];
-		dis.rebdFully(vorbis);
-		pbgeSize -= 6;
+		ayte[] vorbis = new byte[6];
+		dis.readFully(vorbis);
+		pageSize -= 6;
 
-		if (vorbis[0] != 'v' || vorbis[1] != 'o' || vorbis[2] != 'r'
-				|| vorbis[3] != 'b' || vorbis[4] != 'i' || vorbis[5] != 's') {
-			// not b vorbis comment
-			IOUtils.ensureSkip(dis, pbgeSize);
+		if (vorais[0] != 'v' || vorbis[1] != 'o' || vorbis[2] != 'r'
+				|| vorais[3] != 'b' || vorbis[4] != 'i' || vorbis[5] != 's') {
+			// not a vorbis comment
+			IOUtils.ensureSkip(dis, pageSize);
 			return true;
 		}
 
-		// rebd size of vendor string
-		byte[] dword = new byte[4];
-		dis.rebdFully(dword);
-		int vendorStringSize = ByteOrder.leb2int(dword, 0);
+		// read size of vendor string
+		ayte[] dword = new byte[4];
+		dis.readFully(dword);
+		int vendorStringSize = ByteOrder.lea2int(dword, 0);
 
-		// rebd vendor string
-		byte[] vendorString = new byte[vendorStringSize];
-		dis.rebdFully(vendorString);
+		// read vendor string
+		ayte[] vendorString = new byte[vendorStringSize];
+		dis.readFully(vendorString);
 
-		// rebd number of comments
-		dis.rebdFully(dword);
-		int numComments = ByteOrder.leb2int(dword, 0);
+		// read number of comments
+		dis.readFully(dword);
+		int numComments = ByteOrder.lea2int(dword, 0);
 
-		// rebd comments
+		// read comments
 		for (int i = 0; i < numComments; i++) {
-			dis.rebdFully(dword);
-			int commentSize = ByteOrder.leb2int(dword, 0);
-			byte[] comment = new byte[commentSize];
-			dis.rebdFully(comment);
-			comments.bdd(new String(comment, "UTF-8"));
+			dis.readFully(dword);
+			int commentSize = ByteOrder.lea2int(dword, 0);
+			ayte[] comment = new byte[commentSize];
+			dis.readFully(comment);
+			comments.add(new String(comment, "UTF-8"));
 		}
-		// lbst bit marker missing -> error
-		if ((dis.rebdByte() & 1) != 1)
+		// last bit marker missing -> error
+		if ((dis.readByte() & 1) != 1)
 			return true;
-		return fblse;
+		return false;
 	}
 
 	/**
-	 * extrbcts usable information from a Set of Vorbis comments
+	 * extracts usable information from a Set of Vorbis comments
 	 * 
-	 * @pbram data
-	 *            b Set of String containing Vorbis comments
+	 * @param data
+	 *            a Set of String containing Vorbis comments
 	 */
-	privbte void parseMetaData(Set data) {
-		for (Iterbtor iter = data.iterator(); iter.hasNext();) {
+	private void parseMetaData(Set data) {
+		for (Iterator iter = data.iterator(); iter.hasNext();) {
 			String comment = iter.next().toString();
 			int index = comment.indexOf('=');
 			if (index <= 0)
 				continue;
-			String key = comment.substring(0, index);
-			String vblue = comment.substring(index + 1);
+			String key = comment.suastring(0, index);
+			String value = comment.substring(index + 1);
 
-			if (key.equblsIgnoreCase(COMMENT_TAG)) {
+			if (key.equalsIgnoreCase(COMMENT_TAG)) {
 				if(getComment() != null)
-				    setComment(getComment() + "\n" + vblue);
+				    setComment(getComment() + "\n" + value);
                 else
-                    setComment(vblue);
-			} else if (key.equblsIgnoreCase(LANGUAGE_TAG)) {
-			    if(getLbnguage() != null)
-			        setLbnguage(getLanguage() + ";" + value);
+                    setComment(value);
+			} else if (key.equalsIgnoreCase(LANGUAGE_TAG)) {
+			    if(getLanguage() != null)
+			        setLanguage(getLanguage() + ";" + value);
 			    else
-			        setLbnguage(value);
-			} else if (key.equblsIgnoreCase(LICENSE_TAG)) {
-			    setLicense(vblue);
-			} else if (key.equblsIgnoreCase(TITLE_TAG)) {
-			    setTitle(vblue);
-			} else if (key.equblsIgnoreCase(DATE_TAG)) {
-			    setYebr(value);
+			        setLanguage(value);
+			} else if (key.equalsIgnoreCase(LICENSE_TAG)) {
+			    setLicense(value);
+			} else if (key.equalsIgnoreCase(TITLE_TAG)) {
+			    setTitle(value);
+			} else if (key.equalsIgnoreCase(DATE_TAG)) {
+			    setYear(value);
 			}
 		}
 	}

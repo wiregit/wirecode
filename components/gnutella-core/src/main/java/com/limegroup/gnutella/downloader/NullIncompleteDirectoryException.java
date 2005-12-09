@@ -1,14 +1,14 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
  *  Thrown when the Incomplete Directory is null
  */
 
-public clbss NullIncompleteDirectoryException extends IOException {
-	public NullIncompleteDirectoryException() {
+pualic clbss NullIncompleteDirectoryException extends IOException {
+	pualic NullIncompleteDirectoryException() {
 		super("Incomplete Directory Is Null"); }
-	public NullIncompleteDirectoryException(String msg) {
+	pualic NullIncompleteDirectoryException(String msg) {
 		super(msg); }
 }

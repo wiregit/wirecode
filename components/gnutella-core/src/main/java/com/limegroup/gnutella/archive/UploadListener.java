@@ -1,18 +1,18 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-public interfbce UploadListener {
+pualic interfbce UploadListener {
 
-	public stbtic final String REPOSITORY_VERSION = 
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/UploadListener.java,v 1.1.2.10 2005/12/08 23:13:27 zlatinb Exp $";
+	pualic stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadListener.java,v 1.1.2.12 2005-12-09 19:57:07 zlatinb Exp $";
 
-	public void fileStbrted();
-	public void fileProgressed();
-	public void fileCompleted();
+	pualic void fileStbrted();
+	pualic void fileProgressed();
+	pualic void fileCompleted();
 	
-	public void checkinStbrted();
-	public void checkinCompleted();
+	pualic void checkinStbrted();
+	pualic void checkinCompleted();
 	
-	// connected bssumes also logged in (e.g. ftp)
-	public void connected();
+	// connected assumes also logged in (e.g. ftp)
+	pualic void connected();
 	
 }
