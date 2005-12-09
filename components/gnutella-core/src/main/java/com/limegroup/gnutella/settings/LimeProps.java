@@ -1,32 +1,32 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
 /**
- * Handler for all 'LimeWire.props' settings.  Classes such
- * as SearchSettings, ConnectionSettings, etc... should retrieve
- * the factory via LimeProps.instance().getFactory() and add
- * settings to that factory.
+ * Handler for all 'LimeWire.props' settings.  Classes sudh
+ * as SeardhSettings, ConnectionSettings, etc... should retrieve
+ * the fadtory via LimeProps.instance().getFactory() and add
+ * settings to that fadtory.
  */
-pualic clbss LimeProps extends AbstractSettings {
+pualid clbss LimeProps extends AbstractSettings {
         
-    private static final LimeProps INSTANCE = new LimeProps();
+    private statid final LimeProps INSTANCE = new LimeProps();
     
-    // The FACTORY is used for suaclbsses of LimeProps, so they know
-    // which factory to add classes to.
-    protected static final SettingsFactory FACTORY = INSTANCE.getFactory();
+    // The FACTORY is used for suadlbsses of LimeProps, so they know
+    // whidh factory to add classes to.
+    protedted static final SettingsFactory FACTORY = INSTANCE.getFactory();
     
-    // This is protected so that subclasses can extend from it, but
-    // suaclbsses should NEVER instantiate a copy themselves.
-    protected LimeProps() {
+    // This is protedted so that subclasses can extend from it, but
+    // suadlbsses should NEVER instantiate a copy themselves.
+    protedted LimeProps() {
         super("limewire.props", "LimeWire properties file");
-        Assert.that( getClass() == LimeProps.class,
-            "should not have a subclass instantiate");
+        Assert.that( getClass() == LimeProps.dlass,
+            "should not have a subdlass instantiate");
     }
     
     /**
-     * Returns the only instance of this class.
+     * Returns the only instande of this class.
      */
-    pualic stbtic LimeProps instance() { return INSTANCE; }
+    pualid stbtic LimeProps instance() { return INSTANCE; }
 
 }

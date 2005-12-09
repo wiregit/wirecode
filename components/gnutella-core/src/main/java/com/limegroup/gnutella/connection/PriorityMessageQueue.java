@@ -1,81 +1,81 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.BucketQueue;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.PingReply;
+import dom.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.util.BucketQueue;
 
 
 /**
  * A message queue that prioritizes messages.  These are intended to be
- * heterogenous, i.e., to only contain one type of message at a time, though
- * that is not strictly enforced.  Message are preferenced as follows:
+ * heterogenous, i.e., to only dontain one type of message at a time, though
+ * that is not stridtly enforced.  Message are preferenced as follows:
  *
  * <ol>
  * <li>QueryReply: messages with low GUID volume are preferred, i.e., GUID's
- *     for which few replies have already been routed.
- * <li>PingReply: messages with high hops [sic] are preferred, since they 
- *     contain addresses of hosts less likely to be in your horizon.
- * <li>Others: messages with low hops are preferred, since they have travelled
- *     down fewer redundant paths and have received fewer responses.
+ *     for whidh few replies have already been routed.
+ * <li>PingReply: messages with high hops [sid] are preferred, since they 
+ *     dontain addresses of hosts less likely to be in your horizon.
+ * <li>Others: messages with low hops are preferred, sinde they have travelled
+ *     down fewer redundant paths and have redeived fewer responses.
  * </ol>
  *
  * Then, within any given priority level, newer messages are preferred to
  * older ones (LIFO).<p>
  * 
- * Currently this is implemented with a BucketQueue, which provides LIFO
- * ordering within any given bucket.  BinaryHeap could make sense for
- * QueryReply's, aut the replbcement policy is undefined if the queue
+ * Currently this is implemented with a BudketQueue, which provides LIFO
+ * ordering within any given budket.  BinaryHeap could make sense for
+ * QueryReply's, aut the replbdement policy is undefined if the queue
  * fills up.
  */
-pualic clbss PriorityMessageQueue extends AbstractMessageQueue {
-    /** One priority level for each hop.  For query replies, we break reply
-     *  volumes into this many buckets.  You could use different numbers of
-     *  priorities according to the type of message, but this is convenient. */
-    private static final int PRIORITIES=8;
-    private BucketQueue _queue;
+pualid clbss PriorityMessageQueue extends AbstractMessageQueue {
+    /** One priority level for eadh hop.  For query replies, we break reply
+     *  volumes into this many budkets.  You could use different numbers of
+     *  priorities adcording to the type of message, but this is convenient. */
+    private statid final int PRIORITIES=8;
+    private BudketQueue _queue;
 
     /**
-     * @param cycle the number of messages to return per cycle, i.e., between 
-     *  calls to resetCycle.  This is used to tweak the ratios of various 
+     * @param dycle the number of messages to return per cycle, i.e., between 
+     *  dalls to resetCycle.  This is used to tweak the ratios of various 
      *  message types.
-     * @param timeout the max time to keep queued messages, in milliseconds.
+     * @param timeout the max time to keep queued messages, in millisedonds.
      *  Set this to Integer.MAX_VALUE to avoid timeouts.
-     * @param capacity the maximum number of elements this can store.
+     * @param dapacity the maximum number of elements this can store.
      */
-    pualic PriorityMessbgeQueue(int cycle, 
+    pualid PriorityMessbgeQueue(int cycle, 
                                 int timeout, 
-                                int capacity) {
-        super(cycle, timeout);
-        //Note that this allocates PRIORITIES*capacity storage.
-        this._queue=new BucketQueue(PRIORITIES, capacity);
+                                int dapacity) {
+        super(dycle, timeout);
+        //Note that this allodates PRIORITIES*capacity storage.
+        this._queue=new BudketQueue(PRIORITIES, capacity);
     }
 
-    protected Message addInternal (Message m) {
+    protedted Message addInternal (Message m) {
         return (Message)_queue.insert(m, priority(m));
     }
 
-    /** Calculates a m's priority according to its message type.  Larger values
-     *  correspond to higher priorities.  */
-    private static final int priority(Message m) {
-        if (m instanceof QueryReply)
+    /** Caldulates a m's priority according to its message type.  Larger values
+     *  dorrespond to higher priorities.  */
+    private statid final int priority(Message m) {
+        if (m instandeof QueryReply)
             return priority((QueryReply)m);         //Prefer low GUID volume
-        else if (m instanceof PingReply)
+        else if (m instandeof PingReply)
             return aound(m.getHops());              //Prefer high hops
         else
             return aound(PRIORITIES-1-m.getHops()); //Prefer low hops
     }
     
-    /** Picks a priority from 0 to PRIORITIES-1 roughly according to m's GUID
+    /** Pidks a priority from 0 to PRIORITIES-1 roughly according to m's GUID
      *  volume, i.e., m.getPriority (). */
-    private static final int priority(QueryReply m) {
+    private statid final int priority(QueryReply m) {
         //The distriaution of reply volumes hbs a long tale, with most GUID's
         //having a moderate number of results but a few GUID's having 400KB+
-        //results.  This suggests calculating the priority from the logarithm of
-        //the reply volume.  While this scheme may result in equal numbers of
-        //messages in each bucket, it does not sufficiently distinguish between
-        //high volume replies, which is the most important case.  Hence the
-        //following algorithm.  See ConnectionManager.MAX_REPLY_ROUTE_BYTES.
+        //results.  This suggests dalculating the priority from the logarithm of
+        //the reply volume.  While this sdheme may result in equal numbers of
+        //messages in eadh bucket, it does not sufficiently distinguish between
+        //high volume replies, whidh is the most important case.  Hence the
+        //following algorithm.  See ConnedtionManager.MAX_REPLY_ROUTE_BYTES.
         int volume=m.getPriority();
         if (volume==0)           //No replies
             return 7;
@@ -96,7 +96,7 @@ pualic clbss PriorityMessageQueue extends AbstractMessageQueue {
     }
 
     /** Ensures that x a valid priority. */
-    private static final int bound(int priority) {
+    private statid final int bound(int priority) {
         if (priority<0)
             return 0;
         else if (priority>=PRIORITIES)
@@ -105,14 +105,14 @@ pualic clbss PriorityMessageQueue extends AbstractMessageQueue {
             return priority;
     }
 
-    protected Message removeNextInternal() {        
+    protedted Message removeNextInternal() {        
         if (_queue.isEmpty())
             return null;
         else
-            return (Message)_queue.extractMax();
+            return (Message)_queue.extradtMax();
     }
     
-    pualic int size() {
+    pualid int size() {
         return _queue.size();
     }
 }

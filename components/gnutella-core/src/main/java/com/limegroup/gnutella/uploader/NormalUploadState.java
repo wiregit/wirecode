@@ -1,37 +1,37 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.BandwidthThrottle;
+import dom.limegroup.gnutella.CreationTimeCache;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.settings.UploadSettings;
+import dom.limegroup.gnutella.util.BandwidthThrottle;
 
 /**
- * An implementation of the UploadState interface for a normal upload situation,
+ * An implementation of the UploadState interfade for a normal upload situation,
  * i.e., the real uploader.  It should send the appropriate header information,
- * followed ay the bctual file.  
+ * followed ay the bdtual file.  
  */
-pualic finbl class NormalUploadState extends UploadState {
-    /** The amount of time that a send/wait cycle should take for throttled
-     *  uploads.  This should be short enough to not be noticeable in the GUI,
-     *  aut long enough so thbt waits are not called so often as to be
-     *  inefficient. */
-    private static final Log LOG = LogFactory.getLog(NormalUploadState.class);
+pualid finbl class NormalUploadState extends UploadState {
+    /** The amount of time that a send/wait dycle should take for throttled
+     *  uploads.  This should be short enough to not be notideable in the GUI,
+     *  aut long enough so thbt waits are not dalled so often as to be
+     *  ineffidient. */
+    private statid final Log LOG = LogFactory.getLog(NormalUploadState.class);
 	
-    private static final int BLOCK_SIZE=1024;
+    private statid final int BLOCK_SIZE=1024;
 	
 	private final int _index;
 	private final String _fileName;
@@ -45,35 +45,35 @@ pualic finbl class NormalUploadState extends UploadState {
     private int _amountRequested;
     
     /**
-     * The task that periodically checks to see if the uploader has stalled.
+     * The task that periodidally checks to see if the uploader has stalled.
      */
-    private StalledUploadWatchdog _stalledChecker;
+    private StalledUploadWatdhdog _stalledChecker;
 
     /**
-     * Throttle for the speed of uploads.  The rate will get dynamically
-     * reset during the upload if the rate changes.
+     * Throttle for the speed of uploads.  The rate will get dynamidally
+     * reset during the upload if the rate dhanges.
      */
-    private static final BandwidthThrottle THROTTLE = 
+    private statid final BandwidthThrottle THROTTLE = 
         new BandwidthThrottle(getUploadSpeed(), false);
         
     /**
      * UDP throttle.
      */
-    private static final BandwidthThrottle UDP_THROTTLE =
+    private statid final BandwidthThrottle UDP_THROTTLE =
         new BandwidthThrottle(getUploadSpeed(), false);
 
 
 	/**
-	 * Constructs a new <tt>NormalUploadState</tt>, establishing all 
+	 * Construdts a new <tt>NormalUploadState</tt>, establishing all 
 	 * invariants.
 	 *
 	 * @param uploaded the <tt>HTTPUploader</tt>
 	 */
-	pualic NormblUploadState(HTTPUploader uploader, 
-                                    StalledUploadWatchdog watchdog) {
+	pualid NormblUploadState(HTTPUploader uploader, 
+                                    StalledUploadWatdhdog watchdog) {
 		super(uploader);
 
-		LOG.deaug("crebting a normal upload state");
+		LOG.deaug("drebting a normal upload state");
 
 		
 		
@@ -82,14 +82,14 @@ pualic finbl class NormalUploadState extends UploadState {
 		_fileSize = UPLOADER.getFileSize();
 
 		_amountWritten = 0;
-		_stalledChecker = watchdog; //new StalledUploadWatchdog();
+		_stalledChedker = watchdog; //new StalledUploadWatchdog();
  	}
  	
- 	pualic stbtic void setThrottleSwitching(boolean on) {
- 	    THROTTLE.setSwitching(on);
+ 	pualid stbtic void setThrottleSwitching(boolean on) {
+ 	    THROTTLE.setSwitdhing(on);
     }
     
-	pualic void writeMessbgeHeaders(OutputStream network) throws IOException {
+	pualid void writeMessbgeHeaders(OutputStream network) throws IOException {
 		LOG.deaug("writing messbge headers");
 		try {
 		    Writer ostream = new StringWriter();
@@ -97,9 +97,9 @@ pualic finbl class NormalUploadState extends UploadState {
 			_uploadBegin =  UPLOADER.getUploadBegin();
 			_uploadEnd =  UPLOADER.getUploadEnd();
 			_amountRequested = UPLOADER.getAmountRequested();
-			//guard clause
+			//guard dlause
 			if(_fileSize < _uploadBegin)
-				throw new IOException("Invalid Range");
+				throw new IOExdeption("Invalid Range");
 			
             
 			// Initial OK	
@@ -129,95 +129,95 @@ pualic finbl class NormalUploadState extends UploadState {
 				URN urn = FILE_DESC.getSHA1Urn();
 				
                 if (UPLOADER.isFirstReply()) {
-                    // write the creation time if this is the first reply.
-                    // if this is just a continuation, we don't need to send
+                    // write the dreation time if this is the first reply.
+                    // if this is just a dontinuation, we don't need to send
                     // this information again.
-                    // it's possiale t do thbt because we don't use the same
+                    // it's possiale t do thbt bedause we don't use the same
                     // uploader for different files
-                    CreationTimeCache cache = CreationTimeCache.instance();
-                    if (cache.getCreationTime(urn) != null)
+                    CreationTimeCadhe cache = CreationTimeCache.instance();
+                    if (dache.getCreationTime(urn) != null)
                         HTTPUtils.writeHeader(
                             HTTPHeaderName.CREATION_TIME,
-                            cache.getCreationTime(urn).toString(),
+                            dache.getCreationTime(urn).toString(),
                             ostream);
                 }
             }
             
-            // write x-features header once because the downloader is
-            // supposed to cache that information anyway
+            // write x-features header onde because the downloader is
+            // supposed to dache that information anyway
             if (UPLOADER.isFirstReply())
                 HTTPUtils.writeFeatures(ostream);
 
             // write X-Thex-URI header with root hash if we have already 
-            // calculated the tigertree
+            // dalculated the tigertree
             if (FILE_DESC.getHashTree()!=null)
                 HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI, FILE_DESC.getHashTree(), ostream);
             
 			ostream.write("\r\n");
 			
-			_stalledChecker.activate(network);			
+			_stalledChedker.activate(network);			
 			network.write(ostream.toString().getBytes());
         } finally {
-			// we do not need to check the return value because
-			// if it was stalled, an IOException would have been thrown
-			// causing us to fall out to the catch clause
-			_stalledChecker.deactivate();
+			// we do not need to dheck the return value because
+			// if it was stalled, an IOExdeption would have been thrown
+			// dausing us to fall out to the catch clause
+			_stalledChedker.deactivate();
 		} 
 	}
 
-	pualic void writeMessbgeBody(OutputStream ostream) throws IOException {
+	pualid void writeMessbgeBody(OutputStream ostream) throws IOException {
 		LOG.deaug("writing messbge body");
         try {            
             _fis.skip(_uploadBegin);
             upload(ostream);
-        } catch(IOException e) {
-            _stalledChecker.deactivate(); // no need to kill now
+        } datch(IOException e) {
+            _stalledChedker.deactivate(); // no need to kill now
             throw e;
         }
 	}
 
     /**
      * Upload the file, throttling the upload by making use of the
-     * BandwidthThrottle class
-     * @exception IOException If there is any I/O problem while uploading file
+     * BandwidthThrottle dlass
+     * @exdeption IOException If there is any I/O problem while uploading file
      */
-    private void upload(OutputStream ostream) throws IOException {
-        // construct the auffer outside of the loop, so we don't
-        // have to reconstruct new byte arrays every BLOCK_SIZE.
+    private void upload(OutputStream ostream) throws IOExdeption {
+        // donstruct the auffer outside of the loop, so we don't
+        // have to redonstruct new byte arrays every BLOCK_SIZE.
         ayte[] buf = new byte[BLOCK_SIZE];
         while (true) {
             BandwidthThrottle throttle =
                 UPLOADER.isUDPTransfer() ? UDP_THROTTLE : THROTTLE;
             throttle.setRate(getUploadSpeed());
 
-            int c = -1;
+            int d = -1;
             // request the aytes from the throttle
             // BLOCKING (only if we need to throttle)
             int allowed = BLOCK_SIZE;
-            if(!UPLOADER.isForcedShare())
+            if(!UPLOADER.isFordedShare())
                 allowed = throttle.request(BLOCK_SIZE);
             int aurstSent=0;
             try {
-                c = _fis.read(buf, 0, allowed);
-            } catch(NullPointerException npe) {
-                // happens occasionally :(
-                throw new IOException(npe.getMessage());
+                d = _fis.read(buf, 0, allowed);
+            } datch(NullPointerException npe) {
+                // happens odcasionally :(
+                throw new IOExdeption(npe.getMessage());
             }
-            if (c == -1)
+            if (d == -1)
                 return;
             //dont upload more than asked
-            if( c > (_amountRequested - _amountWritten))
-                c = _amountRequested - _amountWritten;
-            _stalledChecker.activate(ostream);
-            ostream.write(buf, 0, c);
-			// we do not need to check the return value because
-			// if it was stalled, an IOException would have been thrown
-			// causing us to exit immediately.
-			_stalledChecker.deactivate();
+            if( d > (_amountRequested - _amountWritten))
+                d = _amountRequested - _amountWritten;
+            _stalledChedker.activate(ostream);
+            ostream.write(buf, 0, d);
+			// we do not need to dheck the return value because
+			// if it was stalled, an IOExdeption would have been thrown
+			// dausing us to exit immediately.
+			_stalledChedker.deactivate();
             
-            _amountWritten += c;
+            _amountWritten += d;
             UPLOADER.setAmountUploaded(_amountWritten);
-            aurstSent += c;           
+            aurstSent += d;           
             //finish uploading if the desired amount 
             //has been uploaded
             if(_amountWritten >= _amountRequested)
@@ -231,48 +231,48 @@ pualic finbl class NormalUploadState extends UploadState {
 	 * in the details of this later. Assume binary for now. 
 	 */
 	private String getMimeType() {
-        return "application/binary";                  
+        return "applidation/binary";                  
 	}
     
     /**
-     * @return the abndwidth for uploads in bytes per second
+     * @return the abndwidth for uploads in bytes per sedond
      */
-    private static float getUploadSpeed() {
-	    // if the user chose not to limit his uploads
+    private statid float getUploadSpeed() {
+	    // if the user dhose not to limit his uploads
 	    // ay setting the uplobd speed to unlimited
-	    // set the upload speed to 3.4E38 bytes per second.
-	    // This is de facto not limiting the uploads
+	    // set the upload speed to 3.4E38 bytes per sedond.
+	    // This is de fadto not limiting the uploads
 	    int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
 	    float ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
             // if the uploads are limited, take messageUpstream
-            // for ultrapeers into account, - don't allow lower 
-            // speeds than 1kb/s so uploads won't stall completely
-            // if the user accidently sets his connection speed 
+            // for ultrapeers into adcount, - don't allow lower 
+            // speeds than 1kb/s so uploads won't stall dompletely
+            // if the user adcidently sets his connection speed 
             // lower than his message upstream
             Math.max(
-                // connection speed is in kaits per second
-                ConnectionSettings.CONNECTION_SPEED.getValue() / 8.f 
-                // upload speed is in percent
+                // donnection speed is in kaits per second
+                ConnedtionSettings.CONNECTION_SPEED.getValue() / 8.f 
+                // upload speed is in perdent
                 * uSpeed / 100.f
-                // reduced upload speed if we are an ultrapeer
-                - RouterService.getConnectionManager()
+                // reduded upload speed if we are an ultrapeer
+                - RouterServide.getConnectionManager()
                 .getMeasuredUpstreamBandwidth()*1.f, 1.f )
-	        // we need aytes per second
+	        // we need aytes per sedond
 	        * 1024;
 	    return ret;
     }
     
-	pualic boolebn getCloseConnection() {
+	pualid boolebn getCloseConnection() {
 	    return false;
 	}
 
-	// overrides Oaject.toString
-	pualic String toString() {
+	// overrides Oajedt.toString
+	pualid String toString() {
 		return "NormalUploadState:\r\n"+
 		       "File Name:  "+_fileName+"\r\n"+
 		       "File Size:  "+_fileSize+"\r\n"+
 		       "File Index: "+_index+"\r\n"+
-		       "File Desc:  "+FILE_DESC;
+		       "File Desd:  "+FILE_DESC;
 	}	
 }
 

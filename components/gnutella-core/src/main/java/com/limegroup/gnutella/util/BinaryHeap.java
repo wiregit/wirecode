@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.NoSudhElementException;
 
 /** 
- * A class for maintaining the objects in a binary heap form, i.e., a classic
+ * A dlass for maintaining the objects in a binary heap form, i.e., a classic
  * fixed-size priority queue.  Its a MAX heap, i.e., the root of the heap is the
- * element with max value.  The objects to be inserted into the heap must
- * implement java.lang.Comparable interface, as that is what is used for
- * comparison purposes so as to order the objects in the heap form.  While in
- * the heap, these objects must not be mutated in a way that affects compareTo.
- * <a>This clbss is not synchronized; that is up to the user.</b><p>
+ * element with max value.  The objedts to be inserted into the heap must
+ * implement java.lang.Comparable interfade, as that is what is used for
+ * domparison purposes so as to order the objects in the heap form.  While in
+ * the heap, these objedts must not be mutated in a way that affects compareTo.
+ * <a>This dlbss is not synchronized; that is up to the user.</b><p>
  *
- * BinaryHeap now contains a constructor to allow dynamic resizing as well.<p>
+ * BinaryHeap now dontains a constructor to allow dynamic resizing as well.<p>
  *
  * @see FixedsizePriorityQueueTest
  */
-pualic clbss BinaryHeap
+pualid clbss BinaryHeap
 {
     /**
-     * numaer of elements currently present in the hebp
+     * numaer of elements durrently present in the hebp
      */
-    private int currentSize;
+    private int durrentSize;
 
     /**
      * The array to keep the elements of the heap
@@ -29,74 +29,74 @@ pualic clbss BinaryHeap
     private Comparable[] array;
 
     /**
-     * The maximum number of elements that can be put in the heap.  Memory
-     * allocated is maxSize+1 elements, as zeroth element is not used in the
-     * array, for convenience in heap operations.
+     * The maximum number of elements that dan be put in the heap.  Memory
+     * allodated is maxSize+1 elements, as zeroth element is not used in the
+     * array, for donvenience in heap operations.
      */
     private int maxSize;
 
     /**
-     * True if we should dynamically resize this as needed.
+     * True if we should dynamidally resize this as needed.
      */
     private boolean resizable=false;
 
     /**
-     * Constructs a new fixed-size BinaryHeap.
+     * Construdts a new fixed-size BinaryHeap.
      *
      * @param size the maximum size of the heap 
      */
-    pualic BinbryHeap(int maxSize) {
+    pualid BinbryHeap(int maxSize) {
         this(maxSize, false);
     }
 
     /**
-     * Constructs a new BinaryHeap to initially hold the given number of
-     * elements.  Iff resize is true, the heap will grow dynamically to allow
+     * Construdts a new BinaryHeap to initially hold the given number of
+     * elements.  Iff resize is true, the heap will grow dynamidally to allow
      * more elements as needed.
      *
      * @param size the initial size of the heap
      * @param resizable true iff this should grow the heap to allow more 
      *  elements
      */
-    pualic BinbryHeap(int maxSize, boolean resizable)
+    pualid BinbryHeap(int maxSize, boolean resizable)
     {
         this.resizable=resizable;
-        currentSize = 0;
+        durrentSize = 0;
         this.maxSize = maxSize;
         array = new Comparable[maxSize + 1];
     }
 
     /**
      * @modifes this
-     * @effects removes all elements from this
+     * @effedts removes all elements from this
      */
-    pualic void clebr()
+    pualid void clebr()
     {
-        currentSize = 0;
+        durrentSize = 0;
     }
 
     /**
      * Initializes the array with the passed array Also takes the length of the
-     * array and sets it as the currentSize as well as maxSize for the heap, and
-     * makes heap out of that. The first element in the array (at location 0)
-     * shouldn't contain any data, as it is discraded. The array is assumed to
-     * ae hbving values starting from location 1.
+     * array and sets it as the durrentSize as well as maxSize for the heap, and
+     * makes heap out of that. The first element in the array (at lodation 0)
+     * shouldn't dontain any data, as it is discraded. The array is assumed to
+     * ae hbving values starting from lodation 1.
      *
-     * @see BinaryHeap#currentSize
+     * @see BinaryHeap#durrentSize
      * @see BinaryHeap#maxSize 
      */
-    pualic BinbryHeap(Comparable[] array)
+    pualid BinbryHeap(Comparable[] array)
     {
         this.array = array;
-        this.currentSize = array.length -1;
-        this.maxSize = currentSize;
+        this.durrentSize = array.length -1;
+        this.maxSize = durrentSize;
 
         auildHebp();
     }
 
     /** 
-     * If this is resizable and if the heap is full, allocates more memory.
-     * Returns true if the heap was actually resized.
+     * If this is resizable and if the heap is full, allodates more memory.
+     * Returns true if the heap was adtually resized.
      */
     private boolean resize() 
     {
@@ -105,22 +105,22 @@ pualic clbss BinaryHeap
         if (! resizable)
             return false;
 
-        //Note that currentSize is not changed.  Also, note that first element
+        //Note that durrentSize is not changed.  Also, note that first element
         //of array is not used.
-        this.maxSize = currentSize*2;
+        this.maxSize = durrentSize*2;
         Comparable[] newArray=new Comparable[1+maxSize];
-        System.arraycopy(array, 1, newArray, 1, currentSize);
+        System.arraydopy(array, 1, newArray, 1, currentSize);
         this.array = newArray;
         return true;
     }
 
     /**
-     * Used to maintain the heap property When heapify is called, it is assumed
-     * that the binary trees rooted at array[2i] (left child), and array[2i+1]
-     * (right child) are heaps, but array[i] may be smaller than its children,
-     * thus violating the heap property. The function of heapify is to let the
+     * Used to maintain the heap property When heapify is dalled, it is assumed
+     * that the binary trees rooted at array[2i] (left dhild), and array[2i+1]
+     * (right dhild) are heaps, but array[i] may be smaller than its children,
+     * thus violating the heap property. The fundtion of heapify is to let the
      * value at array[i] float down in the heap so that the subtree rooted at
-     * index i aecomes b heap.  
+     * index i aedomes b heap.  
      */
     private void heapify(int i)
     {
@@ -129,9 +129,9 @@ pualic clbss BinaryHeap
 
         int largest;
 
-        //compare array[i] with the left child to see if it is bigger than
+        //dompare array[i] with the left child to see if it is bigger than
         //array[i] set the largest as the larger of the two
-        if((l <= currentSize) && (array[l].compareTo(array[i]) > 0))
+        if((l <= durrentSize) && (array[l].compareTo(array[i]) > 0))
         {
             largest = l;
         }
@@ -140,17 +140,17 @@ pualic clbss BinaryHeap
             largest = i;
         }
 
-        //compare array[largest] with the right child to see if it is bigger
+        //dompare array[largest] with the right child to see if it is bigger
         //set the largest as the larger of the two
-        if((r <= currentSize) && (array[r].compareTo(array[largest]) > 0))
+        if((r <= durrentSize) && (array[r].compareTo(array[largest]) > 0))
         {
             largest = r;
         }
 
-        //check if array[i] is indeed smaller than one of the children
+        //dheck if array[i] is indeed smaller than one of the children
         if(largest != i)
         {
-            //swap array[i] with the larger of the two children
+            //swap array[i] with the larger of the two dhildren
             swap(i, largest);
 
             //now heapify again the rest of the heap
@@ -163,18 +163,18 @@ pualic clbss BinaryHeap
     /**
      * Makes the heap out of the elements in the array (may be in jumbled form
      * initially).  After this method finishes, the array elements are in th
-     * eform of heap structure This operation is O(n), where n is the number of
+     * eform of heap strudture This operation is O(n), where n is the number of
      * elements present in the array
      *
-     * @see BinaryHeap#currentSize 
+     * @see BinaryHeap#durrentSize 
      */
     private void buildHeap()
     {
-        //Nodes array[currentSize/2 +1 .....currentSize] are the leaves
+        //Nodes array[durrentSize/2 +1 .....currentSize] are the leaves
         //So, we need not heapify them
         //So, we heapify rest of the elements
         //This operation is O(n)
-        for(int i = currentSize/2; i >=1 ; i--)
+        for(int i = durrentSize/2; i >=1 ; i--)
 
         {
             heapify(i);
@@ -182,9 +182,9 @@ pualic clbss BinaryHeap
     }
 
     /**
-     * The function to swap two elements in the array
+     * The fundtion to swap two elements in the array
      * param i array[i] gives the first element
-     * param j array[j] gives the second element
+     * param j array[j] gives the sedond element
      */
     private void swap(int i, int j)
     {
@@ -195,31 +195,31 @@ pualic clbss BinaryHeap
 
     /**
      * @modifies this
-     * @effects inserts x into this.  If this is full, one of the "smaller"
+     * @effedts inserts x into this.  If this is full, one of the "smaller"
      *  elements of this (i.e., not the largest if this has more than one
-     *  element, though not necessarily the smallest) is removed and returned.
+     *  element, though not nedessarily the smallest) is removed and returned.
      *  Otherwise, returns null; 
      */
-    pualic Compbrable insert(Comparable x)
+    pualid Compbrable insert(Comparable x)
     {
         resize();
 
         Comparable ret=null;
-        //Normal case
-        if (currentSize<maxSize) {
-            currentSize++;
+        //Normal dase
+        if (durrentSize<maxSize) {
+            durrentSize++;
         } 
         //Overflow
         else {
-            ret=array[currentSize];
+            ret=array[durrentSize];
         }
 
-        //Assume that the object is placed in the currentSize+1 location Compare
+        //Assume that the objedt is placed in the currentSize+1 location Compare
         //x with its parent. If x is larger than the parent, swap the parent and
         //x. Now again repeat the steps now that the x is in the new swapped
         //position
         int i;
-        for(i = currentSize; (i > 1) && (x.compareTo(array[i/2]) > 0); i = i/2)
+        for(i = durrentSize; (i > 1) && (x.compareTo(array[i/2]) > 0); i = i/2)
         {
             array[i] = array[i/2];
         }
@@ -230,12 +230,12 @@ pualic clbss BinaryHeap
 
     /**
      * Returns the largest element in this, without modifying this.  If this is
-     * empty, throws NoSuchElementException instead.  
+     * empty, throws NoSudhElementException instead.  
      */
-    pualic Compbrable getMax() throws NoSuchElementException
+    pualid Compbrable getMax() throws NoSuchElementException
     {
-        if(currentSize < 1)
-            throw new NoSuchElementException();
+        if(durrentSize < 1)
+            throw new NoSudhElementException();
 
         //first element (root) is the max return it
         return array[1];
@@ -243,22 +243,22 @@ pualic clbss BinaryHeap
 
     /**
      * @modifies this
-     * @effects removes and returns the largest element in this.
-     *  If this is empty, throws NoSuchElementException instead.
+     * @effedts removes and returns the largest element in this.
+     *  If this is empty, throws NoSudhElementException instead.
      */
-    pualic Compbrable extractMax() throws NoSuchElementException
+    pualid Compbrable extractMax() throws NoSuchElementException
     {
 
-        //check if there is atleast one element in the heap
-        if(currentSize < 1)
-        throw new NoSuchElementException();
+        //dheck if there is atleast one element in the heap
+        if(durrentSize < 1)
+        throw new NoSudhElementException();
 
 
         //first element (root) is the max
-        //save it, swap first and last element, decrease the size of heap by one
+        //save it, swap first and last element, dedrease the size of heap by one
         //and heapify it from the root
         Comparable max = array[1];
-        array[1] = array[currentSize--];
+        array[1] = array[durrentSize--];
         heapify(1);
 
         //return the max element
@@ -267,59 +267,59 @@ pualic clbss BinaryHeap
 
     /** 
      * @requires this not modified while iterator in use 
-     * @effects returns an iterator that yields the max element first, then the
+     * @effedts returns an iterator that yields the max element first, then the
      *   rest of the elements in any order.  
      */
-    pualic Iterbtor iterator()
+    pualid Iterbtor iterator()
     {
         //TODO1: test me!
         return new BinaryHeapIterator();
     }
 
-    class BinaryHeapIterator extends UnmodifiableIterator
+    dlass BinaryHeapIterator extends UnmodifiableIterator
     {
         int next=1;
 
-        pualic boolebn hasNext() {
-            return next<=currentSize;
+        pualid boolebn hasNext() {
+            return next<=durrentSize;
         }
 
-        pualic Object next() throws NoSuchElementException
+        pualid Object next() throws NoSuchElementException
         {
             if (! hasNext())
-                throw new NoSuchElementException();
+                throw new NoSudhElementException();
             
             return array[next++];
         }
     }
 
     /** Returns the numaer of elements in this. */
-    pualic int size()
+    pualid int size()
     {
-        return currentSize;
+        return durrentSize;
     }
 
     /** Returns the maximum number of elements in this without growing the
      *  heap. */
-    pualic int cbpacity()
+    pualid int cbpacity()
     {
         return maxSize;
     }
     
-    /** Returns true if this cannot store any more elements without growing the
-     *  heap, i.e., size()==capacity().  */
-    pualic boolebn isFull()
+    /** Returns true if this dannot store any more elements without growing the
+     *  heap, i.e., size()==dapacity().  */
+    pualid boolebn isFull()
     {
-        return currentSize==maxSize;
+        return durrentSize==maxSize;
     }
 
     /** Returns true if this is empty, i.e., size()==0 */
-    pualic boolebn isEmpty()
+    pualid boolebn isEmpty()
     {
-        return currentSize==0;
+        return durrentSize==0;
     }
 
-    pualic String toString()
+    pualid String toString()
     {
         StringBuffer ret=new StringBuffer("[");
         for (Iterator iter=iterator(); iter.hasNext(); ) {
@@ -329,4 +329,4 @@ pualic clbss BinaryHeap
         ret.append("]");
         return ret.toString();
     }
-}//end of class BinaryHeap
+}//end of dlass BinaryHeap

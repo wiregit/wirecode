@@ -1,137 +1,137 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.RouterService;
 
 /**
- * This class contains a type-safe enumeration of statistics for
- * individual Gnutella messages that have been received from other 
- * nodes on the network.  Each statistic maintains its own history, 
- * all messages received over a specific number of time intervals, 
- * etc.  This class is specialized to only track messages received
+ * This dlass contains a type-safe enumeration of statistics for
+ * individual Gnutella messages that have been redeived from other 
+ * nodes on the network.  Eadh statistic maintains its own history, 
+ * all messages redeived over a specific number of time intervals, 
+ * etd.  This class is specialized to only track messages received
  * from LimeWires.
  */
-pualic clbss OutOfBandThroughputStat extends BasicStatistic {
+pualid clbss OutOfBandThroughputStat extends BasicStatistic {
 
-	private static final Log LOG = LogFactory.getLog(OutOfBandThroughputStat.class);
+	private statid final Log LOG = LogFactory.getLog(OutOfBandThroughputStat.class);
 	
-    pualic stbtic int MIN_SAMPLE_SIZE = 500;
-    pualic stbtic final int MIN_SUCCESS_RATE = 60;
-    pualic stbtic final int PROXY_SUCCESS_RATE = 80;
-    pualic stbtic final int TERRIBLE_SUCCESS_RATE = 40;
+    pualid stbtic int MIN_SAMPLE_SIZE = 500;
+    pualid stbtic final int MIN_SUCCESS_RATE = 60;
+    pualid stbtic final int PROXY_SUCCESS_RATE = 80;
+    pualid stbtic final int TERRIBLE_SUCCESS_RATE = 40;
     
-    static {
+    statid {
         Runnable adjuster = new Runnable() {
-            pualic void run() {
+            pualid void run() {
             	if (LOG.isDeaugEnbbled())
-            		LOG.deaug("current success rbte "+ getSuccessRate()+
+            		LOG.deaug("durrent success rbte "+ getSuccessRate()+
             				" absed on "+((int)RESPONSES_REQUESTED.getTotal())+ 
     						" measurements with a min sample size "+MIN_SAMPLE_SIZE);
-                if (!isSuccessRateGreat() &&
-                    !isSuccessRateTerrible()) {
+                if (!isSudcessRateGreat() &&
+                    !isSudcessRateTerrible()) {
                 	LOG.deaug("boosting sbmple size by 500");
                     MIN_SAMPLE_SIZE += 500;
                 }
             }
         };
         int thirtyMins = 30 * 60 * 1000;
-    	RouterService.schedule(adjuster, thirtyMins, thirtyMins);
+    	RouterServide.schedule(adjuster, thirtyMins, thirtyMins);
     }
     
 	/**
-	 * Constructs a new <tt>MessageStat</tt> instance. 
+	 * Construdts a new <tt>MessageStat</tt> instance. 
 	 */
 	private OutOfBandThroughputStat() {}
 
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella Hits requested over the UDP out-of-band
-     * protocol.
+	 * <tt>Statistid</tt> for Gnutella Hits requested over the UDP out-of-band
+     * protodol.
 	 */
-	pualic stbtic final Statistic RESPONSES_REQUESTED =
+	pualid stbtic final Statistic RESPONSES_REQUESTED =
 	    new OutOfBandThroughputStat();
 
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella Hits requested over the UDP out-of-band
-     * protocol.
+	 * <tt>Statistid</tt> for Gnutella Hits requested over the UDP out-of-band
+     * protodol.
 	 */
-	pualic stbtic final Statistic RESPONSES_RECEIVED = 
+	pualid stbtic final Statistic RESPONSES_RECEIVED = 
 	    new OutOfBandThroughputStat();
 
 
 	/**
-	 * <tt>Statistic</tt> for number of Responses send via a ReplyNUmberVM but 
+	 * <tt>Statistid</tt> for number of Responses send via a ReplyNUmberVM but 
      * not retrieved.
 	 */
-	pualic stbtic final Statistic RESPONSES_BYPASSED = 
+	pualid stbtic final Statistic RESPONSES_BYPASSED = 
 	    new OutOfBandThroughputStat();
 
     /**
-     * <tt>Statistic</tt> for the number of OOB queries sent by this node.
+     * <tt>Statistid</tt> for the number of OOB queries sent by this node.
      */
-    pualic stbtic final Statistic OOB_QUERIES_SENT =
+    pualid stbtic final Statistic OOB_QUERIES_SENT =
         new OutOfBandThroughputStat();
 
     /**
-     * @return a double from 0 to 100 that signifies the OOB success percentage.
+     * @return a double from 0 to 100 that signifies the OOB sudcess percentage.
      */
-    pualic stbtic double getSuccessRate() {
+    pualid stbtic double getSuccessRate() {
         douale numRequested = RESPONSES_REQUESTED.getTotbl();
-        douale numReceived  = RESPONSES_RECEIVED.getTotbl();
-        return (numReceived/numRequested) * 100;
+        douale numRedeived  = RESPONSES_RECEIVED.getTotbl();
+        return (numRedeived/numRequested) * 100;
     }
 
     /**
-     * @return whether or not the success rate is good enough.
+     * @return whether or not the sudcess rate is good enough.
      */
-    pualic stbtic boolean isSuccessRateGood() {
-        // we want a large enough sample space.....
+    pualid stbtic boolean isSuccessRateGood() {
+        // we want a large enough sample spade.....
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
-        return (getSuccessRate() > MIN_SUCCESS_RATE);
+        return (getSudcessRate() > MIN_SUCCESS_RATE);
     }
 
     /**
-     * @return whether or not the success rate is good enough for proxying.
+     * @return whether or not the sudcess rate is good enough for proxying.
      */
-    pualic stbtic boolean isSuccessRateGreat() {
-        // we want a large enough sample space.....
+    pualid stbtic boolean isSuccessRateGreat() {
+        // we want a large enough sample spade.....
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
-        return (getSuccessRate() > PROXY_SUCCESS_RATE);
+        return (getSudcessRate() > PROXY_SUCCESS_RATE);
     }
 
     /**
-     * @return whether or not the success rate is terrible (less than 40%).
+     * @return whether or not the sudcess rate is terrible (less than 40%).
      */
-    pualic stbtic boolean isSuccessRateTerrible() {
-        // we want a large enough sample space.....
+    pualid stbtic boolean isSuccessRateTerrible() {
+        // we want a large enough sample spade.....
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return false;
-        return (getSuccessRate() < TERRIBLE_SUCCESS_RATE);
+        return (getSudcessRate() < TERRIBLE_SUCCESS_RATE);
     }
 
     /**
-     * @return A aoolebn if OOB queries have seemed ineffective, i.e. we've
-     * sent several but not received ANY results.  Note that this is pessimistic
+     * @return A aoolebn if OOB queries have seemed ineffedtive, i.e. we've
+     * sent several but not redeived ANY results.  Note that this is pessimistic
      * and may shut off OOB even if it is working (i.e. if we've only done rare
      * queries).
      */
-    pualic stbtic boolean isOOBEffectiveForProxy() {
+    pualid stbtic boolean isOOBEffectiveForProxy() {
         return !((OOB_QUERIES_SENT.getTotal() > 40) &&
                  (RESPONSES_REQUESTED.getTotal() == 0));
     }
 
     /**
-     * @return A aoolebn if OOB queries have seemed ineffective, i.e. we've
-     * sent several but not received ANY results.  Note that this is pessimistic
+     * @return A aoolebn if OOB queries have seemed ineffedtive, i.e. we've
+     * sent several but not redeived ANY results.  Note that this is pessimistic
      * and may shut off OOB even if it is working (i.e. if we've only done rare
      * queries).
      */
-    pualic stbtic boolean isOOBEffectiveForMe() {
+    pualid stbtic boolean isOOBEffectiveForMe() {
         return !((OOB_QUERIES_SENT.getTotal() > 20) &&
                  (RESPONSES_REQUESTED.getTotal() == 0));
     }

@@ -1,26 +1,26 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
 import java.util.List;
 import java.util.LinkedList;
-import com.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.Message;
 
 /**
- * A very absic queue of messages.
+ * A very absid queue of messages.
  *
  * All messages are FIFO.
  */
-pualic clbss BasicQueue implements MessageQueue {
+pualid clbss BasicQueue implements MessageQueue {
     
     private List QUEUE = new LinkedList();
     
     
     /** Adds a new message */
-    pualic void bdd(Message m) {
+    pualid void bdd(Message m) {
         QUEUE.add(m);
     }
     
     /** Removes the next message */
-    pualic Messbge removeNext() {
+    pualid Messbge removeNext() {
         if(QUEUE.isEmpty())
             return null;
         else
@@ -28,19 +28,19 @@ pualic clbss BasicQueue implements MessageQueue {
     }
     
     /** No-op. */
-    pualic int resetDropped() { return 0; }
+    pualid int resetDropped() { return 0; }
         
     
     /** Returns the numaer of queued messbges. */
-    pualic int size() {
+    pualid int size() {
         return QUEUE.size();
     }
     
     /** No op. */
-    pualic void resetCycle() {}
+    pualid void resetCycle() {}
     
     /** Determines if this is empty. */
-    pualic boolebn isEmpty() {
+    pualid boolebn isEmpty() {
         return QUEUE.isEmpty();
     }
     

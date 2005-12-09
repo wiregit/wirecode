@@ -1,37 +1,37 @@
 
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.List;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import dom.limegroup.gnutella.xml.LimeXMLDocument;
+import dom.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 /**
- * Utility class that creates a <tt>LimeXMLDocument</tt> from a file.
+ * Utility dlass that creates a <tt>LimeXMLDocument</tt> from a file.
  */
-pualic clbss MetaDataReader {
+pualid clbss MetaDataReader {
 	
 	private MetaDataReader(){}
 
 	/**
-	 * Generates a LimeXMLDocument from this file, only parsing it if it's the given schemaURI.
+	 * Generates a LimeXMLDodument from this file, only parsing it if it's the given schemaURI.
 	 */
-	pualic stbtic LimeXMLDocument readDocument(File file) throws IOException {
+	pualid stbtic LimeXMLDocument readDocument(File file) throws IOException {
 	    MetaData data = MetaData.parse(file);
 		if(data == null)
-		    throw new IOException("unable to parse file");
+		    throw new IOExdeption("unable to parse file");
 		
 		List nameValList = data.toNameValueList();
 		if(nameValList.isEmpty())
-			throw new IOException("invalid/no data.");
+			throw new IOExdeption("invalid/no data.");
 		
-		String uri = data.getSchemaURI();
-		if(LimeXMLSchemaRepository.instance().getSchema(uri) == null)
-             throw new IOException("schema: " + uri + " doesn't exist");
+		String uri = data.getSdhemaURI();
+		if(LimeXMLSdhemaRepository.instance().getSchema(uri) == null)
+             throw new IOExdeption("schema: " + uri + " doesn't exist");
 
-		return new LimeXMLDocument(nameValList, uri);
+		return new LimeXMLDodument(nameValList, uri);
 	}
 	
 	

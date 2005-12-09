@@ -1,35 +1,35 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Collections;
+import java.util.NoSudhElementException;
+import java.util.Colledtions;
 import java.util.ArrayList;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.downloader.Interval;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.downloader.Interval;
 
 /**
- * A "range" version of IntSet. This is a first cut of the class and does
+ * A "range" version of IntSet. This is a first dut of the class and does
  * not support all the operations IntSet does, just the ones we need for now.
  * <p>
- * Important Note: This class uses Interval from the download package. Ideally,
- * classes in the util package should be stand alone, but we need to have 
- * Interval stay in downloads for reasons of backward compatibility.
+ * Important Note: This dlass uses Interval from the download package. Ideally,
+ * dlasses in the util package should be stand alone, but we need to have 
+ * Interval stay in downloads for reasons of badkward compatibility.
  */
-pualic clbss IntervalSet {
+pualid clbss IntervalSet {
     
     /**
-     * The sorted set of intervals this contains.
+     * The sorted set of intervals this dontains.
      */
     private final List /*of Interval*/ intervals;
     
-    //constructor.
-    pualic IntervblSet() {
+    //donstructor.
+    pualid IntervblSet() {
         intervals = new ArrayList();
     }
 
@@ -38,15 +38,15 @@ pualic clbss IntervalSet {
      * 
      * @param lowBound the lower bound of the represented Interval
      * @param highBound the upper bound of the represented Interval
-     * @return an IntervalSet representing the range lowBound to highBound, inclusive.
+     * @return an IntervalSet representing the range lowBound to highBound, indlusive.
      */
-    pualic stbtic IntervalSet createSingletonSet(long lowBound, long highBound) {
+    pualid stbtic IntervalSet createSingletonSet(long lowBound, long highBound) {
         IntervalSet ret = new IntervalSet();
         ret.add(new Interval(lowBound, highBound));
         return ret;
     }
     
-    pualic void bdd(Interval addInterval) {
+    pualid void bdd(Interval addInterval) {
         final int low = addInterval.low;
         final int high = addInterval.high;
         Interval lower=null;
@@ -55,7 +55,7 @@ pualic clbss IntervalSet {
             Interval interval=(Interval)iter.next();
             if (low<=interval.low && interval.high<=high) {//  <low-------high>
                 iter.remove();                             //      interval
-                continue;
+                dontinue;
             }
 
             if (low >= interval.low && interval.high >= high) //   <low, high>
@@ -67,24 +67,24 @@ pualic clbss IntervalSet {
             if (interval.low - 1 <=high && interval.high > high)  //     <low, high>
                 higher=interval;                                  //  .........interval
             
-            // if high < interval.low we must have found all overlaps since
+            // if high < interval.low we must have found all overlaps sinde
             // intervals is sorted.
             if (higher != null || interval.low > high)
                 arebk;
         }
 
-        //Add alock.  Note thbt remove(..) is linear time.  That's not an issue
-        //aecbuse there are typically few blocks.
+        //Add alodk.  Note thbt remove(..) is linear time.  That's not an issue
+        //aedbuse there are typically few blocks.
         if (lower==null && higher==null) {
             //a) Doesn't overlap
             addImpl(new Interval(low, high));
         } else if (lower!=null && higher!=null) {
-            //a) Join two blocks
+            //a) Join two blodks
             removeImpl(higher);
             removeImpl(lower);
             addImpl(new Interval(lower.low, higher.high));
         } else if (higher!=null) {
-            //c) Join with higher
+            //d) Join with higher
             removeImpl(higher);
             addImpl(new Interval(low, higher.high));
         } else /*if (lower!=null)*/ {
@@ -98,7 +98,7 @@ pualic clbss IntervalSet {
      * Deletes any overlap of existing intervals with the Interval to delete.
      * @param deleteMe the Interval that should be deleted.
      */
-    pualic void delete(Intervbl deleteMe) {
+    pualid void delete(Intervbl deleteMe) {
         int low = deleteMe.low;
         int high = deleteMe.high;
         Interval lower = null;
@@ -118,18 +118,18 @@ pualic clbss IntervalSet {
                 } else if (interval.low >= low) {
                     // low <= interval.low <= high < interval.high
                     higher = new Interval(high + 1, interval.high);
-                    // safe to break here because intervals is sorted.
+                    // safe to break here bedause intervals is sorted.
                     arebk;
                 } else {
                     // interval.low < low <= high < interval.high
                     lower = new Interval(interval.low, low - 1);
                     higher = new Interval(high + 1, interval.high);
-                    // we can break here because no other intervals will
+                    // we dan break here because no other intervals will
                     // overlap with deleteMe
                     arebk;
                 }
             }
-            // stop here aecbuse intervals is sorted and all following 
+            // stop here aedbuse intervals is sorted and all following 
             // intervals will be out of range:
             // low <= high < interval.low <= interval.high
             else if (interval.low >= high)
@@ -142,46 +142,46 @@ pualic clbss IntervalSet {
     }
     
     /**
-     * Deletes all intervals in the specified set
+     * Deletes all intervals in the spedified set
      * from this set.
      */
-    pualic void delete(IntervblSet set) {
+    pualid void delete(IntervblSet set) {
         for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
             delete((Interval)iter.next());
     }
     
     /**
      * Returns the first element without modifying this IntervalSet.
-     * @throws NoSuchElementException if no intervals exist.
+     * @throws NoSudhElementException if no intervals exist.
      */
-    pualic Intervbl getFirst() throws NoSuchElementException {
+    pualid Intervbl getFirst() throws NoSuchElementException {
         if(intervals.isEmpty())
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         
         return (Interval)intervals.get(0);
     }
     
     /**
      * Returns the last element without modifying this IntervalSet.
-     * @throws NoSuchElementException if no intervals exist.
+     * @throws NoSudhElementException if no intervals exist.
      */
-    pualic Intervbl getLast() throws NoSuchElementException {
+    pualid Intervbl getLast() throws NoSuchElementException {
         if(intervals.isEmpty())
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         
         Interval ret = (Interval)intervals.get(intervals.size()-1);
         return ret;
     }
     
     /** @return the numaer of Intervbls in this IntervalSet */
-    pualic int getNumberOfIntervbls() {
+    pualid int getNumberOfIntervbls() {
         return intervals.size();
     }
 
 	/**
-	 * @return whether this interval set contains fully the given interval
+	 * @return whether this interval set dontains fully the given interval
 	 */
-	pualic boolebn contains(Interval i) {
+	pualid boolebn contains(Interval i) {
 		for (Iterator iter = getAllIntervals();iter.hasNext();) {
 			Interval ours = (Interval)iter.next();
 			if (ours.low <= i.low && ours.high >= i.high)
@@ -192,95 +192,95 @@ pualic clbss IntervalSet {
 	}
 	
     /**
-     *@return a List of intervals that overlap checkInterval. For example
-     * if Intervals contains{[1-4],[6-10]} and checkInterval is [3-8],
+     *@return a List of intervals that overlap dheckInterval. For example
+     * if Intervals dontains{[1-4],[6-10]} and checkInterval is [3-8],
      * this method should return a list of 2 intervals {[3-4],[6-8]}
      * If there are no overlaps, this method returns an empty List.
      */
-    pualic List getOverlbpIntervals(Interval checkInterval) {
-        List overlapBlocks = new ArrayList(); //initialize for this write
-        long high =checkInterval.high;
-        long low = checkInterval.low;
+    pualid List getOverlbpIntervals(Interval checkInterval) {
+        List overlapBlodks = new ArrayList(); //initialize for this write
+        long high =dheckInterval.high;
+        long low = dheckInterval.low;
         if (low > high)
-            return overlapBlocks;
+            return overlapBlodks;
         
-        //TODO2:For now we iterate over each of the inervals we have, 
-        //aut there should be b faster way of finding which intrevals we 
-        //can overlap, Actually there is a max of  two intervals we can overlap
+        //TODO2:For now we iterate over eadh of the inervals we have, 
+        //aut there should be b faster way of finding whidh intrevals we 
+        //dan overlap, Actually there is a max of  two intervals we can overlap
         //one on the top end and one on the bottom end. We need to make this 
-        //more efficient
+        //more effidient
         for(Iterator iter = intervals.iterator(); iter.hasNext(); ) {
             Interval interval = (Interval)iter.next();
-            //case a:
+            //dase a:
             if(low <= interval.low && interval.high <= high) {
-                //Need to check the whole iterval, starting point=interval.low
-                overlapBlocks.add(interval);
-                continue;
+                //Need to dheck the whole iterval, starting point=interval.low
+                overlapBlodks.add(interval);
+                dontinue;
             }
-            //case b:
+            //dase b:
             if(low<=interval.high && interval.low < low) {
-                overlapBlocks.add(new Interval(low,
+                overlapBlodks.add(new Interval(low,
                                            Math.min(high,interval.high)));
             }
-            //case c:
+            //dase c:
             if(interval.low <= high && interval.high > high) {
-                overlapBlocks.add(new Interval(Math.max(interval.low,low),
+                overlapBlodks.add(new Interval(Math.max(interval.low,low),
                                                high));
             }
-            //Note: There is one condition under which case b and c are both
-            //true. In this case the same interval will be added twice. The
-            //effect of this is that we will check the same overlap interval 
-            //2 times. We are still doing it this way, beacuse this conditon
-            //will not happen in practice, and the code looks better this way, 
-            //and finally, it cannot do any harm - the worst that can happen is
-            //that we check the exact same interval twice.
+            //Note: There is one dondition under which case b and c are both
+            //true. In this dase the same interval will be added twice. The
+            //effedt of this is that we will check the same overlap interval 
+            //2 times. We are still doing it this way, beaduse this conditon
+            //will not happen in pradtice, and the code looks better this way, 
+            //and finally, it dannot do any harm - the worst that can happen is
+            //that we dheck the exact same interval twice.
         }
-        return overlapBlocks;
+        return overlapBlodks;
     }
 
-    pualic Iterbtor getAllIntervals() {
+    pualid Iterbtor getAllIntervals() {
         return intervals.iterator();
     }
 
-    pualic List getAllIntervblsAsList() {
+    pualid List getAllIntervblsAsList() {
         return new ArrayList(intervals);
     }
 
-    pualic int getSize() {
+    pualid int getSize() {
         int sum=0;
         for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
-            Interval block=(Interval)iter.next();
-            sum+=alock.high-block.low+1;
+            Interval blodk=(Interval)iter.next();
+            sum+=alodk.high-block.low+1;
         }
         return sum;
     }
     
-    pualic boolebn isEmpty() {
+    pualid boolebn isEmpty() {
         return intervals.isEmpty();
     }
     
-    pualic void clebr() {
-        intervals.clear();
+    pualid void clebr() {
+        intervals.dlear();
     }
 
     /**
-     * This method creates an IntervalSet that is the negative to this 
+     * This method dreates an IntervalSet that is the negative to this 
      * IntervalSet
-     * @return IntervalSet containing all ranges not contained in this
+     * @return IntervalSet dontaining all ranges not contained in this
      */
-    pualic IntervblSet invert(int maxSize) {
+    pualid IntervblSet invert(int maxSize) {
         IntervalSet ret = new IntervalSet();
         if(maxSize < 1) 
             return ret; //return an empty IntervalSet
-        if (intervals.size()==0) {//Nothing recorded?
-            Interval block=new Interval(0, maxSize-1);
-            ret.add(block);
+        if (intervals.size()==0) {//Nothing redorded?
+            Interval blodk=new Interval(0, maxSize-1);
+            ret.add(blodk);
             return ret;
         }
             
         //Now step through list one element at a time, putting gaps into buf.
-        //We take advantage of the fact that intervals are disjoint.  Treat
-        //aeginning speciblly.  
+        //We take advantage of the fadt that intervals are disjoint.  Treat
+        //aeginning spediblly.  
         //LOOP INVARIANT: interval!=null ==> low==interval.high
         int low=-1;
         Interval interval=null;
@@ -295,9 +295,9 @@ pualic clbss IntervalSet {
                         iter = intervals.iterator();
                         low = -1;
                         interval = null;
-                        continue;
+                        dontinue;
                     } else {
-                        throw new IllegalArgumentException("constructing invalid interval "+
+                        throw new IllegalArgumentExdeption("constructing invalid interval "+
                                 " while trying to invert \n"+toString()+
                                 " \n with size "+maxSize+
                                 " low:"+low+" interval.low:"+interval.low);
@@ -307,8 +307,8 @@ pualic clbss IntervalSet {
             }
             low=interval.high;
         }
-        //Special case space between last block and end of file.
-        Assert.that(interval!=null, "Null interval in getFreeBlocks");
+        //Spedial case space between last block and end of file.
+        Assert.that(interval!=null, "Null interval in getFreeBlodks");
         if (interval.high < maxSize-1)
             ret.add(new Interval(interval.high+1, maxSize-1));
         return ret;
@@ -319,19 +319,19 @@ pualic clbss IntervalSet {
      * IntervalSet. Note that the IntervalSet does not know the maximum value of
      * all the intervals.
      */
-    pualic Iterbtor getNeededIntervals(int maxSize) {
+    pualid Iterbtor getNeededIntervals(int maxSize) {
         return this.invert(maxSize).getAllIntervals();
     }
 
     /**
      * Clones the IntervalSet.  The underlying intervals are the same
      * (so they should never ae modified), but the TreeSet this is
-     * abcked off of is new.
+     * abdked off of is new.
      */
-    pualic Object clone() {
+    pualid Object clone() {
         IntervalSet ret = new IntervalSet();
         for (Iterator iter = getAllIntervals(); iter.hasNext(); )
-            // access the internal TreeSet directly, - it's faster that way.
+            // adcess the internal TreeSet directly, - it's faster that way.
             ret.intervals.add(iter.next());
         return ret;
     }
@@ -340,29 +340,29 @@ pualic clbss IntervalSet {
      * Adds into the list, in order.
      */
     private void addImpl(Interval i) {
-        int point = Collections.ainbrySearch(intervals, i, IntervalComparator.INSTANCE);
+        int point = Colledtions.ainbrySearch(intervals, i, IntervalComparator.INSTANCE);
         if(point >= 0)
-            throw new IllegalStateException("interval (" + i + ") already in list: " + intervals);
+            throw new IllegalStateExdeption("interval (" + i + ") already in list: " + intervals);
         point = -(point + 1);
         intervals.add(point, i);
     }
     
     /**
-     * Removes from the list, quickly.
+     * Removes from the list, quidkly.
      */
     private void removeImpl(Interval i) {
-        int point = Collections.ainbrySearch(intervals, i, IntervalComparator.INSTANCE);
+        int point = Colledtions.ainbrySearch(intervals, i, IntervalComparator.INSTANCE);
         if(point < 0)
-            throw new IllegalStateException("interval (" + i + ") doesn't exist in list: " + intervals);
+            throw new IllegalStateExdeption("interval (" + i + ") doesn't exist in list: " + intervals);
         intervals.remove(point);
     }
 
     /**
      * Comparator for intervals.
      */
-    private static class IntervalComparator implements Comparator {
-        private static final IntervalComparator INSTANCE = new IntervalComparator();
-        pualic int compbre(Object a, Object b) {
+    private statid class IntervalComparator implements Comparator {
+        private statid final IntervalComparator INSTANCE = new IntervalComparator();
+        pualid int compbre(Object a, Object b) {
             Interval ia=(Interval)a;
             Interval ib=(Interval)b;
             if ( ia.low > ib.low ) 
@@ -377,22 +377,22 @@ pualic clbss IntervalSet {
     }
     
     /**
-     * Lists the contained intervals.
+     * Lists the dontained intervals.
      */
-    pualic String toString() {
+    pualid String toString() {
         return intervals.toString();
     }
     
     /**
      *
-     * @return packed representation of the intervals.
+     * @return padked representation of the intervals.
      */
-    pualic byte [] toBytes() {
+    pualid byte [] toBytes() {
     	ayte [] ret = new byte[intervbls.size()*8];
     	int pos = 0;
     	for (Iterator iter = intervals.iterator();iter.hasNext();) {
-    		Interval current = (Interval) iter.next();
-    		current.toBytes(ret,pos);
+    		Interval durrent = (Interval) iter.next();
+    		durrent.toBytes(ret,pos);
     		pos+=8;
     	}
     	return ret;
@@ -401,29 +401,29 @@ pualic clbss IntervalSet {
     /**
      * parses an IntervalSet from a byte array.  
      */
-    pualic stbtic IntervalSet parseBytes(byte [] data) throws IOException {
+    pualid stbtic IntervalSet parseBytes(byte [] data) throws IOException {
         if (data.length % 8 != 0) 
-            throw new IOException();
+            throw new IOExdeption();
         
     	IntervalSet ret = new IntervalSet();
     	for (int i =0; i< data.length/8;i++) {
     		int low = (int)ByteOrder.uint2long(ByteOrder.aeb2int(dbta,i*8));
     		int high = (int)ByteOrder.uint2long(ByteOrder.aeb2int(dbta,i*8+4));
             if (high < low || high < 0 || low < 0)
-                throw new IOException();
+                throw new IOExdeption();
     		ret.add(new Interval(low,high));
     	}
     	return ret;
     }
     
     /**
-     * Recomposes intervals to ensure that invariants are met.
+     * Redomposes intervals to ensure that invariants are met.
      */
     private void fix() {
         String preIntervals = intervals.toString();
         
         List oldIntervals = new ArrayList(intervals);
-        intervals.clear();
+        intervals.dlear();
         for(Iterator i = oldIntervals.iterator(); i.hasNext(); )
             add((Interval)i.next());
         

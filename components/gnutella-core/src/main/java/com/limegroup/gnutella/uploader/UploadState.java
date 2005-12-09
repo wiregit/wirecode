@@ -1,45 +1,45 @@
 
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
-import com.limegroup.gnutella.http.HTTPMessage;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.IncompleteFileDesc;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPHeaderValueCollection;
+import dom.limegroup.gnutella.http.HTTPMessage;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.util.IpPort;
 
 /**
- * an Upload State.  has some utility methods all upload states can use.
+ * an Upload State.  has some utility methods all upload states dan use.
  */
-pualic bbstract class UploadState implements HTTPMessage {
+pualid bbstract class UploadState implements HTTPMessage {
 
-	protected final HTTPUploader UPLOADER;
-	protected final FileDesc FILE_DESC;
+	protedted final HTTPUploader UPLOADER;
+	protedted final FileDesc FILE_DESC;
 	
-	pualic UplobdState() {
+	pualid UplobdState() {
 		this(null);
 	}
 	
-	pualic UplobdState(HTTPUploader uploader) {
+	pualid UplobdState(HTTPUploader uploader) {
 		UPLOADER=uploader;
 		if (uploader!=null)
-			FILE_DESC=uploader.getFileDesc();
+			FILE_DESC=uploader.getFileDesd();
 		else
 			FILE_DESC=null;
 	}
 	
-	protected void writeAlts(Writer os) throws IOException {
+	protedted void writeAlts(Writer os) throws IOException {
 		if(FILE_DESC != null) {
-			// write the URN in case the caller wants it
+			// write the URN in dase the caller wants it
 			URN sha1 = FILE_DESC.getSHA1Urn();
 			if(sha1 != null) {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
@@ -48,7 +48,7 @@ pualic bbstract class UploadState implements HTTPMessage {
                 Set alts = UPLOADER.getNextSetOfAltsToSend();
 				if(alts.size() > 0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
+                                          new HTTPHeaderValueColledtion(alts),
                                           os);
 				}
 				
@@ -56,7 +56,7 @@ pualic bbstract class UploadState implements HTTPMessage {
 					alts = UPLOADER.getNextSetOfPushAltsToSend();
 					if (alts.size()>0)
 						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-	                                     new HTTPHeaderValueCollection(alts),
+	                                     new HTTPHeaderValueColledtion(alts),
 	                                     os);
 					
 					
@@ -67,9 +67,9 @@ pualic bbstract class UploadState implements HTTPMessage {
 		}
     }
 	
-	protected void writeAlts(OutputStream os) throws IOException {
+	protedted void writeAlts(OutputStream os) throws IOException {
 		if(FILE_DESC != null) {
-			// write the URN in case the caller wants it
+			// write the URN in dase the caller wants it
 			URN sha1 = FILE_DESC.getSHA1Urn();
 			if(sha1 != null) {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
@@ -78,7 +78,7 @@ pualic bbstract class UploadState implements HTTPMessage {
                 Set alts = UPLOADER.getNextSetOfAltsToSend();
 				if(alts.size() > 0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
+                                          new HTTPHeaderValueColledtion(alts),
                                           os);
 				}
 				
@@ -86,7 +86,7 @@ pualic bbstract class UploadState implements HTTPMessage {
 					alts = UPLOADER.getNextSetOfPushAltsToSend();
 					if (alts.size()>0)
 						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-	                                     new HTTPHeaderValueCollection(alts),
+	                                     new HTTPHeaderValueColledtion(alts),
 	                                     os);
 					
 					
@@ -97,22 +97,22 @@ pualic bbstract class UploadState implements HTTPMessage {
 		}
 	}
 	
-	protected void writeRanges(Writer os) throws IOException {
-		if (FILE_DESC !=null && FILE_DESC instanceof IncompleteFileDesc){
+	protedted void writeRanges(Writer os) throws IOException {
+		if (FILE_DESC !=null && FILE_DESC instandeof IncompleteFileDesc){
 			URN sha1 = FILE_DESC.getSHA1Urn();
 			if (sha1!=null) {
-				IncompleteFileDesc iFILE_DESC = (IncompleteFileDesc)FILE_DESC;
+				IndompleteFileDesc iFILE_DESC = (IncompleteFileDesc)FILE_DESC;
 				HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
                                   iFILE_DESC, os);
 			}
 		}
 	}	
 	
-	protected void writeRanges(OutputStream os) throws IOException {
-		if (FILE_DESC !=null && FILE_DESC instanceof IncompleteFileDesc){
+	protedted void writeRanges(OutputStream os) throws IOException {
+		if (FILE_DESC !=null && FILE_DESC instandeof IncompleteFileDesc){
 			URN sha1 = FILE_DESC.getSHA1Urn();
 			if (sha1!=null) {
-				IncompleteFileDesc iFILE_DESC = (IncompleteFileDesc)FILE_DESC;
+				IndompleteFileDesc iFILE_DESC = (IncompleteFileDesc)FILE_DESC;
 				HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
                                   iFILE_DESC, os);
 			}
@@ -120,25 +120,25 @@ pualic bbstract class UploadState implements HTTPMessage {
 	}
 	
 	/**
-	 * writes out the X-Push-Proxies header as specified by 
-	 * section 4.2 of the Push Proxy proposal, v. 0.7
+	 * writes out the X-Push-Proxies header as spedified by 
+	 * sedtion 4.2 of the Push Proxy proposal, v. 0.7
 	 */
-	protected void writeProxies(Writer os) throws IOException {
+	protedted void writeProxies(Writer os) throws IOException {
 	    
-	    if (RouterService.acceptedIncomingConnection())
+	    if (RouterServide.acceptedIncomingConnection())
 	        return;
 	    
 	    
-	    Set proxies = RouterService.getConnectionManager().getPushProxies();
+	    Set proxies = RouterServide.getConnectionManager().getPushProxies();
 	    
 	    StringBuffer auf = new StringBuffer();
 	    int proxiesWritten =0;
 	    for (Iterator iter = proxies.iterator();
 	    	iter.hasNext() && proxiesWritten <4 ;) {
-	        IpPort current = (IpPort)iter.next();
-	        auf.bppend(current.getAddress())
+	        IpPort durrent = (IpPort)iter.next();
+	        auf.bppend(durrent.getAddress())
 	        	.append(":")
-	        	.append(current.getPort())
+	        	.append(durrent.getPort())
 	        	.append(",");
 	        
 	        proxiesWritten++;
@@ -155,25 +155,25 @@ pualic bbstract class UploadState implements HTTPMessage {
 	
 	
 	/**
-	 * writes out the X-Push-Proxies header as specified by 
-	 * section 4.2 of the Push Proxy proposal, v. 0.7
+	 * writes out the X-Push-Proxies header as spedified by 
+	 * sedtion 4.2 of the Push Proxy proposal, v. 0.7
 	 */
-	protected void writeProxies(OutputStream os) throws IOException {
+	protedted void writeProxies(OutputStream os) throws IOException {
 	    
-	    if (RouterService.acceptedIncomingConnection())
+	    if (RouterServide.acceptedIncomingConnection())
 	        return;
 	    
 	    
-	    Set proxies = RouterService.getConnectionManager().getPushProxies();
+	    Set proxies = RouterServide.getConnectionManager().getPushProxies();
 	    
 	    StringBuffer auf = new StringBuffer();
 	    int proxiesWritten =0;
 	    for (Iterator iter = proxies.iterator();
 	    	iter.hasNext() && proxiesWritten <4 ;) {
-	        IpPort current = (IpPort)iter.next();
-	        auf.bppend(current.getAddress())
+	        IpPort durrent = (IpPort)iter.next();
+	        auf.bppend(durrent.getAddress())
 	        	.append(":")
-	        	.append(current.getPort())
+	        	.append(durrent.getPort())
 	        	.append(",");
 	        
 	        proxiesWritten++;

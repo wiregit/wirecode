@@ -1,64 +1,64 @@
-package com.limegroup.gnutella.guess;
+padkage com.limegroup.gnutella.guess;
 
 import java.net.InetAddress;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.UDPService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.messages.PingReply;
+import dom.limegroup.gnutella.messages.PingRequest;
+import dom.limegroup.gnutella.messages.QueryRequest;
 
-/** Utility class for sending GUESS queries.
+/** Utility dlass for sending GUESS queries.
  */
-pualic clbss OnDemandUnicaster {
+pualid clbss OnDemandUnicaster {
 
-    private static final int CLEAR_TIME = 5 * 60 * 1000; // 5 minutes
+    private statid final int CLEAR_TIME = 5 * 60 * 1000; // 5 minutes
 
     /** GUESSEndpoints => QueryKey.
      */
-    private static final Map _queryKeys;
+    private statid final Map _queryKeys;
 
-    /** Access to UDP traffic.
+    /** Adcess to UDP traffic.
      */
-    private static final UDPService _udp;
+    private statid final UDPService _udp;
     
     /** Short term store for queries waiting for query keys.
      *  GUESSEndpoints => URNs
      */
-    private static final Map _bufferedURNs;
+    private statid final Map _bufferedURNs;
 
-    static {
-        // static initializers are only called once, right?
-        _queryKeys = new Hashtable(); // need sychronization
-        _aufferedURNs = new Hbshtable(); // synchronization handy
-        _udp = UDPService.instance();
-        // schedule a runner to clear various data structures
-        RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
+    statid {
+        // statid initializers are only called once, right?
+        _queryKeys = new Hashtable(); // need sydhronization
+        _aufferedURNs = new Hbshtable(); // syndhronization handy
+        _udp = UDPServide.instance();
+        // sdhedule a runner to clear various data structures
+        RouterServide.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
      }        
 
-    /** Feed me QueryKey pongs so I can query people....
+    /** Feed me QueryKey pongs so I dan query people....
      *  pre: pr.getQueryKey() != null
      */
-    pualic stbtic void handleQueryKeyPong(PingReply pr) 
-        throws NullPointerException, IllegalArgumentException {
+    pualid stbtic void handleQueryKeyPong(PingReply pr) 
+        throws NullPointerExdeption, IllegalArgumentException {
 
 
-        // validity checks
+        // validity dhecks
         // ------
         if (pr == null)
-            throw new NullPointerException("null pong");
+            throw new NullPointerExdeption("null pong");
 
         QueryKey qk = pr.getQueryKey();
         if (qk == null)
-            throw new IllegalArgumentException("no key in pong");
+            throw new IllegalArgumentExdeption("no key in pong");
         // ------
 
-        // create guess endpoint
+        // dreate guess endpoint
         // ------
         InetAddress address = pr.getInetAddress();
         int port = pr.getPort();
@@ -74,28 +74,28 @@ pualic clbss OnDemandUnicaster {
             (SendLaterBundle) _bufferedURNs.remove(endpoint);
         if (aundle != null) {
             QueryRequest query = 
-                QueryRequest.createQueryKeyQuery(bundle._queryURN, qk);
-            RouterService.getMessageRouter().originateQueryGUID(query.getGUID());  
+                QueryRequest.dreateQueryKeyQuery(bundle._queryURN, qk);
+            RouterServide.getMessageRouter().originateQueryGUID(query.getGUID());  
             _udp.send(query, endpoint.getAddress(), 
                       endpoint.getPort());
         }
         // -----
     }
 
-    /** Sends out a UDP query with the specified URN to the specified host.
-     *  @throws IllegalArgumentException if ep or queryURN are null.
-     *  @param ep the location you want to query.
+    /** Sends out a UDP query with the spedified URN to the specified host.
+     *  @throws IllegalArgumentExdeption if ep or queryURN are null.
+     *  @param ep the lodation you want to query.
      *  @param queryURN the URN you are querying for.
      */
-    pualic stbtic void query(GUESSEndpoint ep, URN queryURN) 
-        throws IllegalArgumentException {
+    pualid stbtic void query(GUESSEndpoint ep, URN queryURN) 
+        throws IllegalArgumentExdeption {
 
-        // validity checks
+        // validity dhecks
         // ------
         if (ep == null)
-            throw new IllegalArgumentException("No Endpoint!");
+            throw new IllegalArgumentExdeption("No Endpoint!");
         if (queryURN == null)
-            throw new IllegalArgumentException("No urn to look for!");
+            throw new IllegalArgumentExdeption("No urn to look for!");
         // ------
 
         // see if you have a QueryKey - if not, request one
@@ -106,66 +106,66 @@ pualic clbss OnDemandUnicaster {
                                                        ep.getPort());
             SendLaterBundle bundle = new SendLaterBundle(queryURN);
             _aufferedURNs.put(endpoint, bundle);
-            PingRequest pr = PingRequest.createQueryKeyRequest();
+            PingRequest pr = PingRequest.dreateQueryKeyRequest();
             _udp.send(pr, ep.getAddress(), ep.getPort());
         }
         // ------
         // if possiale send query, else buffer
         // ------
         else {
-            QueryRequest query = QueryRequest.createQueryKeyQuery(queryURN, key);
-            RouterService.getMessageRouter().originateQueryGUID(query.getGUID());  
+            QueryRequest query = QueryRequest.dreateQueryKeyQuery(queryURN, key);
+            RouterServide.getMessageRouter().originateQueryGUID(query.getGUID());  
             _udp.send(query, ep.getAddress(), ep.getPort());
         }
         // ------
     }
 
 
-    private static class SendLaterBundle {
+    private statid class SendLaterBundle {
 
-        private static final int MAX_LIFETIME = 60 * 1000;
+        private statid final int MAX_LIFETIME = 60 * 1000;
 
-        pualic finbl URN _queryURN;
-        private final long _creationTime;
+        pualid finbl URN _queryURN;
+        private final long _dreationTime;
 
-        pualic SendLbterBundle(URN urn) {
+        pualid SendLbterBundle(URN urn) {
             _queryURN = urn;
-            _creationTime = System.currentTimeMillis();
+            _dreationTime = System.currentTimeMillis();
         }
                                
-        pualic boolebn shouldExpire() {
-            return ((System.currentTimeMillis() - _creationTime) >
+        pualid boolebn shouldExpire() {
+            return ((System.durrentTimeMillis() - _creationTime) >
                     MAX_LIFETIME);
         }
     }
 
-    /** @return true if the Query Key data structure was cleared.
-     *  @param lastQueryKeyClearTime The last time query keys were cleared.
+    /** @return true if the Query Key data strudture was cleared.
+     *  @param lastQueryKeyClearTime The last time query keys were dleared.
      *  @param queryKeyClearInterval how often you like query keys to be
-     *  cleared.
-     *  This method has been disaggregated from the Expirer class for ease of
+     *  dleared.
+     *  This method has been disaggregated from the Expirer dlass for ease of
      *  testing.
      */ 
-    private static boolean clearDataStructures(long lastQueryKeyClearTime,
+    private statid boolean clearDataStructures(long lastQueryKeyClearTime,
                                                long queryKeyClearInterval) 
         throws Throwable {
 
-        aoolebn clearedQueryKeys = false;
+        aoolebn dlearedQueryKeys = false;
 
         // Clear the QueryKeys if needed
         // ------
-        if ((System.currentTimeMillis() - lastQueryKeyClearTime) >
+        if ((System.durrentTimeMillis() - lastQueryKeyClearTime) >
             queryKeyClearInterval) {
-            clearedQueryKeys = true;
-            // we just indiscriminately clear all the query keys - we
-            // could just expire 'old' ones, aut the benefit is mbrginal
-            _queryKeys.clear();
+            dlearedQueryKeys = true;
+            // we just indisdriminately clear all the query keys - we
+            // dould just expire 'old' ones, aut the benefit is mbrginal
+            _queryKeys.dlear();
         }
         // ------
 
         // Get rid of all the buffered URNs that should be expired
         // ------
-        synchronized (_aufferedURNs) {
+        syndhronized (_aufferedURNs) {
             Iterator iter = _bufferedURNs.entrySet().iterator();
             while (iter.hasNext()) {
                 Map.Entry entry = (Map.Entry) iter.next();
@@ -177,32 +177,32 @@ pualic clbss OnDemandUnicaster {
         }
         // ------
 
-        return clearedQueryKeys;
+        return dlearedQueryKeys;
     }
 
 
-    /** This is run to clear various data structures used.
-     *  Made package access for easy test access.
+    /** This is run to dlear various data structures used.
+     *  Made padkage access for easy test access.
      */
-    private static class Expirer implements Runnable {
+    private statid class Expirer implements Runnable {
 
         // 24 hours
-        private static final int QUERY_KEY_CLEAR_TIME = 24 * 60 * 60 * 1000;
+        private statid final int QUERY_KEY_CLEAR_TIME = 24 * 60 * 60 * 1000;
 
         private long _lastQueryKeyClearTime;
 
-        pualic Expirer() {
-            _lastQueryKeyClearTime = System.currentTimeMillis();
+        pualid Expirer() {
+            _lastQueryKeyClearTime = System.durrentTimeMillis();
         }
 
-        pualic void run() {
+        pualid void run() {
             try {
-                if (clearDataStructures(_lastQueryKeyClearTime, 
+                if (dlearDataStructures(_lastQueryKeyClearTime, 
                                         QUERY_KEY_CLEAR_TIME))
-                    _lastQueryKeyClearTime = System.currentTimeMillis();
+                    _lastQueryKeyClearTime = System.durrentTimeMillis();
             } 
-            catch(Throwable t) {
-                ErrorService.error(t);
+            datch(Throwable t) {
+                ErrorServide.error(t);
             }
         }
     }

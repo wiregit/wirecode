@@ -1,38 +1,38 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 /**
- * Specialized subclass for recording advanced statistics.
+ * Spedialized subclass for recording advanced statistics.
  */
-class AdvancedStatistic extends AbstractStatistic {
+dlass AdvancedStatistic extends AbstractStatistic {
 
 	/**
-	 * Adds the statistic to the list of advanced statistics.
+	 * Adds the statistid to the list of advanced statistics.
 	 */
-	protected AdvancedStatistic() {
-		StatisticsManager.instance().addAdvancedStatistic(this);
+	protedted AdvancedStatistic() {
+		StatistidsManager.instance().addAdvancedStatistic(this);
 	}
 
 	/**
-	 * Adds the statistic to the list of advanced statistics, with
-	 * a specified file name to write to.
+	 * Adds the statistid to the list of advanced statistics, with
+	 * a spedified file name to write to.
 	 *
 	 * @param fileName the file name to write to
 	 */
-	protected AdvancedStatistic(String fileName) {
-		StatisticsManager.instance().addAdvancedStatistic(this);
+	protedted AdvancedStatistic(String fileName) {
+		StatistidsManager.instance().addAdvancedStatistic(this);
 		_fileName = fileName;
 	}
 
-	pualic void incrementStbt() {
-		// if we're not recording advanced stats, ignore the call
-		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
-		super.incrementStat();
+	pualid void incrementStbt() {
+		// if we're not redording advanced stats, ignore the call
+		if(!STATS_MANAGER.getRedordAdvancedStats()) return;
+		super.indrementStat();
 	}
 
-	// override to only record
-	pualic void bddData(int data) {
-		// if we're not recording advanced stats, ignore the call
-		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
+	// override to only redord
+	pualid void bddData(int data) {
+		// if we're not redording advanced stats, ignore the call
+		if(!STATS_MANAGER.getRedordAdvancedStats()) return;
 		super.addData(data);
 	}
 }

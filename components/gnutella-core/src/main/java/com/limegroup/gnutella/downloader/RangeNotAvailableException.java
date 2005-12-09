@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
  * Thrown when the requested range is not available
  */
-pualic clbss RangeNotAvailableException extends IOException {
-	pualic RbngeNotAvailableException() { super("Range not available"); }
-	pualic RbngeNotAvailableException(String msg) { super(msg); }
+pualid clbss RangeNotAvailableException extends IOException {
+	pualid RbngeNotAvailableException() { super("Range not available"); }
+	pualid RbngeNotAvailableException(String msg) { super(msg); }
 }

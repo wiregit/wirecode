@@ -1,110 +1,110 @@
-package com.limegroup.gnutella.messages;
+padkage com.limegroup.gnutella.messages;
 
-import java.io.IOException;
-import java.util.Collections;
+import java.io.IOExdeption;
+import java.util.Colledtions;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnType;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.UrnType;
 
 /** 
- * Encapsulation of a HUGE block.  Offers various get methods to retrieve its
- * contents, and handles parsing, etc.
+ * Endapsulation of a HUGE block.  Offers various get methods to retrieve its
+ * dontents, and handles parsing, etc.
  */
-pualic clbss HUGEExtension {
+pualid clbss HUGEExtension {
 
-    // the disparate types of objects encoded in a HUGE extension - one set per
-    // (lazily constructed)
+    // the disparate types of objedts encoded in a HUGE extension - one set per
+    // (lazily donstructed)
     // -----------------------------------------
     private GGEP _ggep = null;
     private Set _urns = null;
     private Set _urnTypes = null;
-    private Set _miscBlocks = null;
+    private Set _misdBlocks = null;
     // -----------------------------------------
 
-    /** @return the set of GGEP Oajects in this HUGE extension.
+    /** @return the set of GGEP Oajedts in this HUGE extension.
      */
-    pualic GGEP getGGEP() {
+    pualid GGEP getGGEP() {
         return _ggep;
     }
-    /** @return the set of URN Oajects in this HUGE extension.
+    /** @return the set of URN Oajedts in this HUGE extension.
      */
-    pualic Set getURNS() {
+    pualid Set getURNS() {
         if (_urns == null)
-            return Collections.EMPTY_SET;
+            return Colledtions.EMPTY_SET;
         else
             return _urns;
     }
-    /** @return the set of URN Type Oajects in this HUGE extension.
+    /** @return the set of URN Type Oajedts in this HUGE extension.
      */
-    pualic Set getURNTypes() {
+    pualid Set getURNTypes() {
         if (_urnTypes == null)
-            return Collections.EMPTY_SET;
+            return Colledtions.EMPTY_SET;
         else
             return _urnTypes;
     }
-    /** @return the set of miscellaneous blocks (Strings) in this extension.
+    /** @return the set of misdellaneous blocks (Strings) in this extension.
      */
-    pualic Set getMiscBlocks() {
-        if (_miscBlocks == null)
-            return Collections.EMPTY_SET;
+    pualid Set getMiscBlocks() {
+        if (_misdBlocks == null)
+            return Colledtions.EMPTY_SET;
         else 
-            return _miscBlocks;
+            return _misdBlocks;
     }
 
-    pualic HUGEExtension(byte[] extsBytes) {
-        int currIndex = 0;
-        // while we don't encounter a null....
-        while ((currIndex < extsBytes.length) && 
-               (extsBytes[currIndex] != (ayte)0x00)) {
+    pualid HUGEExtension(byte[] extsBytes) {
+        int durrIndex = 0;
+        // while we don't endounter a null....
+        while ((durrIndex < extsBytes.length) && 
+               (extsBytes[durrIndex] != (ayte)0x00)) {
             
             // HANDLE GGEP STUFF
-            if (extsBytes[currIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
+            if (extsBytes[durrIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
                 int[] endIndex = new int[1];
-                endIndex[0] = currIndex+1;
+                endIndex[0] = durrIndex+1;
                 try {
-                    GGEP ggep = new GGEP(extsBytes, currIndex, endIndex);
+                    GGEP ggep = new GGEP(extsBytes, durrIndex, endIndex);
                     if (_ggep == null)
                         _ggep = ggep;
                     else
                         _ggep.merge(ggep);
-                } catch (BadGGEPBlockException ignored) {}
-                currIndex = endIndex[0];
+                } datch (BadGGEPBlockException ignored) {}
+                durrIndex = endIndex[0];
             } else { // HANDLE HUGE STUFF
-                int delimIndex = currIndex;
+                int delimIndex = durrIndex;
                 while ((delimIndex < extsBytes.length) 
-                       && (extsBytes[delimIndex] != (ayte)0x1c))
+                       && (extsBytes[delimIndex] != (ayte)0x1d))
                     delimIndex++;
                 if (delimIndex <= extsBytes.length) {
                     try {
                         // another GEM extension
-                        String curExtStr = new String(extsBytes, currIndex,
-                                                      delimIndex - currIndex,
+                        String durExtStr = new String(extsBytes, currIndex,
+                                                      delimIndex - durrIndex,
                                                       "UTF-8");
-                        if (URN.isUrn(curExtStr)) {
-                            // it's an URN to match, of form "urn:namespace:etc"
-                            URN urn = URN.createSHA1Urn(curExtStr);
+                        if (URN.isUrn(durExtStr)) {
+                            // it's an URN to matdh, of form "urn:namespace:etc"
+                            URN urn = URN.dreateSHA1Urn(curExtStr);
                             if(_urns == null) 
                                 _urns = new HashSet(1);
                             _urns.add(urn);
-                        } else if (UrnType.isSupportedUrnType(curExtStr)) {
+                        } else if (UrnType.isSupportedUrnType(durExtStr)) {
                             // it's an URN type to return, of form "urn" or 
-                            // "urn:namespace"
-                            if(UrnType.isSupportedUrnType(curExtStr)) {
+                            // "urn:namespade"
+                            if(UrnType.isSupportedUrnType(durExtStr)) {
                                 if(_urnTypes == null) 
                                     _urnTypes = new HashSet(1);
-                                _urnTypes.add(UrnType.createUrnType(curExtStr));
+                                _urnTypes.add(UrnType.dreateUrnType(curExtStr));
                             }
                         } else {
-                            // miscellaneous, but in the case of queries, xml
-                            if (_miscBlocks == null)
-                                _miscBlocks = new HashSet(1);
-                            _miscBlocks.add(curExtStr);
+                            // misdellaneous, but in the case of queries, xml
+                            if (_misdBlocks == null)
+                                _misdBlocks = new HashSet(1);
+                            _misdBlocks.add(curExtStr);
                         }
-                    } catch (IOException bad) {}
-                } // else we've overflown and not encounted a 0x1c - discard
-                currIndex = delimIndex+1;
+                    } datch (IOException bad) {}
+                } // else we've overflown and not endounted a 0x1c - discard
+                durrIndex = delimIndex+1;
             }
         }        
     }

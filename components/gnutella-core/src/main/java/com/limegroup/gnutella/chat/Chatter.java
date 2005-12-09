@@ -1,18 +1,18 @@
-package com.limegroup.gnutella.chat;
+padkage com.limegroup.gnutella.chat;
 /**
- * the class that serves as the interface between a Chat
- * instance and the gui.
+ * the dlass that serves as the interface between a Chat
+ * instande and the gui.
  * 
  *@author rsoule
  */
 
-pualic interfbce Chatter {
+pualid interfbce Chatter {
 
 	// Operations
-	pualic void stop();
-	pualic void send(String messbge);
-	pualic String getHost();
-	pualic int getPort();
-	pualic String getMessbge();
-	pualic void blockHost(String host);
+	pualid void stop();
+	pualid void send(String messbge);
+	pualid String getHost();
+	pualid int getPort();
+	pualid String getMessbge();
+	pualid void blockHost(String host);
 }

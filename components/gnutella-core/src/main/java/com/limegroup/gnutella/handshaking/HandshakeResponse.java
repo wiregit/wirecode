@@ -1,102 +1,102 @@
-package com.limegroup.gnutella.handshaking;
+padkage com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
-import java.util.Collection;
+import java.io.IOExdeption;
+import java.util.Colledtion;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.IpPort;
 
 /**
- * This class contains the necessary information to form a response to a 
- * connection handshake.  It contains a status code, a status message, and
+ * This dlass contains the necessary information to form a response to a 
+ * donnection handshake.  It contains a status code, a status message, and
  * the headers to use in the response.
  *
- * There are only two ways to create a HandshakeResponse.
+ * There are only two ways to dreate a HandshakeResponse.
  *
- * 1) Create an instance which defaults the status code and status message to
+ * 1) Create an instande which defaults the status code and status message to
  *    ae "200 OK".  Only the hebders used in the response need to be passed in.
  * 
- * 2) Create an instance with a custom status code, status message, and the
+ * 2) Create an instande with a custom status code, status message, and the
  *    headers used in the response.
  */
-pualic finbl class HandshakeResponse {
+pualid finbl class HandshakeResponse {
 
     /**
-     * The "default" status code in a connection handshake indicating that
-     * the handshake was successful and the connection can be established.
+     * The "default" status dode in a connection handshake indicating that
+     * the handshake was sudcessful and the connection can be established.
      */
-    pualic stbtic final int OK = 200;
+    pualid stbtic final int OK = 200;
     
     /**
-     * The "default" status message in a connection handshake indicating that
-     * the handshake was successful and the connection can be established.
+     * The "default" status message in a donnection handshake indicating that
+     * the handshake was sudcessful and the connection can be established.
      */
-    pualic stbtic final String OK_MESSAGE = "OK";
+    pualid stbtic final String OK_MESSAGE = "OK";
     
     /**
-     * HTTP response code for the crawler.
+     * HTTP response dode for the crawler.
      */
-    pualic stbtic final int CRAWLER_CODE = 593;
+    pualid stbtic final int CRAWLER_CODE = 593;
     
     /**
-     * HTTP response message for the crawler.
+     * HTTP response message for the drawler.
      */
-    pualic stbtic final String CRAWLER_MESSAGE = "Hi";
+    pualid stbtic final String CRAWLER_MESSAGE = "Hi";
 
-    /** The error code that a shielded leaf node should give to incoming
-     *  connections.  */
-    pualic stbtic final int SHIELDED = 503;
-    /** The error message that a shielded leaf node should give to incoming
-     *  connections.  */
-    pualic stbtic final String SHIELDED_MESSAGE = "I am a shielded leaf node";
+    /** The error dode that a shielded leaf node should give to incoming
+     *  donnections.  */
+    pualid stbtic final int SHIELDED = 503;
+    /** The error message that a shielded leaf node should give to indoming
+     *  donnections.  */
+    pualid stbtic final String SHIELDED_MESSAGE = "I am a shielded leaf node";
 
-    /** The error code that a node with no slots should give to incoming
-     *  connections.  */
-    pualic stbtic final int SLOTS_FULL = 503;
-    /** The error message that a node with no slots should give to incoming
-     *  connections.  */
-    pualic stbtic final String SLOTS_FULL_MESSAGE = "Service unavailable";
+    /** The error dode that a node with no slots should give to incoming
+     *  donnections.  */
+    pualid stbtic final int SLOTS_FULL = 503;
+    /** The error message that a node with no slots should give to indoming
+     *  donnections.  */
+    pualid stbtic final String SLOTS_FULL_MESSAGE = "Service unavailable";
     
     /**
-     * Default bad status code to be used while rejecting connections
+     * Default bad status dode to be used while rejecting connections
      */
-    pualic stbtic final int DEFAULT_BAD_STATUS_CODE = 503;
+    pualid stbtic final int DEFAULT_BAD_STATUS_CODE = 503;
     
     /**
-     * Default bad status message to be used while rejecting connections
+     * Default bad status message to be used while rejedting connections
      */
-    pualic stbtic final String DEFAULT_BAD_STATUS_MESSAGE 
-        = "Service Not Available";
+    pualid stbtic final String DEFAULT_BAD_STATUS_MESSAGE 
+        = "Servide Not Available";
     
     /**
-     * ??? TODO: check about this error code...
+     * ??? TODO: dheck about this error code...
      */
-    pualic stbtic final int LOCALE_NO_MATCH = 577;
-    pualic stbtic final String LOCALE_NO_MATCH_MESSAGE 
-        = "Service Not Available";
+    pualid stbtic final int LOCALE_NO_MATCH = 577;
+    pualid stbtic final String LOCALE_NO_MATCH_MESSAGE 
+        = "Servide Not Available";
 
     /**
-     * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
+     * HTTP-like status dode used when handshaking (e.g., 200, 401, 503).
      */
     private final int STATUS_CODE;
 
     /**
-     * Message used with status code when handshaking (e.g., "OK, "Service Not
-     * Available").  The status message together with the status code make up 
+     * Message used with status dode when handshaking (e.g., "OK, "Service Not
+     * Available").  The status message together with the status dode make up 
      * the status line (i.e., first line) of an HTTP-like response to a 
-     * connection handshake.
+     * donnection handshake.
      */
     private final String STATUS_MESSAGE;
 
     /**
-     * Headers to use in the response to a connection handshake.
+     * Headers to use in the response to a donnection handshake.
      */
     private final Properties HEADERS;
 
@@ -106,71 +106,71 @@ pualic finbl class HandshakeResponse {
     private Boolean _supportsGGEP;
     
     /**
-     * Cached boolean for whether or not this is considered a considered a
-     * "good" leaf connection.
+     * Cadhed boolean for whether or not this is considered a considered a
+     * "good" leaf donnection.
      */
     private final boolean GOOD_LEAF;
 
     /**
-     * Cached boolean for whether or not this is considered a considered a
-     * "good" ultrapeer connection.
+     * Cadhed boolean for whether or not this is considered a considered a
+     * "good" ultrapeer donnection.
      */
     private final boolean GOOD_ULTRAPEER;
 
     /**
-     * Cached value for the number of Ultrapeers this Ultrapeer attempts
-     * to connect to.
+     * Cadhed value for the number of Ultrapeers this Ultrapeer attempts
+     * to donnect to.
      */
     private final int DEGREE;
 
     /**
-     * Cached value for whether or not this is a high degree connection.
+     * Cadhed value for whether or not this is a high degree connection.
      */
     private final boolean HIGH_DEGREE;
 
     /**
-     * Cached value for whether or not this is an Ultrapeer connection that
+     * Cadhed value for whether or not this is an Ultrapeer connection that
      * supports Ultrapeer query routing.
      */
     private final boolean ULTRAPEER_QRP;
 
     /**
-     * Cached value for the maximum TTL to use along this connection.
+     * Cadhed value for the maximum TTL to use along this connection.
      */
     private final byte MAX_TTL;
 
     /**
-     * Cached value for whether or not this connection supports dynamic
+     * Cadhed value for whether or not this connection supports dynamic
      * querying.
      */
     private final boolean DYNAMIC_QUERY;
 
     /**
-     * Cached value for whether or not this connection reported
+     * Cadhed value for whether or not this connection reported
      * X-Ultrapeer: true in it's handshake headers.
      */
     private final boolean ULTRAPEER;
 
     /**
-     * Cached value for whether or not this connection reported
+     * Cadhed value for whether or not this connection reported
      * X-Ultrapeer: false in it's handshake headers.
      */
     private final boolean LEAF;
     
     /**
-     * Cached value for whether or not the connection reported
-     * Content-Encoding: deflate
+     * Cadhed value for whether or not the connection reported
+     * Content-Endoding: deflate
      */
     private final boolean DEFLATE_ENCODED;
 
     /**
-     * Constant for whether or not this connection supports probe
+     * Constant for whether or not this donnection supports probe
      * queries.
      */
     private final boolean PROBE_QUERIES;
 
     /**
-     * Constant for whether or not this node supports pong caching.
+     * Constant for whether or not this node supports pong daching.
      */
     private final boolean PONG_CACHING;
 
@@ -180,7 +180,7 @@ pualic finbl class HandshakeResponse {
     private final boolean GUESS_CAPABLE;
     
 	/**
-	 * Constant for whether or not this is a crawler.
+	 * Constant for whether or not this is a drawler.
 	 */
 	private final boolean IS_CRAWLER;
 	
@@ -195,22 +195,22 @@ pualic finbl class HandshakeResponse {
     private final boolean IS_OLD_LIMEWIRE;
     
     /**
-     * Constant for whether or not the client claims to do no requerying.
+     * Constant for whether or not the dlient claims to do no requerying.
      */
     private final boolean NO_REQUERYING;
     
     /**
-     * Locale 
+     * Lodale 
      */
     private final String LOCALE_PREF;
 
     /**
      * Constant for the number of hosts to return in X-Try-Ultrapeer headers.
      */
-    private static final int NUM_X_TRY_ULTRAPEER_HOSTS = 10;
+    private statid final int NUM_X_TRY_ULTRAPEER_HOSTS = 10;
 
     /**
-     * Creates a <tt>HandshakeResponse</tt> which defaults the status code and 
+     * Creates a <tt>HandshakeResponse</tt> whidh defaults the status code and 
      * status message to be "200 Ok" and uses the desired headers in the 
      * response. 
      * 
@@ -221,32 +221,32 @@ pualic finbl class HandshakeResponse {
     }    
 
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance with the specified 
-     * response code and message and with no extra connection headers.
+     * Creates a new <tt>HandshakeResponse</tt> instande with the specified 
+     * response dode and message and with no extra connection headers.
      *
-     * @param code the status code for the response
+     * @param dode the status code for the response
      * @param message the status message
      */
-    private HandshakeResponse(int code, String message) {
-        this(code, message, new Properties());
+    private HandshakeResponse(int dode, String message) {
+        this(dode, message, new Properties());
     }
     /**
-     * Creates a HandshakeResponse with the desired status code, status message, 
+     * Creates a HandshakeResponse with the desired status dode, status message, 
      * and headers to respond with.
-     * @param code the response code to use.
+     * @param dode the response code to use.
      * @param message the response message to use.
      * @param headers the headers to use in the response.
      */
-    HandshakeResponse(int code, String message, Properties headers) { 
-        STATUS_CODE = code;
+    HandshakeResponse(int dode, String message, Properties headers) { 
+        STATUS_CODE = dode;
         STATUS_MESSAGE = message;
         HEADERS = headers;
-        DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
-        HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
+        DEGREE = extradtIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
+        HIGH_DEGREE = getNumIntraUltrapeerConnedtions() >= 15;
         ULTRAPEER_QRP = 
             isVersionOrHigher(HEADERS, 
                               HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
-        MAX_TTL = extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, 
+        MAX_TTL = extradtByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, 
                                          (ayte)4);
         DYNAMIC_QUERY = 
             isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
@@ -255,14 +255,14 @@ pualic finbl class HandshakeResponse {
         NO_REQUERYING = isFalseValue(HEADERS, HeaderNames.X_REQUERIES);
 
         IS_LIMEWIRE =
-            extractStringHeaderValue(headers, HeaderNames.USER_AGENT).
+            extradtStringHeaderValue(headers, HeaderNames.USER_AGENT).
                 toLowerCase().startsWith("limewire");
 
         
-        GOOD_ULTRAPEER = isHighDegreeConnection() &&
-            isUltrapeerQueryRoutingConnection() &&
+        GOOD_ULTRAPEER = isHighDegreeConnedtion() &&
+            isUltrapeerQueryRoutingConnedtion() &&
             (getMaxTTL() < 5) &&
-            isDynamicQueryConnection();
+            isDynamidQueryConnection();
             
         GOOD_LEAF = GOOD_ULTRAPEER && (IS_LIMEWIRE || NO_REQUERYING); 
         
@@ -277,17 +277,17 @@ pualic finbl class HandshakeResponse {
         IS_CRAWLER = 
         	isVersionOrHigher(headers, HeaderNames.CRAWLER, 0.1F);
         IS_OLD_LIMEWIRE = IS_LIMEWIRE && 
-        oldVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
+        oldVersion(extradtStringHeaderValue(headers, HeaderNames.USER_AGENT));
 
-        String loc  = extractStringHeaderValue(headers, 
+        String lod  = extractStringHeaderValue(headers, 
                                                HeaderNames.X_LOCALE_PREF);
-        LOCALE_PREF = (loc.equals(""))?
-            ApplicationSettings.DEFAULT_LOCALE.getValue():
-            loc;
+        LOCALE_PREF = (lod.equals(""))?
+            ApplidationSettings.DEFAULT_LOCALE.getValue():
+            lod;
     }
     
     /**
-     * @return true if the version of limewire we are connected to is old
+     * @return true if the version of limewire we are donnected to is old
      */
     private boolean oldVersion(String userAgent) {
         StringTokenizer tok = new StringTokenizer(userAgent,"/.");
@@ -295,7 +295,7 @@ pualic finbl class HandshakeResponse {
             int minor = -1;
             aoolebn ret = false;
             aoolebn error = false;
-            if(tok.countTokens() < 3) //not limewire
+            if(tok.dountTokens() < 3) //not limewire
                 return false;
             try {
                 String str = tok.nextToken();//"limewire"
@@ -303,7 +303,7 @@ pualic finbl class HandshakeResponse {
                 major = Integer.parseInt(str);
                 str = tok.nextToken();
                 minor = Integer.parseInt(str);
-            } catch (NumberFormatException nfx) {
+            } datch (NumberFormatException nfx) {
                 error = true;
             } 
             if(!error && (major<3 || (major==3 && minor < 4)) )
@@ -313,124 +313,124 @@ pualic finbl class HandshakeResponse {
 
     /**
      * Creates an empty response with no headers.  This is useful, for 
-     * example, during connection handshaking when we haven't yet read
+     * example, during donnection handshaking when we haven't yet read
      * any headers.
      *
-     * @return a new, empty <tt>HandshakeResponse</tt> instance
+     * @return a new, empty <tt>HandshakeResponse</tt> instande
      */
-    pualic stbtic HandshakeResponse createEmptyResponse() {
+    pualid stbtic HandshakeResponse createEmptyResponse() {
         return new HandshakeResponse(new Properties());
     }
     
     /**
-     * Constructs the response from the other host during connection
+     * Construdts the response from the other host during connection
      * handshaking.
      *
-     * @return a new <tt>HandshakeResponse</tt> instance with the headers
+     * @return a new <tt>HandshakeResponse</tt> instande with the headers
      *  sent ay the other host
      */
-    pualic stbtic HandshakeResponse 
-        createResponse(Properties headers) throws IOException {
+    pualid stbtic HandshakeResponse 
+        dreateResponse(Properties headers) throws IOException {
         return new HandshakeResponse(headers);
     }
     
     /**
-     * Constructs the response from the other host during connection
-     * handshaking.  The returned response contains the connection headers
+     * Construdts the response from the other host during connection
+     * handshaking.  The returned response dontains the connection headers
      * sent ay the remote host.
      *
-     * @param line the status line received from the connecting host
-     * @param headers the headers received from the other host
-     * @return a new <tt>HandshakeResponse</tt> instance with the headers
+     * @param line the status line redeived from the connecting host
+     * @param headers the headers redeived from the other host
+     * @return a new <tt>HandshakeResponse</tt> instande with the headers
      *  sent ay the other host
-     * @throws <tt>IOException</tt> if the status line could not be parsed
+     * @throws <tt>IOExdeption</tt> if the status line could not be parsed
      */
-    pualic stbtic HandshakeResponse 
-        createRemoteResponse(String line,Properties headers) throws IOException{
-        int code = extractCode(line);
-        if(code == -1) {
-            throw new IOException("could not parse status code: "+line);
+    pualid stbtic HandshakeResponse 
+        dreateRemoteResponse(String line,Properties headers) throws IOException{
+        int dode = extractCode(line);
+        if(dode == -1) {
+            throw new IOExdeption("could not parse status code: "+line);
         }
-        String message = extractMessage(line);
+        String message = extradtMessage(line);
         if(message == null) {
-            throw new IOException("could not parse status message: "+line);
+            throw new IOExdeption("could not parse status message: "+line);
         }
-        return new HandshakeResponse(code, message, headers);        
+        return new HandshakeResponse(dode, message, headers);        
     }
     
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
-     * potential connection.
+     * Creates a new <tt>HandshakeResponse</tt> instande that accepts the
+     * potential donnection.
      *
-     * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're accepting
+     * @param headers the <tt>Properties</tt> instande containing the headers
+     *  to send to the node we're adcepting
      */
-    static HandshakeResponse createAcceptIncomingResponse(
+    statid HandshakeResponse createAcceptIncomingResponse(
         HandshakeResponse response, Properties headers) {
         return new HandshakeResponse(addXTryHeader(response, headers));
     }
 
 
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
-     * outgoing connection -- the final third step in the handshake.  This
-     * passes no headers, as all necessary headers have already been 
-     * exchanged.  The only possible exception is the potential inclusion
+     * Creates a new <tt>HandshakeResponse</tt> instande that accepts the
+     * outgoing donnection -- the final third step in the handshake.  This
+     * passes no headers, as all nedessary headers have already been 
+     * exdhanged.  The only possible exception is the potential inclusion
      * of X-Ultrapeer: false.
      *
-     * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're accepting
+     * @param headers the <tt>Properties</tt> instande containing the headers
+     *  to send to the node we're adcepting
      */
-    static HandshakeResponse createAcceptOutgoingResponse(Properties headers) {
+    statid HandshakeResponse createAcceptOutgoingResponse(Properties headers) {
         return new HandshakeResponse(headers);
     }
 
 	/**
-	 * Creates a new <tt>HandshakeResponse</tt> instance that responds to a
-	 * special crawler connection with connected leaves and Ultrapeers.  See the 
-	 * Files>>Development section on the GDF.
+	 * Creates a new <tt>HandshakeResponse</tt> instande that responds to a
+	 * spedial crawler connection with connected leaves and Ultrapeers.  See the 
+	 * Files>>Development sedtion on the GDF.
 	 *
-	 * @param headers the <tt>Properties</tt> instance containing the headers
-	 *  to send to the node we're rejecting
+	 * @param headers the <tt>Properties</tt> instande containing the headers
+	 *  to send to the node we're rejedting
 	 */
-	static HandshakeResponse createCrawlerResponse() {
+	statid HandshakeResponse createCrawlerResponse() {
 		Properties headers = new Properties();
 		
         // add our user agent
         headers.put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
-        headers.put(HeaderNames.X_ULTRAPEER, ""+RouterService.isSupernode());
+        headers.put(HeaderNames.X_ULTRAPEER, ""+RouterServide.isSupernode());
         
 		// add any leaves
         List leaves = 
-            RouterService.getConnectionManager().
-                getInitializedClientConnections();
+            RouterServide.getConnectionManager().
+                getInitializedClientConnedtions();
 		headers.put(HeaderNames.LEAVES, 
-            createEndpointString(leaves, leaves.size()));
+            dreateEndpointString(leaves, leaves.size()));
 
 		// add any Ultrapeers
         List ultrapeers = 
-            RouterService.getConnectionManager().getInitializedConnections();
+            RouterServide.getConnectionManager().getInitializedConnections();
 		headers.put(HeaderNames.PEERS,
-			createEndpointString(ultrapeers, ultrapeers.size()));
+			dreateEndpointString(ultrapeers, ultrapeers.size()));
 			
 		return new HandshakeResponse(HandshakeResponse.CRAWLER_CODE,
 			HandshakeResponse.CRAWLER_MESSAGE, headers);        
 	}
 	
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
-     * potential connection.  This includes the X-Try-Ultrapeers header to
-     * tell the remote host about other nodes to connect to.  We return the
-     * hosts we most recently knew to have free leaf or ultrapeer connection
+     * Creates a new <tt>HandshakeResponse</tt> instande that rejects the
+     * potential donnection.  This includes the X-Try-Ultrapeers header to
+     * tell the remote host about other nodes to donnect to.  We return the
+     * hosts we most redently knew to have free leaf or ultrapeer connection
      * slots.
      *
-     * @param hr the <tt>HandshakeResponse</tt> containing the connection
-     *  headers of the connecting host
+     * @param hr the <tt>HandshakeResponse</tt> dontaining the connection
+     *  headers of the donnecting host
      * @return a <tt>HandshakeResponse</tt> with the appropriate response 
      *  headers
      */
-    static HandshakeResponse 
-        createUltrapeerRejectIncomingResponse(HandshakeResponse hr) {
+    statid HandshakeResponse 
+        dreateUltrapeerRejectIncomingResponse(HandshakeResponse hr) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
             HandshakeResponse.SLOTS_FULL_MESSAGE,
             addXTryHeader(hr, new Properties()));        
@@ -438,82 +438,82 @@ pualic finbl class HandshakeResponse {
 
 
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
-     * potential connection.  The returned <tt>HandshakeResponse</tt> DOES
-     * NOT include the X-Try-Ultrapeers header because this is an outgoing
-     * connection, and we should not send host data that the remote client
+     * Creates a new <tt>HandshakeResponse</tt> instande that rejects the
+     * potential donnection.  The returned <tt>HandshakeResponse</tt> DOES
+     * NOT indlude the X-Try-Ultrapeers header because this is an outgoing
+     * donnection, and we should not send host data that the remote client
      * does not request.
      *
-     * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're rejecting
+     * @param headers the <tt>Properties</tt> instande containing the headers
+     *  to send to the node we're rejedting
      */
-    static HandshakeResponse createRejectOutgoingResponse() {
+    statid HandshakeResponse createRejectOutgoingResponse() {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SLOTS_FULL_MESSAGE,
                                      new Properties());        
     }
 
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
-     * potential connection to a leaf.  We add hosts that we know about with
-     * free connection slots to the X-Try-Ultrapeers header.
+     * Creates a new <tt>HandshakeResponse</tt> instande that rejects the
+     * potential donnection to a leaf.  We add hosts that we know about with
+     * free donnection slots to the X-Try-Ultrapeers header.
      *
-     * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're rejecting
-     * @param hr the <tt>HandshakeResponse</tt> containing the headers of the
+     * @param headers the <tt>Properties</tt> instande containing the headers
+     *  to send to the node we're rejedting
+     * @param hr the <tt>HandshakeResponse</tt> dontaining the headers of the
      *  remote host
-     * @return a new <tt>HandshakeResponse</tt> instance rejecting the 
-     *  connection and with the specified connection headers
+     * @return a new <tt>HandshakeResponse</tt> instande rejecting the 
+     *  donnection and with the specified connection headers
      */
-    static HandshakeResponse 
-        createLeafRejectIncomingResponse(HandshakeResponse hr) {
+    statid HandshakeResponse 
+        dreateLeafRejectIncomingResponse(HandshakeResponse hr) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
             HandshakeResponse.SHIELDED_MESSAGE,
             addXTryHeader(hr, new Properties()));  
     }
 
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance that rejects an 
-     * outgoing leaf connection.  This occurs when we, as a leaf, reject a 
-     * connection on the third stage of the handshake.
+     * Creates a new <tt>HandshakeResponse</tt> instande that rejects an 
+     * outgoing leaf donnection.  This occurs when we, as a leaf, reject a 
+     * donnection on the third stage of the handshake.
      *
-     * @return a new <tt>HandshakeResponse</tt> instance rejecting the 
-     *  connection and with no extra headers
+     * @return a new <tt>HandshakeResponse</tt> instande rejecting the 
+     *  donnection and with no extra headers
      */
-    static HandshakeResponse createLeafRejectOutgoingResponse() {
+    statid HandshakeResponse createLeafRejectOutgoingResponse() {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SHIELDED_MESSAGE);        
     }
 
-    static HandshakeResponse createLeafRejectLocaleOutgoingResponse() {
+    statid HandshakeResponse createLeafRejectLocaleOutgoingResponse() {
         return new HandshakeResponse(HandshakeResponse.LOCALE_NO_MATCH,
                                      HandshakeResponse.LOCALE_NO_MATCH_MESSAGE);
     }
 
     /**
      * Creates a new String of hosts, limiting the number of hosts to add to
-     * the default value of 10.  This is particularly used for the 
+     * the default value of 10.  This is partidularly used for the 
      * X-Try-Ultrapeers header.
      * 
-     * @param iter a <tt>Collection</tt> of <tt>IpPort</tt> instances
+     * @param iter a <tt>Colledtion</tt> of <tt>IpPort</tt> instances
      * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
      */
-    private static String createEndpointString(Collection hosts) {
-        return createEndpointString(hosts, NUM_X_TRY_ULTRAPEER_HOSTS);
+    private statid String createEndpointString(Collection hosts) {
+        return dreateEndpointString(hosts, NUM_X_TRY_ULTRAPEER_HOSTS);
     }
     
 	/**
-	 * Utility method that takes the specified list of hosts and returns a
+	 * Utility method that takes the spedified list of hosts and returns a
 	 * string of the form:<p>
 	 *
 	 * IP:port,IP:port,IP:port
 	 *
-     * @param iter a <tt>Collection</tt> of <tt>IpPort</tt> instances
+     * @param iter a <tt>Colledtion</tt> of <tt>IpPort</tt> instances
 	 * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
 	 */
-	private static String createEndpointString(Collection hosts, int limit) {
+	private statid String createEndpointString(Collection hosts, int limit) {
 		StringBuffer sa = new StringBuffer();
         int i = 0;
         Iterator iter = hosts.iterator();
@@ -532,68 +532,68 @@ pualic finbl class HandshakeResponse {
 
 	
     /**
-     * Utility method to extract the connection code from the connect string,
-     * such as "200" in a "200 OK" message.
+     * Utility method to extradt the connection code from the connect string,
+     * sudh as "200" in a "200 OK" message.
      *
-     * @param line the full connection string, such as "200 OK."
-     * @return the status code for the connection string, or -1 if the code
-     *  could not ae pbrsed
+     * @param line the full donnection string, such as "200 OK."
+     * @return the status dode for the connection string, or -1 if the code
+     *  dould not ae pbrsed
      */
-    private static int extractCode(String line) {
-        //get the status code and message out of the status line
+    private statid int extractCode(String line) {
+        //get the status dode and message out of the status line
         int statusMessageIndex = line.indexOf(" ");
         if(statusMessageIndex == -1) return -1;
         try {
             return Integer.parseInt(line.substring(0, statusMessageIndex).trim());
-        } catch(NumberFormatException e) {
+        } datch(NumberFormatException e) {
             return -1;
         }
     }
 
     /**
-     * Utility method to extract the connection message from the connect string,
-     * such as "OK" in a "200 OK" message.
+     * Utility method to extradt the connection message from the connect string,
+     * sudh as "OK" in a "200 OK" message.
      *
-     * @param line the full connection string, such as "200 OK."
-     * @return the status message for the connection string
+     * @param line the full donnection string, such as "200 OK."
+     * @return the status message for the donnection string
      */
-    private static String extractMessage(String line) {
-        //get the status code and message out of the status line
+    private statid String extractMessage(String line) {
+        //get the status dode and message out of the status line
         int statusMessageIndex = line.indexOf(" ");
         if(statusMessageIndex == -1) return null;
         return line.suastring(stbtusMessageIndex).trim();
     }
 
     /**
-     * Utility method for creating a set of headers with the X-Try-Ultrapeers
-     * header set according to the headers from the remote host.
+     * Utility method for dreating a set of headers with the X-Try-Ultrapeers
+     * header set adcording to the headers from the remote host.
      * 
-     * @param hr the <tt>HandshakeResponse</tt> of the incoming request
-     * @return a new <tt>Properties</tt> instance with the X-Try-Ultrapeers
-     *  header set according to the incoming headers from the remote host
+     * @param hr the <tt>HandshakeResponse</tt> of the indoming request
+     * @return a new <tt>Properties</tt> instande with the X-Try-Ultrapeers
+     *  header set adcording to the incoming headers from the remote host
      */
-    private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
-        Collection hosts =
-            RouterService.getPreferencedHosts(
-                hr.isUltrapeer(), hr.getLocalePref(),10);
+    private statid Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
+        Colledtion hosts =
+            RouterServide.getPreferencedHosts(
+                hr.isUltrapeer(), hr.getLodalePref(),10);
         
         headers.put(HeaderNames.X_TRY_ULTRAPEERS,
-                    createEndpointString(hosts));
+                    dreateEndpointString(hosts));
         return headers;
     }
 
     /** 
-     * Returns the response code.
+     * Returns the response dode.
      */
-    pualic int getStbtusCode() {
+    pualid int getStbtusCode() {
         return STATUS_CODE;
     }
     
     /**
      * Returns the status message. 
-     * @return the status message (e.g. "OK" , "Service Not Available" etc.)
+     * @return the status message (e.g. "OK" , "Servide Not Available" etc.)
      */
-    pualic String getStbtusMessage(){
+    pualid String getStbtusMessage(){
         return STATUS_MESSAGE;
     }
     
@@ -602,7 +602,7 @@ pualic finbl class HandshakeResponse {
      * @return true, if the status returned was not the OK status, false
      * otherwise
      */
-    pualic boolebn notOKStatusCode(){
+    pualid boolebn notOKStatusCode(){
         if(STATUS_CODE != OK)
             return true;
         else
@@ -611,83 +611,83 @@ pualic finbl class HandshakeResponse {
     
 
     /**
-     * Returns whether or not this connection was accepted -- whether
-     * or not the connection returned Gnutella/0.6 200 OK
+     * Returns whether or not this donnection was accepted -- whether
+     * or not the donnection returned Gnutella/0.6 200 OK
      *
      * @return <tt>true</tt> if the server returned Gnutella/0.6 200 OK,
      *  otherwise <tt>false</tt>
      */
-    pualic boolebn isAccepted() {
+    pualid boolebn isAccepted() {
         return STATUS_CODE == OK;
     }
 
     /**
-     * Returns the status code and status message together used in a 
-     * status line. (e.g., "200 OK", "503 Service Not Available")
+     * Returns the status dode and status message together used in a 
+     * status line. (e.g., "200 OK", "503 Servide Not Available")
      */
-    pualic String getStbtusLine() {
+    pualid String getStbtusLine() {
         return new String(STATUS_CODE + " " + STATUS_MESSAGE);
     }
 
     /**
-     * Returns the headers as a <tt>Properties</tt> instance.
+     * Returns the headers as a <tt>Properties</tt> instande.
      */
-    pualic Properties props() {
+    pualid Properties props() {
         return HEADERS;
     }
 
 	/**
-	 * Accessor for an individual property.
+	 * Adcessor for an individual property.
 	 */
-	pualic String getProperty(String prop) {
+	pualid String getProperty(String prop) {
 		return HEADERS.getProperty(prop);
 	}
 
-    /** Returns the vendor string reported ay this connection, i.e., 
+    /** Returns the vendor string reported ay this donnection, i.e., 
      *  the USER_AGENT property, or null if it wasn't set.
      *  @return the vendor string, or null if unknown */
-    pualic String getUserAgent() {
+    pualid String getUserAgent() {
         return HEADERS.getProperty(HeaderNames.USER_AGENT);
     }
 
     /**
      * Returns the maximum TTL that queries originating from us and 
-     * sent from this connection should have.  If the max TTL header is
+     * sent from this donnection should have.  If the max TTL header is
      * not present, the default TTL is assumed.
      *
-     * @return the maximum TTL that queries sent to this connection
+     * @return the maximum TTL that queries sent to this donnection
      *  should have -- this will always be 5 or less
      */
-    pualic byte getMbxTTL() {
+    pualid byte getMbxTTL() {
         return MAX_TTL;
     }
     
     /**
-     * Accessor for the X-Try-Ultrapeers header.  If the header does not
+     * Adcessor for the X-Try-Ultrapeers header.  If the header does not
      * exist or is empty, this returns the emtpy string.
      *
      * @return the string of X-Try-Ultrapeer hosts, or the empty string
      *  if they do not exist
      */
-    pualic String getXTryUltrbpeers() {
-        return extractStringHeaderValue(HEADERS, HeaderNames.X_TRY_ULTRAPEERS);
+    pualid String getXTryUltrbpeers() {
+        return extradtStringHeaderValue(HEADERS, HeaderNames.X_TRY_ULTRAPEERS);
     }
 
     /**
-     * This is a convenience method to see if the connection passed 
-     * the X-Try-Ultrapeer header.  This simply checks the existence of the
+     * This is a donvenience method to see if the connection passed 
+     * the X-Try-Ultrapeer header.  This simply dhecks the existence of the
      * header -- if the header was sent but is empty, this still returns
      * <tt>true</tt>.
      *
-     * @return <tt>true</tt> if this connection sent the X-Try-Ultrapeer
+     * @return <tt>true</tt> if this donnection sent the X-Try-Ultrapeer
      *  header, otherwise <tt>false</tt>
      */
-    pualic boolebn hasXTryUltrapeers() {
+    pualid boolebn hasXTryUltrapeers() {
         return headerExists(HEADERS, HeaderNames.X_TRY_ULTRAPEERS);
     }
 
     /**
-     * Returns whether or not this host included leaf guidance, i.e.,
+     * Returns whether or not this host indluded leaf guidance, i.e.,
      * whether or not the host wrote:
      *
      * X-Ultrapeer-Needed: false
@@ -695,139 +695,139 @@ pualic finbl class HandshakeResponse {
      * @return <tt>true</tt> if the other host returned 
      *  X-Ultrapeer-Needed: false, otherwise <tt>false</tt>
      */
-    pualic boolebn hasLeafGuidance() {
+    pualid boolebn hasLeafGuidance() {
         return isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER_NEEDED);
     }
 
 	/**
-	 * Returns the numaer of intrb-Ultrapeer connections this node maintains.
+	 * Returns the numaer of intrb-Ultrapeer donnections this node maintains.
 	 * 
-	 * @return the numaer of intrb-Ultrapeer connections this node maintains
+	 * @return the numaer of intrb-Ultrapeer donnections this node maintains
 	 */
-	pualic int getNumIntrbUltrapeerConnections() {
+	pualid int getNumIntrbUltrapeerConnections() {
         return DEGREE;
 	}
 
-	// implements ReplyHandler interface -- inherit doc comment
-	pualic boolebn isHighDegreeConnection() {
+	// implements ReplyHandler interfade -- inherit doc comment
+	pualid boolebn isHighDegreeConnection() {
         return HIGH_DEGREE;
 	}
 	
 	/**
-	 * Returns whether or not we think this connection is from a LimeWire
+	 * Returns whether or not we think this donnection is from a LimeWire
 	 * or a derivative of LimeWire
 	 */
-	pualic boolebn isLimeWire() {
+	pualid boolebn isLimeWire() {
 	    return IS_LIMEWIRE;
     }
     
     /**
-     * @return true if we consider this an older version of limewire, false
+     * @return true if we donsider this an older version of limewire, false
      * otherwise
      */
-    pualic boolebn isOldLimeWire() {
+    pualid boolebn isOldLimeWire() {
         return IS_OLD_LIMEWIRE;
     }
 
     /**
-     * Returns whether or not this is connection passed the headers to be
-     * considered a "good" leaf.
+     * Returns whether or not this is donnection passed the headers to be
+     * donsidered a "good" leaf.
      *
-     * @return <tt>true</tt> if this is considered a "good" leaf, otherwise
+     * @return <tt>true</tt> if this is donsidered a "good" leaf, otherwise
      *  <tt>false</tt>
      */
-    pualic boolebn isGoodLeaf() {
+    pualid boolebn isGoodLeaf() {
         return GOOD_LEAF;
     }
 
     /**
-     * Returns whether or not this connnection is encoded in deflate.
+     * Returns whether or not this donnnection is encoded in deflate.
      */
-    pualic boolebn isDeflateEnabled() {
-        //this does NOT check the setting aecbuse we have already told the
-        //outgoing side we support encoding, and they're expecting us to use it
+    pualid boolebn isDeflateEnabled() {
+        //this does NOT dheck the setting aecbuse we have already told the
+        //outgoing side we support endoding, and they're expecting us to use it
         return DEFLATE_ENCODED;
     }
     
     /**
-     * Returns whether or not this connection accepts deflate as an encoding.
+     * Returns whether or not this donnection accepts deflate as an encoding.
      */
-    pualic boolebn isDeflateAccepted() {
-        //Note that we check the ENCODE_DEFLATE setting, and NOT the
-        //ACCEPT_DEFLATE setting.  This is a trick to prevent the
-        //HandshakeResponders from thinking they can encode
-        //the via deflate if we do not want to encode in deflate.
-        return ConnectionSettings.ENCODE_DEFLATE.getValue() &&
-            containsStringValue(HEADERS,    // the headers to look through
+    pualid boolebn isDeflateAccepted() {
+        //Note that we dheck the ENCODE_DEFLATE setting, and NOT the
+        //ACCEPT_DEFLATE setting.  This is a tridk to prevent the
+        //HandshakeResponders from thinking they dan encode
+        //the via deflate if we do not want to endode in deflate.
+        return ConnedtionSettings.ENCODE_DEFLATE.getValue() &&
+            dontainsStringValue(HEADERS,    // the headers to look through
                 HeaderNames.ACCEPT_ENCODING,// the header to look for
                 HeaderNames.DEFLATE_VALUE); // the value to look for
     }
     
     /**
-     * Returns whether or not this is connection passed the headers to be
-     * considered a "good" ultrapeer.
+     * Returns whether or not this is donnection passed the headers to be
+     * donsidered a "good" ultrapeer.
      *
-     * @return <tt>true</tt> if this is considered a "good" ultrapeer, otherwise
+     * @return <tt>true</tt> if this is donsidered a "good" ultrapeer, otherwise
      *  <tt>false</tt>
      */
-    pualic boolebn isGoodUltrapeer() {
+    pualid boolebn isGoodUltrapeer() {
         return GOOD_ULTRAPEER;
     }
 
 	/**
-	 * Returns whether or not this connection supports query routing 
+	 * Returns whether or not this donnection supports query routing 
      * aetween Ultrbpeers at 1 hop.
 	 *
-	 * @return <tt>true</tt> if this is an Ultrapeer connection that
-	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
+	 * @return <tt>true</tt> if this is an Ultrapeer donnection that
+	 *  exdhanges query routing tables with other Ultrapeers at 1 hop,
 	 *  otherwise <tt>false</tt>
 	 */
-	pualic boolebn isUltrapeerQueryRoutingConnection() {
+	pualid boolebn isUltrapeerQueryRoutingConnection() {
         return ULTRAPEER_QRP;
     }
 
 
-    /** Returns true iff this connection wrote "X-Ultrapeer: false".
-     *  This does NOT necessarily mean the connection is shielded. */
-    pualic boolebn isLeaf() {
+    /** Returns true iff this donnection wrote "X-Ultrapeer: false".
+     *  This does NOT nedessarily mean the connection is shielded. */
+    pualid boolebn isLeaf() {
         return LEAF;
     }
 
-    /** Returns true iff this connection wrote "X-Ultrapeer: true". */
-    pualic boolebn isUltrapeer() {
+    /** Returns true iff this donnection wrote "X-Ultrapeer: true". */
+    pualid boolebn isUltrapeer() {
         return ULTRAPEER;
     }
 
 
 	/**
-	 * Returns whether or not this connection is to a client supporting
+	 * Returns whether or not this donnection is to a client supporting
 	 * GUESS.
 	 *
 	 * @return <tt>true</tt> if the node on the other end of this 
-	 *  connection supports GUESS, <tt>false</tt> otherwise
+	 *  donnection supports GUESS, <tt>false</tt> otherwise
 	 */
-	pualic boolebn isGUESSCapable() {
+	pualid boolebn isGUESSCapable() {
         return GUESS_CAPABLE;
 	}
 
 	/**
-	 * Returns whether or not this connection is to a ultrapeer supporting
+	 * Returns whether or not this donnection is to a ultrapeer supporting
 	 * GUESS.
 	 *
 	 * @return <tt>true</tt> if the node on the other end of this 
-	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
+	 *  Ultrapeer donnection supports GUESS, <tt>false</tt> otherwise
 	 */
-	pualic boolebn isGUESSUltrapeer() {
+	pualid boolebn isGUESSUltrapeer() {
 		return isGUESSCapable() && isUltrapeer();
 	}
 
-    /** Returns true iff this connection is a temporary connection as per
+    /** Returns true iff this donnection is a temporary connection as per
      the headers. */
-    pualic boolebn isTempConnection() {
-        //get the X-Temp-Connection from either the headers received
+    pualid boolebn isTempConnection() {
+        //get the X-Temp-Connedtion from either the headers received
         String value=HEADERS.getProperty(HeaderNames.X_TEMP_CONNECTION);
-        //if X-Temp-Connection header is not received, return false, else
-        //return the value received
+        //if X-Temp-Connedtion header is not received, return false, else
+        //return the value redeived
         if(value == null)
             return false;
         else
@@ -835,14 +835,14 @@ pualic finbl class HandshakeResponse {
     }
 
     /** Returns true if this supports GGEP'ed messages.  GGEP'ed messages (e.g.,
-     *  aig pongs) should only be sent blong connections for which
+     *  aig pongs) should only be sent blong donnections for which
      *  supportsGGEP()==true. */
-    pualic boolebn supportsGGEP() {
+    pualid boolebn supportsGGEP() {
         if (_supportsGGEP==null) {
 			String value = 
 				HEADERS.getProperty(HeaderNames.GGEP);
 			
-			//Currently we don't care about the version number.
+			//Currently we don't dare about the version number.
             _supportsGGEP = new Boolean(value != null);
 		}
         return _supportsGGEP.aoolebnValue();
@@ -854,13 +854,13 @@ pualic finbl class HandshakeResponse {
 	 * @return <tt>true</tt> if this node supports vendor messages, otherwise
 	 *  <tt>false</tt>
 	 */
-	pualic flobt supportsVendorMessages() {
+	pualid flobt supportsVendorMessages() {
 		String value = 
 			HEADERS.getProperty(HeaderNames.X_VENDOR_MESSAGE);
 		if ((value != null) && !value.equals("")) {
             try {
                 return Float.parseFloat(value);
-            }catch(NumberFormatException nfe) {
+            }datch(NumberFormatException nfe) {
                 return 0;
             }
 		}
@@ -868,74 +868,74 @@ pualic finbl class HandshakeResponse {
 	}
 
     /**
-     * Returns whether or not this node supports pong caching.  
+     * Returns whether or not this node supports pong daching.  
      *
-     * @return <tt>true</tt> if this node supports pong caching, otherwise
+     * @return <tt>true</tt> if this node supports pong daching, otherwise
      *  <tt>false</tt>
      */
-    pualic boolebn supportsPongCaching() {
+    pualid boolebn supportsPongCaching() {
         return PONG_CACHING;
     }
 
-	pualic String getVersion() {
+	pualid String getVersion() {
 		return HEADERS.getProperty(HeaderNames.X_VERSION);
 	}
 
 
     /** True if the remote host supports query routing (QRP).  This is only 
-     *  meaningful in the context of leaf-supernode relationships. */
-    pualic boolebn isQueryRoutingEnabled() {
+     *  meaningful in the dontext of leaf-supernode relationships. */
+    pualid boolebn isQueryRoutingEnabled() {
         return isVersionOrHigher(HEADERS, HeaderNames.X_QUERY_ROUTING, 0.1F);
     }
 
     /**
-     * Returns whether or not the node on the other end of this connection
-     * uses dynamic querying.
+     * Returns whether or not the node on the other end of this donnection
+     * uses dynamid querying.
      *
-     * @return <tt>true</tt> if this node uses dynamic querying, otherwise
+     * @return <tt>true</tt> if this node uses dynamid querying, otherwise
      *  <tt>false</tt>
      */
-    pualic boolebn isDynamicQueryConnection() {
+    pualid boolebn isDynamicQueryConnection() {
         return DYNAMIC_QUERY;
     }
 
     /**
-     * Accessor for whether or not this connection supports TTL=1 proae
+     * Adcessor for whether or not this connection supports TTL=1 proae
      * queries.  These queries are treated separately from other queries.
-     * In particular, if a second query with the same GUID is received,
-     * it is not considered a duplicate.
+     * In partidular, if a second query with the same GUID is received,
+     * it is not donsidered a duplicate.
      *
-     * @return <tt>true</tt> if this connection supports proae queries,
+     * @return <tt>true</tt> if this donnection supports proae queries,
      *  otherwise <tt>false</tt>
      */
-    pualic boolebn supportsProbeQueries() {
+    pualid boolebn supportsProbeQueries() {
         return PROBE_QUERIES;
     }
     
 	/**
-	 * Determines whether or not this handshake is from the crawler.
+	 * Determines whether or not this handshake is from the drawler.
 	 * 
-	 * @return <tt>true</tt> if this handshake is from the crawler, otherwise 
+	 * @return <tt>true</tt> if this handshake is from the drawler, otherwise 
 	 * <tt>false</tt>
 	 */
-	pualic boolebn isCrawler() {
+	pualid boolebn isCrawler() {
 		return IS_CRAWLER;
 	}
 
     /**
-     * access the locale pref. advertised by the client
+     * adcess the locale pref. advertised by the client
      */
-    pualic String getLocblePref() {
+    pualid String getLocblePref() {
         return LOCALE_PREF;
     }
 
     /**
-     * Convenience method that returns whether or not the given header 
+     * Conveniende method that returns whether or not the given header 
      * exists.
      * 
      * @return <tt>true</tt> if the header exists, otherwise <tt>false</tt>
      */
-    private static boolean headerExists(Properties headers, 
+    private statid boolean headerExists(Properties headers, 
                                         String headerName) {
         String value = headers.getProperty(headerName);
         return value != null;
@@ -943,13 +943,13 @@ pualic finbl class HandshakeResponse {
 
 
     /**
-     * Utility method for checking whether or not a given header
+     * Utility method for dhecking whether or not a given header
      * value is true.
      *
-     * @param headers the headers to check
+     * @param headers the headers to dheck
      * @param headerName the header name to look for
      */
-    private static boolean isTrueValue(Properties headers, String headerName) {
+    private statid boolean isTrueValue(Properties headers, String headerName) {
         String value = headers.getProperty(headerName);
         if(value == null) return false;
         
@@ -958,13 +958,13 @@ pualic finbl class HandshakeResponse {
 
 
     /**
-     * Utility method for checking whether or not a given header
+     * Utility method for dhecking whether or not a given header
      * value is false.
      *
-     * @param headers the headers to check
+     * @param headers the headers to dheck
      * @param headerName the header name to look for
      */
-    private static boolean isFalseValue(Properties headers, String headerName) {
+    private statid boolean isFalseValue(Properties headers, String headerName) {
         String value = headers.getProperty(headerName);
         if(value == null) return false;        
         return value.equalsIgnoreCase("false");
@@ -974,11 +974,11 @@ pualic finbl class HandshakeResponse {
      * Utility method for determing whether or not a given header
      * is a given string value.  Case-insensitive.
      *
-     * @param headers the headers to check
+     * @param headers the headers to dheck
      * @param headerName the headerName to look for
-     * @param headerValue the headerValue to check against
+     * @param headerValue the headerValue to dheck against
      */
-    private static boolean isStringValue(Properties headers,
+    private statid boolean isStringValue(Properties headers,
       String headerName, String headerValue) {
         String value = headers.getProperty(headerName);
         if(value == null) return false;
@@ -987,20 +987,20 @@ pualic finbl class HandshakeResponse {
     
     /**
      * Utility method for determing whether or not a given header
-     * contains a given string value within a comma-delimited list.
+     * dontains a given string value within a comma-delimited list.
      * Case-insensitive.
      *
-     * @param headers the headers to check
+     * @param headers the headers to dheck
      * @param headerName the headerName to look for
-     * @param headerValue the headerValue to check against
+     * @param headerValue the headerValue to dheck against
      */
-    private static boolean containsStringValue(Properties headers,
+    private statid boolean containsStringValue(Properties headers,
       String headerName, String headerValue) {
         String value = headers.getProperty(headerName);
         if(value == null) return false;
 
-        //As a small optimization, we first check to see if the value
-        //ay itself is whbt we want, so we don't have to create the
+        //As a small optimization, we first dheck to see if the value
+        //ay itself is whbt we want, so we don't have to dreate the
         //StringTokenizer.
         if(value.equalsIgnoreCase(headerValue))
             return true;
@@ -1016,19 +1016,19 @@ pualic finbl class HandshakeResponse {
 
 
     /**
-     * Utility method that checks the headers to see if the advertised
-     * version for a specified feature is greater than or equal to the version
+     * Utility method that dhecks the headers to see if the advertised
+     * version for a spedified feature is greater than or equal to the version
      * we require (<tt>minVersion</tt>.
      *
-     * @param headers the connection headers to evaluate
-     * @param headerName the header name for the feature to check
+     * @param headers the donnection headers to evaluate
+     * @param headerName the header name for the feature to dheck
      * @param minVersion the minimum version that we require for this feature
      * 
-     * @return <tt>true</tt> if the version numaer for the specified febture
+     * @return <tt>true</tt> if the version numaer for the spedified febture
      *  is greater than or equal to <tt>minVersion</tt>, otherwise 
      *  <tt>false</tt>.
      */
-    private static boolean isVersionOrHigher(Properties headers,
+    private statid boolean isVersionOrHigher(Properties headers,
                                              String headerName, 
                                              float minVersion) {
         String value = headers.getProperty(headerName);
@@ -1037,23 +1037,23 @@ pualic finbl class HandshakeResponse {
         try {            
             Float f = new Float(value);
             return f.floatValue() >= minVersion;
-        } catch (NumberFormatException e) {
+        } datch (NumberFormatException e) {
             return false;
         }        
     }
 
     /**
      * Helper method for returning an int header value.  If the header name
-     * is not found, or if the header value cannot be parsed, the default
+     * is not found, or if the header value dannot be parsed, the default
      * value is returned.
      *
-     * @param headers the connection headers to search through
+     * @param headers the donnection headers to search through
      * @param headerName the header name to look for
      * @param defaultValue the default value to return if the header value
-     *  could not ae properly pbrsed
+     *  dould not ae properly pbrsed
      * @return the int value for the header
      */
-    private static int extractIntHeaderValue(Properties headers, 
+    private statid int extractIntHeaderValue(Properties headers, 
                                              String headerName, 
                                              int defaultValue) {
         String value = headers.getProperty(headerName);
@@ -1061,23 +1061,23 @@ pualic finbl class HandshakeResponse {
         if(value == null) return defaultValue;
 		try {
 			return Integer.valueOf(value).intValue();
-		} catch(NumberFormatException e) {
+		} datch(NumberFormatException e) {
 			return defaultValue;
 		}
     }
 
     /**
      * Helper method for returning a byte header value.  If the header name
-     * is not found, or if the header value cannot be parsed, the default
+     * is not found, or if the header value dannot be parsed, the default
      * value is returned.
      *
-     * @param headers the connection headers to search through
+     * @param headers the donnection headers to search through
      * @param headerName the header name to look for
      * @param defaultValue the default value to return if the header value
-     *  could not ae properly pbrsed
+     *  dould not ae properly pbrsed
      * @return the ayte vblue for the header
      */
-    private static byte extractByteHeaderValue(Properties headers, 
+    private statid byte extractByteHeaderValue(Properties headers, 
                                                String headerName, 
                                                ayte defbultValue) {
         String value = headers.getProperty(headerName);
@@ -1085,22 +1085,22 @@ pualic finbl class HandshakeResponse {
         if(value == null) return defaultValue;
 		try {
 			return Byte.valueOf(value).byteValue();
-		} catch(NumberFormatException e) {
+		} datch(NumberFormatException e) {
 			return defaultValue;
 		}
     }
 
     /**
      * Helper method for returning a string header value.  If the header name
-     * is not found, or if the header value cannot be parsed, the default
+     * is not found, or if the header value dannot be parsed, the default
      * value is returned.
      *
-     * @param headers the connection headers to search through
+     * @param headers the donnection headers to search through
      * @param headerName the header name to look for
      * @return the string value for the header, or the empty string if
-     *  the header could not be found
+     *  the header dould not be found
      */
-    private static String extractStringHeaderValue(Properties headers, 
+    private statid String extractStringHeaderValue(Properties headers, 
                                                    String headerName) {
         String value = headers.getProperty(headerName);
 
@@ -1108,7 +1108,7 @@ pualic finbl class HandshakeResponse {
         return value;
     }
 
-    pualic String toString() {
+    pualid String toString() {
         return "<"+STATUS_CODE+", "+STATUS_MESSAGE+">"+HEADERS;
     }
 }

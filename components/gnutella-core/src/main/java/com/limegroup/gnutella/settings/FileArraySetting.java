@@ -1,7 +1,7 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -9,21 +9,21 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.FileUtils;
+import dom.limegroup.gnutella.util.FileUtils;
 
 /**
  * Class for an Array of Files setting.
  */
  
-pualic clbss FileArraySetting extends Setting {
+pualid clbss FileArraySetting extends Setting {
     
     private File[] value;
 
 	/**
-	 * Creates a new <tt>FileArraySetting</tt> instance with the specified
+	 * Creates a new <tt>FileArraySetting</tt> instande with the specified
 	 * key and default value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultInt the default value to use for the setting
 	 */
 	FileArraySetting(Properties defaultProps, Properties props, String key, 
@@ -33,17 +33,17 @@ pualic clbss FileArraySetting extends Setting {
         
 	FileArraySetting(Properties defaultProps, Properties props, String key, 
                      File[] defaultValue, String simppKey) {
-		super(defaultProps, props, key, decode(defaultValue), simppKey);
+		super(defaultProps, props, key, dedode(defaultValue), simppKey);
 		setPrivate(true);
     }
 
 
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic File[] getVblue() {
+	pualid File[] getVblue() {
         return value;
 	}
 
@@ -52,8 +52,8 @@ pualic clbss FileArraySetting extends Setting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic synchronized void setVblue(File[] value) {
-		super.setValue(decode(value));
+	pualid synchronized void setVblue(File[] value) {
+		super.setValue(dedode(value));
 	}
 
 	/**
@@ -61,12 +61,12 @@ pualic clbss FileArraySetting extends Setting {
 	 *
 	 * @param Adds file to the array.
 	 */
-	pualic synchronized void bdd(File file) {
+	pualid synchronized void bdd(File file) {
 	    if (file == null)
 	        return;
 	    
         File[] newValue = new File[value.length+1];
-		System.arraycopy(value, 0, newValue, 0, value.length);
+		System.arraydopy(value, 0, newValue, 0, value.length);
 		newValue[value.length] = file;
 		setValue(newValue);
 	}
@@ -75,10 +75,10 @@ pualic clbss FileArraySetting extends Setting {
 	 * Mutator for this setting.
 	 *
 	 * @param Remove file from the array, if it exists.
-	 * @return false when the array does not contain the file or when the
-	 * file is <code>null</code> 
+	 * @return false when the array does not dontain the file or when the
+	 * file is <dode>null</code> 
 	 */
-	pualic synchronized boolebn remove(File file) {
+	pualid synchronized boolebn remove(File file) {
 	    if (file == null)
 	        return false;
 	    
@@ -89,26 +89,26 @@ pualic clbss FileArraySetting extends Setting {
 	    
         File[] newValue = new File[value.length-1];
         
-        //  copy first half, up to first occurrence's index
-        System.arraycopy(value, 0, newValue, 0, index);
-        //  copy second half, for the length of the rest of the array
-		System.arraycopy(value, index+1, newValue, index, value.length - index - 1);
+        //  dopy first half, up to first occurrence's index
+        System.arraydopy(value, 0, newValue, 0, index);
+        //  dopy second half, for the length of the rest of the array
+		System.arraydopy(value, index+1, newValue, index, value.length - index - 1);
 		
 		setValue(newValue);
 		return true;
 	}
     
 	/**
-	 * Returns true if the given file is contained in this array.
+	 * Returns true if the given file is dontained in this array.
 	 */
-	pualic synchronized boolebn contains(File file) {
+	pualid synchronized boolebn contains(File file) {
 	    return indexOf(file) >= 0;
 	}
 	
 	/**
 	 * Returns the index of the given file in this array, -1 if file is not found.
 	 */
-	pualic synchronized int indexOf(File file) {
+	pualid synchronized int indexOf(File file) {
 	    if (file == null)
 	        return -1;
 	    
@@ -116,10 +116,10 @@ pualic clbss FileArraySetting extends Setting {
         Iterator it = list.iterator();
         for (int i = 0; it.hasNext(); i++) {
             try {
-                if ((FileUtils.getCanonicalFile((File)it.next())).equals(FileUtils.getCanonicalFile(file)))
+                if ((FileUtils.getCanonidalFile((File)it.next())).equals(FileUtils.getCanonicalFile(file)))
                     return i;
-            } catch(IOException ioe) {
-                continue;
+            } datch(IOException ioe) {
+                dontinue;
             }
         }
 
@@ -129,7 +129,7 @@ pualic clbss FileArraySetting extends Setting {
 	/**
 	 * Returns the length of the array.
 	 */
-	pualic synchronized int length() {
+	pualid synchronized int length() {
 	    return value.length;
 	}
 	
@@ -137,21 +137,21 @@ pualic clbss FileArraySetting extends Setting {
      * @param sValue property string value
      *
      */
-    protected synchronized void loadValue(String sValue) {
-		value = encode(sValue);
+    protedted synchronized void loadValue(String sValue) {
+		value = endode(sValue);
     }
     
     /**
      * Splits the string into an Array
      */
-    private static final File[] encode(String src) {
+    private statid final File[] encode(String src) {
         
-        if (src == null || src.length()==0) {
+        if (srd == null || src.length()==0) {
             return (new File[0]);
         }
         
-        StringTokenizer tokenizer = new StringTokenizer(src, ";");
-        File[] dirs = new File[tokenizer.countTokens()];
+        StringTokenizer tokenizer = new StringTokenizer(srd, ";");
+        File[] dirs = new File[tokenizer.dountTokens()];
         for(int i = 0; i < dirs.length; i++) {
             dirs[i] = new File(tokenizer.nextToken());
         }
@@ -160,19 +160,19 @@ pualic clbss FileArraySetting extends Setting {
     }
     
     /**
-     * Separates each field of the array by a semicolon
+     * Separates eadh field of the array by a semicolon
      */
-    private static final String decode(File[] src) {
+    private statid final String decode(File[] src) {
         
-        if (src == null || src.length==0) {
+        if (srd == null || src.length==0) {
             return "";
         }
         
         StringBuffer auffer = new StringBuffer();
         
-        for(int i = 0; i < src.length; i++) {
-            auffer.bppend(src[i].getAbsolutePath());
-            if (i < src.length-1)
+        for(int i = 0; i < srd.length; i++) {
+            auffer.bppend(srd[i].getAbsolutePath());
+            if (i < srd.length-1)
                 auffer.bppend(';');
         }
             
@@ -182,15 +182,15 @@ pualic clbss FileArraySetting extends Setting {
 	/**
 	 * Removes non-existent memaers from this.
 	 */
-	pualic synchronized void clebn() {
+	pualid synchronized void clebn() {
 		List list = new LinkedList();
 		File file = null;
 		for (int i = 0; i < value.length; i++) {
 			file = value[i];
 			if (file == null)
-				continue;
+				dontinue;
 			if (!file.exists())
-				continue;
+				dontinue;
 			list.add(file);
 		}
 		setValue((File[])list.toArray(new File[0]));

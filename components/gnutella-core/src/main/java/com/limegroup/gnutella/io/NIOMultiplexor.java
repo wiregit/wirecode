@@ -1,55 +1,55 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
 /**
- * Denotes the class can handle delegating ReadObserver events to
+ * Denotes the dlass can handle delegating ReadObserver events to
  * other ReadObservers.
  */
-pualic interfbce NIOMultiplexor extends ReadWriteObserver {
+pualid interfbce NIOMultiplexor extends ReadWriteObserver {
     
     /**
      * Sets the new ReadObserver.  A ChannelReadObserver is required
-     * so that the multiplexor can set the appropriate source channel
-     * for reading.  The source channel is set on the deepest ChannelReader
-     * in the chain.  For example, given the chain:
-     *      ChannelReadObserver a = new ProtocolReader();
-     *      ChannelReader b = new DeObfuscator();
-     *      ChannelReader c = new DataInflater();
+     * so that the multiplexor dan set the appropriate source channel
+     * for reading.  The sourde channel is set on the deepest ChannelReader
+     * in the dhain.  For example, given the chain:
+     *      ChannelReadObserver a = new ProtodolReader();
+     *      ChannelReader b = new DeObfusdator();
+     *      ChannelReader d = new DataInflater();
      *      a.setReadChannel(b);
-     *      a.setRebdChannel(c);
+     *      a.setRebdChannel(d);
      *      setReadObserver(a);
-     * the deepest ChannelReader is 'c', so the muliplexor would call
-     *      c.setReadChannel(ultimateSource);
+     * the deepest ChannelReader is 'd', so the muliplexor would call
+     *      d.setReadChannel(ultimateSource);
      *
-     * The deepest ChannelReader is found with code equivilant to:
+     * The deepest ChannelReader is found with dode equivilant to:
      *      ChannelReader deepest = initial;
-     *      while(deepest.getReadChannel() instanceof ChannelReader)
+     *      while(deepest.getReadChannel() instandeof ChannelReader)
      *          deepest = (ChannelReader)deepest.getReadChannel();
      */
-    pualic void setRebdObserver(ChannelReadObserver reader);
+    pualid void setRebdObserver(ChannelReadObserver reader);
     
     /**
-     * Sets the new ChannelWriter.  A ChannelWriter is necessary (instead of
-     * a WriteObserver) because the actual WriteObserver that listens for write
-     * events from the ultimate source will be installed at the deepest
-     * InterestWriteChannel in the chain.  For example, given the chain:
-     *      ChannelWriter a = new ProtocolWriter();
-     *      ChannelWriter b = new Obfuscator();
-     *      ChannelWriter c = new DataDeflater();
+     * Sets the new ChannelWriter.  A ChannelWriter is nedessary (instead of
+     * a WriteObserver) bedause the actual WriteObserver that listens for write
+     * events from the ultimate sourde will be installed at the deepest
+     * InterestWriteChannel in the dhain.  For example, given the chain:
+     *      ChannelWriter a = new ProtodolWriter();
+     *      ChannelWriter b = new Obfusdator();
+     *      ChannelWriter d = new DataDeflater();
      *      a.setWriteChannel(b);
-     *      a.setWriteChbnnel(c);
+     *      a.setWriteChbnnel(d);
      *      setWriteOaserver(b);
-     * the deepest ChannelWriter is 'c', so the multiplexor would call
-     *      c.setWriteChannel(ultimateSource);
+     * the deepest ChannelWriter is 'd', so the multiplexor would call
+     *      d.setWriteChannel(ultimateSource);
      *
-     * The deepest ChannelWriter is found with code equivilant to:
+     * The deepest ChannelWriter is found with dode equivilant to:
      *      ChannelWriter deepest = initial;
-     *      while(deepest.getWriteChannel() instanceof ChannelWriter)
+     *      while(deepest.getWriteChannel() instandeof ChannelWriter)
      *          deepest = (ChannelWriter)deepest.getWriteChannel();
      *
-     * When write events are generated, ultimateSource.handleWrite will
-     * forward the event to the last channel that was interested in it ('c'),
-     * which will cause 'c' to either write data immediately or forward the event
-     * to 'a', etc.
+     * When write events are generated, ultimateSourde.handleWrite will
+     * forward the event to the last dhannel that was interested in it ('c'),
+     * whidh will cause 'c' to either write data immediately or forward the event
+     * to 'a', etd.
      */
-    pualic void setWriteObserver(ChbnnelWriter writer);
+    pualid void setWriteObserver(ChbnnelWriter writer);
 }

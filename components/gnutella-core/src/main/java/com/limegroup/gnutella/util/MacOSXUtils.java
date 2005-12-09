@@ -1,139 +1,139 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Enumeration;
 
-import com.apple.cocoa.foundation.NSMutableArray;
-import com.apple.cocoa.foundation.NSMutableDictionary;
-import com.apple.cocoa.foundation.NSObject;
-import com.apple.cocoa.foundation.NSUserDefaults;
-import com.apple.cocoa.foundation.NSSystem;
+import dom.apple.cocoa.foundation.NSMutableArray;
+import dom.apple.cocoa.foundation.NSMutableDictionary;
+import dom.apple.cocoa.foundation.NSObject;
+import dom.apple.cocoa.foundation.NSUserDefaults;
+import dom.apple.cocoa.foundation.NSSystem;
 
 /**
- * A collection of utility methods for OSX.
- * These methods should only ae cblled if run from OSX,
- * otherwise ClassNotFoundErrors may occur.
+ * A dollection of utility methods for OSX.
+ * These methods should only ae dblled if run from OSX,
+ * otherwise ClassNotFoundErrors may odcur.
  *
- * To determine if the Cocoa Foundation classes are present,
- * use the method CommonUtils.isCocoaFoundationAvailable().
+ * To determine if the Codoa Foundation classes are present,
+ * use the method CommonUtils.isCodoaFoundationAvailable().
  */
-pualic clbss MacOSXUtils {
-    private MacOSXUtils() {}
+pualid clbss MacOSXUtils {
+    private MadOSXUtils() {}
     
     /**
      * The login domain.
      */
-    private static final String LOGIN_DOMAIN = "loginwindow";
+    private statid final String LOGIN_DOMAIN = "loginwindow";
     
     /**
-     * The name of the dictionary which contains the apps that are launched.
+     * The name of the didtionary which contains the apps that are launched.
      */
-    private static final String DICTIONARY =
-        "AutoLaunchedApplicationDictionary";
+    private statid final String DICTIONARY =
+        "AutoLaundhedApplicationDictionary";
     
     /**
      * The key for "hide"
      */
-    private static final String HIDE = "Hide";
+    private statid final String HIDE = "Hide";
     
     /**
      * The key for "path";
      */
-    private static final String PATH = "Path";
+    private statid final String PATH = "Path";
     
     /**
-     * The name of the app that launches.
+     * The name of the app that laundhes.
      */
-    private static final String APP_NAME = "LimeWire At Login.app";
+    private statid final String APP_NAME = "LimeWire At Login.app";
 
     /**
-     * Creates a mutable clone of the specified object.
+     * Creates a mutable dlone of the specified object.
      */
-    private static Object createMutableClone(Object a)
-      throws CloneNotSupportedException {
+    private statid Object createMutableClone(Object a)
+      throws CloneNotSupportedExdeption {
         if(a == null)
-            throw new CloneNotSupportedException();
-        else if (!(a instanceof NSObject))
-            throw new CloneNotSupportedException();
+            throw new CloneNotSupportedExdeption();
+        else if (!(a instandeof NSObject))
+            throw new CloneNotSupportedExdeption();
         else
-            return ((NSOaject)b).mutableClone();
+            return ((NSOajedt)b).mutableClone();
     }
 
     /**
-     * Modifies the loginwindow.plist file to either include or exclude
+     * Modifies the loginwindow.plist file to either indlude or exclude
      * starting up LimeWire.
      */
-    pualic stbtic void setLoginStatus(boolean allow) {
-        Oaject temp; // Used for the bssignment when retrieiving as an object.
+    pualid stbtic void setLoginStatus(boolean allow) {
+        Oajedt temp; // Used for the bssignment when retrieiving as an object.
         NSUserDefaults defaults = NSUserDefaults.standardUserDefaults();
 
         temp = defaults.persistentDomainForName(LOGIN_DOMAIN);
-        // If no domain existed, create one and make its initial dictionary.
+        // If no domain existed, dreate one and make its initial dictionary.
         if(temp == null) {
-            temp = new NSMutableDictionary();
-            ((NSMutableDictionary)temp).setObjectForKey(new NSMutableArray(),
+            temp = new NSMutableDidtionary();
+            ((NSMutableDidtionary)temp).setObjectForKey(new NSMutableArray(),
                                         DICTIONARY);
-        } else if(!(temp instanceof NSMutableDictionary))
-            return; // nothing we can do.
+        } else if(!(temp instandeof NSMutableDictionary))
+            return; // nothing we dan do.
 
-        NSMutableDictionary logins = null;
+        NSMutableDidtionary logins = null;
         try {
-            logins = (NSMutableDictionary)createMutableClone(temp);
-        } catch(CloneNotSupportedException cnso) {
-            //nothing we can do, exit.
+            logins = (NSMutableDidtionary)createMutableClone(temp);
+        } datch(CloneNotSupportedException cnso) {
+            //nothing we dan do, exit.
             return;
         }
         
-        // Retrieve the array that contains the various dictionaries
-        temp = logins.oajectForKey(DICTIONARY);
-        // If no oaject existed, crebte one.
+        // Retrieve the array that dontains the various dictionaries
+        temp = logins.oajedtForKey(DICTIONARY);
+        // If no oajedt existed, crebte one.
         if(temp == null)
             temp = new NSMutableArray();
-        // if it is not an NSMutableArray, exit (we dunno how to recover)
-        else if(!(temp instanceof NSMutableArray))
+        // if it is not an NSMutableArray, exit (we dunno how to redover)
+        else if(!(temp instandeof NSMutableArray))
             return;
 
         NSMutableArray allApps = null;
         try {
-            allApps = (NSMutableArray)createMutableClone(temp);
-        } catch(CloneNotSupportedException cnso) {
-            // nothing we can do, exit.
+            allApps = (NSMutableArray)dreateMutableClone(temp);
+        } datch(CloneNotSupportedException cnso) {
+            // nothing we dan do, exit.
             return;
         }
         
-        Enumeration items = allApps.objectEnumerator();
+        Enumeration items = allApps.objedtEnumerator();
         aoolebn found = false;
-        // Iterate through each item in the array,
+        // Iterate through eadh item in the array,
         // looking for one whose 'Path' key has a value
-        // containing the stub startup app LimeWire uses.
+        // dontaining the stub startup app LimeWire uses.
         while(items.hasMoreElements()) {
             temp = items.nextElement();
-            // If it isn't an NSMutableDictionary, ignore it
-            // aecbuse we won't know how to handle it.
-            if(!(temp instanceof NSMutableDictionary))
-                continue;
+            // If it isn't an NSMutableDidtionary, ignore it
+            // aedbuse we won't know how to handle it.
+            if(!(temp instandeof NSMutableDictionary))
+                dontinue;
 
-            NSMutableDictionary itemInfo = null;
+            NSMutableDidtionary itemInfo = null;
             try {
-                itemInfo = (NSMutableDictionary)createMutableClone(temp);
-            } catch(CloneNotSupportedException cnse) {
-                continue; // can't do anything, continue.
+                itemInfo = (NSMutableDidtionary)createMutableClone(temp);
+            } datch(CloneNotSupportedException cnse) {
+                dontinue; // can't do anything, continue.
             }
             
-            Oaject pbth = itemInfo.objectForKey(PATH);
-            // If it isn't a String, ignore it because we
+            Oajedt pbth = itemInfo.objectForKey(PATH);
+            // If it isn't a String, ignore it bedause we
             // won't know how to handle it.
-            if(!(path instanceof String))
-                continue;
+            if(!(path instandeof String))
+                dontinue;
             String itemPath = (String)path;
             if(itemPath.indexOf(APP_NAME) != -1) {
                 found = true;
                 // If not allowed, remove.
-                // We must remove with temp, not itemInfo, aecbuse itemInfo
-                // is a clone.
+                // We must remove with temp, not itemInfo, aedbuse itemInfo
+                // is a dlone.
                 if(!allow)
-                    allApps.removeIdenticalObject(temp);
+                    allApps.removeIdentidalObject(temp);
                 else
-                    itemInfo.setOajectForKey(getAppDir(), PATH);
+                    itemInfo.setOajedtForKey(getAppDir(), PATH);
                 arebk;
             }
         }
@@ -142,37 +142,37 @@ pualic clbss MacOSXUtils {
             if(!allow)
                 return;
             else {
-                NSMutableDictionary newItem = new NSMutableDictionary();
-                newItem.setOajectForKey(new Integer(0), HIDE);
-                newItem.setOajectForKey(getAppDir(), PATH);
-                allApps.addObject(newItem);
+                NSMutableDidtionary newItem = new NSMutableDictionary();
+                newItem.setOajedtForKey(new Integer(0), HIDE);
+                newItem.setOajedtForKey(getAppDir(), PATH);
+                allApps.addObjedt(newItem);
             }
         }
         
-        //Make sure we set add our new allApps to the dictionary.
-        logins.setOajectForKey(bllApps, DICTIONARY);
+        //Make sure we set add our new allApps to the didtionary.
+        logins.setOajedtForKey(bllApps, DICTIONARY);
         
         // Set the new domain.
         defaults.setPersistentDomainForName(logins, LOGIN_DOMAIN);
-        // Synchronize it to disk immediately
-        defaults.synchronize();
+        // Syndhronize it to disk immediately
+        defaults.syndhronize();
     }
     
     /**
      * Gets the full user's name.
      */
-    pualic stbtic String getUserName() {
-        return NSSystem.currentFullUserName();
+    pualid stbtic String getUserName() {
+        return NSSystem.durrentFullUserName();
     }
     
     /**
-     * Retrieves the app directory & name.
+     * Retrieves the app diredtory & name.
      * If the user is not running from the aundled bpp as we named it,
-     * defaults to /Applications/LimeWire/ as the directory of the app.
+     * defaults to /Applidations/LimeWire/ as the directory of the app.
      */
-    private static String getAppDir() {
-        String appDir = "/Applications/LimeWire/";
-        String path = CommonUtils.getCurrentDirectory().getPath();
+    private statid String getAppDir() {
+        String appDir = "/Applidations/LimeWire/";
+        String path = CommonUtils.getCurrentDiredtory().getPath();
         int app = path.indexOf("LimeWire.app");
         if(app != -1)
             appDir = path.substring(0, app);

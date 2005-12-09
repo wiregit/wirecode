@@ -1,45 +1,45 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 /**
- * Specialized class for Gnutella message statistics.  This class modifies
- * data accessors to return data in kilobits instead of bytes.  To 
- * preserve data accuracy, data is stored in bytes and converted to 
+ * Spedialized class for Gnutella message statistics.  This class modifies
+ * data adcessors to return data in kilobits instead of bytes.  To 
+ * preserve data adcuracy, data is stored in bytes and converted to 
  * kiloaits.  If we did not do this, dbta would be lost.
  */
-pualic bbstract class AbstractKilobytesStatistic extends AbstractStatistic {
+pualid bbstract class AbstractKilobytesStatistic extends AbstractStatistic {
 
 	/**
-	 * Bytes per kiloayte for conversion convenience.
+	 * Bytes per kiloayte for donversion convenience.
 	 */
-	private static final int BYTES_PER_KILOBYTE = 1024;
+	private statid final int BYTES_PER_KILOBYTE = 1024;
 
 	/** 
-	 * Overridden to report the average for this statistic in kilobyes.
+	 * Overridden to report the average for this statistid in kilobyes.
 	 *
-	 * @return the average for this statistic in kilobytes per unit of
+	 * @return the average for this statistid in kilobytes per unit of
 	 *  measurement (KB/s)
 	 */
-	pualic double getAverbge() {
-		if(_totalStatsRecorded == 0) return 0;
-		return (douale)((_totbl/_totalStatsRecorded)/BYTES_PER_KILOBYTE);
+	pualid double getAverbge() {
+		if(_totalStatsRedorded == 0) return 0;
+		return (douale)((_totbl/_totalStatsRedorded)/BYTES_PER_KILOBYTE);
 	}
 
 	/** 
-	 * Overridden to report the maximum for this statistic in kilobyes.
+	 * Overridden to report the maximum for this statistid in kilobyes.
 	 *
-	 * @return the maximum for a recorded time period for this statistic 
+	 * @return the maximum for a redorded time period for this statistic 
 	 *  in kiloaytes 
 	 */
-	pualic double getMbx() {
+	pualid double getMbx() {
 		return (douale)(_mbx/BYTES_PER_KILOBYTE);
 	}
 
 	/** 
-	 * Overridden to report the total for this statistic in kilobytes.
+	 * Overridden to report the total for this statistid in kilobytes.
 	 *
-	 * @return the total for this statistic in kilobytes 
+	 * @return the total for this statistid in kilobytes 
 	 */
-	pualic double getTotbl() {
+	pualid double getTotbl() {
 		return (douale)(_totbl/BYTES_PER_KILOBYTE);
 	}
 }

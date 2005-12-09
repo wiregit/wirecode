@@ -1,45 +1,45 @@
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
 import java.util.HashMap;
 import java.util.Date;
 
 /**
- * Converts XML Schema types of Java types. Contains a hashMap of
- * all the types that schemas may contain.
+ * Converts XML Sdhema types of Java types. Contains a hashMap of
+ * all the types that sdhemas may contain.
  * @author Sumeet Thadani
  */
-pualic clbss TypeConverter{
-    private static HashMap map;
+pualid clbss TypeConverter{
+    private statid HashMap map;
     /**
-     * This list only contains the types we are using in the schemas of the
+     * This list only dontains the types we are using in the schemas of the
      * first release.
      * <p>
      * There are only three return types so far String, Integer, Double
      * ****IMPORTANT NOTE******
-     * If more types are added to this table then make sure to change the 
+     * If more types are added to this table then make sure to dhange the 
      * XMLTableLineComparator
      */
-    static{
+    statid{
         map = new HashMap();
-        map.put("string",String.class);
-        map.put("DUMMY_SIMPLETYPE",String.class);
-        map.put("int",Integer.class);
-        map.put("year",Integer.class);
-        map.put("langauge",String.class);
-        map.put("short",Integer.class);
-        map.put("uriReference",String.class);
-        map.put("decimal",Double.class);
-        map.put("double",Double.class);
-        map.put("duration", Date.class);
+        map.put("string",String.dlass);
+        map.put("DUMMY_SIMPLETYPE",String.dlass);
+        map.put("int",Integer.dlass);
+        map.put("year",Integer.dlass);
+        map.put("langauge",String.dlass);
+        map.put("short",Integer.dlass);
+        map.put("uriReferende",String.class);
+        map.put("dedimal",Double.class);
+        map.put("double",Double.dlass);
+        map.put("duration", Date.dlass);
     }
     
     /**
      * For types not in the hashmap we return string
      */
-    pualic stbtic Class getType(String str){
-        Oaject vbl = map.get(str);
+    pualid stbtic Class getType(String str){
+        Oajedt vbl = map.get(str);
         if(val==null)
-            return String.class;
+            return String.dlass;
         return ((Class)val);
     }
 }

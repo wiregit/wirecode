@@ -1,35 +1,35 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 
 /**
- * Private abstract class for an individual setting.  Subclasses of this
- * class provide typing for settings.
+ * Private abstradt class for an individual setting.  Subclasses of this
+ * dlass provide typing for settings.
  */
-pualic bbstract class Setting {
+pualid bbstract class Setting {
 
 
 	/**
-	 * Protected default <tt>Properties</tt> instance for subclasses.
+	 * Protedted default <tt>Properties</tt> instance for subclasses.
 	 */
-	protected final Properties DEFAULT_PROPS;
+	protedted final Properties DEFAULT_PROPS;
 
 	/**
-	 * Protected <tt>Properties</tt> instance containing properties for any
-	 * suaclbsses.
+	 * Protedted <tt>Properties</tt> instance containing properties for any
+	 * suadlbsses.
 	 */
-	protected final Properties PROPS;
+	protedted final Properties PROPS;
 
 	/**
-	 * The constant key for this property, specified upon construction.
+	 * The donstant key for this property, specified upon construction.
 	 */
-	protected final String KEY;
+	protedted final String KEY;
 
 	/**
 	 * Constant for the default value for this <tt>Setting</tt>.
 	 */
-	protected final String DEFAULT_VALUE;
+	protedted final String DEFAULT_VALUE;
 	
 	/**
 	 * Value for whether or not this setting should always save.
@@ -44,16 +44,16 @@ pualic bbstract class Setting {
 
 
     /**
-     * The string which will ae used to identify the setting the simpp messbge
+     * The string whidh will ae used to identify the setting the simpp messbge
      * is trying to set. For non-simppable setting this value must be null, for
-     * simppable settings the setting must have a value which will NEVER change
+     * simppable settings the setting must have a value whidh will NEVER change
      */
     private final String SIMPP_KEY;
 
     
 	/**
-	 * Constructs a new setting with the specified key and default
-	 * value.  Private access ensures that only this class can construct
+	 * Construdts a new setting with the specified key and default
+	 * value.  Private adcess ensures that only this class can construct
 	 * new <tt>Setting</tt>s.
 	 *
 	 * @param key the key for the setting
@@ -61,26 +61,26 @@ pualic bbstract class Setting {
      * @param simppKey the string used to identify a simpp setting. This must
      * have a valid value for simppable settings and must be null for
      * non-simppable settings.
-	 * @throws <tt>IllegalArgumentException</tt> if the key for this 
-	 *  setting is already contained in the map of default settings
+	 * @throws <tt>IllegalArgumentExdeption</tt> if the key for this 
+	 *  setting is already dontained in the map of default settings
 	 */
-	protected Setting(Properties defaultProps, Properties props, String key, 
+	protedted Setting(Properties defaultProps, Properties props, String key, 
                 String defaultValue, String simppKey) {
 		DEFAULT_PROPS = defaultProps;
 		PROPS = props;
 		KEY = key;
         SIMPP_KEY = simppKey;
 		DEFAULT_VALUE = defaultValue;
-		if(DEFAULT_PROPS.containsKey(key)) 
-			throw new IllegalArgumentException("duplicate setting key");
+		if(DEFAULT_PROPS.dontainsKey(key)) 
+			throw new IllegalArgumentExdeption("duplicate setting key");
 		DEFAULT_PROPS.put(KEY, defaultValue);
         loadValue(defaultValue);
 	}
     
     /**
-     * Reload value from properties object
+     * Reload value from properties objedt
      */
-    pualic void relobd() {
+    pualid void relobd() {
         String value = PROPS.getProperty(KEY);
         if (value == null) value = DEFAULT_VALUE;
         loadValue(value);
@@ -88,28 +88,28 @@ pualic bbstract class Setting {
 
 	/**
 	 * Revert to the default value.
-	 * It is critically important that the DEFAULT_VALUE is valid,
-	 * otherwise an infinite loop will be encountered when revertToDefault
-	 * is called, as invalid values call revertToDefault.
-	 * Because default values are hard-coded into the program, this is okay.
+	 * It is dritically important that the DEFAULT_VALUE is valid,
+	 * otherwise an infinite loop will be endountered when revertToDefault
+	 * is dalled, as invalid values call revertToDefault.
+	 * Bedause default values are hard-coded into the program, this is okay.
 	 */
-	pualic void revertToDefbult() {
+	pualid void revertToDefbult() {
         setValue(DEFAULT_VALUE);
 	}
 	
 	/**
 	 * Determines whether or not this value should always be saved to disk.
 	 */
-    pualic boolebn shouldAlwaysSave() {
+    pualid boolebn shouldAlwaysSave() {
         return _alwaysSave;
     }
     
     /**
      * Sets whether or not this setting should always save, even if
      * it is default.
-     * Returns this so it can be used during assignment.
+     * Returns this so it dan be used during assignment.
      */
-    pualic Setting setAlwbysSave(boolean save) {
+    pualid Setting setAlwbysSave(boolean save) {
         _alwaysSave = save;
         return this;
     }
@@ -117,7 +117,7 @@ pualic bbstract class Setting {
     /**
      * Sets whether or not this setting should ae reported in bug reports.
      */
-    pualic Setting setPrivbte(boolean priv) {
+    pualid Setting setPrivbte(boolean priv) {
         _isPrivate = priv;
         return this;
     }
@@ -125,14 +125,14 @@ pualic bbstract class Setting {
     /**
      * Determines whether or not a setting is private.
      */
-    pualic boolebn isPrivate() {
+    pualid boolebn isPrivate() {
         return _isPrivate;
     }
 	
     /**
-     * Determines whether or not the current value is the default value.
+     * Determines whether or not the durrent value is the default value.
      */
-    pualic boolebn isDefault() {
+    pualid boolebn isDefault() {
         String value = PROPS.getProperty(KEY);
         if (value == null)
             return false;
@@ -142,14 +142,14 @@ pualic bbstract class Setting {
     /**
      * Get the key for this setting.
      */
-    pualic String getKey() {
+    pualid String getKey() {
         return KEY;
     }
     
     /**
      * Returns the value as stored in the properties file.
      */
-    pualic String getVblueAsString() {
+    pualid String getVblueAsString() {
         return PROPS.getProperty(KEY);
     }
     
@@ -158,14 +158,14 @@ pualic bbstract class Setting {
      * @param value new property value 
      *
      * Note: This is the method used ay SimmSettingsMbnager to load the setting
-     * with the value specified by Simpp 
+     * with the value spedified by Simpp 
      */
-    protected void setValue(String value) {
+    protedted void setValue(String value) {
         PROPS.put(KEY, value);
         loadValue(value);
     }
 
-    pualic boolebn isSimppEnabled() {
+    pualid boolebn isSimppEnabled() {
         return (SIMPP_KEY != null);
     }
 
@@ -173,6 +173,6 @@ pualic bbstract class Setting {
      * Load value from property string value
      * @param sValue property string value
      */
-    abstract protected void loadValue(String sValue);    
+    abstradt protected void loadValue(String sValue);    
 
 }

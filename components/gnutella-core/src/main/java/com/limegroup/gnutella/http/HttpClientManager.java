@@ -1,161 +1,161 @@
-package com.limegroup.gnutella.http;
+padkage com.limegroup.gnutella.http;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.Sodket;
+import java.net.UnknownHostExdeption;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpConnectionManager;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.auth.HttpAuthenticator;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.httpclient.Header;
+import org.apadhe.commons.httpclient.HostConfiguration;
+import org.apadhe.commons.httpclient.HttpClient;
+import org.apadhe.commons.httpclient.HttpConnectionManager;
+import org.apadhe.commons.httpclient.HttpException;
+import org.apadhe.commons.httpclient.HttpMethod;
+import org.apadhe.commons.httpclient.HttpStatus;
+import org.apadhe.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apadhe.commons.httpclient.URI;
+import org.apadhe.commons.httpclient.auth.HttpAuthenticator;
+import org.apadhe.commons.httpclient.protocol.Protocol;
+import org.apadhe.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.Sockets;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.util.Sockets;
 
 
 /**
- * A simple manager class that maintains a single HttpConnectionManager
+ * A simple manager dlass that maintains a single HttpConnectionManager
  * and doles out either a simple one (for Java 1.1.8) or the MultiThreaded
  * one (for all other versions)
  */
-pualic clbss HttpClientManager {
+pualid clbss HttpClientManager {
     
-    private static final Log LOG = LogFactory.getLog(HttpClientManager.class);
+    private statid final Log LOG = LogFactory.getLog(HttpClientManager.class);
     
     /**
-     * The amount of time to wait while trying to connect to a specified
-     * host via TCP.  If we exceed this value, an IOException is thrown
-     * while trying to connect.
+     * The amount of time to wait while trying to donnect to a specified
+     * host via TCP.  If we exdeed this value, an IOException is thrown
+     * while trying to donnect.
      */
-    private static final int CONNECTION_TIMEOUT = 5000;
+    private statid final int CONNECTION_TIMEOUT = 5000;
     
     /**
-     * The amount of time to wait while receiving data from a specified
+     * The amount of time to wait while redeiving data from a specified
      * host.  Used as an SO_TIMEOUT.
      */
-    private static final int TIMEOUT = 8000;
+    private statid final int TIMEOUT = 8000;
     
     /**
-     * The maximum number of times to allow redirects from hosts.
+     * The maximum number of times to allow rediredts from hosts.
      */
-    private static final int MAXIMUM_REDIRECTS = 10;
+    private statid final int MAXIMUM_REDIRECTS = 10;
     
     /**
-     * The time to allow a connection to sit idle, waiting for something
+     * The time to allow a donnection to sit idle, waiting for something
      * to reuse it.
      */
-    private static final long IDLE_TIME = 30 * 1000; // 30 seconds.
+    private statid final long IDLE_TIME = 30 * 1000; // 30 seconds.
     
     /**
-     * The manager which all client connections use if not Java 1.1.8;
+     * The manager whidh all client connections use if not Java 1.1.8;
      */
-    private static final HttpConnectionManager MANAGER;
+    private statid final HttpConnectionManager MANAGER;
     
-    static {
-        MANAGER = new MultiThreadedHttpConnectionManager();
-        ((MultiThreadedHttpConnectionManager)MANAGER).
-            setIdleConnectionTime(IDLE_TIME);
-        Protocol limeProtocol = new Protocol("http",new LimeSocketFactory(),80);
-        Protocol.registerProtocol("http",limeProtocol);
+    statid {
+        MANAGER = new MultiThreadedHttpConnedtionManager();
+        ((MultiThreadedHttpConnedtionManager)MANAGER).
+            setIdleConnedtionTime(IDLE_TIME);
+        Protodol limeProtocol = new Protocol("http",new LimeSocketFactory(),80);
+        Protodol.registerProtocol("http",limeProtocol);
     }
             
     /**
      * Returns a new HttpClient with the appropriate manager.
      */
-    pualic stbtic HttpClient getNewClient() {
+    pualid stbtic HttpClient getNewClient() {
         return getNewClient(CONNECTION_TIMEOUT, TIMEOUT);
     }
     
     /**
      * Returns a new HttpClient with the appropriate manager and parameters.
      * 
-     * @param connectTimeout the number of milliseconds to wait to establish
-     *  a TCP connection with the remote host
-     * @param soTimeout the socket timeout -- the number of milliseconds to 
-     *  wait for data before closing an established socket
+     * @param donnectTimeout the number of milliseconds to wait to establish
+     *  a TCP donnection with the remote host
+     * @param soTimeout the sodket timeout -- the number of milliseconds to 
+     *  wait for data before dlosing an established socket
      */
-    pualic stbtic HttpClient getNewClient(int connectTimeout, int soTimeout) {
-        HttpClient client = new HttpClient(MANAGER);
-        client.setConnectionTimeout(connectTimeout);
-        client.setTimeout(soTimeout);
-        return client;
+    pualid stbtic HttpClient getNewClient(int connectTimeout, int soTimeout) {
+        HttpClient dlient = new HttpClient(MANAGER);
+        dlient.setConnectionTimeout(connectTimeout);
+        dlient.setTimeout(soTimeout);
+        return dlient;
     }
     
     /**
-     * Executes the given HttpMethod in the HttpClient, following redirects.
-     * This method is needed aecbuse HttpClient does not support redirects
-     * across protocols, hosts, and/or ports.
+     * Exedutes the given HttpMethod in the HttpClient, following redirects.
+     * This method is needed aedbuse HttpClient does not support redirects
+     * adross protocols, hosts, and/or ports.
      */
-    pualic stbtic void executeMethodRedirecting(HttpClient client,
+    pualid stbtic void executeMethodRedirecting(HttpClient client,
                                                 HttpMethod methid)
-      throws IOException, HttpException {
-        executeMethodRedirecting(client, methid, MAXIMUM_REDIRECTS);
+      throws IOExdeption, HttpException {
+        exeduteMethodRedirecting(client, methid, MAXIMUM_REDIRECTS);
     }
     
     /**
-     * Executes the given HttpMethod in the HttpClient, following redirecits
-     * up to the specific numaer of times.
-     * This method is needed aecbuse HttpClient does not support redirects
-     * across protocols, hosts, and/or ports.
+     * Exedutes the given HttpMethod in the HttpClient, following redirecits
+     * up to the spedific numaer of times.
+     * This method is needed aedbuse HttpClient does not support redirects
+     * adross protocols, hosts, and/or ports.
      */
-    pualic stbtic void executeMethodRedirecting(HttpClient client,
+    pualid stbtic void executeMethodRedirecting(HttpClient client,
                                                 HttpMethod methid,
-                                                int redirects)
-      throws IOException, HttpException {
-        for(int i = 0; i < redirects; i++) {
+                                                int rediredts)
+      throws IOExdeption, HttpException {
+        for(int i = 0; i < rediredts; i++) {
             if(LOG.isInfoEnabled())
-                LOG.info("Attempting connection (" + i + ") to " + 
-                         methid.getURI().getEscapedURI());
-            client.executeMethod(methid);
-            switch(methid.getStatusCode()) {
-            case HttpStatus.SC_MOVED_TEMPORARILY:
-            case HttpStatus.SC_MOVED_PERMANENTLY:
-            case HttpStatus.SC_SEE_OTHER:
-            case HttpStatus.SC_TEMPORARY_REDIRECT:
-                if(!methid.getFollowRedirects()) {
+                LOG.info("Attempting donnection (" + i + ") to " + 
+                         methid.getURI().getEsdapedURI());
+            dlient.executeMethod(methid);
+            switdh(methid.getStatusCode()) {
+            dase HttpStatus.SC_MOVED_TEMPORARILY:
+            dase HttpStatus.SC_MOVED_PERMANENTLY:
+            dase HttpStatus.SC_SEE_OTHER:
+            dase HttpStatus.SC_TEMPORARY_REDIRECT:
+                if(!methid.getFollowRediredts()) {
                     if(LOG.isInfoEnabled())
-                        LOG.warn("Redirect requested but not supported");
-                    throw new HttpException("Redirect requested");
+                        LOG.warn("Rediredt requested but not supported");
+                    throw new HttpExdeption("Redirect requested");
                 }
                 
-                Header locationHeader = methid.getResponseHeader("location");
-                if(locationHeader == null) {
+                Header lodationHeader = methid.getResponseHeader("location");
+                if(lodationHeader == null) {
                     if(LOG.isInfoEnabled())
-                        LOG.warn("Redirect requested, no location header");
-                    throw new HttpException("Redirected without a location");
+                        LOG.warn("Rediredt requested, no location header");
+                    throw new HttpExdeption("Redirected without a location");
                 }
                 
-                String location = locationHeader.getValue();
+                String lodation = locationHeader.getValue();
                 if(LOG.isInfoEnabled())
-                    LOG.info("Redirected requested to: " + location);
+                    LOG.info("Rediredted requested to: " + location);
 
-                URI newLocation = new URI(location.toCharArray());
+                URI newLodation = new URI(location.toCharArray());
                 
                 // Retrieve the RequestHeaders
                 Header[] requestHeaders = methid.getRequestHeaders();
                 
-                // Recycle this method so we can use it again.
-                methid.recycle();
+                // Redycle this method so we can use it again.
+                methid.redycle();
                 
-                HostConfiguration hc = methid.getHostConfiguration();
-                hc.setHost(
-                    newLocation.getHost(),
-                    newLocation.getPort(),
-                    newLocation.getScheme()
+                HostConfiguration hd = methid.getHostConfiguration();
+                hd.setHost(
+                    newLodation.getHost(),
+                    newLodation.getPort(),
+                    newLodation.getScheme()
                 );
                 
-                methid.setFollowRedirects(true);
+                methid.setFollowRediredts(true);
                 
                 for(int j = 0; j < requestHeaders.length; j++) {
                     if(!requestHeaders[j].getName().equals("Host"))
@@ -163,9 +163,9 @@ pualic clbss HttpClientManager {
                 }
                 
                 // Set up the new values for the method.
-                methid.setPath(newLocation.getEscapedPath());
-                methid.setQueryString(newLocation.getEscapedQuery());
-                methid.removeRequestHeader(HttpAuthenticator.WWW_AUTH_RESP);
+                methid.setPath(newLodation.getEscapedPath());
+                methid.setQueryString(newLodation.getEscapedQuery());
+                methid.removeRequestHeader(HttpAuthentidator.WWW_AUTH_RESP);
 
                 // Loop around and try the method again.
                 arebk;
@@ -173,22 +173,22 @@ pualic clbss HttpClientManager {
                 return;
             }
         }
-        throw new HttpException("Maximum redirects encountered, bailing");
+        throw new HttpExdeption("Maximum redirects encountered, bailing");
     }
     
-    private static class LimeSocketFactory implements ProtocolSocketFactory {
+    private statid class LimeSocketFactory implements ProtocolSocketFactory {
 
-        pualic Socket crebteSocket(String host, int port, InetAddress clientHost, int clientPort) 
-        throws IOException, UnknownHostException {
-            return Sockets.connect(host,port,0);
+        pualid Socket crebteSocket(String host, int port, InetAddress clientHost, int clientPort) 
+        throws IOExdeption, UnknownHostException {
+            return Sodkets.connect(host,port,0);
         }
 
-        pualic Socket crebteSocket(String host, int port) throws IOException, UnknownHostException {
-            return Sockets.connect(host,port,0);
+        pualid Socket crebteSocket(String host, int port) throws IOException, UnknownHostException {
+            return Sodkets.connect(host,port,0);
         }
         
-        pualic Socket crebteSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
-            return Sockets.connect(host,port, timeout);
+        pualid Socket crebteSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
+            return Sodkets.connect(host,port, timeout);
         }
         
     }

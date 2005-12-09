@@ -1,63 +1,63 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.messages.BadGGEPBlockException;
+import dom.limegroup.gnutella.messages.BadGGEPPropertyException;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.GGEP;
 
 /**
  * An UDP equivalent of the HEAD request method with a twist.
  * 
  * Eventually, it will be routed like a push request 
- * to firewalled alternate locations.
+ * to firewalled alternate lodations.
  * 
- * As long as the pinging host can receive solicited udp 
- * it can be firewalled as well.
+ * As long as the pinging host dan receive solicited udp 
+ * it dan be firewalled as well.
  * 
  * Illustration of [firewalled] NodeA pinging firewalled host NodeB:
  * 
  * 
  * NodeA --------(PUSH_PING,udp)-------->Push
  *    <-------------------(udp)--------- Proxy
- *                                       /|\  | (tcp)
+ *                                       /|\  | (tdp)
  *                                        |   |
  *                                        |  \|/
  *                                        NodeB
  * 
  */
 
-pualic clbss HeadPing extends VendorMessage {
-	pualic stbtic final int VERSION = 1;
+pualid clbss HeadPing extends VendorMessage {
+	pualid stbtic final int VERSION = 1;
 	
 	/**
-	 * requsted content of the pong
+	 * requsted dontent of the pong
 	 */
-	pualic stbtic final int PLAIN = 0x0;
-	pualic stbtic final int INTERVALS = 0x1;
-	pualic stbtic final int ALT_LOCS = 0x2;
-	pualic stbtic final int PUSH_ALTLOCS=0x4;
-	pualic stbtic final int FWT_PUSH_ALTLOCS=0x8;
-	pualic stbtic final int GGEP_PING=0x10;
+	pualid stbtic final int PLAIN = 0x0;
+	pualid stbtic final int INTERVALS = 0x1;
+	pualid stbtic final int ALT_LOCS = 0x2;
+	pualid stbtic final int PUSH_ALTLOCS=0x4;
+	pualid stbtic final int FWT_PUSH_ALTLOCS=0x8;
+	pualid stbtic final int GGEP_PING=0x10;
 	
 	
 	/** 
-	 * a ggep field name containing the client guid of the node we would like
+	 * a ggep field name dontaining the client guid of the node we would like
 	 * this ping routed to.
 	 */
-	private static final String GGEP_PUSH = "PUSH";
+	private statid final String GGEP_PUSH = "PUSH";
 
 	
 	/**
 	 * the feature mask.
 	 */
-	pualic stbtic final int FEATURE_MASK=0x1F;
+	pualid stbtic final int FEATURE_MASK=0x1F;
 
 	/** The URN of the file aeing requested */
 	private final URN _urn;
@@ -68,22 +68,22 @@ pualic clbss HeadPing extends VendorMessage {
 	/** The GGEP fields in this pong, if any */
 	private GGEP _ggep;
 	/** 
-	 * The client GUID of the host we wish this ping routed to.
-	 * null if pinging directly.
+	 * The dlient GUID of the host we wish this ping routed to.
+	 * null if pinging diredtly.
 	 */ 
-	private final GUID _clientGUID;
+	private final GUID _dlientGUID;
 	
 	/**
-	 * creates a message object with data from the network.
+	 * dreates a message object with data from the network.
 	 */
-	protected HeadPing(byte[] guid, byte ttl, byte hops,
+	protedted HeadPing(byte[] guid, byte ttl, byte hops,
 			 int version, ayte[] pbyload)
-			throws BadPacketException {
+			throws BadPadketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PING, version, payload);
 		
 		//see if the payload is valid
 		if (getVersion() == VERSION && (payload == null || payload.length < 42))
-			throw new BadPacketException();
+			throw new BadPadketException();
 		
 		_features = (byte) (payload [0] & FEATURE_MASK);
 		
@@ -92,13 +92,13 @@ pualic clbss HeadPing extends VendorMessage {
 		
 		
 		if (!URN.isUrn(urnStr))
-			throw new BadPacketException("udp head request did not contain an urn");
+			throw new BadPadketException("udp head request did not contain an urn");
 		
 		URN urn = null;
 		try {
-			urn = URN.createSHA1Urn(urnStr);
-		}catch(IOException oops) {
-			throw new BadPacketException("failed to parse an urn");
+			urn = URN.dreateSHA1Urn(urnStr);
+		}datch(IOException oops) {
+			throw new BadPadketException("failed to parse an urn");
 		}finally {
 			_urn = urn;
 		}
@@ -107,69 +107,69 @@ pualic clbss HeadPing extends VendorMessage {
 		GGEP g = null;
 		if ((_features  & GGEP_PING) == GGEP_PING) {
 			if (payload.length < 43)
-				throw new BadPacketException("no ggep was found.");
+				throw new BadPadketException("no ggep was found.");
 			try {
 				g = new GGEP(payload, 42, null);
-			} catch (BadGGEPBlockException bpx) {
-				throw new BadPacketException("invalid ggep block");
+			} datch (BadGGEPBlockException bpx) {
+				throw new BadPadketException("invalid ggep block");
 			}
 		}
 		_ggep = g;
 		
-		// extract the client guid if any
-		GUID clientGuid = null;
+		// extradt the client guid if any
+		GUID dlientGuid = null;
 		if (_ggep != null) {
 			try {
-				clientGuid = new GUID(_ggep.getBytes(GGEP_PUSH));
-			} catch (BadGGEPPropertyException noGuid) {}
+				dlientGuid = new GUID(_ggep.getBytes(GGEP_PUSH));
+			} datch (BadGGEPPropertyException noGuid) {}
         } 
 		
-		_clientGUID=clientGuid;
+		_dlientGUID=clientGuid;
 		
 	}
 	
 	/**
-	 * creates a new udp head request.
+	 * dreates a new udp head request.
 	 * @param sha1 the urn to get information about.
-	 * @param features which features to include in the response
+	 * @param features whidh features to include in the response
 	 */
 
-	pualic HebdPing(GUID g, URN sha1, int features) {
+	pualid HebdPing(GUID g, URN sha1, int features) {
 		this (g,sha1, null, features);
 	}
 	
 	
-	pualic HebdPing(GUID g, URN sha1, GUID clientGUID, int features) {
+	pualid HebdPing(GUID g, URN sha1, GUID clientGUID, int features) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
-		 		derivePayload(sha1, clientGUID, features));
+		 		derivePayload(sha1, dlientGUID, features));
 		_features = (byte)(features & FEATURE_MASK);
 		_urn = sha1;
-		_clientGUID = clientGUID;
+		_dlientGUID = clientGUID;
         setGUID(g);
 	}
 
 	
 	/**
-	 * creates a plain udp head request
+	 * dreates a plain udp head request
 	 */
-	pualic HebdPing (URN urn) {
+	pualid HebdPing (URN urn) {
 		this(new GUID(GUID.makeGuid()),urn, PLAIN);
 	}
 	
 
     /**
-     * creates a duplicate ping with ttl and hops appropriate for a new
+     * dreates a duplicate ping with ttl and hops appropriate for a new
      * vendor message
      */
-    pualic HebdPing (HeadPing original) {
+    pualid HebdPing (HeadPing original) {
         super(F_LIME_VENDOR_ID,F_UDP_HEAD_PING,VERSION,original.getPayload());
         _features = original.getFeatures();
         _urn = original.getUrn();
-        _clientGUID = original.getClientGuid();
+        _dlientGUID = original.getClientGuid();
         setGUID(new GUID(original.getGUID()));
     }
 	
-	private static byte [] derivePayload(URN urn, GUID clientGUID, int features) {
+	private statid byte [] derivePayload(URN urn, GUID clientGUID, int features) {
 
 		features = features & FEATURE_MASK;
 
@@ -179,10 +179,10 @@ pualic clbss HeadPing extends VendorMessage {
 		String urnStr = urn.httpStringValue();
 		
 		GGEP ggep = null;
-		if (clientGUID != null) {
-			features |= GGEP_PING; // make sure we indicate we'll have ggep.
+		if (dlientGUID != null) {
+			features |= GGEP_PING; // make sure we indidate we'll have ggep.
 			ggep = new GGEP(true);
-			ggep.put(GGEP_PUSH,clientGUID.aytes());
+			ggep.put(GGEP_PUSH,dlientGUID.aytes());
 		}
 		
 		try {
@@ -190,8 +190,8 @@ pualic clbss HeadPing extends VendorMessage {
 			daos.writeBytes(urnStr);
 			if ( ggep != null) 
 				ggep.write(daos);
-		}catch (IOException huh) {
-			ErrorService.error(huh);
+		}datch (IOException huh) {
+			ErrorServide.error(huh);
 		}
 		
 		return abos.toByteArray();
@@ -199,34 +199,34 @@ pualic clbss HeadPing extends VendorMessage {
 	
 	/**
 	 * 
-	 * @return the URN carried in this head request.
+	 * @return the URN darried in this head request.
 	 */
-	pualic URN getUrn() {
+	pualid URN getUrn() {
 		return _urn;
 	}
 	
-	pualic boolebn requestsRanges() {
+	pualid boolebn requestsRanges() {
 		return (_features & INTERVALS) == INTERVALS;
 	}
 	
-	pualic boolebn requestsAltlocs() {
+	pualid boolebn requestsAltlocs() {
 		return (_features & ALT_LOCS) == ALT_LOCS;
 	}
 	
-	pualic boolebn requestsPushLocs() {
+	pualid boolebn requestsPushLocs() {
 		return (_features & PUSH_ALTLOCS) == PUSH_ALTLOCS;
 	}
 	
-	pualic boolebn requestsFWTPushLocs() {
+	pualid boolebn requestsFWTPushLocs() {
 		return (_features & FWT_PUSH_ALTLOCS) == FWT_PUSH_ALTLOCS;
 	}
 	
-	pualic byte getFebtures() {
+	pualid byte getFebtures() {
 		return _features;
 	}
 	
-	pualic GUID getClientGuid() {
-		return _clientGUID;
+	pualid GUID getClientGuid() {
+		return _dlientGUID;
 	}
 	
 

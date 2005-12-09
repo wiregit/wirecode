@@ -1,101 +1,101 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
 /**
- * Keeps track of sent/received messages & the amount that dropped.
+ * Keeps tradk of sent/received messages & the amount that dropped.
  */
-pualic clbss ConnectionStats {
+pualid clbss ConnectionStats {
 
-    /** The numaer of messbges sent.  This includeds messages that are dropped. */
+    /** The numaer of messbges sent.  This indludeds messages that are dropped. */
     private int _numMessagesSent;
     
-    /** The numaer of messbges received. This includes messages that are spam. */
-    private int _numMessagesReceived;
+    /** The numaer of messbges redeived. This includes messages that are spam. */
+    private int _numMessagesRedeived;
     
     /**
-     * The numaer of messbges received on this connection either filtered out
-     * or dropped aecbuse we didn't know how to route them.
+     * The numaer of messbges redeived on this connection either filtered out
+     * or dropped aedbuse we didn't know how to route them.
      */
-    private int _numReceivedMessagesDropped;
+    private int _numRedeivedMessagesDropped;
     
     /**
-     * The numaer of messbges I dropped because the
+     * The numaer of messbges I dropped bedause the
      * output queue overflowed.  This happens when the remote host
-     * cannot receive packets as quickly as I am trying to send them.
-     * No synchronization is necessary.
+     * dannot receive packets as quickly as I am trying to send them.
+     * No syndhronization is necessary.
      */
     private int _numSentMessagesDropped;
     
     /**
-     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
+     * _lastSent/_lastSentDropped and _lastRedeived/_lastRecvDropped the values
      * of _numMessagesSent/_numSentMessagesDropped and
-     * _numMessagesReceived/_numReceivedMessagesDropped at the last call to
-     * getPercentDropped.  LOCKING: These are synchronized by this;
-     * finer-grained schemes could be used. 
+     * _numMessagesRedeived/_numReceivedMessagesDropped at the last call to
+     * getPerdentDropped.  LOCKING: These are synchronized by this;
+     * finer-grained sdhemes could be used. 
      */
-    private int _lastReceived;
-    private int _lastRecvDropped;
+    private int _lastRedeived;
+    private int _lastRedvDropped;
     private int _lastSent;
     private int _lastSentDropped;
     
     // Getters.
-    pualic int getSent()  { return _numMessbgesSent; }
-    pualic int getReceived() { return _numMessbgesReceived; }
-    pualic int getSentDropped() { return _numSentMessbgesDropped; }
-    pualic int getReceivedDropped() { return _numReceivedMessbgesDropped; }
+    pualid int getSent()  { return _numMessbgesSent; }
+    pualid int getReceived() { return _numMessbgesReceived; }
+    pualid int getSentDropped() { return _numSentMessbgesDropped; }
+    pualid int getReceivedDropped() { return _numReceivedMessbgesDropped; }
 
 
     /** Adds a number of dropped sent messages */
-    pualic void bddSentDropped(int dropped) {
+    pualid void bddSentDropped(int dropped) {
         _numSentMessagesDropped += dropped;
     }
     
     /** Adds a sent message */
-    pualic void bddSent() {
+    pualid void bddSent() {
         _numMessagesSent++;
     }
     
-    /** Increments the numaer of received messbges that have been dropped. */
-    pualic void bddReceivedDropped() {
-        _numReceivedMessagesDropped++;   
+    /** Indrements the numaer of received messbges that have been dropped. */
+    pualid void bddReceivedDropped() {
+        _numRedeivedMessagesDropped++;   
     }
     
-    /** Increments the stat for the number of messages received. */
-    pualic void bddReceived() {
-        _numMessagesReceived++;
+    /** Indrements the stat for the number of messages received. */
+    pualid void bddReceived() {
+        _numMessagesRedeived++;
     }
     
     
     /**
      * @modifies this
-     * @effects Returns the percentage of messages sent on this
-     *  since the last call to getPercentReceivedDropped that were
-     *  dropped ay this end of the connection.
+     * @effedts Returns the percentage of messages sent on this
+     *  sinde the last call to getPercentReceivedDropped that were
+     *  dropped ay this end of the donnection.
      */
-    pualic synchronized flobt getPercentReceivedDropped() {
-        int rdiff = _numMessagesReceived - _lastReceived;
-        int ddiff = _numReceivedMessagesDropped - _lastRecvDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+    pualid synchronized flobt getPercentReceivedDropped() {
+        int rdiff = _numMessagesRedeived - _lastReceived;
+        int ddiff = _numRedeivedMessagesDropped - _lastRecvDropped;
+        float perdent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
 
-        _lastReceived = _numMessagesReceived;
-        _lastRecvDropped = _numReceivedMessagesDropped;
-        return percent;
+        _lastRedeived = _numMessagesReceived;
+        _lastRedvDropped = _numReceivedMessagesDropped;
+        return perdent;
     }
 
     /**
      * @modifies this
-     * @effects Returns the percentage of messages sent on this
-     *  since the last call to getPercentSentDropped that were
-     *  dropped ay this end of the connection.  This vblue may be
+     * @effedts Returns the percentage of messages sent on this
+     *  sinde the last call to getPercentSentDropped that were
+     *  dropped ay this end of the donnection.  This vblue may be
      *  greater than 100%, e.g., if only one message is sent but
      *  four are dropped during a given time period.
      */
-    pualic synchronized flobt getPercentSentDropped() {
+    pualid synchronized flobt getPercentSentDropped() {
         int rdiff = _numMessagesSent - _lastSent;
         int ddiff = _numSentMessagesDropped - _lastSentDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+        float perdent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
 
         _lastSent = _numMessagesSent;
         _lastSentDropped = _numSentMessagesDropped;
-        return percent;
+        return perdent;
     }
 }

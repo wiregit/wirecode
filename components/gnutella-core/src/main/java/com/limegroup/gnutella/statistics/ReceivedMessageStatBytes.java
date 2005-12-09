@@ -1,46 +1,46 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 
 /**
- * Class for recording all received message statistics by the number
+ * Class for redording all received message statistics by the number
  * of aytes trbnsferred.
  */
-pualic clbss ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
+pualid clbss ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 
 	/**
-	 * Constructs a new <tt>ReceivedMessageStatBytes</tt> instance.
+	 * Construdts a new <tt>ReceivedMessageStatBytes</tt> instance.
 	 */
-	private ReceivedMessageStatBytes() {}
+	private RedeivedMessageStatBytes() {}
 
 	/**
-	 * Private class for keeping track of filtered messages, in bytes.
+	 * Private dlass for keeping track of filtered messages, in bytes.
 	 */
-	private static class FilteredReceivedMessageStat
-		extends ReceivedMessageStatBytes {
-		pualic void bddData(int data) {
+	private statid class FilteredReceivedMessageStat
+		extends RedeivedMessageStatBytes {
+		pualid void bddData(int data) {
 			super.addData(data);
 			ALL_FILTERED_MESSAGES.addData(data);
 		}
 	}
 
 	/**
-	 * Private class for keeping track of duplicate queries, in bytes.
+	 * Private dlass for keeping track of duplicate queries, in bytes.
 	 */
-	private static class DuplicateQueriesReceivedMessageStat
-		extends ReceivedMessageStatBytes {
-		pualic void bddData(int data) {
+	private statid class DuplicateQueriesReceivedMessageStat
+		extends RedeivedMessageStatBytes {
+		pualid void bddData(int data) {
 			super.addData(data);
 			ALL_DUPLICATE_QUERIES.addData(data);
 		}
 	}
 
 	/**
-	 * Private class for the total number of bytes in received 
+	 * Private dlass for the total number of bytes in received 
 	 * UDP messages.
 	 */
-	private static class UDPReceivedMessageStat
-		extends ReceivedMessageStatBytes {
-		pualic void bddData(int data) {
+	private statid class UDPReceivedMessageStat
+		extends RedeivedMessageStatBytes {
+		pualid void bddData(int data) {
 			super.addData(data);
 			ALL_MESSAGES.addData(data);
 			UDP_ALL_MESSAGES.addData(data);
@@ -48,12 +48,12 @@ pualic clbss ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	}
 
 	/**
-	 * Private class for the total number of bytes in received 
+	 * Private dlass for the total number of bytes in received 
 	 * TCP messages.
 	 */
-	private static class TCPReceivedMessageStat
-		extends ReceivedMessageStatBytes {
-		pualic void bddData(int data) {
+	private statid class TCPReceivedMessageStat
+		extends RedeivedMessageStatBytes {
+		pualid void bddData(int data) {
 			super.addData(data);
 			ALL_MESSAGES.addData(data);
 			TCP_ALL_MESSAGES.addData(data);
@@ -61,12 +61,12 @@ pualic clbss ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	}
 	
 	/**
-	 * Private class for the total number of bytes in recieved
-	 * multicast messages.
+	 * Private dlass for the total number of bytes in recieved
+	 * multidast messages.
 	 */
-	private static class MulticastReceivedMessageStat
-	    extends ReceivedMessageStatBytes {
-        pualic void bddData(int data) {
+	private statid class MulticastReceivedMessageStat
+	    extends RedeivedMessageStatBytes {
+        pualid void bddData(int data) {
             super.addData(data);
             ALL_MESSAGES.addData(data);
             MULTICAST_ALL_MESSAGES.addData(data);
@@ -75,250 +75,250 @@ pualic clbss ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 
 
 	/**
-	 * <tt>Statistic</tt> for all messages received.
+	 * <tt>Statistid</tt> for all messages received.
 	 */
-	pualic stbtic final Statistic ALL_MESSAGES =
-		new ReceivedMessageStatBytes();
+	pualid stbtic final Statistic ALL_MESSAGES =
+		new RedeivedMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for all UPD messages received.
+	 * <tt>Statistid</tt> for all UPD messages received.
 	 */
-	pualic stbtic final Statistic UDP_ALL_MESSAGES =
-		new ReceivedMessageStatBytes();
+	pualid stbtic final Statistic UDP_ALL_MESSAGES =
+		new RedeivedMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for all TCP messages received.
+	 * <tt>Statistid</tt> for all TCP messages received.
 	 */
-	pualic stbtic final Statistic TCP_ALL_MESSAGES =
-		new ReceivedMessageStatBytes();
+	pualid stbtic final Statistic TCP_ALL_MESSAGES =
+		new RedeivedMessageStatBytes();
 		
     /**
-     * <tt>Statistic</tt> for all Multicast messages recieved.
+     * <tt>Statistid</tt> for all Multicast messages recieved.
      */
-    pualic stbtic final Statistic MULTICAST_ALL_MESSAGES =
-        new ReceivedMessageStatBytes();		
+    pualid stbtic final Statistic MULTICAST_ALL_MESSAGES =
+        new RedeivedMessageStatBytes();		
 
 	/**
-	 * <tt>Statistic</tt> for all filtered messages.
+	 * <tt>Statistid</tt> for all filtered messages.
 	 */
-	pualic stbtic final Statistic ALL_FILTERED_MESSAGES =
-		new ReceivedMessageStatBytes();
+	pualid stbtic final Statistic ALL_FILTERED_MESSAGES =
+		new RedeivedMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for all duplicate queries, in bytes.
+	 * <tt>Statistid</tt> for all duplicate queries, in bytes.
 	 */
-	pualic stbtic final Statistic ALL_DUPLICATE_QUERIES =
-		new ReceivedMessageStatBytes();
+	pualid stbtic final Statistic ALL_DUPLICATE_QUERIES =
+		new RedeivedMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pings received over UDP.
+	 * <tt>Statistid</tt> for Gnutella pings received over UDP.
 	 */
-	pualic stbtic final Statistic UDP_PING_REQUESTS = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_PING_REQUESTS = 
+	    new UDPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pings received over TCP.
+	 * <tt>Statistid</tt> for Gnutella pings received over TCP.
 	 */
-	pualic stbtic final Statistic TCP_PING_REQUESTS = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_PING_REQUESTS = 
+	    new TCPRedeivedMessageStat();
 	    
     /**
-     * <tt>Statistic</tt> for Gnutella pings recieved over Multicast.
+     * <tt>Statistid</tt> for Gnutella pings recieved over Multicast.
      */
-    pualic stbtic final Statistic MULTICAST_PING_REQUESTS =
-        new MulticastReceivedMessageStat();
+    pualid stbtic final Statistic MULTICAST_PING_REQUESTS =
+        new MultidastReceivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pongs received over UDP.
+	 * <tt>Statistid</tt> for Gnutella pongs received over UDP.
 	 */
-	pualic stbtic final Statistic UDP_PING_REPLIES = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_PING_REPLIES = 
+	    new UDPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pongs received over TCP.
+	 * <tt>Statistid</tt> for Gnutella pongs received over TCP.
 	 */
-	pualic stbtic final Statistic TCP_PING_REPLIES = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_PING_REPLIES = 
+	    new TCPRedeivedMessageStat();
 	    
     /**
-     * <tt>Statistic</tt> for Gnutella pongs recieved over Multicast.
+     * <tt>Statistid</tt> for Gnutella pongs recieved over Multicast.
      */
-    pualic stbtic final Statistic MULTICAST_PING_REPLIES =
-        new MulticastReceivedMessageStat();	    
+    pualid stbtic final Statistic MULTICAST_PING_REPLIES =
+        new MultidastReceivedMessageStat();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query requests received over 
+	 * <tt>Statistid</tt> for Gnutella query requests received over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_QUERY_REQUESTS = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_QUERY_REQUESTS = 
+	    new UDPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query requests received over 
+	 * <tt>Statistid</tt> for Gnutella query requests received over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_QUERY_REQUESTS = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_QUERY_REQUESTS = 
+	    new TCPRedeivedMessageStat();
 	    
     /**
-     * <tt>Statistic</tt> for Gnutella query requests recieved over
-     * Multicast.
+     * <tt>Statistid</tt> for Gnutella query requests recieved over
+     * Multidast.
      */
-    pualic stbtic final Statistic MULTICAST_QUERY_REQUESTS =
-        new MulticastReceivedMessageStat();	    
+    pualid stbtic final Statistic MULTICAST_QUERY_REQUESTS =
+        new MultidastReceivedMessageStat();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query replies received over 
+	 * <tt>Statistid</tt> for Gnutella query replies received over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_QUERY_REPLIES = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_QUERY_REPLIES = 
+	    new UDPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query replies received over 
+	 * <tt>Statistid</tt> for Gnutella query replies received over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_QUERY_REPLIES = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_QUERY_REPLIES = 
+	    new TCPRedeivedMessageStat();
 	    
     /**
-     * <tt>Statistic</tt> for Gnutella query replies recieved over
-     * Multicast.
+     * <tt>Statistid</tt> for Gnutella query replies recieved over
+     * Multidast.
      */
-    pualic stbtic final Statistic MULTICAST_QUERY_REPLIES =
-        new MulticastReceivedMessageStat();	    
+    pualid stbtic final Statistic MULTICAST_QUERY_REPLIES =
+        new MultidastReceivedMessageStat();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella push requests received over 
+	 * <tt>Statistid</tt> for Gnutella push requests received over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_PUSH_REQUESTS = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_PUSH_REQUESTS = 
+	    new UDPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella push requests received over 
+	 * <tt>Statistid</tt> for Gnutella push requests received over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_PUSH_REQUESTS = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_PUSH_REQUESTS = 
+	    new TCPRedeivedMessageStat();
 	    
     /**
-     * <tt>Statistic</tt> for Gnutella push requests received over
-     * Multicast
+     * <tt>Statistid</tt> for Gnutella push requests received over
+     * Multidast
      */
-    pualic stbtic final Statistic MULTICAST_PUSH_REQUESTS =
-        new MulticastReceivedMessageStat();
+    pualid stbtic final Statistic MULTICAST_PUSH_REQUESTS =
+        new MultidastReceivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella route table messages received 
+	 * <tt>Statistid</tt> for Gnutella route table messages received 
 	 * over UDP.
 	 */
-	pualic stbtic final Statistic UDP_ROUTE_TABLE_MESSAGES = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_ROUTE_TABLE_MESSAGES = 
+	    new UDPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella reset route table messages received 
+	 * <tt>Statistid</tt> for Gnutella reset route table messages received 
 	 * over TCP.
 	 */
-	pualic stbtic final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new TCPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella patch route table messages received 
+	 * <tt>Statistid</tt> for Gnutella patch route table messages received 
 	 * over TCP.
 	 */
-	pualic stbtic final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	    new TCPRedeivedMessageStat();
 	    
     /**
-     * <tt>Statistic</tt> for Gnutella route table messages received
-     * over Multicast.
+     * <tt>Statistid</tt> for Gnutella route table messages received
+     * over Multidast.
      */
-    pualic stbtic final Statistic MULTICAST_ROUTE_TABLE_MESSAGES =
-        new MulticastReceivedMessageStat();
+    pualid stbtic final Statistic MULTICAST_ROUTE_TABLE_MESSAGES =
+        new MultidastReceivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella filtered messages received 
+	 * <tt>Statistid</tt> for Gnutella filtered messages received 
 	 * over UDP.
 	 */
-	pualic stbtic final Statistic UDP_FILTERED_MESSAGES = 
-	    new FilteredReceivedMessageStat();
+	pualid stbtic final Statistic UDP_FILTERED_MESSAGES = 
+	    new FilteredRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella filtered messages received 
+	 * <tt>Statistid</tt> for Gnutella filtered messages received 
 	 * over TCP.
 	 */
-	pualic stbtic final Statistic TCP_FILTERED_MESSAGES = 
-	    new FilteredReceivedMessageStat();
+	pualid stbtic final Statistic TCP_FILTERED_MESSAGES = 
+	    new FilteredRedeivedMessageStat();
 	    
     /**
-     * <tt>Statistic</tt> for Gnutella filter messages recieved
-     * over Multicast.
+     * <tt>Statistid</tt> for Gnutella filter messages recieved
+     * over Multidast.
      */
-    pualic stbtic final Statistic MULTICAST_FILTERED_MESSAGES =
-        new FilteredReceivedMessageStat();
+    pualid stbtic final Statistic MULTICAST_FILTERED_MESSAGES =
+        new FilteredRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for duplicate Gnutella queries received 
+	 * <tt>Statistid</tt> for duplicate Gnutella queries received 
 	 * over UDP.
 	 */	
-	pualic stbtic final Statistic UDP_DUPLICATE_QUERIES =
-		new DuplicateQueriesReceivedMessageStat();
+	pualid stbtic final Statistic UDP_DUPLICATE_QUERIES =
+		new DuplidateQueriesReceivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for duplicate Gnutella queries received 
+	 * <tt>Statistid</tt> for duplicate Gnutella queries received 
 	 * over TCP.
 	 */	
-	pualic stbtic final Statistic TCP_DUPLICATE_QUERIES =
-		new DuplicateQueriesReceivedMessageStat();
+	pualid stbtic final Statistic TCP_DUPLICATE_QUERIES =
+		new DuplidateQueriesReceivedMessageStat();
 		
     /**
-     * <tt>Statistic</tt> for duplicate Gnutella queries received
-     * over Multicast
+     * <tt>Statistid</tt> for duplicate Gnutella queries received
+     * over Multidast
      */
-    pualic stbtic final Statistic MULTICAST_DUPLICATE_QUERIES =
-        new DuplicateQueriesReceivedMessageStat();
+    pualid stbtic final Statistic MULTICAST_DUPLICATE_QUERIES =
+        new DuplidateQueriesReceivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella hops flow messages received over 
+	 * <tt>Statistid</tt> for Gnutella hops flow messages received over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_HOPS_FLOW = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_HOPS_FLOW = 
+	    new TCPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella meta-vendor messages received over 
+	 * <tt>Statistid</tt> for Gnutella meta-vendor messages received over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_MESSAGES_SUPPORTED = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_MESSAGES_SUPPORTED = 
+	    new TCPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella TCP ConnectBack messages received over 
+	 * <tt>Statistid</tt> for Gnutella TCP ConnectBack messages received over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_TCP_CONNECTBACK = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_TCP_CONNECTBACK = 
+	    new TCPRedeivedMessageStat();
 	    
 	/**
-	 * <tt>Statistic</tt> for Gnutella UDP ConnectBack received over 
+	 * <tt>Statistid</tt> for Gnutella UDP ConnectBack received over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_UDP_CONNECTBACK = 
-	    new TCPReceivedMessageStat();
+	pualid stbtic final Statistic TCP_UDP_CONNECTBACK = 
+	    new TCPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella ReplyNumber VM received over 
+	 * <tt>Statistid</tt> for Gnutella ReplyNumber VM received over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_REPLY_NUMBER = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_REPLY_NUMBER = 
+	    new UDPRedeivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella LimeACK VM received over 
+	 * <tt>Statistid</tt> for Gnutella LimeACK VM received over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_LIME_ACK = 
-	    new UDPReceivedMessageStat();
+	pualid stbtic final Statistic UDP_LIME_ACK = 
+	    new UDPRedeivedMessageStat();
 
 }

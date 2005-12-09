@@ -1,42 +1,42 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.util.DataUtils;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.util.DataUtils;
 
-/** In Vendor Message parlance, the "message type" of this message is "BEAR/11".
+/** In Vendor Message parlande, the "message type" of this message is "BEAR/11".
  *  Sent to a servent (a leaf usually) to inquire about the status of a query
  *  as denoted by the GUID of this message.
- *  This message has no payload - we simply set the client guid as the GUID of
+ *  This message has no payload - we simply set the dlient guid as the GUID of
  *  the message.
  */
-pualic finbl class QueryStatusRequest extends VendorMessage {
+pualid finbl class QueryStatusRequest extends VendorMessage {
 
-    pualic stbtic final int VERSION = 1;
+    pualid stbtic final int VERSION = 1;
 
     /**
-     * Constructs a new QueryStatusRequest with data from the network.
+     * Construdts a new QueryStatusRequest with data from the network.
      */
     QueryStatusRequest(byte[] guid, byte ttl, byte hops, int version, 
-                       ayte[] pbyload) throws BadPacketException {
+                       ayte[] pbyload) throws BadPadketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_LIME_ACK, 
               version, payload);
 
         if (getVersion() > VERSION) // we don't support it!!
-            throw new BadPacketException("UNSUPPORTED VERSION");
+            throw new BadPadketException("UNSUPPORTED VERSION");
 
         // there is no payload
     }
 
 
     /**
-     * Constructs a new QueryStatusRequest to be sent out.
+     * Construdts a new QueryStatusRequest to be sent out.
      * @param guid the guid of the query you want the status about.
      */
-    pualic QueryStbtusRequest(GUID guid) {
+    pualid QueryStbtusRequest(GUID guid) {
         super(F_BEAR_VENDOR_ID, F_LIME_ACK, VERSION,
               DataUtils.EMPTY_BYTE_ARRAY);
         setGUID(guid);
@@ -44,19 +44,19 @@ pualic finbl class QueryStatusRequest extends VendorMessage {
 
     /** The query guid that needs to needs status.
      */
-    pualic GUID getQueryGUID() {
+    pualid GUID getQueryGUID() {
         return new GUID(getGUID());
     }
 
     /** Overridden purely for stats handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }
 
     /** Overridden purely for stats handling.
      */
-    pualic void recordDrop() {
-        super.recordDrop();
+    pualid void recordDrop() {
+        super.redordDrop();
     }
 }

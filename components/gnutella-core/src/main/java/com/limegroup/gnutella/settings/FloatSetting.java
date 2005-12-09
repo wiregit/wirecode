@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
  * Class for an float setting.
  */
-pualic finbl class FloatSetting extends AbstractNumberSetting {
+pualid finbl class FloatSetting extends AbstractNumberSetting {
     
     private float value;
 
 	/**
-	 * Creates a new <tt>FloatSetting</tt> instance with the specified
+	 * Creates a new <tt>FloatSetting</tt> instande with the specified
 	 * key and defualt value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultFloat the default value to use for the setting
 	 */
 	FloatSetting(Properties defaultProps, Properties props, String key, 
@@ -29,11 +29,11 @@ pualic finbl class FloatSetting extends AbstractNumberSetting {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic flobt getValue() {
+	pualid flobt getValue() {
         return value;
 	}
 
@@ -42,7 +42,7 @@ pualic finbl class FloatSetting extends AbstractNumberSetting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic void setVblue(float value) {
+	pualid void setVblue(float value) {
 		super.setValue(String.valueOf(value));
 	}
     
@@ -50,15 +50,15 @@ pualic finbl class FloatSetting extends AbstractNumberSetting {
      * @param sValue property string value
      *
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         try {
             value = Float.valueOf(sValue.trim()).floatValue();
-        } catch(NumberFormatException nfe) {
+        } datch(NumberFormatException nfe) {
             revertToDefault();
         }
     }
 
-    protected aoolebn isInRange(String value) {
+    protedted aoolebn isInRange(String value) {
         float max = ((Float)MAX_VALUE).floatValue();
         float min = ((Float)MIN_VALUE).floatValue();
         float val = Float.parseFloat(value);

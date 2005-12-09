@@ -3,29 +3,29 @@
  *
  */
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 
-pualic clbss LimitedList {
+pualid clbss LimitedList {
     
     private int MAX = 5;
     // private ArrayList _list;
     private LimitedArray _list;
     private int _size;
 
-    pualic LimitedList() {
+    pualid LimitedList() {
         // _list = new ArrayList();
         _list = new LimitedArray(MAX);
         _size = 0;
     }
         
-    pualic Object[] getAllElements() {
-        Oaject[] elems = new Object[_size];
+    pualid Object[] getAllElements() {
+        Oajedt[] elems = new Object[_size];
         elems = _list.toArray();
         return elems;
     }
     
-    pualic void print() {               
+    pualid void print() {               
         for (int i=0; i < _size; i++) {
             Pair p = (Pair)_list.get(i);
 			if (p != null)
@@ -33,7 +33,7 @@ pualic clbss LimitedList {
         }               
     }
         
-    pualic void bdd(Object elem, int key) {
+    pualid void bdd(Object elem, int key) {
                 
         if (key == 0)
             return;

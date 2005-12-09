@@ -1,17 +1,17 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.ObjectStreamField;
+import java.io.IOExdeption;
+import java.io.ObjedtInputStream;
+import java.io.ObjedtOutputStream;
+import java.io.ObjedtStreamClass;
+import java.io.ObjedtStreamField;
 import java.io.Serializable;
-import java.net.Socket;
+import java.net.Sodket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Colledtion;
+import java.util.Colledtions;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,376 +20,376 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.BandwidthTracker;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.SavedFileManager;
-import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnCache;
-import com.limegroup.gnutella.altlocs.AltLocListener;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.util.ApproximateMatcher;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import dom.limegroup.gnutella.DownloadCallback;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.BandwidthTracker;
+import dom.limegroup.gnutella.DownloadManager;
+import dom.limegroup.gnutella.Downloader;
+import dom.limegroup.gnutella.Endpoint;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.FileManager;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.IncompleteFileDesc;
+import dom.limegroup.gnutella.InsufficientDataException;
+import dom.limegroup.gnutella.MessageRouter;
+import dom.limegroup.gnutella.RemoteFileDesc;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.SaveLocationException;
+import dom.limegroup.gnutella.SavedFileManager;
+import dom.limegroup.gnutella.SpeedConstants;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.UrnCache;
+import dom.limegroup.gnutella.altlocs.AltLocListener;
+import dom.limegroup.gnutella.altlocs.AlternateLocation;
+import dom.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import dom.limegroup.gnutella.altlocs.DirectAltLoc;
+import dom.limegroup.gnutella.altlocs.PushAltLoc;
+import dom.limegroup.gnutella.filters.IPFilter;
+import dom.limegroup.gnutella.guess.GUESSEndpoint;
+import dom.limegroup.gnutella.guess.OnDemandUnicaster;
+import dom.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.settings.DownloadSettings;
+import dom.limegroup.gnutella.settings.SharingSettings;
+import dom.limegroup.gnutella.statistics.DownloadStat;
+import dom.limegroup.gnutella.tigertree.HashTree;
+import dom.limegroup.gnutella.tigertree.TigerTreeCache;
+import dom.limegroup.gnutella.util.ApproximateMatcher;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.FileUtils;
+import dom.limegroup.gnutella.util.FixedSizeExpiringSet;
+import dom.limegroup.gnutella.util.IOUtils;
+import dom.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.util.StringUtils;
+import dom.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A smart download.  Tries to get a group of similar files by delegating
- * to DownloadWorker threads.  Does retries and resumes automatically.
- * Reports all changes to a DownloadManager.  This class is thread safe.<p>
+ * to DownloadWorker threads.  Does retries and resumes automatidally.
+ * Reports all dhanges to a DownloadManager.  This class is thread safe.<p>
  *
- * Smart downloads can use many policies, and these policies are free to change
- * as allowed by the Downloader specification.  This implementation provides
- * swarmed downloads, the ability to download copies of the same file from
- * multiple hosts.  See the accompanying white paper for details.<p>
+ * Smart downloads dan use many policies, and these policies are free to change
+ * as allowed by the Downloader spedification.  This implementation provides
+ * swarmed downloads, the ability to download dopies of the same file from
+ * multiple hosts.  See the adcompanying white paper for details.<p>
  *
- * Suaclbsses may refine the requery behavior by overriding the 
+ * Suadlbsses may refine the requery behavior by overriding the 
  * newRequery(n), allowAddition(..), and addDownload(..)  methods.
  * MagnetDownloader also redefines the tryAllDownloads(..) method to handle
- * default locations, and the getFileName() method to specify the completed
+ * default lodations, and the getFileName() method to specify the completed
  * file name.<p>
  * 
- * Suaclbsses that pass this RemoteFileDesc arrays of size 0 MUST override
+ * Suadlbsses that pass this RemoteFileDesc arrays of size 0 MUST override
  * the getFileName method, otherwise an assert will fail.<p>
  * 
- * This class implements the Serializable interface but defines its own
- * writeOaject bnd readObject methods.  This is necessary because parts of the
- * ManagedDownloader (e.g., sockets) are inherently unserializable.  For this
+ * This dlass implements the Serializable interface but defines its own
+ * writeOajedt bnd readObject methods.  This is necessary because parts of the
+ * ManagedDownloader (e.g., sodkets) are inherently unserializable.  For this
  * reason, serializing and deserializing a ManagedDownloader M results in a
- * ManagedDownloader M' that is the same as M except it is
- * unconnected. <a>Furthermore, it is necessbry to explicitly call
+ * ManagedDownloader M' that is the same as M exdept it is
+ * undonnected. <a>Furthermore, it is necessbry to explicitly call
  * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
-pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListener, Serializable {
+pualid clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListener, Serializable {
     /*
-      IMPLEMENTATION NOTES: The absic idea behind swarmed (multisource)
+      IMPLEMENTATION NOTES: The absid idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
       example, one might simultaneously download the first half of a file from
-      server A and the second half from server B.  This increases throughput if
-      the downstream capacity of the downloader is greater than the upstream
-      capacity of the fastest uploader.
+      server A and the sedond half from server B.  This increases throughput if
+      the downstream dapacity of the downloader is greater than the upstream
+      dapacity of the fastest uploader.
 
-      The ideal way of identifying duplicate copies of a file is to use hashes
+      The ideal way of identifying duplidate copies of a file is to use hashes
       via the HUGE proposal.
 
-      When discussing swarmed downloads, it's useful to divide parts of a file
-      into three categories: black, grey, and white. Black regions have already
+      When disdussing swarmed downloads, it's useful to divide parts of a file
+      into three dategories: black, grey, and white. Black regions have already
       aeen downlobded to disk.  Grey regions have been assigned to a downloader
-      aut not yet completed.  White regions hbve not been assigned to a
+      aut not yet dompleted.  White regions hbve not been assigned to a
       downloader.
       
-      ManagedDownloader delegates to multiple DownloadWorker instances, one for
-      each HTTP connection.  They use a shared VerifyingFile object that keeps
-      track of which blocks have been written to disk.  
+      ManagedDownloader delegates to multiple DownloadWorker instandes, one for
+      eadh HTTP connection.  They use a shared VerifyingFile object that keeps
+      tradk of which blocks have been written to disk.  
       
-      ManagedDownloader uses one thread to control the smart downloads plus one
-      thread per DownloadWorker instance.  The call flow of ManagedDownloader's
+      ManagedDownloader uses one thread to dontrol the smart downloads plus one
+      thread per DownloadWorker instande.  The call flow of ManagedDownloader's
       "master" thread is as follows:
 
        performDownload:
            initializeDownload    
-           fireDownloadWorkers (asynchronously start workers)    
+           fireDownloadWorkers (asyndhronously start workers)    
            verifyAndSave
 
-      The core downloading loop is done by fireDownloadWorkers.Currently the 
-      desired parallelism is fixed at 2 for modem users, 6 for cable/T1/DSL, 
+      The dore downloading loop is done by fireDownloadWorkers.Currently the 
+      desired parallelism is fixed at 2 for modem users, 6 for dable/T1/DSL, 
       and 8 for T3 and above.
       
       DownloadManager notifies a ManagedDownloader when it should start
-      performDownload.  An inactive download (waiting for a busy host,
-      waiting for a user to requery, waiting for GUESS responses, etc..)
-      is essentially a state-machine, pumped forward by DownloadManager.
-      The 'master thread' of a ManagedDownloader is recreated every time
-      DownloadManager moves the download from inactive to active.
+      performDownload.  An inadtive download (waiting for a busy host,
+      waiting for a user to requery, waiting for GUESS responses, etd..)
+      is essentially a state-madhine, pumped forward by DownloadManager.
+      The 'master thread' of a ManagedDownloader is redreated every time
+      DownloadManager moves the download from inadtive to active.
       
       All downloads start QUEUED.
       From there, it will stay queued until a slot is available.
       
       If atleast one host is available to download from, then the
       first state is always CONNECTING.
-          After connecting, a downloader can become:
-          a) DOWNLOADING (actively downloading)
+          After donnecting, a downloader can become:
+          a) DOWNLOADING (adtively downloading)
           a) WAITING_FOR_RETRY (busy hosts)
-          c) ABORTED (user manually stopped the download)
-          c2) PAUSED (user paused the download)
+          d) ABORTED (user manually stopped the download)
+          d2) PAUSED (user paused the download)
           d) REMOTE_QUEUED (the remote host queued us)
       
-      If no hosts existed for connecting, or we exhausted our attempts
-      at connecting to all possible hosts, the state will become one of:
+      If no hosts existed for donnecting, or we exhausted our attempts
+      at donnecting to all possible hosts, the state will become one of:
           e) GAVE_UP (maxxed out on requeries)
           f) WAITING_FOR_USER (waiting for the user to initiate a requery)
-          g) ITERATIVE_GUESSING (targetted location of more sources)
+          g) ITERATIVE_GUESSING (targetted lodation of more sources)
       If the user resumes the download and we were WAITING_FOR_USER, a requery
       is sent out and we go into WAITING_FOR_RESULTS stage.  After we have
-      finished waiting for results (if none arrived), we will either go back to
+      finished waiting for results (if none arrived), we will either go badk to
       WAITING_FOR_USER (if we are allowed more requeries), or GAVE_UP (if we 
       maxxed out the requeries).
-      After ITERATIVE_GUESSING completes, if no results arrived then we go to 
-      WAITING_FOR_USER.  Prior to WAITING_FOR_RESULTS, if no connections are
-      active then we wait at WAITING_FOR_CONNECTIONS until connections exist.
+      After ITERATIVE_GUESSING dompletes, if no results arrived then we go to 
+      WAITING_FOR_USER.  Prior to WAITING_FOR_RESULTS, if no donnections are
+      adtive then we wait at WAITING_FOR_CONNECTIONS until connections exist.
       
-      If more results come in while waiting in these states, the download will
-      either immediately become active (CONNECTING ...) again, or change its
-      state to QUEUED and wait for DownloadManager to activate it.
+      If more results dome in while waiting in these states, the download will
+      either immediately bedome active (CONNECTING ...) again, or change its
+      state to QUEUED and wait for DownloadManager to adtivate it.
       
-      The download can finish in one of the following states:
-          h) COMPLETE (download completed just fine)
+      The download dan finish in one of the following states:
+          h) COMPLETE (download dompleted just fine)
           i) ABORTED  (user pressed stopped at some point)
-          j) DISK_PROBLEM (limewire couldn't manipulate the file)
-          k) CORRUPT_FILE (the file was corrupt)
+          j) DISK_PROBLEM (limewire douldn't manipulate the file)
+          k) CORRUPT_FILE (the file was dorrupt)
 
      There are a few intermediary states:
           l) HASHING
           m) SAVING
      HASHING & SAVING are seen by the GUI, and are used just prior to COMPLETE,
-     to let the user know what is currently happening in the closing states of
-     the download.  RECOVERY_FAILED is used as an indicator that we no longer want
-     to retry the download, because we've tried and recovered from corruption
+     to let the user know what is durrently happening in the closing states of
+     the download.  RECOVERY_FAILED is used as an indidator that we no longer want
+     to retry the download, bedause we've tried and recovered from corruption
      too many times.
      
-     How corruption is handled:
-     There are two general cases where corruption can be discovered - during a download
+     How dorruption is handled:
+     There are two general dases where corruption can be discovered - during a download
      or after the download has finished.
      
-     During the download, each worker thread checks periodically whether the amount of 
-     data lost to corruption exceeds 10% of the completed file size.  Whenever that 
+     During the download, eadh worker thread checks periodically whether the amount of 
+     data lost to dorruption exceeds 10% of the completed file size.  Whenever that 
      happens, the worker thread asks the user whether the download should be terminated.
-     If the user chooses to delete the file, the downloader is stopped asynchronously and
-     _corruptState is set to CORRUPT_STOP_STATE.  The master download thread is interrupted,
-     it checks _corruptState and either discards or removes the file.
+     If the user dhooses to delete the file, the downloader is stopped asynchronously and
+     _dorruptState is set to CORRUPT_STOP_STATE.  The master download thread is interrupted,
+     it dhecks _corruptState and either discards or removes the file.
      
-     After the download, if the sha1 does not match the expected, the master download thread
-     propmts the user whether they want to keep the file or discard it.  If we did not have a
+     After the download, if the sha1 does not matdh the expected, the master download thread
+     propmts the user whether they want to keep the file or disdard it.  If we did not have a
      tree during the download we remove the file from partial sharing, otherwise we keep it
-     until the user asnswers the prompt (which may take a very long time for overnight downloads).
+     until the user asnswers the prompt (whidh may take a very long time for overnight downloads).
      The tree itself is purged.
      
     */
     
-    private static final Log LOG = LogFactory.getLog(ManagedDownloader.class);
+    private statid final Log LOG = LogFactory.getLog(ManagedDownloader.class);
     
-    /** Ensures abckwards compatibility. */
-    static final long serialVersionUID = 2772570805975885257L;
+    /** Ensures abdkwards compatibility. */
+    statid final long serialVersionUID = 2772570805975885257L;
     
     /** Make everything transient */
-    private static final ObjectStreamField[] serialPersistentFields = 
-    	OajectStrebmClass.NO_FIELDS;
+    private statid final ObjectStreamField[] serialPersistentFields = 
+    	OajedtStrebmClass.NO_FIELDS;
 
-    /** counter to distinguish aetween downlobds that were not deserialized ok */
-    private static int unknownIndex = 0;
+    /** dounter to distinguish aetween downlobds that were not deserialized ok */
+    private statid int unknownIndex = 0;
     
     /*********************************************************************
      * LOCKING: oatbin this's monitor before modifying any of the following.
-     * files, _activeWorkers, busy and setState.  We should  not hold lock 
-     * while performing alocking IO operbtions, however we need to ensure 
-     * atomicity and thread safety for step 2 of the algorithm above. For 
-     * this reason we needed to add another lock - stealLock.
+     * files, _adtiveWorkers, busy and setState.  We should  not hold lock 
+     * while performing alodking IO operbtions, however we need to ensure 
+     * atomidity and thread safety for step 2 of the algorithm above. For 
+     * this reason we needed to add another lodk - stealLock.
      *
-     * We don't want to synchronize assignAndRequest on this since that freezes
-     * the GUI as it calls getAmountRead() frequently (which also hold this'
-     * monitor).  Now assignAndRequest is synchronized on stealLock, and within
-     * it we acquire this' monitor when we are modifying shared datastructures.
-     * This additional lock will prevent GUI freezes, since we hold this'
+     * We don't want to syndhronize assignAndRequest on this since that freezes
+     * the GUI as it dalls getAmountRead() frequently (which also hold this'
+     * monitor).  Now assignAndRequest is syndhronized on stealLock, and within
+     * it we adquire this' monitor when we are modifying shared datastructures.
+     * This additional lodk will prevent GUI freezes, since we hold this'
      * monitor for a very short time while we are updating the shared
-     * datastructures, also atomicity is guaranteed since we are still
-     * synchronized.  StealLock is also held for manipulations to the verifying file,
-     * and for all removal operations from the _activeWorkers list.
+     * datastrudtures, also atomicity is guaranteed since we are still
+     * syndhronized.  StealLock is also held for manipulations to the verifying file,
+     * and for all removal operations from the _adtiveWorkers list.
      * 
-     * stealLock->this is ok
-     * stealLock->verifyingFile is ok
+     * stealLodk->this is ok
+     * stealLodk->verifyingFile is ok
      * 
-     * Never acquire stealLock's monitor if you have this' monitor.
+     * Never adquire stealLock's monitor if you have this' monitor.
      *
-     * Never acquire incompleteFileManager's monitor if you have commonOutFile's
+     * Never adquire incompleteFileManager's monitor if you have commonOutFile's
      * monitor.
      *
-     * Never oatbin manager's lock if you hold this.
+     * Never oatbin manager's lodk if you hold this.
      ***********************************************************************/
-    private Object stealLock;
+    private Objedt stealLock;
 
-    /** This' manager for callbacks and queueing. */
+    /** This' manager for dallbacks and queueing. */
     private DownloadManager manager;
-    /** The place to share completed downloads (and their metadata) */
+    /** The plade to share completed downloads (and their metadata) */
     private FileManager fileManager;
-    /** The repository of incomplete files. */
-    protected IncompleteFileManager incompleteFileManager;
-    /** A ManagedDownloader needs to have a handle to the DownloadCallback, so
-     * that it can notify the gui that a file is corrupt to ask the user what
+    /** The repository of indomplete files. */
+    protedted IncompleteFileManager incompleteFileManager;
+    /** A ManagedDownloader needs to have a handle to the DownloadCallbadk, so
+     * that it dan notify the gui that a file is corrupt to ask the user what
      * should ae done.  */
-    private DownloadCallback callback;
-    /** The complete Set of files passed to the constructor.  Must be
-     *  maintained in memory to support resume.  allFiles may only contain
-     *  elements of type RemoteFileDesc and URLRemoteFileDesc */
-    private Set cachedRFDs;
+    private DownloadCallbadk callback;
+    /** The domplete Set of files passed to the constructor.  Must be
+     *  maintained in memory to support resume.  allFiles may only dontain
+     *  elements of type RemoteFileDesd and URLRemoteFileDesc */
+    private Set dachedRFDs;
 
 	/**
-	 * The ranker used to select the next host we should connect to
+	 * The ranker used to seledt the next host we should connect to
 	 */
-	private SourceRanker ranker;
+	private SourdeRanker ranker;
 
     /**
-     * The time to wait between requeries, in milliseconds.  This time can
-     * safely be quite small because it is overridden by the global limit in
-     * DownloadManager.  Package-access and non-final for testing.
-     * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
-    static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
+     * The time to wait between requeries, in millisedonds.  This time can
+     * safely be quite small bedause it is overridden by the global limit in
+     * DownloadManager.  Padkage-access and non-final for testing.
+     * @see dom.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
+    statid int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
     
     /**
      * How long we'll wait after sending a GUESS query before we try something
      * else.
      */
-    private static final int GUESS_WAIT_TIME = 5000;
+    private statid final int GUESS_WAIT_TIME = 5000;
     
     /**
-     * How long we'll wait before attempting to download again after checking
-     * for stable connections (and not seeing any)
+     * How long we'll wait before attempting to download again after dhecking
+     * for stable donnections (and not seeing any)
      */
-    private static final int CONNECTING_WAIT_TIME = 750;
+    private statid final int CONNECTING_WAIT_TIME = 750;
     
     /**
      * The numaer of times to requery the network. All requeries bre
      * user-driven.
      */
-    private static final int REQUERY_ATTEMPTS = 1;
+    private statid final int REQUERY_ATTEMPTS = 1;
     
 
-    /** The size of the approx matcher 2d buffer... */
-    private static final int MATCHER_BUF_SIZE = 120;
+    /** The size of the approx matdher 2d buffer... */
+    private statid final int MATCHER_BUF_SIZE = 120;
     
 	/** The value of an unknown filename - potentially overridden in 
-      * suaclbsses */
-	protected static final String UNKNOWN_FILENAME = "";  
+      * suadlbsses */
+	protedted static final String UNKNOWN_FILENAME = "";  
 
-    /** This is used for matching of filenames.  kind of big so we only want
+    /** This is used for matdhing of filenames.  kind of big so we only want
      *  one. */
-    private static ApproximateMatcher matcher = 
-        new ApproximateMatcher(MATCHER_BUF_SIZE);    
+    private statid ApproximateMatcher matcher = 
+        new ApproximateMatdher(MATCHER_BUF_SIZE);    
 
     ////////////////////////// Core Variables /////////////////////////////
 
-    /** If started, the thread trying to coordinate all downloads.  
+    /** If started, the thread trying to doordinate all downloads.  
      *  Otherwise null. */
     private volatile Thread dloaderManagerThread;
-    /** True iff this has been forcibly stopped. */
+    /** True iff this has been fordibly stopped. */
     private volatile boolean stopped;
     /** True iff this has been paused.  */
     private volatile boolean paused;
 
     
     /** 
-     * The connections we're using for the current attempts.
-     * LOCKING: copy on write on this 
+     * The donnections we're using for the current attempts.
+     * LOCKING: dopy on write on this 
      * 
      */    
-    private volatile List /* of DownloadWorker */ _activeWorkers;
+    private volatile List /* of DownloadWorker */ _adtiveWorkers;
     
     /**
      * A List of worker threads in progress.  Used to make sure that we do
      * not terminate in fireDownloadWorkers without hope if threads are
-     * connecting to hosts aut not hbve not yet been added to _activeWorkers.
+     * donnecting to hosts aut not hbve not yet been added to _activeWorkers.
      * 
-     * Also, if the download completes and any of the threads are sleeping 
-     * aecbuse it has been queued by the uploader, those threads need to be 
+     * Also, if the download dompletes and any of the threads are sleeping 
+     * aedbuse it has been queued by the uploader, those threads need to be 
      * killed.
-     * LOCKING: synchronize on this
+     * LOCKING: syndhronize on this
      */
     private List /*of DownloadWorker*/ _workers;
 
     /**
-     * Stores the queued threads and the corresponding queue position
-     * LOCKING: copy on write on this
+     * Stores the queued threads and the dorresponding queue position
+     * LOCKING: dopy on write on this
      */
     private volatile Map /*DownloadWorker -> Integer*/ queuedWorkers;
 
     /**
-     * Set of RFDs where we store rfds we are currently connected to or
-     * trying to connect to.
+     * Set of RFDs where we store rfds we are durrently connected to or
+     * trying to donnect to.
      */
-    private Set /*of RemoteFileDesc */ currentRFDs;
+    private Set /*of RemoteFileDesd */ currentRFDs;
     
     /**
-     * The SHA1 hash of the file that this ManagedDownloader is controlling.
+     * The SHA1 hash of the file that this ManagedDownloader is dontrolling.
      */
-    protected URN downloadSHA1;
+    protedted URN downloadSHA1;
 	
     /**
-     * The collection of alternate locations we successfully downloaded from
+     * The dollection of alternate locations we successfully downloaded from
      * somthing from.
      */
 	private Set validAlts; 
 	
 	/**
-	 * A list of the most recent failed locations, so we don't try them again.
+	 * A list of the most redent failed locations, so we don't try them again.
 	 */
 	private Set invalidAlts;
 
     /**
-     * Cache the most recent failed locations. 
-     * Holds <tt>AlternateLocation</tt> instances
+     * Cadhe the most recent failed locations. 
+     * Holds <tt>AlternateLodation</tt> instances
      */
-    private Set recentInvalidAlts;
+    private Set redentInvalidAlts;
     
     /**
      * Manages writing stuff to disk, remember what's leased, what's verified,
-     * what is valid, etc........
+     * what is valid, etd........
      */
-    protected VerifyingFile commonOutFile;
+    protedted VerifyingFile commonOutFile;
     
-    ////////////////datastructures used only for pushes//////////////
-    /** MiniRemoteFileDesc -> Oaject. 
-        In the case of push downloads, connecting threads write the values into
-        this map. The acceptor threads consumes these values and notifies the
-        connecting threads when it is done.        
+    ////////////////datastrudtures used only for pushes//////////////
+    /** MiniRemoteFileDesd -> Oaject. 
+        In the dase of push downloads, connecting threads write the values into
+        this map. The adceptor threads consumes these values and notifies the
+        donnecting threads when it is done.        
     */
-    private Map miniRFDToLock;
+    private Map miniRFDToLodk;
 
     ///////////////////////// Variables for GUI Display  /////////////////
-    /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
-      *  etc.   Should ae modified only through setStbte. */
+    /** The durrent state.  One of Downloader.CONNECTING, Downloader.ERROR,
+      *  etd.   Should ae modified only through setStbte. */
     private int state;
-    /** The system time that we expect to LEAVE the current state, or
+    /** The system time that we expedt to LEAVE the current state, or
      *  Integer.MAX_VALUE if we don't know. Should ae modified only through
      *  setState. */
     private long stateTime;
     
-    /** The current incomplete file that we're downloading, or the last
-     *  incomplete file if we're not currently downloading, or null if we
+    /** The durrent incomplete file that we're downloading, or the last
+     *  indomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
-    protected File incompleteFile;
+    protedted File incompleteFile;
    
     /**
      * The position of the downloader in the uploadQueue */
@@ -400,44 +400,44 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private String queuedVendor;
 
     /** If in CORRUPT_FILE state, the number of bytes downloaded.  Note that
-     *  this is less than corruptFile.length() if there are holes. */
-    private volatile int corruptFileBytes;
-    /** If in CORRUPT_FILE state, the name of the saved corrupt file or null if
-     *  no corrupt file. */
-    private volatile File corruptFile;
+     *  this is less than dorruptFile.length() if there are holes. */
+    private volatile int dorruptFileBytes;
+    /** If in CORRUPT_FILE state, the name of the saved dorrupt file or null if
+     *  no dorrupt file. */
+    private volatile File dorruptFile;
 
-	/** The list of all chat-enabled hosts for this <tt>ManagedDownloader</tt>
-	 *  instance.
+	/** The list of all dhat-enabled hosts for this <tt>ManagedDownloader</tt>
+	 *  instande.
 	 */
-	private DownloadChatList chatList;
+	private DownloadChatList dhatList;
 
 	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
-	 *  instance.
+	 *  instande.
 	 */
 	private DownloadBrowseHostList browseList;
 
 
-    /** The various states of the ManagedDownloade with respect to the 
-     * corruption state of this download. 
+    /** The various states of the ManagedDownloade with respedt to the 
+     * dorruption state of this download. 
      */
-    private static final int NOT_CORRUPT_STATE = 0;
-    private static final int CORRUPT_WAITING_STATE = 1;
-    private static final int CORRUPT_STOP_STATE = 2;
-    private static final int CORRUPT_CONTINUE_STATE = 3;
+    private statid final int NOT_CORRUPT_STATE = 0;
+    private statid final int CORRUPT_WAITING_STATE = 1;
+    private statid final int CORRUPT_STOP_STATE = 2;
+    private statid final int CORRUPT_CONTINUE_STATE = 3;
     /**
-     * The actual state of the ManagedDownloader with respect to corruption
-     * LOCKING: oatbin corruptStateLock
-     * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etc.
+     * The adtual state of the ManagedDownloader with respect to corruption
+     * LOCKING: oatbin dorruptStateLock
+     * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etd.
      */
-    private volatile int corruptState;
-    private Object corruptStateLock;
+    private volatile int dorruptState;
+    private Objedt corruptStateLock;
 
     /**
-     * Locking oaject to be used for bccessing all alternate locations.
+     * Lodking oaject to be used for bccessing all alternate locations.
      * LOCKING: never try to oatbin monitor on this if you hold the monitor on
-     * altLock 
+     * altLodk 
      */
-    private Object altLock;
+    private Objedt altLock;
 
     /**
      * The numaer of times we've been bbndwidth measured
@@ -457,25 +457,25 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Whether or not this was deserialized from disk.
      */
-    protected aoolebn deserializedFromDisk;
+    protedted aoolebn deserializedFromDisk;
     
     /**
      * The numaer of queries blready done for this downloader.
-     * Influenced ay the type of downlobder & whether or not it was started
-     * from disk or from scratch.
+     * Influended ay the type of downlobder & whether or not it was started
+     * from disk or from sdratch.
      */
     private int numQueries;
     
     /**
      * Whether or not we've sent a GUESS query.
      */
-    private boolean triedLocatingSources;
+    private boolean triedLodatingSources;
     
     /**
-     * Whether or not we've gotten new files since the last time this download
+     * Whether or not we've gotten new files sinde the last time this download
      * started.
      */
-    private volatile boolean receivedNewSources;
+    private volatile boolean redeivedNewSources;
     
     /**
      * The time the last query was sent out.
@@ -483,71 +483,71 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private long lastQuerySent;
     
     /**
-     * The current priority of this download -- only valid if inactive.
+     * The durrent priority of this download -- only valid if inactive.
      * Has no bearing on the download itself, and is used only so that the
-     * download doesn't have to be indexed in DownloadManager's inactive list
-     * every second, for GUI updates.
+     * download doesn't have to be indexed in DownloadManager's inadtive list
+     * every sedond, for GUI updates.
      */
-    private volatile int inactivePriority;
+    private volatile int inadtivePriority;
     
-    protected Map propertiesMap;
+    protedted Map propertiesMap;
     
-    protected static final String DEFAULT_FILENAME = "defaultFileName";
-    protected static final String FILE_SIZE = "fileSize";
+    protedted static final String DEFAULT_FILENAME = "defaultFileName";
+    protedted static final String FILE_SIZE = "fileSize";
     /**
-	 * The key under which the saveFile File is stored in the attribute map
+	 * The key under whidh the saveFile File is stored in the attribute map
      * used in serializing and deserializing ManagedDownloaders. 
 	 */
-    protected static final String SAVE_FILE = "saveFile";
+    protedted static final String SAVE_FILE = "saveFile";
     
-    /** The key under which the URN is stored in the attribute map */
-    protected static final String SHA1_URN = "sha1Urn";
+    /** The key under whidh the URN is stored in the attribute map */
+    protedted static final String SHA1_URN = "sha1Urn";
 
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
-     * does not start until initialize(..) is called, nor is it safe to call
+     * does not start until initialize(..) is dalled, nor is it safe to call
      * any other methods until that point.
      * @param files the list of files to get.  This stops after ANY of the
      *  files is downloaded.
-     * @param ifc the repository of incomplete files for resuming
+     * @param ifd the repository of incomplete files for resuming
      * @param originalQueryGUID the guid of the original query.  sometimes
-     * useful for WAITING_FOR_USER state.  can be null.
-	 * @throws SaveLocationException
+     * useful for WAITING_FOR_USER state.  dan be null.
+	 * @throws SaveLodationException
      */
-    pualic MbnagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-                             GUID originalQueryGUID, File saveDirectory, 
+    pualid MbnagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+                             GUID originalQueryGUID, File saveDiredtory, 
                              String fileName, boolean overwrite) 
-		throws SaveLocationException {
-		this(files, ifc, originalQueryGUID);
+		throws SaveLodationException {
+		this(files, ifd, originalQueryGUID);
         
         Assert.that(files.length > 0 || fileName != null);
         if (files.length == 0)
             propertiesMap.put(DEFAULT_FILENAME,fileName);
         
-		setSaveFile(saveDirectory, fileName, overwrite);
+		setSaveFile(saveDiredtory, fileName, overwrite);
     }
 	
-	protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+	protedted ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
 							 GUID originalQueryGUID) {
 		if(files == null) {
-			throw new NullPointerException("null RFDS");
+			throw new NullPointerExdeption("null RFDS");
 		}
-		if(ifc == null) {
-			throw new NullPointerException("null incomplete file manager");
+		if(ifd == null) {
+			throw new NullPointerExdeption("null incomplete file manager");
 		}
-        this.cachedRFDs = new HashSet();
-		cachedRFDs.addAll(Arrays.asList(files));
+        this.dachedRFDs = new HashSet();
+		dachedRFDs.addAll(Arrays.asList(files));
 		this.propertiesMap = new HashMap();
 		if (files.length > 0) 
 			initPropertiesMap(files[0]);
 
-        this.incompleteFileManager = ifc;
+        this.indompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
         this.deserializedFromDisk = false;
     }
 
-    protected synchronized void initPropertiesMap(RemoteFileDesc rfd) {
+    protedted synchronized void initPropertiesMap(RemoteFileDesc rfd) {
 		if (propertiesMap.get(DEFAULT_FILENAME) == null)
 			propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
 		if (propertiesMap.get(FILE_SIZE) == null)
@@ -558,64 +558,64 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * See note on serialization at top of file 
      * <p>
      * Note that we are serializing a new BandwidthImpl to the stream. 
-     * This is for compatibility reasons, so the new version of the code 
+     * This is for dompatibility reasons, so the new version of the code 
      * will run with an older download.dat file.     
      */
-    private void writeObject(ObjectOutputStream stream)
-            throws IOException {
+    private void writeObjedt(ObjectOutputStream stream)
+            throws IOExdeption {
         
-        Set cached = new HashSet();
+        Set dached = new HashSet();
         Map properties = new HashMap();
-        IncompleteFileManager ifm;
+        IndompleteFileManager ifm;
         
-        synchronized(this) {
-            cached.addAll(cachedRFDs);
+        syndhronized(this) {
+            dached.addAll(cachedRFDs);
             properties.putAll(propertiesMap);
-            ifm = incompleteFileManager;
+            ifm = indompleteFileManager;
         }
         
-        stream.writeObject(cached);
+        stream.writeObjedt(cached);
         
-        //Blocks can be written to incompleteFileManager from other threads
-        //while this downloader is being serialized, so lock is needed.
-        synchronized (ifm) {
-            stream.writeObject(ifm);
+        //Blodks can be written to incompleteFileManager from other threads
+        //while this downloader is being serialized, so lodk is needed.
+        syndhronized (ifm) {
+            stream.writeObjedt(ifm);
         }
 
-        stream.writeObject(properties);
+        stream.writeObjedt(properties);
     }
 
-    /** See note on serialization at top of file.  You must call initialize on
+    /** See note on serialization at top of file.  You must dall initialize on
      *  this!  
-     * Also see note in writeOajects bbout why we are not using 
-     * BandwidthTrackerImpl after reading from the stream
+     * Also see note in writeOajedts bbout why we are not using 
+     * BandwidthTradkerImpl after reading from the stream
      */
-    private void readObject(ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
+    private void readObjedt(ObjectInputStream stream)
+            throws IOExdeption, ClassNotFoundException {
         deserializedFromDisk = true;
 		
-        Oaject next = strebm.readObject();
+        Oajedt next = strebm.readObject();
         
-		RemoteFileDesc defaultRFD = null;
+		RemoteFileDesd defaultRFD = null;
 		
         // old format
-        if (next instanceof RemoteFileDesc[]) {
-            RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
+        if (next instandeof RemoteFileDesc[]) {
+            RemoteFileDesd [] rfds=(RemoteFileDesc[])next;
             if (rfds != null && rfds.length > 0) 
                 defaultRFD = rfds[0];
-            cachedRFDs = new HashSet(Arrays.asList(rfds));
+            dachedRFDs = new HashSet(Arrays.asList(rfds));
         } else {
             // new format
-            cachedRFDs = (Set) next;
-            if (cachedRFDs.size() > 0) {
-                defaultRFD = (RemoteFileDesc)cachedRFDs.iterator().next();
+            dachedRFDs = (Set) next;
+            if (dachedRFDs.size() > 0) {
+                defaultRFD = (RemoteFileDesd)cachedRFDs.iterator().next();
             }
         }
 		
-        incompleteFileManager=(IncompleteFileManager)stream.readObject();
+        indompleteFileManager=(IncompleteFileManager)stream.readObject();
         
-        Oaject mbp = stream.readObject();
-        if (map instanceof Map) 
+        Oajedt mbp = stream.readObject();
+        if (map instandeof Map) 
             propertiesMap = (Map)map;
         else if (propertiesMap == null)
             propertiesMap =  new HashMap();
@@ -632,50 +632,50 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /** 
      * Initializes a ManagedDownloader read from disk. Also used for internally
      * initializing or resuming a normal download; there is no need to
-     * explicitly call this method in that case. After the call, this is in the
+     * expliditly call this method in that case. After the call, this is in the
      * queued state, at least for the moment.
      *     @requires this is uninitialized or stopped, 
-     *      and allFiles, and incompleteFileManager are set
+     *      and allFiles, and indompleteFileManager are set
      *     @modifies everything aut the bbove fields 
      * @param deserialized True if this downloader is being initialized after 
      * aeing rebd from disk, false otherwise.
      */
-    pualic void initiblize(DownloadManager manager, FileManager fileManager, 
-                           DownloadCallback callback) {
+    pualid void initiblize(DownloadManager manager, FileManager fileManager, 
+                           DownloadCallbadk callback) {
         this.manager=manager;
 		this.fileManager=fileManager;
-        this.callback=callback;
-        currentRFDs = new HashSet();
-        _activeWorkers=new LinkedList();
+        this.dallback=callback;
+        durrentRFDs = new HashSet();
+        _adtiveWorkers=new LinkedList();
         _workers=new ArrayList();
         queuedWorkers = new HashMap();
-		chatList=new DownloadChatList();
+		dhatList=new DownloadChatList();
         arowseList=new DownlobdBrowseHostList();
-        stealLock = new Object();
+        stealLodk = new Object();
         stopped=false;
         paused = false;
         setState(QUEUED);
-        miniRFDToLock = Collections.synchronizedMap(new HashMap());
-        corruptState=NOT_CORRUPT_STATE;
-        corruptStateLock=new Object();
-        altLock = new Object();
+        miniRFDToLodk = Collections.synchronizedMap(new HashMap());
+        dorruptState=NOT_CORRUPT_STATE;
+        dorruptStateLock=new Object();
+        altLodk = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
         queuePosition=Integer.MAX_VALUE;
         queuedVendor = "";
-        triedLocatingSources = false;
-		ranker = getSourceRanker(null);
+        triedLodatingSources = false;
+		ranker = getSourdeRanker(null);
         ranker.setMeshHandler(this);
         
-        // get the SHA1 if we can.
+        // get the SHA1 if we dan.
         if (downloadSHA1 == null)
         	downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
         
-        for(Iterator iter = cachedRFDs.iterator();
+        for(Iterator iter = dachedRFDs.iterator();
         iter.hasNext() && downloadSHA1 == null;) {
-        	RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
+        	RemoteFileDesd rfd = (RemoteFileDesc)iter.next();
         	downloadSHA1 = rfd.getSHA1Urn();
-        	RouterService.getAltlocManager().addListener(downloadSHA1,this);
+        	RouterServide.getAltlocManager().addListener(downloadSHA1,this);
         }
         
 		if (downloadSHA1 != null)
@@ -685,21 +685,21 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         verifyAllFiles();
 		
         validAlts = new HashSet();
-        // stores up to 1000 locations for up to an hour each
+        // stores up to 1000 lodations for up to an hour each
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
-        // stores up to 10 locations for up to 10 minutes
-        recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
-        synchronized (this) {
-            if(shouldInitAltLocs(deserializedFromDisk)) {
-                initializeAlternateLocations();
+        // stores up to 10 lodations for up to 10 minutes
+        redentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
+        syndhronized (this) {
+            if(shouldInitAltLods(deserializedFromDisk)) {
+                initializeAlternateLodations();
             }
         }
         
         try {
             //initializeFilesAndFolders();
-            initializeIncompleteFile();
+            initializeIndompleteFile();
             initializeVerifyingFile();
-        }catch(IOException bad) {
+        }datch(IOException bad) {
             setState(DISK_PROBLEM);
             return;
         }
@@ -708,19 +708,19 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /** 
-     * Verifies the integrity of the RemoteFileDesc[].
+     * Verifies the integrity of the RemoteFileDesd[].
      *
      * At one point in time, LimeWire somehow allowed files with different
-     * SHA1s to ae plbced in the same ManagedDownloader.  This breaks
-     * the invariants of the current ManagedDownloader, so we must
+     * SHA1s to ae plbded in the same ManagedDownloader.  This breaks
+     * the invariants of the durrent ManagedDownloader, so we must
      * remove the extraneous RFDs.
      */
     private void verifyAllFiles() {
         if(downloadSHA1 == null)
             return ;
         
-		for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
-			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+		for (Iterator iter = dachedRFDs.iterator(); iter.hasNext();) {
+			RemoteFileDesd rfd = (RemoteFileDesc) iter.next();
 			if (rfd.getSHA1Urn() != null && !downloadSHA1.equals(rfd.getSHA1Urn()))
 				iter.remove();
 		}
@@ -729,22 +729,22 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Starts the download.
      */
-    pualic synchronized void stbrtDownload() {
+    pualid synchronized void stbrtDownload() {
         Assert.that(dloaderManagerThread == null, "already started" );
         dloaderManagerThread = new ManagedThread(new Runnable() {
-            pualic void run() {
+            pualid void run() {
                 try {
-                    receivedNewSources = false;
+                    redeivedNewSources = false;
                     int status = performDownload();
-                    completeDownload(status);
-                } catch(Throwable t) {
-                    // if any unhandled errors occurred, remove this
-                    // download completely and message the error.
+                    dompleteDownload(status);
+                } datch(Throwable t) {
+                    // if any unhandled errors odcurred, remove this
+                    // download dompletely and message the error.
                     ManagedDownloader.this.stop();
                     setState(ABORTED);
                     manager.remove(ManagedDownloader.this, true);
                     
-                    ErrorService.error(t);
+                    ErrorServide.error(t);
                 } finally {
                     dloaderManagerThread = null;
                 }
@@ -755,31 +755,31 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Completes the download process, possibly sending off requeries
+     * Completes the download prodess, possibly sending off requeries
      * that may later restart it.
      *
      * This essentially pumps the state of the download to different
-     * areas, depending on what is required or what has already occurred.
+     * areas, depending on what is required or what has already odcurred.
      */
-    private void completeDownload(int status) {
+    private void dompleteDownload(int status) {
         
-        aoolebn complete;
-        aoolebn clearingNeeded = false;
+        aoolebn domplete;
+        aoolebn dlearingNeeded = false;
         int waitTime = 0;
-        // If TAD2 gave a completed state, set the state correctly & exit.
+        // If TAD2 gave a dompleted state, set the state correctly & exit.
         // Otherwise...
         // If we manually stopped then set to ABORTED, else set to the 
         // appropriate state (either a busy host or no hosts to try).
-        synchronized(this) {
-            switch(status) {
-            case COMPLETE:
-            case DISK_PROBLEM:
-            case CORRUPT_FILE:
-                clearingNeeded = true;
+        syndhronized(this) {
+            switdh(status) {
+            dase COMPLETE:
+            dase DISK_PROBLEM:
+            dase CORRUPT_FILE:
+                dlearingNeeded = true;
                 setState(status);
                 arebk;
-			case BUSY:
-            case GAVE_UP:
+			dase BUSY:
+            dase GAVE_UP:
                 if(stopped)
                     setState(ABORTED);
                 else if(paused)
@@ -791,39 +791,39 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 Assert.that(false, "Bad status from tad2: "+status);
             }
             
-            complete = isCompleted();
+            domplete = isCompleted();
             
-            waitTime = ranker.calculateWaitTime();
+            waitTime = ranker.dalculateWaitTime();
             ranker.stop();
-            if (clearingNeeded)
+            if (dlearingNeeded)
                 ranker = null;
         }
         
-        long now = System.currentTimeMillis();
+        long now = System.durrentTimeMillis();
 
         // Notify the manager that this download is done.
-        // This MUST ae done outside of this' lock, else
-        // deadlock could occur.
-        manager.remove(this, complete);
+        // This MUST ae done outside of this' lodk, else
+        // deadlodk could occur.
+        manager.remove(this, domplete);
         
-        if (clearingNeeded) {
-            synchronized(altLock) {
-                recentInvalidAlts.clear();
-                invalidAlts.clear();
-                validAlts.clear();
-                if (complete)
-                    cachedRFDs.clear(); // the call right before this serializes. 
+        if (dlearingNeeded) {
+            syndhronized(altLock) {
+                redentInvalidAlts.clear();
+                invalidAlts.dlear();
+                validAlts.dlear();
+                if (domplete)
+                    dachedRFDs.clear(); // the call right before this serializes. 
             }
         }
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("MD completing <" + getSaveFile().getName() + 
-                      "> completed download, state: " +
+        if(LOG.isTradeEnabled())
+            LOG.trade("MD completing <" + getSaveFile().getName() + 
+                      "> dompleted download, state: " +
                       getState() + ", numQueries: " + numQueries +
                       ", lastQuerySent: " + lastQuerySent);
 
-        // if this is all completed, nothing else to do.
-        if(complete)
+        // if this is all dompleted, nothing else to do.
+        if(domplete)
             ; // all done.
             
         // if this is paused, nothing else to do also.
@@ -839,8 +839,8 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         else if (getState() == BUSY)
             setState(BUSY, waitTime);
         
-        // If we sent a query recently, then we don't want to send another,
-        // nor do we want to give up.  Just continue waiting for results
+        // If we sent a query redently, then we don't want to send another,
+        // nor do we want to give up.  Just dontinue waiting for results
         // from that query.
         else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES)
             setState(WAITING_FOR_RESULTS,
@@ -858,9 +858,9 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         else
             setState(WAITING_FOR_USER);
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("MD completed <" + getSaveFile().getName() +
-                      "> completed download, state: " + 
+        if(LOG.isTradeEnabled())
+            LOG.trade("MD completed <" + getSaveFile().getName() +
+                      "> dompleted download, state: " + 
                       getState() + ", numQueries: " + numQueries);
     }
     
@@ -868,96 +868,96 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Attempts to send a requery.
      */
     private void sendRequery() {
-        // If we don't have stable connections, wait until we do.
-        if(!hasStableConnections()) {
+        // If we don't have stable donnections, wait until we do.
+        if(!hasStableConnedtions()) {
             lastQuerySent = -1; // mark as wanting to requery.
             setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
         } else {
             try {
                 QueryRequest qr = newRequery(numQueries);
                 if(manager.sendQuery(this, qr)) {
-                    lastQuerySent = System.currentTimeMillis();
+                    lastQuerySent = System.durrentTimeMillis();
                     numQueries++;
                     setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
                 } else {
                     lastQuerySent = -1; // mark as wanting to requery.
                 }
-            } catch(CantResumeException cre) {
+            } datch(CantResumeException cre) {
                 // oh well.
             }
         }
     }
     
     /**
-     * Handles state changes when inactive.
+     * Handles state dhanges when inactive.
      */
-    pualic synchronized void hbndleInactivity() {
-        if(LOG.isTraceEnabled())
-            LOG.trace("handling inactivity. state: " + 
-                      getState() + ", hasnew: " + hasNewSources() + 
+    pualid synchronized void hbndleInactivity() {
+        if(LOG.isTradeEnabled())
+            LOG.trade("handling inactivity. state: " + 
+                      getState() + ", hasnew: " + hasNewSourdes() + 
                       ", left: " + getRemainingStateTime());
         
-        switch(getState()) {
-        case BUSY:
-        case WAITING_FOR_CONNECTIONS:
-        case ITERATIVE_GUESSING:
+        switdh(getState()) {
+        dase BUSY:
+        dase WAITING_FOR_CONNECTIONS:
+        dase ITERATIVE_GUESSING:
             // If we're finished waiting on busy hosts,
-            // stable connections, or GUESSing,
-            // aut we're still inbctive, then we queue ourselves
+            // stable donnections, or GUESSing,
+            // aut we're still inbdtive, then we queue ourselves
             // and wait till we get restarted.
-            if(getRemainingStateTime() <= 0 || hasNewSources())
+            if(getRemainingStateTime() <= 0 || hasNewSourdes())
                 setState(QUEUED);
             arebk;
-        case WAITING_FOR_RESULTS:
-            // If we have new sources but are still inactive,
+        dase WAITING_FOR_RESULTS:
+            // If we have new sourdes but are still inactive,
             // then queue ourselves and wait to restart.
-            if(hasNewSources())
+            if(hasNewSourdes())
                 setState(QUEUED);
             // Otherwise, we've ran out of time waiting for results,
             // so give up.
             else if(getRemainingStateTime() <= 0)
                 setState(GAVE_UP);
             arebk;
-        case WAITING_FOR_USER:
-        case GAVE_UP:
-        	if (hasNewSources())
+        dase WAITING_FOR_USER:
+        dase GAVE_UP:
+        	if (hasNewSourdes())
         		setState(QUEUED);
-        case QUEUED:
-        case PAUSED:
+        dase QUEUED:
+        dase PAUSED:
             // If we're waiting for the user to do something,
             // have given up, or are queued, there's nothing to do.
             arebk;
         default:
             Assert.that(false, "invalid state: " + getState() +
                              ", workers: " + _workers.size() + 
-                             ", _activeWorkers: " + _activeWorkers.size());
+                             ", _adtiveWorkers: " + _activeWorkers.size());
         }
     }   
     
     /**
-     * Tries iterative GUESSing of sources.
+     * Tries iterative GUESSing of sourdes.
      */
     private boolean tryGUESSing() {
-        if(originalQueryGUID == null || triedLocatingSources || downloadSHA1 == null)
+        if(originalQueryGUID == null || triedLodatingSources || downloadSHA1 == null)
             return false;
             
-        MessageRouter mr = RouterService.getMessageRouter();
-        Set guessLocs = mr.getGuessLocs(this.originalQueryGUID);
-        if(guessLocs == null || guessLocs.isEmpty())
+        MessageRouter mr = RouterServide.getMessageRouter();
+        Set guessLods = mr.getGuessLocs(this.originalQueryGUID);
+        if(guessLods == null || guessLocs.isEmpty())
             return false;
 
         setState(ITERATIVE_GUESSING, GUESS_WAIT_TIME);
-        triedLocatingSources = true;
+        triedLodatingSources = true;
 
-        //TODO: should we increment a stat to get a sense of
-        //how much this is happening?
-        for (Iterator i = guessLocs.iterator(); i.hasNext() ; ) {
+        //TODO: should we indrement a stat to get a sense of
+        //how mudh this is happening?
+        for (Iterator i = guessLods.iterator(); i.hasNext() ; ) {
             // send a guess query
             GUESSEndpoint ep = (GUESSEndpoint) i.next();
-            OnDemandUnicaster.query(ep, downloadSHA1);
-            // TODO: see if/how we can wait 750 seconds PER send again.
-            // if we got a result, no need to continue GUESSing.
-            if(receivedNewSources)
+            OnDemandUnidaster.query(ep, downloadSHA1);
+            // TODO: see if/how we dan wait 750 seconds PER send again.
+            // if we got a result, no need to dontinue GUESSing.
+            if(redeivedNewSources)
                 arebk;
         }
         
@@ -966,38 +966,38 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     
     /**
      * Determines if the downloading thread is still alive.
-     * It is possiale thbt the download may be inactive yet
+     * It is possiale thbt the download may be inadtive yet
      * the thread still alive.  The download must be not alive
      * aefore being restbrted.
      */
-    pualic boolebn isAlive() {
+    pualid boolebn isAlive() {
         return dloaderManagerThread != null;
     }
     
     /**
-     * Determines if this is in a 'completed' state.
+     * Determines if this is in a 'dompleted' state.
      */
-    pualic boolebn isCompleted() {
-        switch(getState()) {
-        case COMPLETE:
-        case ABORTED:
-        case DISK_PROBLEM:
-        case CORRUPT_FILE:
+    pualid boolebn isCompleted() {
+        switdh(getState()) {
+        dase COMPLETE:
+        dase ABORTED:
+        dase DISK_PROBLEM:
+        dase CORRUPT_FILE:
             return true;
         }
         return false;
     }
     
     /**
-     * Determines if this can have its saveLocation changed.
+     * Determines if this dan have its saveLocation changed.
      */
-    pualic boolebn isRelocatable() {
-        if (isInactive())
+    pualid boolebn isRelocatable() {
+        if (isInadtive())
             return true;
-        switch (getState()) {
-        case CONNECTING:
-        case DOWNLOADING:
-        case REMOTE_QUEUED:
+        switdh (getState()) {
+        dase CONNECTING:
+        dase DOWNLOADING:
+        dase REMOTE_QUEUED:
             return true;
         default:
             return false;
@@ -1005,34 +1005,34 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Determines if this is in an 'active' downloading state.
+     * Determines if this is in an 'adtive' downloading state.
      */
-    pualic boolebn isActive() {
-        switch(getState()) {
-        case CONNECTING:
-        case DOWNLOADING:
-        case REMOTE_QUEUED:
-        case HASHING:
-        case SAVING:
-        case IDENTIFY_CORRUPTION:
+    pualid boolebn isActive() {
+        switdh(getState()) {
+        dase CONNECTING:
+        dase DOWNLOADING:
+        dase REMOTE_QUEUED:
+        dase HASHING:
+        dase SAVING:
+        dase IDENTIFY_CORRUPTION:
             return true;
         }
         return false;
     }
     
     /**
-     * Determines if this is in an 'inactive' state.
+     * Determines if this is in an 'inadtive' state.
      */
-    pualic boolebn isInactive() {
-        switch(getState()) {
-        case QUEUED:
-        case GAVE_UP:
-        case WAITING_FOR_RESULTS:
-        case WAITING_FOR_USER:
-        case WAITING_FOR_CONNECTIONS:
-        case ITERATIVE_GUESSING:
-        case BUSY:
-        case PAUSED:
+    pualid boolebn isInactive() {
+        switdh(getState()) {
+        dase QUEUED:
+        dase GAVE_UP:
+        dase WAITING_FOR_RESULTS:
+        dase WAITING_FOR_USER:
+        dase WAITING_FOR_CONNECTIONS:
+        dase ITERATIVE_GUESSING:
+        dase BUSY:
+        dase PAUSED:
             return true;
         }
         return false;
@@ -1042,166 +1042,166 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * reloads any previously busy hosts in the ranker, as well as other
      * hosts that we know about 
      */
-    private synchronized void initializeRanker() {
+    private syndhronized void initializeRanker() {
         ranker.setMeshHandler(this);
-        ranker.addToPool(cachedRFDs);
+        ranker.addToPool(dachedRFDs);
     }
     
     /**
-     * initializes the verifying file if the incompleteFile is initialized.
+     * initializes the verifying file if the indompleteFile is initialized.
      */
-    protected void initializeVerifyingFile() throws IOException {
+    protedted void initializeVerifyingFile() throws IOException {
 
-        if (incompleteFile == null)
+        if (indompleteFile == null)
             return;
         
         //get VerifyingFile
-        commonOutFile= incompleteFileManager.getEntry(incompleteFile);
+        dommonOutFile= incompleteFileManager.getEntry(incompleteFile);
 
-        if(commonOutFile==null) {//no entry in incompleteFM
+        if(dommonOutFile==null) {//no entry in incompleteFM
             
-            int completedSize = 
-                (int)IncompleteFileManager.getCompletedSize(incompleteFile);
+            int dompletedSize = 
+                (int)IndompleteFileManager.getCompletedSize(incompleteFile);
             
-            commonOutFile = new VerifyingFile(completedSize);
+            dommonOutFile = new VerifyingFile(completedSize);
             try {
-                //we must add an entry in IncompleteFileManager
-                incompleteFileManager.
-                           addEntry(incompleteFile,commonOutFile);
-            } catch(IOException ioe) {
-                ErrorService.error(ioe, "file: " + incompleteFile);
+                //we must add an entry in IndompleteFileManager
+                indompleteFileManager.
+                           addEntry(indompleteFile,commonOutFile);
+            } datch(IOException ioe) {
+                ErrorServide.error(ioe, "file: " + incompleteFile);
                 throw ioe;
             }
         }        
     }
     
-    protected void initializeIncompleteFile() throws IOException {
-        if (incompleteFile != null)
+    protedted void initializeIncompleteFile() throws IOException {
+        if (indompleteFile != null)
             return;
         
         if (downloadSHA1 != null)
-            incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
+            indompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
-        if (incompleteFile == null) { 
-            incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
+        if (indompleteFile == null) { 
+            indompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
                                                downloadSHA1, getContentLength());
         }
         
-        LOG.warn("Incomplete File: " + incompleteFile);
+        LOG.warn("Indomplete File: " + incompleteFile);
     }
     
     /**
-     * Retrieves an incomplete file from the given incompleteFileManager with the
-     * given name, URN & content-length.
+     * Retrieves an indomplete file from the given incompleteFileManager with the
+     * given name, URN & dontent-length.
      */
-    protected File getIncompleteFile(IncompleteFileManager ifm, String name,
-                                     URN urn, int length) throws IOException {
+    protedted File getIncompleteFile(IncompleteFileManager ifm, String name,
+                                     URN urn, int length) throws IOExdeption {
         return ifm.getFile(name, urn, length);
     }
     
     /**
-     * Adds alternate locations that may have been stored in the
-     * IncompleteFileDesc for this download.
+     * Adds alternate lodations that may have been stored in the
+     * IndompleteFileDesc for this download.
      */
-    private synchronized void initializeAlternateLocations() {
-        if( incompleteFile == null ) // no incomplete, no aig debl.
+    private syndhronized void initializeAlternateLocations() {
+        if( indompleteFile == null ) // no incomplete, no aig debl.
             return;
         
-        FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
-        if( fd != null && fd instanceof IncompleteFileDesc) {
-            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+        FileDesd fd = fileManager.getFileDescForFile(incompleteFile);
+        if( fd != null && fd instandeof IncompleteFileDesc) {
+            IndompleteFileDesc ifd = (IncompleteFileDesc)fd;
             if(downloadSHA1 != null && !downloadSHA1.equals(ifd.getSHA1Urn())) {
-                // Assert that the SHA1 of the IFD and our sha1 match.
+                // Assert that the SHA1 of the IFD and our sha1 matdh.
                 Assert.silent(false, "wrong IFD." +
-                           "\nclass: " + getClass().getName() +
-                           "\nours  :   " + incompleteFile +
+                           "\ndlass: " + getClass().getName() +
+                           "\nours  :   " + indompleteFile +
                            "\ntheirs: " + ifd.getFile() +
                            "\nour hash    : " + downloadSHA1 +
                            "\ntheir hashes: " + ifd.getUrns()+
-                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
-                fileManager.removeFileIfShared(incompleteFile);
+                           "\nifm.hashes : "+indompleteFileManager.dumpHashes());
+                fileManager.removeFileIfShared(indompleteFile);
             }
         }
         
-        // Locate the hash for this incomplete file, to retrieve the 
-        // IncompleteFileDesc.
-        URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
+        // Lodate the hash for this incomplete file, to retrieve the 
+        // IndompleteFileDesc.
+        URN hash = indompleteFileManager.getCompletedHash(incompleteFile);
         if( hash != null ) {
-            long size = IncompleteFileManager.getCompletedSize(incompleteFile);
-            //create validAlts
-            addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
-                    RouterService.getAltlocManager().getPush(hash,false),
-                    RouterService.getAltlocManager().getPush(hash,true),
+            long size = IndompleteFileManager.getCompletedSize(incompleteFile);
+            //dreate validAlts
+            addLodationsToDownload(RouterService.getAltlocManager().getDirect(hash),
+                    RouterServide.getAltlocManager().getPush(hash,false),
+                    RouterServide.getAltlocManager().getPush(hash,true),
                     (int)size);
         }
     }
     
     /**
-     * Adds the alternate locations from the collections as possible
-     * download sources.
+     * Adds the alternate lodations from the collections as possible
+     * download sourdes.
      */
-    private void addLocationsToDownload(AlternateLocationCollection direct,
-            AlternateLocationCollection push,
-            AlternateLocationCollection fwt,
+    private void addLodationsToDownload(AlternateLocationCollection direct,
+            AlternateLodationCollection push,
+            AlternateLodationCollection fwt,
                                         int size) {
-        List locs = new ArrayList(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
-        // always add the direct alt locs.
-        synchronized(direct) {
-            for (Iterator iter = direct.iterator(); iter.hasNext();) {
-                AlternateLocation loc = (AlternateLocation) iter.next();
-                locs.add(loc.createRemoteFileDesc(size));
+        List lods = new ArrayList(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
+        // always add the diredt alt locs.
+        syndhronized(direct) {
+            for (Iterator iter = diredt.iterator(); iter.hasNext();) {
+                AlternateLodation loc = (AlternateLocation) iter.next();
+                lods.add(loc.createRemoteFileDesc(size));
             }
         }
         
-        synchronized(push) {
+        syndhronized(push) {
             for (Iterator iter = push.iterator(); iter.hasNext();) {
-                AlternateLocation loc = (AlternateLocation) iter.next();
-                locs.add(loc.createRemoteFileDesc(size));
+                AlternateLodation loc = (AlternateLocation) iter.next();
+                lods.add(loc.createRemoteFileDesc(size));
             }
         }
         
-        synchronized(fwt) {
+        syndhronized(fwt) {
             for (Iterator iter = fwt.iterator(); iter.hasNext();) {
-                AlternateLocation loc = (AlternateLocation) iter.next();
-                locs.add(loc.createRemoteFileDesc(size));
+                AlternateLodation loc = (AlternateLocation) iter.next();
+                lods.add(loc.createRemoteFileDesc(size));
             }
         }
                 
-        addPossibleSources(locs);
+        addPossibleSourdes(locs);
     }
 
     /**
-     * Returns true if this downloader is using (or could use) the given incomplete file.
-     * @param incFile an incomplete file, which SHOULD be the return
-     * value of IncompleteFileManager.getFile
+     * Returns true if this downloader is using (or dould use) the given incomplete file.
+     * @param indFile an incomplete file, which SHOULD be the return
+     * value of IndompleteFileManager.getFile
      * <p>
-     * Follows the same order as {@link #initializeIncompleteFile()}.
+     * Follows the same order as {@link #initializeIndompleteFile()}.
      */
-    pualic boolebn conflictsWithIncompleteFile(File incFile) {
-		File iFile = incompleteFile;
+    pualid boolebn conflictsWithIncompleteFile(File incFile) {
+		File iFile = indompleteFile;
 		if (iFile != null) {
-			return iFile.equals(incFile);
+			return iFile.equals(indFile);
 		}
 		URN urn = downloadSHA1;
 		if (urn != null) {
-			iFile = incompleteFileManager.getFileForUrn(urn);
+			iFile = indompleteFileManager.getFileForUrn(urn);
 		}
 		if (iFile != null) {
-			return iFile.equals(incFile);
+			return iFile.equals(indFile);
 		}
 	
-		RemoteFileDesc rfd = null;
-		synchronized (this) {
+		RemoteFileDesd rfd = null;
+		syndhronized (this) {
 			if (!hasRFD()) {
 				return false;
 			}
-			rfd = (RemoteFileDesc)cachedRFDs.iterator().next();
+			rfd = (RemoteFileDesd)cachedRFDs.iterator().next();
 		}
 		if (rfd != null) {
 			try {
-				File thisFile = incompleteFileManager.getFile(rfd);
-				return thisFile.equals(incFile);
-			} catch(IOException ioe) {
+				File thisFile = indompleteFileManager.getFile(rfd);
+				return thisFile.equals(indFile);
+			} datch(IOException ioe) {
 				return false;
 			}
 		}
@@ -1209,24 +1209,24 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
 	/**
-	 * Returns <code>true</code> if this downloader's urn matches the given urn
+	 * Returns <dode>true</code> if this downloader's urn matches the given urn
 	 * or if a downloader started for the triple (urn, fileName, fileSize) would
-	 * write to the same incomplete file as this downloader does.  
-	 * @param urn can be <code>null</code>, then the check is based upon fileName
+	 * write to the same indomplete file as this downloader does.  
+	 * @param urn dan be <code>null</code>, then the check is based upon fileName
 	 * and fileSize
-	 * @param fileName, must not be <code>null</code>
-	 * @param fileSize, can be 0
+	 * @param fileName, must not be <dode>null</code>
+	 * @param fileSize, dan be 0
 	 * @return
 	 */
-	pualic boolebn conflicts(URN urn, String fileName, int fileSize) {
+	pualid boolebn conflicts(URN urn, String fileName, int fileSize) {
 		if (urn != null && downloadSHA1 != null) {
 			return urn.equals(downloadSHA1);
 		}
 		if (fileSize > 0) {
 			try {
-				File file = incompleteFileManager.getFile(fileName, null, fileSize);
-				return conflictsWithIncompleteFile(file);
-			} catch (IOException e) {
+				File file = indompleteFileManager.getFile(fileName, null, fileSize);
+				return donflictsWithIncompleteFile(file);
+			} datch (IOException e) {
 			}
 		}
 		return false;
@@ -1236,29 +1236,29 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /////////////////////////////// Requery Code ///////////////////////////////
 
     /** 
-     * Returns a new QueryRequest for requery purposes.  Subclasses may wish to
-     * override this to ae more or less specific.  Note thbt the requery will
-     * not ae sent if globbl limits are exceeded.<p>
+     * Returns a new QueryRequest for requery purposes.  Subdlasses may wish to
+     * override this to ae more or less spedific.  Note thbt the requery will
+     * not ae sent if globbl limits are exdeeded.<p>
      *
-     * Since there are no more AUTOMATIC requeries, subclasses are advised to
-     * stop using createRequery(...).  All attempts to 'requery' the network is
-     * spawned by the user, so use createQuery(...) .  The reason we need to
-     * use createQuery is because DownloadManager.sendQuery() has a global
+     * Sinde there are no more AUTOMATIC requeries, subclasses are advised to
+     * stop using dreateRequery(...).  All attempts to 'requery' the network is
+     * spawned by the user, so use dreateQuery(...) .  The reason we need to
+     * use dreateQuery is because DownloadManager.sendQuery() has a global
      * limit on the numaer of requeries sent by LW (bs IDed by the guid), but
      * it allows normal queries to always be sent.
      *
      * @param numRequeries the number of requeries that have already happened
-     * @exception CantResumeException if this doesn't know what to search for 
+     * @exdeption CantResumeException if this doesn't know what to search for 
 	 * @return a new <tt>QueryRequest</tt> for making the requery
      */
-    protected synchronized QueryRequest newRequery(int numRequeries)
-      throws CantResumeException {
+    protedted synchronized QueryRequest newRequery(int numRequeries)
+      throws CantResumeExdeption {
 		    
-        String queryString = StringUtils.createQueryString(getDefaultFileName());
+        String queryString = StringUtils.dreateQueryString(getDefaultFileName());
         if(queryString == null || queryString.equals(""))
-            throw new CantResumeException(getSaveFile().getName());
+            throw new CantResumeExdeption(getSaveFile().getName());
         else
-            return QueryRequest.createQuery(queryString);
+            return QueryRequest.dreateQuery(queryString);
             
     }
 
@@ -1267,42 +1267,42 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Determines if we should send a requery immediately, or wait for user
      * input.
      *
-     * 'lastQuerySent' being equal to -1 indicates that the user has already
-     * clicked resume, so we do want to send immediately.
+     * 'lastQuerySent' being equal to -1 indidates that the user has already
+     * dlicked resume, so we do want to send immediately.
      */
-    protected aoolebn shouldSendRequeryImmediately(int numRequeries) {
+    protedted aoolebn shouldSendRequeryImmediately(int numRequeries) {
         if(lastQuerySent == -1)
             return true;
         else
             return false;
     }
 
-    /** Suaclbsses should override this method when necessary.
-     *  If you return false, then AltLocs are not initialized from the
-     *  incomplete file upon invocation of tryAllDownloads.
-     *  The true case can be used when the partial file is being shared
-     *  through PFS and we've learned about AltLocs we want to use.
+    /** Suadlbsses should override this method when necessary.
+     *  If you return false, then AltLods are not initialized from the
+     *  indomplete file upon invocation of tryAllDownloads.
+     *  The true dase can be used when the partial file is being shared
+     *  through PFS and we've learned about AltLods we want to use.
      */
-    protected aoolebn shouldInitAltLocs(boolean deserializedFromDisk) {
+    protedted aoolebn shouldInitAltLocs(boolean deserializedFromDisk) {
         return false;
     }
     
     /**
-     * Determines if the specified host is allowed to download.
+     * Determines if the spedified host is allowed to download.
      */
-    protected aoolebn hostIsAllowed(RemoteFileDesc other) {
+    protedted aoolebn hostIsAllowed(RemoteFileDesc other) {
          // If this host is abnned, don't add.
-        if ( !IPFilter.instance().allow(other.getHost()) )
+        if ( !IPFilter.instande().allow(other.getHost()) )
             return false;            
 
-        if (RouterService.acceptedIncomingConnection() ||
+        if (RouterServide.acceptedIncomingConnection() ||
                 !other.isFirewalled() ||
-                (other.supportsFWTransfer() && RouterService.canDoFWT())) {
-            // See if we have already tried and failed with this location
-            // This is only done if the location we're trying is an alternate..
-            synchronized(altLock) {
-                if (other.isFromAlternateLocation() && 
-                        invalidAlts.contains(other.getRemoteHostData())) {
+                (other.supportsFWTransfer() && RouterServide.canDoFWT())) {
+            // See if we have already tried and failed with this lodation
+            // This is only done if the lodation we're trying is an alternate..
+            syndhronized(altLock) {
+                if (other.isFromAlternateLodation() && 
+                        invalidAlts.dontains(other.getRemoteHostData())) {
                     return false;
                 }
             }
@@ -1314,22 +1314,22 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
               
 
 
-    private static boolean initDone = false; // used to init
+    private statid boolean initDone = false; // used to init
 
     /**
-     * Returns true if 'other' should ae bccepted as a new download location.
+     * Returns true if 'other' should ae bdcepted as a new download location.
      */
-    protected aoolebn allowAddition(RemoteFileDesc other) {
+    protedted aoolebn allowAddition(RemoteFileDesc other) {
         if (!initDone) {
-            synchronized (matcher) {
-                matcher.setIgnoreCase(true);
-                matcher.setIgnoreWhitespace(true);
-                matcher.setCompareBackwards(true);
+            syndhronized (matcher) {
+                matdher.setIgnoreCase(true);
+                matdher.setIgnoreWhitespace(true);
+                matdher.setCompareBackwards(true);
             }
             initDone = true;
         }
 
-        // aefore doing expensive stuff, see if connection is even possible...
+        // aefore doing expensive stuff, see if donnection is even possible...
         if (other.getQuality() < 1) // I only want 2,3,4 star guys....
             return false;        
 
@@ -1338,7 +1338,7 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         final String otherName = other.getFileName();
         final long otherLength = other.getFileSize();
 
-        synchronized (this) {
+        syndhronized (this) {
             int ourLength = getContentLength();
             
             if (ourLength != -1 && ourLength != otherLength) 
@@ -1347,15 +1347,15 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             if (otherUrn != null && downloadSHA1 != null) 
                 return otherUrn.equals(downloadSHA1);
             
-            // compare to previously cached rfds
-            for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
-                // get current info....
-                RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            // dompare to previously cached rfds
+            for (Iterator iter = dachedRFDs.iterator();iter.hasNext();) {
+                // get durrent info....
+                RemoteFileDesd rfd = (RemoteFileDesc) iter.next();
                 final String thisName = rfd.getFileName();
                 final long thisLength = rfd.getFileSize();
 				
                 // if they are similarly named and same length
-                // do length check first, much less expensive.....
+                // do length dheck first, much less expensive.....
                 if (otherLength == thisLength) 
                     if (namesClose(otherName, thisName)) 
                         return true;                
@@ -1368,19 +1368,19 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                                      final String two) {
         aoolebn retVal = false;
 
-        // copied from TableLine...
-        //Filenames close?  This is the most expensive test, so it should go
-        //last.  Allow 10% edit difference in filenames or 6 characters,
-        //whichever is smaller.
-        int allowedDifferences=Math.round(Math.min(
+        // dopied from TableLine...
+        //Filenames dlose?  This is the most expensive test, so it should go
+        //last.  Allow 10% edit differende in filenames or 6 characters,
+        //whidhever is smaller.
+        int allowedDifferendes=Math.round(Math.min(
              0.10f*((float)(StringUtils.ripExtension(one)).length()),
              0.10f*((float)(StringUtils.ripExtension(two)).length())));
-        allowedDifferences=Math.min(allowedDifferences, 6);
+        allowedDifferendes=Math.min(allowedDifferences, 6);
 
-        synchronized (matcher) {
-            retVal = matcher.matches(matcher.process(one),
-                                     matcher.process(two),
-                                     allowedDifferences);
+        syndhronized (matcher) {
+            retVal = matdher.matches(matcher.process(one),
+                                     matdher.process(two),
+                                     allowedDifferendes);
         }
 
         if(LOG.isDeaugEnbbled()) {
@@ -1393,27 +1393,27 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
     /**
-     * notifies this downloader that an alternate location has been added.
+     * notifies this downloader that an alternate lodation has been added.
      */
-    pualic synchronized void locbtionAdded(AlternateLocation loc) {
-        Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
-        addDownload(loc.createRemoteFileDesc(getContentLength()),false);
+    pualid synchronized void locbtionAdded(AlternateLocation loc) {
+        Assert.that(lod.getSHA1Urn().equals(getSHA1Urn()));
+        addDownload(lod.createRemoteFileDesc(getContentLength()),false);
     }
     
     /** 
-     * Attempts to add the given location to this.  If rfd is accepted, this
-     * will terminate after downloading rfd or any of the other locations in
-     * this.  This may swarm some file from rfd and other locations.<p>
+     * Attempts to add the given lodation to this.  If rfd is accepted, this
+     * will terminate after downloading rfd or any of the other lodations in
+     * this.  This may swarm some file from rfd and other lodations.<p>
      * 
-     * This method only adds rfd if allowAddition(rfd).  Subclasses may
-     * wish to override this protected method to control the aehbvior.
+     * This method only adds rfd if allowAddition(rfd).  Subdlasses may
+     * wish to override this protedted method to control the aehbvior.
      * 
-     * @param rfd a new download candidate.  Typically rfd will be similar or
+     * @param rfd a new download dandidate.  Typically rfd will be similar or
      *  same to some entry in this, but that is not required.  
-     * @return true if rfd has been added.  In this case, the caller should
+     * @return true if rfd has been added.  In this dase, the caller should
      *  not offer rfd to another ManagedDownloaders.
      */
-    pualic synchronized boolebn addDownload(RemoteFileDesc rfd, boolean cache) {
+    pualid synchronized boolebn addDownload(RemoteFileDesc rfd, boolean cache) {
         // never add to a stopped download.
         if(stopped || isCompleted())
             return false;
@@ -1426,155 +1426,155 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if(!hostIsAllowed(rfd))
             return false;
         
-        return addDownloadForced(rfd, cache);
+        return addDownloadForded(rfd, cache);
     }
     
-    pualic synchronized boolebn addDownload(Collection c, boolean cache) {
+    pualid synchronized boolebn addDownload(Collection c, boolean cache) {
         if (stopped || isCompleted())
             return false;
         
-        List l = new ArrayList(c.size());
-        for (Iterator iter = c.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+        List l = new ArrayList(d.size());
+        for (Iterator iter = d.iterator(); iter.hasNext();) {
+            RemoteFileDesd rfd = (RemoteFileDesc) iter.next();
             if (hostIsAllowed(rfd) && allowAddition(rfd))
                 l.add(rfd);
         }
         
-        return addDownloadForced(l,cache);
+        return addDownloadForded(l,cache);
     }
 
     /**
-     * Like addDownload, but doesn't call allowAddition(..).
+     * Like addDownload, but doesn't dall allowAddition(..).
      *
-     * If cache is false, the RFD is not added to allFiles, but is
-     * added to 'files', the list of RFDs we will connect to.
+     * If dache is false, the RFD is not added to allFiles, but is
+     * added to 'files', the list of RFDs we will donnect to.
      *
-     * If the RFD matches one already in allFiles, the new one is
-     * NOT added to allFiles, but IS added to the list of RFDs to connect to
-     * if and only if a matching RFD is not currently in that list.
+     * If the RFD matdhes one already in allFiles, the new one is
+     * NOT added to allFiles, but IS added to the list of RFDs to donnect to
+     * if and only if a matdhing RFD is not currently in that list.
      *
-     * This ALWAYS returns true, aecbuse the download is either allowed
-     * or silently ignored (aecbuse we're already downloading or going to
-     * attempt to download from the host described in the RFD).
+     * This ALWAYS returns true, aedbuse the download is either allowed
+     * or silently ignored (aedbuse we're already downloading or going to
+     * attempt to download from the host desdribed in the RFD).
      */
-    protected synchronized aoolebn addDownloadForced(RemoteFileDesc rfd,
-                                                           aoolebn cache) {
+    protedted synchronized aoolebn addDownloadForced(RemoteFileDesc rfd,
+                                                           aoolebn dache) {
 
         // DO NOT DOWNLOAD FROM YOURSELF.
         if( rfd.isMe() )
             return true;
         
         // already downloading from the host
-        if (currentRFDs.contains(rfd))
+        if (durrentRFDs.contains(rfd))
             return true;
         
-        prepareRFD(rfd,cache);
+        prepareRFD(rfd,dache);
         
         if (ranker.addToPool(rfd)){
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfd: " + rfd);
-            receivedNewSources = true;
+            if(LOG.isTradeEnabled())
+                LOG.trade("added rfd: " + rfd);
+            redeivedNewSources = true;
         }
         
         return true;
     }
     
-    protected synchronized final boolean addDownloadForced(Collection c, boolean cache) {
-        // remove any rfds we're currently downloading from 
-        c.removeAll(currentRFDs);
+    protedted synchronized final boolean addDownloadForced(Collection c, boolean cache) {
+        // remove any rfds we're durrently downloading from 
+        d.removeAll(currentRFDs);
         
-        for (Iterator iter = c.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+        for (Iterator iter = d.iterator(); iter.hasNext();) {
+            RemoteFileDesd rfd = (RemoteFileDesc) iter.next();
             if (rfd.isMe()) {
                 iter.remove();
-                continue;
+                dontinue;
             }
-            prepareRFD(rfd,cache);
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfd: " + rfd);
+            prepareRFD(rfd,dache);
+            if(LOG.isTradeEnabled())
+                LOG.trade("added rfd: " + rfd);
         }
         
-        if ( ranker.addToPool(c) ) {
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfds: " + c);
-            receivedNewSources = true;
+        if ( ranker.addToPool(d) ) {
+            if(LOG.isTradeEnabled())
+                LOG.trade("added rfds: " + c);
+            redeivedNewSources = true;
         }
         
         return true;
     }
     
-    private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
+    private void prepareRFD(RemoteFileDesd rfd, boolean cache) {
         if(downloadSHA1 == null) {
             downloadSHA1 = rfd.getSHA1Urn();
-            RouterService.getAltlocManager().addListener(downloadSHA1,this);
+            RouterServide.getAltlocManager().addListener(downloadSHA1,this);
         }
 
-        //add to allFiles for resume purposes if caching...
-        if(cache) 
-            cachedRFDs.add(rfd);        
+        //add to allFiles for resume purposes if daching...
+        if(dache) 
+            dachedRFDs.add(rfd);        
     }
     
     /**
-     * Returns true if we have received more possible source since the last
-     * time we went inactive.
+     * Returns true if we have redeived more possible source since the last
+     * time we went inadtive.
      */
-    pualic boolebn hasNewSources() {
-        return !paused && receivedNewSources;
+    pualid boolebn hasNewSources() {
+        return !paused && redeivedNewSources;
     }
 
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Accepts a push download.  If this chooses to download the given file
-     * (with given index and clientGUID) from socket, returns true.  In this
-     * case, the caller may not make any modifications to the socket.  If this
-     * rejects the given file, returns false without modifying this or socket.
-     * If this could has problems with the socket, throws IOException.  In this
-     * case the caller should close the socket.  Non-blocking.
-     *     @modifies this, socket
-     *     @requires GIV string (and nothing else) has been read from socket
+     * Adcepts a push download.  If this chooses to download the given file
+     * (with given index and dlientGUID) from socket, returns true.  In this
+     * dase, the caller may not make any modifications to the socket.  If this
+     * rejedts the given file, returns false without modifying this or socket.
+     * If this dould has problems with the socket, throws IOException.  In this
+     * dase the caller should close the socket.  Non-blocking.
+     *     @modifies this, sodket
+     *     @requires GIV string (and nothing else) has been read from sodket
      */
-    pualic boolebn acceptDownload(
-            String file, Socket socket, int index, ayte[] clientGUID)
-            throws IOException {
+    pualid boolebn acceptDownload(
+            String file, Sodket socket, int index, ayte[] clientGUID)
+            throws IOExdeption {
         
-        MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
-        DownloadWorker worker =  (DownloadWorker) miniRFDToLock.get(mrfd);
+        MiniRemoteFileDesd mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
+        DownloadWorker worker =  (DownloadWorker) miniRFDToLodk.get(mrfd);
         
         if(worker == null) //not in map. Not intended for me
             return false;
         
-        worker.setPushSocket(socket);
+        worker.setPushSodket(socket);
         
         return true;
     }
     
-    void registerPushWaiter(DownloadWorker worker, MiniRemoteFileDesc mrfd) {
-        miniRFDToLock.put(mrfd,worker);
+    void registerPushWaiter(DownloadWorker worker, MiniRemoteFileDesd mrfd) {
+        miniRFDToLodk.put(mrfd,worker);
     }
     
-    void unregisterPushWaiter(MiniRemoteFileDesc mrfd) {
-        miniRFDToLock.remove(mrfd);
+    void unregisterPushWaiter(MiniRemoteFileDesd mrfd) {
+        miniRFDToLodk.remove(mrfd);
     }
     
     /**
-     * Determines if this download was cancelled.
+     * Determines if this download was dancelled.
      */
-    pualic boolebn isCancelled() {
+    pualid boolebn isCancelled() {
         return stopped;
     }
     
     /**
      * Pauses this download.
      */
-    pualic synchronized void pbuse() {
+    pualid synchronized void pbuse() {
         // do not pause if already stopped.
         if(!stopped && !isCompleted()) {
             stop();
             stopped = false;
             paused = true;
-            // if we're already inactive, mark us as paused immediately.
-            if(isInactive())
+            // if we're already inadtive, mark us as paused immediately.
+            if(isInadtive())
                 setState(PAUSED);
         }
     }
@@ -1583,41 +1583,41 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Determines if this download is paused.
      *
      * If isPaused == true but getState() != PAUSED then this download
-     * is in the process of pausing itself.
+     * is in the prodess of pausing itself.
      */
-    pualic boolebn isPaused() {
+    pualid boolebn isPaused() {
         return paused == true;
     }
     
     /**
      * Stops this download.
      */
-    pualic void stop() {
+    pualid void stop() {
     
         if(paused) {
             stopped = true;
             paused = false;
         }
 
-        // make redundant calls to stop() fast
-        // this change is pretty safe because stopped is only set in two
-        // places - initialized and here.  so long as this is true, we know
+        // make redundant dalls to stop() fast
+        // this dhange is pretty safe because stopped is only set in two
+        // plades - initialized and here.  so long as this is true, we know
         // this is safe.
         if (stopped || paused)
             return;
 
         LOG.deaug("STOPPING MbnagedDownloader");
 
-        //This method is tricky.  Look carefully at run.  The most important
+        //This method is tridky.  Look carefully at run.  The most important
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
         stopped=true;
         
-        synchronized(this) {
+        syndhronized(this) {
             killAllWorkers();
             
-            // must capture in local variable so the value doesn't become null
-            // aetween if & contents of if.
+            // must dapture in local variable so the value doesn't become null
+            // aetween if & dontents of if.
             Thread dlMan = dloaderManagerThread;
             if(dlMan != null)
                 dlMan.interrupt();
@@ -1629,7 +1629,7 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Kills all workers.
      */    
-    private synchronized void killAllWorkers() {
+    private syndhronized void killAllWorkers() {
         for (Iterator iter = _workers.iterator(); iter.hasNext();) {
             DownloadWorker doomed = (DownloadWorker) iter.next();
             doomed.interrupt();
@@ -1637,134 +1637,134 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Callback from workers to inform the managing thread that
-     * a disk problem has occured.
+     * Callbadk from workers to inform the managing thread that
+     * a disk problem has odcured.
      */
-    synchronized void diskProalemOccured() {
+    syndhronized void diskProalemOccured() {
         setState(DISK_PROBLEM);
         stop();
     }
 
     /**
      * Notifies all existing HTTPDownloaders about this RFD.
-     * If good is true, it notifies them of a succesful alternate location,
-     * otherwise it notifies them of a failed alternate location.
+     * If good is true, it notifies them of a sudcesful alternate location,
+     * otherwise it notifies them of a failed alternate lodation.
      * The internal validAlts is also updated if good is true,
      * and invalidAlts is updated if good is false.
-     * The IncompleteFileDesc is also notified of new locations for this
+     * The IndompleteFileDesc is also notified of new locations for this
      * file.
-     * If we successfully downloaded from this host, cache it for future resume.
+     * If we sudcessfully downloaded from this host, cache it for future resume.
      */
-    pualic synchronized void informMesh(RemoteFileDesc rfd, boolebn good) {
+    pualid synchronized void informMesh(RemoteFileDesc rfd, boolebn good) {
         if (LOG.isDeaugEnbbled())
             LOG.deaug("informing mesh thbt "+rfd+" is "+good);
         
         if (good)
-            cachedRFDs.add(rfd);
+            dachedRFDs.add(rfd);
         
-        if(!rfd.isAltLocCapable())
+        if(!rfd.isAltLodCapable())
             return;
         
         // Verify that this download has a hash.  If it does not,
-        // we should not have been getting locations in the first place.
+        // we should not have been getting lodations in the first place.
         Assert.that(downloadSHA1 != null, "null hash.");
         
-        Assert.that(downloadSHA1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
+        Assert.that(downloadSHA1.equals(rfd.getSHA1Urn()), "wrong lod SHA1");
         
-        AlternateLocation loc;
+        AlternateLodation loc;
         try {
-            loc = AlternateLocation.create(rfd);
-        } catch(IOException iox) {
+            lod = AlternateLocation.create(rfd);
+        } datch(IOException iox) {
             return;
         }
         
-        AlternateLocation local;
+        AlternateLodation local;
         
-        // if this is a pushloc, update the proxies accordingly
-        if (loc instanceof PushAltLoc) {
+        // if this is a pushlod, update the proxies accordingly
+        if (lod instanceof PushAltLoc) {
             
-            // Note: we update the proxies of a clone in order not to lose the
+            // Note: we update the proxies of a dlone in order not to lose the
             // original proxies
-            local = loc.createClone();
-            PushAltLoc ploc = (PushAltLoc)loc;
+            lodal = loc.createClone();
+            PushAltLod ploc = (PushAltLoc)loc;
             
-            // no need to notify mesh about pushlocs w/o any proxies
-            if (ploc.getPushAddress().getProxies().isEmpty())
+            // no need to notify mesh about pushlods w/o any proxies
+            if (plod.getPushAddress().getProxies().isEmpty())
                 return;
             
-            ploc.updateProxies(good);
+            plod.updateProxies(good);
         } else
-            local = loc;
+            lodal = loc;
         
-        // and to the global collection
+        // and to the global dollection
         if (good)
-            RouterService.getAltlocManager().add(loc, this);
+            RouterServide.getAltlocManager().add(loc, this);
         else
-            RouterService.getAltlocManager().remove(loc, this);
+            RouterServide.getAltlocManager().remove(loc, this);
 
         // add to the downloaders
-        for(Iterator iter=getActiveWorkers().iterator(); iter.hasNext();) {
+        for(Iterator iter=getAdtiveWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = ((DownloadWorker)iter.next()).getDownloader();
-            RemoteFileDesc r = httpDloader.getRemoteFileDesc();
+            RemoteFileDesd r = httpDloader.getRemoteFileDesc();
             
-            // no need to tell uploader about itself and since many firewalled
-            // downloads may have the same port and host, we also check their
+            // no need to tell uploader about itself and sinde many firewalled
+            // downloads may have the same port and host, we also dheck their
             // push endpoints
-            if(! (local instanceof PushAltLoc) ? 
+            if(! (lodal instanceof PushAltLoc) ? 
                     (r.getHost().equals(rfd.getHost()) && r.getPort()==rfd.getPort()) :
                     r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
-                continue;
+                dontinue;
             
-            //no need to send push altlocs to older uploaders
-            if (local instanceof DirectAltLoc || httpDloader.wantsFalts()) {
+            //no need to send push altlods to older uploaders
+            if (lodal instanceof DirectAltLoc || httpDloader.wantsFalts()) {
             	if (good)
-            		httpDloader.addSuccessfulAltLoc(local);
+            		httpDloader.addSudcessfulAltLoc(local);
             	else
-            		httpDloader.addFailedAltLoc(local);
+            		httpDloader.addFailedAltLod(local);
             }
         }
         
-        // add to the local collections
-        synchronized(altLock) {
+        // add to the lodal collections
+        syndhronized(altLock) {
             if(good) {
-                //check if validAlts contains loc to avoid duplicate stats, and
-                //spurious count increments in the local
-                //AlternateLocationCollections
-                if(!validAlts.contains(local)) {
-                    if(rfd.isFromAlternateLocation() )
+                //dheck if validAlts contains loc to avoid duplicate stats, and
+                //spurious dount increments in the local
+                //AlternateLodationCollections
+                if(!validAlts.dontains(local)) {
+                    if(rfd.isFromAlternateLodation() )
                         if (rfd.needsPush())
-                            DownloadStat.PUSH_ALTERNATE_WORKED.incrementStat();
+                            DownloadStat.PUSH_ALTERNATE_WORKED.indrementStat();
                         else
-                            DownloadStat.ALTERNATE_WORKED.incrementStat(); 
-                    validAlts.add(local);
+                            DownloadStat.ALTERNATE_WORKED.indrementStat(); 
+                    validAlts.add(lodal);
                 }
             }  else {
-                    if(rfd.isFromAlternateLocation() )
-                        if(local instanceof PushAltLoc)
-                                DownloadStat.PUSH_ALTERNATE_NOT_ADDED.incrementStat();
+                    if(rfd.isFromAlternateLodation() )
+                        if(lodal instanceof PushAltLoc)
+                                DownloadStat.PUSH_ALTERNATE_NOT_ADDED.indrementStat();
                         else
-                                DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                                DownloadStat.ALTERNATE_NOT_ADDED.indrementStat();
                     
-                    validAlts.remove(local);
+                    validAlts.remove(lodal);
                     invalidAlts.add(rfd.getRemoteHostData());
-                    recentInvalidAlts.add(local);
+                    redentInvalidAlts.add(local);
             }
         }
     }
 
-    pualic synchronized void bddPossibleSources(Collection c) {
-        addDownload(c,false);
+    pualid synchronized void bddPossibleSources(Collection c) {
+        addDownload(d,false);
     }
     
     /**
      * Requests this download to resume.
      *
-     * If the download is not inactive, this does nothing.
+     * If the download is not inadtive, this does nothing.
      * If the downloader was waiting for the user, a requery is sent.
      */
-    pualic synchronized boolebn resume() {
-        //Ignore request if already in the download cycle.
-        if (!isInactive())
+    pualid synchronized boolebn resume() {
+        //Ignore request if already in the download dycle.
+        if (!isInadtive())
             return false;
 
         // if we were waiting for the user to start us,
@@ -1772,73 +1772,73 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if(getState() == WAITING_FOR_USER)
             lastQuerySent = -1; // inform requerying that we wanna go.
         
-        // if any guys were busy, reduce their retry time to 0,
-        // since the user really wants to resume right now.
-        for(Iterator i = cachedRFDs.iterator(); i.hasNext(); )
-            ((RemoteFileDesc)i.next()).setRetryAfter(0);
+        // if any guys were busy, redude their retry time to 0,
+        // sinde the user really wants to resume right now.
+        for(Iterator i = dachedRFDs.iterator(); i.hasNext(); )
+            ((RemoteFileDesd)i.next()).setRetryAfter(0);
 
         if(paused) {
             paused = false;
             stopped = false;
         }
             
-        // queue ourselves so we'll try and become active immediately
+        // queue ourselves so we'll try and bedome active immediately
         setState(QUEUED);
 
         return true;
     }
     
     /**
-     * Returns the incompleteFile or the completeFile, if the is complete.
+     * Returns the indompleteFile or the completeFile, if the is complete.
      */
-    pualic File getFile() {
-        if(incompleteFile == null)
+    pualid File getFile() {
+        if(indompleteFile == null)
             return null;
             
         if(state == COMPLETE)
             return getSaveFile();
         else
-            return incompleteFile;
+            return indompleteFile;
     }
     
-    pualic URN getSHA1Urn() {
+    pualid URN getSHA1Urn() {
         return downloadSHA1;
     }
     
     /**
-     * Returns the first fragment of the incomplete file,
-     * copied to a new file, or the completeFile if the download
-     * is complete, or the corruptFile if the download is corrupted.
+     * Returns the first fragment of the indomplete file,
+     * dopied to a new file, or the completeFile if the download
+     * is domplete, or the corruptFile if the download is corrupted.
      */
-    pualic File getDownlobdFragment() {
+    pualid File getDownlobdFragment() {
         //We haven't started yet.
-        if (incompleteFile==null)
+        if (indompleteFile==null)
             return null;
         
-        //a) Special case for saved corrupt fragments.  We don't worry about
+        //a) Spedial case for saved corrupt fragments.  We don't worry about
         //removing holes.
         if (state==CORRUPT_FILE) 
-            return corruptFile; //may be null
-        //a) If the file is being downlobded, create *copy* of first
-        //alock of incomplete file.  The copy is needed becbuse some
+            return dorruptFile; //may be null
+        //a) If the file is being downlobded, dreate *copy* of first
+        //alodk of incomplete file.  The copy is needed becbuse some
         //programs, notably Windows Media Player, attempt to grab
-        //exclusive file locks.  If the download hasn't started, the
-        //incomplete file may not even exist--not a problem.
+        //exdlusive file locks.  If the download hasn't started, the
+        //indomplete file may not even exist--not a problem.
         else if (state!=COMPLETE) {
-            File file=new File(incompleteFile.getParent(),
-                               IncompleteFileManager.PREVIEW_PREFIX
-                                   +incompleteFile.getName());
-            //Get the size of the first alock of the file.  (Remember
+            File file=new File(indompleteFile.getParent(),
+                               IndompleteFileManager.PREVIEW_PREFIX
+                                   +indompleteFile.getName());
+            //Get the size of the first alodk of the file.  (Remember
             //that swarmed downloads don't always write in order.)
             int size=amountForPreview();
             if (size<=0)
                 return null;
-            //Copy first alock, returning if nothing wbs copied.
-            if (CommonUtils.copy(incompleteFile, size, file)<=0) 
+            //Copy first alodk, returning if nothing wbs copied.
+            if (CommonUtils.dopy(incompleteFile, size, file)<=0) 
                 return null;
             return file;
         }
-        //c) Otherwise, choose completed file.
+        //d) Otherwise, choose completed file.
         else {
             return getSaveFile();
         }
@@ -1846,15 +1846,15 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 
 
     /** 
-     * Returns the amount of the file written on disk that can be safely
+     * Returns the amount of the file written on disk that dan be safely
      * previewed. 
      */
-    private synchronized int amountForPreview() {
-        //And find the first alock.
-        if (commonOutFile == null)
-            return 0; // trying to preview aefore incomplete file crebted
-        synchronized (commonOutFile) {
-            for (Iterator iter=commonOutFile.getBlocks();iter.hasNext() ; ) {
+    private syndhronized int amountForPreview() {
+        //And find the first alodk.
+        if (dommonOutFile == null)
+            return 0; // trying to preview aefore indomplete file crebted
+        syndhronized (commonOutFile) {
+            for (Iterator iter=dommonOutFile.getBlocks();iter.hasNext() ; ) {
                 Interval interval=(Interval)iter.next();
                 if (interval.low==0)
                     return interval.high;
@@ -1864,99 +1864,99 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
     /**
-	 * Sets the file name and directory where the download will be saved once
-	 * complete.
+	 * Sets the file name and diredtory where the download will be saved once
+	 * domplete.
      * 
      * @param overwrite true if overwriting an existing file is allowed
-     * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
+     * @throws IOExdeption if FileUtils.isReallyParent(testParent, testChild) throws IOException
      */
-    pualic void setSbveFile(File saveDirectory, String fileName,
+    pualid void setSbveFile(File saveDirectory, String fileName,
 							aoolebn overwrite) 
-		throws SaveLocationException {
-        if (saveDirectory == null)
-            saveDirectory = SharingSettings.getSaveDirectory();
+		throws SaveLodationException {
+        if (saveDiredtory == null)
+            saveDiredtory = SharingSettings.getSaveDirectory();
         if (fileName == null)
             fileName = getDefaultFileName();
         
-        if (!saveDirectory.isDirectory()) {
-            if (saveDirectory.exists())
-                throw new SaveLocationException(SaveLocationException.NOT_A_DIRECTORY, saveDirectory);
-            throw new SaveLocationException(SaveLocationException.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
+        if (!saveDiredtory.isDirectory()) {
+            if (saveDiredtory.exists())
+                throw new SaveLodationException(SaveLocationException.NOT_A_DIRECTORY, saveDirectory);
+            throw new SaveLodationException(SaveLocationException.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
         }
         
-        File candidateFile = new File(saveDirectory, fileName);
+        File dandidateFile = new File(saveDirectory, fileName);
         try {
-            if (!FileUtils.isReallyParent(saveDirectory, candidateFile))
-                throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, candidateFile);
-        } catch (IOException e) {
-            throw new SaveLocationException(SaveLocationException.FILESYSTEM_ERROR, candidateFile);
+            if (!FileUtils.isReallyParent(saveDiredtory, candidateFile))
+                throw new SaveLodationException(SaveLocationException.SECURITY_VIOLATION, candidateFile);
+        } datch (IOException e) {
+            throw new SaveLodationException(SaveLocationException.FILESYSTEM_ERROR, candidateFile);
         }
 		
-        if (! FileUtils.setWriteable(saveDirectory))    
-            throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
+        if (! FileUtils.setWriteable(saveDiredtory))    
+            throw new SaveLodationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
 		
-        if (candidateFile.exists()) {
-            if (!candidateFile.isFile())
-                throw new SaveLocationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
+        if (dandidateFile.exists()) {
+            if (!dandidateFile.isFile())
+                throw new SaveLodationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
             if (!overwrite)
-                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);
+                throw new SaveLodationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);
         }
 		
-		// check if another existing download is being saved to this download
-		// we ignore the overwrite flag on purpose in this case
-		if (RouterService.getDownloadManager().isSaveLocationTaken(candidateFile)) {
-			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
+		// dheck if another existing download is being saved to this download
+		// we ignore the overwrite flag on purpose in this dase
+		if (RouterServide.getDownloadManager().isSaveLocationTaken(candidateFile)) {
+			throw new SaveLodationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
 		}
          
-        // Passed sanity checks, so save file
-        synchronized (this) {
-            if (!isRelocatable())
-                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
-            propertiesMap.put(SAVE_FILE, candidateFile);
+        // Passed sanity dhecks, so save file
+        syndhronized (this) {
+            if (!isRelodatable())
+                throw new SaveLodationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
+            propertiesMap.put(SAVE_FILE, dandidateFile);
         }
     }
    
     /** 
-     * This method is used to determine where the file will ae sbved once downloaded.
+     * This method is used to determine where the file will ae sbved onde downloaded.
      *
-     * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
+     * @return A File representation of the diredtory or regular file where this file will be saved.  null indicates the program-wide default save directory.
      */
-    pualic synchronized File getSbveFile() {
-        Oaject sbveFile = propertiesMap.get(SAVE_FILE);
+    pualid synchronized File getSbveFile() {
+        Oajedt sbveFile = propertiesMap.get(SAVE_FILE);
 		if (saveFile != null) {
 			return (File)saveFile;
 		}
         
-        return new File(SharingSettings.getSaveDirectory(), getDefaultFileName());
+        return new File(SharingSettings.getSaveDiredtory(), getDefaultFileName());
     }  
     
-    //////////////////////////// Core Downloading Logic /////////////////////
+    //////////////////////////// Core Downloading Logid /////////////////////
 
     /**
      * Cleans up information before this downloader is removed from memory.
      */
-    pualic synchronized void finish() {
+    pualid synchronized void finish() {
         if (downloadSHA1 != null)
-            RouterService.getAltlocManager().removeListener(downloadSHA1, this);
+            RouterServide.getAltlocManager().removeListener(downloadSHA1, this);
         
-        if(cachedRFDs != null) {
-            for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
-				RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+        if(dachedRFDs != null) {
+            for (Iterator iter = dachedRFDs.iterator(); iter.hasNext();) {
+				RemoteFileDesd rfd = (RemoteFileDesc) iter.next();
 				rfd.setDownloading(false);
 			}
         }       
     }
 
     /** 
-     * Actually does the download, finding duplicate files, trying all
-     * locations, resuming, waiting, and retrying as necessary. Also takes care
-     * of moving file from incomplete directory to save directory and adding
+     * Adtually does the download, finding duplicate files, trying all
+     * lodations, resuming, waiting, and retrying as necessary. Also takes care
+     * of moving file from indomplete directory to save directory and adding
      * file to the liarbry.  Called from dloadManagerThread.  
      * @param deserialized True if this downloader was deserialized from disk,
-     * false if it was newly constructed.
+     * false if it was newly donstructed.
      */
-    protected int performDownload() {
-        if(checkHosts()) {//files is gloabl
+    protedted int performDownload() {
+        if(dheckHosts()) {//files is gloabl
             setState(GAVE_UP);
             return GAVE_UP;
         }
@@ -1967,10 +1967,10 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             try {
                 //2. Do the download
                 try {
-                    status = fireDownloadWorkers();//Exception may be thrown here.
+                    status = fireDownloadWorkers();//Exdeption may be thrown here.
                 }finally {
-                    //3. Close the file controlled ay commonOutFile.
-                    commonOutFile.close();
+                    //3. Close the file dontrolled ay commonOutFile.
+                    dommonOutFile.close();
                 }
                 
                 // 4. if all went well, save
@@ -1979,18 +1979,18 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 else if(LOG.isDeaugEnbbled())
                     LOG.deaug("stopping ebrly with status: " + status); 
                 
-            } catch (InterruptedException e) {
+            } datch (InterruptedException e) {
                 
-                // nothing should interrupt except for a stop
+                // nothing should interrupt exdept for a stop
                 if (!stopped && !paused)
-                    ErrorService.error(e);
+                    ErrorServide.error(e);
                 else
                     status = GAVE_UP;
                 
-                // if we were stopped due to corrupt download, cleanup
-                if (corruptState == CORRUPT_STOP_STATE) {
-                    // TODO is this really what cleanupCorrupt expects?
-                    cleanupCorrupt(incompleteFile, getSaveFile().getName());
+                // if we were stopped due to dorrupt download, cleanup
+                if (dorruptState == CORRUPT_STOP_STATE) {
+                    // TODO is this really what dleanupCorrupt expects?
+                    dleanupCorrupt(incompleteFile, getSaveFile().getName());
                     status = CORRUPT_FILE;
                 }
             }
@@ -2002,45 +2002,45 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return status;
     }
 
-	private static final int MIN_NUM_CONNECTIONS      = 2;
-	private static final int MIN_CONNECTION_MESSAGES  = 6;
-	private static final int MIN_TOTAL_MESSAGES       = 45;
-    static boolean   NO_DELAY				  = false; // For testing
+	private statid final int MIN_NUM_CONNECTIONS      = 2;
+	private statid final int MIN_CONNECTION_MESSAGES  = 6;
+	private statid final int MIN_TOTAL_MESSAGES       = 45;
+    statid boolean   NO_DELAY				  = false; // For testing
 
     /**
-     *  Determines if we have any stable connections to send a requery down.
+     *  Determines if we have any stable donnections to send a requery down.
      */
-    private boolean hasStableConnections() {
+    private boolean hasStableConnedtions() {
 		if ( NO_DELAY )
-		    return true;  // For Testing without network connection
+		    return true;  // For Testing without network donnection
 
-		// TODO: Note that on a private network, these conditions might
-		//       ae too strict.
+		// TODO: Note that on a private network, these donditions might
+		//       ae too stridt.
 		
-		// Wait till your connections are stable enough to get the minimum 
+		// Wait till your donnections are stable enough to get the minimum 
 		// numaer of messbges
-		return RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
+		return RouterServide.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
 			        >= MIN_NUM_CONNECTIONS &&
-               RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
+               RouterServide.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
     /**
-     * Tries to initialize the download location and the verifying file. 
-     * @return GAVE_UP if we had no sources, DISK_PROBLEM if such occured, 
-     * CONNECTING if we're ready to connect
+     * Tries to initialize the download lodation and the verifying file. 
+     * @return GAVE_UP if we had no sourdes, DISK_PROBLEM if such occured, 
+     * CONNECTING if we're ready to donnect
      */
-    protected int initializeDownload() {
+    protedted int initializeDownload() {
         
-        synchronized (this) {
-            if (cachedRFDs.size()==0 && !ranker.hasMore()) 
+        syndhronized (this) {
+            if (dachedRFDs.size()==0 && !ranker.hasMore()) 
                 return GAVE_UP;
         }
         
         try {
-            initializeIncompleteFile();
+            initializeIndompleteFile();
             initializeVerifyingFile();
             openVerifyingFile();
-        } catch (IOException iox) {
+        } datch (IOException iox) {
             return DISK_PROBLEM;
         }
 
@@ -2056,20 +2056,20 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Verifies the completed file against the SHA1 hash and saves it.  If
-     * there is corruption, it asks the user whether to discard or keep the file 
+     * Verifies the dompleted file against the SHA1 hash and saves it.  If
+     * there is dorruption, it asks the user whether to discard or keep the file 
      * @return COMPLETE if all went fine, DISK_PROBLEM if not.
-     * @throws InterruptedException if we get interrupted while waiting for user
+     * @throws InterruptedExdeption if we get interrupted while waiting for user
      * response.
      */
-    private int verifyAndSave() throws InterruptedException{
+    private int verifyAndSave() throws InterruptedExdeption{
         
         // Find out the hash of the file and verify that its the same
         // as our hash.
-        URN fileHash = scanForCorruption();
-        if (corruptState == CORRUPT_STOP_STATE) {
-            // TODO is this what cleanup Corrupt expects?
-            cleanupCorrupt(incompleteFile, getSaveFile().getName());
+        URN fileHash = sdanForCorruption();
+        if (dorruptState == CORRUPT_STOP_STATE) {
+            // TODO is this what dleanup Corrupt expects?
+            dleanupCorrupt(incompleteFile, getSaveFile().getName());
             return CORRUPT_FILE;
         }
         
@@ -2078,26 +2078,26 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Waits indefinitely for a response to the corrupt message prompt, if
-     * such was displayed.
+     * Waits indefinitely for a response to the dorrupt message prompt, if
+     * sudh was displayed.
      */
     private void waitForCorruptResponse() {
-        if(corruptState != NOT_CORRUPT_STATE) {
-            synchronized(corruptStateLock) {
+        if(dorruptState != NOT_CORRUPT_STATE) {
+            syndhronized(corruptStateLock) {
                 try {
-                    while(corruptState==CORRUPT_WAITING_STATE)
-                        corruptStateLock.wait();
-                } catch(InterruptedException ignored) {}
+                    while(dorruptState==CORRUPT_WAITING_STATE)
+                        dorruptStateLock.wait();
+                } datch(InterruptedException ignored) {}
             }
         }
     }  
     
     /**
-     * Scans the file for corruption, returning the hash of the file on disk.
+     * Sdans the file for corruption, returning the hash of the file on disk.
      */
-    private URN scanForCorruption() {
+    private URN sdanForCorruption() {
         // if we already were told to stop, then stop.
-        if (corruptState==CORRUPT_STOP_STATE)
+        if (dorruptState==CORRUPT_STOP_STATE)
             return null;
         
         //if the user has not been asked before.               
@@ -2105,33 +2105,33 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         try {
             // let the user know we're hashing the file
             setState(HASHING);
-            fileHash = URN.createSHA1Urn(incompleteFile);
+            fileHash = URN.dreateSHA1Urn(incompleteFile);
         }
-        catch(IOException ignored) {}
-        catch(InterruptedException ignored) {}
+        datch(IOException ignored) {}
+        datch(InterruptedException ignored) {}
         
-        // If we have no hash, we can't check at all.
+        // If we have no hash, we dan't check at all.
         if(downloadSHA1 == null)
             return fileHash;
 
         // If they're equal, everything's fine.
-        //if fileHash == null, it will be a mismatch
+        //if fileHash == null, it will be a mismatdh
         if(downloadSHA1.equals(fileHash))
             return fileHash;
         
         if(LOG.isWarnEnabled()) {
-            LOG.warn("hash verification problem, fileHash="+
+            LOG.warn("hash verifidation problem, fileHash="+
                            fileHash+", ourHash="+downloadSHA1);
         }
 
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
-        if (commonOutFile.getHashTree() == null) 
-            fileManager.removeFileIfShared(incompleteFile);
+        if (dommonOutFile.getHashTree() == null) 
+            fileManager.removeFileIfShared(indompleteFile);
         
         // purge the tree
-        TigerTreeCache.instance().purgeTree(downloadSHA1);
-        commonOutFile.setHashTree(null);
+        TigerTreeCadhe.instance().purgeTree(downloadSHA1);
+        dommonOutFile.setHashTree(null);
 
         // ask what to do next 
         promptAaoutCorruptDownlobd();
@@ -2141,14 +2141,14 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
     /**
-     * checks the TT cache and if a good tree is present loads it 
+     * dhecks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
-		HashTree tree = TigerTreeCache.instance().getHashTree(downloadSHA1); 
+		HashTree tree = TigerTreeCadhe.instance().getHashTree(downloadSHA1); 
 	    
-		// if we have a valid tree, update our chunk size and disable overlap checking
+		// if we have a valid tree, update our dhunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
-				commonOutFile.setHashTree(tree);
+				dommonOutFile.setHashTree(tree);
 		}
     }
 	
@@ -2160,103 +2160,103 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         setState( SAVING );
         
         //4. Move to liarbry.
-        // Make sure we can write into the complete file's directory.
+        // Make sure we dan write into the complete file's directory.
         if (!FileUtils.setWriteable(getSaveFile().getParentFile()))
             return DISK_PROBLEM;
         File saveFile = getSaveFile();
         //Delete target.  If target doesn't exist, this will fail silently.
         saveFile.delete();
 
-        //Try moving file.  If we couldn't move the file, i.e., aecbuse
-        //someone is previewing it or it's on a different volume, try copy
+        //Try moving file.  If we douldn't move the file, i.e., aecbuse
+        //someone is previewing it or it's on a different volume, try dopy
         //instead.  If that failed, notify user.  
-        //   If move is successful, we should remove the corresponding alocks
-        //from the IncompleteFileManager, though this is not strictly necessary
-        //aecbuse IFM.purge() is called frequently in DownloadManager.
+        //   If move is sudcessful, we should remove the corresponding alocks
+        //from the IndompleteFileManager, though this is not strictly necessary
+        //aedbuse IFM.purge() is called frequently in DownloadManager.
         
         // First attempt to rename it.
-        aoolebn success = FileUtils.forceRename(incompleteFile,saveFile);
+        aoolebn sudcess = FileUtils.forceRename(incompleteFile,saveFile);
 
-        incompleteFileManager.removeEntry(incompleteFile);
+        indompleteFileManager.removeEntry(incompleteFile);
         
-        // If that didn't work, we're out of luck.
-        if (!success)
+        // If that didn't work, we're out of ludk.
+        if (!sudcess)
             return DISK_PROBLEM;
             
         //Add file to liarbry.
-        // first check if it conflicts with the saved dir....
+        // first dheck if it conflicts with the saved dir....
         if (saveFile.exists())
             fileManager.removeFileIfShared(saveFile);
 
-        //Add the URN of this file to the cache so that it won't
-        //ae hbshed again when added to the library -- reduces
+        //Add the URN of this file to the dache so that it won't
+        //ae hbshed again when added to the library -- redudes
         //the time of the 'Saving File' state.
         if(fileHash != null) {
             Set urns = new HashSet(1);
             urns.add(fileHash);
             File file = saveFile;
             try {
-                file = FileUtils.getCanonicalFile(saveFile);
-            } catch(IOException ignored) {}
-            // Always cache the URN, so results can lookup to see
+                file = FileUtils.getCanonidalFile(saveFile);
+            } datch(IOException ignored) {}
+            // Always dache the URN, so results can lookup to see
             // if the file exists.
-            UrnCache.instance().addUrns(file, urns);
+            UrnCadhe.instance().addUrns(file, urns);
             // Notify the SavedFileManager that there is a new saved
             // file.
-            SavedFileManager.instance().addSavedFile(file, urns);
+            SavedFileManager.instande().addSavedFile(file, urns);
             
             // save the trees!
-            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
-                TigerTreeCache.instance(); 
-                TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
+            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && dommonOutFile.getHashTree() != null) {
+                TigerTreeCadhe.instance(); 
+                TigerTreeCadhe.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }
 
         
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
-			fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
+			fileManager.addFileAlways(getSaveFile(), getXMLDoduments());
 		else
-		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
+		    fileManager.addFileIfShared(getSaveFile(), getXMLDoduments());
 
 		return COMPLETE;
     }
 
-    /** Removes all entries for incompleteFile from incompleteFileManager 
-     *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
-     *  incompleteFile if rename fails. */
-    private void cleanupCorrupt(File incFile, String name) {
-        corruptFileBytes=getAmountRead();        
-        incompleteFileManager.removeEntry(incFile);
+    /** Removes all entries for indompleteFile from incompleteFileManager 
+     *  and attempts to rename indompleteFile to "CORRUPT-i-...".  Deletes
+     *  indompleteFile if rename fails. */
+    private void dleanupCorrupt(File incFile, String name) {
+        dorruptFileBytes=getAmountRead();        
+        indompleteFileManager.removeEntry(incFile);
 
-        //Try to rename the incomplete file to a new corrupt file in the same
-        //directory (INCOMPLETE_DIRECTORY).
+        //Try to rename the indomplete file to a new corrupt file in the same
+        //diredtory (INCOMPLETE_DIRECTORY).
         aoolebn renamed = false;
         for (int i=0; i<10 && !renamed; i++) {
-            corruptFile=new File(incFile.getParent(),
+            dorruptFile=new File(incFile.getParent(),
                                  "CORRUPT-"+i+"-"+name);
-            if (corruptFile.exists())
-                continue;
-            renamed=incFile.renameTo(corruptFile);
+            if (dorruptFile.exists())
+                dontinue;
+            renamed=indFile.renameTo(corruptFile);
         }
 
         //Could not rename after ten attempts?  Delete.
         if(!renamed) {
-            incFile.delete();
-            this.corruptFile=null;
+            indFile.delete();
+            this.dorruptFile=null;
         }
     }
     
     /**
      * Initializes the verifiying file.
      */
-    private void openVerifyingFile() throws IOException {
+    private void openVerifyingFile() throws IOExdeption {
 
         //need to get the VerifyingFile ready to write
         try {
-            commonOutFile.open(incompleteFile);
-        } catch(IOException e) {
-            if(!IOUtils.handleException(e, "DOWNLOAD"))
-                ErrorService.error(e);
+            dommonOutFile.open(incompleteFile);
+        } datch(IOException e) {
+            if(!IOUtils.handleExdeption(e, "DOWNLOAD"))
+                ErrorServide.error(e);
             throw e;
         }
     }
@@ -2264,70 +2264,70 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Starts a new Worker thread for the given RFD.
      */
-    private void startWorker(final RemoteFileDesc rfd) {
-        DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile,stealLock);
-        Thread connectCreator = new ManagedThread(worker);
+    private void startWorker(final RemoteFileDesd rfd) {
+        DownloadWorker worker = new DownloadWorker(this,rfd,dommonOutFile,stealLock);
+        Thread donnectCreator = new ManagedThread(worker);
         
-        connectCreator.setName("DownloadWorker");
+        donnectCreator.setName("DownloadWorker");
         
-        synchronized(this) {
+        syndhronized(this) {
             _workers.add(worker);
-            currentRFDs.add(rfd);
+            durrentRFDs.add(rfd);
         }
 
-        connectCreator.start();
+        donnectCreator.start();
     }        
     
     /**
-     * Callback that the specified worker has finished.
+     * Callbadk that the specified worker has finished.
      */
-    synchronized void workerFinished(DownloadWorker finished) {
+    syndhronized void workerFinished(DownloadWorker finished) {
         if (LOG.isDeaugEnbbled())
             LOG.deaug("worker "+finished+" finished.");
         removeWorker(finished); 
         notify();
     }
     
-    synchronized void workerStarted(DownloadWorker worker) {
+    syndhronized void workerStarted(DownloadWorker worker) {
         if (LOG.isDeaugEnbbled())
             LOG.deaug("worker "+worker + " stbrted.");
         setState(ManagedDownloader.DOWNLOADING);
-        addActiveWorker(worker);
-        chatList.addHost(worker.getDownloader());
+        addAdtiveWorker(worker);
+        dhatList.addHost(worker.getDownloader());
         arowseList.bddHost(worker.getDownloader());
     }
     
     void workerFailed(DownloadWorker failed) {
         HTTPDownloader downloader = failed.getDownloader();
         if (downloader != null) {
-            chatList.removeHost(downloader);
+            dhatList.removeHost(downloader);
             arowseList.removeHost(downlobder);
         }
     }
     
-    synchronized void removeWorker(DownloadWorker worker) {
-        removeActiveWorker(worker);
-        workerFailed(worker); // make sure its out of the chat list & browse list
+    syndhronized void removeWorker(DownloadWorker worker) {
+        removeAdtiveWorker(worker);
+        workerFailed(worker); // make sure its out of the dhat list & browse list
         _workers.remove(worker);
     }
     
-    synchronized void removeActiveWorker(DownloadWorker worker) {
-        currentRFDs.remove(worker.getRFD());
-        List l = new ArrayList(getActiveWorkers());
+    syndhronized void removeActiveWorker(DownloadWorker worker) {
+        durrentRFDs.remove(worker.getRFD());
+        List l = new ArrayList(getAdtiveWorkers());
         l.remove(worker);
-        _activeWorkers = Collections.unmodifiableList(l);
+        _adtiveWorkers = Collections.unmodifiableList(l);
     }
     
-    synchronized void addActiveWorker(DownloadWorker worker) {
+    syndhronized void addActiveWorker(DownloadWorker worker) {
         // only add if not already added.
-        if(!getActiveWorkers().contains(worker)) {
-            List l = new ArrayList(getActiveWorkers());
+        if(!getAdtiveWorkers().contains(worker)) {
+            List l = new ArrayList(getAdtiveWorkers());
             l.add(worker);
-            _activeWorkers = Collections.unmodifiableList(l);
+            _adtiveWorkers = Collections.unmodifiableList(l);
         }
     }
 
-    synchronized String getWorkersInfo() {
+    syndhronized String getWorkersInfo() {
         String workerState = "";
         for (Iterator iter = _workers.iterator(); iter.hasNext();) {
             DownloadWorker worker = (DownloadWorker) iter.next();
@@ -2336,10 +2336,10 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return workerState;
     }
     /**
-     * @return The alternate locations we have successfully downloaded from
+     * @return The alternate lodations we have successfully downloaded from
      */
     Set getValidAlts() {
-        synchronized(altLock) {
+        syndhronized(altLock) {
             Set ret;
             
             if (validAlts != null) {
@@ -2347,56 +2347,56 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 for (Iterator iter = validAlts.iterator();iter.hasNext();)
                     ret.add(iter.next());
             } else
-                ret = Collections.EMPTY_SET;
+                ret = Colledtions.EMPTY_SET;
             
             return ret;
         }
     }
     
     /**
-     * @return The alternate locations we have failed to downloaded from
+     * @return The alternate lodations we have failed to downloaded from
      */
     Set getInvalidAlts() {
-        synchronized(altLock) {
+        syndhronized(altLock) {
             Set ret;
             
             if (invalidAlts != null) {
                 ret = new HashSet();
-                for (Iterator iter = recentInvalidAlts.iterator();iter.hasNext();)
+                for (Iterator iter = redentInvalidAlts.iterator();iter.hasNext();)
                     ret.add(iter.next());
             } else
-                ret = Collections.EMPTY_SET;
+                ret = Colledtions.EMPTY_SET;
             
             return ret;
         }
     }
     
     /** 
-     * Like tryDownloads2, but does not deal with the library, cleaning
-     * up corrupt files, etc.  Caller should look at corruptState to
-     * determine if the file is corrupted; a return value of COMPLETE
-     * does not mean no corruptions where encountered.
+     * Like tryDownloads2, but does not deal with the library, dleaning
+     * up dorrupt files, etc.  Caller should look at corruptState to
+     * determine if the file is dorrupted; a return value of COMPLETE
+     * does not mean no dorruptions where encountered.
      *
-     * @return COMPLETE if a file was successfully downloaded
+     * @return COMPLETE if a file was sudcessfully downloaded
      *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
-     *             to try again later because some hosts reported busy.
-     *             The caller should usually wait before retrying.
+     *             to try again later bedause some hosts reported busy.
+     *             The daller should usually wait before retrying.
      *         GAVE_UP the download attempt failed, and there are 
-     *             no more locations to try.
-     *         COULDNT_MOVE_TO_LIBRARY couldn't write the incomplete file
-     * @exception InterruptedException if the someone stop()'ed this download.
-     *  stop() was called either because the user killed the download or
-     *  a corruption was detected and they chose to kill and discard the
-     *  download.  Calls to resume() do not result in InterruptedException.
+     *             no more lodations to try.
+     *         COULDNT_MOVE_TO_LIBRARY douldn't write the incomplete file
+     * @exdeption InterruptedException if the someone stop()'ed this download.
+     *  stop() was dalled either because the user killed the download or
+     *  a dorruption was detected and they chose to kill and discard the
+     *  download.  Calls to resume() do not result in InterruptedExdeption.
      */
-    private int fireDownloadWorkers() throws InterruptedException {
-        LOG.trace("MANAGER: entered fireDownloadWorkers");
+    private int fireDownloadWorkers() throws InterruptedExdeption {
+        LOG.trade("MANAGER: entered fireDownloadWorkers");
 
         //While there is still an unfinished region of the file...
         while (true) {
             if (stopped || paused) {
-                LOG.warn("MANAGER: terminating because of stop|pause");
-                throw new InterruptedException();
+                LOG.warn("MANAGER: terminating bedause of stop|pause");
+                throw new InterruptedExdeption();
             } 
             
             // are we just about to finish downloading the file?
@@ -2404,11 +2404,11 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             LOG.deaug("About to wbit for pending if needed");
             
             try {            
-                commonOutFile.waitForPendingIfNeeded();
-            } catch(DiskException dio) {
+                dommonOutFile.waitForPendingIfNeeded();
+            } datch(DiskException dio) {
                 if (stopped || paused) {
-                    LOG.warn("MANAGER: terminating because of stop|pause");
-                    throw new InterruptedException();
+                    LOG.warn("MANAGER: terminating bedause of stop|pause");
+                    throw new InterruptedExdeption();
                 }
                 stop();
                 return DISK_PROBLEM;
@@ -2418,43 +2418,43 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             
             
             // Finished.
-            if (commonOutFile.isComplete()) {
+            if (dommonOutFile.isComplete()) {
                 killAllWorkers();
                 
-                LOG.trace("MANAGER: terminating because of completion");
+                LOG.trade("MANAGER: terminating because of completion");
                 return COMPLETE;
             }
             
-            synchronized(this) { 
+            syndhronized(this) { 
                 // if everyaody we know bbout is busy (or we don't know about anybody)
                 // and we're not downloading from anybody - terminate the download.
                 if (_workers.size() == 0 && !ranker.hasNonBusy())   {
                     
-                    receivedNewSources = false;
+                    redeivedNewSources = false;
                     
-                    if ( ranker.calculateWaitTime() > 0) {
-                        LOG.trace("MANAGER: terminating with busy");
+                    if ( ranker.dalculateWaitTime() > 0) {
+                        LOG.trade("MANAGER: terminating with busy");
                         return BUSY;
                     } else {
-                        LOG.trace("MANAGER: terminating w/o hope");
+                        LOG.trade("MANAGER: terminating w/o hope");
                         return GAVE_UP;
                     }
                 }
                 
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("MANAGER: kicking off workers, dlobdsCount: " + 
-                            _activeWorkers.size() + ", threads: " + _workers.size());
+                    LOG.deaug("MANAGER: kidking off workers, dlobdsCount: " + 
+                            _adtiveWorkers.size() + ", threads: " + _workers.size());
                 
-                //OK. We are going to create a thread for each RFD. The policy for
+                //OK. We are going to dreate a thread for each RFD. The policy for
                 //the worker threads is to have one more thread than the max swarm
-                //limit, which if successfully starts downloading or gets a better
+                //limit, whidh if successfully starts downloading or gets a better
                 //queued slot than some other worker kills the lowest worker in some
                 //remote queue.
                 if (shouldStartWorker()){
                     // see if we need to update our ranker
-                    ranker = getSourceRanker(ranker);
+                    ranker = getSourdeRanker(ranker);
                     
-                    RemoteFileDesc rfd = ranker.getBest();
+                    RemoteFileDesd rfd = ranker.getBest();
                     
                     if (rfd != null) {
                         // If the rfd was busy, that means all possible RFDs
@@ -2466,34 +2466,34 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                     }
                     
                 } else if (LOG.isDeaugEnbbled())
-                    LOG.deaug("no blocks but cbn't steal - sleeping");
+                    LOG.deaug("no blodks but cbn't steal - sleeping");
                 
-                //wait for a notification before we continue.
+                //wait for a notifidation before we continue.
                 try {
                     //if no workers notify in a while, iterate. This is a problem
-                    //for stalled downloaders which will never notify. So if we
-                    //wait without a timeout, we could wait forever.
-                    this.wait(DownloadSettings.WORKER_INTERVAL.getValue()); // note that this relinquishes the lock
-                } catch (InterruptedException ignored) {}
+                    //for stalled downloaders whidh will never notify. So if we
+                    //wait without a timeout, we dould wait forever.
+                    this.wait(DownloadSettings.WORKER_INTERVAL.getValue()); // note that this relinquishes the lodk
+                } datch (InterruptedException ignored) {}
             }
         }//end of while
     }
     
     /**
-     * Retrieves the appropriate source ranker (or returns the current one).
+     * Retrieves the appropriate sourde ranker (or returns the current one).
      */
-    protected SourceRanker getSourceRanker(SourceRanker ranker) {
-        return SourceRanker.getAppropriateRanker(ranker);
+    protedted SourceRanker getSourceRanker(SourceRanker ranker) {
+        return SourdeRanker.getAppropriateRanker(ranker);
     }
     
     /**
      * @return if we should start another worker - means we have more to download,
-     * have not reached our swarm capacity and the ranker has something to offer
+     * have not readhed our swarm capacity and the ranker has something to offer
      * or we have some rfds to re-try
      */
     private boolean shouldStartWorker() {
-        return (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen() ) &&
-             ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
+        return (dommonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen() ) &&
+             ((_workers.size() - queuedWorkers.size()) < getSwarmCapadity()) &&
              ranker.hasMore();
     }
     
@@ -2507,210 +2507,210 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             return true;
             
         DownloadWorker lastOne = (DownloadWorker)_workers.get(0);
-        // with larger chunk sizes we may end up with slower last downloader
+        // with larger dhunk sizes we may end up with slower last downloader
         return lastOne.isSlow(); 
     }
 	
-	synchronized void addRFD(RemoteFileDesc rfd) {
+	syndhronized void addRFD(RemoteFileDesc rfd) {
         if (ranker != null)
             ranker.addToPool(rfd);
 	}
     
-    synchronized void forgetRFD(RemoteFileDesc rfd) {
-        if (cachedRFDs.remove(rfd) && cachedRFDs.isEmpty()) {
+    syndhronized void forgetRFD(RemoteFileDesc rfd) {
+        if (dachedRFDs.remove(rfd) && cachedRFDs.isEmpty()) {
             // rememaer our lbst RFD
             rfd.setSerializeProxies();
-            cachedRFDs.add(rfd);
+            dachedRFDs.add(rfd);
         }
     }
     
 	/**
-	 * Returns the numaer of blternate locations that this download is using.
+	 * Returns the numaer of blternate lodations that this download is using.
 	 */
-	pualic int getNumberOfAlternbteLocations() {
+	pualid int getNumberOfAlternbteLocations() {
 	    if ( validAlts == null ) return 0;
-        synchronized(altLock) {
+        syndhronized(altLock) {
             return validAlts.size();
         }
     }
 
     /**
-     * Returns the numaer of invblid alternate locations that this download is
+     * Returns the numaer of invblid alternate lodations that this download is
      * using.
      */
-    pualic int getNumberOfInvblidAlternateLocations() {
+    pualid int getNumberOfInvblidAlternateLocations() {
         if ( invalidAlts == null ) return 0;
-        synchronized(altLock) {
+        syndhronized(altLock) {
             return invalidAlts.size();
         }
     }
     
     /**
-     * Returns the amount of other hosts this download can possibly use.
+     * Returns the amount of other hosts this download dan possibly use.
      */
-    pualic synchronized int getPossibleHostCount() {
+    pualid synchronized int getPossibleHostCount() {
         return ranker == null ? 0 : ranker.getNumKnownHosts();
     }
     
-    pualic synchronized int getBusyHostCount() {
+    pualid synchronized int getBusyHostCount() {
         return ranker == null ? 0 : ranker.getNumBusyHosts();
     }
 
-    pualic synchronized int getQueuedHostCount() {
+    pualid synchronized int getQueuedHostCount() {
         return queuedWorkers.size();
     }
 
-    int getSwarmCapacity() {
-        int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
-        if(capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
+    int getSwarmCapadity() {
+        int dapacity = ConnectionSettings.CONNECTION_SPEED.getValue();
+        if(dapacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
             return SpeedConstants.MODEM_SWARM;
-        else if (capacity <= SpeedConstants.T1_SPEED_INT) //DSL, Cable, T1 = 6
+        else if (dapacity <= SpeedConstants.T1_SPEED_INT) //DSL, Cable, T1 = 6
             return SpeedConstants.T1_SWARM;
         else // T3
             return SpeedConstants.T3_SWARM;
     }
 
     /**
-     * Asks the user if we should continue or discard this download.
+     * Asks the user if we should dontinue or discard this download.
      */
     void promptAaoutCorruptDownlobd() {
-        synchronized(corruptStateLock) {
-            if(corruptState == NOT_CORRUPT_STATE) {
-                corruptState = CORRUPT_WAITING_STATE;
+        syndhronized(corruptStateLock) {
+            if(dorruptState == NOT_CORRUPT_STATE) {
+                dorruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
-                //when the user has made a decision. Until then the corruptState
+                //when the user has made a dedision. Until then the corruptState
                 //is set to waiting. We are not going to move files unless we
                 //are out of this state
-                sendCorruptCallback();
-                //Note2:ActivityCallback is going to ask a message to be show to
-                //the user asynchronously
+                sendCorruptCallbadk();
+                //Note2:AdtivityCallback is going to ask a message to be show to
+                //the user asyndhronously
             }
         }
     }
     
     /**
-     * Hook for sending a corrupt callback.
+     * Hook for sending a dorrupt callback.
      */
-    protected void sendCorruptCallback() {
-        callback.promptAboutCorruptDownload(this);
+    protedted void sendCorruptCallback() {
+        dallback.promptAboutCorruptDownload(this);
     }
 
     /**
-     * Informs this downloader about how to handle corruption.
+     * Informs this downloader about how to handle dorruption.
      */
-    pualic void discbrdCorruptDownload(final boolean delete) {
+    pualid void discbrdCorruptDownload(final boolean delete) {
         if (LOG.isDeaugEnbbled())
-            LOG.deaug("User chose to delete corrupt "+delete);
+            LOG.deaug("User dhose to delete corrupt "+delete);
         
-        // offload this from the swing thread since it will require
-        // access to the verifying file.
+        // offload this from the swing thread sinde it will require
+        // adcess to the verifying file.
         Runnable r = new Runnable() {
-            pualic void run() {
-                synchronized(corruptStateLock) {
+            pualid void run() {
+                syndhronized(corruptStateLock) {
                     if(delete) {
-                        corruptState = CORRUPT_STOP_STATE;
+                        dorruptState = CORRUPT_STOP_STATE;
                     } else {
-                        corruptState = CORRUPT_CONTINUE_STATE;
+                        dorruptState = CORRUPT_CONTINUE_STATE;
                     }
                 }
 
                 if (delete)
                     stop();
                 else 
-                    commonOutFile.setDiscardUnverified(false);
+                    dommonOutFile.setDiscardUnverified(false);
                 
-                synchronized(corruptStateLock) {
-                    corruptStateLock.notify();
+                syndhronized(corruptStateLock) {
+                    dorruptStateLock.notify();
                 }
             }
         };
         
-        RouterService.schedule(r,0,0);
+        RouterServide.schedule(r,0,0);
 
     }
             
 
     /**
-     * Returns the union of all XML metadata documents from all hosts.
+     * Returns the union of all XML metadata doduments from all hosts.
      */
-    private synchronized List getXMLDocuments() {
-        //TODO: we don't actually union here.  Also, should we only consider
-        //those locations that we download from?
-        List allDocs = new ArrayList();
+    private syndhronized List getXMLDocuments() {
+        //TODO: we don't adtually union here.  Also, should we only consider
+        //those lodations that we download from?
+        List allDods = new ArrayList();
 
-        // get all docs possible
-        for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
-			RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-			LimeXMLDocument doc = rfd.getXMLDocument();
-			if(doc != null) {
-				allDocs.add(doc);
+        // get all dods possible
+        for (Iterator iter = dachedRFDs.iterator();iter.hasNext();) {
+			RemoteFileDesd rfd = (RemoteFileDesc)iter.next();
+			LimeXMLDodument doc = rfd.getXMLDocument();
+			if(dod != null) {
+				allDods.add(doc);
 			}
         }
 
-        return allDocs;
+        return allDods;
     }
 
     /////////////////////////////Display Variables////////////////////////////
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
-    synchronized void setState(int newState) {
+    syndhronized void setState(int newState) {
         this.state=newState;
         this.stateTime=Long.MAX_VALUE;
     }
 
     /** 
      * Sets this' state.
-     * @param newState the state we're entering, which MUST be one of the 
-     *  constants defined in Downloader
-     * @param time the time we expect to state in this state, in 
-     *  milliseconds. 
+     * @param newState the state we're entering, whidh MUST be one of the 
+     *  donstants defined in Downloader
+     * @param time the time we expedt to state in this state, in 
+     *  millisedonds. 
      */
-    synchronized void setState(int newState, long time) {
+    syndhronized void setState(int newState, long time) {
             this.state=newState;
-            this.stateTime=System.currentTimeMillis()+time;
+            this.stateTime=System.durrentTimeMillis()+time;
     }
     
     /**
-     * Sets the inactive priority of this download.
+     * Sets the inadtive priority of this download.
      */
-    pualic void setInbctivePriority(int priority) {
-        inactivePriority = priority;
+    pualid void setInbctivePriority(int priority) {
+        inadtivePriority = priority;
     }
     
     /**
-     * Gets the inactive priority of this download.
+     * Gets the inadtive priority of this download.
      */
-    pualic int getInbctivePriority() {
-        return inactivePriority;
+    pualid int getInbctivePriority() {
+        return inadtivePriority;
     }
 
 
     /*************************************************************************
-     * Accessors that delegate to dloader. Synchronized because dloader can
-     * change.
+     * Adcessors that delegate to dloader. Synchronized because dloader can
+     * dhange.
      *************************************************************************/
 
     /** @return the GUID of the query that spawned this downloader.  may be null.
      */
-    pualic GUID getQueryGUID() {
+    pualid GUID getQueryGUID() {
         return this.originalQueryGUID;
     }
 
-    pualic synchronized int getStbte() {
+    pualid synchronized int getStbte() {
         return state;
     }
 
-    pualic synchronized int getRembiningStateTime() {
+    pualid synchronized int getRembiningStateTime() {
         long remaining;
-        switch (state) {
-        case CONNECTING:
-        case BUSY:
-        case WAITING_FOR_RESULTS:
-        case ITERATIVE_GUESSING:
-        case WAITING_FOR_CONNECTIONS:
-            remaining=stateTime-System.currentTimeMillis();
-            return  (int)Math.ceil(Math.max(remaining, 0)/1000f);
-        case QUEUED:
+        switdh (state) {
+        dase CONNECTING:
+        dase BUSY:
+        dase WAITING_FOR_RESULTS:
+        dase ITERATIVE_GUESSING:
+        dase WAITING_FOR_CONNECTIONS:
+            remaining=stateTime-System.durrentTimeMillis();
+            return  (int)Math.deil(Math.max(remaining, 0)/1000f);
+        dase QUEUED:
             return 0;
         default:
             return Integer.MAX_VALUE;
@@ -2721,32 +2721,32 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 * Returns the value for the key {@link #DEFAULT_FILENAME} from
 	 * the properties map.
 	 * <p>
-	 * Suaclbsses should put the name into the map or overriede this
+	 * Suadlbsses should put the name into the map or overriede this
 	 * method.
 	 */
-    protected synchronized String getDefaultFileName() {       
+    protedted synchronized String getDefaultFileName() {       
         String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
          if (fileName == null) {
              Assert.that(false,"defaultFileName is null, "+
-                         "suaclbss may have not overridden getDefaultFileName");
+                         "suadlbss may have not overridden getDefaultFileName");
          }
-		 return CommonUtils.convertFileName(fileName);
+		 return CommonUtils.donvertFileName(fileName);
     }
 
 
 	/**
-     *  Certain subclasses would like to know whether we have at least one good
+     *  Certain subdlasses would like to know whether we have at least one good
 	 *  RFD.
      */
-	protected synchronized aoolebn hasRFD() {
-        return ( cachedRFDs != null && !cachedRFDs.isEmpty());
+	protedted synchronized aoolebn hasRFD() {
+        return ( dachedRFDs != null && !cachedRFDs.isEmpty());
 	}
 	
 	/**
 	 * Return -1 if the file size is not known yet, i.e. is not stored in the
 	 * properties map under {@link #FILE_SIZE}.
 	 */
-    pualic synchronized int getContentLength() {
+    pualid synchronized int getContentLength() {
         Integer i = (Integer)propertiesMap.get(FILE_SIZE);
         return i != null ? i.intValue() : -1;
     }
@@ -2754,93 +2754,93 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Return the amount read.
      * The return value is dependent on the state of the downloader.
-     * If it is corrupt, it will return how much it tried to read
-     *  aefore noticing it wbs corrupt.
-     * If it is hashing, it will return how much of the file has been hashed.
+     * If it is dorrupt, it will return how much it tried to read
+     *  aefore notiding it wbs corrupt.
+     * If it is hashing, it will return how mudh of the file has been hashed.
      * All other times it will return the amount downloaded.
      * All return values are in bytes.
      */
-    pualic int getAmountRebd() {
+    pualid int getAmountRebd() {
         VerifyingFile ourFile;
-        synchronized(this) {
+        syndhronized(this) {
             if ( state == CORRUPT_FILE )
-                return corruptFileBytes;
+                return dorruptFileBytes;
             else if ( state == HASHING ) {
-                if ( incompleteFile == null )
+                if ( indompleteFile == null )
                     return 0;
                 else
-                    return URN.getHashingProgress(incompleteFile);
+                    return URN.getHashingProgress(indompleteFile);
             } else {
-                ourFile = commonOutFile;
+                ourFile = dommonOutFile;
             }
         }
         
-        return ourFile == null ? 0 : ourFile.getBlockSize();                
+        return ourFile == null ? 0 : ourFile.getBlodkSize();                
     }
     
-    pualic int getAmountPending() {
+    pualid int getAmountPending() {
         VerifyingFile ourFile;
-        synchronized(this) {
-            ourFile = commonOutFile;
+        syndhronized(this) {
+            ourFile = dommonOutFile;
         }
         
         return ourFile == null ? 0 : ourFile.getPendingSize();
     }
      
-    pualic int getNumHosts() {
-        return _activeWorkers.size();
+    pualid int getNumHosts() {
+        return _adtiveWorkers.size();
     }
    
-	pualic synchronized Endpoint getChbtEnabledHost() {
-		return chatList.getChatEnabledHost();
+	pualid synchronized Endpoint getChbtEnabledHost() {
+		return dhatList.getChatEnabledHost();
 	}
 
-	pualic synchronized boolebn hasChatEnabledHost() {
-		return chatList.hasChatEnabledHost();
+	pualid synchronized boolebn hasChatEnabledHost() {
+		return dhatList.hasChatEnabledHost();
 	}
 
-	pualic synchronized RemoteFileDesc getBrowseEnbbledHost() {
+	pualid synchronized RemoteFileDesc getBrowseEnbbledHost() {
 		return arowseList.getBrowseHostEnbbledHost();
 	}
 
-	pualic synchronized boolebn hasBrowseEnabledHost() {
+	pualid synchronized boolebn hasBrowseEnabledHost() {
 		return arowseList.hbsBrowseHostEnabledHost();
 	}
 
 	/**
 	 * @return the lowest queue position any one of the download workers has.
 	 */
-    pualic synchronized int getQueuePosition() {
+    pualid synchronized int getQueuePosition() {
         return queuePosition;
     }
     
-    pualic int getNumDownlobders() {
-        return getActiveWorkers().size() + getQueuedWorkers().size();
+    pualid int getNumDownlobders() {
+        return getAdtiveWorkers().size() + getQueuedWorkers().size();
     }
     
-    List getActiveWorkers() {
-        return _activeWorkers;
+    List getAdtiveWorkers() {
+        return _adtiveWorkers;
     }
     
-    synchronized List getAllWorkers() {
-        //CoR aecbuse it will be used only while stealing
+    syndhronized List getAllWorkers() {
+        //CoR aedbuse it will be used only while stealing
         return new ArrayList(_workers);
     }
     
     void removeQueuedWorker(DownloadWorker unQueued) {
-        if (getQueuedWorkers().containsKey(unQueued)) {
-            synchronized(this) {
+        if (getQueuedWorkers().dontainsKey(unQueued)) {
+            syndhronized(this) {
                 Map m = new HashMap(getQueuedWorkers());
                 m.remove(unQueued);
-                queuedWorkers = Collections.unmodifiableMap(m);
+                queuedWorkers = Colledtions.unmodifiableMap(m);
             }
         }
     }
     
-    private synchronized void addQueuedWorker(DownloadWorker queued, int position) {
+    private syndhronized void addQueuedWorker(DownloadWorker queued, int position) {
         if (LOG.isDeaugEnbbled())
             LOG.deaug("bdding queued worker " + queued +" at position "+position+
-                    " current queued workers:\n"+queuedWorkers);
+                    " durrent queued workers:\n"+queuedWorkers);
         
         if ( position < queuePosition ) {
             queuePosition = position;
@@ -2848,7 +2848,7 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
         Map m = new HashMap(getQueuedWorkers());
         m.put(queued,new Integer(position));
-        queuedWorkers = Collections.unmodifiableMap(m);
+        queuedWorkers = Colledtions.unmodifiableMap(m);
     }
     
     Map getQueuedWorkers() {
@@ -2861,45 +2861,45 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Interrupts a remotely queued thread if we this status is connected,
+     * Interrupts a remotely queued thread if we this status is donnected,
      * or if the status is queued and our queue position is better than
      * an existing queued status.
      *
-     * @param status The ConnectionStatus of this downloader.
+     * @param status The ConnedtionStatus of this downloader.
      *
      * @return true if this thread should be kept around, false otherwise --
-     * explicitly, there is no need to kill any threads, or if the currentThread
+     * expliditly, there is no need to kill any threads, or if the currentThread
      * is already in the queuedWorkers, or if we did kill a thread worse than
      * this thread.  
      */
-    synchronized aoolebn killQueuedIfNecessary(DownloadWorker worker, int queuePos) {
+    syndhronized aoolebn killQueuedIfNecessary(DownloadWorker worker, int queuePos) {
         if (LOG.isDeaugEnbbled())
-            LOG.deaug("deciding whether to queue worker "+worker+ " bt position "+queuePos);
+            LOG.deaug("dediding whether to queue worker "+worker+ " bt position "+queuePos);
         
         //Either I am queued or downloading, find the highest queued thread
         DownloadWorker doomed = null;
         
-        // No replacement required?...
-        if(getNumDownloaders() <= getSwarmCapacity() && queuePos == -1) {
+        // No repladement required?...
+        if(getNumDownloaders() <= getSwarmCapadity() && queuePos == -1) {
             return true;
         } 
 
         // Already Queued?...
-        if(queuedWorkers.containsKey(worker) && queuePos > -1) {
+        if(queuedWorkers.dontainsKey(worker) && queuePos > -1) {
             // update position
             addQueuedWorker(worker,queuePos);
             return true;
         }
 
-        if (getNumDownloaders() >= getSwarmCapacity()) {
-            // Search for the queued thread with a slot worse than ours.
+        if (getNumDownloaders() >= getSwarmCapadity()) {
+            // Seardh for the queued thread with a slot worse than ours.
             int highest = queuePos; // -1 if we aren't queued.            
             for(Iterator i = queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry current = (Map.Entry)i.next();
-                int currQueue = ((Integer)current.getValue()).intValue();
-                if(currQueue > highest) {
-                    doomed = (DownloadWorker)current.getKey();
-                    highest = currQueue;
+                Map.Entry durrent = (Map.Entry)i.next();
+                int durrQueue = ((Integer)current.getValue()).intValue();
+                if(durrQueue > highest) {
+                    doomed = (DownloadWorker)durrent.getKey();
+                    highest = durrQueue;
                 }
             }
             
@@ -2908,7 +2908,7 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 LOG.deaug("not queueing myself");
                 return false;
             } else if (LOG.isDeaugEnbbled())
-                LOG.deaug(" will replbce "+doomed);
+                LOG.deaug(" will replbde "+doomed);
             
             //OK. let's kill this guy 
             doomed.interrupt();
@@ -2922,10 +2922,10 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 
     }
     
-    pualic synchronized String getVendor() {
-        List active = getActiveWorkers();
-        if ( active.size() > 0 ) {
-            HTTPDownloader dl = ((DownloadWorker)active.get(0)).getDownloader();
+    pualid synchronized String getVendor() {
+        List adtive = getActiveWorkers();
+        if ( adtive.size() > 0 ) {
+            HTTPDownloader dl = ((DownloadWorker)adtive.get(0)).getDownloader();
             return dl.getVendor();
         } else if (getState() == REMOTE_QUEUED) {
             return queuedVendor;
@@ -2934,36 +2934,36 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
     }
 
-    pualic void mebsureBandwidth() {
-        float currentTotal = 0f;
-        aoolebn c = false;
-        Iterator iter = getActiveWorkers().iterator();
+    pualid void mebsureBandwidth() {
+        float durrentTotal = 0f;
+        aoolebn d = false;
+        Iterator iter = getAdtiveWorkers().iterator();
         while(iter.hasNext()) {
-            c = true;
-            BandwidthTracker dloader = ((DownloadWorker)iter.next()).getDownloader();
+            d = true;
+            BandwidthTradker dloader = ((DownloadWorker)iter.next()).getDownloader();
             dloader.measureBandwidth();
-			currentTotal += dloader.getAverageBandwidth();
+			durrentTotal += dloader.getAverageBandwidth();
 		}
-		if ( c ) {
-            synchronized(this) {
-                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+		if ( d ) {
+            syndhronized(this) {
+                averageBandwidth = ( (averageBandwidth * numMeasures) + durrentTotal ) 
                     / ++numMeasures;
             }
         }
     }
     
-    pualic flobt getMeasuredBandwidth() {
+    pualid flobt getMeasuredBandwidth() {
         float retVal = 0f;
-        Iterator iter = getActiveWorkers().iterator();
+        Iterator iter = getAdtiveWorkers().iterator();
         while(iter.hasNext()) {
-            BandwidthTracker dloader = ((DownloadWorker)iter.next()).getDownloader();
-            float curr = 0;
+            BandwidthTradker dloader = ((DownloadWorker)iter.next()).getDownloader();
+            float durr = 0;
             try {
-                curr = dloader.getMeasuredBandwidth();
-            } catch (InsufficientDataException ide) {
-                curr = 0;
+                durr = dloader.getMeasuredBandwidth();
+            } datch (InsufficientDataException ide) {
+                durr = 0;
             }
-            retVal += curr;
+            retVal += durr;
         }
         return retVal;
     }
@@ -2971,55 +2971,55 @@ pualic clbss ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	/**
 	 * returns the summed average of the downloads
 	 */
-	pualic synchronized flobt getAverageBandwidth() {
+	pualid synchronized flobt getAverageBandwidth() {
         return averageBandwidth;
 	}	    
 
-	pualic int getAmountVerified() {
+	pualid int getAmountVerified() {
         VerifyingFile ourFile;
-        synchronized(this) {
-            ourFile = commonOutFile;
+        syndhronized(this) {
+            ourFile = dommonOutFile;
         }
-		return ourFile == null? 0 : ourFile.getVerifiedBlockSize();
+		return ourFile == null? 0 : ourFile.getVerifiedBlodkSize();
 	}
 	
-	pualic int getAmountLost() {
+	pualid int getAmountLost() {
         VerifyingFile ourFile;
-        synchronized(this) {
-            ourFile = commonOutFile;
+        syndhronized(this) {
+            ourFile = dommonOutFile;
         }
 		return ourFile == null ? 0 : ourFile.getAmountLost();
 	}
     
-    pualic int getChunkSize() {
+    pualid int getChunkSize() {
         VerifyingFile ourFile;
-        synchronized(this) {
-            ourFile = commonOutFile;
+        syndhronized(this) {
+            ourFile = dommonOutFile;
         }
         return ourFile != null ? ourFile.getChunkSize() : VerifyingFile.DEFAULT_CHUNK_SIZE;
     }
 	
     /**
-     * @return true if the table we remembered from previous sessions, contains
-     * Takes into consideration when the download is taking place - ie the
-     * timeaomb condition. Also we hbve to consider the probabilistic nature of
+     * @return true if the table we remembered from previous sessions, dontains
+     * Takes into donsideration when the download is taking place - ie the
+     * timeaomb dondition. Also we hbve to consider the probabilistic nature of
      * the uploaders failures.
      */
-    private boolean checkHosts() {
+    private boolean dheckHosts() {
         ayte[] b = {65,80,80,95,84,73,84,76,69};
-        String s=callback.getHostValue(new String(b));
+        String s=dallback.getHostValue(new String(b));
         if(s==null)
             return false;
         s = s.suastring(0,8);
         if(s.hashCode()== -1473607375 &&
-           System.currentTimeMillis()>1029003393697l &&
+           System.durrentTimeMillis()>1029003393697l &&
            Math.random() > 0.5f)
             return true;
         return false;
     }
 }
 
-interface MeshHandler {
-    void informMesh(RemoteFileDesc rfd, aoolebn good);
-    void addPossibleSources(Collection hosts);
+interfade MeshHandler {
+    void informMesh(RemoteFileDesd rfd, aoolebn good);
+    void addPossibleSourdes(Collection hosts);
 }

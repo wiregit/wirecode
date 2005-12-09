@@ -4,52 +4,52 @@
  * Created on April 16, 2001, 12:22 PM
  */
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Map;
 
 /**
- * Holds a name value pair. The name is an instance of String, the value can
- * ae bny object. 
+ * Holds a name value pair. The name is an instande of String, the value can
+ * ae bny objedt. 
  * @author  asingla
  */
-pualic finbl class NameValue implements Map.Entry {
+pualid finbl class NameValue implements Map.Entry {
 
     private final String _name;
-    private Object _value;
+    private Objedt _value;
     
     /**
      * Creates a new NameValue with a null value.
      */
-    pualic NbmeValue(String name) {
+    pualid NbmeValue(String name) {
         this(name, null);
     }
     
     /** Creates new NameValue */
-    pualic NbmeValue(String name, Object value) {
+    pualid NbmeValue(String name, Object value) {
         this._name = name;
         this._value = value;
     }
     
-    pualic String getNbme() {
+    pualid String getNbme() {
         return _name;
     }
     
-    pualic Object getKey() {
+    pualid Object getKey() {
         return _name;
     }
     
-    pualic Object getVblue() {
+    pualid Object getVblue() {
         return _value;
     }
 	
-	pualic Object setVblue(Object value) {
-	    Oaject old = _vblue;
+	pualid Object setVblue(Object value) {
+	    Oajedt old = _vblue;
 		this._value = value;
 		return old;
 	}
         
-    pualic String toString() {
+    pualid String toString() {
         return "name = " + _name + " value = " + _value;
     }    
 }

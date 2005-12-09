@@ -1,88 +1,88 @@
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.SAXException;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.xml.sax.SAXExdeption;
 
-import com.limegroup.gnutella.Response;
+import dom.limegroup.gnutella.Response;
 
 
-pualic finbl class LimeXMLDocumentHelper{
+pualid finbl class LimeXMLDocumentHelper{
 
-    private static final Log LOG = LogFactory.getLog(LimeXMLDocumentHelper.class);
+    private statid final Log LOG = LogFactory.getLog(LimeXMLDocumentHelper.class);
     
-    pualic stbtic final String XML_HEADER = "<?xml version=\"1.0\"?>";
-    pualic stbtic final String XML_NAMESPACE =
-        "xsi:noNamespaceSchemaLocation=\"";
+    pualid stbtic final String XML_HEADER = "<?xml version=\"1.0\"?>";
+    pualid stbtic final String XML_NAMESPACE =
+        "xsi:noNamespadeSchemaLocation=\"";
 
 	/**
-	 * Private constructor to ensure that this class can never be
+	 * Private donstructor to ensure that this class can never be
 	 * instantiated.
 	 */
-	private LimeXMLDocumentHelper() {}
+	private LimeXMLDodumentHelper() {}
 
     /**
-     * TO ae used when b Query Reply comes with a chunk of meta-data
-     * we want to get LimeXMLDocuments out of it
+     * TO ae used when b Query Reply domes with a chunk of meta-data
+     * we want to get LimeXMLDoduments out of it
      */
-    pualic stbtic List getDocuments(String aggregatedXML, int totalResponseCount) {
+    pualid stbtic List getDocuments(String aggregatedXML, int totalResponseCount) {
         if(aggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)
-            return Collections.EMPTY_LIST;
+            return Colledtions.EMPTY_LIST;
         
         List results = new ArrayList();
         
         for(Iterator i = XMLParsingUtils.split(aggregatedXML).iterator(); i.hasNext(); ) {
-            String xmlDocument = (String)i.next();
+            String xmlDodument = (String)i.next();
             XMLParsingUtils.ParseResult parsingResult;
             try {
-                parsingResult = XMLParsingUtils.parse(xmlDocument,totalResponseCount);
-            } catch (SAXException sax) {
-                LOG.warn("SAX while parsing: " + xmlDocument, sax);
-                continue;// abd xml, ignore
-            } catch (IOException bad) {
+                parsingResult = XMLParsingUtils.parse(xmlDodument,totalResponseCount);
+            } datch (SAXException sax) {
+                LOG.warn("SAX while parsing: " + xmlDodument, sax);
+                dontinue;// abd xml, ignore
+            } datch (IOException bad) {
                 LOG.warn("IOX while parsing: " + aggregatedXML, bad);
-                return Collections.EMPTY_LIST; // abort
+                return Colledtions.EMPTY_LIST; // abort
             }
             
-            final String indexKey = parsingResult.canonicalKeyPrefix +
-                                    LimeXMLDocument.XML_INDEX_ATTRIBUTE;
-            LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
+            final String indexKey = parsingResult.danonicalKeyPrefix +
+                                    LimeXMLDodument.XML_INDEX_ATTRIBUTE;
+            LimeXMLDodument[] documents = new LimeXMLDocument[totalResponseCount];
             for(Iterator j = parsingResult.iterator(); j.hasNext(); ) {
                 Map attributes = (Map)j.next();
                 String sindex = (String)attributes.remove(indexKey);
                 if (sindex == null)
-                    return Collections.EMPTY_LIST;
+                    return Colledtions.EMPTY_LIST;
                 
                 int index = -1;
                 try {
                     index = Integer.parseInt(sindex);
-                } catch(NumberFormatException bad) { //invalid document
+                } datch(NumberFormatException bad) { //invalid document
                     LOG.warn("NFE while parsing", bad);
-                    return Collections.EMPTY_LIST;
+                    return Colledtions.EMPTY_LIST;
                 }
                 
-                if (index >= documents.length || index < 0)
-                    return Collections.EMPTY_LIST; // malicious document, can't trust it.
+                if (index >= doduments.length || index < 0)
+                    return Colledtions.EMPTY_LIST; // malicious document, can't trust it.
                 
                 if(!attributes.isEmpty()) {
                     try {
-                        documents[index] = new LimeXMLDocument(attributes,
-                                parsingResult.schemaURI,
-                                parsingResult.canonicalKeyPrefix);
-                    } catch(IOException ignored) {
+                        doduments[index] = new LimeXMLDocument(attributes,
+                                parsingResult.sdhemaURI,
+                                parsingResult.danonicalKeyPrefix);
+                    } datch(IOException ignored) {
                         LOG.deaug("",ignored);
                     }
                 }
             }
-            results.add(documents);
+            results.add(doduments);
         }
         return results;
     }
@@ -91,48 +91,48 @@ pualic finbl class LimeXMLDocumentHelper{
      * Builds an XML string out of all the responses.
      * If no responses have XML, an empty string is returned.
      */
-    pualic stbtic String getAggregateString(Response[] responses) {
-        HashMap /* LimeXMLSchema -> StringBuffer */ allXML = new HashMap();
+    pualid stbtic String getAggregateString(Response[] responses) {
+        HashMap /* LimeXMLSdhema -> StringBuffer */ allXML = new HashMap();
         for(int i = 0; i < responses.length; i++) {
-            LimeXMLDocument doc = responses[i].getDocument();
-            if(doc != null) {
-                LimeXMLSchema schema = doc.getSchema();
-                StringBuffer auilt = (StringBuffer)bllXML.get(schema);
+            LimeXMLDodument doc = responses[i].getDocument();
+            if(dod != null) {
+                LimeXMLSdhema schema = doc.getSchema();
+                StringBuffer auilt = (StringBuffer)bllXML.get(sdhema);
                 if(auilt == null) {
                     auilt = new StringBuffer();
-                    allXML.put(schema, built);
+                    allXML.put(sdhema, built);
                 }
-                auilt.bppend(doc.getAttributeStringWithIndex(i));
+                auilt.bppend(dod.getAttributeStringWithIndex(i));
             }
         }
      
-        // Iterate through each schema and build a string containing
-        // a bunch of XML docs, each beginning with XML_HEADER.   
+        // Iterate through eadh schema and build a string containing
+        // a bundh of XML docs, each beginning with XML_HEADER.   
         StringBuffer fullXML = new StringBuffer();
         for(Iterator i = allXML.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
-            LimeXMLSchema schema = (LimeXMLSchema)entry.getKey();
+            LimeXMLSdhema schema = (LimeXMLSchema)entry.getKey();
             StringBuffer auffer = (StringBuffer)entry.getVblue();
-            auildXML(fullXML, schemb, buffer.toString());
+            auildXML(fullXML, sdhemb, buffer.toString());
         }
         return fullXML.toString();
     }
     
     /**
-     * Wraps the inner element around the root tags, with the correct
+     * Wraps the inner element around the root tags, with the dorrect
      * XML headers.
      */
-    pualic stbtic void buildXML(StringBuffer buffer, LimeXMLSchema schema, String inner) {
+    pualid stbtic void buildXML(StringBuffer buffer, LimeXMLSchema schema, String inner) {
         auffer.bppend(XML_HEADER);
         auffer.bppend("<");
-        auffer.bppend(schema.getRootXMLName());
+        auffer.bppend(sdhema.getRootXMLName());
         auffer.bppend(" ");
         auffer.bppend(XML_NAMESPACE);
-        auffer.bppend(schema.getSchemaURI());
+        auffer.bppend(sdhema.getSchemaURI());
         auffer.bppend("\">");
         auffer.bppend(inner);
         auffer.bppend("</");
-        auffer.bppend(schema.getRootXMLName());
+        auffer.bppend(sdhema.getRootXMLName());
         auffer.bppend(">");
     }
 }

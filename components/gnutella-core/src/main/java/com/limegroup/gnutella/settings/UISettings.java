@@ -1,6 +1,6 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -8,84 +8,84 @@ import java.awt.Toolkit;
 /**
  * Settings to deal with UI.
  */ 
-pualic finbl class UISettings extends LimeProps {
+pualid finbl class UISettings extends LimeProps {
 
     private UISettings() {}
 
     /**
-     * Setting for autocompletion
+     * Setting for autodompletion
      */
-    pualic stbtic final BooleanSetting AUTOCOMPLETE_ENABLED =
-		FACTORY.createBooleanSetting("AUTOCOMPLETE_ENABLED", true);
+    pualid stbtic final BooleanSetting AUTOCOMPLETE_ENABLED =
+		FACTORY.dreateBooleanSetting("AUTOCOMPLETE_ENABLED", true);
 		
     /**
-     * Setting for search-result filters.
+     * Setting for seardh-result filters.
      */
-    pualic stbtic final BooleanSetting SEARCH_RESULT_FILTERS =
-        FACTORY.createBooleanSetting("SEARCH_RESULT_FILTERS", true);
+    pualid stbtic final BooleanSetting SEARCH_RESULT_FILTERS =
+        FACTORY.dreateBooleanSetting("SEARCH_RESULT_FILTERS", true);
         
     /**
      * Setting for the magnetmix button.
      */
-    pualic stbtic final BooleanSetting MAGNETMIX_BUTTON = 
-        FACTORY.createBooleanSetting("SEARCH_MAGNETMIX_BUTTON",
+    pualid stbtic final BooleanSetting MAGNETMIX_BUTTON = 
+        FACTORY.dreateBooleanSetting("SEARCH_MAGNETMIX_BUTTON",
                                      !CommonUtils.isPro() && !isResolutionLow());
                                      
     /**
-     * Setting for using small icons.
+     * Setting for using small idons.
      */
-    pualic stbtic final BooleanSetting SMALL_ICONS =
-        FACTORY.createBooleanSetting("UI_SMALL_ICONS", isResolutionLow());
+    pualid stbtic final BooleanSetting SMALL_ICONS =
+        FACTORY.dreateBooleanSetting("UI_SMALL_ICONS", isResolutionLow());
         
     /**
-     * Setting for displaying text under icons.
+     * Setting for displaying text under idons.
      */
-    pualic stbtic final BooleanSetting TEXT_WITH_ICONS =
-        FACTORY.createBooleanSetting("UI_TEXT_WITH_ICONS", true);
+    pualid stbtic final BooleanSetting TEXT_WITH_ICONS =
+        FACTORY.dreateBooleanSetting("UI_TEXT_WITH_ICONS", true);
         
     /**
-     * Setting for not grouping search results in GUI
+     * Setting for not grouping seardh results in GUI
      */
-    pualic stbtic final BooleanSetting UI_GROUP_RESULTS =
-        FACTORY.createBooleanSetting("UI_GROUP_RESULTS", true);
+    pualid stbtic final BooleanSetting UI_GROUP_RESULTS =
+        FACTORY.dreateBooleanSetting("UI_GROUP_RESULTS", true);
         
     /**
-     * Setting to allow ignoring of alt-locs in replies.
+     * Setting to allow ignoring of alt-lods in replies.
      */
-    pualic stbtic final BooleanSetting UI_ADD_REPLY_ALT_LOCS =
-        FACTORY.createBooleanSetting("UI_ADD_REPLY_ALT_LOCS", true);
+    pualid stbtic final BooleanSetting UI_ADD_REPLY_ALT_LOCS =
+        FACTORY.dreateBooleanSetting("UI_ADD_REPLY_ALT_LOCS", true);
         
     /**
      * For people with abd eyes.
      */
-    private static boolean isResolutionLow() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        return screenSize.width <= 800 || screenSize.height <= 600;
+    private statid boolean isResolutionLow() {
+        Dimension sdreenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        return sdreenSize.width <= 800 || screenSize.height <= 600;
     }
 
     /**
-     * Setting to persist monitor check aox stbte.
+     * Setting to persist monitor dheck aox stbte.
      */
-    pualic stbtic final BooleanSetting UI_MONITOR_SHOW_INCOMING_SEARCHES =
-        FACTORY.createBooleanSetting("UI_MONITOR_SHOW_INCOMING_SEARCHES", false);
+    pualid stbtic final BooleanSetting UI_MONITOR_SHOW_INCOMING_SEARCHES =
+        FACTORY.dreateBooleanSetting("UI_MONITOR_SHOW_INCOMING_SEARCHES", false);
 	
 	/**
-	 * Setting for the divider location between library tree and table.
+	 * Setting for the divider lodation between library tree and table.
 	 */
-	pualic stbtic final IntSetting UI_LIBRARY_TREE_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_LIBRARY_TREE_DIVIDER_LOCATION", -1);
+	pualid stbtic final IntSetting UI_LIBRARY_TREE_DIVIDER_LOCATION =
+		FACTORY.dreateIntSetting("UI_LIBRARY_TREE_DIVIDER_LOCATION", -1);
 	
 	/**
-	 * Setting for the divider location between library and playlist.
+	 * Setting for the divider lodation between library and playlist.
 	 */
-	pualic stbtic final IntSetting UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION",
+	pualid stbtic final IntSetting UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION =
+		FACTORY.dreateIntSetting("UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION",
 				300);
 	
 	/**
-	 * Setting for the divider location between incoming query monitors and
+	 * Setting for the divider lodation between incoming query monitors and
 	 * upload panel.
 	 */
-	pualic stbtic final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
+	pualid stbtic final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
+		FACTORY.dreateIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
 }

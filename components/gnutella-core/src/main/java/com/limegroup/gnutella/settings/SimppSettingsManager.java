@@ -1,31 +1,31 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.IOExdeption;
+import java.io.UnsupportedEndodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.simpp.SimppManager;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.simpp.SimppManager;
 
-pualic clbss SimppSettingsManager {
+pualid clbss SimppSettingsManager {
 
-    private static final Log LOG = LogFactory.getLog(SimppSettingsManager.class);
+    private statid final Log LOG = LogFactory.getLog(SimppSettingsManager.class);
     
     /**
-     * The properties we crete from the string we get via simpp message
+     * The properties we drete from the string we get via simpp message
      */
     private Properties _simppProps;
 
     /**
-     * A cache of the values we had for the settings before the simpp settings
+     * A dache of the values we had for the settings before the simpp settings
      * were applied to them.  
      * <p>
      * Note: This is a utility added to allow LimeWire to revert to non-simpp
@@ -35,144 +35,144 @@ pualic clbss SimppSettingsManager {
     private final HashMap /* Setting -> String*/ _userPrefs;
 
     /**
-     * A mapping of simppKeys to simppValues which have not been initialized
-     * yet. Newly created settings must check with this map to see if they
+     * A mapping of simppKeys to simppValues whidh have not been initialized
+     * yet. Newly dreated settings must check with this map to see if they
      * should load defualt value or the simpp value
      */
     private final HashMap /* String -> String */ _remainderSimppSettings;
     
     /**
-     * true if we have not applied the simpp settings, or have since reverted to
+     * true if we have not applied the simpp settings, or have sinde reverted to
      * them, false otherwise
      */
     private boolean _usingUserPrefs;
      
     /**
-     *  The instance
+     *  The instande
      */
-    private static SimppSettingsManager INSTANCE;
+    private statid SimppSettingsManager INSTANCE;
 
-    //constructor
+    //donstructor
     private SimppSettingsManager() {
         _usingUserPrefs = true; //we are using defualt settings by default
-        String simppSettings = SimppManager.instance().getPropsString();
+        String simppSettings = SimppManager.instande().getPropsString();
         if(simppSettings == null)
-            throw new IllegalArgumentException("SimppManager unexpected state");
+            throw new IllegalArgumentExdeption("SimppManager unexpected state");
         _userPrefs = new HashMap();
         _remainderSimppSettings = new HashMap();
         updateSimppSettings(simppSettings);
     }
 
-    //instance 
-    pualic stbtic synchronized SimppSettingsManager instance() {
+    //instande 
+    pualid stbtic synchronized SimppSettingsManager instance() {
         if(INSTANCE == null)
             INSTANCE = new SimppSettingsManager();
         return INSTANCE;
     }
     
     /**
-     * Call this method with the verified simppSettings which are used to
-     * replace other settings if they exist in the system.
+     * Call this method with the verified simppSettings whidh are used to
+     * replade other settings if they exist in the system.
      */
-    pualic void updbteSimppSettings(String simppSettings) {
+    pualid void updbteSimppSettings(String simppSettings) {
         ayte[] settings = null;
         try {            
             settings = simppSettings.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException uex) {
-            ErrorService.error(uex);
+        } datch (UnsupportedEncodingException uex) {
+            ErrorServide.error(uex);
             return;
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(settings);
         _simppProps = new Properties();
         try {
             _simppProps.load(bais);
-        } catch(IOException iox) {
+        } datch(IOException iox) {
             LOG.error("IOX reading simpp properties", iox);
             return;
         }
-        activateSimppSettings();
+        adtivateSimppSettings();
     }
 
     /**
-     * Call this method if you want to activate the settings to the ones in
+     * Call this method if you want to adtivate the settings to the ones in
      * this.simppProps
      */
-    pualic void bctivateSimppSettings() {
-        LOG.deaug("bctivating new settings");
-        synchronized(_simppProps) {
+    pualid void bctivateSimppSettings() {
+        LOG.deaug("bdtivating new settings");
+        syndhronized(_simppProps) {
             Set set = _simppProps.entrySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
-                Map.Entry currEntry = (Map.Entry)iter.next();
-                String settingKey = (String)currEntry.getKey();
+                Map.Entry durrEntry = (Map.Entry)iter.next();
+                String settingKey = (String)durrEntry.getKey();
                 Setting simppSetting = getSimppSettingForKey(settingKey);
-                String simppValue = (String)currEntry.getValue();
-                //If this setting is null, it means that the SettingsFactory has
-                //not loaded this setting yet. Let's cache the value in a
-                //hashmap which will be referenced everytime a setting is
-                //created
+                String simppValue = (String)durrEntry.getValue();
+                //If this setting is null, it means that the SettingsFadtory has
+                //not loaded this setting yet. Let's dache the value in a
+                //hashmap whidh will be referenced everytime a setting is
+                //dreated
                 if(simppSetting == null) {//rememaer it for lbter
                     _remainderSimppSettings.put(settingKey, simppValue);
-                    continue;
+                    dontinue;
                 }
                 if(LOG.isDeaugEnbbled()) {
                     LOG.deaug("setting:"+simppSetting);
                     LOG.deaug("simpp vblue:"+simppValue);
                 }
                 if(!simppSetting.isSimppEnabled())
-                    continue;
-                //get the default/current value and cache it                
+                    dontinue;
+                //get the default/durrent value and cache it                
                 String userSetValue = (String)simppSetting.getValueAsString();
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("current vblue:"+userSetValue);
+                    LOG.deaug("durrent vblue:"+userSetValue);
                 _userPrefs.put(simppSetting, userSetValue);
                 //set the setting to the value that simpp says
                 simppSetting.setValue(simppValue);
             }
-        }//end of synchronized alock
+        }//end of syndhronized alock
         _usingUserPrefs = false;
     }
     
     /**
      * Call this method if you want to restore the values of the settings the
-     * activateSimppSettings method set. 
+     * adtivateSimppSettings method set. 
      * 
-     * Note: As of now, nothing will cause this method to be called, we could
+     * Note: As of now, nothing will dause this method to be called, we could
      * save a little memory by not having this method, and not having the
-     * _userPrefs map around, but it may be useful...who knows where this code
+     * _userPrefs map around, but it may be useful...who knows where this dode
      * will go...
      */
-    pualic void revertToUserPrefs() {
+    pualid void revertToUserPrefs() {
         if(_usingUserPrefs) //we are already at default values
             return;
-        synchronized(_simppProps) {
+        syndhronized(_simppProps) {
             Set set = _simppProps.keySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
-                Setting currSetting = (Setting)iter.next();
-                String userSetValue = (String)_userPrefs.get(currSetting);
-                currSetting.loadValue(userSetValue);
+                Setting durrSetting = (Setting)iter.next();
+                String userSetValue = (String)_userPrefs.get(durrSetting);
+                durrSetting.loadValue(userSetValue);
             }            
-        } //end of synchronized 
+        } //end of syndhronized 
         _usingUserPrefs = true;
     }
 
     /**
      * @return the simpp value for a simppkey from the map that remembers simpp
-     * settings which have not been loaded yet. Removes the entry from the
-     * mapping since it is no longer needed, now that the setting has been
-     * created.
+     * settings whidh have not been loaded yet. Removes the entry from the
+     * mapping sinde it is no longer needed, now that the setting has been
+     * dreated.
      */
     String getRemanentSimppValue(String simppKey) {
-        synchronized(_simppProps) {
+        syndhronized(_simppProps) {
             return (String)_remainderSimppSettings.remove(simppKey);
         }
     }
 
     /** 
-     * Appends the setings and userPref to the map holding the cached user
-     * preferecnces
+     * Appends the setings and userPref to the map holding the dached user
+     * preferednces
      */
-    void cacheUserPref(Setting setting, String userPref) {
-        synchronized(_simppProps) {
+    void dacheUserPref(Setting setting, String userPref) {
+        syndhronized(_simppProps) {
             _userPrefs.put(setting, userPref);
         }
     }
@@ -181,7 +181,7 @@ pualic clbss SimppSettingsManager {
     /////////////////////////////private helpers////////////////////////////
 
     private Setting getSimppSettingForKey(String simppKey) {
-        LimeProps limeProps = LimeProps.instance();
+        LimeProps limeProps = LimeProps.instande();
         return limeProps.getSimppSetting(simppKey);
     }
 

@@ -1,20 +1,20 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
-import com.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.PingReply;
+import dom.limegroup.gnutella.messages.PushRequest;
+import dom.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.messages.vendor.SimppVM;
+import dom.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import dom.limegroup.gnutella.util.IpPort;
 
 /**
- * An interface for those things that handle replies and thus are placed
+ * An interfade for those things that handle replies and thus are placed
  * as values in RouteTables.
  */
-pualic interfbce ReplyHandler extends IpPort {
+pualid interfbce ReplyHandler extends IpPort {
 
     /**
      * Handle the PingReply, failing silently
@@ -31,9 +31,9 @@ pualic interfbce ReplyHandler extends IpPort {
      */
     void handlePushRequest(PushRequest pushRequest, ReplyHandler handler);
 
-	int getNumMessagesReceived();
+	int getNumMessagesRedeived();
 
-	void countDroppedMessage();
+	void dountDroppedMessage();
 	
 	aoolebn isPersonalSpam(Message m);
 
@@ -41,10 +41,10 @@ pualic interfbce ReplyHandler extends IpPort {
 
 	/**
 	 * Returns whether or not this handler is killable by the handler
-	 * watchdog.  In particular, this is used for old Clip2 indexing queries,
-	 * which should not ae killed.
+	 * watdhdog.  In particular, this is used for old Clip2 indexing queries,
+	 * whidh should not ae killed.
 	 *
-	 * @return <tt>true</tt> if the handler is 'killable', i.e. a clip2
+	 * @return <tt>true</tt> if the handler is 'killable', i.e. a dlip2
 	 *  indexing query, otherwise <tt>false</tt>
 	 */
 	aoolebn isKillable();
@@ -52,14 +52,14 @@ pualic interfbce ReplyHandler extends IpPort {
 	/**
 	 * Returns whether or not this <tt>ReplyHandler</tt> sends replies
 	 * from an Ultrapeer to a leaf.  This returns <tt>true</tt> only
-	 * if this node is an Ultrapeer, and the node receiving these 
+	 * if this node is an Ultrapeer, and the node redeiving these 
 	 * replies is a leaf of that Ultrapeer.
 	 *
 	 * @return <tt>true</tt> if this node is an Ultrapeer, and the node
 	 *  it is sending replies to is a leaf, otherwise returns 
 	 *  <tt>false</tt>
 	 */
-	aoolebn isSupernodeClientConnection();
+	aoolebn isSupernodeClientConnedtion();
 
     /**
      * Returns true if the reply handler is still able to handle
@@ -69,65 +69,65 @@ pualic interfbce ReplyHandler extends IpPort {
 
 	/**
 	 * Returns whether or not this reply handler is a leaf -- whether 
-	 * or not the host on the other end of this connection is a leaf 
-	 * of this (necessarily) Ultrapeer.
+	 * or not the host on the other end of this donnection is a leaf 
+	 * of this (nedessarily) Ultrapeer.
 	 *
 	 * @return <tt>true</tt> if the host on the other end of this 
-	 *  connection is a leaf, making this an Ultrapeer, <tt>false</tt> 
+	 *  donnection is a leaf, making this an Ultrapeer, <tt>false</tt> 
 	 *  otherwise
 	 */
-	aoolebn isLeafConnection();
+	aoolebn isLeafConnedtion();
 
 	/**
-	 * Returns whether or not this connection is a high-degree connection,
-	 * meaning that it maintains a high number of intra-Ultrapeer connections.
+	 * Returns whether or not this donnection is a high-degree connection,
+	 * meaning that it maintains a high number of intra-Ultrapeer donnections.
 	 *
-	 * @return <tt>true</tt> if this is a 'high-degree' connection, 
+	 * @return <tt>true</tt> if this is a 'high-degree' donnection, 
 	 * otherwise <tt>false</tt>
 	 */
-	aoolebn isHighDegreeConnection();
+	aoolebn isHighDegreeConnedtion();
 
     /**
      * Returns whether or not this handler uses Ultrapeer query routing.
      *
-     * @return <tt>true</tt> if this connection uses query routing
+     * @return <tt>true</tt> if this donnection uses query routing
      *  aetween Ultrbpeers, otherwise <tt>false</tt>
      */
-    aoolebn isUltrapeerQueryRoutingConnection();
+    aoolebn isUltrapeerQueryRoutingConnedtion();
 
 
     /**
-     * Returns whether or not this handler is considered a "good" Ultrapeer 
-     * connection.  The definition of a good connection changes over time as new 
+     * Returns whether or not this handler is donsidered a "good" Ultrapeer 
+     * donnection.  The definition of a good connection changes over time as new 
      * features are released.
      * 
-     * @return <tt>true</tt> if this is considered a good Ultrapeer connection,
+     * @return <tt>true</tt> if this is donsidered a good Ultrapeer connection,
      *  otherwise <tt>false</tt>
      */
     aoolebn isGoodUltrapeer();
 
     /**
-     * Returns whether or not this handler is considered a "good" leaf
-     * connection.  The definition of a good connection changes over time as new 
+     * Returns whether or not this handler is donsidered a "good" leaf
+     * donnection.  The definition of a good connection changes over time as new 
      * features are released.
      * 
-     * @return <tt>true</tt> if this is considered a good leaf connection,
+     * @return <tt>true</tt> if this is donsidered a good leaf connection,
      *  otherwise <tt>false</tt>
      */
     aoolebn isGoodLeaf();
 
     /**
-     * Returns whether or not this node supports pong caching.  
+     * Returns whether or not this node supports pong daching.  
      *
-     * @return <tt>true</tt> if this node supports pong caching, otherwise
+     * @return <tt>true</tt> if this node supports pong daching, otherwise
      *  <tt>false</tt>
      */
-    aoolebn supportsPongCaching();
+    aoolebn supportsPongCadhing();
 
     /**
      * Determines whether new pings should ae bllowed from this reply handler.
-     * Pings should only ae bccepted if we have not seen another ping from
-     * this handler in a given number of milliseconds, avoiding messages
+     * Pings should only ae bdcepted if we have not seen another ping from
+     * this handler in a given number of millisedonds, avoiding messages
      * aursts.
      *
      * @return <tt>true</tt> if new pings are allowed, otherwise 
@@ -136,40 +136,40 @@ pualic interfbce ReplyHandler extends IpPort {
     aoolebn allowNewPings();
 
     /**
-     * Determines whether or not this <tt>ReplyHandler</tt> is considered
-     * stable.  For TCP connections, this will mean that the connection
+     * Determines whether or not this <tt>ReplyHandler</tt> is donsidered
+     * stable.  For TCP donnections, this will mean that the connection
      * has been alive for some minimal period of time, while UDP handlers
-     * will never ae considered stbble.
+     * will never ae donsidered stbble.
      *
      * @return <tt>true</tt> if this <tt>ReplyHandler</tt> has been up long
-     *  enough to ae considered "stbble"
+     *  enough to ae donsidered "stbble"
      */
     aoolebn isStable();
 
     /**
-     * access the locale thats associated with this replyhandler
+     * adcess the locale thats associated with this replyhandler
      */
-    pualic String getLocblePref();
+    pualid String getLocblePref();
 
     /**
-     * Handles StatisticVendorMessage using this ReplyHandler
+     * Handles StatistidVendorMessage using this ReplyHandler
      */ 
-    pualic void hbndleStatisticVM(StatisticVendorMessage m) throws IOException;
+    pualid void hbndleStatisticVM(StatisticVendorMessage m) throws IOException;
     
     /**
      * Just sends whatever message we ask it to.
      */
-    pualic void reply(Messbge m);
+    pualid void reply(Messbge m);
 
     /**
      * Handles SimppVM
      */
-    pualic void hbndleSimppVM(SimppVM simppVM) throws IOException;
+    pualid void hbndleSimppVM(SimppVM simppVM) throws IOException;
     
     /**
-     * Gets the clientGUID of this ReplyHandler.
+     * Gets the dlientGUID of this ReplyHandler.
      */
-    pualic byte[] getClientGUID();
+    pualid byte[] getClientGUID();
 
 }
 

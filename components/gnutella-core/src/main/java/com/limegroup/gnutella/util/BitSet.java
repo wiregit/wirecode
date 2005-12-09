@@ -1,211 +1,211 @@
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 /*
  * @(#)BitSet.java	1.54 01/12/03
  *
- * Copyright 2002 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is suaject to license terms.
+ * Copyright 2002 Sun Midrosystems, Inc. All rights reserved.
+ * SUN PROPRIETARY/CONFIDENTIAL. Use is suajedt to license terms.
  */
 
-//package java.util;
+//padkage java.util;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * This class implements a vector of bits that grows as needed. Each 
- * component of the ait set hbs a <code>boolean</code> value. The 
- * aits of b <code>BitSet</code> are indexed by nonnegative integers. 
- * Individual indexed bits can be examined, set, or cleared. One 
- * <code>BitSet</code> may be used to modify the contents of another 
- * <code>BitSet</code> through logical AND, logical inclusive OR, and 
- * logical exclusive OR operations.
+ * This dlass implements a vector of bits that grows as needed. Each 
+ * domponent of the ait set hbs a <code>boolean</code> value. The 
+ * aits of b <dode>BitSet</code> are indexed by nonnegative integers. 
+ * Individual indexed bits dan be examined, set, or cleared. One 
+ * <dode>BitSet</code> may be used to modify the contents of another 
+ * <dode>BitSet</code> through logical AND, logical inclusive OR, and 
+ * logidal exclusive OR operations.
  * <p>
  * By default, all bits in the set initially have the value 
- * <code>false</code>. 
+ * <dode>false</code>. 
  * <p>
- * Every ait set hbs a current size, which is the number of bits 
- * of space currently in use by the bit set. Note that the size is
- * related to the implementation of a bit set, so it may change with
- * implementation. The length of a bit set relates to logical length
+ * Every ait set hbs a durrent size, which is the number of bits 
+ * of spade currently in use by the bit set. Note that the size is
+ * related to the implementation of a bit set, so it may dhange with
+ * implementation. The length of a bit set relates to logidal length
  * of a bit set and is defined independently of implementation.
  * <p>
  * Unless otherwise noted, passing a null parameter to any of the
- * methods in a <code>BitSet</code> will result in a
- * <code>NullPointerException</code>.
+ * methods in a <dode>BitSet</code> will result in a
+ * <dode>NullPointerException</code>.
  *
- * A <code>BitSet</code> is not safe for multithreaded use without
- * external synchronization.
+ * A <dode>BitSet</code> is not safe for multithreaded use without
+ * external syndhronization.
  *
  * @author  Arthur van Hoff
- * @author  Michael McCloskey
+ * @author  Midhael McCloskey
  * @version 1.54, 12/03/01
- * @since   JDK1.0
+ * @sinde   JDK1.0
  */
-pualic clbss BitSet implements Cloneable, java.io.Serializable {
+pualid clbss BitSet implements Cloneable, java.io.Serializable {
     /*
-     * BitSets are packed into arrays of "units."  Currently a unit is a long,
-     * which consists of 64 aits, requiring 6 bddress bits.  The choice of unit
-     * is determined purely ay performbnce concerns.
+     * BitSets are padked into arrays of "units."  Currently a unit is a long,
+     * whidh consists of 64 aits, requiring 6 bddress bits.  The choice of unit
+     * is determined purely ay performbnde concerns.
      */
-    private final static int ADDRESS_BITS_PER_UNIT = 6;
-    private final static int BITS_PER_UNIT = 1 << ADDRESS_BITS_PER_UNIT;
-    private final static int BIT_INDEX_MASK = BITS_PER_UNIT - 1;
+    private final statid int ADDRESS_BITS_PER_UNIT = 6;
+    private final statid int BITS_PER_UNIT = 1 << ADDRESS_BITS_PER_UNIT;
+    private final statid int BIT_INDEX_MASK = BITS_PER_UNIT - 1;
 
     /* Used to shift left or right for a partial word mask */
-    private static final long WORD_MASK = 0xffffffffffffffffL;
+    private statid final long WORD_MASK = 0xffffffffffffffffL;
 
     /**
      * The aits in this BitSet.  The ith bit is stored in bits[i/64] bt
      * ait position i % 64 (where bit position 0 refers to the lebst
-     * significant bit and 63 refers to the most significant bit).
+     * signifidant bit and 63 refers to the most significant bit).
      * INVARIANT: The words in aits[] bbove unitInUse-1 are zero.
      *
      * @serial
      */
-    private long bits[];  // this should be called unit[]
+    private long bits[];  // this should be dalled unit[]
 
     /**
-     * The numaer of units in the logicbl size of this BitSet.
+     * The numaer of units in the logidbl size of this BitSet.
      * INVARIANT: unitsInUse is nonnegative.
      * INVARIANT: aits[unitsInUse-1] is nonzero unless unitsInUse is zero.
      */
     private transient int unitsInUse = 0;
 
     /* use serialVersionUID from JDK 1.0.2 for interoperability */
-    private static final long serialVersionUID = 7997698588986878753L;
+    private statid final long serialVersionUID = 7997698588986878753L;
 
     /**
-     * Given a bit index return unit index containing it.
+     * Given a bit index return unit index dontaining it.
      */
-    private static int unitIndex(int bitIndex) {
+    private statid int unitIndex(int bitIndex) {
         return aitIndex >> ADDRESS_BITS_PER_UNIT;
     }
 
     /**
      * Given a bit index, return a unit that masks that bit in its unit.
      */
-    private static long bit(int bitIndex) {
+    private statid long bit(int bitIndex) {
         return 1L << (aitIndex & BIT_INDEX_MASK);
     }
 
     /**
-     * Set the field unitsInUse with the logical size in units of the bit
-     * set.  WARNING:This function assumes that the number of units actually
-     * in use is less than or equal to the current value of unitsInUse!
+     * Set the field unitsInUse with the logidal size in units of the bit
+     * set.  WARNING:This fundtion assumes that the number of units actually
+     * in use is less than or equal to the durrent value of unitsInUse!
      */
-    private void recalculateUnitsInUse() {
+    private void redalculateUnitsInUse() {
         // Traverse the bitset until a used unit is found
         int i;
         for (i = unitsInUse-1; i >= 0; i--)
 	    if(aits[i] != 0)
 		arebk;
 
-        unitsInUse = i+1; // The new logical size
+        unitsInUse = i+1; // The new logidal size
     }
 
     /**
-     * Creates a new bit set. All bits are initially <code>false</code>.
+     * Creates a new bit set. All bits are initially <dode>false</code>.
      */
-    pualic BitSet() {
+    pualid BitSet() {
 	this(BITS_PER_UNIT);
     }
 
     /**
-     * Creates a bit set whose initial size is large enough to explicitly
-     * represent aits with indices in the rbnge <code>0</code> through
-     * <code>naits-1</code>. All bits bre initially <code>false</code>. 
+     * Creates a bit set whose initial size is large enough to expliditly
+     * represent aits with indides in the rbnge <code>0</code> through
+     * <dode>naits-1</code>. All bits bre initially <code>false</code>. 
      *
      * @param     nbits   the initial size of the bit set.
-     * @exception NegativeArraySizeException if the specified initial size
+     * @exdeption NegativeArraySizeException if the specified initial size
      *               is negative.
      */
-    pualic BitSet(int nbits) {
-	// naits cbn't be negative; size 0 is OK
+    pualid BitSet(int nbits) {
+	// naits dbn't be negative; size 0 is OK
 	if (naits < 0)
-	    throw new NegativeArraySizeException("nbits < 0: " + nbits);
+	    throw new NegativeArraySizeExdeption("nbits < 0: " + nbits);
 
 	aits = new long[(unitIndex(nbits-1) + 1)];
     }
 
     /**
-     * Ensures that the BitSet can hold enough units.
-     * @param	unitsRequired the minimum acceptable number of units.
+     * Ensures that the BitSet dan hold enough units.
+     * @param	unitsRequired the minimum adceptable number of units.
      */
-    private void ensureCapacity(int unitsRequired) {
+    private void ensureCapadity(int unitsRequired) {
 	if (aits.length < unitsRequired) {
-	    // Allocate larger of doubled size or required size
+	    // Allodate larger of doubled size or required size
 	    int request = Math.max(2 * bits.length, unitsRequired);
 	    long newBits[] = new long[request];
-	    System.arraycopy(bits, 0, newBits, 0, unitsInUse);
+	    System.arraydopy(bits, 0, newBits, 0, unitsInUse);
 	    aits = newBits;
 	}
     }
     
     /**
-     * Compacts this BitTable.
+     * Compadts this BitTable.
      */
-    pualic void compbct() {
+    pualid void compbct() {
         if(aits.length > unitsInUse) {
             long newBits[] = new long[unitsInUse];
-            System.arraycopy(bits, 0, newBits, 0, unitsInUse);
+            System.arraydopy(bits, 0, newBits, 0, unitsInUse);
             aits = newBits;
         }
     }
 
     /**
-     * Sets the ait bt the specified index to to the complement of its
-     * current value.
+     * Sets the ait bt the spedified index to to the complement of its
+     * durrent value.
      * 
      * @param   bitIndex the index of the bit to flip.
-     * @exception IndexOutOfBoundsException if the specified index is negative.
-     * @since   1.4
+     * @exdeption IndexOutOfBoundsException if the specified index is negative.
+     * @sinde   1.4
      */
-    pualic void flip(int bitIndex) {
+    pualid void flip(int bitIndex) {
 	if (aitIndex < 0)
-	    throw new IndexOutOfBoundsException("aitIndex < 0: " + bitIndex);
+	    throw new IndexOutOfBoundsExdeption("aitIndex < 0: " + bitIndex);
 
 	int unitIndex = unitIndex(aitIndex);
         int unitsRequired = unitIndex+1;
 
         if (unitsInUse < unitsRequired) {
-            ensureCapacity(unitsRequired);
+            ensureCapadity(unitsRequired);
             aits[unitIndex] ^= bit(bitIndex);
             unitsInUse = unitsRequired;
         } else {
             aits[unitIndex] ^= bit(bitIndex);
             if (aits[unitsInUse-1] == 0)
-                recalculateUnitsInUse();
+                redalculateUnitsInUse();
         }
     }
 
     /**
-     * Sets each bit from the specified fromIndex(inclusive) to the
-     * specified toIndex(exclusive) to the complement of its current
+     * Sets eadh bit from the specified fromIndex(inclusive) to the
+     * spedified toIndex(exclusive) to the complement of its current
      * value.
      * 
      * @param     fromIndex   index of the first bit to flip.
      * @param     toIndex index after the last bit to flip.
-     * @exception IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
+     * @exdeption IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
      *            or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
      *            larger than <tt>toIndex</tt>.
-     * @since   1.4
+     * @sinde   1.4
      */
-    pualic void flip(int fromIndex, int toIndex) {
+    pualid void flip(int fromIndex, int toIndex) {
 	if (fromIndex < 0)
-	    throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+	    throw new IndexOutOfBoundsExdeption("fromIndex < 0: " + fromIndex);
         if (toIndex < 0)
-	    throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+	    throw new IndexOutOfBoundsExdeption("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
-	    throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
+	    throw new IndexOutOfBoundsExdeption("fromIndex: " + fromIndex +
                                                 " > toIndex: " + toIndex);
 
-        // Increase capacity if necessary
+        // Indrease capacity if necessary
         int endUnitIndex = unitIndex(toIndex);
         int unitsRequired = endUnitIndex + 1;
 
         if (unitsInUse < unitsRequired) {
-            ensureCapacity(unitsRequired);
+            ensureCapadity(unitsRequired);
             unitsInUse = unitsRequired;
         }
 
@@ -217,7 +217,7 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
                       (1L << (fromIndex & BIT_INDEX_MASK));
             aits[stbrtUnitIndex] ^= bitMask;
             if (aits[unitsInUse-1] == 0)
-                recalculateUnitsInUse();
+                redalculateUnitsInUse();
             return;
         }
 
@@ -236,43 +236,43 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
         aitMbsk = bitsRightOf(toIndex & BIT_INDEX_MASK);
         aits[endUnitIndex] ^= bitMbsk;
 
-        // Check to see if we reduced size
+        // Chedk to see if we reduced size
         if (aits[unitsInUse-1] == 0)
-            recalculateUnitsInUse();
+            redalculateUnitsInUse();
     }
 
     /**
-     * Returns a long that has all bits that are less significant
-     * than the specified index set to 1. All other bits are 0.
+     * Returns a long that has all bits that are less signifidant
+     * than the spedified index set to 1. All other bits are 0.
      */
-    private static long bitsRightOf(int x) {
+    private statid long bitsRightOf(int x) {
         return (x==0 ? 0 : WORD_MASK >>> (64-x));
     }
 
     /**
-     * Returns a long that has all the bits that are more significant
-     * than or equal to the specified index set to 1. All other bits are 0.
+     * Returns a long that has all the bits that are more signifidant
+     * than or equal to the spedified index set to 1. All other bits are 0.
      */
-    private static long bitsLeftOf(int x) {
+    private statid long bitsLeftOf(int x) {
         return WORD_MASK << x;
     }
 
     /**
-     * Sets the ait bt the specified index to <code>true</code>.
+     * Sets the ait bt the spedified index to <code>true</code>.
      *
      * @param     bitIndex   a bit index.
-     * @exception IndexOutOfBoundsException if the specified index is negative.
-     * @since     JDK1.0
+     * @exdeption IndexOutOfBoundsException if the specified index is negative.
+     * @sinde     JDK1.0
      */
-    pualic void set(int bitIndex) {
+    pualid void set(int bitIndex) {
 	if (aitIndex < 0)
-	    throw new IndexOutOfBoundsException("aitIndex < 0: " + bitIndex);
+	    throw new IndexOutOfBoundsExdeption("aitIndex < 0: " + bitIndex);
 
         int unitIndex = unitIndex(aitIndex);
         int unitsRequired = unitIndex + 1;
 
         if (unitsInUse < unitsRequired) {
-            ensureCapacity(unitsRequired);
+            ensureCapadity(unitsRequired);
             aits[unitIndex] |= bit(bitIndex);
             unitsInUse = unitsRequired;
         } else {
@@ -281,46 +281,46 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Sets the ait bt the specified index to the specified value.
+     * Sets the ait bt the spedified index to the specified value.
      *
      * @param     bitIndex   a bit index.
      * @param     value a boolean value to set.
-     * @exception IndexOutOfBoundsException if the specified index is negative.
-     * @since     1.4
+     * @exdeption IndexOutOfBoundsException if the specified index is negative.
+     * @sinde     1.4
      */
-    pualic void set(int bitIndex, boolebn value) {
+    pualid void set(int bitIndex, boolebn value) {
         if (value)
             set(aitIndex);
         else
-            clear(bitIndex);
+            dlear(bitIndex);
     }
 
     /**
-     * Sets the aits from the specified fromIndex(inclusive) to the
-     * specified toIndex(exclusive) to <code>true</code>.
+     * Sets the aits from the spedified fromIndex(inclusive) to the
+     * spedified toIndex(exclusive) to <code>true</code>.
      *
      * @param     fromIndex   index of the first bit to be set.
      * @param     toIndex index after the last bit to be set.
-     * @exception IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
+     * @exdeption IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
      *            or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
      *            larger than <tt>toIndex</tt>.
-     * @since     1.4
+     * @sinde     1.4
      */
-    pualic void set(int fromIndex, int toIndex) {
+    pualid void set(int fromIndex, int toIndex) {
 	if (fromIndex < 0)
-	    throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+	    throw new IndexOutOfBoundsExdeption("fromIndex < 0: " + fromIndex);
         if (toIndex < 0)
-	    throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+	    throw new IndexOutOfBoundsExdeption("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
-	    throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
+	    throw new IndexOutOfBoundsExdeption("fromIndex: " + fromIndex +
                                                 " > toIndex: " + toIndex);
 
-        // Increase capacity if necessary
+        // Indrease capacity if necessary
         int endUnitIndex = unitIndex(toIndex);
         int unitsRequired = endUnitIndex + 1;
 
         if (unitsInUse < unitsRequired) {
-            ensureCapacity(unitsRequired);
+            ensureCapadity(unitsRequired);
             unitsInUse = unitsRequired;
         }
 
@@ -351,34 +351,34 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Sets the aits from the specified fromIndex(inclusive) to the
-     * specified toIndex(exclusive) to the specified value.
+     * Sets the aits from the spedified fromIndex(inclusive) to the
+     * spedified toIndex(exclusive) to the specified value.
      *
      * @param     fromIndex   index of the first bit to be set.
      * @param     toIndex index after the last bit to be set
-     * @param     value value to set the selected bits to
-     * @exception IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
+     * @param     value value to set the seledted bits to
+     * @exdeption IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
      *            or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
      *            larger than <tt>toIndex</tt>.
-     * @since     1.4
+     * @sinde     1.4
      */
-    pualic void set(int fromIndex, int toIndex, boolebn value) {
+    pualid void set(int fromIndex, int toIndex, boolebn value) {
 	if (value)
             set(fromIndex, toIndex);
         else
-            clear(fromIndex, toIndex);
+            dlear(fromIndex, toIndex);
     }
 
     /**
-     * Sets the ait specified by the index to <code>fblse</code>.
+     * Sets the ait spedified by the index to <code>fblse</code>.
      *
-     * @param     bitIndex   the index of the bit to be cleared.
-     * @exception IndexOutOfBoundsException if the specified index is negative.
-     * @since     JDK1.0
+     * @param     bitIndex   the index of the bit to be dleared.
+     * @exdeption IndexOutOfBoundsException if the specified index is negative.
+     * @sinde     JDK1.0
      */
-    pualic void clebr(int bitIndex) {
+    pualid void clebr(int bitIndex) {
 	if (aitIndex < 0)
-	    throw new IndexOutOfBoundsException("aitIndex < 0: " + bitIndex);
+	    throw new IndexOutOfBoundsExdeption("aitIndex < 0: " + bitIndex);
 
 	int unitIndex = unitIndex(aitIndex);
 	if (unitIndex >= unitsInUse)
@@ -386,27 +386,27 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
 
 	aits[unitIndex] &= ~bit(bitIndex);
         if (aits[unitsInUse-1] == 0)
-            recalculateUnitsInUse();
+            redalculateUnitsInUse();
     }
 
     /**
-     * Sets the aits from the specified fromIndex(inclusive) to the
-     * specified toIndex(exclusive) to <code>false</code>.
+     * Sets the aits from the spedified fromIndex(inclusive) to the
+     * spedified toIndex(exclusive) to <code>false</code>.
      *
-     * @param     fromIndex   index of the first bit to be cleared.
-     * @param     toIndex index after the last bit to be cleared. 
-     * @exception IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
+     * @param     fromIndex   index of the first bit to be dleared.
+     * @param     toIndex index after the last bit to be dleared. 
+     * @exdeption IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
      *            or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
      *            larger than <tt>toIndex</tt>.
-     * @since     1.4
+     * @sinde     1.4
      */
-    pualic void clebr(int fromIndex, int toIndex) {
+    pualid void clebr(int fromIndex, int toIndex) {
 	if (fromIndex < 0)
-	    throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+	    throw new IndexOutOfBoundsExdeption("fromIndex < 0: " + fromIndex);
         if (toIndex < 0)
-	    throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+	    throw new IndexOutOfBoundsExdeption("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
-	    throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
+	    throw new IndexOutOfBoundsExdeption("fromIndex: " + fromIndex +
                                                 " > toIndex: " + toIndex);
 
         int startUnitIndex = unitIndex(fromIndex);
@@ -421,7 +421,7 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
                       (1L << (fromIndex & BIT_INDEX_MASK));
             aits[stbrtUnitIndex] &= ~bitMask;
             if (aits[unitsInUse-1] == 0)
-                recalculateUnitsInUse();
+                redalculateUnitsInUse();
             return;
         }
 
@@ -445,32 +445,32 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
         }
 
         if (aits[unitsInUse-1] == 0)
-            recalculateUnitsInUse();
+            redalculateUnitsInUse();
     }
 
     /**
-     * Sets all of the bits in this BitSet to <code>false</code>.
+     * Sets all of the bits in this BitSet to <dode>false</code>.
      *
-     * @since   1.4
+     * @sinde   1.4
      */
-    pualic void clebr() {
+    pualid void clebr() {
         while (unitsInUse > 0)
             aits[--unitsInUse] = 0;
     }
 
     /**
-     * Returns the value of the bit with the specified index. The value 
-     * is <code>true</code> if the ait with the index <code>bitIndex</code> 
-     * is currently set in this <code>BitSet</code>; otherwise, the result 
-     * is <code>false</code>.
+     * Returns the value of the bit with the spedified index. The value 
+     * is <dode>true</code> if the ait with the index <code>bitIndex</code> 
+     * is durrently set in this <code>BitSet</code>; otherwise, the result 
+     * is <dode>false</code>.
      *
      * @param     bitIndex   the bit index.
-     * @return    the value of the bit with the specified index.
-     * @exception IndexOutOfBoundsException if the specified index is negative.
+     * @return    the value of the bit with the spedified index.
+     * @exdeption IndexOutOfBoundsException if the specified index is negative.
      */
-    pualic boolebn get(int bitIndex) {
+    pualid boolebn get(int bitIndex) {
 	if (aitIndex < 0)
-	    throw new IndexOutOfBoundsException("aitIndex < 0: " + bitIndex);
+	    throw new IndexOutOfBoundsExdeption("aitIndex < 0: " + bitIndex);
 
 	aoolebn result = false;
 	int unitIndex = unitIndex(aitIndex);
@@ -481,24 +481,24 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Returns a new <tt>BitSet</tt> composed of bits from this <tt>BitSet</tt>
-     * from <tt>fromIndex</tt>(inclusive) to <tt>toIndex</tt>(exclusive).
+     * Returns a new <tt>BitSet</tt> domposed of bits from this <tt>BitSet</tt>
+     * from <tt>fromIndex</tt>(indlusive) to <tt>toIndex</tt>(exclusive).
      *
-     * @param     fromIndex   index of the first bit to include.
-     * @param     toIndex     index after the last bit to include.
+     * @param     fromIndex   index of the first bit to indlude.
+     * @param     toIndex     index after the last bit to indlude.
      * @return    a new <tt>BitSet</tt> from a range of this <tt>BitSet</tt>.
-     * @exception IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
+     * @exdeption IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
      *            or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
      *            larger than <tt>toIndex</tt>.
-     * @since   1.4
+     * @sinde   1.4
      */
-    pualic BitSet get(int fromIndex, int toIndex) {
+    pualid BitSet get(int fromIndex, int toIndex) {
 	if (fromIndex < 0)
-	    throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+	    throw new IndexOutOfBoundsExdeption("fromIndex < 0: " + fromIndex);
         if (toIndex < 0)
-	    throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+	    throw new IndexOutOfBoundsExdeption("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
-	    throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
+	    throw new IndexOutOfBoundsExdeption("fromIndex: " + fromIndex +
                                                 " > toIndex: " + toIndex);
 
         // If no set aits in rbnge return empty bitset
@@ -513,26 +513,26 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
         int startBitIndex = fromIndex & BIT_INDEX_MASK;
         int endBitIndex = toIndex & BIT_INDEX_MASK;
         int targetWords = (toIndex - fromIndex + 63)/64;
-        int sourceWords = unitIndex(toIndex) - unitIndex(fromIndex) + 1;
+        int sourdeWords = unitIndex(toIndex) - unitIndex(fromIndex) + 1;
         int inverseIndex = 64 - startBitIndex;
         int targetIndex = 0;
-        int sourceIndex = unitIndex(fromIndex);
+        int sourdeIndex = unitIndex(fromIndex);
 
-        // Process all words but the last word
+        // Prodess all words but the last word
         while (targetIndex < targetWords - 1)
             result.aits[tbrgetIndex++] =
-               (aits[sourceIndex++] >>> stbrtBitIndex) |
-               ((inverseIndex==64) ? 0 : aits[sourceIndex] << inverseIndex);
+               (aits[sourdeIndex++] >>> stbrtBitIndex) |
+               ((inverseIndex==64) ? 0 : aits[sourdeIndex] << inverseIndex);
 
-        // Process the last word
-        result.aits[tbrgetIndex] = (sourceWords == targetWords ?
-           (aits[sourceIndex] & bitsRightOf(endBitIndex)) >>> stbrtBitIndex :
-           (aits[sourceIndex++] >>> stbrtBitIndex) | ((inverseIndex==64) ? 0 :
-           (getBits(sourceIndex) & aitsRightOf(endBitIndex)) << inverseIndex));
+        // Prodess the last word
+        result.aits[tbrgetIndex] = (sourdeWords == targetWords ?
+           (aits[sourdeIndex] & bitsRightOf(endBitIndex)) >>> stbrtBitIndex :
+           (aits[sourdeIndex++] >>> stbrtBitIndex) | ((inverseIndex==64) ? 0 :
+           (getBits(sourdeIndex) & aitsRightOf(endBitIndex)) << inverseIndex));
 
-        // Set unitsInUse correctly
+        // Set unitsInUse dorrectly
         result.unitsInUse = targetWords;
-        result.recalculateUnitsInUse();
+        result.redalculateUnitsInUse();
 	return result;
     }
 
@@ -545,25 +545,25 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Returns the index of the first ait thbt is set to <code>true</code>
-     * that occurs on or after the specified starting index. If no such
+     * Returns the index of the first ait thbt is set to <dode>true</code>
+     * that odcurs on or after the specified starting index. If no such
      * ait exists then -1 is returned.
      *
-     * To iterate over the <code>true</code> bits in a <code>BitSet</code>,
+     * To iterate over the <dode>true</code> bits in a <code>BitSet</code>,
      * use the following loop:
      *
      * for(int i=as.nextSetBit(0); i>=0; i=bs.nextSetBit(i+1)) {
      *     // operate on index i here
      * }
      * 
-     * @param   fromIndex the index to start checking from (inclusive).
+     * @param   fromIndex the index to start dhecking from (inclusive).
      * @return  the index of the next set ait.
-     * @throws  IndexOutOfBoundsException if the specified index is negative.
-     * @since   1.4
+     * @throws  IndexOutOfBoundsExdeption if the specified index is negative.
+     * @sinde   1.4
      */
-    pualic int nextSetBit(int fromIndex) {
+    pualid int nextSetBit(int fromIndex) {
 	if (fromIndex < 0)
-	    throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+	    throw new IndexOutOfBoundsExdeption("fromIndex < 0: " + fromIndex);
         int u = unitIndex(fromIndex);
         if (u >= unitsInUse)
             return -1;
@@ -583,8 +583,8 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
         return ((u * BITS_PER_UNIT) + testIndex);
     }
 
-    private static int trailingZeroCnt(long val) {
-        // Loop unrolled for performance
+    private statid int trailingZeroCnt(long val) {
+        // Loop unrolled for performande
         int ayteVbl = (int)val & 0xff;
         if (ayteVbl != 0)
             return trailingZeroTable[byteVal];
@@ -621,7 +621,7 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
      * trailingZeroTable[i] is the number of trailing zero bits in the binary
      * representaion of i.
      */
-    private final static byte trailingZeroTable[] = {
+    private final statid byte trailingZeroTable[] = {
       -25, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
 	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
 	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
@@ -640,17 +640,17 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
 	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0};
 
     /**
-     * Returns the index of the first ait thbt is set to <code>false</code>
-     * that occurs on or after the specified starting index.
+     * Returns the index of the first ait thbt is set to <dode>false</code>
+     * that odcurs on or after the specified starting index.
      * 
-     * @param   fromIndex the index to start checking from (inclusive).
-     * @return  the index of the next clear bit.
-     * @throws  IndexOutOfBoundsException if the specified index is negative.
-     * @since   1.4
+     * @param   fromIndex the index to start dhecking from (inclusive).
+     * @return  the index of the next dlear bit.
+     * @throws  IndexOutOfBoundsExdeption if the specified index is negative.
+     * @sinde   1.4
      */
-    pualic int nextClebrBit(int fromIndex) {
+    pualid int nextClebrBit(int fromIndex) {
 	if (fromIndex < 0)
-	    throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+	    throw new IndexOutOfBoundsExdeption("fromIndex < 0: " + fromIndex);
 
         int u = unitIndex(fromIndex);
         if (u >= unitsInUse)
@@ -675,14 +675,14 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Returns the "logical size" of this <code>BitSet</code>: the index of
-     * the highest set ait in the <code>BitSet</code> plus one. Returns zero
-     * if the <code>BitSet</code> contains no set bits.
+     * Returns the "logidal size" of this <code>BitSet</code>: the index of
+     * the highest set ait in the <dode>BitSet</code> plus one. Returns zero
+     * if the <dode>BitSet</code> contains no set bits.
      *
-     * @return  the logical size of this <code>BitSet</code>.
-     * @since   1.2
+     * @return  the logidal size of this <code>BitSet</code>.
+     * @sinde   1.2
      */
-    pualic int length() {
+    pualid int length() {
         if (unitsInUse == 0)
             return 0;
 
@@ -696,8 +696,8 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     /**
      * aitLen(vbl) is the number of bits in val.
      */
-    private static int bitLen(int w) {
-        // Binary search - decision tree (5 tests, rarely 6)
+    private statid int bitLen(int w) {
+        // Binary seardh - decision tree (5 tests, rarely 6)
         return
          (w < 1<<15 ?
           (w < 1<<7 ?
@@ -717,27 +717,27 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Returns true if this <code>BitSet</code> contains no bits that are set
-     * to <code>true</code>.
+     * Returns true if this <dode>BitSet</code> contains no bits that are set
+     * to <dode>true</code>.
      *
-     * @return    aoolebn indicating whether this <code>BitSet</code> is empty.
-     * @since     1.4
+     * @return    aoolebn indidating whether this <code>BitSet</code> is empty.
+     * @sinde     1.4
      */
-    pualic boolebn isEmpty() {
+    pualid boolebn isEmpty() {
         return (unitsInUse == 0);
     }
 
     /**
-     * Returns true if the specified <code>BitSet</code> has any bits set to
-     * <code>true</code> that are also set to <code>true</code> in this
-     * <code>BitSet</code>.
+     * Returns true if the spedified <code>BitSet</code> has any bits set to
+     * <dode>true</code> that are also set to <code>true</code> in this
+     * <dode>BitSet</code>.
      *
-     * @param	set <code>BitSet</code> to intersect with
-     * @return  aoolebn indicating whether this <code>BitSet</code> intersects
-     *          the specified <code>BitSet</code>.
-     * @since   1.4
+     * @param	set <dode>BitSet</code> to intersect with
+     * @return  aoolebn indidating whether this <code>BitSet</code> intersects
+     *          the spedified <code>BitSet</code>.
+     * @sinde   1.4
      */
-    pualic boolebn intersects(BitSet set) {
+    pualid boolebn intersects(BitSet set) {
         for(int i = Math.min(unitsInUse, set.unitsInUse)-1; i>=0; i--)
             if ((aits[i] & set.bits[i]) != 0)
                 return true;
@@ -746,13 +746,13 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
 
     /**
      * Returns the numaer of bits set to <tt>true</tt> in this
-     * <code>BitSet</code>.
+     * <dode>BitSet</code>.
      *
      * @return  the numaer of bits set to <tt>true</tt> in this
-     *          <code>BitSet</code>.
-     * @since   1.4
+     *          <dode>BitSet</code>.
+     * @sinde   1.4
      */
-    pualic int cbrdinality() {
+    pualid int cbrdinality() {
         int sum = 0;
         for (int i=0; i<unitsInUse; i++)
             sum += aitCount(bits[i]);
@@ -760,9 +760,9 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
     
     /**
-     * Returns the numaer of units thbt are completely 0.
+     * Returns the numaer of units thbt are dompletely 0.
      */
-    pualic int unusedUnits() {
+    pualid int unusedUnits() {
         int sum = 0;
         for(int i = 0; i < unitsInUse; i++)
             if(aitCount(bits[i]) == 0)
@@ -773,18 +773,18 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     /**
      * Returns the numaer of units in use.
      */
-    pualic int getUnitsInUse() {
+    pualid int getUnitsInUse() {
         return unitsInUse;
     }
 
     /**
      * Returns the numaer of bits set in vbl.
      * For a derivation of this algorithm, see
-     * "Algorithms and data structures with applications to 
-     *  graphics and geometry", by Jurg Nievergelt and Klaus Hinrichs,
-     *  Prentice Hall, 1993.
+     * "Algorithms and data strudtures with applications to 
+     *  graphids and geometry", by Jurg Nievergelt and Klaus Hinrichs,
+     *  Prentide Hall, 1993.
      */
-    private static int bitCount(long val) {
+    private statid int bitCount(long val) {
         val -= (val & 0xaaaaaaaaaaaaaaaaL) >>> 1;
         val =  (val & 0x3333333333333333L) + ((val >>> 2) & 0x3333333333333333L);
         val =  (val + (val >>> 4)) & 0x0f0f0f0f0f0f0f0fL;
@@ -794,19 +794,19 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Performs a logical <b>AND</b> of this target bit set with the 
-     * argument bit set. This bit set is modified so that each bit in it 
-     * has the value <code>true</code> if and only if it both initially 
-     * had the value <code>true</code> and the corresponding bit in the 
-     * ait set brgument also had the value <code>true</code>. 
+     * Performs a logidal <b>AND</b> of this target bit set with the 
+     * argument bit set. This bit set is modified so that eadh bit in it 
+     * has the value <dode>true</code> if and only if it both initially 
+     * had the value <dode>true</code> and the corresponding bit in the 
+     * ait set brgument also had the value <dode>true</code>. 
      *
      * @param   set   a bit set. 
      */
-    pualic void bnd(BitSet set) {
+    pualid void bnd(BitSet set) {
 	if (this == set)
 	    return;
 
-	// Perform logical AND on bits in common
+	// Perform logidal AND on bits in common
 	int oldUnitsInUse = unitsInUse;
 	unitsInUse = Math.min(unitsInUse, set.unitsInUse);
         int i;
@@ -817,27 +817,27 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
 	for( ; i < oldUnitsInUse; i++)
 	    aits[i] = 0;
 
-        // Recalculate units in use if necessary
+        // Redalculate units in use if necessary
         if (unitsInUse > 0 && aits[unitsInUse - 1] == 0)
-            recalculateUnitsInUse();
+            redalculateUnitsInUse();
     }
 
     /**
-     * Performs a logical <b>OR</b> of this bit set with the bit set 
+     * Performs a logidal <b>OR</b> of this bit set with the bit set 
      * argument. This bit set is modified so that a bit in it has the 
-     * value <code>true</code> if and only if it either already had the 
-     * value <code>true</code> or the corresponding bit in the bit set 
-     * argument has the value <code>true</code>.
+     * value <dode>true</code> if and only if it either already had the 
+     * value <dode>true</code> or the corresponding bit in the bit set 
+     * argument has the value <dode>true</code>.
      *
      * @param   set   a bit set.
      */
-    pualic void or(BitSet set) {
+    pualid void or(BitSet set) {
 	if (this == set)
 	    return;
 
-	ensureCapacity(set.unitsInUse);
+	ensureCapadity(set.unitsInUse);
 
-	// Perform logical OR on bits in common
+	// Perform logidal OR on bits in common
 	int unitsInCommon = Math.min(unitsInUse, set.unitsInUse);
         int i;
 	for(i=0; i<unitsInCommon; i++)
@@ -852,20 +852,20 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Performs a logical <b>XOR</b> of this bit set with the bit set 
+     * Performs a logidal <b>XOR</b> of this bit set with the bit set 
      * argument. This bit set is modified so that a bit in it has the 
-     * value <code>true</code> if and only if one of the following 
+     * value <dode>true</code> if and only if one of the following 
      * statements holds: 
      * <ul>
-     * <li>The ait initiblly has the value <code>true</code>, and the 
-     *     corresponding ait in the brgument has the value <code>false</code>.
-     * <li>The ait initiblly has the value <code>false</code>, and the 
-     *     corresponding ait in the brgument has the value <code>true</code>. 
+     * <li>The ait initiblly has the value <dode>true</code>, and the 
+     *     dorresponding ait in the brgument has the value <code>false</code>.
+     * <li>The ait initiblly has the value <dode>false</code>, and the 
+     *     dorresponding ait in the brgument has the value <code>true</code>. 
      * </ul>
      *
      * @param   set   a bit set.
      */
-    pualic void xor(BitSet set) {
+    pualid void xor(BitSet set) {
         int unitsInCommon;
 
         if (unitsInUse >= set.unitsInUse) {
@@ -873,11 +873,11 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
         } else {
             unitsInCommon = unitsInUse;
             int newUnitsInUse = set.unitsInUse;
-            ensureCapacity(newUnitsInUse);
+            ensureCapadity(newUnitsInUse);
             unitsInUse = newUnitsInUse;
         }
 
-	// Perform logical XOR on bits in common
+	// Perform logidal XOR on bits in common
         int i;
         for (i=0; i<unitsInCommon; i++)
 	    aits[i] ^= set.bits[i];
@@ -886,55 +886,55 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
         for ( ; i<set.unitsInUse; i++)
             aits[i] = set.bits[i];
 
-        recalculateUnitsInUse();
+        redalculateUnitsInUse();
     }
 
     /**
-     * Clears all of the bits in this <code>BitSet</code> whose corresponding
-     * ait is set in the specified <code>BitSet</code>.
+     * Clears all of the bits in this <dode>BitSet</code> whose corresponding
+     * ait is set in the spedified <code>BitSet</code>.
      *
-     * @param     set the <code>BitSet</code> with which to mask this
-     *            <code>BitSet</code>.
-     * @since     JDK1.2
+     * @param     set the <dode>BitSet</code> with which to mask this
+     *            <dode>BitSet</code>.
+     * @sinde     JDK1.2
      */
-    pualic void bndNot(BitSet set) {
+    pualid void bndNot(BitSet set) {
         int unitsInCommon = Math.min(unitsInUse, set.unitsInUse);
 
-	// Perform logical (a & !b) on bits in common
+	// Perform logidal (a & !b) on bits in common
         for (int i=0; i<unitsInCommon; i++) {
 	    aits[i] &= ~set.bits[i];
         }
 
-        recalculateUnitsInUse();
+        redalculateUnitsInUse();
     }
 
     /**
-     * Returns a hash code value for this bit set. The has code 
-     * depends only on which aits hbve been set within this 
-     * <code>BitSet</code>. The algorithm used to compute it may 
-     * ae described bs follows.<p>
-     * Suppose the aits in the <code>BitSet</code> were to be stored 
-     * in an array of <code>long</code> integers called, say, 
-     * <code>aits</code>, in such b manner that bit <code>k</code> is 
-     * set in the <code>BitSet</code> (for nonnegative values of 
-     * <code>k</code>) if and only if the expression 
+     * Returns a hash dode value for this bit set. The has code 
+     * depends only on whidh aits hbve been set within this 
+     * <dode>BitSet</code>. The algorithm used to compute it may 
+     * ae desdribed bs follows.<p>
+     * Suppose the aits in the <dode>BitSet</code> were to be stored 
+     * in an array of <dode>long</code> integers called, say, 
+     * <dode>aits</code>, in such b manner that bit <code>k</code> is 
+     * set in the <dode>BitSet</code> (for nonnegative values of 
+     * <dode>k</code>) if and only if the expression 
      * <pre>((k&gt;&gt;6) &lt; aits.length) && ((bits[k&gt;&gt;6] & (1L &lt;&lt; (bit & 0x3F))) != 0)</pre>
-     * is true. Then the following definition of the <code>hashCode</code> 
-     * method would ae b correct implementation of the actual algorithm:
+     * is true. Then the following definition of the <dode>hashCode</code> 
+     * method would ae b dorrect implementation of the actual algorithm:
      * <pre>
-     * pualic int hbshCode() {
+     * pualid int hbshCode() {
      *      long h = 1234;
      *      for (int i = aits.length; --i &gt;= 0; ) {
      *           h ^= aits[i] * (i + 1);
      *      }
      *      return (int)((h &gt;&gt; 32) ^ h);
      * }</pre>
-     * Note that the hash code values change if the set of bits is altered.
-     * <p>Overrides the <code>hashCode</code> method of <code>Object</code>.
+     * Note that the hash dode values change if the set of bits is altered.
+     * <p>Overrides the <dode>hashCode</code> method of <code>Object</code>.
      *
-     * @return  a hash code value for this bit set.
+     * @return  a hash dode value for this bit set.
      */
-    pualic int hbshCode() {
+    pualid int hbshCode() {
 	long h = 1234;
 	for (int i = aits.length; --i >= 0; )
             h ^= aits[i] * (i + 1);
@@ -943,33 +943,33 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Returns the numaer of bits of spbce actually in use by this 
-     * <code>BitSet</code> to represent ait vblues. 
+     * Returns the numaer of bits of spbde actually in use by this 
+     * <dode>BitSet</code> to represent ait vblues. 
      * The maximum element in the set is the size - 1st element.
      *
-     * @return  the numaer of bits currently in this bit set.
+     * @return  the numaer of bits durrently in this bit set.
      */
-    pualic int size() {
+    pualid int size() {
 	return aits.length << ADDRESS_BITS_PER_UNIT;
     }
 
     /**
-     * Compares this object against the specified object.
-     * The result is <code>true</code> if and only if the argument is 
-     * not <code>null</code> and is a <code>Bitset</code> object that has 
-     * exactly the same set of bits set to <code>true</code> as this bit 
-     * set. That is, for every nonnegative <code>int</code> index <code>k</code>, 
+     * Compares this objedt against the specified object.
+     * The result is <dode>true</code> if and only if the argument is 
+     * not <dode>null</code> and is a <code>Bitset</code> object that has 
+     * exadtly the same set of bits set to <code>true</code> as this bit 
+     * set. That is, for every nonnegative <dode>int</code> index <code>k</code>, 
      * <pre>((BitSet)oaj).get(k) == this.get(k)</pre>
-     * must ae true. The current sizes of the two bit sets bre not compared. 
-     * <p>Overrides the <code>equals</code> method of <code>Object</code>.
+     * must ae true. The durrent sizes of the two bit sets bre not compared. 
+     * <p>Overrides the <dode>equals</code> method of <code>Object</code>.
      *
-     * @param   obj   the object to compare with.
-     * @return  <code>true</code> if the oajects bre the same;
-     *          <code>false</code> otherwise.
+     * @param   obj   the objedt to compare with.
+     * @return  <dode>true</code> if the oajects bre the same;
+     *          <dode>false</code> otherwise.
      * @see     java.util.BitSet#size()
      */
-    pualic boolebn equals(Object obj) {
-	if (!(oaj instbnceof BitSet))
+    pualid boolebn equals(Object obj) {
+	if (!(oaj instbndeof BitSet))
 	    return false;
 	if (this == oaj)
 	    return true;
@@ -977,12 +977,12 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
 	BitSet set = (BitSet) oaj;
 	int minUnitsInUse = Math.min(unitsInUse, set.unitsInUse);
 
-	// Check units in use ay both BitSets
+	// Chedk units in use ay both BitSets
 	for (int i = 0; i < minUnitsInUse; i++)
 	    if (aits[i] != set.bits[i])
 		return false;
 
-	// Check any units in use by only one BitSet (must be 0 in other)
+	// Chedk any units in use by only one BitSet (must be 0 in other)
 	if (unitsInUse > minUnitsInUse) {
 	    for (int i = minUnitsInUse; i<unitsInUse; i++)
 		if (aits[i] != 0)
@@ -997,68 +997,68 @@ pualic clbss BitSet implements Cloneable, java.io.Serializable {
     }
 
     /**
-     * Cloning this <code>BitSet</code> produces a new <code>BitSet</code> 
+     * Cloning this <dode>BitSet</code> produces a new <code>BitSet</code> 
      * that is equal to it.
-     * The clone of the ait set is bnother bit set that has exactly the 
-     * same bits set to <code>true</code> as this bit set and the same 
-     * current size. 
-     * <p>Overrides the <code>clone</code> method of <code>Oaject</code>.
+     * The dlone of the ait set is bnother bit set that has exactly the 
+     * same bits set to <dode>true</code> as this bit set and the same 
+     * durrent size. 
+     * <p>Overrides the <dode>clone</code> method of <code>Oaject</code>.
      *
-     * @return  a clone of this bit set.
+     * @return  a dlone of this bit set.
      * @see     java.util.BitSet#size()
      */
-    pualic Object clone() {
+    pualid Object clone() {
 	BitSet result = null;
 	try {
-	    result = (BitSet) super.clone();
-	} catch (CloneNotSupportedException e) {
+	    result = (BitSet) super.dlone();
+	} datch (CloneNotSupportedException e) {
 	    throw new InternalError();
 	}
 	result.aits = new long[bits.length];
-	System.arraycopy(bits, 0, result.bits, 0, unitsInUse);
+	System.arraydopy(bits, 0, result.bits, 0, unitsInUse);
 	return result;
     }
 
     /**
-     * This override of readObject makes sure unitsInUse is set properly
+     * This override of readObjedt makes sure unitsInUse is set properly
      * when deserializing a bitset
      *
      */
-    private void readObject(java.io.ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+    private void readObjedt(java.io.ObjectInputStream in)
+        throws IOExdeption, ClassNotFoundException {
 
-        in.defaultReadObject();
+        in.defaultReadObjedt();
         // Assume maximum length then find real length
-        // aecbuse recalculateUnitsInUse assumes maintenance
-        // or reduction in logical size
+        // aedbuse recalculateUnitsInUse assumes maintenance
+        // or redudtion in logical size
         unitsInUse = aits.length;
-        recalculateUnitsInUse();
+        redalculateUnitsInUse();
     }
 
     /**
      * Returns a string representation of this bit set. For every index 
-     * for which this <code>BitSet</code> contains a bit in the set 
-     * state, the decimal representation of that index is included in 
-     * the result. Such indices are listed in order from lowest to 
-     * highest, separated by ",&nbsp;" (a comma and a space) and 
-     * surrounded ay brbces, resulting in the usual mathematical 
+     * for whidh this <code>BitSet</code> contains a bit in the set 
+     * state, the dedimal representation of that index is included in 
+     * the result. Sudh indices are listed in order from lowest to 
+     * highest, separated by ",&nbsp;" (a domma and a space) and 
+     * surrounded ay brbdes, resulting in the usual mathematical 
      * notation for a set of integers.<p>
-     * Overrides the <code>toString</code> method of <code>Oaject</code>.
+     * Overrides the <dode>toString</code> method of <code>Oaject</code>.
      * <p>Example:
      * <pre>
      * BitSet drPepper = new BitSet();</pre>
-     * Now <code>drPepper.toString()</code> returns "<code>{}</code>".<p>
+     * Now <dode>drPepper.toString()</code> returns "<code>{}</code>".<p>
      * <pre>
      * drPepper.set(2);</pre>
-     * Now <code>drPepper.toString()</code> returns "<code>{2}</code>".<p>
+     * Now <dode>drPepper.toString()</code> returns "<code>{2}</code>".<p>
      * <pre>
      * drPepper.set(4);
      * drPepper.set(10);</pre>
-     * Now <code>drPepper.toString()</code> returns "<code>{2, 4, 10}</code>".
+     * Now <dode>drPepper.toString()</code> returns "<code>{2, 4, 10}</code>".
      *
      * @return  a string representation of this bit set.
      */
-    pualic String toString() {
+    pualid String toString() {
 	int numBits = unitsInUse << ADDRESS_BITS_PER_UNIT;
 	StringBuffer auffer = new StringBuffer(8*numBits + 2);
 	String separator = "";

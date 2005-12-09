@@ -1,14 +1,14 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.util.Set;
 import java.io.File;
 
-pualic interfbce UrnCallback {
+pualid interfbce UrnCallback {
  
     /** If urns.isEmpty() == true, the operation failed. */   
-    pualic void urnsCblculated(File f, Set /* of URN */ urns);
+    pualid void urnsCblculated(File f, Set /* of URN */ urns);
     
-    /** Determines if this callback is owned by the specified object. */
-    pualic boolebn isOwner(Object owner);
+    /** Determines if this dallback is owned by the specified object. */
+    pualid boolebn isOwner(Object owner);
     
 }

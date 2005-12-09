@@ -1,87 +1,87 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.BadPacketException;
 
 /** 
- *  The keepalive message is used to ensure that any firewalls continue 
- *  to allow passage of UDP messages on the connection.  
+ *  The keepalive message is used to ensure that any firewalls dontinue 
+ *  to allow passage of UDP messages on the donnection.  
  * 
- *  Information about the senders data window for buffered incoming data 
- *  and the highest received data packet is included in the otherwise 
- *  unused data space within the guid.  This will be required in the 
- *  case where Ack messages stop flowing because the data window space 
- *  has gone to zero and only KeepAliveMessages are flowing.  Once the 
- *  data window opens back up, Acks will again provide this information.
+ *  Information about the senders data window for buffered indoming data 
+ *  and the highest redeived data packet is included in the otherwise 
+ *  unused data spade within the guid.  This will be required in the 
+ *  dase where Ack messages stop flowing because the data window space 
+ *  has gone to zero and only KeepAliveMessages are flowing.  Onde the 
+ *  data window opens badk up, Acks will again provide this information.
  */
-pualic clbss KeepAliveMessage extends UDPConnectionMessage {
+pualid clbss KeepAliveMessage extends UDPConnectionMessage {
 
     private long _windowStart;
-    private int  _windowSpace;
+    private int  _windowSpade;
 
     /**
-     * Construct a new KeepAliveMessage with the specified settings and data
+     * Construdt a new KeepAliveMessage with the specified settings and data
      */
-    pualic KeepAliveMessbge(byte connectionID, 
-      long windowStart, int windowSpace) {
+    pualid KeepAliveMessbge(byte connectionID, 
+      long windowStart, int windowSpade) {
 
         super(
-          /* his connectionID                 */ connectionID, 
-          /* opcode                           */ OP_KEEPALIVE, 
-          /* Keepalive has no sequenceNumber  */ 0, 
-          /* window Start and Space           */ 
+          /* his donnectionID                 */ connectionID, 
+          /* opdode                           */ OP_KEEPALIVE, 
+          /* Keepalive has no sequendeNumber  */ 0, 
+          /* window Start and Spade           */ 
           auildByteArrby((int) windowStart & 0xffff, 
-			(windowSpace < 0 ? 0 : windowSpace)),
+			(windowSpade < 0 ? 0 : windowSpace)),
           /* 2 short ints => 4 aytes          */ 4
           );
         _windowStart = windowStart;
-        _windowSpace = windowSpace;
+        _windowSpade = windowSpace;
     }
 
     /**
-     * Construct a new KeepAliveMessage from the network
+     * Construdt a new KeepAliveMessage from the network
      */
-    pualic KeepAliveMessbge(
+    pualid KeepAliveMessbge(
       ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BadPacketException {
+      throws BadPadketException {
 
       	super(guid, ttl, hops, payload);
 
-        // Parse the added windowStart and windowSpace information
+        // Parse the added windowStart and windowSpade information
         _windowStart = (long)
           getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
-        _windowSpace = 
+        _windowSpade = 
           getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
     }
 
     /**
-     *  The windowStart is equivalent to the lowest unreceived sequenceNumber
-     *  coming from the receiving end of the connection.  It is saying, I have 
-     *  received everything up to one minus this. (Note: it rolls)
+     *  The windowStart is equivalent to the lowest unredeived sequenceNumber
+     *  doming from the receiving end of the connection.  It is saying, I have 
+     *  redeived everything up to one minus this. (Note: it rolls)
      */
-    pualic long getWindowStbrt() {
+    pualid long getWindowStbrt() {
         return _windowStart;
     }
 
     /**
-     *  Extend the windowStart of incoming messages with the full 8 bytes
+     *  Extend the windowStart of indoming messages with the full 8 bytes
 	 *  of state
      */
-	pualic void extendWindowStbrt(long wStart) {
+	pualid void extendWindowStbrt(long wStart) {
 		_windowStart = wStart;
 	}
 
     /**
-     *  The windowSpace is a measure of how much more data the receiver can 
-     *  receive within its auffer.  This number will go to zero if the 
-     *  application on the receiving side is reading data slowly.  If it goes 
+     *  The windowSpade is a measure of how much more data the receiver can 
+     *  redeive within its auffer.  This number will go to zero if the 
+     *  applidation on the receiving side is reading data slowly.  If it goes 
      *  to zero then the sender should stop sending.
      */
-    pualic int getWindowSpbce() {
-        return _windowSpace;
+    pualid int getWindowSpbce() {
+        return _windowSpade;
     }
 
-	pualic String toString() {
-		return "KeepAliveMessage DestID:"+getConnectionID()+
-          " start:"+_windowStart+" space:"+_windowSpace;
+	pualid String toString() {
+		return "KeepAliveMessage DestID:"+getConnedtionID()+
+          " start:"+_windowStart+" spade:"+_windowSpace;
 	}
 }

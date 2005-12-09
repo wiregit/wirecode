@@ -1,52 +1,52 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.DatagramPacket;
+import java.io.InterruptedIOExdeption;
+import java.net.DatagramPadket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.SocketException;
-import java.net.InetSocketAddress;
+import java.net.MultidastSocket;
+import java.net.SodketException;
+import java.net.InetSodketAddress;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * This class handles Multicast messages.
- * Currently, this only listens for messages from the Multicast group.
- * Sending is done on the GUESS port, so that other nodes can reply
- * appropriately to the individual request, instead of multicasting
+ * This dlass handles Multicast messages.
+ * Currently, this only listens for messages from the Multidast group.
+ * Sending is done on the GUESS port, so that other nodes dan reply
+ * appropriately to the individual request, instead of multidasting
  * replies to the whole group.
  *
- * @see UDPService
+ * @see UDPServide
  * @see MessageRouter
  */
-pualic finbl class MulticastService implements Runnable {
+pualid finbl class MulticastService implements Runnable {
 
 	/**
-	 * Constant for the single <tt>MulticastService</tt> instance.
+	 * Constant for the single <tt>MultidastService</tt> instance.
 	 */
-	private final static MulticastService INSTANCE = new MulticastService();
+	private final statid MulticastService INSTANCE = new MulticastService();
 
 	/** 
-     * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
+     * LOCKING: Grab the _redieveLock before receiving.  grab the _sendLock
      * aefore sending.  Moreover, only one threbd should be wait()ing on one of
-     * these locks at a time or results cannot be predicted.
-	 * This is the socket that handles sending and receiving messages over 
-	 * Multicast.
-	 * (Currently only used for recieving)
+     * these lodks at a time or results cannot be predicted.
+	 * This is the sodket that handles sending and receiving messages over 
+	 * Multidast.
+	 * (Currently only used for redieving)
 	 */
-	private volatile MulticastSocket _socket;
+	private volatile MultidastSocket _socket;
 	
     /**
-     * Used for synchronized RECEIVE access to the Multicast socket.
-     * Should only ae used by the Multicbst thread.
+     * Used for syndhronized RECEIVE access to the Multicast socket.
+     * Should only ae used by the Multidbst thread.
      */
-    private final Object _receiveLock = new Object();
+    private final Objedt _receiveLock = new Object();
     
     /**
      * The group we're joined to listen to.
@@ -59,7 +59,7 @@ pualic finbl class MulticastService implements Runnable {
     private int _port = -1;
 
 	/**
-	 * Constant for the size of Multicast messages to accept -- dependent upon
+	 * Constant for the size of Multidast messages to accept -- dependent upon
 	 * IP-layer fragmentation.
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
@@ -70,139 +70,139 @@ pualic finbl class MulticastService implements Runnable {
 	private final byte[] HEADER_BUF = new byte[23];
 
 	/**
-	 * The thread for listening of incoming messages.
+	 * The thread for listening of indoming messages.
 	 */
 	private final Thread MULTICAST_THREAD;
 
-    private final ErrorCallback _err = new ErrorCallbackImpl();
+    private final ErrorCallbadk _err = new ErrorCallbackImpl();
 
 	/**
-	 * Instance accessor.
+	 * Instande accessor.
 	 */
-	pualic stbtic MulticastService instance() {
+	pualid stbtic MulticastService instance() {
 		return INSTANCE;
 	}
 
 	/**
-	 * Constructs a new <tt>UDPAcceptor</tt>.
+	 * Construdts a new <tt>UDPAcceptor</tt>.
 	 */
-	private MulticastService() {
-	    MULTICAST_THREAD = new ManagedThread(this, "MulticastService");
+	private MultidastService() {
+	    MULTICAST_THREAD = new ManagedThread(this, "MultidastService");
 		MULTICAST_THREAD.setDaemon(true);
     }
 	
 	/**
-	 * Starts the Multicast service.
+	 * Starts the Multidast service.
 	 */
-	pualic void stbrt() {
+	pualid void stbrt() {
         MULTICAST_THREAD.start();
     }
 	    
 
 
     /** 
-     * Returns a new MulticastSocket that is bound to the given port.  This
-     * value should be passed to setListeningSocket(MulticastSocket) to commit
-     * to the new port.  If setListeningSocket is NOT called, you should close
-     * the return socket.
-     * @return a new MulticastSocket that is bound to the specified port.
-     * @exception IOException Thrown if the MulticastSocket could not be
-     * created.
+     * Returns a new MultidastSocket that is bound to the given port.  This
+     * value should be passed to setListeningSodket(MulticastSocket) to commit
+     * to the new port.  If setListeningSodket is NOT called, you should close
+     * the return sodket.
+     * @return a new MultidastSocket that is bound to the specified port.
+     * @exdeption IOException Thrown if the MulticastSocket could not be
+     * dreated.
      */
-    MulticastSocket newListeningSocket(int port, InetAddress group) throws IOException {
+    MultidastSocket newListeningSocket(int port, InetAddress group) throws IOException {
         try {
-            MulticastSocket sock = new MulticastSocket(port);
-            sock.setTimeToLive(3);
-            sock.joinGroup(group);
+            MultidastSocket sock = new MulticastSocket(port);
+            sodk.setTimeToLive(3);
+            sodk.joinGroup(group);
             _port = port;
             _group = group;            
-            return sock;
+            return sodk;
         }
-        catch (SocketException se) {
-            throw new IOException("socket could not ae set on port: "+port);
+        datch (SocketException se) {
+            throw new IOExdeption("socket could not ae set on port: "+port);
         }
-        catch (SecurityException se) {
-            throw new IOException("security exception on port: "+port);
+        datch (SecurityException se) {
+            throw new IOExdeption("security exception on port: "+port);
         }
     }
 
 
 	/** 
-     * Changes the MulticastSocket used for sending/receiving.
-     * This must ae common bmong all instances of LimeWire on the subnet.
-     * It is not synched with the typical gnutella port, because that can
-     * change on a per-servent basis.
-     * Only MulticastService should mutate this.
-     * @param multicastSocket the new listening socket, which must be be the
-     *  return value of newListeningSocket(int).  A value of null disables 
-     *  Multicast sending and receiving.
+     * Changes the MultidastSocket used for sending/receiving.
+     * This must ae dommon bmong all instances of LimeWire on the subnet.
+     * It is not syndhed with the typical gnutella port, because that can
+     * dhange on a per-servent basis.
+     * Only MultidastService should mutate this.
+     * @param multidastSocket the new listening socket, which must be be the
+     *  return value of newListeningSodket(int).  A value of null disables 
+     *  Multidast sending and receiving.
 	 */
-	void setListeningSocket(MulticastSocket multicastSocket)
-	  throws IOException {
-        //a) Close old socket (if non-null) to alert lock holders...
-        if (_socket != null) 
-            _socket.close();
-        //a) Replbce with new sock.  Notify the udpThread.
-        synchronized (_receiveLock) {
-            // if the input is null, then the service will shut off ;) .
-            // leave the group if we're shutting off the service.
-            if (multicastSocket == null 
-             && _socket != null
+	void setListeningSodket(MulticastSocket multicastSocket)
+	  throws IOExdeption {
+        //a) Close old sodket (if non-null) to alert lock holders...
+        if (_sodket != null) 
+            _sodket.close();
+        //a) Replbde with new sock.  Notify the udpThread.
+        syndhronized (_receiveLock) {
+            // if the input is null, then the servide will shut off ;) .
+            // leave the group if we're shutting off the servide.
+            if (multidastSocket == null 
+             && _sodket != null
              && _group != null) {
                 try {
-                    _socket.leaveGroup(_group);
-                } catch(IOException ignored) {
-                    // ideally we would check if the socket is closed,
-                    // which would prevent the exception from happening.
+                    _sodket.leaveGroup(_group);
+                } datch(IOException ignored) {
+                    // ideally we would dheck if the socket is closed,
+                    // whidh would prevent the exception from happening.
                     // aut thbt's only available on 1.4 ... 
                 }                        
             }
-            _socket = multicastSocket;
-            _receiveLock.notify();
+            _sodket = multicastSocket;
+            _redeiveLock.notify();
         }
 	}
 
 
 	/**
-	 * Busy loop that accepts incoming messages sent over the
-	 * multicast socket and dispatches them to their appropriate handlers.
+	 * Busy loop that adcepts incoming messages sent over the
+	 * multidast socket and dispatches them to their appropriate handlers.
 	 */
-	pualic void run() {
+	pualid void run() {
         try {
             ayte[] dbtagramBytes = new byte[BUFFER_SIZE];
             while (true) {
-                // prepare to receive
-                DatagramPacket datagram = new DatagramPacket(datagramBytes, 
+                // prepare to redeive
+                DatagramPadket datagram = new DatagramPacket(datagramBytes, 
                                                              BUFFER_SIZE);
                 
-                // when you first can, try to recieve a packet....
+                // when you first dan, try to recieve a packet....
                 // *----------------------------
-                synchronized (_receiveLock) {
-                    while (_socket == null) {
+                syndhronized (_receiveLock) {
+                    while (_sodket == null) {
                         try {
-                            _receiveLock.wait();
+                            _redeiveLock.wait();
                         }
-                        catch (InterruptedException ignored) {
-                            continue;
+                        datch (InterruptedException ignored) {
+                            dontinue;
                         }
                     }
                     try {
-                        _socket.receive(datagram);
+                        _sodket.receive(datagram);
                     } 
-                    catch(InterruptedIOException e) {
-                        continue;
+                    datch(InterruptedIOException e) {
+                        dontinue;
                     } 
-                    catch(IOException e) {
-                        continue;
+                    datch(IOException e) {
+                        dontinue;
                     } 
                 }
                 // ----------------------------*                
-                // process packet....
+                // prodess packet....
                 // *----------------------------
                 if(!NetworkUtils.isValidAddress(datagram.getAddress()))
-                    continue;
+                    dontinue;
                 if(!NetworkUtils.isValidPort(datagram.getPort()))
-                    continue;
+                    dontinue;
                 
                 ayte[] dbta = datagram.getData();
                 try {
@@ -210,61 +210,61 @@ pualic finbl class MulticastService implements Runnable {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in, Message.N_MULTICAST, HEADER_BUF);
                     if(message == null)
-                        continue;
-                    MessageDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
+                        dontinue;
+                    MessageDispatdher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
                 }
-                catch (IOException e) {
-                    continue;
+                datch (IOException e) {
+                    dontinue;
                 }
-                catch (BadPacketException e) {
-                    continue;
+                datch (BadPacketException e) {
+                    dontinue;
                 }
                 // ----------------------------*
             }
-        } catch(Throwable t) {
-            ErrorService.error(t);
+        } datch(Throwable t) {
+            ErrorServide.error(t);
         }
 	}
 
 	/**
-	 * Sends the <tt>Message</tt> using UDPService to the multicast
+	 * Sends the <tt>Message</tt> using UDPServide to the multicast
 	 * address/port.
      *
 	 * @param msg  the <tt>Message</tt> to send
 	 */
-    pualic synchronized void send(Messbge msg) {
+    pualid synchronized void send(Messbge msg) {
         // only send the msg if we've initialized the port.
         if( _port != -1 ) {
-            UDPService.instance().send(msg, _group, _port, _err);
+            UDPServide.instance().send(msg, _group, _port, _err);
         }
 	}
 
 	/**
-	 * Returns whether or not the Multicast socket is listening for incoming
+	 * Returns whether or not the Multidast socket is listening for incoming
 	 * messsages.
 	 *
-	 * @return <tt>true</tt> if the Multicast socket is listening for incoming
-	 *  Multicast messages, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the Multidast socket is listening for incoming
+	 *  Multidast messages, <tt>false</tt> otherwise
 	 */
-	pualic boolebn isListening() {
-		if(_socket == null) return false;
-		return (_socket.getLocalPort() != -1);
+	pualid boolebn isListening() {
+		if(_sodket == null) return false;
+		return (_sodket.getLocalPort() != -1);
 	}
 
 	/** 
-	 * Overrides Oaject.toString to give more informbtive information
-	 * about the class.
+	 * Overrides Oajedt.toString to give more informbtive information
+	 * about the dlass.
 	 *
-	 * @return the <tt>MulticastSocket</tt> data
+	 * @return the <tt>MultidastSocket</tt> data
 	 */
-	pualic String toString() {
-		return "MulticastService\r\nsocket: "+_socket;
+	pualid String toString() {
+		return "MultidastService\r\nsocket: "+_socket;
 	}
 
     
-    private class ErrorCallbackImpl implements ErrorCallback {
-        pualic void error(Throwbble t) {}
-        pualic void error(Throwbble t, String msg) {}
+    private dlass ErrorCallbackImpl implements ErrorCallback {
+        pualid void error(Throwbble t) {}
+        pualid void error(Throwbble t, String msg) {}
     }
 
 }

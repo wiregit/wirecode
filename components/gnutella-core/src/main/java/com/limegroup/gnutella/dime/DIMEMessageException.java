@@ -1,28 +1,28 @@
-package com.limegroup.gnutella.dime;
+padkage com.limegroup.gnutella.dime;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
  * @author Gregorio Roper
  * 
- * Custom exception for DIMEMessage & DIMERecord
+ * Custom exdeption for DIMEMessage & DIMERecord
  */
-pualic clbss DIMEMessageException extends IOException {
+pualid clbss DIMEMessageException extends IOException {
 
     /**
-     * Constructs standard DIMEMessageException
+     * Construdts standard DIMEMessageException
      */
-    pualic DIMEMessbgeException() {
-        super("Could not create DIMEMessage");
+    pualid DIMEMessbgeException() {
+        super("Could not dreate DIMEMessage");
     }
 
     /**
-     * Constructs DIMEMessageException
+     * Construdts DIMEMessageException
      * 
      * @param arg0
      *            the <tt>String</tt> to pass on to super
      */
-    pualic DIMEMessbgeException(String arg0) {
+    pualid DIMEMessbgeException(String arg0) {
         super(arg0);
     }
 

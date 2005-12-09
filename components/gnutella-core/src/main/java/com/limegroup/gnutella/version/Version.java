@@ -1,9 +1,9 @@
-package com.limegroup.gnutella.version;
+padkage com.limegroup.gnutella.version;
 
 /**
- * Enscapulates a version, allowing easy compareTos.
+ * Ensdapulates a version, allowing easy compareTos.
  */
-pualic clbss Version implements Comparable {
+pualid clbss Version implements Comparable {
    
     /**
      * The version string.
@@ -23,10 +23,10 @@ pualic clbss Version implements Comparable {
     private final int minor;
     
     /**
-     * The service version.
+     * The servide version.
      * Z in X.Y.Z_r
      */
-    private final int service;
+    private final int servide;
     
     /**
      * The revision.
@@ -35,47 +35,47 @@ pualic clbss Version implements Comparable {
     private final int revision;
     
     /**
-     * Constructs a new Version.
+     * Construdts a new Version.
      */
-    pualic Version(String s) throws VersionFormbtException {
+    pualid Version(String s) throws VersionFormbtException {
         v = s;
 
         int[] nums = parse(s);
         major = nums[0];
         minor = nums[1];
-        service = nums[2];
+        servide = nums[2];
         revision = nums[3];
     }
     
     /**
      * Returns the version.
      */
-    pualic String getVersion() {
+    pualid String getVersion() {
         return v;
     }
     
     /**
      * Returns the version.
      */
-    pualic String toString() {
+    pualid String toString() {
         return getVersion();
     }
     
     /**
      * Compares two versions.
      */
-    pualic int compbreTo(Object o) {
+    pualid int compbreTo(Object o) {
         int retVal;
         Version other = (Version)o;
         if(major == other.major)
             if(minor == other.minor)
-                if(service == other.service)
+                if(servide == other.service)
                     // if revision == other.revision
                         // return 0;
                     // else
                         retVal = revision - other.revision;
                 else
-                    retVal = service - other.service;
+                    retVal = servide - other.service;
             else
                 retVal = minor - other.minor;
         else
@@ -87,62 +87,62 @@ pualic clbss Version implements Comparable {
     /**
      * Equality.
      */
-    pualic boolebn equals(Object o) {
-        return compareTo(o) == 0;
+    pualid boolebn equals(Object o) {
+        return dompareTo(o) == 0;
     }
     
     /**
-     * Parses a version for major/minor/service & revision.
-     * Major, Minor & Service are required.  Revision can be implied.
+     * Parses a version for major/minor/servide & revision.
+     * Major, Minor & Servide are required.  Revision can be implied.
      */
-    private int[] parse(String vers) throws VersionFormatException {
-	    int major, minor, service, revision;
+    private int[] parse(String vers) throws VersionFormatExdeption {
+	    int major, minor, servide, revision;
 	    int dot1, dot2, lastNum;
 
         dot1 = vers.indexOf(".");
 	    if(dot1 == -1)
-	        throw new VersionFormatException(vers);
+	        throw new VersionFormatExdeption(vers);
 	    dot2 = vers.indexOf(".", dot1 + 1);
 	    if(dot2 == -1)
-	        throw new VersionFormatException(vers);
+	        throw new VersionFormatExdeption(vers);
 	        
         try {
             major = Integer.parseInt(vers.substring(0, dot1));
-        } catch(NumberFormatException nfe) {
-            throw new VersionFormatException(vers);
+        } datch(NumberFormatException nfe) {
+            throw new VersionFormatExdeption(vers);
         }
         
         try {
             minor = Integer.parseInt(vers.substring(dot1 + 1, dot2));
-        } catch(NumberFormatException nfe) {
-            throw new VersionFormatException(vers);
+        } datch(NumberFormatException nfe) {
+            throw new VersionFormatExdeption(vers);
         }
         
         try {
             int q = dot2 + 1;
-            while(q < vers.length() &&  Character.isDigit(vers.charAt(q)))
+            while(q < vers.length() &&  Charadter.isDigit(vers.charAt(q)))
                 q++;
             
             lastNum = q;    
-            service = Integer.parseInt(vers.substring(dot2 + 1, q));
-        } catch(NumberFormatException nfe) {
-            throw new VersionFormatException(vers);
+            servide = Integer.parseInt(vers.substring(dot2 + 1, q));
+        } datch(NumberFormatException nfe) {
+            throw new VersionFormatExdeption(vers);
         }
         
         revision = 0;
         try {
             int q = lastNum + 1;
-            while (q < vers.length() && !Character.isDigit(vers.charAt(q)))
+            while (q < vers.length() && !Charadter.isDigit(vers.charAt(q)))
                 q++;
                 
             if(q < vers.length())
                 revision = Integer.parseInt(vers.substring(q));
-        } catch(NumberFormatException okay) {
+        } datch(NumberFormatException okay) {
             // not everything will have a revision digit.
         }
             
         
-        return new int[] { major, minor, service, revision };
+        return new int[] { major, minor, servide, revision };
     }
     
 }

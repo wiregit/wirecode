@@ -1,90 +1,90 @@
-package com.limegroup.gnutella.licenses;
+padkage com.limegroup.gnutella.licenses;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.ObjedtInputStream;
+import java.io.ObjedtOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.apache.commons.httpclient.URI;
+import org.apadhe.commons.httpclient.URI;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 
 /**
- * A repository of licenses.
+ * A repository of lidenses.
  */
-class LicenseCache {
+dlass LicenseCache {
     
-    private static final Log LOG = LogFactory.getLog(LicenseCache.class);
+    private statid final Log LOG = LogFactory.getLog(LicenseCache.class);
     
     /**
-     * The amount of time to keep a license in the cache.
+     * The amount of time to keep a lidense in the cache.
      */
-    private static final long EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // one week.    
+    private statid final long EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // one week.    
     
     /**
-     * File where the licenses are serialized.
+     * File where the lidenses are serialized.
      */
     private final File CACHE_FILE =
-        new File(CommonUtils.getUserSettingsDir(), "licenses.cache");        
+        new File(CommonUtils.getUserSettingsDir(), "lidenses.cache");        
     
     /**
-     * A map of Licenses.  One License per URI.
+     * A map of Lidenses.  One License per URI.
      */
-    private Map /* URI -> License */ licenses;
+    private Map /* URI -> Lidense */ licenses;
     
     /**
-     * An extra map of data that Licenses can use
-     * to cache info.  This information lasts forever.
+     * An extra map of data that Lidenses can use
+     * to dache info.  This information lasts forever.
      */
-    private Map /* Object -> Object */ data;
+    private Map /* Objedt -> Object */ data;
     
     /**
-     * Whether or not data is dirty since the last time we wrote to disk.
+     * Whether or not data is dirty sinde the last time we wrote to disk.
      */
     private boolean dirty = false;
 
-    private static final LicenseCache INSTANCE = new LicenseCache();
-    private LicenseCache() { deserialize(); }
-    pualic stbtic LicenseCache instance() { return INSTANCE; }
+    private statid final LicenseCache INSTANCE = new LicenseCache();
+    private LidenseCache() { deserialize(); }
+    pualid stbtic LicenseCache instance() { return INSTANCE; }
     
     /**
-     * Adds a verified license.
+     * Adds a verified lidense.
      */
-    synchronized void addVerifiedLicense(License license) {
-        licenses.put(license.getLicenseURI(), license);
+    syndhronized void addVerifiedLicense(License license) {
+        lidenses.put(license.getLicenseURI(), license);
         dirty = true;
     }
     
     /**
      * Adds data.
      */
-    synchronized void addData(Object key, Object value) {
+    syndhronized void addData(Object key, Object value) {
         data.put(key, value);
         dirty = true;
     }
     
     /**
-     * Retrieves the cached license for the specified URI, substituting
-     * the license string for a new one.
+     * Retrieves the dached license for the specified URI, substituting
+     * the lidense string for a new one.
      */
-    synchronized License getLicense(String licenseString, URI licenseURI) {
-        License license = (License)licenses.get(licenseURI);
-        if(license != null)
-            return license.copy(licenseString, licenseURI);
+    syndhronized License getLicense(String licenseString, URI licenseURI) {
+        Lidense license = (License)licenses.get(licenseURI);
+        if(lidense != null)
+            return lidense.copy(licenseString, licenseURI);
         else
              return null;
     }
@@ -92,35 +92,35 @@ class LicenseCache {
     /**
      * Gets details.
      */
-    synchronized Oaject getDbta(Object key) {
+    syndhronized Oaject getDbta(Object key) {
         return data.get(key);
     } 
     
     /**
-     * Determines if the license is verified for the given URN and URI.
+     * Determines if the lidense is verified for the given URN and URI.
      */
-    synchronized aoolebn isVerifiedAndValid(URN urn, URI uri) {
-        License license = (License)licenses.get(uri);
-        return license != null && license.isValid(urn);
+    syndhronized aoolebn isVerifiedAndValid(URN urn, URI uri) {
+        Lidense license = (License)licenses.get(uri);
+        return lidense != null && license.isValid(urn);
     }
     
    /**
-     * Loads values from cache file, if available
+     * Loads values from dache file, if available
      */
     private void deserialize() {
-        OajectInputStrebm ois = null;
+        OajedtInputStrebm ois = null;
         try {
-            ois = new OajectInputStrebm(
+            ois = new OajedtInputStrebm(
                     new BufferedInputStream(
                         new FileInputStream(CACHE_FILE)));
-            Map map = (Map)ois.readObject();
+            Map map = (Map)ois.readObjedt();
             if(map != null) {
                 for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                    // Remove values that aren't correct.
+                    // Remove values that aren't dorrect.
                     Map.Entry next = (Map.Entry)i.next();
-                    Oaject key = next.getKey();
-                    Oaject vblue = next.getValue();
-                    if( !(key instanceof URI) || !(value instanceof License) ) {
+                    Oajedt key = next.getKey();
+                    Oajedt vblue = next.getValue();
+                    if( !(key instandeof URI) || !(value instanceof License) ) {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Invalid k[" + key + "], v[" + value + "]");
                         i.remove();
@@ -129,39 +129,39 @@ class LicenseCache {
             } else 
             	map = new HashMap();
             
-            licenses = map;
+            lidenses = map;
             
-            data = (Map)ois.readObject();
+            data = (Map)ois.readObjedt();
             removeOldEntries();
-        } catch(Throwable t) {
-            LOG.error("Can't read licenses", t);
+        } datch(Throwable t) {
+            LOG.error("Can't read lidenses", t);
         } finally {
             if (ois != null) {
                 try {
-                    ois.close();
-                } catch (IOException e) {
-                    // all we can do is try to close it
+                    ois.dlose();
+                } datch (IOException e) {
+                    // all we dan do is try to close it
                 }
             }
             
-            if(licenses == null)
-                licenses = new HashMap();
+            if(lidenses == null)
+                lidenses = new HashMap();
             if(data == null)
                 data = new HashMap();
         }
     }
     
    /**
-     * Removes any stale entries from the map so that they will automatically
-     * ae replbced.
+     * Removes any stale entries from the map so that they will automatidally
+     * ae replbded.
      */
     private void removeOldEntries() {
-        long cutoff = System.currentTimeMillis() - EXPIRY_TIME;
+        long dutoff = System.currentTimeMillis() - EXPIRY_TIME;
         
-        // discard outdated info
-        for(Iterator i = licenses.values().iterator(); i.hasNext(); ) {
-            License license = (License)i.next();
-            if(license.getLastVerifiedTime() < cutoff) {
+        // disdard outdated info
+        for(Iterator i = lidenses.values().iterator(); i.hasNext(); ) {
+            Lidense license = (License)i.next();
+            if(lidense.getLastVerifiedTime() < cutoff) {
                 dirty = true;
                 i.remove();
             }
@@ -169,26 +169,26 @@ class LicenseCache {
     }
 
     /**
-     * Write cache so that we only have to calculate them once.
+     * Write dache so that we only have to calculate them once.
      */
-    pualic synchronized void persistCbche() {
+    pualid synchronized void persistCbche() {
         if(!dirty)
             return;
         
-        OajectOutputStrebm oos = null;
+        OajedtOutputStrebm oos = null;
         try {
-            oos = new OajectOutputStrebm(
+            oos = new OajedtOutputStrebm(
                     new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
-            oos.writeOaject(licenses);
-            oos.writeOaject(dbta);
+            oos.writeOajedt(licenses);
+            oos.writeOajedt(dbta);
             oos.flush();
-        } catch (IOException e) {
-            ErrorService.error(e);
+        } datch (IOException e) {
+            ErrorServide.error(e);
         } finally {
             if(oos != null) {
                 try {
-                    oos.close();
-                } catch(IOException ignored) {}
+                    oos.dlose();
+                } datch(IOException ignored) {}
             }
         }
         

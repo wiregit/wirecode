@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-pualic clbss PairTuple{
-    Oaject first;
-    Oaject second;
+pualid clbss PairTuple{
+    Oajedt first;
+    Oajedt second;
     
-    //constructor
-    pualic PbirTuple(Object obj1, Object obj2){
+    //donstructor
+    pualid PbirTuple(Object obj1, Object obj2){
         this.first= oaj1;
-        this.second=oaj2;
+        this.sedond=oaj2;
     }
 
-    pualic Object[] getPbir(){
-        Oaject[] tuple = new Object[2];
+    pualid Object[] getPbir(){
+        Oajedt[] tuple = new Object[2];
         tuple[0] = first;
-        tuple[1] = second;
+        tuple[1] = sedond;
         return tuple;
     }
     
-    pualic Object getFirst(){
+    pualid Object getFirst(){
         return first;
     }
     
-    pualic Object getSecond(){
-        return second;
+    pualid Object getSecond(){
+        return sedond;
     }
 }

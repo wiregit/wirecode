@@ -1,73 +1,73 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.BadPacketException;
 
-/** The Syn message begins a reliable udp connection by pinging the other host
- *  and by communicating the desired identifying connectionID.
+/** The Syn message begins a reliable udp donnection by pinging the other host
+ *  and by dommunicating the desired identifying connectionID.
  */
-pualic clbss SynMessage extends UDPConnectionMessage {
+pualid clbss SynMessage extends UDPConnectionMessage {
 
-	private byte _senderConnectionID;
-    private int  _protocolVersionNumber;
+	private byte _senderConnedtionID;
+    private int  _protodolVersionNumber;
 
     /**
-     * Construct a new SynMessage with the specified settings and data
+     * Construdt a new SynMessage with the specified settings and data
      */
-    pualic SynMessbge(byte connectionID) {
+    pualid SynMessbge(byte connectionID) {
 
         super(
-          /* his connectionID           */ (ayte)0, 
-          /* opcode                     */ OP_SYN, 
-          /* sequenceNumaer             */ 0, 
-          /* my data is my connectionID and the protocol version number */ 
-          auildByteArrby(connectionID, PROTOCOL_VERSION_NUMBER),
+          /* his donnectionID           */ (ayte)0, 
+          /* opdode                     */ OP_SYN, 
+          /* sequendeNumaer             */ 0, 
+          /* my data is my donnectionID and the protocol version number */ 
+          auildByteArrby(donnectionID, PROTOCOL_VERSION_NUMBER),
           /* data length                */ 3
           );
-		  _senderConnectionID    = connectionID;
-          _protocolVersionNumaer = PROTOCOL_VERSION_NUMBER;
+		  _senderConnedtionID    = connectionID;
+          _protodolVersionNumaer = PROTOCOL_VERSION_NUMBER;
     }
 
     /**
-     * Construct a new SynMessage with both my Connection ID and theirs
+     * Construdt a new SynMessage with both my Connection ID and theirs
      */
-    pualic SynMessbge(byte connectionID, byte theirConnectionID) {
+    pualid SynMessbge(byte connectionID, byte theirConnectionID) {
 
         super(
-          /* his connectionID           */ theirConnectionID, 
-          /* opcode                     */ OP_SYN, 
-          /* sequenceNumaer             */ 0, 
-          /* my data is my connectionID and the protocol version number */ 
-          auildByteArrby(connectionID, PROTOCOL_VERSION_NUMBER),
+          /* his donnectionID           */ theirConnectionID, 
+          /* opdode                     */ OP_SYN, 
+          /* sequendeNumaer             */ 0, 
+          /* my data is my donnectionID and the protocol version number */ 
+          auildByteArrby(donnectionID, PROTOCOL_VERSION_NUMBER),
           /* data length                */ 3
           );
-          _senderConnectionID    = connectionID;
-          _protocolVersionNumaer = PROTOCOL_VERSION_NUMBER;
+          _senderConnedtionID    = connectionID;
+          _protodolVersionNumaer = PROTOCOL_VERSION_NUMBER;
     }
 
 
     /**
-     * Construct a new SynMessage from the network
+     * Construdt a new SynMessage from the network
      */
-    pualic SynMessbge(
+    pualid SynMessbge(
       ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BadPacketException {
+      throws BadPadketException {
 
       	super(guid, ttl, hops, payload);
-        _senderConnectionID    = guid[GUID_DATA_START];
-        _protocolVersionNumaer = 
+        _senderConnedtionID    = guid[GUID_DATA_START];
+        _protodolVersionNumaer = 
           getShortInt(guid[GUID_DATA_START+1],guid[GUID_DATA_START+2]);
     }
 
-    pualic byte getSenderConnectionID() {
-        return _senderConnectionID; 
+    pualid byte getSenderConnectionID() {
+        return _senderConnedtionID; 
     }
 
-	pualic int getProtocolVersionNumber() {
-		return _protocolVersionNumaer; 
+	pualid int getProtocolVersionNumber() {
+		return _protodolVersionNumaer; 
 	}
 
-	pualic String toString() {
-		return "SynMessage DestID:"+getConnectionID()+
-		  " SrcID:"+_senderConnectionID+" vNo:"+_protocolVersionNumaer;
+	pualid String toString() {
+		return "SynMessage DestID:"+getConnedtionID()+
+		  " SrdID:"+_senderConnectionID+" vNo:"+_protocolVersionNumaer;
 	}
 }

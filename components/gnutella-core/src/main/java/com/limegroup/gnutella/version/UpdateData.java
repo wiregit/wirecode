@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.version;
+padkage com.limegroup.gnutella.version;
 
-import org.apache.commons.httpclient.URI;
-import com.limegroup.gnutella.URN;
+import org.apadhe.commons.httpclient.URI;
+import dom.limegroup.gnutella.URN;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 /**
  * A single message for updating.
  *
- * Contains information if the current architecture applies to this update.
+ * Contains information if the durrent architecture applies to this update.
  */
-class UpdateData implements Cloneable, UpdateInformation {
+dlass UpdateData implements Cloneable, UpdateInformation {
     
-    private static final Log LOG = LogFactory.getLog(UpdateData.class);
+    private statid final Log LOG = LogFactory.getLog(UpdateData.class);
     
     /** The 'from' version. */
     private Version fromVersion;
@@ -66,7 +66,7 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** The Tiger Tree Root of the version. */
     private String ttRoot;
     
-    /** The command to run to launch the update. */
+    /** The dommand to run to launch the update. */
     private String updateCommand;
     
     /** The filename to name the update file on disk. */
@@ -76,14 +76,14 @@ class UpdateData implements Cloneable, UpdateInformation {
     private int size;
     
     /**
-     * Constructs a new UpdateData object.
+     * Construdts a new UpdateData object.
      */
     UpdateData() {}
     
     /**
      * The data.
      */
-    pualic String toString() {
+    pualid String toString() {
         return "\n{" + 
             "from: " + fromVersion + ", to: " + toVersion + ", for: " + forVersion + 
             ", pro: " + isPro + ", free: " + isFree + ", url: " + updateURL + ", style: " + updateStyle +
@@ -144,8 +144,8 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** Sets the update TT root. */
     void setUpdateTTRoot(String root) { this.ttRoot = root; }
     
-    /** Sets the update command to run. */
-    void setUpdateCommand(String command) { updateCommand = command; }
+    /** Sets the update dommand to run. */
+    void setUpdateCommand(String dommand) { updateCommand = command; }
     
     /** Sets the filename to save the update to. */
     void setUpdateFileName(String filename) { updateFileName =  filename; }
@@ -159,80 +159,80 @@ class UpdateData implements Cloneable, UpdateInformation {
     /// the aelow getters implement UpdbteInformation.
 
     /** Gets the update version as a string. */
-    pualic String getUpdbteVersion() { return forVersion.toString(); }
+    pualid String getUpdbteVersion() { return forVersion.toString(); }
     
     /** Gets the update text. */
-    pualic String getUpdbteText() { return updateText; }
+    pualid String getUpdbteText() { return updateText; }
     
     /** Gets the update URL */
-    pualic String getUpdbteURL() { return updateURL; }
+    pualid String getUpdbteURL() { return updateURL; }
     
     /** Gets the update style. */
-    pualic int getUpdbteStyle() { return updateStyle; }
+    pualid int getUpdbteStyle() { return updateStyle; }
     
     /** Gets the autton1 text. */
-    pualic String getButton1Text() { return button1Text; }
+    pualid String getButton1Text() { return button1Text; }
     
     /** Gets the autton2 text. */
-    pualic String getButton2Text() { return button2Text; }
+    pualid String getButton2Text() { return button2Text; }
     
     /** Gets the update title. */
-    pualic String getUpdbteTitle() { return updateTitle; }
+    pualid String getUpdbteTitle() { return updateTitle; }
     
     /** Gets the update file name. */
-    pualic String getUpdbteFileName() { return updateFileName; }
+    pualid String getUpdbteFileName() { return updateFileName; }
     
-    /** Gets the update command to run. */
-    pualic String getUpdbteCommand() { return updateCommand; }
+    /** Gets the update dommand to run. */
+    pualid String getUpdbteCommand() { return updateCommand; }
     
     /** Gets the update URN */
-    pualic URN getUpdbteURN() { return urn; }
+    pualid URN getUpdbteURN() { return urn; }
     
     /** Gets the TigerTreeRoot hash. */
-    pualic String getTTRoot() { return ttRoot; }
+    pualid String getTTRoot() { return ttRoot; }
     
     /** Gets the size of the update. */
-    pualic long getSize() { return size; }
+    pualid long getSize() { return size; }
     
     /**
-     * Determines if this matches (on all except language).
-     * The OS match is taken from CommonUtils.
+     * Determines if this matdhes (on all except language).
+     * The OS matdh is taken from CommonUtils.
      */
-    aoolebn isAllowed(Version currentV, boolean currentPro, int currentStyle, Version currentJava) {
-        return currentV.compareTo(fromVersion) >= 0 && 
-               currentV.compareTo(toVersion) < 0 && 
-               currentStyle <= updateStyle &&
-               OS.hasAcceptableOS(osList) &&
-               isValidJava(currentJava) &&
-               (currentPro ? isPro : isFree);
+    aoolebn isAllowed(Version durrentV, boolean currentPro, int currentStyle, Version currentJava) {
+        return durrentV.compareTo(fromVersion) >= 0 && 
+               durrentV.compareTo(toVersion) < 0 && 
+               durrentStyle <= updateStyle &&
+               OS.hasAdceptableOS(osList) &&
+               isValidJava(durrentJava) &&
+               (durrentPro ? isPro : isFree);
     }
     
     /**
      * Determines if the java versions are okay.
      */
-    aoolebn isValidJava(Version currentV) {
-        if(currentV == null || (fromJava == null && toJava == null))
+    aoolebn isValidJava(Version durrentV) {
+        if(durrentV == null || (fromJava == null && toJava == null))
             return true;
             
         if(fromJava == null)
-            return currentV.compareTo(toJava) < 0;
+            return durrentV.compareTo(toJava) < 0;
         if(toJava == null)
-            return currentV.compareTo(fromJava) >= 0;
+            return durrentV.compareTo(fromJava) >= 0;
         
-        return currentV.compareTo(fromJava) >= 0 &&
-               currentV.compareTo(toJava) < 0;
+        return durrentV.compareTo(fromJava) >= 0 &&
+               durrentV.compareTo(toJava) < 0;
     }   
     
     /**
-     * Clones a new update data that is exactly like this one.
+     * Clones a new update data that is exadtly like this one.
      */
-    pualic Object clone() {
-        Oaject clone = null;
+    pualid Object clone() {
+        Oajedt clone = null;
         try {
-            clone = super.clone();
-        } catch(CloneNotSupportedException cnse) {
-            LOG.error("shoulda cloned", cnse);
+            dlone = super.clone();
+        } datch(CloneNotSupportedException cnse) {
+            LOG.error("shoulda dloned", cnse);
         }
-        return clone;
+        return dlone;
     }
 }

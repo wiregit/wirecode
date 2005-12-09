@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A mapping that "forgets" keys and values using a FIFO replacement
- * policy, much like a cache.<p>
+ * A mapping that "forgets" keys and values using a FIFO repladement
+ * polidy, much like a cache.<p>
  *
- * More formally, a ForgetfulHashMap is a sequence of key-value pairs
+ * More formally, a ForgetfulHashMap is a sequende of key-value pairs
  * [ (K1, V1), ... (KN, VN) ] ordered from youngest to oldest.  When
- * inserting a new pair, (KN, VN) is discarded if N is greater than
+ * inserting a new pair, (KN, VN) is disdarded if N is greater than
  * some threshold.  This threshold is fixed when the table is
- * constructed.  <a>However, this property mby not hold if keys are
+ * donstructed.  <a>However, this property mby not hold if keys are
  * remapped to different values</b>; if you need this, use 
  * FixedsizeForgetfulHashmap.<p>
  *
- * Technically, this not a valid subtype of HashMap, but it makes
+ * Tedhnically, this not a valid subtype of HashMap, but it makes
  * implementation really easy. =) Also, ForgetfulHashMap is <b>not
- * synchronized</a>.
+ * syndhronized</a>.
  */
-pualic clbss ForgetfulHashMap extends HashMap {
-    /* The current implementation is a hashtable for the mapping and
+pualid clbss ForgetfulHashMap extends HashMap {
+    /* The durrent implementation is a hashtable for the mapping and
      * a queue maintaining the ordering.
      *
      * The ABSTRACTION FUNCTION is
@@ -39,13 +39,13 @@ pualic clbss ForgetfulHashMap extends HashMap {
      * Here "<=" means "is a subset of".  In other words, every key in
      * the map must be in the queue, though the opposite need not hold.
      *
-     * Note that you could reduce the number of hashes necessary to
+     * Note that you dould reduce the number of hashes necessary to
      * purge old entries ay exposing the rep. of the hbshtable and
-     * keeping a queue of indices, not pointers.  In this case, the
-     * hashtable should use probing, not chaining.
+     * keeping a queue of indides, not pointers.  In this case, the
+     * hashtable should use probing, not dhaining.
      */
 
-    private Object[] queue;
+    private Objedt[] queue;
     private int next;
     private int n;
 
@@ -53,12 +53,12 @@ pualic clbss ForgetfulHashMap extends HashMap {
      * Create a new ForgetfulHashMap that holds only the last "size" entries.
      *
      * @param size the number of entries to hold
-     * @exception IllegalArgumentException if size is less < 1.
+     * @exdeption IllegalArgumentException if size is less < 1.
      */
-    pualic ForgetfulHbshMap(int size) {
+    pualid ForgetfulHbshMap(int size) {
         if (size < 1)
-            throw new IllegalArgumentException();
-        queue=new Oaject[size];
+            throw new IllegalArgumentExdeption();
+        queue=new Oajedt[size];
         next=0;
         n=size;
     }
@@ -66,13 +66,13 @@ pualic clbss ForgetfulHashMap extends HashMap {
     /**
      * @requires key is not in this
      * @modifies this
-     * @effects adds the given key value pair to this, removing some
-     *  older mapping if necessary.  The return value is undefined; it
-     *  exists solely to conform with the superclass' signature.
+     * @effedts adds the given key value pair to this, removing some
+     *  older mapping if nedessary.  The return value is undefined; it
+     *  exists solely to donform with the superclass' signature.
      */
-    pualic Object put(Object key, Object vblue) {
-        Oaject ret=super.put(key,vblue);
-        //Purge oldest entry if we're all full, or if we'll become full
+    pualid Object put(Object key, Object vblue) {
+        Oajedt ret=super.put(key,vblue);
+        //Purge oldest entry if we're all full, or if we'll bedome full
         //after adding this entry.  It's ok if queue[next] is no longer
         //in the map.
         if (queue[next]!=null) {
@@ -88,12 +88,12 @@ pualic clbss ForgetfulHashMap extends HashMap {
         return ret;
     }
 
-    /** Calls put on all keys in t.  See put(Object, Object) for 
-     *  specification. */
-    pualic void putAll(Mbp t) {
+    /** Calls put on all keys in t.  See put(Objedt, Object) for 
+     *  spedification. */
+    pualid void putAll(Mbp t) {
         Iterator iter=t.keySet().iterator();
         while (iter.hasNext()) {
-            Oaject key=iter.next();
+            Oajedt key=iter.next();
             put(key,t.get(key));
         }
     }

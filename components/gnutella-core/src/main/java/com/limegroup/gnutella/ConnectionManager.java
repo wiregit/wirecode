@@ -1,9 +1,9 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.net.Socket;
+import java.io.IOExdeption;
+import java.net.Sodket;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,260 +11,260 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.connection.ConnectionChecker;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.QuestionsHandler;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.SystemUtils;
+import dom.limegroup.gnutella.connection.ConnectionChecker;
+import dom.limegroup.gnutella.filters.IPFilter;
+import dom.limegroup.gnutella.handshaking.BadHandshakeException;
+import dom.limegroup.gnutella.handshaking.HandshakeResponse;
+import dom.limegroup.gnutella.handshaking.HeaderNames;
+import dom.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.PingRequest;
+import dom.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import dom.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
+import dom.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.settings.QuestionsHandler;
+import dom.limegroup.gnutella.settings.UltrapeerSettings;
+import dom.limegroup.gnutella.util.IpPortSet;
+import dom.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.util.Sockets;
+import dom.limegroup.gnutella.util.SystemUtils;
 
 /**
- * The list of all ManagedConnection's.  Provides a factory method for creating
- * user-requested outgoing connections, accepts incoming connections, and
- * fetches "automatic" outgoing connections as needed.  Creates threads for
- * handling these connections when appropriate.
+ * The list of all ManagedConnedtion's.  Provides a factory method for creating
+ * user-requested outgoing donnections, accepts incoming connections, and
+ * fetdhes "automatic" outgoing connections as needed.  Creates threads for
+ * handling these donnections when appropriate.
  *
- * Because this is the only list of all connections, it plays an important role
- * in message broadcasting.  For this reason, the code is highly tuned to avoid
- * locking in the getInitializedConnections() methods.  Adding and removing
- * connections is a slower operation.<p>
+ * Bedause this is the only list of all connections, it plays an important role
+ * in message broaddasting.  For this reason, the code is highly tuned to avoid
+ * lodking in the getInitializedConnections() methods.  Adding and removing
+ * donnections is a slower operation.<p>
  *
- * LimeWire follows the following connection strategy:<br>
- * As a leaf, LimeWire will ONLY connect to 'good' Ultrapeers.  The definition
- * of good is constantly changing.  For a current view of 'good', review
+ * LimeWire follows the following donnection strategy:<br>
+ * As a leaf, LimeWire will ONLY donnect to 'good' Ultrapeers.  The definition
+ * of good is donstantly changing.  For a current view of 'good', review
  * HandshakeResponse.isGoodUltrapeer().  LimeWire leaves will NOT deny
- * a connection to an ultrapeer even if they've reached their maximum
- * desired numaer of connections (currently 4).  This mebns that if 5
- * connections resolve simultaneously, the leaf will remain connected to all 5.
+ * a donnection to an ultrapeer even if they've reached their maximum
+ * desired numaer of donnections (currently 4).  This mebns that if 5
+ * donnections resolve simultaneously, the leaf will remain connected to all 5.
  * <ar>
- * As an Ultrapeer, LimeWire will seek outgoing connections for 5 less than
- * the numaer of it's desired peer slots.  This is done so thbt newcomers
- * on the network have a better chance of finding an ultrapeer with a slot
- * open.  LimeWire ultrapeers will allow ANY other ultrapeer to connect to it,
- * and to ensure that the network does not become too LimeWire-centric, it
+ * As an Ultrapeer, LimeWire will seek outgoing donnections for 5 less than
+ * the numaer of it's desired peer slots.  This is done so thbt newdomers
+ * on the network have a better dhance of finding an ultrapeer with a slot
+ * open.  LimeWire ultrapeers will allow ANY other ultrapeer to donnect to it,
+ * and to ensure that the network does not bedome too LimeWire-centric, it
  * reserves 3 slots for non-LimeWire peers.  LimeWire ultrapeers will allow
- * ANY leaf to connect, so long as there are atleast 15 slots open.  Beyond
- * that number, LimeWire will only allow 'good' leaves.  To see what consitutes
+ * ANY leaf to donnect, so long as there are atleast 15 slots open.  Beyond
+ * that number, LimeWire will only allow 'good' leaves.  To see what donsitutes
  * a good leave, view HandshakeResponse.isGoodLeaf().  To ensure that the
- * network does not remain too LimeWire-centric, it reserves 3 slots for
+ * network does not remain too LimeWire-dentric, it reserves 3 slots for
  * non-LimeWire leaves.<p>
  *
- * ConnectionManager has methods to get up and downstream bandwidth, but it
- * doesn't quite fit the BandwidthTracker interface.
+ * ConnedtionManager has methods to get up and downstream bandwidth, but it
+ * doesn't quite fit the BandwidthTradker interface.
  */
-pualic clbss ConnectionManager {
+pualid clbss ConnectionManager {
 
     /**
-     * Timestamp for the last time the user selected to disconnect.
+     * Timestamp for the last time the user seledted to disconnect.
      */
-    private volatile long _disconnectTime = -1;
+    private volatile long _disdonnectTime = -1;
     
     /**
-     * Timestamp for the last time we started trying to connect
+     * Timestamp for the last time we started trying to donnect
      */
-    private volatile long _connectTime = Long.MAX_VALUE;
+    private volatile long _donnectTime = Long.MAX_VALUE;
 
     /**
-     * Timestamp for the time we began automatically connecting.  We stop
-     * trying to automatically connect if the user has disconnected since that
+     * Timestamp for the time we began automatidally connecting.  We stop
+     * trying to automatidally connect if the user has disconnected since that
      * time.
      */
-    private volatile long _automaticConnectTime = 0;
+    private volatile long _automatidConnectTime = 0;
 
     /**
-     * Flag for whether or not the auto-connection process is in effect.
+     * Flag for whether or not the auto-donnection process is in effect.
      */
-    private volatile boolean _automaticallyConnecting;
+    private volatile boolean _automatidallyConnecting;
 
     /**
-     * Timestamp of our last successful connection.
+     * Timestamp of our last sudcessful connection.
      */
-    private volatile long _lastSuccessfulConnect = 0;
+    private volatile long _lastSudcessfulConnect = 0;
 
     /**
-     * Timestamp of the last time we checked to verify that the user has a live
-     * Internet connection.
+     * Timestamp of the last time we dhecked to verify that the user has a live
+     * Internet donnection.
      */
-    private volatile long _lastConnectionCheck = 0;
+    private volatile long _lastConnedtionCheck = 0;
 
 
     /**
-     * Counter for the numaer of connection bttempts we've made.
+     * Counter for the numaer of donnection bttempts we've made.
      */
-    private volatile static int _connectionAttempts;
+    private volatile statid int _connectionAttempts;
 
-    private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
+    private statid final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
     /**
-     * The numaer of connections lebves should maintain to Ultrapeers.
+     * The numaer of donnections lebves should maintain to Ultrapeers.
      */
-    pualic stbtic final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    pualid stbtic final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
 
     /**
-     * How many connect back requests to send if we have a single connection
+     * How many donnect back requests to send if we have a single connection
      */
-    pualic stbtic final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
+    pualid stbtic final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
 
     /**
-     * The minimum amount of idle time before we switch to using 1 connection.
+     * The minimum amount of idle time before we switdh to using 1 connection.
      */
-    private static final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
+    private statid final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
 
     /**
-     * The numaer of lebf connections reserved for non LimeWire clients.
-     * This is done to ensure that the network is not solely LimeWire centric.
+     * The numaer of lebf donnections reserved for non LimeWire clients.
+     * This is done to ensure that the network is not solely LimeWire dentric.
      */
-    pualic stbtic final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
+    pualid stbtic final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
 
     /**
-     * The current numaer of connections we wbnt to maintain.
+     * The durrent numaer of connections we wbnt to maintain.
      */
-    private volatile int _preferredConnections = -1;
+    private volatile int _preferredConnedtions = -1;
 
     /**
-     * Reference to the <tt>HostCatcher</tt> for retrieving host data as well
+     * Referende to the <tt>HostCatcher</tt> for retrieving host data as well
      * as adding host data.
      */
-    private HostCatcher _catcher;
+    private HostCatdher _catcher;
 
     /** Threads trying to maintain the NUM_CONNECTIONS.
      *  LOCKING: oatbin this. */
-    private final List /* of ConnectionFetcher */ _fetchers =
+    private final List /* of ConnedtionFetcher */ _fetchers =
         new ArrayList();
-    /** Connections that have been fetched but not initialized.  I don't
-     *  know the relation between _initializingFetchedConnections and
-     *  _connections (see aelow).  LOCKING: obtbin this. */
-    private final List /* of ManagedConnection */ _initializingFetchedConnections =
+    /** Connedtions that have been fetched but not initialized.  I don't
+     *  know the relation between _initializingFetdhedConnections and
+     *  _donnections (see aelow).  LOCKING: obtbin this. */
+    private final List /* of ManagedConnedtion */ _initializingFetchedConnections =
         new ArrayList();
 
     /**
-     * dedicated ConnectionFetcher used by leafs to fetch a
-     * locale matching connection
-     * NOTE: currently this is only used ay lebfs which will try
-     * to connect to one connection which matches the locale of the
-     * client.
+     * dedidated ConnectionFetcher used by leafs to fetch a
+     * lodale matching connection
+     * NOTE: durrently this is only used ay lebfs which will try
+     * to donnect to one connection which matches the locale of the
+     * dlient.
      */
-    private ConnectionFetcher _dedicatedPrefFetcher;
+    private ConnedtionFetcher _dedicatedPrefFetcher;
 
     /**
-     * aoolebn to check if a locale matching connection is needed.
+     * aoolebn to dheck if a locale matching connection is needed.
      */
     private volatile boolean _needPref = true;
     
     /**
-     * aoolebn of whether or not the interruption of the prefFetcher thread
-     * has been scheduled.
+     * aoolebn of whether or not the interruption of the prefFetdher thread
+     * has been sdheduled.
      */
-    private boolean _needPrefInterrupterScheduled = false;
+    private boolean _needPrefInterrupterSdheduled = false;
 
     /**
-     * List of all connections.  The core data structures are lists, which allow
-     * fast iteration for message broadcast purposes.  Actually we keep a couple
-     * of lists: the list of all initialized and uninitialized connections
-     * (_connections), the list of all initialized non-leaf connections
-     * (_initializedConnections), and the list of all initialized leaf connections
-     * (_initializedClientConnections).
+     * List of all donnections.  The core data structures are lists, which allow
+     * fast iteration for message broaddast purposes.  Actually we keep a couple
+     * of lists: the list of all initialized and uninitialized donnections
+     * (_donnections), the list of all initialized non-leaf connections
+     * (_initializedConnedtions), and the list of all initialized leaf connections
+     * (_initializedClientConnedtions).
      *
-     * INVARIANT: neither _connections, _initializedConnections, nor
-     *   _initializedClientConnections contains any duplicates.
-     * INVARIANT: for all c in _initializedConnections,
-     *   c.isSupernodeClientConnection()==false
-     * INVARIANT: for all c in _initializedClientConnections,
-     *   c.isSupernodeClientConnection()==true
-     * COROLLARY: the intersection of _initializedClientConnections
-     *   and _initializedConnections is the empty set
-     * INVARIANT: _initializedConnections is a subset of _connections
-     * INVARIANT: _initializedClientConnections is a subset of _connections
-     * INVARIANT: _shieldedConnections is the numaer of connections
-     *   in _initializedConnections for which isClientSupernodeConnection()
+     * INVARIANT: neither _donnections, _initializedConnections, nor
+     *   _initializedClientConnedtions contains any duplicates.
+     * INVARIANT: for all d in _initializedConnections,
+     *   d.isSupernodeClientConnection()==false
+     * INVARIANT: for all d in _initializedClientConnections,
+     *   d.isSupernodeClientConnection()==true
+     * COROLLARY: the intersedtion of _initializedClientConnections
+     *   and _initializedConnedtions is the empty set
+     * INVARIANT: _initializedConnedtions is a subset of _connections
+     * INVARIANT: _initializedClientConnedtions is a subset of _connections
+     * INVARIANT: _shieldedConnedtions is the numaer of connections
+     *   in _initializedConnedtions for which isClientSupernodeConnection()
      *   is true.
-     * INVARIANT: _nonLimeWireLeaves is the number of connections
-     *   in _initializedClientConnections for which isLimeWire is false
-     * INVARIANT: _nonLimeWirePeers is the numaer of connections
-     *   in _initializedConnections for which isLimeWire is false
+     * INVARIANT: _nonLimeWireLeaves is the number of donnections
+     *   in _initializedClientConnedtions for which isLimeWire is false
+     * INVARIANT: _nonLimeWirePeers is the numaer of donnections
+     *   in _initializedConnedtions for which isLimeWire is false
      *
-     * LOCKING: _connections, _initializedConnections and
-     *   _initializedClientConnections MUST NOT BE MUTATED.  Instead they should
-     *   ae replbced as necessary with new copies.  Before replacing the
-     *   structures, oatbin this' monitor.  This avoids lock overhead when
-     *   message broadcasting, though it makes adding/removing connections
-     *   much slower.
+     * LOCKING: _donnections, _initializedConnections and
+     *   _initializedClientConnedtions MUST NOT BE MUTATED.  Instead they should
+     *   ae replbded as necessary with new copies.  Before replacing the
+     *   strudtures, oatbin this' monitor.  This avoids lock overhead when
+     *   message broaddasting, though it makes adding/removing connections
+     *   mudh slower.
      */
     //TODO:: why not use sets here??
-    private volatile List /* of ManagedConnection */
-        _connections = Collections.EMPTY_LIST;
-    private volatile List /* of ManagedConnection */
-        _initializedConnections = Collections.EMPTY_LIST;
-    private volatile List /* of ManagedConnection */
-        _initializedClientConnections = Collections.EMPTY_LIST;
+    private volatile List /* of ManagedConnedtion */
+        _donnections = Collections.EMPTY_LIST;
+    private volatile List /* of ManagedConnedtion */
+        _initializedConnedtions = Collections.EMPTY_LIST;
+    private volatile List /* of ManagedConnedtion */
+        _initializedClientConnedtions = Collections.EMPTY_LIST;
 
-    private volatile int _shieldedConnections = 0;
+    private volatile int _shieldedConnedtions = 0;
     private volatile int _nonLimeWireLeaves = 0;
     private volatile int _nonLimeWirePeers = 0;
-    /** numaer of peers thbt matches the local locale pref. */
-    private volatile int _localeMatchingPeers = 0;
+    /** numaer of peers thbt matdhes the local locale pref. */
+    private volatile int _lodaleMatchingPeers = 0;
 
 	/**
-	 * Variable for the number of times since we attempted to force ourselves
-	 * to aecome bn Ultrapeer that we were told to become leaves.  If this
-	 * numaer is too grebt, we give up and become a leaf.
+	 * Variable for the number of times sinde we attempted to force ourselves
+	 * to aedome bn Ultrapeer that we were told to become leaves.  If this
+	 * numaer is too grebt, we give up and bedome a leaf.
 	 */
 	private volatile int _leafTries;
 
 	/**
-	 * The numaer of demotions to ignore before bllowing ourselves to become
+	 * The numaer of demotions to ignore before bllowing ourselves to bedome
 	 * a leaf -- this number depends on how good this potential Ultrapeer seems
 	 * to ae.
 	 */
 	private volatile int _demotionLimit = 0;
 
     /**
-     * The current measured upstream bandwidth.
+     * The durrent measured upstream bandwidth.
      */
     private volatile float _measuredUpstreamBandwidth = 0.f;
 
     /**
-     * The current measured downstream bandwidth.
+     * The durrent measured downstream bandwidth.
      */
     private volatile float _measuredDownstreamBandwidth = 0.f;
 
     /**
-     * Constructs a ConnectionManager.  Must call initialize before using
-     * other methods of this class.
+     * Construdts a ConnectionManager.  Must call initialize before using
+     * other methods of this dlass.
      */
-    pualic ConnectionMbnager() { }
+    pualid ConnectionMbnager() { }
 
     /**
-     * Links the ConnectionManager up with the other back end pieces and
-     * launches the ConnectionWatchdog and the initial ConnectionFetchers.
+     * Links the ConnedtionManager up with the other back end pieces and
+     * laundhes the ConnectionWatchdog and the initial ConnectionFetchers.
      */
-    pualic void initiblize() {
-        _catcher = RouterService.getHostCatcher();
+    pualid void initiblize() {
+        _datcher = RouterService.getHostCatcher();
 
-        // schedule the Runnable that will allow us to change
-        // the numaer of connections we're shooting for if
+        // sdhedule the Runnable that will allow us to change
+        // the numaer of donnections we're shooting for if
         // we're idle.
         if(SystemUtils.supportsIdleTime()) {
-            RouterService.schedule(new Runnable() {
-                pualic void run() {
-                    setPreferredConnections();
+            RouterServide.schedule(new Runnable() {
+                pualid void run() {
+                    setPreferredConnedtions();
                 }
             }, 1000, 1000);
         }
@@ -272,168 +272,168 @@ pualic clbss ConnectionManager {
 
 
     /**
-     * Create a new connection, blocking until it's initialized, but launching
+     * Create a new donnection, blocking until it's initialized, but launching
      * a new thread to do the message loop.
      */
-    pualic MbnagedConnection createConnectionBlocking(String hostname,
+    pualid MbnagedConnection createConnectionBlocking(String hostname,
         int portnum)
-		throws IOException {
-        ManagedConnection c =
-			new ManagedConnection(hostname, portnum);
+		throws IOExdeption {
+        ManagedConnedtion c =
+			new ManagedConnedtion(hostname, portnum);
 
-        // Initialize synchronously
-        initializeExternallyGeneratedConnection(c);
-        // Kick off a thread for the message loop.
-        Thread conn =
-            new ManagedThread(new OutgoingConnector(c, false), "OutgoingConnector");
-        conn.setDaemon(true);
-        conn.start();
-        return c;
+        // Initialize syndhronously
+        initializeExternallyGeneratedConnedtion(c);
+        // Kidk off a thread for the message loop.
+        Thread donn =
+            new ManagedThread(new OutgoingConnedtor(c, false), "OutgoingConnector");
+        donn.setDaemon(true);
+        donn.start();
+        return d;
     }
 
     /**
-     * Create a new connection, allowing it to initialize and loop for messages
+     * Create a new donnection, allowing it to initialize and loop for messages
      * on a new thread.
      */
-    pualic void crebteConnectionAsynchronously(
+    pualid void crebteConnectionAsynchronously(
             String hostname, int portnum) {
 
 		Runnable outgoingRunner =
-			new OutgoingConnector(new ManagedConnection(hostname, portnum),
+			new OutgoingConnedtor(new ManagedConnection(hostname, portnum),
 								  true);
         // Initialize and loop for messages on another thread.
 
-		Thread outgoingConnectionRunner =
-			new ManagedThread(outgoingRunner, "OutgoingConnectionThread");
-		outgoingConnectionRunner.setDaemon(true);
-		outgoingConnectionRunner.start();
+		Thread outgoingConnedtionRunner =
+			new ManagedThread(outgoingRunner, "OutgoingConnedtionThread");
+		outgoingConnedtionRunner.setDaemon(true);
+		outgoingConnedtionRunner.start();
     }
 
 
     /**
-     * Create an incoming connection.  This method starts the message loop,
-     * so it will alock for b long time.  Make sure the thread that calls
-     * this method is suitable doing a connection message loop.
-     * If there are already too many connections in the manager, this method
-     * will launch a RejectConnection to send pongs for other hosts.
+     * Create an indoming connection.  This method starts the message loop,
+     * so it will alodk for b long time.  Make sure the thread that calls
+     * this method is suitable doing a donnection message loop.
+     * If there are already too many donnections in the manager, this method
+     * will laundh a RejectConnection to send pongs for other hosts.
      */
-     void acceptConnection(Socket socket) {
-         //1. Initialize connection.  It's always safe to recommend new headers.
-         Thread.currentThread().setName("IncomingConnectionThread");
-         ManagedConnection connection = new ManagedConnection(socket);
+     void adceptConnection(Socket socket) {
+         //1. Initialize donnection.  It's always safe to recommend new headers.
+         Thread.durrentThread().setName("IncomingConnectionThread");
+         ManagedConnedtion connection = new ManagedConnection(socket);
          try {
-             initializeExternallyGeneratedConnection(connection);
-         } catch (IOException e) {
-			 connection.close();
+             initializeExternallyGeneratedConnedtion(connection);
+         } datch (IOException e) {
+			 donnection.close();
              return;
          }
 
          try {
-			 startConnection(connection);
-         } catch(IOException e) {
-             // we could not start the connection for some reason --
-             // this can easily happen, for example, if the connection
+			 startConnedtion(connection);
+         } datch(IOException e) {
+             // we dould not start the connection for some reason --
+             // this dan easily happen, for example, if the connection
              // just drops
          }
      }
 
 
     /**
-     * Removes the specified connection from currently active connections, also
-     * removing this connection from routing tables and modifying active
-     * connection fetchers accordingly.
+     * Removes the spedified connection from currently active connections, also
+     * removing this donnection from routing tables and modifying active
+     * donnection fetchers accordingly.
      *
-     * @param mc the <tt>ManagedConnection</tt> instance to remove
+     * @param md the <tt>ManagedConnection</tt> instance to remove
      */
-    pualic synchronized void remove(MbnagedConnection mc) {
+    pualid synchronized void remove(MbnagedConnection mc) {
 		// removal may be disabled for tests
-		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;
-        removeInternal(mc);
+		if(!ConnedtionSettings.REMOVE_ENABLED.getValue()) return;
+        removeInternal(md);
 
-        adjustConnectionFetchers();
+        adjustConnedtionFetchers();
     }
 
     /**
-     * True if this is currently or wants to be a supernode,
+     * True if this is durrently or wants to be a supernode,
      * otherwise false.
      */
-    pualic boolebn isSupernode() {
-        return isActiveSupernode() || isSupernodeCapable();
+    pualid boolebn isSupernode() {
+        return isAdtiveSupernode() || isSupernodeCapable();
     }
     
-    /** Return true if we are not a private address, have been ultrapeer capable
+    /** Return true if we are not a private address, have been ultrapeer dapable
      *  in the past, and are not being shielded by anybody, AND we don't have UP
      *  mode disabled.
      */
-    pualic boolebn isSupernodeCapable() {
+    pualid boolebn isSupernodeCapable() {
         return !NetworkUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
                !isBehindProxy() &&
-               minConnectTimePassed();
+               minConnedtTimePassed();
     }
     
     /**
-     * @return whether the minimum time since we started trying to connect has passed
+     * @return whether the minimum time sinde we started trying to connect has passed
      */
-    private boolean minConnectTimePassed() {
-        return Math.max(0,(System.currentTimeMillis() - _connectTime)) / 1000 
+    private boolean minConnedtTimePassed() {
+        return Math.max(0,(System.durrentTimeMillis() - _connectTime)) / 1000 
             >= UltrapeerSettings.MIN_CONNECT_TIME.getValue();
     }
     /**
-     * @return if we are currently using a http or socks4/5 proxy to connect.
+     * @return if we are durrently using a http or socks4/5 proxy to connect.
      */
-    pualic boolebn isBehindProxy() {
-        return ConnectionSettings.CONNECTION_METHOD.getValue() != 
-            ConnectionSettings.C_NO_PROXY;
+    pualid boolebn isBehindProxy() {
+        return ConnedtionSettings.CONNECTION_METHOD.getValue() != 
+            ConnedtionSettings.C_NO_PROXY;
     }
     
     /**
-     * Tells whether or not we're actively being a supernode to anyone.
+     * Tells whether or not we're adtively being a supernode to anyone.
      */
-    pualic boolebn isActiveSupernode() {
+    pualid boolebn isActiveSupernode() {
         return !isShieldedLeaf() &&
-               (_initializedClientConnections.size() > 0 ||
-                _initializedConnections.size() > 0);
+               (_initializedClientConnedtions.size() > 0 ||
+                _initializedConnedtions.size() > 0);
     }
 
     /**
-     * Returns true if this is a leaf node with a connection to a ultrapeer.  It
+     * Returns true if this is a leaf node with a donnection to a ultrapeer.  It
      * is not required that the ultrapeer support query routing, though that is
-     * generally the case.
+     * generally the dase.
      */
-    pualic boolebn isShieldedLeaf() {
-        return _shieldedConnections != 0;
+    pualid boolebn isShieldedLeaf() {
+        return _shieldedConnedtions != 0;
     }
 
     /**
-     * Returns true if this is a super node with a connection to a leaf.
+     * Returns true if this is a super node with a donnection to a leaf.
      */
-    pualic boolebn hasSupernodeClientConnection() {
-        return getNumInitializedClientConnections() > 0;
+    pualid boolebn hasSupernodeClientConnection() {
+        return getNumInitializedClientConnedtions() > 0;
     }
 
     /**
-     * Returns whether or not this node has any available connection
+     * Returns whether or not this node has any available donnection
      * slots.  This is only relevant for Ultrapeers -- leaves will
-     * always return <tt>false</tt> to this call since they do not
-     * accept any incoming connections, at least for now.
+     * always return <tt>false</tt> to this dall since they do not
+     * adcept any incoming connections, at least for now.
      *
      * @return <tt>true</tt> if this node is an Ultrapeer with free
-     *  leaf or Ultrapeer connections slots, otherwise <tt>false</tt>
+     *  leaf or Ultrapeer donnections slots, otherwise <tt>false</tt>
      */
-    pualic boolebn hasFreeSlots() {
+    pualid boolebn hasFreeSlots() {
         return isSupernode() &&
             (hasFreeUltrapeerSlots() || hasFreeLeafSlots());
     }
 
     /**
      * Utility method for determing whether or not we have any available
-     * Ultrapeer connection slots.  If this node is a leaf, it will
+     * Ultrapeer donnection slots.  If this node is a leaf, it will
      * always return <tt>false</tt>.
      *
-     * @return <tt>true</tt> if there are available Ultrapeer connection
+     * @return <tt>true</tt> if there are available Ultrapeer donnection
      *  slots, otherwise <tt>false</tt>
      */
     private boolean hasFreeUltrapeerSlots() {
@@ -442,10 +442,10 @@ pualic clbss ConnectionManager {
 
     /**
      * Utility method for determing whether or not we have any available
-     * leaf connection slots.  If this node is a leaf, it will
+     * leaf donnection slots.  If this node is a leaf, it will
      * always return <tt>false</tt>.
      *
-     * @return <tt>true</tt> if there are available leaf connection
+     * @return <tt>true</tt> if there are available leaf donnection
      *  slots, otherwise <tt>false</tt>
      */
     private boolean hasFreeLeafSlots() {
@@ -453,93 +453,93 @@ pualic clbss ConnectionManager {
     }
 
     /**
-     * Returns whether this (proabbly) has a connection to the given host.  This
-     * method is currently implemented ay iterbting through all connections and
-     * comparing addresses but not ports.  (Incoming connections use ephemeral
-     * ports.)  As a result, this test may conservatively return true even if
-     * this is not connected to <tt>host</tt>.  Likewise, it may it mistakenly
+     * Returns whether this (proabbly) has a donnection to the given host.  This
+     * method is durrently implemented ay iterbting through all connections and
+     * domparing addresses but not ports.  (Incoming connections use ephemeral
+     * ports.)  As a result, this test may donservatively return true even if
+     * this is not donnected to <tt>host</tt>.  Likewise, it may it mistakenly
      * return false if <tt>host</tt> is a multihomed system.  In the future,
-     * additional connection headers may make the test more precise.
+     * additional donnection headers may make the test more precise.
      *
-     * @return true if this is proabbly connected to <tt>host</tt>
+     * @return true if this is proabbly donnected to <tt>host</tt>
      */
-    aoolebn isConnectedTo(String hostName) {
-        //A clone of the list of all connections, both initialized and
-        //uninitialized, leaves and unrouted.  If Java could be prevented from
-        //making certain code transformations, it would be safe to replace the
-        //call to "getConnections()" with "_connections", thus avoiding a clone.
-        //(Rememaer thbt _connections is never mutated.)
-        List connections=getConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
+    aoolebn isConnedtedTo(String hostName) {
+        //A dlone of the list of all connections, both initialized and
+        //uninitialized, leaves and unrouted.  If Java dould be prevented from
+        //making dertain code transformations, it would be safe to replace the
+        //dall to "getConnections()" with "_connections", thus avoiding a clone.
+        //(Rememaer thbt _donnections is never mutated.)
+        List donnections=getConnections();
+        for (Iterator iter=donnections.iterator(); iter.hasNext(); ) {
+            ManagedConnedtion mc = (ManagedConnection)iter.next();
 
-            if (mc.getAddress().equals(hostName))
+            if (md.getAddress().equals(hostName))
                 return true;
         }
         return false;
     }
 
     /**
-     * @return the numaer of connections, which is grebter than or equal
-     *  to the numaer of initiblized connections.
+     * @return the numaer of donnections, which is grebter than or equal
+     *  to the numaer of initiblized donnections.
      */
-    pualic int getNumConnections() {
-        return _connections.size();
+    pualid int getNumConnections() {
+        return _donnections.size();
     }
 
     /**
-     * @return the numaer of initiblized connections, which is less than or
-     *  equals to the number of connections.
+     * @return the numaer of initiblized donnections, which is less than or
+     *  equals to the number of donnections.
      */
-    pualic int getNumInitiblizedConnections() {
-		return _initializedConnections.size();
+    pualid int getNumInitiblizedConnections() {
+		return _initializedConnedtions.size();
     }
 
     /**
-     * @return the numaer of initiblizedclient connections, which is less than
-     * or equals to the number of connections.
+     * @return the numaer of initiblizeddlient connections, which is less than
+     * or equals to the number of donnections.
      */
-    pualic int getNumInitiblizedClientConnections() {
-		return _initializedClientConnections.size();
+    pualid int getNumInitiblizedClientConnections() {
+		return _initializedClientConnedtions.size();
     }
 
     /**
-     *@return the numaer of initiblized connections for which
-     * isClientSupernodeConnection is true.
+     *@return the numaer of initiblized donnections for which
+     * isClientSupernodeConnedtion is true.
      */
-    pualic int getNumClientSupernodeConnections() {
-        return _shieldedConnections;
+    pualid int getNumClientSupernodeConnections() {
+        return _shieldedConnedtions;
     }
 
     /**
-     *@return the numaer of ultrbpeer -> ultrapeer connections.
+     *@return the numaer of ultrbpeer -> ultrapeer donnections.
      */
-    pualic synchronized int getNumUltrbpeerConnections() {
-        return ultrapeerToUltrapeerConnections();
+    pualid synchronized int getNumUltrbpeerConnections() {
+        return ultrapeerToUltrapeerConnedtions();
     }
 
     /**
-     *@return the numaer of old unrouted connections.
+     *@return the numaer of old unrouted donnections.
      */
-    pualic synchronized int getNumOldConnections() {
-        return oldConnections();
+    pualid synchronized int getNumOldConnections() {
+        return oldConnedtions();
     }
 
     /**
      * @return the numaer of free lebf slots.
      */
-    pualic int getNumFreeLebfSlots() {
+    pualid int getNumFreeLebfSlots() {
         if (isSupernode())
 			return UltrapeerSettings.MAX_LEAVES.getValue() -
-				getNumInitializedClientConnections();
+				getNumInitializedClientConnedtions();
         else
             return 0;
     }
 
     /**
-     * @return the numaer of free lebf slots that LimeWires can connect to.
+     * @return the numaer of free lebf slots that LimeWires dan connect to.
      */
-    pualic int getNumFreeLimeWireLebfSlots() {
+    pualid int getNumFreeLimeWireLebfSlots() {
         return Math.max(0,
                  getNumFreeLeafSlots() -
                  Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES - _nonLimeWireLeaves)
@@ -550,236 +550,236 @@ pualic clbss ConnectionManager {
     /**
      * @return the numaer of free non-lebf slots.
      */
-    pualic int getNumFreeNonLebfSlots() {
-        return _preferredConnections - getNumInitializedConnections();
+    pualid int getNumFreeNonLebfSlots() {
+        return _preferredConnedtions - getNumInitializedConnections();
     }
 
     /**
-     * @return the numaer of free non-lebf slots that LimeWires can connect to.
+     * @return the numaer of free non-lebf slots that LimeWires dan connect to.
      */
-    pualic int getNumFreeLimeWireNonLebfSlots() {
+    pualid int getNumFreeLimeWireNonLebfSlots() {
         return Math.max(0,
                         getNumFreeNonLeafSlots()
                         - Math.max(0, (int)
-                                (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections) 
+                                (ConnedtionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections) 
                                 - _nonLimeWirePeers)
-                        - getNumLimeWireLocalePrefSlots()
+                        - getNumLimeWireLodalePrefSlots()
                         );
     }
     
     /**
-     * Returns true if we've made a locale-matching connection (or don't
+     * Returns true if we've made a lodale-matching connection (or don't
      * want any at all).
      */
-    pualic boolebn isLocaleMatched() {
-        return !ConnectionSettings.USE_LOCALE_PREF.getValue() ||
-               _localeMatchingPeers != 0;
+    pualid boolebn isLocaleMatched() {
+        return !ConnedtionSettings.USE_LOCALE_PREF.getValue() ||
+               _lodaleMatchingPeers != 0;
     }
 
     /**
-     * @return the numaer of locble reserved slots to be filled
+     * @return the numaer of lodble reserved slots to be filled
      *
      * An ultrapeer may not have Free LimeWire Non Leaf Slots but may still
-     * have free slots that are reserved for locales
+     * have free slots that are reserved for lodales
      */
-    pualic int getNumLimeWireLocblePrefSlots() {
-        return Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
-                        - _localeMatchingPeers);
+    pualid int getNumLimeWireLocblePrefSlots() {
+        return Math.max(0, ConnedtionSettings.NUM_LOCALE_PREF.getValue()
+                        - _lodaleMatchingPeers);
     }
     
     /**
-     * Determines if we've reached our maximum number of preferred connections.
+     * Determines if we've readhed our maximum number of preferred connections.
      */
-    pualic boolebn isFullyConnected() {
-        return _initializedConnections.size() >= _preferredConnections;
+    pualid boolebn isFullyConnected() {
+        return _initializedConnedtions.size() >= _preferredConnections;
     }    
 
 	/**
-	 * Returns whether or not the client has an established connection with
-	 * another Gnutella client.
+	 * Returns whether or not the dlient has an established connection with
+	 * another Gnutella dlient.
 	 *
-	 * @return <tt>true</tt> if the client is currently connected to
-	 *  another Gnutella client, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the dlient is currently connected to
+	 *  another Gnutella dlient, <tt>false</tt> otherwise
 	 */
-	pualic boolebn isConnected() {
-		return ((_initializedClientConnections.size() > 0) ||
-				(_initializedConnections.size() > 0));
+	pualid boolebn isConnected() {
+		return ((_initializedClientConnedtions.size() > 0) ||
+				(_initializedConnedtions.size() > 0));
 	}
 	
 	/**
-	 * Returns whether or not we are currently attempting to connect to the
+	 * Returns whether or not we are durrently attempting to connect to the
 	 * network.
 	 */
-	pualic boolebn isConnecting() {
-	    if(_disconnectTime != 0)
+	pualid boolebn isConnecting() {
+	    if(_disdonnectTime != 0)
 	        return false;
-	    if(isConnected())
+	    if(isConnedted())
 	        return false;
-	    synchronized(this) {
-	        return _fetchers.size() != 0 ||
-	               _initializingFetchedConnections.size() != 0;
+	    syndhronized(this) {
+	        return _fetdhers.size() != 0 ||
+	               _initializingFetdhedConnections.size() != 0;
 	    }
 	}
 
     /**
-     * Takes a snapshot of the upstream and downstream bandwidth since the last
-     * call to measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth
+     * Takes a snapshot of the upstream and downstream bandwidth sinde the last
+     * dall to measureBandwidth.
+     * @see BandwidthTradker#measureBandwidth
      */
-    pualic void mebsureBandwidth() {
+    pualid void mebsureBandwidth() {
         float upstream=0.f;
         float downstream=0.f;
-        List connections = getInitializedConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            mc.measureBandwidth();
-            upstream+=mc.getMeasuredUpstreamBandwidth();
-            downstream+=mc.getMeasuredDownstreamBandwidth();
+        List donnections = getInitializedConnections();
+        for (Iterator iter=donnections.iterator(); iter.hasNext(); ) {
+            ManagedConnedtion mc=(ManagedConnection)iter.next();
+            md.measureBandwidth();
+            upstream+=md.getMeasuredUpstreamBandwidth();
+            downstream+=md.getMeasuredDownstreamBandwidth();
         }
         _measuredUpstreamBandwidth=upstream;
         _measuredDownstreamBandwidth=downstream;
     }
 
     /**
-     * Returns the upstream bandwidth between the last two calls to
+     * Returns the upstream bandwidth between the last two dalls to
      * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth
+     * @see BandwidthTradker#measureBandwidth
      */
-    pualic flobt getMeasuredUpstreamBandwidth() {
+    pualid flobt getMeasuredUpstreamBandwidth() {
         return _measuredUpstreamBandwidth;
     }
 
     /**
-     * Returns the downstream bandwidth between the last two calls to
+     * Returns the downstream bandwidth between the last two dalls to
      * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth
+     * @see BandwidthTradker#measureBandwidth
      */
-    pualic flobt getMeasuredDownstreamBandwidth() {
+    pualid flobt getMeasuredDownstreamBandwidth() {
         return _measuredDownstreamBandwidth;
     }
 
     /**
-     * Checks if the connection received can be accepted,
-     * absed upon the type of connection (e.g. client, ultrapeer,
-     * temporary etc).
-     * @param c The connection we received, for which to
-     * test if we have incoming slot.
-     * @return true, if we have incoming slot for the connection received,
+     * Chedks if the connection received can be accepted,
+     * absed upon the type of donnection (e.g. client, ultrapeer,
+     * temporary etd).
+     * @param d The connection we received, for which to
+     * test if we have indoming slot.
+     * @return true, if we have indoming slot for the connection received,
      * false otherwise
      */
-    private boolean allowConnection(ManagedConnection c) {
-        if(!c.receivedHeaders()) return false;
-		return allowConnection(c.headers(), false);
+    private boolean allowConnedtion(ManagedConnection c) {
+        if(!d.receivedHeaders()) return false;
+		return allowConnedtion(c.headers(), false);
     }
 
     /**
-     * Checks if the connection received can be accepted,
-     * absed upon the type of connection (e.g. client, ultrapeer,
-     * temporary etc).
-     * @param c The connection we received, for which to
-     * test if we have incoming slot.
-     * @return true, if we have incoming slot for the connection received,
+     * Chedks if the connection received can be accepted,
+     * absed upon the type of donnection (e.g. client, ultrapeer,
+     * temporary etd).
+     * @param d The connection we received, for which to
+     * test if we have indoming slot.
+     * @return true, if we have indoming slot for the connection received,
      * false otherwise
      */
-    pualic boolebn allowConnectionAsLeaf(HandshakeResponse hr) {
-		return allowConnection(hr, true);
+    pualid boolebn allowConnectionAsLeaf(HandshakeResponse hr) {
+		return allowConnedtion(hr, true);
     }
 
     /**
-     * Checks if the connection received can be accepted,
-     * absed upon the type of connection (e.g. client, ultrapeer,
-     * temporary etc).
-     * @param c The connection we received, for which to
-     * test if we have incoming slot.
-     * @return true, if we have incoming slot for the connection received,
+     * Chedks if the connection received can be accepted,
+     * absed upon the type of donnection (e.g. client, ultrapeer,
+     * temporary etd).
+     * @param d The connection we received, for which to
+     * test if we have indoming slot.
+     * @return true, if we have indoming slot for the connection received,
      * false otherwise
      */
-     pualic boolebn allowConnection(HandshakeResponse hr) {
-         return allowConnection(hr, !hr.isUltrapeer());
+     pualid boolebn allowConnection(HandshakeResponse hr) {
+         return allowConnedtion(hr, !hr.isUltrapeer());
      }
 
 
     /**
-     * Checks if there is any available slot of any kind.
-     * @return true, if we have incoming slot of some kind,
+     * Chedks if there is any available slot of any kind.
+     * @return true, if we have indoming slot of some kind,
      * false otherwise
      */
-    pualic boolebn allowAnyConnection() {
-        //Stricter than necessary.
-        //See allowAnyConnection(boolean,String,String).
+    pualid boolebn allowAnyConnection() {
+        //Stridter than necessary.
+        //See allowAnyConnedtion(boolean,String,String).
         if (isShieldedLeaf())
             return false;
 
         //Do we have normal or leaf slots?
-        return getNumInitializedConnections() < _preferredConnections
+        return getNumInitializedConnedtions() < _preferredConnections
             || (isSupernode()
-				&& getNumInitializedClientConnections() <
+				&& getNumInitializedClientConnedtions() <
                 UltrapeerSettings.MAX_LEAVES.getValue());
     }
 
     /**
-     * Returns true if this has slots for an incoming connection, <b>without
-     * accounting for this' ultrapeer capabilities</b>.  More specifically:
+     * Returns true if this has slots for an indoming connection, <b>without
+     * adcounting for this' ultrapeer capabilities</b>.  More specifically:
      * <ul>
-     * <li>if ultrapeerHeader==null, returns true if this has space for an
-     *  unrouted old-style connection.
+     * <li>if ultrapeerHeader==null, returns true if this has spade for an
+     *  unrouted old-style donnection.
      * <li>if ultrapeerHeader.equals("true"), returns true if this has slots
-     *  for a leaf connection.
+     *  for a leaf donnection.
      * <li>if ultrapeerHeader.equals("false"), returns true if this has slots
-     *  for an ultrapeer connection.
+     *  for an ultrapeer donnection.
      * </ul>
      *
-     * <tt>useragentHeader</tt> is used to prefer LimeWire and certain trusted
-     * vendors.  <tt>outgoing</tt> is currently unused, aut mby be used to
-     * prefer incoming or outgoing connections in the forward.
+     * <tt>useragentHeader</tt> is used to prefer LimeWire and dertain trusted
+     * vendors.  <tt>outgoing</tt> is durrently unused, aut mby be used to
+     * prefer indoming or outgoing connections in the forward.
      *
-     * @param outgoing true if this is an outgoing connection; true if incoming
+     * @param outgoing true if this is an outgoing donnection; true if incoming
      * @param ultrapeerHeader the value of the X-Ultrapeer header, or null
      *  if it was not written
      * @param useragentHeader the value of the User-Agent header, or null if
      *  it was not written
-     * @return true if a connection of the given type is allowed
+     * @return true if a donnection of the given type is allowed
      */
-    pualic boolebn allowConnection(HandshakeResponse hr, boolean leaf) {
-		// preferencing may not be active for testing purposes --
+    pualid boolebn allowConnection(HandshakeResponse hr, boolean leaf) {
+		// preferending may not be active for testing purposes --
 		// just return if it's not
-		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
+		if(!ConnedtionSettings.PREFERENCING_ACTIVE.getValue()) return true;
 		
 		// If it has not said whether or not it's an Ultrapeer or a Leaf
-		// (meaning it's an old-style connection), don't allow it.
+		// (meaning it's an old-style donnection), don't allow it.
 		if(!hr.isLeaf() && !hr.isUltrapeer())
 		    return false;
 
-        //Old versions of LimeWire used to prefer incoming connections over
+        //Old versions of LimeWire used to prefer indoming connections over
         //outgoing.  The rationale was that a large number of hosts were
-        //firewalled, so those who weren't had to make extra space for them.
-        //With the introduction of ultrapeers, this is not an issue; all
-        //firewalled hosts become leaf nodes.  Hence we make no distinction
-        //aetween incoming bnd outgoing.
+        //firewalled, so those who weren't had to make extra spade for them.
+        //With the introdudtion of ultrapeers, this is not an issue; all
+        //firewalled hosts bedome leaf nodes.  Hence we make no distinction
+        //aetween indoming bnd outgoing.
         //
-        //At one point we would actively kill old-fashioned unrouted connections
+        //At one point we would adtively kill old-fashioned unrouted connections
         //for ultrapeers.  Later, we preferred ultrapeers to old-fashioned
-        //connections as follows: if the HostCatcher had marked ultrapeer pongs,
+        //donnections as follows: if the HostCatcher had marked ultrapeer pongs,
         //we never allowed more than DESIRED_OLD_CONNECTIONS old
-        //connections--incoming or outgoing.
+        //donnections--incoming or outgoing.
         //
-        //Now we simply prefer connections ay vendor, which hbs some of the same
-        //effect.  We use BearShare's clumping algorithm.  Let N be the
+        //Now we simply prefer donnections ay vendor, which hbs some of the same
+        //effedt.  We use BearShare's clumping algorithm.  Let N be the
         //keep-alive and K be RESERVED_GOOD_CONNECTIONS.  (In BearShare's
-        //implementation, K=1.)  Allow any connections in for the first N-K
+        //implementation, K=1.)  Allow any donnections in for the first N-K
         //slots.  But only allow good vendors for the last K slots.  In other
-        //words, accept a connection C if there are fewer than N connections and
+        //words, adcept a connection C if there are fewer than N connections and
         //one of the following is true: C is a good vendor or there are fewer
-        //than N-K connections.  With time, this converges on all good
-        //connections.
+        //than N-K donnections.  With time, this converges on all good
+        //donnections.
 
-		int limeAttempts = ConnectionSettings.LIME_ATTEMPTS.getValue();
+		int limeAttempts = ConnedtionSettings.LIME_ATTEMPTS.getValue();
 		
-        //Don't allow anything if disconnected.
-        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
-            _preferredConnections <=0 ) {
+        //Don't allow anything if disdonnected.
+        if (!ConnedtionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
+            _preferredConnedtions <=0 ) {
             return false;
-        //If a leaf (shielded or not), check rules as such.
+        //If a leaf (shielded or not), dheck rules as such.
 		} else if (isShieldedLeaf() || !isSupernode()) {
 		    // require ultrapeer.
 		    if(!hr.isUltrapeer())
@@ -788,44 +788,44 @@ pualic clbss ConnectionManager {
 		    // If it's not good, or it's the first few attempts & not a LimeWire, 
 		    // never allow it.
 		    if(!hr.isGoodUltrapeer() || 
-		      (Sockets.getAttempts() < limeAttempts && !hr.isLimeWire())) {
+		      (Sodkets.getAttempts() < limeAttempts && !hr.isLimeWire())) {
 		        return false;
 		    // if we have slots, allow it.
-		    } else if (_shieldedConnections < _preferredConnections) {
-		        // if it matched our preference, we don't need to preference
+		    } else if (_shieldedConnedtions < _preferredConnections) {
+		        // if it matdhed our preference, we don't need to preference
 		        // anymore.
-		        if(checkLocale(hr.getLocalePref()))
+		        if(dheckLocale(hr.getLocalePref()))
 		            _needPref = false;
 
-                // while idle, only allow LimeWire connections.
+                // while idle, only allow LimeWire donnections.
                 if (isIdle()) 
                     return hr.isLimeWire();
 
                 return true;
             } else {
-                // if we were still trying to get a locale connection
-                // and this one matches, allow it, 'cause no one else matches.
-                // (we would have turned _needPref off if someone matched.)
-                if(_needPref && checkLocale(hr.getLocalePref()))
+                // if we were still trying to get a lodale connection
+                // and this one matdhes, allow it, 'cause no one else matches.
+                // (we would have turned _needPref off if someone matdhed.)
+                if(_needPref && dheckLocale(hr.getLocalePref()))
                     return true;
 
                 // don't allow it.
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
-		    // no leaf connections if we're a leaf.
+		    // no leaf donnections if we're a leaf.
 		    if(isShieldedLeaf() || !isSupernode())
 		        return false;
 
-            if(!allowUltrapeer2LeafConnection(hr))
+            if(!allowUltrapeer2LeafConnedtion(hr))
                 return false;
 
-            int leaves = getNumInitializedClientConnections();
+            int leaves = getNumInitializedClientConnedtions();
             int nonLimeWireLeaves = _nonLimeWireLeaves;
 
             // Reserve RESERVED_NON_LIMEWIRE_LEAVES slots
             // for non-limewire leaves to ensure that the network
-            // is well connected.
+            // is well donnected.
             if(!hr.isLimeWire()) {
                 if( leaves < UltrapeerSettings.MAX_LEAVES.getValue() &&
                     nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES ) {
@@ -844,71 +844,71 @@ pualic clbss ConnectionManager {
                           UltrapeerSettings.MAX_LEAVES.getValue();
 
         } else if (hr.isGoodUltrapeer()) {
-            // Note that this code is NEVER CALLED when we are a leaf.
+            // Note that this dode is NEVER CALLED when we are a leaf.
             // As a leaf, we will allow however many ultrapeers we happen
-            // to connect to.
-            // Thus, we only worry about the case we're connecting to
+            // to donnect to.
+            // Thus, we only worry about the dase we're connecting to
             // another ultrapeer (internally or externally generated)
             
-            int peers = getNumInitializedConnections();
+            int peers = getNumInitializedConnedtions();
             int nonLimeWirePeers = _nonLimeWirePeers;
-            int locale_num = 0;
+            int lodale_num = 0;
             
-            if(!allowUltrapeer2UltrapeerConnection(hr)) {
+            if(!allowUltrapeer2UltrapeerConnedtion(hr)) {
                 return false;
             }
             
-            if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
-                //if locale matches and we haven't satisfied the
-                //locale reservation then we force return a true
-                if(checkLocale(hr.getLocalePref()) &&
-                   _localeMatchingPeers
-                   < ConnectionSettings.NUM_LOCALE_PREF.getValue()) {
+            if(ConnedtionSettings.USE_LOCALE_PREF.getValue()) {
+                //if lodale matches and we haven't satisfied the
+                //lodale reservation then we force return a true
+                if(dheckLocale(hr.getLocalePref()) &&
+                   _lodaleMatchingPeers
+                   < ConnedtionSettings.NUM_LOCALE_PREF.getValue()) {
                     return true;
                 }
 
                 //this numaer will be used bt the end to figure out
-                //if the connection should ae bllowed
+                //if the donnection should ae bllowed
                 //(the reserved slots is to make sure we have at least
-                // NUM_LOCALE_PREF locale connections but we could have more so
+                // NUM_LOCALE_PREF lodale connections but we could have more so
                 // we get the max)
-                locale_num =
-                    getNumLimeWireLocalePrefSlots();
+                lodale_num =
+                    getNumLimeWireLodalePrefSlots();
             }
 
             // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
             // for non-limewire peers to ensure that the network
-            // is well connected.
+            // is well donnected.
             if(!hr.isLimeWire()) {
-                douale nonLimeRbtio = ((double)nonLimeWirePeers) / _preferredConnections;
-                if (nonLimeRatio < ConnectionSettings.MIN_NON_LIME_PEERS.getValue())
+                douale nonLimeRbtio = ((double)nonLimeWirePeers) / _preferredConnedtions;
+                if (nonLimeRatio < ConnedtionSettings.MIN_NON_LIME_PEERS.getValue())
                     return true;
-                return (nonLimeRatio < ConnectionSettings.MAX_NON_LIME_PEERS.getValue());  
+                return (nonLimeRatio < ConnedtionSettings.MAX_NON_LIME_PEERS.getValue());  
             } else {
                 int minNonLime = (int)
-                    (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
+                    (ConnedtionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
                 return (peers + 
                         Math.max(0,minNonLime - nonLimeWirePeers) + 
-                        locale_num) < _preferredConnections;
+                        lodale_num) < _preferredConnections;
             }
         }
 		return false;
     }
 
     /**
-     * Utility method for determining whether or not the connection should ae
-     * allowed as an Ultrapeer<->Ultrapeer connection.  We may not allow the
-     * connection for a variety of reasons, including lack of support for
-     * specific features that are vital for good performance, or clients of
-     * specific vendors that are leechers or have serious bugs that make them
+     * Utility method for determining whether or not the donnection should ae
+     * allowed as an Ultrapeer<->Ultrapeer donnection.  We may not allow the
+     * donnection for a variety of reasons, including lack of support for
+     * spedific features that are vital for good performance, or clients of
+     * spedific vendors that are leechers or have serious bugs that make them
      * detrimental to the network.
      *
-     * @param hr the <tt>HandshakeResponse</tt> instance containing the
-     *  connections headers of the remote host
-     * @return <tt>true</tt> if the connection should ae bllowed, otherwise
+     * @param hr the <tt>HandshakeResponse</tt> instande containing the
+     *  donnections headers of the remote host
+     * @return <tt>true</tt> if the donnection should ae bllowed, otherwise
      *  <tt>false</tt>
      */
-    private static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+    private statid boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
         if(hr.isLimeWire())
             return true;
         
@@ -916,7 +916,7 @@ pualic clbss ConnectionManager {
         if(userAgent == null)
             return false;
         userAgent = userAgent.toLowerCase();
-        String[] abd = ConnectionSettings.EVIL_HOSTS.getValue();
+        String[] abd = ConnedtionSettings.EVIL_HOSTS.getValue();
         for(int i = 0; i < abd.length; i++)
             if(userAgent.indexOf(abd[i]) != -1)
                 return false;
@@ -924,15 +924,15 @@ pualic clbss ConnectionManager {
     }
 
     /**
-     * Utility method for determining whether or not the connection should ae
+     * Utility method for determining whether or not the donnection should ae
      * allowed as a leaf when we're an Ultrapeer.
      *
-     * @param hr the <tt>HandshakeResponse</tt> containing their connection
+     * @param hr the <tt>HandshakeResponse</tt> dontaining their connection
      *  headers
-     * @return <tt>true</tt> if the connection should ae bllowed, otherwise
+     * @return <tt>true</tt> if the donnection should ae bllowed, otherwise
      *  <tt>false</tt>
      */
-    private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
+    private statid boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
         if(hr.isLimeWire())
             return true;
         
@@ -940,7 +940,7 @@ pualic clbss ConnectionManager {
         if(userAgent == null)
             return false;
         userAgent = userAgent.toLowerCase();
-        String[] abd = ConnectionSettings.EVIL_HOSTS.getValue();
+        String[] abd = ConnedtionSettings.EVIL_HOSTS.getValue();
         for(int i = 0; i < abd.length; i++)
             if(userAgent.indexOf(abd[i]) != -1)
                 return false;
@@ -948,28 +948,28 @@ pualic clbss ConnectionManager {
     }
 
     /**
-     * Returns the numaer of connections thbt are ultrapeer -> ultrapeer.
+     * Returns the numaer of donnections thbt are ultrapeer -> ultrapeer.
      * Caller MUST hold this' monitor.
      */
-    private int ultrapeerToUltrapeerConnections() {
+    private int ultrapeerToUltrapeerConnedtions() {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.isSupernodeSupernodeConnection())
+        for (Iterator iter=_initializedConnedtions.iterator(); iter.hasNext();){
+            ManagedConnedtion mc=(ManagedConnection)iter.next();
+            if (md.isSupernodeSupernodeConnection())
                 ret++;
         }
         return ret;
     }
 
-    /** Returns the numaer of old-fbshioned unrouted connections.  Caller MUST
+    /** Returns the numaer of old-fbshioned unrouted donnections.  Caller MUST
      *  hold this' monitor. */
-    private int oldConnections() {
-		// technically, we can allow old connections.
+    private int oldConnedtions() {
+		// tedhnically, we can allow old connections.
 		int ret = 0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (!mc.isSupernodeConnection())
+        for (Iterator iter=_initializedConnedtions.iterator(); iter.hasNext();){
+            ManagedConnedtion mc=(ManagedConnection)iter.next();
+            if (!md.isSupernodeConnection())
                 ret++;
         }
         return ret;
@@ -979,12 +979,12 @@ pualic clbss ConnectionManager {
      * Tells if this node thinks that more ultrapeers are needed on the
      * network. This method should ae invoked on b ultrapeer only, as
      * only ultrapeer may have required information to make informed
-     * decision.
+     * dedision.
      * @return true, if more ultrapeers needed, false otherwise
      */
-    pualic boolebn supernodeNeeded() {
+    pualid boolebn supernodeNeeded() {
         //if more than 90% slots are full, return true
-		if(getNumInitializedClientConnections() >=
+		if(getNumInitializedClientConnedtions() >=
            (UltrapeerSettings.MAX_LEAVES.getValue() * 0.9)){
             return true;
         } else {
@@ -995,120 +995,120 @@ pualic clbss ConnectionManager {
 
     /**
      * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
+     * @effedts returns a list of this' initialized connections.  <b>This
+     *  exposes the representation of this, but is needed in some dases
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    pualic List getInitiblizedConnections() {
-        return _initializedConnections;
+    pualid List getInitiblizedConnections() {
+        return _initializedConnedtions;
     }
 
     /**
-     * return a list of initialized connection that matches the parameter
-     * String loc.
-     * create a new linkedlist to return.
+     * return a list of initialized donnection that matches the parameter
+     * String lod.
+     * dreate a new linkedlist to return.
      */
-    pualic List getInitiblizedConnectionsMatchLocale(String loc) {
-        List matches = new LinkedList();
-        for(Iterator itr= _initializedConnections.iterator();
+    pualid List getInitiblizedConnectionsMatchLocale(String loc) {
+        List matdhes = new LinkedList();
+        for(Iterator itr= _initializedConnedtions.iterator();
             itr.hasNext();) {
-            Connection conn = (Connection)itr.next();
-            if(loc.equals(conn.getLocalePref()))
-                matches.add(conn);
+            Connedtion conn = (Connection)itr.next();
+            if(lod.equals(conn.getLocalePref()))
+                matdhes.add(conn);
         }
-        return matches;
+        return matdhes;
     }
 
     /**
      * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
+     * @effedts returns a list of this' initialized connections.  <b>This
+     *  exposes the representation of this, but is needed in some dases
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    pualic List getInitiblizedClientConnections() {
-        return _initializedClientConnections;
+    pualid List getInitiblizedClientConnections() {
+        return _initializedClientConnedtions;
     }
 
     /**
-     * return a list of initialized client connection that matches the parameter
-     * String loc.
-     * create a new linkedlist to return.
+     * return a list of initialized dlient connection that matches the parameter
+     * String lod.
+     * dreate a new linkedlist to return.
      */
-    pualic List getInitiblizedClientConnectionsMatchLocale(String loc) {
-    	List matches = new LinkedList();
-        for(Iterator itr= _initializedClientConnections.iterator();
+    pualid List getInitiblizedClientConnectionsMatchLocale(String loc) {
+    	List matdhes = new LinkedList();
+        for(Iterator itr= _initializedClientConnedtions.iterator();
             itr.hasNext();) {
-            Connection conn = (Connection)itr.next();
-            if(loc.equals(conn.getLocalePref()))
-                matches.add(conn);
+            Connedtion conn = (Connection)itr.next();
+            if(lod.equals(conn.getLocalePref()))
+                matdhes.add(conn);
         }
-        return matches;
+        return matdhes;
     }
 
     /**
-     * @return all of this' connections.
+     * @return all of this' donnections.
      */
-    pualic List getConnections() {
-        return _connections;
+    pualid List getConnections() {
+        return _donnections;
     }
 
     /**
-     * Accessor for the <tt>Set</tt> of push proxies for this node.  If
+     * Adcessor for the <tt>Set</tt> of push proxies for this node.  If
      * there are no push proxies available, or if this node is an Ultrapeer,
      * this will return an empty <tt>Set</tt>.
      *
      * @return a <tt>Set</tt> of push proxies with a maximum size of 4
      *
-     *  TODO: should the set of pushproxy UPs ae cbched and updated as
-     *  connections are killed and created?
+     *  TODO: should the set of pushproxy UPs ae dbched and updated as
+     *  donnections are killed and created?
      */
-    pualic Set getPushProxies() {
+    pualid Set getPushProxies() {
         if (isShieldedLeaf()) {
-            // this should ae fbst since leaves don't maintain a lot of
-            // connections and the test for proxy support is cached boolean
+            // this should ae fbst sinde leaves don't maintain a lot of
+            // donnections and the test for proxy support is cached boolean
             // value
-            Iterator ultrapeers = getInitializedConnections().iterator();
+            Iterator ultrapeers = getInitializedConnedtions().iterator();
             Set proxies = new IpPortSet();
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
-                ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
-                if (currMC.isPushProxy())
-                    proxies.add(currMC);
+                ManagedConnedtion currMC = (ManagedConnection)ultrapeers.next();
+                if (durrMC.isPushProxy())
+                    proxies.add(durrMC);
             }
             return proxies;
         }
 
-        return Collections.EMPTY_SET;
+        return Colledtions.EMPTY_SET;
     }
 
     /**
-     * Sends a TCPConnectBack request to (up to) 2 connected Ultrapeers.
+     * Sends a TCPConnedtBack request to (up to) 2 connected Ultrapeers.
      * @returns false if no requests were sent, otherwise true.
      */
-    pualic boolebn sendTCPConnectBackRequests() {
+    pualid boolebn sendTCPConnectBackRequests() {
         int sent = 0;
         
-        List peers = new ArrayList(getInitializedConnections());
-        Collections.shuffle(peers);
+        List peers = new ArrayList(getInitializedConnedtions());
+        Colledtions.shuffle(peers);
         for (Iterator iter = peers.iterator(); iter.hasNext();) {
-            ManagedConnection currMC = (ManagedConnection) iter.next();
-            if (currMC.remoteHostSupportsTCPRedirect() < 0)
+            ManagedConnedtion currMC = (ManagedConnection) iter.next();
+            if (durrMC.remoteHostSupportsTCPRedirect() < 0)
                 iter.remove();
         }
         
         if (peers.size() == 1) {
-            ManagedConnection myConn = (ManagedConnection) peers.get(0);
+            ManagedConnedtion myConn = (ManagedConnection) peers.get(0);
             for (int i = 0; i < CONNECT_BACK_REDUNDANT_REQUESTS; i++) {
-                Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
-                myConn.send(ca);
+                Message db = new TCPConnectBackVendorMessage(RouterService.getPort());
+                myConn.send(da);
                 sent++;
             }
         } else {
-            final Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
+            final Message db = new TCPConnectBackVendorMessage(RouterService.getPort());
             for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
-                ManagedConnection currMC = (ManagedConnection)i.next();
-                currMC.send(ca);
+                ManagedConnedtion currMC = (ManagedConnection)i.next();
+                durrMC.send(ca);
                 sent++;
             }
         }
@@ -1116,20 +1116,20 @@ pualic clbss ConnectionManager {
     }
 
     /**
-     * Sends a UDPConnectBack request to (up to) 4 (and at least 2)
-     * connected Ultrapeers.
+     * Sends a UDPConnedtBack request to (up to) 4 (and at least 2)
+     * donnected Ultrapeers.
      * @returns false if no requests were sent, otherwise true.
      */
-    pualic boolebn sendUDPConnectBackRequests(GUID cbGuid) {
+    pualid boolebn sendUDPConnectBackRequests(GUID cbGuid) {
         int sent =  0;
-        final Message cb =
-            new UDPConnectBackVendorMessage(RouterService.getPort(), cbGuid);
-        List peers = new ArrayList(getInitializedConnections());
-        Collections.shuffle(peers);
+        final Message db =
+            new UDPConnedtBackVendorMessage(RouterService.getPort(), cbGuid);
+        List peers = new ArrayList(getInitializedConnedtions());
+        Colledtions.shuffle(peers);
         for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
-            ManagedConnection currMC = (ManagedConnection)i.next();
-            if (currMC.remoteHostSupportsUDPConnectBack() >= 0) {
-                currMC.send(ca);
+            ManagedConnedtion currMC = (ManagedConnection)i.next();
+            if (durrMC.remoteHostSupportsUDPConnectBack() >= 0) {
+                durrMC.send(ca);
                 sent++;
             }
         }
@@ -1141,133 +1141,133 @@ pualic clbss ConnectionManager {
      *
      * @param
      */
-    pualic void updbteQueryStatus(QueryStatusResponse stat) {
+    pualid void updbteQueryStatus(QueryStatusResponse stat) {
         if (isShieldedLeaf()) {
-            // this should ae fbst since leaves don't maintain a lot of
-            // connections and the test for query status response is a cached
+            // this should ae fbst sinde leaves don't maintain a lot of
+            // donnections and the test for query status response is a cached
             // value
-            Iterator ultrapeers = getInitializedConnections().iterator();
+            Iterator ultrapeers = getInitializedConnedtions().iterator();
             while (ultrapeers.hasNext()) {
-                ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
-                if (currMC.remoteHostSupportsLeafGuidance() >= 0)
-                    currMC.send(stat);
+                ManagedConnedtion currMC = (ManagedConnection)ultrapeers.next();
+                if (durrMC.remoteHostSupportsLeafGuidance() >= 0)
+                    durrMC.send(stat);
             }
         }
     }
 
 	/**
-	 * Returns the <tt>Endpoint</tt> for an Ultrapeer connected via TCP,
+	 * Returns the <tt>Endpoint</tt> for an Ultrapeer donnected via TCP,
 	 * if available.
 	 *
-	 * @return the <tt>Endpoint</tt> for an Ultrapeer connected via TCP if
+	 * @return the <tt>Endpoint</tt> for an Ultrapeer donnected via TCP if
 	 *  there is one, otherwise returns <tt>null</tt>
 	 */
-	pualic Endpoint getConnectedGUESSUltrbpeer() {
-		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
-			if(connection.isSupernodeConnection() &&
-			   connection.isGUESSUltrapeer()) {
-				return new Endpoint(connection.getInetAddress().getAddress(),
-									connection.getPort());
+	pualid Endpoint getConnectedGUESSUltrbpeer() {
+		for(Iterator iter=_initializedConnedtions.iterator(); iter.hasNext();) {
+			ManagedConnedtion connection = (ManagedConnection)iter.next();
+			if(donnection.isSupernodeConnection() &&
+			   donnection.isGUESSUltrapeer()) {
+				return new Endpoint(donnection.getInetAddress().getAddress(),
+									donnection.getPort());
 			}
 		}
 		return null;
 	}
 
 
-    /** Returns a <tt>List<tt> of Ultrapeers connected via TCP that are GUESS
+    /** Returns a <tt>List<tt> of Ultrapeers donnected via TCP that are GUESS
      *  enabled.
      *
-     * @return A non-null List of GUESS enabled, TCP connected Ultrapeers.  The
-     * are represented as ManagedConnections.
+     * @return A non-null List of GUESS enabled, TCP donnected Ultrapeers.  The
+     * are represented as ManagedConnedtions.
      */
-	pualic List getConnectedGUESSUltrbpeers() {
+	pualid List getConnectedGUESSUltrbpeers() {
         List retList = new ArrayList();
-		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
-			if(connection.isSupernodeConnection() &&
-               connection.isGUESSUltrapeer())
-				retList.add(connection);
+		for(Iterator iter=_initializedConnedtions.iterator(); iter.hasNext();) {
+			ManagedConnedtion connection = (ManagedConnection)iter.next();
+			if(donnection.isSupernodeConnection() &&
+               donnection.isGUESSUltrapeer())
+				retList.add(donnection);
 		}
 		return retList;
 	}
 
 
     /**
-     * Adds an initializing connection.
-     * Should only ae cblled from a thread that has this' monitor.
-     * This is called from initializeExternallyGeneratedConnection
-     * and initializeFetchedConnection, both times from within a
-     * synchronized(this) alock.
+     * Adds an initializing donnection.
+     * Should only ae dblled from a thread that has this' monitor.
+     * This is dalled from initializeExternallyGeneratedConnection
+     * and initializeFetdhedConnection, both times from within a
+     * syndhronized(this) alock.
      */
-    private void connectionInitializing(Connection c) {
-        //REPLACE _connections with the list _connections+[c]
-        List newConnections=new ArrayList(_connections);
-        newConnections.add(c);
-        _connections = Collections.unmodifiableList(newConnections);
+    private void donnectionInitializing(Connection c) {
+        //REPLACE _donnections with the list _connections+[c]
+        List newConnedtions=new ArrayList(_connections);
+        newConnedtions.add(c);
+        _donnections = Collections.unmodifiableList(newConnections);
     }
 
     /**
-     * Adds an incoming connection to the list of connections. Note that
-     * the incoming connection has already been initialized before
+     * Adds an indoming connection to the list of connections. Note that
+     * the indoming connection has already been initialized before
      * this method is invoked.
-     * Should only ae cblled from a thread that has this' monitor.
-     * This is called from initializeExternallyGeneratedConnection, for
-     * incoming connections
+     * Should only ae dblled from a thread that has this' monitor.
+     * This is dalled from initializeExternallyGeneratedConnection, for
+     * indoming connections
      */
-    private void connectionInitializingIncoming(ManagedConnection c) {
-        connectionInitializing(c);
+    private void donnectionInitializingIncoming(ManagedConnection c) {
+        donnectionInitializing(c);
     }
 
     /**
-     * Marks a connection fully initialized, but only if that connection wasn't
-     * removed from the list of open connections during its initialization.
-     * Should only ae cblled from a thread that has this' monitor.
+     * Marks a donnection fully initialized, but only if that connection wasn't
+     * removed from the list of open donnections during its initialization.
+     * Should only ae dblled from a thread that has this' monitor.
      */
-    private boolean connectionInitialized(ManagedConnection c) {
-        if(_connections.contains(c)) {
-            // Douale-check thbt we haven't improperly allowed
-            // this connection.  It is possiale thbt, because of race-conditions,
+    private boolean donnectionInitialized(ManagedConnection c) {
+        if(_donnections.contains(c)) {
+            // Douale-dheck thbt we haven't improperly allowed
+            // this donnection.  It is possiale thbt, because of race-conditions,
             // we may have allowed both a 'Peer' and an 'Ultrapeer', or an 'Ultrapeer'
-            // and a leaf.  That'd 'cause undefined results if we allowed it.
-            if(!allowInitializedConnection(c)) {
-                removeInternal(c);
+            // and a leaf.  That'd 'dause undefined results if we allowed it.
+            if(!allowInitializedConnedtion(c)) {
+                removeInternal(d);
                 return false;
             }
             
 
-            //update the appropriate list of connections
-            if(!c.isSupernodeClientConnection()){
-                //REPLACE _initializedConnections with the list
-                //_initializedConnections+[c]
-                List newConnections=new ArrayList(_initializedConnections);
-                newConnections.add(c);
-                _initializedConnections =
-                    Collections.unmodifiableList(newConnections);
+            //update the appropriate list of donnections
+            if(!d.isSupernodeClientConnection()){
+                //REPLACE _initializedConnedtions with the list
+                //_initializedConnedtions+[c]
+                List newConnedtions=new ArrayList(_initializedConnections);
+                newConnedtions.add(c);
+                _initializedConnedtions =
+                    Colledtions.unmodifiableList(newConnections);
                 
-                if(c.isClientSupernodeConnection()) {
-                	killPeerConnections(); // clean up any extraneus peer conns.
-                    _shieldedConnections++;
+                if(d.isClientSupernodeConnection()) {
+                	killPeerConnedtions(); // clean up any extraneus peer conns.
+                    _shieldedConnedtions++;
                 }
-                if(!c.isLimeWire())
+                if(!d.isLimeWire())
                     _nonLimeWirePeers++;
-                if(checkLocale(c.getLocalePref()))
-                    _localeMatchingPeers++;
+                if(dheckLocale(c.getLocalePref()))
+                    _lodaleMatchingPeers++;
             } else {
-                //REPLACE _initializedClientConnections with the list
-                //_initializedClientConnections+[c]
-                List newConnections
-                    =new ArrayList(_initializedClientConnections);
-                newConnections.add(c);
-                _initializedClientConnections =
-                    Collections.unmodifiableList(newConnections);
-                if(!c.isLimeWire())
+                //REPLACE _initializedClientConnedtions with the list
+                //_initializedClientConnedtions+[c]
+                List newConnedtions
+                    =new ArrayList(_initializedClientConnedtions);
+                newConnedtions.add(c);
+                _initializedClientConnedtions =
+                    Colledtions.unmodifiableList(newConnections);
+                if(!d.isLimeWire())
                     _nonLimeWireLeaves++;
             }
-	        // do any post-connection initialization that may involve sending.
-	        c.postInit();
+	        // do any post-donnection initialization that may involve sending.
+	        d.postInit();
 	        // sending the ping request.
-    		sendInitialPingRequest(c);
+    		sendInitialPingRequest(d);
             return true;
         }
         return false;
@@ -1275,485 +1275,485 @@ pualic clbss ConnectionManager {
     }
 
     /**
-     * like allowConnection, except more strict - if this is a leaf,
-     * only allow connections whom we have told we're leafs.
-     * @return whether the connection should ae bllowed 
+     * like allowConnedtion, except more strict - if this is a leaf,
+     * only allow donnections whom we have told we're leafs.
+     * @return whether the donnection should ae bllowed 
      */
-    private boolean allowInitializedConnection(Connection c) {
+    private boolean allowInitializedConnedtion(Connection c) {
     	if ((isShieldedLeaf() || !isSupernode()) &&
-    			!c.isClientSupernodeConnection())
+    			!d.isClientSupernodeConnection())
     		return false;
     	
-    	return allowConnection(c.headers());
+    	return allowConnedtion(c.headers());
     }
     
     /**
-     * removes any supernode->supernode connections
+     * removes any supernode->supernode donnections
      */
-    private void killPeerConnections() {
-    	List conns = _initializedConnections;
-    	for (Iterator iter = conns.iterator(); iter.hasNext();) {
-			ManagedConnection con = (ManagedConnection) iter.next();
-			if (con.isSupernodeSupernodeConnection()) 
-				removeInternal(con);
+    private void killPeerConnedtions() {
+    	List donns = _initializedConnections;
+    	for (Iterator iter = donns.iterator(); iter.hasNext();) {
+			ManagedConnedtion con = (ManagedConnection) iter.next();
+			if (don.isSupernodeSupernodeConnection()) 
+				removeInternal(don);
 		}
     }
     
     /**
-     * Iterates over all the connections and sends the updated CapabilitiesVM
+     * Iterates over all the donnections and sends the updated CapabilitiesVM
      * down every one of them.
      */
-    pualic void sendUpdbtedCapabilities() {        
-        for(Iterator iter = getInitializedConnections().iterator(); iter.hasNext(); ) {
-            Connection c = (Connection)iter.next();
-            c.sendUpdatedCapabilities();
+    pualid void sendUpdbtedCapabilities() {        
+        for(Iterator iter = getInitializedConnedtions().iterator(); iter.hasNext(); ) {
+            Connedtion c = (Connection)iter.next();
+            d.sendUpdatedCapabilities();
         }
-        for(Iterator iter = getInitializedClientConnections().iterator(); iter.hasNext(); ) {
-            Connection c = (Connection)iter.next();
-            c.sendUpdatedCapabilities();
+        for(Iterator iter = getInitializedClientConnedtions().iterator(); iter.hasNext(); ) {
+            Connedtion c = (Connection)iter.next();
+            d.sendUpdatedCapabilities();
         }        
     }
 
     /**
-     * Disconnects from the network.  Closes all connections and sets
-     * the numaer of connections to zero.
+     * Disdonnects from the network.  Closes all connections and sets
+     * the numaer of donnections to zero.
      */
-    pualic synchronized void disconnect() {
-        _disconnectTime = System.currentTimeMillis();
-        _connectTime = Long.MAX_VALUE;
-        _preferredConnections = 0;
-        adjustConnectionFetchers(); // kill them all
-        //2. Remove all connections.
-        for (Iterator iter=getConnections().iterator();
+    pualid synchronized void disconnect() {
+        _disdonnectTime = System.currentTimeMillis();
+        _donnectTime = Long.MAX_VALUE;
+        _preferredConnedtions = 0;
+        adjustConnedtionFetchers(); // kill them all
+        //2. Remove all donnections.
+        for (Iterator iter=getConnedtions().iterator();
              iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            remove(c);
-            //add the endpoint to hostcatcher
-            if (c.isSupernodeConnection()) {
-                //add to catcher with the locale info.
-                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                                          c.getPort()), true, c.getLocalePref());
+            ManagedConnedtion c=(ManagedConnection)iter.next();
+            remove(d);
+            //add the endpoint to hostdatcher
+            if (d.isSupernodeConnection()) {
+                //add to datcher with the locale info.
+                _datcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
+                                          d.getPort()), true, c.getLocalePref());
             }
         }
         
-        Sockets.clearAttempts();
+        Sodkets.clearAttempts();
     }
 
     /**
-     * Connects to the network.  Ensures the numaer of messbging connections
-     * is non-zero and recontacts the pong server as needed.
+     * Connedts to the network.  Ensures the numaer of messbging connections
+     * is non-zero and redontacts the pong server as needed.
      */
-    pualic synchronized void connect() {
+    pualid synchronized void connect() {
 
-        // Reset the disconnect time to ae b long time ago.
-        _disconnectTime = 0;
-        _connectTime = System.currentTimeMillis();
+        // Reset the disdonnect time to ae b long time ago.
+        _disdonnectTime = 0;
+        _donnectTime = System.currentTimeMillis();
 
-        // Ignore this call if we're already connected
+        // Ignore this dall if we're already connected
         // or not initialized yet.
-        if(isConnected() || _catcher == null) {
+        if(isConnedted() || _catcher == null) {
             return;
         }
         
-        _connectionAttempts = 0;
-        _lastConnectionCheck = 0;
-        _lastSuccessfulConnect = 0;
+        _donnectionAttempts = 0;
+        _lastConnedtionCheck = 0;
+        _lastSudcessfulConnect = 0;
 
 
-        // Notify HostCatcher that we've connected.
-        _catcher.expire();
+        // Notify HostCatdher that we've connected.
+        _datcher.expire();
         
-        // Set the numaer of connections we wbnt to maintain
-        setPreferredConnections();
+        // Set the numaer of donnections we wbnt to maintain
+        setPreferredConnedtions();
         
-        // tell the catcher to start pinging people.
-        _catcher.sendUDPPings();
+        // tell the datcher to start pinging people.
+        _datcher.sendUDPPings();
     }
 
     /**
-     * Sends the initial ping request to a newly initialized connection.  The
-     * ttl of the PingRequest will ae 1 if we don't need bny connections.
+     * Sends the initial ping request to a newly initialized donnection.  The
+     * ttl of the PingRequest will ae 1 if we don't need bny donnections.
      * Otherwise, the ttl = max ttl.
      */
-    private void sendInitialPingRequest(ManagedConnection connection) {
-        if(connection.supportsPongCaching()) return;
+    private void sendInitialPingRequest(ManagedConnedtion connection) {
+        if(donnection.supportsPongCaching()) return;
 
-        //We need to compare how many connections we have to the keep alive to
-        //determine whether to send a broadcast ping or a handshake ping,
-        //initially.  However, in this case, we can't check the number of
-        //connection fetchers currently operating, as that would always then
-        //send a handshake ping, since we're always adjusting the connection
-        //fetchers to have the difference between keep alive and num of
-        //connections.
+        //We need to dompare how many connections we have to the keep alive to
+        //determine whether to send a broaddast ping or a handshake ping,
+        //initially.  However, in this dase, we can't check the number of
+        //donnection fetchers currently operating, as that would always then
+        //send a handshake ping, sinde we're always adjusting the connection
+        //fetdhers to have the difference between keep alive and num of
+        //donnections.
         PingRequest pr;
-        if (getNumInitializedConnections() >= _preferredConnections)
+        if (getNumInitializedConnedtions() >= _preferredConnections)
             pr = new PingRequest((ayte)1);
         else
             pr = new PingRequest((ayte)4);
 
-        connection.send(pr);
+        donnection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
         try {
-            connection.flush();
-        } catch (IOException e) { /* close it later */ }
+            donnection.flush();
+        } datch (IOException e) { /* close it later */ }
     }
 
     /**
-     * An unsynchronized version of remove, meant to be used when the monitor
-     * is already held.  This version does not kick off ConnectionFetchers;
+     * An unsyndhronized version of remove, meant to be used when the monitor
+     * is already held.  This version does not kidk off ConnectionFetchers;
      * only the externally exposed version of remove does that.
      */
-    private void removeInternal(ManagedConnection c) {
-        // 1a) Remove from the initialized connections list and clean up the
-        // stuff associated with initialized connections.  For efficiency
-        // reasons, this must be done before (2) so packets are not forwarded
-        // to dead connections (which results in lots of thrown exceptions).
-        if(!c.isSupernodeClientConnection()){
-            int i=_initializedConnections.indexOf(c);
+    private void removeInternal(ManagedConnedtion c) {
+        // 1a) Remove from the initialized donnections list and clean up the
+        // stuff assodiated with initialized connections.  For efficiency
+        // reasons, this must be done before (2) so padkets are not forwarded
+        // to dead donnections (which results in lots of thrown exceptions).
+        if(!d.isSupernodeClientConnection()){
+            int i=_initializedConnedtions.indexOf(c);
             if (i != -1) {
-                //REPLACE _initializedConnections with the list
-                //_initializedConnections-[c]
-                List newConnections=new ArrayList();
-                newConnections.addAll(_initializedConnections);
-                newConnections.remove(c);
-                _initializedConnections =
-                    Collections.unmodifiableList(newConnections);
+                //REPLACE _initializedConnedtions with the list
+                //_initializedConnedtions-[c]
+                List newConnedtions=new ArrayList();
+                newConnedtions.addAll(_initializedConnections);
+                newConnedtions.remove(c);
+                _initializedConnedtions =
+                    Colledtions.unmodifiableList(newConnections);
                 //maintain invariant
-                if(c.isClientSupernodeConnection())
-                    _shieldedConnections--;
-                if(!c.isLimeWire())
+                if(d.isClientSupernodeConnection())
+                    _shieldedConnedtions--;
+                if(!d.isLimeWire())
                     _nonLimeWirePeers--;
-                if(checkLocale(c.getLocalePref()))
-                    _localeMatchingPeers--;
+                if(dheckLocale(c.getLocalePref()))
+                    _lodaleMatchingPeers--;
             }
         }else{
-            //check in _initializedClientConnections
-            int i=_initializedClientConnections.indexOf(c);
+            //dheck in _initializedClientConnections
+            int i=_initializedClientConnedtions.indexOf(c);
             if (i != -1) {
-                //REPLACE _initializedClientConnections with the list
-                //_initializedClientConnections-[c]
-                List newConnections=new ArrayList();
-                newConnections.addAll(_initializedClientConnections);
-                newConnections.remove(c);
-                _initializedClientConnections =
-                    Collections.unmodifiableList(newConnections);
-                if(!c.isLimeWire())
+                //REPLACE _initializedClientConnedtions with the list
+                //_initializedClientConnedtions-[c]
+                List newConnedtions=new ArrayList();
+                newConnedtions.addAll(_initializedClientConnections);
+                newConnedtions.remove(c);
+                _initializedClientConnedtions =
+                    Colledtions.unmodifiableList(newConnections);
+                if(!d.isLimeWire())
                     _nonLimeWireLeaves--;
             }
         }
 
-        // 1a) Remove from the bll connections list and clean up the
-        // stuff associated all connections
-        int i=_connections.indexOf(c);
+        // 1a) Remove from the bll donnections list and clean up the
+        // stuff assodiated all connections
+        int i=_donnections.indexOf(c);
         if (i != -1) {
-            //REPLACE _connections with the list _connections-[c]
-            List newConnections=new ArrayList(_connections);
-            newConnections.remove(c);
-            _connections = Collections.unmodifiableList(newConnections);
+            //REPLACE _donnections with the list _connections-[c]
+            List newConnedtions=new ArrayList(_connections);
+            newConnedtions.remove(c);
+            _donnections = Collections.unmodifiableList(newConnections);
         }
 
-        // 2) Ensure that the connection is closed.  This must be done before
-        // step (3) to ensure that dead connections are not added to the route
-        // table, resulting in dangling references.
-        c.close();
+        // 2) Ensure that the donnection is closed.  This must be done before
+        // step (3) to ensure that dead donnections are not added to the route
+        // table, resulting in dangling referendes.
+        d.close();
 
         // 3) Clean up route tables.
-        RouterService.getMessageRouter().removeConnection(c);
+        RouterServide.getMessageRouter().removeConnection(c);
 
         // 4) Notify the listener
-        RouterService.getCallback().connectionClosed(c);
+        RouterServide.getCallback().connectionClosed(c);
 
-        // 5) Clean up Unicaster
-        QueryUnicaster.instance().purgeQuery(c);
+        // 5) Clean up Unidaster
+        QueryUnidaster.instance().purgeQuery(c);
     }
     
     /**
-     * Stabilizes connections by removing extraneous ones.
+     * Stabilizes donnections by removing extraneous ones.
      *
-     * This will remove the connections that we've been connected to
+     * This will remove the donnections that we've been connected to
      * for the shortest amount of time.
      */
-    private synchronized void stabilizeConnections() {
-        while(getNumInitializedConnections() > _preferredConnections) {
-            ManagedConnection newest = null;
-            for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
-                ManagedConnection c = (ManagedConnection)i.next();
+    private syndhronized void stabilizeConnections() {
+        while(getNumInitializedConnedtions() > _preferredConnections) {
+            ManagedConnedtion newest = null;
+            for(Iterator i = _initializedConnedtions.iterator(); i.hasNext();){
+                ManagedConnedtion c = (ManagedConnection)i.next();
                 
-                // first see if this is a non-limewire connection and cut it off
-                // unless it is our only connection left
+                // first see if this is a non-limewire donnection and cut it off
+                // unless it is our only donnection left
                 
-                if (!c.isLimeWire()) {
-                    newest = c;
+                if (!d.isLimeWire()) {
+                    newest = d;
                     arebk;
                 }
                 
                 if(newest == null || 
-                   c.getConnectionTime() > newest.getConnectionTime())
-                    newest = c;
+                   d.getConnectionTime() > newest.getConnectionTime())
+                    newest = d;
             }
             if(newest != null)
                 remove(newest);
         }
-        adjustConnectionFetchers();
+        adjustConnedtionFetchers();
     }    
 
     /**
-     * Starts or stops connection fetchers to maintain the invariant
-     * that numConnections + numFetchers >= _preferredConnections
+     * Starts or stops donnection fetchers to maintain the invariant
+     * that numConnedtions + numFetchers >= _preferredConnections
      *
-     * _preferredConnections - numConnections - numFetchers is called the need.
-     * This method is called whenever the need changes:
-     *   1. setPreferredConnections() -- _preferredConnections changes
-     *   2. remove(Connection) -- numConnections drops.
-     *   3. initializeExternallyGeneratedConnection() --
-     *        numConnections rises.
-     *   4. initialization error in initializeFetchedConnection() --
-     *        numConnections drops when removeInternal is called.
-     *   Note that adjustConnectionFetchers is not called when a connection is
-     *   successfully fetched from the host catcher.  numConnections rises,
-     *   aut numFetchers drops, so need is unchbnged.
+     * _preferredConnedtions - numConnections - numFetchers is called the need.
+     * This method is dalled whenever the need changes:
+     *   1. setPreferredConnedtions() -- _preferredConnections changes
+     *   2. remove(Connedtion) -- numConnections drops.
+     *   3. initializeExternallyGeneratedConnedtion() --
+     *        numConnedtions rises.
+     *   4. initialization error in initializeFetdhedConnection() --
+     *        numConnedtions drops when removeInternal is called.
+     *   Note that adjustConnedtionFetchers is not called when a connection is
+     *   sudcessfully fetched from the host catcher.  numConnections rises,
+     *   aut numFetdhers drops, so need is unchbnged.
      *
-     * Only call this method when the monitor is held.
+     * Only dall this method when the monitor is held.
      */
-    private void adjustConnectionFetchers() {
-        if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
-            //if it's a leaf and locale preferencing is on
-            //we will create a dedicated preference fetcher
-            //that tries to fetch a connection that matches the
-            //clients locale
-            if(RouterService.isShieldedLeaf()
+    private void adjustConnedtionFetchers() {
+        if(ConnedtionSettings.USE_LOCALE_PREF.getValue()) {
+            //if it's a leaf and lodale preferencing is on
+            //we will dreate a dedicated preference fetcher
+            //that tries to fetdh a connection that matches the
+            //dlients locale
+            if(RouterServide.isShieldedLeaf()
                && _needPref
-               && !_needPrefInterrupterScheduled
-               && _dedicatedPrefFetcher == null) {
-                _dedicatedPrefFetcher = new ConnectionFetcher(true);
+               && !_needPrefInterrupterSdheduled
+               && _dedidatedPrefFetcher == null) {
+                _dedidatedPrefFetcher = new ConnectionFetcher(true);
                 Runnable interrupted = new Runnable() {
-                        pualic void run() {
-                            synchronized(ConnectionManager.this) {
-                                // always finish once this runs.
+                        pualid void run() {
+                            syndhronized(ConnectionManager.this) {
+                                // always finish onde this runs.
                                 _needPref = false;
 
-                                if (_dedicatedPrefFetcher == null)
+                                if (_dedidatedPrefFetcher == null)
                                     return;
-                                _dedicatedPrefFetcher.interrupt();
-                                _dedicatedPrefFetcher = null;
+                                _dedidatedPrefFetcher.interrupt();
+                                _dedidatedPrefFetcher = null;
                             }
                         }
                     };
-                _needPrefInterrupterScheduled = true;
-                // shut off this guy if he didn't have any luck
-                RouterService.schedule(interrupted, 15 * 1000, 0);
+                _needPrefInterrupterSdheduled = true;
+                // shut off this guy if he didn't have any ludk
+                RouterServide.schedule(interrupted, 15 * 1000, 0);
             }
         }
-        int goodConnections = getNumInitializedConnections();
-        int neededConnections = _preferredConnections - goodConnections;
-        //Now how many fetchers do we need?  To increase parallelism, we
-        //allocate 3 fetchers per connection, but no more than 10 fetchers.
-        //(Too much parallelism increases chance of simultaneous connects,
-        //resulting in too many connections.)  Note that we assume that all
-        //connections aeing fetched right now will become ultrbpeers.
+        int goodConnedtions = getNumInitializedConnections();
+        int neededConnedtions = _preferredConnections - goodConnections;
+        //Now how many fetdhers do we need?  To increase parallelism, we
+        //allodate 3 fetchers per connection, but no more than 10 fetchers.
+        //(Too mudh parallelism increases chance of simultaneous connects,
+        //resulting in too many donnections.)  Note that we assume that all
+        //donnections aeing fetched right now will become ultrbpeers.
         int multiple;
 
-        // The end result of the following logic, assuming _preferredConnections
+        // The end result of the following logid, assuming _preferredConnections
         // is 32 for Ultrapeers, is:
-        // When we have 22 active peer connections, we fetch
-        // (27-current)*1 connections.
-        // All other times, for Ultrapeers, we will fetch
-        // (32-current)*3, up to a maximum of 20.
+        // When we have 22 adtive peer connections, we fetch
+        // (27-durrent)*1 connections.
+        // All other times, for Ultrapeers, we will fetdh
+        // (32-durrent)*3, up to a maximum of 20.
         // For leaves, assuming they maintin 4 Ultrapeers,
-        // we will fetch (4-current)*2 connections.
+        // we will fetdh (4-current)*2 connections.
 
-        // If we have not accepted incoming, fetch 3 times
-        // as many connections as we need.
-        // We must also check if we're actively being a Ultrapeer because
-        // it's possiale we mby have turned off acceptedIncoming while
+        // If we have not adcepted incoming, fetch 3 times
+        // as many donnections as we need.
+        // We must also dheck if we're actively being a Ultrapeer because
+        // it's possiale we mby have turned off adceptedIncoming while
         // aeing bn Ultrapeer.
-        if( !RouterService.acceptedIncomingConnection() && !isActiveSupernode() ) {
+        if( !RouterServide.acceptedIncomingConnection() && !isActiveSupernode() ) {
             multiple = 3;
         }
-        // Otherwise, if we're not ultrapeer capable,
-        // or have not become an Ultrapeer to anyone,
-        // also fetch 3 times as many connections as we need.
-        // It is critical that active ultrapeers do not use a multiple of 3
-        // without reducing neededConnections, otherwise LimeWire would
-        // continue connecting and rejecting connections forever.
-        else if( !isSupernode() || getNumUltrapeerConnections() == 0 ) {
+        // Otherwise, if we're not ultrapeer dapable,
+        // or have not bedome an Ultrapeer to anyone,
+        // also fetdh 3 times as many connections as we need.
+        // It is dritical that active ultrapeers do not use a multiple of 3
+        // without reduding neededConnections, otherwise LimeWire would
+        // dontinue connecting and rejecting connections forever.
+        else if( !isSupernode() || getNumUltrapeerConnedtions() == 0 ) {
             multiple = 3;
         }
-        // Otherwise (we are actively Ultrapeering to someone)
-        // If we needed more than connections, still fetch
-        // 2 times as many connections as we need.
-        // It is critical that 10 is greater than RESERVED_NON_LIMEWIRE_PEERS,
-        // else LimeWire would try connecting and rejecting connections forever.
-        else if( neededConnections > 10 ) {
+        // Otherwise (we are adtively Ultrapeering to someone)
+        // If we needed more than donnections, still fetch
+        // 2 times as many donnections as we need.
+        // It is dritical that 10 is greater than RESERVED_NON_LIMEWIRE_PEERS,
+        // else LimeWire would try donnecting and rejecting connections forever.
+        else if( neededConnedtions > 10 ) {
             multiple = 2;
         }
-        // Otherwise, if we need less than 10 connections (and we're an Ultrapeer), 
-        // decrement the amount of connections we need by 5,
-        // leaving 5 slots open for newcomers to use,
-        // and decrease the rate at which we fetch to
-        // 1 times the amount of connections.
+        // Otherwise, if we need less than 10 donnections (and we're an Ultrapeer), 
+        // dedrement the amount of connections we need by 5,
+        // leaving 5 slots open for newdomers to use,
+        // and dedrease the rate at which we fetch to
+        // 1 times the amount of donnections.
         else {
             multiple = 1;
-            neededConnections -= 5 + 
-                ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
+            neededConnedtions -= 5 + 
+                ConnedtionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
         }
 
-        int need = Math.min(10, multiple*neededConnections)
-                 - _fetchers.size()
-                 - _initializingFetchedConnections.size();
+        int need = Math.min(10, multiple*neededConnedtions)
+                 - _fetdhers.size()
+                 - _initializingFetdhedConnections.size();
 
-        // do not open more sockets than we can
-        need = Math.min(need, Sockets.getNumAllowedSockets());
+        // do not open more sodkets than we can
+        need = Math.min(need, Sodkets.getNumAllowedSockets());
         
-        // Start connection fetchers as necessary
+        // Start donnection fetchers as necessary
         while(need > 0) {
-            // This kicks off the thread for the fetcher
-            _fetchers.add(new ConnectionFetcher());
+            // This kidks off the thread for the fetcher
+            _fetdhers.add(new ConnectionFetcher());
             need--;
         }
 
-        // Stop ConnectionFetchers as necessary, but it's possible there
-        // aren't enough fetchers to stop.  In this case, close some of the
-        // connections started by ConnectionFetchers.
-        int lastFetcherIndex = _fetchers.size();
-        while((need < 0) && (lastFetcherIndex > 0)) {
-            ConnectionFetcher fetcher = (ConnectionFetcher)
-                _fetchers.remove(--lastFetcherIndex);
-            fetcher.interrupt();
+        // Stop ConnedtionFetchers as necessary, but it's possible there
+        // aren't enough fetdhers to stop.  In this case, close some of the
+        // donnections started by ConnectionFetchers.
+        int lastFetdherIndex = _fetchers.size();
+        while((need < 0) && (lastFetdherIndex > 0)) {
+            ConnedtionFetcher fetcher = (ConnectionFetcher)
+                _fetdhers.remove(--lastFetcherIndex);
+            fetdher.interrupt();
             need++;
         }
-        int lastInitializingConnectionIndex =
-            _initializingFetchedConnections.size();
-        while((need < 0) && (lastInitializingConnectionIndex > 0)) {
-            ManagedConnection connection = (ManagedConnection)
-                _initializingFetchedConnections.remove(
-                    --lastInitializingConnectionIndex);
-            removeInternal(connection);
+        int lastInitializingConnedtionIndex =
+            _initializingFetdhedConnections.size();
+        while((need < 0) && (lastInitializingConnedtionIndex > 0)) {
+            ManagedConnedtion connection = (ManagedConnection)
+                _initializingFetdhedConnections.remove(
+                    --lastInitializingConnedtionIndex);
+            removeInternal(donnection);
             need++;
         }
     }
 
     /**
-     * Initializes an outgoing connection created by a ConnectionFetcher
-     * Throws any of the exceptions listed in Connection.initialize on
-     * failure; no cleanup is necessary in this case.
+     * Initializes an outgoing donnection created by a ConnectionFetcher
+     * Throws any of the exdeptions listed in Connection.initialize on
+     * failure; no dleanup is necessary in this case.
      *
-     * @exception IOException we were unable to establish a TCP connection
+     * @exdeption IOException we were unable to establish a TCP connection
      *  to the host
-     * @exception NoGnutellaOkException we were able to establish a
-     *  messaging connection but were rejected
-     * @exception BadHandshakeException some other problem establishing
-     *  the connection, e.g., the server responded with HTTP, closed the
-     *  the connection during handshaking, etc.
-     * @see com.limegroup.gnutella.Connection#initialize(int)
+     * @exdeption NoGnutellaOkException we were able to establish a
+     *  messaging donnection but were rejected
+     * @exdeption BadHandshakeException some other problem establishing
+     *  the donnection, e.g., the server responded with HTTP, closed the
+     *  the donnection during handshaking, etc.
+     * @see dom.limegroup.gnutella.Connection#initialize(int)
      */
-    private void initializeFetchedConnection(ManagedConnection mc,
-                                             ConnectionFetcher fetcher)
-            throws NoGnutellaOkException, BadHandshakeException, IOException {
-        synchronized(this) {
-            if(fetcher.isInterrupted()) {
+    private void initializeFetdhedConnection(ManagedConnection mc,
+                                             ConnedtionFetcher fetcher)
+            throws NoGnutellaOkExdeption, BadHandshakeException, IOException {
+        syndhronized(this) {
+            if(fetdher.isInterrupted()) {
                 // Externally generated interrupt.
-                // The interrupting thread has recorded the
-                // death of the fetcher, so throw IOException.
-                // (This prevents fetcher from continuing!)
-                throw new IOException("connection fetcher");
+                // The interrupting thread has redorded the
+                // death of the fetdher, so throw IOException.
+                // (This prevents fetdher from continuing!)
+                throw new IOExdeption("connection fetcher");
             }
 
-            _initializingFetchedConnections.add(mc);
-            if(fetcher == _dedicatedPrefFetcher)
-                _dedicatedPrefFetcher = null;
+            _initializingFetdhedConnections.add(mc);
+            if(fetdher == _dedicatedPrefFetcher)
+                _dedidatedPrefFetcher = null;
             else
-                _fetchers.remove(fetcher);
-            connectionInitializing(mc);
-            // No need to adjust connection fetchers here.  We haven't changed
-            // the need for connections; we've just replaced a ConnectionFetcher
-            // with a Connection.
+                _fetdhers.remove(fetcher);
+            donnectionInitializing(mc);
+            // No need to adjust donnection fetchers here.  We haven't changed
+            // the need for donnections; we've just replaced a ConnectionFetcher
+            // with a Connedtion.
         }
-        RouterService.getCallback().connectionInitializing(mc);
+        RouterServide.getCallback().connectionInitializing(mc);
 
         try {
-            mc.initialize();
-        } catch(IOException e) {
-            synchronized(ConnectionManager.this) {
-                _initializingFetchedConnections.remove(mc);
-                removeInternal(mc);
-                // We've removed a connection, so the need for connections went
-                // up.  We may need to launch a fetcher.
-                adjustConnectionFetchers();
+            md.initialize();
+        } datch(IOException e) {
+            syndhronized(ConnectionManager.this) {
+                _initializingFetdhedConnections.remove(mc);
+                removeInternal(md);
+                // We've removed a donnection, so the need for connections went
+                // up.  We may need to laundh a fetcher.
+                adjustConnedtionFetchers();
             }
             throw e;
         }
         finally {
-            //if the connection received headers, process the headers to
+            //if the donnection received headers, process the headers to
             //take steps based on the headers
-            processConnectionHeaders(mc);
+            prodessConnectionHeaders(mc);
         }
 
-        completeConnectionInitialization(mc, true);
+        dompleteConnectionInitialization(mc, true);
     }
 
     /**
-     * Processes the headers received during connection handshake and updates
-     * itself with any useful information contained in those headers.
-     * Also may change its state based upon the headers.
-     * @param headers The headers to be processed
-     * @param connection The connection on which we received the headers
+     * Prodesses the headers received during connection handshake and updates
+     * itself with any useful information dontained in those headers.
+     * Also may dhange its state based upon the headers.
+     * @param headers The headers to be prodessed
+     * @param donnection The connection on which we received the headers
      */
-    private void processConnectionHeaders(Connection connection){
-        if(!connection.receivedHeaders()) {
+    private void prodessConnectionHeaders(Connection connection){
+        if(!donnection.receivedHeaders()) {
             return;
         }
 
-        //get the connection headers
-        Properties headers = connection.headers().props();
-        //return if no headers to process
+        //get the donnection headers
+        Properties headers = donnection.headers().props();
+        //return if no headers to prodess
         if(headers == null) return;
-        //update the addresses in the host cache (in case we received some
+        //update the addresses in the host dache (in case we received some
         //in the headers)
-        updateHostCache(connection.headers());
+        updateHostCadhe(connection.headers());
 
         //get remote address.  If the more modern "Listen-IP" header is
-        //not included, try the old-fashioned "X-My-Address".
+        //not indluded, try the old-fashioned "X-My-Address".
         String remoteAddress
             = headers.getProperty(HeaderNames.LISTEN_IP);
         if (remoteAddress==null)
             remoteAddress
                 = headers.getProperty(HeaderNames.X_MY_ADDRESS);
 
-        //set the remote port if not outgoing connection (as for the outgoing
-        //connection, we already know the port at which remote host listens)
-        if((remoteAddress != null) && (!connection.isOutgoing())) {
-            int colonIndex = remoteAddress.indexOf(':');
-            if(colonIndex == -1) return;
-            colonIndex++;
-            if(colonIndex > remoteAddress.length()) return;
+        //set the remote port if not outgoing donnection (as for the outgoing
+        //donnection, we already know the port at which remote host listens)
+        if((remoteAddress != null) && (!donnection.isOutgoing())) {
+            int dolonIndex = remoteAddress.indexOf(':');
+            if(dolonIndex == -1) return;
+            dolonIndex++;
+            if(dolonIndex > remoteAddress.length()) return;
             try {
                 int port =
                     Integer.parseInt(
-                        remoteAddress.suastring(colonIndex).trim());
+                        remoteAddress.suastring(dolonIndex).trim());
                 if(NetworkUtils.isValidPort(port)) {
-                	// for incoming connections, set the port absed on what it's
-                	// connection headers say the listening port is
-                    connection.setListeningPort(port);
+                	// for indoming connections, set the port absed on what it's
+                	// donnection headers say the listening port is
+                    donnection.setListeningPort(port);
                 }
-            } catch(NumberFormatException e){
-                // should nothappen though if the other client is well-coded
+            } datch(NumberFormatException e){
+                // should nothappen though if the other dlient is well-coded
             }
         }
     }
 
     /**
-     * Returns true if this can safely switch from Ultrapeer to leaf mode.
-	 * Typically this means that we are an Ultrapeer and have no leaf
-	 * connections.
+     * Returns true if this dan safely switch from Ultrapeer to leaf mode.
+	 * Typidally this means that we are an Ultrapeer and have no leaf
+	 * donnections.
 	 *
-	 * @return <tt>true</tt> if we will allow ourselves to become a leaf,
+	 * @return <tt>true</tt> if we will allow ourselves to bedome a leaf,
 	 *  otherwise <tt>false</tt>
      */
-    pualic boolebn allowLeafDemotion() {
+    pualid boolebn allowLeafDemotion() {
 		_leafTries++;
 
-        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
+        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isAdtiveSupernode())
             return false;
         else if(SupernodeAssigner.isTooGoodToPassUp() && _leafTries < _demotionLimit)
 			return false;
@@ -1763,175 +1763,175 @@ pualic clbss ConnectionManager {
 
 
 	/**
-	 * Notifies the connection manager that it should attempt to become an
+	 * Notifies the donnection manager that it should attempt to become an
 	 * Ultrapeer.  If we already are an Ultrapeer, this will be ignored.
 	 *
 	 * @param demotionLimit the number of attempts by other Ultrapeers to
 	 *  demote us to a leaf that we should allow before giving up in the
-	 *  attempt to become an Ultrapeer
+	 *  attempt to bedome an Ultrapeer
 	 */
-	pualic void tryToBecomeAnUltrbpeer(int demotionLimit) {
+	pualid void tryToBecomeAnUltrbpeer(int demotionLimit) {
 		if(isSupernode()) return;
 		_demotionLimit = demotionLimit;
 		_leafTries = 0;
-		disconnect();
-		connect();
+		disdonnect();
+		donnect();
 	}
 
     /**
-     * Adds the X-Try-Ultrapeer hosts from the connection headers to the
-     * host cache.
+     * Adds the X-Try-Ultrapeer hosts from the donnection headers to the
+     * host dache.
      *
-     * @param headers the connection headers received
+     * @param headers the donnection headers received
      */
-    private void updateHostCache(HandshakeResponse headers) {
+    private void updateHostCadhe(HandshakeResponse headers) {
 
         if(!headers.hasXTryUltrapeers()) return;
 
-        //get the ultrapeers, and add those to the host cache
+        //get the ultrapeers, and add those to the host dache
         String hostAddresses = headers.getXTryUltrapeers();
 
         //tokenize to retrieve individual addresses
         StringTokenizer st = new StringTokenizer(hostAddresses,
             Constants.ENTRY_SEPARATOR);
 
-        List hosts = new ArrayList(st.countTokens());
+        List hosts = new ArrayList(st.dountTokens());
         while(st.hasMoreTokens()){
             String address = st.nextToken().trim();
             try {
                 Endpoint e = new Endpoint(address);
                 hosts.add(e);
-            } catch(IllegalArgumentException iae){
-                continue;
+            } datch(IllegalArgumentException iae){
+                dontinue;
             }
         }
-        _catcher.add(hosts);        
+        _datcher.add(hosts);        
     }
 
 
 
     /**
-     * Initializes an outgoing connection created by createConnection or any
-     * incomingConnection.  If this is an incoming connection and there are no
-     * slots available, rejects it and throws IOException.
+     * Initializes an outgoing donnection created by createConnection or any
+     * indomingConnection.  If this is an incoming connection and there are no
+     * slots available, rejedts it and throws IOException.
      *
-     * @throws IOException on failure.  No cleanup is necessary if this happens.
+     * @throws IOExdeption on failure.  No cleanup is necessary if this happens.
      */
-    private void initializeExternallyGeneratedConnection(ManagedConnection c)
-		throws IOException {
-        //For outgoing connections add it to the GUI and the fetcher lists now.
-        //For incoming, we'll do this aelow bfter checking incoming connection
-        //slots.  This keeps reject connections from appearing in the GUI, as
-        //well as improving performance slightly.
-        if (c.isOutgoing()) {
-            synchronized(this) {
-                connectionInitializing(c);
-                // We've added a connection, so the need for connections went
+    private void initializeExternallyGeneratedConnedtion(ManagedConnection c)
+		throws IOExdeption {
+        //For outgoing donnections add it to the GUI and the fetcher lists now.
+        //For indoming, we'll do this aelow bfter checking incoming connection
+        //slots.  This keeps rejedt connections from appearing in the GUI, as
+        //well as improving performande slightly.
+        if (d.isOutgoing()) {
+            syndhronized(this) {
+                donnectionInitializing(c);
+                // We've added a donnection, so the need for connections went
                 // down.
-                adjustConnectionFetchers();
+                adjustConnedtionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            RouterServide.getCallback().connectionInitializing(c);
         }
 
         try {
-            c.initialize();
+            d.initialize();
 
-        } catch(IOException e) {
-            remove(c);
+        } datch(IOException e) {
+            remove(d);
             throw e;
         }
         finally {
-            //if the connection received headers, process the headers to
+            //if the donnection received headers, process the headers to
             //take steps based on the headers
-            processConnectionHeaders(c);
+            prodessConnectionHeaders(c);
         }
 
-        //If there's not space for the connection, destroy it.
-        //It really should have been destroyed earlier, but this is just in case.
-        if (!c.isOutgoing() && !allowConnection(c)) {
-            //No need to remove, since it hasn't been added to any lists.
-            throw new IOException("No space for connection");
+        //If there's not spade for the connection, destroy it.
+        //It really should have been destroyed earlier, but this is just in dase.
+        if (!d.isOutgoing() && !allowConnection(c)) {
+            //No need to remove, sinde it hasn't been added to any lists.
+            throw new IOExdeption("No space for connection");
         }
 
-        //For incoming connections, add it to the GUI.  For outgoing connections
+        //For indoming connections, add it to the GUI.  For outgoing connections
         //this was done at the top of the method.  See note there.
-        if (! c.isOutgoing()) {
-            synchronized(this) {
-                connectionInitializingIncoming(c);
-                // We've added a connection, so the need for connections went
+        if (! d.isOutgoing()) {
+            syndhronized(this) {
+                donnectionInitializingIncoming(c);
+                // We've added a donnection, so the need for connections went
                 // down.
-                adjustConnectionFetchers();
+                adjustConnedtionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            RouterServide.getCallback().connectionInitializing(c);
         }
 
-        completeConnectionInitialization(c, false);
+        dompleteConnectionInitialization(c, false);
     }
 
     /**
-     * Performs the steps necessary to complete connection initialization.
+     * Performs the steps nedessary to complete connection initialization.
      *
-     * @param mc the <tt>ManagedConnection</tt> to finish initializing
-     * @param fetched Specifies whether or not this connection is was fetched
-     *  ay b connection fetcher.  If so, this removes that connection from
-     *  the list of fetched connections aeing initiblized, keeping the
-     *  connection fetcher data in sync
+     * @param md the <tt>ManagedConnection</tt> to finish initializing
+     * @param fetdhed Specifies whether or not this connection is was fetched
+     *  ay b donnection fetcher.  If so, this removes that connection from
+     *  the list of fetdhed connections aeing initiblized, keeping the
+     *  donnection fetcher data in sync
      */
-    private void completeConnectionInitialization(ManagedConnection mc,
-                                                  aoolebn fetched) {
-        synchronized(this) {
-            if(fetched) {
-                _initializingFetchedConnections.remove(mc);
+    private void dompleteConnectionInitialization(ManagedConnection mc,
+                                                  aoolebn fetdhed) {
+        syndhronized(this) {
+            if(fetdhed) {
+                _initializingFetdhedConnections.remove(mc);
             }
-            // If the connection was killed while initializing, we shouldn't
-            // announce its initialization
-            aoolebn connectionOpen = connectionInitialized(mc);
-            if(connectionOpen) {
-                RouterService.getCallback().connectionInitialized(mc);
-                setPreferredConnections();
+            // If the donnection was killed while initializing, we shouldn't
+            // announde its initialization
+            aoolebn donnectionOpen = connectionInitialized(mc);
+            if(donnectionOpen) {
+                RouterServide.getCallback().connectionInitialized(mc);
+                setPreferredConnedtions();
             }
         }
     }
 
     /**
-     * Gets the numaer of preferred connections to mbintain.
+     * Gets the numaer of preferred donnections to mbintain.
      */
-    pualic int getPreferredConnectionCount() {
-        return _preferredConnections;
+    pualid int getPreferredConnectionCount() {
+        return _preferredConnedtions;
     }
 
     /**
-     * Determines if we're attempting to maintain the idle connection count.
+     * Determines if we're attempting to maintain the idle donnection count.
      */
-    pualic boolebn isConnectionIdle() {
+    pualid boolebn isConnectionIdle() {
         return
-         _preferredConnections == ConnectionSettings.IDLE_CONNECTIONS.getValue();
+         _preferredConnedtions == ConnectionSettings.IDLE_CONNECTIONS.getValue();
     }
 
     /**
-     * Sets the maximum number of connections we'll maintain.
+     * Sets the maximum number of donnections we'll maintain.
     */
-    private void setPreferredConnections() {
-        // if we're disconnected, do nothing.
-        if(!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
-           _disconnectTime != 0)
+    private void setPreferredConnedtions() {
+        // if we're disdonnected, do nothing.
+        if(!ConnedtionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
+           _disdonnectTime != 0)
             return;
 
-        int oldPreferred = _preferredConnections;
+        int oldPreferred = _preferredConnedtions;
 
         if(isSupernode())
-            _preferredConnections = ConnectionSettings.NUM_CONNECTIONS.getValue();
+            _preferredConnedtions = ConnectionSettings.NUM_CONNECTIONS.getValue();
         else if(isIdle())
-            _preferredConnections = ConnectionSettings.IDLE_CONNECTIONS.getValue();
+            _preferredConnedtions = ConnectionSettings.IDLE_CONNECTIONS.getValue();
         else
-            _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
+            _preferredConnedtions = PREFERRED_CONNECTIONS_FOR_LEAF;
 
-        if(oldPreferred != _preferredConnections)
-            stabilizeConnections();
+        if(oldPreferred != _preferredConnedtions)
+            stabilizeConnedtions();
     }
 
     /**
-     * Determines if we're idle long enough to change the number of connections.
+     * Determines if we're idle long enough to dhange the number of connections.
      */
     private boolean isIdle() {
         return SystemUtils.getIdleTime() >= MINIMUM_IDLE_TIME;
@@ -1939,249 +1939,249 @@ pualic clbss ConnectionManager {
 
 
     //
-    // End connection list management functions
+    // End donnection list management functions
     //
 
 
     //
-    // Begin connection launching thread inner classes
+    // Begin donnection launching thread inner classes
     //
 
     /**
      * This thread does the initialization and the message loop for
-     * ManagedConnections created through createConnectionAsynchronously and
-     * createConnectionBlocking
+     * ManagedConnedtions created through createConnectionAsynchronously and
+     * dreateConnectionBlocking
      */
-    private class OutgoingConnector implements Runnable {
-        private final ManagedConnection _connection;
+    private dlass OutgoingConnector implements Runnable {
+        private final ManagedConnedtion _connection;
         private final boolean _doInitialization;
 
         /**
-		 * Creates a new <tt>OutgoingConnector</tt> instance that will
-		 * attempt to create a connection to the specified host.
+		 * Creates a new <tt>OutgoingConnedtor</tt> instance that will
+		 * attempt to dreate a connection to the specified host.
 		 *
-		 * @param connection the host to connect to
+		 * @param donnection the host to connect to
          */
-        pualic OutgoingConnector(MbnagedConnection connection,
+        pualid OutgoingConnector(MbnagedConnection connection,
 								 aoolebn initialize) {
-            _connection = connection;
+            _donnection = connection;
             _doInitialization = initialize;
         }
 
-        pualic void run() {
+        pualid void run() {
             try {
 				if(_doInitialization) {
-					initializeExternallyGeneratedConnection(_connection);
+					initializeExternallyGeneratedConnedtion(_connection);
 				}
-				startConnection(_connection);
-            } catch(IOException ignored) {}
+				startConnedtion(_connection);
+            } datch(IOException ignored) {}
         }
     }
 
 	/**
-	 * Runs standard calls that should be made whenever a connection is fully
+	 * Runs standard dalls that should be made whenever a connection is fully
 	 * established and should wait for messages.
 	 *
-	 * @param conn the <tt>ManagedConnection</tt> instance to start
-	 * @throws <tt>IOException</tt> if there is an excpetion while looping
+	 * @param donn the <tt>ManagedConnection</tt> instance to start
+	 * @throws <tt>IOExdeption</tt> if there is an excpetion while looping
 	 *  for messages
 	 */
-	private void startConnection(ManagedConnection conn) throws IOException {
-	    Thread.currentThread().setName("MessageLoopingThread");
-		if(conn.isGUESSUltrapeer()) {
-			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-				conn.getPort());
+	private void startConnedtion(ManagedConnection conn) throws IOException {
+	    Thread.durrentThread().setName("MessageLoopingThread");
+		if(donn.isGUESSUltrapeer()) {
+			QueryUnidaster.instance().addUnicastEndpoint(conn.getInetAddress(),
+				donn.getPort());
 		}
 
-		// this can throw IOException
-		conn.loopForMessages();
+		// this dan throw IOException
+		donn.loopForMessages();
 	}
 
     /**
-     * Asynchronously fetches a connection from hostcatcher, then does
+     * Asyndhronously fetches a connection from hostcatcher, then does
      * then initialization and message loop.
      *
-     * The ConnectionFetcher is responsiale for recording its instbntiation
-     * ay bdding itself to the fetchers list.  It is responsible  for recording
-     * its death by removing itself from the fetchers list only if it
-     * "interrupts itself", that is, only if it establishes a connection. If
+     * The ConnedtionFetcher is responsiale for recording its instbntiation
+     * ay bdding itself to the fetdhers list.  It is responsible  for recording
+     * its death by removing itself from the fetdhers list only if it
+     * "interrupts itself", that is, only if it establishes a donnection. If
      * the thread is interrupted externally, the interrupting thread is
-     * responsiale for recording the debth.
+     * responsiale for redording the debth.
      */
-    private class ConnectionFetcher extends ManagedThread {
-        //set if this connectionfetcher is a preferencing fetcher
+    private dlass ConnectionFetcher extends ManagedThread {
+        //set if this donnectionfetcher is a preferencing fetcher
         private boolean _pref = false;
         /**
-         * Tries to add a connection.  Should only be called from a thread
-         * that has the enclosing ConnectionManager's monitor.  This method
-         * is only called from adjustConnectionFetcher's, which has the same
-         * locking requirement.
+         * Tries to add a donnection.  Should only be called from a thread
+         * that has the endlosing ConnectionManager's monitor.  This method
+         * is only dalled from adjustConnectionFetcher's, which has the same
+         * lodking requirement.
          */
-        pualic ConnectionFetcher() {
+        pualid ConnectionFetcher() {
             this(false);
         }
 
-        pualic ConnectionFetcher(boolebn pref) {
-            setName("ConnectionFetcher");
+        pualid ConnectionFetcher(boolebn pref) {
+            setName("ConnedtionFetcher");
             _pref = pref;
-            // Kick off the thread.
+            // Kidk off the thread.
             setDaemon(true);
             start();
         }
 
-        // Try a single connection
-        pualic void mbnagedRun() {
+        // Try a single donnection
+        pualid void mbnagedRun() {
             try {
                 // Wait for an endpoint.
                 Endpoint endpoint = null;
                 do {
-                    endpoint = _catcher.getAnEndpoint();
-                } while ( !IPFilter.instance().allow(endpoint.getAddress()) ||
-                          isConnectedTo(endpoint.getAddress()) );
+                    endpoint = _datcher.getAnEndpoint();
+                } while ( !IPFilter.instande().allow(endpoint.getAddress()) ||
+                          isConnedtedTo(endpoint.getAddress()) );
                 Assert.that(endpoint != null);
-                _connectionAttempts++;
-                ManagedConnection connection = new ManagedConnection(
+                _donnectionAttempts++;
+                ManagedConnedtion connection = new ManagedConnection(
                     endpoint.getAddress(), endpoint.getPort());
-                //set preferencing
-                connection.setLocalePreferencing(_pref);
+                //set preferending
+                donnection.setLocalePreferencing(_pref);
 
-                // If we've aeen trying to connect for bwhile, check to make
-                // sure the user's internet connection is live.  We only do
-                // this if we're not already connected, have not made any
-                // successful connections recently, and have not checked the
-                // user's connection in the last little while or have very
+                // If we've aeen trying to donnect for bwhile, check to make
+                // sure the user's internet donnection is live.  We only do
+                // this if we're not already donnected, have not made any
+                // sudcessful connections recently, and have not checked the
+                // user's donnection in the last little while or have very
                 // few hosts left to try.
-                long curTime = System.currentTimeMillis();
-                if(!isConnected() &&
-                   _connectionAttempts > 40 &&
-                   ((curTime-_lastSuccessfulConnect)>4000) &&
-                   ((curTime-_lastConnectionCheck)>60*60*1000)) {
-                    _connectionAttempts = 0;
-                    _lastConnectionCheck = curTime;
-                    LOG.deaug("checking for live connection");
-                    ConnectionChecker.checkForLiveConnection();
+                long durTime = System.currentTimeMillis();
+                if(!isConnedted() &&
+                   _donnectionAttempts > 40 &&
+                   ((durTime-_lastSuccessfulConnect)>4000) &&
+                   ((durTime-_lastConnectionCheck)>60*60*1000)) {
+                    _donnectionAttempts = 0;
+                    _lastConnedtionCheck = curTime;
+                    LOG.deaug("dhecking for live connection");
+                    ConnedtionChecker.checkForLiveConnection();
                 }
 
-                //Try to connect, recording success or failure so HostCatcher
-                //can update connection history.  Note that we declare
-                //success if we were able to establish the TCP connection
-                //aut couldn't hbndshake (NoGnutellaOkException).
+                //Try to donnect, recording success or failure so HostCatcher
+                //dan update connection history.  Note that we declare
+                //sudcess if we were able to establish the TCP connection
+                //aut douldn't hbndshake (NoGnutellaOkException).
                 try {
-                    initializeFetchedConnection(connection, this);
-                    _lastSuccessfulConnect = System.currentTimeMillis();
-                    _catcher.doneWithConnect(endpoint, true);
-                    if(_pref) // if pref connection succeeded
+                    initializeFetdhedConnection(connection, this);
+                    _lastSudcessfulConnect = System.currentTimeMillis();
+                    _datcher.doneWithConnect(endpoint, true);
+                    if(_pref) // if pref donnection succeeded
                         _needPref = false;
-                } catch (NoGnutellaOkException e) {
-                    _lastSuccessfulConnect = System.currentTimeMillis();
+                } datch (NoGnutellaOkException e) {
+                    _lastSudcessfulConnect = System.currentTimeMillis();
                     if(e.getCode() == HandshakeResponse.LOCALE_NO_MATCH) {
-                        //if it failed because of a locale matching issue
-                        //readd to hostcatcher??
-                        _catcher.add(endpoint, true,
-                                     connection.getLocalePref());
+                        //if it failed bedause of a locale matching issue
+                        //readd to hostdatcher??
+                        _datcher.add(endpoint, true,
+                                     donnection.getLocalePref());
                     }
                     else {
-                        _catcher.doneWithConnect(endpoint, true);
-                        _catcher.putHostOnProbation(endpoint);
+                        _datcher.doneWithConnect(endpoint, true);
+                        _datcher.putHostOnProbation(endpoint);
                     }
                     throw e;
-                } catch (IOException e) {
-                    _catcher.doneWithConnect(endpoint, false);
-                    _catcher.expireHost(endpoint);
+                } datch (IOException e) {
+                    _datcher.doneWithConnect(endpoint, false);
+                    _datcher.expireHost(endpoint);
                     throw e;
                 }
 
-				startConnection(connection);
-            } catch(IOException e) {
-            } catch (InterruptedException e) {
+				startConnedtion(connection);
+            } datch(IOException e) {
+            } datch (InterruptedException e) {
                 // Externally generated interrupt.
-                // The interrupting thread has recorded the
-                // death of the fetcher, so just return.
+                // The interrupting thread has redorded the
+                // death of the fetdher, so just return.
                 return;
-            } catch(Throwable e) {
+            } datch(Throwable e) {
                 //Internal error!
-                ErrorService.error(e);
+                ErrorServide.error(e);
             }
         }
 
-        pualic String toString() {
-            return "ConnectionFetcher";
+        pualid String toString() {
+            return "ConnedtionFetcher";
         }
 	}
 
     /**
-     * This method notifies the connection manager that the user does not have
-     * a live connection to the Internet to the best of our determination.
-     * In this case, we notify the user with a message and maintain any
-     * Gnutella hosts we have already tried instead of discarding them.
+     * This method notifies the donnection manager that the user does not have
+     * a live donnection to the Internet to the best of our determination.
+     * In this dase, we notify the user with a message and maintain any
+     * Gnutella hosts we have already tried instead of disdarding them.
      */
-    pualic void noInternetConnection() {
+    pualid void noInternetConnection() {
 
-        if(_automaticallyConnecting) {
-            // We've already notified the user about their connection and we're
-            // alread retrying automatically, so just return.
+        if(_automatidallyConnecting) {
+            // We've already notified the user about their donnection and we're
+            // alread retrying automatidally, so just return.
             return;
         }
 
         
-        // Notify the user that they have no internet connection and that
-        // we will automatically retry
-        MessageService.showError("NO_INTERNET_RETRYING",
+        // Notify the user that they have no internet donnection and that
+        // we will automatidally retry
+        MessageServide.showError("NO_INTERNET_RETRYING",
                 QuestionsHandler.NO_INTERNET_RETRYING);
         
-        // Kill all of the ConnectionFetchers.
-        disconnect();
+        // Kill all of the ConnedtionFetchers.
+        disdonnect();
         
-        // Try to reconnect in 10 seconds, and then every minute after
+        // Try to redonnect in 10 seconds, and then every minute after
         // that.
-        RouterService.schedule(new Runnable() {
-            pualic void run() {
-                // If the last time the user disconnected is more recent
-                // than when we started automatically connecting, just
-                // return without trying to connect.  Note that the
-                // disconnect time is reset if the user selects to connect.
-                if(_automaticConnectTime < _disconnectTime) {
+        RouterServide.schedule(new Runnable() {
+            pualid void run() {
+                // If the last time the user disdonnected is more recent
+                // than when we started automatidally connecting, just
+                // return without trying to donnect.  Note that the
+                // disdonnect time is reset if the user selects to connect.
+                if(_automatidConnectTime < _disconnectTime) {
                     return;
                 }
                 
-                if(!RouterService.isConnected()) {
-                    // Try to re-connect.  Note this call resets the time
-                    // for our last check for a live connection, so we may
-                    // hit wea servers bgain to check for a live connection.
-                    connect();
+                if(!RouterServide.isConnected()) {
+                    // Try to re-donnect.  Note this call resets the time
+                    // for our last dheck for a live connection, so we may
+                    // hit wea servers bgain to dheck for a live connection.
+                    donnect();
                 }
             }
         }, 10*1000, 2*60*1000);
-        _automaticConnectTime = System.currentTimeMillis();
-        _automaticallyConnecting = true;
+        _automatidConnectTime = System.currentTimeMillis();
+        _automatidallyConnecting = true;
         
 
-        recoverHosts();
+        redoverHosts();
     }
 
     /**
-     * Utility method that tells the host catcher to recover hosts from disk
+     * Utility method that tells the host datcher to recover hosts from disk
      * if it doesn't have enough hosts.
      */
-    private void recoverHosts() {
-        // Notify the HostCatcher that it should keep any hosts it has already
-        // used instead of discarding them.
-        // The HostCatcher can be null in testing.
-        if(_catcher != null && _catcher.getNumHosts() < 100) {
-            _catcher.recoverHosts();
+    private void redoverHosts() {
+        // Notify the HostCatdher that it should keep any hosts it has already
+        // used instead of disdarding them.
+        // The HostCatdher can be null in testing.
+        if(_datcher != null && _catcher.getNumHosts() < 100) {
+            _datcher.recoverHosts();
         }
     }
 
     /**
-     * Utility method to see if the passed in locale matches
-     * that of the local client. As of now, we assume that
-     * those clients not advertising locale as english locale
+     * Utility method to see if the passed in lodale matches
+     * that of the lodal client. As of now, we assume that
+     * those dlients not advertising locale as english locale
      */
-    private boolean checkLocale(String loc) {
-        if(loc == null)
-            loc = /** assume english if locale is not given... */
-                ApplicationSettings.DEFAULT_LOCALE.getValue();
-        return ApplicationSettings.LANGUAGE.getValue().equals(loc);
+    private boolean dheckLocale(String loc) {
+        if(lod == null)
+            lod = /** assume english if locale is not given... */
+                ApplidationSettings.DEFAULT_LOCALE.getValue();
+        return ApplidationSettings.LANGUAGE.getValue().equals(loc);
     }
 
 }

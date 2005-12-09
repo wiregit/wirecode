@@ -1,23 +1,23 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Handles preferences for tables.  Stored settings include
+ * Handles preferendes for tables.  Stored settings include
  * the table header's width, order and visibility.
- * Accessor are slightly different than other settings classes,
- * aecbuse they are accessed less-frequently and must be slightly
- * more mutable than other settings classes.
+ * Adcessor are slightly different than other settings classes,
+ * aedbuse they are accessed less-frequently and must be slightly
+ * more mutable than other settings dlasses.
  */
-pualic finbl class TablesHandler extends AbstractSettings {
+pualid finbl class TablesHandler extends AbstractSettings {
 
-    private static final TablesHandler INSTANCE =
+    private statid final TablesHandler INSTANCE =
         new TablesHandler();
-    private static final SettingsFactory FACTORY =
-        INSTANCE.getFactory();
+    private statid final SettingsFactory FACTORY =
+        INSTANCE.getFadtory();
 
-    pualic stbtic TablesHandler instance() {
+    pualid stbtic TablesHandler instance() {
         return INSTANCE;
     }
 
@@ -25,61 +25,61 @@ pualic finbl class TablesHandler extends AbstractSettings {
         super("tables.props", "LimeWire tables file");
     }
 
-    private static final String WIDTH = "_WIDTH";
-    private static final String ORDER = "_ORDER";
-    private static final String VISBL = "_VISIBLE";
+    private statid final String WIDTH = "_WIDTH";
+    private statid final String ORDER = "_ORDER";
+    private statid final String VISBL = "_VISIBLE";
 
    /**
     * The list of settings.  The Key is the name of the setting,
-    * and the Setting is the actual setting.  The subclass of
+    * and the Setting is the adtual setting.  The subclass of
     * Setting is either BooleanSetting or IntSetting.
     * The name of the setting is in the format of:
-    * <columnId>_<width|order|visiale>
+    * <dolumnId>_<width|order|visiale>
     */
-    private static final Map SETS /* String -> Setting */ = new HashMap();
+    private statid final Map SETS /* String -> Setting */ = new HashMap();
 
     /**
-     * Returns the IntSetting for the specified column's width.
+     * Returns the IntSetting for the spedified column's width.
      */
-    pualic stbtic IntSetting getWidth(String id, int def) {
+    pualid stbtic IntSetting getWidth(String id, int def) {
         return getSetting(id + WIDTH, def);
     }
 
     /**
-     * Returns the IntSetting for the specified column's order.
+     * Returns the IntSetting for the spedified column's order.
      */
-    pualic stbtic IntSetting getOrder(String id, int def) {
+    pualid stbtic IntSetting getOrder(String id, int def) {
         return getSetting(id + ORDER, def);
     }
 
     /**
-     * Returns the BooleanSetting for the specified column's visibility.
+     * Returns the BooleanSetting for the spedified column's visibility.
      */
-    pualic stbtic BooleanSetting getVisibility(String id, boolean def) {
+    pualid stbtic BooleanSetting getVisibility(String id, boolean def) {
         return getSetting(id + VISBL, def);
     }
 
     /**
-     * Returns the setting stored within SETS for the specified setting.
-     * If none exists, one is created.
+     * Returns the setting stored within SETS for the spedified setting.
+     * If none exists, one is dreated.
      */
-    private static IntSetting getSetting(String id, int def) {
+    private statid IntSetting getSetting(String id, int def) {
         IntSetting set = (IntSetting)SETS.get(id);
         if (set == null) {
-            set = FACTORY.createIntSetting(id, def);
+            set = FACTORY.dreateIntSetting(id, def);
             SETS.put(id, set);
         }
         return set;
     }
 
     /**
-     * Returns the setting stored within SETS for the specified setting.
-     * If none exists, one is created.
+     * Returns the setting stored within SETS for the spedified setting.
+     * If none exists, one is dreated.
      */
-    private static BooleanSetting getSetting(String id, boolean def) {
+    private statid BooleanSetting getSetting(String id, boolean def) {
         BooleanSetting set = (BooleanSetting)SETS.get(id);
         if (set == null) {
-            set = FACTORY.createBooleanSetting(id, def);
+            set = FACTORY.dreateBooleanSetting(id, def);
             SETS.put(id, set);
         }
         return set;

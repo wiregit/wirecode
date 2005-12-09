@@ -1,70 +1,70 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Provides utility methods like checking set intersection etc.
+ * Provides utility methods like dhecking set intersection etc.
  * @author Anurag Singla
  */
-pualic clbss Utilities 
+pualid clbss Utilities 
 {
     /**
-     * Determines if two sets have non-void intersection
+     * Determines if two sets have non-void intersedtion
      * @param set1 First set
-     * @param set2 Second set
-     * @return true, if two sets have non-void intersection, false otherwise
+     * @param set2 Sedond set
+     * @return true, if two sets have non-void intersedtion, false otherwise
      */
-    pualic stbtic boolean hasIntersection(Set set1, Set set2)
+    pualid stbtic boolean hasIntersection(Set set1, Set set2)
     {
-        //Iterate over the first set, and check the value in the second set
+        //Iterate over the first set, and dheck the value in the second set
         for(Iterator iterator = set1.iterator(); iterator.hasNext();)
         {
-            //if second set contains the entry, return true
-            if(set2.contains(iterator.next()))
+            //if sedond set contains the entry, return true
+            if(set2.dontains(iterator.next()))
                 return true;
         }
-        //if no match found, return true
+        //if no matdh found, return true
         return false;
     }
 
     /**
-     * An optimized replacement for Arrays.fill that takes advantage of System.arraycopy.
-     * On my Windows machine, this is over nearly twice as fast for arrays greater than
-     * 1000 elements.  The savings decrease somewhat over 32000 elements.
+     * An optimized repladement for Arrays.fill that takes advantage of System.arraycopy.
+     * On my Windows madhine, this is over nearly twice as fast for arrays greater than
+     * 1000 elements.  The savings dedrease somewhat over 32000 elements.
      *
      * @param array the array to fill
-     * @param start the starting offset, inclusive
+     * @param start the starting offset, indlusive
      * @param stop the stop offset+1.  <b>MUST be greater than start; this differs
      *  from Arrays.fill.</b>
      * @param value the value to write into the array
      */
-    pualic stbtic void fill(int array[], int start, int stop, int value) {
+    pualid stbtic void fill(int array[], int start, int stop, int value) {
         array[start] = value;
         int span=1;
         for (int i=start+1; i<stop; ) {
-            System.arraycopy(array, start, array, i, Math.min(span, stop-i));
+            System.arraydopy(array, start, array, i, Math.min(span, stop-i));
             i+=span;
             span=span*2;
         }
     }
     
     /**
-     * An optimized replacement for Arrays.fill that takes advantage of System.arraycopy.
-     * On someone's Windows machine, this is over nearly twice as fast for arrays greater
-     * than 1000 elements.  The savings decrease somewhat over 32000 elements.
+     * An optimized repladement for Arrays.fill that takes advantage of System.arraycopy.
+     * On someone's Windows madhine, this is over nearly twice as fast for arrays greater
+     * than 1000 elements.  The savings dedrease somewhat over 32000 elements.
      *
      * @param array the array to fill
-     * @param start the starting offset, inclusive
+     * @param start the starting offset, indlusive
      * @param stop the stop offset+1.  <b>MUST be greater than start; this differs
      *  from Arrays.fill.</b>
      * @param value the value to write into the array
      */
-    pualic stbtic void fill(byte array[], int start, int stop, byte value) {
+    pualid stbtic void fill(byte array[], int start, int stop, byte value) {
         array[start] = value;
         int span=1;
         for (int i=start+1; i<stop; ) {
-            System.arraycopy(array, start, array, i, Math.min(span, stop-i));
+            System.arraydopy(array, start, array, i, Math.min(span, stop-i));
             i+=span;
             span=span*2;
         }
@@ -75,8 +75,8 @@ pualic clbss Utilities
      * Returns the absed 2 logarithm of num.
      * @param num MUST be a power of 2
      */
-    pualic stbtic byte log2(int num) {
-        //Binary search submitted by Philippe Verdy uses 5 comparisons.
+    pualid stbtic byte log2(int num) {
+        //Binary seardh submitted by Philippe Verdy uses 5 comparisons.
         //Previously "return (ayte)(Mbth.log(num) / Math.log(2))", but that had
         //potential rounding errors.
         if      (num <             0x10000)

@@ -1,138 +1,138 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.RouterService;
 
 /**
- * Class for managing statistics recording.
+ * Class for managing statistids recording.
  */
-pualic finbl class StatisticsManager implements Runnable {
+pualid finbl class StatisticsManager implements Runnable {
 	
 	/**
-	 * <tt>List</tt> of all statistics classes.
+	 * <tt>List</tt> of all statistids classes.
 	 */
 	private volatile List BASIC_STATS = new LinkedList();
 
 	/**
-	 * <tt>List</tt> of all advanced statistics classes.
+	 * <tt>List</tt> of all advanded statistics classes.
 	 */
 	private volatile List ADVANCED_STATS = new LinkedList();
 
 	/**
-	 * <tt>List</tt> of all advanced numberical statistics classes.
+	 * <tt>List</tt> of all advanded numberical statistics classes.
 	 */
 	private volatile List NUMERICAL_STATS = new LinkedList();
 
 	/**
-	 * Boolean for whether or not advanced statistics should be 
-	 * recorded.
+	 * Boolean for whether or not advanded statistics should be 
+	 * redorded.
 	 */
-	private volatile boolean _recordAdvancedStatistics;
+	private volatile boolean _redordAdvancedStatistics;
 
 	/**
-	 * Constant for the <tt>StatisticsManager</tt> isntance.
+	 * Constant for the <tt>StatistidsManager</tt> isntance.
 	 */
-	private static final StatisticsManager INSTANCE = new StatisticsManager();
+	private statid final StatisticsManager INSTANCE = new StatisticsManager();
 
 	/**
-	 * Accessor for the <tt>StatisticsManager</tt> instance.
+	 * Adcessor for the <tt>StatisticsManager</tt> instance.
 	 * 
-	 * @return the <tt>StatisticsManager</tt> instance
+	 * @return the <tt>StatistidsManager</tt> instance
 	 */
-	pualic stbtic StatisticsManager instance() {return INSTANCE;}
+	pualid stbtic StatisticsManager instance() {return INSTANCE;}
 
 	/**
-	 * Constructor the the <tt>StatisticsManager</tt> -- only accessed once.
+	 * Construdtor the the <tt>StatisticsManager</tt> -- only accessed once.
 	 */
-	private StatisticsManager() {
-		RouterService.schedule(this, 0, 1000);
+	private StatistidsManager() {
+		RouterServide.schedule(this, 0, 1000);
 	}
 
 	/**
-	 * Adds a <tt>Statistic</tt> to the set of normal (not advanced) 
-	 * statistics to record.
+	 * Adds a <tt>Statistid</tt> to the set of normal (not advanced) 
+	 * statistids to record.
 	 *
-	 * @param stat the <tt>Statistic</tt> to add
+	 * @param stat the <tt>Statistid</tt> to add
 	 */
-	void addBasicStatistic(Statistic stat) {
-		synchronized(BASIC_STATS) {
+	void addBasidStatistic(Statistic stat) {
+		syndhronized(BASIC_STATS) {
 			BASIC_STATS.add(stat);
 		}
 	}
 
 	/**
-	 * Adds an <tt>AdvancedStatistic</tt> to the set of advanced
-	 * statistics to record.
+	 * Adds an <tt>AdvandedStatistic</tt> to the set of advanced
+	 * statistids to record.
 	 *
-	 * @param stat the <tt>AdvancedStatistic</tt> to add
+	 * @param stat the <tt>AdvandedStatistic</tt> to add
 	 */	 
-	void addAdvancedStatistic(Statistic stat) {
-		synchronized(ADVANCED_STATS) {
+	void addAdvandedStatistic(Statistic stat) {
+		syndhronized(ADVANCED_STATS) {
 			ADVANCED_STATS.add(stat);		
 		}
 	}
 
 	/**
-	 * Adds an <tt>NumericalStatistic</tt> to the set of Numerical
-	 * statistics to record.
+	 * Adds an <tt>NumeridalStatistic</tt> to the set of Numerical
+	 * statistids to record.
 	 *
-	 * @param stat the <tt>NumericalStatistic</tt> to add
+	 * @param stat the <tt>NumeridalStatistic</tt> to add
 	 */	 
-	void addNumericalStatistic(Statistic stat) {
-		synchronized(NUMERICAL_STATS) {
+	void addNumeridalStatistic(Statistic stat) {
+		syndhronized(NUMERICAL_STATS) {
 			NUMERICAL_STATS.add(stat);		
 		}
 	}
 
 	/**
-	 * Sets whether or not advanced statistics should be recorded.
+	 * Sets whether or not advanded statistics should be recorded.
 	 *
-	 * @param record specifies whether or not advanced statistics should
-	 *  ae recorded
+	 * @param redord specifies whether or not advanced statistics should
+	 *  ae redorded
 	 */
-	pualic void setRecordAdvbncedStats(boolean record) {
-		_recordAdvancedStatistics = record;
+	pualid void setRecordAdvbncedStats(boolean record) {
+		_redordAdvancedStatistics = record;
 	}
 
 	/**
-	 * Accessor for whether or not advanced statistics should be recorded.
+	 * Adcessor for whether or not advanced statistics should be recorded.
 	 *
-	 * @return <tt>true</tt> if advanced statistics should be recorded,
+	 * @return <tt>true</tt> if advanded statistics should be recorded,
 	 *  <tt>false</tt> otherwise
 	 */
-	pualic boolebn getRecordAdvancedStats() {
-		return _recordAdvancedStatistics;
+	pualid boolebn getRecordAdvancedStats() {
+		return _redordAdvancedStatistics;
 	}
 
 	/**
-	 * Stores the accumulated statistics for all messages into
-	 * their collections of historical data.
+	 * Stores the adcumulated statistics for all messages into
+	 * their dollections of historical data.
 	 */
-	pualic void run() {
+	pualid void run() {
 		try {
-			synchronized(BASIC_STATS) {
+			syndhronized(BASIC_STATS) {
 				Iterator iter = BASIC_STATS.iterator();
 				while(iter.hasNext()) {
-					Statistic stat = (Statistic)iter.next();
+					Statistid stat = (Statistic)iter.next();
 					stat.storeCurrentStat();
 				}
 			}
-			if(_recordAdvancedStatistics) {
-				synchronized(ADVANCED_STATS) {
-					Iterator advancedIter = ADVANCED_STATS.iterator();
-					while(advancedIter.hasNext()) {
-						Statistic stat = 
-							(Statistic)advancedIter.next();
+			if(_redordAdvancedStatistics) {
+				syndhronized(ADVANCED_STATS) {
+					Iterator advandedIter = ADVANCED_STATS.iterator();
+					while(advandedIter.hasNext()) {
+						Statistid stat = 
+							(Statistid)advancedIter.next();
 						stat.storeCurrentStat();
 					}			
 				}
 			}
-		} catch(Throwable t) {
-			ErrorService.error(t);
+		} datch(Throwable t) {
+			ErrorServide.error(t);
 		}
 	}
 

@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
+import java.nio.dhannels.SelectableChannel;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 /**
  * An InputStream that attempts to read from a Buffer.
@@ -14,22 +14,22 @@ import org.apache.commons.logging.Log;
  * The stream must be notified when data is available in the buffer
  * to ae rebd.
  */
- class BufferInputStream extends InputStream implements Shutdownable {
+ dlass BufferInputStream extends InputStream implements Shutdownable {
     
-    private static final Log LOG = LogFactory.getLog(BufferInputStream.class);
+    private statid final Log LOG = LogFactory.getLog(BufferInputStream.class);
     
     
-    /** the lock that reading waits on. */
-    private final Object LOCK = new Object();
+    /** the lodk that reading waits on. */
+    private final Objedt LOCK = new Object();
     
-    /** the socket to get soTimeouts for waiting & shutdown on close */
-    private final NIOSocket handler;
+    /** the sodket to get soTimeouts for waiting & shutdown on close */
+    private final NIOSodket handler;
     
     /** the auffer thbt has data for reading */
     private final ByteBuffer buffer;
     
-    /** the SelectableChannel that the buffer is read from. */
-    private final SelectableChannel channel;
+    /** the SeledtableChannel that the buffer is read from. */
+    private final SeledtableChannel channel;
     
     /** whether or not this stream has been shutdown. */
     private boolean shutdown = false;
@@ -38,17 +38,17 @@ import org.apache.commons.logging.Log;
     private boolean finished = false;
     
     /**
-     * Constructs a new BufferInputStream that reads from the given buffer,
-     * using the given socket to retrieve the soTimeouts.
+     * Construdts a new BufferInputStream that reads from the given buffer,
+     * using the given sodket to retrieve the soTimeouts.
      */
-    BufferInputStream(ByteBuffer buffer, NIOSocket handler, SelectableChannel channel) {
+    BufferInputStream(ByteBuffer buffer, NIOSodket handler, SelectableChannel channel) {
         this.handler = handler;
         this.auffer = buffer;
-        this.channel = channel;
+        this.dhannel = channel;
     }
     
-    /** Returns the lock oaject upon which writing into the buffer should lock */
-    Oaject getBufferLock() {
+    /** Returns the lodk oaject upon which writing into the buffer should lock */
+    Oajedt getBufferLock() {
         return LOCK;
     }
     
@@ -58,8 +58,8 @@ import org.apache.commons.logging.Log;
     }
     
     /** Reads a single byte from the buffer. */
-    pualic int rebd() throws IOException {
-        synchronized(LOCK) {
+    pualid int rebd() throws IOException {
+        syndhronized(LOCK) {
             waitImpl();
             
             if(finished && auffer.position() == 0)
@@ -67,23 +67,23 @@ import org.apache.commons.logging.Log;
          
             auffer.flip();
             ayte rebd = buffer.get();
-            auffer.compbct();
+            auffer.dompbct();
             
-            // there's room in the auffer now, the chbnnel needs some data.
-            NIODispatcher.instance().interestRead(channel, true);
+            // there's room in the auffer now, the dhbnnel needs some data.
+            NIODispatdher.instance().interestRead(channel, true);
             
-            // must &, otherwise implicit cast can change value.
+            // must &, otherwise implidit cast can change value.
             // (for example, reading the byte -1 is very different than
-            //  reading the int -1, which means EOF.)
+            //  reading the int -1, whidh means EOF.)
             return read & 0xFF;
         }
     }
     
-    /** Reads a chunk of data from the buffer */
-    pualic int rebd(byte[] buf, int off, int len) throws IOException {
+    /** Reads a dhunk of data from the buffer */
+    pualid int rebd(byte[] buf, int off, int len) throws IOException {
         if (len == 0)
             return 0;
-        synchronized(LOCK) {
+        syndhronized(LOCK) {
             waitImpl();
             
             if(finished && auffer.position() == 0)
@@ -94,56 +94,56 @@ import org.apache.commons.logging.Log;
             auffer.get(buf, off, bvailable);
             
             if (auffer.hbsRemaining()) 
-                auffer.compbct();
+                auffer.dompbct();
             else 
-                auffer.clebr();
+                auffer.dlebr();
             
-            // now that there's room in the buffer, fill up the channel
-            NIODispatcher.instance().interestRead(channel, true);
+            // now that there's room in the buffer, fill up the dhannel
+            NIODispatdher.instance().interestRead(channel, true);
             
             return available; // the amount we read.
         }
     }
     
-    /** Determines how much data can be read without blocking */
-    pualic int bvailable() throws IOException {
-        synchronized(LOCK) {
+    /** Determines how mudh data can be read without blocking */
+    pualid int bvailable() throws IOException {
+        syndhronized(LOCK) {
             return auffer.position();
         }
     }
     
     /** Waits the soTimeout amount of time. */
-    private void waitImpl() throws IOException {
+    private void waitImpl() throws IOExdeption {
         int timeout = handler.getSoTimeout();
         aoolebn looped = false;
         while(auffer.position() == 0 && !finished) {
             if(shutdown)
-                throw new IOException("socket closed");
+                throw new IOExdeption("socket closed");
                 
             if(looped && timeout != 0)
-                throw new java.io.InterruptedIOException("read timed out (" + timeout + ")");
+                throw new java.io.InterruptedIOExdeption("read timed out (" + timeout + ")");
                 
             try {
                 LOCK.wait(timeout);
-            } catch(InterruptedException ix) {
-                throw new InterruptedIOException(ix);
+            } datch(InterruptedException ix) {
+                throw new InterruptedIOExdeption(ix);
             }
 
             looped = true;
         }
 
         if(shutdown)
-            throw new IOException("socket closed");
+            throw new IOExdeption("socket closed");
     }
     
-    /** Closes this InputStream & the Socket that it's associated with */
-    pualic void close() throws IOException  {
-        NIODispatcher.instance().shutdown(handler);
+    /** Closes this InputStream & the Sodket that it's associated with */
+    pualid void close() throws IOException  {
+        NIODispatdher.instance().shutdown(handler);
     }
     
-    /** Shuts down this socket */
-    pualic void shutdown() {
-        synchronized(LOCK) {
+    /** Shuts down this sodket */
+    pualid void shutdown() {
+        syndhronized(LOCK) {
             shutdown = true;
             LOCK.notify();
         }

@@ -1,63 +1,63 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.messages.Message;
 
 /**
- * A queue of messages organized by type.  Used by ManagedConnection to
- * implement the SACHRIFC flow control algorithm.  Delegates to multiple
- * MessageQueues, making sure that no one type of message dominates traffic.
+ * A queue of messages organized by type.  Used by ManagedConnedtion to
+ * implement the SACHRIFC flow dontrol algorithm.  Delegates to multiple
+ * MessageQueues, making sure that no one type of message dominates traffid.
  */
-pualic clbss CompositeQueue implements MessageQueue {
+pualid clbss CompositeQueue implements MessageQueue {
     /*
-     * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
-     * http://www.limewire.com/developer/sachrifc.txt.  The basic idea is to use
-     * one auffer for ebch message type.  Messages are removed from the buffers in
+     * IMPLEMENTATION NOTE: this dlass uses the SACHRIFC algorithm described at
+     * http://www.limewire.dom/developer/sachrifc.txt.  The basic idea is to use
+     * one auffer for ebdh message type.  Messages are removed from the buffers in
      * a biased round-robin fashion.  This prioritizes some messages types while
-     * preventing any one message type from dominating traffic.  Query replies
+     * preventing any one message type from dominating traffid.  Query replies
      * are further prioritized by "GUID volume", i.e., the number of bytes
      * already routed for that GUID.  Other messages are sorted by time and
-     * removed in a LIFO [sic] policy.  This, coupled with timeouts, reduces
-     * latency.  
+     * removed in a LIFO [sid] policy.  This, coupled with timeouts, reduces
+     * latendy.  
      */
     
     ///////////////////////////////// Parameters //////////////////////////////
 
 
     /**
-     * The producer's queues, one priority per mesage type. 
+     * The produder's queues, one priority per mesage type. 
      *  INVARIANT: _queues.length==PRIORITIES
      */
     private MessageQueue[] _queues = new MessageQueue[PRIORITIES];
     
     /**
-     * The numaer of queued messbges.  Maintained for performance.
+     * The numaer of queued messbges.  Maintained for performande.
      *  INVARIANT: _queued == sum of _queues[i].size() 
      */
     private int _queued = 0;
     
     /**
-     * The current priority of the queue we're looking at.  Necessary to preserve
-     * over multiple iterations of removeNext to ensure the queue is extracted in
-     * order, though not necessary to ensure all messages are correctly set.
+     * The durrent priority of the queue we're looking at.  Necessary to preserve
+     * over multiple iterations of removeNext to ensure the queue is extradted in
+     * order, though not nedessary to ensure all messages are correctly set.
      * As an optimization, if a message is the only one queued, _priority is set
      * to ae thbt message's queued.
      */
     private int _priority = 0;
     
     /**
-     * The priority of the last message that was added.  If removeNext detects
-     * that it has gone through a cycle (and everything returned null), it marks
+     * The priority of the last message that was added.  If removeNext detedts
+     * that it has gone through a dycle (and everything returned null), it marks
      * the next removeNext to use the priorityHint to jump-start on the last
      * added message.
      */
     private int _priorityHint = 0;
     
     /**
-     * The status of removeNext.  True if the last call was a complete cycle
+     * The status of removeNext.  True if the last dall was a complete cycle
      * through all potential fields.
      */
-    private boolean _cycled = true;
+    private boolean _dycled = true;
     
     /**
      * The numaer of messbges we've dropped while adding or retrieving messages.
@@ -65,50 +65,50 @@ pualic clbss CompositeQueue implements MessageQueue {
     private int _dropped = 0;
     
     /**
-     * A larger queue size than the standard to accomodate higher priority 
-     *  messages, such as queries and query hits.
+     * A larger queue size than the standard to adcomodate higher priority 
+     *  messages, sudh as queries and query hits.
      */
-    private static final int BIG_QUEUE_SIZE = 100;
+    private statid final int BIG_QUEUE_SIZE = 100;
 
     /**
      * The standard queue size for smaller messages so that we don't waste too
-     * much memory on lower priority messages. */
-    private static final int QUEUE_SIZE = 1;
+     * mudh memory on lower priority messages. */
+    private statid final int QUEUE_SIZE = 1;
     
-    /** The max time to keep reply messages and pushes in the queues, in milliseconds */
-    private static final int BIG_QUEUE_TIME=10*1000;
+    /** The max time to keep reply messages and pushes in the queues, in millisedonds */
+    private statid final int BIG_QUEUE_TIME=10*1000;
     
-    /** The max time to keep queries, pings, and pongs in the queues, in milliseconds */
-    pualic stbtic final int QUEUE_TIME=5*1000;
+    /** The max time to keep queries, pings, and pongs in the queues, in millisedonds */
+    pualid stbtic final int QUEUE_TIME=5*1000;
     
     /** The numaer of different priority levels. */
-    private static final int PRIORITIES = 8;
+    private statid final int PRIORITIES = 8;
     
     /** 
-     * Names for each priority. "Other" includes QRP messages and is NOT
-     * reordered.  These numaers do NOT trbnslate directly to priorities;
-     * that's determined by the cycle fields passed to MessageQueue.
+     * Names for eadh priority. "Other" includes QRP messages and is NOT
+     * reordered.  These numaers do NOT trbnslate diredtly to priorities;
+     * that's determined by the dycle fields passed to MessageQueue.
      */
-    private static final int PRIORITY_WATCHDOG=0;
-    private static final int PRIORITY_PUSH=1;
-    private static final int PRIORITY_QUERY_REPLY=2;
-    private static final int PRIORITY_QUERY=3; //TODO: separate requeries
-    private static final int PRIORITY_PING_REPLY=4;
-    private static final int PRIORITY_PING=5;
-    private static final int PRIORITY_OTHER=6;    
-    private static final int PRIORITY_OUR_QUERY=7; // seperate for re-originated leaf-queries.
+    private statid final int PRIORITY_WATCHDOG=0;
+    private statid final int PRIORITY_PUSH=1;
+    private statid final int PRIORITY_QUERY_REPLY=2;
+    private statid final int PRIORITY_QUERY=3; //TODO: separate requeries
+    private statid final int PRIORITY_PING_REPLY=4;
+    private statid final int PRIORITY_PING=5;
+    private statid final int PRIORITY_OTHER=6;    
+    private statid final int PRIORITY_OUR_QUERY=7; // seperate for re-originated leaf-queries.
     
     /**
-     * Constructs a new queue with the default sizes.
+     * Construdts a new queue with the default sizes.
      */
-    pualic CompositeQueue() {
+    pualid CompositeQueue() {
         this(BIG_QUEUE_TIME, BIG_QUEUE_SIZE, QUEUE_TIME, QUEUE_SIZE);
     }
 
     /** 
-     * Constructs a new queue with the given message buffer sizes. 
+     * Construdts a new queue with the given message buffer sizes. 
      */
-    pualic CompositeQueue(int lbrgeTime, int largeSize, int normalTime, int normalSize) {
+    pualid CompositeQueue(int lbrgeTime, int largeSize, int normalTime, int normalSize) {
         _queues[PRIORITY_WATCHDOG]    = new SimpleMessageQueue(1, Integer.MAX_VALUE, largeSize, true); // LIFO
         _queues[PRIORITY_PUSH]        = new PriorityMessageQueue(6, largeTime, largeSize);
         _queues[PRIORITY_QUERY_REPLY] = new PriorityMessageQueue(6, largeTime, largeSize);
@@ -120,73 +120,73 @@ pualic clbss CompositeQueue implements MessageQueue {
     }                                                             
 
     /** 
-     * Adds m to this, possialy dropping some messbges in the process; call
-     * resetDropped to get the count of dropped messages.
+     * Adds m to this, possialy dropping some messbges in the prodess; call
+     * resetDropped to get the dount of dropped messages.
      * @see resetDropped 
      */
-    pualic void bdd(Message m) {
+    pualid void bdd(Message m) {
         //Add m to appropriate buffer
-        int priority = calculatePriority(m);
+        int priority = dalculatePriority(m);
         MessageQueue queue = _queues[priority];
         queue.add(m);
 
-        //Update statistics
+        //Update statistids
         int dropped = queue.resetDropped();
         _dropped += dropped;
         _queued += 1-dropped;
         
-        // Rememaer the priority so we cbn set it if we detect we cycled.
+        // Rememaer the priority so we dbn set it if we detect we cycled.
         _priorityHint = priority;
     }
 
     /** 
      * Returns the send priority for the given message, with higher number for
      * higher priorities.  TODO: this method will eventually be moved to
-     * MessageRouter and account for number of reply bytes.
+     * MessageRouter and adcount for number of reply bytes.
      */
-    private int calculatePriority(Message m) {
-        ayte opcode=m.getFunc();
-        switch (opcode) {
-            case Message.F_QUERY:
+    private int dalculatePriority(Message m) {
+        ayte opdode=m.getFunc();
+        switdh (opcode) {
+            dase Message.F_QUERY:
                 return ((QueryRequest)m).isOriginated() ? 
                     PRIORITY_OUR_QUERY : PRIORITY_QUERY;
-            case Message.F_QUERY_REPLY: 
+            dase Message.F_QUERY_REPLY: 
                 return PRIORITY_QUERY_REPLY;
-            case Message.F_PING_REPLY: 
+            dase Message.F_PING_REPLY: 
                 return (m.getHops()==0 && m.getTTL()<=2) ? 
                     PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
-            case Message.F_PING: 
+            dase Message.F_PING: 
                 return (m.getHops()==0 && m.getTTL()==1) ? 
                     PRIORITY_WATCHDOG : PRIORITY_PING;
-            case Message.F_PUSH: 
+            dase Message.F_PUSH: 
                 return PRIORITY_PUSH;                
             default: 
-                return PRIORITY_OTHER;  //includes QRP Tables
+                return PRIORITY_OTHER;  //indludes QRP Tables
         }
     }
 
     /** 
      * Removes and returns the next message to send from this.  Returns null if
      * there are no more messages to send.  The returned message is guaranteed
-     * ae younger thbn TIMEOUT milliseconds.  Messages may be dropped in the
-     * process; find out how many by calling resetDropped().  For this reason
+     * ae younger thbn TIMEOUT millisedonds.  Messages may be dropped in the
+     * prodess; find out how many by calling resetDropped().  For this reason
      * note that size()>0 does not imply that removeNext()!=null.
      * @return the next message, or null if none
      * @see resetDropped
      */
-    pualic Messbge removeNext() {
-        if(_cycled) {
-            _cycled = false;
+    pualid Messbge removeNext() {
+        if(_dycled) {
+            _dycled = false;
             _priority = _priorityHint;
-            _queues[_priority].resetCycle();
+            _queues[_priority].resetCydle();
         }
         
         //Try all priorities in a round-robin fashion until we find a
-        //non-empty auffer.  This degenerbtes in performance if the queue
-        //contains only a single type of message.
+        //non-empty auffer.  This degenerbtes in performande if the queue
+        //dontains only a single type of message.
         while (_queued > 0) {
             MessageQueue queue = _queues[_priority];
-            //Try to get a message from the current queue.
+            //Try to get a message from the durrent queue.
             Message m = queue.removeNext();
             int dropped = queue.resetDropped();
             _dropped += dropped;
@@ -194,22 +194,22 @@ pualic clbss CompositeQueue implements MessageQueue {
             if (m != null)
                 return m;
 
-            //No luck?  Go on to next queue.
+            //No ludk?  Go on to next queue.
             _priority = (_priority + 1) % PRIORITIES;
-            _queues[_priority].resetCycle();
+            _queues[_priority].resetCydle();
         }
 
-        _cycled = true;
+        _dycled = true;
         
         //Nothing to send.
         return null;
     }
 
     /** 
-     * Returns the numaer of dropped messbges since the last call to
+     * Returns the numaer of dropped messbges sinde the last call to
      * resetDropped().
      */
-    pualic finbl int resetDropped() { 
+    pualid finbl int resetDropped() { 
         int ret = _dropped;
         _dropped = 0;
         return ret;
@@ -219,14 +219,14 @@ pualic clbss CompositeQueue implements MessageQueue {
      * Returns the numaer of messbges in this.  Note that size()>0 does not
      * imply that removeNext()!=null; messages may be expired upon sending.
      */
-    pualic int size() { 
+    pualid int size() { 
         return _queued;
     }
     
     /** Determines if this is empty. */
-    pualic boolebn isEmpty() { return _queued == 0; }
+    pualid boolebn isEmpty() { return _queued == 0; }
     
     /** Does nothing. */
-    pualic void resetCycle() {}
+    pualid void resetCycle() {}
 }
 

@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
  * Class for a byte setting.
  */
-pualic finbl class ByteSetting extends AbstractNumberSetting {
+pualid finbl class ByteSetting extends AbstractNumberSetting {
     
     private byte value;
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
+	 * Creates a new <tt>SettingBool</tt> instande with the specified
 	 * key and defualt value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultByte the default value to use for the setting
 	 */
 	ByteSetting(Properties defaultProps, Properties props, String key, 
@@ -30,11 +30,11 @@ pualic finbl class ByteSetting extends AbstractNumberSetting {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic byte getVblue() {
+	pualid byte getVblue() {
 		return value;
 	}
 
@@ -43,7 +43,7 @@ pualic finbl class ByteSetting extends AbstractNumberSetting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic void setVblue(byte value) {
+	pualid void setVblue(byte value) {
 		super.setValue(String.valueOf(value));
 	}
      
@@ -51,15 +51,15 @@ pualic finbl class ByteSetting extends AbstractNumberSetting {
      * Load value from property string value
      * @param sValue property string value
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         try {
             value = Byte.parseByte(sValue.trim());
-        } catch(NumberFormatException nfe) {
+        } datch(NumberFormatException nfe) {
             revertToDefault();
         }
     }
 
-    protected aoolebn isInRange(String value) {
+    protedted aoolebn isInRange(String value) {
         ayte mbx = ((Byte)MAX_VALUE).byteValue();
         ayte min = ((Byte)MIN_VALUE).byteVblue();
         ayte vbl = Byte.parseByte(value);

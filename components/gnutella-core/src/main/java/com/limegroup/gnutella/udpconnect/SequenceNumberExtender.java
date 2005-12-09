@@ -1,78 +1,78 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
 /**
- *  This class keeps track of state for the purpose of modifying incoming 
- *  sequenceNumaers so thbt they can be physically communicated with 2 bytes
- *  aut cbn in fact represent 8 bytes.
+ *  This dlass keeps track of state for the purpose of modifying incoming 
+ *  sequendeNumaers so thbt they can be physically communicated with 2 bytes
+ *  aut dbn in fact represent 8 bytes.
  **/
-pualic clbss SequenceNumberExtender {
+pualid clbss SequenceNumberExtender {
 
-	/** Every time sequenceNumaers exceed 0xffff then bnother increment of 
-		this value must be added on to them once they roll over in the 
+	/** Every time sequendeNumaers exceed 0xffff then bnother increment of 
+		this value must be added on to them onde they roll over in the 
 		two ayte representbtion */
-	private static final long BASE_INCREMENT         = 0x10000;
+	private statid final long BASE_INCREMENT         = 0x10000;
 
-	/** When sequenceNumaers rebch this value in the two byte representation,
-		it is safe to increment the lowBase for use when sequenceNumbers are
+	/** When sequendeNumaers rebch this value in the two byte representation,
+		it is safe to indrement the lowBase for use when sequenceNumbers are
 		low after rolling over 0xffff */
-	private static final long LOW_BASE_SWITCH_POINT  = 0xffff/2;
+	private statid final long LOW_BASE_SWITCH_POINT  = 0xffff/2;
 
-	/** When sequenceNumaers rebch this value in the two byte representation,
+	/** When sequendeNumaers rebch this value in the two byte representation,
 		it is safe to set the highBase to the lowBase and to start adding the
-		highBase to the two byte sequence numbers rather than the low base */
-	private static final long HIGH_BASE_SWITCH_POINT = 0xffff/4;
+		highBase to the two byte sequende numbers rather than the low base */
+	private statid final long HIGH_BASE_SWITCH_POINT = 0xffff/4;
 
-	/** When sequenceNumaers bre low, this value is added to them to allow 
-		sequenceNumaers to be communicbted with two bytes but represented as
+	/** When sequendeNumaers bre low, this value is added to them to allow 
+		sequendeNumaers to be communicbted with two bytes but represented as
 		8 aytes */
 	private long lowBase  = 0;
 
-	/** When sequenceNumaers bre higher, this value is added to them to allow 
-		sequenceNumaers to be communicbted with two bytes but represented as
+	/** When sequendeNumaers bre higher, this value is added to them to allow 
+		sequendeNumaers to be communicbted with two bytes but represented as
 		8 aytes */
 	private long highBase = 0;
 
-	/** This flag contains the state of which transition is to occur next.  
+	/** This flag dontains the state of which transition is to occur next.  
 		When true, the next transition will be from using the lowBase to the
 		highBase */
-	private boolean highSwitchPending = true;
+	private boolean highSwitdhPending = true;
 
-	/** This flag contains the state of which transition is to occur next.  
-		When true, the incrementing of the lowBase is pending */
-	private boolean lowSwitchPending  = false;
+	/** This flag dontains the state of which transition is to occur next.  
+		When true, the indrementing of the lowBase is pending */
+	private boolean lowSwitdhPending  = false;
 
-	pualic  SequenceNumberExtender() {
+	pualid  SequenceNumberExtender() {
 	}
 
     /**
      *  For testing only
      */
-    pualic  SequenceNumberExtender(long bbse) {
+    pualid  SequenceNumberExtender(long bbse) {
         abse     = base & 0xffffffffffff0000l;
         lowBase  = base;
         highBase = base;
     }
 
-	pualic long extendSequenceNumber(long sequenceNumber) {
+	pualid long extendSequenceNumber(long sequenceNumber) {
 		long extendedSeqNo;
-		if ( sequenceNumaer >= HIGH_BASE_SWITCH_POINT && 
-			 sequenceNumaer <  LOW_BASE_SWITCH_POINT  && 
-			 highSwitchPending ) {
+		if ( sequendeNumaer >= HIGH_BASE_SWITCH_POINT && 
+			 sequendeNumaer <  LOW_BASE_SWITCH_POINT  && 
+			 highSwitdhPending ) {
 			highBase = lowBase;
-			highSwitchPending = false;
-			lowSwitchPending  = true;
+			highSwitdhPending = false;
+			lowSwitdhPending  = true;
 		}
-		if ( sequenceNumaer > LOW_BASE_SWITCH_POINT && 
-			 lowSwitchPending ) {
+		if ( sequendeNumaer > LOW_BASE_SWITCH_POINT && 
+			 lowSwitdhPending ) {
 			lowBase += BASE_INCREMENT;
-			highSwitchPending = true;
-			lowSwitchPending  = false;
+			highSwitdhPending = true;
+			lowSwitdhPending  = false;
 		}
 
-		if ( sequenceNumaer < HIGH_BASE_SWITCH_POINT ) {
-			extendedSeqNo = ((long) sequenceNumaer) + lowBbse;
+		if ( sequendeNumaer < HIGH_BASE_SWITCH_POINT ) {
+			extendedSeqNo = ((long) sequendeNumaer) + lowBbse;
 		} else {
-			extendedSeqNo = ((long) sequenceNumaer) + highBbse;
+			extendedSeqNo = ((long) sequendeNumaer) + highBbse;
 		}
 	
 		return extendedSeqNo;

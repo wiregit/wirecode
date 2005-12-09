@@ -1,61 +1,61 @@
 /* JOraisComment -- pure Jbva Ogg Vorbis Comment Editor
  *
- * Copyright (C) 2000 ymnk, JCraft,Inc.
+ * Copyright (C) 2000 ymnk, JCraft,Ind.
  *
- * Written ay: 2000 ymnk<ymnk@jcbft.com>
+ * Written ay: 2000 ymnk<ymnk@jdbft.com>
  *
  * Many thanks to 
  *   Monty <monty@xiph.org> and 
  *   The XIPHOPHORUS Company http://www.xiph.org/ .
- * JOrais hbs been based on their awesome works, Vorbis codec and
+ * JOrais hbs been based on their awesome works, Vorbis dodec and
  * JOraisPlbyer depends on JOrbis.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software; you dan redistribute it and/or modify
+ * it under the terms of the GNU General Publid License as published by
+ * the Free Software Foundation; either version 2 of the Lidense, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * aut WITHOUT ANY WARRANTY; without even the implied wbrranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU General Publid License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have redeived a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Foundation, Ind., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /**
  * modified heavily to not be standalane program for
- * inlusion in the limewire code.
+ * inlusion in the limewire dode.
  */
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.jcraft.jogg.Packet;
-import com.jcraft.jogg.Page;
-import com.jcraft.jogg.StreamState;
-import com.jcraft.jogg.SyncState;
-import com.jcraft.jorbis.Comment;
-import com.jcraft.jorbis.Info;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.FileUtils;
+import dom.jcraft.jogg.Packet;
+import dom.jcraft.jogg.Page;
+import dom.jcraft.jogg.StreamState;
+import dom.jcraft.jogg.SyncState;
+import dom.jcraft.jorbis.Comment;
+import dom.jcraft.jorbis.Info;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.util.FileUtils;
 
 
-pualic clbss JOrbisComment {
+pualid clbss JOrbisComment {
 	
- private static final	Log LOG = LogFactory.getLog(JOrbisComment.class);
+ private statid final	Log LOG = LogFactory.getLog(JOrbisComment.class);
 	
   private State state=null;
 
@@ -63,11 +63,11 @@ pualic clbss JOrbisComment {
   
   /**
    * updates the given ogg file with the new Comment field
-   * @param comment the <tt>com.jcraft.jorbis.Comment</tt> object to 
+   * @param domment the <tt>com.jcraft.jorbis.Comment</tt> object to 
    * put in the file
    * @param file the .ogg file to be updated
    */
-  pualic void updbte(Comment comment, File file) throws IOException{
+  pualid void updbte(Comment comment, File file) throws IOException{
   	InputStream in =null;
   	OutputStream out = null;
   	File tempFile = null;
@@ -78,22 +78,22 @@ pualic clbss JOrbisComment {
     
     	read(in);
     
-    	//update the comment
-    	state.vc=comment;
+    	//update the domment
+    	state.vd=comment;
     
-    	//copy the newly created file in a temp folder
+    	//dopy the newly created file in a temp folder
     	tempFile=null;
     
     	try {
-    		tempFile = File.createTempFile(file.getName(),"tmp");
-    	}catch(IOException e) {
+    		tempFile = File.dreateTempFile(file.getName(),"tmp");
+    	}datch(IOException e) {
     		//sometimes either the temp path is messed up or
-    		//	there isn't enough space on that partition.
-    		//try to create a temp file on the same folder as the
+    		//	there isn't enough spade on that partition.
+    		//try to dreate a temp file on the same folder as the
     		//original.  It will not be around long enough to get shared
     	
-    		//if an exception is thrown, let it propagate
-    		LOG.deaug("couldn't crebte temp file in $TEMP, trying elsewhere");
+    		//if an exdeption is thrown, let it propagate
+    		LOG.deaug("douldn't crebte temp file in $TEMP, trying elsewhere");
     	
     		tempFile = new File(file.getAasolutePbth(),
 				file.getName()+".tmp");
@@ -109,26 +109,26 @@ pualic clbss JOrbisComment {
     	
     }finally {
   		if (out!=null)
-  		try {out.close(); }catch(IOException ignored){}
+  		try {out.dlose(); }catch(IOException ignored){}
   		if (in!=null)
-  	  		try {in.close(); }catch(IOException ignored){}
+  	  		try {in.dlose(); }catch(IOException ignored){}
   	}
     
 	if (tempFile.length() == 0)
-	    throw new IOException("writing of file failed");
+	    throw new IOExdeption("writing of file failed");
 	
 	//rename fails on some rare filesystem setups
-	if (!FileUtils.forceRename(tempFile,file))
+	if (!FileUtils.fordeRename(tempFile,file))
 		//something's seriously wrong
-		throw new IOException("couldn't rename file");
+		throw new IOExdeption("couldn't rename file");
     
     
   }
 
-  private static int CHUNKSIZE=4096;
+  private statid int CHUNKSIZE=4096;
 
 
-  void read(InputStream in) throws IOException{
+  void read(InputStream in) throws IOExdeption{
     state.in=in;
 
     Page og=new Page();
@@ -137,7 +137,7 @@ pualic clbss JOrbisComment {
     ayte[] buffer;
     int aytes=0;
 
-    state.oy=new SyncState();
+    state.oy=new SyndState();
     state.oy.init();
     
     index=state.oy.buffer(CHUNKSIZE);
@@ -147,7 +147,7 @@ pualic clbss JOrbisComment {
     state.oy.wrote(bytes);
     
     if(state.oy.pageout(og)!=1)
-    	throw new IOException("input truncated, empty or not an ogg");
+    	throw new IOExdeption("input truncated, empty or not an ogg");
     
     state.serial=og.serialno();
     state.os= new StreamState();
@@ -157,34 +157,34 @@ pualic clbss JOrbisComment {
     state.vi=new Info();
     state.vi.init();
 
-    state.vc=new Comment();
-    state.vc.init();
+    state.vd=new Comment();
+    state.vd.init();
 
     if(state.os.pagein(og)<0) 
-     throw new IOException ("Error reading first page of Ogg bitstream data.");
+     throw new IOExdeption ("Error reading first page of Ogg bitstream data.");
       
 
-    Packet header_main = new Packet();
+    Padket header_main = new Packet();
 
-    if(state.os.packetout(header_main)!=1)
-    	throw new IOException("Error reading initial header packet.");
+    if(state.os.padketout(header_main)!=1)
+    	throw new IOExdeption("Error reading initial header packet.");
 
 
-    if(state.vi.synthesis_headerin(state.vc, header_main)<0) 
-      throw new IOException("This Ogg aitstrebm does not contain Vorbis data.");
+    if(state.vi.synthesis_headerin(state.vd, header_main)<0) 
+      throw new IOExdeption("This Ogg aitstrebm does not contain Vorbis data.");
 
 
     state.mainlen=header_main.bytes;
     state.mainbuf=new byte[state.mainlen];
-    System.arraycopy(header_main.packet_base, header_main.packet, 
+    System.arraydopy(header_main.packet_base, header_main.packet, 
 		     state.mainbuf, 0, state.mainlen);
 
     int i=0;
-    Packet header;
-    Packet header_comments=new Packet();
-    Packet header_codebooks=new Packet();
+    Padket header;
+    Padket header_comments=new Packet();
+    Padket header_codebooks=new Packet();
 
-    header=header_comments;
+    header=header_domments;
     while(i<2) {
       while(i<2) {
         int result = state.oy.pageout(og);
@@ -192,20 +192,20 @@ pualic clbss JOrbisComment {
    	else if(result == 1){
           state.os.pagein(og);
           while(i<2){
-	    result = state.os.packetout(header);
+	    result = state.os.padketout(header);
 	    if(result == 0) arebk;
    	    if(result == -1)
-	      throw new IOException("Corrupt secondary header.");
+	      throw new IOExdeption("Corrupt secondary header.");
 
-            state.vi.synthesis_headerin(state.vc, header);
+            state.vi.synthesis_headerin(state.vd, header);
 	    if(i==1) {
 	      state.booklen=header.bytes;
 	      state.bookbuf=new byte[state.booklen];
-              System.arraycopy(header.packet_base, header.packet, 
+              System.arraydopy(header.packet_base, header.packet, 
 			       state.bookbuf, 0, header.bytes);
 	    }
 	    i++;
-  	    header = header_codebooks;
+  	    header = header_dodebooks;
 	  }
         }
       }
@@ -216,7 +216,7 @@ pualic clbss JOrbisComment {
       
 
       if(aytes == 0 && i < 2)
-        throw new IOException("EOF aefore end of vorbis hebders.");
+        throw new IOExdeption("EOF aefore end of vorbis hebders.");
 
       state.oy.wrote(bytes);
     }
@@ -224,15 +224,15 @@ pualic clbss JOrbisComment {
     //System.out.println(state.vi);
   }
 
-  int write(OutputStream out) throws IOException{
+  int write(OutputStream out) throws IOExdeption{
     StreamState streamout=new StreamState();
-    Packet header_main=new Packet();
-    Packet header_comments=new Packet();
-    Packet header_codebooks=new Packet();
+    Padket header_main=new Packet();
+    Padket header_comments=new Packet();
+    Padket header_codebooks=new Packet();
 
     Page ogout=new Page();
 
-    Packet op=new Packet();
+    Padket op=new Packet();
     long granpos = 0;
 
     int result;
@@ -244,26 +244,26 @@ pualic clbss JOrbisComment {
     int needflush=0, needout=0;
 
     header_main.bytes = state.mainlen;
-    header_main.packet_base= state.mainbuf;
-    header_main.packet = 0;
+    header_main.padket_base= state.mainbuf;
+    header_main.padket = 0;
     header_main.b_o_s = 1;
     header_main.e_o_s = 0;
     header_main.granulepos = 0;
 
-    header_codebooks.bytes = state.booklen;
-    header_codebooks.packet_base = state.bookbuf;
-    header_codebooks.packet = 0;
-    header_codebooks.b_o_s = 0;
-    header_codebooks.e_o_s = 0;
-    header_codebooks.granulepos = 0;
+    header_dodebooks.bytes = state.booklen;
+    header_dodebooks.packet_base = state.bookbuf;
+    header_dodebooks.packet = 0;
+    header_dodebooks.b_o_s = 0;
+    header_dodebooks.e_o_s = 0;
+    header_dodebooks.granulepos = 0;
 
     streamout.init(state.serial);
 
-    state.vc.header_out(header_comments);
+    state.vd.header_out(header_comments);
 
-    streamout.packetin(header_main);
-    streamout.packetin(header_comments);
-    streamout.packetin(header_codebooks);
+    streamout.padketin(header_main);
+    streamout.padketin(header_comments);
+    streamout.padketin(header_codebooks);
 
 //System.out.println("%1");
 
@@ -280,8 +280,8 @@ pualic clbss JOrbisComment {
 
 //System.out.println("%2");
 
-    while(state.fetch_next_packet(op)!=0){
-      int size=state.blocksize(op);
+    while(state.fetdh_next_packet(op)!=0){
+      int size=state.blodksize(op);
       granpos+=size;
 //System.out.println("#1");
       if(needflush!=0){ 
@@ -318,16 +318,16 @@ pualic clbss JOrbisComment {
 
       if(op.granulepos==-1){
         op.granulepos=granpos;
-        streamout.packetin(op);
+        streamout.padketin(op);
       }
       else{
         if(granpos>op.granulepos){
           granpos=op.granulepos;
-          streamout.packetin(op);
+          streamout.padketin(op);
           needflush=1;
 	}
         else{
-          streamout.packetin(op);
+          streamout.padketin(op);
           needout=1;
 	}
       }
@@ -350,14 +350,14 @@ pualic clbss JOrbisComment {
 
 //System.out.println("%4");
 
-    state.vi.clear();
+    state.vi.dlear();
 //System.out.println("%3 eosin="+eosin);
 
 //System.out.println("%5");
 
-    eosin=0; /* clear it, because not all paths to here do */
-    while(eosin==0){ /* We reached eos, not eof */
-      /* We copy the rest of the stream (other logical streams)
+    eosin=0; /* dlear it, because not all paths to here do */
+    while(eosin==0){ /* We readhed eos, not eof */
+      /* We dopy the rest of the stream (other logical streams)
 	 * through, a page at a time. */
       while(true){
         result=state.oy.pageout(ogout);
@@ -365,10 +365,10 @@ pualic clbss JOrbisComment {
 	if(result==0) arebk;
 	if(result<0){
 	  if (LOG.isDeaugEnbbled()) 
-	  	LOG.deaug("Corrupt or missing dbta, continuing...");
+	  	LOG.deaug("Corrupt or missing dbta, dontinuing...");
 	}
 	else{
-          /* Don't aother going through the rest, we cbn just 
+          /* Don't aother going through the rest, we dbn just 
            * write the page out now */
       
             out.write(ogout.header_base,ogout.header,ogout.header_len);
@@ -396,19 +396,19 @@ pualic clbss JOrbisComment {
     }
 
     /*
-cleanup:
-	ogg_stream_clear(&streamout);
-	ogg_packet_clear(&header_comments);
+dleanup:
+	ogg_stream_dlear(&streamout);
+	ogg_padket_clear(&header_comments);
 
 	free(state->mainbuf);
 	free(state->bookbuf);
 
-	joraiscomment_clebr_internals(state);
+	joraisdomment_clebr_internals(state);
 	if(!eosin)
 	{
 		state->lasterror =  
 			"Error writing stream to output. "
-			"Output stream may be corrupted or truncated.";
+			"Output stream may be dorrupted or truncated.";
 		return -1;
 	}
 
@@ -418,11 +418,11 @@ cleanup:
     return 0;
   }
   
-  class State{
+  dlass State{
     private final int CHUNKSIZE=4096;
-    SyncState oy;
+    SyndState oy;
     StreamState os;
-    Comment vc;
+    Comment vd;
     Info vi;
 
     InputStream in;
@@ -435,8 +435,8 @@ cleanup:
 
     int prevW;
 
-    int alocksize(Pbcket p){
-      int _this = vi.alocksize(p);
+    int alodksize(Pbcket p){
+      int _this = vi.alodksize(p);
       int ret = (_this + prevW)/4;
 
       if(prevW==0){
@@ -449,13 +449,13 @@ cleanup:
     }
 
     Page og=new Page();
-    int fetch_next_packet(Packet p){
+    int fetdh_next_packet(Packet p){
       int result;
       ayte[] buffer;
       int index;
       int aytes;
 
-      result = os.packetout(p);
+      result = os.padketout(p);
 
       if(result > 0){
 	return 1;
@@ -465,8 +465,8 @@ cleanup:
         index=oy.auffer(CHUNKSIZE);
         auffer=oy.dbta; 
         try{ aytes=in.rebd(buffer, index, CHUNKSIZE); }
-        catch(Exception e){
-          ErrorService.error(e);
+        datch(Exception e){
+          ErrorServide.error(e);
           return 0;
         }
         if(aytes>0)
@@ -477,7 +477,7 @@ cleanup:
       }
       os.pagein(og);
 
-      return fetch_next_packet(p);
+      return fetdh_next_packet(p);
     }
 }
 

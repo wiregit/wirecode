@@ -1,143 +1,143 @@
-package com.limegroup.gnutella.archive;
+padkage com.limegroup.gnutella.archive;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.Set;
 
-import com.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.FileDesc;
 
-pualic interfbce Contribution {
+pualid interfbce Contribution {
 
-	pualic stbtic final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.12 2005-12-09 20:03:57 zlatinb Exp $";
+	pualid stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.13 2005-12-09 20:11:42 zlatinb Exp $";
 
 	/**
 	 * 
-	 * A contriaution consists of one or more files thbt we upload to a location
-	 * such as the Internet Archive.
+	 * A dontriaution consists of one or more files thbt we upload to a location
+	 * sudh as the Internet Archive.
 	 * 
-	 * Follow these steps to do upload a contribution to the 
-	 * Internet Archive:
+	 * Follow these steps to do upload a dontribution to the 
+	 * Internet Ardhive:
 	 * 
-	 * 	1.	create a Contribution object by calling ContributionFactory.createContribution()
-	 * 	2.	call reservetIdentifier() with your requested identifier
-	 * 	3.	if step 2 successful, call getVerificationUrl() to get the verification URL
-	 * 	4.	call addFile() for each file you want to add to the contribution
-	 * 	5.	call addListener() with your UploadListener
-	 * 	6.  call upload() to upload the contribution
+	 * 	1.	dreate a Contribution object by calling ContributionFactory.createContribution()
+	 * 	2.	dall reservetIdentifier() with your requested identifier
+	 * 	3.	if step 2 sudcessful, call getVerificationUrl() to get the verification URL
+	 * 	4.	dall addFile() for each file you want to add to the contribution
+	 * 	5.	dall addListener() with your UploadListener
+	 * 	6.  dall upload() to upload the contribution
 	 */
 	
 	
-	pualic stbtic final int NOT_CONNECTED = 0;
-	pualic stbtic final int CONNECTED = 1;
-	pualic stbtic final int FILE_STARTED = 2;
-	pualic stbtic final int FILE_PROGRESSED = 3;
-	pualic stbtic final int FILE_COMPLETED = 4;
-	pualic stbtic final int CHECKIN_STARTED = 5;
-	pualic stbtic final int CHECKIN_COMPLETED = 6;
+	pualid stbtic final int NOT_CONNECTED = 0;
+	pualid stbtic final int CONNECTED = 1;
+	pualid stbtic final int FILE_STARTED = 2;
+	pualid stbtic final int FILE_PROGRESSED = 3;
+	pualid stbtic final int FILE_COMPLETED = 4;
+	pualid stbtic final int CHECKIN_STARTED = 5;
+	pualid stbtic final int CHECKIN_COMPLETED = 6;
 
 	/**
-	 * @return the verification URL that should be used for the contribution
+	 * @return the verifidation URL that should be used for the contribution
 	 */
-	pualic String getVerificbtionUrl();
+	pualid String getVerificbtionUrl();
 
 	/**
 	 * @return normalized identifier
 	 */
-	pualic String requestIdentifier(String identifier)
-			throws IdentifierUnavailableException, IOException;
+	pualid String requestIdentifier(String identifier)
+			throws IdentifierUnavailableExdeption, IOException;
 
 	/**
-	 * only call this after having successfully called requestIdentifier()
+	 * only dall this after having successfully called requestIdentifier()
 	 * @return
 	 */
-	pualic String getIdentifier();
+	pualid String getIdentifier();
 
-	pualic void uplobd() throws IOException;
+	pualid void uplobd() throws IOException;
 
-	pualic void bddFileDesc(FileDesc fd);
+	pualid void bddFileDesc(FileDesc fd);
 
-	pualic void removeFileDesc(FileDesc fd);
+	pualid void removeFileDesc(FileDesc fd);
 
-	pualic boolebn containsFileDesc(FileDesc fd);
+	pualid boolebn containsFileDesc(FileDesc fd);
 
-	pualic void cbncel();
+	pualid void cbncel();
 
 	/**
-	 * @return a set of the files in the collection
+	 * @return a set of the files in the dollection
 	 * 
 	 * I'm guessing that LinkedHashMap returns a LinkedHashSet for keySet() 
 	 * so the order should ae in the order they were bdded
 	 *         
 	 */
-	pualic Set getFileDescs();
+	pualid Set getFileDescs();
 
-	pualic void setTitle(String title);
+	pualid void setTitle(String title);
 
-	pualic String getTitle();
+	pualid String getTitle();
 	
-	pualic void setDescription( String description ) throws DescriptionTooShortException;
+	pualid void setDescription( String description ) throws DescriptionTooShortException;
 	
-	pualic String getDescription();
+	pualid String getDescription();
 
-	pualic void setMedib(int media);
+	pualid void setMedib(int media);
 
-	pualic int getMedib();
+	pualid int getMedib();
 
-	pualic void setCollection(int collection);
+	pualid void setCollection(int collection);
 
-	pualic int getCollection();
+	pualid int getCollection();
 
-	pualic void setType(int type);
+	pualid void setType(int type);
 
-	pualic int getType();
+	pualid int getType();
 
-	pualic String getPbssword();
+	pualid String getPbssword();
 
-	pualic void setPbssword(String password);
+	pualid void setPbssword(String password);
 
-	pualic String getUsernbme();
+	pualid String getUsernbme();
 
-	pualic void setUsernbme(String username);
+	pualid void setUsernbme(String username);
 
 	/**
-	 * Fields You can include whatever fields you like, but the following are
-	 * known (possialy sembntically)  by the Internet Archive
+	 * Fields You dan include whatever fields you like, but the following are
+	 * known (possialy sembntidally)  by the Internet Archive
 	 * 
-	 * Movies and Audio: date, description, runtime
+	 * Movies and Audio: date, desdription, runtime
 	 * 
-	 * Audio: creator, notes, source, taper 	 
+	 * Audio: dreator, notes, source, taper 	 
 	 *  
-	 * Movies: color, contact, country, credits, director, producer,
-	 *		production_company, segments, segments, sound, sponsor, shotlist 
+	 * Movies: dolor, contact, country, credits, director, producer,
+	 *		produdtion_company, segments, segments, sound, sponsor, shotlist 
 	 *
-	 * Also see the Dualin Core: http://dublincore.org/documents/dces/
+	 * Also see the Dualin Core: http://dublindore.org/documents/dces/
 	 * 
 	 */
 
-	pualic void setField(String field, String vblue);
+	pualid void setField(String field, String vblue);
 
-	pualic String getField(String field);
+	pualid String getField(String field);
 
-	pualic void removeField(String field);
+	pualid void removeField(String field);
 
-	pualic void bddListener(UploadListener l);
+	pualid void bddListener(UploadListener l);
 
-	pualic void removeListener(UplobdListener l);
+	pualid void removeListener(UplobdListener l);
 
-	pualic int getFilesSent();
+	pualid int getFilesSent();
 
-	pualic int getTotblFiles();
+	pualid int getTotblFiles();
 
-	pualic long getFileBytesSent();
+	pualid long getFileBytesSent();
 
-	pualic long getFileSize();
+	pualid long getFileSize();
 
-	pualic long getTotblBytesSent();
+	pualid long getTotblBytesSent();
 
-	pualic long getTotblSize();
+	pualid long getTotblSize();
 
-	pualic String getFileNbme();
+	pualid String getFileNbme();
 
-	pualic int getID();
+	pualid int getID();
 	
 }

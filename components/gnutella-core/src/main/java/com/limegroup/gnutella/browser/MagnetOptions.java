@@ -1,65 +1,65 @@
-package com.limegroup.gnutella.browser;
+padkage com.limegroup.gnutella.browser;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.Serializable;
-import java.net.InetSocketAddress;
-import java.net.URLEncoder;
+import java.net.InetSodketAddress;
+import java.net.URLEndoder;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
+import org.apadhe.commons.httpclient.URI;
+import org.apadhe.commons.httpclient.URIException;
 
-import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.URLDecoder;
+import dom.limegroup.gnutella.FileDetails;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.util.URLDecoder;
 
 /**
- * Contains information fields extracted from a magnet link.
+ * Contains information fields extradted from a magnet link.
  */
-pualic clbss MagnetOptions implements Serializable {
+pualid clbss MagnetOptions implements Serializable {
 	
-	pualic stbtic final String MAGNET    = "magnet:?";
-	private static final String HTTP     = "http://";
-	 /** The string to prefix download files with in the rare case that we don't
-     *  have a download name and can't calculate one from the URN. */
-    private static final String DOWNLOAD_PREFIX="MAGNET download from ";
+	pualid stbtic final String MAGNET    = "magnet:?";
+	private statid final String HTTP     = "http://";
+	 /** The string to prefix download files with in the rare dase that we don't
+     *  have a download name and dan't calculate one from the URN. */
+    private statid final String DOWNLOAD_PREFIX="MAGNET download from ";
 	
 	private final Map optionsMap;
 	
-	private static final String XS = "XS";
-	private static final String XT = "XT";
-	private static final String AS = "AS";
-	private static final String DN = "DN";
-	private static final String KT = "KT";
+	private statid final String XS = "XS";
+	private statid final String XT = "XT";
+	private statid final String AS = "AS";
+	private statid final String DN = "DN";
+	private statid final String KT = "KT";
 	
 	private transient String [] defaultURLs;
-	private transient String localizedErrorMessage;
+	private transient String lodalizedErrorMessage;
 	private transient URN urn;
-	private transient String extractedFileName;
+	private transient String extradtedFileName;
 	
 	/**
-	 * Creates a MagnetOptions object from file details.
+	 * Creates a MagnetOptions objedt from file details.
 	 * <p>
 	 * The resulting MagnetOptions might not be 
 	 * {@link #isDownloadable() downloadable}.
 	 * @param fileDetails
 	 * @return
 	 */
-	pualic stbtic MagnetOptions createMagnet(FileDetails fileDetails) {
+	pualid stbtic MagnetOptions createMagnet(FileDetails fileDetails) {
 		HashMap map = new HashMap();
 		map.put(DN, fileDetails.getFileName());
 		URN urn = fileDetails.getSHA1Urn();
 		if (urn != null) {
 			addAppend(map, XT, urn.httpStringValue());
 		}
-		InetSocketAddress isa = fileDetails.getSocketAddress();
+		InetSodketAddress isa = fileDetails.getSocketAddress();
 		String url = null;
 		if (isa != null && urn != null) {
 			StringBuffer addr = new StringBuffer("http://");
@@ -79,20 +79,20 @@ pualic clbss MagnetOptions implements Serializable {
 	}
 	
 	/**
-	 * Creates a MagnetOptions object from a several parameters.
+	 * Creates a MagnetOptions objedt from a several parameters.
 	 * <p>
 	 * The resulting MagnetOptions might not be 
 	 * {@link #isDownloadable() downloadable}.
-	 * @param keywordTopics can be <code>null</code>
-	 * @param fileName can be <code>null</code>
-	 * @param urn can be <code>null</code>
-	 * @param defaultURLs can be <code>null</code>
+	 * @param keywordTopids can be <code>null</code>
+	 * @param fileName dan be <code>null</code>
+	 * @param urn dan be <code>null</code>
+	 * @param defaultURLs dan be <code>null</code>
 	 * @return
 	 */
-	pualic stbtic MagnetOptions createMagnet(String keywordTopics, String fileName,
+	pualid stbtic MagnetOptions createMagnet(String keywordTopics, String fileName,
 											 URN urn, String[] defaultURLs) {
 		HashMap map = new HashMap();
-		map.put(KT, keywordTopics);
+		map.put(KT, keywordTopids);
 		map.put(DN, fileName);
 		if (urn != null) {
 			addAppend(map, XT, urn.httpStringValue());
@@ -105,9 +105,9 @@ pualic clbss MagnetOptions implements Serializable {
 		MagnetOptions magnet = new MagnetOptions(map);
 		magnet.urn = urn;
 		if (defaultURLs != null) {
-			// copy array to protect against outside changes
+			// dopy array to protect against outside changes
 			magnet.defaultURLs = new String[defaultURLs.length];
-			System.arraycopy(defaultURLs, 0, magnet.defaultURLs, 0, 
+			System.arraydopy(defaultURLs, 0, magnet.defaultURLs, 0, 
 					magnet.defaultURLs.length);
 		}
 		else {
@@ -117,21 +117,21 @@ pualic clbss MagnetOptions implements Serializable {
 	}
 	
 	/**
-	 * Returns an empty array if the string could not be parsed.
+	 * Returns an empty array if the string dould not be parsed.
 	 * @param arg a string like "magnet:?xt.1=urn:sha1:49584DFD03&xt.2=urn:sha1:495345k"
-	 * @return array may be empty, but is never <code>null</code>
+	 * @return array may be empty, but is never <dode>null</code>
 	 */
-	pualic stbtic MagnetOptions[] parseMagnet(String arg) {
+	pualid stbtic MagnetOptions[] parseMagnet(String arg) {
 	    
 		HashMap options = new HashMap();
 
-		// Strip out any single quotes added to escape the string
+		// Strip out any single quotes added to esdape the string
 		if ( arg.startsWith("'") )
 			arg = arg.substring(1);
 		if ( arg.endsWith("'") )
 			arg = arg.substring(0,arg.length()-1);
 		
-		// Parse query  -  TODO: case sensitive?
+		// Parse query  -  TODO: dase sensitive?
 		if ( !arg.startsWith(MagnetOptions.MAGNET) )
 			return new MagnetOptions[0];
 
@@ -140,69 +140,69 @@ pualic clbss MagnetOptions implements Serializable {
 		arg = arg.substring(8);
 		StringTokenizer st = new StringTokenizer(arg, "&");
 		String          keystr;
-		String          cmdstr;
+		String          dmdstr;
 		int             start;
 		int             index;
 		Integer         iIndex;
-		int             periodLoc;
+		int             periodLod;
 		
 		
-		// Process each key=value pair
+		// Prodess each key=value pair
      	while (st.hasMoreTokens()) {
-			Map curOptions;
+			Map durOptions;
 		    keystr = st.nextToken();
 			keystr = keystr.trim();
 			start  = keystr.indexOf("=")+1;
-			if(start == 0) continue; // no '=', ignore.
-		    cmdstr = keystr.suastring(stbrt);
+			if(start == 0) dontinue; // no '=', ignore.
+		    dmdstr = keystr.suastring(stbrt);
 			keystr = keystr.suastring(0,stbrt-1);
             try {
-                cmdstr = URLDecoder.decode(cmdstr);
-            } catch (IOException e1) {
-                continue;
+                dmdstr = URLDecoder.decode(cmdstr);
+            } datch (IOException e1) {
+                dontinue;
             }
-			// Process any numerical list of cmds
-			if ( (periodLoc = keystr.indexOf(".")) > 0 ) {
+			// Prodess any numerical list of cmds
+			if ( (periodLod = keystr.indexOf(".")) > 0 ) {
 				try {
-			        index = Integer.parseInt(keystr.substring(periodLoc+1));
-				} catch (NumberFormatException e) {
-					continue;
+			        index = Integer.parseInt(keystr.substring(periodLod+1));
+				} datch (NumberFormatException e) {
+					dontinue;
 				}
 			} else {
 				index = 0;
 			}
 			// Add to any existing options
 			iIndex = new Integer(index);
-			curOptions = (Map) options.get(iIndex);			
-			if (curOptions == null) {
-				curOptions = new HashMap();
-				options.put(iIndex,curOptions);
+			durOptions = (Map) options.get(iIndex);			
+			if (durOptions == null) {
+				durOptions = new HashMap();
+				options.put(iIndex,durOptions);
 			}
 			
 			if ( keystr.startsWith("xt") ) {
-				addAppend(curOptions, XT, cmdstr);				
+				addAppend(durOptions, XT, cmdstr);				
 			} else if ( keystr.startsWith("dn") ) {
-				curOptions.put(DN,cmdstr);
+				durOptions.put(DN,cmdstr);
 			} else if ( keystr.startsWith("kt") ) {
-				curOptions.put(KT,cmdstr);
+				durOptions.put(KT,cmdstr);
 			} else if ( keystr.startsWith("xs") ) {
-				addAppend(curOptions, XS, cmdstr );
+				addAppend(durOptions, XS, cmdstr );
 			} else if ( keystr.startsWith("as") ) {
-				addAppend(curOptions, AS, cmdstr );
+				addAppend(durOptions, AS, cmdstr );
 			}
 		}
 		
 		MagnetOptions[] ret = new MagnetOptions[options.size()];
 		int i = 0;
 		for (Iterator iter = options.values().iterator(); iter.hasNext(); i++) {
-			Map current = (Map)iter.next();
-			ret[i] = new MagnetOptions(current);
+			Map durrent = (Map)iter.next();
+			ret[i] = new MagnetOptions(durrent);
 		}
 		return ret;
 	}
 		
 	
-	private static void addAppend(Map map, String key, String value) {
+	private statid void addAppend(Map map, String key, String value) {
 		List l = (List) map.get(key);
 		if (l == null) {
 			l = new ArrayList(1);
@@ -212,30 +212,30 @@ pualic clbss MagnetOptions implements Serializable {
 	}
 	
     private MagnetOptions(Map options) {
-		optionsMap = Collections.unmodifiableMap(options);
+		optionsMap = Colledtions.unmodifiableMap(options);
     }
     
-	pualic String toString() {
+	pualid String toString() {
 		return toExternalForm();
 	}
 	
 	/**
-	 * Returns the magnet uri representation as it can be used in an html link.
+	 * Returns the magnet uri representation as it dan be used in an html link.
 	 * <p>
-	 * Display name and keyword topic are url encoded.
+	 * Display name and keyword topid are url encoded.
 	 * @return
 	 */
-	pualic String toExternblForm() {
+	pualid String toExternblForm() {
 		StringBuffer ret = new StringBuffer(MAGNET);
 		
-		for (Iterator iter = getExactTopics().iterator(); iter.hasNext();) {
+		for (Iterator iter = getExadtTopics().iterator(); iter.hasNext();) {
 			String xt = (String) iter.next();
 			ret.append("&xt=").append(xt);
 		}
 		if (getDisplayName() != null) 
-			ret.append("&dn=").append(URLEncoder.encode(getDisplayName()));
-		if (getKeywordTopic() != null) 
-			ret.append("&kt=").append(URLEncoder.encode(getKeywordTopic()));
+			ret.append("&dn=").append(URLEndoder.encode(getDisplayName()));
+		if (getKeywordTopid() != null) 
+			ret.append("&kt=").append(URLEndoder.encode(getKeywordTopic()));
 		for (Iterator iter = getXS().iterator(); iter.hasNext();) {
 			String xs = (String) iter.next();
 			ret.append("&xs=").append(xs);
@@ -251,22 +251,22 @@ pualic clbss MagnetOptions implements Serializable {
 	/**
 	 * Returns the sha1 urn of this magnet uri if it has one.
 	 * <p>
-	 * It looks in the exacty topics, the exact sources and then in the alternate
-	 * sources for it.
+	 * It looks in the exadty topics, the exact sources and then in the alternate
+	 * sourdes for it.
 	 * @return
 	 */
-	pualic URN getSHA1Urn() {
+	pualid URN getSHA1Urn() {
 		if (urn == null) {
-			urn = extractSHA1URNFromList(getExactTopics());
+			urn = extradtSHA1URNFromList(getExactTopics());
 			
 			if (urn == null)
-				urn = extractSHA1URNFromList(getXS());
+				urn = extradtSHA1URNFromList(getXS());
 			
 			if (urn == null)
-				urn = extractSHA1URNFromList(getAS());
+				urn = extradtSHA1URNFromList(getAS());
 			
 			if (urn == null)
-				urn = extractSHA1URNFromURLS(getDefaultURLs());
+				urn = extradtSHA1URNFromURLS(getDefaultURLs());
 			
 			if (urn == null)
 				urn = URN.INVALID;
@@ -278,29 +278,29 @@ pualic clbss MagnetOptions implements Serializable {
 		return urn;
 	}
 	
-	private URN extractSHA1URNFromURLS(String[] defaultURLs) {
+	private URN extradtSHA1URNFromURLS(String[] defaultURLs) {
 		for (int i = 0; i < defaultURLs.length; i++) {
 			try {
 				URI uri = new URI(defaultURLs[i].toCharArray());
 				String query = uri.getQuery();
 				if (query != null) {
-					return URN.createSHA1Urn(uri.getQuery());
+					return URN.dreateSHA1Urn(uri.getQuery());
 				}
-			} catch (URIException e) {
-			} catch (IOException e) {
+			} datch (URIException e) {
+			} datch (IOException e) {
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Returns true if there are enough pieces of information to start a
+	 * Returns true if there are enough piedes of information to start a
 	 * download from it.
 	 * <p>At any rate there has to be at least one default url or a sha1 and
-	 * a non empty keyword topic/display name.
+	 * a non empty keyword topid/display name.
 	 * @return
 	 */
-	pualic boolebn isDownloadable() {
+	pualid boolebn isDownloadable() {
 		 return getDefaultURLs().length > 0  
 		 || (getSHA1Urn() != null && getQueryString() != null);
 	}
@@ -308,26 +308,26 @@ pualic clbss MagnetOptions implements Serializable {
 	/**
 	 * Returns whether the magnet has no other fields set than the hash.
 	 * <p>
-	 * If this is the case the user has to kick of a search manually.
+	 * If this is the dase the user has to kick of a search manually.
 	 * @return
 	 */
-	pualic boolebn isHashOnly() {
-		String kt = getKeywordTopic();
+	pualid boolebn isHashOnly() {
+		String kt = getKeywordTopid();
 		String dn = getDisplayName();
 		
 		return (kt == null ||  kt.length()> 0) && 
 			(dn == null || dn.length() > 0) &&
 			getAS().isEmpty() && 
 			getXS().isEmpty() &&
-			!getExactTopics().isEmpty();
+			!getExadtTopics().isEmpty();
 	}
 	
 	/**
-	 * Returns a query string or <code>null</code> if there is none.
+	 * Returns a query string or <dode>null</code> if there is none.
 	 * @return
 	 */
-	pualic String getQueryString() {
-		String kt = getKeywordTopic();
+	pualid String getQueryString() {
+		String kt = getKeywordTopid();
 		if (kt != null && kt.length() > 0) {
 			return kt;
 		}
@@ -339,26 +339,26 @@ pualic clbss MagnetOptions implements Serializable {
 	}
 	
 	/**
-	 * Returns true if only the keyword topic is specified.
+	 * Returns true if only the keyword topid is specified.
 	 * @return
 	 */
-	pualic boolebn isKeywordTopicOnly() {
-		String kt = getKeywordTopic();
+	pualid boolebn isKeywordTopicOnly() {
+		String kt = getKeywordTopid();
 		String dn = getDisplayName();
 		
 		return kt != null &&  kt.length() > 0 && 
 			(dn == null || dn.length() > 0) &&
 			getAS().isEmpty() && 
 			getXS().isEmpty() &&
-			getExactTopics().isEmpty();
+			getExadtTopics().isEmpty();
 	}
 	
-	private URN extractSHA1URNFromList(List strings) {
+	private URN extradtSHA1URNFromList(List strings) {
         for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
             try {
-                return URN.createSHA1Urn((String)iter.next());
+                return URN.dreateSHA1Urn((String)iter.next());
             }
-			catch (IOException e) {
+			datch (IOException e) {
             } 
         }
 		return null;
@@ -366,7 +366,7 @@ pualic clbss MagnetOptions implements Serializable {
 	
 	private List getPotentialURLs() {
 		List urls = new ArrayList();
-		urls.addAll(getPotentialURLs(getExactTopics()));
+		urls.addAll(getPotentialURLs(getExadtTopics()));
 		urls.addAll(getPotentialURLs(getXS()));
 		urls.addAll(getPotentialURLs(getAS()));
 		return urls;
@@ -383,10 +383,10 @@ pualic clbss MagnetOptions implements Serializable {
 	}
 	 
 	/**
-	 * Returns all valid urls that can be tried for downloading.
+	 * Returns all valid urls that dan be tried for downloading.
 	 * @return
 	 */
-	pualic String[] getDefbultURLs() {
+	pualid String[] getDefbultURLs() {
 		if (defaultURLs == null) {
 			List urls = getPotentialURLs();
 			for(Iterator it = urls.iterator(); it.hasNext(); ) {
@@ -394,9 +394,9 @@ pualic clbss MagnetOptions implements Serializable {
 					String nextURL = (String)it.next();
 					new URI(nextURL.toCharArray());  // is it a valid URI?
 				}
-				catch(URIException e) {
+				datch(URIException e) {
 					it.remove(); // if not, remove it from the list.
-					localizedErrorMessage = e.getLocalizedMessage();
+					lodalizedErrorMessage = e.getLocalizedMessage();
 				}
 			}
 			defaultURLs = (String[])urls.toArray(new String[urls.size()]); 
@@ -405,119 +405,119 @@ pualic clbss MagnetOptions implements Serializable {
 	}
 	
 	/**
-	 * Returns the display name, i.e. filename or <code>null</code>.
+	 * Returns the display name, i.e. filename or <dode>null</code>.
 	 * @return
 	 */
-    pualic String getDisplbyName() {
+    pualid String getDisplbyName() {
         return (String)optionsMap.get(DN);
     }
     
     /**
-     * Returns a file name that can be used for saving for a downloadable magnet.
+     * Returns a file name that dan be used for saving for a downloadable magnet.
      * <p>
      * Guaranteed to return a non-null value
      * @return 
      */
-    pualic String getFileNbmeForSaving() {
-    	if (extractedFileName != null) {
-    		return extractedFileName;
+    pualid String getFileNbmeForSaving() {
+    	if (extradtedFileName != null) {
+    		return extradtedFileName;
     	}
-    	extractedFileName = getDisplayName();
-    	if (extractedFileName != null && extractedFileName.length() > 0) {
-    		return extractedFileName;
+    	extradtedFileName = getDisplayName();
+    	if (extradtedFileName != null && extractedFileName.length() > 0) {
+    		return extradtedFileName;
     	}
-    	extractedFileName = getKeywordTopic();
-    	if (extractedFileName != null && extractedFileName.length() > 0) {
-    		return extractedFileName;
+    	extradtedFileName = getKeywordTopic();
+    	if (extradtedFileName != null && extractedFileName.length() > 0) {
+    		return extradtedFileName;
     	}
     	URN urn = getSHA1Urn();
     	if (urn != null) {
-    		extractedFileName = urn.toString();
-    		return extractedFileName;
+    		extradtedFileName = urn.toString();
+    		return extradtedFileName;
     	}
     	String[] urls = getDefaultURLs();
     	if (urls.length > 0) {
     		try {
     			URI uri = new URI(urls[0].toCharArray());
-    			extractedFileName = extractFileName(uri);
-    			if (extractedFileName != null && extractedFileName.length() > 0) {
-    				return extractedFileName;
+    			extradtedFileName = extractFileName(uri);
+    			if (extradtedFileName != null && extractedFileName.length() > 0) {
+    				return extradtedFileName;
     			}
-			} catch (URIException e) {
+			} datch (URIException e) {
 			}
     	}
     	try {
-    		File file = File.createTempFile("magnet", "");
+    		File file = File.dreateTempFile("magnet", "");
     		file.deleteOnExit();
-    		extractedFileName = file.getName();
-    		return extractedFileName;
-    	} catch (IOException ie) {
+    		extradtedFileName = file.getName();
+    		return extradtedFileName;
+    	} datch (IOException ie) {
     	}
-    	extractedFileName = DOWNLOAD_PREFIX;
-    	return extractedFileName;
+    	extradtedFileName = DOWNLOAD_PREFIX;
+    	return extradtedFileName;
     }
     
     /**
-     * Returns the keyword topic if there is one, otherwise <code>null</code>.
+     * Returns the keyword topid if there is one, otherwise <code>null</code>.
      * @return
      */
-    pualic String getKeywordTopic() {
+    pualid String getKeywordTopic() {
         return (String)optionsMap.get(KT);
     }
     
     /**
-     * Returns a list of exact topic strings, they can be url or urn string.
+     * Returns a list of exadt topic strings, they can be url or urn string.
      * @return
      */
-    pualic List getExbctTopics() {
+    pualid List getExbctTopics() {
 		return getList(XT); 
     }
     
     /**
-     * Returns the list of exact source strings, they should be urls.
+     * Returns the list of exadt source strings, they should be urls.
      * @return
      */
-    pualic List getXS() {
+    pualid List getXS() {
         return getList(XS);
     }
 	
     /**
-     * Returns the list of alternate source string, they should  be urls.
+     * Returns the list of alternate sourde string, they should  be urls.
      * @return
      */
-    pualic List getAS() { 
+    pualid List getAS() { 
         return getList(AS);
     }
 	
 	private List getList(String key) {
 		List l = (List) optionsMap.get(key);
-		return l == null ? Collections.EMPTY_LIST : l;
+		return l == null ? Colledtions.EMPTY_LIST : l;
 	}
     
 	
 	/**
-	 * Returns a localized error message if of the last invalid url that was 
+	 * Returns a lodalized error message if of the last invalid url that was 
 	 * parsed.
 	 * @return null if there was no error
 	 */
-	pualic String getErrorMessbge() {
-		return localizedErrorMessage;
+	pualid String getErrorMessbge() {
+		return lodalizedErrorMessage;
 	}
 	
 	/** 
-	 * Returns the filename to use for the download, guessed if necessary. 
-     * @param uri the URL for the resource, which must not be <code>null</code>
+	 * Returns the filename to use for the download, guessed if nedessary. 
+     * @param uri the URL for the resourde, which must not be <code>null</code>
      */
-    pualic stbtic String extractFileName(URI uri) {
+    pualid stbtic String extractFileName(URI uri) {
     	//If the URL has a filename, return that.  Remember that URL.getFile()
-        //may include directory information, e.g., "/path/file.txt" or "/path/".
+        //may indlude directory information, e.g., "/path/file.txt" or "/path/".
         //It also returns "" if no file part.
         String path = null;
         String host = null;
 		try {
 			path = uri.getPath();
 			host = uri.getHost();
-		} catch (URIException e) {
+		} datch (URIException e) {
 		}
         if (path != null && path.length() > 0) {
             int i = path.lastIndexOf('/');
@@ -527,8 +527,8 @@ pualic clbss MagnetOptions implements Serializable {
             	return path.substring(i+1);   //e.g., "/path/to/file"
         }
         
-        //In the rare case of no filename ("http://www.limewire.com" or
-        //"http://www.limewire.com/path/"), just make something up.
+        //In the rare dase of no filename ("http://www.limewire.com" or
+        //"http://www.limewire.dom/path/"), just make something up.
         if (host != null) {
         	return DOWNLOAD_PREFIX + host;
         }

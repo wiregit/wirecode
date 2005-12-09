@@ -1,30 +1,30 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
- * Class for a setting that's an array of chars.
+ * Class for a setting that's an array of dhars.
  */
-pualic finbl class CharArraySetting extends Setting {
+pualid finbl class CharArraySetting extends Setting {
     
     /**
-     * Cached value.
+     * Cadhed value.
      */
-    private char[] value;
+    private dhar[] value;
 
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
+	 * Creates a new <tt>SettingBool</tt> instande with the specified
 	 * key and defualt value.
 	 *
      * @param defaultProps the default properties
      * @param props the set properties
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultValue the default value to use for the setting
 	 */
-    static CharArraySetting 
-        createCharArraySetting(Properties defaultProps, Properties props, 
-                               String key, char[] defaultValue) {
+    statid CharArraySetting 
+        dreateCharArraySetting(Properties defaultProps, Properties props, 
+                               String key, dhar[] defaultValue) {
         return new CharArraySetting(defaultProps, props, key, 
                                            new String(defaultValue));
     }
@@ -35,17 +35,17 @@ pualic finbl class CharArraySetting extends Setting {
 	}
      
 	CharArraySetting(Properties defaultProps, Properties props, String key, 
-                 char[] defaultValue, String simppKey) {
+                 dhar[] defaultValue, String simppKey) {
 		super(defaultProps, props, key, new String(defaultValue), simppKey);
 	}
 
    
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic chbr[] getValue() {
+	pualid chbr[] getValue() {
 		return value;
 	}
 
@@ -54,7 +54,7 @@ pualic finbl class CharArraySetting extends Setting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic void setVblue(char[] value) {
+	pualid void setVblue(char[] value) {
 		super.setValue(new String(value));
 	}
      
@@ -62,7 +62,7 @@ pualic finbl class CharArraySetting extends Setting {
      * Load value from property string value
      * @param sValue property string value
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         value = sValue.trim().toCharArray();
     }
 

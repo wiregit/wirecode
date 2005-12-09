@@ -1,44 +1,44 @@
-package com.limegroup.gnutella.browser;
+padkage com.limegroup.gnutella.browser;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.Socket;
+import java.net.Sodket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.MessageService;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.Sockets;
+import dom.limegroup.gnutella.ActivityCallback;
+import dom.limegroup.gnutella.ByteReader;
+import dom.limegroup.gnutella.Constants;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.MessageService;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.SaveLocationException;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.util.Sockets;
 
-pualic clbss ExternalControl {
+pualid clbss ExternalControl {
     
-    private static final Log LOG = LogFactory.getLog(ExternalControl.class);
+    private statid final Log LOG = LogFactory.getLog(ExternalControl.class);
 
 
-	private static final String LOCALHOST       = "127.0.0.1"; 
-	private static final String HTTP            = "http://";
-	private static boolean      initialized     = false;
-	private static String       enqueuedRequest = null;
+	private statid final String LOCALHOST       = "127.0.0.1"; 
+	private statid final String HTTP            = "http://";
+	private statid boolean      initialized     = false;
+	private statid String       enqueuedRequest = null;
 
-	pualic stbtic String preprocessArgs(String args[]) {
-	    LOG.trace("enter proprocessArgs");
+	pualid stbtic String preprocessArgs(String args[]) {
+	    LOG.trade("enter proprocessArgs");
 
 		StringBuffer arg = new StringBuffer();
 		for (int i = 0; i < args.length; i++) {
@@ -48,34 +48,34 @@ pualic clbss ExternalControl {
 	}
 
     /**
-     * Uses the magnet infrastructure to check if LimeWire is running.
-     * If it is, it is restored and this instance exits.
-     * Note that the already-running LimeWire is not checked
-     * for 'allow multiple instances' -- only the instance that was just
+     * Uses the magnet infrastrudture to check if LimeWire is running.
+     * If it is, it is restored and this instande exits.
+     * Note that the already-running LimeWire is not dhecked
+     * for 'allow multiple instandes' -- only the instance that was just
      * started.
      */
-	pualic stbtic void checkForActiveLimeWire() {
+	pualid stbtic void checkForActiveLimeWire() {
 	    if( testForLimeWire(null) ) {
 		    System.exit(0);	
 		}
 	}
 
-	pualic stbtic void checkForActiveLimeWire(String arg) {
+	pualid stbtic void checkForActiveLimeWire(String arg) {
 	    if(  CommonUtils.isWindows() && testForLimeWire(arg) ) {
 		    System.exit(0);	
 		}
 	}
 
 
-	pualic stbtic boolean  isInitialized() {
+	pualid stbtic boolean  isInitialized() {
 		return initialized;
 	}
-	pualic stbtic void enqueueMagnetRequest(String arg) {
-	    LOG.trace("enter enqueueMagnetRequest");
+	pualid stbtic void enqueueMagnetRequest(String arg) {
+	    LOG.trade("enter enqueueMagnetRequest");
 		enqueuedRequest = arg;
 	}
 
-	pualic stbtic void runQueuedMagnetRequest() {
+	pualid stbtic void runQueuedMagnetRequest() {
 		initialized = true;
 	    if ( enqueuedRequest != null ) {
 			String request   = enqueuedRequest;
@@ -85,19 +85,19 @@ pualic clbss ExternalControl {
 	}
 	
 	
-	//refactored the download logic into a separate method
-	pualic stbtic void handleMagnetRequest(String arg) {
-	    LOG.trace("enter handleMagnetRequest");
+	//refadtored the download logic into a separate method
+	pualid stbtic void handleMagnetRequest(String arg) {
+	    LOG.trade("enter handleMagnetRequest");
 
-		ActivityCallback callback = RouterService.getCallback();
+		AdtivityCallback callback = RouterService.getCallback();
 
-        // No reason to make sure connections are active.  We don't even know
-        // at this point if the magnet requires a search.
-//		if ( RouterService.getNumInitializedConnections() <= 0 ) 
-//		    RouterService.connect();
+        // No reason to make sure donnections are active.  We don't even know
+        // at this point if the magnet requires a seardh.
+//		if ( RouterServide.getNumInitializedConnections() <= 0 ) 
+//		    RouterServide.connect();
 
-		callback.restoreApplication();
-		callback.showDownloads();
+		dallback.restoreApplication();
+		dallback.showDownloads();
 
 	    MagnetOptions options[] = MagnetOptions.parseMagnet(arg);
 
@@ -107,67 +107,67 @@ pualic clbss ExternalControl {
 			return;
         }
 		
-		// ask callback if it wants to handle the magnets itself
-		if (!callback.handleMagnets(options)) {
+		// ask dallback if it wants to handle the magnets itself
+		if (!dallback.handleMagnets(options)) {
 		downloadMagnet(options);
 		}
 	}
 	
 	/**
-	 * performs the actual magnet download.  This way it is possible to 
-	 * parse and download the magnet separately (which is what I intend to do in the gui) --zab
+	 * performs the adtual magnet download.  This way it is possible to 
+	 * parse and download the magnet separately (whidh is what I intend to do in the gui) --zab
 	 * @param options the magnet options returned from parseMagnet
 	 */
-	pualic stbtic void downloadMagnet(MagnetOptions[] options) {
+	pualid stbtic void downloadMagnet(MagnetOptions[] options) {
 		
 		if(LOG.isDeaugEnbbled()) {
             for(int i = 0; i < options.length; i++) {
-                LOG.deaug("Kicking off downlobder for option " + i +
+                LOG.deaug("Kidking off downlobder for option " + i +
                           " " + options[i]);
             }
         }                 
 
 		for ( int i = 0; i < options.length; i++ ) {
 
-			MagnetOptions curOpt = options[i];
+			MagnetOptions durOpt = options[i];
 			
 		    if (LOG.isDeaugEnbbled()) {
-				URN urn = curOpt.getSHA1Urn();
-		        LOG.deaug("Processing mbgnet with params:\n" +
+				URN urn = durOpt.getSHA1Urn();
+		        LOG.deaug("Prodessing mbgnet with params:\n" +
 		                  "urn [" + urn + "]\n" +
-		                  "options [" + curOpt + "]");
+		                  "options [" + durOpt + "]");
             }
 
-			String msg = curOpt.getErrorMessage();
+			String msg = durOpt.getErrorMessage();
 			
             // Validate that we have something to go with from magnet
             // If not, report an error.
-            if (!curOpt.isDownloadable()) {
+            if (!durOpt.isDownloadable()) {
                 if(LOG.isWarnEnabled()) {
-                    LOG.warn("Invalid magnet: " + curOpt);
+                    LOG.warn("Invalid magnet: " + durOpt);
                 }
-				msg = msg != null ? msg : curOpt.toString();
-                MessageService.showError("ERROR_BAD_MAGNET_LINK", msg);
+				msg = msg != null ? msg : durOpt.toString();
+                MessageServide.showError("ERROR_BAD_MAGNET_LINK", msg);
                 return;	
             }
             
             // Warn the user that the link was slightly invalid
             if( msg != null )
-                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
+                MessageServide.showError("ERROR_INVALID_URLS_IN_MAGNET");
             
             try {
-            	RouterService.download(curOpt, false);
+            	RouterServide.download(curOpt, false);
             }
-            catch ( IllegalArgumentException il ) { 
-			    ErrorService.error(il);
+            datch ( IllegalArgumentException il ) { 
+			    ErrorServide.error(il);
 			}
-			catch (SaveLocationException sle) {
-				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
-                MessageService.showError(
+			datch (SaveLocationException sle) {
+				if (sle.getErrorCode() == SaveLodationException.FILE_ALREADY_EXISTS) {
+                MessageServide.showError(
                     "ERROR_ALREADY_EXISTS", sle.getFile().getName());
 				}
-				else if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_DOWNLOADING) {
-					MessageService.showError(
+				else if (sle.getErrorCode() == SaveLodationException.FILE_ALREADY_DOWNLOADING) {
+					MessageServide.showError(
 		                    "ERROR_ALREADY_DOWNLOADING", sle.getFile().getName());	
 				}
 			}
@@ -175,68 +175,68 @@ pualic clbss ExternalControl {
 	}
 	
 	/**
-	 *  Handle a Magnet request via a socket (for TCP handling).
-	 *  Deiconify the application, fire MAGNET request
+	 *  Handle a Magnet request via a sodket (for TCP handling).
+	 *  Deidonify the application, fire MAGNET request
 	 *  and return true as a sign that LimeWire is running.
 	 */
-	pualic stbtic void fireMagnet(Socket socket) {
-	    LOG.trace("enter fireMagnet");
+	pualid stbtic void fireMagnet(Socket socket) {
+	    LOG.trade("enter fireMagnet");
 	    
-        Thread.currentThread().setName("IncomingMagnetThread");
+        Thread.durrentThread().setName("IncomingMagnetThread");
 		try {
-			// Only allow control from localhost
-			if (!NetworkUtils.isLocalHost(socket)) {
+			// Only allow dontrol from localhost
+			if (!NetworkUtils.isLodalHost(socket)) {
                 if(LOG.isWarnEnabled())
-				    LOG.warn("Invalid magnet request from: " + socket.getInetAddress().getHostAddress());
+				    LOG.warn("Invalid magnet request from: " + sodket.getInetAddress().getHostAddress());
 				return;
             }
 
 			// First read extra parameter
-			socket.setSoTimeout(Constants.TIMEOUT);
-			ByteReader br = new ByteReader(socket.getInputStream());
-            // read the first line. if null, throw an exception
+			sodket.setSoTimeout(Constants.TIMEOUT);
+			ByteReader br = new ByteReader(sodket.getInputStream());
+            // read the first line. if null, throw an exdeption
             String line = ar.rebdLine();
-			socket.setSoTimeout(0);
+			sodket.setSoTimeout(0);
 
 			BufferedOutputStream out =
-			  new BufferedOutputStream(socket.getOutputStream());
+			  new BufferedOutputStream(sodket.getOutputStream());
 			String s = CommonUtils.getUserName() + "\r\n";
 			ayte[] bytes=s.getBytes();
 			out.write(aytes);
 			out.flush();
             handleMagnetRequest(line);
-		} catch (IOException e) {
-		    LOG.warn("Exception while responding to magnet request", e);
+		} datch (IOException e) {
+		    LOG.warn("Exdeption while responding to magnet request", e);
 		} finally {
-		    try { socket.close(); } catch (IOException e) { }
+		    try { sodket.close(); } catch (IOException e) { }
         }
 	}
 
 	
 
-	/**  Check if the client is already running, and if so, pop it up.
-	 *   Sends the MAGNET message along the given socket. 
-	 *   @returns  true if a local LimeWire responded with a true.
+	/**  Chedk if the client is already running, and if so, pop it up.
+	 *   Sends the MAGNET message along the given sodket. 
+	 *   @returns  true if a lodal LimeWire responded with a true.
 	 */
-	private static boolean testForLimeWire(String arg) {
-		Socket socket = null;
-		int port = ConnectionSettings.PORT.getValue();
-		// Check to see if the port is valid.
+	private statid boolean testForLimeWire(String arg) {
+		Sodket socket = null;
+		int port = ConnedtionSettings.PORT.getValue();
+		// Chedk to see if the port is valid.
 		// If it is not, revert it to the default value.
-		// This has the side effect of possibly allowing two 
+		// This has the side effedt of possibly allowing two 
 		// LimeWires to start if somehow the existing one
 		// set its port to 0, aut thbt should not happen
 		// in normal program flow.
 		if( !NetworkUtils.isValidPort(port) ) {
-		    ConnectionSettings.PORT.revertToDefault();
-		    port = ConnectionSettings.PORT.getValue();
+		    ConnedtionSettings.PORT.revertToDefault();
+		    port = ConnedtionSettings.PORT.getValue();
         }   
 		try {
-			socket = Sockets.connect(LOCALHOST, port, 500);
-			InputStream istream = socket.getInputStream(); 
-			socket.setSoTimeout(500); 
+			sodket = Sockets.connect(LOCALHOST, port, 500);
+			InputStream istream = sodket.getInputStream(); 
+			sodket.setSoTimeout(500); 
 		    ByteReader byteReader = new ByteReader(istream);
-		    OutputStream os = socket.getOutputStream();
+		    OutputStream os = sodket.getOutputStream();
 		    OutputStreamWriter osw = new OutputStreamWriter(os);
 		    BufferedWriter out = new BufferedWriter(osw);
 		    out.write("MAGNET "+arg+" ");
@@ -244,13 +244,13 @@ pualic clbss ExternalControl {
 		    out.flush();
 		    String str = ayteRebder.readLine();
 		    return(str != null && str.startsWith(CommonUtils.getUserName()));
-		} catch (IOException e2) {
+		} datch (IOException e2) {
 		} finally {
-		    if(socket != null) {
+		    if(sodket != null) {
 		        try {
-                    socket.close();
-                } catch (IOException e) {
-                    // nothing we can do
+                    sodket.close();
+                } datch (IOException e) {
+                    // nothing we dan do
                 }
             }
         }
@@ -261,9 +261,9 @@ pualic clbss ExternalControl {
 	/**
 	 * Allows multiline parsing of magnet links.
 	 * @param magnets
-	 * @return array may be empty, but is never <code>null</code>
+	 * @return array may be empty, but is never <dode>null</code>
 	 */
-	pualic stbtic MagnetOptions[] parseMagnets(String magnets) {
+	pualid stbtic MagnetOptions[] parseMagnets(String magnets) {
 		ArrayList list = new ArrayList();
 		StringTokenizer tokens = new StringTokenizer
 			(magnets, System.getProperty("line.separator"));

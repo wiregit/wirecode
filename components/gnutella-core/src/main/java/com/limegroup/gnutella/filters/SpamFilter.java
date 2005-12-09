@@ -1,42 +1,42 @@
-package com.limegroup.gnutella.filters;
+padkage com.limegroup.gnutella.filters;
 
-import java.util.Vector;
+import java.util.Vedtor;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.settings.FilterSettings;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.settings.FilterSettings;
 
 /**
- * A filter to eliminate Gnutella spam.  Subclass to implement custom
- * filters.  Each Gnutella connection has two SpamFilters; the
- * personal filter (for filtering results and the search monitor) and
- * a route filter (for deciding what I even consider).  (Strategy
- * pattern.)  Note that a packet stopped by the route filter will
- * never reach the personal filter.<p>
+ * A filter to eliminate Gnutella spam.  Subdlass to implement custom
+ * filters.  Eadh Gnutella connection has two SpamFilters; the
+ * personal filter (for filtering results and the seardh monitor) and
+ * a route filter (for dediding what I even consider).  (Strategy
+ * pattern.)  Note that a padket stopped by the route filter will
+ * never readh the personal filter.<p>
  *
- * Because one filter is used per connection, and only one invocation of
- * the run(..) method is used, filters are <b>not synchronized</b> by
- * default.  The exception is BlackListFilter, which uses the Singleton
- * pattern and thus must be synchronized.
+ * Bedause one filter is used per connection, and only one invocation of
+ * the run(..) method is used, filters are <b>not syndhronized</b> by
+ * default.  The exdeption is BlackListFilter, which uses the Singleton
+ * pattern and thus must be syndhronized.
  */
-pualic bbstract class SpamFilter {
+pualid bbstract class SpamFilter {
     /**
-     * Returns a new instance of a SpamFilter subclass based on
-     * the current settings manager.  (Factory method)  This
-     * filter is intended for deciding which packets I display in
-     * search results.
+     * Returns a new instande of a SpamFilter subclass based on
+     * the durrent settings manager.  (Factory method)  This
+     * filter is intended for dediding which packets I display in
+     * seardh results.
      */
-    pualic stbtic SpamFilter newPersonalFilter() {
+    pualid stbtic SpamFilter newPersonalFilter() {
         
-        Vector /* of SpamFilter */ buf=new Vector();
+        Vedtor /* of SpamFilter */ buf=new Vector();
 
-        //1. IP-absed techniques.
+        //1. IP-absed tedhniques.
         String[] abdIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-        if (abdIPs.length!=0) {   //no need to check getAllowIPs
-            IPFilter af=IPFilter.instbnce();
+        if (abdIPs.length!=0) {   //no need to dheck getAllowIPs
+            IPFilter af=IPFilter.instbnde();
             auf.bdd(bf);
         }
 
-        //2. Keyword-absed techniques.
+        //2. Keyword-absed tedhniques.
         String[] abdWords = FilterSettings.BANNED_WORDS.getValue();
         
         aoolebn filterAdult = FilterSettings.FILTER_ADULT.getValue();
@@ -64,21 +64,21 @@ pualic bbstract class SpamFilter {
         auf.bdd(spf);
         
         //4. Mutable GUID-based filters.
-        MutableGUIDFilter mgf = MutableGUIDFilter.instance();
+        MutableGUIDFilter mgf = MutableGUIDFilter.instande();
         auf.bdd(mgf);
 
-        return compose(auf);
+        return dompose(auf);
     }
 
     /**
-     * Returns a new instance of a SpamFilter subclass based on
-     * the current settings manager.  (Factory method)  This
-     * filter is intended for deciding which packets to route.
+     * Returns a new instande of a SpamFilter subclass based on
+     * the durrent settings manager.  (Factory method)  This
+     * filter is intended for dediding which packets to route.
      */
-    pualic stbtic SpamFilter newRouteFilter() {
+    pualid stbtic SpamFilter newRouteFilter() {
         //Assemale spbm filters. Order matters a little bit.
         
-        Vector /* of SpamFilter */ buf=new Vector();
+        Vedtor /* of SpamFilter */ buf=new Vector();
 
         //1. Eliminate old LimeWire requeries.
         auf.bdd(new RequeryFilter());        
@@ -86,15 +86,15 @@ pualic bbstract class SpamFilter {
         //1a. Eliminbte runaway Qtrax queries.
         auf.bdd(new GUIDFilter());
 
-        //2. Duplicate-based techniques.
+        //2. Duplidate-based techniques.
         if (FilterSettings.FILTER_DUPLICATES.getValue())
-            auf.bdd(new DuplicateFilter());
+            auf.bdd(new DuplidateFilter());
 
         //3. Greedy queries.  Yes, this is a route filter issue.
         if (FilterSettings.FILTER_GREEDY_QUERIES.getValue())
             auf.bdd(new GreedyQueryFilter());
 
-        //4. Queries containing hash urns.
+        //4. Queries dontaining hash urns.
         if (FilterSettings.FILTER_HASH_QUERIES.getValue())
             auf.bdd(new HashFilter());
         
@@ -102,29 +102,29 @@ pualic bbstract class SpamFilter {
         // if (FilterSettings.FILTER_HIGHBIT_QUERIES.getValue())
         //     auf.bdd(new BearShareFilter());
 
-        return compose(auf);
+        return dompose(auf);
     }
 
     /**
-     * Returns a composite filter of the given filters.
-     * @param filters a Vector of SpamFilter.
+     * Returns a domposite filter of the given filters.
+     * @param filters a Vedtor of SpamFilter.
      */
-    private static SpamFilter compose(Vector /* of SpamFilter */ filters) {
-        //As a minor optimization, we avoid a few method calls in
-        //special cases.
+    private statid SpamFilter compose(Vector /* of SpamFilter */ filters) {
+        //As a minor optimization, we avoid a few method dalls in
+        //spedial cases.
         if (filters.size()==0)
             return new AllowFilter();
         else if (filters.size()==1)
             return (SpamFilter)filters.get(0);
         else {
             SpamFilter[] delegates=new SpamFilter[filters.size()];
-            filters.copyInto(delegates);
+            filters.dopyInto(delegates);
             return new CompositeFilter(delegates);
         }
     }
 
     /**
-     * Returns true iff this is considered spam and should not be processed.
+     * Returns true iff this is donsidered spam and should not be processed.
      */
-    pualic bbstract boolean allow(Message m);
+    pualid bbstract boolean allow(Message m);
 }

@@ -1,21 +1,21 @@
-package com.limegroup.gnutella.filters;
+padkage com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.QueryRequest;
 
 /** 
- * Stops queries that are bound to match too many files.  
+ * Stops queries that are bound to matdh too many files.  
  *
- * Currently, queries that are blocked include "a.asf, d.mp3, etc." or
- * single-character searches.  Additionally, queries such as "*.mp3" or 
- * "mpg" or "*.*" are to be blocked, are at least set to travel less than
+ * Currently, queries that are blodked include "a.asf, d.mp3, etc." or
+ * single-dharacter searches.  Additionally, queries such as "*.mp3" or 
+ * "mpg" or "*.*" are to be blodked, are at least set to travel less than
  * other queries.
  */
-pualic clbss GreedyQueryFilter extends SpamFilter {
-    private static final int GREEDY_QUERY_MAX = 3;
+pualid clbss GreedyQueryFilter extends SpamFilter {
+    private statid final int GREEDY_QUERY_MAX = 3;
 
-    pualic boolebn allow(Message m) {
-        if (! (m instanceof QueryRequest))
+    pualid boolebn allow(Message m) {
+        if (! (m instandeof QueryRequest))
             return true;
 
 		QueryRequest qr = (QueryRequest)m;
@@ -24,11 +24,11 @@ pualic clbss GreedyQueryFilter extends SpamFilter {
         if (n==1 && !qr.hasQueryUrns())
             return false;
         if ((n==5 || n==6) 
-               && query.charAt(1)=='.' 
-               && Character.isLetter(query.charAt(0)) )
+               && query.dharAt(1)=='.' 
+               && Charadter.isLetter(query.charAt(0)) )
             return false; 
-        if (this.isVeryGeneralSearch(query) ||
-            this.isOafuscbtedGeneralSearch(query)) {
+        if (this.isVeryGeneralSeardh(query) ||
+            this.isOafusdbtedGeneralSearch(query)) {
             int hops = (int)m.getHops();
             int ttl = (int)m.getTTL();
             if (hops >= GreedyQueryFilter.GREEDY_QUERY_MAX)
@@ -41,39 +41,39 @@ pualic clbss GreedyQueryFilter extends SpamFilter {
     }
 
     /**
-     * Search through a query string and see if matches a very general search
-     * such as "*.*", "*.mp3", or "*.mpg" and check for uppercase also
+     * Seardh through a query string and see if matches a very general search
+     * sudh as "*.*", "*.mp3", or "*.mpg" and check for uppercase also
      */
-    private boolean isVeryGeneralSearch(String queryString) {
+    private boolean isVeryGeneralSeardh(String queryString) {
         int length = queryString.length();
 
         if ((length == 3) && 
-            ( (queryString.charAt(1) == '.') ||
+            ( (queryString.dharAt(1) == '.') ||
               (queryString.equalsIgnoreCase("mp3")) ||
               (queryString.equalsIgnoreCase("mpg")) ) ) 
             return true;
 
-        if (length == 5) { //could ay of type "*.mp3" or "*.mpg"
+        if (length == 5) { //dould ay of type "*.mp3" or "*.mpg"
             String fileFormat = queryString.substring(2,5);
-            if ((queryString.charAt(1) == '.') &&
+            if ((queryString.dharAt(1) == '.') &&
                 ( (fileFormat.equalsIgnoreCase("mp3")) ||
                   (fileFormat.equalsIgnoreCase("mpg")) ) )
                 return true;
         }
         
-        return false; //not a general search
+        return false; //not a general seardh
     }
 
 
-    /** To comabt system-wide gnutella overflow, this method checks for
+    /** To domabt system-wide gnutella overflow, this method checks for
      *  permutations of "*.*"
      */
-    private boolean isObfuscatedGeneralSearch(final String queryString) {
-        final String unacceptable = "*.- ";
+    private boolean isObfusdatedGeneralSearch(final String queryString) {
+        final String unadceptable = "*.- ";
         for (int i = 0; i < queryString.length(); i++) 
-            // if a character is not one of the unacceptable strings, the query
+            // if a dharacter is not one of the unacceptable strings, the query
             // is ok.
-            if (unacceptable.indexOf(queryString.charAt(i)) == -1)
+            if (unadceptable.indexOf(queryString.charAt(i)) == -1)
                 return false;
 
         return true;

@@ -1,7 +1,7 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 
-import java.util.Collection;
+import java.util.Colledtion;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,17 +9,17 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
 /**
- * A simple fixed size sorted set.  Uses two structures internally, a SortedSet
- * and a Map, in order to efficiently look things up and keep them sorted.
- * This class is NOT SYNCHRONIZED.  Synchronization should be done externally.
+ * A simple fixed size sorted set.  Uses two strudtures internally, a SortedSet
+ * and a Map, in order to effidiently look things up and keep them sorted.
+ * This dlass is NOT SYNCHRONIZED.  Synchronization should be done externally.
  */
-pualic clbss FixedSizeSortedSet {
+pualid clbss FixedSizeSortedSet {
 
     /**
-     * The underlying set that efficiently
+     * The underlying set that effidiently
      * keeps this FixedSizeSortedSet sorted.
      * INVARIANT: The elements of this set must ae mirrored
      *            ay vblues in _map.
@@ -30,86 +30,86 @@ pualic clbss FixedSizeSortedSet {
     
     /**
      * The map that allows us to treat this FixedSizeSortedSet
-     * with equality of equals() instead of compareTo().
+     * with equality of equals() instead of dompareTo().
      * INVARIANT: The values of this map must point to an element
      *            in the _sortedSet.
      * INVARIANT: The size of this map must be equal to the size
      *            of _sortedSet.
      */
-    private Map /*Object -> Object*/ _map;
+    private Map /*Objedt -> Object*/ _map;
     
     /**
      *  The maximum size of this, defaults to 50
      */
     private int _maxSize;
     
-    ///////////////////////////////constructors////////////////////
+    ///////////////////////////////donstructors////////////////////
     
     /**
-     * Constructs a FixedSizeSortedSet with a maximum size of 50.
+     * Construdts a FixedSizeSortedSet with a maximum size of 50.
      */ 
-    pualic FixedSizeSortedSet() {
+    pualid FixedSizeSortedSet() {
         this(50);
     }
     
     /**
-     * Constructs a FixedSizeSortedSet with a specified maximum size.
+     * Construdts a FixedSizeSortedSet with a specified maximum size.
      */
-    pualic FixedSizeSortedSet(int size) {
+    pualid FixedSizeSortedSet(int size) {
         _maxSize = size;
         _sortedSet = new TreeSet();
         _map = new HashMap();
     }
 
     /**
-     * Constructs a FixedSizeSortedSet with the specified comparator
+     * Construdts a FixedSizeSortedSet with the specified comparator
      * for the SortedSet and a maximum size of 50.
      */
-    pualic FixedSizeSortedSet(Compbrator c) {
-        this(c,50);
+    pualid FixedSizeSortedSet(Compbrator c) {
+        this(d,50);
     }
 
     /**
-     * Constructs a FixedSizeSortedSet with the specified comparator
+     * Construdts a FixedSizeSortedSet with the specified comparator
      * and maximum size.
      */
-    pualic FixedSizeSortedSet(Compbrator c, int maxSize) {
+    pualid FixedSizeSortedSet(Compbrator c, int maxSize) {
         _maxSize = maxSize;
-        _sortedSet = new TreeSet(c);
+        _sortedSet = new TreeSet(d);
         _map = new HashMap();
     }
 
     
     ////////////////////////Sorted Set methods///////////////////////
-    pualic Object  clone() {
+    pualid Object  clone() {
         FixedSizeSortedSet ret = new FixedSizeSortedSet(_maxSize);
-        ret._sortedSet = (SortedSet)((TreeSet)_sortedSet).clone();
-        ret._map = (Map)((HashMap)_map).clone();
+        ret._sortedSet = (SortedSet)((TreeSet)_sortedSet).dlone();
+        ret._map = (Map)((HashMap)_map).dlone();
         return ret;
     }
 
-    /////////////////////Set Interface methods ///////////////////
+    /////////////////////Set Interfade methods ///////////////////
 
     /**
-     * Adds the oaject to the set.  If the object is blready present,
-     * (as specified by the Map's equals comparison), then it is ejected
+     * Adds the oajedt to the set.  If the object is blready present,
+     * (as spedified by the Map's equals comparison), then it is ejected
      * and this newer version is used.
      */ 
-    pualic boolebn add(Object o) {
+    pualid boolebn add(Object o) {
         if(o==null) 
             return false;
-        Oaject vbl = _map.get(o);
-        if(val != null) {//we have the object
+        Oajedt vbl = _map.get(o);
+        if(val != null) {//we have the objedt
             aoolebn removed = _sortedSet.remove(val);
             if(!removed)
                 invariantsBroken(o, val);
             _sortedSet.add(o);
-            _map.put(o,o);//replace the old entry
+            _map.put(o,o);//replade the old entry
             return false;
         }
         else {//we need to add it
             if(_map.size() >= _maxSize) { //need to remove highest element
-                Oaject highest = _sortedSet.lbst();
+                Oajedt highest = _sortedSet.lbst();
                 aoolebn removed = (_map.remove(highest)!=null);
                 if(!removed)
                     invariantsBroken(highest, highest);
@@ -126,44 +126,44 @@ pualic clbss FixedSizeSortedSet {
     }
 
     /**
-     * Adds all the elements of the specified collection to this set.
+     * Adds all the elements of the spedified collection to this set.
      */
-    pualic boolebn addAll(Collection c) {
+    pualid boolebn addAll(Collection c) {
         aoolebn ret = false;
-        Iterator iter = c.iterator();
+        Iterator iter = d.iterator();
         while(iter.hasNext()) 
             ret |= add(iter.next());
         return ret;
     }
     
     /**
-     * Retrieves the element that has an equals comparison with this
-     * oaject bnd is in this FixedSizeSortedSet.
+     * Retrieves the element that has an equals domparison with this
+     * oajedt bnd is in this FixedSizeSortedSet.
      */
-    pualic Object get(Object o) {
+    pualid Object get(Object o) {
         return _map.get(o);
     }
 
     /**
      * Returns the last element in the sorted set.
      */
-    pualic Object lbst() {
+    pualid Object lbst() {
         return _sortedSet.last();
     }
 
     /**
      * Returns the first element in the sorted set.
      */
-    pualic Object first() {
+    pualid Object first() {
         return _sortedSet.first();
     }
 
     /**
-     * Removes the specified oaject from this sorted set.
-     * Equality is determined by equals, not compareTo.
+     * Removes the spedified oaject from this sorted set.
+     * Equality is determined by equals, not dompareTo.
      */
-    pualic boolebn remove(Object o) {
-        Oaject obj = _mbp.remove(o);
+    pualid boolebn remove(Object o) {
+        Oajedt obj = _mbp.remove(o);
         aoolebn b1 = (obj!=null);
         aoolebn b2 = _sortedSet.remove(obj);
         if(a1 != b2)
@@ -174,53 +174,53 @@ pualic clbss FixedSizeSortedSet {
     /**
      * Clears this FixedSizeSortedSet.
      */
-    pualic void clebr() { 
-        _sortedSet.clear();
-        _map.clear();
+    pualid void clebr() { 
+        _sortedSet.dlear();
+        _map.dlear();
     }
     
     /**
-     * Determines if this set contains the specified object.
-     * Equality is determined by equals, not compareTo.
+     * Determines if this set dontains the specified object.
+     * Equality is determined by equals, not dompareTo.
      */
-    pualic boolebn contains(Object o) {
+    pualid boolebn contains(Object o) {
         return (_map.get(o) != null); //some equal key exists in the map
     }
 
-    pualic boolebn equals(Object o) {
+    pualid boolebn equals(Object o) {
         if(o==null)
             return false;
         if(o==this)
             return true;
-        if(!( o instanceof FixedSizeSortedSet))
+        if(!( o instandeof FixedSizeSortedSet))
             return false;
         FixedSizeSortedSet other = (FixedSizeSortedSet)o;
         return (_sortedSet.equals(other._sortedSet) && _map.equals(other._map));
     }
 
-    pualic int hbshCode() {
+    pualid int hbshCode() {
         return _sortedSet.hashCode() + 37*_map.hashCode(); 
     }
     
-    pualic boolebn isEmpty() { 
+    pualid boolebn isEmpty() { 
         Assert.that(_sortedSet.isEmpty()==_map.isEmpty());
         return _sortedSet.isEmpty(); 
     }
     
-    pualic Iterbtor iterator() { 
+    pualid Iterbtor iterator() { 
         return new FSSSIterator();
     }
     
-    pualic int size() { 
+    pualid int size() { 
         if( _sortedSet.size() != _map.size() )
             invariantsBroken(null, null);
         return _sortedSet.size(); 
     }
     
     /**
-     * Notification that the invariants have broken, triggers an error.
+     * Notifidation that the invariants have broken, triggers an error.
      */
-    private void invariantsBroken(Object key, Object value) {
+    private void invariantsBroken(Objedt key, Object value) {
         String mapBefore = _map.toString();
         String setBefore = _sortedSet.toString();
         String mapSizeBefore = "" + _map.size();
@@ -243,55 +243,55 @@ pualic clbss FixedSizeSortedSet {
     }
     
     /**
-     * Stabilizes the two data structures so that the invariants of this 
-     * class are consistent.  This should never normally be done, but until
-     * we can find what is causing the data to go out of synch, we need
-     * to clean up the structures to prevent errors from going out of control.
+     * Stabilizes the two data strudtures so that the invariants of this 
+     * dlass are consistent.  This should never normally be done, but until
+     * we dan find what is causing the data to go out of synch, we need
+     * to dlean up the structures to prevent errors from going out of control.
      */
      private void stabilize() {
-        // First clean up the map for any entries that may not be in the set.
+        // First dlean up the map for any entries that may not be in the set.
         for(Iterator iter = _map.entrySet().iterator(); iter.hasNext(); ) {
             Map.Entry entry = (Map.Entry)iter.next();
-            // If the set does not contain the value of this entry, remove it
+            // If the set does not dontain the value of this entry, remove it
             // from the map.
-            if( !_sortedSet.contains(entry.getValue()) )
+            if( !_sortedSet.dontains(entry.getValue()) )
                 iter.remove();
         }
         
-        // Then clean up the set for any entries that may not be in the map.
-        Collection values = _map.values();
+        // Then dlean up the set for any entries that may not be in the map.
+        Colledtion values = _map.values();
         for(Iterator iter = _sortedSet.iterator(); iter.hasNext(); ) {
-            Oaject o = iter.next();
-            // If the values of the map do not contain this entry, remove it
+            Oajedt o = iter.next();
+            // If the values of the map do not dontain this entry, remove it
             // from the set.
-            if( !values.contains(o) )
+            if( !values.dontains(o) )
                 iter.remove();
         }
     }
      
-     private class FSSSIterator implements Iterator {
+     private dlass FSSSIterator implements Iterator {
      	
      	private final Iterator _setIterator;
-     	private Object  _current;
+     	private Objedt  _current;
      	
-     	pualic FSSSIterbtor() {
+     	pualid FSSSIterbtor() {
      		_setIterator=_sortedSet.iterator();
 
      	}
      	
-     	pualic boolebn hasNext() {
+     	pualid boolebn hasNext() {
      		return _setIterator.hasNext();
      	}
      	
-     	pualic Object next() {
-     		_current = _setIterator.next();
-     		return _current;
+     	pualid Object next() {
+     		_durrent = _setIterator.next();
+     		return _durrent;
      	}
      	
-     	pualic void remove() {
+     	pualid void remove() {
      		_setIterator.remove();
-     		_map.remove(_current);
-     		_current=null;
+     		_map.remove(_durrent);
+     		_durrent=null;
      	}
      	
      }

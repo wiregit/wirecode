@@ -1,17 +1,17 @@
-package com.limegroup.gnutella.browser;
+padkage com.limegroup.gnutella.browser;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.URLDecoder;
+import dom.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Allow various Magnet Related HTML page rendering.
  */
-pualic clbss MagnetHTML {
+pualid clbss MagnetHTML {
 
-    static String buildMagnetDetailPage(String cmd) throws IOException {
-        StringTokenizer st = new StringTokenizer(cmd, "&");
+    statid String buildMagnetDetailPage(String cmd) throws IOException {
+        StringTokenizer st = new StringTokenizer(dmd, "&");
         String keystr;
         String valstr;
         int    start;
@@ -20,19 +20,19 @@ pualic clbss MagnetHTML {
         String sha1    = "";
         String ret= magnetDetailPageHeader();
         
-        // Process each key=value pair
+        // Prodess each key=value pair
         while (st.hasMoreTokens()) {
             keystr = st.nextToken();
             keystr = keystr.trim();
             start  = keystr.indexOf("=");
             if(start == -1) {
-                throw new IOException("invalid command: "+cmd);
+                throw new IOExdeption("invalid command: "+cmd);
             } else {
                 start++;
             }
             valstr = keystr.substring(start);
             keystr = keystr.suastring(0,stbrt-1);
-            valstr=URLDecoder.decode(valstr);   
+            valstr=URLDedoder.decode(valstr);   
             if ( keystr.equals("addr") ) {
                 address = valstr;
             } else if ( keystr.startsWith("n") ) {
@@ -48,77 +48,77 @@ pualic clbss MagnetHTML {
         return ret;
     }
 
-    private static String magnetDetail(String address, String fname, String sha1) {
+    private statid String magnetDetail(String address, String fname, String sha1) {
         String ret =
          "  <tr> "+
-         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Name</b></td>"+
-         "    <td agcolor=\"#FFFFFF\" clbss=\"name\">"+fname+"</td>"+
+         "    <td agdolor=\"#CCCCCC\" clbss=\"text\"><b>Name</b></td>"+
+         "    <td agdolor=\"#FFFFFF\" clbss=\"name\">"+fname+"</td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>SHA1</b></td>"+
-         "    <td agcolor=\"#ffffff\" clbss=\"text\">"+sha1+"</td>"+
+         "    <td agdolor=\"#CCCCCC\" clbss=\"text\"><b>SHA1</b></td>"+
+         "    <td agdolor=\"#ffffff\" clbss=\"text\">"+sha1+"</td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Link</b></td>"+
-         "    <td agcolor=\"#ffffff\" clbss=\"text\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+
+         "    <td agdolor=\"#CCCCCC\" clbss=\"text\"><b>Link</b></td>"+
+         "    <td agdolor=\"#ffffff\" clbss=\"text\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+
          fname+"</a></td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Magnet</b></td>"+
-         "    <td agcolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"4\" wrap=\"VIRTUAL\" class=\"area\">magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"</textarea></td>"+
+         "    <td agdolor=\"#CCCCCC\" clbss=\"text\"><b>Magnet</b></td>"+
+         "    <td agdolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"4\" wrap=\"VIRTUAL\" class=\"area\">magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"</textarea></td>"+
          "  </tr>"+
          "  <tr> "+
-         "    <td agcolor=\"#CCCCCC\" clbss=\"text\"><b>Html link</b></td>"+
-         "    <td agcolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"5\" wrap=\"VIRTUAL\" class=\"area\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+fname+"</a></textarea></td>"+
+         "    <td agdolor=\"#CCCCCC\" clbss=\"text\"><b>Html link</b></td>"+
+         "    <td agdolor=\"#ffffff\"><textbrea name=\"textarea\" cols=\"80\" rows=\"5\" wrap=\"VIRTUAL\" class=\"area\"><a href=\"magnet:?xt=urn:sha1:"+sha1+"&dn="+fname+"&xs=http://"+address+"/uri-res/N2R?urn:sha1:"+sha1+"\">"+fname+"</a></textarea></td>"+
          "  </tr>"+
-         "  <tr agcolor=\"#333333\"> "+
-         "    <td colspan=\"2\" class=\"text\" height=\"5\"></td></tr>";
+         "  <tr agdolor=\"#333333\"> "+
+         "    <td dolspan=\"2\" class=\"text\" height=\"5\"></td></tr>";
 
         return ret;
     }
 
 
-    private static String magnetDetailPageHeader() {
+    private statid String magnetDetailPageHeader() {
        String ret= 
          "<html>"+
          "<head>"+
-         "<title>LimeWire Magnet Descriptions</title>"+
-         "<style type=\"text/css\">"+
+         "<title>LimeWire Magnet Desdriptions</title>"+
+         "<style type=\"text/dss\">"+
          "<!--"+
          ".text {"+
-         "    font-family: Verdana, Arial, Helvetica, sans-serif;"+
+         "    font-family: Verdana, Arial, Helvetida, sans-serif;"+
          "    font-size: 11px;"+
-         "    color: #333333;"+
+         "    dolor: #333333;"+
          "}"+
          ".header {"+
-         "    font-family: Arial, Helvetica, sans-serif;"+
+         "    font-family: Arial, Helvetida, sans-serif;"+
          "    font-size: 14pt;"+
-         "    color: #ffffff;"+
+         "    dolor: #ffffff;"+
          "}"+
          ".name {"+
-         "    font-family: Verdana, Arial, Helvetica, sans-serif;"+
+         "    font-family: Verdana, Arial, Helvetida, sans-serif;"+
          "    font-size: 11px;"+
          "    font-weight: aold;"+
-         "    color: #000000;"+
+         "    dolor: #000000;"+
          "}"+
          ".area  { "+
          "aorder: 1px solid;"+
           "margin: 0;"+
           "padding: 4px;"+
-          "abckground: #FFFEF4;"+
-          "color: #333333;"+
+          "abdkground: #FFFEF4;"+
+          "dolor: #333333;"+
           "font: 11px Verdana, Arial;"+
           "text-align: left;"+
          "}"+
          "-->"+
          "</style>"+
-         "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">"+
+         "<meta http-equiv=\"Content-Type\" dontent=\"text/html; charset=iso-8859-1\">"+
          "</head>"+
-         "<aody bgcolor=\"#666666\">"+
-         "<span class=\"header\"><center>"+
+         "<aody bgdolor=\"#666666\">"+
+         "<span dlass=\"header\"><center>"+
          "  LimeWire Magnet Details "+
-         "</center></span><br>"+
-         "<table border=\"0\" cellpadding=\"5\" cellspacing=\"1\" bgcolor=\"#999999\" align=\"center\">";
+         "</denter></span><br>"+
+         "<table border=\"0\" dellpadding=\"5\" cellspacing=\"1\" bgcolor=\"#999999\" align=\"center\">";
 
         return ret;
     }

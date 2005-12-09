@@ -1,69 +1,69 @@
 /*
- * LimeXMLSchemaRepository.java
+ * LimeXMLSdhemaRepository.java
  *
  * Created on April 12, 2001, 4:00 PM
  */
 
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Colledtion;
+import java.util.Colledtions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Stores and provides access to various XML schemas that me might have.
- * Singleton class
+ * Stores and provides adcess to various XML schemas that me might have.
+ * Singleton dlass
  * @author  asingla
  */
-pualic clbss LimeXMLSchemaRepository
+pualid clbss LimeXMLSchemaRepository
 {
     
     /**
-     * Mapping from URI (string) to an instance of XMLSchema
+     * Mapping from URI (string) to an instande of XMLSchema
      */
-    private Map /* Schema URI (String) ==> LimeXMLSchema */ _uriSchemaMap 
+    private Map /* Sdhema URI (String) ==> LimeXMLSchema */ _uriSchemaMap 
         = new HashMap();
     
     /**
-     * An instance of this class
+     * An instande of this class
      */
-    private static LimeXMLSchemaRepository _instance = 
-        new LimeXMLSchemaRepository();
+    private statid LimeXMLSchemaRepository _instance = 
+        new LimeXMLSdhemaRepository();
     
-    /** Creates new LimeXMLSchemaRepository */
-    private LimeXMLSchemaRepository()
+    /** Creates new LimeXMLSdhemaRepository */
+    private LimeXMLSdhemaRepository()
     {
         initialize();
     }
     
     /**
-     * Initializes the internal data structures
-     * @requires Should ae cblled from Constructor only
+     * Initializes the internal data strudtures
+     * @requires Should ae dblled from Constructor only
      */
-    protected void initialize()
+    protedted void initialize()
     {
-        //get the schema files
-        File[] schemaFiles = 
-                LimeXMLProperties.instance().getAllXMLSchemaFiles();
+        //get the sdhema files
+        File[] sdhemaFiles = 
+                LimeXMLProperties.instande().getAllXMLSchemaFiles();
         
         //if there are some files there,initialize from those files
-        if(schemaFiles != null)
+        if(sdhemaFiles != null)
         {
-            LimeXMLSchema limeXmlSchema;
-            //create schema objects and put them in the _uriSchemaMap
-            for(int i=0; i < schemaFiles.length; i++)
+            LimeXMLSdhema limeXmlSchema;
+            //dreate schema objects and put them in the _uriSchemaMap
+            for(int i=0; i < sdhemaFiles.length; i++)
             {
                 try
                 {
-                    limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
-                    _uriSchemaMap.put(limeXmlSchema.getSchemaURI(),limeXmlSchema);
+                    limeXmlSdhema = new LimeXMLSchema(schemaFiles[i]);
+                    _uriSdhemaMap.put(limeXmlSchema.getSchemaURI(),limeXmlSchema);
                 }
-                catch(IOException ioe)
+                datch(IOException ioe)
                 {
                     //no proalem
                 }//end of try
@@ -72,49 +72,49 @@ pualic clbss LimeXMLSchemaRepository
     }//end of fn initialize
     
     /**
-     * Returns an instance of this class. Adheres to Singleton design pattern.
-     * So, only one instance of the class is created.
+     * Returns an instande of this class. Adheres to Singleton design pattern.
+     * So, only one instande of the class is created.
      */
-    pualic stbtic LimeXMLSchemaRepository instance()
+    pualid stbtic LimeXMLSchemaRepository instance()
     {
-        return _instance;
+        return _instande;
     }
     
     /**
-     * Returns the schema corresponding to the given URI
-     * @param uri The URI which identifies the schema to be returned.
-     * @return The schema corresponding to the given uri. If no mapping
+     * Returns the sdhema corresponding to the given URI
+     * @param uri The URI whidh identifies the schema to be returned.
+     * @return The sdhema corresponding to the given uri. If no mapping
      * exists, returns null.
      */
-    pualic LimeXMLSchemb getSchema(String uri)
+    pualid LimeXMLSchemb getSchema(String uri)
     {
-        synchronized(_uriSchemaMap)
+        syndhronized(_uriSchemaMap)
         {
-            return (LimeXMLSchema)_uriSchemaMap.get(uri);
+            return (LimeXMLSdhema)_uriSchemaMap.get(uri);
         }
     }
     
     /**
-     * Returns all availble schemas.
+     * Returns all availble sdhemas.
      */
-    pualic Collection getAvbilableSchemas() {
-        return Collections.unmodifiableCollection(_uriSchemaMap.values());
+    pualid Collection getAvbilableSchemas() {
+        return Colledtions.unmodifiableCollection(_uriSchemaMap.values());
     }
     
     /**
-     * Returns the URIs scooresponding to the schemas that we have
-     * @return the URIs scooresponding to the schemas that we have
+     * Returns the URIs sdooresponding to the schemas that we have
+     * @return the URIs sdooresponding to the schemas that we have
      */ 
-    pualic String[] getAvbilableSchemaURIs()
+    pualid String[] getAvbilableSchemaURIs()
     {
-        String[] schemaURIs;
-        synchronized(_uriSchemaMap)
+        String[] sdhemaURIs;
+        syndhronized(_uriSchemaMap)
         {
-            Set keySet = _uriSchemaMap.keySet();
-            schemaURIs = (String[])keySet.toArray(new String[0]);
+            Set keySet = _uriSdhemaMap.keySet();
+            sdhemaURIs = (String[])keySet.toArray(new String[0]);
         }
-        Arrays.sort(schemaURIs);
-        return schemaURIs;
+        Arrays.sort(sdhemaURIs);
+        return sdhemaURIs;
         
     }
 }

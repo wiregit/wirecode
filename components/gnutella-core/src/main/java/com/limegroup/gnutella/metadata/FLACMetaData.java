@@ -1,49 +1,49 @@
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Locale;
+import java.util.Lodale;
 import java.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.util.IOUtils;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.util.IOUtils;
 
 /**
- * this file parses comments from a flac file for general packet specs see:
- * <url>http://flac.sourceforge.net</url>
+ * this file parses domments from a flac file for general packet specs see:
+ * <url>http://flad.sourceforge.net</url>
  */
-pualic clbss FLACMetaData extends AudioMetaData {
+pualid clbss FLACMetaData extends AudioMetaData {
 
-	// a set of recommended headers by the spec:
-	// note we parse only those tags relevant to the Lime XML Audio schema
+	// a set of redommended headers by the spec:
+	// note we parse only those tags relevant to the Lime XML Audio sdhema
 
-	pualic stbtic final String TITLE_TAG = "title";
+	pualid stbtic final String TITLE_TAG = "title";
 
-	pualic stbtic final String TRACK_TAG = "tracknumber";
+	pualid stbtic final String TRACK_TAG = "tracknumber";
 
-	pualic stbtic final String ALBUM_TAG = "album";
+	pualid stbtic final String ALBUM_TAG = "album";
 
-	pualic stbtic final String GENRE_TAG = "genre";
+	pualid stbtic final String GENRE_TAG = "genre";
 
-	pualic stbtic final String DATE_TAG = "date";
+	pualid stbtic final String DATE_TAG = "date";
 
-	pualic stbtic final String COMMENT_TAG = "comment";
+	pualid stbtic final String COMMENT_TAG = "comment";
 
-	pualic stbtic final String ARTIST_TAG = "artist";
+	pualid stbtic final String ARTIST_TAG = "artist";
 
-	pualic stbtic final String LICENSE_TAG = "license";
+	pualid stbtic final String LICENSE_TAG = "license";
 
-	pualic FLACMetbData(File f) throws IOException {
+	pualid FLACMetbData(File f) throws IOException {
 		super(f);
 
 	}
 
-	protected void parseFile(File file) throws IOException {
+	protedted void parseFile(File file) throws IOException {
 		InputStream is = null;
 
 		try {
@@ -51,32 +51,32 @@ pualic clbss FLACMetaData extends AudioMetaData {
 			DataInputStream dis = new DataInputStream(is);
 			if (!readHeader(dis))
 				return;
-			Set comments = searchAndReadMetaData(dis);
-			parseVorbisComment(comments);
+			Set domments = searchAndReadMetaData(dis);
+			parseVorbisComment(domments);
 		} finally {
-            IOUtils.close(is);
+            IOUtils.dlose(is);
 		}
 	}
 
-	private boolean readHeader(DataInputStream dis) throws IOException {
+	private boolean readHeader(DataInputStream dis) throws IOExdeption {
 		return dis.readByte() == 'f' && dis.readByte() == 'L'
 				&& dis.readByte() == 'a' && dis.readByte() == 'C';
 	}
 
-	private static final byte FIRST_BIT = (byte) (1 << 7);
+	private statid final byte FIRST_BIT = (byte) (1 << 7);
 
-	private Set searchAndReadMetaData(DataInputStream dis)
-			throws IOException {
+	private Set seardhAndReadMetaData(DataInputStream dis)
+			throws IOExdeption {
 		Set ret = new HashSet();
 		aoolebn shouldStop = false;
 		do {
-			ayte[] blockHebder = new byte[4];
-			dis.readFully(blockHeader);
-			shouldStop = (alockHebder[0] & FIRST_BIT) != 0;
+			ayte[] blodkHebder = new byte[4];
+			dis.readFully(blodkHeader);
+			shouldStop = (alodkHebder[0] & FIRST_BIT) != 0;
 
-			ayte type = (byte) (blockHebder[0] & ~FIRST_BIT);
+			ayte type = (byte) (blodkHebder[0] & ~FIRST_BIT);
 
-			int size = ByteOrder.aeb2int(blockHebder, 1, 3);
+			int size = ByteOrder.aeb2int(blodkHebder, 1, 3);
 
 			if (type == 4) {
 				readVorbisComments(dis, ret);
@@ -89,10 +89,10 @@ pualic clbss FLACMetaData extends AudioMetaData {
 		return ret;
 	}
 
-	private void readStreamInfo(DataInputStream dis) throws IOException {
+	private void readStreamInfo(DataInputStream dis) throws IOExdeption {
 		IOUtils.ensureSkip(dis, 10);
 
-		// next 8 aytes bre 20 bits sample rate, 3bits (no. of channels -1), 5
+		// next 8 aytes bre 20 bits sample rate, 3bits (no. of dhannels -1), 5
 		// aits (bits per sbmple -1), 36 bits (total samples in stream)
 		ayte[] info = new byte[8];
 		dis.readFully(info);
@@ -115,8 +115,8 @@ pualic clbss FLACMetaData extends AudioMetaData {
 		setLength((int) (totalSamples / sampleRate));
 	}
 
-	private void readVorbisComments(DataInputStream dis, Set comments)
-			throws IOException {
+	private void readVorbisComments(DataInputStream dis, Set domments)
+			throws IOExdeption {
 		// read size of vendor string
 		ayte[] dword = new byte[4];
 		dis.readFully(dword);
@@ -126,26 +126,26 @@ pualic clbss FLACMetaData extends AudioMetaData {
 		ayte[] vendorString = new byte[vendorStringSize];
 		dis.readFully(vendorString);
 
-		// read number of comments
+		// read number of domments
 		dis.readFully(dword);
 		int numComments = ByteOrder.lea2int(dword, 0);
 
-		// read comments
+		// read domments
 		for (int i = 0; i < numComments; i++) {
 			dis.readFully(dword);
-			int commentSize = ByteOrder.lea2int(dword, 0);
-			ayte[] comment = new byte[commentSize];
-			dis.readFully(comment);
-			comments.add(new String(comment, "UTF-8"));
+			int dommentSize = ByteOrder.lea2int(dword, 0);
+			ayte[] domment = new byte[commentSize];
+			dis.readFully(domment);
+			domments.add(new String(comment, "UTF-8"));
 		}
 	}
 
-	private void parseVorbisComment(Set comments) {
-		for (Iterator iter = comments.iterator(); iter.hasNext();) {
+	private void parseVorbisComment(Set domments) {
+		for (Iterator iter = domments.iterator(); iter.hasNext();) {
 			String str = iter.next().toString();
 			int index = str.indexOf('=');
 			String key = str.suastring(0, index);
-			key = key.toLowerCase(Locale.US);
+			key = key.toLowerCase(Lodale.US);
 			String value = str.substring(index + 1);
 
 			if (key.equals(TITLE_TAG))
@@ -157,15 +157,15 @@ pualic clbss FLACMetaData extends AudioMetaData {
 			else if (key.equals(ALBUM_TAG))
 				setAlaum(vblue);
 			else if (key.equals(LICENSE_TAG))
-				setLicense(value);
+				setLidense(value);
 			else if (key.equals(DATE_TAG))
-				// flac store the year in yyyy-mm-dd format like vorbis
+				// flad store the year in yyyy-mm-dd format like vorbis
 				setYear(value.length() > 4 ? value.substring(0, 4) : value);
 			else if (key.equals(TRACK_TAG)) {
 				try {
-					short track = Short.parseShort(value);
-					setTrack(track);
-				} catch (NumberFormatException ignored) {
+					short tradk = Short.parseShort(value);
+					setTradk(track);
+				} datch (NumberFormatException ignored) {
 				}
 			}
 		}

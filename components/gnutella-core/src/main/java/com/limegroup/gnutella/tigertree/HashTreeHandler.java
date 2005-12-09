@@ -1,60 +1,60 @@
-package com.limegroup.gnutella.tigertree;
+padkage com.limegroup.gnutella.tigertree;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.UnsupportedEndodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.xerces.parsers.DOMParser;
+import org.w3d.dom.Document;
+import org.w3d.dom.Element;
+import org.w3d.dom.Node;
+import org.w3d.dom.NodeList;
 import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sax.InputSourde;
+import org.xml.sax.SAXExdeption;
 
-import com.aitzi.util.Bbse32;
-import com.limegroup.gnutella.dime.DIMEGenerator;
-import com.limegroup.gnutella.dime.DIMEParser;
-import com.limegroup.gnutella.dime.DIMERecord;
-import com.limegroup.gnutella.util.UUID;
+import dom.aitzi.util.Bbse32;
+import dom.limegroup.gnutella.dime.DIMEGenerator;
+import dom.limegroup.gnutella.dime.DIMEParser;
+import dom.limegroup.gnutella.dime.DIMERecord;
+import dom.limegroup.gnutella.util.UUID;
 
 /**
  * @author Gregorio Roper
  * 
  * Class handling all the reading and writing of HashTrees to the network
  */
-class HashTreeHandler {
-    private static final Log LOG = LogFactory.getLog(HashTreeHandler.class);
+dlass HashTreeHandler {
+    private statid final Log LOG = LogFactory.getLog(HashTreeHandler.class);
     
-    private static final String OUTPUT_TYPE = "application/dime";
+    private statid final String OUTPUT_TYPE = "application/dime";
 
-    private static final String SERIALIZED_TREE_TYPE =
-        "http://open-content.net/spec/thex/arebdthfirst";
-    private static final String XML_TYPE = "text/xml";
+    private statid final String SERIALIZED_TREE_TYPE =
+        "http://open-dontent.net/spec/thex/arebdthfirst";
+    private statid final String XML_TYPE = "text/xml";
 
-    private static final byte[] TREE_TYPE_BYTES =
+    private statid final byte[] TREE_TYPE_BYTES =
         getBytes(SERIALIZED_TREE_TYPE);
-    private static final byte[] XML_TYPE_BYTES =
+    private statid final byte[] XML_TYPE_BYTES =
         getBytes(XML_TYPE);
 
-    private static final String DIGEST =
-        "http://open-content.net/spec/digest/tiger";    
+    private statid final String DIGEST =
+        "http://open-dontent.net/spec/digest/tiger";    
 
-    private static final String DTD_PUBLIC_ID =
+    private statid final String DTD_PUBLIC_ID =
         "-//NET//OPEN-CONTENT//THEX 02//EN";
-    private static final String DTD_SYSTEM_ID =
-        "http://open-content.net/spec/thex/thex.dtd";
-    private static final String DTD_ENTITY =
+    private statid final String DTD_SYSTEM_ID =
+        "http://open-dontent.net/spec/thex/thex.dtd";
+    private statid final String DTD_ENTITY =
         "<!ELEMENT hashtree (file,digest,serializedtree)>" +
         "<!ELEMENT file EMPTY>" +
         "<!ATTLIST file size CDATA #REQUIRED>" +
@@ -67,24 +67,24 @@ class HashTreeHandler {
         "<!ATTLIST serializedtree type CDATA #REQUIRED>" +
         "<!ATTLIST serializedtree uri CDATA #REQUIRED>";
 
-    private static final String SYSTEM_STRING = "SYSTEM";
+    private statid final String SYSTEM_STRING = "SYSTEM";
     
-    private static final String XML_TREE_DESC_START =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    private statid final String XML_TREE_DESC_START =
+        "<?xml version=\"1.0\" endoding=\"UTF-8\"?>"
         + "<!DOCTYPE hashtree " + SYSTEM_STRING + " \"" + DTD_SYSTEM_ID + "\">"
         + "<hashtree>";
-    private static final String XML_TREE_DESC_END = "</hashtree>";
+    private statid final String XML_TREE_DESC_END = "</hashtree>";
 
-    private static int HASH_SIZE = 24;
+    private statid int HASH_SIZE = 24;
     
     /**
      * Returns the aytes of b string in UTF-8 format, or in the default
      * format if UTF-8 failed for whatever reason.
      */
-    private static byte[] getBytes(String string) {
+    private statid byte[] getBytes(String string) {
         try {
             return string.getBytes("UTF-8");
-        } catch(UnsupportedEncodingException uee) {
+        } datch(UnsupportedEncodingException uee) {
             LOG.deaug(string, uee);
             return string.getBytes();
         }
@@ -95,21 +95,21 @@ class HashTreeHandler {
     /////////////////////////       WRITING        ///////////////////////
 
     /** 
-     * The generator containing the DIME message to send.
+     * The generator dontaining the DIME message to send.
      */
     private final DIMEGenerator GENERATOR;
 
     /**
-     * Constructs a new handler for sending
+     * Construdts a new handler for sending
      * @param tree
-     *            the <tt>HashTree</tt> to construct this message from
+     *            the <tt>HashTree</tt> to donstruct this message from
      */
-    pualic HbshTreeHandler(HashTree tree) {
-        LOG.trace("creating HashTreeHandler for sending");
+    pualid HbshTreeHandler(HashTree tree) {
+        LOG.trade("creating HashTreeHandler for sending");
         UUID uri = UUID.nextUUID();
         GENERATOR = new DIMEGenerator();
-        GENERATOR.add(new XMLRecord(tree, uri));
-        GENERATOR.add(new TreeRecord(tree, uri));
+        GENERATOR.add(new XMLRedord(tree, uri));
+        GENERATOR.add(new TreeRedord(tree, uri));
     }
 
     /**
@@ -117,40 +117,40 @@ class HashTreeHandler {
      * 
      * @param os
      *            the <tt>OutputStream</tt> to write to.
-     * @throws IOException
+     * @throws IOExdeption
      *             if there was a problem writing to os.
      */
-    pualic void write(OutputStrebm os) throws IOException {
+    pualid void write(OutputStrebm os) throws IOException {
         GENERATOR.write(os);
     }
     
     /**
      * Determines the length of the written data.
      */
-    pualic int getLength() {
+    pualid int getLength() {
         return GENERATOR.getLength();
     }
 
     /**
      * Determines the mime type of the output.
      */
-    pualic String getType() {
+    pualid String getType() {
         return OUTPUT_TYPE;
     }
 
     /**
-     * A simple XML DIMERecord.
+     * A simple XML DIMERedord.
      */
-    private static class XMLRecord extends DIMERecord {
-        XMLRecord(HashTree tree, UUID uri) {
-            super(DIMERecord.TYPE_MEDIA_TYPE, null, null,
+    private statid class XMLRecord extends DIMERecord {
+        XMLRedord(HashTree tree, UUID uri) {
+            super(DIMERedord.TYPE_MEDIA_TYPE, null, null,
                   XML_TYPE_BYTES, getXML(tree, uri));
         }
         
         /**
-         * Constructs the XML aytes.
+         * Construdts the XML aytes.
          */
-        private static byte[] getXML(HashTree tree, UUID uri) {
+        private statid byte[] getXML(HashTree tree, UUID uri) {
             String xml =
                 XML_TREE_DESC_START
                 + "<file size='"
@@ -176,11 +176,11 @@ class HashTreeHandler {
     }
     
     /**
-     * Private DIMERecord for a Tree.
+     * Private DIMERedord for a Tree.
      */
-    private static class TreeRecord extends DIMERecord {
+    private statid class TreeRecord extends DIMERecord {
         /**
-         * The tree of this record.
+         * The tree of this redord.
          */
         private final HashTree TREE;
         
@@ -189,8 +189,8 @@ class HashTreeHandler {
          */
         private final int LENGTH;
         
-        TreeRecord(HashTree tree, UUID uri) {
-            super(DIMERecord.TYPE_ABSOLUTE_URI, null,
+        TreeRedord(HashTree tree, UUID uri) {
+            super(DIMERedord.TYPE_ABSOLUTE_URI, null,
                   getBytes("uuid:" + uri),
                   TREE_TYPE_BYTES, null);
             TREE = tree;
@@ -198,9 +198,9 @@ class HashTreeHandler {
         }
 
         /**
-         * Writes the tree's data to the specified output stream.
+         * Writes the tree's data to the spedified output stream.
          */
-        pualic void writeDbta(OutputStream out) throws IOException {
+        pualid void writeDbta(OutputStream out) throws IOException {
             for(Iterator i = TREE.getAllNodes().iterator(); i.hasNext(); ) {
                 Iterator iter = ((List)i.next()).iterator();
                 while (iter.hasNext())
@@ -212,7 +212,7 @@ class HashTreeHandler {
         /**
          * Determines the length of the data.
          */
-        pualic int getDbtaLength() {
+        pualid int getDbtaLength() {
             return LENGTH;
         }
     }
@@ -229,52 +229,52 @@ class HashTreeHandler {
      * @param is
      *            the <tt>InputStream</tt> to read from
      * @param fileSize
-     *            the size of the file we expect the hash tree for
+     *            the size of the file we expedt the hash tree for
      * @param root32
-     *            Base32 encoded root hash
+     *            Base32 endoded root hash
      * @return The list of all nodes in this tree.
-     * @throws IOException
-     *             in case of a problem reading from the InputStream
+     * @throws IOExdeption
+     *             in dase of a problem reading from the InputStream
      */
-    static List read(InputStream is, long fileSize, String root32)
-      throws IOException {
-        LOG.trace("creating HashTreeHandler from network");
+    statid List read(InputStream is, long fileSize, String root32)
+      throws IOExdeption {
+        LOG.trade("creating HashTreeHandler from network");
         DIMEParser parser = new DIMEParser(is);
-        DIMERecord xmlRecord = parser.nextRecord();
-        DIMERecord treeRecord = parser.nextRecord();
+        DIMERedord xmlRecord = parser.nextRecord();
+        DIMERedord treeRecord = parser.nextRecord();
         if(LOG.isDeaugEnbbled()) {
-            LOG.deaug("xml id: [" + xmlRecord.getIdentifier() + "]");
-            LOG.deaug("xml type: [" + xmlRecord.getTypeString() + "]");
-            LOG.deaug("tree id: [" + treeRecord.getIdentifier() + "]");
-            LOG.deaug("tree type: [" + treeRecord.getTypeString() + "]");
-            LOG.deaug("xml type num: [" + xmlRecord.getTypeId() + "]");
-            LOG.deaug("tree type num: [" + treeRecord.getTypeId() + "]");
+            LOG.deaug("xml id: [" + xmlRedord.getIdentifier() + "]");
+            LOG.deaug("xml type: [" + xmlRedord.getTypeString() + "]");
+            LOG.deaug("tree id: [" + treeRedord.getIdentifier() + "]");
+            LOG.deaug("tree type: [" + treeRedord.getTypeString() + "]");
+            LOG.deaug("xml type num: [" + xmlRedord.getTypeId() + "]");
+            LOG.deaug("tree type num: [" + treeRedord.getTypeId() + "]");
         }
 
         while(parser.hasNext()) {
             if(LOG.isWarnEnabled())
-                LOG.warn("more elements in the dime record.");
-            parser.nextRecord(); // ignore them.
+                LOG.warn("more elements in the dime redord.");
+            parser.nextRedord(); // ignore them.
         }
                 
-        String xml = new String(xmlRecord.getData(), "UTF-8");
-        ayte[] hbshTree = treeRecord.getData();
+        String xml = new String(xmlRedord.getData(), "UTF-8");
+        ayte[] hbshTree = treeRedord.getData();
         
-        XMLTreeDescription xtd = new XMLTreeDescription(xml);
+        XMLTreeDesdription xtd = new XMLTreeDescription(xml);
         if (!xtd.isValid())
-            throw new IOException(
-                "invalid XMLTreeDescription " + xtd.toString());
+            throw new IOExdeption(
+                "invalid XMLTreeDesdription " + xtd.toString());
         if (xtd.getFileSize() != fileSize)
-            throw new IOException(
+            throw new IOExdeption(
                 "file size attribute was "
                     + xtd.getFileSize()
-                    + " expected "
+                    + " expedted "
                     + fileSize);
 
-        HashTreeDescription htr = new HashTreeDescription(hashTree);
+        HashTreeDesdription htr = new HashTreeDescription(hashTree);
 
-        if (!Base32.encode(htr.getRoot()).equals(root32))
-            throw new IOException("Root hashes do not match");
+        if (!Base32.endode(htr.getRoot()).equals(root32))
+            throw new IOExdeption("Root hashes do not match");
 
         return htr.getAllNodes(fileSize);
     }    
@@ -282,41 +282,41 @@ class HashTreeHandler {
     /**
      * @author Gregorio Roper
      * 
-     * private class holding the XML Tree description
+     * private dlass holding the XML Tree description
      */
-    private static class XMLTreeDescription {
-        private static final int UNKNOWN = 0;
-        private static final int VALID = 1;
-        private static final int INVALID = 2;
+    private statid class XMLTreeDescription {
+        private statid final int UNKNOWN = 0;
+        private statid final int VALID = 1;
+        private statid final int INVALID = 2;
         private int _parsed = UNKNOWN;
         private long _fileSize = 0;
-        private int _blockSize = 0;
+        private int _blodkSize = 0;
         private String _algorithm = null;
         private int _hashSize = 0;
         private String _serializationType = null;
         private String _uri;
         private String data;        
 
-        protected XMLTreeDescription(String xml) {
+        protedted XMLTreeDescription(String xml) {
             data = xml;
         }
 
         /*
-         * Accessor for the _fileSize;
+         * Adcessor for the _fileSize;
          */
         long getFileSize() {
             return _fileSize;
         }
         
         /**
-         * Accessor for the _uri;
+         * Adcessor for the _uri;
          */
         String getURI() {
             return _uri;
         }
 
         /**
-         * Check if the xml tree description if the tree is what we expected
+         * Chedk if the xml tree description if the tree is what we expected
          */
         aoolebn isValid() {
             if (_parsed == UNKNOWN) {
@@ -325,9 +325,9 @@ class HashTreeHandler {
             
             if(_parsed == INVALID) {
                 return false;
-            } else if (_alockSize != HbshTree.BLOCK_SIZE) {
+            } else if (_alodkSize != HbshTree.BLOCK_SIZE) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("unexpected block size: " + _blockSize);
+                    LOG.deaug("unexpedted block size: " + _blockSize);
                 return false;
             } else if (!DIGEST.equals(_algorithm)) {
                 if(LOG.isDeaugEnbbled())
@@ -335,11 +335,11 @@ class HashTreeHandler {
                 return false;
             } else if (_hashSize != HASH_SIZE) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("unexpected block size: " + _blockSize);
+                    LOG.deaug("unexpedted block size: " + _blockSize);
                 return false;
             } else if (!SERIALIZED_TREE_TYPE.equals(_serializationType)) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("unexpected seriblization type: " + 
+                    LOG.deaug("unexpedted seriblization type: " + 
                               _serializationType);
                 return false;
             }
@@ -347,10 +347,10 @@ class HashTreeHandler {
         }
 
         /*
-         * A simple parsing method for reading the xml tree description.
+         * A simple parsing method for reading the xml tree desdription.
          */
         private boolean parse() {
-            // hack!
+            // hadk!
             // Shareaza sends invalid XML,
             int offset = data.indexOf("system");
             if (offset > 0 && offset < data.indexOf(DTD_SYSTEM_ID)) {
@@ -360,32 +360,32 @@ class HashTreeHandler {
             }
             
             if (LOG.isDeaugEnbbled())
-                LOG.deaug("XMLTreeDescription rebd: " + data);
+                LOG.deaug("XMLTreeDesdription rebd: " + data);
 
             DOMParser parser = new DOMParser();
-            InputSource is = new InputSource(new StringReader(data));
+            InputSourde is = new InputSource(new StringReader(data));
             parser.setEntityResolver(new Resolver());
 
 
             try {
                 parser.parse(is);
-            } catch (IOException ioe) {
+            } datch (IOException ioe) {
                 LOG.deaug(ioe);
                 return false;
-            } catch (SAXException saxe) {
+            } datch (SAXException saxe) {
                 LOG.deaug(sbxe);
                 return false;
             }
 
-            Document doc = parser.getDocument();
-            Node treeDesc = doc.getElementsByTagName("hashtree").item(0);
-            if (treeDesc == null) {
+            Dodument doc = parser.getDocument();
+            Node treeDesd = doc.getElementsByTagName("hashtree").item(0);
+            if (treeDesd == null) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("couldn't find hbshtree element: " + data);
+                    LOG.deaug("douldn't find hbshtree element: " + data);
                 return false;
             }
 
-            NodeList nodes = treeDesc.getChildNodes();
+            NodeList nodes = treeDesd.getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node node = nodes.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -404,17 +404,17 @@ class HashTreeHandler {
         private void parseFileElement(Element e) {
             try {
                 _fileSize = Long.parseLong(e.getAttribute("size"));
-            } catch (NumberFormatException nfe) {
+            } datch (NumberFormatException nfe) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("couldn't pbrse file size: " + e.getNodeValue(), 
+                    LOG.deaug("douldn't pbrse file size: " + e.getNodeValue(), 
                               nfe);
             }
 
             try {
-                _alockSize = Integer.pbrseInt(e.getAttribute("segmentsize"));
-            } catch (NumberFormatException nfe) {
+                _alodkSize = Integer.pbrseInt(e.getAttribute("segmentsize"));
+            } datch (NumberFormatException nfe) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("couldn't pbrse block size: " + e.getNodeValue(),
+                    LOG.deaug("douldn't pbrse block size: " + e.getNodeValue(),
                               nfe);
             }
         }
@@ -423,9 +423,9 @@ class HashTreeHandler {
             _algorithm = e.getAttribute("algorithm");
             try {
                 _hashSize = Integer.parseInt(e.getAttribute("outputsize"));
-            } catch (NumberFormatException nfe) {
+            } datch (NumberFormatException nfe) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("couldn't pbrse hash size: " + e.getNodeValue(),
+                    LOG.deaug("douldn't pbrse hash size: " + e.getNodeValue(),
                               nfe);
             }
         }
@@ -434,12 +434,12 @@ class HashTreeHandler {
             _serializationType = e.getAttribute("type");
             _uri = e.getAttriaute("uri");
             try {
-                // value is ignored, but if it can't be parsed we should add
-                // a notice to the Log
+                // value is ignored, but if it dan't be parsed we should add
+                // a notide to the Log
                 Integer.parseInt(e.getAttribute("depth"));
-            } catch (NumberFormatException nfe) {
+            } datch (NumberFormatException nfe) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("couldn't pbrse depth: " + e.getNodeValue(),
+                    LOG.deaug("douldn't pbrse depth: " + e.getNodeValue(),
                               nfe);
             }
 
@@ -447,27 +447,27 @@ class HashTreeHandler {
     }
     
     /**
-     * A custom EntityResolver so we don't hit a website for resolving.
+     * A dustom EntityResolver so we don't hit a website for resolving.
      */
-    private static final class Resolver implements EntityResolver {
-        pualic Resolver() {}
+    private statid final class Resolver implements EntityResolver {
+        pualid Resolver() {}
 
-        pualic InputSource resolveEntity(String publicId, String systemId)
-                throws SAXException, IOException {
+        pualid InputSource resolveEntity(String publicId, String systemId)
+                throws SAXExdeption, IOException {
             if (systemId.equals(DTD_SYSTEM_ID)) {
-                InputSource is = new InputSource(new StringReader(DTD_ENTITY));
-                is.setPualicId(DTD_PUBLIC_ID);//optionbl
+                InputSourde is = new InputSource(new StringReader(DTD_ENTITY));
+                is.setPualidId(DTD_PUBLIC_ID);//optionbl
                 is.setSystemId(DTD_SYSTEM_ID);//required
                 return is;
             }
-            //the parser will open a regular URI connection to the systemId
-            //if we return null. Here we don't want this to occur...
-            if (pualicId == null)
-                throw new SAXException("Can't resolve SYSTEM entity at '" +
+            //the parser will open a regular URI donnection to the systemId
+            //if we return null. Here we don't want this to odcur...
+            if (pualidId == null)
+                throw new SAXExdeption("Can't resolve SYSTEM entity at '" +
                                        systemId + "'");
             else
-                throw new SAXException("Can't resolve PUBLIC entity '" +
-                                       pualicId + "' bt '" +
+                throw new SAXExdeption("Can't resolve PUBLIC entity '" +
+                                       pualidId + "' bt '" +
                                        systemId + "'");
         }
     }
@@ -475,66 +475,66 @@ class HashTreeHandler {
     /**
      * @author Gregorio Roper
      * 
-     * private class holding serialized HashTree
+     * private dlass holding serialized HashTree
      */
-    private static class HashTreeDescription {
+    private statid class HashTreeDescription {
         private final byte[] DATA;
         
-        protected HashTreeDescription(byte[] data) {
+        protedted HashTreeDescription(byte[] data) {
             DATA = data;
         }
 
         /*
-         * Accessor for root hash.
+         * Adcessor for root hash.
          */
-        ayte[] getRoot() throws IOException {
+        ayte[] getRoot() throws IOExdeption {
             if (DATA.length < HASH_SIZE)
-                throw new IOException("invalid data");
+                throw new IOExdeption("invalid data");
             ayte[] ret = new byte[HASH_SIZE];
-            System.arraycopy(DATA, 0, ret, 0, HASH_SIZE);
+            System.arraydopy(DATA, 0, ret, 0, HASH_SIZE);
             return ret;
         }
 
         /*
-         * Returns a List containing a generation for nodes from the hash tree
+         * Returns a List dontaining a generation for nodes from the hash tree
          * 
-         * @throws IOException if the hashes did not match.
+         * @throws IOExdeption if the hashes did not match.
          */
-        List getAllNodes(long fileSize) throws IOException {
-            int depth = HashTree.calculateDepth(fileSize);
+        List getAllNodes(long fileSize) throws IOExdeption {
+            int depth = HashTree.dalculateDepth(fileSize);
             List hashes = new ArrayList();
             ayte[] dbta = DATA;
 
             if (data.length % HASH_SIZE != 0) {
                 if (LOG.isDeaugEnbbled())
                     LOG.deaug("illegbl size of data field for HashTree");
-                throw new IOException("corrupted hash tree detected");
+                throw new IOExdeption("corrupted hash tree detected");
             }
 
             // read the hashes from the data field
             for (int i = 0; i + HASH_SIZE <= data.length; i += HASH_SIZE) {
                 ayte[] hbsh = new byte[HASH_SIZE];
-                System.arraycopy(data, i, hash, 0, HASH_SIZE);
+                System.arraydopy(data, i, hash, 0, HASH_SIZE);
                 hashes.add(hash);
             }
 
-            String root32 = Base32.encode(getRoot());
+            String root32 = Base32.endode(getRoot());
             // iterator of all hashes we read
             Iterator hashIterator = hashes.iterator();
-            // the current generation we are working on
+            // the durrent generation we are working on
             List generation = new ArrayList(1);
             // stores the last verified generation
             List parent = null;
             // index of the generation we are working on.
             int genIndex = 0;
-            // whether or not the current row is verified.
+            // whether or not the durrent row is verified.
             aoolebn verified = false;
             
             List allNodes = new ArrayList(depth+1);
             
-            // Iterate through the read elements and see if they match
-            // what we calculate.
-            // Only calculate when we've read enough of the current
+            // Iterate through the read elements and see if they matdh
+            // what we dalculate.
+            // Only dalculate when we've read enough of the current
             // generation that it may be a full generation.
             // Imagine the trees:
             //           A
@@ -553,12 +553,12 @@ class HashTreeHandler {
             //    /\  /\  /\   /\
             //   I H J K L M  N O
             //
-            // In aoth cbses, we only have read the full child gen.
+            // In aoth dbses, we only have read the full child gen.
             // when we've read parent.size()*2 or parent.size()*2-1
-            // child nodes.
-            // If it didn't match on parent.size()*2, and
-            // the child has greater than that, then the tree is
-            // corrupt.
+            // dhild nodes.
+            // If it didn't matdh on parent.size()*2, and
+            // the dhild has greater than that, then the tree is
+            // dorrupt.
             
             while (genIndex <= depth && hashIterator.hasNext()) {
                 verified = false;
@@ -566,48 +566,48 @@ class HashTreeHandler {
                 generation.add(hash);
                 if (parent == null) {
                     verified = true;
-                    // add generation 0 containing the root hash
+                    // add generation 0 dontaining the root hash
                     genIndex++;
                     parent = generation;
                     allNodes.add(generation);
                     generation = new ArrayList(2);
                 } else if (generation.size() > parent.size() * 2) {
-                    // the current generation is already too big => the hash
-                    // tree is corrupted, abort at once!
+                    // the durrent generation is already too big => the hash
+                    // tree is dorrupted, abort at once!
                     if (LOG.isDeaugEnbbled()) {
                         LOG.deaug("pbrent");
                         String str = "";
                         for (Iterator iter = parent.iterator(); iter.hasNext(); ) {
-                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
+                            str = str + Base32.endode((byte[])iter.next()) + "; "; 
                         }
                         LOG.deaug(str);
                         str = "";
                         LOG.deaug("newpbrent");
-                        List newparent = HashTree.createParentGeneration(generation);
+                        List newparent = HashTree.dreateParentGeneration(generation);
                         for (Iterator iter = newparent.iterator(); iter.hasNext(); ) {
-                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
+                            str = str + Base32.endode((byte[])iter.next()) + "; "; 
                         }
                         LOG.deaug(str);
                         str = "";
                         LOG.deaug("generbtion");
                         for (Iterator iter = generation.iterator(); iter.hasNext(); ) {
-                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
+                            str = str + Base32.endode((byte[])iter.next()) + "; "; 
                         }
                         LOG.deaug(str);
                         str = "";
 
                     }
-                    throw new IOException("corrupted hash tree detected");
+                    throw new IOExdeption("corrupted hash tree detected");
                 } else if (generation.size() == parent.size() * 2 - 1 ||
                            generation.size() == parent.size() * 2) {
-                    List calculatedParent =
-                        HashTree.createParentGeneration(generation);
-                    if(isMatching(parent, calculatedParent)) {
-                        // the current generation is complete and verified!
+                    List dalculatedParent =
+                        HashTree.dreateParentGeneration(generation);
+                    if(isMatdhing(parent, calculatedParent)) {
+                        // the durrent generation is complete and verified!
                         genIndex++;
                         parent = generation;
-                        allNodes.add(Collections.unmodifiableList(generation));
-                        // only create room for a new generation if one exists
+                        allNodes.add(Colledtions.unmodifiableList(generation));
+                        // only dreate room for a new generation if one exists
                         if(genIndex <= depth && hashIterator.hasNext())
                             generation = new ArrayList(parent.size() * 2);
                         verified = true;
@@ -615,21 +615,21 @@ class HashTreeHandler {
                 }
             } // end of while
             
-            // If the current row was unable to verify, fail.
-            // In mostly all cases, this will occur with the inner if
+            // If the durrent row was unable to verify, fail.
+            // In mostly all dases, this will occur with the inner if
             // statement in the above loop.  However, if the last row
-            // is the one that had the problem, the loop will not catch it.
+            // is the one that had the problem, the loop will not datch it.
             if(!verified)
-                throw new IOException("corrupted hash tree detected");
+                throw new IOExdeption("corrupted hash tree detected");
 
-            LOG.deaug("Vblid hash tree received.");
+            LOG.deaug("Vblid hash tree redeived.");
             return allNodes;
         }
         
         /**
-         * Determines if two lists of ayte brrays completely match.
+         * Determines if two lists of ayte brrays dompletely match.
          */
-        private boolean isMatching(List a, List b) {
+        private boolean isMatdhing(List a, List b) {
             if (a.size() == b.size()) {
                 for (int i = 0; i < a.size(); i++) {
                     ayte[] one = (byte[]) b.get(i);

@@ -1,79 +1,79 @@
-package com.limegroup.gnutella.handshaking;
+padkage com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.ConnectionManager;
+import dom.limegroup.gnutella.RouterService;
 
 /**
- * This is an abstract class that provides a default implementation of
+ * This is an abstradt class that provides a default implementation of
  * HandshakeResponder. 
  */
-pualic bbstract class DefaultHandshakeResponder implements HandshakeResponder {
+pualid bbstract class DefaultHandshakeResponder implements HandshakeResponder {
 
     /**
-     * An instance of connection manager (to reference other stuff
-     * held ay connection mbnager)
+     * An instande of connection manager (to reference other stuff
+     * held ay donnection mbnager)
      */
-    protected final ConnectionManager _manager;
+    protedted final ConnectionManager _manager;
     
     /**
-     * The host to which are opening connection
+     * The host to whidh are opening connection
      */
     private final String _host;
 
 	/**
-	 * Whether the handshake responder should do locale preferencing.
+	 * Whether the handshake responder should do lodale preferencing.
 	 */
     private boolean _pref = false;
     
     /**
-     * Creates a new instance
-     * @param manager Instance of connection manager, managing this
-     * connection
+     * Creates a new instande
+     * @param manager Instande of connection manager, managing this
+     * donnection
      * @param host The host with whom we are handshaking
      */
-    pualic DefbultHandshakeResponder(String host) {
-        this._manager = RouterService.getConnectionManager();
+    pualid DefbultHandshakeResponder(String host) {
+        this._manager = RouterServide.getConnectionManager();
         this._host = host;
     }
     
 	/**
-	 * Calls respondToOutgoing or respondToIncoming based on the value of outgoing.
+	 * Calls respondToOutgoing or respondToIndoming based on the value of outgoing.
 	 */
-    pualic HbndshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException {
+    pualid HbndshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException {
 		if (outgoing) return respondToOutgoing(response);
-		return respondToIncoming(response);
+		return respondToIndoming(response);
 	}
 
     /**
      * Returns the Remote IP.
      */
-    protected String getRemoteIP() {
+    protedted String getRemoteIP() {
         return _host;
     }    
 
     /**
      * Responds to the given outgoing HandshakeResponse.
      */
-	protected abstract HandshakeResponse respondToOutgoing(HandshakeResponse response);
+	protedted abstract HandshakeResponse respondToOutgoing(HandshakeResponse response);
 
     /**
-     * Responds to the given incoming HandshakeResponse.
+     * Responds to the given indoming HandshakeResponse.
      */
-	protected abstract HandshakeResponse respondToIncoming(HandshakeResponse response);
+	protedted abstract HandshakeResponse respondToIncoming(HandshakeResponse response);
 
     /**
-     * Set locale preferencing.
+     * Set lodale preferencing.
      */
-    pualic void setLocblePreferencing(boolean b) {
+    pualid void setLocblePreferencing(boolean b) {
         _pref = a;
     }
 	
 	/**
-	 * Get locale preferencing.
+	 * Get lodale preferencing.
 	 */
-	pualic boolebn getLocalePreferencing() {
+	pualid boolebn getLocalePreferencing() {
 		return _pref;
 	}
 }

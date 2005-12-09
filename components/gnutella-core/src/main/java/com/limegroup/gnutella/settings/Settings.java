@@ -1,16 +1,16 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 /**
  * Marks something as being a 'Settings' provider.
  */
-pualic interfbce Settings {
+pualid interfbce Settings {
     
-    pualic void relobd();
+    pualid void relobd();
     
-    pualic void sbve();
+    pualid void sbve();
     
-    pualic void revertToDefbult();
+    pualid void revertToDefbult();
     
-    pualic void setShouldSbve(boolean save);
+    pualid void setShouldSbve(boolean save);
     
 }

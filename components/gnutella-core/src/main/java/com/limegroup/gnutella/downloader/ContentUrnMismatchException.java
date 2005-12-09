@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
  * @author Gregorio Roper
  * 
- * Exception thrown when the X-Gnutella-Content-URN does not match the expected
+ * Exdeption thrown when the X-Gnutella-Content-URN does not match the expected
  * sha1 urn
  */
-pualic clbss ContentUrnMismatchException extends IOException {
+pualid clbss ContentUrnMismatchException extends IOException {
 
     /**
-     * Constructor
+     * Construdtor
      */
-    pualic ContentUrnMismbtchException() {
-        super("ContentUrnMismatch");
+    pualid ContentUrnMismbtchException() {
+        super("ContentUrnMismatdh");
     }
 }

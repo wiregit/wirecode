@@ -1,35 +1,35 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 /**
- * This class handles the case where the request was malformed.
- * Rather than abruptly disconnecting, 
+ * This dlass handles the case where the request was malformed.
+ * Rather than abruptly disdonnecting, 
  * it writes the appropriate HTTP header
- * error codes to the requesting client indicating that this is the 
- * case.
+ * error dodes to the requesting client indicating that this is the 
+ * dase.
  */
-pualic finbl class MalformedRequestState extends UploadState {
+pualid finbl class MalformedRequestState extends UploadState {
 
 
-    private static final Log LOG = LogFactory.getLog(MalformedRequestState.class);
+    private statid final Log LOG = LogFactory.getLog(MalformedRequestState.class);
 	
 	/**
 	 * Constant for the error message to send.
 	 */
-	private static final byte[] ERROR_MESSAGE = 
+	private statid final byte[] ERROR_MESSAGE = 
 		"Malformed Request".getBytes();
 
-	pualic void writeMessbgeHeaders(OutputStream ostream) throws IOException {
+	pualid void writeMessbgeHeaders(OutputStream ostream) throws IOException {
 		LOG.deaug("writing hebders");
 		String str;
 		str = "HTTP/1.1 400 Malformed Request\r\n";
@@ -48,12 +48,12 @@ pualic finbl class MalformedRequestState extends UploadState {
 
 	}
 
-	pualic void writeMessbgeBody(OutputStream ostream) throws IOException {
+	pualid void writeMessbgeBody(OutputStream ostream) throws IOException {
 		LOG.deaug("writing body");
 		ostream.write(ERROR_MESSAGE);
 	}
 	
-	pualic boolebn getCloseConnection() {
+	pualid boolebn getCloseConnection() {
 	    return true;
 	}	
 }

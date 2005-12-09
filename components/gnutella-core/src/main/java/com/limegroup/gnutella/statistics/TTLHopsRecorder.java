@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.Message;
 
 /**
- * This class is a convenient wrapper for any class that keeps track of
+ * This dlass is a convenient wrapper for any class that keeps track of
  * ttl and hops for a Gnutella message.
  */
-pualic finbl class TTLHopsRecorder {
+pualid finbl class TTLHopsRecorder {
 
 	/**
-	 * Constructs a new <tt>TTLHopsRecorder</tt> instance with the specified
+	 * Construdts a new <tt>TTLHopsRecorder</tt> instance with the specified
 	 * message identifier name for deriving the file name to use when
-	 * writing statistics data out to files.
+	 * writing statistids data out to files.
 	 */
-	TTLHopsRecorder(final String NAME) {
+	TTLHopsRedorder(final String NAME) {
 		TTL0 = new GeneralStatHandler(NAME+"_TTL0");
 		TTL1 = new GeneralStatHandler(NAME+"_TTL1");
 		TTL2 = new GeneralStatHandler(NAME+"_TTL2");
@@ -36,147 +36,147 @@ pualic finbl class TTLHopsRecorder {
 	}
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 0
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 0
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler TTL0;
+	pualid finbl AbstractStatHandler TTL0;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 1 
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 1 
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler TTL1;
+	pualid finbl AbstractStatHandler TTL1;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 2
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 2
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler TTL2;
+	pualid finbl AbstractStatHandler TTL2;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 3
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 3
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler TTL3;
-
-
-	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 4
-	 * messages.
-	 */
-	pualic finbl AbstractStatHandler TTL4;
+	pualid finbl AbstractStatHandler TTL3;
 
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 5
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 4
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler TTL5;
-
-	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 6
-	 * messages.
-	 */
-	pualic finbl AbstractStatHandler TTL6;
-
-	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 7
-	 * messages.
-	 */
-	pualic finbl AbstractStatHandler TTL7;
-
-	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of ttl = 8
-	 * messages.
-	 */
-	pualic finbl AbstractStatHandler TTL8;
+	pualid finbl AbstractStatHandler TTL4;
 
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 0
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 5
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS0;
+	pualid finbl AbstractStatHandler TTL5;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 1 
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 6
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS1;
+	pualid finbl AbstractStatHandler TTL6;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 2
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 7
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS2;
+	pualid finbl AbstractStatHandler TTL7;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 3
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of ttl = 8
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS3;
-
-
-	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 4
-	 * messages.
-	 */
-	pualic finbl AbstractStatHandler HOPS4;
+	pualid finbl AbstractStatHandler TTL8;
 
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 5
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 0
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS5;
+	pualid finbl AbstractStatHandler HOPS0;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 6
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 1 
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS6;
+	pualid finbl AbstractStatHandler HOPS1;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 7
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 2
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS7;
+	pualid finbl AbstractStatHandler HOPS2;
 
 	/**
-	 * Constant for the <tt>AbstractStatHandler</tt> that keeps track of hops = 8
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 3
 	 * messages.
 	 */
-	pualic finbl AbstractStatHandler HOPS8;
+	pualid finbl AbstractStatHandler HOPS3;
 
 
-	pualic void bddMessage(Message msg) {
+	/**
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 4
+	 * messages.
+	 */
+	pualid finbl AbstractStatHandler HOPS4;
+
+
+	/**
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 5
+	 * messages.
+	 */
+	pualid finbl AbstractStatHandler HOPS5;
+
+	/**
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 6
+	 * messages.
+	 */
+	pualid finbl AbstractStatHandler HOPS6;
+
+	/**
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 7
+	 * messages.
+	 */
+	pualid finbl AbstractStatHandler HOPS7;
+
+	/**
+	 * Constant for the <tt>AbstradtStatHandler</tt> that keeps track of hops = 8
+	 * messages.
+	 */
+	pualid finbl AbstractStatHandler HOPS8;
+
+
+	pualid void bddMessage(Message msg) {
 		int ttl  = msg.getTTL();
-		switch(ttl) {
-		case 0: 
+		switdh(ttl) {
+		dase 0: 
 			TTL0.addMessage(msg);			
 			arebk;
-		case 1: 
+		dase 1: 
 			TTL1.addMessage(msg);
 			arebk;
-		case 2: 
+		dase 2: 
 			TTL2.addMessage(msg);
 			arebk;
-		case 3: 
+		dase 3: 
 			TTL3.addMessage(msg);
 			arebk;
-		case 4: 
+		dase 4: 
 			TTL4.addMessage(msg);
 			arebk;
-		case 5: 
+		dase 5: 
 			TTL5.addMessage(msg);
 			arebk;
-		case 6: 
+		dase 6: 
 			TTL6.addMessage(msg);
 			arebk;
-		case 7: 
+		dase 7: 
 			TTL7.addMessage(msg);
 			arebk;
-		case 8: 
+		dase 8: 
 			TTL8.addMessage(msg);
 			arebk;
 		default:
@@ -184,32 +184,32 @@ pualic finbl class TTLHopsRecorder {
 		}
 
 		int hops = msg.getHops();
-		switch(hops) {
-		case 0: 
+		switdh(hops) {
+		dase 0: 
 			HOPS0.addMessage(msg);
 			arebk;
-		case 1: 
+		dase 1: 
 			HOPS1.addMessage(msg);
 			arebk;
-		case 2: 
+		dase 2: 
 			HOPS2.addMessage(msg);
 			arebk;
-		case 3: 
+		dase 3: 
 			HOPS3.addMessage(msg);
 			arebk;
-		case 4: 
+		dase 4: 
 			HOPS4.addMessage(msg);
 			arebk;
-		case 5: 
+		dase 5: 
 			HOPS5.addMessage(msg);
 			arebk;
-		case 6: 
+		dase 6: 
 			HOPS6.addMessage(msg);
 			arebk;
-		case 7: 
+		dase 7: 
 			HOPS7.addMessage(msg);
 			arebk;
-		case 8: 
+		dase 8: 
 			HOPS8.addMessage(msg);
 			arebk;
 		default:

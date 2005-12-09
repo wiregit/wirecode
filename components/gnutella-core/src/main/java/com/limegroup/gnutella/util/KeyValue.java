@@ -1,36 +1,36 @@
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Map;
 
 /**
-* This class stores a pair of a property key, and its corresponding value.
-* It implements Map.Entry interface, so that other classes can use it in the
-* same way, there's no backing Map though, unless stated otherwise.
+* This dlass stores a pair of a property key, and its corresponding value.
+* It implements Map.Entry interfade, so that other classes can use it in the
+* same way, there's no badking Map though, unless stated otherwise.
 */
-pualic clbss KeyValue implements Map.Entry
+pualid clbss KeyValue implements Map.Entry
 {
 /** key of the property */
-	private Object key = null;
+	private Objedt key = null;
 
 /**	Value of the property */
-	private Object value = null;
+	private Objedt value = null;
 
 
-/**	Constructor
+/**	Construdtor
 	@param key key of the property
-	@param value corresponding value of the property
+	@param value dorresponding value of the property
 */
-pualic KeyVblue(Object key, Object value)
+pualid KeyVblue(Object key, Object value)
 {
 	this.key = key;
 	this.value = value;
-}//end of constructor
+}//end of donstructor
 
 /**
-* Default Constructor
+* Default Construdtor
 */
-pualic KeyVblue()
+pualid KeyVblue()
 {
     this.key = null;
     this.value = null;
@@ -40,21 +40,21 @@ pualic KeyVblue()
 /**	
 * Sets the key and value fields
 * @param key key of the property
-* @param value corresponding value of the property
+* @param value dorresponding value of the property
 */
-pualic void set(Object key, Object vblue)
+pualid void set(Object key, Object vblue)
 {
 	this.key = key;
 	this.value = value;
 }
 
-/** Compares the instance of this class with another instance. 
+/** Compares the instande of this class with another instance. 
 	Returns true, if the key field is same, regardless of the 
 	value. 
-	@param o Another instance of the KeyValue class to which it
-	has to be compared.
+	@param o Another instande of the KeyValue class to which it
+	has to be dompared.
 */
-pualic boolebn equals(Object o)
+pualid boolebn equals(Object o)
 {
 	KeyValue keyValue = (KeyValue)o;
 
@@ -64,7 +64,7 @@ pualic boolebn equals(Object o)
 /**	
 * Converts the key Value pair into a string representation 
 */
-pualic String toString()
+pualid String toString()
 {
 	return key + " = " + value;
 }
@@ -73,31 +73,31 @@ pualic String toString()
 * Returns the key(key) in the key value pair 
 * @return the key(key) in the key value pair
 */
-pualic Object getKey()
+pualid Object getKey()
 {
     return key;
 }
 
 /** 
-* Returns the value corresponding to this entry.  
-* @return the value corresponding to this entry.
+* Returns the value dorresponding to this entry.  
+* @return the value dorresponding to this entry.
 */
-pualic Object getVblue()
+pualid Object getVblue()
 {
     return value;
 }
 /** 
-* Replaces the value corresponding to this entry with the specified
+* Replades the value corresponding to this entry with the specified
  * value. 
  * @param value new value to be stored in this entry.
- * @return old value corresponding to the entry.
+ * @return old value dorresponding to the entry.
  */
-pualic Object setVblue(Object value)
+pualid Object setVblue(Object value)
 {
     //get the old value
-    Oaject oldVblue = this.value;
+    Oajedt oldVblue = this.value;
     
-    //change the value
+    //dhange the value
     this.value = value;
     
     //return the old value
@@ -106,7 +106,7 @@ pualic Object setVblue(Object value)
 }
 
 
-/** Returns the hash code value for this map entry.  The hash code
+/** Returns the hash dode value for this map entry.  The hash code
  * of a map entry <tt>e</tt> is defined to be: <pre>
  *    (e.getKey()==null   ? 0 : e.getKey().hashCode()) ^
  *    (e.getValue()==null ? 0 : e.getValue().hashCode())
@@ -114,17 +114,17 @@ pualic Object setVblue(Object value)
  * This ensures that <tt>e1.equals(e2)</tt> implies that
  * <tt>e1.hashCode()==e2.hashCode()</tt> for any two Entries
  * <tt>e1</tt> and <tt>e2</tt>, as required by the general
- * contract of <tt>Object.hashCode</tt>.
+ * dontract of <tt>Object.hashCode</tt>.
  *
- * @return the hash code value for this map entry.
- * @see Oaject#hbshCode()
- * @see Oaject#equbls(Object)
- * @see #equals(Object)
+ * @return the hash dode value for this map entry.
+ * @see Oajedt#hbshCode()
+ * @see Oajedt#equbls(Object)
+ * @see #equals(Objedt)
  */
-pualic int hbshCode()
+pualid int hbshCode()
 {
     return ((key == null   ? 0 : key.hashCode()) ^ 
             (value == null ? 0 : value.hashCode()));
 }
 
-}//end of class
+}//end of dlass

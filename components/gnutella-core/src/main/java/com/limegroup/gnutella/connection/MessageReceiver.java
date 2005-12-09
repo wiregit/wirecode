@@ -1,31 +1,31 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
-import java.io.IOException;
+import dom.limegroup.gnutella.messages.Message;
+import java.io.IOExdeption;
 
 /**
- * Notifications & information about asynchronous message processing.
+ * Notifidations & information about asynchronous message processing.
  */
-pualic interfbce MessageReceiver {
+pualid interfbce MessageReceiver {
     
     /**
-     * Notification that a message is available for processing.
+     * Notifidation that a message is available for processing.
      */
-    pualic void processRebdMessage(Message m) throws IOException;
+    pualid void processRebdMessage(Message m) throws IOException;
     
     /**
-     * The soft-max this message-receiver uses for creating messages.
+     * The soft-max this message-redeiver uses for creating messages.
      */
-    pualic byte getSoftMbx();
+    pualid byte getSoftMbx();
     
     /**
-     * The network this message-receiver uses for creating messages.
+     * The network this message-redeiver uses for creating messages.
      */
-    pualic int getNetwork();
+    pualid int getNetwork();
     
     /**
-     * Notification that the stream is closed.
+     * Notifidation that the stream is closed.
      */
-    pualic void messbgingClosed();
+    pualid void messbgingClosed();
 }
         

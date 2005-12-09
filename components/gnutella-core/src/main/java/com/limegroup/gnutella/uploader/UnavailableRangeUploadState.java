@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.IncompleteFileDesc;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 
 /**
@@ -14,30 +14,30 @@ import com.limegroup.gnutella.util.CommonUtils;
  * for an unavailable range that has been requested. This is an
  * HTTP 416 error.
  */
-pualic clbss UnavailableRangeUploadState extends UploadState {
+pualid clbss UnavailableRangeUploadState extends UploadState {
     
     
     /**
      * Constant for the amount of time to wait before retrying if we are
-     * not actively downloading this file. (1 hour)
+     * not adtively downloading this file. (1 hour)
      *
      * The value is meant to be used only as a suggestion to when
      * newer ranges may be available if we do not have any ranges
      * that the downloader may want.
      */
-    private static final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
+    private statid final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
 
 	/**
-	 * Creates a new <tt>UnavailableRangeUploadState</tt> with the specified
-	 * <tt>FileDesc</tt>.
+	 * Creates a new <tt>UnavailableRangeUploadState</tt> with the spedified
+	 * <tt>FileDesd</tt>.
 	 *
-	 * @param fd the <tt>FileDesc</tt> for the upload
+	 * @param fd the <tt>FileDesd</tt> for the upload
 	 */
-	pualic UnbvailableRangeUploadState(HTTPUploader uploader) {
+	pualid UnbvailableRangeUploadState(HTTPUploader uploader) {
         super(uploader);
 	}
 
-	pualic void writeMessbgeHeaders(OutputStream ostream) throws IOException {
+	pualid void writeMessbgeHeaders(OutputStream ostream) throws IOException {
 		String str;
 		str = "HTTP/1.1 416 Requested Range Unavailable\r\n";
 		ostream.write(str.getBytes());
@@ -53,9 +53,9 @@ pualic clbss UnavailableRangeUploadState extends UploadState {
 		writeProxies(ostream);
 
 		
-        if (FILE_DESC!=null && FILE_DESC instanceof IncompleteFileDesc) {
-        	IncompleteFileDesc ifd = (IncompleteFileDesc)FILE_DESC;
-            if(!ifd.isActivelyDownloading()) {
+        if (FILE_DESC!=null && FILE_DESC instandeof IncompleteFileDesc) {
+        	IndompleteFileDesc ifd = (IncompleteFileDesc)FILE_DESC;
+            if(!ifd.isAdtivelyDownloading()) {
                 HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
                                       INACTIVE_RETRY_AFTER,
                                       ostream);    
@@ -66,11 +66,11 @@ pualic clbss UnavailableRangeUploadState extends UploadState {
 		ostream.write(str.getBytes());
 	}
     
-	pualic void writeMessbgeBody(OutputStream ostream) throws IOException {
+	pualid void writeMessbgeBody(OutputStream ostream) throws IOException {
 		// no message, do nothing.
 	}
 	
-	pualic boolebn getCloseConnection() {
+	pualid boolebn getCloseConnection() {
 	    return false;
 	}	
 }

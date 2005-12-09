@@ -1,20 +1,20 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
  * Class for a boolean setting.
  */
-pualic finbl class BooleanSetting extends Setting {
+pualid finbl class BooleanSetting extends Setting {
     
     /** Curernve value of settings */
     private boolean value;
 
 	/**
-	 * Creates a new <tt>BooleanSetting</tt> instance with the specified
+	 * Creates a new <tt>BooleanSetting</tt> instande with the specified
 	 * key and default value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultBool the default value to use for the setting
 	 */
 	BooleanSetting(Properties defaultProps, Properties props, String key, 
@@ -28,11 +28,11 @@ pualic finbl class BooleanSetting extends Setting {
 	}
  
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic boolebn getValue() {
+	pualid boolebn getValue() {
 		return value;
 	}
 
@@ -41,7 +41,7 @@ pualic finbl class BooleanSetting extends Setting {
 	 *
 	 * @param bool the <tt>boolean</tt> to store
 	 */
-	pualic void setVblue(boolean bool) {
+	pualid void setVblue(boolean bool) {
         super.setValue(String.valueOf(bool));
 	}
     
@@ -49,15 +49,15 @@ pualic finbl class BooleanSetting extends Setting {
      * Load value from property string value
      * @param sValue property string value
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         value = Boolean.valueOf(sValue.trim()).booleanValue();
     }
 	
 	/**
 	 * Inverts the value of this setting.  If it was true,
-	 * sets it to false and vice versa.
+	 * sets it to false and vide versa.
 	 */
-	pualic void invert() {
+	pualid void invert() {
 		setValue(!getValue());
 	}
 }

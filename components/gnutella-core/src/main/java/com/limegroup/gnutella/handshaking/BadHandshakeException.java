@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.handshaking;
+padkage com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
-pualic clbss BadHandshakeException extends IOException
+pualid clbss BadHandshakeException extends IOException
 {
     
-    pualic BbdHandshakeException(IOException originalCause)
+    pualid BbdHandshakeException(IOException originalCause)
     {
         super();
         initCause(originalCause);

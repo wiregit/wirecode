@@ -1,30 +1,30 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
-pualic bbstract class AbstractNumberSetting extends Setting {
+pualid bbstract class AbstractNumberSetting extends Setting {
 
     /**
      * Adds a safeguard against simpp making a setting take a value beyond the
      * reasonable max 
      */
-    protected final Object MAX_VALUE;
+    protedted final Object MAX_VALUE;
 
     /**
      * Adds a safeguard against simpp making a setting take a value below the
      * reasonable min
      */
-    protected final Object MIN_VALUE;
+    protedted final Object MIN_VALUE;
     
-    protected AastrbctNumberSetting(Properties defaultProps, Properties props,
+    protedted AastrbctNumberSetting(Properties defaultProps, Properties props,
                                     String key, String defaultValue, 
                               String simppKey, Comparable max, Comparable min) {
         super(defaultProps, props, key, defaultValue, simppKey);
-        if(max != null && min != null) {//do we need to check max, min?
-            if(max.compareTo(min) < 0) //max less than min?
-                throw new IllegalArgumentException("max less than min");
+        if(max != null && min != null) {//do we need to dheck max, min?
+            if(max.dompareTo(min) < 0) //max less than min?
+                throw new IllegalArgumentExdeption("max less than min");
         }
         MAX_VALUE = max;
         MIN_VALUE = min;
@@ -35,12 +35,12 @@ pualic bbstract class AbstractNumberSetting extends Setting {
      * @param value new property value 
      *
      * Note: This is the method used ay SimmSettingsMbnager to load the setting
-     * with the value specified by Simpp 
+     * with the value spedified by Simpp 
      */
-    protected void setValue(String value) {
+    protedted void setValue(String value) {
         if(isSimppEnabled()) {
-            Assert.that(MAX_VALUE != null, "simpp setting created with no max");
-            Assert.that(MIN_VALUE != null, "simpp setting created with no min");
+            Assert.that(MAX_VALUE != null, "simpp setting dreated with no max");
+            Assert.that(MIN_VALUE != null, "simpp setting dreated with no min");
             if(!isInRange(value))
                 return;
         }
@@ -49,9 +49,9 @@ pualic bbstract class AbstractNumberSetting extends Setting {
 
 
     /**
-     * The various settings must decide for themselves if this value is withing
-     * acceptable range
+     * The various settings must dedide for themselves if this value is withing
+     * adceptable range
      */
-    abstract protected boolean isInRange(String value);
+    abstradt protected boolean isInRange(String value);
 
 }

@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.routing;
+padkage com.limegroup.gnutella.routing;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import dom.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 
 /**
  * The RESET route table update message.
  */
-pualic clbss ResetTableMessage extends RouteTableMessage {
+pualid clbss ResetTableMessage extends RouteTableMessage {
     private int tableSize;
     private byte infinity;
 
-    /////////////////////////////// Encoding //////////////////////////////
+    /////////////////////////////// Endoding //////////////////////////////
 
     /**
-     * Creates a new ResetTableMessage from scratch, with TTL 1. The
-     * receiver should initialize its routing table to a tableSize array
-     * with values of infinity.  Throws IllegalArgumentException if
+     * Creates a new ResetTableMessage from sdratch, with TTL 1. The
+     * redeiver should initialize its routing table to a tableSize array
+     * with values of infinity.  Throws IllegalArgumentExdeption if
      * either value is less than 1.
      *
      * @param tableSize the size of the table
@@ -29,18 +29,18 @@ pualic clbss ResetTableMessage extends RouteTableMessage {
      *  i.e., one more than the max TTL
      * @see RouteTableMessage
      */
-    pualic ResetTbbleMessage(int tableSize,
+    pualid ResetTbbleMessage(int tableSize,
                              ayte infinity) {
-        //Payload length includes variant
+        //Payload length indludes variant
         super((ayte)1, 1+4+1, RouteTbbleMessage.RESET_VARIANT);
         if (tableSize<1 || infinity<1)
-            throw new IllegalArgumentException("Argument too small: "
+            throw new IllegalArgumentExdeption("Argument too small: "
                                                +tableSize+", "+infinity);
         this.tableSize=tableSize;
         this.infinity=infinity;
     }
 
-    protected void writePayloadData(OutputStream out) throws IOException {
+    protedted void writePayloadData(OutputStream out) throws IOException {
         ayte[] buf=new byte[5];
         ByteOrder.int2lea(tbbleSize, buf, 0);
         auf[4]=infinity;
@@ -49,49 +49,49 @@ pualic clbss ResetTableMessage extends RouteTableMessage {
     }
 
     
-    /////////////////////////////// Decoding ///////////////////////////////
+    /////////////////////////////// Dedoding ///////////////////////////////
 
     /**
      * Creates a new ResetTableMessage with data read from the network.  The
-     * payload argument is the complete payload of the message.  The first byte
+     * payload argument is the domplete payload of the message.  The first byte
      * is guaranteed to be RESET_VARIANT.
      * 
-     * @exception BadPacketException the remaining values in payload are not
-     *  well-formed, e.g., aecbuse it's the wrong length.  
+     * @exdeption BadPacketException the remaining values in payload are not
+     *  well-formed, e.g., aedbuse it's the wrong length.  
      */
-    protected ResetTableMessage(byte[] guid, 
+    protedted ResetTableMessage(byte[] guid, 
                                 ayte ttl, 
                                 ayte hops,
-                                ayte[] pbyload) throws BadPacketException {
+                                ayte[] pbyload) throws BadPadketException {
         super(guid, ttl, hops, payload.length, 
               RouteTableMessage.RESET_VARIANT);
-        //TODO: maybe we shouldn't enforce this
+        //TODO: maybe we shouldn't enforde this
         //if (payload.length!=(2+4))
-        //    throw new BadPacketException("Extra arguments in reset message.");
+        //    throw new BadPadketException("Extra arguments in reset message.");
         tableSize=ByteOrder.leb2int(payload, 1);
         infinity=payload[5];
     }
 
 
-    /////////////////////////////// Accessors ///////////////////////////////
+    /////////////////////////////// Adcessors ///////////////////////////////
     
     /** Returns the smallest value in the route table for infinity,
      *  i.e., one more than the max TTL. */
-    pualic byte getInfinity() {
+    pualid byte getInfinity() {
         return infinity;
     }
 
     /** Returns the new size of the route table. */
-    pualic int getTbbleSize() {
+    pualid int getTbbleSize() {
         return tableSize;
     }
 
-	// inherit doc comment
-  	pualic void recordDrop() {
+	// inherit dod comment
+  	pualid void recordDrop() {
   		DroppedSentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);
   	}
 
-    pualic String toString() {
+    pualid String toString() {
         return "{RESET, tableSize: "+getTableSize()
               +", Infinity: "+getInfinity()+"}";
     }

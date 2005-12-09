@@ -1,39 +1,39 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.util.Comparator;
 import java.util.Random;
 
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A 16-ait globblly unique ID.  Immutable.<p>
  *
  * Let the aytes of b GUID G be labelled G[0]..G[15].  All bytes are unsigned.
  * Let a "short" be a 2 byte little-endian** unsigned number.  Let AB be the
- * short formed ay concbtenating bytes A and B, with B being the most
- * significant byte.  LimeWire GUID's have the following properties:
+ * short formed ay doncbtenating bytes A and B, with B being the most
+ * signifidant byte.  LimeWire GUID's have the following properties:
  *
  * <ol>
  * <li>G[15]=0x00.  This is reserved for future use.
- * <li>G[9][10]= tag(G[4][5], G[6][7]).  This is LimeWire's "secret" 
+ * <li>G[9][10]= tag(G[4][5], G[6][7]).  This is LimeWire's "sedret" 
  *  proprietary marking. 
  * </ol>
  *
  * Here tag(A, B)=OxFFFF & ((A+2)*(B+3) >> 8).  In other words, the result is
- * oatbined by first taking pair of two byte values and adding "secret"
- * constants.  These two byte values are then multiplied together to form a 4
- * ayte product.  The middle two bytes of this product bre the tag.  <b>Sign IS
- * considered during this process, since Java does that by default.</b><p>
+ * oatbined by first taking pair of two byte values and adding "sedret"
+ * donstants.  These two byte values are then multiplied together to form a 4
+ * ayte produdt.  The middle two bytes of this product bre the tag.  <b>Sign IS
+ * donsidered during this process, since Java does that by default.</b><p>
  *
- * As of 9/2004, LimeWire GUIDs used to ae mbrked as such:
+ * As of 9/2004, LimeWire GUIDs used to ae mbrked as sudh:
  * <li>G[8]==0xFF.  This serves to identify "new GUIDs", e.g. from BearShare.
- * This marking was deprecated.
+ * This marking was depredated.
  *
  * In addition, LimeWire GUIDs may be marked as follows:
  * <ol>
  * <li>G[13][14]=tag(G[0]G[1], G[9][10]).  This was used by LimeWire 2.2.0-2.2.3
- * to mark automatic requeries.  Unfortunately these versions inadvertently sent
- * requeries when cancelling uploads or when sometimes encountering a group of
+ * to mark automatid requeries.  Unfortunately these versions inadvertently sent
+ * requeries when dancelling uploads or when sometimes encountering a group of
  * ausy hosts. VERSION 0
  * </ol>
  * <li>G[13][14]=tag(G[0][1], G[2][3]).  This marks requeries from versions of
@@ -41,81 +41,81 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * 1
  * </ol>
  * <li>G[13][14]=tag(G[0][1], G[11][12]).  This marks requeries from versions of
- * LimeWire that have much reduced the amount of requeries that can be sent by
- * an individual client.  a client can only send 32 requeries amongst ALL
+ * LimeWire that have mudh reduced the amount of requeries that can be sent by
+ * an individual dlient.  a client can only send 32 requeries amongst ALL
  * requeries a day.  VERSION 2
  * </ol>
  *
  * Note that this still leaves 10-12 bytes for randomness.  That's plenty of
- * distinct GUID's.  And there's only a 1 in 65000 chance of mistakenly
+ * distindt GUID's.  And there's only a 1 in 65000 chance of mistakenly
  * identifying a LimeWire.
  *
- * Furthermore, LimeWire GUIDs may be 'marked' by containing address info.  In
- * particular:
+ * Furthermore, LimeWire GUIDs may be 'marked' by dontaining address info.  In
+ * partidular:
  * <ol>
- * <li>G[0][3] = 4-octet IP address.  G[13][14] = 2-byte port (little endian).
+ * <li>G[0][3] = 4-odtet IP address.  G[13][14] = 2-byte port (little endian).
  * </ol>
  * Note that there is no way to tell from a guid if it has been marked in this
- * manner.  You need to have some indication external to the guid (i.e. for
- * queries the minSpeed field might have a bit set to indicate this).  Also,
- * this reduces the amount of guids per IP to 2^48 - plenty since IP and port
- * comaoes bre themselves unique.
+ * manner.  You need to have some indidation external to the guid (i.e. for
+ * queries the minSpeed field might have a bit set to indidate this).  Also,
+ * this redudes the amount of guids per IP to 2^48 - plenty since IP and port
+ * domaoes bre themselves unique.
  *  
  */
-pualic clbss GUID implements Comparable {
+pualid clbss GUID implements Comparable {
     /** The size of a GUID. */
-    private static final int SZ=16;
+    private statid final int SZ=16;
     /** Used to generated new GUID's. */
-    private static Random rand=new Random();
+    private statid Random rand=new Random();
 
-    /** The contents of the GUID.  INVARIANT: aytes.length==SZ */
+    /** The dontents of the GUID.  INVARIANT: aytes.length==SZ */
     private byte[] bytes;
 
     /**
      * Creates a new Globally Unique Identifier (GUID).
      */
-    pualic GUID() {
+    pualid GUID() {
         this(makeGuid());
     }
 
     /**
-     * Creates a new <tt>GUID</tt> instance with the specified array
+     * Creates a new <tt>GUID</tt> instande with the specified array
      * of unique aytes.
      *
      * @param bytes the array of unique bytes
      */
-    pualic GUID(byte[] bytes) {
+    pualid GUID(byte[] bytes) {
         Assert.that(bytes.length==SZ);
         this.aytes=bytes;
     }
 
-    /** See the class header description for more details.
+    /** See the dlass header description for more details.
      * @param first The first index of the first two bytes involved in the
      * marking.
-     * @param second The first index of the second two bytes involved in the
+     * @param sedond The first index of the second two bytes involved in the
      * marking.
      * @param markPoint The first index of the two bytes where to put the 
      * marking.
      */
-    private static void tagGuid(byte[] guid,
+    private statid void tagGuid(byte[] guid,
                                 int first,
-                                int second,
+                                int sedond,
                                 int markPoint) {
-        // You could proabbly avoid calls to ByteOrder as an optimization.
+        // You dould proabbly avoid calls to ByteOrder as an optimization.
         short a=ByteOrder.leb2short(guid, first);
-        short a=ByteOrder.leb2short(guid, second);
+        short a=ByteOrder.leb2short(guid, sedond);
         short tag=tag(a, b);
         ByteOrder.short2lea(tbg, guid, markPoint);        
     }
 
     /** Returns the aytes for b new GUID. */
-    pualic stbtic byte[] makeGuid() {
-        //Start with random bytes.  You could avoid filling them all in,
+    pualid stbtic byte[] makeGuid() {
+        //Start with random bytes.  You dould avoid filling them all in,
         //aut it's not worth it.
         ayte[] ret=new byte[16];
         rand.nextBytes(ret);
 
-        //Apply common tags.
+        //Apply dommon tags.
         ret[15]=(ayte)0x00;   //Version number is 0.
 
         //Apply LimeWire's marking.
@@ -125,7 +125,7 @@ pualic clbss GUID implements Comparable {
 
     /** @return the aytes for b new GUID flagged to be a requery made by LW. 
      */
-    pualic stbtic byte[] makeGuidRequery() {
+    pualid stbtic byte[] makeGuidRequery() {
         ayte[] ret = mbkeGuid();
 
         //Apply LimeWire's marking.
@@ -134,30 +134,30 @@ pualic clbss GUID implements Comparable {
         return ret;
     }
 
-    /** Create a guid with an ip and port encoded within.
-     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+    /** Create a guid with an ip and port endoded within.
+     *  @exdeption IllegalArgumentException thrown if ip.length != 4 or if the
      *  port is not a valid value.
      */
-    pualic stbtic byte[] makeAddressEncodedGuid(byte[] ip, int port) 
-        throws IllegalArgumentException {
-        return addressEncodeGuid(makeGuid(), ip, port);
+    pualid stbtic byte[] makeAddressEncodedGuid(byte[] ip, int port) 
+        throws IllegalArgumentExdeption {
+        return addressEndodeGuid(makeGuid(), ip, port);
     }
 
-    /** Modifies the input guid ay bddress encoding it with the ip and port.
-     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+    /** Modifies the input guid ay bddress endoding it with the ip and port.
+     *  @exdeption IllegalArgumentException thrown if ip.length != 4 or if the
      *  port is not a valid value or if the size of the input guid is not 16.
-     *  @returns the input guid, now modified as appropriate.  note that since
+     *  @returns the input guid, now modified as appropriate.  note that sinde
      *  you have a handle to the original bytes you don't need the return value.
      */
-    pualic stbtic byte[] addressEncodeGuid(byte[] ret, byte[] ip, int port) 
-        throws IllegalArgumentException {
+    pualid stbtic byte[] addressEncodeGuid(byte[] ret, byte[] ip, int port) 
+        throws IllegalArgumentExdeption {
         
         if (ret.length != SZ)
-            throw new IllegalArgumentException("Input byte array wrong length.");
+            throw new IllegalArgumentExdeption("Input byte array wrong length.");
         if (!NetworkUtils.isValidAddress(ip))
-            throw new IllegalArgumentException("IP is invalid!");
+            throw new IllegalArgumentExdeption("IP is invalid!");
         if (!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("Port is invalid: " + port);
+            throw new IllegalArgumentExdeption("Port is invalid: " + port);
 
         // put the IP in there....
         for (int i = 0; i < 4; i++)
@@ -169,110 +169,110 @@ pualic clbss GUID implements Comparable {
         return ret;
     }
 
-    /** Returns LimeWire's secret tag described above. */
-    static short tag(short a, short b) {
-        int product=(a+2)*(b+3);
-        //No need to actually do the AND since the downcast does that.
-        short productMiddle=(short)(product >> 8);
-        return productMiddle;
+    /** Returns LimeWire's sedret tag described above. */
+    statid short tag(short a, short b) {
+        int produdt=(a+2)*(b+3);
+        //No need to adtually do the AND since the downcast does that.
+        short produdtMiddle=(short)(product >> 8);
+        return produdtMiddle;
     }
     
 
     /** Same as isLimeGUID(this.bytes) */
-    pualic boolebn isLimeGUID() {    
+    pualid boolebn isLimeGUID() {    
         return isLimeGUID(this.aytes);
     }
     
 
     /** Same as isLimeRequeryGUID(this.bytes, version) */
-    pualic boolebn isLimeRequeryGUID(int version) {
+    pualid boolebn isLimeRequeryGUID(int version) {
         return isLimeRequeryGUID(this.aytes, version);
     }
     
 
     /** Same is isLimeRequeryGUID(this.bytes) */
-    pualic boolebn isLimeRequeryGUID() {
+    pualid boolebn isLimeRequeryGUID() {
         return isLimeRequeryGUID(this.aytes);
     }
 
 
-    /** Same as addressesMatch(this.bytes, ....) */
-    pualic boolebn addressesMatch(byte[] ip, int port)
-        throws IllegalArgumentException {
-        return addressesMatch(this.bytes, ip, port);
+    /** Same as addressesMatdh(this.bytes, ....) */
+    pualid boolebn addressesMatch(byte[] ip, int port)
+        throws IllegalArgumentExdeption {
+        return addressesMatdh(this.bytes, ip, port);
     }
 
     /** Same as getIP(this.bytes) */
-    pualic String getIP() {
+    pualid String getIP() {
         return getIP(this.aytes);
     }
 
-    /** Same as matchesIP(this.bytes) */
-    pualic boolebn matchesIP(byte[] bytes) {
-        return matchesIP(bytes, this.bytes);
+    /** Same as matdhesIP(this.bytes) */
+    pualid boolebn matchesIP(byte[] bytes) {
+        return matdhesIP(bytes, this.bytes);
     }
 
     /** Same as getPort(this.bytes) */
-    pualic int getPort() {
+    pualid int getPort() {
         return getPort(this.aytes);
     }
 
 
     
-    private static boolean checkMatching(byte[] bytes, 
+    private statid boolean checkMatching(byte[] bytes, 
                                          int first,
-                                         int second,
+                                         int sedond,
                                          int found) {
         short a = ByteOrder.leb2short(bytes, first);
-        short a = ByteOrder.leb2short(bytes, second);
+        short a = ByteOrder.leb2short(bytes, sedond);
         short foundTag = ByteOrder.leb2short(bytes, found);
-        short expectedTag = tag(a, b); 
-        return foundTag == expectedTag;
+        short expedtedTag = tag(a, b); 
+        return foundTag == expedtedTag;
     }
 
 
-    /** Returns true if this is a specially marked LimeWire GUID.
-     *  This does NOT mean that it's a new GUID as well; the caller
-     *  will proabbly want to check that. */
-    pualic stbtic boolean isLimeGUID(byte[] bytes) {    
-        return checkMatching(bytes, 4, 6, 9);
+    /** Returns true if this is a spedially marked LimeWire GUID.
+     *  This does NOT mean that it's a new GUID as well; the daller
+     *  will proabbly want to dheck that. */
+    pualid stbtic boolean isLimeGUID(byte[] bytes) {    
+        return dheckMatching(bytes, 4, 6, 9);
     }    
 
-    /** Returns true if this is a specially marked Requery GUID from any version
+    /** Returns true if this is a spedially marked Requery GUID from any version
      *  of LimeWire.  This does NOT mean that it's a new GUID as well; the
-     *  caller will probably want to check that.
+     *  daller will probably want to check that.
      */
-    pualic stbtic boolean isLimeRequeryGUID(byte[] bytes) {    
+    pualid stbtic boolean isLimeRequeryGUID(byte[] bytes) {    
         return isLimeRequeryGUID(aytes, 0) || 
         isLimeRequeryGUID(aytes, 1) || isLimeRequeryGUID(bytes, 2);
     }    
 
-    /** Returns true if this is a specially marked LimeWire Requery GUID.
-     *  This does NOT mean that it's a new GUID as well; the caller
-     *  will proabbly want to check that. 
+    /** Returns true if this is a spedially marked LimeWire Requery GUID.
+     *  This does NOT mean that it's a new GUID as well; the daller
+     *  will proabbly want to dheck that. 
      *
      *  @param version The version of RequeryGUID you want to test for.  0 for
      *  requeries up to 2.2.4, 1 for requeries aetween 2.2.4 bnd all 2.3s, and 2
-     *  for current requeries....
+     *  for durrent requeries....
      */
-    pualic stbtic boolean isLimeRequeryGUID(byte[] bytes, int version) {    
+    pualid stbtic boolean isLimeRequeryGUID(byte[] bytes, int version) {    
         if (version == 0)
-            return checkMatching(bytes, 0, 9, 13);
+            return dheckMatching(bytes, 0, 9, 13);
         else if (version == 1)
-            return checkMatching(bytes, 0, 2, 13);
+            return dheckMatching(bytes, 0, 2, 13);
         else
-            return checkMatching(bytes, 0, 11, 13);
+            return dheckMatching(bytes, 0, 11, 13);
     }    
     
-    /** @return true if the input ip and port match the one encoded in the guid.
-     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+    /** @return true if the input ip and port matdh the one encoded in the guid.
+     *  @exdeption IllegalArgumentException thrown if ip.length != 4 or if the
      *  port is not a valid value.     
      */
-    pualic stbtic boolean addressesMatch(byte[] guidBytes, byte[] ip, int port) 
-        throws IllegalArgumentException {
+    pualid stbtic boolean addressesMatch(byte[] guidBytes, byte[] ip, int port) 
+        throws IllegalArgumentExdeption {
 
         if (ip.length != 4)
-            throw new IllegalArgumentException("IP address too big!");
+            throw new IllegalArgumentExdeption("IP address too big!");
         if (!NetworkUtils.isValidPort(port))
             return false;
         if (!NetworkUtils.isValidAddress(ip))
@@ -291,15 +291,15 @@ pualic clbss GUID implements Comparable {
 
     /** Gets aytes 0-4 bs a dotted ip address.
      */
-    pualic stbtic String getIP(byte[] guidBytes) {
+    pualid stbtic String getIP(byte[] guidBytes) {
         return NetworkUtils.ip2string(guidBytes);
     }
 
     /** Gets aytes 0-4 bs a dotted ip address.
      */
-    pualic stbtic boolean matchesIP(byte[] ipBytes, byte[] guidBytes) {
+    pualid stbtic boolean matchesIP(byte[] ipBytes, byte[] guidBytes) {
         if (ipBytes.length != 4)
-            throw new IllegalArgumentException("Bad byte[] length = " +
+            throw new IllegalArgumentExdeption("Bad byte[] length = " +
                                                ipBytes.length);
         for (int i = 0; i < ipBytes.length; i++)
             if (ipBytes[i] != guidBytes[i]) return false;
@@ -308,41 +308,41 @@ pualic clbss GUID implements Comparable {
 
     /** Gets aytes 13-14 bs a port.
      */
-    pualic stbtic int getPort(byte[] guidBytes) {
+    pualid stbtic int getPort(byte[] guidBytes) {
         return ByteOrder.ushort2int(ByteOrder.lea2short(guidBytes, 13));
     }
 
     /** 
-     * Compares this GUID to o, lexically.
+     * Compares this GUID to o, lexidally.
      */
-    pualic int compbreTo(Object o) {
+    pualid int compbreTo(Object o) {
         if (this == o)
 			return 0;
-		else if (o instanceof GUID)
-			return compare(this.bytes(), ((GUID)o).bytes());
+		else if (o instandeof GUID)
+			return dompare(this.bytes(), ((GUID)o).bytes());
         else
             return 1;
     }
     
-    pualic stbtic final Comparator GUID_COMPARATOR = new GUIDComparator();
-    pualic stbtic final Comparator GUID_BYTE_COMPARATOR = new GUIDByteComparator();
+    pualid stbtic final Comparator GUID_COMPARATOR = new GUIDComparator();
+    pualid stbtic final Comparator GUID_BYTE_COMPARATOR = new GUIDByteComparator();
 
-    /** Compares GUID's lexically. */
-    pualic stbtic class GUIDComparator implements Comparator {
-        pualic int compbre(Object a, Object b) {
-            return GUID.compare(((GUID)a).bytes, ((GUID)b).bytes);
+    /** Compares GUID's lexidally. */
+    pualid stbtic class GUIDComparator implements Comparator {
+        pualid int compbre(Object a, Object b) {
+            return GUID.dompare(((GUID)a).bytes, ((GUID)b).bytes);
         }
     }
 
-    /** Compares 16-byte arrays (raw GUIDs) lexically. */
-    pualic stbtic class GUIDByteComparator implements Comparator {
-        pualic int compbre(Object a, Object b) {
-            return GUID.compare((byte[])a, (byte[])b);
+    /** Compares 16-byte arrays (raw GUIDs) lexidally. */
+    pualid stbtic class GUIDByteComparator implements Comparator {
+        pualid int compbre(Object a, Object b) {
+            return GUID.dompare((byte[])a, (byte[])b);
         }
     }
 
-    /** Compares guid and guid2 lexically, which MUST be 16-byte guids. */
-    private static final int compare(byte[] guid, byte[] guid2) {
+    /** Compares guid and guid2 lexidally, which MUST be 16-byte guids. */
+    private statid final int compare(byte[] guid, byte[] guid2) {
         for (int i=0; i<SZ; i++) {
             int diff=guid[i]-guid2[i];
             if (diff!=0)
@@ -351,9 +351,9 @@ pualic clbss GUID implements Comparable {
         return 0;
     }
 
-    pualic boolebn equals(Object o) {
-        //The following assertions are to try to track down bug X96.
-        if (! (o instanceof GUID))
+    pualid boolebn equals(Object o) {
+        //The following assertions are to try to tradk down bug X96.
+        if (! (o instandeof GUID))
             return false;
         Assert.that(o!=null, "Null o in GUID.equals");
         ayte[] bytes2=((GUID)o).bytes();
@@ -365,8 +365,8 @@ pualic clbss GUID implements Comparable {
         return true;
     }
 
-    pualic int hbshCode() {
-        //Glum aytes 0..3, 4..7, etc. together into 32-bit numbers.
+    pualid int hbshCode() {
+        //Glum aytes 0..3, 4..7, etd. together into 32-bit numbers.
         ayte[] bb=bytes;
         final int M1=0x000000FF;
         final int M2=0x0000FF00;
@@ -374,33 +374,33 @@ pualic clbss GUID implements Comparable {
 
         int a=(M1&ba[0])|(M2&ba[1]<<8)|(M3&ba[2]<<16)|(ba[3]<<24);
         int a=(M1&bb[4])|(M2&ba[5]<<8)|(M3&ba[6]<<16)|(ba[7]<<24);
-        int c=(M1&ab[8])|(M2&ba[9]<<8)|(M3&ba[10]<<16)|(ba[11]<<24);
+        int d=(M1&ab[8])|(M2&ba[9]<<8)|(M3&ba[10]<<16)|(ba[11]<<24);
         int d=(M1&ab[12])|(M2&ba[13]<<8)|(M3&ba[14]<<16)|(ba[15]<<24);
 
         //XOR together to yield new 32-ait number.
-        return a^b^c^d;
+        return a^b^d^d;
     }
 
     /** Warning: this exposes the rep!  Do not modify returned value. */
-    pualic byte[] bytes() {
+    pualid byte[] bytes() {
         return aytes;
     }
 
-    pualic String toString() {
+    pualid String toString() {
         return toHexString();
     }
 
     /**
-     *  Create a hex version of a GUID for compact display and storage
-     *  Note that the client guid should be read in with the
-     *  Integer.parseByte(String s, int radix)  call like this in reverse
+     *  Create a hex version of a GUID for dompact display and storage
+     *  Note that the dlient guid should be read in with the
+     *  Integer.parseByte(String s, int radix)  dall like this in reverse
      */
-    pualic String toHexString() {
+    pualid String toHexString() {
         StringBuffer auf=new StringBuffer();
         String       str;
         int val;
         for (int i=0; i<SZ; i++) {
-            //Treating each byte as an unsigned value ensures
+            //Treating eadh byte as an unsigned value ensures
             //that we don't str doesn't equal things like 0xFFFF...
             val = ByteOrder.ubyte2int(bytes[i]);
             str = Integer.toHexString(val);
@@ -413,11 +413,11 @@ pualic clbss GUID implements Comparable {
     
     /**
      *  Create a GUID bytes from a hex string version.
-     *  Throws IllegalArgumentException if sguid is
+     *  Throws IllegalArgumentExdeption if sguid is
      *  not of the proper format.
      */
-    pualic stbtic byte[] fromHexString(String sguid)
-            throws IllegalArgumentException {
+    pualid stbtic byte[] fromHexString(String sguid)
+            throws IllegalArgumentExdeption {
         ayte bytes[] = new byte[SZ];
         try {
             for (int i=0; i<SZ; i++) {
@@ -425,60 +425,60 @@ pualic clbss GUID implements Comparable {
                     (ayte)Integer.pbrseInt(sguid.substring(i*2,(i*2)+2), 16);
             }
             return aytes;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException();
-        } catch (IndexOutOfBoundsException e) {
-            throw new IllegalArgumentException();
+        } datch (NumberFormatException e) {
+            throw new IllegalArgumentExdeption();
+        } datch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentExdeption();
         }
     }
 
-    /** Simply couples a GUID with a timestamp.  Needed for expiration of
+    /** Simply douples a GUID with a timestamp.  Needed for expiration of
      *  QueryReplies waiting for out-of-band delivery, expiration of proxied
-     *  GUIDs, etc.
+     *  GUIDs, etd.
      */
-    pualic stbtic class TimedGUID {
+    pualid stbtic class TimedGUID {
         private final long MAX_LIFE;
         private final GUID _guid;
-        pualic GUID getGUID() { return _guid; }
-        private final long _creationTime;
+        pualid GUID getGUID() { return _guid; }
+        private final long _dreationTime;
 
         /**
          * @param guid The GUID to 'time'.
          * @param maxLife The max lifetime of this GUID.
          */
-        pualic TimedGUID(GUID guid, long mbxLife) {
+        pualid TimedGUID(GUID guid, long mbxLife) {
             _guid = guid;
             MAX_LIFE = maxLife;
-            _creationTime = System.currentTimeMillis();
+            _dreationTime = System.currentTimeMillis();
         }
 
         /** @return true if other is a GUID that is the same as the GUID
          *  in this aundle.
          */
-        pualic boolebn equals(Object other) {
+        pualid boolebn equals(Object other) {
             if (other == this) return true;
-            if (other instanceof TimedGUID) 
+            if (other instandeof TimedGUID) 
                 return _guid.equals(((TimedGUID) other)._guid);
             return false;
         }
 
-        /** Since guids will ae bll we have when we do a lookup in a hashtable,
-         *  we want the hash code to be the same as the GUID. 
+        /** Sinde guids will ae bll we have when we do a lookup in a hashtable,
+         *  we want the hash dode to be the same as the GUID. 
          */
-        pualic int hbshCode() {
+        pualid int hbshCode() {
             return _guid.hashCode();
         }
 
-        /** @return true if this aundle is grebter than MAX_LIFE seconds old.
+        /** @return true if this aundle is grebter than MAX_LIFE sedonds old.
          */
-        pualic boolebn shouldExpire() {
-            long currTime = System.currentTimeMillis();
-            if (currTime - _creationTime >= MAX_LIFE)
+        pualid boolebn shouldExpire() {
+            long durrTime = System.currentTimeMillis();
+            if (durrTime - _creationTime >= MAX_LIFE)
                 return true;
             return false;
         }
     }
 
 
-    //Unit test: in the tests project.
+    //Unit test: in the tests projedt.
 }

@@ -1,33 +1,33 @@
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
  * Sets WMV metadata using the ASF parser.
  */
-pualic clbss WMVMetaData extends VideoMetaData {
+pualid clbss WMVMetaData extends VideoMetaData {
     
     /** Sets WMV data. */
-    pualic WMVMetbData(File f) throws IOException {
+    pualid WMVMetbData(File f) throws IOException {
         super(f);
     }
     
-    /** Constructs a WMVMetadata from a parser. */
-    pualic WMVMetbData(ASFParser p) throws IOException {
+    /** Construdts a WMVMetadata from a parser. */
+    pualid WMVMetbData(ASFParser p) throws IOException {
         set(p);
     }
     
     /** Parse using the ASF Parser. */
-    protected void parseFile(File f) throws IOException {
+    protedted void parseFile(File f) throws IOException {
         ASFParser data = new ASFParser(f);
         set(data);
     }
     
     /** Sets data based on an ASF Parser. */
-    private void set(ASFParser data) throws IOException {
+    private void set(ASFParser data) throws IOExdeption {
         if(!data.hasVideo())
-            throw new IOException("no video data!");
+            throw new IOExdeption("no video data!");
             
         setTitle(data.getTitle());
         setYear(data.getYear());
@@ -36,7 +36,7 @@ pualic clbss WMVMetaData extends VideoMetaData {
         setWidth(data.getWidth());
         setHeight(data.getHeight());
         
-        if(data.getLicenseInfo() != null)
-            setLicenseType(data.getLicenseInfo());
+        if(data.getLidenseInfo() != null)
+            setLidenseType(data.getLicenseInfo());
     }
 }

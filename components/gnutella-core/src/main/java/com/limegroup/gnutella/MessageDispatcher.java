@@ -1,82 +1,82 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import java.net.InetSocketAddress;
+import java.net.InetSodketAddress;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.util.ProcessingQueue;
 
 /**
- * Dispatches messages to the MessageRouter.
+ * Dispatdhes messages to the MessageRouter.
  */
-class MessageDispatcher {
+dlass MessageDispatcher {
     
-    private static final MessageDispatcher INSTANCE = new MessageDispatcher();
-    private MessageDispatcher() {}
-    pualic stbtic MessageDispatcher instance() { return INSTANCE; }
+    private statid final MessageDispatcher INSTANCE = new MessageDispatcher();
+    private MessageDispatdher() {}
+    pualid stbtic MessageDispatcher instance() { return INSTANCE; }
     
-    private final ProcessingQueue DISPATCH = new ProcessingQueue("MessageDispatch");
+    private final ProdessingQueue DISPATCH = new ProcessingQueue("MessageDispatch");
     
     /**
-     * Dispatches a UDP message.
+     * Dispatdhes a UDP message.
      */
-    pualic void dispbtchUDP(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new UDPDispatch(m, addr));
+    pualid void dispbtchUDP(Message m, InetSocketAddress addr) {
+        DISPATCH.add(new UDPDispatdh(m, addr));
     }
     
     /**
-     * Dispatches a Multicast message.
+     * Dispatdhes a Multicast message.
      */
-    pualic void dispbtchMulticast(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new MulticastDispatch(m, addr));
+    pualid void dispbtchMulticast(Message m, InetSocketAddress addr) {
+        DISPATCH.add(new MultidastDispatch(m, addr));
     }
     
     /**
-     * Dispatches a TCP message.
+     * Dispatdhes a TCP message.
      */
-    pualic void dispbtchTCP(Message m, ManagedConnection conn) {
-        DISPATCH.add(new TCPDispatch(m, conn));
+    pualid void dispbtchTCP(Message m, ManagedConnection conn) {
+        DISPATCH.add(new TCPDispatdh(m, conn));
     }
     
     
-    private static class UDPDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
+    private statid class UDPDispatch implements Runnable {
+        private statid final MessageRouter ROUTER = RouterService.getMessageRouter();
         private final Message m;
-        private final InetSocketAddress addr;
+        private final InetSodketAddress addr;
         
-        UDPDispatch(Message m, InetSocketAddress addr) {
+        UDPDispatdh(Message m, InetSocketAddress addr) {
             this.m = m; this.addr = addr;
         }
         
-        pualic void run() {
+        pualid void run() {
             ROUTER.handleUDPMessage(m, addr);
         }
     }
     
-    private static class MulticastDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
+    private statid class MulticastDispatch implements Runnable {
+        private statid final MessageRouter ROUTER = RouterService.getMessageRouter();
         private final Message m;
-        private final InetSocketAddress addr;
+        private final InetSodketAddress addr;
         
-        MulticastDispatch(Message m, InetSocketAddress addr) {
+        MultidastDispatch(Message m, InetSocketAddress addr) {
             this.m = m; this.addr = addr;
         }
 
-        pualic void run() {
-            ROUTER.handleMulticastMessage(m, addr);
+        pualid void run() {
+            ROUTER.handleMultidastMessage(m, addr);
         }
     }
     
-    private static class TCPDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
+    private statid class TCPDispatch implements Runnable {
+        private statid final MessageRouter ROUTER = RouterService.getMessageRouter();
         private final Message m;
-        private final ManagedConnection conn;
+        private final ManagedConnedtion conn;
 
-        TCPDispatch(Message m, ManagedConnection conn) {
-            this.m = m; this.conn = conn;
+        TCPDispatdh(Message m, ManagedConnection conn) {
+            this.m = m; this.donn = conn;
         }
         
-        pualic void run() {
-            ROUTER.handleMessage(m, conn);
+        pualid void run() {
+            ROUTER.handleMessage(m, donn);
         }
     }
 }

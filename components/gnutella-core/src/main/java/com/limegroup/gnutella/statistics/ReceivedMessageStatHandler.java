@@ -1,28 +1,28 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 
 /**
- * Wrapper class for keeping track of Gnutella message data.  For a given
- * Gnutella message, this class provides the simultaneous updating of both 
- * the numaer of messbges received and the total bytes received.  All calls 
- * to add data for received Gnutella message statistics should go through 
- * this class to avoid losing any data.
+ * Wrapper dlass for keeping track of Gnutella message data.  For a given
+ * Gnutella message, this dlass provides the simultaneous updating of both 
+ * the numaer of messbges redeived and the total bytes received.  All calls 
+ * to add data for redeived Gnutella message statistics should go through 
+ * this dlass to avoid losing any data.
  */
-pualic finbl class ReceivedMessageStatHandler extends AbstractMessageStatHandler {
+pualid finbl class ReceivedMessageStatHandler extends AbstractMessageStatHandler {
 
 	/**
-	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
-	 * Private constructor to ensure that no other classes can
-	 * construct this class, following the type-safe enum pattern.
+	 * Creates a new <tt>RedeivedMessageStatHandler</tt> instance.  
+	 * Private donstructor to ensure that no other classes can
+	 * donstruct this class, following the type-safe enum pattern.
 	 *
-	 * @param numberStat the statistic that is simply incremented with
-	 *  each new message
-	 * @param byteStat the statistic for keeping track of the total bytes
+	 * @param numberStat the statistid that is simply incremented with
+	 *  eadh new message
+	 * @param byteStat the statistid for keeping track of the total bytes
 	 */
-	private ReceivedMessageStatHandler(Statistic numberStat, 
-									   Statistic byteStat,
-									   Statistic limeNumberStat,
-									   Statistic limeByteStat,
+	private RedeivedMessageStatHandler(Statistic numberStat, 
+									   Statistid byteStat,
+									   Statistid limeNumberStat,
+									   Statistid limeByteStat,
 									   String fileName) {
 		super(numaerStbt, byteStat, limeNumberStat, limeByteStat,
 			  BandwidthStat.GNUTELLA_MESSAGE_DOWNSTREAM_BANDWIDTH, fileName);
@@ -30,312 +30,312 @@ pualic finbl class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	
 
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pings received over UDP.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella pings received over UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_PING_REQUESTS = 
-		new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REQUESTS, 
-									   ReceivedMessageStatBytes.UDP_PING_REQUESTS,
-									   LimeReceivedMessageStat.UDP_PING_REQUESTS,
-									   LimeReceivedMessageStatBytes.UDP_PING_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler UDP_PING_REQUESTS = 
+		new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REQUESTS, 
+									   RedeivedMessageStatBytes.UDP_PING_REQUESTS,
+									   LimeRedeivedMessageStat.UDP_PING_REQUESTS,
+									   LimeRedeivedMessageStatBytes.UDP_PING_REQUESTS,
 									   "RECEIVED_UDP_PING_REQUESTS");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pings received over TCP.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella pings received over TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_PING_REQUESTS = 
-		new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REQUESTS,
-									   ReceivedMessageStatBytes.TCP_PING_REQUESTS,
-									   LimeReceivedMessageStat.TCP_PING_REQUESTS,
-									   LimeReceivedMessageStatBytes.TCP_PING_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler TCP_PING_REQUESTS = 
+		new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REQUESTS,
+									   RedeivedMessageStatBytes.TCP_PING_REQUESTS,
+									   LimeRedeivedMessageStat.TCP_PING_REQUESTS,
+									   LimeRedeivedMessageStatBytes.TCP_PING_REQUESTS,
 									   "RECEIVED_TCP_PING_REQUESTS");
 
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pings received over Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella pings received over Multicast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_PING_REQUESTS = 
-		new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PING_REQUESTS,
-									   ReceivedMessageStatBytes.MULTICAST_PING_REQUESTS,
-									   LimeReceivedMessageStat.MULTICAST_PING_REQUESTS,
-									   LimeReceivedMessageStatBytes.MULTICAST_PING_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_PING_REQUESTS = 
+		new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PING_REQUESTS,
+									   RedeivedMessageStatBytes.MULTICAST_PING_REQUESTS,
+									   LimeRedeivedMessageStat.MULTICAST_PING_REQUESTS,
+									   LimeRedeivedMessageStatBytes.MULTICAST_PING_REQUESTS,
 									   "RECEIVED_MULTICAST_PING_REQUESTS");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over UDP.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella pongs received over UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_PING_REPLIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REPLIES, 
-									   ReceivedMessageStatBytes.UDP_PING_REPLIES,
-									   LimeReceivedMessageStat.UDP_PING_REPLIES, 
-									   LimeReceivedMessageStatBytes.UDP_PING_REPLIES,
+	pualid stbtic final ReceivedMessageStatHandler UDP_PING_REPLIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REPLIES, 
+									   RedeivedMessageStatBytes.UDP_PING_REPLIES,
+									   LimeRedeivedMessageStat.UDP_PING_REPLIES, 
+									   LimeRedeivedMessageStatBytes.UDP_PING_REPLIES,
 									   "RECEIVED_UDP_PING_REPLIES");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over TCP.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella pongs received over TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_PING_REPLIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REPLIES, 
-									   ReceivedMessageStatBytes.TCP_PING_REPLIES,
-									   LimeReceivedMessageStat.TCP_PING_REPLIES, 
-									   LimeReceivedMessageStatBytes.TCP_PING_REPLIES,
+	pualid stbtic final ReceivedMessageStatHandler TCP_PING_REPLIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REPLIES, 
+									   RedeivedMessageStatBytes.TCP_PING_REPLIES,
+									   LimeRedeivedMessageStat.TCP_PING_REPLIES, 
+									   LimeRedeivedMessageStatBytes.TCP_PING_REPLIES,
 									   "RECEIVED_TCP_PING_REPLIES");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella pongs received over Multicast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_PING_REPLIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PING_REPLIES, 
-									   ReceivedMessageStatBytes.MULTICAST_PING_REPLIES,
-									   LimeReceivedMessageStat.MULTICAST_PING_REPLIES, 
-									   LimeReceivedMessageStatBytes.MULTICAST_PING_REPLIES,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_PING_REPLIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PING_REPLIES, 
+									   RedeivedMessageStatBytes.MULTICAST_PING_REPLIES,
+									   LimeRedeivedMessageStat.MULTICAST_PING_REPLIES, 
+									   LimeRedeivedMessageStatBytes.MULTICAST_PING_REPLIES,
 									   "RECEIVED_MULTICAST_PING_REPLIES");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella query requests received 
 	 * over UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_QUERY_REQUESTS = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REQUESTS, 
-									   ReceivedMessageStatBytes.UDP_QUERY_REQUESTS,
-									   LimeReceivedMessageStat.UDP_QUERY_REQUESTS, 
-									   LimeReceivedMessageStatBytes.UDP_QUERY_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler UDP_QUERY_REQUESTS = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REQUESTS, 
+									   RedeivedMessageStatBytes.UDP_QUERY_REQUESTS,
+									   LimeRedeivedMessageStat.UDP_QUERY_REQUESTS, 
+									   LimeRedeivedMessageStatBytes.UDP_QUERY_REQUESTS,
 									   "RECEIVED_UDP_QUERY_REQUESTS");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella query requests received 
 	 * over TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_QUERY_REQUESTS = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REQUESTS, 
-									   ReceivedMessageStatBytes.TCP_QUERY_REQUESTS,
-									   LimeReceivedMessageStat.TCP_QUERY_REQUESTS, 
-									   LimeReceivedMessageStatBytes.TCP_QUERY_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler TCP_QUERY_REQUESTS = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REQUESTS, 
+									   RedeivedMessageStatBytes.TCP_QUERY_REQUESTS,
+									   LimeRedeivedMessageStat.TCP_QUERY_REQUESTS, 
+									   LimeRedeivedMessageStatBytes.TCP_QUERY_REQUESTS,
 									   "RECEIVED_TCP_QUERY_REQUESTS");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
-	 * over Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella query requests received 
+	 * over Multidast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_QUERY_REQUESTS = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_QUERY_REQUESTS, 
-									   ReceivedMessageStatBytes.MULTICAST_QUERY_REQUESTS,
-									   LimeReceivedMessageStat.MULTICAST_QUERY_REQUESTS, 
-									   LimeReceivedMessageStatBytes.MULTICAST_QUERY_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_QUERY_REQUESTS = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_QUERY_REQUESTS, 
+									   RedeivedMessageStatBytes.MULTICAST_QUERY_REQUESTS,
+									   LimeRedeivedMessageStat.MULTICAST_QUERY_REQUESTS, 
+									   LimeRedeivedMessageStatBytes.MULTICAST_QUERY_REQUESTS,
 									   "RECEIVED_MULTICAST_QUERY_REQUESTS");
 									   									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella query replies received over 
 	 * UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_QUERY_REPLIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REPLIES, 
-									   ReceivedMessageStatBytes.UDP_QUERY_REPLIES,
-									   LimeReceivedMessageStat.UDP_QUERY_REPLIES, 
-									   LimeReceivedMessageStatBytes.UDP_QUERY_REPLIES,
+	pualid stbtic final ReceivedMessageStatHandler UDP_QUERY_REPLIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REPLIES, 
+									   RedeivedMessageStatBytes.UDP_QUERY_REPLIES,
+									   LimeRedeivedMessageStat.UDP_QUERY_REPLIES, 
+									   LimeRedeivedMessageStatBytes.UDP_QUERY_REPLIES,
 									   "RECEIVED_UDP_QUERY_REPLIES");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella query replies received over 
 	 * TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_QUERY_REPLIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REPLIES, 
-									   ReceivedMessageStatBytes.TCP_QUERY_REPLIES,
-									   LimeReceivedMessageStat.TCP_QUERY_REPLIES, 
-									   LimeReceivedMessageStatBytes.TCP_QUERY_REPLIES,
+	pualid stbtic final ReceivedMessageStatHandler TCP_QUERY_REPLIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REPLIES, 
+									   RedeivedMessageStatBytes.TCP_QUERY_REPLIES,
+									   LimeRedeivedMessageStat.TCP_QUERY_REPLIES, 
+									   LimeRedeivedMessageStatBytes.TCP_QUERY_REPLIES,
 									   "RECEIVED_TCP_QUERY_REPLIES");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
-	 * Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella query replies received over 
+	 * Multidast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_QUERY_REPLIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_QUERY_REPLIES, 
-									   ReceivedMessageStatBytes.MULTICAST_QUERY_REPLIES,
-									   LimeReceivedMessageStat.MULTICAST_QUERY_REPLIES, 
-									   LimeReceivedMessageStatBytes.MULTICAST_QUERY_REPLIES,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_QUERY_REPLIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_QUERY_REPLIES, 
+									   RedeivedMessageStatBytes.MULTICAST_QUERY_REPLIES,
+									   LimeRedeivedMessageStat.MULTICAST_QUERY_REPLIES, 
+									   LimeRedeivedMessageStatBytes.MULTICAST_QUERY_REPLIES,
 									   "RECEIVED_MULTICAST_QUERY_REPLIES");
 									   									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella push requests received over 
 	 * UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_PUSH_REQUESTS = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PUSH_REQUESTS, 
-									   ReceivedMessageStatBytes.UDP_PUSH_REQUESTS,
-									   LimeReceivedMessageStat.UDP_PUSH_REQUESTS, 
-									   LimeReceivedMessageStatBytes.UDP_PUSH_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler UDP_PUSH_REQUESTS = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_PUSH_REQUESTS, 
+									   RedeivedMessageStatBytes.UDP_PUSH_REQUESTS,
+									   LimeRedeivedMessageStat.UDP_PUSH_REQUESTS, 
+									   LimeRedeivedMessageStatBytes.UDP_PUSH_REQUESTS,
 									   "RECEIVED_UDP_PUSH_REQUESTS");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella push requests received over 
 	 * TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_PUSH_REQUESTS = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PUSH_REQUESTS, 
-									   ReceivedMessageStatBytes.TCP_PUSH_REQUESTS,
-									   LimeReceivedMessageStat.TCP_PUSH_REQUESTS, 
-									   LimeReceivedMessageStatBytes.TCP_PUSH_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler TCP_PUSH_REQUESTS = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_PUSH_REQUESTS, 
+									   RedeivedMessageStatBytes.TCP_PUSH_REQUESTS,
+									   LimeRedeivedMessageStat.TCP_PUSH_REQUESTS, 
+									   LimeRedeivedMessageStatBytes.TCP_PUSH_REQUESTS,
 									   "RECEIVED_TCP_PUSH_REQUESTS");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
-	 * Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella push requests received over 
+	 * Multidast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_PUSH_REQUESTS = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PUSH_REQUESTS, 
-									   ReceivedMessageStatBytes.MULTICAST_PUSH_REQUESTS,
-									   LimeReceivedMessageStat.MULTICAST_PUSH_REQUESTS, 
-									   LimeReceivedMessageStatBytes.MULTICAST_PUSH_REQUESTS,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_PUSH_REQUESTS = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PUSH_REQUESTS, 
+									   RedeivedMessageStatBytes.MULTICAST_PUSH_REQUESTS,
+									   LimeRedeivedMessageStat.MULTICAST_PUSH_REQUESTS, 
+									   LimeRedeivedMessageStatBytes.MULTICAST_PUSH_REQUESTS,
 									   "RECEIVED_MULTICAST_PUSH_REQUESTS");
 									   									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella route table messages received 
 	 * over UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_ROUTE_TABLE_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
-									   ReceivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
-									   LimeReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
-									   LimeReceivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
+	pualid stbtic final ReceivedMessageStatHandler UDP_ROUTE_TABLE_MESSAGES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
+									   RedeivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
+									   LimeRedeivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
+									   LimeRedeivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
 									   "RECEIVED_UDP_ROUTE_TABLE_MESSAGES");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella reset route table messages
-     * received over TCP.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella reset route table messages
+     * redeived over TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_RESET_ROUTE_TABLE_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES, 
-									   ReceivedMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
-									   LimeReceivedMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES, 
-									   LimeReceivedMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
+	pualid stbtic final ReceivedMessageStatHandler TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES, 
+									   RedeivedMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
+									   LimeRedeivedMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES, 
+									   LimeRedeivedMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
 									   "RECEIVED_TCP_RESET_ROUTE_TABLE_MESSAGES");
 
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table patch messages
-     * received over TCP.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella route table patch messages
+     * redeived over TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_PATCH_ROUTE_TABLE_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES, 
-									   ReceivedMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
-									   LimeReceivedMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES, 
-									   LimeReceivedMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+	pualid stbtic final ReceivedMessageStatHandler TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES, 
+									   RedeivedMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+									   LimeRedeivedMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES, 
+									   LimeRedeivedMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
 									   "RECEIVED_TCP_PATCH_ROUTE_TABLE_MESSAGES");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
-	 * over Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella route table messages received 
+	 * over Multidast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_ROUTE_TABLE_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES, 
-									   ReceivedMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
-									   LimeReceivedMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES, 
-									   LimeReceivedMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES, 
+									   RedeivedMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
+									   LimeRedeivedMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES, 
+									   LimeRedeivedMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
 									   "RECEIVED_MULTICAST_ROUTE_TABLE_MESSAGES");
 									   									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella filtered messages received 
 	 * over UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_FILTERED_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   ReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
+	pualid stbtic final ReceivedMessageStatHandler UDP_FILTERED_MESSAGES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_FILTERED_MESSAGES,
+									   RedeivedMessageStatBytes.UDP_FILTERED_MESSAGES,
+									   LimeRedeivedMessageStat.UDP_FILTERED_MESSAGES,
+									   LimeRedeivedMessageStatBytes.UDP_FILTERED_MESSAGES,
 									   "RECEIVED_UDP_FILTERED_MESSAGES");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella filtered messages received 
 	 * over TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_FILTERED_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_FILTERED_MESSAGES,
-									   ReceivedMessageStatBytes.TCP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStat.TCP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStatBytes.TCP_FILTERED_MESSAGES,
+	pualid stbtic final ReceivedMessageStatHandler TCP_FILTERED_MESSAGES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_FILTERED_MESSAGES,
+									   RedeivedMessageStatBytes.TCP_FILTERED_MESSAGES,
+									   LimeRedeivedMessageStat.TCP_FILTERED_MESSAGES,
+									   LimeRedeivedMessageStatBytes.TCP_FILTERED_MESSAGES,
 									   "RECEIVED_TCP_FILTERED_MESSAGES");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
-	 * over Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for Gnutella filtered messages received 
+	 * over Multidast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_FILTERED_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_FILTERED_MESSAGES,
-									   ReceivedMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
-									   LimeReceivedMessageStat.MULTICAST_FILTERED_MESSAGES,
-									   LimeReceivedMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_FILTERED_MESSAGES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_FILTERED_MESSAGES,
+									   RedeivedMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
+									   LimeRedeivedMessageStat.MULTICAST_FILTERED_MESSAGES,
+									   LimeRedeivedMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
 									   "RECEIVED_MULTICAST_FILTERED_MESSAGES");	
 									   								   
 
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
+	 * <tt>RedeivedMessageStatHandler</tt> for duplicate queries received 
 	 * over UDP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler UDP_DUPLICATE_QUERIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_DUPLICATE_QUERIES,
-									   ReceivedMessageStatBytes.UDP_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStat.UDP_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStatBytes.UDP_DUPLICATE_QUERIES,
+	pualid stbtic final ReceivedMessageStatHandler UDP_DUPLICATE_QUERIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_DUPLICATE_QUERIES,
+									   RedeivedMessageStatBytes.UDP_DUPLICATE_QUERIES,
+									   LimeRedeivedMessageStat.UDP_DUPLICATE_QUERIES,
+									   LimeRedeivedMessageStatBytes.UDP_DUPLICATE_QUERIES,
 									   "RECEIVED_UDP_DUPLICATE_QUERIES");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
+	 * <tt>RedeivedMessageStatHandler</tt> for duplicate queries received 
 	 * over TCP.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler TCP_DUPLICATE_QUERIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_DUPLICATE_QUERIES,
-									   ReceivedMessageStatBytes.TCP_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStat.TCP_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStatBytes.TCP_DUPLICATE_QUERIES,
+	pualid stbtic final ReceivedMessageStatHandler TCP_DUPLICATE_QUERIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_DUPLICATE_QUERIES,
+									   RedeivedMessageStatBytes.TCP_DUPLICATE_QUERIES,
+									   LimeRedeivedMessageStat.TCP_DUPLICATE_QUERIES,
+									   LimeRedeivedMessageStatBytes.TCP_DUPLICATE_QUERIES,
 									   "RECEIVED_TCP_DUPLICATE_QUERIES");
 									   
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
-	 * over Multicast.
+	 * <tt>RedeivedMessageStatHandler</tt> for duplicate queries received 
+	 * over Multidast.
 	 */
-	pualic stbtic final ReceivedMessageStatHandler MULTICAST_DUPLICATE_QUERIES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_DUPLICATE_QUERIES,
-									   ReceivedMessageStatBytes.MULTICAST_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStat.MULTICAST_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStatBytes.MULTICAST_DUPLICATE_QUERIES,
+	pualid stbtic final ReceivedMessageStatHandler MULTICAST_DUPLICATE_QUERIES = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.MULTICAST_DUPLICATE_QUERIES,
+									   RedeivedMessageStatBytes.MULTICAST_DUPLICATE_QUERIES,
+									   LimeRedeivedMessageStat.MULTICAST_DUPLICATE_QUERIES,
+									   LimeRedeivedMessageStatBytes.MULTICAST_DUPLICATE_QUERIES,
 									   "RECEIVED_MULTICAST_DUPLICATE_QUERIES");									   
 
-	pualic stbtic final ReceivedMessageStatHandler UDP_LIME_ACK = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_LIME_ACK,
-                                       ReceivedMessageStatBytes.UDP_LIME_ACK,
-                                       LimeReceivedMessageStat.UDP_LIME_ACK,
-                                       LimeReceivedMessageStatBytes.UDP_LIME_ACK,
+	pualid stbtic final ReceivedMessageStatHandler UDP_LIME_ACK = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_LIME_ACK,
+                                       RedeivedMessageStatBytes.UDP_LIME_ACK,
+                                       LimeRedeivedMessageStat.UDP_LIME_ACK,
+                                       LimeRedeivedMessageStatBytes.UDP_LIME_ACK,
                                        "RECEIVED_UDP_LIME_ACK");
 
     
-	pualic stbtic final ReceivedMessageStatHandler TCP_HOPS_FLOW = 
-        new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_HOPS_FLOW,
-                                       ReceivedMessageStatBytes.TCP_HOPS_FLOW,
-                                       LimeReceivedMessageStat.TCP_HOPS_FLOW,
-                                       LimeReceivedMessageStatBytes.TCP_HOPS_FLOW,
+	pualid stbtic final ReceivedMessageStatHandler TCP_HOPS_FLOW = 
+        new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_HOPS_FLOW,
+                                       RedeivedMessageStatBytes.TCP_HOPS_FLOW,
+                                       LimeRedeivedMessageStat.TCP_HOPS_FLOW,
+                                       LimeRedeivedMessageStatBytes.TCP_HOPS_FLOW,
                                        "RECEIVED_UDP_HOPS_FLOW");
     
 
-	pualic stbtic final ReceivedMessageStatHandler TCP_TCP_CONNECTBACK = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_TCP_CONNECTBACK,
-                                       ReceivedMessageStatBytes.TCP_TCP_CONNECTBACK,
-                                       LimeReceivedMessageStat.TCP_TCP_CONNECTBACK,
-                                       LimeReceivedMessageStatBytes.TCP_TCP_CONNECTBACK, 
+	pualid stbtic final ReceivedMessageStatHandler TCP_TCP_CONNECTBACK = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_TCP_CONNECTBACK,
+                                       RedeivedMessageStatBytes.TCP_TCP_CONNECTBACK,
+                                       LimeRedeivedMessageStat.TCP_TCP_CONNECTBACK,
+                                       LimeRedeivedMessageStatBytes.TCP_TCP_CONNECTBACK, 
                                        "RECEIVED_TCP_TCP_CONNECTBACK");
 
 
-	pualic stbtic final ReceivedMessageStatHandler TCP_UDP_CONNECTBACK = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_UDP_CONNECTBACK,
-                                       ReceivedMessageStatBytes.TCP_UDP_CONNECTBACK,
-                                       LimeReceivedMessageStat.TCP_UDP_CONNECTBACK,
-                                       LimeReceivedMessageStatBytes.TCP_UDP_CONNECTBACK, 
+	pualid stbtic final ReceivedMessageStatHandler TCP_UDP_CONNECTBACK = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_UDP_CONNECTBACK,
+                                       RedeivedMessageStatBytes.TCP_UDP_CONNECTBACK,
+                                       LimeRedeivedMessageStat.TCP_UDP_CONNECTBACK,
+                                       LimeRedeivedMessageStatBytes.TCP_UDP_CONNECTBACK, 
                                        "RECEIVED_TCP_UDP_CONNECTBACK");
 
 
-	pualic stbtic final ReceivedMessageStatHandler TCP_MESSAGES_SUPPORTED = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_MESSAGES_SUPPORTED,
-                                       ReceivedMessageStatBytes.TCP_MESSAGES_SUPPORTED,
-                                       LimeReceivedMessageStat.TCP_MESSAGES_SUPPORTED,
-                                       LimeReceivedMessageStatBytes.TCP_MESSAGES_SUPPORTED,
+	pualid stbtic final ReceivedMessageStatHandler TCP_MESSAGES_SUPPORTED = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.TCP_MESSAGES_SUPPORTED,
+                                       RedeivedMessageStatBytes.TCP_MESSAGES_SUPPORTED,
+                                       LimeRedeivedMessageStat.TCP_MESSAGES_SUPPORTED,
+                                       LimeRedeivedMessageStatBytes.TCP_MESSAGES_SUPPORTED,
                                        "RECEIVED_TCP_MESSAGES_SUPPORTED");
     
 
-	pualic stbtic final ReceivedMessageStatHandler UDP_REPLY_NUMBER = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_REPLY_NUMBER,
-                                       ReceivedMessageStatBytes.UDP_REPLY_NUMBER,
-                                       LimeReceivedMessageStat.UDP_REPLY_NUMBER,
-                                       LimeReceivedMessageStatBytes.UDP_REPLY_NUMBER,
+	pualid stbtic final ReceivedMessageStatHandler UDP_REPLY_NUMBER = 
+	    new RedeivedMessageStatHandler(ReceivedMessageStat.UDP_REPLY_NUMBER,
+                                       RedeivedMessageStatBytes.UDP_REPLY_NUMBER,
+                                       LimeRedeivedMessageStat.UDP_REPLY_NUMBER,
+                                       LimeRedeivedMessageStatBytes.UDP_REPLY_NUMBER,
                                        "RECEIVED_UDP_REPLY_NUMBER");
 
 

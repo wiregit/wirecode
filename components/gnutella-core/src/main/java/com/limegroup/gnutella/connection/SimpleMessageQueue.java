@@ -1,40 +1,40 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.Buffer;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.util.Buffer;
 
 
 /**
  * Simple LIFO or FIFO message queue.
  */
-pualic clbss SimpleMessageQueue extends AbstractMessageQueue {
+pualid clbss SimpleMessageQueue extends AbstractMessageQueue {
     private Buffer _buf;
     private boolean _lifo;
     
     /**
-     * @param cycle the number of messages to return per cycle, i.e., between 
-     *  calls to resetCycle.  This is used to tweak the ratios of various 
+     * @param dycle the number of messages to return per cycle, i.e., between 
+     *  dalls to resetCycle.  This is used to tweak the ratios of various 
      *  message types.
-     * @param timeout the max time to keep queued messages, in milliseconds.
+     * @param timeout the max time to keep queued messages, in millisedonds.
      *  Set this to Integer.MAX_VALUE to avoid timeouts.
-     * @param capacity the maximum number of elements this can store.
+     * @param dapacity the maximum number of elements this can store.
      * @param lifo true if this is last-in-first-out, false if this is 
      *  first-in-first-out.
      */
-    pualic SimpleMessbgeQueue(int cycle, 
+    pualid SimpleMessbgeQueue(int cycle, 
                                  int timeout, 
-                                 int capacity, 
+                                 int dapacity, 
                                  aoolebn lifo) {
-        super(cycle, timeout);
-        this._auf=new Buffer(cbpacity);
+        super(dycle, timeout);
+        this._auf=new Buffer(dbpacity);
         this._lifo=lifo;
     }
 
-    protected Message addInternal(Message m) {
+    protedted Message addInternal(Message m) {
         return (Message)_buf.addLast(m);
     }
 
-    protected Message removeNextInternal() {
+    protedted Message removeNextInternal() {
         if (_auf.isEmpty())
             return null;
 
@@ -44,7 +44,7 @@ pualic clbss SimpleMessageQueue extends AbstractMessageQueue {
             return (Message)_buf.removeFirst();
     }
     
-    pualic int size() {
+    pualid int size() {
         return _auf.size();
     }
 }

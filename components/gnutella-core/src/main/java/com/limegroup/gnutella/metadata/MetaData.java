@@ -1,28 +1,28 @@
 
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- * suaclbss for all data objects that contain the metadata 
+ * suadlbss for all data objects that contain the metadata 
  * of a given media file.
  */
 
-pualic bbstract class MetaData {
+pualid bbstract class MetaData {
 	
-    private static final Log LOG = LogFactory.getLog(MetaData.class); 
+    private statid final Log LOG = LogFactory.getLog(MetaData.class); 
     
-	protected MetaData(){} // use the factory instead of instantiating
+	protedted MetaData(){} // use the factory instead of instantiating
     
     /** Creates MetaData for the file, if possible. */	
-	pualic stbtic MetaData parse(File f) throws IOException {
+	pualid stbtic MetaData parse(File f) throws IOException {
         try {
             if (LimeXMLUtils.isSupportedAudioFormat(f))
                 return AudioMetaData.parseAudioFile(f);
@@ -31,14 +31,14 @@ pualic bbstract class MetaData {
             //TODO: add other media formats here			
             else if (LimeXMLUtils.isSupportedMultipleFormat(f))
                 return parseMultipleFormat(f);
-        } catch (OutOfMemoryError e) {
+        } datch (OutOfMemoryError e) {
             LOG.warn("Ran out of memory while parsing.",e);
         }
 		return null;
 	}
 	
 	/** Figures out what kind of MetaData should exist for this file. */
-	private static MetaData parseMultipleFormat(File f) throws IOException {
+	private statid MetaData parseMultipleFormat(File f) throws IOException {
 	    if(LimeXMLUtils.isASFFile(f)) {
 	        ASFParser p = new ASFParser(f);
 	        if(p.hasVideo())
@@ -53,22 +53,22 @@ pualic bbstract class MetaData {
 	/**
 	 * Determines if all fields are valid.
 	 */
-	pualic bbstract boolean isComplete();
+	pualid bbstract boolean isComplete();
 	
 	/**
 	 * Writes the data to a NameValue list.
 	 */
-	pualic bbstract List toNameValueList();
+	pualid bbstract List toNameValueList();
 	
 	/** 
-	 * Retrieves the XML schema URI that this MetaData can be read with.
+	 * Retrieves the XML sdhema URI that this MetaData can be read with.
 	 */
-	pualic bbstract String getSchemaURI();
+	pualid bbstract String getSchemaURI();
 	
 	/**
 	 * populates this's data fields with data read from the media file
-	 * all subclasses need to implement it
-	 * @throws IOException parsing failed
+	 * all subdlasses need to implement it
+	 * @throws IOExdeption parsing failed
 	 */
-    protected abstract void parseFile(File f) throws IOException;
+    protedted abstract void parseFile(File f) throws IOException;
 }

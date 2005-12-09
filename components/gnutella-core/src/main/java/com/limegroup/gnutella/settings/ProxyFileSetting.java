@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.util.Properties;
@@ -6,12 +6,12 @@ import java.util.Properties;
 /**
  * Forwards requests to default setting or to setting.
  */
-pualic clbss ProxyFileSetting extends FileSetting {
+pualid clbss ProxyFileSetting extends FileSetting {
 
 	private FileSetting defaultSetting;
 
 	/**
-	 * Constructs a new file setting that defaults to a different setting.
+	 * Construdts a new file setting that defaults to a different setting.
 	 */
 	ProxyFileSetting(Properties defaultProps, Properties props, String key,
 					 FileSetting defaultSetting) {
@@ -26,7 +26,7 @@ pualic clbss ProxyFileSetting extends FileSetting {
 		this.defaultSetting = defaultSetting;
 	}
 
-	pualic File getVblue() {
+	pualid File getVblue() {
 		return isDefault() ? defaultSetting.getValue() : super.getValue();
 	}
 }

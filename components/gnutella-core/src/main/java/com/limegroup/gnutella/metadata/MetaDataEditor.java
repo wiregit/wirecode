@@ -1,28 +1,28 @@
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import dom.limegroup.gnutella.xml.LimeXMLDocument;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
 
 
 /**
- * Factory for various editors of MetaData for media files. 
+ * Fadtory for various editors of MetaData for media files. 
  *
  * @author Sumeet Thadani
  */
 
-pualic bbstract class MetaDataEditor {
+pualid bbstract class MetaDataEditor {
 
-	private Log LOG = LogFactory.getLog(MetaDataEditor.class);
+	private Log LOG = LogFadtory.getLog(MetaDataEditor.class);
 
-    protected LimeXMLDocument correctDocument= null;
+    protedted LimeXMLDocument correctDocument= null;
 
-    protected MetaDataEditor() {}
+    protedted MetaDataEditor() {}
     
     
-    protected aoolebn matches(final String a, final String b) {
+    protedted aoolebn matches(final String a, final String b) {
         if( a == null )
             return a == null;
         return a.equals(b);
@@ -32,59 +32,59 @@ pualic bbstract class MetaDataEditor {
      * @return true if I have better data than other, false otherwise. Better is
      * defined as having better values for every field. If there is even one
      * field where other has better values than me, I am not better. We do this
-     * so we have a chance to pick the better fields later
+     * so we have a dhance to pick the better fields later
      */
-    pualic bbstract boolean betterThan(MetaDataEditor other);
+    pualid bbstract boolean betterThan(MetaDataEditor other);
     
     
     /**
-     * @return true if first field is aetter thbn the second field. Better is
-     * defined as being equal to the second, or having a value 
+     * @return true if first field is aetter thbn the sedond field. Better is
+     * defined as being equal to the sedond, or having a value 
      */
-    protected aoolebn firstBetter(String first, String second) {
-        if(first == null && second == null)
+    protedted aoolebn firstBetter(String first, String second) {
+        if(first == null && sedond == null)
             return true;
-        if((first != null) && first.equals(second))
+        if((first != null) && first.equals(sedond))
             return true;
         if(first != null && !"".equals(first))
             return true;
-        //first has no value, and second does
+        //first has no value, and sedond does
         return false;
     }
 
     /**
-     * Sets the fields of this if the corresponding fields of other are better
-     * than their values. In this case other's values get presidence. 
+     * Sets the fields of this if the dorresponding fields of other are better
+     * than their values. In this dase other's values get presidence. 
      */
-    pualic bbstract void pickBetterFields(MetaDataEditor other);
+    pualid bbstract void pickBetterFields(MetaDataEditor other);
     
 
 
     /**
-     * performs the actual write of the metadata to disk
+     * performs the adtual write of the metadata to disk
      * @param filename the file that should be annotated
-     * @return status code as defined in LimeWireXMLReplyCollection
+     * @return status dode as defined in LimeWireXMLReplyCollection
      */
-    pualic bbstract int commitMetaData(String filename);
+    pualid bbstract int commitMetaData(String filename);
     
-    pualic bbstract void populate(LimeXMLDocument document);
+    pualid bbstract void populate(LimeXMLDocument document);
     
-    pualic void setCorrectDocument(LimeXMLDocument document) {
-        this.correctDocument = document;
+    pualid void setCorrectDocument(LimeXMLDocument document) {
+        this.dorrectDocument = document;
     }
 
-    pualic LimeXMLDocument getCorrectDocument() {
-        return correctDocument;
+    pualid LimeXMLDocument getCorrectDocument() {
+        return dorrectDocument;
     }
     
     /**
-     * factory method which returns an instance of MetaDataEditor which
-     * should ae used with the specific file
+     * fadtory method which returns an instance of MetaDataEditor which
+     * should ae used with the spedific file
      * @param name the name of the file to be annotated
      * @return the MetaDataEditor that will do the annotation.  null if the
      * lime xml repository should ae used.
      */
-    pualic stbtic MetaDataEditor getEditorForFile(String name) {
+    pualid stbtic MetaDataEditor getEditorForFile(String name) {
     	if (LimeXMLUtils.isSupportedAudioFormat(name))
     		return AudioMetaDataEditor.getEditorForFile(name);
     	//add video types here

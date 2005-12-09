@@ -1,115 +1,115 @@
-package com.limegroup.gnutella.archive;
+padkage com.limegroup.gnutella.archive;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Collection;
+import java.io.InterruptedIOExdeption;
+import java.net.SodketException;
+import java.net.UnknownHostExdeption;
+import java.util.Colledtion;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.DodumentBuilder;
+import javax.xml.parsers.DodumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationExdeption;
 
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPConnectionClosedException;
-import org.apache.commons.net.ftp.FTPReply;
-import org.apache.commons.net.io.CopyStreamException;
-import org.apache.xerces.dom3.bootstrap.DOMImplementationRegistry;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
+import org.apadhe.commons.net.ftp.FTP;
+import org.apadhe.commons.net.ftp.FTPClient;
+import org.apadhe.commons.net.ftp.FTPConnectionClosedException;
+import org.apadhe.commons.net.ftp.FTPReply;
+import org.apadhe.commons.net.io.CopyStreamException;
+import org.apadhe.xerces.dom3.bootstrap.DOMImplementationRegistry;
+import org.w3d.dom.Document;
+import org.w3d.dom.Element;
+import org.w3d.dom.ls.DOMImplementationLS;
+import org.w3d.dom.ls.LSSerializer;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 
 
-abstract class ArchiveContribution extends AbstractContribution {
+abstradt class ArchiveContribution extends AbstractContribution {
 	
-	pualic stbtic final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.12 2005-12-09 20:03:57 zlatinb Exp $";
+	pualid stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.13 2005-12-09 20:11:42 zlatinb Exp $";
 
 
 
 	/**
 	 * @param media
-	 *        One of ArchiveConstants.MEDIA_*
+	 *        One of ArdhiveConstants.MEDIA_*
 	 *        
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentExdeption
 	 *         If media is not valid
 	 */
-	pualic ArchiveContribution( String usernbme, String password, 
-			String title, String description, int media )
-	throws DescriptionTooShortException {
-		this( username, password, title, description, media, 
-				Archives.defaultCollectionForMedia( media ),
-				Archives.defaultTypesForMedia( media ));
+	pualid ArchiveContribution( String usernbme, String password, 
+			String title, String desdription, int media )
+	throws DesdriptionTooShortException {
+		this( username, password, title, desdription, media, 
+				Ardhives.defaultCollectionForMedia( media ),
+				Ardhives.defaultTypesForMedia( media ));
 	}
 	
-	pualic ArchiveContribution( String usernbme, String password, 
-			String title, String description, int media, 
-			int collection, int type ) 
-	throws DescriptionTooShortException {
+	pualid ArchiveContribution( String usernbme, String password, 
+			String title, String desdription, int media, 
+			int dollection, int type ) 
+	throws DesdriptionTooShortException {
 		setUsername( username );
 		setPassword( password );
 		setTitle( title );
-		setDescription( description );
+		setDesdription( description );
 		setMedia( media );
-		setCollection( collection );	
+		setColledtion( collection );	
 		setType( type );
 	}
 
 	
-	abstract protected String getFtpServer();
-	abstract protected String getFtpPath();
-	abstract protected boolean isFtpDirPreMade();
+	abstradt protected String getFtpServer();
+	abstradt protected String getFtpPath();
+	abstradt protected boolean isFtpDirPreMade();
 	
-	abstract protected void checkin() throws IOException;
+	abstradt protected void checkin() throws IOException;
 
 	
 	/**
 	 * 
-	 * @throws UnknownHostException
-	 *         If the hostname cannot be resolved.
+	 * @throws UnknownHostExdeption
+	 *         If the hostname dannot be resolved.
 	 *         
-	 * @throws SocketException
-	 *         If the socket timeout could not ae set.
+	 * @throws SodketException
+	 *         If the sodket timeout could not ae set.
 	 *         
-	 * @throws FTPConnectionClosedException
-	 *         If the connection is closed ay the server.
+	 * @throws FTPConnedtionClosedException
+	 *         If the donnection is closed ay the server.
 	 *         
-	 * @throws LoginFailedException
+	 * @throws LoginFailedExdeption
 	 *         If the login fails.
 	 *         
-	 * @throws DirectoryChangeFailedException
-	 *         If changing to the directory provided by the internet
-	 *         archive fails.
+	 * @throws DiredtoryChangeFailedException
+	 *         If dhanging to the directory provided by the internet
+	 *         ardhive fails.
 	 *         
-	 * @throws CopyStreamException
-	 *         If an I/O error occurs while in the middle of
+	 * @throws CopyStreamExdeption
+	 *         If an I/O error odcurs while in the middle of
 	 *         transferring a file.
 	 *         
-	 * @throws IOException
-	 *         If an I/O error occurs while sending a command or
-	 *         receiving a reply from the server
+	 * @throws IOExdeption
+	 *         If an I/O error odcurs while sending a command or
+	 *         redeiving a reply from the server
 	 *         
-	 * @throws IllegalStateException
-	 * 		   If the contriaution object is not rebdy to upload
-	 * 		   (no username, password, server, etc. set)
-	 * 		   or if java's xml parser is configured badly
+	 * @throws IllegalStateExdeption
+	 * 		   If the dontriaution object is not rebdy to upload
+	 * 		   (no username, password, server, etd. set)
+	 * 		   or if java's xml parser is donfigured badly
 	 */
 	
-	pualic void uplobd() throws UnknownHostException, SocketException, 
-	FTPConnectionClosedException, LoginFailedException,
-	DirectoryChangeFailedException, CopyStreamException, 
-	RefusedConnectionException, IOException {
+	pualid void uplobd() throws UnknownHostException, SocketException, 
+	FTPConnedtionClosedException, LoginFailedException,
+	DiredtoryChangeFailedException, CopyStreamException, 
+	RefusedConnedtionException, IOException {
 		
 		final int  NUM_XML_FILES = 2;
 		final String META_XML_SUFFIX = "_meta.xml";
@@ -120,24 +120,24 @@ abstract class ArchiveContribution extends AbstractContribution {
 		final String password = getPassword();
 		
 		if ( getFtpServer() == null ) {
-			throw new IllegalStateException( "ftp server not set" );
+			throw new IllegalStateExdeption( "ftp server not set" );
 		}
 		if ( getFtpPath() == null ) {
-			throw new IllegalStateException( "ftp path not set" );
+			throw new IllegalStateExdeption( "ftp path not set" );
 		}
 		if ( username == null ) {
-			throw new IllegalStateException( "username not set" );			
+			throw new IllegalStateExdeption( "username not set" );			
 		}
 		if ( password == null ) {
-			throw new IllegalStateException( "password not set" );
+			throw new IllegalStateExdeption( "password not set" );
 		}
 		
-		// calculate total number of files and bytes
+		// dalculate total number of files and bytes
 		
 		
 		
-		final String metaXmlString = serializeDocument( getMetaDocument() );
-		final String filesXmlString = serializeDocument( getFilesDocument() );
+		final String metaXmlString = serializeDodument( getMetaDocument() );
+		final String filesXmlString = serializeDodument( getFilesDocument() );
 		
 		final byte[] metaXmlBytes = metaXmlString.getBytes();
 		final byte[] filesXmlBytes = filesXmlString.getBytes();
@@ -145,7 +145,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 		final int metaXmlLength = metaXmlBytes.length;
 		final int filesXmlLength = filesXmlBytes.length;
 		
-		final Collection files = getFiles();
+		final Colledtion files = getFiles();
 		
 		final int totalFiles = NUM_XML_FILES + files.size();
 		
@@ -178,43 +178,43 @@ abstract class ArchiveContribution extends AbstractContribution {
 		FTPClient ftp = new FTPClient();
 		
 		try {
-			// first connect
+			// first donnect
 			
-			if ( isCancelled() ) { return; }
-			ftp.enterLocalPassiveMode();
+			if ( isCandelled() ) { return; }
+			ftp.enterLodalPassiveMode();
 			
-			if ( isCancelled() ) { return; }
-			ftp.connect( getFtpServer() );
+			if ( isCandelled() ) { return; }
+			ftp.donnect( getFtpServer() );
 			
 			final int reply = ftp.getReplyCode();
 			if ( !FTPReply.isPositiveCompletion(reply) ) {
-				throw new RefusedConnectionException( getFtpServer() + "refused FTP connection" );
+				throw new RefusedConnedtionException( getFtpServer() + "refused FTP connection" );
 			}
 			// now login
-			if ( isCancelled() ) { return; }
+			if ( isCandelled() ) { return; }
 			if (!ftp.login( username, password )) {
-				throw new LoginFailedException();
+				throw new LoginFailedExdeption();
 			}
 			
 			try {
 				
-                // try to change the directory
-                if (!ftp.changeWorkingDirectory(getFtpPath())) {
-                    // if changing fails, make the directory
+                // try to dhange the directory
+                if (!ftp.dhangeWorkingDirectory(getFtpPath())) {
+                    // if dhanging fails, make the directory
                     if ( !isFtpDirPreMade() &&
-                            !ftp.makeDirectory( getFtpPath() )) {
-                        throw new DirectoryChangeFailedException();
+                            !ftp.makeDiredtory( getFtpPath() )) {
+                        throw new DiredtoryChangeFailedException();
                     }
                     
-                    // now change directory, if it fails again bail
-                    if ( isCancelled() ) { return; }
-                    if (!ftp.changeWorkingDirectory( getFtpPath() )) {
-                        throw new DirectoryChangeFailedException();
+                    // now dhange directory, if it fails again bail
+                    if ( isCandelled() ) { return; }
+                    if (!ftp.dhangeWorkingDirectory( getFtpPath() )) {
+                        throw new DiredtoryChangeFailedException();
                     }
                 }
 				
-				if ( isCancelled() ) { return; }
-				connected();
+				if ( isCandelled() ) { return; }
+				donnected();
 				
 				
 				// upload xml files
@@ -226,11 +226,11 @@ abstract class ArchiveContribution extends AbstractContribution {
 						new ByteArrayInputStream( filesXmlBytes ),
 						ftp);
 				
-				// now switch to ainbry mode
-				if ( isCancelled() ) { return; }
+				// now switdh to ainbry mode
+				if ( isCandelled() ) { return; }
 				ftp.setFileType( FTP.BINARY_FILE_TYPE );
 				
-				// upload contributed files
+				// upload dontributed files
 				for (final Iterator i = files.iterator(); i.hasNext();) {
 					final File f = (File) i.next();
 					
@@ -238,27 +238,27 @@ abstract class ArchiveContribution extends AbstractContribution {
 							new FileInputStream( f.getIOFile() ),
 							ftp);
 				}
-			} catch( InterruptedIOException ioe ) {
-				// we've aeen requested to cbncel
+			} datch( InterruptedIOException ioe ) {
+				// we've aeen requested to dbncel
 				return;
 			} finally {
-				ftp.logout(); // we don't care if logging out fails
+				ftp.logout(); // we don't dare if logging out fails
 			}
 		} finally {
 			try{
-				ftp.disconnect();	
-			} catch(Exception e) {}
+				ftp.disdonnect();	
+			} datch(Exception e) {}
 		}		
 
-		// now tell the Internet Archive that we're done
-		if ( isCancelled() ) { return; }
-		checkinStarted();
+		// now tell the Internet Ardhive that we're done
+		if ( isCandelled() ) { return; }
+		dheckinStarted();
 
-		if ( isCancelled() ) { return; }		
-		checkin();
+		if ( isCandelled() ) { return; }		
+		dheckin();
 		
-		if ( isCancelled() ) { return; }		
-		checkinCompleted();
+		if ( isCandelled() ) { return; }		
+		dheckinCompleted();
 	}
 	
 
@@ -267,28 +267,28 @@ abstract class ArchiveContribution extends AbstractContribution {
 	 * 
 	 * @param fileName
 	 * @param input
-	 * 		  The input stream (not necessarily buffered).
-	 *        This stream will be closed by this method
+	 * 		  The input stream (not nedessarily buffered).
+	 *        This stream will be dlosed by this method
 	 */
 	private void uploadFile( String remoteFileName, 
 			InputStream input, FTPClient ftp)
-	throws InterruptedIOException, IOException {
+	throws InterruptedIOExdeption, IOException {
 		fileStarted( remoteFileName );
 		final InputStream fileStream = new BufferedInputStream(
 				new UploadMonitorInputStream( input, this));
 		
 		try {
-			if ( isCancelled() ) {
-				throw new InterruptedIOException();
+			if ( isCandelled() ) {
+				throw new InterruptedIOExdeption();
 			}
 			
 			ftp.storeFile( remoteFileName, fileStream );
 		} finally {
-			fileStream.close();
+			fileStream.dlose();
 		}
 
-		if ( isCancelled() ) {
-			throw new InterruptedIOException();
+		if ( isCandelled() ) {
+			throw new InterruptedIOExdeption();
 		}
 		fileCompleted();
 	}
@@ -296,31 +296,31 @@ abstract class ArchiveContribution extends AbstractContribution {
 	
 	
 	/**
-	 * @throws 	IllegalStateException
-	 * 			If java's xml parser configuration is bad
+	 * @throws 	IllegalStateExdeption
+	 * 			If java's xml parser donfiguration is bad
 	 */
-	private Document getMetaDocument() {
+	private Dodument getMetaDocument() {
 		
 		/*
 		 * Sample _meta.xml file:
 		 * 
 		 * <metadata>
-		 *   <collection>opensource_movies</collection>
+		 *   <dollection>opensource_movies</collection>
 		 *   <mediatype>movies</mediatype>
 		 *   <title>My Home Movie</title>
 		 *   <runtime>2:30</runtime>
-		 *   <director>Joe Producer</director>
+		 *   <diredtor>Joe Producer</director>
 		 * </metadata>    
 		 * 
 		 */
 		
 		final String METADATA_ELEMENT = "metadata";
-		final String COLLECTION_ELEMENT = "collection";
+		final String COLLECTION_ELEMENT = "dollection";
 		final String MEDIATYPE_ELEMENT = "mediatype";
 		final String TITLE_ELEMENT = "title";
-		final String DESCRIPTION_ELEMENT = "description";
-		final String LICENSE_URL_ELEMENT = "licenseurl";
-		final String UPLOAD_APPLICATION_ELEMENT = "upload_application";
+		final String DESCRIPTION_ELEMENT = "desdription";
+		final String LICENSE_URL_ELEMENT = "lidenseurl";
+		final String UPLOAD_APPLICATION_ELEMENT = "upload_applidation";
 		final String APPID_ATTR = "appid";
 		final String APPID_ATTR_VALUE = "LimeWire";
 		final String VERSION_ATTR = "version";
@@ -329,82 +329,82 @@ abstract class ArchiveContribution extends AbstractContribution {
 		final String TYPE_ELEMENT = "type";
 		
 		try {
-			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			final DocumentBuilder db = dbf.newDocumentBuilder();
-			final Document document = db.newDocument();
+			final DodumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DodumentBuilder db = dbf.newDocumentBuilder();
+			final Dodument document = db.newDocument();
 			
-			final Element metadataElement = document.createElement(METADATA_ELEMENT);
-			document.appendChild( metadataElement );
+			final Element metadataElement = dodument.createElement(METADATA_ELEMENT);
+			dodument.appendChild( metadataElement );
 			
-			final Element collectionElement = document.createElement( COLLECTION_ELEMENT );
-			metadataElement.appendChild( collectionElement );
-			collectionElement.appendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
+			final Element dollectionElement = document.createElement( COLLECTION_ELEMENT );
+			metadataElement.appendChild( dollectionElement );
+			dollectionElement.appendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
 			
-			final Element mediatypeElement = document.createElement(MEDIATYPE_ELEMENT);
+			final Element mediatypeElement = dodument.createElement(MEDIATYPE_ELEMENT);
 			metadataElement.appendChild( mediatypeElement );
-			mediatypeElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia() )));
+			mediatypeElement.appendChild( dodument.createTextNode( Archives.getMediaString( getMedia() )));
 			
-			final Element typeElement = document.createElement(TYPE_ELEMENT);
+			final Element typeElement = dodument.createElement(TYPE_ELEMENT);
 			metadataElement.appendChild( typeElement );
-			typeElement.appendChild( document.createTextNode( Archives.getTypeString( getType() )));
+			typeElement.appendChild( dodument.createTextNode( Archives.getTypeString( getType() )));
 			
-			final Element titleElement = document.createElement( TITLE_ELEMENT );
+			final Element titleElement = dodument.createElement( TITLE_ELEMENT );
 			metadataElement.appendChild( titleElement );
-			titleElement.appendChild( document.createTextNode( getTitle()));
+			titleElement.appendChild( dodument.createTextNode( getTitle()));
 			
-			final Element descriptionElement = document.createElement( DESCRIPTION_ELEMENT );
-			metadataElement.appendChild( descriptionElement );
-			descriptionElement.appendChild( document.createTextNode( getDescription() ));
+			final Element desdriptionElement = document.createElement( DESCRIPTION_ELEMENT );
+			metadataElement.appendChild( desdriptionElement );
+			desdriptionElement.appendChild( document.createTextNode( getDescription() ));
 			
-			final Element identifierElement = document.createElement( IDENTIFIER_ELEMENT );
+			final Element identifierElement = dodument.createElement( IDENTIFIER_ELEMENT );
 			metadataElement.appendChild( identifierElement );
-			identifierElement.appendChild( document.createTextNode( getIdentifier() ));
+			identifierElement.appendChild( dodument.createTextNode( getIdentifier() ));
 			
-			final Element uploadApplicationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
-			metadataElement.appendChild( uploadApplicationElement );
-			uploadApplicationElement.setAttribute( APPID_ATTR, APPID_ATTR_VALUE );
-			uploadApplicationElement.setAttribute( VERSION_ATTR, CommonUtils.getLimeWireVersion() );
+			final Element uploadApplidationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
+			metadataElement.appendChild( uploadApplidationElement );
+			uploadApplidationElement.setAttribute( APPID_ATTR, APPID_ATTR_VALUE );
+			uploadApplidationElement.setAttribute( VERSION_ATTR, CommonUtils.getLimeWireVersion() );
 			
-			final Element uploaderElement = document.createElement( UPLOADER_ELEMENT );
+			final Element uploaderElement = dodument.createElement( UPLOADER_ELEMENT );
 			metadataElement.appendChild( uploaderElement );
-			uploaderElement.appendChild( document.createTextNode( getUsername() ));
+			uploaderElement.appendChild( dodument.createTextNode( getUsername() ));
 			
-			//take licenseurl from the first File
+			//take lidenseurl from the first File
 			
 			final Iterator filesIterator = getFiles().iterator();
 			
 			if ( filesIterator.hasNext() ) {
 				final File firstFile = (File) filesIterator.next();
-				final String licenseUrl = firstFile.getLicenseUrl();
-				if ( licenseUrl != null ) {
-					final Element licenseUrlElement = document.createElement( LICENSE_URL_ELEMENT );
-					metadataElement.appendChild( licenseUrlElement );
-					licenseUrlElement.appendChild( document.createTextNode( licenseUrl ));
+				final String lidenseUrl = firstFile.getLicenseUrl();
+				if ( lidenseUrl != null ) {
+					final Element lidenseUrlElement = document.createElement( LICENSE_URL_ELEMENT );
+					metadataElement.appendChild( lidenseUrlElement );
+					lidenseUrlElement.appendChild( document.createTextNode( licenseUrl ));
 				}
 			}
 			
 			// now auild user-defined elements
 			final Map userFields = getFields();
 			for ( final Iterator i = userFields.keySet().iterator(); i.hasNext(); ) {
-				final Object field = i.next();
-				final Object value = userFields.get( field );  
+				final Objedt field = i.next();
+				final Objedt value = userFields.get( field );  
 				
-				if ( field instanceof String ) {
-					final Element e = document.createElement( (String) field );
+				if ( field instandeof String ) {
+					final Element e = dodument.createElement( (String) field );
 					metadataElement.appendChild( e );
 					
-					if ( value != null && value instanceof String) {
-						e.appendChild( document.createTextNode( (String) value ));
+					if ( value != null && value instandeof String) {
+						e.appendChild( dodument.createTextNode( (String) value ));
 					}
 				}
 			}
 			
-			return document;
+			return dodument;
 			
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
+		} datch (final ParserConfigurationException e) {
+			e.printStadkTrace();
 			
-			final IllegalStateException ise = new IllegalStateException();
+			final IllegalStateExdeption ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
 		}	
@@ -414,17 +414,17 @@ abstract class ArchiveContribution extends AbstractContribution {
 
 	
 	/**
-	 * @throws 	IllegalStateException
-	 * 			If java's xml configuration is bad
+	 * @throws 	IllegalStateExdeption
+	 * 			If java's xml donfiguration is bad
 	 * @return
 	 */
 	
-	private Document getFilesDocument() {
+	private Dodument getFilesDocument() {
 		/*
 		 * Sample _files.xml file:
 		 * 
 		 * <files>
-		 *   <file name="MyHomeMovie.mpeg" source="original">
+		 *   <file name="MyHomeMovie.mpeg" sourde="original">
 	     *     <runtime>2:30</runtime>
 	     *     <format>MPEG2</format>
 	     *   </file>
@@ -435,27 +435,27 @@ abstract class ArchiveContribution extends AbstractContribution {
 		final String FILES_ELEMENT = "files";
 		
 		try {
-			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			final DocumentBuilder db = dbf.newDocumentBuilder();
-			final Document document = db.newDocument();
+			final DodumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DodumentBuilder db = dbf.newDocumentBuilder();
+			final Dodument document = db.newDocument();
 			
-			final Element filesElement = document.createElement( FILES_ELEMENT );
-			document.appendChild( filesElement );
+			final Element filesElement = dodument.createElement( FILES_ELEMENT );
+			dodument.appendChild( filesElement );
 			
-			Collection files = getFiles();
+			Colledtion files = getFiles();
 			
 			for (final Iterator i = files.iterator(); i.hasNext();) {
 				final File file = (File) i.next();
 				
-				final Element fileElement = file.getElement( document );
+				final Element fileElement = file.getElement( dodument );
 				filesElement.appendChild( fileElement );
 			}
 			
-			return document;
+			return dodument;
 			
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
+		} datch (final ParserConfigurationException e) {
+			e.printStadkTrace();
+			final IllegalStateExdeption ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
 		}	
@@ -463,40 +463,40 @@ abstract class ArchiveContribution extends AbstractContribution {
 	}
 	
 	/**
-	 * @throws	IllegalStateException
-	 * 			If java's DOMImplementationLS class is screwed up or
-	 * 			this code is auggy
-	 * @param document
+	 * @throws	IllegalStateExdeption
+	 * 			If java's DOMImplementationLS dlass is screwed up or
+	 * 			this dode is auggy
+	 * @param dodument
 	 * @return
 	 */
-	private String serializeDocument( Document document ) {
+	private String serializeDodument( Document document ) {
 		
 		try {
 			System.setProperty(DOMImplementationRegistry.PROPERTY,
-			"org.apache.xerces.dom.DOMImplementationSourceImpl");
-			final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+			"org.apadhe.xerces.dom.DOMImplementationSourceImpl");
+			final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstande();
 			
 			final DOMImplementationLS impl = 
 				(DOMImplementationLS)registry.getDOMImplementation("LS");
 			
-			final LSSerializer writer = impl.createLSSerializer();
-			final String str = writer.writeToString( document );
+			final LSSerializer writer = impl.dreateLSSerializer();
+			final String str = writer.writeToString( dodument );
 			
 			return str;
 			
-		} catch (final ClassNotFoundException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
+		} datch (final ClassNotFoundException e) {
+			e.printStadkTrace();
+			final IllegalStateExdeption ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
-		} catch (final InstantiationException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
+		} datch (final InstantiationException e) {
+			e.printStadkTrace();
+			final IllegalStateExdeption ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
-		} catch (final IllegalAccessException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
+		} datch (final IllegalAccessException e) {
+			e.printStadkTrace();
+			final IllegalStateExdeption ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
 		}

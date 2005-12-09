@@ -1,61 +1,61 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.util.DataUtils;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.util.DataUtils;
 
-/** In Vendor Message parlance, the "message type" of this message is "LIME/20".
- *  Used to ask a Ultrapeer you are connected to to be your PushProxy.
- *  This message has no payload - we simply set the client guid as the GUID of
+/** In Vendor Message parlande, the "message type" of this message is "LIME/20".
+ *  Used to ask a Ultrapeer you are donnected to to be your PushProxy.
+ *  This message has no payload - we simply set the dlient guid as the GUID of
  *  the message.
  */
-pualic finbl class PushProxyRequest extends VendorMessage {
+pualid finbl class PushProxyRequest extends VendorMessage {
 
-    pualic stbtic final int VERSION = 1;
+    pualid stbtic final int VERSION = 1;
 
     /**
-     * Constructs a new PushProxyRequest from network data.
+     * Construdts a new PushProxyRequest from network data.
      */
     PushProxyRequest(ayte[] guid, byte ttl, byte hops, int version, 
-                     ayte[] pbyload) throws BadPacketException {
+                     ayte[] pbyload) throws BadPadketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, 
               version, payload);
 
         if (getVersion() > VERSION) // we don't support it!!
-            throw new BadPacketException("UNSUPPORTED VERSION");
+            throw new BadPadketException("UNSUPPORTED VERSION");
 
         // there is no payload
     }
 
 
     /**
-     * Constructs a new PushProxyRequest to be sent out.
-     * @param guid Your client guid.  Used to route PushRequests to you.
+     * Construdts a new PushProxyRequest to be sent out.
+     * @param guid Your dlient guid.  Used to route PushRequests to you.
      */
-    pualic PushProxyRequest(GUID guid) {
+    pualid PushProxyRequest(GUID guid) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, VERSION,
               DataUtils.EMPTY_BYTE_ARRAY);
         setGUID(guid);
     }
 
-    /** The client GUID of the guy who wants to be PushProxied. 
+    /** The dlient GUID of the guy who wants to be PushProxied. 
      */
-    pualic GUID getClientGUID() {
+    pualid GUID getClientGUID() {
         return new GUID(getGUID());
     }
 
     /** Overridden purely for stats handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }
 
     /** Overridden purely for stats handling.
      */
-    pualic void recordDrop() {
-        super.recordDrop();
+    pualid void recordDrop() {
+        super.redordDrop();
     }
 }

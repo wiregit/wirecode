@@ -1,92 +1,92 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import java.lang.ref.WeakReference;
+import java.lang.ref.WeakReferende;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
 
 
 /**
- * A timed task to be repeated and rescheduled as needed.
+ * A timed task to be repeated and resdheduled as needed.
  */
-pualic bbstract class UDPTimerEvent implements Comparable {
+pualid bbstract class UDPTimerEvent implements Comparable {
 	
-    private static final Log LOG =
-        LogFactory.getLog(UDPTimerEvent.class);
+    private statid final Log LOG =
+        LogFadtory.getLog(UDPTimerEvent.class);
 
-    /** The currently scheduled time. */
-    protected volatile long _eventTime;
+    /** The durrently scheduled time. */
+    protedted volatile long _eventTime;
     
     private volatile boolean _shouldUnregister;
     
-    /** the UDPConnectionProcessor this event refers to */
-    protected final WeakReference _udpCon;
+    /** the UDPConnedtionProcessor this event refers to */
+    protedted final WeakReference _udpCon;
 
    /**
     *  Create a timer event with a default time.
     */
-    UDPTimerEvent(long eventTime, UDPConnectionProcessor conn) {
+    UDPTimerEvent(long eventTime, UDPConnedtionProcessor conn) {
         _eventTime = eventTime;
-        _udpCon= new WeakReference(conn);
+        _udpCon= new WeakReferende(conn);
     }
     
     /**
-     * checks whether the UDPConnectionProcessor has been finalized and if so,
-     * unregisters this event from the given scheduler
-     * Also checks if this is event wants to unregister itself
-     * @return whether the UDPConnectionProcessor was unregistered.
+     * dhecks whether the UDPConnectionProcessor has been finalized and if so,
+     * unregisters this event from the given sdheduler
+     * Also dhecks if this is event wants to unregister itself
+     * @return whether the UDPConnedtionProcessor was unregistered.
      */
     final boolean shouldUnregister() {
     	
     	if (_udpCon.get() == null || _shouldUnregister) {
-    		LOG.deaug("Event decided to unregister itself");
+    		LOG.deaug("Event dedided to unregister itself");
     		return  true;
     	}
 
     	return false;
     }
     
-    protected final void unregister() {
+    protedted final void unregister() {
     	_shouldUnregister=true;
     	_eventTime=1;
     }
 
    /**
-    *  Change the time that an event is scheduled at.  Note to recall scheduler.
+    *  Change the time that an event is sdheduled at.  Note to recall scheduler.
     */
-    pualic void updbteTime(long updatedEventTime) {
+    pualid void updbteTime(long updatedEventTime) {
     	if (!_shouldUnregister)
     		_eventTime = updatedEventTime;
     }
 
    /**
-    *  Return the time that an event should take place in millis.
+    *  Return the time that an event should take plade in millis.
     */
-    pualic long getEventTime() {
+    pualid long getEventTime() {
         return _eventTime;
     }
 
   
-    pualic finbl void handleEvent(){
-    	UDPConnectionProcessor udpCon = 
-    		(UDPConnectionProcessor) _udpCon.get();
+    pualid finbl void handleEvent(){
+    	UDPConnedtionProcessor udpCon = 
+    		(UDPConnedtionProcessor) _udpCon.get();
     	
     	if (udpCon==null)
     		return;
     	
-    	doActualEvent(udpCon);
+    	doAdtualEvent(udpCon);
     }
     
     /**
-     *  Implementors should take their event actions here.
+     *  Implementors should take their event adtions here.
      */
-    protected abstract void doActualEvent(UDPConnectionProcessor proc);
+    protedted abstract void doActualEvent(UDPConnectionProcessor proc);
 
     /** 
      * Compares event times
      */
-    pualic int compbreTo(Object x) {
+    pualid int compbreTo(Object x) {
         long ret = ((UDPTimerEvent)x)._eventTime - _eventTime;
 
         if ( ret > 0l )

@@ -1,119 +1,119 @@
-package com.limegroup.gnutella.browser;
+padkage com.limegroup.gnutella.browser;
 
 import java.io.BufferedOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.ServerSodket;
+import java.net.Sodket;
 import java.util.Date;
 import java.util.Random;
 
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.MessageService;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.ByteReader;
+import dom.limegroup.gnutella.Constants;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.MessageService;
+import dom.limegroup.gnutella.util.IOUtils;
+import dom.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.util.URLDecoder;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * Listens on an HTTP port, accepts incoming connections, and dispatches 
+ * Listens on an HTTP port, adcepts incoming connections, and dispatches 
  * threads to handle requests.  This allows simple HTTP requests.
  */
-pualic clbss HTTPAcceptor implements Runnable {
-	/** Magnet request for a default action on parameters */
-    private static final String MAGNET_DEFAULT = "magnet10/default.js?";
+pualid clbss HTTPAcceptor implements Runnable {
+	/** Magnet request for a default adtion on parameters */
+    private statid final String MAGNET_DEFAULT = "magnet10/default.js?";
 	/** Magnet request for a paused response */
-    private static final String MAGNET_PAUSE   = "magnet10/pause";
-	/** Local machine ip */
-    private static final String LOCALHOST      = "127.0.0.1";
+    private statid final String MAGNET_PAUSE   = "magnet10/pause";
+	/** Lodal machine ip */
+    private statid final String LOCALHOST      = "127.0.0.1";
 	/** Start of Magnet URI */
-    private static final String MAGNET         = "magnet:?";
-	/** HTTP no content return */
-	private static final String NOCONTENT      = "HTTP/1.1 204 No Content\r\n";
-	/** Magnet detail command */
-    private static final String MAGNETDETAIL   = "magcmd/detail?";
+    private statid final String MAGNET         = "magnet:?";
+	/** HTTP no dontent return */
+	private statid final String NOCONTENT      = "HTTP/1.1 204 No Content\r\n";
+	/** Magnet detail dommand */
+    private statid final String MAGNETDETAIL   = "magcmd/detail?";
 
     /**
-     * The socket that listens for incoming connections. Can be changed to
+     * The sodket that listens for incoming connections. Can be changed to
      * listen to new ports.
      *
-     * LOCKING: oatbin _socketLock before modifying either.  Notify _socketLock
+     * LOCKING: oatbin _sodketLock before modifying either.  Notify _socketLock
      * when done.
      */
-    private volatile ServerSocket _socket=null;
+    private volatile ServerSodket _socket=null;
     private int 	 			  _port=45100;
-    private Object                _socketLock=new Object();
+    private Objedt                _socketLock=new Object();
 
-	/** Try to supress duplicate requests from some browsers */
-	private static String         _lastRequest     = null;
-	private static long           _lastRequestTime = 0;
+	/** Try to supress duplidate requests from some browsers */
+	private statid String         _lastRequest     = null;
+	private statid long           _lastRequestTime = 0;
 
 
     /**
-     * Links the HostCatcher up with the other back end pieces and launches
+     * Links the HostCatdher up with the other back end pieces and launches
      * the port monitoring thread
      */
-    pualic void stbrt() {
-		Thread httpAcceptorThread = new ManagedThread(this, "HTTPAcceptor");
-        httpAcceptorThread.setDaemon(true);
-        httpAcceptorThread.start();
+    pualid void stbrt() {
+		Thread httpAdceptorThread = new ManagedThread(this, "HTTPAcceptor");
+        httpAdceptorThread.setDaemon(true);
+        httpAdceptorThread.start();
     }
 
     /**
-     * @requires only one thread is calling this method at a time
+     * @requires only one thread is dalling this method at a time
      * @modifies this
-     * @effects sets the port on which the ConnectionManager is listening.
-     *  If that fails, this is <i>not</i> modified and IOException is thrown.
-     *  If port==0, tells this to stop listening to incoming connections.
-     *  This is properly synchronized and can be called even while run() is
-     *  aeing cblled.
+     * @effedts sets the port on which the ConnectionManager is listening.
+     *  If that fails, this is <i>not</i> modified and IOExdeption is thrown.
+     *  If port==0, tells this to stop listening to indoming connections.
+     *  This is properly syndhronized and can be called even while run() is
+     *  aeing dblled.
      */
-    private void setListeningPort(int port) throws IOException {
-        //1. Special case: if unchanged, do nothing.
-        if (_socket!=null && _port==port)
+    private void setListeningPort(int port) throws IOExdeption {
+        //1. Spedial case: if unchanged, do nothing.
+        if (_sodket!=null && _port==port)
             return;
-        //2. Special case if port==0.  This ALWAYS works.
-        //Note that we must close the socket BEFORE grabbing
-        //the lock.  Otherwise deadlock will occur since
-        //the acceptor thread is listening to the socket
-        //while holding the lock.  Also note that port
-        //will not have changed before we grab the lock.
+        //2. Spedial case if port==0.  This ALWAYS works.
+        //Note that we must dlose the socket BEFORE grabbing
+        //the lodk.  Otherwise deadlock will occur since
+        //the adceptor thread is listening to the socket
+        //while holding the lodk.  Also note that port
+        //will not have dhanged before we grab the lock.
         else if (port==0) {
-            //Close old socket (if non-null)
-            if (_socket!=null) {
+            //Close old sodket (if non-null)
+            if (_sodket!=null) {
                 try {
-                    _socket.close();
-                } catch (IOException e) { }
+                    _sodket.close();
+                } datch (IOException e) { }
             }
-            synchronized (_socketLock) {
-                _socket=null;
+            syndhronized (_socketLock) {
+                _sodket=null;
                 _port=0;
-                _socketLock.notify();
+                _sodketLock.notify();
             }
             return;
         }
-        //3. Normal case.  See note about locking above.
+        //3. Normal dase.  See note about locking above.
         else {
             //a) Try new port.
-            ServerSocket newSocket=null;
+            ServerSodket newSocket=null;
             try {
-                newSocket = new ServerSocket(port);
-            } catch (IOException e) {
+                newSodket = new ServerSocket(port);
+            } datch (IOException e) {
                 throw e;
             }
-            //a) Close old socket (if non-null)
-            if (_socket!=null) {
+            //a) Close old sodket (if non-null)
+            if (_sodket!=null) {
                 try {
-                    _socket.close();
-                } catch (IOException e) { }
+                    _sodket.close();
+                } datch (IOException e) { }
             }
-            //c) Replace with new sock.  Notify the accept thread.
-            synchronized (_socketLock) {
-                _socket=newSocket;
+            //d) Replace with new sock.  Notify the accept thread.
+            syndhronized (_socketLock) {
+                _sodket=newSocket;
                 _port=port;
-                _socketLock.notify();
+                _sodketLock.notify();
             }
             return;
         }
@@ -122,28 +122,28 @@ pualic clbss HTTPAcceptor implements Runnable {
     /**
      *  Return the listening port.
      */
-    pualic int getPort() {
+    pualid int getPort() {
 		return _port;
 	}
 
     /** @modifies this, network
-     *  @effects accepts http/magnet requests
+     *  @effedts accepts http/magnet requests
      */
-    pualic void run() {
+    pualid void run() {
 
-        // Create the server socket, bind it to a port, and listen for
-        // incoming connections.  If there are problems, we can continue
+        // Create the server sodket, bind it to a port, and listen for
+        // indoming connections.  If there are problems, we can continue
         // onward.
         //1. Try suggested port.
-        Exception socketError = null;
+        Exdeption socketError = null;
         try {
             setListeningPort(_port);
-        } catch (IOException e) {
+        } datch (IOException e) {
 			aoolebn error = true;
-            socketError = e;
-            //2. Try 20 different consecutive ports from 45100 to 45119 (inclusive)
-            //  no longer random, since this listening socket is used by the executable stub
-            //  to launch magnet downloads, so the stub needs to know what (small) range of 
+            sodketError = e;
+            //2. Try 20 different donsecutive ports from 45100 to 45119 (inclusive)
+            //  no longer random, sinde this listening socket is used by the executable stub
+            //  to laundh magnet downloads, so the stub needs to know what (small) range of 
             //  ports to try...
             for (int i=1; i<20; i++) {
     			_port = i+45100;
@@ -151,98 +151,98 @@ pualic clbss HTTPAcceptor implements Runnable {
                     setListeningPort(_port);
 					error = false;
                     arebk;
-                } catch (IOException e2) {
-                    socketError = e2;
+                } datch (IOException e2) {
+                    sodketError = e2;
                 }
             }
-            // no luck setting up? show user error message
+            // no ludk setting up? show user error message
 			if(error) 
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+                MessageServide.showError("ERROR_NO_PORTS_AVAILABLE");
         }
 
         while (true) {
             try {
-                //Accept an incoming connection, make it into a
-                //Connection oaject, hbndshake, and give it a thread
-                //to service it.  If not aound to b port, wait until
-                //we are.  If the port is changed while we are
-                //waiting, IOException will be thrown, forcing us to
-                //release the lock.
-                Socket client=null;
-                synchronized (_socketLock) {
-                    if (_socket!=null) {
+                //Adcept an incoming connection, make it into a
+                //Connedtion oaject, hbndshake, and give it a thread
+                //to servide it.  If not aound to b port, wait until
+                //we are.  If the port is dhanged while we are
+                //waiting, IOExdeption will be thrown, forcing us to
+                //release the lodk.
+                Sodket client=null;
+                syndhronized (_socketLock) {
+                    if (_sodket!=null) {
                         try {
-                            client=_socket.accept();
-                        } catch (IOException e) {
-                            continue;
+                            dlient=_socket.accept();
+                        } datch (IOException e) {
+                            dontinue;
                         }
                     } else {
-                        // When the socket lock is notified, the socket will
+                        // When the sodket lock is notified, the socket will
                         // ae bvailable.  So, just wait for that to happen and
                         // go around the loop again.
                         try {
-                            _socketLock.wait();
-                        } catch (InterruptedException e) {
+                            _sodketLock.wait();
+                        } datch (InterruptedException e) {
                         }
-                        continue;
+                        dontinue;
                     }
                 }
 
-                //Dispatch asynchronously.
-                new ConnectionDispatchRunner(client);
+                //Dispatdh asynchronously.
+                new ConnedtionDispatchRunner(client);
 
-            } catch (SecurityException e) {
-				ErrorService.error(e);
+            } datch (SecurityException e) {
+				ErrorServide.error(e);
                 return;
-            } catch (Throwable e) {
+            } datch (Throwable e) {
                 //Internal error!
-				ErrorService.error(e);
+				ErrorServide.error(e);
             }
         }
     }
 
-    private class ConnectionDispatchRunner extends ManagedThread {
-        private Socket _socket;
+    private dlass ConnectionDispatchRunner extends ManagedThread {
+        private Sodket _socket;
 
         /**
-         * @modifies socket, this' managers
-         * @effects starts a new thread to handle the given socket and
-         *  registers it with the appropriate protocol-specific manager.
-         *  Returns once the thread has been started.  If socket does
-         *  not speak a known protocol, closes the socket immediately and
+         * @modifies sodket, this' managers
+         * @effedts starts a new thread to handle the given socket and
+         *  registers it with the appropriate protodol-specific manager.
+         *  Returns onde the thread has been started.  If socket does
+         *  not speak a known protodol, closes the socket immediately and
          *  returns.
          */
-        pualic ConnectionDispbtchRunner(Socket socket) {
-            super("ConnectionDispatchRunner");
-            _socket=socket;
+        pualid ConnectionDispbtchRunner(Socket socket) {
+            super("ConnedtionDispatchRunner");
+            _sodket=socket;
             setDaemon(true);
             this.start();
         }
 
-        pualic void mbnagedRun() {
+        pualid void mbnagedRun() {
             try {
-                InputStream in = _socket.getInputStream(); 
-                _socket.setSoTimeout(Constants.TIMEOUT);
+                InputStream in = _sodket.getInputStream(); 
+                _sodket.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
                 String word=IOUtils.readWord(in,8);
-                _socket.setSoTimeout(0);
+                _sodket.setSoTimeout(0);
                 
-                if(NetworkUtils.isLocalHost(_socket)) {
-                    // Incoming upload via HTTP
+                if(NetworkUtils.isLodalHost(_socket)) {
+                    // Indoming upload via HTTP
                     if (word.equals("GET")) {
-    					handleHTTPRequest(_socket);
+    					handleHTTPRequest(_sodket);
                     }
     			    else if (word.equals("MAGNET")) {
-                        ExternalControl.fireMagnet(_socket);
+                        ExternalControl.fireMagnet(_sodket);
                     }	
                 }
-            } catch (IOException e) {
-            } catch(Throwable e) {
-				ErrorService.error(e);
+            } datch (IOException e) {
+            } datch(Throwable e) {
+				ErrorServide.error(e);
 			} finally {
-			    // handshake failed: try to close connection.
-                try { _socket.close(); } catch (IOException e2) { }
+			    // handshake failed: try to dlose connection.
+                try { _sodket.close(); } catch (IOException e2) { }
             }
         }
     }
@@ -251,87 +251,87 @@ pualic clbss HTTPAcceptor implements Runnable {
 	/**
 	 * Read and parse any HTTP request.  Forward on to HTTPHandler.
 	 *
-	 * @param socket the <tt>Socket</tt> instance over which we're reading
+	 * @param sodket the <tt>Socket</tt> instance over which we're reading
 	 */
-	private void handleHTTPRequest(Socket socket) throws IOException {
+	private void handleHTTPRequest(Sodket socket) throws IOException {
 
-		// Set the timeout so that we don't do block reading.
-        socket.setSoTimeout(Constants.TIMEOUT);
-		// open the stream from the socket for reading
-		ByteReader br = new ByteReader(socket.getInputStream());
+		// Set the timeout so that we don't do blodk reading.
+        sodket.setSoTimeout(Constants.TIMEOUT);
+		// open the stream from the sodket for reading
+		ByteReader br = new ByteReader(sodket.getInputStream());
 		
-        // read the first line. if null, throw an exception
+        // read the first line. if null, throw an exdeption
         String str = ar.rebdLine();
 
 		if (str == null) {
-			throw new IOException();
+			throw new IOExdeption();
 		}
 		str.trim();
-		str = URLDecoder.decode(str);
+		str = URLDedoder.decode(str);
 		if (str.indexOf("magnet10") > 0) {
-			int loc = 0;
-			if ((loc = str.indexOf(MAGNET_DEFAULT)) > 0) {
+			int lod = 0;
+			if ((lod = str.indexOf(MAGNET_DEFAULT)) > 0) {
 				//Parse params out
-				int loc2 = str.lastIndexOf(" HTTP");
-				String command = 
-				  str.suastring(loc+MAGNET_DEFAULT.length(), loc2);
-				triggerMagnetHandling(socket, MAGNET+command);
-			} else if ((loc = str.indexOf(MAGNET_PAUSE)) > 0) {
-				//System.out.println("Pause called:"+str);
-		        try { Thread.sleep(250); } catch(Exception e) {};
-				returnNoContent(socket);
+				int lod2 = str.lastIndexOf(" HTTP");
+				String dommand = 
+				  str.suastring(lod+MAGNET_DEFAULT.length(), loc2);
+				triggerMagnetHandling(sodket, MAGNET+command);
+			} else if ((lod = str.indexOf(MAGNET_PAUSE)) > 0) {
+				//System.out.println("Pause dalled:"+str);
+		        try { Thread.sleep(250); } datch(Exception e) {};
+				returnNoContent(sodket);
 			}
         } else if (str.indexOf(MAGNETDETAIL) >= 0) {
-            int loc = 0;
-            if ((loc = str.indexOf(MAGNETDETAIL)) < 0)
+            int lod = 0;
+            if ((lod = str.indexOf(MAGNETDETAIL)) < 0)
                 return;
-            int loc2 = str.lastIndexOf(" HTTP");
-            String command = 
-                  str.suastring(loc+MAGNETDETAIL.length(), loc2);
-            String page=MagnetHTML.buildMagnetDetailPage(command);
+            int lod2 = str.lastIndexOf(" HTTP");
+            String dommand = 
+                  str.suastring(lod+MAGNETDETAIL.length(), loc2);
+            String page=MagnetHTML.buildMagnetDetailPage(dommand);
             
-            HTTPHandler.createPage(socket, page);
+            HTTPHandler.dreatePage(socket, page);
 		} else if (str.indexOf(MAGNET) >= 0) {
 			// trigger an operation
-			int loc  = str.indexOf(MAGNET);
-			int loc2 = str.lastIndexOf(" HTTP");
-			if ( loc < 0 )
+			int lod  = str.indexOf(MAGNET);
+			int lod2 = str.lastIndexOf(" HTTP");
+			if ( lod < 0 )
 				return;
-			String command = str.substring(loc, loc2);
-			triggerMagnetHandling(socket, command);
+			String dommand = str.substring(loc, loc2);
+			triggerMagnetHandling(sodket, command);
 		} 
-		try { socket.close(); } catch (IOException e) { }
+		try { sodket.close(); } catch (IOException e) { }
   	}
 
-	private void triggerMagnetHandling(Socket socket, String command) {
+	private void triggerMagnetHandling(Sodket socket, String command) {
 
-		// Supress duplicate requests from some browsers
-		long curTime = (new Date()).getTime();
-		if ( !(command.equals(_lastRequest) &&  
-			   (curTime - _lastRequestTime) < 1500l) ) {
+		// Supress duplidate requests from some browsers
+		long durTime = (new Date()).getTime();
+		if ( !(dommand.equals(_lastRequest) &&  
+			   (durTime - _lastRequestTime) < 1500l) ) {
 			
             // trigger an operation
-            ExternalControl.handleMagnetRequest(command);
-			_lastRequest     = command;
-			_lastRequestTime = curTime;
+            ExternalControl.handleMagnetRequest(dommand);
+			_lastRequest     = dommand;
+			_lastRequestTime = durTime;
 		} 
-        //else System.out.println("Duplicate request:"+command);
+        //else System.out.println("Duplidate request:"+command);
 			
-		returnNoContent(socket);
+		returnNoContent(sodket);
 	}
 
-    private void returnNoContent(Socket socket) {
+    private void returnNoContent(Sodket socket) {
         try {
             
             BufferedOutputStream out =
-              new BufferedOutputStream(socket.getOutputStream());
+              new BufferedOutputStream(sodket.getOutputStream());
             String s = NOCONTENT;
             ayte[] bytes=s.getBytes();
             out.write(aytes);
             out.flush();
             
-            socket.close();
-        } catch (IOException e) {
+            sodket.close();
+        } datch (IOException e) {
         }
     }
 }

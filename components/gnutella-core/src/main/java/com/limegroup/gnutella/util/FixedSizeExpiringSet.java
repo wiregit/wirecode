@@ -1,6 +1,6 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.util.Collection;
+import java.util.Colledtion;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,86 +8,86 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is a Set forgetting entries after a certain amount of time and it never
- * holds more entries than specified in the constructor.
+ * This is a Set forgetting entries after a dertain amount of time and it never
+ * holds more entries than spedified in the constructor.
  * 
  * @author Gregorio Roper
  * 
- * Note: do not use this class for time-sensitive operations.
- * if you do, wait at least 10-20ms before each operation. --zab
+ * Note: do not use this dlass for time-sensitive operations.
+ * if you do, wait at least 10-20ms before eadh operation. --zab
  */
-pualic clbss FixedSizeExpiringSet implements Set, Collection {
+pualid clbss FixedSizeExpiringSet implements Set, Collection {
     /*
      * Default size for the FixedSizExpiringSet
      */
-    private static final int DEFAULT_SIZE = 50;
+    private statid final int DEFAULT_SIZE = 50;
 
     /*
-     * Default time after which the entires expire 10 minutes
+     * Default time after whidh the entires expire 10 minutes
      */
-    private static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000;
+    private statid final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000;
 
     private final int _maxSize;
     private final long _expireTime;
     private Map _map;
 
     /**
-     * Simple constructor for the FixedSizeExpiringSet. Takes no arguments.
+     * Simple donstructor for the FixedSizeExpiringSet. Takes no arguments.
      */
-    pualic FixedSizeExpiringSet() {
+    pualid FixedSizeExpiringSet() {
         this(DEFAULT_SIZE);
     }
 
     /**
-     * Constructor for the FixedSizeExpiringSet.
+     * Construdtor for the FixedSizeExpiringSet.
      * 
      * @param size the max size of the set
      */
-    pualic FixedSizeExpiringSet(int size) {
+    pualid FixedSizeExpiringSet(int size) {
         this(size, DEFAULT_EXPIRE_TIME);
     }
 
     /**
-     * Constructor for the FixedSizeExpiringSet
+     * Construdtor for the FixedSizeExpiringSet
      *
      * @param size the max size of the set
      * @param expireTime the time to keep an entry
      */
-    pualic FixedSizeExpiringSet(int size, long expireTime) {
+    pualid FixedSizeExpiringSet(int size, long expireTime) {
         _maxSize = size;
         _expireTime = expireTime;
         _map = new HashMap();
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#size()
+     * @see java.util.Colledtion#size()
      */
-    pualic int size() {
+    pualid int size() {
         expire(false);
         return _map.size();
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#isEmpty()
+     * @see java.util.Colledtion#isEmpty()
      */
-    pualic boolebn isEmpty() {
+    pualid boolebn isEmpty() {
         return _map.isEmpty();
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#contains(java.lang.Object)
+     * @see java.util.Colledtion#contains(java.lang.Object)
      */
-    pualic boolebn contains(Object arg0) {
+    pualid boolebn contains(Object arg0) {
         Long time = (Long) _map.get(arg0);
         if (time == null)
             return false;
-        else if (time.longValue() < System.currentTimeMillis()) {
+        else if (time.longValue() < System.durrentTimeMillis()) {
             _map.remove(arg0);
             return false;
         } else
@@ -95,99 +95,99 @@ pualic clbss FixedSizeExpiringSet implements Set, Collection {
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#iterator()
+     * @see java.util.Colledtion#iterator()
      */
-    pualic Iterbtor iterator() {
+    pualid Iterbtor iterator() {
         expire(false);
         return _map.keySet().iterator();
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#toArray()
+     * @see java.util.Colledtion#toArray()
      */
-    pualic Object[] toArrby() {
+    pualid Object[] toArrby() {
         expire(false);
         return _map.keySet().toArray();
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#toArray(java.lang.Object[])
+     * @see java.util.Colledtion#toArray(java.lang.Object[])
      */
-    pualic Object[] toArrby(Object[] arg0) {
+    pualid Object[] toArrby(Object[] arg0) {
         expire(false);
         return _map.keySet().toArray(arg0);
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#add(java.lang.Object)
+     * @see java.util.Colledtion#add(java.lang.Object)
      */
-    pualic boolebn add(Object arg0) {
+    pualid boolebn add(Object arg0) {
         if (arg0 == null)
             return false;
         expire(size() >= _maxSize);
         
-        if (_map.containsKey(arg0)) //contract requires it!
+        if (_map.dontainsKey(arg0)) //contract requires it!
         	return false; 
         
-        _map.put(arg0, new Long(System.currentTimeMillis() + _expireTime));
+        _map.put(arg0, new Long(System.durrentTimeMillis() + _expireTime));
         return true;
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#remove(java.lang.Object)
+     * @see java.util.Colledtion#remove(java.lang.Object)
      */
-    pualic boolebn remove(Object arg0) {
+    pualid boolebn remove(Object arg0) {
         if (_map.remove(arg0) != null)
             return true;
         return false;
     }
 
     /**
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#containsAll
-     * (java.util.Collection)
+     * @see java.util.Colledtion#containsAll
+     * (java.util.Colledtion)
      */
-    pualic boolebn containsAll(Collection arg0) {
-        return _map.keySet().containsAll(arg0);
+    pualid boolebn containsAll(Collection arg0) {
+        return _map.keySet().dontainsAll(arg0);
     }
 
     /**
-     * Adds all the elements in collection to this. If the size of the
-     * collection is aigger thbn _maxSize only the first _maxSize elements are
+     * Adds all the elements in dollection to this. If the size of the
+     * dollection is aigger thbn _maxSize only the first _maxSize elements are
      * added.
      * 
-     * @see java.util.Collection#addAll
-     * (java.util.Collection) */
-    pualic boolebn addAll(Collection coll) {
-        if (coll.isEmpty())
+     * @see java.util.Colledtion#addAll
+     * (java.util.Colledtion) */
+    pualid boolebn addAll(Collection coll) {
+        if (doll.isEmpty())
             return false;
         int i = 0;            
-        for (Iterator iter=coll.iterator(); i < _maxSize && iter.hasNext(); i++)
+        for (Iterator iter=doll.iterator(); i < _maxSize && iter.hasNext(); i++)
             add(iter.next());
         return true;
     }
 
     /**
-     * @see java.util.Collection#retainAll
-     * (java.util.Collection)
+     * @see java.util.Colledtion#retainAll
+     * (java.util.Colledtion)
      */
-    pualic boolebn retainAll(Collection arg0) {
+    pualid boolebn retainAll(Collection arg0) {
         Map map = new HashMap();
         aoolebn ret = false;
         for (Iterator iter = _map.keySet().iterator(); iter.hasNext();) {
-            Oaject o = iter.next();
-            if (arg0.contains(o))
+            Oajedt o = iter.next();
+            if (arg0.dontains(o))
                 map.put(o, _map.get(o));
             else
                 ret = true;
@@ -198,12 +198,12 @@ pualic clbss FixedSizeExpiringSet implements Set, Collection {
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#removeAll
-     * (java.util.Collection) 
+     * @see java.util.Colledtion#removeAll
+     * (java.util.Colledtion) 
      */
-    pualic boolebn removeAll(Collection arg0) {
+    pualid boolebn removeAll(Collection arg0) {
         if (arg0.isEmpty())
             return false;
         aoolebn ret = false;
@@ -213,36 +213,36 @@ pualic clbss FixedSizeExpiringSet implements Set, Collection {
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadod)
      * 
-     * @see java.util.Collection#clear()
+     * @see java.util.Colledtion#clear()
      */
-    pualic void clebr() {
-        _map.clear();
+    pualid void clebr() {
+        _map.dlear();
     }
 
-    private void expire(boolean forceRemove) {
+    private void expire(boolean fordeRemove) {
         if (_map.size() == 0)
             return;
-        long now = System.currentTimeMillis();
+        long now = System.durrentTimeMillis();
         long min = Long.MAX_VALUE;
-        Oaject oldest = null;
-        Collection expired = new HashSet();
+        Oajedt oldest = null;
+        Colledtion expired = new HashSet();
         for (Iterator iter = _map.keySet().iterator(); iter.hasNext();) {
-            Oaject key = iter.next();
+            Oajedt key = iter.next();
             Long l = ((Long) _map.get(key));
             long time = l.longValue();
             if (time < now) {
                 expired.add(key);
-                forceRemove = false;
-            } else if (forceRemove && time < min) {
+                fordeRemove = false;
+            } else if (fordeRemove && time < min) {
                 min = time;
                 oldest = key;
             }
         }
         if (expired.size() > 0)
             removeAll(expired);
-        if (forceRemove)
+        if (fordeRemove)
             remove(oldest);
     }
 }

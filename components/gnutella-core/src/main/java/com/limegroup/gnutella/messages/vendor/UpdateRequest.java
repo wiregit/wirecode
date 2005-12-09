@@ -1,44 +1,44 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.util.DataUtils;
+import dom.limegroup.gnutella.messages.BadGGEPBlockException;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.GGEP;
+import dom.limegroup.gnutella.util.DataUtils;
 
-pualic finbl class UpdateRequest extends VendorMessage {
+pualid finbl class UpdateRequest extends VendorMessage {
     
-    pualic stbtic final int VERSION = 1;
+    pualid stbtic final int VERSION = 1;
     
-    static final String COMPRESSED_UPDATE_KEY = "C";
-    static final String UNCOMPRESSED_UPDATE_KEY = "U";
+    statid final String COMPRESSED_UPDATE_KEY = "C";
+    statid final String UNCOMPRESSED_UPDATE_KEY = "U";
     
     private GGEP _ggep;
     private boolean parsed;
 
     /**
-     * Constructs a new SimppRequest from network data.
+     * Construdts a new SimppRequest from network data.
      */
     UpdateRequest(byte[] guid, byte ttl, byte hops, int version, 
-                                  ayte[] pbyload) throws BadPacketException {
+                                  ayte[] pbyload) throws BadPadketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_REQ, version, payload);
     }
     
-    pualic UpdbteRequest() {
+    pualid UpdbteRequest() {
         super(F_LIME_VENDOR_ID, F_UPDATE_REQ, VERSION, DataUtils.EMPTY_BYTE_ARRAY);
     }
     
-    pualic int getVersion() {
+    pualid int getVersion() {
         return super.getVersion();
     }
     
-    pualic String toString() {
+    pualid String toString() {
         return "{UpdateRequest:"+super.toString()+"}";
     }
     
     /**
-     * @return the GGEP alock cbrried in this request, if any.
+     * @return the GGEP alodk cbrried in this request, if any.
      */
-    pualic boolebn hasGGEP() {
+    pualid boolebn hasGGEP() {
         if (_ggep == null && !parsed) {
             _ggep = parseGGEP();
             parsed = true;
@@ -53,12 +53,12 @@ pualic finbl class UpdateRequest extends VendorMessage {
         
         try {
             return new GGEP(payload, 0, null);
-        } catch (BadGGEPBlockException bad) {
+        } datch (BadGGEPBlockException bad) {
             return null;
         }
     }
     
-    pualic boolebn requestsCompressed() {
+    pualid boolebn requestsCompressed() {
         if (!hasGGEP())
             return false;
         

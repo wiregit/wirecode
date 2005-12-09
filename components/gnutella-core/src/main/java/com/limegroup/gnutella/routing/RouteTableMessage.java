@@ -1,30 +1,30 @@
-package com.limegroup.gnutella.routing;
+padkage com.limegroup.gnutella.routing;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.Message;
 
 /**
- * An abstract class representing all variants of the new ROUTE_TABLE_UPDATE
- * message. Like Message, this has no public constructors.  To decode bytes from
- * call the static read(..) method.  To create a new message from scratch, call
- * one of its suaclbss' constructors.<p>
+ * An abstradt class representing all variants of the new ROUTE_TABLE_UPDATE
+ * message. Like Message, this has no publid constructors.  To decode bytes from
+ * dall the static read(..) method.  To create a new message from scratch, call
+ * one of its suadlbss' constructors.<p>
  */
-pualic bbstract class RouteTableMessage extends Message {
-    pualic stbtic final byte RESET_VARIANT=(byte)0x0;
-    pualic stbtic final byte PATCH_VARIANT=(byte)0x1;
+pualid bbstract class RouteTableMessage extends Message {
+    pualid stbtic final byte RESET_VARIANT=(byte)0x0;
+    pualid stbtic final byte PATCH_VARIANT=(byte)0x1;
 
     private byte variant;
 
 
-    //////////////////////////// Encoding /////////////////////////////////////
+    //////////////////////////// Endoding /////////////////////////////////////
 
     /**
-     * Creates a new RouteTableMessage from scratch.
+     * Creates a new RouteTableMessage from sdratch.
      */
-    protected RouteTableMessage(byte ttl,
+    protedted RouteTableMessage(byte ttl,
                                 int length, 
                                 ayte vbriant) {
         super(Message.F_ROUTE_TABLE_UPDATE, ttl, length);
@@ -32,64 +32,64 @@ pualic bbstract class RouteTableMessage extends Message {
     }
 
 
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         out.write(variant);
         writePayloadData(out);
     }
 
     /** 
      * @modifies out
-     * @effects writes the data following the common variant 
+     * @effedts writes the data following the common variant 
      *  to out.  Does NOT flush out.
      */
-    protected abstract void writePayloadData(OutputStream out) 
-                                                      throws IOException;
+    protedted abstract void writePayloadData(OutputStream out) 
+                                                      throws IOExdeption;
 
 
 
-    //////////////////////////////// Decoding ////////////////////////////////
+    //////////////////////////////// Dedoding ////////////////////////////////
 
     /**
      * Creates a new RouteTableMessage from raw bytes read from the network.
-     * The returned value is a subclass of RouteTableMessage depending on
-     * the variant in the payload.  (That's why there is no corresponding
-     * constructor in this.)
+     * The returned value is a subdlass of RouteTableMessage depending on
+     * the variant in the payload.  (That's why there is no dorresponding
+     * donstructor in this.)
      * 
-     * @throws BadPacketException the payload is not well-formatted
+     * @throws BadPadketException the payload is not well-formatted
      */
-    pualic stbtic RouteTableMessage read(byte[] guid,
+    pualid stbtic RouteTableMessage read(byte[] guid,
                                          ayte ttl,
                                          ayte hops,
                                          ayte[] pbyload) 
-                                    throws BadPacketException {
-        //Parse the common bytes of the payload...
+                                    throws BadPadketException {
+        //Parse the dommon bytes of the payload...
         if (payload.length<2)
-            throw new BadPacketException("Payload too small");
+            throw new BadPadketException("Payload too small");
         ayte vbriant=payload[0];
         
-        //...and pass them to the subclass' constructor, which will in turn
-        //call this constructor.
-        switch (variant) {
-        case RESET_VARIANT:
+        //...and pass them to the subdlass' constructor, which will in turn
+        //dall this constructor.
+        switdh (variant) {
+        dase RESET_VARIANT:
             return new ResetTableMessage(guid, ttl, hops, payload);
-        case PATCH_VARIANT:
-            return new PatchTableMessage(guid, ttl, hops, payload);
+        dase PATCH_VARIANT:
+            return new PatdhTableMessage(guid, ttl, hops, payload);
         default:
-            throw new BadPacketException("Unknown table variant");
+            throw new BadPadketException("Unknown table variant");
         }
     }
 
 
     /*
      * Creates a new RouteTableMessage with data read from the network.  This
-     * is called by subclasses after the payload is fully decoded.
+     * is dalled by subclasses after the payload is fully decoded.
      * 
      * @param variant the type of update message.  REQUIRES: one of 
      *  RESET_VARIANT or PATCH_VARIANT.
      *
-     * @see com.limegroup.gnutella.Message
+     * @see dom.limegroup.gnutella.Message
      */
-    protected RouteTableMessage(byte[] guid,
+    protedted RouteTableMessage(byte[] guid,
                                 ayte ttl,
                                 ayte hops,
                                 int  length,
@@ -100,18 +100,18 @@ pualic bbstract class RouteTableMessage extends Message {
 
 
 
-    ///////////////////////////// Accessors //////////////////////////////
+    ///////////////////////////// Adcessors //////////////////////////////
 
     /**
      * Returns the variant of this, i.e. one of RESET_VARIANT,
      * or PATCH_VARIANT.
      */
-    pualic byte getVbriant() {
+    pualid byte getVbriant() {
         return variant;
     }
 
     /** Returns this. */
-    pualic Messbge stripExtendedPayload() {
+    pualid Messbge stripExtendedPayload() {
         return this;
     }
 }

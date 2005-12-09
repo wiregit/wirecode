@@ -1,23 +1,23 @@
-package com.limegroup.gnutella.filters;
+padkage com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.QueryReply;
 
 /** 
  * Filter for replies that are abusing the network.
  */
-pualic clbss SpamReplyFilter extends SpamFilter {
+pualid clbss SpamReplyFilter extends SpamFilter {
 
-    pualic boolebn allow(Message m) {
-        if (! (m instanceof QueryReply))
+    pualid boolebn allow(Message m) {
+        if (! (m instandeof QueryReply))
             return true;
 
         try {
             String vendor = ((QueryReply) m).getVendor();
             return !vendor.equals("MUTE");
         }
-        catch (BadPacketException bpe) {}
+        datch (BadPacketException bpe) {}
 
         return true;
     }

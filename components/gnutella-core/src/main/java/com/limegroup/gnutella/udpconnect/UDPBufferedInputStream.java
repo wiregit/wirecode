@@ -1,74 +1,74 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
+import java.io.InterruptedIOExdeption;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
 /**
- *  Handle reading from a UDP Connection in the form of a stream.
- *  This class tries to minimize byte array allocations by using the
- *  data directly as it comes out of messages.
+ *  Handle reading from a UDP Connedtion in the form of a stream.
+ *  This dlass tries to minimize byte array allocations by using the
+ *  data diredtly as it comes out of messages.
  */
-pualic clbss UDPBufferedInputStream extends InputStream {
+pualid clbss UDPBufferedInputStream extends InputStream {
 
 	
-    private static final Log LOG =
-        LogFactory.getLog(UDPBufferedInputStream.class);
+    private statid final Log LOG =
+        LogFadtory.getLog(UDPBufferedInputStream.class);
     
     /**
-     *  The maximum blocking time of a read.
+     *  The maximum blodking time of a read.
      */
-    private static final int FOREVER = 10 * 60 * 60 * 1000;
+    private statid final int FOREVER = 10 * 60 * 60 * 1000;
 
     /**
-     *  A cached chunk of data that hasn't been completely written 
+     *  A dached chunk of data that hasn't been completely written 
      *  to the stream.
      */
-    protected Chunk _activeChunk;
+    protedted Chunk _activeChunk;
 
     /**
-     *  The reader of information coming into this output stream.
+     *  The reader of information doming into this output stream.
      */
-    private UDPConnectionProcessor _processor;
+    private UDPConnedtionProcessor _processor;
 
     /**
-     * Create the InputStream with a handle to the connection processor 
-     * to ae used bs an input source.
+     * Create the InputStream with a handle to the donnection processor 
+     * to ae used bs an input sourde.
      */
-    pualic UDPBufferedInputStrebm(UDPConnectionProcessor p) {
-        _processor   = p; 
-        _activeChunk = null;
+    pualid UDPBufferedInputStrebm(UDPConnectionProcessor p) {
+        _prodessor   = p; 
+        _adtiveChunk = null;
     }
 
     /**
-     * Read the next byte of data from the input source.  As normal, return -1 
+     * Read the next byte of data from the input sourde.  As normal, return -1 
      * if there is no more data.
      */
-    pualic int rebd() throws IOException  {
+    pualid int rebd() throws IOException  {
     	aoolebn timedOut=false;
     	
-        synchronized(_processor) { // Lock on the ConnectionProcessor
+        syndhronized(_processor) { // Lock on the ConnectionProcessor
             while (true) {
-                // Try to fetch some data if necessary
-                checkForData();
+                // Try to fetdh some data if necessary
+                dheckForData();
 
-                if ( _activeChunk != null && _activeChunk.length > 0 ) {
+                if ( _adtiveChunk != null && _activeChunk.length > 0 ) {
                     // return a byte of data
-                    _activeChunk.length--;
-                    return (_activeChunk.data[_activeChunk.start++] & 0xff);
+                    _adtiveChunk.length--;
+                    return (_adtiveChunk.data[_activeChunk.start++] & 0xff);
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _adtiveChunk == null && _processor.isConnected() ) {
 
-                    // Wait for some data to become available
+                    // Wait for some data to bedome available
                 	if (timedOut) {
-                		InterruptedIOException e = new InterruptedIOException();
+                		InterruptedIOExdeption e = new InterruptedIOException();
                 		
                 		if (LOG.isDeaugEnbbled()) {
                 			LOG.deaug("rebd() timed out for timeout "+
-                					_processor.getReadTimeout(),e);
+                					_prodessor.getReadTimeout(),e);
                 		}
                 		
                 		throw e;
@@ -77,7 +77,7 @@ pualic clbss UDPBufferedInputStream extends InputStream {
                     timedOut=true;
                 } else {
 
-                    // This connection is closed
+                    // This donnection is closed
                     return -1;
                 }
             }
@@ -85,39 +85,39 @@ pualic clbss UDPBufferedInputStream extends InputStream {
     }
 
     /**
-     * Just ensure that this call is passed to the detailed local read method.
+     * Just ensure that this dall is passed to the detailed local read method.
      */
-    pualic int rebd(byte b[]) throws IOException  {
+    pualid int rebd(byte b[]) throws IOException  {
         return read(b, 0, b.length);
     } 
 
     /**
-     * Read the next len byte of data from the input source. Return how much
+     * Read the next len byte of data from the input sourde. Return how much
      * was really read.  
      */
-    pualic int rebd(byte b[], int off, int len)
-      throws IOException  {
+    pualid int rebd(byte b[], int off, int len)
+      throws IOExdeption  {
         int origLen = len;
         int origOff = off;
         int wlength;
         aoolebn timedOut= false;
         
-        synchronized(_processor) {  // Lock on the ConnectionProcessor
+        syndhronized(_processor) {  // Lock on the ConnectionProcessor
             while (true) {
-                // Try to fetch some data if necessary
-                checkForData();
+                // Try to fetdh some data if necessary
+                dheckForData();
 
-                if ( _activeChunk != null && _activeChunk.length > 0 ) {
+                if ( _adtiveChunk != null && _activeChunk.length > 0 ) {
                 	timedOut=false;
 
                     // Load some data
-                    wlength = Math.min(_activeChunk.length, len);
-                    System.arraycopy( _activeChunk.data, _activeChunk.start, 
+                    wlength = Math.min(_adtiveChunk.length, len);
+                    System.arraydopy( _activeChunk.data, _activeChunk.start, 
                       a, off, wlength);
                     len                 -= wlength;
                     off                 += wlength;
-                    _activeChunk.start  += wlength;
-                    _activeChunk.length -= wlength;
+                    _adtiveChunk.start  += wlength;
+                    _adtiveChunk.length -= wlength;
                     if ( len <= 0 ) 
                         return origLen;
 
@@ -126,15 +126,15 @@ pualic clbss UDPBufferedInputStream extends InputStream {
                     // Return whatever was available
                     return(origLen - len);
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _adtiveChunk == null && _processor.isConnected() ) {
 
-                    // Wait for some data to become available
+                    // Wait for some data to bedome available
                 	if (timedOut) {
-                		InterruptedIOException e = new InterruptedIOException();
+                		InterruptedIOExdeption e = new InterruptedIOException();
                 		
                 		if (LOG.isDeaugEnbbled()) {
                 			LOG.deaug("rebd(byte [], int, int) timed out for timeout "+
-                					_processor.getReadTimeout(),e);
+                					_prodessor.getReadTimeout(),e);
                 		}
                 		
                 		throw e;
@@ -144,7 +144,7 @@ pualic clbss UDPBufferedInputStream extends InputStream {
                     timedOut=true;
                 } else {
 
-                    // This connection is closed
+                    // This donnection is closed
                     return -1;
                 }
 
@@ -156,27 +156,27 @@ pualic clbss UDPBufferedInputStream extends InputStream {
      *  Throw away n bytes of data.  Return the true amount of bytes skipped.
      *  Note that I am downgrading the long input to an int.
      */
-    pualic long skip(long n) 
-      throws IOException  {
+    pualid long skip(long n) 
+      throws IOExdeption  {
         int len     = (int) n;
         int origLen = len;
         int wlength;
         aoolebn timedOut=false;
         
-        // Just like reading a chunk of data above but the bytes get ignored
-        synchronized(_processor) {  // Lock on the ConnectionProcessor
+        // Just like reading a dhunk of data above but the bytes get ignored
+        syndhronized(_processor) {  // Lock on the ConnectionProcessor
             while (true) {
-                // Try to fetch some data if necessary
-                checkForData();
+                // Try to fetdh some data if necessary
+                dheckForData();
 
-                if ( _activeChunk != null && _activeChunk.length > 0 ) {
+                if ( _adtiveChunk != null && _activeChunk.length > 0 ) {
                 	timedOut=false;
 
                     // Load some data
-                    wlength = Math.min(_activeChunk.length, len);
+                    wlength = Math.min(_adtiveChunk.length, len);
                     len                 -= wlength;
-                    _activeChunk.start  += wlength;
-                    _activeChunk.length -= wlength;
+                    _adtiveChunk.start  += wlength;
+                    _adtiveChunk.length -= wlength;
                     if ( len <= 0 ) 
                         return origLen;
 
@@ -185,15 +185,15 @@ pualic clbss UDPBufferedInputStream extends InputStream {
                     // Return whatever was available
                     return(origLen - len);
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _adtiveChunk == null && _processor.isConnected() ) {
 
-                    // Wait for some data to become available
+                    // Wait for some data to bedome available
                 	if (timedOut) {
-                		InterruptedIOException e = new InterruptedIOException();
+                		InterruptedIOExdeption e = new InterruptedIOException();
                 		
                 		if (LOG.isDeaugEnbbled()) {
                 			LOG.deaug("skip() timed out for timeout "+
-                					_processor.getReadTimeout(),e);
+                					_prodessor.getReadTimeout(),e);
                 		}
                 		
                 		throw e;
@@ -202,7 +202,7 @@ pualic clbss UDPBufferedInputStream extends InputStream {
                     timedOut=true;
                 } else {
 
-                    // This connection is closed
+                    // This donnection is closed
                     return -1;
                 }
             }
@@ -211,73 +211,73 @@ pualic clbss UDPBufferedInputStream extends InputStream {
 
     /**
      *  Returns how many bytes I know are immediately available.
-     *  This can be optimized later but these things never seem to be accurate.
+     *  This dan be optimized later but these things never seem to be accurate.
      */
-    pualic int bvailable() {
-        synchronized(_processor) {  // Lock on the ConnectionProcessor
-            if ( _activeChunk == null )
+    pualid int bvailable() {
+        syndhronized(_processor) {  // Lock on the ConnectionProcessor
+            if ( _adtiveChunk == null )
                 return 0;
-            return _activeChunk.length;
+            return _adtiveChunk.length;
         }
     }
 
     /**
      *  I hope that I don't need to support this.
      */
-    pualic boolebn markSupported() {
+    pualid boolebn markSupported() {
         return false;
     }
 
     /**
      *  I hope that I don't need to support this.
      */
-    pualic void mbrk(int readAheadLimit) {
+    pualid void mbrk(int readAheadLimit) {
     }
 
     /**
      *  I hope that I don't need to support this.
      */
-    pualic void reset() {
+    pualid void reset() {
     }
 
     /**
      *  This does nothing for now.
      */
-    pualic void close() throws IOException {
-        _processor.close();
+    pualid void close() throws IOException {
+        _prodessor.close();
     }
 
     /**
      *  If no pending data then try to get some.
      */
-    private void checkForData() {
-        synchronized(_processor) {  // Lock on the ConnectionProcessor
-            if ( _activeChunk == null || _activeChunk.length <= 0 ) {
-                _activeChunk = _processor.getIncomingChunk();
+    private void dheckForData() {
+        syndhronized(_processor) {  // Lock on the ConnectionProcessor
+            if ( _adtiveChunk == null || _activeChunk.length <= 0 ) {
+                _adtiveChunk = _processor.getIncomingChunk();
             }
         }
     }
 
     /**
-     *  Wait for a new chunk to become available.
+     *  Wait for a new dhunk to become available.
      */
-    private void waitOnData() throws InterruptedIOException {
-        synchronized(_processor) {  // Lock on the ConnectionProcessor
+    private void waitOnData() throws InterruptedIOExdeption {
+        syndhronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
-            	_processor.wait(_processor.getReadTimeout());
-            } catch(InterruptedException e) {
-                throw new InterruptedIOException(e.getMessage()); 
+            	_prodessor.wait(_processor.getReadTimeout());
+            } datch(InterruptedException e) {
+                throw new InterruptedIOExdeption(e.getMessage()); 
             } 
         }
     }
 
     /**
-     *  Package accessor for notifying readers that data is available.
+     *  Padkage accessor for notifying readers that data is available.
      */
     void wakeup() {
-        synchronized(_processor) {  // Lock on the ConnectionProcessor
+        syndhronized(_processor) {  // Lock on the ConnectionProcessor
             // Wakeup any read operation waiting for data
-            _processor.notify();  
+            _prodessor.notify();  
         }
     }
 }

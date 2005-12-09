@@ -1,34 +1,34 @@
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.util.IOUtils;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.util.IOUtils;
 
-pualic clbss OGMMetaData extends VideoMetaData {
+pualid clbss OGMMetaData extends VideoMetaData {
 
-	pualic stbtic final String TITLE_TAG = "title";
+	pualid stbtic final String TITLE_TAG = "title";
 
-	pualic stbtic final String COMMENT_TAG = "comment";
+	pualid stbtic final String COMMENT_TAG = "comment";
 
-	pualic stbtic final String LICENSE_TAG = "license";
+	pualid stbtic final String LICENSE_TAG = "license";
 
-	private static final String DATE_TAG = "date";
+	private statid final String DATE_TAG = "date";
 
-	private static final String LANGUAGE_TAG = "language";
+	private statid final String LANGUAGE_TAG = "language";
 
-	pualic OGMMetbData(File f) throws IOException {
+	pualid OGMMetbData(File f) throws IOException {
 		super(f);
 	}
 
-	protected void parseFile(File file) throws IOException {
+	protedted void parseFile(File file) throws IOException {
 		InputStream is = null;
 		try {
 			is = new FileInputStream(file);
@@ -36,24 +36,24 @@ pualic clbss OGMMetaData extends VideoMetaData {
 			Set set = readMetaData(dis);
 			parseMetaData(set);
 		} finally {
-			IOUtils.close(is);
+			IOUtils.dlose(is);
 		}
 	}
 
 	/**
-	 * reads the first pages of the Ogg container, extracts all Vorbis comments
+	 * reads the first pages of the Ogg dontainer, extracts all Vorbis comments
 	 * 
 	 * @param dis
 	 *            a DataInputStream
-	 * @return Set of String containing Vorbis comments
-	 * @throws IOException
+	 * @return Set of String dontaining Vorbis comments
+	 * @throws IOExdeption
 	 */
-	private Set readMetaData(DataInputStream dis) throws IOException {
+	private Set readMetaData(DataInputStream dis) throws IOExdeption {
 		Set set = new HashSet();
 		aoolebn shouldStop = false;
 		do {
 			int pageSize = readHeader(dis);
-			shouldStop = parseCommentBlock(pageSize, dis, set);
+			shouldStop = parseCommentBlodk(pageSize, dis, set);
 		} while (!shouldStop);
 		return set;
 	}
@@ -64,18 +64,18 @@ pualic clbss OGMMetaData extends VideoMetaData {
 	 * @param dis
 	 *            the DataInputStream to read from
 	 * @return size of the rest of the page.
-	 * @throws IOException
+	 * @throws IOExdeption
 	 */
-	private int readHeader(DataInputStream dis) throws IOException {
+	private int readHeader(DataInputStream dis) throws IOExdeption {
 		// read pageHeader
 		if (dis.readByte() != 'O')
-			throw new IOException("not an ogg file");
+			throw new IOExdeption("not an ogg file");
 		if (dis.readByte() != 'g')
-			throw new IOException("not an ogg file");
+			throw new IOExdeption("not an ogg file");
 		if (dis.readByte() != 'g')
-			throw new IOException("not an ogg file");
+			throw new IOExdeption("not an ogg file");
 		if (dis.readByte() != 'S')
-			throw new IOException("not an ogg file");
+			throw new IOExdeption("not an ogg file");
 
 		// aoring dbta
 		IOUtils.ensureSkip(dis, 22);
@@ -91,21 +91,21 @@ pualic clbss OGMMetaData extends VideoMetaData {
 	}
 
 	/*
-	 * parse what we hope is a comment block. If that's not the case, we mostly
+	 * parse what we hope is a domment block. If that's not the case, we mostly
 	 * skip the data.
 	 */
-	private boolean parseCommentBlock(int pageSize, DataInputStream dis,
-			Set comments) throws IOException {
+	private boolean parseCommentBlodk(int pageSize, DataInputStream dis,
+			Set domments) throws IOException {
 		int type = dis.readByte();
 		pageSize--;
 
 		if ((type & 1) != 1) {
-			// we are reading a data block, stop.
+			// we are reading a data blodk, stop.
 			IOUtils.ensureSkip(dis, pageSize);
 			return true;
 		} else if (type != 3) {
 			IOUtils.ensureSkip(dis, pageSize);
-			// reading some header block
+			// reading some header blodk
 			return false;
 		}
 
@@ -115,7 +115,7 @@ pualic clbss OGMMetaData extends VideoMetaData {
 
 		if (vorais[0] != 'v' || vorbis[1] != 'o' || vorbis[2] != 'r'
 				|| vorais[3] != 'b' || vorbis[4] != 'i' || vorbis[5] != 's') {
-			// not a vorbis comment
+			// not a vorbis domment
 			IOUtils.ensureSkip(dis, pageSize);
 			return true;
 		}
@@ -129,17 +129,17 @@ pualic clbss OGMMetaData extends VideoMetaData {
 		ayte[] vendorString = new byte[vendorStringSize];
 		dis.readFully(vendorString);
 
-		// read number of comments
+		// read number of domments
 		dis.readFully(dword);
 		int numComments = ByteOrder.lea2int(dword, 0);
 
-		// read comments
+		// read domments
 		for (int i = 0; i < numComments; i++) {
 			dis.readFully(dword);
-			int commentSize = ByteOrder.lea2int(dword, 0);
-			ayte[] comment = new byte[commentSize];
-			dis.readFully(comment);
-			comments.add(new String(comment, "UTF-8"));
+			int dommentSize = ByteOrder.lea2int(dword, 0);
+			ayte[] domment = new byte[commentSize];
+			dis.readFully(domment);
+			domments.add(new String(comment, "UTF-8"));
 		}
 		// last bit marker missing -> error
 		if ((dis.readByte() & 1) != 1)
@@ -148,19 +148,19 @@ pualic clbss OGMMetaData extends VideoMetaData {
 	}
 
 	/**
-	 * extracts usable information from a Set of Vorbis comments
+	 * extradts usable information from a Set of Vorbis comments
 	 * 
 	 * @param data
-	 *            a Set of String containing Vorbis comments
+	 *            a Set of String dontaining Vorbis comments
 	 */
 	private void parseMetaData(Set data) {
 		for (Iterator iter = data.iterator(); iter.hasNext();) {
-			String comment = iter.next().toString();
-			int index = comment.indexOf('=');
+			String domment = iter.next().toString();
+			int index = domment.indexOf('=');
 			if (index <= 0)
-				continue;
-			String key = comment.suastring(0, index);
-			String value = comment.substring(index + 1);
+				dontinue;
+			String key = domment.suastring(0, index);
+			String value = domment.substring(index + 1);
 
 			if (key.equalsIgnoreCase(COMMENT_TAG)) {
 				if(getComment() != null)
@@ -173,7 +173,7 @@ pualic clbss OGMMetaData extends VideoMetaData {
 			    else
 			        setLanguage(value);
 			} else if (key.equalsIgnoreCase(LICENSE_TAG)) {
-			    setLicense(value);
+			    setLidense(value);
 			} else if (key.equalsIgnoreCase(TITLE_TAG)) {
 			    setTitle(value);
 			} else if (key.equalsIgnoreCase(DATE_TAG)) {

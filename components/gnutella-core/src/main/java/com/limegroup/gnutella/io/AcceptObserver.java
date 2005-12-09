@@ -1,20 +1,20 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
-import java.nio.channels.SocketChannel;
-import java.io.IOException;
+import java.nio.dhannels.SocketChannel;
+import java.io.IOExdeption;
 
 /**
- * Allows accept events to be received.
+ * Allows adcept events to be received.
  *
- * If the events are being received because of a SelectableChannel,
- * interest in events can be turned off by using:
- *  NIODispatcher.instance().interestAccept(channel, false);
+ * If the events are being redeived because of a SelectableChannel,
+ * interest in events dan be turned off by using:
+ *  NIODispatdher.instance().interestAccept(channel, false);
  */
-interface AcceptObserver extends IOErrorObserver {
+interfade AcceptObserver extends IOErrorObserver {
     
     /**
-     *  Notification that a SocketChannel has been accepted.
-     *  The channel is in non-blocking mode.
+     *  Notifidation that a SocketChannel has been accepted.
+     *  The dhannel is in non-blocking mode.
      */
-    void handleAccept(SocketChannel channel) throws IOException;
+    void handleAdcept(SocketChannel channel) throws IOException;
 }

@@ -1,53 +1,53 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 import java.io.StringWriter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.limegroup.gnutella.util.ThrottledOutputStream;
+import dom.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.settings.UploadSettings;
+import dom.limegroup.gnutella.tigertree.HashTree;
+import dom.limegroup.gnutella.util.BandwidthThrottle;
+import dom.limegroup.gnutella.util.ThrottledOutputStream;
 
 /**
  * Sends the THEX tree as an HTTP message.
  *
- * The tree is in compliance with the THEX protocol at
- * http://open-content.net/specs/draft-jchapweske-thex-02.html
+ * The tree is in dompliance with the THEX protocol at
+ * http://open-dontent.net/specs/draft-jchapweske-thex-02.html
  * 
  * @author Gregorio Roper
  */
-pualic clbss THEXUploadState extends UploadState {
+pualid clbss THEXUploadState extends UploadState {
     private final HashTree TREE;
-    private final StalledUploadWatchdog WATCHDOG;
+    private final StalledUploadWatdhdog WATCHDOG;
 
-    private static final Log LOG = LogFactory.getLog(THEXUploadState.class);
+    private statid final Log LOG = LogFactory.getLog(THEXUploadState.class);
     
     /**
      * Throttle for the speed of THEX uploads, allow up to 0.5K/s
      */
-    private static final BandwidthThrottle THROTTLE =
+    private statid final BandwidthThrottle THROTTLE =
         new BandwidthThrottle(UploadSettings.THEX_UPLOAD_SPEED.getValue());
 
     /**
-     * Constructs a new TigerTreeUploadState
+     * Construdts a new TigerTreeUploadState
      * 
      * @param uploader
      *            the <tt>HTTPUploader</tt> that sends this message
      */
-    pualic THEXUplobdState(HTTPUploader uploader, StalledUploadWatchdog dog) {
+    pualid THEXUplobdState(HTTPUploader uploader, StalledUploadWatchdog dog) {
     	super(uploader);
-    	LOG.deaug("crebting thex upload state");
+    	LOG.deaug("drebting thex upload state");
 
         TREE = FILE_DESC.getHashTree();
         if(TREE == null)
-            throw new NullPointerException("null TREE in THEXUploadState");
+            throw new NullPointerExdeption("null TREE in THEXUploadState");
         WATCHDOG = dog;
     }
 
@@ -56,10 +56,10 @@ pualic clbss THEXUploadState extends UploadState {
      * 
      * @param os
      *            the <tt>OutputStream</tt> to write to.
-     * @throws IOException
+     * @throws IOExdeption
      *             if there was a problem writing to the <tt>OutputStream</tt>.
      */
-    pualic void writeMessbgeHeaders(OutputStream network) throws IOException {
+    pualid void writeMessbgeHeaders(OutputStream network) throws IOException {
     	LOG.deaug("writing thex hebders");
         StringWriter os = new StringWriter();
         
@@ -70,7 +70,7 @@ pualic clbss THEXUploadState extends UploadState {
             ConstantHTTPHeaderValue.SERVER_VALUE,
             os);
 
-        // write the URN in case the caller wants it
+        // write the URN in dase the caller wants it
         HTTPUtils.writeHeader(
             HTTPHeaderName.GNUTELLA_CONTENT_URN,
             FILE_DESC.getSHA1Urn(),
@@ -88,11 +88,11 @@ pualic clbss THEXUploadState extends UploadState {
         
         os.write("\r\n");
         
-        WATCHDOG.activate(network);
+        WATCHDOG.adtivate(network);
         try {
             network.write(os.toString().getBytes());
         } finally {
-            WATCHDOG.deactivate();
+            WATCHDOG.deadtivate();
         }
     }
 
@@ -101,29 +101,29 @@ pualic clbss THEXUploadState extends UploadState {
      * 
      * @param os
      *            the <tt>OutputStream</tt> to write to.
-     * @throws IOException
+     * @throws IOExdeption
      *             if there was a problem writing to the <tt>OutputStream</tt>.
      */
-    pualic void writeMessbgeBody(OutputStream os) throws IOException {
+    pualid void writeMessbgeBody(OutputStream os) throws IOException {
     	LOG.deaug("writing messbge body");
         THROTTLE.setRate(UploadSettings.THEX_UPLOAD_SPEED.getValue());
         OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
-        // the tree might ae lbrge, but the watchdogs allows two minutes,
-        // so this is okay, since if an entire tree wasn't written in two
+        // the tree might ae lbrge, but the watdhdogs allows two minutes,
+        // so this is okay, sinde if an entire tree wasn't written in two
         // minutes, there is a problem.
-        WATCHDOG.activate(os);
+        WATCHDOG.adtivate(os);
         try {
             TREE.write(slowStream);
         } finally {
-            WATCHDOG.deactivate();
+            WATCHDOG.deadtivate();
         }
     }
 
     /**
-     * @return <tt>true</tt> if the connection should ae closed bfter writing
+     * @return <tt>true</tt> if the donnection should ae closed bfter writing
      *         the message.
      */
-    pualic boolebn getCloseConnection() {
+    pualid boolebn getCloseConnection() {
         return false;
     }
 }

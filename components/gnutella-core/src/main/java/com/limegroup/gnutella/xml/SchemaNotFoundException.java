@@ -1,16 +1,16 @@
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
 /**
- * The exception is thrown when a GML Document's template cannot be loaded
+ * The exdeption is thrown when a GML Document's template cannot be loaded
  *
  * @author Ron Vogl
  */
-pualic clbss SchemaNotFoundException
-    extends Exception
+pualid clbss SchemaNotFoundException
+    extends Exdeption
 {
-    pualic SchembNotFoundException() {}
+    pualid SchembNotFoundException() {}
 
-    pualic SchembNotFoundException(String message)
+    pualid SchembNotFoundException(String message)
     {
         super(message);
     }

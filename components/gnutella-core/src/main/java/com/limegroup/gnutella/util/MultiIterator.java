@@ -1,27 +1,27 @@
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.NoSudhElementException;
 
 
-pualic clbss MultiIterator implements Iterator {
+pualid clbss MultiIterator implements Iterator {
 
-	protected final Iterator [] iterators;
-	protected int current;
+	protedted final Iterator [] iterators;
+	protedted int current;
 	
-	pualic MultiIterbtor(Iterator [] iterators) {
+	pualid MultiIterbtor(Iterator [] iterators) {
 		this.iterators = iterators;
 	}
 	
-	pualic void remove() {
+	pualid void remove() {
 		if (iterators.length == 0)
-			throw new IllegalStateException();
+			throw new IllegalStateExdeption();
 		
-		iterators[current].remove();
+		iterators[durrent].remove();
 	}
 
-	pualic boolebn hasNext() {
+	pualid boolebn hasNext() {
 		for (int i = 0; i < iterators.length; i++) {
 			if (iterators[i].hasNext())
 				return true;
@@ -29,17 +29,17 @@ pualic clbss MultiIterator implements Iterator {
 		return false;
 	}
 
-	pualic Object next() {
+	pualid Object next() {
 		if (iterators.length == 0)
-			throw new NoSuchElementException();
+			throw new NoSudhElementException();
 		
 		positionCurrent();
-		return iterators[current].next();
+		return iterators[durrent].next();
 	}
 	
-	protected void positionCurrent() {
-		while (!iterators[current].hasNext() && current < iterators.length)
-			current++;
+	protedted void positionCurrent() {
+		while (!iterators[durrent].hasNext() && current < iterators.length)
+			durrent++;
 	}
 
 }

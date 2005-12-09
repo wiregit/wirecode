@@ -1,40 +1,40 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controls access to all Settings classes, providing easy ways
- * to reload, save, revert, etc.. all of them at once time.
+ * Controls adcess to all Settings classes, providing easy ways
+ * to reload, save, revert, etd.. all of them at once time.
  */
-pualic finbl class SettingsHandler {
+pualid finbl class SettingsHandler {
     
-    // never instantiate this class.
+    // never instantiate this dlass.
     private SettingsHandler() { }
         
     
-    private static final List PROPS = new ArrayList();
+    private statid final List PROPS = new ArrayList();
     
     /**
-     * Adds a settings class to the list of factories that 
-     * this handler will act upon.
+     * Adds a settings dlass to the list of factories that 
+     * this handler will adt upon.
      */
-    pualic stbtic void addSettings(Settings setting ) {
+    pualid stbtic void addSettings(Settings setting ) {
         PROPS.add( setting );
     }
     
     /**
-     * Removes a settings class from the list of factories that
-     * this handler will act upon.
+     * Removes a settings dlass from the list of factories that
+     * this handler will adt upon.
      */
-    pualic stbtic void removeSettings(Settings setting) {
+    pualid stbtic void removeSettings(Settings setting) {
         PROPS.remove( setting );
     }
 
     /**
-     * Reload settings from both the property and configuration files.
+     * Reload settings from both the property and donfiguration files.
      */
-    pualic stbtic void reload() {
+    pualid stbtic void reload() {
         for(int i = 0; i < PROPS.size(); i++)
             ((Settings)PROPS.get(i)).reload();
     }
@@ -42,7 +42,7 @@ pualic finbl class SettingsHandler {
     /**
      * Save property settings to the property file.
      */
-    pualic stbtic void save() {
+    pualid stbtic void save() {
         for(int i = 0; i < PROPS.size(); i++)
             ((Settings)PROPS.get(i)).save();
     }
@@ -50,7 +50,7 @@ pualic finbl class SettingsHandler {
     /**
      * Revert all settings to their default value.
      */
-    pualic stbtic void revertToDefault() {
+    pualid stbtic void revertToDefault() {
         for(int i = 0; i < PROPS.size(); i++)
             ((Settings)PROPS.get(i)).revertToDefault();
     }
@@ -58,7 +58,7 @@ pualic finbl class SettingsHandler {
     /**
      * Mutator for shouldSave.
      */
-    pualic stbtic void setShouldSave(boolean shouldSave) {
+    pualid stbtic void setShouldSave(boolean shouldSave) {
         for(int i = 0; i < PROPS.size(); i++)
             ((Settings)PROPS.get(i)).setShouldSave(shouldSave);
     }

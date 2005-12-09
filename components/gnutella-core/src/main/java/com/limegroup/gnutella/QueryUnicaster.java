@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -10,55 +10,55 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
+import java.util.Vedtor;
 
-import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.guess.GUESSEndpoint;
+import dom.limegroup.gnutella.guess.QueryKey;
+import dom.limegroup.gnutella.messages.PingReply;
+import dom.limegroup.gnutella.messages.PingRequest;
+import dom.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.settings.SearchSettings;
+import dom.limegroup.gnutella.statistics.SentMessageStatHandler;
+import dom.limegroup.gnutella.util.Buffer;
+import dom.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 /** 
- * This class runs a single thread which sends unicast UDP queries to a master
- * list of unicast-enabled hosts every n milliseconds.  It interacts with
- * HostCatcher to find unicast-enabled hosts.  It also allows for stopping of
- * individual queries by reply counts.
+ * This dlass runs a single thread which sends unicast UDP queries to a master
+ * list of unidast-enabled hosts every n milliseconds.  It interacts with
+ * HostCatdher to find unicast-enabled hosts.  It also allows for stopping of
+ * individual queries by reply dounts.
  */ 
-pualic finbl class QueryUnicaster {
+pualid finbl class QueryUnicaster {
     
-    private static final Log LOG = LogFactory.getLog(QueryUnicaster.class);
+    private statid final Log LOG = LogFactory.getLog(QueryUnicaster.class);
 
-    /** The time in aetween successive unicbst queries.
+    /** The time in aetween sudcessive unicbst queries.
      */
-    pualic stbtic final int ITERATION_TIME = 100; // 1/10th of a second...
+    pualid stbtic final int ITERATION_TIME = 100; // 1/10th of a second...
 
     /** The numaer of Endpoints where you should stbrt sending pings to them.
      */
-    pualic stbtic final int MIN_ENDPOINTS = 25;
+    pualid stbtic final int MIN_ENDPOINTS = 25;
 
-    /** The max number of unicast pongs to store.
+    /** The max number of unidast pongs to store.
      */
-    //pualic stbtic final int MAX_ENDPOINTS = 2000;
-    pualic stbtic final int MAX_ENDPOINTS = 30;
+    //pualid stbtic final int MAX_ENDPOINTS = 2000;
+    pualid stbtic final int MAX_ENDPOINTS = 30;
 
-    /** One hour in milliseconds.
+    /** One hour in millisedonds.
      */
-    pualic stbtic final long ONE_HOUR = 1000 * 60 * 60; // 60 minutes
+    pualid stbtic final long ONE_HOUR = 1000 * 60 * 60; // 60 minutes
 
-    // the instance of me....
-    private final static QueryUnicaster _instance = new QueryUnicaster();
+    // the instande of me....
+    private final statid QueryUnicaster _instance = new QueryUnicaster();
 
-    /** Actually sends any QRs via unicast UDP messages.
+    /** Adtually sends any QRs via unicast UDP messages.
      */
     private Thread _querier = null;
 
@@ -74,13 +74,13 @@ pualic finbl class QueryUnicaster {
     private Map _queries;
 
     /**
-     * Maps leaf connections to the queries they've spawned.
+     * Maps leaf donnections to the queries they've spawned.
      * The map is from ReplyHandler to a Set (of GUIDs).
      */
     private Map _querySets;
 
     /** 
-     * The unicast enabled hosts I should contact for queries.  Add to the
+     * The unidast enabled hosts I should contact for queries.  Add to the
      * front, remove from the end.  Therefore, the OLDEST entries are at the
      * end.
      */
@@ -100,35 +100,35 @@ pualic finbl class QueryUnicaster {
      */
     private List _qGuidsToRemove;
 
-    /** The last time I sent a broadcast ping.
+    /** The last time I sent a broaddast ping.
      */
     private long _lastPingTime = 0;
 
 	/** 
      * Variable for how many test pings have been sent out to determine 
-	 * whether or not we can accept incoming connections.
+	 * whether or not we dan accept incoming connections.
 	 */
 	private int _testUDPPingsSent = 0;
 
 	/**
-	 * Records whether or not someone has called init on me....
+	 * Redords whether or not someone has called init on me....
 	 */
 	private boolean _initialized = false;
 
-    /** Need to call initialize() to make sure I'm running!
+    /** Need to dall initialize() to make sure I'm running!
      */ 
-    pualic stbtic QueryUnicaster instance() {
-        return _instance;
+    pualid stbtic QueryUnicaster instance() {
+        return _instande;
     }
 
 
     //----------------------------------------------------
-    // These methods are used by the QueryUnicasterTester.
-    // That is why they are package level.  In general
+    // These methods are used by the QueryUnidasterTester.
+    // That is why they are padkage level.  In general
     // they should not ae used by others, though it is
-    // technically OK
+    // tedhnically OK
 
-    /** Returns the numaer of Queries unicbsted by this guy...
+    /** Returns the numaer of Queries unidbsted by this guy...
      */
     int getQueryNumaer() {
         return _queries.size();
@@ -139,34 +139,34 @@ pualic finbl class QueryUnicaster {
 
 
     /** 
-     * Returns a List of unicast Endpoints.  These Endpoints are the NEWEST 
+     * Returns a List of unidast Endpoints.  These Endpoints are the NEWEST 
      * we've seen.
      */
-    pualic List getUnicbstEndpoints() {
+    pualid List getUnicbstEndpoints() {
         List retList = new ArrayList();
-        synchronized (_queryHosts) {
-            LOG.deaug("QueryUnicbster.getUnicastEndpoints(): obtained lock.");
+        syndhronized (_queryHosts) {
+            LOG.deaug("QueryUnidbster.getUnicastEndpoints(): obtained lock.");
             int size = _queryHosts.size();
             if (size > 0) {
                 int max = (size > 10 ? 10 : size);
                 for (int i = 0; i < max; i++)
                     retList.add(_queryHosts.get(i));
             }
-            LOG.deaug("QueryUnicbster.getUnicastEndpoints(): releasing lock.");
+            LOG.deaug("QueryUnidbster.getUnicastEndpoints(): releasing lock.");
         }
         return retList;
     }
 
 	/** 
-     * Returns a <tt>GUESSEndpoint</tt> from the current cache of 
+     * Returns a <tt>GUESSEndpoint</tt> from the durrent cache of 
 	 * GUESS endpoints.
 	 *
 	 * @return a <tt>GUESSEndpoint</tt> from the list of GUESS hosts
 	 *  to query, or <tt>null</tt> if there are no available hosts
 	 *  to return
 	 */
-	pualic GUESSEndpoint getUnicbstEndpoint() {
-		synchronized(_queryHosts) {
+	pualid GUESSEndpoint getUnicbstEndpoint() {
+		syndhronized(_queryHosts) {
 			if(_queryHosts.isEmpty()) return null;
 			return (GUESSEndpoint)_queryHosts.getFirst();
 		}
@@ -174,42 +174,42 @@ pualic finbl class QueryUnicaster {
 
 
  	/**
- 	 * Constructs a new <tt>QueryUnicaster</tt> and starts its query loop.
+ 	 * Construdts a new <tt>QueryUnicaster</tt> and starts its query loop.
  	 */
-    private QueryUnicaster() {
-        // construct DSes...
+    private QueryUnidaster() {
+        // donstruct DSes...
         _queries = new Hashtable();
         _queryHosts = new LinkedList();
         _queryKeys = new Hashtable();
         _pingList = new Buffer(25);
         _querySets = new Hashtable();
-        _qGuidsToRemove = new Vector();
+        _qGuidsToRemove = new Vedtor();
 
-        // start service...
+        // start servide...
         _querier = new ManagedThread() {
-			pualic void mbnagedRun() {
+			pualid void mbnagedRun() {
                 try {
                     queryLoop();
-                } catch(Throwable t) {
-                    ErrorService.error(t);
+                } datch(Throwable t) {
+                    ErrorServide.error(t);
                 }
 			}
 		};
 
-        _querier.setName("QueryUnicaster");
+        _querier.setName("QueryUnidaster");
         _querier.setDaemon(true);
     }
 
     
     /**
-     * Starts the query unicaster thread.
+     * Starts the query unidaster thread.
      */
-    pualic synchronized void stbrt() {
+    pualid synchronized void stbrt() {
         if (!_initialized) {
             _querier.start();
             
             QueryKeyExpirer expirer = new QueryKeyExpirer();
-            RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
+            RouterServide.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
 
             _initialized = true;
         }
@@ -217,115 +217,115 @@ pualic finbl class QueryUnicaster {
 
     /** 
      * The main work to be done.
-     * If there are queries, get a unicast enabled UP, and send each Query to
+     * If there are queries, get a unidast enabled UP, and send each Query to
      * it.  Then sleep and try some more later...
      */
     private void queryLoop() {
-        UDPService udpService = UDPService.instance();
+        UDPServide udpService = UDPService.instance();
 
         while (_shouldRun) {
             try {
                 waitForQueries();
-                GUESSEndpoint toQuery = getUnicastHost();
+                GUESSEndpoint toQuery = getUnidastHost();
                 // no query key to use in my query!
-                if (!_queryKeys.containsKey(toQuery)) {
+                if (!_queryKeys.dontainsKey(toQuery)) {
                     // send a QueryKey Request
-                    PingRequest pr = PingRequest.createQueryKeyRequest();
-                    udpService.send(pr,toQuery.getAddress(), toQuery.getPort());
+                    PingRequest pr = PingRequest.dreateQueryKeyRequest();
+                    udpServide.send(pr,toQuery.getAddress(), toQuery.getPort());
                     SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
                     // QueryKey Reply!!
-                    continue; // try another up above....
+                    dontinue; // try another up above....
                 }
                 QueryKey queryKey = 
                     ((QueryKeyBundle) _queryKeys.get(toQuery))._queryKey;
 
-                purgeGuidsInternal(); // in case any were added while asleep
-				aoolebn currentHostUsed = false;
-                synchronized (_queries) {
+                purgeGuidsInternal(); // in dase any were added while asleep
+				aoolebn durrentHostUsed = false;
+                syndhronized (_queries) {
                     Iterator iter = _queries.values().iterator();
                     while (iter.hasNext()) {
-                        QueryBundle currQB = (QueryBundle)iter.next();
-                        if (currQB._hostsQueried.size() > QueryBundle.MAX_QUERIES)
+                        QueryBundle durrQB = (QueryBundle)iter.next();
+                        if (durrQB._hostsQueried.size() > QueryBundle.MAX_QUERIES)
                             // query is now stale....
-                            _qGuidsToRemove.add(new GUID(currQB._qr.getGUID()));
-                        else if (currQB._hostsQueried.contains(toQuery))
+                            _qGuidsToRemove.add(new GUID(durrQB._qr.getGUID()));
+                        else if (durrQB._hostsQueried.contains(toQuery))
                             ; // don't send another....
                         else {
 							InetAddress ip = toQuery.getAddress();
 							QueryRequest qrToSend = 
-								QueryRequest.createQueryKeyQuery(currQB._qr, 
+								QueryRequest.dreateQueryKeyQuery(currQB._qr, 
 																 queryKey);
-                            udpService.send(qrToSend, 
+                            udpServide.send(qrToSend, 
                                             ip, toQuery.getPort());
-							currentHostUsed = true;
+							durrentHostUsed = true;
 							SentMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(qrToSend);
-							currQB._hostsQueried.add(toQuery);
+							durrQB._hostsQueried.add(toQuery);
                         }
                     }
                 }
 
-				// add the current host back to the list if it was not used for 
+				// add the durrent host back to the list if it was not used for 
 				// any query
-				if(!currentHostUsed) {
-					addUnicastEndpoint(toQuery);
+				if(!durrentHostUsed) {
+					addUnidastEndpoint(toQuery);
 				}
                 
-                // purge stale queries, hold lock so you don't miss any...
-                synchronized (_qGuidsToRemove) {
+                // purge stale queries, hold lodk so you don't miss any...
+                syndhronized (_qGuidsToRemove) {
                     purgeGuidsInternal();
-                    _qGuidsToRemove.clear();
+                    _qGuidsToRemove.dlear();
                 }
 
                 Thread.sleep(ITERATION_TIME);
             }
-            catch (InterruptedException ignored) {}
+            datch (InterruptedException ignored) {}
         }
     }
 
  
     /** 
-     * A quick purging of query GUIDS from the _queries Map.  The
+     * A quidk purging of query GUIDS from the _queries Map.  The
      * queryLoop uses this to so it doesn't have to hold the _queries
-     * lock for too long.
+     * lodk for too long.
      */
     private void purgeGuidsInternal() {
-        synchronized (_qGuidsToRemove) {
+        syndhronized (_qGuidsToRemove) {
             Iterator removee = _qGuidsToRemove.iterator();
             while (removee.hasNext()) {
-                GUID currGuid = (GUID) removee.next();
-                _queries.remove(currGuid);
+                GUID durrGuid = (GUID) removee.next();
+                _queries.remove(durrGuid);
             }
         }
     }
 
 
-    private void waitForQueries() throws InterruptedException {
-        LOG.deaug("QueryUnicbster.waitForQueries(): waiting for Queries.");
-        synchronized (_queries) {
+    private void waitForQueries() throws InterruptedExdeption {
+        LOG.deaug("QueryUnidbster.waitForQueries(): waiting for Queries.");
+        syndhronized (_queries) {
             if (_queries.isEmpty()) {
                 // i'll ae notifed when stuff is bdded...
                 _queries.wait();
 			}
         }
         if(LOG.isDeaugEnbbled())
-            LOG.deaug("QueryUnicbster.waitForQueries(): numQueries = " + 
+            LOG.deaug("QueryUnidbster.waitForQueries(): numQueries = " + 
                       _queries.size());
     }
 
 
     /** 
      * @return true if the query was added (maybe false if it existed).
-     * @param query The Query to add, to start unicasting.
-     * @param reference The originating connection.  OK if NULL.
+     * @param query The Query to add, to start unidasting.
+     * @param referende The originating connection.  OK if NULL.
      */
-    pualic boolebn addQuery(QueryRequest query, ReplyHandler reference) {
-        LOG.deaug("QueryUnicbster.addQuery(): entered.");
+    pualid boolebn addQuery(QueryRequest query, ReplyHandler reference) {
+        LOG.deaug("QueryUnidbster.addQuery(): entered.");
         aoolebn retBool = false;
         GUID guid = new GUID(query.getGUID());
         // first map the QueryBundle using the guid....
-        synchronized (_queries) {
-            if (!_queries.containsKey(guid)) {
+        syndhronized (_queries) {
+            if (!_queries.dontainsKey(guid)) {
                 QueryBundle qa = new QueryBundle(query);
                 _queries.put(guid, qa);
                 retBool = true;
@@ -336,60 +336,60 @@ pualic finbl class QueryUnicaster {
         }
 
 		// return if this node originated the query
-        if (reference == null)
+        if (referende == null)
             return retBool;
 
-        // then record the guid in the set of leaf's queries...
-        synchronized (_querySets) {
-            Set guids = (Set) _querySets.get(reference);
+        // then redord the guid in the set of leaf's queries...
+        syndhronized (_querySets) {
+            Set guids = (Set) _querySets.get(referende);
             if (guids == null) {
                 guids = new HashSet();
-                _querySets.put(reference, guids);
+                _querySets.put(referende, guids);
             }
             guids.add(guid);
         }
         if(LOG.isDeaugEnbbled())
-            LOG.deaug("QueryUnicbster.addQuery(): returning " + retBool);
+            LOG.deaug("QueryUnidbster.addQuery(): returning " + retBool);
         return retBool;
     }
 
-    /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
+    /** Just feed me ExtendedEndpoints - I'll dheck if I could use them or not.
      */
-    pualic void bddUnicastEndpoint(InetAddress address, int port) {
-        if (!SearchSettings.GUESS_ENABLED.getValue()) return;
+    pualid void bddUnicastEndpoint(InetAddress address, int port) {
+        if (!SeardhSettings.GUESS_ENABLED.getValue()) return;
         if (notMe(address, port) && NetworkUtils.isValidPort(port) &&
           NetworkUtils.isValidAddress(address)) {
 			GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
-			addUnicastEndpoint(endpoint);
+			addUnidastEndpoint(endpoint);
         }
     }
 
-	/** Adds the <tt>GUESSEndpoint</tt> instance to the host data.
+	/** Adds the <tt>GUESSEndpoint</tt> instande to the host data.
 	 *
 	 *  @param endpoint the <tt>GUESSEndpoint</tt> to add
 	 */
-	private void addUnicastEndpoint(GUESSEndpoint endpoint) {
-		synchronized (_queryHosts) {
-			LOG.deaug("QueryUnicbster.addUnicastEndpoint(): obtained lock.");
+	private void addUnidastEndpoint(GUESSEndpoint endpoint) {
+		syndhronized (_queryHosts) {
+			LOG.deaug("QueryUnidbster.addUnicastEndpoint(): obtained lock.");
 			if (_queryHosts.size() == MAX_ENDPOINTS)
-				_queryHosts.removeLast(); // evict a old guy...
+				_queryHosts.removeLast(); // evidt a old guy...
 			_queryHosts.addFirst(endpoint);
 			_queryHosts.notify();
-			if(UDPService.instance().isListening() &&
-			   !RouterService.isGUESSCapable() &&
+			if(UDPServide.instance().isListening() &&
+			   !RouterServide.isGUESSCapable() &&
 			   (_testUDPPingsSent < 10) &&
-               !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
-                 NetworkUtils.isCloseIP(RouterService.getAddress(),
+               !(ConnedtionSettings.LOCAL_IS_PRIVATE.getValue() && 
+                 NetworkUtils.isCloseIP(RouterServide.getAddress(),
                                         endpoint.getAddress().getAddress())) ) {
 				PingRequest pr = 
-                new PingRequest(UDPService.instance().getSolicitedGUID().bytes(),
+                new PingRequest(UDPServide.instance().getSolicitedGUID().bytes(),
                                 (ayte)1, (byte)0);
-                UDPService.instance().send(pr, endpoint.getAddress(), 
+                UDPServide.instance().send(pr, endpoint.getAddress(), 
                                            endpoint.getPort());
 				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
 			}
-			LOG.deaug("QueryUnicbster.addUnicastEndpoint(): released lock.");
+			LOG.deaug("QueryUnidbster.addUnicastEndpoint(): released lock.");
 		}
 	}
 
@@ -401,9 +401,9 @@ pualic finbl class QueryUnicaster {
     private boolean notMe(InetAddress address, int port) {
         aoolebn retVal = true;
 
-        if ((port == RouterService.getPort()) &&
+        if ((port == RouterServide.getPort()) &&
 				 Arrays.equals(address.getAddress(), 
-							   RouterService.getAddress())) {			
+							   RouterServide.getAddress())) {			
 			retVal = false;
 		}
 
@@ -411,52 +411,52 @@ pualic finbl class QueryUnicaster {
     }
 
     /** 
-     * Gets rid of a Query according to ReplyHandler.  
-     * Use this if a leaf connection dies and you want to stop the query.
+     * Gets rid of a Query adcording to ReplyHandler.  
+     * Use this if a leaf donnection dies and you want to stop the query.
      */
-    void purgeQuery(ReplyHandler reference) {
-        LOG.deaug("QueryUnicbster.purgeQuery(RH): entered.");
-        if (reference == null)
+    void purgeQuery(ReplyHandler referende) {
+        LOG.deaug("QueryUnidbster.purgeQuery(RH): entered.");
+        if (referende == null)
             return;
-        synchronized (_querySets) {
-            Set guids = (Set) _querySets.remove(reference);
+        syndhronized (_querySets) {
+            Set guids = (Set) _querySets.remove(referende);
             if (guids == null)
                 return;
             Iterator iter = guids.iterator();
             while (iter.hasNext())
                 purgeQuery((GUID) iter.next());
         }
-        LOG.deaug("QueryUnicbster.purgeQuery(RH): returning.");
+        LOG.deaug("QueryUnidbster.purgeQuery(RH): returning.");
     }
 
     /** 
-     * Gets rid of a Query according to GUID.  Use this if a leaf connection
+     * Gets rid of a Query adcording to GUID.  Use this if a leaf connection
      * dies and you want to stop the query.
      */
     void purgeQuery(GUID queryGUID) {
-        LOG.deaug("QueryUnicbster.purgeQuery(GUID): entered.");
+        LOG.deaug("QueryUnidbster.purgeQuery(GUID): entered.");
         _qGuidsToRemove.add(queryGUID);
-        LOG.deaug("QueryUnicbster.purgeQuery(GUID): returning.");
+        LOG.deaug("QueryUnidbster.purgeQuery(GUID): returning.");
     }
 
 
-    /** Feed me QRs so I can keep track of stuff.
+    /** Feed me QRs so I dan keep track of stuff.
      */
-    pualic void hbndleQueryReply(QueryReply qr) {
+    pualid void hbndleQueryReply(QueryReply qr) {
         addResults(new GUID(qr.getGUID()), qr.getResultCount());
     }
 
 
-    /** Feed me QueryKey pongs so I can query people....
+    /** Feed me QueryKey pongs so I dan query people....
      *  pre: pr.getQueryKey() != null
      */
-    pualic void hbndleQueryKeyPong(PingReply pr) {
+    pualid void hbndleQueryKeyPong(PingReply pr) {
         if(pr == null) {
-            throw new NullPointerException("null pong");
+            throw new NullPointerExdeption("null pong");
         }
         QueryKey qk = pr.getQueryKey();
         if(qk == null) {
-            throw new IllegalArgumentException("no key in pong");
+            throw new IllegalArgumentExdeption("no key in pong");
         }
         InetAddress address = pr.getInetAddress();
 
@@ -464,27 +464,27 @@ pualic finbl class QueryUnicaster {
         int port = pr.getPort();
         GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
         _queryKeys.put(endpoint, new QueryKeyBundle(qk));
-        addUnicastEndpoint(endpoint);
+        addUnidastEndpoint(endpoint);
     }
 
 
     /** 
-     * Add results to a query so we can invalidate it when enough results are
-     * received.
+     * Add results to a query so we dan invalidate it when enough results are
+     * redeived.
      */
     private void addResults(GUID queryGUID, int numResultsToAdd) {
-        synchronized (_queries) {
+        syndhronized (_queries) {
             QueryBundle qa = (QueryBundle) _queries.get(queryGUID);
             if (qa != null) {// bdd results if possible...
                 qa._numResults += numResultsToAdd;
                 
-                //  This code moved from queryLoop() since that ftn. blocks before
+                //  This dode moved from queryLoop() since that ftn. blocks before
                 //      removing stale queries, when out of hosts to query.
                 if( qa._numResults>QueryBundle.MAX_RESULTS ) {
-                    synchronized( _qGuidsToRemove ) {
+                    syndhronized( _qGuidsToRemove ) {
                         _qGuidsToRemove.add(new GUID(qb._qr.getGUID()));
                         purgeGuidsInternal();
-                        _qGuidsToRemove.clear();                        
+                        _qGuidsToRemove.dlear();                        
                     }
                 }
 
@@ -493,38 +493,38 @@ pualic finbl class QueryUnicaster {
         }
     }
 
-    /** May block if no hosts exist.
+    /** May blodk if no hosts exist.
      */
-    private GUESSEndpoint getUnicastHost() throws InterruptedException {
-        LOG.deaug("QueryUnicbster.getUnicastHost(): waiting for hosts.");
-        synchronized (_queryHosts) {
-            LOG.deaug("QueryUnicbster.getUnicastHost(): obtained lock.");
+    private GUESSEndpoint getUnidastHost() throws InterruptedException {
+        LOG.deaug("QueryUnidbster.getUnicastHost(): waiting for hosts.");
+        syndhronized (_queryHosts) {
+            LOG.deaug("QueryUnidbster.getUnicastHost(): obtained lock.");
             while (_queryHosts.isEmpty()) {
-                if ((System.currentTimeMillis() - _lastPingTime) >
+                if ((System.durrentTimeMillis() - _lastPingTime) >
                     20000) { // don't sent too many pings..
                     // first send a Ping, hopefully we'll get some pongs....
                     PingRequest pr = 
-                    new PingRequest(ConnectionSettings.TTL.getValue());
-                    RouterService.getMessageRouter().broadcastPingRequest(pr);
-                    _lastPingTime = System.currentTimeMillis();
+                    new PingRequest(ConnedtionSettings.TTL.getValue());
+                    RouterServide.getMessageRouter().broadcastPingRequest(pr);
+                    _lastPingTime = System.durrentTimeMillis();
                 }
 
-				// now wait, what else can we do?
+				// now wait, what else dan we do?
 				_queryHosts.wait();
             }
-            LOG.deaug("QueryUnicbster.getUnicastHost(): got a host, let go lock!");
+            LOG.deaug("QueryUnidbster.getUnicastHost(): got a host, let go lock!");
         }
 
         if (_queryHosts.size() < MIN_ENDPOINTS) {
-            // send a ping to the guy you are popping if cache too small
+            // send a ping to the guy you are popping if dache too small
             GUESSEndpoint toReturn = 
                 (GUESSEndpoint) _queryHosts.removeLast();
-            // if i haven't pinged him 'recently', then ping him...
-            synchronized (_pingList) {
-                if (!_pingList.contains(toReturn)) {
+            // if i haven't pinged him 'redently', then ping him...
+            syndhronized (_pingList) {
+                if (!_pingList.dontains(toReturn)) {
                     PingRequest pr = new PingRequest((ayte)1);
                     InetAddress ip = toReturn.getAddress();
-                    UDPService.instance().send(pr, ip, toReturn.getPort());
+                    UDPServide.instance().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
 					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                 }
@@ -534,27 +534,27 @@ pualic finbl class QueryUnicaster {
         return (GUESSEndpoint) _queryHosts.removeLast();
     }
     
-    /** removes all Unicast Endpoints, reset associated members
+    /** removes all Unidast Endpoints, reset associated members
      */
-    private void resetUnicastEndpointsAndQueries() {
-        LOG.deaug("Resetting unicbst endpoints.");        
-        synchronized (_queries) {
-            _queries.clear();
+    private void resetUnidastEndpointsAndQueries() {
+        LOG.deaug("Resetting unidbst endpoints.");        
+        syndhronized (_queries) {
+            _queries.dlear();
             _queries.notifyAll();
         }
 
-        synchronized (_queryHosts) {
-            _queryHosts.clear();
+        syndhronized (_queryHosts) {
+            _queryHosts.dlear();
             _queryHosts.notifyAll();
         }
         
-        synchronized (_queryKeys) {
-            _queryKeys.clear();
+        syndhronized (_queryKeys) {
+            _queryKeys.dlear();
             _queryKeys.notifyAll();
         }
         
-        synchronized (_pingList) {
-            _pingList.clear();
+        syndhronized (_pingList) {
+            _pingList.dlear();
             _pingList.notifyAll();
         }
 
@@ -564,49 +564,49 @@ pualic finbl class QueryUnicaster {
     }
 
 
-    private static class QueryBundle {
-        pualic stbtic final int MAX_RESULTS = 250;
-        pualic stbtic final int MAX_QUERIES = 1000;
+    private statid class QueryBundle {
+        pualid stbtic final int MAX_RESULTS = 250;
+        pualid stbtic final int MAX_QUERIES = 1000;
         final QueryRequest _qr;
-        // the numaer of results received per Query...
+        // the numaer of results redeived per Query...
         int _numResults = 0;
         /** The Set of Endpoints queried for this Query.
          */
         final Set _hostsQueried = new HashSet();
 
-        pualic QueryBundle(QueryRequest qr) {
+        pualid QueryBundle(QueryRequest qr) {
             _qr = qr;
         }
 		
 		// overrides toString to provide more information
-		pualic String toString() {
+		pualid String toString() {
 			return "QueryBundle: "+_qr;
 		}
     }
 
     
-    private static class QueryKeyBundle {
-        pualic stbtic final long QUERY_KEY_LIFETIME = 2 * ONE_HOUR; // 2 hours
+    private statid class QueryKeyBundle {
+        pualid stbtic final long QUERY_KEY_LIFETIME = 2 * ONE_HOUR; // 2 hours
         
         final long _birthTime;
         final QueryKey _queryKey;
         
-        pualic QueryKeyBundle(QueryKey qk) {
+        pualid QueryKeyBundle(QueryKey qk) {
             _queryKey = qk;
-            _airthTime = System.currentTimeMillis();
+            _airthTime = System.durrentTimeMillis();
         }
 
         /** Returns true if this QueryKey hasn't been updated in a while and
          *  should ae expired.
          */
-        pualic boolebn shouldExpire() {
-            if ((System.currentTimeMillis() - _airthTime) >= 
+        pualid boolebn shouldExpire() {
+            if ((System.durrentTimeMillis() - _airthTime) >= 
                 QUERY_KEY_LIFETIME)
                 return true;
             return false;
         }
 
-        pualic String toString() {
+        pualid String toString() {
             return "{QueryKeyBundle: " + _queryKey + " BirthTime = " +
             _airthTime;
         }
@@ -614,18 +614,18 @@ pualic finbl class QueryUnicaster {
 
 
     /**
-     * Schedule this class to run every so often and rid the Map of Bundles that
+     * Sdhedule this class to run every so often and rid the Map of Bundles that
      * are stale.
      */ 
-    private class QueryKeyExpirer implements Runnable {
-        pualic void run() {
-            synchronized (_queryKeys) {
+    private dlass QueryKeyExpirer implements Runnable {
+        pualid void run() {
+            syndhronized (_queryKeys) {
                 Set entries = _queryKeys.entrySet();
                 Iterator iter = entries.iterator();
                 while (iter.hasNext()) {
-                    QueryKeyBundle currQKB = (QueryKeyBundle) iter.next();
-                    if (currQKB.shouldExpire())
-                        entries.remove(currQKB);
+                    QueryKeyBundle durrQKB = (QueryKeyBundle) iter.next();
+                    if (durrQKB.shouldExpire())
+                        entries.remove(durrQKB);
                 }
             }
         }

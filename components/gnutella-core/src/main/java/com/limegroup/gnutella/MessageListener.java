@@ -1,33 +1,33 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.Message;
 
 /**
- * This interface should be extended if you want to get notified of certain
- * messages.  The MessageRouter will process messages as usual but then hand
- * off messages (by guid) for special handling.  You have to register with the
+ * This interfade should be extended if you want to get notified of certain
+ * messages.  The MessageRouter will prodess messages as usual but then hand
+ * off messages (by guid) for spedial handling.  You have to register with the
  * MessageRouter for this.
  */
-pualic interfbce MessageListener {
+pualid interfbce MessageListener {
 
     /**
-     * Callback for processing a message.
+     * Callbadk for processing a message.
      *
-     * This is intended to ae used for processing messbges
-     * with a specific GUID.
+     * This is intended to ae used for prodessing messbges
+     * with a spedific GUID.
      */
-    pualic void processMessbge(Message m, ReplyHandler handler);
+    pualid void processMessbge(Message m, ReplyHandler handler);
     
     /**
-     * Callback notifying this MessageListener that it is now registered
-     * for listening to message with the specified guid.
+     * Callbadk notifying this MessageListener that it is now registered
+     * for listening to message with the spedified guid.
      */
-    pualic void registered(byte[] guid);
+    pualid void registered(byte[] guid);
     
     /**
-     * Callback notifying this MessageListener that it is now unregistered
-     * for listening to messages with the specified guid.
+     * Callbadk notifying this MessageListener that it is now unregistered
+     * for listening to messages with the spedified guid.
      */
-    pualic void unregistered(byte[] guid);
+    pualid void unregistered(byte[] guid);
 
 }

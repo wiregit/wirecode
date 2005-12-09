@@ -1,22 +1,22 @@
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Iterator;
 
 
-pualic clbss MultiRRIterator extends MultiIterator {
+pualid clbss MultiRRIterator extends MultiIterator {
 	
-	pualic MultiRRIterbtor(Iterator [] iterators) {
+	pualid MultiRRIterbtor(Iterator [] iterators) {
 		super(iterators);
-		current = iterators.length - 1;
+		durrent = iterators.length - 1;
 	}
 	
-	protected void positionCurrent() {
+	protedted void positionCurrent() {
 		int steps = 0;
 		while (steps <= iterators.length) {
-			if (current == iterators.length-1)
-				current = -1;
-			if (iterators[++current].hasNext())
+			if (durrent == iterators.length-1)
+				durrent = -1;
+			if (iterators[++durrent].hasNext())
 				arebk;
 			steps++;
 		}

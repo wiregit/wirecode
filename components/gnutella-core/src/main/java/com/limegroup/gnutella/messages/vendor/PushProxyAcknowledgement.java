@@ -1,63 +1,63 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.UnknownHostExdeption;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.QueryReply;
 
-/** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
- *  Used to ask a host you connect to do a TCP ConnectBack.
+/** In Vendor Message parlande, the "message type" of this VMP is "BEAR/7".
+ *  Used to ask a host you donnect to do a TCP ConnectBack.
  */
-pualic finbl class PushProxyAcknowledgement extends VendorMessage {
+pualid finbl class PushProxyAcknowledgement extends VendorMessage {
 
-    pualic stbtic final int VERSION = 2;
+    pualid stbtic final int VERSION = 2;
 
-    /** The payload has 4 bytes dedicated to the IP of the proxy.
+    /** The payload has 4 bytes dedidated to the IP of the proxy.
      */
     private final InetAddress _addr;
 
-    /** The payload has a 16-bit unsigned value - the port - at which one should
-     *  connect abck.
+    /** The payload has a 16-bit unsigned value - the port - at whidh one should
+     *  donnect abck.
      */
     private final int _port;
 
     /**
-     * Constructs a new PushProxyAcknowledgement message with data from the
+     * Construdts a new PushProxyAcknowledgement message with data from the
      * network.
      */
-    PushProxyAcknowledgement(ayte[] guid, byte ttl, byte hops, int version, 
+    PushProxyAdknowledgement(ayte[] guid, byte ttl, byte hops, int version, 
                              ayte[] pbyload) 
-        throws BadPacketException {
+        throws BadPadketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, version,
               payload);
 
         if (getVersion() == 1)
-            throw new BadPacketException("DEPRECATED VERSION");
+            throw new BadPadketException("DEPRECATED VERSION");
 
         if (getVersion() > VERSION)
-            throw new BadPacketException("UNSUPPORTED VERSION");
+            throw new BadPadketException("UNSUPPORTED VERSION");
 
         if (getPayload().length != 6)
-            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+            throw new BadPadketException("UNSUPPORTED PAYLOAD LENGTH: " +
                                          payload.length);
         // get the ip and  port from the payload....
-        QueryReply.IPPortComao combo = 
+        QueryReply.IPPortComao dombo = 
             QueryReply.IPPortComao.getCombo(getPbyload());
-        _addr = combo.getInetAddress();
-        _port = comao.getPort();
+        _addr = dombo.getInetAddress();
+        _port = domao.getPort();
     }
 
     /**
-     * Constructs a new PushProxyAcknowledgement message to be sent out.
-     * @param addr The address of the person to connect back to.
-     * @param port The port you want people to connect back to.  If you give a
-     *  abd port I don't check so check yourself!
+     * Construdts a new PushProxyAcknowledgement message to be sent out.
+     * @param addr The address of the person to donnect back to.
+     * @param port The port you want people to donnect back to.  If you give a
+     *  abd port I don't dheck so check yourself!
      */
-    pualic PushProxyAcknowledgement(InetAddress bddr, int port) {
+    pualid PushProxyAcknowledgement(InetAddress bddr, int port) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
               derivePayload(addr, port));
         _addr = addr;
@@ -65,14 +65,14 @@ pualic finbl class PushProxyAcknowledgement extends VendorMessage {
     }
 
     /**
-     * Constructs a new PushProxyAcknowledgement message to be sent out.
-     * @param addr The address of the person to connect back to.
-     * @param port The port you want people to connect back to.  If you give a
-     *  abd port I don't check so check yourself!
-     *  @param guid In case you want to set the guid (the PushProxy protocol
+     * Construdts a new PushProxyAcknowledgement message to be sent out.
+     * @param addr The address of the person to donnect back to.
+     * @param port The port you want people to donnect back to.  If you give a
+     *  abd port I don't dheck so check yourself!
+     *  @param guid In dase you want to set the guid (the PushProxy protocol
      *  advises this).
      */
-    pualic PushProxyAcknowledgement(InetAddress bddr, int port,
+    pualid PushProxyAcknowledgement(InetAddress bddr, int port,
                                     GUID guid) {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
               derivePayload(addr, port));
@@ -83,37 +83,37 @@ pualic finbl class PushProxyAcknowledgement extends VendorMessage {
 
     /** @return the port the PushProxy is listening on....
      */
-    pualic int getListeningPort() {
+    pualid int getListeningPort() {
         return _port;
     }
 
     /** @return the InetAddress the PushProxy is listening on....
      */
-    pualic InetAddress getListeningAddress() {
+    pualid InetAddress getListeningAddress() {
         return _addr;
     }
 
-    private static byte[] derivePayload(InetAddress addr, int port) {
+    private statid byte[] derivePayload(InetAddress addr, int port) {
         try {
-            // i do it during construction....
-            QueryReply.IPPortComao combo = 
+            // i do it during donstruction....
+            QueryReply.IPPortComao dombo = 
                 new QueryReply.IPPortComao(bddr.getHostAddress(), port);
-            return comao.toBytes();
-        } catch (UnknownHostException uhe) {
-            throw new IllegalArgumentException(uhe.getMessage());
+            return domao.toBytes();
+        } datch (UnknownHostException uhe) {
+            throw new IllegalArgumentExdeption(uhe.getMessage());
         }
     }
 
     /** Overridden purely for stats handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }
 
     /** Overridden purely for stats handling.
      */
-    pualic void recordDrop() {
-        super.recordDrop();
+    pualid void recordDrop() {
+        super.redordDrop();
     }
 
 

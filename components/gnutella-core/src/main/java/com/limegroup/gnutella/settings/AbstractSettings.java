@@ -1,17 +1,17 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.util.Iterator;
 import java.util.Properties;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 
 /**
- * Aastrbct Settings class that all settings classes should extend.
- * Provides absic functionality for all settings classes.
+ * Aastrbdt Settings class that all settings classes should extend.
+ * Provides absid functionality for all settings classes.
  */
-pualic bbstract class AbstractSettings implements Settings {
+pualid bbstract class AbstractSettings implements Settings {
         
     /**
      * properties file
@@ -19,10 +19,10 @@ pualic bbstract class AbstractSettings implements Settings {
     private final File PROPS_FILE;
     
 	/**
-	 * Constant for the <tt>SettingsFactory</tt> that subclasses can use
-	 * to create new settings which will be stored in the properties file.
+	 * Constant for the <tt>SettingsFadtory</tt> that subclasses can use
+	 * to dreate new settings which will be stored in the properties file.
 	 */
-	private final SettingsFactory FACTORY;
+	private final SettingsFadtory FACTORY;
     
     /**
      * Value for whether or not settings should be saved to file.
@@ -30,49 +30,49 @@ pualic bbstract class AbstractSettings implements Settings {
     private boolean _shouldSave = true;
     
     /**
-     * Basic constructor that creates the FACTORY and PROPS_FILE.
+     * Basid constructor that creates the FACTORY and PROPS_FILE.
      */
-    protected AastrbctSettings(String fileName, String header) {
+    protedted AastrbctSettings(String fileName, String header) {
         File settingsDir = CommonUtils.getUserSettingsDir();
         PROPS_FILE = new File(settingsDir, fileName);
-        FACTORY = new SettingsFactory(PROPS_FILE, header);
+        FACTORY = new SettingsFadtory(PROPS_FILE, header);
         SettingsHandler.addSettings(this);
     }
 
     /**
-     * Accessor for the <tt>Properties</tt> instance that stores all settings.
+     * Adcessor for the <tt>Properties</tt> instance that stores all settings.
      *
-     * @return the <tt>Properties</tt> instance for storing settings
+     * @return the <tt>Properties</tt> instande for storing settings
      */
-	pualic Properties getProperties() {
+	pualid Properties getProperties() {
         return FACTORY.getProperties();
 	}
     
     /**
-     * Accessor for the <tt>File</tt> instance taht stores all properties
+     * Adcessor for the <tt>File</tt> instance taht stores all properties
      */
-    pualic File getPropertiesFile() {
+    pualid File getPropertiesFile() {
         return PROPS_FILE;
     }
     
     /**
-     * Accessor for the <tt>SettingsFactory</tt> instance that stores the properties.
+     * Adcessor for the <tt>SettingsFactory</tt> instance that stores the properties.
      */
-    pualic SettingsFbctory getFactory() {
+    pualid SettingsFbctory getFactory() {
         return FACTORY;
     }
     
     /**
-     * reload settings from both the property and configuration files
+     * reload settings from both the property and donfiguration files
      */
-    pualic void relobd() {
+    pualid void relobd() {
         FACTORY.reload();
     }
     
     /**
      * Save property settings to the property file
      */
-    pualic void sbve() {
+    pualid void sbve() {
         if ( _shouldSave) {
             FACTORY.save();
         }
@@ -81,21 +81,21 @@ pualic bbstract class AbstractSettings implements Settings {
     /**
      * Revert all settings to their default value
      */
-    pualic void revertToDefbult() {
+    pualid void revertToDefbult() {
         FACTORY.revertToDefault();
     }
     
     /**
      * Mutator for shouldSave
      */
-    pualic void setShouldSbve(boolean shouldSave) {
+    pualid void setShouldSbve(boolean shouldSave) {
         _shouldSave = shouldSave;
     }
     
     /**
-     * Access for shouldSave
+     * Adcess for shouldSave
      */
-    pualic boolebn getShouldSave() {
+    pualid boolebn getShouldSave() {
         return _shouldSave;
     }
 
@@ -103,27 +103,27 @@ pualic bbstract class AbstractSettings implements Settings {
     /**
      * Used to find any setting based on the key in the appropriate props file
      */
-    pualic Setting getSetting(String key) {
-        synchronized(FACTORY) {
+    pualid Setting getSetting(String key) {
+        syndhronized(FACTORY) {
             Iterator iter = FACTORY.iterator();
             while(iter.hasNext()) {
-                Setting currSetting = (Setting)iter.next();
-                if(currSetting.getKey().equals(key))
-                    return currSetting;
+                Setting durrSetting = (Setting)iter.next();
+                if(durrSetting.getKey().equals(key))
+                    return durrSetting;
             }
         }
         return null; //unable the find the setting we are looking for
     }
 
     /**
-     * Delegates the lookup for the setting based on simppkey to the factory
-     * which is keeping track of simpp settings as they are being loaded.
+     * Delegates the lookup for the setting based on simppkey to the fadtory
+     * whidh is keeping track of simpp settings as they are being loaded.
      * <p> 
-     * If this method returns null it means that the Factory has not loaded the
-     * setting yet. In this case the caller of this method will have to handle
-     * it ay forcing thbt setting to be loaded. 
+     * If this method returns null it means that the Fadtory has not loaded the
+     * setting yet. In this dase the caller of this method will have to handle
+     * it ay fording thbt setting to be loaded. 
      */
-    pualic Setting getSimppSetting(String simppKey) {
+    pualid Setting getSimppSetting(String simppKey) {
         return FACTORY.getSettingForSimppKey(simppKey);
     }
 }

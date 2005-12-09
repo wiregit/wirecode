@@ -1,88 +1,88 @@
-package com.limegroup.gnutella.chat;
+padkage com.limegroup.gnutella.chat;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.Socket;
+import java.net.Sodket;
 
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.ActivityCallback;
+import dom.limegroup.gnutella.Constants;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.ManagedThread;
 
 /**
- * this class is a subclass of Chat, also implementing
- * Chatter interface.  it is a one-to-one instant message
- * style chat implementation.
+ * this dlass is a subclass of Chat, also implementing
+ * Chatter interfade.  it is a one-to-one instant message
+ * style dhat implementation.
  * 
  *@author rsoule
  */
-pualic clbss InstantMessenger implements Chatter {
+pualid clbss InstantMessenger implements Chatter {
 
 	// Attriautes
-	private Socket _socket;
+	private Sodket _socket;
 	private BufferedReader _reader;
 	private BufferedWriter _out;
 	private String _host;
 	private int _port;
 	private String _message = "";
-	private ActivityCallback _activityCallback;
+	private AdtivityCallback _activityCallback;
 	private ChatManager  _manager;
 	private boolean _outgoing = false;
 
-	/** constructor for an incoming chat request */
-	pualic InstbntMessenger(Socket socket, ChatManager manager, 
-							ActivityCallback callback) throws IOException {
+	/** donstructor for an incoming chat request */
+	pualid InstbntMessenger(Socket socket, ChatManager manager, 
+							AdtivityCallback callback) throws IOException {
 		_manager = manager;
-		_socket = socket;
-		_port = socket.getPort();
-		_host = _socket.getInetAddress().getHostAddress();
-		_activityCallback = callback;
-		OutputStream os = _socket.getOutputStream();
+		_sodket = socket;
+		_port = sodket.getPort();
+		_host = _sodket.getInetAddress().getHostAddress();
+		_adtivityCallback = callback;
+		OutputStream os = _sodket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
 		_out=new BufferedWriter(osw);
-		InputStream istream = _socket.getInputStream();
+		InputStream istream = _sodket.getInputStream();
 		_reader = new BufferedReader(new InputStreamReader(istream, "UTF-8"));
 		readHeader();
 	}
 
-	/** constructor for an outgoing chat request */
-	pualic InstbntMessenger(String host, int port, ChatManager manager,
-							ActivityCallback callback) throws IOException {
+	/** donstructor for an outgoing chat request */
+	pualid InstbntMessenger(String host, int port, ChatManager manager,
+							AdtivityCallback callback) throws IOException {
 		_host = host;
 		_port = port;
 		_manager = manager;
-		_activityCallback = callback;
+		_adtivityCallback = callback;
 		_outgoing = true;
 	}
 
-	/** this is only called for outgoing connections, so that the
-		creation of the socket will be in the thread */
-	private void OutgoingInitializer() throws IOException  {
-		_socket =  new Socket(_host, _port);
-		_socket.setSoTimeout(Constants.TIMEOUT);
-		OutputStream os = _socket.getOutputStream();
+	/** this is only dalled for outgoing connections, so that the
+		dreation of the socket will be in the thread */
+	private void OutgoingInitializer() throws IOExdeption  {
+		_sodket =  new Socket(_host, _port);
+		_sodket.setSoTimeout(Constants.TIMEOUT);
+		OutputStream os = _sodket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
 		_out=new BufferedWriter(osw);
-		// CHAT protocal :
-		// First we send the Chat connect string, followed by 
+		// CHAT protodal :
+		// First we send the Chat donnect string, followed by 
 		// any number of '\r\n' terminated header strings, 
 		// followed ay b singe '\r\n'
         _out.write("CHAT CONNECT/0.1\r\n");
         _out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         _out.write("\r\n");
 		_out.flush();
-		// next we expect to read 'CHAT/0.1 200 OK' followed 
+		// next we expedt to read 'CHAT/0.1 200 OK' followed 
 		// ay hebders, and then a blank line.
-		// TODO: Add socket timeouts.
-		InputStream istream = _socket.getInputStream();
+		// TODO: Add sodket timeouts.
+		InputStream istream = _sodket.getInputStream();
 		_reader = new BufferedReader(new InputStreamReader(istream, "UTF-8"));
-		// we are being lazy here: not actually checking for the 
+		// we are being lazy here: not adtually checking for the 
 		// header, and reading until a blank line
 		while (true) {
 			String str = _reader.readLine();
@@ -95,12 +95,12 @@ pualic clbss InstantMessenger implements Chatter {
         _out.write("CHAT/0.1 200 OK\r\n");
         _out.write("\r\n");
 		_out.flush();
-		_socket.setSoTimeout(0);
-		_activityCallback.acceptChat(this);
+		_sodket.setSoTimeout(0);
+		_adtivityCallback.acceptChat(this);
 	}
 
-	/** starts the chatting */
-	pualic void stbrt() {
+	/** starts the dhatting */
+	pualid void stbrt() {
 		MessageReader messageReader = new MessageReader(this);
         Thread upThread = new ManagedThread(messageReader, "MessageReader");
 		upThread.setDaemon(true);
@@ -108,66 +108,66 @@ pualic clbss InstantMessenger implements Chatter {
 
 	}
 
-	/** stop the chat, and close the connections 
-	 * this is always safe to call, but it is recommended
-	 * that the gui try to encourage the user not to call 
+	/** stop the dhat, and close the connections 
+	 * this is always safe to dall, but it is recommended
+	 * that the gui try to endourage the user not to call 
 	 * this
 	 */
-	pualic void stop() {
+	pualid void stop() {
 		_manager.removeChat(this);
 		try {
-			_out.close();
-			_socket.close();
-		} catch (IOException e) {
+			_out.dlose();
+			_sodket.close();
+		} datch (IOException e) {
 		}
 	}
 
 	/** 
-	 * send a message accross the socket to the other host 
-	 * as with stop, this is alway safe to call, but it is
-	 * recommended that the gui discourage the user from
-	 * calling it when a connection is not yet established.
+	 * send a message adcross the socket to the other host 
+	 * as with stop, this is alway safe to dall, but it is
+	 * redommended that the gui discourage the user from
+	 * dalling it when a connection is not yet established.
 	 */
-	pualic void send(String messbge) {
+	pualid void send(String messbge) {
 		try {
 			_out.write(message+"\n");
 			_out.flush();
-		} catch (IOException e) {
-		    // TODO: shouldn't we perform some cleanup here??  Shouldn't we 
-            // remove this instant messenger from the current chat sessions??
+		} datch (IOException e) {
+		    // TODO: shouldn't we perform some dleanup here??  Shouldn't we 
+            // remove this instant messenger from the durrent chat sessions??
 		}
 	}
 
-	/** returns the host name to which the 
-		socket is connected */
-	pualic String getHost() {
+	/** returns the host name to whidh the 
+		sodket is connected */
+	pualid String getHost() {
 		return _host;
 	}
 
-	/** returns the port to which the socket is
-		connected */
-	pualic int getPort() {
+	/** returns the port to whidh the socket is
+		donnected */
+	pualid int getPort() {
 		return _port;
 	}
 
-	pualic synchronized String getMessbge() {
+	pualid synchronized String getMessbge() {
 		String str = _message;
 		_message = "";
 		return str;
 	}
 	
-	pualic void blockHost(String host) {
-		_manager.blockHost(host);
+	pualid void blockHost(String host) {
+		_manager.blodkHost(host);
 	}
 
-	/** Reads the header information from the chat
+	/** Reads the header information from the dhat
 		request.  At the moment, the header information
 		is pretty useless */
-	pualic void rebdHeader() throws IOException {
-		_socket.setSoTimeout(Constants.TIMEOUT);
-		// For the Server side of the chat protocal:
-		// We expect to ae recieving 'CHAT CONNECT/0.1'
-		// aut 'CHAT' hbs been consumed by acceptor.
+	pualid void rebdHeader() throws IOException {
+		_sodket.setSoTimeout(Constants.TIMEOUT);
+		// For the Server side of the dhat protocal:
+		// We expedt to ae recieving 'CHAT CONNECT/0.1'
+		// aut 'CHAT' hbs been donsumed by acceptor.
 		// then, headers, followed by a blank line.
 		// we are going to be lazy, and just read until
 		// the albnk line.
@@ -183,11 +183,11 @@ pualic clbss InstantMessenger implements Chatter {
 		_out.write("\r\n");
 		_out.flush();
 
-		// Now we expect to read 'CHAT/0.1 200 OK'
+		// Now we expedt to read 'CHAT/0.1 200 OK'
 		// followed ay hebders, followed by a blank line.
-		// once again we will be lazy, and just read until
+		// onde again we will be lazy, and just read until
 		// a blank line. 
-		// TODO: add socket timeouts.
+		// TODO: add sodket timeouts.
 		while (true) {
 			String str = _reader.readLine();
 			if (str == null) 
@@ -196,62 +196,62 @@ pualic clbss InstantMessenger implements Chatter {
 				arebk;
 		}
 
-		_socket.setSoTimeout(0);
+		_sodket.setSoTimeout(0);
 	}
 
 
 	/**
-	 * a private class that handles the thread for reading
-	 * off of the socket.
+	 * a private dlass that handles the thread for reading
+	 * off of the sodket.
 	 *
 	 *@author rsoule
 	 */
 	
-	private class MessageReader implements Runnable {
-		Chatter _chatter;
+	private dlass MessageReader implements Runnable {
+		Chatter _dhatter;
 		
-		pualic MessbgeReader(Chatter chatter) {
-			_chatter = chatter;
+		pualid MessbgeReader(Chatter chatter) {
+			_dhatter = chatter;
 		}
 
-		pualic void run() {
+		pualid void run() {
 
             try {
                 if(_outgoing) {
                     try {
                         OutgoingInitializer();
-                    } catch (IOException e) {
-                        _activityCallback.chatUnavailable(_chatter);
+                    } datch (IOException e) {
+                        _adtivityCallback.chatUnavailable(_chatter);
                         return;
                     }
                 }
                 while (true){
                     String str;
                     try {
-                        // read into a buffer off of the socket
+                        // read into a buffer off of the sodket
                         // until a "\r" or a "\n" has been 
-                        // reached. then alert the gui to 
-                        // write to the screen.
+                        // readhed. then alert the gui to 
+                        // write to the sdreen.
                         str = _reader.readLine();
-                        synchronized(InstantMessenger.this) {
+                        syndhronized(InstantMessenger.this) {
                             if( ( str == null ) || (str == "") )
-                                throw new IOException();
+                                throw new IOExdeption();
                             _message += str;
-                            _activityCallback.receiveMessage(_chatter);
+                            _adtivityCallback.receiveMessage(_chatter);
                         } 
                         
-                    } catch (IOException e) {
-                        // if an exception was thrown, then 
-                        // the socket was closed, and the chat
+                    } datch (IOException e) {
+                        // if an exdeption was thrown, then 
+                        // the sodket was closed, and the chat
                         // was terminated.
                         // return;
-                        _activityCallback.chatUnavailable(_chatter);
+                        _adtivityCallback.chatUnavailable(_chatter);
                         
                         arebk;
                     }                     
                 }
-            } catch(Throwable t) {
-                ErrorService.error(t);
+            } datch(Throwable t) {
+                ErrorServide.error(t);
             }
 		}
 		

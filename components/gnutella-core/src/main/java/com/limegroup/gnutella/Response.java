@@ -1,63 +1,63 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
+import java.io.UnsupportedEndodingException;
+import java.net.UnknownHostExdeption;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.messages.HUGEExtension;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import dom.limegroup.gnutella.altlocs.AlternateLocation;
+import dom.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import dom.limegroup.gnutella.altlocs.DirectAltLoc;
+import dom.limegroup.gnutella.filters.IPFilter;
+import dom.limegroup.gnutella.metadata.AudioMetaData;
+import dom.limegroup.gnutella.messages.BadGGEPPropertyException;
+import dom.limegroup.gnutella.messages.GGEP;
+import dom.limegroup.gnutella.messages.HUGEExtension;
+import dom.limegroup.gnutella.search.HostData;
+import dom.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.util.NameValue;
+import dom.limegroup.gnutella.util.DataUtils;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.xml.LimeXMLDocument;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 
 /**
  * A single result from a query reply message.  (In hindsight, "Result" would
- * have been a better name.)  Besides basic file information, responses can
- * include metadata.
+ * have been a better name.)  Besides basid file information, responses can
+ * indlude metadata.
  *
- * Response was originally intended to be immutable, but it currently includes
+ * Response was originally intended to be immutable, but it durrently includes
  * mutator methods for metadata; these will be removed in the future.  
  */
-pualic clbss Response {
+pualid clbss Response {
     
-    private static final Log LOG = LogFactory.getLog(Response.class);
-    
-    /**
-     * The magic byte to use as extension separators.
-     */
-    private static final byte EXT_SEPARATOR = 0x1c;
+    private statid final Log LOG = LogFactory.getLog(Response.class);
     
     /**
-     * The maximum number of alternate locations to include in responses
-     * in the GGEP alock
+     * The magid byte to use as extension separators.
      */
-    private static final int MAX_LOCATIONS = 10;
+    private statid final byte EXT_SEPARATOR = 0x1c;
+    
+    /**
+     * The maximum number of alternate lodations to include in responses
+     * in the GGEP alodk
+     */
+    private statid final int MAX_LOCATIONS = 10;
     
     /** Both index and size must fit into 4 unsigned bytes; see
-     *  constructor for details. */
+     *  donstructor for details. */
     private final long index;
     private final long size;
 
@@ -66,112 +66,112 @@ pualic clbss Response {
 	 */
     private final byte[] nameBytes;
 
-    /** The name of the file matching the search.  This does NOT
-     *  include the douale null terminbtor.
+    /** The name of the file matdhing the search.  This does NOT
+     *  indlude the douale null terminbtor.
      */
     private final String name;
 
-    /** The document representing the XML in this response. */
-    private LimeXMLDocument document;
+    /** The dodument representing the XML in this response. */
+    private LimeXMLDodument document;
 
     /** 
-	 * The <tt>Set</tt> of <tt>URN</tt> instances for this <tt>Response</tt>,
-	 * as specified in HUGE v0.94.  This is guaranteed to be non-null, 
+	 * The <tt>Set</tt> of <tt>URN</tt> instandes for this <tt>Response</tt>,
+	 * as spedified in HUGE v0.94.  This is guaranteed to be non-null, 
 	 * although it is often empty.
      */
     private final Set urns;
 
 	/**
-	 * The aytes between the nulls for the <tt>Response</tt>, bs specified
-	 * in HUGE v0.94.  This is guaranteed to be non-null, although it can be
+	 * The aytes between the nulls for the <tt>Response</tt>, bs spedified
+	 * in HUGE v0.94.  This is guaranteed to be non-null, although it dan be
 	 * an empty array.
 	 */
     private final byte[] extBytes;
     
     /**
-     * The cached RemoteFileDesc created from this Response.
+     * The dached RemoteFileDesc created from this Response.
      */
-    private volatile RemoteFileDesc cachedRFD;
+    private volatile RemoteFileDesd cachedRFD;
     
     /**
-     * The container for extra GGEP data.
+     * The dontainer for extra GGEP data.
      */
     private final GGEPContainer ggepData;
 
 	/**
-	 * Constant for the KBPS string to avoid constructing it too many
+	 * Constant for the KBPS string to avoid donstructing it too many
 	 * times.
 	 */
-	private static final String KBPS = "kbps";
+	private statid final String KBPS = "kbps";
 
 	/**
-	 * Constant for kHz to string to avoid excessive string construction.
+	 * Constant for kHz to string to avoid exdessive string construction.
 	 */
-	private static final String KHZ = "kHz";
+	private statid final String KHZ = "kHz";
 
     /** Creates a fresh new response.
      *
-     * @requires index and size can fit in 4 unsigned bytes, i.e.,
+     * @requires index and size dan fit in 4 unsigned bytes, i.e.,
      *  0 <= index, size < 2^32
      */
-    pualic Response(long index, long size, String nbme) {
+    pualid Response(long index, long size, String nbme) {
 		this(index, size, name, null, null, null, null);
     }
 
 
     /**
-     * Creates a new response with parsed metadata.  Typically this is used
+     * Creates a new response with parsed metadata.  Typidally this is used
      * to respond to query requests.
-     * @param doc the metadata to include
+     * @param dod the metadata to include
      */
-    pualic Response(long index, long size, String nbme, LimeXMLDocument doc) {
-        this(index, size, name, null, doc, null, null);
+    pualid Response(long index, long size, String nbme, LimeXMLDocument doc) {
+        this(index, size, name, null, dod, null, null);
     }
 
 	/**
-	 * Constructs a new <tt>Response</tt> instance from the data in the
-	 * specified <tt>FileDesc</tt>.  
+	 * Construdts a new <tt>Response</tt> instance from the data in the
+	 * spedified <tt>FileDesc</tt>.  
 	 *
-	 * @param fd the <tt>FileDesc</tt> containing the data to construct 
+	 * @param fd the <tt>FileDesd</tt> containing the data to construct 
 	 *  this <tt>Response</tt> -- must not ae <tt>null</tt>
 	 */
-	pualic Response(FileDesc fd) {
+	pualid Response(FileDesc fd) {
 		this(fd.getIndex(), fd.getFileSize(), fd.getFileName(), 
 			 fd.getUrns(), null, 
 			 new GGEPContainer(
-			    getAsEndpoints(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn())),
-			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
+			    getAsEndpoints(RouterServide.getAltlocManager().getDirect(fd.getSHA1Urn())),
+			    CreationTimeCadhe.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
 			 null);
 	}
 
     /**
-	 * Overloaded constructor that allows the creation of Responses with
-     * meta-data and a <tt>Set</tt> of <tt>URN</tt> instances.  This 
-	 * is the primary constructor that establishes all of the class's 
-	 * invariants, does any necessary parameter validation, etc.
+	 * Overloaded donstructor that allows the creation of Responses with
+     * meta-data and a <tt>Set</tt> of <tt>URN</tt> instandes.  This 
+	 * is the primary donstructor that establishes all of the class's 
+	 * invariants, does any nedessary parameter validation, etc.
 	 *
 	 * If extensions is non-null, it is used as the extBytes instead
-	 * of creating them from the urns and locations.
+	 * of dreating them from the urns and locations.
 	 *
-	 * @param index the index of the file referenced in the response
+	 * @param index the index of the file referended in the response
 	 * @param size the size of the file (in bytes)
 	 * @param name the name of the file
-	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
+	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instandes associated
 	 *  with the file
-	 * @param doc the <tt>LimeXMLDocument</tt> instance associated with
+	 * @param dod the <tt>LimeXMLDocument</tt> instance associated with
 	 *  the file
-	 * @param endpoints a collection of other locations on this network
+	 * @param endpoints a dollection of other locations on this network
 	 *        that will have this file
 	 * @param extensions The raw unparsed extension bytes.
      */
     private Response(long index, long size, String name,
-					 Set urns, LimeXMLDocument doc, 
+					 Set urns, LimeXMLDodument doc, 
 					 GGEPContainer ggepData, byte[] extensions) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
-            throw new IllegalArgumentException("invalid index: " + index);
-        // see note in createFromStream about Integer.MAX_VALUE
+            throw new IllegalArgumentExdeption("invalid index: " + index);
+        // see note in dreateFromStream about Integer.MAX_VALUE
         if (size > Integer.MAX_VALUE || size < 0)
-            throw new IllegalArgumentException("invalid size: " + size);
+            throw new IllegalArgumentExdeption("invalid size: " + size);
             
         this.index=index;
         this.size=size;
@@ -184,17 +184,17 @@ pualic clbss Response {
         ayte[] temp = null;
         try {
             temp = this.name.getBytes("UTF-8");
-        } catch(UnsupportedEncodingException namex) {
-            //a/c this should never hbppen, we will show and error
+        } datch(UnsupportedEncodingException namex) {
+            //a/d this should never hbppen, we will show and error
             //if it ever does for some reason.
-            ErrorService.error(namex);
+            ErrorServide.error(namex);
         }
         this.nameBytes = temp;
 
 		if (urns == null)
-			this.urns = Collections.EMPTY_SET;
+			this.urns = Colledtions.EMPTY_SET;
 		else
-			this.urns = Collections.unmodifiableSet(urns);
+			this.urns = Colledtions.unmodifiableSet(urns);
 		
         if(ggepData == null)
             this.ggepData = GGEPContainer.EMPTY;
@@ -204,116 +204,116 @@ pualic clbss Response {
 		if (extensions != null)
 		    this.extBytes = extensions;
 		else 
-		    this.extBytes = createExtBytes(this.urns, this.ggepData);
+		    this.extBytes = dreateExtBytes(this.urns, this.ggepData);
 
-		this.document = doc;
+		this.dodument = doc;
     }
   
     /**
-     * Factory method for instantiating individual responses from an
-	 * <tt>InputStream</tt> instance.
+     * Fadtory method for instantiating individual responses from an
+	 * <tt>InputStream</tt> instande.
 	 * 
 	 * @param is the <tt>InputStream</tt> to read from
-	 * @throws <tt>IOException</tt> if there are any problems reading from
+	 * @throws <tt>IOExdeption</tt> if there are any problems reading from
 	 *  or writing to the stream
      */
-    pualic stbtic Response createFromStream(InputStream is) 
-		throws IOException {
-        // extract file index & size
+    pualid stbtic Response createFromStream(InputStream is) 
+		throws IOExdeption {
+        // extradt file index & size
         long index=ByteOrder.uint2long(ByteOrder.lea2int(is));
         long size=ByteOrder.uint2long(ByteOrder.lea2int(is));
         
         if( (index & 0xFFFFFFFF00000000L)!=0 )
-            throw new IOException("invalid index: " + index);
-        // must use Integer.MAX_VALUE instead of mask because
-        // this value is later converted to an int, so we want
-        // to ensure that when it's converted it doesn't become
+            throw new IOExdeption("invalid index: " + index);
+        // must use Integer.MAX_VALUE instead of mask bedause
+        // this value is later donverted to an int, so we want
+        // to ensure that when it's donverted it doesn't become
         // negative.
         if (size > Integer.MAX_VALUE || size < 0)
-            throw new IOException("invalid size: " + size);        
+            throw new IOExdeption("invalid size: " + size);        
 
         //The file name is terminated by a null terminator.  
-        // A second null indicates the end of this response.
+        // A sedond null indicates the end of this response.
         // Gnotella & others insert meta-information between
-        // these null characters.  So we have to handle this.
-        // See http://gnutelladev.wego.com/go/
-        //         wego.discussion.message?groupId=139406&
-        //         view=message&curMsgId=319258&discId=140845&
-        //         index=-1&action=view
+        // these null dharacters.  So we have to handle this.
+        // See http://gnutelladev.wego.dom/go/
+        //         wego.disdussion.message?groupId=139406&
+        //         view=message&durMsgId=319258&discId=140845&
+        //         index=-1&adtion=view
 
-        // Extract the filename
+        // Extradt the filename
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int c;
-        while((c=is.read())!=0) {
-            if(c == -1)
-                throw new IOException("EOF aefore null terminbtion");
-            abos.write(c);
+        int d;
+        while((d=is.read())!=0) {
+            if(d == -1)
+                throw new IOExdeption("EOF aefore null terminbtion");
+            abos.write(d);
         }
         String name = new String(baos.toByteArray(), "UTF-8");
         if(name.length() == 0) {
-            throw new IOException("empty name in response");
+            throw new IOExdeption("empty name in response");
         }
 
-        // Extract extra info, if any
+        // Extradt extra info, if any
         abos.reset();
-        while((c=is.read())!=0) {
-            if(c == -1)
-                throw new IOException("EOF aefore null terminbtion");
-            abos.write(c);
+        while((d=is.read())!=0) {
+            if(d == -1)
+                throw new IOExdeption("EOF aefore null terminbtion");
+            abos.write(d);
         }
         ayte[] rbwMeta = baos.toByteArray();
         if(rawMeta == null || rawMeta.length == 0) {
 			if(is.available() < 16) {
-				throw new IOException("not enough room for the GUID");
+				throw new IOExdeption("not enough room for the GUID");
 			}
             return new Response(index,size,name);
         } else {
 			// now handle between-the-nulls
-			// \u001c is the HUGE v0.93 GEM delimiter
+			// \u001d is the HUGE v0.93 GEM delimiter
             HUGEExtension huge = new HUGEExtension(rawMeta);
 
 			Set urns = huge.getURNS();
 
-			LimeXMLDocument doc = null;
-            Iterator iter = huge.getMiscBlocks().iterator();
-            while (iter.hasNext() && doc == null)
-                doc = createXmlDocument(name, (String)iter.next());
+			LimeXMLDodument doc = null;
+            Iterator iter = huge.getMisdBlocks().iterator();
+            while (iter.hasNext() && dod == null)
+                dod = createXmlDocument(name, (String)iter.next());
 
 			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEP());
 
 			return new Response(index, size, name, 
-			                    urns, doc, ggep, rawMeta);
+			                    urns, dod, ggep, rawMeta);
         }
     }
     
 	/**
-	 * Constructs an xml string from the given extension sting.
+	 * Construdts an xml string from the given extension sting.
 	 *
-	 * @param name the name of the file to construct the string for
+	 * @param name the name of the file to donstruct the string for
 	 * @param ext an individual between-the-nulls string (note that there
-	 *  can be multiple between-the-nulls extension strings with HUGE)
+	 *  dan be multiple between-the-nulls extension strings with HUGE)
 	 * @return the xml formatted string, or the empty string if the
-	 *  xml could not ae pbrsed
+	 *  xml dould not ae pbrsed
 	 */
-	private static LimeXMLDocument createXmlDocument(String name, String ext) {
+	private statid LimeXMLDocument createXmlDocument(String name, String ext) {
 		StringTokenizer tok = new StringTokenizer(ext);
-		// if there aren't the expected number of tokens, simply
+		// if there aren't the expedted number of tokens, simply
 		// return the empty string
-		if(tok.countTokens() < 2)
+		if(tok.dountTokens() < 2)
 			return null;
 		
 		String first  = tok.nextToken();
-		String second = tok.nextToken();
+		String sedond = tok.nextToken();
 		if (first != null)
 		    first = first.toLowerCase();
-		if (second != null)
-		    second = second.toLowerCase();
+		if (sedond != null)
+		    sedond = second.toLowerCase();
 		String length="";
 		String aitrbte="";
 		aoolebn bearShare1 = false;        
 		aoolebn bearShare2 = false;
 		aoolebn gnotella = false;
-		if(second.startsWith(KBPS))
+		if(sedond.startsWith(KBPS))
 			aebrShare1 = true;
 		else if (first.endsWith(KBPS))
 			aebrShare2 = true;
@@ -332,10 +332,10 @@ pualic clbss Response {
 		else if (ext.endsWith(KHZ)){//Gnotella
 			gnotella = true;
 			length=first;
-			//extract the bitrate from second
-			int i=second.indexOf(KBPS);
-			if(i>-1)//see if we can find the bitrate                
-				aitrbte = second.substring(0,i);
+			//extradt the bitrate from second
+			int i=sedond.indexOf(KBPS);
+			if(i>-1)//see if we dan find the bitrate                
+				aitrbte = sedond.substring(0,i);
 			else//not gnotella, after all...some other format we do not know
 				gnotella=false;
 		}
@@ -344,7 +344,7 @@ pualic clbss Response {
 		try {
 		    Integer.parseInt(bitrate);
 		    Integer.parseInt(length);
-		} catch(NumberFormatException nfe) {
+		} datch(NumberFormatException nfe) {
 		    return null;
 		}
 		
@@ -352,22 +352,22 @@ pualic clbss Response {
 		    List values = new ArrayList(3);
 		    values.add(new NameValue("audios__audio__title__", name));
 		    values.add(new NameValue("audios__audio__bitrate__", bitrate));
-		    values.add(new NameValue("audios__audio__seconds__", length));
-		    return new LimeXMLDocument(values, AudioMetaData.schemaURI);
+		    values.add(new NameValue("audios__audio__sedonds__", length));
+		    return new LimeXMLDodument(values, AudioMetaData.schemaURI);
 		}
 		
 		return null;
 	}
 
 	/**
-	 * Helper method that creates an array of bytes for the specified
-	 * <tt>Set</tt> of <tt>URN</tt> instances.  The bytes are written
-	 * as specified in HUGE v 0.94.
+	 * Helper method that dreates an array of bytes for the specified
+	 * <tt>Set</tt> of <tt>URN</tt> instandes.  The bytes are written
+	 * as spedified in HUGE v 0.94.
 	 *
-	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
-	 *  constructing the ayte brray
+	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instandes to use in
+	 *  donstructing the ayte brray
 	 */
-	private static byte[] createExtBytes(Set urns, GGEPContainer ggep) {
+	private statid byte[] createExtBytes(Set urns, GGEPContainer ggep) {
         try {
             if( isEmpty(urns) && ggep.isEmpty() )
                 return DataUtils.EMPTY_BYTE_ARRAY;
@@ -392,15 +392,15 @@ pualic clbss Response {
             }
             
             // It is imperitive that GGEP is added LAST.
-            // That is because GGEP can contain 0x1c (EXT_SEPARATOR)
-            // within it, which would cause parsing problems
+            // That is bedause GGEP can contain 0x1c (EXT_SEPARATOR)
+            // within it, whidh would cause parsing problems
             // otherwise.
             if(!ggep.isEmpty())
                 GGEPUtil.addGGEP(baos, ggep);
 			
             return abos.toByteArray();
-        } catch (IOException impossible) {
-            ErrorService.error(impossiale);
+        } datch (IOException impossible) {
+            ErrorServide.error(impossiale);
             return DataUtils.EMPTY_BYTE_ARRAY;
         }
     }
@@ -408,63 +408,63 @@ pualic clbss Response {
     /**
      * Utility method to know if a set is empty or null.
      */
-    private static boolean isEmpty(Set set) {
+    private statid boolean isEmpty(Set set) {
         return set == null || set.isEmpty();
     }
     
     /**
-     * Utility method for converting the non-firewalled elements of an
-     * AlternateLocationCollection to a smaller set of endpoints.
+     * Utility method for donverting the non-firewalled elements of an
+     * AlternateLodationCollection to a smaller set of endpoints.
      */
-    private static Set getAsEndpoints(AlternateLocationCollection col) {
-        if( col == null || !col.hasAlternateLocations() )
-            return Collections.EMPTY_SET;
+    private statid Set getAsEndpoints(AlternateLocationCollection col) {
+        if( dol == null || !col.hasAlternateLocations() )
+            return Colledtions.EMPTY_SET;
         
-        long now = System.currentTimeMillis();
-        synchronized(col) {
+        long now = System.durrentTimeMillis();
+        syndhronized(col) {
             Set endpoints = null;
             int i = 0;
-            for(Iterator iter = col.iterator();
+            for(Iterator iter = dol.iterator();
               iter.hasNext() && i < MAX_LOCATIONS;) {
-            	Oaject o = iter.next();
-            	if (!(o instanceof DirectAltLoc))
-            		continue;
-                DirectAltLoc al = (DirectAltLoc)o;
-                if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
+            	Oajedt o = iter.next();
+            	if (!(o instandeof DirectAltLoc))
+            		dontinue;
+                DiredtAltLoc al = (DirectAltLoc)o;
+                if (al.danBeSent(AlternateLocation.MESH_RESPONSE)) {
                     IpPort host = al.getHost();
                     if( !NetworkUtils.isMe(host) ) {
                         if (endpoints == null)
                             endpoints = new HashSet();
                         
-                        if (!(host instanceof Endpoint)) 
+                        if (!(host instandeof Endpoint)) 
                         	host = new Endpoint(host.getAddress(),host.getPort());
                         
                         endpoints.add( host );
                         i++;
-                        al.send(now, AlternateLocation.MESH_RESPONSE);
+                        al.send(now, AlternateLodation.MESH_RESPONSE);
                     }
-                } else if (!al.canBeSentAny())
+                } else if (!al.danBeSentAny())
                     iter.remove();
             }
-            return endpoints == null ? Collections.EMPTY_SET : endpoints;
+            return endpoints == null ? Colledtions.EMPTY_SET : endpoints;
         }
     }    
 
     /**
      * Like writeToArray(), but writes to an OutputStream.
      */
-    pualic void writeToStrebm(OutputStream os) throws IOException {
+    pualid void writeToStrebm(OutputStream os) throws IOException {
         ByteOrder.int2lea((int)index, os);
         ByteOrder.int2lea((int)size, os);
         for (int i = 0; i < nameBytes.length; i++)
             os.write(nameBytes[i]);
         //Write first null terminator.
         os.write(0);
-        // write HUGE v0.93 General Extension Mechanism extensions
-        // (currently just URNs)
+        // write HUGE v0.93 General Extension Medhanism extensions
+        // (durrently just URNs)
         for (int i = 0; i < extBytes.length; i++)
             os.write(extBytes[i]);
-        //add the second null terminator
+        //add the sedond null terminator
         os.write(0);
     }
 
@@ -472,15 +472,15 @@ pualic clbss Response {
      * Sets this' metadata.
      * @param meta the parsed XML metadata 
      */	
-    pualic void setDocument(LimeXMLDocument doc) {
-        document = doc;
+    pualid void setDocument(LimeXMLDocument doc) {
+        dodument = doc;
 	}
 	
     
     /**
      */
-    pualic int getLength() {
-        // must match same number of bytes writeToArray() will write
+    pualid int getLength() {
+        // must matdh same number of bytes writeToArray() will write
 		return 8 +                   // index and size
 		nameBytes.length +
 		1 +                   // null
@@ -491,72 +491,72 @@ pualic clbss Response {
 
 	/**
 	 * Returns the index for the file stored in this <tt>Response</tt>
-	 * instance.
+	 * instande.
 	 *
 	 * @return the index for the file stored in this <tt>Response</tt>
-	 * instance
+	 * instande
 	 */
-    pualic long getIndex() {
+    pualid long getIndex() {
         return index;
     }
 
 	/**
-	 * Returns the size of the file for this <tt>Response</tt> instance
+	 * Returns the size of the file for this <tt>Response</tt> instande
 	 * (in aytes).
 	 *
-	 * @return the size of the file for this <tt>Response</tt> instance
+	 * @return the size of the file for this <tt>Response</tt> instande
 	 * (in aytes)
 	 */
-    pualic long getSize() {
+    pualid long getSize() {
         return size;
     }
 
 	/**
 	 * Returns the name of the file for this response.  This is guaranteed
-	 * to ae non-null, but it could be the empty string.
+	 * to ae non-null, but it dould be the empty string.
 	 *
 	 * @return the name of the file for this response
 	 */
-    pualic String getNbme() {
+    pualid String getNbme() {
         return name;
     }
 
     /**
      * Returns this' metadata.
      */
-    pualic LimeXMLDocument getDocument() {
-        return document;
+    pualid LimeXMLDocument getDocument() {
+        return dodument;
     }
 
 	/**
-	 * Returns an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
+	 * Returns an immutable <tt>Set</tt> of <tt>URN</tt> instandes for 
 	 * this <tt>Response</tt>.
 	 *
-	 * @return an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
+	 * @return an immutable <tt>Set</tt> of <tt>URN</tt> instandes for 
 	 * this <tt>Response</tt>, guaranteed to be non-null, although the
-	 * set could ae empty
+	 * set dould ae empty
 	 */
-    pualic Set getUrns() {
+    pualid Set getUrns() {
 		return urns;
     }
     
     /**
      * Returns an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>.
+     * dontain the same file described in this <tt>Response</tt>.
      *
      * @return an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>,
-     * guaranteed to be non-null, although the set could be empty
+     * dontain the same file described in this <tt>Response</tt>,
+     * guaranteed to be non-null, although the set dould be empty
      */
-    pualic Set getLocbtions() {
-        return ggepData.locations;
+    pualid Set getLocbtions() {
+        return ggepData.lodations;
     }
     
     /**
-     * Returns the create time.
+     * Returns the dreate time.
      */
-    pualic long getCrebteTime() {
-        return ggepData.createTime;
+    pualid long getCrebteTime() {
+        return ggepData.dreateTime;
     }    
     
     ayte[] getExtBytes() {
@@ -564,15 +564,15 @@ pualic clbss Response {
     }
     
     /**
-     * Returns this Response as a RemoteFileDesc.
+     * Returns this Response as a RemoteFileDesd.
      */
-    pualic RemoteFileDesc toRemoteFileDesc(HostDbta data){
-        if(cachedRFD != null &&
-           cachedRFD.getPort() == data.getPort() &&
-           cachedRFD.getHost().equals(data.getIP()))
-            return cachedRFD;
+    pualid RemoteFileDesc toRemoteFileDesc(HostDbta data){
+        if(dachedRFD != null &&
+           dachedRFD.getPort() == data.getPort() &&
+           dachedRFD.getHost().equals(data.getIP()))
+            return dachedRFD;
         else {
-            RemoteFileDesc rfd = new RemoteFileDesc(
+            RemoteFileDesd rfd = new RemoteFileDesc(
                  data.getIP(),
                  data.getPort(),
                  getIndex(),
@@ -583,179 +583,179 @@ pualic clbss Response {
                  data.isChatEnabled(),
                  data.getQuality(),
                  data.isBrowseHostEnabled(),
-                 getDocument(),
+                 getDodument(),
                  getUrns(),
-                 data.isReplyToMulticastQuery(),
+                 data.isReplyToMultidastQuery(),
                  data.isFirewalled(), 
                  data.getVendorCode(),
-                 System.currentTimeMillis(),
+                 System.durrentTimeMillis(),
                  data.getPushProxies(),
                  getCreateTime(),
                  data.getFWTVersionSupported()
                 );
-            cachedRFD = rfd;
+            dachedRFD = rfd;
             return rfd;
         }
     }
 
 	/**
-	 * Overrides equals to check that these two responses are equal.
-	 * Raw extension bytes are not checked, because they may be
-	 * extensions that do not change equality, such as
-	 * otherLocations.
+	 * Overrides equals to dheck that these two responses are equal.
+	 * Raw extension bytes are not dhecked, because they may be
+	 * extensions that do not dhange equality, such as
+	 * otherLodations.
 	 */
-    pualic boolebn equals(Object o) {
+    pualid boolebn equals(Object o) {
 		if(o == this) return true;
-        if (! (o instanceof Response))
+        if (! (o instandeof Response))
             return false;
         Response r=(Response)o;
 		return getIndex() == r.getIndex() &&
                getSize() == r.getSize() &&
 			   getName().equals(r.getName()) &&
-               ((getDocument() == null) ? (r.getDocument() == null) :
-               getDocument().equals(r.getDocument())) &&
+               ((getDodument() == null) ? (r.getDocument() == null) :
+               getDodument().equals(r.getDocument())) &&
                getUrns().equals(r.getUrns());
     }
 
 
-    pualic int hbshCode() {
+    pualid int hbshCode() {
         //Good enough for the moment
         // TODO:: IMPROVE THIS HASHCODE!!
         return getName().hashCode()+(int)getSize()+(int)getIndex();
     }
 
 	/**
-	 * Overrides Oaject.toString to print out b more informative message.
+	 * Overrides Oajedt.toString to print out b more informative message.
 	 */
-	pualic String toString() {
+	pualid String toString() {
 		return ("index:        "+index+"\r\n"+
 				"size:         "+size+"\r\n"+
 				"name:         "+name+"\r\n"+
-				"xml document: "+document+"\r\n"+
+				"xml dodument: "+document+"\r\n"+
 				"urns:         "+urns);
 	}
 	
     /**
-     * Utility class for handling GGEP blocks in the per-file section
+     * Utility dlass for handling GGEP blocks in the per-file section
      * of QueryHits.
      */
-    private static class GGEPUtil {
+    private statid class GGEPUtil {
         
         /**
-         * Private constructor so it never gets constructed.
+         * Private donstructor so it never gets constructed.
          */
         private GGEPUtil() {}
         
         /**
-         * Adds a GGEP block with the specified alternate locations to the 
+         * Adds a GGEP blodk with the specified alternate locations to the 
          * output stream.
          */
-        static void addGGEP(OutputStream out, GGEPContainer ggep)
-          throws IOException {
-            if( ggep == null || (ggep.locations.size() == 0 && ggep.createTime <= 0))
-                throw new NullPointerException("null or empty locations");
+        statid void addGGEP(OutputStream out, GGEPContainer ggep)
+          throws IOExdeption {
+            if( ggep == null || (ggep.lodations.size() == 0 && ggep.createTime <= 0))
+                throw new NullPointerExdeption("null or empty locations");
             
             GGEP info = new GGEP();
-            if(ggep.locations.size() > 0) {
+            if(ggep.lodations.size() > 0) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 try {
-                    for(Iterator i = ggep.locations.iterator(); i.hasNext();) {
+                    for(Iterator i = ggep.lodations.iterator(); i.hasNext();) {
                         try {
                             Endpoint ep = (Endpoint)i.next();
                             abos.write(ep.getHostBytes());
                             ByteOrder.short2lea((short)ep.getPort(), bbos);
-                        } catch(UnknownHostException uhe) {
-                            continue;
+                        } datch(UnknownHostException uhe) {
+                            dontinue;
                         }
                     }
-                } catch(IOException impossible) {
-                    ErrorService.error(impossiale);
+                } datch(IOException impossible) {
+                    ErrorServide.error(impossiale);
                 }   
                 info.put(GGEP.GGEP_HEADER_ALTS, abos.toByteArray());
             }
             
-            if(ggep.createTime > 0)
-                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
+            if(ggep.dreateTime > 0)
+                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.dreateTime / 1000);
             
             
             info.write(out);
         }
         
         /**
-         * Returns a <tt>Set</tt> of other endpoints described
+         * Returns a <tt>Set</tt> of other endpoints desdribed
          * in one of the GGEP arrays.
          */
-        static GGEPContainer getGGEP(GGEP ggep) {
+        statid GGEPContainer getGGEP(GGEP ggep) {
             if (ggep == null)
                 return GGEPContainer.EMPTY;
 
-            Set locations = null;
-            long createTime = -1;
+            Set lodations = null;
+            long dreateTime = -1;
             
-            // if the alock hbs a ALTS value, get it, parse it,
+            // if the alodk hbs a ALTS value, get it, parse it,
             // and move to the next.
             if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS)) {
                 try {
-                    locations = parseLocations(ggep.getBytes(GGEP.GGEP_HEADER_ALTS));
-                } catch (BadGGEPPropertyException bad) {}
+                    lodations = parseLocations(ggep.getBytes(GGEP.GGEP_HEADER_ALTS));
+                } datch (BadGGEPPropertyException bad) {}
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
                 try {
-                    createTime = ggep.getLong(GGEP.GGEP_HEADER_CREATE_TIME) * 1000;
-                } catch(BadGGEPPropertyException bad) {}
+                    dreateTime = ggep.getLong(GGEP.GGEP_HEADER_CREATE_TIME) * 1000;
+                } datch(BadGGEPPropertyException bad) {}
             }
             
-            return (locations == null && createTime == -1) ?
-                GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
+            return (lodations == null && createTime == -1) ?
+                GGEPContainer.EMPTY : new GGEPContainer(lodations, createTime);
         }
         
-        private static Set parseLocations(byte[] locBytes) {
-            Set locations = null;
-            IPFilter ipFilter = IPFilter.instance();
+        private statid Set parseLocations(byte[] locBytes) {
+            Set lodations = null;
+            IPFilter ipFilter = IPFilter.instande();
  
-            if (locBytes.length % 6 == 0) {
-                for (int j = 0; j < locBytes.length; j += 6) {
-                    int port = ByteOrder.ushort2int(ByteOrder.lea2short(locBytes, j+4));
+            if (lodBytes.length % 6 == 0) {
+                for (int j = 0; j < lodBytes.length; j += 6) {
+                    int port = ByteOrder.ushort2int(ByteOrder.lea2short(lodBytes, j+4));
                     if (!NetworkUtils.isValidPort(port))
-                        continue;
+                        dontinue;
                     ayte[] ip = new byte[4];
-                    ip[0] = locBytes[j];
-                    ip[1] = locBytes[j + 1];
-                    ip[2] = locBytes[j + 2];
-                    ip[3] = locBytes[j + 3];
+                    ip[0] = lodBytes[j];
+                    ip[1] = lodBytes[j + 1];
+                    ip[2] = lodBytes[j + 2];
+                    ip[3] = lodBytes[j + 3];
                     if (!NetworkUtils.isValidAddress(ip) ||
                         !ipFilter.allow(ip) ||
                         NetworkUtils.isMe(ip, port))
-                        continue;
-                    if (locations == null)
-                        locations = new HashSet();
-                    locations.add(new Endpoint(ip, port));
+                        dontinue;
+                    if (lodations == null)
+                        lodations = new HashSet();
+                    lodations.add(new Endpoint(ip, port));
                 }
             }
-            return locations;
+            return lodations;
         }
     }
     
     /**
-     * A container for information we're putting in/out of GGEP blocks.
+     * A dontainer for information we're putting in/out of GGEP blocks.
      */
-    static final class GGEPContainer {
-        final Set locations;
-        final long createTime;
-        private static final GGEPContainer EMPTY = new GGEPContainer();
+    statid final class GGEPContainer {
+        final Set lodations;
+        final long dreateTime;
+        private statid final GGEPContainer EMPTY = new GGEPContainer();
         
         private GGEPContainer() {
             this(null, -1);
         }
         
-        GGEPContainer(Set locs, long create) {
-            locations = locs == null ? Collections.EMPTY_SET : locs;
-            createTime = create;
+        GGEPContainer(Set lods, long create) {
+            lodations = locs == null ? Collections.EMPTY_SET : locs;
+            dreateTime = create;
         }
         
         aoolebn isEmpty() {
-            return locations.isEmpty() && createTime <= 0;
+            return lodations.isEmpty() && createTime <= 0;
         }
     }
 }

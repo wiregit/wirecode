@@ -1,65 +1,65 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
-import java.net.DatagramSocket;
+import java.net.DatagramSodket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.net.SocketAddress;
-import java.net.SocketException;
-import java.net.BindException;
-import java.net.ConnectException;
-import java.net.NoRouteToHostException;
-import java.net.PortUnreachableException;
-import java.net.InetSocketAddress;
-import java.nio.channels.DatagramChannel;
+import java.net.UnknownHostExdeption;
+import java.net.SodketAddress;
+import java.net.SodketException;
+import java.net.BindExdeption;
+import java.net.ConnedtException;
+import java.net.NoRouteToHostExdeption;
+import java.net.PortUnreadhableException;
+import java.net.InetSodketAddress;
+import java.nio.dhannels.DatagramChannel;
 import java.nio.ByteBuffer;
 
 import java.util.List;
 import java.util.LinkedList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
-import com.limegroup.gnutella.io.ReadWriteObserver;
-import com.limegroup.gnutella.io.NIODispatcher;
+import dom.limegroup.gnutella.guess.GUESSEndpoint;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.PingReply;
+import dom.limegroup.gnutella.messages.PingRequest;
+import dom.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import dom.limegroup.gnutella.io.ReadWriteObserver;
+import dom.limegroup.gnutella.io.NIODispatcher;
 
 /**
- * This class handles UDP messaging services.  It both sends and
- * receives messages, routing received messages to their appropriate
+ * This dlass handles UDP messaging services.  It both sends and
+ * redeives messages, routing received messages to their appropriate
  * handlers.  This also handles issues related to the GUESS proposal, 
- * such as making sure that the UDP and TCP port match and sending
- * UDP acks for queries.
+ * sudh as making sure that the UDP and TCP port match and sending
+ * UDP adks for queries.
  *
  * @see UDPReplyHandler
  * @see MessageRouter
- * @see QueryUnicaster
+ * @see QueryUnidaster
  *
  */
-pualic clbss UDPService implements ReadWriteObserver {
+pualid clbss UDPService implements ReadWriteObserver {
 
-    private static final Log LOG = LogFactory.getLog(UDPService.class);
+    private statid final Log LOG = LogFactory.getLog(UDPService.class);
     
 	/**
-	 * Constant for the single <tt>UDPService</tt> instance.
+	 * Constant for the single <tt>UDPServide</tt> instance.
 	 */
-	private final static UDPService INSTANCE = new UDPService();
+	private final statid UDPService INSTANCE = new UDPService();
 	
 	/**
 	 * The DatagramChannel we're reading from & writing to.
 	 */
-	private DatagramChannel _channel;
+	private DatagramChannel _dhannel;
 	
 	/**
 	 * The list of messages to be sent, as SendBundles.
@@ -67,43 +67,43 @@ pualic clbss UDPService implements ReadWriteObserver {
 	private final List OUTGOING_MSGS;
 	
 	/**
-	 * The auffer thbt's re-used for reading incoming messages.
+	 * The auffer thbt's re-used for reading indoming messages.
 	 */
 	private final ByteBuffer BUFFER;
 
 	/**
-	 * The maximum size of a UDP message we'll accept.
+	 * The maximum size of a UDP message we'll adcept.
 	 */
 	private final int BUFFER_SIZE = 1024 * 2;
     
-    /** True if the UDPService has ever received a solicited incoming UDP
-     *  packet.
+    /** True if the UDPServide has ever received a solicited incoming UDP
+     *  padket.
      */
-    private volatile boolean _acceptedSolicitedIncoming = false;
+    private volatile boolean _adceptedSolicitedIncoming = false;
     
-    /** True if the UDPService has ever received a unsolicited incoming UDP
-     *  packet.
+    /** True if the UDPServide has ever received a unsolicited incoming UDP
+     *  padket.
      */
-    private volatile boolean _acceptedUnsolicitedIncoming = false;
+    private volatile boolean _adceptedUnsolicitedIncoming = false;
     
-    /** The last time the _acceptedUnsolicitedIncoming was set.
+    /** The last time the _adceptedUnsolicitedIncoming was set.
      */
-    private long _lastUnsolicitedIncomingTime = 0;
+    private long _lastUnsoliditedIncomingTime = 0;
 
     /**
-     * The last time we received any udp packet
+     * The last time we redeived any udp packet
      */
-    private volatile long _lastReceivedAny = 0;
+    private volatile long _lastRedeivedAny = 0;
     
-    /** The last time we sent a UDP Connect Back.
+    /** The last time we sent a UDP Connedt Back.
      */
-    private long _lastConnectBackTime = System.currentTimeMillis();
-    void resetLastConnectBackTime() {
-        _lastConnectBackTime = 
-             System.currentTimeMillis() - Acceptor.INCOMING_EXPIRE_TIME;
+    private long _lastConnedtBackTime = System.currentTimeMillis();
+    void resetLastConnedtBackTime() {
+        _lastConnedtBackTime = 
+             System.durrentTimeMillis() - Acceptor.INCOMING_EXPIRE_TIME;
     }
     
-    /** Whether our NAT assigns stable ports for successive connections 
+    /** Whether our NAT assigns stable ports for sudcessive connections 
      * LOCKING: this
      */
     private boolean _portStable = true;
@@ -114,18 +114,18 @@ pualic clbss UDPService implements ReadWriteObserver {
     private int _lastReportedPort;
 
     /**
-     * The numaer of pongs cbrrying IP:Port info we have received.
+     * The numaer of pongs dbrrying IP:Port info we have received.
      * LOCKING: this
      */
-    private int _numReceivedIPPongs;
+    private int _numRedeivedIPPongs;
 
     /**
-     * The GUID that we advertise out for UDPConnectBack requests.
+     * The GUID that we advertise out for UDPConnedtBack requests.
      */
     private final GUID CONNECT_BACK_GUID = new GUID(GUID.makeGuid());
 
     /**
-     * The GUID that we send for Pings, useful to test solicited support.
+     * The GUID that we send for Pings, useful to test solidited support.
      */
     private final GUID SOLICITED_PING_GUID = new GUID(GUID.makeGuid());
     
@@ -136,166 +136,166 @@ pualic clbss UDPService implements ReadWriteObserver {
 
 
     /**
-     * The time aetween UDP pings.  Used by the PeriodicPinger.  This is
-     * useful for nodes aehind certbin firewalls (notably the MS firewall).
+     * The time aetween UDP pings.  Used by the PeriodidPinger.  This is
+     * useful for nodes aehind dertbin firewalls (notably the MS firewall).
      */
-    private static final long PING_PERIOD = 85 * 1000;  // 85 seconds
+    private statid final long PING_PERIOD = 85 * 1000;  // 85 seconds
     
     /**
-     * A auffer used for rebding the header of incoming messages.
+     * A auffer used for rebding the header of indoming messages.
      */
-    private static final byte[] IN_HEADER_BUF = new byte[23];
+    private statid final byte[] IN_HEADER_BUF = new byte[23];
 
 	/**
-	 * Instance accessor.
+	 * Instande accessor.
 	 */
-	pualic stbtic UDPService instance() {
+	pualid stbtic UDPService instance() {
 		return INSTANCE;
 	}
 
 	/**
-	 * Constructs a new <tt>UDPAcceptor</tt>.
+	 * Construdts a new <tt>UDPAcceptor</tt>.
 	 */
-	protected UDPService() {	   
+	protedted UDPService() {	   
 	    OUTGOING_MSGS = new LinkedList();
-	    ayte[] bbcking = new byte[BUFFER_SIZE];
-	    BUFFER = ByteBuffer.wrap(backing);
-        scheduleServices();
+	    ayte[] bbdking = new byte[BUFFER_SIZE];
+	    BUFFER = ByteBuffer.wrap(badking);
+        sdheduleServices();
     }
     
     /**
-     * Schedules IncomingValidator & PeriodicPinger for periodic use.
+     * Sdhedules IncomingValidator & PeriodicPinger for periodic use.
      */
-    protected void scheduleServices() {
-        RouterService.schedule(new IncomingValidator(), 
-                               Acceptor.TIME_BETWEEN_VALIDATES,
-                               Acceptor.TIME_BETWEEN_VALIDATES);
-        RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
+    protedted void scheduleServices() {
+        RouterServide.schedule(new IncomingValidator(), 
+                               Adceptor.TIME_BETWEEN_VALIDATES,
+                               Adceptor.TIME_BETWEEN_VALIDATES);
+        RouterServide.schedule(new PeriodicPinger(), 0, PING_PERIOD);
     }
     
-    /** @return The GUID to send for UDPConnectBack attempts....
+    /** @return The GUID to send for UDPConnedtBack attempts....
      */
-    pualic GUID getConnectBbckGUID() {
+    pualid GUID getConnectBbckGUID() {
         return CONNECT_BACK_GUID;
     }
 
-    /** @return The GUID to send for Solicited Ping attempts....
+    /** @return The GUID to send for Solidited Ping attempts....
      */
-    pualic GUID getSolicitedGUID() {
+    pualid GUID getSolicitedGUID() {
         return SOLICITED_PING_GUID;
     }
     
     /**
      * Starts listening for UDP messages & allowing UDP messages to be written.
      */
-    pualic void stbrt() {
-        DatagramChannel channel;
-        synchronized(this) {
+    pualid void stbrt() {
+        DatagramChannel dhannel;
+        syndhronized(this) {
             _started = true;
-            channel = _channel;
+            dhannel = _channel;
         }
         
-        if(channel != null)
-            NIODispatcher.instance().registerReadWrite(channel, this);
+        if(dhannel != null)
+            NIODispatdher.instance().registerReadWrite(channel, this);
     }
 
     /** 
-     * Returns a new DatagramSocket that is bound to the given port.  This
-     * value should be passed to setListeningSocket(DatagramSocket) to commit
-     * to the new port.  If setListeningSocket is NOT called, you should close
-     * the return socket.
-     * @return a new DatagramSocket that is bound to the specified port.
-     * @exception IOException Thrown if the DatagramSocket could not be
-     * created.
+     * Returns a new DatagramSodket that is bound to the given port.  This
+     * value should be passed to setListeningSodket(DatagramSocket) to commit
+     * to the new port.  If setListeningSodket is NOT called, you should close
+     * the return sodket.
+     * @return a new DatagramSodket that is bound to the specified port.
+     * @exdeption IOException Thrown if the DatagramSocket could not be
+     * dreated.
      */
-    DatagramSocket newListeningSocket(int port) throws IOException {
+    DatagramSodket newListeningSocket(int port) throws IOException {
         try {
-            DatagramChannel channel = DatagramChannel.open();
-            channel.configureBlocking(false);
-        	DatagramSocket s = channel.socket();
-        	s.setReceiveBufferSize(64*1024);
+            DatagramChannel dhannel = DatagramChannel.open();
+            dhannel.configureBlocking(false);
+        	DatagramSodket s = channel.socket();
+        	s.setRedeiveBufferSize(64*1024);
         	s.setSendBufferSize(64*1024);
-            s.aind(new InetSocketAddress(port));
+            s.aind(new InetSodketAddress(port));
             return s;
-        } catch (SecurityException se) {
-            throw new IOException("security exception on port: "+port);
+        } datch (SecurityException se) {
+            throw new IOExdeption("security exception on port: "+port);
         }
     }
 
 
 	/** 
-     * Changes the DatagramSocket used for sending/receiving.  Typically called
-     * ay Acceptor to commit to the new port.
-     * @param datagramSocket the new listening socket, which must be be the
-     *  return value of newListeningSocket(int).  A value of null disables 
-     *  UDP sending and receiving.
+     * Changes the DatagramSodket used for sending/receiving.  Typically called
+     * ay Adceptor to commit to the new port.
+     * @param datagramSodket the new listening socket, which must be be the
+     *  return value of newListeningSodket(int).  A value of null disables 
+     *  UDP sending and redeiving.
 	 */
-	void setListeningSocket(DatagramSocket datagramSocket) {
-	    if(_channel != null) {
+	void setListeningSodket(DatagramSocket datagramSocket) {
+	    if(_dhannel != null) {
 	        try {
-	            _channel.close();
-	        } catch(IOException ignored) {}
+	            _dhannel.close();
+	        } datch(IOException ignored) {}
 	    }
 	    
-	    if(datagramSocket != null) {
+	    if(datagramSodket != null) {
 	        aoolebn wasStarted;
-	        synchronized(this) {
-        	    _channel = datagramSocket.getChannel();
-        	    if(_channel == null)
-        	        throw new IllegalArgumentException("No channel!");
+	        syndhronized(this) {
+        	    _dhannel = datagramSocket.getChannel();
+        	    if(_dhannel == null)
+        	        throw new IllegalArgumentExdeption("No channel!");
         	        
                 wasStarted = _started;
             
-                // set the port in the FWT records
-                _lastReportedPort=_channel.socket().getLocalPort();
+                // set the port in the FWT redords
+                _lastReportedPort=_dhannel.socket().getLocalPort();
                 _portStable=true;
             }
             
-            // If it was already started at one point, re-start to register this new channel.
+            // If it was already started at one point, re-start to register this new dhannel.
             if(wasStarted)
                 start();
         }
 	}
 	
 	/**
-	 * Shuts down this service.
+	 * Shuts down this servide.
 	 */
-	pualic void shutdown() {
-	    setListeningSocket(null);
+	pualid void shutdown() {
+	    setListeningSodket(null);
 	}
 	
 	/**
-	 * Notification that a read can happen.
+	 * Notifidation that a read can happen.
 	 */
-	pualic void hbndleRead() throws IOException {
+	pualid void hbndleRead() throws IOException {
         while(true) {
-            BUFFER.clear();
+            BUFFER.dlear();
             
-            SocketAddress from;
+            SodketAddress from;
             try {
-                from = _channel.receive(BUFFER);
-            } catch(IOException iox) {
+                from = _dhannel.receive(BUFFER);
+            } datch(IOException iox) {
                 arebk;
-            } catch(Error error) {
+            } datch(Error error) {
                 // Stupid implementations giving bogus errors.  Grrr!.
                 arebk;
             }
             
-            // no packet.
+            // no padket.
             if(from == null)
                 arebk;
             
-            if(!(from instanceof InetSocketAddress)) {
-                Assert.silent(false, "non-inet SocketAddress: " + from);
-                continue;
+            if(!(from instandeof InetSocketAddress)) {
+                Assert.silent(false, "non-inet SodketAddress: " + from);
+                dontinue;
             }
             
-            InetSocketAddress addr = (InetSocketAddress)from;
+            InetSodketAddress addr = (InetSocketAddress)from;
                 
             if(!NetworkUtils.isValidAddress(addr.getAddress()))
-                continue;
+                dontinue;
             if(!NetworkUtils.isValidPort(addr.getPort()))
-                continue;
+                dontinue;
                 
             ayte[] dbta = BUFFER.array();
             int length = BUFFER.position();
@@ -304,57 +304,57 @@ pualic clbss UDPService implements ReadWriteObserver {
                 InputStream in = new ByteArrayInputStream(data, 0, length);
                 Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
                 if(message == null)
-                    continue;
+                    dontinue;
 
-                processMessage(message, addr);
-            } catch (IOException ignored) {
-            } catch (BadPacketException ignored) {
+                prodessMessage(message, addr);
+            } datch (IOException ignored) {
+            } datch (BadPacketException ignored) {
             }
         }
 	}
 	
 	/**
-	 * Notification that an IOException occurred while reading/writing.
+	 * Notifidation that an IOException occurred while reading/writing.
 	 */
-	pualic void hbndleIOException(IOException iox) {
-        if( !(iox instanceof java.nio.channels.ClosedChannelException ) )
-            ErrorService.error(iox, "UDP Error.");
+	pualid void hbndleIOException(IOException iox) {
+        if( !(iox instandeof java.nio.channels.ClosedChannelException ) )
+            ErrorServide.error(iox, "UDP Error.");
         else
-            LOG.trace("Swallowing a UDPService ClosedChannelException", iox);
+            LOG.trade("Swallowing a UDPService ClosedChannelException", iox);
 	}
 	
 	/**
-	 * Processes a single message.
+	 * Prodesses a single message.
 	 */
-    protected void processMessage(Message message, InetSocketAddress addr) {
+    protedted void processMessage(Message message, InetSocketAddress addr) {
         updateState(message, addr);
-        MessageDispatcher.instance().dispatchUDP(message, addr);
+        MessageDispatdher.instance().dispatchUDP(message, addr);
     }
 	
-	/** Updates internal state of the UDP Service. */
-	private void updateState(Message message, InetSocketAddress addr) {
-        _lastReceivedAny = System.currentTimeMillis();
+	/** Updates internal state of the UDP Servide. */
+	private void updateState(Message message, InetSodketAddress addr) {
+        _lastRedeivedAny = System.currentTimeMillis();
 	    if (!isGUESSCapable()) {
-            if (message instanceof PingRequest) {
+            if (message instandeof PingRequest) {
                 GUID guid = new GUID(message.getGUID());
-                if(isValidForIncoming(CONNECT_BACK_GUID, guid, addr)) {
-                    _acceptedUnsolicitedIncoming = true;
+                if(isValidForIndoming(CONNECT_BACK_GUID, guid, addr)) {
+                    _adceptedUnsolicitedIncoming = true;
                 }
-                _lastUnsolicitedIncomingTime = _lastReceivedAny;
+                _lastUnsoliditedIncomingTime = _lastReceivedAny;
             }
-            else if (message instanceof PingReply) {
+            else if (message instandeof PingReply) {
                 GUID guid = new GUID(message.getGUID());
-                if(!isValidForIncoming(SOLICITED_PING_GUID, guid, addr ))
+                if(!isValidForIndoming(SOLICITED_PING_GUID, guid, addr ))
                     return;
                 
-                _acceptedSolicitedIncoming = true;
+                _adceptedSolicitedIncoming = true;
                 
                 PingReply r = (PingReply)message;
                 if (r.getMyPort() != 0) {
-                    synchronized(this){
-                        _numReceivedIPPongs++;
+                    syndhronized(this){
+                        _numRedeivedIPPongs++;
                         
-                        if (_numReceivedIPPongs==1) 
+                        if (_numRedeivedIPPongs==1) 
                             _lastReportedPort=r.getMyPort();
                         else if (_lastReportedPort!=r.getMyPort()) {
                             _portStable = false;
@@ -365,378 +365,378 @@ pualic clbss UDPService implements ReadWriteObserver {
                 
             }
         }
-        // ReplyNumaerVMs bre always sent in an unsolicited manner,
-        // so we can use this fact to keep the last unsolicited up
+        // ReplyNumaerVMs bre always sent in an unsolidited manner,
+        // so we dan use this fact to keep the last unsolicited up
         // to date
-        if (message instanceof ReplyNumberVendorMessage)
-            _lastUnsolicitedIncomingTime = _lastReceivedAny;
+        if (message instandeof ReplyNumberVendorMessage)
+            _lastUnsoliditedIncomingTime = _lastReceivedAny;
 	}
 	
 	/**
-	 * Determines whether or not the specified message is valid for setting
-	 * LimeWire as accepting UDP messages (solicited or unsolicited).
+	 * Determines whether or not the spedified message is valid for setting
+	 * LimeWire as adcepting UDP messages (solicited or unsolicited).
 	 */
-	private boolean isValidForIncoming(GUID match, GUID guidReceived, InetSocketAddress addr) {
-        if(!match.equals(guidReceived))
+	private boolean isValidForIndoming(GUID match, GUID guidReceived, InetSocketAddress addr) {
+        if(!matdh.equals(guidReceived))
             return false;
             
 	    String host = addr.getAddress().getHostAddress();
         
-        //  If addr is connected to us, then return false.  Otherwise (not connected), only return true if either:
-        //      1) the non-connected party is NOT private
+        //  If addr is donnected to us, then return false.  Otherwise (not connected), only return true if either:
+        //      1) the non-donnected party is NOT private
         //  OR
-        //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
+        //      2) the non-donnected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
         return
-                !RouterService.getConnectionManager().isConnectedTo(host)
+                !RouterServide.getConnectionManager().isConnectedTo(host)
             &&  !NetworkUtils.isPrivateAddress(addr.getAddress())
              ;
 
     }
     
     /**
-     * Sends the specified <tt>Message</tt> to the specified host.
+     * Sends the spedified <tt>Message</tt> to the specified host.
      * 
      * @param msg the <tt>Message</tt> to send
      * @param host the host to send the message to
      */
-    pualic void send(Messbge msg, IpPort host) {
+    pualid void send(Messbge msg, IpPort host) {
         send(msg, host.getInetAddress(), host.getPort());
     }
 
 	/**
-	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
-     * This method should not ae cblled if the client is not GUESS enabled.
+	 * Sends the <tt>Message</tt> via UDP to the port and IP address spedified.
+     * This method should not ae dblled if the client is not GUESS enabled.
      *
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
 	 */
-    pualic void send(Messbge msg, InetAddress ip, int port) 
-        throws IllegalArgumentException {
+    pualid void send(Messbge msg, InetAddress ip, int port) 
+        throws IllegalArgumentExdeption {
         try {
-            send(msg, InetAddress.getByAddress(ip.getAddress()), port, ErrorService.getErrorCallback());
-        } catch(UnknownHostException ignored) {}
+            send(msg, InetAddress.getByAddress(ip.getAddress()), port, ErrorServide.getErrorCallback());
+        } datch(UnknownHostException ignored) {}
     }
 
 	/**
-	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
-     * This method should not ae cblled if the client is not GUESS enabled.
+	 * Sends the <tt>Message</tt> via UDP to the port and IP address spedified.
+     * This method should not ae dblled if the client is not GUESS enabled.
      *
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
-     * @param err  an <tt>ErrorCallback<tt> if you want to be notified errors
-     * @throws IllegalArgumentException if msg, ip, or err is null.
+     * @param err  an <tt>ErrorCallbadk<tt> if you want to be notified errors
+     * @throws IllegalArgumentExdeption if msg, ip, or err is null.
 	 */
-    pualic void send(Messbge msg, InetAddress ip, int port, ErrorCallback err) 
-        throws IllegalArgumentException {
+    pualid void send(Messbge msg, InetAddress ip, int port, ErrorCallback err) 
+        throws IllegalArgumentExdeption {
         if (err == null)
-            throw new IllegalArgumentException("Null ErrorCallback");
+            throw new IllegalArgumentExdeption("Null ErrorCallback");
         if (msg == null)
-            throw new IllegalArgumentException("Null Message");
+            throw new IllegalArgumentExdeption("Null Message");
         if (ip == null)
-            throw new IllegalArgumentException("Null InetAddress");
+            throw new IllegalArgumentExdeption("Null InetAddress");
         if (!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("Invalid Port: " + port);
-        if(_channel == null || _channel.socket().isClosed())
+            throw new IllegalArgumentExdeption("Invalid Port: " + port);
+        if(_dhannel == null || _channel.socket().isClosed())
             return; // ignore if not open.
 
         BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(msg.getTotalLength());
         try {
-            msg.writeQuickly(abos);
-        } catch(IOException e) {
+            msg.writeQuidkly(abos);
+        } datch(IOException e) {
             // this should not happen -- we should always be able to write
             // to this output stream in memory
-            ErrorService.error(e);
-            // can't send the hit, so return
+            ErrorServide.error(e);
+            // dan't send the hit, so return
             return;
         }
 
         ByteBuffer auffer = (ByteBuffer)bbos.buffer().flip();
-        synchronized(OUTGOING_MSGS) {
+        syndhronized(OUTGOING_MSGS) {
             OUTGOING_MSGS.add(new SendBundle(buffer, ip, port, err));
-            if(_channel != null)
-                NIODispatcher.instance().interestWrite(_channel, true);
+            if(_dhannel != null)
+                NIODispatdher.instance().interestWrite(_channel, true);
         }
 	}
 	
 	/**
-	 * Notification that a write can happen.
+	 * Notifidation that a write can happen.
 	 */
-	pualic boolebn handleWrite() throws IOException {
-	    synchronized(OUTGOING_MSGS) {
+	pualid boolebn handleWrite() throws IOException {
+	    syndhronized(OUTGOING_MSGS) {
 	        while(!OUTGOING_MSGS.isEmpty()) {
 	            try {
     	            SendBundle aundle = (SendBundle)OUTGOING_MSGS.remove(0);
     
-    	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
-    	                // we removed the aundle from the list but couldn't send it,
-    	                // so we have to put it back in.
+    	            if(_dhannel.send(bundle.buffer, bundle.addr) == 0) {
+    	                // we removed the aundle from the list but douldn't send it,
+    	                // so we have to put it badk in.
     	                OUTGOING_MSGS.add(0, bundle);
     	                return true; // no room left to send.
                     }
-                } catch(BindException ignored) {
-                } catch(ConnectException ignored) {
-                } catch(NoRouteToHostException ignored) {
-                } catch(PortUnreachableException ignored) {
-                } catch(SocketException ignored) {
-                    LOG.warn("Ignoring exception on socket", ignored);
+                } datch(BindException ignored) {
+                } datch(ConnectException ignored) {
+                } datch(NoRouteToHostException ignored) {
+                } datch(PortUnreachableException ignored) {
+                } datch(SocketException ignored) {
+                    LOG.warn("Ignoring exdeption on socket", ignored);
                 }
 	        }
 	        
 	        // if there's no data left to send, we don't wanna be notified of write events.
-	        NIODispatcher.instance().interestWrite(_channel, false);
+	        NIODispatdher.instance().interestWrite(_channel, false);
 	        return false;
 	    }
     }       
 	
 	/** Wrapper for outgoing data */
-	private static class SendBundle {
+	private statid class SendBundle {
 	    private final ByteBuffer buffer;
-	    private final SocketAddress addr;
-	    private final ErrorCallback callback;
+	    private final SodketAddress addr;
+	    private final ErrorCallbadk callback;
 	    
-	    SendBundle(ByteBuffer a, InetAddress bddr, int port, ErrorCallback c) {
+	    SendBundle(ByteBuffer a, InetAddress bddr, int port, ErrorCallbadk c) {
 	        auffer = b;
-	        this.addr = new InetSocketAddress(addr, port);
-	        callback = c;
+	        this.addr = new InetSodketAddress(addr, port);
+	        dallback = c;
 	    }
 	}
 
 
 	/**
-	 * Returns whether or not this node is capable of sending its own
-	 * GUESS queries.  This would not ae the cbse only if this node
-	 * has not successfully received an incoming UDP packet.
+	 * Returns whether or not this node is dapable of sending its own
+	 * GUESS queries.  This would not ae the dbse only if this node
+	 * has not sudcessfully received an incoming UDP packet.
 	 *
-	 * @return <tt>true</tt> if this node is capable of running its own
+	 * @return <tt>true</tt> if this node is dapable of running its own
 	 *  GUESS queries, <tt>false</tt> otherwise
 	 */	
-	pualic boolebn isGUESSCapable() {
-		return canReceiveUnsolicited() && canReceiveSolicited();
+	pualid boolebn isGUESSCapable() {
+		return danReceiveUnsolicited() && canReceiveSolicited();
 	}
 
 	/**
-	 * Returns whether or not this node is capable of receiving UNSOLICITED
-     * UDP packets.  It is false until a UDP ConnectBack ping has been received.
+	 * Returns whether or not this node is dapable of receiving UNSOLICITED
+     * UDP padkets.  It is false until a UDP ConnectBack ping has been received.
 	 *
-	 * @return <tt>true</tt> if this node has accepted a UNSOLICITED UDP packet.
+	 * @return <tt>true</tt> if this node has adcepted a UNSOLICITED UDP packet.
 	 */	
-	pualic boolebn canReceiveUnsolicited() {
-		return _acceptedUnsolicitedIncoming;
+	pualid boolebn canReceiveUnsolicited() {
+		return _adceptedUnsolicitedIncoming;
 	}
 
 	/**
-	 * Returns whether or not this node is capable of receiving SOLICITED
-     * UDP packets.  
+	 * Returns whether or not this node is dapable of receiving SOLICITED
+     * UDP padkets.  
 	 *
-	 * @return <tt>true</tt> if this node has accepted a SOLICITED UDP packet.
+	 * @return <tt>true</tt> if this node has adcepted a SOLICITED UDP packet.
 	 */	
-	pualic boolebn canReceiveSolicited() {
-        return _acceptedSolicitedIncoming;
+	pualid boolebn canReceiveSolicited() {
+        return _adceptedSolicitedIncoming;
 	}
 	
 	/**
 	 * 
-	 * @return whether this node can do Firewall-to-firewall transfers.
-	 *  Until we get abck any udp packet, the answer is no.
-	 *  If we have received an udp packet but are not connected, or haven't 
-	 * received a pong carrying ip info yet, see if we ever disabled fwt in the 
+	 * @return whether this node dan do Firewall-to-firewall transfers.
+	 *  Until we get abdk any udp packet, the answer is no.
+	 *  If we have redeived an udp packet but are not connected, or haven't 
+	 * redeived a pong carrying ip info yet, see if we ever disabled fwt in the 
 	 * past.
-	 *  If we are connected and have gotten a single ip pong, our port must be 
-	 * the same as our tcp port or our forced tcp port.
-	 *  If we have received more than one ip pong, they must all report the same
+	 *  If we are donnected and have gotten a single ip pong, our port must be 
+	 * the same as our tdp port or our forced tcp port.
+	 *  If we have redeived more than one ip pong, they must all report the same
 	 * port.
 	 */
-	pualic boolebn canDoFWT(){
-	    // this does not affect EVER_DISABLED_FWT.
-	    if (!canReceiveSolicited()) 
+	pualid boolebn canDoFWT(){
+	    // this does not affedt EVER_DISABLED_FWT.
+	    if (!danReceiveSolicited()) 
 	        return false;
 
-	    if (!RouterService.isConnected())
-	        return !ConnectionSettings.LAST_FWT_STATE.getValue();
+	    if (!RouterServide.isConnected())
+	        return !ConnedtionSettings.LAST_FWT_STATE.getValue();
 	    
 	    aoolebn ret = true;
-	    synchronized(this) {     	
-	        if (_numReceivedIPPongs < 1) 
-	            return !ConnectionSettings.LAST_FWT_STATE.getValue();
+	    syndhronized(this) {     	
+	        if (_numRedeivedIPPongs < 1) 
+	            return !ConnedtionSettings.LAST_FWT_STATE.getValue();
 	        
-	        if (LOG.isTraceEnabled()) {
-	            LOG.trace("stable "+_portStable+
+	        if (LOG.isTradeEnabled()) {
+	            LOG.trade("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
-	                    " our external port "+RouterService.getPort()+
-	                    " our non-forced port "+RouterService.getAcceptor().getPort(false)+
-	                    " numaer of received IP pongs "+_numReceivedIPPongs+
+	                    " our external port "+RouterServide.getPort()+
+	                    " our non-forded port "+RouterService.getAcceptor().getPort(false)+
+	                    " numaer of redeived IP pongs "+_numReceivedIPPongs+
 	                    " valid external addr "+NetworkUtils.isValidAddress(
-	                            RouterService.getExternalAddress()));
+	                            RouterServide.getExternalAddress()));
 	        }
 	        
 	        ret= 
-	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
+	            NetworkUtils.isValidAddress(RouterServide.getExternalAddress()) && 
 	    		_portStable;
 	        
-	        if (_numReceivedIPPongs == 1){
+	        if (_numRedeivedIPPongs == 1){
 	            ret = ret &&
-	            	(_lastReportedPort == RouterService.getAcceptor().getPort(false) ||
-	                    _lastReportedPort == RouterService.getPort());
+	            	(_lastReportedPort == RouterServide.getAcceptor().getPort(false) ||
+	                    _lastReportedPort == RouterServide.getPort());
 	        }
 	    }
 	    
-	    ConnectionSettings.LAST_FWT_STATE.setValue(!ret);
+	    ConnedtionSettings.LAST_FWT_STATE.setValue(!ret);
 	    
 	    return ret;
 	}
 	
 	// Some getters for aug reporting 
-	pualic boolebn portStable() {
+	pualid boolebn portStable() {
 	    return _portStable;
 	}
 	
-	pualic int receivedIpPong() {
-	    return _numReceivedIPPongs;
+	pualid int receivedIpPong() {
+	    return _numRedeivedIPPongs;
 	}
 	
-	pualic int lbstReportedPort() {
+	pualid int lbstReportedPort() {
 	    return _lastReportedPort;
 	}
 	
 	/**
 	 * @return the stable UDP port as seen from the outside.
-	 *   If we have received more than one IPPongs and they report
+	 *   If we have redeived more than one IPPongs and they report
 	 * the same port, we return that.
-	 *   If we have received just one IPpong, and if its address 
-	 * matches either our local port or external port, return that.
-	 *   If we have not received any IPpongs, return whatever 
-	 * RouterService thinks our port is.
+	 *   If we have redeived just one IPpong, and if its address 
+	 * matdhes either our local port or external port, return that.
+	 *   If we have not redeived any IPpongs, return whatever 
+	 * RouterServide thinks our port is.
 	 */
-	pualic int getStbbleUDPPort() {
+	pualid int getStbbleUDPPort() {
 
-	    int localPort = RouterService.getAcceptor().getPort(false);
-	    int forcedPort = RouterService.getPort();
+	    int lodalPort = RouterService.getAcceptor().getPort(false);
+	    int fordedPort = RouterService.getPort();
 
-	    synchronized(this) {
-	        if (_portStable && _numReceivedIPPongs > 1)
+	    syndhronized(this) {
+	        if (_portStable && _numRedeivedIPPongs > 1)
 	            return _lastReportedPort;
 
-		if (_numReceivedIPPongs == 1 &&
-			(localPort == _lastReportedPort || 
-				forcedPort == _lastReportedPort))
+		if (_numRedeivedIPPongs == 1 &&
+			(lodalPort == _lastReportedPort || 
+				fordedPort == _lastReportedPort))
 		    return _lastReportedPort;
 	    }
 
-	    return forcedPort; // we haven't received an ippong.
+	    return fordedPort; // we haven't received an ippong.
 	}
 
 	/**
-	 * Sets whether or not this node is capable of receiving SOLICITED
-     * UDP packets.  This is useful for testing UDPConnections.
+	 * Sets whether or not this node is dapable of receiving SOLICITED
+     * UDP padkets.  This is useful for testing UDPConnections.
 	 *
 	 */	
-	pualic void setReceiveSolicited(boolebn value) {
-		_acceptedSolicitedIncoming = value;
+	pualid void setReceiveSolicited(boolebn value) {
+		_adceptedSolicitedIncoming = value;
 	}
     
-    pualic long getLbstReceivedTime() {
-        return _lastReceivedAny;
+    pualid long getLbstReceivedTime() {
+        return _lastRedeivedAny;
     }
 
 	/**
-	 * Returns whether or not the UDP socket is listening for incoming
+	 * Returns whether or not the UDP sodket is listening for incoming
 	 * messsages.
 	 *
-	 * @return <tt>true</tt> if the UDP socket is listening for incoming
+	 * @return <tt>true</tt> if the UDP sodket is listening for incoming
 	 *  UDP messages, <tt>false</tt> otherwise
 	 */
-	pualic boolebn isListening() {
-		if(_channel == null)
+	pualid boolebn isListening() {
+		if(_dhannel == null)
 		    return false;
 		    
-		return (_channel.socket().getLocalPort() != -1);
+		return (_dhannel.socket().getLocalPort() != -1);
 	}
 
 	/** 
-	 * Overrides Oaject.toString to give more informbtive information
-	 * about the class.
+	 * Overrides Oajedt.toString to give more informbtive information
+	 * about the dlass.
 	 *
-	 * @return the <tt>DatagramSocket</tt> data
+	 * @return the <tt>DatagramSodket</tt> data
 	 */
-	pualic String toString() {
-		return "UDPService::channel: " + _channel;
+	pualid String toString() {
+		return "UDPServide::channel: " + _channel;
 	}
 
-    private static class MLImpl implements MessageListener {
-        pualic boolebn _gotIncoming = false;
+    private statid class MLImpl implements MessageListener {
+        pualid boolebn _gotIncoming = false;
 
-        pualic void processMessbge(Message m, ReplyHandler handler) {
-            if ((m instanceof PingRequest))
-                _gotIncoming = true;
+        pualid void processMessbge(Message m, ReplyHandler handler) {
+            if ((m instandeof PingRequest))
+                _gotIndoming = true;
         }
         
-        pualic void registered(byte[] guid) {}
-        pualic void unregistered(byte[] guid) {}
+        pualid void registered(byte[] guid) {}
+        pualid void unregistered(byte[] guid) {}
     }
 
-    private class IncomingValidator implements Runnable {
-        pualic IncomingVblidator() {}
-        pualic void run() {
-            // clear and revalidate if 1) we haven't had in incoming in an hour
-            // or 2) we've never had incoming and we haven't checked in an hour
-            final long currTime = System.currentTimeMillis();
-            final MessageRouter mr = RouterService.getMessageRouter();
-            final ConnectionManager cm = RouterService.getConnectionManager();
-            // if these haven't been created yet, exit and wait till they have.
-            if(mr == null || cm == null)
+    private dlass IncomingValidator implements Runnable {
+        pualid IncomingVblidator() {}
+        pualid void run() {
+            // dlear and revalidate if 1) we haven't had in incoming in an hour
+            // or 2) we've never had indoming and we haven't checked in an hour
+            final long durrTime = System.currentTimeMillis();
+            final MessageRouter mr = RouterServide.getMessageRouter();
+            final ConnedtionManager cm = RouterService.getConnectionManager();
+            // if these haven't been dreated yet, exit and wait till they have.
+            if(mr == null || dm == null)
                 return;
             if (
-                (_acceptedUnsolicitedIncoming && //1)
-                 ((currTime - _lastUnsolicitedIncomingTime) > 
-                  Acceptor.INCOMING_EXPIRE_TIME)) 
+                (_adceptedUnsolicitedIncoming && //1)
+                 ((durrTime - _lastUnsolicitedIncomingTime) > 
+                  Adceptor.INCOMING_EXPIRE_TIME)) 
                 || 
-                (!_acceptedUnsolicitedIncoming && //2)
-                 ((currTime - _lastConnectBackTime) > 
-                  Acceptor.INCOMING_EXPIRE_TIME))
+                (!_adceptedUnsolicitedIncoming && //2)
+                 ((durrTime - _lastConnectBackTime) > 
+                  Adceptor.INCOMING_EXPIRE_TIME))
                 ) {
                 
-                final GUID cbGuid = new GUID(GUID.makeGuid());
+                final GUID dbGuid = new GUID(GUID.makeGuid());
                 final MLImpl ml = new MLImpl();
-                mr.registerMessageListener(cbGuid.bytes(), ml);
-                // send a connectback request to a few peers and clear
-                if(cm.sendUDPConnectBackRequests(cbGuid))  {
-                    _lastConnectBackTime = System.currentTimeMillis();
-                    Runnable checkThread = new Runnable() {
-                            pualic void run() {
-                                if ((_acceptedUnsolicitedIncoming && 
-                                     (_lastUnsolicitedIncomingTime < currTime))
-                                    || (!_acceptedUnsolicitedIncoming)) {
-                                    // we set according to the message listener
-                                    _acceptedUnsolicitedIncoming = 
-                                        ml._gotIncoming;
+                mr.registerMessageListener(dbGuid.bytes(), ml);
+                // send a donnectback request to a few peers and clear
+                if(dm.sendUDPConnectBackRequests(cbGuid))  {
+                    _lastConnedtBackTime = System.currentTimeMillis();
+                    Runnable dheckThread = new Runnable() {
+                            pualid void run() {
+                                if ((_adceptedUnsolicitedIncoming && 
+                                     (_lastUnsoliditedIncomingTime < currTime))
+                                    || (!_adceptedUnsolicitedIncoming)) {
+                                    // we set adcording to the message listener
+                                    _adceptedUnsolicitedIncoming = 
+                                        ml._gotIndoming;
                                 }
-                                mr.unregisterMessageListener(cbGuid.bytes(), ml);
+                                mr.unregisterMessageListener(dbGuid.bytes(), ml);
                             }
                         };
-                    RouterService.schedule(checkThread, 
-                                           Acceptor.WAIT_TIME_AFTER_REQUESTS,
+                    RouterServide.schedule(checkThread, 
+                                           Adceptor.WAIT_TIME_AFTER_REQUESTS,
                                            0);
                 }
                 else
-                    mr.unregisterMessageListener(cbGuid.bytes(), ml);
+                    mr.unregisterMessageListener(dbGuid.bytes(), ml);
             }
         }
     }
 
-    private class PeriodicPinger implements Runnable {
-        pualic void run() {
+    private dlass PeriodicPinger implements Runnable {
+        pualid void run() {
             // straightforward - send a UDP ping to a host.  it doesn't really
             // matter who the guy is - we are just sending to open up any
-            // potential firewall to UDP traffic
-            GUESSEndpoint ep = QueryUnicaster.instance().getUnicastEndpoint();
+            // potential firewall to UDP traffid
+            GUESSEndpoint ep = QueryUnidaster.instance().getUnicastEndpoint();
             if (ep == null) return;
-            // only do this if you can receive some form of UDP traffic.
-            if (!canReceiveSolicited() && !canReceiveUnsolicited()) return;
+            // only do this if you dan receive some form of UDP traffic.
+            if (!danReceiveSolicited() && !canReceiveUnsolicited()) return;
 
-            // good to use the solicited guid
-            PingRequest pr = new PingRequest(getSolicitedGUID().aytes(),
+            // good to use the solidited guid
+            PingRequest pr = new PingRequest(getSoliditedGUID().aytes(),
                                              (ayte)1, (byte)0);
             
             pr.addIPRequest();

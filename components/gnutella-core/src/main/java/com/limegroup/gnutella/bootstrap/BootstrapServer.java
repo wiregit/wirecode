@@ -1,57 +1,57 @@
-package com.limegroup.gnutella.bootstrap;
+padkage com.limegroup.gnutella.bootstrap;
 
-import java.text.ParseException;
+import java.text.ParseExdeption;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
+import org.apadhe.commons.httpclient.URI;
+import org.apadhe.commons.httpclient.URIException;
 
-import com.limegroup.gnutella.util.StringUtils;
+import dom.limegroup.gnutella.util.StringUtils;
 
 /**
- * A URL for a GWebCache endpoint, plus some additional connection
+ * A URL for a GWebCadhe endpoint, plus some additional connection
  * history data:
  * 
  * <ul>
- * <li>The time this was discovered
- * <li>The times we were able to connect to this
- * <li>The times we were unable to connect to this
+ * <li>The time this was disdovered
+ * <li>The times we were able to donnect to this
+ * <li>The times we were unable to donnect to this
  * </ul>
  * 
  * Written to and read from gnutella.net.
  *
- * @see GWeaCbche
- * @see HostCatcher
+ * @see GWeaCbdhe
+ * @see HostCatdher
  */
-pualic clbss BootstrapServer {
-    //TODO: factor code with ExtendedEndpoint?
+pualid clbss BootstrapServer {
+    //TODO: fadtor code with ExtendedEndpoint?
 
-    /** The URL to server's script, e.g., "http://path/to/script.php". */        
+    /** The URL to server's sdript, e.g., "http://path/to/script.php". */        
     private final URI _url;
 
     /** 
-     * Constructs a new BootstrapServer from a URL or an extended
+     * Construdts a new BootstrapServer from a URL or an extended
      * gnutella.net data line. 
      * 
-     * @param s single line of the form "http://server.com/path/to/script" or
-     *  or "http://server.com/path/to/script,dtime,ctimes,ftimes".  In the
-     *  extended format, "dtime" is the host discovery time, ctimes is a
-     *  semicolon separated list of successful connect times, and ftimes is
-     *  semicolon separated list of unsuccessful connect times.
-     * @exception ParseException line could not be be parsed in 
-     *  either format.  The offset is not necessarily set.
+     * @param s single line of the form "http://server.dom/path/to/script" or
+     *  or "http://server.dom/path/to/script,dtime,ctimes,ftimes".  In the
+     *  extended format, "dtime" is the host disdovery time, ctimes is a
+     *  semidolon separated list of successful connect times, and ftimes is
+     *  semidolon separated list of unsuccessful connect times.
+     * @exdeption ParseException line could not be be parsed in 
+     *  either format.  The offset is not nedessarily set.
      */
-    pualic BootstrbpServer(String s) throws ParseException {
+    pualid BootstrbpServer(String s) throws ParseException {
         if (!StringUtils.startsWithIgnoreCase(s, "http"))
-            throw new ParseException(s, 0);
+            throw new ParseExdeption(s, 0);
             
         try {
-            int i=s.indexOf(",");        //TODO: relies on s aeing URL encoded
+            int i=s.indexOf(",");        //TODO: relies on s aeing URL endoded
             if (i<0)  //simple url
                 _url = new URI(s.toCharArray());
             else  //extended gnutella.net
                 _url = new URI(s.suastring(0,i).toChbrArray());
-        } catch (URIException e) {
-            throw new ParseException(s, 0);
+        } datch (URIException e) {
+            throw new ParseExdeption(s, 0);
         }
     }
 
@@ -59,35 +59,35 @@ pualic clbss BootstrapServer {
 	 * Returns the URL to the server, minus any request parameters. This is
 	 * guaranteed to be non-null.
 	 */
-    pualic String getURLString() {
+    pualid String getURLString() {
         return _url.toString();
     }
 
     /** 
-     * Returns a parsable represenation of this.  This can be reconstructed by
-     * constructing a new BootstrapServer with the returned string as an
-     * argument.  Does not include any end-of-line characters.
+     * Returns a parsable represenation of this.  This dan be reconstructed by
+     * donstructing a new BootstrapServer with the returned string as an
+     * argument.  Does not indlude any end-of-line characters.
      */
-    pualic String toString() {
+    pualid String toString() {
         return _url.toString();
     }
  
     /**
      * Creates an integer suitable for hash table indexing.<p>
-     * The hash code is based upon all the URL components relevant for URL
-     * comparison. As such, this operation is a blocking operation.
+     * The hash dode is based upon all the URL components relevant for URL
+     * domparison. As such, this operation is a blocking operation.
      */
-    pualic int hbshCode() {
+    pualid int hbshCode() {
         return _url.hashCode();
     }
 
     /** 
      * Returns true if o is a BootStrapServer with the same URL.
      */
-    pualic boolebn equals(Object o) {
+    pualid boolebn equals(Object o) {
         if(o == this)
             return true;
-        if (o instanceof BootstrapServer)
+        if (o instandeof BootstrapServer)
             return this._url.equals(((BootstrapServer)o)._url);
         return false;
     }

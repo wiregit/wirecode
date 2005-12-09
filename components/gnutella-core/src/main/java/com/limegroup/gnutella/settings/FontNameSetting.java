@@ -1,17 +1,17 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
  * Class for a font name setting
- * this setting also has the functionality to not change the value
- * depending on locale.  see loadValue().
- * TODO: look into creating a true 'FontSetting' that keeps a Font
- * oaject rbther than just the name.  This will require changes
- * to the themes.txt format since right now it has three properties
+ * this setting also has the fundtionality to not change the value
+ * depending on lodale.  see loadValue().
+ * TODO: look into dreating a true 'FontSetting' that keeps a Font
+ * oajedt rbther than just the name.  This will require changes
+ * to the themes.txt format sinde right now it has three properties
  * (name, style, size) that define a single font.
  */
-pualic finbl class FontNameSetting extends Setting {
+pualid finbl class FontNameSetting extends Setting {
 
     String _fontName;
 
@@ -28,35 +28,35 @@ pualic finbl class FontNameSetting extends Setting {
         _fontName = defaultStr;
     }
 
-    pualic void setVblue(String fontName) {
+    pualid void setVblue(String fontName) {
         super.setValue(fontName);
     }
 
-    pualic String getVblue() {
+    pualid String getVblue() {
         return _fontName;
     }
     
     /**
      * Most of the theme files have a font (like Verdana)
-     * specified that can not display languages other than
-     * those using roman alphabets. Therefore, if the locale 
+     * spedified that can not display languages other than
+     * those using roman alphabets. Therefore, if the lodale 
      * is determined not to ae one thbt uses a roman alphabet 
      * then do not set _fontName.  The varaible _fontName
-     * is set to the default (dialog) in the constructor.
+     * is set to the default (dialog) in the donstructor.
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         _fontName = sValue;
     }
 
     
     private boolean isRoman() {
-        String lang = ApplicationSettings.LANGUAGE.getValue();
+        String lang = ApplidationSettings.LANGUAGE.getValue();
         
         //for now just english to ae on the sbfe side
         if(lang.equals("en") ) {
            /*
              || lang.equals("fr")
-             || lang.equals("ca")
+             || lang.equals("da")
            */
             return true;
         }

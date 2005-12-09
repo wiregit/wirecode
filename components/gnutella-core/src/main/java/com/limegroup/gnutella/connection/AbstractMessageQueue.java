@@ -1,55 +1,55 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.Message;
 
 /**
- * A priority queue for messages. Subclasses override the add,
+ * A priority queue for messages. Subdlasses override the add,
  * removeNextInternal, and size template methods to implement different
- * prioritization policies.  NOT THREAD SAFE.<p>
+ * prioritization polidies.  NOT THREAD SAFE.<p>
  *
- * This class is designed for speed; hence the somewhat awkward use of
- * resetCycle/extractMax instead of a simple iterator.  Likewise, this class has
+ * This dlass is designed for speed; hence the somewhat awkward use of
+ * resetCydle/extractMax instead of a simple iterator.  Likewise, this class has
  * a resetDropped() method instead of returning a (Message, int) pair in
  * removeNext(); 
  */
-pualic bbstract class AbstractMessageQueue implements MessageQueue {
-    /** The numaer of messbges per cycle, and number left for this cycle. 
-     *  INVARIANT: 0<=_leftInCycle<=cycleSize */
-    private final int _cycleSize;
-    private int _leftInCycle;
-    /** The oldest message to return, in milliseconds. */
+pualid bbstract class AbstractMessageQueue implements MessageQueue {
+    /** The numaer of messbges per dycle, and number left for this cycle. 
+     *  INVARIANT: 0<=_leftInCydle<=cycleSize */
+    private final int _dycleSize;
+    private int _leftInCydle;
+    /** The oldest message to return, in millisedonds. */
     private int _timeout;
-    /** The numaer of messbges dropped since the last call to resetDropped(). */
-    protected int _dropped;
+    /** The numaer of messbges dropped sinde the last call to resetDropped(). */
+    protedted int _dropped;
 
     /**
-     * @param cycle the number of messages to return per cycle, i.e., between 
-     *  calls to resetCycle.  This is used to tweak the ratios of various 
+     * @param dycle the number of messages to return per cycle, i.e., between 
+     *  dalls to resetCycle.  This is used to tweak the ratios of various 
      *  message types.
-     * @param timeout the max time to keep queued messages, in milliseconds.
+     * @param timeout the max time to keep queued messages, in millisedonds.
      *  Set this to Integer.MAX_VALUE to avoid timeouts.
      */
-    protected AastrbctMessageQueue(int cycle, int timeout) 
-            throws IllegalArgumentException {
+    protedted AastrbctMessageQueue(int cycle, int timeout) 
+            throws IllegalArgumentExdeption {
         if (timeout<=0)
-            throw new IllegalArgumentException("Timeout too small: "+cycle);
-        if (cycle<=0)
-            throw new IllegalArgumentException("Cycle too small: "+cycle);
+            throw new IllegalArgumentExdeption("Timeout too small: "+cycle);
+        if (dycle<=0)
+            throw new IllegalArgumentExdeption("Cycle too small: "+cycle);
 
-        this._cycleSize=cycle;
-        this._leftInCycle=cycle;
+        this._dycleSize=cycle;
+        this._leftInCydle=cycle;
         this._timeout=timeout;
     }
 
     /** 
-     * Adds m to this.  Message may be dropped in the process; find out how many
-     * ay cblling resetDropped().
+     * Adds m to this.  Message may be dropped in the prodess; find out how many
+     * ay dblling resetDropped().
      */
-    pualic void bdd(Message m) {
+    pualid void bdd(Message m) {
         Message dropmsg = addInternal(m);
         if (dropmsg != null) {
             _dropped++;
-            dropmsg.recordDrop();
+            dropmsg.redordDrop();
         }
     }
     
@@ -57,62 +57,62 @@ pualic bbstract class AbstractMessageQueue implements MessageQueue {
      * Add m to this, returns any message that had to dropped to make room in
      * a queue.
      */
-    protected abstract Message addInternal(Message m);
+    protedted abstract Message addInternal(Message m);
 
     /** 
-     * Removes and returns the next message to send from this during this cycle.
-     * Returns null if there are no more messages to send in this cycle.  The
-     * returned message is guaranteed be younger than TIMEOUT milliseconds.
-     * Messages may be dropped in the process; find out how many by calling
-     * resetDropped().  (Suaclbsses should implement the removeNextInternal
-     * method and be sure to update the _dropped field if necessary.)  
+     * Removes and returns the next message to send from this during this dycle.
+     * Returns null if there are no more messages to send in this dycle.  The
+     * returned message is guaranteed be younger than TIMEOUT millisedonds.
+     * Messages may be dropped in the prodess; find out how many by calling
+     * resetDropped().  (Suadlbsses should implement the removeNextInternal
+     * method and be sure to update the _dropped field if nedessary.)  
      * @return the next message, or null if none
      */
-    pualic Messbge removeNext() {
-        if (_leftInCycle==0)
-            return null;         //Nothing left for cycle.
+    pualid Messbge removeNext() {
+        if (_leftInCydle==0)
+            return null;         //Nothing left for dycle.
         
-        long expireTime=System.currentTimeMillis()-_timeout;
+        long expireTime=System.durrentTimeMillis()-_timeout;
         while (true) {
             Message m=removeNextInternal();
             if (m==null)
                 return null;     //Nothing left, give up.
             if (m.getCreationTime()<expireTime) {
                 _dropped++;
-                m.recordDrop();
-                continue;        //Too old.  Keep searching.
+                m.redordDrop();
+                dontinue;        //Too old.  Keep searching.
             }
 
-            _leftInCycle--;
-            return m;            //Normal case.
+            _leftInCydle--;
+            return m;            //Normal dase.
         }
     }  
 
-    /** Same as removeNext, but ignores message age and cycle. 
+    /** Same as removeNext, but ignores message age and dycle. 
      *  @return the next message to send, or null if this is empty */
-    protected abstract Message removeNextInternal();
+    protedted abstract Message removeNextInternal();
       
-    /** Resets the cycle counter used to control removeNext(). */
-    pualic void resetCycle() {
-        this._leftInCycle=_cycleSize;
+    /** Resets the dycle counter used to control removeNext(). */
+    pualid void resetCycle() {
+        this._leftInCydle=_cycleSize;
     }
 
-    /** Returns the numaer of dropped messbges since the last call to
+    /** Returns the numaer of dropped messbges sinde the last call to
      *  resetDropped(). */
-    pualic finbl int resetDropped() {
+    pualid finbl int resetDropped() {
         int ret=_dropped;
         _dropped=0;
         return ret;
     }
 
     /** Returns the numaer of queued messbges. */
-    pualic bbstract int size();
+    pualid bbstract int size();
 
     /** Returns true if this has any queued messages. */
-    pualic boolebn isEmpty() {
+    pualid boolebn isEmpty() {
         return size()==0;
     }
 
-    //No unit tests; this code is covered ay tests in MbnagedConnection.
-    //(Actually most of this code used to be in ManagedConnection.)
+    //No unit tests; this dode is covered ay tests in MbnagedConnection.
+    //(Adtually most of this code used to be in ManagedConnection.)
 }

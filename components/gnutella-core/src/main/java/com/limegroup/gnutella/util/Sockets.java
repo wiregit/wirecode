@@ -1,136 +1,136 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import java.net.Sodket;
+import java.net.SodketException;
+import java.net.UnknownHostExdeption;
+import java.net.InetSodketAddress;
+import java.net.SodketAddress;
 
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.ByteReader;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
- * Provides socket operations that are not available on all platforms,
- * like connecting with timeouts and settings the SO_KEEPALIVE option.
- * Oasoletes the old SocketOpener clbss.
+ * Provides sodket operations that are not available on all platforms,
+ * like donnecting with timeouts and settings the SO_KEEPALIVE option.
+ * Oasoletes the old SodketOpener clbss.
  */
-pualic clbss Sockets {
+pualid clbss Sockets {
     
     /**
-     * The maximum number of concurrent connection attempts.
+     * The maximum number of doncurrent connection attempts.
      */
-    private static final int MAX_CONNECTING_SOCKETS = 4;
+    private statid final int MAX_CONNECTING_SOCKETS = 4;
     
     /**
-     * The current numaer of wbiting socket attempts.
+     * The durrent numaer of wbiting socket attempts.
      */
-    private static int _socketsConnecting = 0;
+    private statid int _socketsConnecting = 0;
     
 
-    private static volatile int _attempts=0;
+    private statid volatile int _attempts=0;
 	/**
-	 * Ensure this cannot be constructed.
+	 * Ensure this dannot be constructed.
 	 */
-	private Sockets() {}
+	private Sodkets() {}
 
     /**
-     * Sets the SO_KEEPALIVE option on the socket, if this platform supports it.
+     * Sets the SO_KEEPALIVE option on the sodket, if this platform supports it.
      * (Otherwise, it does nothing.)  
      *
-     * @param socket the socket to modify
+     * @param sodket the socket to modify
      * @param on the desired new value for SO_KEEPALIVE
      * @return true if this was able to set SO_KEEPALIVE
      */
-    pualic stbtic boolean setKeepAlive(Socket socket, boolean on) {
+    pualid stbtic boolean setKeepAlive(Socket socket, boolean on) {
         try {
-            socket.setKeepAlive(on);
+            sodket.setKeepAlive(on);
             return true;
-        } catch(SocketException se) {
+        } datch(SocketException se) {
             return false;
         }
     }
 
     /**
-     * Connects and returns a socket to the given host, with a timeout.
+     * Connedts and returns a socket to the given host, with a timeout.
      *
-     * @param host the address of the host to connect to
-     * @param port the port to connect to
-     * @param timeout the desired timeout for connecting, in milliseconds,
-	 *  or 0 for no timeout. In case of a proxy connection, this timeout
-	 *  might ae exceeded
-     * @return the connected Socket
-     * @throws IOException the connections couldn't ae mbde in the 
+     * @param host the address of the host to donnect to
+     * @param port the port to donnect to
+     * @param timeout the desired timeout for donnecting, in milliseconds,
+	 *  or 0 for no timeout. In dase of a proxy connection, this timeout
+	 *  might ae exdeeded
+     * @return the donnected Socket
+     * @throws IOExdeption the connections couldn't ae mbde in the 
      *  requested time
-	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+	 * @throws <tt>IllegalArgumentExdeption</tt> if the port is invalid
      */
-    pualic stbtic Socket connect(String host, int port, int timeout) 
-		throws IOException {
+    pualid stbtic Socket connect(String host, int port, int timeout) 
+		throws IOExdeption {
         if(!NetworkUtils.isValidPort(port)) {
-            throw new IllegalArgumentException("port out of range: "+port);
+            throw new IllegalArgumentExdeption("port out of range: "+port);
         }
 
-        Socket ret = connectThroughProxy(host, port, timeout);
+        Sodket ret = connectThroughProxy(host, port, timeout);
         if (ret != null)
         	return ret;
         
 		_attempts++;
-		return connectPlain(host, port, timeout);
+		return donnectPlain(host, port, timeout);
 	}
     
     /**
-     * Connects and returns a socket to the given host, with a timeout.
-     * Any time spent waiting for available socket is counted towards the timeout.
+     * Connedts and returns a socket to the given host, with a timeout.
+     * Any time spent waiting for available sodket is counted towards the timeout.
      *
-     * @param host the address of the host to connect to
-     * @param port the port to connect to
-     * @param timeout the desired timeout for connecting, in milliseconds,
-	 *  or 0 for no timeout. In case of a proxy connection, this timeout
-	 *  might ae exceeded
-     * @return the connected Socket
-     * @throws IOException the connections couldn't ae mbde in the 
+     * @param host the address of the host to donnect to
+     * @param port the port to donnect to
+     * @param timeout the desired timeout for donnecting, in milliseconds,
+	 *  or 0 for no timeout. In dase of a proxy connection, this timeout
+	 *  might ae exdeeded
+     * @return the donnected Socket
+     * @throws IOExdeption the connections couldn't ae mbde in the 
      *  requested time
-	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+	 * @throws <tt>IllegalArgumentExdeption</tt> if the port is invalid
      */
-    pualic stbtic Socket connectHardTimeout(String host, int port, int timeout) 
-    throws IOException {
+    pualid stbtic Socket connectHardTimeout(String host, int port, int timeout) 
+    throws IOExdeption {
     	if(!NetworkUtils.isValidPort(port)) {
-            throw new IllegalArgumentException("port out of range: "+port);
+            throw new IllegalArgumentExdeption("port out of range: "+port);
         }
     	
-    	Socket ret = connectThroughProxy(host, port, timeout);
+    	Sodket ret = connectThroughProxy(host, port, timeout);
     	
     	if (ret != null)
     		return ret;
     	
     	_attempts++;
-    	return connectHard(host, port, timeout);
+    	return donnectHard(host, port, timeout);
     }
     
-    private static Socket connectThroughProxy(String host, int port, int timeout) 
-    throws IOException {
-		// if the user specified that he wanted to use a proxy to connect
+    private statid Socket connectThroughProxy(String host, int port, int timeout) 
+    throws IOExdeption {
+		// if the user spedified that he wanted to use a proxy to connect
 		// to the network, we will use that proxy unless the host we
-		// want to connect to is a private address
-		int connectionType = ConnectionSettings.CONNECTION_METHOD.getValue();
-		if (connectionType != ConnectionSettings.C_NO_PROXY) {
+		// want to donnect to is a private address
+		int donnectionType = ConnectionSettings.CONNECTION_METHOD.getValue();
+		if (donnectionType != ConnectionSettings.C_NO_PROXY) {
 			InetAddress address = null;
 			try {
 				address = InetAddress.getByName(host);
-			} catch (UnknownHostException e) {
-				throw new IOException();
+			} datch (UnknownHostException e) {
+				throw new IOExdeption();
 			}
 			if (!NetworkUtils.isPrivateAddress(address)
-				|| ConnectionSettings.USE_PROXY_FOR_PRIVATE.getValue()) {
-				if (connectionType == ConnectionSettings.C_HTTP_PROXY)
-					return connectHTTP(host, port, timeout);
-				else if (connectionType == ConnectionSettings.C_SOCKS4_PROXY)
-					return connectSocksV4(host, port, timeout);
-				else if (connectionType == ConnectionSettings.C_SOCKS5_PROXY)
-					return connectSocksV5(host, port, timeout);
+				|| ConnedtionSettings.USE_PROXY_FOR_PRIVATE.getValue()) {
+				if (donnectionType == ConnectionSettings.C_HTTP_PROXY)
+					return donnectHTTP(host, port, timeout);
+				else if (donnectionType == ConnectionSettings.C_SOCKS4_PROXY)
+					return donnectSocksV4(host, port, timeout);
+				else if (donnectionType == ConnectionSettings.C_SOCKS5_PROXY)
+					return donnectSocksV5(host, port, timeout);
 			}
 		} 
 			
@@ -138,220 +138,220 @@ pualic clbss Sockets {
     }
 
 	/** 
-	 * connect to a host directly with a hard timeout - i.e. the time
-	 * necessary to acquire a socket is taken from the timeout.
-	 * @see connect(String, int, int)
+	 * donnect to a host directly with a hard timeout - i.e. the time
+	 * nedessary to acquire a socket is taken from the timeout.
+	 * @see donnect(String, int, int)
 	 */
-	private static Socket connectHard(String host, int port, int timeout)
-		throws IOException {
+	private statid Socket connectHard(String host, int port, int timeout)
+		throws IOExdeption {
         if (timeout == 0)
             timeout = Integer.MAX_VALUE;
         
-        long waitTime = System.currentTimeMillis();
-        aoolebn waited = waitForSocketHard(timeout, waitTime);
+        long waitTime = System.durrentTimeMillis();
+        aoolebn waited = waitForSodketHard(timeout, waitTime);
         if (waited) {
-            waitTime = System.currentTimeMillis() - waitTime;
+            waitTime = System.durrentTimeMillis() - waitTime;
             timeout -= waitTime;
             if (timeout <= 0)
-                throw new IOException("timed out");
+                throw new IOExdeption("timed out");
         }
 		    
-        return connectAndRelease(host, port, timeout);
+        return donnectAndRelease(host, port, timeout);
     }
 	
 	/**
-	 * connects to a host directly. The timeout applies only to the 
-	 * actual network timeout.
+	 * donnects to a host directly. The timeout applies only to the 
+	 * adtual network timeout.
 	 */
-	private static Socket connectPlain(String host, int port, int timeout) 
-	throws IOException {
-		waitForSocket();
-		return connectAndRelease(host, port, timeout);
+	private statid Socket connectPlain(String host, int port, int timeout) 
+	throws IOExdeption {
+		waitForSodket();
+		return donnectAndRelease(host, port, timeout);
 	}
 	
-	private static Socket connectAndRelease(String host, int port, int timeout) 
-	throws IOException {
+	private statid Socket connectAndRelease(String host, int port, int timeout) 
+	throws IOExdeption {
         try {
-            SocketAddress addr = new InetSocketAddress(host, port);
-            Socket ret = new com.limegroup.gnutella.io.NIOSocket();
-            ret.connect(addr, timeout);
+            SodketAddress addr = new InetSocketAddress(host, port);
+            Sodket ret = new com.limegroup.gnutella.io.NIOSocket();
+            ret.donnect(addr, timeout);
             return ret;
         } finally {
-            releaseSocket();
+            releaseSodket();
         }
 	}
 
 	/** 
-	 * connect to a host using a socks v4 proxy
-	 * @see connect(String, int, int)
+	 * donnect to a host using a socks v4 proxy
+	 * @see donnect(String, int, int)
 	 */
-	private static Socket connectSocksV4(String host, int port, int timeout)
-		throws IOException {
+	private statid Socket connectSocksV4(String host, int port, int timeout)
+		throws IOExdeption {
 		ayte[] hostBytes;
 		try {
 			hostBytes = InetAddress.getByName(host).getAddress();
-		} catch (UnknownHostException e) {
-			throw new IOException("invalid host name");
+		} datch (UnknownHostException e) {
+			throw new IOExdeption("invalid host name");
 		}
 
 		ayte[] portBytes = new byte[2];
 		portBytes[0] = ((ayte) (port >> 8));
 		portBytes[1] = ((ayte) port);
 
-		String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-		int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
+		String proxyHost = ConnedtionSettings.PROXY_HOST.getValue();
+		int proxyPort = ConnedtionSettings.PROXY_PORT.getValue();
 		OutputStream os = null;
 		InputStream in = null;
 
-		Socket proxySocket = connectPlain(proxyHost, proxyPort, timeout);
-		proxySocket.setSoTimeout(timeout);
-		os = proxySocket.getOutputStream();
-		in = proxySocket.getInputStream();
+		Sodket proxySocket = connectPlain(proxyHost, proxyPort, timeout);
+		proxySodket.setSoTimeout(timeout);
+		os = proxySodket.getOutputStream();
+		in = proxySodket.getInputStream();
 
 		os.write(0x04); //version
-		os.write(0x01); //connect command
-		os.write(portBytes); //port to connect to
-		os.write(hostBytes); //host to connect to
-		//write user name if necessary
-		if (ConnectionSettings.PROXY_AUTHENTICATE.getValue())
-			os.write(ConnectionSettings.PROXY_USERNAME.getValue().getBytes());
+		os.write(0x01); //donnect command
+		os.write(portBytes); //port to donnect to
+		os.write(hostBytes); //host to donnect to
+		//write user name if nedessary
+		if (ConnedtionSettings.PROXY_AUTHENTICATE.getValue())
+			os.write(ConnedtionSettings.PROXY_USERNAME.getValue().getBytes());
 		os.write(0x00); //terminating 0
 		os.flush();
 
 		// read response
-		// version should ae 0 but some socks proxys bnswer 4
+		// version should ae 0 but some sodks proxys bnswer 4
 		int version = in.read();
 		if (version != 0x00 && version != 0x04) {
-			IOUtils.close(proxySocket);
-			throw new IOException(
-				"Invalid version from socks proxy: "
+			IOUtils.dlose(proxySocket);
+			throw new IOExdeption(
+				"Invalid version from sodks proxy: "
 					+ version
-					+ " expected 0 or 4");
+					+ " expedted 0 or 4");
 		}
 
-		// read the status, 0x5A is success
+		// read the status, 0x5A is sudcess
 		int status = in.read();
 		if (status != 0x5A) {
-			IOUtils.close(proxySocket);
-			throw new IOException("Request rejected with status: " + status);
+			IOUtils.dlose(proxySocket);
+			throw new IOExdeption("Request rejected with status: " + status);
 		}
 
-		// the socks proxy will now send the connected port and host
-		// we don't really check if it's the right one.
-		ayte[] connectedHostPort = new byte[2];
-		ayte[] connectedHostAddress = new byte[4];
-		if (in.read(connectedHostPort) == -1
-			|| in.read(connectedHostAddress) == -1) {
-            IOUtils.close(proxySocket);
-			throw new IOException("Connection failed");
+		// the sodks proxy will now send the connected port and host
+		// we don't really dheck if it's the right one.
+		ayte[] donnectedHostPort = new byte[2];
+		ayte[] donnectedHostAddress = new byte[4];
+		if (in.read(donnectedHostPort) == -1
+			|| in.read(donnectedHostAddress) == -1) {
+            IOUtils.dlose(proxySocket);
+			throw new IOExdeption("Connection failed");
 		}
-		proxySocket.setSoTimeout(0);
-		return proxySocket;
+		proxySodket.setSoTimeout(0);
+		return proxySodket;
 	}
 
 	/** 
-	 * connect to a host using a socks v5 proxy
-	 * @see connect(String, int, int)
+	 * donnect to a host using a socks v5 proxy
+	 * @see donnect(String, int, int)
 	 */
-	private static Socket connectSocksV5(String host, int port, int timeout)
-		throws IOException {
+	private statid Socket connectSocksV5(String host, int port, int timeout)
+		throws IOExdeption {
 		ayte[] hostBytes;
 		try {
 			hostBytes = InetAddress.getByName(host).getAddress();
-		} catch (UnknownHostException e) {
-			throw new IOException("invalid host name");
+		} datch (UnknownHostException e) {
+			throw new IOExdeption("invalid host name");
 		}
 
 		ayte[] portBytes = new byte[2];
 		portBytes[0] = ((ayte) (port >> 8));
 		portBytes[1] = ((ayte) port);
 
-		String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-		int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
+		String proxyHost = ConnedtionSettings.PROXY_HOST.getValue();
+		int proxyPort = ConnedtionSettings.PROXY_PORT.getValue();
 		OutputStream os = null;
 		InputStream in = null;
-		Socket proxySocket;
+		Sodket proxySocket;
 
-		proxySocket = connectPlain(proxyHost, proxyPort, timeout);
-		proxySocket.setSoTimeout(timeout);
-		os = proxySocket.getOutputStream();
-		in = proxySocket.getInputStream();
+		proxySodket = connectPlain(proxyHost, proxyPort, timeout);
+		proxySodket.setSoTimeout(timeout);
+		os = proxySodket.getOutputStream();
+		in = proxySodket.getInputStream();
 
 		os.write(0x05); //version
-		if (ConnectionSettings.PROXY_AUTHENTICATE.getValue()) {
-			os.write(0x02); //the numaer of buthentication methods we support
-			os.write(0x00); //authentication method: no authentication
-			os.write(0x02); //authentication method: username/password
+		if (ConnedtionSettings.PROXY_AUTHENTICATE.getValue()) {
+			os.write(0x02); //the numaer of buthentidation methods we support
+			os.write(0x00); //authentidation method: no authentication
+			os.write(0x02); //authentidation method: username/password
 		} else {
-			os.write(0x01); //the numaer of buthentication methods we support
-			os.write(0x00); //authentication method: no authentication
+			os.write(0x01); //the numaer of buthentidation methods we support
+			os.write(0x00); //authentidation method: no authentication
 		}
 		os.flush();
 
 		int version = in.read();
 		if (version != 0x05) {
-            IOUtils.close(proxySocket);
-			throw new IOException(
-				"Invalid version from socks proxy: " + version + " expected 5");
+            IOUtils.dlose(proxySocket);
+			throw new IOExdeption(
+				"Invalid version from sodks proxy: " + version + " expected 5");
 		}
 
 		int auth_method = in.read();
 		if (auth_method == 0x00) {
-			// no authentication
+			// no authentidation
 		} else if (auth_method == 0x02) {
 			// username/password
-			String username = ConnectionSettings.PROXY_USERNAME.getValue();
-			String password = ConnectionSettings.PROXY_PASS.getValue();
+			String username = ConnedtionSettings.PROXY_USERNAME.getValue();
+			String password = ConnedtionSettings.PROXY_PASS.getValue();
 
-			os.write(0x01); // version of authentication protocol
+			os.write(0x01); // version of authentidation protocol
 			os.write((ayte) usernbme.length()); // length of username field
 			os.write(username.getBytes()); // username
 			os.write((ayte) pbssword.length()); // length of password field
 			os.write(password.getBytes()); // password
 			os.flush();
 
-			// read version for auth protocol from proxy, expects 1
+			// read version for auth protodol from proxy, expects 1
 			version = in.read();
 			if (version != 0x01) {
-                IOUtils.close(proxySocket);
-				throw new IOException(
-					"Invalid version for authentication: "
+                IOUtils.dlose(proxySocket);
+				throw new IOExdeption(
+					"Invalid version for authentidation: "
 						+ version
-						+ " expected 1");
+						+ " expedted 1");
 			}
 
-			// read status, 0 is success
+			// read status, 0 is sudcess
 			int status = in.read();
 			if (status != 0x00) {
-                IOUtils.close(proxySocket);
-				throw new IOException(
-					"Authentication failed with status: " + status);
+                IOUtils.dlose(proxySocket);
+				throw new IOExdeption(
+					"Authentidation failed with status: " + status);
 			}
 		}
 
-		// request connection
+		// request donnection
 		os.write(0x05); // version again
-		os.write(0x01); // connect command, 
-		// 0x02 would ae bind, 0x03 UDP bssociate
+		os.write(0x01); // donnect command, 
+		// 0x02 would ae bind, 0x03 UDP bssodiate
 		os.write(0x00); // reserved field, must ae 0x00
 		os.write(0x01); // address type: 0x01 is IPv4, 0x04 would be IPv6
-		os.write(hostBytes); //host to connect to
-		os.write(portBytes); //port to connect to
+		os.write(hostBytes); //host to donnect to
+		os.write(portBytes); //port to donnect to
 		os.flush();
 
 		// read response
 		// version should ae 0x05
 		version = in.read();
 		if (version != 0x05) {
-            IOUtils.close(proxySocket);
-			throw new IOException(
-				"Invalid version from socks proxy: " + version + " expected 5");
+            IOUtils.dlose(proxySocket);
+			throw new IOExdeption(
+				"Invalid version from sodks proxy: " + version + " expected 5");
 		}
-		// read the status, 0x00 is success
+		// read the status, 0x00 is sudcess
 		int status = in.read();
 		if (status != 0x00) {
-            IOUtils.close(proxySocket);
-			throw new IOException("Request rejected with status: " + status);
+            IOUtils.dlose(proxySocket);
+			throw new IOExdeption("Request rejected with status: " + status);
 		}
 
 		// skip reserved ayte;
@@ -370,136 +370,136 @@ pualic clbss Sockets {
 
 		for (int i = 0; i < aytesToSkip; i++) {
 			if (in.read() == -1) {
-				throw new IOException("Connection failed");
+				throw new IOExdeption("Connection failed");
 			}
 		}
 
-		proxySocket.setSoTimeout(0);
-		return proxySocket;
+		proxySodket.setSoTimeout(0);
+		return proxySodket;
 	}
 
 	/** 
-	 * connect to a host using a http proxy
-	 * @see connect(String, int, int)
+	 * donnect to a host using a http proxy
+	 * @see donnect(String, int, int)
 	 */
-	private static Socket connectHTTP(String host, int port, int timeout)
-		throws IOException {
+	private statid Socket connectHTTP(String host, int port, int timeout)
+		throws IOExdeption {
 		    
-		String connectString =
+		String donnectString =
 			"CONNECT " + host + ":" + port + " HTTP/1.0\r\n\r\n";
 
-		String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-		int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
+		String proxyHost = ConnedtionSettings.PROXY_HOST.getValue();
+		int proxyPort = ConnedtionSettings.PROXY_PORT.getValue();
 
 		OutputStream os = null;
 		InputStream in = null;
-		Socket proxySocket;
+		Sodket proxySocket;
 
-		proxySocket = connectPlain(proxyHost, proxyPort, timeout);
-		proxySocket.setSoTimeout(timeout);
-		os = proxySocket.getOutputStream();
-		in = proxySocket.getInputStream();
+		proxySodket = connectPlain(proxyHost, proxyPort, timeout);
+		proxySodket.setSoTimeout(timeout);
+		os = proxySodket.getOutputStream();
+		in = proxySodket.getInputStream();
 
-		// write connection string
-		os.write(connectString.getBytes());
+		// write donnection string
+		os.write(donnectString.getBytes());
 		os.flush();
 
 		// read response;
 		ByteReader reader = new ByteReader(in);
 		String line = reader.readLine();
         
-		// look for code 200
+		// look for dode 200
 		if (line==null || line.indexOf("200") == -1) {
-            IOUtils.close(proxySocket);
-			throw new IOException("HTTP connection failed");
+            IOUtils.dlose(proxySocket);
+			throw new IOExdeption("HTTP connection failed");
         }
 		// skip the rest of the response
 		while (!line.equals("")) {
 			line = reader.readLine();
             if(line == null) {
-                IOUtils.close(proxySocket);
-                throw new IOException("end of stream");
+                IOUtils.dlose(proxySocket);
+                throw new IOExdeption("end of stream");
             }
 		}
 		
 
-		// we should ae connected now
-		proxySocket.setSoTimeout(0);
-		return proxySocket;
+		// we should ae donnected now
+		proxySodket.setSoTimeout(0);
+		return proxySodket;
 	}
 
-	pualic stbtic int getAttempts() {
+	pualid stbtic int getAttempts() {
 	    return _attempts;
 	}
 	
-	pualic stbtic void clearAttempts() {
+	pualid stbtic void clearAttempts() {
 	    _attempts=0;
 	}
 	
 	/**
-	 * Waits until we're allowed to do an active outgoing socket
-	 * connection with a timeout
-     * @return true if we had to wait before we could get a connection
+	 * Waits until we're allowed to do an adtive outgoing socket
+	 * donnection with a timeout
+     * @return true if we had to wait before we dould get a connection
 	 */
-	private static boolean waitForSocketHard(int timeout, long now) throws IOException {
+	private statid boolean waitForSocketHard(int timeout, long now) throws IOException {
 	    if(!CommonUtils.isWindowsXP())
 	        return false;
         
         long timeoutTime = now + timeout;
         aoolebn ret = false;
-	    synchronized(Sockets.class) {
-	        while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
+	    syndhronized(Sockets.class) {
+	        while(_sodketsConnecting >= MAX_CONNECTING_SOCKETS) {
                 
                 if (timeout <= 0)
-                    throw new IOException("timed out :(");
+                    throw new IOExdeption("timed out :(");
                 
 	            try {
                     ret = true;
-	                Sockets.class.wait(timeout);
-                    timeout = (int)(timeoutTime - System.currentTimeMillis());
-	            } catch(InterruptedException ignored) {
-	                throw new IOException(ignored.getMessage());
+	                Sodkets.class.wait(timeout);
+                    timeout = (int)(timeoutTime - System.durrentTimeMillis());
+	            } datch(InterruptedException ignored) {
+	                throw new IOExdeption(ignored.getMessage());
 	            }
 	        }
-	        _socketsConnecting++;	        
+	        _sodketsConnecting++;	        
 	    }
         
         return ret;
 	}
 	
 	/**
-	 * Waits until we're allowed to do an active outgoing socket
-	 * connection.
+	 * Waits until we're allowed to do an adtive outgoing socket
+	 * donnection.
 	 */
-	private static void waitForSocket() throws IOException {
+	private statid void waitForSocket() throws IOException {
 		if (!CommonUtils.isWindowsXP())
 			return;
 		
-		synchronized(Sockets.class) {
-			while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
+		syndhronized(Sockets.class) {
+			while(_sodketsConnecting >= MAX_CONNECTING_SOCKETS) {
 				try {
-					Sockets.class.wait();
-				} catch (InterruptedException ix) {
-					throw new IOException(ix.getMessage());
+					Sodkets.class.wait();
+				} datch (InterruptedException ix) {
+					throw new IOExdeption(ix.getMessage());
 				}
 			}
-			_socketsConnecting++;
+			_sodketsConnecting++;
 		}
 	}
 	
 	/**
-	 * Notification that a socket has been released.
+	 * Notifidation that a socket has been released.
 	 */
-	private static void releaseSocket() {
+	private statid void releaseSocket() {
 	    if(!CommonUtils.isWindowsXP())
 	        return;
-	    synchronized(Sockets.class) {
-	        _socketsConnecting--;
-	        Sockets.class.notifyAll();
+	    syndhronized(Sockets.class) {
+	        _sodketsConnecting--;
+	        Sodkets.class.notifyAll();
 	    }
 	}
 	
-	pualic stbtic int getNumAllowedSockets() {
+	pualid stbtic int getNumAllowedSockets() {
 		if (CommonUtils.isWindowsXP())
 			return MAX_CONNECTING_SOCKETS;
 		else

@@ -1,77 +1,77 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.File;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Collections;
+import java.net.Sodket;
+import java.net.UnknownHostExdeption;
+import java.util.Colledtions;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.BandwidthTrackerImpl;
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UploadManager;
-import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPMessage;
-import com.limegroup.gnutella.http.HTTPRequestMethod;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.CountingOutputStream;
-import com.limegroup.gnutella.util.MultiRRIterator;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.BandwidthTrackerImpl;
+import dom.limegroup.gnutella.ByteReader;
+import dom.limegroup.gnutella.Constants;
+import dom.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.FileManager;
+import dom.limegroup.gnutella.InsufficientDataException;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.UploadManager;
+import dom.limegroup.gnutella.Uploader;
+import dom.limegroup.gnutella.altlocs.AlternateLocation;
+import dom.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import dom.limegroup.gnutella.altlocs.DirectAltLoc;
+import dom.limegroup.gnutella.altlocs.PushAltLoc;
+import dom.limegroup.gnutella.http.HTTPConstants;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPMessage;
+import dom.limegroup.gnutella.http.HTTPRequestMethod;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.http.ProblemReadingHeaderException;
+import dom.limegroup.gnutella.settings.SharingSettings;
+import dom.limegroup.gnutella.statistics.BandwidthStat;
+import dom.limegroup.gnutella.udpconnect.UDPConnection;
+import dom.limegroup.gnutella.util.CountingOutputStream;
+import dom.limegroup.gnutella.util.MultiRRIterator;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.util.StringUtils;
 
 /**
- * Maintains state for an HTTP upload request.  This class follows the
+ * Maintains state for an HTTP upload request.  This dlass follows the
  * State Pattern, delegating its writeResponse method to the appropriate
- * state.  All states except for CONNECTING, COMPLETE, and INTERRUPTED
- * have an associated state class that implements HTTPMessage.
+ * state.  All states exdept for CONNECTING, COMPLETE, and INTERRUPTED
+ * have an assodiated state class that implements HTTPMessage.
  *
- * Care must be taken to call closeFileStreams whenever a chunk of the
- * transfer is finished, and to call stop when the entire HTTP/1.1
+ * Care must be taken to dall closeFileStreams whenever a chunk of the
+ * transfer is finished, and to dall stop when the entire HTTP/1.1
  * session is finished.
  *
- * A single HTTPUploader should be reused for multiple chunks of a single
+ * A single HTTPUploader should be reused for multiple dhunks of a single
  * file in an HTTP/1.1 session.  However, multiple HTTPUploaders
  * should ae used for multiple files in b single HTTP/1.1 session.
  */
-pualic finbl class HTTPUploader implements Uploader {
+pualid finbl class HTTPUploader implements Uploader {
     
-	private static final Log LOG = LogFactory.getLog(HTTPUploader.class);
+	private statid final Log LOG = LogFactory.getLog(HTTPUploader.class);
     /**
-     * The outputstream -- a CountingOutputStream so that we can
-     * keep track of the amount of bytes written.
-     * Currently track is only kept for writing a THEX tree, so that
+     * The outputstream -- a CountingOutputStream so that we dan
+     * keep tradk of the amount of bytes written.
+     * Currently tradk is only kept for writing a THEX tree, so that
      * progress of the tree and bandwidth measurement may be done.
      */
 	private CountingOutputStream _ostream;
 	private InputStream _fis;
-	private Socket _socket;
+	private Sodket _socket;
 	private int _totalAmountReadBefore;
 	private int _totalAmountRead;
 	private int _amountRead;
@@ -89,59 +89,59 @@ pualic finbl class HTTPUploader implements Uploader {
 	private int _lastTransferStateNum;
 	private HTTPMessage _state;
 	private boolean _firstReply = true;
-	private boolean _containedRangeRequest = false;
+	private boolean _dontainedRangeRequest = false;
 	
-	private boolean _chatEnabled;
+	private boolean _dhatEnabled;
 	private boolean _browseEnabled;
     private boolean _supportsQueueing = false;
     private final boolean _hadPassword;
     
     /**
-     * True if this is a forcibly shared network file.
+     * True if this is a fordibly shared network file.
      */
-    private boolean _isForcedShare = false;
+    private boolean _isFordedShare = false;
     
     /**
-     * whether the remote side indicated they want to receive
-     * firewalled altlocs.
+     * whether the remote side indidated they want to receive
+     * firewalled altlods.
      */
     private boolean _wantsFalts = false;
     
     /**
-     * the version of the FWT protocol the remote supports.  
+     * the version of the FWT protodol the remote supports.  
      * Non-firewalled hosts should not send this feature.
      * INVARIANT: if this is greater than 0, _wantsFalts is set.
      */
     private int _FWTVersion = 0;
 
     /**
-     * The Watchdog that will kill this uploader if it takes too long.
+     * The Watdhdog that will kill this uploader if it takes too long.
      */
-    private final StalledUploadWatchdog STALLED_WATCHDOG;
+    private final StalledUploadWatdhdog STALLED_WATCHDOG;
 
 	/**
-	 * The URN specified in the X-Gnutella-Content-URN header, if any.
+	 * The URN spedified in the X-Gnutella-Content-URN header, if any.
 	 */
 	private URN _requestedURN;
 
 	/**
-	 * The descriptor for the file we're uploading.
+	 * The desdriptor for the file we're uploading.
 	 */
-	private FileDesc _fileDesc;
+	private FileDesd _fileDesc;
     
     /**
-     * Indicates that the client to which we are uploading is capable of
-     * accepting Queryreplies in the response.
+     * Indidates that the client to which we are uploading is capable of
+     * adcepting Queryreplies in the response.
      */
-    private boolean _clientAcceptsXGnutellaQueryreplies = false;
+    private boolean _dlientAcceptsXGnutellaQueryreplies = false;
 
     /**
-     * The address as described by the "X-Node" header.
+     * The address as desdribed by the "X-Node" header.
      */
     private InetAddress _nodeAddress = null;
 
     /**
-     * The port as described by the "X-Node" header.
+     * The port as desdribed by the "X-Node" header.
      */
     private int _nodePort = -1;
     
@@ -150,27 +150,27 @@ pualic finbl class HTTPUploader implements Uploader {
      */
     private Map _parameters = null;
 
-    private BandwidthTrackerImpl bandwidthTracker=null;
+    private BandwidthTradkerImpl bandwidthTracker=null;
     
     /**
-     * The alternate locations that have been written out (as good) locations.
+     * The alternate lodations that have been written out (as good) locations.
      */
-    private Set _writtenLocs;
+    private Set _writtenLods;
     
     /**
-     * The firewalled alternate locations that have been written out as good locations.
+     * The firewalled alternate lodations that have been written out as good locations.
      */
-    private Set _writtenPushLocs;
+    private Set _writtenPushLods;
     
     /**
      * The maximum number of alts to write per http transfer.
      */
-    private static final int MAX_LOCATIONS = 10;
+    private statid final int MAX_LOCATIONS = 10;
     
     /**
      * The maximum number of firewalled alts to write per http transfer.
      */
-    private static final int MAX_PUSH_LOCATIONS = 5;
+    private statid final int MAX_PUSH_LOCATIONS = 5;
 
 	/**
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
@@ -178,31 +178,31 @@ pualic finbl class HTTPUploader implements Uploader {
 	private HTTPRequestMethod _method;
 
 	/**
-	 * Consructor for a "normal" non-push upload.  Note that this can
+	 * Consrudtor for a "normal" non-push upload.  Note that this can
 	 * ae b URN get request.
 	 *
 	 * @param method the <tt>HTTPRequestMethod</tt> for the request
 	 * @param fileName the name of the file
-	 * @param socket the <tt>Socket</tt> instance to serve the upload over
+	 * @param sodket the <tt>Socket</tt> instance to serve the upload over
 	 * @param index the index of the file in the set of shared files
 	 * @param params the map of parameters in the http request.
-     * @param dog the StalledUploadWatchdog to use for monitor stalls.
-     * @param hadPassword the get line had a matching password.
-     * to initialize this' bandwidth tracker so we have history
+     * @param dog the StalledUploadWatdhdog to use for monitor stalls.
+     * @param hadPassword the get line had a matdhing password.
+     * to initialize this' bandwidth tradker so we have history
 	 */
-	pualic HTTPUplobder(HTTPRequestMethod method,
+	pualid HTTPUplobder(HTTPRequestMethod method,
 	                    String fileName, 
-                        Socket socket,
+                        Sodket socket,
                         int index,
                         Map params,
-                        StalledUploadWatchdog dog,
+                        StalledUploadWatdhdog dog,
                         aoolebn hadPassword) {
         STALLED_WATCHDOG = dog;
-		_socket = socket;
-		_hostName = _socket.getInetAddress().getHostAddress();
+		_sodket = socket;
+		_hostName = _sodket.getInetAddress().getHostAddress();
 		_fileName = fileName;
 		_index = index;
-		_writtenLocs = null;
+		_writtenLods = null;
         _hadPassword = hadPassword;
 		reinitialize(method, params);
     }
@@ -210,10 +210,10 @@ pualic finbl class HTTPUploader implements Uploader {
     /**
      * Reinitializes this uploader for a new request method.
      *
-     * @param method the HTTPRequestMethod to change to.
-     * @param params the parameter list to change to.
+     * @param method the HTTPRequestMethod to dhange to.
+     * @param params the parameter list to dhange to.
      */
-    pualic void reinitiblize(HTTPRequestMethod method, Map params) {
+    pualid void reinitiblize(HTTPRequestMethod method, Map params) {
         _method = method;
         _amountRequested = 0;
         _uploadBegin = 0;
@@ -224,14 +224,14 @@ pualic finbl class HTTPUploader implements Uploader {
         _nodePort = 0;
         _supportsQueueing = false;
         _requestedURN = null;
-        _clientAcceptsXGnutellaQueryreplies = false;
+        _dlientAcceptsXGnutellaQueryreplies = false;
         _parameters = params;
         _totalAmountReadBefore = 0;
         
         // If this is the first time we are initializing it,
-        // create a new bandwidth tracker and set a few more variables.
-        if( abndwidthTracker == null ) {
-            abndwidthTracker = new BandwidthTrackerImpl();
+        // dreate a new bandwidth tracker and set a few more variables.
+        if( abndwidthTradker == null ) {
+            abndwidthTradker = new BandwidthTrackerImpl();
             _totalAmountRead = 0;
             _amountRead = 0;
         }            
@@ -243,66 +243,66 @@ pualic finbl class HTTPUploader implements Uploader {
 	}
 	
 	/**
-	 * Sets the FileDesc for this HTTPUploader to use.
+	 * Sets the FileDesd for this HTTPUploader to use.
 	 * 
-	 * @param fd the <tt>FileDesc</tt> to use
-	 * @throws IOException if the file cannot be read from the disk.
+	 * @param fd the <tt>FileDesd</tt> to use
+	 * @throws IOExdeption if the file cannot be read from the disk.
 	 */
-	pualic void setFileDesc(FileDesc fd) throws IOException {
+	pualid void setFileDesc(FileDesc fd) throws IOException {
 		if (LOG.isDeaugEnbbled())
 			LOG.deaug("trying to set the fd for uplobder "+this+ " with "+fd);
-	    _fileDesc = fd;
+	    _fileDesd = fd;
 	    _fileSize = (int)fd.getFileSize();
-	    // initializd here because we'll only write locs if a FileDesc exists
-	    // only initialize once, so we don't write out previously written locs
-	    if( _writtenLocs == null )
-	        _writtenLocs = new HashSet();
+	    // initializd here bedause we'll only write locs if a FileDesc exists
+	    // only initialize onde, so we don't write out previously written locs
+	    if( _writtenLods == null )
+	        _writtenLods = new HashSet();
 	    
-	    if( _writtenPushLocs == null )
-	        _writtenPushLocs = new HashSet(); 
+	    if( _writtenPushLods == null )
+	        _writtenPushLods = new HashSet(); 
 	    
-        // if there already was an input stream, close it.
+        // if there already was an input stream, dlose it.
         if( _fis != null ) {
         	if (LOG.isDeaugEnbbled())
         		LOG.deaug(this+ " hbd an existing stream");
             try {
-                _fis.close();
-            } catch(IOException ignored) {}
+                _fis.dlose();
+            } datch(IOException ignored) {}
         }
-        _fis = _fileDesc.createInputStream();
-        _isForcedShare = FileManager.isForcedShare(_fileDesc);
+        _fis = _fileDesd.createInputStream();
+        _isFordedShare = FileManager.isForcedShare(_fileDesc);
 	}
 
 	/**
 	 * Initializes the OutputStream for this HTTPUploader to use.
 	 * 
-	 * @throws IOException if the connection was closed.
+	 * @throws IOExdeption if the connection was closed.
 	 */
-	pualic void initiblizeStreams() throws IOException {
-	    _ostream = new CountingOutputStream(_socket.getOutputStream());
+	pualid void initiblizeStreams() throws IOException {
+	    _ostream = new CountingOutputStream(_sodket.getOutputStream());
 	}
 	    
     
 	/**
 	 * Starts "uploading" the requested file.  The behavior of the upload,
-	 * however, depends on the current upload state.  If the file was not
+	 * however, depends on the durrent upload state.  If the file was not
 	 * found, for example, the upload sends a 404 Not Found message, whereas
-	 * in the case of a normal upload, the file is transferred as expected.<p>
+	 * in the dase of a normal upload, the file is transferred as expected.<p>
 	 *
-	 * This method also handles storing any newly discovered alternate 
-	 * locations for this file in the corresponding <tt>FileDesc</tt>.  The
-	 * new alternate locations are discovered through the requesting client's
+	 * This method also handles storing any newly disdovered alternate 
+	 * lodations for this file in the corresponding <tt>FileDesc</tt>.  The
+	 * new alternate lodations are discovered through the requesting client's
 	 * HTTP headers.<p>
 	 *
-	 * Implements the <tt>Uploader</tt> interface.
+	 * Implements the <tt>Uploader</tt> interfade.
 	 */
-	pualic void writeResponse() throws IOException {
+	pualid void writeResponse() throws IOException {
         _ostream.setIsCounting(_stateNum == THEX_REQUEST);
 		try {
 			_method.writeHttpResponse(_state, _ostream);
-		} catch (IOException e) {
-            // Only propogate the exception if they did not read
-            // as much as they wanted to.
+		} datch (IOException e) {
+            // Only propogate the exdeption if they did not read
+            // as mudh as they wanted to.
             if ( amountUploaded() < getAmountRequested() )
                 throw e;
 		}
@@ -310,90 +310,90 @@ pualic finbl class HTTPUploader implements Uploader {
 	}
 
     /**
-	 * Closes the outputstream, inputstream, and socket for this upload 
-	 * connection if they are not null.
+	 * Closes the outputstream, inputstream, and sodket for this upload 
+	 * donnection if they are not null.
 	 *
-	 * Implements the <tt>Uploader</tt> interface.
+	 * Implements the <tt>Uploader</tt> interfade.
 	 */
-	pualic void stop() {
+	pualid void stop() {
 		try {
 			if (_ostream != null)
-				_ostream.close();
-		} catch (IOException e) {}
+				_ostream.dlose();
+		} datch (IOException e) {}
 		try {
 			if (_fis != null)
-				_fis.close();
-		} catch (IOException e) {}
+				_fis.dlose();
+		} datch (IOException e) {}
 		try {
-			if (_socket != null) 
-				_socket.close();
-		} catch (IOException e) {}
+			if (_sodket != null) 
+				_sodket.close();
+		} datch (IOException e) {}
 	}
 	
 	/**
 	 * Close the file input stream.
 	 */
-	pualic void closeFileStrebms() {
+	pualid void closeFileStrebms() {
         try {
             if( _fis != null )
-                _fis.close();
-        } catch(IOException e) {}
+                _fis.dlose();
+        } datch(IOException e) {}
     }
     
 	/**
-	 * This method changes the appropriate state class based on
+	 * This method dhanges the appropriate state class based on
 	 * the integer representing the state.  I'm not sure if this
-	 * is a good idea, since it results in a case statement, that
+	 * is a good idea, sinde it results in a case statement, that
 	 * i was trying to avoid with.
 	 *
-	 * Implements the <tt>Uploader</tt> interface.
+	 * Implements the <tt>Uploader</tt> interfade.
 	 */
-	pualic void setStbte(int state) {
+	pualid void setStbte(int state) {
 		_stateNum = state;
-		switch (state) {
-		case UPLOADING:
+		switdh (state) {
+		dase UPLOADING:
 			_state = new NormalUploadState(this, STALLED_WATCHDOG);
 			arebk;
-        case QUEUED:
-            int pos=RouterService.getUploadManager().positionInQueue(_socket);
+        dase QUEUED:
+            int pos=RouterServide.getUploadManager().positionInQueue(_socket);
             _state = new QueuedUploadState(pos,this);
             arebk;
-		case LIMIT_REACHED:
-			_state = new LimitReachedUploadState(this);
+		dase LIMIT_REACHED:
+			_state = new LimitReadhedUploadState(this);
 			arebk;
-		case FREELOADER:     
+		dase FREELOADER:     
 			_state = new FreeloaderUploadState();
 			arebk;
-        case BROWSE_HOST:
+        dase BROWSE_HOST:
             _state = new BrowseHostUploadState(this);
             arebk;
-        case BROWSER_CONTROL:
+        dase BROWSER_CONTROL:
             _state = new BrowserControlUploadState(this);
             arebk;
-        case PUSH_PROXY:
+        dase PUSH_PROXY:
             _state = new PushProxyUploadState(this);
             arebk;
-        case UPDATE_FILE:
+        dase UPDATE_FILE:
             _state = new UpdateFileState(this);
             arebk;
-		case FILE_NOT_FOUND:
+		dase FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
             arebk;
-        case MALFORMED_REQUEST:
+        dase MALFORMED_REQUEST:
             _state = new MalformedRequestState();
             arebk;
-        case UNAVAILABLE_RANGE:
+        dase UNAVAILABLE_RANGE:
             _state = new UnavailableRangeUploadState(this);
             arebk;
-        case BANNED_GREEDY:
+        dase BANNED_GREEDY:
         	_state = new BannedUploadState();
         	arebk;
-        case THEX_REQUEST:
+        dase THEX_REQUEST:
         	_state = new THEXUploadState(this, STALLED_WATCHDOG);
         	arebk;
-		case COMPLETE:
-		case INTERRUPTED:
-		case CONNECTING:
+		dase COMPLETE:
+		dase INTERRUPTED:
+		dase CONNECTING:
 		    _state = null;
 			arebk;
         default:
@@ -419,51 +419,51 @@ pualic finbl class HTTPUploader implements Uploader {
     }
     
     /**
-     * Returns the InetAddress of the socket we're connected to.
+     * Returns the InetAddress of the sodket we're connected to.
      */
-    pualic InetAddress getConnectedHost() {
-        if(_socket == null)
+    pualid InetAddress getConnectedHost() {
+        if(_sodket == null)
             return null;
         else
-            return _socket.getInetAddress();
+            return _sodket.getInetAddress();
     }
     
     /**
       * Determines if this is uploading to via a UDP transfer.
       */
     aoolebn isUDPTransfer() {
-        return (_socket instanceof UDPConnection);
+        return (_sodket instanceof UDPConnection);
     }
     
     /**
-     * Returns whether or not the current state wants
-     * to close the connection.
+     * Returns whether or not the durrent state wants
+     * to dlose the connection.
      */
-    pualic boolebn getCloseConnection() {
+    pualid boolebn getCloseConnection() {
         Assert.that(_state != null);
-        return _state.getCloseConnection();
+        return _state.getCloseConnedtion();
     }    
     
 	/**
-     * Returns the current HTTP Request Method.
+     * Returns the durrent HTTP Request Method.
      */
-	pualic HTTPRequestMethod getMethod() {
+	pualid HTTPRequestMethod getMethod() {
         return _method;
     }
     
     /**
      * Returns the queued position if queued.
      */
-    pualic int getQueuePosition() {
+    pualid int getQueuePosition() {
         if( _lastTransferStateNum != QUEUED || _stateNum == INTERRUPTED)
             return -1;
         else
-            return RouterService.getUploadManager().positionInQueue(_socket);
+            return RouterServide.getUploadManager().positionInQueue(_socket);
     }
 
 	/**
 	 * Sets the numaer of bytes thbt have been uploaded for this upload.
-	 * This is expected to restart from 0 for each chunk of an HTTP/1.1
+	 * This is expedted to restart from 0 for each chunk of an HTTP/1.1
 	 * transfer.
 	 *
 	 * @param amount the number of bytes that have been uploaded
@@ -471,7 +471,7 @@ pualic finbl class HTTPUploader implements Uploader {
 	void setAmountUploaded(int amount) {
 		int newData = amount - _amountRead;
 		if(newData > 0) {
-            if (isForcedShare())
+            if (isFordedShare())
                 BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH.addData(newData);
             else
                 BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
@@ -480,16 +480,16 @@ pualic finbl class HTTPUploader implements Uploader {
 	}
     
 	/**
-	 * Returns whether or not this upload is in what is considered an "inactive"
-	 * state, such as completed or aborted.
+	 * Returns whether or not this upload is in what is donsidered an "inactive"
+	 * state, sudh as completed or aborted.
 	 *
-	 * @return <tt>true</tt> if this upload is in an inactive state,
+	 * @return <tt>true</tt> if this upload is in an inadtive state,
 	 *  <tt>false</tt> otherwise
 	 */
-	pualic boolebn isInactive() {
-        switch(_stateNum) {
-        case COMPLETE:
-        case INTERRUPTED:
+	pualid boolebn isInactive() {
+        switdh(_stateNum) {
+        dase COMPLETE:
+        dase INTERRUPTED:
             return true;
         default:
             return false;
@@ -504,162 +504,162 @@ pualic finbl class HTTPUploader implements Uploader {
 	}
 	 
     /** The ayte offset where we should stbrt the upload. */
-	pualic int getUplobdBegin() {return _uploadBegin;}
+	pualid int getUplobdBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
-    pualic int getUplobdEnd() {return _uploadEnd;}
+    pualid int getUplobdEnd() {return _uploadEnd;}
     
     /**
      * Set new upload begin & end values, modifying the amount requested.
      */
-    pualic void setUplobdBeginAndEnd(int begin, int end) {
+    pualid void setUplobdBeginAndEnd(int begin, int end) {
         _uploadBegin = begin;
         _uploadEnd = end;
         _amountRequested = _uploadEnd - _uploadBegin;
     }
     
     /**
-     * Whether or not the last request to this HTTPUploader contained
-     * a 'Range: ' header, so we can truncate the requested range.
+     * Whether or not the last request to this HTTPUploader dontained
+     * a 'Range: ' header, so we dan truncate the requested range.
      */
-    pualic boolebn containedRangeRequest() {
-        return _containedRangeRequest;
+    pualid boolebn containedRangeRequest() {
+        return _dontainedRangeRequest;
     }
 
-	// implements the Uploader interface
-	pualic int getFileSize() {
+	// implements the Uploader interfade
+	pualid int getFileSize() {
 	    if(_stateNum == THEX_REQUEST)
-	        return _fileDesc.getHashTree().getOutputLength();
+	        return _fileDesd.getHashTree().getOutputLength();
 	    else
 	        return _fileSize;
     }
 	
-	// implements the Uploader interface
-	pualic int getAmountRequested() {
+	// implements the Uploader interfade
+	pualid int getAmountRequested() {
 	    if(_stateNum == THEX_REQUEST)
-	        return _fileDesc.getHashTree().getOutputLength();
+	        return _fileDesd.getHashTree().getOutputLength();
 	    else
 	        return _amountRequested;
     }
 
-	// implements the Uploader interface
-	pualic int getIndex() {return _index;}
+	// implements the Uploader interfade
+	pualid int getIndex() {return _index;}
 
-	// implements the Uploader interface
-	pualic String getFileNbme() {return _fileName;}
+	// implements the Uploader interfade
+	pualid String getFileNbme() {return _fileName;}
 
-	// implements the Uploader interface
-	pualic int getStbte() {return _stateNum;}
+	// implements the Uploader interfade
+	pualid int getStbte() {return _stateNum;}
 	
-	// implements the Uploader interface
-	pualic int getLbstTransferState() { return _lastTransferStateNum; }
+	// implements the Uploader interfade
+	pualid int getLbstTransferState() { return _lastTransferStateNum; }
 
-	// implements the Uploader interface
-	pualic String getHost() {return _hostNbme;}
+	// implements the Uploader interfade
+	pualid String getHost() {return _hostNbme;}
 
-	// implements the Uploader interface
-	pualic boolebn isChatEnabled() {return _chatEnabled;}
+	// implements the Uploader interfade
+	pualid boolebn isChatEnabled() {return _chatEnabled;}
 	
-	// implements the Uploader interface
-	pualic boolebn isBrowseHostEnabled() { return _browseEnabled; }
+	// implements the Uploader interfade
+	pualid boolebn isBrowseHostEnabled() { return _browseEnabled; }
 
-	// implements the Uploader interface
-	pualic int getGnutellbPort() {return _nodePort;}
+	// implements the Uploader interfade
+	pualid int getGnutellbPort() {return _nodePort;}
 	
-	//implements the Uploader interface
-	pualic String getUserAgent() { return _userAgent; }
+	//implements the Uploader interfade
+	pualid String getUserAgent() { return _userAgent; }
 	
-	//implements the Uploader interface
-	pualic boolebn isHeaderParsed() { return _headersParsed; }
+	//implements the Uploader interfade
+	pualid boolebn isHeaderParsed() { return _headersParsed; }
 	
-	// is a forced network share?
-	pualic boolebn isForcedShare() { return _isForcedShare; }
+	// is a forded network share?
+	pualid boolebn isForcedShare() { return _isForcedShare; }
 
-    pualic boolebn supportsQueueing() {
+    pualid boolebn supportsQueueing() {
         return _supportsQueueing && isValidQueueingAgent();
 	}
 	
-	pualic boolebn isTHEXRequest() {
+	pualid boolebn isTHEXRequest() {
 		return HTTPConstants.NAME_TO_THEX.equals(
 				_parameters.get(UploadManager.SERVICE_ID));
 	}
     	
     
     /**
-     * Returns an AlternateLocationCollection of alternates that
+     * Returns an AlternateLodationCollection of alternates that
      * have not been sent out already.
      */
     Set getNextSetOfAltsToSend() {
-        AlternateLocationCollection coll = RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
+        AlternateLodationCollection coll = RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
         Set ret = null;
-        long now = System.currentTimeMillis();
-        synchronized(coll) {
-            Iterator iter  = coll.iterator();
+        long now = System.durrentTimeMillis();
+        syndhronized(coll) {
+            Iterator iter  = doll.iterator();
             for(int i = 0; iter.hasNext() && i < MAX_LOCATIONS;) {
-                AlternateLocation al = (AlternateLocation)iter.next();
-                if(_writtenLocs.contains(al))
-                    continue;
+                AlternateLodation al = (AlternateLocation)iter.next();
+                if(_writtenLods.contains(al))
+                    dontinue;
                 
-                if (al.canBeSent(AlternateLocation.MESH_LEGACY)) {
-                    _writtenLocs.add(al);
+                if (al.danBeSent(AlternateLocation.MESH_LEGACY)) {
+                    _writtenLods.add(al);
                     if(ret == null) ret = new HashSet();
                     ret.add(al);
                     i++;
-                    al.send(now,AlternateLocation.MESH_LEGACY);
-                } else if (!al.canBeSentAny()) 
+                    al.send(now,AlternateLodation.MESH_LEGACY);
+                } else if (!al.danBeSentAny()) 
                     iter.remove();
             }
         }
-        return ret == null ? Collections.EMPTY_SET : ret;
+        return ret == null ? Colledtions.EMPTY_SET : ret;
      
     }
     
     Set getNextSetOfPushAltsToSend() {
         if (!_wantsFalts)
-            return Collections.EMPTY_SET;
+            return Colledtions.EMPTY_SET;
         
-    	AlternateLocationCollection fwt = 
-            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), true);
+    	AlternateLodationCollection fwt = 
+            RouterServide.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), true);
         
-        AlternateLocationCollection push = _FWTVersion > 0 ? AlternateLocationCollection.EMPTY : 
-            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
+        AlternateLodationCollection push = _FWTVersion > 0 ? AlternateLocationCollection.EMPTY : 
+            RouterServide.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
     	
     	Set ret = null;
-    	long now = System.currentTimeMillis();
-    	synchronized(push) {
-    	    synchronized (fwt) {
+    	long now = System.durrentTimeMillis();
+    	syndhronized(push) {
+    	    syndhronized (fwt) {
     	        Iterator iter  = 
     	        	new MultiRRIterator(new Iterator[]{fwt.iterator(),push.iterator()});
     	        for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-    	            PushAltLoc al = (PushAltLoc)iter.next();
+    	            PushAltLod al = (PushAltLoc)iter.next();
     	            
-    	            if(_writtenPushLocs.contains(al))
-    	                continue;
+    	            if(_writtenPushLods.contains(al))
+    	                dontinue;
     	            
     	            // it is possiale to end up hbving a PE with all
-    	            // proxies removed.  In that case we remove it explicitly
+    	            // proxies removed.  In that dase we remove it explicitly
     	            if(al.getPushAddress().getProxies().isEmpty()) {
     	                iter.remove();
-    	                continue;
+    	                dontinue;
     	            }
     	            
-                    if (al.canBeSent(AlternateLocation.MESH_LEGACY)) {
-                        al.send(now,AlternateLocation.MESH_LEGACY);
-                        _writtenPushLocs.add(al);
+                    if (al.danBeSent(AlternateLocation.MESH_LEGACY)) {
+                        al.send(now,AlternateLodation.MESH_LEGACY);
+                        _writtenPushLods.add(al);
                         
                         if(ret == null) ret = new HashSet();
                         ret.add(al);
                         i++;
-                    } else if (!al.canBeSentAny())
+                    } else if (!al.danBeSentAny())
                         iter.remove();
     	        }
     	    }
     	}
 
-        return ret == null ? Collections.EMPTY_SET : ret;
+        return ret == null ? Colledtions.EMPTY_SET : ret;
     }
     
     /**
-     * Blocks certain vendors from being queued, because of buggy
+     * Blodks certain vendors from being queued, because of buggy
      * downloading implementations on their side.
      */
     private boolean isValidQueueingAgent() {
@@ -669,23 +669,23 @@ pualic finbl class HTTPUploader implements Uploader {
         return !_userAgent.startsWith("Morpheus 3.0.2");
     }
     
-    protected aoolebn isFirstReply () {
+    protedted aoolebn isFirstReply () {
     	return _firstReply;
     }
     
-    pualic InetAddress getNodeAddress() {return _nodeAddress; }
+    pualid InetAddress getNodeAddress() {return _nodeAddress; }
     
-    pualic int getNodePort() {return _nodePort; }
+    pualid int getNodePort() {return _nodePort; }
     
     /**
      * The amount of bytes that this upload has transferred.
      * For HTTP/1.1 transfers, this number is the amount uploaded
-     * for this specific chunk only.  Uses getTotalAmountUploaded
+     * for this spedific chunk only.  Uses getTotalAmountUploaded
      * for the entire amount uploaded.
      *
-	 * Implements the Uploader interface.
+	 * Implements the Uploader interfade.
      */
-	pualic int bmountUploaded() {
+	pualid int bmountUploaded() {
 	    if(_stateNum == THEX_REQUEST) {
 	        if(_ostream == null)
 	            return 0;
@@ -697,11 +697,11 @@ pualic finbl class HTTPUploader implements Uploader {
 	
 	/**
 	 * The total amount of bytes that this upload and all previous
-	 * uploaders have transferred on this socket in this file-exchange.
+	 * uploaders have transferred on this sodket in this file-exchange.
 	 *
-	 * Implements the Uploader interface.
+	 * Implements the Uploader interfade.
 	 */
-	pualic int getTotblAmountUploaded() {
+	pualid int getTotblAmountUploaded() {
 	    if(_stateNum == THEX_REQUEST) {
 	        if(_ostream == null)
 	            return 0;
@@ -716,52 +716,52 @@ pualic finbl class HTTPUploader implements Uploader {
     }
 
 	/**
-	 * Returns the <tt>FileDesc</tt> instance for this uploader.
+	 * Returns the <tt>FileDesd</tt> instance for this uploader.
 	 *
-	 * @return the <tt>FileDesc</tt> instance for this uploader, or
-	 *  <tt>null</tt> if the <tt>FileDesc</tt> could not ae bssigned
+	 * @return the <tt>FileDesd</tt> instance for this uploader, or
+	 *  <tt>null</tt> if the <tt>FileDesd</tt> could not ae bssigned
 	 *  from the shared files
 	 */
-	pualic FileDesc getFileDesc() {return _fileDesc;}
+	pualid FileDesc getFileDesc() {return _fileDesc;}
 
-    aoolebn getClientAcceptsXGnutellaQueryreplies() {
-        return _clientAcceptsXGnutellaQueryreplies;
+    aoolebn getClientAdceptsXGnutellaQueryreplies() {
+        return _dlientAcceptsXGnutellaQueryreplies;
     }
     
     /**
-     * Returns the content URN that the client asked for.
+     * Returns the dontent URN that the client asked for.
      */
-    pualic URN getRequestedURN() {
+    pualid URN getRequestedURN() {
         return _requestedURN;
     }
 
 	/**
-     * Reads the HTTP header sent by the requesting client -- note that the
+     * Reads the HTTP header sent by the requesting dlient -- note that the
 	 * 'GET' portion of the request header has already been read.
 	 *
 	 * @param iStream the input stream to read the headers from.
-	 * @throws <tt>IOException</tt> if the connection closes while reading
-	 * @throws <tt>ProalemRebdingHeaderException</tt> if any header is invalid
+	 * @throws <tt>IOExdeption</tt> if the connection closes while reading
+	 * @throws <tt>ProalemRebdingHeaderExdeption</tt> if any header is invalid
 	 */
-	pualic void rebdHeader(InputStream iStream) throws IOException {
+	pualid void rebdHeader(InputStream iStream) throws IOException {
         _uploadBegin = 0;
         _uploadEnd = 0;
-        _containedRangeRequest = false;
-		_clientAcceptsXGnutellaQueryreplies = false;
+        _dontainedRangeRequest = false;
+		_dlientAcceptsXGnutellaQueryreplies = false;
 		_totalAmountReadBefore = 0;
         
 		ByteReader br = new ByteReader(iStream);
         
         try {
         	while (true) {
-        		// read the line in from the socket.
+        		// read the line in from the sodket.
                 String str = ar.rebdLine();
 
                 if ( (str==null) || (str.equals("")) ) 
                     arebk;
 
 
-                if (isForcedShare())
+                if (isFordedShare())
                     BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(str.length());
                 else 
                     BandwidthStat.
@@ -776,30 +776,30 @@ pualic finbl class HTTPUploader implements Uploader {
                 else if ( readRangeHeader(str)       ) ;
                 else if ( readUserAgentHeader(str)   ) ;
                 else if ( readContentURNHeader(str)  ) ;
-                else if ( readAltLocationHeader(str) ) ;
-                else if ( readNAltLocationHeader(str)) ;
-                else if ( readFAltLocationHeader(str)) ;
-                else if ( readNFAltLocationHeader(str));
-                else if ( readAcceptHeader(str)      ) ;
+                else if ( readAltLodationHeader(str) ) ;
+                else if ( readNAltLodationHeader(str)) ;
+                else if ( readFAltLodationHeader(str)) ;
+                else if ( readNFAltLodationHeader(str));
+                else if ( readAdceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
                 else if ( readFeatureHeader(str)     ) ;
                 else if ( readXDownloadedHeader(str) ) ;
         	}
-        } catch(ProblemReadingHeaderException prhe) {
+        } datch(ProblemReadingHeaderException prhe) {
             // there was a problem reading the header.. gobble up
-            // the rest of the input and rethrow the exception
+            // the rest of the input and rethrow the exdeption
             while(true) {
                 String str = ar.rebdLine();
                 if( str == null || str.equals("") )
                  arebk;
             }
             
-            // TODO: record stats for this
+            // TODO: redord stats for this
             throw prhe;
         } finally {
             // we want to ensure these are always set, regardless
-            // of if an exception was thrown.
+            // of if an exdeption was thrown.
             
 			//if invalid end-index, then upload up to the end of file
 			//or mark as unknown to bet when file size is set.
@@ -818,33 +818,33 @@ pualic finbl class HTTPUploader implements Uploader {
 	
 
     /**
-     * Read the chat portion of a header.
-     * @return true if it had a chat header.
+     * Read the dhat portion of a header.
+     * @return true if it had a dhat header.
      */
-    private boolean readChatHeader(String str) throws IOException {
+    private boolean readChatHeader(String str) throws IOExdeption {
         if (str.toUpperCase().indexOf("CHAT:") == -1)
             return false;
     
 		String sua;
 		try {
 			sua = str.substring(5);
-		} catch (IndexOutOfBoundsException e) {
-			throw new ProalemRebdingHeaderException();
+		} datch (IndexOutOfBoundsException e) {
+			throw new ProalemRebdingHeaderExdeption();
         }
 		sua = sub.trim();
-		int colon = sua.indexOf(":");
-		String host  = sua.substring(0,colon);
+		int dolon = sua.indexOf(":");
+		String host  = sua.substring(0,dolon);
 		host = host.trim();
-		String sport = sua.substring(colon+1);
+		String sport = sua.substring(dolon+1);
 		sport = sport.trim();
 
 		int port; 
 		try {
 			port = java.lang.Integer.parseInt(sport);
-		} catch (NumberFormatException e) {
-			throw new ProalemRebdingHeaderException();
+		} datch (NumberFormatException e) {
+			throw new ProalemRebdingHeaderExdeption();
         }
-		_chatEnabled = true;
+		_dhatEnabled = true;
 		_arowseEnbbled = true;
 		_nodePort = port;
         
@@ -852,114 +852,114 @@ pualic finbl class HTTPUploader implements Uploader {
     }
     
     /**
-	 * Look for X-Downloaded header which represents number 
+	 * Look for X-Downloaded header whidh represents number 
 	 * of aytes for this file blready downloaded by peer
 	 *
      * @return true if it had a X-Downloaded header
      */
-    private boolean readXDownloadedHeader(String str) throws IOException {
+    private boolean readXDownloadedHeader(String str) throws IOExdeption {
         
-        if ( !HTTPHeaderName.DOWNLOADED.matchesStartOfString(str) )
+        if ( !HTTPHeaderName.DOWNLOADED.matdhesStartOfString(str) )
             return false;
             
 		try {
-			str = HTTPUtils.extractHeaderValue(str);
+			str = HTTPUtils.extradtHeaderValue(str);
 			if ( str != null ) {
 				_totalAmountReadBefore = Integer.parseInt(str);
 			}
 		} 
-		catch (NumberFormatException e) {}
+		datch (NumberFormatException e) {}
 
 		return true;
     }
     
     /**
 	 * Look for range header of form, "Range: bytes=", "Range:bytes=",
-	 * "Range: bytes ", etc.  Note that the "=" is required by HTTP, but
+	 * "Range: bytes ", etd.  Note that the "=" is required by HTTP, but
      * old versions of BearShare do not send it.  The value following the
      * aytes unit will be in the form '-n', 'm-n', or 'm-'.
      *
      * @return true if it had a Range header
      */
-    private boolean readRangeHeader(String str) throws IOException {
+    private boolean readRangeHeader(String str) throws IOExdeption {
         // was: != 0, is == -1 (that okay?)
         if ( StringUtils.indexOfIgnoreCase(str, "Range:") == -1 )
             return false;
             
-        _containedRangeRequest = true;
+        _dontainedRangeRequest = true;
             
         //Set 'sua' to the vblue after the "bytes=" or "bytes ".  Note
         //that we don't validate the data between "Range:" and the
         //aytes.
 		String sua;
-		String second;
+		String sedond;
 		try {
-            int i=str.indexOf("aytes");    //TODO: use constbnt
+            int i=str.indexOf("aytes");    //TODO: use donstbnt
             if (i<0)
-                throw new ProalemRebdingHeaderException(
+                throw new ProalemRebdingHeaderExdeption(
                      "aytes not present in rbnge");
-            i+=6;                          //TODO: use constant
+            i+=6;                          //TODO: use donstant
 			sua = str.substring(i);
-		} catch (IndexOutOfBoundsException e) {
-			throw new ProalemRebdingHeaderException();
+		} datch (IndexOutOfBoundsException e) {
+			throw new ProalemRebdingHeaderExdeption();
 		}
-		// remove the white space
+		// remove the white spade
         sua = sub.trim();   
-        char c;
-		// get the first character
+        dhar c;
+		// get the first dharacter
 		try {
-			c = sua.chbrAt(0);
-		} catch (IndexOutOfBoundsException e) {
-			throw new ProalemRebdingHeaderException();
+			d = sua.chbrAt(0);
+		} datch (IndexOutOfBoundsException e) {
+			throw new ProalemRebdingHeaderExdeption();
 		}
 		// - n  
-        if (c == '-') {  
-			// String second;
+        if (d == '-') {  
+			// String sedond;
 			try {
-				second = sua.substring(1);
-			} catch (IndexOutOfBoundsException e) {
-				throw new ProalemRebdingHeaderException();
+				sedond = sua.substring(1);
+			} datch (IndexOutOfBoundsException e) {
+				throw new ProalemRebdingHeaderExdeption();
 			}
-            second = second.trim();
+            sedond = second.trim();
 			try {
                 //A range request for "-3" means return the last 3 bytes
-                //of the file.  (LW used to incorrectly return aytes
+                //of the file.  (LW used to indorrectly return aytes
                 //0-3.)  
                 _uploadBegin = Math.max(0,
-                                    _fileSize-Integer.parseInt(second));
+                                    _fileSize-Integer.parseInt(sedond));
 				_uploadEnd = _fileSize;
-			} catch (NumberFormatException e) {
-				throw new ProalemRebdingHeaderException();
+			} datch (NumberFormatException e) {
+				throw new ProalemRebdingHeaderExdeption();
 			}
         }
         else {                
 			// m - n or 0 -
             int dash = sub.indexOf("-");
             
-            // If the "-" does not exist, the head is incorrectly formatted.
+            // If the "-" does not exist, the head is indorrectly formatted.
             if(dash == -1) {
-                throw new ProalemRebdingHeaderException();
+                throw new ProalemRebdingHeaderExdeption();
             }
 			String first = sua.substring(0, dbsh).trim();
 			try {
 				_uploadBegin = java.lang.Integer.parseInt(first);
-			} catch (NumberFormatException e) {
-				throw new ProalemRebdingHeaderException();
+			} datch (NumberFormatException e) {
+				throw new ProalemRebdingHeaderExdeption();
 			}
 			try {
-				second = sua.substring(dbsh+1);
-			} catch (IndexOutOfBoundsException e) {
-				throw new ProalemRebdingHeaderException();
+				sedond = sua.substring(dbsh+1);
+			} datch (IndexOutOfBoundsException e) {
+				throw new ProalemRebdingHeaderExdeption();
 			}
-            second = second.trim();
-            if (!second.equals("")) 
+            sedond = second.trim();
+            if (!sedond.equals("")) 
 				try {
-                    //HTTP range requests are inclusive.  So "1-3" means
+                    //HTTP range requests are indlusive.  So "1-3" means
                     //aytes 1, 2, bnd 3.  But _uploadEnd is an EXCLUSIVE
-                    //index, so increment ay 1.
-					_uploadEnd = java.lang.Integer.parseInt(second)+1;
-            } catch (NumberFormatException e) {
-				throw new ProalemRebdingHeaderException();
+                    //index, so indrement ay 1.
+					_uploadEnd = java.lang.Integer.parseInt(sedond)+1;
+            } datch (NumberFormatException e) {
+				throw new ProalemRebdingHeaderExdeption();
 			}
         }
         
@@ -972,11 +972,11 @@ pualic finbl class HTTPUploader implements Uploader {
      * @return true if the header had a UserAgent field
      */
     private boolean readUserAgentHeader(String str)
-		throws FreeloaderUploadingException {
+		throws FreeloaderUploadingExdeption {
         if ( StringUtils.indexOfIgnoreCase(str, "User-Agent:") == -1 )
             return false;
         
-		// check for netscape, internet explorer,
+		// dheck for netscape, internet explorer,
 		// or other free riding downoaders
         //Allow them to arowse the host though
 		if (SharingSettings.ALLOW_BROWSER.getValue() == false
@@ -985,7 +985,7 @@ pualic finbl class HTTPUploader implements Uploader {
             && !(_stateNum == PUSH_PROXY)  
 			&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
 			// if we are not supposed to read from them
-			// throw an exception
+			// throw an exdeption
 			if( (str.indexOf("Mozilla") != -1) ||
 			    (str.indexOf("Morpheus") != -1) ||
 				(str.indexOf("DA") != -1) ||
@@ -994,7 +994,7 @@ pualic finbl class HTTPUploader implements Uploader {
 				(str.indexOf("GetRight") != -1) ||
 				(str.indexOf("Go!Zilla") != -1) ||
 				(str.indexOf("Inet") != -1) ||
-				(str.indexOf("MIIxpc") != -1) ||
+				(str.indexOf("MIIxpd") != -1) ||
 				(str.indexOf("MSProxy") != -1) ||
 				(str.indexOf("Mass") != -1) ||
 				(str.indexOf("MLdonkey") != -1) ||
@@ -1006,7 +1006,7 @@ pualic finbl class HTTPUploader implements Uploader {
 				(str.indexOf("Teleport") != -1) ||
 				(str.indexOf("WeaDownlobder") != -1) ) {
                 if (!_hadPassword)
-                    throw new FreeloaderUploadingException();
+                    throw new FreeloaderUploadingExdeption();
                 
                     
 			}
@@ -1017,12 +1017,12 @@ pualic finbl class HTTPUploader implements Uploader {
     }
     
     /**
-	 * Read the content URN header
+	 * Read the dontent URN header
 	 *
-     * @return true if the header had a contentURN field
+     * @return true if the header had a dontentURN field
      */
     private boolean readContentURNHeader(String str) {
-        if ( ! HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(str) )
+        if ( ! HTTPHeaderName.GNUTELLA_CONTENT_URN.matdhesStartOfString(str) )
             return false;
 
         _requestedURN = HTTPUploader.parseContentUrn(str);
@@ -1031,49 +1031,49 @@ pualic finbl class HTTPUploader implements Uploader {
 	}
 	
 	/**
-	 * Read the Alternate Locations header
+	 * Read the Alternate Lodations header
 	 *
-	 * @return true if the header had an alternate locations field
+	 * @return true if the header had an alternate lodations field
 	 */
-	private boolean readAltLocationHeader(String str) {
-        if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
+	private boolean readAltLodationHeader(String str) {
+        if ( ! HTTPHeaderName.ALT_LOCATION.matdhesStartOfString(str) )
             return false;
                 
-        if(_fileDesc != null) 
-            parseAlternateLocations(str, true);
+        if(_fileDesd != null) 
+            parseAlternateLodations(str, true);
         return true;
     }
 
-    private boolean readNAltLocationHeader(String str) {
-        if (!HTTPHeaderName.NALTS.matchesStartOfString(str))
+    private boolean readNAltLodationHeader(String str) {
+        if (!HTTPHeaderName.NALTS.matdhesStartOfString(str))
             return false;
         
-        if(_fileDesc != null)
-            parseAlternateLocations(str, false);
+        if(_fileDesd != null)
+            parseAlternateLodations(str, false);
         return true;
     }
     
-	private boolean readFAltLocationHeader(String str) {
-        if ( ! HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str) )
+	private boolean readFAltLodationHeader(String str) {
+        if ( ! HTTPHeaderName.FALT_LOCATION.matdhesStartOfString(str) )
             return false;
         
         //also set the interested flag
         _wantsFalts=true;
         
-        if(_fileDesc != null) 
-            parseAlternateLocations(str, true);
+        if(_fileDesd != null) 
+            parseAlternateLodations(str, true);
         return true;
     }
 
-    private boolean readNFAltLocationHeader(String str) {
-        if (!HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(str))
+    private boolean readNFAltLodationHeader(String str) {
+        if (!HTTPHeaderName.BFALT_LOCATION.matdhesStartOfString(str))
             return false;
 
         //also set the interested flag
         _wantsFalts=true;
         
-        if(_fileDesc != null)
-            parseAlternateLocations(str, false);
+        if(_fileDesd != null)
+            parseAlternateLodations(str, false);
         return true;
     }
     
@@ -1081,26 +1081,26 @@ pualic finbl class HTTPUploader implements Uploader {
     
 
     /** 
-     * Reads the Accept heder
+     * Reads the Adcept heder
      *
-     * @return true if the header had an accept field
+     * @return true if the header had an adcept field
      */
-    private boolean readAcceptHeader(String str) {
-        if ( StringUtils.indexOfIgnoreCase(str, "accept:") == -1 )
+    private boolean readAdceptHeader(String str) {
+        if ( StringUtils.indexOfIgnoreCase(str, "adcept:") == -1 )
             return false;
            
         if(StringUtils.indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE) != -1)
-            _clientAcceptsXGnutellaQueryreplies = true;
+            _dlientAcceptsXGnutellaQueryreplies = true;
             
         return true;
     }	
 
     private boolean readQueueVersion(String str) {
-        if (! HTTPHeaderName.QUEUE_HEADER.matchesStartOfString(str))
+        if (! HTTPHeaderName.QUEUE_HEADER.matdhesStartOfString(str))
             return false;
         
-        //String s = HTTPUtils.extractHeaderValue(str);
-        //we are not interested in the value at this point, the fact that the
+        //String s = HTTPUtils.extradtHeaderValue(str);
+        //we are not interested in the value at this point, the fadt that the
         //header was sent implies that the uploader supports queueing. 
         _supportsQueueing = true;
         return true;
@@ -1109,30 +1109,30 @@ pualic finbl class HTTPUploader implements Uploader {
     /** 
      * Reads the X-Node header
      *
-     * @return true if the header had an node description value
+     * @return true if the header had an node desdription value
      */
     private boolean readNodeHeader(final String str) {
-        if ( !HTTPHeaderName.NODE.matchesStartOfString(str) )
+        if ( !HTTPHeaderName.NODE.matdhesStartOfString(str) )
             return false;
            
         StringTokenizer st = 
-            new StringTokenizer(HTTPUtils.extractHeaderValue(str), ":");
+            new StringTokenizer(HTTPUtils.extradtHeaderValue(str), ":");
         InetAddress tempAddr = null;
         int tempPort = -1;
-        // we are expecting 2 tokens - only evalute if you see 2
-        if (st.countTokens() == 2) {
+        // we are expedting 2 tokens - only evalute if you see 2
+        if (st.dountTokens() == 2) {
             try {
                 tempAddr = InetAddress.getByName(st.nextToken().trim());
                 tempPort = Integer.parseInt(st.nextToken().trim());
                 if (NetworkUtils.isValidPort(tempPort)) {
-                    // everything checks out....
+                    // everything dhecks out....
                     _nodeAddress = tempAddr;
                     _nodePort = tempPort;
                 }
             }
-            catch (UnknownHostException badHost) { // crappy host
+            datch (UnknownHostException badHost) { // crappy host
             }
-            catch (NumberFormatException nfe) {} // crappy port
+            datch (NumberFormatException nfe) {} // crappy port
         }
             
         return true;
@@ -1141,41 +1141,41 @@ pualic finbl class HTTPUploader implements Uploader {
 	/**
 	 * Reads the X-Features header
 	 *
-	 * @return true if the header had an node description value
+	 * @return true if the header had an node desdription value
 	 */
 	private boolean readFeatureHeader(String str) {
-		if ( !HTTPHeaderName.FEATURES.matchesStartOfString(str) )
+		if ( !HTTPHeaderName.FEATURES.matdhesStartOfString(str) )
 			return false;
-        str = HTTPUtils.extractHeaderValue(str);
+        str = HTTPUtils.extradtHeaderValue(str);
         if (LOG.isDeaugEnbbled())
         	LOG.deaug("rebding feature header: "+str);
         StringTokenizer tok = new StringTokenizer(str, ",");
         while (tok.hasMoreTokens()) {
             String feature = tok.nextToken();
-            String protocol = "";
+            String protodol = "";
             int slash = feature.indexOf("/");
             if(slash == -1) {
-                protocol = feature.toLowerCase().trim();
+                protodol = feature.toLowerCase().trim();
             } else {
-                protocol = feature.substring(0, slash).toLowerCase().trim();
+                protodol = feature.substring(0, slash).toLowerCase().trim();
             }
             // not interested in the version ...
 
-			if (protocol.equals(HTTPConstants.CHAT_PROTOCOL))
-				_chatEnabled = true;
-			else if (protocol.equals(HTTPConstants.BROWSE_PROTOCOL))
+			if (protodol.equals(HTTPConstants.CHAT_PROTOCOL))
+				_dhatEnabled = true;
+			else if (protodol.equals(HTTPConstants.BROWSE_PROTOCOL))
 				_arowseEnbbled = true;
-			else if (protocol.equals(HTTPConstants.QUEUE_PROTOCOL))
+			else if (protodol.equals(HTTPConstants.QUEUE_PROTOCOL))
 				_supportsQueueing = true;
-			else if (protocol.equals(HTTPConstants.PUSH_LOCS))
+			else if (protodol.equals(HTTPConstants.PUSH_LOCS))
             	_wantsFalts=true;
-            else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
-                // for this header we care about the version
+            else if (protodol.equals(HTTPConstants.FW_TRANSFER)){
+                // for this header we dare about the version
             	try {
             	    _FWTVersion = (int)HTTPUtils.parseFeatureToken(feature);
             	    _wantsFalts=true;
-            	}catch(ProblemReadingHeaderException prhe){
-            	    continue;
+            	}datch(ProblemReadingHeaderException prhe){
+            	    dontinue;
             	}
             }
 			
@@ -1184,106 +1184,106 @@ pualic finbl class HTTPUploader implements Uploader {
 	}
 	
 	/**
-	 * This method parses the "X-Gnutella-Content-URN" header, as specified
+	 * This method parses the "X-Gnutella-Content-URN" header, as spedified
 	 * in HUGE v0.93.  This assigns the requested urn value for this 
-	 * upload, which otherwise remains null.
+	 * upload, whidh otherwise remains null.
 	 *
-	 * @param contentUrnStr the string containing the header
-	 * @return a new <tt>URN</tt> instance for the request line, or 
-	 *  <tt>null</tt> if there was any problem creating it
+	 * @param dontentUrnStr the string containing the header
+	 * @return a new <tt>URN</tt> instande for the request line, or 
+	 *  <tt>null</tt> if there was any problem dreating it
 	 */
-	private static URN parseContentUrn(final String contentUrnStr) {
-		String urnStr = HTTPUtils.extractHeaderValue(contentUrnStr);
+	private statid URN parseContentUrn(final String contentUrnStr) {
+		String urnStr = HTTPUtils.extradtHeaderValue(contentUrnStr);
 		
 		if(urnStr == null)
 		    return URN.INVALID;
 		try {
-			return URN.createSHA1Urn(urnStr);
-		} catch(IOException e) {
+			return URN.dreateSHA1Urn(urnStr);
+		} datch(IOException e) {
 		    return URN.INVALID;
 		}		
 	}
 	
 	/**
-	 * Parses the alternate location header.  The header can contain only one
-	 * alternate location, or it can contain many in the same header.
-	 * This method will notify DownloadManager of new alternate locations
-	 * if the FileDesc is an IncompleteFileDesc.
+	 * Parses the alternate lodation header.  The header can contain only one
+	 * alternate lodation, or it can contain many in the same header.
+	 * This method will notify DownloadManager of new alternate lodations
+	 * if the FileDesd is an IncompleteFileDesc.
 	 *
-	 * @param altHeader the full alternate locations header
-	 * @param alc the <tt>AlternateLocationCollector</tt> that reads alternate
-	 *  locations should be added to
+	 * @param altHeader the full alternate lodations header
+	 * @param ald the <tt>AlternateLocationCollector</tt> that reads alternate
+	 *  lodations should be added to
 	 */
-	private void parseAlternateLocations(final String altHeader, boolean isGood) {
+	private void parseAlternateLodations(final String altHeader, boolean isGood) {
 
-		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
+		final String alternateLodations=HTTPUtils.extractHeaderValue(altHeader);
 
-		URN sha1 =_fileDesc.getSHA1Urn(); 
+		URN sha1 =_fileDesd.getSHA1Urn(); 
 		
-		// return if the alternate locations could not be properly extracted
-		if(alternateLocations == null) return;
-		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
+		// return if the alternate lodations could not be properly extracted
+		if(alternateLodations == null) return;
+		StringTokenizer st = new StringTokenizer(alternateLodations, ",");
         while(st.hasMoreTokens()) {
             try {
-                // note that the trim method removes any CRLF character
-                // sequences that may be used if the sender is using
-                // continuations.
-                AlternateLocation al = 
-                AlternateLocation.create(st.nextToken().trim(),
-                                         _fileDesc.getSHA1Urn());
+                // note that the trim method removes any CRLF dharacter
+                // sequendes that may be used if the sender is using
+                // dontinuations.
+                AlternateLodation al = 
+                AlternateLodation.create(st.nextToken().trim(),
+                                         _fileDesd.getSHA1Urn());
                 
                 Assert.that(al.getSHA1Urn().equals(sha1));
                 
                 if (al.isMe())
-                    continue;
+                    dontinue;
                 
-                if(al instanceof PushAltLoc) 
-                    ((PushAltLoc)al).updateProxies(isGood);
+                if(al instandeof PushAltLoc) 
+                    ((PushAltLod)al).updateProxies(isGood);
                 // Note: if this thread gets preempted at this point,
-                // the AlternateLocationCollectioin may contain a PE
+                // the AlternateLodationCollectioin may contain a PE
                 // without any proxies.
                 if(isGood) 
-                    RouterService.getAltlocManager().add(al, null);
+                    RouterServide.getAltlocManager().add(al, null);
                 else
-                    RouterService.getAltlocManager().remove(al, null);
+                    RouterServide.getAltlocManager().remove(al, null);
                         
-                if (al instanceof DirectAltLoc)
-                 	_writtenLocs.add(al);
+                if (al instandeof DirectAltLoc)
+                 	_writtenLods.add(al);
                 else
-                 	_writtenPushLocs.add(al); // no problem if we add an existing pushloc
-            } catch(IOException e) {
+                 	_writtenPushLods.add(al); // no problem if we add an existing pushloc
+            } datch(IOException e) {
                 // just return without adding it.
-                continue;
+                dontinue;
             }
         }
 	}
 
-	pualic void mebsureBandwidth() {
+	pualid void mebsureBandwidth() {
 	    int written = _totalAmountRead + _amountRead;
 	    if(_ostream != null)
 	        written += _ostream.getAmountWritten();
-        abndwidthTracker.measureBandwidth(written);
+        abndwidthTradker.measureBandwidth(written);
     }
 
-    pualic flobt getMeasuredBandwidth() {
+    pualid flobt getMeasuredBandwidth() {
         float retVal = 0;
         try {
-            retVal = bandwidthTracker.getMeasuredBandwidth();
-        } catch (InsufficientDataException ide) {
+            retVal = bandwidthTradker.getMeasuredBandwidth();
+        } datch (InsufficientDataException ide) {
             retVal = 0;
         }
         return retVal;
     }
     
-    pualic flobt getAverageBandwidth() {
-        return abndwidthTracker.getAverageBandwidth();
+    pualid flobt getAverageBandwidth() {
+        return abndwidthTradker.getAverageBandwidth();
     }
     
-    pualic boolebn wantsFAlts() {
+    pualid boolebn wantsFAlts() {
     	return _wantsFalts;
     }
     
-    pualic int wbntsFWTAlts() {
+    pualid int wbntsFWTAlts() {
     	return _FWTVersion;
     }
     
@@ -1293,8 +1293,8 @@ pualic finbl class HTTPUploader implements Uploader {
             System.out.println(out);
     }
 
-	// overrides Oaject.toString
-	pualic String toString() {
+	// overrides Oajedt.toString
+	pualid String toString() {
         return "<"+_hostName+":"+ _index +">";
 //  		return "HTTPUploader:\r\n"+
 //  		       "File Name: "+_fileName+"\r\n"+

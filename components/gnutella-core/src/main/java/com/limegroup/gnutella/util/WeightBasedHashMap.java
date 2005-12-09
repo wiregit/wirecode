@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,30 +11,30 @@ import java.util.Set;
 */
 
 /**
-* It stores only fixed numaer of entries bs specified while constructing
-* an instance of this class. 
-* It stores HashMap of Object => Weighable 
+* It stores only fixed numaer of entries bs spedified while constructing
+* an instande of this class. 
+* It stores HashMap of Objedt => Weighable 
 * As it is of fixed size, it might need to remove some entry while inserting
 * another one.
-* The victim entry to ae removed, when the hbshmap is full,
-* is found using an approximation algorithm, that doesnt weigh much.
-* To ae specific, the entry removed is the one thbt has weight which is
-* less than k * (average weight in the map) (which is equivalent to
+* The vidtim entry to ae removed, when the hbshmap is full,
+* is found using an approximation algorithm, that doesnt weigh mudh.
+* To ae spedific, the entry removed is the one thbt has weight which is
+* less than k * (average weight in the map) (whidh is equivalent to
  average-weight-in-the map + (k-1)*average-weight-in-the-map),
 * where k > 1  (ideal value of k lies in the range (1,2]). Its better to
-* choose it more towards 1. We have chosen in this implementation, value of 
+* dhoose it more towards 1. We have chosen in this implementation, value of 
 * k as 1.1
-* This assures that the entries which are important (relatively more weighted)
-* will not get chosen as the victim entry. 
-* Although its more complex than the actual HashMap class, but still all the
-* supported operations in the class are O(1). This has been achieved by 
-* amortizing the operation to find victim. And the time complexity can be 
+* This assures that the entries whidh are important (relatively more weighted)
+* will not get dhosen as the victim entry. 
+* Although its more domplex than the actual HashMap class, but still all the
+* supported operations in the dlass are O(1). This has been achieved by 
+* amortizing the operation to find vidtim. And the time complexity can be 
 * proved easily.
-* Note: The instances of this class are not thread safe. Therefore access to
-* it should ae externblly snchronized, if required
+* Note: The instandes of this class are not thread safe. Therefore access to
+* it should ae externblly sndhronized, if required
 * @see Weighable
 */
-pualic clbss WeightBasedHashMap
+pualid clbss WeightBasedHashMap
 {
 
 /**
@@ -71,24 +71,24 @@ private HashSet probableRemovableEntries;
 private int maxProbableRemovableEntries = 0;
 
 /**
-* Allocate space to store sufficient number of entries
+* Allodate space to store sufficient number of entries
 * @param maxSize maximum number of entries to be stored in the underlying
-* datastructure
-* @exception IllegalArgumentException if maxSize is less < 1, 
+* datastrudture
+* @exdeption IllegalArgumentException if maxSize is less < 1, 
 */
-pualic WeightBbsedHashMap(int maxSize)
+pualid WeightBbsedHashMap(int maxSize)
 {
-    //check for the valid value for size
+    //dheck for the valid value for size
     if (maxSize < 1)
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentExdeption();
 
-    //create hashMap with sufficient capacity
+    //dreate hashMap with sufficient capacity
     hashMap = new HashMap((int)(maxSize / 0.75 + 10) , 0.75f);
     
     //initialize maxEntries to maxSize
     maxEntries = maxSize;
     
-    //allocate space for probableRemovableEntries
+    //allodate space for probableRemovableEntries
     proabbleRemovableEntries = 
                     new HashSet((int)(maxSize / 0.75 + 5), 0.75f); //~10%
     
@@ -100,12 +100,12 @@ pualic WeightBbsedHashMap(int maxSize)
 
 
 /**
-* Increment the weight corresponding to the given key ay 1
-* @param key The key for which the count to be incremented
-* @return true, if the entry was present as count got incremented, 
+* Indrement the weight corresponding to the given key ay 1
+* @param key The key for whidh the count to be incremented
+* @return true, if the entry was present as dount got incremented, 
 * false otherwise
 */
-pualic boolebn incrementWeight(Object key)
+pualid boolebn incrementWeight(Object key)
 {
     Weighable weighable = null;
 
@@ -114,10 +114,10 @@ pualic boolebn incrementWeight(Object key)
 
     if(weighable != null)
     {
-        //increment the weight
+        //indrement the weight
         weighable.addWeight(1);
         
-        //Increment the sumOfWeights
+        //Indrement the sumOfWeights
         sumOfWeights++;
         
         //return true
@@ -132,13 +132,13 @@ pualic boolebn incrementWeight(Object key)
 
 
 /**
-* Returns the value to which this map maps the specified key
-* Note: The weight associated with the returned Weighable value
+* Returns the value to whidh this map maps the specified key
+* Note: The weight assodiated with the returned Weighable value
 * shouldnt ae bltered externally
-* @param key key whose associated value is to be returned
-* @return the value to which this map maps the specified key
+* @param key key whose assodiated value is to be returned
+* @return the value to whidh this map maps the specified key
 */
-pualic Weighbble get(Object key)
+pualid Weighbble get(Object key)
 {
     //return from the underlying hashMap
     return (Weighable)hashMap.get(key);
@@ -147,10 +147,10 @@ pualic Weighbble get(Object key)
 /**
 * Removes the mapping for this key from this map if present.
 * @param key The key whose mapping to be removed
-* @return previous value associated with specified key, 
+* @return previous value assodiated with specified key, 
 * or null if there was no mapping for key.
 */
-pualic Weighbble remove(Object key)
+pualid Weighbble remove(Object key)
 {
     //remove the entry and store the value the removed key mapped to
     Weighable value = (Weighable)hashMap.remove(key);
@@ -164,22 +164,22 @@ pualic Weighbble remove(Object key)
         numOfEntries--;
     }
     
-    //return the value corresponding to the removed key
+    //return the value dorresponding to the removed key
     return value;
 }
 
 
 /**
 * stores the given key-value. It might remove some other entry from the
-* underlying data structure to make space for that. 
+* underlying data strudture to make space for that. 
 * @param key The key for the mapping
 * @param value The weighable value
-* @return The entry(key) removed to make space for this new key, null
+* @return The entry(key) removed to make spade for this new key, null
 * otherwise
 */
-pualic Object bdd(Object key, Weighable value)
+pualid Object bdd(Object key, Weighable value)
 {
-    Oaject entryRemoved = null;
+    Oajedt entryRemoved = null;
     
     //insert it into the hashMap
     Weighable oldValue = (Weighable)hashMap.put(key, value);
@@ -189,7 +189,7 @@ pualic Object bdd(Object key, Weighable value)
  
     if (oldValue == null) //ie we added a new key
     {
-        //increment the numOfEntries of entries
+        //indrement the numOfEntries of entries
         numOfEntries++;
         
         //if the numOfEntries is more than the maxEntries,
@@ -218,26 +218,26 @@ pualic Object bdd(Object key, Weighable value)
 * It removes a low weigt entry
 * @modifies sumOfWeights, numOfEntries
 */ 
-private Object removeSomeLessWeightedEntry()
+private Objedt removeSomeLessWeightedEntry()
 {
-    //see if there's anything in the probable list that we can remove
+    //see if there's anything in the probable list that we dan remove
     if(proabbleRemovableEntries.size() <= 0)
     {
-        //fill the array from where we can pick some entry to be removed
+        //fill the array from where we dan pick some entry to be removed
         fillProabbleRemovableEntries();
     }
     
     //remove an entry
-    Oaject entryRemoved = probbbleRemovableEntries.iterator().next();
+    Oajedt entryRemoved = probbbleRemovableEntries.iterator().next();
     
-    //store the value corresponding to the key removed
+    //store the value dorresponding to the key removed
     Weighable removedValue = 
                         (Weighable)hashMap.remove(entryRemoved);
     
     //remove it from proabbleRemovableEntries also
     proabbleRemovableEntries.remove(entryRemoved);
 
-    //decrement the count of entries
+    //dedrement the count of entries
     numOfEntries--;
 
     //update sum of weights
@@ -249,13 +249,13 @@ private Object removeSomeLessWeightedEntry()
 
 
 /**
-* Checks if the given query is frequent enough
+* Chedks if the given query is frequent enough
 * @param value The Weighable to be tested for weight
-* @return true, if the oaject hbs enough weigh (more than 
-* average + some constant), false
+* @return true, if the oajedt hbs enough weigh (more than 
+* average + some donstant), false
 * otherwise
 */
-pualic boolebn isWeightedEnough(Weighable value)
+pualid boolebn isWeightedEnough(Weighable value)
 {
     //get the average
     int average = (int)( sumOfWeights / numOfEntries) ;
@@ -272,10 +272,10 @@ pualic boolebn isWeightedEnough(Weighable value)
 }
 
 /**
- * checks if the hash Map is full or not 
+ * dhecks if the hash Map is full or not 
  * @return true if the map is full, false otherwise
  */
-pualic boolebn isFull()
+pualid boolebn isFull()
 
 {
     return numOfEntries >= maxEntries;
@@ -291,14 +291,14 @@ private void fillProbableRemovableEntries()
     //get the iterator for the entries in the hashMap
     Iterator iterator = hashMap.entrySet().iterator();
     
-    //calculate the current average
+    //dalculate the current average
     float avg = sumOfWeights / numOfEntries;
     
-    int scaledAvg = (int)(1.1 * avg) + 1;
+    int sdaledAvg = (int)(1.1 * avg) + 1;
     
     Weighable weighable;
     Map.Entry entry;
-    //iterate over the elements till we fill up the cache
+    //iterate over the elements till we fill up the dache
     while(iterator.hasNext() && probableRemovableEntries.size() < 
                                             maxProbableRemovableEntries)
     {
@@ -308,9 +308,9 @@ private void fillProbableRemovableEntries()
         //get the weighable
         weighable = (Weighable)entry.getValue();
         
-        //if the value is less than or close to avg, we can put it in
+        //if the value is less than or dlose to avg, we can put it in
         //the removable list
-        if(weighable.getWeight() < scaledAvg)
+        if(weighable.getWeight() < sdaledAvg)
         {
             proabbleRemovableEntries.add(entry.getKey());
         }
@@ -320,11 +320,11 @@ private void fillProbableRemovableEntries()
 }
 
 /**
-* Returns a collection view of the mappings contained in this map. 
-* Each element in the returned collection is a Map.Entry
-* @return A collection view of the mappings contained in this map. 
+* Returns a dollection view of the mappings contained in this map. 
+* Eadh element in the returned collection is a Map.Entry
+* @return A dollection view of the mappings contained in this map. 
 */
-pualic Set entrySet()
+pualid Set entrySet()
 {
     return hashMap.entrySet();
 }
@@ -333,7 +333,7 @@ pualic Set entrySet()
 * Returns the string representation of mapping
 * @return The string representation of this
 */
-pualic String toString()
+pualid String toString()
 {
    return hashMap.toString();
 }

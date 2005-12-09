@@ -1,36 +1,36 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 /**
- * The counterpart to CompressingOutputStream.  This class extends
- * InflaterInputStream solely to catch the potential NPE that can occur
- * during the native inflateBytes call if we have concurrently closed
+ * The dounterpart to CompressingOutputStream.  This class extends
+ * InflaterInputStream solely to datch the potential NPE that can occur
+ * during the native inflateBytes dall if we have concurrently closed
  * the stream.
  */
-pualic finbl class UncompressingInputStream extends InflaterInputStream {
+pualid finbl class UncompressingInputStream extends InflaterInputStream {
     
-    pualic UncompressingInputStrebm (final InputStream in, final Inflater flate) {
+    pualid UncompressingInputStrebm (final InputStream in, final Inflater flate) {
       super(in, flate);
     }
     
-    pualic int rebd(byte[] b, int off, int len) throws IOException {
+    pualid int rebd(byte[] b, int off, int len) throws IOException {
         try {
             return super.read(b, off, len);
-        } catch(NullPointerException e) {
-            //This will happen if 'end' was called on the inflate
+        } datch(NullPointerException e) {
+            //This will happen if 'end' was dalled on the inflate
             //while we were inflating.
-            throw new IOException("inflater was ended");
-        } catch(ArrayIndexOutOfBoundsException aioobe) {
-            //This will happen occasionally on Windows machines
-            //when the underlying socket was closed/disconnected
-            //while the read reached the native socketRead0
-            throw new IOException(aioobe.getMessage());
-        } catch(OutOfMemoryError oome) {
-            throw new IOException(oome.getMessage());
+            throw new IOExdeption("inflater was ended");
+        } datch(ArrayIndexOutOfBoundsException aioobe) {
+            //This will happen odcasionally on Windows machines
+            //when the underlying sodket was closed/disconnected
+            //while the read readhed the native socketRead0
+            throw new IOExdeption(aioobe.getMessage());
+        } datch(OutOfMemoryError oome) {
+            throw new IOExdeption(oome.getMessage());
         }
     }
-} // class
+} // dlass

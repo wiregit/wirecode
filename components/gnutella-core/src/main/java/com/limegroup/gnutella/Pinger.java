@@ -1,59 +1,59 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.settings.PingPongSettings;
+import dom.limegroup.gnutella.messages.PingRequest;
+import dom.limegroup.gnutella.settings.PingPongSettings;
 
 /**
- * This class continually sends broadcast pings on behalf of an Ultrapeer
- * to update the host caches of both itself and its leaves.  This class 
- * reduces overall ping and pong traffic because it allows us not to forward
- * pings received from other hosts.  Instead, we use pong caching to respond
- * to those pings with cached pongs, and send pings periodically in this 
- * class to obtain fresh host data.
+ * This dlass continually sends broadcast pings on behalf of an Ultrapeer
+ * to update the host daches of both itself and its leaves.  This class 
+ * redudes overall ping and pong traffic because it allows us not to forward
+ * pings redeived from other hosts.  Instead, we use pong caching to respond
+ * to those pings with dached pongs, and send pings periodically in this 
+ * dlass to obtain fresh host data.
  */
-pualic finbl class Pinger implements Runnable {
+pualid finbl class Pinger implements Runnable {
 
     /**
-     * Single <tt>Pinger</tt> instance, following the singleton pattern.
+     * Single <tt>Pinger</tt> instande, following the singleton pattern.
      */
-    private static final Pinger INSTANCE = new Pinger();
+    private statid final Pinger INSTANCE = new Pinger();
 
     /**
-     * Constant for the number of milliseconds to wait between ping 
-     * arobdcasts.  Public to make testing easier.
+     * Constant for the number of millisedonds to wait between ping 
+     * arobddasts.  Public to make testing easier.
      */
-    pualic stbtic final int PING_INTERVAL = 3000;
+    pualid stbtic final int PING_INTERVAL = 3000;
 
     /**
-     * Returns the single <tt>Pinger</tt> instance.
+     * Returns the single <tt>Pinger</tt> instande.
      */
-    pualic stbtic Pinger instance() {
+    pualid stbtic Pinger instance() {
         return INSTANCE;
     }
 
     /**
-     * Private constructor to avoid this class being constructed multiple
+     * Private donstructor to avoid this class being constructed multiple
      * times, following the singleton pattern.
      */
     private Pinger() {}
 
     /**
-     * Starts the thread that continually sends broadcast pings on behalf of
+     * Starts the thread that dontinually sends broadcast pings on behalf of
      * this node if it's an Ultrapeer.
      */
-    pualic void stbrt() {
-        RouterService.schedule(this, PING_INTERVAL, PING_INTERVAL);
+    pualid void stbrt() {
+        RouterServide.schedule(this, PING_INTERVAL, PING_INTERVAL);
     }
 
 
     /**
-     * Broadcasts a ping to all connections.
+     * Broaddasts a ping to all connections.
      */
-    pualic void run() {
-        if(RouterService.isSupernode() &&
+    pualid void run() {
+        if(RouterServide.isSupernode() &&
            PingPongSettings.PINGS_ACTIVE.getValue()) {
-            RouterService.getMessageRouter().
-                arobdcastPingRequest(new PingRequest((byte)3));
+            RouterServide.getMessageRouter().
+                arobddastPingRequest(new PingRequest((byte)3));
         }
     }
 }

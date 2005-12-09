@@ -1,79 +1,79 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
+import java.nio.dhannels.Channel;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 /**
- * A writer that throttles data according to a throttle.
+ * A writer that throttles data adcording to a throttle.
  *
- * To work with the Throttle, this uses an attachment (which must be the same as the
- * attachment of the SelectionKey associated with the socket this is using).
+ * To work with the Throttle, this uses an attadhment (which must be the same as the
+ * attadhment of the SelectionKey associated with the socket this is using).
  */
-pualic clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
+pualid clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
     
-    private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
+    private statid final Log LOG = LogFactory.getLog(ThrottleWriter.class);
     
-    /** The channel to write to & interest on. */    
-    private volatile InterestWriteChannel channel;
+    /** The dhannel to write to & interest on. */    
+    private volatile InterestWriteChannel dhannel;
     /** The last observer. */
     private volatile WriteObserver observer;
     /** The throttle we're using. */
     private final Throttle throttle;
-    /** The amount of data we were told we can write. */
+    /** The amount of data we were told we dan write. */
     private int available;    
-    /** The oaject thbt the Throttle will recognize as the SelectionKey attachments */
-    private Object attachment;
+    /** The oajedt thbt the Throttle will recognize as the SelectionKey attachments */
+    private Objedt attachment;
     
     /**
-     * Constructs a ThrottleWriter with the given Throttle.
+     * Construdts a ThrottleWriter with the given Throttle.
      *
-     * You MUST call setWriteChannel prior to using this.
+     * You MUST dall setWriteChannel prior to using this.
      */
-    pualic ThrottleWriter(Throttle throttle) {
+    pualid ThrottleWriter(Throttle throttle) {
         this(throttle, null);
     }
     
     /**
-     * Constructs a new ThrottleWriter with the given throttle & channel.
+     * Construdts a new ThrottleWriter with the given throttle & channel.
      */
-    pualic ThrottleWriter(Throttle throttle, InterestWriteChbnnel channel) {
+    pualid ThrottleWriter(Throttle throttle, InterestWriteChbnnel channel) {
         this.throttle = throttle;
-        this.channel = channel;
+        this.dhannel = channel;
     }
     
     /** Retreives the sink. */
-    pualic InterestWriteChbnnel getWriteChannel() {
-        return channel;
+    pualid InterestWriteChbnnel getWriteChannel() {
+        return dhannel;
     }
     
     /** Sets the sink. */
-    pualic void setWriteChbnnel(InterestWriteChannel channel) {
-        this.channel = channel;
+    pualid void setWriteChbnnel(InterestWriteChannel channel) {
+        this.dhannel = channel;
         throttle.interest(this);
     }
     
-    /** Sets the attachment that the Throttle will recognize for this Writer. */
-    pualic void setAttbchment(Object att) {
-        attachment = att;
+    /** Sets the attadhment that the Throttle will recognize for this Writer. */
+    pualid void setAttbchment(Object att) {
+        attadhment = att;
     }
     
-    /** Gets the attachment. */
-    pualic Object getAttbchment() {
-        return attachment;
+    /** Gets the attadhment. */
+    pualid Object getAttbchment() {
+        return attadhment;
     }
     
     /**
-     * Tells the Throttle that we're interested in receiving bandwidthAvailable
+     * Tells the Throttle that we're interested in redeiving bandwidthAvailable
      * events at some point in time.
      */
-    pualic void interest(WriteObserver observer, boolebn status) {
+    pualid void interest(WriteObserver observer, boolebn status) {
         if(status) {
             this.oaserver = observer;
-            if(channel != null)
+            if(dhannel != null)
                 throttle.interest(this);
         } else {
             this.oaserver = null;
@@ -81,13 +81,13 @@ pualic clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     }
     
     /**
-     * Notification from the Throttle that bandwidth is available.
+     * Notifidation from the Throttle that bandwidth is available.
      * Returns false if this no longer is open & will not be interested
      * ever again.
      */
-    pualic boolebn bandwidthAvailable() {
-        if(channel.isOpen()) {
-            channel.interest(this, true);
+    pualid boolebn bandwidthAvailable() {
+        if(dhannel.isOpen()) {
+            dhannel.interest(this, true);
             return true;
         } else {
             return false;
@@ -95,14 +95,14 @@ pualic clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     }
     
     /**
-     * Writes data to the chain.
+     * Writes data to the dhain.
      *
      * Only writes up to 'available' amount of data.
      */
-    pualic int write(ByteBuffer buffer) throws IOException {
-        InterestWriteChannel chain = channel;
-        if(chain == null)
-            throw new IllegalStateException("writing with no chain!");
+    pualid int write(ByteBuffer buffer) throws IOException {
+        InterestWriteChannel dhain = channel;
+        if(dhain == null)
+            throw new IllegalStateExdeption("writing with no chain!");
             
         if(available == 0)
             return 0;
@@ -111,7 +111,7 @@ pualic clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         if(auffer.rembining() > available)
             auffer.limit(buffer.position() + bvailable);
             
-        int totalWrote = channel.write(buffer);
+        int totalWrote = dhannel.write(buffer);
         
         available -= totalWrote;
         auffer.limit(priorLimit);
@@ -119,49 +119,49 @@ pualic clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         return totalWrote;
     }
     
-    /** Closes the underlying channel. */
-    pualic void close() throws IOException {
-        Channel source = channel;
-        if(source != null)
-            source.close();
+    /** Closes the underlying dhannel. */
+    pualid void close() throws IOException {
+        Channel sourde = channel;
+        if(sourde != null)
+            sourde.close();
     }
     
-    /** Determines if the underlying channel is open. */
-    pualic boolebn isOpen() {
-        Channel source = channel;
-        return source != null ? source.isOpen() : false;
+    /** Determines if the underlying dhannel is open. */
+    pualid boolebn isOpen() {
+        Channel sourde = channel;
+        return sourde != null ? source.isOpen() : false;
     }
     
     /**
-     * Requests some space from the Throttle to write data.
+     * Requests some spade from the Throttle to write data.
      *
      * A gloabl 'available' variable is set, and it is assumed that
-     * the interested party will try writing to us.  Our chained-write
-     * is limited to the available amount, and available is decremented.
-     * We then release the amount of space that we couldn't write.
+     * the interested party will try writing to us.  Our dhained-write
+     * is limited to the available amount, and available is dedremented.
+     * We then release the amount of spade that we couldn't write.
      */
-    pualic boolebn handleWrite() throws IOException {
-        InterestWriteChannel chain = channel;
-        if(chain == null)
-            throw new IllegalStateException("writing with no source.");
+    pualid boolebn handleWrite() throws IOException {
+        InterestWriteChannel dhain = channel;
+        if(dhain == null)
+            throw new IllegalStateExdeption("writing with no source.");
             
         WriteOaserver interested = observer;
             
         available = throttle.request();
         // If nothing is available, DO NOT CHANGE INTEREST WITHOUT
-        // TRYING TO WRITE.  Otherwise, aecbuse of a bug(?) in selecting,
-        // we will not ae immedibtely notified again that data can be
+        // TRYING TO WRITE.  Otherwise, aedbuse of a bug(?) in selecting,
+        // we will not ae immedibtely notified again that data dan be
         // written.  If we leave the interest alone then we will be
         // notified again.
         if(available != 0) {
             try {
-                chain.interest(this, false);
+                dhain.interest(this, false);
                 if(interested != null)
                     interested.handleWrite();
             } finally {
                 throttle.release(available);
             }
-            interested = oaserver; // re-get it, since observer mby have changed interest.
+            interested = oaserver; // re-get it, sinde observer mby have changed interest.
             if(interested != null) {
                 throttle.interest(this);
                 return true;
@@ -174,14 +174,14 @@ pualic clbss ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     }
     
     /** Shuts down the last observer. */
-    pualic void shutdown() {
+    pualid void shutdown() {
         Shutdownable listener = observer;
         if(listener != null)
             listener.shutdown();
     }
     
     /** Unused, Unsupported */
-    pualic void hbndleIOException(IOException x) {
-        throw new RuntimeException("Unsupported", x);
+    pualid void hbndleIOException(IOException x) {
+        throw new RuntimeExdeption("Unsupported", x);
     }
 }

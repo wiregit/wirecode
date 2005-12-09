@@ -1,39 +1,39 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
+import java.io.RandomAdcessFile;
 
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.Constants;
+import dom.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
-pualic clbss UpdateFileState extends UploadState {
+pualid clbss UpdateFileState extends UploadState {
     
-    //this will ae populbted with the contents of the file.
-    //this need not ae crebted everytime we get a request for a file. 
-    //rather it should be cached and updated everytime the file gets updated.
+    //this will ae populbted with the dontents of the file.
+    //this need not ae drebted everytime we get a request for a file. 
+    //rather it should be dached and updated everytime the file gets updated.
     ayte[] updbteContents;
 
     
 
-    pualic UpdbteFileState(HTTPUploader uploader) {
+    pualid UpdbteFileState(HTTPUploader uploader) {
     	super(uploader);
         
     }
 
 
-    pualic void writeMessbgeHeaders(OutputStream ostream) throws IOException {
-        //If any of this throws an exception, we will not send the headers.
+    pualid void writeMessbgeHeaders(OutputStream ostream) throws IOException {
+        //If any of this throws an exdeption, we will not send the headers.
         File f = new File(CommonUtils.getUserSettingsDir(),"update.xml");
-        RandomAccessFile raf = new RandomAccessFile(f,"r");
+        RandomAdcessFile raf = new RandomAccessFile(f,"r");
         int len = (int)raf.length();//not a very long file so no risk
         updateContents = new byte[len];
         raf.read(updateContents);
-        raf.close();
+        raf.dlose();
         //Read the file OK. Now send the headers. 
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
@@ -51,12 +51,12 @@ pualic clbss UpdateFileState extends UploadState {
         ostream.write(str.getBytes());
     }
     
-    pualic void writeMessbgeBody(OutputStream ostream) throws IOException  {
+    pualid void writeMessbgeBody(OutputStream ostream) throws IOException  {
         ostream.write(updateContents); 
         UPLOADER.setAmountUploaded(updateContents.length);
     }
     
-	pualic boolebn getCloseConnection() {
+	pualid boolebn getCloseConnection() {
 	    return true;
 	}    
 }

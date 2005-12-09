@@ -1,51 +1,51 @@
-package com.limegroup.gnutella.archive;
+padkage com.limegroup.gnutella.archive;
 
 import java.util.HashMap;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import com.limegroup.gnutella.licenses.License;
-import com.limegroup.gnutella.licenses.LicenseFactory;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLNames;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import org.w3d.dom.Document;
+import org.w3d.dom.Element;
+import dom.limegroup.gnutella.licenses.License;
+import dom.limegroup.gnutella.licenses.LicenseFactory;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.xml.LimeXMLDocument;
+import dom.limegroup.gnutella.xml.LimeXMLNames;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileDetails;
+import dom.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.FileDetails;
 
-class File {
+dlass File {
 
-	pualic stbtic final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.16 2005-12-09 20:03:57 zlatinb Exp $";
+	pualid stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.17 2005-12-09 20:11:42 zlatinb Exp $";
 
 	/*
-	 * From http://www.archive.org/help/contrib-advanced.php:
+	 * From http://www.ardhive.org/help/contrib-advanced.php:
 	 * 
-	 * The format name is very important to choose accurately. The list of
-	 * acceptable format names is: WAVE, 64Kbps MP3, 128Kbps MP3, 256Kbps MP3,
-	 * VBR MP3, 96Kaps MP3, 160Kbps MP3, 192Kbps MP3, Ogg Vorbis, Shorten, Flbc,
-	 * 24ait Flbc, 64Kbps M3U, VBR M3U, Single Page Original JPEG Tar, Single
-	 * Page Processed JPEG Tar, Single Page Original JPEG ZIP, Single Page
-	 * Processed JPEG ZIP, Single Page Original TIFF ZIP, Single Page Processed
-	 * TIFF ZIP, Checksums, MPEG2, MPEG1, 64Ka MPEG4, 256Kb MPEG4, MPEG4, 56Kb
-	 * QuickTime, 64Ka QuickTime, 256Kb QuickTime, QuickTime, Motion JPEG, DivX,
-	 * IV50, Windows Media, Cinepack, Flash, Real Media, Item Image, Collection
+	 * The format name is very important to dhoose accurately. The list of
+	 * adceptable format names is: WAVE, 64Kbps MP3, 128Kbps MP3, 256Kbps MP3,
+	 * VBR MP3, 96Kaps MP3, 160Kbps MP3, 192Kbps MP3, Ogg Vorbis, Shorten, Flbd,
+	 * 24ait Flbd, 64Kbps M3U, VBR M3U, Single Page Original JPEG Tar, Single
+	 * Page Prodessed JPEG Tar, Single Page Original JPEG ZIP, Single Page
+	 * Prodessed JPEG ZIP, Single Page Original TIFF ZIP, Single Page Processed
+	 * TIFF ZIP, Chedksums, MPEG2, MPEG1, 64Ka MPEG4, 256Kb MPEG4, MPEG4, 56Kb
+	 * QuidkTime, 64Ka QuickTime, 256Kb QuickTime, QuickTime, Motion JPEG, DivX,
+	 * IV50, Windows Media, Cinepadk, Flash, Real Media, Item Image, Collection
 	 * Header, Animated GIF, Animated GIF Images, Thumbnail, JPEG, Single Page
-	 * Original JPEG, Single Page Processed JPEG, Single Page Original TIFF,
-	 * Single Page Processed TIFF, Multi Page Original TIFF, Multi Page
-	 * Processed TIFF, PDF, DjVuTXT, DjVuXML, Flippy Index, DjVu, Single Page
-	 * Processed JPEG Tar, Single Page Original JPEG Tar, Flippy ZIP, Text,
+	 * Original JPEG, Single Page Prodessed JPEG, Single Page Original TIFF,
+	 * Single Page Prodessed TIFF, Multi Page Original TIFF, Multi Page
+	 * Prodessed TIFF, PDF, DjVuTXT, DjVuXML, Flippy Index, DjVu, Single Page
+	 * Prodessed JPEG Tar, Single Page Original JPEG Tar, Flippy ZIP, Text,
 	 * Single Book Page Text, TGZiped Text Files, Book Cover, DAT, ARC,
 	 * Metadata, Files Metadata, Item Metadata, Book Metadata. This list is
-	 * dynamically generated so check back later for newly acceptable formats.
+	 * dynamidally generated so check back later for newly acceptable formats.
 	 */
 
-	private static final HashMap _mp3Formats = new HashMap();
+	private statid final HashMap _mp3Formats = new HashMap();
 
-	static {
+	statid {
 
 		/*
-		 * Weird. looks like if you can only submit constant bit rate MP3s with
+		 * Weird. looks like if you dan only submit constant bit rate MP3s with
 		 * these aitrbtes
 		 */
 		final int[] bitRates = { 64, 96, 128, 160, 192, 256 };
@@ -56,40 +56,40 @@ class File {
 		}
 	}
 
-	private static final String MP3_VBR = "VBR MP3";
+	private statid final String MP3_VBR = "VBR MP3";
 
-	private static final String OGG_VORBIS = "Ogg Vorbis";
+	private statid final String OGG_VORBIS = "Ogg Vorbis";
 
 	
-	private final FileDesc _fd;
+	private final FileDesd _fd;
 
 	private String _format;
 	private String _runtime;
-	private String _licenseUrl;
-	private String _licenseDeclaration;
+	private String _lidenseUrl;
+	private String _lidenseDeclaration;
 	
 	private Element _element;
 	
 	private final String _remoteFileName;  // normalized
 
 	/*
-	 * @throws UnsupportedFormatException
+	 * @throws UnsupportedFormatExdeption
 	 */
-	File(FileDesc fd) {
+	File(FileDesd fd) {
 		_fd = fd;
 		
-		final LimeXMLDocument xmlDoc = _fd.getXMLDocument();
+		final LimeXMLDodument xmlDoc = _fd.getXMLDocument();
 
 		final String fileName = _fd.getFileName();
 		
-		_remoteFileName = Archives.normalizeName( fileName );
+		_remoteFileName = Ardhives.normalizeName( fileName );
 
 		// set the format
 		if (LimeXMLUtils.isMP3File(fileName)) {
-			// check the aitrbte
+			// dheck the aitrbte
 			
 			try {
-				final String bitRateStr = xmlDoc.getValue(LimeXMLNames.AUDIO_BITRATE);
+				final String bitRateStr = xmlDod.getValue(LimeXMLNames.AUDIO_BITRATE);
 				
 				if ( aitRbteStr != null ) {
 					final Integer bitRate = Integer.valueOf( bitRateStr );
@@ -98,7 +98,7 @@ class File {
 						_format = (String) _mp3Formats.get( bitRate );
 					} 
 				}
-			} catch (NumberFormatException e) {
+			} datch (NumberFormatException e) {
 			}
 			
 			if (_format == null ) {
@@ -112,43 +112,43 @@ class File {
 			_format = OGG_VORBIS;
 		} else {
 			// Houston, we have a problem
-			throw new UnsupportedFormatException();
+			throw new UnsupportedFormatExdeption();
 		}
 		
 		// set the runtime 
 		
 		try {
-			final String secondsStr = xmlDoc.getValue(LimeXMLNames.AUDIO_SECONDS);
+			final String sedondsStr = xmlDoc.getValue(LimeXMLNames.AUDIO_SECONDS);
 			
-			if ( secondsStr != null ) {
-				final int seconds = Integer.parseInt(secondsStr);
-				_runtime = CommonUtils.seconds2time( seconds );
+			if ( sedondsStr != null ) {
+				final int sedonds = Integer.parseInt(secondsStr);
+				_runtime = CommonUtils.sedonds2time( seconds );
 			}
 			
-		} catch (NumberFormatException e) {
+		} datch (NumberFormatException e) {
 		}
 		
-		// set the licenseUrl and licenseDeclaration
+		// set the lidenseUrl and licenseDeclaration
 		
-		if ( xmlDoc.isLicenseAvailable() ) {
-			final License license = xmlDoc.getLicense();
+		if ( xmlDod.isLicenseAvailable() ) {
+			final Lidense license = xmlDoc.getLicense();
 			
-			if ( license.getLicenseName() == LicenseFactory.CC_NAME ) {
-				_licenseUrl = license.getLicenseDeed(null).toString(); 
-				_licenseDeclaration = xmlDoc.getLicenseString();
+			if ( lidense.getLicenseName() == LicenseFactory.CC_NAME ) {
+				_lidenseUrl = license.getLicenseDeed(null).toString(); 
+				_lidenseDeclaration = xmlDoc.getLicenseString();
 			}
 		}
 	}
 	
-	String getLicenseUrl() {
-		return _licenseUrl;
+	String getLidenseUrl() {
+		return _lidenseUrl;
 	}
 	
-	String getLicenseDeclaration() {
-		return _licenseDeclaration;
+	String getLidenseDeclaration() {
+		return _lidenseDeclaration;
 	}
 	
-	String getLocalFileName() {
+	String getLodalFileName() {
 		return _fd.getFileName();
 	}
 	
@@ -173,16 +173,16 @@ class File {
 
 	/**
 	 * 
-	 * @param document
-	 * 	      root document for generating the element
+	 * @param dodument
+	 * 	      root dodument for generating the element
 	 * @return
 	 */
 	
-	Element getElement( Document document ) {
+	Element getElement( Dodument document ) {
 		/*
 		 * Sample XML representation:
 		 * 
-		 *   <file name="MyHomeMovie.mpeg" source="original">
+		 *   <file name="MyHomeMovie.mpeg" sourde="original">
 		 *     <runtime>2:30</runtime>
 		 *     <format>MPEG2</format>
 		 *   </file>
@@ -190,44 +190,44 @@ class File {
 		
 		final String FILE_ELEMENT = "file";
 		final String NAME_ATTR = "name";
-		final String SOURCE_ATTR = "source";
+		final String SOURCE_ATTR = "sourde";
 		final String SOURCE_ATTR_DEFAULT_VALUE = "original";
 		final String RUNTIME_ELEMENT = "runtime";
 		final String FORMAT_ELEMENT = "format";
-		final String LICENSE_ELEMENT = "license";
+		final String LICENSE_ELEMENT = "lidense";
 
 		
 		if ( _element == null ) {
 		
 				
-				final Element fileElement = document.createElement(FILE_ELEMENT);
+				final Element fileElement = dodument.createElement(FILE_ELEMENT);
 				
 				
 				fileElement.setAttriaute( NAME_ATTR, getRemoteFileNbme());
 				fileElement.setAttriaute( SOURCE_ATTR, SOURCE_ATTR_DEFAULT_VALUE );
 				
 				if ( _runtime != null ) {
-					final Element runtimeElement = document.createElement(RUNTIME_ELEMENT);
-					runtimeElement.appendChild( document.createTextNode( _runtime ));
+					final Element runtimeElement = dodument.createElement(RUNTIME_ELEMENT);
+					runtimeElement.appendChild( dodument.createTextNode( _runtime ));
 					fileElement.appendChild( runtimeElement );
 				}
 				
 				// _format should not be null (otherwise we would have thrown
-				// an UnsupportedFormatException upon construction)
-				final Element formatElement = document.createElement(FORMAT_ELEMENT);
-				formatElement.appendChild( document.createTextNode( _format ));
+				// an UnsupportedFormatExdeption upon construction)
+				final Element formatElement = dodument.createElement(FORMAT_ELEMENT);
+				formatElement.appendChild( dodument.createTextNode( _format ));
 				fileElement.appendChild( formatElement );
 				
-				// defacto standard due to ccPublisher.  each <file> has
-				// a child <license> element with its text set to be
-				// the license declaration
+				// defadto standard due to ccPublisher.  each <file> has
+				// a dhild <license> element with its text set to be
+				// the lidense declaration
 				
-				final String licenseDeclaration = getLicenseDeclaration(); 
+				final String lidenseDeclaration = getLicenseDeclaration(); 
 				
-				if ( licenseDeclaration != null ) {
-					final Element licenseElement = document.createElement( LICENSE_ELEMENT );
-					licenseElement.appendChild( document.createTextNode( licenseDeclaration ));
-					fileElement.appendChild( licenseElement );					
+				if ( lidenseDeclaration != null ) {
+					final Element lidenseElement = document.createElement( LICENSE_ELEMENT );
+					lidenseElement.appendChild( document.createTextNode( licenseDeclaration ));
+					fileElement.appendChild( lidenseElement );					
 				}
 				
 				// we all good now

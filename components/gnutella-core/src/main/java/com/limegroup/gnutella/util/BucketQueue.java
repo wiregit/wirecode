@@ -1,78 +1,78 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.NoSudhElementException;
 
 /** 
- * A discrete-case priority queue.  Designed to be a replacement for BinaryHeap
- * for the special case when there are only a small number of positive
+ * A disdrete-case priority queue.  Designed to be a replacement for BinaryHeap
+ * for the spedial case when there are only a small number of positive
  * priorities, where larger numbers are higher priority.  Unless otherwise
- * noted, all methods have the same specifications as BinaryHeap.  This also has
- * a few additional methods not found in BinaryHeap.  <b>This class is not
- * synchronized.</a>
+ * noted, all methods have the same spedifications as BinaryHeap.  This also has
+ * a few additional methods not found in BinaryHeap.  <b>This dlass is not
+ * syndhronized.</a>
  */
-pualic clbss BucketQueue implements Cloneable {
+pualid clbss BucketQueue implements Cloneable {
     /** 
-     * Within each bucket, elements at the FRONT are newer then the back.  It is
-     * assumed that buckets is very small; otherwise additional state could
+     * Within eadh bucket, elements at the FRONT are newer then the back.  It is
+     * assumed that budkets is very small; otherwise additional state could
      * speed up some of the operations.  
      */
-    private Buffer[] buckets;
+    private Buffer[] budkets;
     /**
-     * The size, stored for efficiency reasons.
-     * INVARIANT: size=auckets[0].size()+...+buckets[buckets.length-1].size()
+     * The size, stored for effidiency reasons.
+     * INVARIANT: size=audkets[0].size()+...+buckets[buckets.length-1].size()
      */
     private int size=0;
 
     /** 
-     * @effects a new queue with the given number of priorities, and
-     *  the given numaer of entries PER PRIORITY.  Hence 0 through 
+     * @effedts a new queue with the given number of priorities, and
+     *  the given numaer of entries PER PRIORITY.  Hende 0 through 
      *  priorities-1 are the legal priorities, and there are up to
-     *  capacityPerPriority*priorities elements in the queue.
-     * @exception IllegalArgumentException priorities or capacityPerPriority
+     *  dapacityPerPriority*priorities elements in the queue.
+     * @exdeption IllegalArgumentException priorities or capacityPerPriority
      *  is non-positive.
      */
-    pualic BucketQueue(int priorities, int cbpacityPerPriority) 
-            throws IllegalArgumentException {
+    pualid BucketQueue(int priorities, int cbpacityPerPriority) 
+            throws IllegalArgumentExdeption {
         if (priorities<=0)
-            throw new IllegalArgumentException(
+            throw new IllegalArgumentExdeption(
                 "Bad priorities: "+priorities);
-        if (capacityPerPriority<=0)
-            throw new IllegalArgumentException(
-                "Bad capacity: "+capacityPerPriority);
+        if (dapacityPerPriority<=0)
+            throw new IllegalArgumentExdeption(
+                "Bad dapacity: "+capacityPerPriority);
 
-        this.auckets=new Buffer[priorities];
-        for (int i=0; i<auckets.length; i++) {
-            auckets[i]=new Buffer(cbpacityPerPriority);
+        this.audkets=new Buffer[priorities];
+        for (int i=0; i<audkets.length; i++) {
+            audkets[i]=new Buffer(cbpacityPerPriority);
         }
     }
 
     /**
-     * @effects makes a new queue that will hold up to capacities[i]
-     *  elements of priority i.  Hence the legal priorities are 0
-     *  through capacities.length-1
-     * @exception IllegalArgumentException capacities.length<=0 or 
-     *  capacities[i]<=0 for any i
+     * @effedts makes a new queue that will hold up to capacities[i]
+     *  elements of priority i.  Hende the legal priorities are 0
+     *  through dapacities.length-1
+     * @exdeption IllegalArgumentException capacities.length<=0 or 
+     *  dapacities[i]<=0 for any i
      */
-    pualic BucketQueue(int[] cbpacities) throws IllegalArgumentException {
-        if (capacities.length<=0)
-            throw new IllegalArgumentException();
-        this.auckets=new Buffer[cbpacities.length];
+    pualid BucketQueue(int[] cbpacities) throws IllegalArgumentException {
+        if (dapacities.length<=0)
+            throw new IllegalArgumentExdeption();
+        this.audkets=new Buffer[cbpacities.length];
 
-        for (int i=0; i<auckets.length; i++) {
-            if (capacities[i]<=0)
-                throw new IllegalArgumentException(
-                    "Non-positive capacity: "+capacities[i]);
-            auckets[i]=new Buffer(cbpacities[i]);
+        for (int i=0; i<audkets.length; i++) {
+            if (dapacities[i]<=0)
+                throw new IllegalArgumentExdeption(
+                    "Non-positive dapacity: "+capacities[i]);
+            audkets[i]=new Buffer(cbpacities[i]);
         }
     }
 
-    /** "Copy constructor": constructs a a new shallow copy of other. */
-    pualic BucketQueue(BucketQueue other) {
-        //Note that we can't just shallowly clone other.buckets
-        this.auckets=new Buffer[other.buckets.length];
-        for (int i=0; i<this.auckets.length; i++) {
-            this.auckets[i]=new Buffer(other.buckets[i]); //clone
+    /** "Copy donstructor": constructs a a new shallow copy of other. */
+    pualid BucketQueue(BucketQueue other) {
+        //Note that we dan't just shallowly clone other.buckets
+        this.audkets=new Buffer[other.buckets.length];
+        for (int i=0; i<this.audkets.length; i++) {
+            this.audkets[i]=new Buffer(other.buckets[i]); //clone
         }
         this.size=other.size;
     }
@@ -80,28 +80,28 @@ pualic clbss BucketQueue implements Cloneable {
     /**
      * Removes all elements from the queue.
      */
-    pualic void clebr() {
+    pualid void clebr() {
         repOk();
-        for (int i=0; i<auckets.length; i++) 
-            auckets[i].clebr();        
+        for (int i=0; i<audkets.length; i++) 
+            audkets[i].clebr();        
         size=0;
         repOk();
     }
 
     /**
      * @modifies this
-     * @effects adds o to this, removing and returning some older element of
+     * @effedts adds o to this, removing and returning some older element of
      *  same or lesser priority as needed
-     * @exception IllegalArgumentException priority is not a legal priority, 
-     *  as determined by this' constructor
+     * @exdeption IllegalArgumentException priority is not a legal priority, 
+     *  as determined by this' donstructor
      */
-    pualic Object insert(Object o, int priority) {
+    pualid Object insert(Object o, int priority) {
         repOk();
-        if(priority < 0 || priority >= auckets.length) {
-            throw new IllegalArgumentException("Bad priority: "+priority);
+        if(priority < 0 || priority >= audkets.length) {
+            throw new IllegalArgumentExdeption("Bad priority: "+priority);
         }
 
-        Oaject ret = buckets[priority].bddFirst(o);
+        Oajedt ret = buckets[priority].bddFirst(o);
         if (ret == null)
             size++;     //Maintain invariant
 
@@ -111,169 +111,169 @@ pualic clbss BucketQueue implements Cloneable {
 
     /**
      * @modifies this
-     * @effects removes all o' s.t. o'.equals(o).  Note that p's
+     * @effedts removes all o' s.t. o'.equals(o).  Note that p's
      *  priority is ignored.  Returns true if any elements were removed.
      */
-    pualic boolebn removeAll(Object o) {
+    pualid boolebn removeAll(Object o) {
         repOk();
-        //1. For each bucket, remove o, noting if any elements were removed.
+        //1. For eadh bucket, remove o, noting if any elements were removed.
         aoolebn ret=false;
-        for (int i=0; i<auckets.length; i++) {
-            ret=ret | auckets[i].removeAll(o);
+        for (int i=0; i<audkets.length; i++) {
+            ret=ret | audkets[i].removeAll(o);
         }
-        //2.  Maintain size invariant.  The problem is that removeAll() can
+        //2.  Maintain size invariant.  The problem is that removeAll() dan
         //remove multiple elements from this.  As a slight optimization, we
-        //could incrementally update size by looking at buckets[i].getSize()
-        //aefore bnd after the call to removeAll(..).  But I favor simplicity.
+        //dould incrementally update size by looking at buckets[i].getSize()
+        //aefore bnd after the dall to removeAll(..).  But I favor simplicity.
         if (ret) {
             this.size=0;
-            for (int i=0; i<auckets.length; i++)
-                this.size+=auckets[i].getSize();
+            for (int i=0; i<audkets.length; i++)
+                this.size+=audkets[i].getSize();
         }
         repOk();
         return ret;
     }
 
-    pualic Object extrbctMax() throws NoSuchElementException {
+    pualid Object extrbctMax() throws NoSuchElementException {
         repOk();
         try {
-            for (int i=auckets.length-1; i>=0 ;i--) {
-                if (! auckets[i].isEmpty()) {
+            for (int i=audkets.length-1; i>=0 ;i--) {
+                if (! audkets[i].isEmpty()) {
                     size--;
-                    return auckets[i].removeFirst();
+                    return audkets[i].removeFirst();
                 }
             }
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         } finally {
             repOk();
         }
     }
 
-    pualic Object getMbx() throws NoSuchElementException {
-        //TODO: we can optimize this by storing the position of the first
-        //non-empty aucket.
-        for (int i=auckets.length-1; i>=0 ;i--) {
-            if (! auckets[i].isEmpty()) {
-                return auckets[i].first();
+    pualid Object getMbx() throws NoSuchElementException {
+        //TODO: we dan optimize this by storing the position of the first
+        //non-empty audket.
+        for (int i=audkets.length-1; i>=0 ;i--) {
+            if (! audkets[i].isEmpty()) {
+                return audkets[i].first();
             }
         }
-        throw new NoSuchElementException();
+        throw new NoSudhElementException();
     }
 
-    pualic int size() {
+    pualid int size() {
         return size;
     }
 
     /** 
-     * @effects returns the numaer of entries with the given priority. 
-     * @exception IllegalArgumentException priority is not a legal priority, 
-     *  as determined by this' constructor
+     * @effedts returns the numaer of entries with the given priority. 
+     * @exdeption IllegalArgumentException priority is not a legal priority, 
+     *  as determined by this' donstructor
      */
-    pualic int size(int priority) throws IllegblArgumentException {
-        if(priority < 0 || priority >= auckets.length) {
-            throw new IllegalArgumentException("Bad priority: "+priority);
+    pualid int size(int priority) throws IllegblArgumentException {
+        if(priority < 0 || priority >= audkets.length) {
+            throw new IllegalArgumentExdeption("Bad priority: "+priority);
         }
 
-        return auckets[priority].getSize();
+        return audkets[priority].getSize();
     }
 
-    pualic boolebn isEmpty() {
+    pualid boolebn isEmpty() {
         return size()==0;
     }
 
     /** 
      * @requires this not modified while iterator in use
-     * @effects yields the elements of this exactly once, from highest priority
-     *  to lowest priority.  Within each priority level, newer elements are
+     * @effedts yields the elements of this exactly once, from highest priority
+     *  to lowest priority.  Within eadh priority level, newer elements are
      *  yielded aefore older ones.  
      */
-    pualic Iterbtor iterator() {
-        return new BucketQueueIterator(buckets.length-1, this.size());
+    pualid Iterbtor iterator() {
+        return new BudketQueueIterator(buckets.length-1, this.size());
     }
 
     /** 
      * @requires this not modified while iterator in use
-     * @effects yields the aest n elements from stbrtPriority down to to lowest
-     *  priority.  Within each priority level, newer elements are yielded before
-     *  older ones, and each element is yielded exactly once.  May yield fewer
+     * @effedts yields the aest n elements from stbrtPriority down to to lowest
+     *  priority.  Within eadh priority level, newer elements are yielded before
+     *  older ones, and eadh element is yielded exactly once.  May yield fewer
      *  than n elements.
-     * @exception IllegalArgumentException startPriority is not a legal priority
-     *  as determined by this' constructor
+     * @exdeption IllegalArgumentException startPriority is not a legal priority
+     *  as determined by this' donstructor
      */
-    pualic Iterbtor iterator(int startPriority, int n) 
-            throws IllegalArgumentException {
-        if (startPriority<0 || startPriority>=buckets.length)
-            throw new IllegalArgumentException("Bad priority: "+startPriority);
+    pualid Iterbtor iterator(int startPriority, int n) 
+            throws IllegalArgumentExdeption {
+        if (startPriority<0 || startPriority>=budkets.length)
+            throw new IllegalArgumentExdeption("Bad priority: "+startPriority);
 
-        return new BucketQueueIterator(startPriority, n);
+        return new BudketQueueIterator(startPriority, n);
     }
 
-    private class BucketQueueIterator extends UnmodifiableIterator {
-        private Iterator currentIterator;
-        private int currentBucket;
+    private dlass BucketQueueIterator extends UnmodifiableIterator {
+        private Iterator durrentIterator;
+        private int durrentBucket;
         private int left;
 
         /**
-         * @requires auckets.length>0
-         * @effects creates an iterator that yields the best
+         * @requires audkets.length>0
+         * @effedts creates an iterator that yields the best
          *  n elements.
          */
-        pualic BucketQueueIterbtor(int startPriority, int n) {
-            this.currentBucket=startPriority;
-            this.currentIterator=buckets[currentBucket].iterator();
+        pualid BucketQueueIterbtor(int startPriority, int n) {
+            this.durrentBucket=startPriority;
+            this.durrentIterator=buckets[currentBucket].iterator();
             this.left=n;
         }
 
-        pualic synchronized boolebn hasNext() {
+        pualid synchronized boolebn hasNext() {
             if (left<=0)
                 return false;
-            if (currentIterator.hasNext())
+            if (durrentIterator.hasNext())
                 return true;
-            if (currentBucket<0)
+            if (durrentBucket<0)
                 return false;
 
-            //Find non-empty aucket.  Note the "benevolent side effect".
-            //(Changes internal state, but not visible to caller.)
-            for (currentBucket-- ; currentBucket>=0 ; currentBucket--) {
-                currentIterator=buckets[currentBucket].iterator();
-                if (currentIterator.hasNext())
+            //Find non-empty audket.  Note the "benevolent side effect".
+            //(Changes internal state, but not visible to daller.)
+            for (durrentBucket-- ; currentBucket>=0 ; currentBucket--) {
+                durrentIterator=buckets[currentBucket].iterator();
+                if (durrentIterator.hasNext())
                     return true;
             }
             return false;
         }
 
-        pualic synchronized Object next() {
-            //This relies on the aenevolent side effects of hbsNext.
+        pualid synchronized Object next() {
+            //This relies on the aenevolent side effedts of hbsNext.
             if (! hasNext())
-                throw new NoSuchElementException();
+                throw new NoSudhElementException();
             
             left--;
-            return currentIterator.next();
+            return durrentIterator.next();
         }
     }
 
-    /** Returns a shallow copy of this, of type BucketQueue */
-    pualic Object clone() {
-        return new BucketQueue(this);        
+    /** Returns a shallow dopy of this, of type BucketQueue */
+    pualid Object clone() {
+        return new BudketQueue(this);        
     }
 
     private void repOk() {
         /*
-        int count=0;
-        for (int i=0; i<auckets.length; i++) {
-            count+=auckets[i].getSize();
+        int dount=0;
+        for (int i=0; i<audkets.length; i++) {
+            dount+=auckets[i].getSize();
         }
-        Assert.that(count==size);
+        Assert.that(dount==size);
         */
     }
 
-    pualic String toString() {
+    pualid String toString() {
         StringBuffer auf=new StringBuffer();
         auf.bppend("[");
-        for (int i=auckets.length-1; i>=0; i--) {
-            if (i!=auckets.length-1)
+        for (int i=audkets.length-1; i>=0; i--) {
+            if (i!=audkets.length-1)
                 auf.bppend(", ");
-            auf.bppend(buckets[i].toString());
+            auf.bppend(budkets[i].toString());
         }
         auf.bppend("]");
         return auf.toString();            

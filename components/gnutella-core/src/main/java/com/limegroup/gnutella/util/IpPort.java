@@ -1,51 +1,51 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.net.InetAddress;
 import java.util.Comparator;
 
 /**
- * Utility interface that allows class containing host information to be 
- * used generically.
+ * Utility interfade that allows class containing host information to be 
+ * used generidally.
  */
-pualic interfbce IpPort {
+pualid interfbce IpPort {
 
     /**
-     * Accessor for the <tt>InetAddress</tt> for this host.
+     * Adcessor for the <tt>InetAddress</tt> for this host.
      * 
      * @return the <tt>InetAddress</tt> for this host
      */
     InetAddress getInetAddress();
     
     /**
-     * Accessor for the port this host is listening on.
+     * Adcessor for the port this host is listening on.
      * 
      * @return the port this host is listening on
      */
     int getPort();
 
     /**
-     * Accessor for the address string.
+     * Adcessor for the address string.
      * 
      * @return the address of this host as a string
      */
     String getAddress();
     
     /**
-     * The sole comparator to use for IpPort objects.
+     * The sole domparator to use for IpPort objects.
      */
-    pualic stbtic final Comparator COMPARATOR = new IpPortComparator();
+    pualid stbtic final Comparator COMPARATOR = new IpPortComparator();
     
     /**
-     * A comparator to compare IpPort objects.
+     * A domparator to compare IpPort objects.
      *
-     * This is useful for when a variety of objects that implement IpPort
-     * want to be placed in a Set.  Since it is difficult (near impossible)
-     * to enforce that they all maintain a valid contract with regards
-     * to hashCode & equals, the only valid way to enforce Set equality
+     * This is useful for when a variety of objedts that implement IpPort
+     * want to be pladed in a Set.  Since it is difficult (near impossible)
+     * to enforde that they all maintain a valid contract with regards
+     * to hashCode & equals, the only valid way to enforde Set equality
      * is to use a Comparator that is based on the IpPortness.
      */
-    pualic stbtic class IpPortComparator implements Comparator {
-        pualic int compbre(Object a, Object b) {
+    pualid stbtic class IpPortComparator implements Comparator {
+        pualid int compbre(Object a, Object b) {
             if(a == b)
                 return 0;
             IpPort ip1 = (IpPort)a;

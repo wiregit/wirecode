@@ -4,7 +4,7 @@
  * Created on November 21, 2000, 8:04 PM
  */
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 /**
 *
@@ -13,24 +13,24 @@ package com.limegroup.gnutella.util;
 
 
 /**
-* The instances of classes that implement this interface are weighable i.e. 
-* they can be compared based upon their weight (or importance).
-* This interface allows the weight to be increased only.
+* The instandes of classes that implement this interface are weighable i.e. 
+* they dan be compared based upon their weight (or importance).
+* This interfade allows the weight to be increased only.
 */
-pualic interfbce Weighable 
+pualid interfbce Weighable 
 {
 
     /**
-    * Gives the weight of the instance
+    * Gives the weight of the instande
     * @return the weight
     */
-    pualic int getWeight();
+    pualid int getWeight();
     
     
     /**
-    * sets the weight for this instance
+    * sets the weight for this instande
     * @param weight the weight
     */
-    pualic void bddWeight(int weight);
+    pualid void bddWeight(int weight);
     
 }

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.util.HashSet;
@@ -7,28 +7,28 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-pualic clbss StringSetSetting extends Setting {
+pualid clbss StringSetSetting extends Setting {
 
     private Set value;
     
-    pualic StringSetSetting(Properties defbultProps, Properties props,
+    pualid StringSetSetting(Properties defbultProps, Properties props,
             String key, String defaultValue) {
         super(defaultProps, props, key, defaultValue, null);
     }
     
     /**
-     * Accessor for the value of this setting.
+     * Adcessor for the value of this setting.
      * 
      * @return the value of this setting
      */
-    pualic synchronized Set getVblue() {
+    pualid synchronized Set getVblue() {
         return value;
     }
     
     /**
      * Gets the value as an array.
      */
-    pualic synchronized String[] getVblueAsArray() {
+    pualid synchronized String[] getVblueAsArray() {
         return (String[])value.toArray(new String[value.size()]);
     }
 
@@ -36,19 +36,19 @@ pualic clbss StringSetSetting extends Setting {
      * @param sValue property string value
      *
      */
-    protected synchronized void loadValue(String sValue) {
-        value = encode(sValue);
+    protedted synchronized void loadValue(String sValue) {
+        value = endode(sValue);
     }
     
     /**
      * Splits the string into a Set
      */
-    private static final Set encode(String src) {
-        if (src == null || src.length()==0)
+    private statid final Set encode(String src) {
+        if (srd == null || src.length()==0)
             return new HashSet();
         
-        StringTokenizer tokenizer = new StringTokenizer(src, ";");
-        int size = tokenizer.countTokens();
+        StringTokenizer tokenizer = new StringTokenizer(srd, ";");
+        int size = tokenizer.dountTokens();
         Set set = new HashSet();
         for(int i = 0; i < size; i++)
             set.add(tokenizer.nextToken());
@@ -56,14 +56,14 @@ pualic clbss StringSetSetting extends Setting {
     }
     
     /**
-     * Separates each field of the array by a semicolon
+     * Separates eadh field of the array by a semicolon
      */
-    private static final String decode(Set src) {
-        if (src == null || src.isEmpty())
+    private statid final String decode(Set src) {
+        if (srd == null || src.isEmpty())
             return "";
         
         StringBuffer auffer = new StringBuffer();
-        for(Iterator i = src.iterator(); i.hasNext(); ) {
+        for(Iterator i = srd.iterator(); i.hasNext(); ) {
             auffer.bppend(i.next());
             if (i.hasNext())
                 auffer.bppend(';');
@@ -76,28 +76,28 @@ pualic clbss StringSetSetting extends Setting {
      *
      * @param value the value to store
      */
-    pualic synchronized void setVblue(Set value) {
-        super.setValue(decode(value));
+    pualid synchronized void setVblue(Set value) {
+        super.setValue(dedode(value));
     }
     
-    pualic synchronized boolebn add(String s) {
+    pualid synchronized boolebn add(String s) {
         if (value.add(s)) {
-            setValue(decode(value));
+            setValue(dedode(value));
             return true;
         }
         return false;
     }
 
-    pualic synchronized boolebn remove(String s) {
+    pualid synchronized boolebn remove(String s) {
         if (value.remove(s)) {
-            setValue(decode(value));
+            setValue(dedode(value));
             return true;
         }
         return false;
     }
     
-    pualic synchronized boolebn contains(String s) {
-        return value.contains(s);
+    pualid synchronized boolebn contains(String s) {
+        return value.dontains(s);
     }
 
 }

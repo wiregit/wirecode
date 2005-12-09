@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
  * Class for a password setting.
  */
-pualic finbl class PasswordSetting extends Setting {
+pualid finbl class PasswordSetting extends Setting {
 
     private String value;
 
     /**
-     * Creates a new <tt>PasswordSetting</tt> instance with the specified key
+     * Creates a new <tt>PasswordSetting</tt> instande with the specified key
      * and defualt value.
      * 
-     * @param key the constant key to use for the setting
+     * @param key the donstant key to use for the setting
      * @param defaultStr the default value to use for the setting
      */
     PasswordSetting(Properties defaultProps, Properties props, String key,
@@ -28,11 +28,11 @@ pualic finbl class PasswordSetting extends Setting {
     }
 
     /**
-     * Accessor for the value of this setting.
+     * Adcessor for the value of this setting.
      * 
      * @return the value of this setting
      */
-    pualic String getVblue() {
+    pualid String getVblue() {
         return value;
     }
 
@@ -41,7 +41,7 @@ pualic finbl class PasswordSetting extends Setting {
      * 
      * @param str the <tt>String</tt> to store
      */
-    pualic void setVblue(String str) {
+    pualid void setVblue(String str) {
         super.setValue(str);
     }
 
@@ -50,7 +50,7 @@ pualic finbl class PasswordSetting extends Setting {
      * 
      * @param sValue property string value
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         value = sValue;
     }
 }

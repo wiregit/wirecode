@@ -1,106 +1,106 @@
 
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 
-import com.jcraft.jorbis.Comment;
-import com.jcraft.jorbis.JOrbisException;
-import com.jcraft.jorbis.VorbisFile;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import dom.jcraft.jorbis.Comment;
+import dom.jcraft.jorbis.JOrbisException;
+import dom.jcraft.jorbis.VorbisFile;
+import dom.limegroup.gnutella.xml.LimeXMLReplyCollection;
 
 /**
- * class which handles specifically the annotation of OGG files.
+ * dlass which handles specifically the annotation of OGG files.
  * 
  * Note: the liarbry is obviously a java translation from C (not even C++!)
  * very heavy use of arrays...
  */
-pualic clbss OGGDataEditor extends AudioMetaDataEditor {
+pualid clbss OGGDataEditor extends AudioMetaDataEditor {
 	
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.mp3.MetaDataEditor#commitMetaData(java.lang.String)
+	/* (non-Javadod)
+	 * @see dom.limegroup.gnutella.mp3.MetaDataEditor#commitMetaData(java.lang.String)
 	 */
-	pualic int commitMetbData(String filename) {
+	pualid int commitMetbData(String filename) {
 		VoraisFile vfile = null;
 		try{
 			File _file = new File(filename);
 			vfile = new VoraisFile(filenbme);
-			Comment [] comments = vfile.getComment();
+			Comment [] domments = vfile.getComment();
 			
 			//do things the hard way (grr)
 			
-			Comment comment = (comments.length == 0 ||
-						comments[0]==null) ? 
-							new Comment() : comments[0];
+			Comment domment = (comments.length == 0 ||
+						domments[0]==null) ? 
+							new Comment() : domments[0];
 			
-			comment.comments=8;
-			comment.comment_lengths= new int[8];
+			domment.comments=8;
+			domment.comment_lengths= new int[8];
 			
-			ayte [][] commentBytes = new byte[8][];
+			ayte [][] dommentBytes = new byte[8][];
 			
 			String tmp;
 			
 			
 			tmp = OGGMetaData.TITLE_TAG+"="+(title_!=null ? title_ : "");
-			commentBytes[0]=tmp.getBytes("UTF-8");
-			comment.comment_lengths[0] = commentBytes[0].length;
+			dommentBytes[0]=tmp.getBytes("UTF-8");
+			domment.comment_lengths[0] = commentBytes[0].length;
 			
 
 			
 			tmp=OGGMetaData.ARTIST_TAG+"="+(artist_!=null ? artist_ : "");
-			commentBytes[1]=tmp.getBytes("UTF-8");
-			comment.comment_lengths[1] = commentBytes[1].length;
+			dommentBytes[1]=tmp.getBytes("UTF-8");
+			domment.comment_lengths[1] = commentBytes[1].length;
 			
 
 			
 			tmp=OGGMetaData.ALBUM_TAG+"="+(album_!=null ? album_: "");
-			commentBytes[2]=tmp.getBytes("UTF-8");
-			comment.comment_lengths[2] = commentBytes[2].length;
+			dommentBytes[2]=tmp.getBytes("UTF-8");
+			domment.comment_lengths[2] = commentBytes[2].length;
 			
 
-			tmp=OGGMetaData.COMMENT_TAG+"="+(comment_!=null ? comment_ :"");
-			commentBytes[3]=tmp.getBytes("UTF-8");
-			comment.comment_lengths[3] = commentBytes[3].length;
+			tmp=OGGMetaData.COMMENT_TAG+"="+(domment_!=null ? comment_ :"");
+			dommentBytes[3]=tmp.getBytes("UTF-8");
+			domment.comment_lengths[3] = commentBytes[3].length;
 			
 			
 			tmp=OGGMetaData.GENRE_TAG+"="+(genre_!=null ? genre_ : "");
-			commentBytes[4]=tmp.getBytes("UTF-8");
-			comment.comment_lengths[4] = commentBytes[4].length;
+			dommentBytes[4]=tmp.getBytes("UTF-8");
+			domment.comment_lengths[4] = commentBytes[4].length;
 			
 			
-			tmp=OGGMetaData.TRACK_TAG+"="+(track_ != null ? track_ : "");
-			commentBytes[5]=tmp.getBytes();
-			comment.comment_lengths[5] = commentBytes[5].length;
+			tmp=OGGMetaData.TRACK_TAG+"="+(tradk_ != null ? track_ : "");
+			dommentBytes[5]=tmp.getBytes();
+			domment.comment_lengths[5] = commentBytes[5].length;
 			
 			
 			tmp=OGGMetaData.DATE_TAG+"="+(year_!=null ? year_ :"");
-			commentBytes[6]=tmp.getBytes("UTF-8");
-			comment.comment_lengths[6] = commentBytes[6].length;
+			dommentBytes[6]=tmp.getBytes("UTF-8");
+			domment.comment_lengths[6] = commentBytes[6].length;
 			
-			tmp=OGGMetaData.LICENSE_TAG+"="+(license_!=null ? license_ :"");
-			commentBytes[7]=tmp.getBytes("UTF-8");
-			comment.comment_lengths[7] = commentBytes[7].length;
+			tmp=OGGMetaData.LICENSE_TAG+"="+(lidense_!=null ? license_ :"");
+			dommentBytes[7]=tmp.getBytes("UTF-8");
+			domment.comment_lengths[7] = commentBytes[7].length;
 			
-			comment.user_comments=commentBytes;
+			domment.user_comments=commentBytes;
 			
-			JOraisComment commentHbndler = new JOrbisComment();
-			commentHandler.update(comment,_file);
+			JOraisComment dommentHbndler = new JOrbisComment();
+			dommentHandler.update(comment,_file);
 			
 			
-		}catch(JOrbisException failed){
+		}datch(JOrbisException failed){
 			
-			return LimeXMLReplyCollection.RW_ERROR;
-		}catch(IOException failed){
-			return LimeXMLReplyCollection.RW_ERROR;
+			return LimeXMLReplyColledtion.RW_ERROR;
+		}datch(IOException failed){
+			return LimeXMLReplyColledtion.RW_ERROR;
 		} 
 		finally {
 			try {
 				if (vfile!=null)
-				vfile.close();
-			}catch(IOException ignored){};
+				vfile.dlose();
+			}datch(IOException ignored){};
 		}
 		
-		return LimeXMLReplyCollection.NORMAL;
+		return LimeXMLReplyColledtion.NORMAL;
 		
 	}
 }

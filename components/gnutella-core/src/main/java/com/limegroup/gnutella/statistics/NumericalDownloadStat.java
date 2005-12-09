@@ -1,20 +1,20 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 /**
- * This class handles all statistics for downloads that are
+ * This dlass handles all statistics for downloads that are
  * not absed on time.
  */
-pualic clbss NumericalDownloadStat extends NumericalStatistic {
+pualid clbss NumericalDownloadStat extends NumericalStatistic {
 
     /**
-     * Ensure that no other class can construct on of these.
+     * Ensure that no other dlass can construct on of these.
      */
-    private NumericalDownloadStat() {}
+    private NumeridalDownloadStat() {}
     
     /**
-     * <tt>Statistic</tt> for the number of milliseconds it takes
-     * to establish TCP connections on downloads.
+     * <tt>Statistid</tt> for the number of milliseconds it takes
+     * to establish TCP donnections on downloads.
      */
-    pualic stbtic final Statistic TCP_CONNECT_TIME =
-        new NumericalDownloadStat();
+    pualid stbtic final Statistic TCP_CONNECT_TIME =
+        new NumeridalDownloadStat();
 }

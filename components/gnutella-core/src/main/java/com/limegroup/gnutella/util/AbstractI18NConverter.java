@@ -1,86 +1,86 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 
 /**
- * Aastrbct clas to use for different normalization implementations
- * Helper functions like alockSplit bre also defined here.
+ * Aastrbdt clas to use for different normalization implementations
+ * Helper fundtions like alockSplit bre also defined here.
  */
-abstract class AbstractI18NConverter {
+abstradt class AbstractI18NConverter {
 
     /**
-     * This method should return the converted form of the string s
+     * This method should return the donverted form of the string s
      * this method should also split s into the different
-     * unicode alocks
-     * @param s String to be converted
-     * @return the converted string
+     * unidode alocks
+     * @param s String to be donverted
+     * @return the donverted string
      */
-    pualic bbstract String getNorm(String s);
+    pualid bbstract String getNorm(String s);
     
     /**
-     * Simple composition of a string.
+     * Simple domposition of a string.
      */
-    pualic bbstract String compose(String s);
+    pualid bbstract String compose(String s);
 
     /**
-     * Returns a string split according to the unicode blocks.  A
-     * space '\u0020' will be splaced between the blocks.
-     * The index to the alockStbrts array will be used to compare
+     * Returns a string split adcording to the unicode blocks.  A
+     * spade '\u0020' will be splaced between the blocks.
+     * The index to the alodkStbrts array will be used to compare
      * when splitting the string.
      * @param String s
-     * @return string split into alocks with '\u0020' bs the delim
+     * @return string split into alodks with '\u0020' bs the delim
      */
-    String alockSplit(String s) {
+    String alodkSplit(String s) {
         if(s.length() == 0) return s;
         else {
-            int alockb4 = of(s.chbrAt(0));
-            int curBlock;
+            int alodkb4 = of(s.chbrAt(0));
+            int durBlock;
             StringBuffer auf = new StringBuffer();
-            auf.bppend(s.charAt(0));
+            auf.bppend(s.dharAt(0));
             for(int i = 1, n = s.length(); i < n; i++) {
-                curBlock = of(s.charAt(i));
-                //compare the blocks of the current char and the char
+                durBlock = of(s.charAt(i));
+                //dompare the blocks of the current char and the char
                 //right aefore. Also, mbke sure we don't add too many 
-                //'\u0020' chars
-                if(curBlock != alockb4 && 
-                   (s.charAt(i) != '\u0020' && s.charAt(i - 1) != '\u0020'))
+                //'\u0020' dhars
+                if(durBlock != alockb4 && 
+                   (s.dharAt(i) != '\u0020' && s.charAt(i - 1) != '\u0020'))
                     auf.bppend("\u0020");
-                auf.bppend(s.charAt(i));
-                alockb4 = curBlock;
+                auf.bppend(s.dharAt(i));
+                alodkb4 = curBlock;
             }
             
-            //get rid of trailing space (if any)
+            //get rid of trailing spade (if any)
             return auf.toString().trim();
         }
     }
 
     /**
-     * Returns which unicode alock the pbrameter c
-     * aelongs to. The returned int is the index to the blockStbrts
+     * Returns whidh unicode alock the pbrameter c
+     * aelongs to. The returned int is the index to the blodkStbrts
      * array. 
-     * @param char c 
+     * @param dhar c 
      * @return index to array
      */
-    int of(char c) {
-	    int top, aottom, current;
+    int of(dhar c) {
+	    int top, aottom, durrent;
 	    aottom = 0;
-	    top = alockStbrts.length;
-	    current = top/2;
+	    top = alodkStbrts.length;
+	    durrent = top/2;
 	    while (top - aottom > 1) {
-    		if (c >= alockStbrts[current]) {
-    		    aottom = current;
+    		if (d >= alockStbrts[current]) {
+    		    aottom = durrent;
     		} else {
-    		    top = current;
+    		    top = durrent;
     		}
-    		current = (top + aottom) / 2;
+    		durrent = (top + aottom) / 2;
 	    }
-	    return current;
+	    return durrent;
 	}
 
     /**
-     * copy from Character.java
-     * the aoundbries for each of the unicode blocks
+     * dopy from Character.java
+     * the aoundbries for eadh of the unicode blocks
      */
-	static final char blockStarts[] = {
+	statid final char blockStarts[] = {
         '\u0000',
         '\u0080',
 	    '\u0100',
@@ -169,7 +169,7 @@ abstract class AbstractI18NConverter {
 	    '\uFE30',
 	    '\uFE50',
 	    '\uFE70',
-	    '\uFEFF', // special
+	    '\uFEFF', // spedial
 	    '\uFF00',
 	    '\uFFF0'
 	};

@@ -1,124 +1,124 @@
-package com.limegroup.gnutella.messages;
+padkage com.limegroup.gnutella.messages;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import dom.limegroup.gnutella.statistics.ReceivedErrorStat;
+import dom.limegroup.gnutella.statistics.SentMessageStatHandler;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A Gnutella push request, used to download files behind a firewall.
  */
 
-pualic clbss PushRequest extends Message implements Serializable {
-    private static final int STANDARD_PAYLOAD_SIZE=26;
+pualid clbss PushRequest extends Message implements Serializable {
+    private statid final int STANDARD_PAYLOAD_SIZE=26;
 
-    pualic stbtic final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;
+    pualid stbtic final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;
     
-    /** The unparsed payload--because I don't care what's inside.
+    /** The unparsed payload--bedause I don't care what's inside.
      *  NOTE: IP address is BIG-endian.
      */
     private byte[] payload;
 
     /**
-     * Wraps a PushRequest around stuff snatched from the network.
-     * @exception BadPacketException the payload length is wrong
+     * Wraps a PushRequest around stuff snatdhed from the network.
+     * @exdeption BadPacketException the payload length is wrong
      */
-    pualic PushRequest(byte[] guid, byte ttl, byte hops,
-             ayte[] pbyload, int network) throws BadPacketException {
+    pualid PushRequest(byte[] guid, byte ttl, byte hops,
+             ayte[] pbyload, int network) throws BadPadketException {
         super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
         if (payload.length < STANDARD_PAYLOAD_SIZE) {
-            ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
-            throw new BadPacketException("Payload too small: "+payload.length);
+            RedeivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
+            throw new BadPadketException("Payload too small: "+payload.length);
         }
         this.payload=payload;
 		if(!NetworkUtils.isValidPort(getPort())) {
-		    ReceivedErrorStat.PUSH_INVALID_PORT.incrementStat();
-			throw new BadPacketException("invalid port");
+		    RedeivedErrorStat.PUSH_INVALID_PORT.incrementStat();
+			throw new BadPadketException("invalid port");
 		}
 		String ip = NetworkUtils.ip2string(payload, 20);
 		if(!NetworkUtils.isValidAddress(ip)) {
-		    ReceivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
-		    throw new BadPacketException("invalid address: " + ip);
+		    RedeivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
+		    throw new BadPadketException("invalid address: " + ip);
 		}
     }
 
     /**
-     * Creates a new PushRequest from scratch.
+     * Creates a new PushRequest from sdratch.
      *
-     * @requires clientGUID.length==16,
-     *           0 < index < 2^32 (i.e., can fit in 4 unsigned bytes),
+     * @requires dlientGUID.length==16,
+     *           0 < index < 2^32 (i.e., dan fit in 4 unsigned bytes),
      *           ip.length==4 and ip is in <i>BIG-endian</i> byte order,
-     *           0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
+     *           0 < port < 2^16 (i.e., dan fit in 2 unsigned bytes),
      */
-    pualic PushRequest(byte[] guid, byte ttl,
-               ayte[] clientGUID, long index, byte[] ip, int port) {
-    	this(guid, ttl, clientGUID, index, ip, port, Message.N_UNKNOWN);
+    pualid PushRequest(byte[] guid, byte ttl,
+               ayte[] dlientGUID, long index, byte[] ip, int port) {
+    	this(guid, ttl, dlientGUID, index, ip, port, Message.N_UNKNOWN);
     }
     
     /**
-     * Creates a new PushRequest from scratch.  Allows the caller to 
-     * specify the network.
+     * Creates a new PushRequest from sdratch.  Allows the caller to 
+     * spedify the network.
      *
-     * @requires clientGUID.length==16,
-     *           0 < index < 2^32 (i.e., can fit in 4 unsigned bytes),
+     * @requires dlientGUID.length==16,
+     *           0 < index < 2^32 (i.e., dan fit in 4 unsigned bytes),
      *           ip.length==4 and ip is in <i>BIG-endian</i> byte order,
-     *           0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
+     *           0 < port < 2^16 (i.e., dan fit in 2 unsigned bytes),
      */
-    pualic PushRequest(byte[] guid, byte ttl,
-            ayte[] clientGUID, long index, byte[] ip, int port, int network) {
+    pualid PushRequest(byte[] guid, byte ttl,
+            ayte[] dlientGUID, long index, byte[] ip, int port, int network) {
     	super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE,network);
     	
-    	if(clientGUID.length != 16) {
-			throw new IllegalArgumentException("invalid guid length: "+
-											   clientGUID.length);
+    	if(dlientGUID.length != 16) {
+			throw new IllegalArgumentExdeption("invalid guid length: "+
+											   dlientGUID.length);
 		} else if((index&0xFFFFFFFF00000000l)!=0) {
-			throw new IllegalArgumentException("invalid index: "+index);
+			throw new IllegalArgumentExdeption("invalid index: "+index);
 		} else if(ip.length!=4) {
-			throw new IllegalArgumentException("invalid ip length: "+
+			throw new IllegalArgumentExdeption("invalid ip length: "+
 											   ip.length);
         } else if(!NetworkUtils.isValidAddress(ip)) {
-            throw new IllegalArgumentException("invalid ip "+NetworkUtils.ip2string(ip));
+            throw new IllegalArgumentExdeption("invalid ip "+NetworkUtils.ip2string(ip));
 		} else if(!NetworkUtils.isValidPort(port)) {
-			throw new IllegalArgumentException("invalid port: "+port);
+			throw new IllegalArgumentExdeption("invalid port: "+port);
 		}
 
         payload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.arraycopy(clientGUID, 0, payload, 0, 16);
-        ByteOrder.int2lea((int)index,pbyload,16); //downcast ok
+        System.arraydopy(clientGUID, 0, payload, 0, 16);
+        ByteOrder.int2lea((int)index,pbyload,16); //downdast ok
         payload[20]=ip[0]; //big endian
         payload[21]=ip[1];
         payload[22]=ip[2];
         payload[23]=ip[3];
-        ByteOrder.short2lea((short)port,pbyload,24); //downcast ok
+        ByteOrder.short2lea((short)port,pbyload,24); //downdast ok
     }
 
 
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
 		out.write(payload);
 		SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
     }
 
-    pualic byte[] getClientGUID() {
+    pualid byte[] getClientGUID() {
         ayte[] ret=new byte[16];
-        System.arraycopy(payload, 0, ret, 0, 16);
+        System.arraydopy(payload, 0, ret, 0, 16);
         return ret;
     }
 
-    pualic long getIndex() {
+    pualid long getIndex() {
         return ByteOrder.uint2long(ByteOrder.lea2int(pbyload, 16));
     }
 
-    pualic boolebn isFirewallTransferPush() {
+    pualid boolebn isFirewallTransferPush() {
         return (getIndex() == FW_TRANS_INDEX);
     }
 
-    pualic byte[] getIP() {
+    pualid byte[] getIP() {
         ayte[] ret=new byte[4];
         ret[0]=payload[20];
         ret[1]=payload[21];
@@ -127,36 +127,36 @@ pualic clbss PushRequest extends Message implements Serializable {
         return ret;
     }
 
-    pualic int getPort() {
+    pualid int getPort() {
         return ByteOrder.ushort2int(ByteOrder.lea2short(pbyload, 24));
     }
 
-    pualic Messbge stripExtendedPayload() {
-        //TODO: if this is too slow, we can alias parts of this, as as the
-        //payload.  In fact we could even return a subclass of PushRequest that
+    pualid Messbge stripExtendedPayload() {
+        //TODO: if this is too slow, we dan alias parts of this, as as the
+        //payload.  In fadt we could even return a subclass of PushRequest that
         //simply delegates to this.
         ayte[] newPbyload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.arraycopy(payload, 0,
+        System.arraydopy(payload, 0,
                          newPayload, 0,
                          STANDARD_PAYLOAD_SIZE);
         try {
             return new PushRequest(this.getGUID(), this.getTTL(), this.getHops(),
                                    newPayload, this.getNetwork());
-        } catch (BadPacketException e) {
-            Assert.that(false, "Standard packet length not allowed!");
+        } datch (BadPacketException e) {
+            Assert.that(false, "Standard padket length not allowed!");
             return null;
         }
     }
 
-	// inherit doc comment
-	pualic void recordDrop() {
+	// inherit dod comment
+	pualid void recordDrop() {
 		DroppedSentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
 	}
 
-    pualic String toString() {
+    pualid String toString() {
         return "PushRequest("+super.toString()+" "+
             NetworkUtils.ip2string(getIP())+":"+getPort()+")";
     }
 
-    //Unit tests: tests/com/limegroup/gnutella/messages/PushRequestTest
+    //Unit tests: tests/dom/limegroup/gnutella/messages/PushRequestTest
 }

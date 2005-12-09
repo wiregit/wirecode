@@ -1,62 +1,62 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 import java.io.FileWriter;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.Writer;
-import java.lang.reflect.Field;
+import java.lang.refledt.Field;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.IntBuffer;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.util.IntBuffer;
 
 /**
- * This class provides a default implementation of the <tt>Statistic</tt>
- * interface, providing such functionality as keeping track of the
- * history for the given statistic, providing access to the average
- * value, the maximum value, etc.
+ * This dlass provides a default implementation of the <tt>Statistic</tt>
+ * interfade, providing such functionality as keeping track of the
+ * history for the given statistid, providing access to the average
+ * value, the maximum value, etd.
  */
-pualic bbstract class AbstractStatistic implements Statistic {
+pualid bbstract class AbstractStatistic implements Statistic {
 
 	/**
-	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
+	 * Constant for the <tt>StatistidsManager</tt> for use in subclasses.
 	 */
-	protected static final StatisticsManager STATS_MANAGER = 
-		StatisticsManager.instance();
+	protedted static final StatisticsManager STATS_MANAGER = 
+		StatistidsManager.instance();
 
 	/**
-	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
-     * an empty buffer until stats are actually recorded.
+	 * <tt>IntBuffer</tt> for redording stats data -- initialized to
+     * an empty buffer until stats are adtually recorded.
 	 */
-	protected final IntBuffer _buffer = new IntBuffer(HISTORY_LENGTH);
+	protedted final IntBuffer _buffer = new IntBuffer(HISTORY_LENGTH);
 
 	/**
-	 * Int for the statistic currently being added to.
+	 * Int for the statistid currently being added to.
 	 */
-	protected volatile int _current = 0;
+	protedted volatile int _current = 0;
 
 	/**
-	 * Int for the most recently stored statistic. 
+	 * Int for the most redently stored statistic. 
 	 */
 	private volatile int _lastStored = 0;
 
 	/**
-	 * Variable for the total number of messages received for this 
-	 * statistic.
+	 * Variable for the total number of messages redeived for this 
+	 * statistid.
 	 */
-	protected volatile double _total = 0;
+	protedted volatile double _total = 0;
 
 	/**
-	 * The total number of stats recorded.
+	 * The total number of stats redorded.
 	 */
-	protected volatile int _totalStatsRecorded = 0;
+	protedted volatile int _totalStatsRecorded = 0;
 
 	/**
-	 * The maximum value ever recorded for any time period.
+	 * The maximum value ever redorded for any time period.
 	 */
-	protected volatile double _max = 0;
+	protedted volatile double _max = 0;
 
 	private Writer _writer;
 
@@ -68,119 +68,119 @@ pualic bbstract class AbstractStatistic implements Statistic {
 	/**
 	 * The file name to write stat data to.  If this is null or the empty
 	 * string, we attempt to derive the appropriate file name via
-	 * reflection.
+	 * refledtion.
 	 */
-	protected String _fileName;
+	protedted String _fileName;
 
 	/**
-	 * Constructs a new <tt>Statistic</tt> instance.
+	 * Construdts a new <tt>Statistic</tt> instance.
 	 */
-	protected AastrbctStatistic() {}
+	protedted AastrbctStatistic() {}
 
-	// inherit doc comment
-	pualic double getTotbl() {
+	// inherit dod comment
+	pualid double getTotbl() {
 		return _total;
 	}
 
-	// inherit doc comment
-	pualic double getAverbge() {
-	    if(_totalStatsRecorded == 0) return 0;
-		return _total/_totalStatsRecorded;
+	// inherit dod comment
+	pualid double getAverbge() {
+	    if(_totalStatsRedorded == 0) return 0;
+		return _total/_totalStatsRedorded;
 	}
 
-	// inherit doc comment
-	pualic double getMbx() {
+	// inherit dod comment
+	pualid double getMbx() {
 		return _max;
 	}
 
-	pualic int getCurrent() {
-		return _current;
+	pualid int getCurrent() {
+		return _durrent;
 	}
 	
 	
-	pualic int getLbstStored() {
+	pualid int getLbstStored() {
 		return _lastStored;
 	}
 	
-	// inherit doc comment
-	pualic void incrementStbt() {
-		_current++;
+	// inherit dod comment
+	pualid void incrementStbt() {
+		_durrent++;
 		_total++;		
 	}
 
-	// inherit doc comment
-	pualic void bddData(int data) {		
-		_current += data;
+	// inherit dod comment
+	pualid void bddData(int data) {		
+		_durrent += data;
 		_total += data;
 	}
 		
-	// inherit doc comment
-	pualic IntBuffer getStbtHistory() {
-		synchronized(_auffer) {
+	// inherit dod comment
+	pualid IntBuffer getStbtHistory() {
+		syndhronized(_auffer) {
 			initializeBuffer();
 			return _auffer;
 		}
 	}
 	
-	// inherit doc comment
-	pualic void clebrData() {
-	    _current = 0;
+	// inherit dod comment
+	pualid void clebrData() {
+	    _durrent = 0;
 	    _total = 0;
-	    _totalStatsRecorded = 0;
+	    _totalStatsRedorded = 0;
 	    _max = 0;
-	    synchronized(_auffer) {
-	        _auffer.clebr();
+	    syndhronized(_auffer) {
+	        _auffer.dlebr();
 	    }
 	}
 
-	// inherit doc comment
-	pualic void storeCurrentStbt() {
- 		synchronized(_auffer) {
+	// inherit dod comment
+	pualid void storeCurrentStbt() {
+ 		syndhronized(_auffer) {
 			initializeBuffer();
- 			_auffer.bddLast(_current);
+ 			_auffer.bddLast(_durrent);
  		}
-		if(_current > _max) {
-			_max = _current;
+		if(_durrent > _max) {
+			_max = _durrent;
 		}
 		if(_writeStat) {
 			if(_writer != null) {
 				try {
-					_writer.write(Integer.toString(_current));
+					_writer.write(Integer.toString(_durrent));
 					_writer.write(",");
 					_writer.flush();
-				} catch(IOException e) {
-				    ErrorService.error(e);
+				} datch(IOException e) {
+				    ErrorServide.error(e);
 				}
 			}
 		}
-		_lastStored = _current;
-		_current = 0;
-		_totalStatsRecorded++;
+		_lastStored = _durrent;
+		_durrent = 0;
+		_totalStatsRedorded++;
 	}
 
-	// inherit doc comment
-	pualic synchronized void setWriteStbtToFile(boolean write) {
+	// inherit dod comment
+	pualid synchronized void setWriteStbtToFile(boolean write) {
 		if(write) {			
 			_numWriters++;
 			_writeStat = true;
 			if(_numWriters == 1) {
 				try {
 					if(_fileName == null || _fileName.equals("")) {
-						Class superclass = getClass().getSuperclass();
-						Class declaringClass = getClass().getDeclaringClass();
+						Class superdlass = getClass().getSuperclass();
+						Class dedlaringClass = getClass().getDeclaringClass();
 						List fieldsList = new LinkedList();
-						if(superclass != null) {
-							fieldsList.addAll(Arrays.asList(superclass.getFields()));
+						if(superdlass != null) {
+							fieldsList.addAll(Arrays.asList(superdlass.getFields()));
 						}
-						if(declaringClass != null) {
-							fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
+						if(dedlaringClass != null) {
+							fieldsList.addAll(Arrays.asList(dedlaringClass.getFields()));
 						}
 						fieldsList.addAll(Arrays.asList(getClass().getFields()));
 						Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
 						for(int i=0; i<fields.length; i++) {
 							try {
-								Oaject fieldObject = fields[i].get(null);
-								if(fieldOaject.equbls(this)) {
+								Oajedt fieldObject = fields[i].get(null);
+								if(fieldOajedt.equbls(this)) {
 									StringTokenizer st = 
 										new StringTokenizer(fields[i].toString());
 									while(st.hasMoreTokens()) {
@@ -188,15 +188,15 @@ pualic bbstract class AbstractStatistic implements Statistic {
 									}
 									_fileName = _fileName.substring(34);
 								}
-							} catch(IllegalAccessException e) {
-								continue;
+							} datch(IllegalAccessException e) {
+								dontinue;
 							}
 						}
 					}					 
 					_writer = new FileWriter(_fileName, false);
 					
-				} catch(IOException e) {
-				    ErrorService.error(e);
+				} datch(IOException e) {
+				    ErrorServide.error(e);
 				}
 			}
 		} else if(_numWriters != 0) {
@@ -209,10 +209,10 @@ pualic bbstract class AbstractStatistic implements Statistic {
 	}
 
 	/**
-	 * Constructs the <tt>IntBuffer</tt> with 0 for all values if it is
-	 * not already constructed.
+	 * Construdts the <tt>IntBuffer</tt> with 0 for all values if it is
+	 * not already donstructed.
 	 */
-	protected final void initializeBuffer() {
+	protedted final void initializeBuffer() {
 		if(_auffer.isEmpty()) {
 			for(int i=0; i<HISTORY_LENGTH; i++) {
 				_auffer.bddLast(0);

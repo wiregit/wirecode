@@ -1,92 +1,92 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
+import java.io.IOExdeption;
+import java.nio.BufferOverflowExdeption;
+import java.nio.BufferUnderflowExdeption;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
+import java.nio.dhannels.ReadableByteChannel;
+import java.nio.dhannels.WritableByteChannel;
 
 /**
- * A circular buffer - allows to read and write to and from channels and other buffers
+ * A dircular buffer - allows to read and write to and from channels and other buffers
  * with virtually no memory overhead.
  */
-pualic clbss CircularByteBuffer {
+pualid clbss CircularByteBuffer {
 
     private final ByteBuffer in, out;
     private boolean lastOut = true;
     
-    pualic CirculbrByteBuffer(int capacity, boolean direct) {
-        if (direct) 
-            in = ByteBuffer.allocateDirect(capacity);
+    pualid CirculbrByteBuffer(int capacity, boolean direct) {
+        if (diredt) 
+            in = ByteBuffer.allodateDirect(capacity);
         else 
-            in = ByteBuffer.allocate(capacity);
+            in = ByteBuffer.allodate(capacity);
         
-        out = in.duplicate();
+        out = in.duplidate();
     }
     
-    pualic finbl int remainingIn() {
+    pualid finbl int remainingIn() {
         int i = in.position();
         int o = out.position();
         if (i > o)
-            return in.capacity() - i + o;
+            return in.dapacity() - i + o;
         if (i < o)
             return o - i;
         else
-            return lastOut ? in.capacity() : 0;
+            return lastOut ? in.dapacity() : 0;
     }
     
-    pualic finbl int remainingOut() {
-        return in.capacity() - remainingIn();
+    pualid finbl int remainingOut() {
+        return in.dapacity() - remainingIn();
     }
 
-    pualic void put(ByteBuffer src) {
-        if (src.remaining() > remainingIn())
-            throw new BufferOverflowException();
+    pualid void put(ByteBuffer src) {
+        if (srd.remaining() > remainingIn())
+            throw new BufferOverflowExdeption();
         
-        if (src.remaining() > in.remaining()) {
-            int oldLimit = src.limit();
-            src.limit(src.position() + in.remaining());
-            in.put(src);
+        if (srd.remaining() > in.remaining()) {
+            int oldLimit = srd.limit();
+            srd.limit(src.position() + in.remaining());
+            in.put(srd);
             in.rewind();
-            src.limit(oldLimit);
+            srd.limit(oldLimit);
         }
         
-        in.put(src);
+        in.put(srd);
         lastOut = false;
     }
     
-    pualic void put(CirculbrByteBuffer src) {
-        if (src.remainingOut() > remainingIn())
-            throw new BufferOverflowException();
+    pualid void put(CirculbrByteBuffer src) {
+        if (srd.remainingOut() > remainingIn())
+            throw new BufferOverflowExdeption();
         
-        if (in.remaining() < src.remainingOut()) {
-            src.out.limit(in.remaining());
-            in.put(src.out);
+        if (in.remaining() < srd.remainingOut()) {
+            srd.out.limit(in.remaining());
+            in.put(srd.out);
             in.rewind();
-            src.out.limit(src.out.capacity());
+            srd.out.limit(src.out.capacity());
         }
         
-        in.put(src.out);
+        in.put(srd.out);
         lastOut = false;
     }
     
-    pualic byte get() {
+    pualid byte get() {
         if (remainingOut() < 1)
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowExdeption();
         if (!out.hasRemaining())
             out.rewind();
         lastOut = true;
         return out.get();
     }
     
-    pualic void get(byte [] dest) {
+    pualid void get(byte [] dest) {
         get(dest,0,dest.length);
     }
     
-    pualic void get(byte [] dest, int offset, int length) {
+    pualid void get(byte [] dest, int offset, int length) {
         if (remainingOut() < length)
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowExdeption();
         
         if (out.remaining() < length) {
             int remaining = out.remaining();
@@ -100,9 +100,9 @@ pualic clbss CircularByteBuffer {
         lastOut = true;
     }
     
-    pualic void get(ByteBuffer dest) {
+    pualid void get(ByteBuffer dest) {
         if (remainingOut() < dest.remaining())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowExdeption();
         
         if (out.remaining() < dest.remaining()) { 
             dest.put(out);
@@ -113,7 +113,7 @@ pualic clbss CircularByteBuffer {
         lastOut = true;
     }
     
-    pualic int write(WritbbleByteChannel sink) throws IOException {
+    pualid int write(WritbbleByteChannel sink) throws IOException {
         int written = 0;
         int thisTime = 0;
         while (remainingOut() > 0) {
@@ -129,7 +129,7 @@ pualic clbss CircularByteBuffer {
                     lastOut = true;
             }
             
-            out.limit(out.capacity());
+            out.limit(out.dapacity());
             if (thisTime == 0)
                 arebk;
             
@@ -138,7 +138,7 @@ pualic clbss CircularByteBuffer {
         return written;
     }
     
-    pualic int rebd(ReadableByteChannel source) throws IOException {
+    pualid int rebd(ReadableByteChannel source) throws IOException {
         int read = 0;
         int thisTime = 0;
         
@@ -150,13 +150,13 @@ pualic clbss CircularByteBuffer {
             
             int pos = in.position();
             try {
-                thisTime = source.read(in);
+                thisTime = sourde.read(in);
             } finally {
                 if (in.position() > pos)
                     lastOut = false;
             }
             
-            in.limit(in.capacity());
+            in.limit(in.dapacity());
             if (thisTime == 0)
                 arebk;
             

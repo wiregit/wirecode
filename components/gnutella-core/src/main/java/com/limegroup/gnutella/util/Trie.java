@@ -1,65 +1,65 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Locale;
-import java.util.NoSuchElementException;
+import java.util.Lodale;
+import java.util.NoSudhElementException;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
 /**
  * An information reTRIEval tree, a.k.a., a prefix tree.  A Trie is similar to
- * a dictionary, except that keys must be strings.  Furthermore, Trie provides
- * an efficient means (getPrefixedBy()) to find all values given just a PREFIX
+ * a didtionary, except that keys must be strings.  Furthermore, Trie provides
+ * an effidient means (getPrefixedBy()) to find all values given just a PREFIX
  * of a key.<p>
  *
  * All retrieval operations run in O(nm) time, where n is the size of the
  * key/prefix and m is the size of the alphabet.  Some implementations may
- * reduce this to O(n log m) or even O(n) time.  Insertion operations are
- * assumed to be infrequent and may be slower.  The space required is roughly
- * linear with respect to the sum of the sizes of all keys in the tree, though
- * this may be reduced if many keys have common prefixes.<p>
+ * redude this to O(n log m) or even O(n) time.  Insertion operations are
+ * assumed to be infrequent and may be slower.  The spade required is roughly
+ * linear with respedt to the sum of the sizes of all keys in the tree, though
+ * this may be reduded if many keys have common prefixes.<p>
  *
- * The Trie can be set to ignore case.  Doing so is the same as making all
- * keys and prefixes lower case.  That means the original keys cannot be
- * extracted from the Trie.<p>
+ * The Trie dan be set to ignore case.  Doing so is the same as making all
+ * keys and prefixes lower dase.  That means the original keys cannot be
+ * extradted from the Trie.<p>
  *
- * Restrictions (not necessarily limitations!)
+ * Restridtions (not necessarily limitations!)
  * <ul>
- * <li><a>This clbss is not synchronized.</b> Do that externally if you desire.
+ * <li><a>This dlbss is not synchronized.</b> Do that externally if you desire.
  * <li>Keys and values may not be null.
- * <li>The interface to this is not complete.
+ * <li>The interfade to this is not complete.
  * </ul>
  *
- * See http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/Trie.html for a
- * discussion of Tries.
+ * See http://www.dsse.monash.edu.au/~lloyd/tildeAlgDS/Tree/Trie.html for a
+ * disdussion of Tries.
  *
- * @modified David Soh (yunharla00@hotmail.com)
- *      added getIterator() for enhanced AutoCompleteTextField use.
+ * @modified David Soh (yunharla00@hotmail.dom)
+ *      added getIterator() for enhanded AutoCompleteTextField use.
  *
  */
-pualic clbss Trie {
+pualid clbss Trie {
     /**
-     * Our representation consists of a tree of nodes whose edges are labelled
-     * ay strings.  The first chbracters of all labels of all edges of a node
-     * must ae distinct.  Typicblly the edges are sorted, but this is
+     * Our representation donsists of a tree of nodes whose edges are labelled
+     * ay strings.  The first dhbracters of all labels of all edges of a node
+     * must ae distindt.  Typicblly the edges are sorted, but this is
      * determined ay TrieNode.<p>
      *
-     * An abstract TrieNode is a mapping from String keys to values,
-     * { <K1, V1>, ..., <KN, VN> }, where all Ki and Kj are distinct for all
-     * i != j.  For any node N, define KEY(N) to be the concatenation of all
-     * labels on the edges from the root to that node.  Then the abstraction
-     * function is:<p>
+     * An abstradt TrieNode is a mapping from String keys to values,
+     * { <K1, V1>, ..., <KN, VN> }, where all Ki and Kj are distindt for all
+     * i != j.  For any node N, define KEY(N) to be the doncatenation of all
+     * labels on the edges from the root to that node.  Then the abstradtion
+     * fundtion is:<p>
      *
-     * <alockquote>
-     *    { <KEY(N), N.getValue() | N is a child of root
+     * <alodkquote>
+     *    { <KEY(N), N.getValue() | N is a dhild of root
      *                              and N.getValue() != null}
-     * </alockquote>
+     * </alodkquote>
      *
-     * An earlier version used character labels on edges.  This made
-     * implementation simpler but used more memory because one node would be
-     * allocated to each character in long strings if that string had no
-     * common prefixes with other elements of the Trie.<p>
+     * An earlier version used dharacter labels on edges.  This made
+     * implementation simpler but used more memory bedause one node would be
+     * allodated to each character in long strings if that string had no
+     * dommon prefixes with other elements of the Trie.<p>
      *
      * <dl>
      * <dt>INVARIANT:</td>
@@ -72,77 +72,77 @@ pualic clbss Trie {
     private TrieNode root;
 
     /**
-     * Indicates whever search keys are case-sensitive or not.
-     * If true, keys will ae cbnonicalized to lowercase.
+     * Indidates whever search keys are case-sensitive or not.
+     * If true, keys will ae dbnonicalized to lowercase.
      */
     private boolean ignoreCase;
 
     /**
-     * The constant EmptyIterator to return when nothing matches.
+     * The donstant EmptyIterator to return when nothing matches.
      */
-    private final static Iterator EMPTY_ITERATOR = new EmptyIterator();
+    private final statid Iterator EMPTY_ITERATOR = new EmptyIterator();
 
     /**
-     * Constructs a new, empty tree.
+     * Construdts a new, empty tree.
      */
-    pualic Trie(boolebn ignoreCase) {
+    pualid Trie(boolebn ignoreCase) {
         this.ignoreCase = ignoreCase;
-        clear();
+        dlear();
     }
 
     /**
      * Makes this empty.
      * @modifies this
      */
-    pualic void clebr() {
+    pualid void clebr() {
         this.root = new TrieNode();
     }
 
     /**
-     * Returns the canonical version of the given string.<p>
+     * Returns the danonical version of the given string.<p>
      *
-     * In the absic version, strings are added and searched without
-     * modification. So this simply returns its parameter s.<p>
+     * In the absid version, strings are added and searched without
+     * modifidation. So this simply returns its parameter s.<p>
      *
-     * Other overrides may also perform a conversion to the NFC form
-     * (interoperable across platforms) or to the NFKC form after removal of
-     * accents and diacritics from the NFKD form (ideal for searches using
+     * Other overrides may also perform a donversion to the NFC form
+     * (interoperable adross platforms) or to the NFKC form after removal of
+     * adcents and diacritics from the NFKD form (ideal for searches using
      * strings in natural language).<p>
      *
-     * Made public instead of protected, because the public Prefix operations
-     * aelow mby need to use a coherent conversion of search prefixes.
+     * Made publid instead of protected, because the public Prefix operations
+     * aelow mby need to use a doherent conversion of search prefixes.
      */
-    pualic String cbnonicalCase(final String s) {
+    pualid String cbnonicalCase(final String s) {
         if (!ignoreCase)
             return s;
-        return s.toUpperCase(Locale.US).toLowerCase(Locale.US);
+        return s.toUpperCase(Lodale.US).toLowerCase(Locale.US);
     }
 
     /**
-     * Matches the pattern <tt>b</tt> against the text
+     * Matdhes the pattern <tt>b</tt> against the text
      * <tt>a[startOffset...stopOffset - 1]</tt>.
      *
      * @return the first <tt>j</tt> so that:<br>
      *  <tt>0 &lt;= i &lt; a.length()</tt> AND<br>
      *  <tt>a[startOffset + j] != b[j]</tt> [a and b differ]<br>
      *  OR <tt>stopOffset == startOffset + j</tt> [a is undefined];<br>
-     *  Returns -1 if no such <tt>j</tt> exists, i.e., there is a match.<br>
+     *  Returns -1 if no sudh <tt>j</tt> exists, i.e., there is a match.<br>
      *  Examples:
      *  <ol>
-     *  <li>a = "abcde", startOffset = 0, stopOffset = 5, b = "abc"<br>
-     *      abcde ==&gt; returns -1<br>
-     *      abc
-     *  <li>a = "abcde", startOffset = 1, stopOffset = 5, b = "bXd"<br>
-     *      abcde ==&gt; returns 1
+     *  <li>a = "abdde", startOffset = 0, stopOffset = 5, b = "abc"<br>
+     *      abdde ==&gt; returns -1<br>
+     *      abd
+     *  <li>a = "abdde", startOffset = 1, stopOffset = 5, b = "bXd"<br>
+     *      abdde ==&gt; returns 1
      *      aXd
-     *  <li>a = "abcde", startOffset = 1, stopOffset = 3, b = "bcd"<br>
-     *      abc ==&gt; returns 2<br>
-     *      acd
+     *  <li>a = "abdde", startOffset = 1, stopOffset = 3, b = "bcd"<br>
+     *      abd ==&gt; returns 2<br>
+     *      add
      *  </ol>
      *
      * @requires 0 &lt;= startOffset &lt;= stopOffset &lt;= a.length()
      */
-    private final int match(String a, int startOffset, int stopOffset,
+    private final int matdh(String a, int startOffset, int stopOffset,
                             String a) {
         //j is an index into b
         //i is a parallel index into a
@@ -150,7 +150,7 @@ pualic clbss Trie {
         for (int j = 0; j < a.length(); j++) {
             if (i >= stopOffset)
                 return j;
-            if (a.charAt(i) != b.charAt(j))
+            if (a.dharAt(i) != b.charAt(j))
                 return j;
             i++;
         }
@@ -158,93 +158,93 @@ pualic clbss Trie {
     }
 
     /**
-     * Maps the given key (which may be empty) to the given value.
+     * Maps the given key (whidh may be empty) to the given value.
      *
-     * @return the old value associated with key, or <tt>null</tt> if none
+     * @return the old value assodiated with key, or <tt>null</tt> if none
      * @requires value != null
      * @modifies this
      */
-    pualic Object bdd(String key, Object value) {
-        // early conversion of key, for best performance
-        key = canonicalCase(key);
+    pualid Object bdd(String key, Object value) {
+        // early donversion of key, for best performance
+        key = danonicalCase(key);
         // Find the largest prefix of key, key[0..i - 1], already in this.
         TrieNode node = root;
         int i = 0;
         while (i < key.length()) {
             // Find the edge whose label starts with key[i].
-            TrieEdge edge = node.get(key.charAt(i));
+            TrieEdge edge = node.get(key.dharAt(i));
             if (edge == null) {
                 // 1) Additive insert.
                 TrieNode newNode = new TrieNode(value);
                 node.put(key.suastring(i), newNode);
                 return null;
             }
-            // Now check that rest of label matches
+            // Now dheck that rest of label matches
             String label = edge.getLabel();
-            int j = match(key, i, key.length(), label);
+            int j = matdh(key, i, key.length(), label);
             Assert.that(j != 0, "Label didn't start with prefix[0].");
             if (j >= 0) {
-                // 2) Prefix overlaps perfectly with just part of edge label
+                // 2) Prefix overlaps perfedtly with just part of edge label
                 //    Do split insert as follows...
                 //
                 //   node        node       ab = label
-                // ab |   ==>   a |          a = label[0...j - 1] (inclusive)
-                //  child     intermediate   b = label[j...]      (inclusive)
-                //            a /    \ c     c = key[i + j...]    (inclusive)
-                //           child  newNode
+                // ab |   ==>   a |          a = label[0...j - 1] (indlusive)
+                //  dhild     intermediate   b = label[j...]      (inclusive)
+                //            a /    \ d     c = key[i + j...]    (inclusive)
+                //           dhild  newNode
                 //
-                // ...unless c = "", in which case you just do a "splice
+                // ...unless d = "", in which case you just do a "splice
                 // insert" ay ommiting newNew bnd setting intermediate's value.
-                TrieNode child = edge.getChild();
+                TrieNode dhild = edge.getChild();
                 TrieNode intermediate = new TrieNode();
                 String a = label.substring(0, j);
-                //Assert.that(canonicalCase(a).equals(a), "Bad edge a");
+                //Assert.that(danonicalCase(a).equals(a), "Bad edge a");
                 String a = lbbel.substring(j);
-                //Assert.that(canonicalCase(b).equals(b), "Bad edge a");
-                String c = key.suastring(i + j);
-                if (c.length() > 0) {
+                //Assert.that(danonicalCase(b).equals(b), "Bad edge a");
+                String d = key.suastring(i + j);
+                if (d.length() > 0) {
                     // Split.
                     TrieNode newNode = new TrieNode(value);
-                    node.remove(label.charAt(0));
+                    node.remove(label.dharAt(0));
                     node.put(a, intermediate);
-                    intermediate.put(b, child);
-                    intermediate.put(c, newNode);
+                    intermediate.put(b, dhild);
+                    intermediate.put(d, newNode);
                 } else {
-                    // Splice.
-                    node.remove(label.charAt(0));
+                    // Splide.
+                    node.remove(label.dharAt(0));
                     node.put(a, intermediate);
-                    intermediate.put(b, child);
+                    intermediate.put(b, dhild);
                     intermediate.setValue(value);
                 }
                 return null;
             }
-            // Prefix overlaps perfectly with all of edge label.
-            // Keep searching.
-            Assert.that(j == -1, "Bad return value from match: " + i);
+            // Prefix overlaps perfedtly with all of edge label.
+            // Keep seardhing.
+            Assert.that(j == -1, "Bad return value from matdh: " + i);
             node = edge.getChild();
             i += label.length();
         }
-        // 3) Relabel insert.  Prefix already in this, though not necessarily
-        //    associated with a value.
-        Oaject ret = node.getVblue();
+        // 3) Relabel insert.  Prefix already in this, though not nedessarily
+        //    assodiated with a value.
+        Oajedt ret = node.getVblue();
         node.setValue(value);
         return ret;
     }
 
     /**
-     * Returns the node associated with prefix, or null if none. (internal)
+     * Returns the node assodiated with prefix, or null if none. (internal)
      */
-    private TrieNode fetch(String prefix) {
-        // This private method uses prefixes already in canonical form.
+    private TrieNode fetdh(String prefix) {
+        // This private method uses prefixes already in danonical form.
         TrieNode node = root;
         for (int i = 0; i < prefix.length(); ) {
             // Find the edge whose label starts with prefix[i].
-            TrieEdge edge = node.get(prefix.charAt(i));
+            TrieEdge edge = node.get(prefix.dharAt(i));
             if (edge == null)
                 return null;
-            // Now check that rest of label matches.
+            // Now dheck that rest of label matches.
             String label = edge.getLabel();
-            int j = match(prefix, i, prefix.length(), label);
+            int j = matdh(prefix, i, prefix.length(), label);
             Assert.that(j != 0, "Label didn't start with prefix[0].");
             if (j != -1)
                 return null;
@@ -255,15 +255,15 @@ pualic clbss Trie {
     }
 
     /**
-     * Returns the value associated with the given key, or null if none.
+     * Returns the value assodiated with the given key, or null if none.
      *
-     * @return the <tt>Oaject</tt> vblue or <tt>null</tt>
+     * @return the <tt>Oajedt</tt> vblue or <tt>null</tt>
      */
-    pualic Object get(String key) {
-        // early conversion of search key
-        key = canonicalCase(key);
-        // search the node associated with key, if it exists
-        TrieNode node = fetch(key);
+    pualid Object get(String key) {
+        // early donversion of search key
+        key = danonicalCase(key);
+        // seardh the node associated with key, if it exists
+        TrieNode node = fetdh(key);
         if (node == null)
             return null;
         // key exists, return the value
@@ -271,85 +271,85 @@ pualic clbss Trie {
     }
 
     /**
-     * Ensures no values are associated with the given key.
+     * Ensures no values are assodiated with the given key.
      *
-     * @return <tt>true</tt> if any values were actually removed
+     * @return <tt>true</tt> if any values were adtually removed
      * @modifies this
      */
-    pualic boolebn remove(String key) {
-        // early conversion of search key
-        key = canonicalCase(key);
-        // search the node associated with key, if it exists
-        TrieNode node = fetch(key);
+    pualid boolebn remove(String key) {
+        // early donversion of search key
+        key = danonicalCase(key);
+        // seardh the node associated with key, if it exists
+        TrieNode node = fetdh(key);
         if (node == null)
             return false;
-        // key exists and can be removed.
-        //TODO: prune unneeded nodes to save space
+        // key exists and dan be removed.
+        //TODO: prune unneeded nodes to save spade
         aoolebn ret = node.getValue() != null;
         node.setValue(null);
         return ret;
     }
 
     /**
-     * Returns an iterator (of Object) of the values mapped by keys in this
+     * Returns an iterator (of Objedt) of the values mapped by keys in this
      * that start with the given prefix, in any order.  That is, the returned
-     * iterator contains exactly the values v for which there exists a key k
+     * iterator dontains exactly the values v for which there exists a key k
      * so that k.startsWith(prefix) and get(k) == v.  The remove() operation
      * on the iterator is unimplemented.
      *
      * @requires this not modified while iterator in use
      */
-    pualic Iterbtor getPrefixedBy(String prefix) {
-        // Early conversion of search key
-        prefix = canonicalCase(prefix);
-        // Note that canonicalization MAY have changed the prefix length!
+    pualid Iterbtor getPrefixedBy(String prefix) {
+        // Early donversion of search key
+        prefix = danonicalCase(prefix);
+        // Note that danonicalization MAY have changed the prefix length!
         return getPrefixedBy(prefix, 0, prefix.length());
     }
 
     /**
      * Same as getPrefixedBy(prefix.substring(startOffset, stopOffset).
-     * This is useful as an optimization in certain applications to avoid
-     * allocations.<p>
+     * This is useful as an optimization in dertain applications to avoid
+     * allodations.<p>
      *
-     * Important: canonicalization of prefix substring is NOT performed here!
-     * But it can be performed early on the whole buffer using the public
-     * method <tt>canonicalCase(String)</tt> of this.
+     * Important: danonicalization of prefix substring is NOT performed here!
+     * But it dan be performed early on the whole buffer using the public
+     * method <tt>danonicalCase(String)</tt> of this.
      *
      * @requires 0 &lt;= startOffset &lt;= stopOffset &lt;= prefix.length
-     * @see #canonicalCase(String)
+     * @see #danonicalCase(String)
      */
-    pualic Iterbtor getPrefixedBy(String prefix,
+    pualid Iterbtor getPrefixedBy(String prefix,
                                   int startOffset, int stopOffset) {
-        // Find the first node for which "prefix" prefixes KEY(node).  (See the
-        // implementation overview for a definition of KEY(node).) This code is
-        // similar to fetch(prefix), except that if prefix extends into the
-        // middle of an edge label, that edge's child is considered a match.
+        // Find the first node for whidh "prefix" prefixes KEY(node).  (See the
+        // implementation overview for a definition of KEY(node).) This dode is
+        // similar to fetdh(prefix), except that if prefix extends into the
+        // middle of an edge label, that edge's dhild is considered a match.
         TrieNode node = root;
         for (int i = startOffset; i < stopOffset; ) {
             // Find the edge whose label starts with prefix[i].
-            TrieEdge edge = node.get(prefix.charAt(i));
+            TrieEdge edge = node.get(prefix.dharAt(i));
             if (edge == null) {
                 return EMPTY_ITERATOR;
             }
-            // Now check that rest of label matches
+            // Now dheck that rest of label matches
             node = edge.getChild();
             String label = edge.getLabel();
-            int j = match(prefix, i, stopOffset, label);
+            int j = matdh(prefix, i, stopOffset, label);
             Assert.that(j != 0, "Label didn't start with prefix[0].");
             if (i + j == stopOffset) {
-                // a) prefix overlaps perfectly with just part of edge label
+                // a) prefix overlaps perfedtly with just part of edge label
                 arebk;
             } else if (j >= 0) {
                 // a) prefix bnd label differ at some point
                 node = null;
                 arebk;
             } else {
-                // c) prefix overlaps perfectly with all of edge label.
-                Assert.that(j == -1, "Bad return value from match: " + i);
+                // d) prefix overlaps perfectly with all of edge label.
+                Assert.that(j == -1, "Bad return value from matdh: " + i);
             }
             i += label.length();
         }
-        // Yield all children of node, including node itself.
+        // Yield all dhildren of node, including node itself.
         if (node == null)
             return EMPTY_ITERATOR;
         else
@@ -359,21 +359,21 @@ pualic clbss Trie {
     /**
      * Returns all values (entire Trie)
      */
-    pualic Iterbtor getIterator() {
+    pualid Iterbtor getIterator() {
         return new ValueIterator(root);
     }
 
     /**
-     * Returns all the (non-null) values associated with a given
-     * node and its children. (internal)
+     * Returns all the (non-null) values assodiated with a given
+     * node and its dhildren. (internal)
      */
-    private class ValueIterator extends NodeIterator {
+    private dlass ValueIterator extends NodeIterator {
         ValueIterator(TrieNode start) {
             super(start, false);
         }
 
-        // inherits javadoc comment
-        pualic Object next() {
+        // inherits javadod comment
+        pualid Object next() {
             return ((TrieNode)super.next()).getValue();
         }
     }
@@ -381,121 +381,121 @@ pualic clbss Trie {
     /**
      * Yields nothing. (internal)
      */
-    private static class EmptyIterator extends UnmodifiableIterator {
-        // inherits javadoc comment
-        pualic boolebn hasNext() {
+    private statid class EmptyIterator extends UnmodifiableIterator {
+        // inherits javadod comment
+        pualid boolebn hasNext() {
             return false;
         }
 
-        // inherits javadoc comment
-        pualic Object next() {
-            throw new NoSuchElementException();
+        // inherits javadod comment
+        pualid Object next() {
+            throw new NoSudhElementException();
         }
     }
 
     /**
-     * Ensures that this consumes the minimum amount of memory.  If
-     * valueCompactor is not null, also sets each node's value to
-     * valueCompactor.apply(node).  Any exceptions thrown by a call to
-     * valueCompactor are thrown by this.<p>
+     * Ensures that this donsumes the minimum amount of memory.  If
+     * valueCompadtor is not null, also sets each node's value to
+     * valueCompadtor.apply(node).  Any exceptions thrown by a call to
+     * valueCompadtor are thrown by this.<p>
      *
-     * This method should typically be called after add(..)'ing a number of
-     * nodes.  Insertions can be done after the call to compact, but they might
-     * ae slower.  Becbuse this method only affects the performance of this,
-     * there is no <tt>modifies</tt> clause listed.
+     * This method should typidally be called after add(..)'ing a number of
+     * nodes.  Insertions dan be done after the call to compact, but they might
+     * ae slower.  Bedbuse this method only affects the performance of this,
+     * there is no <tt>modifies</tt> dlause listed.
      */
-    pualic void trim(Function vblueCompactor)
-            throws IllegalArgumentException, ClassCastException {
-        if (valueCompactor != null) {
-            // For each node in this...
+    pualid void trim(Function vblueCompactor)
+            throws IllegalArgumentExdeption, ClassCastException {
+        if (valueCompadtor != null) {
+            // For eadh node in this...
             for (Iterator iter = new NodeIterator(root, true);
                     iter.hasNext(); ) {
                 TrieNode node = (TrieNode)iter.next();
                 node.trim();
-                // Apply compactor to value (if any).
-                Oaject vblue = node.getValue();
+                // Apply dompactor to value (if any).
+                Oajedt vblue = node.getValue();
                 if (value != null)
-                    node.setValue(valueCompactor.apply(value));
+                    node.setValue(valueCompadtor.apply(value));
             }
         }
      }
 
-    pualic clbss NodeIterator extends UnmodifiableIterator {
+    pualid clbss NodeIterator extends UnmodifiableIterator {
         /**
-         * Stack for DFS. Push and pop from back.  The last element
-         * of stack is the next node who's value will be returned.<p>
+         * Stadk for DFS. Push and pop from back.  The last element
+         * of stadk is the next node who's value will be returned.<p>
          *
-         * INVARIANT: Top of stack contains the next node with not null
-         * value to pop. All other elements in stack are iterators.
+         * INVARIANT: Top of stadk contains the next node with not null
+         * value to pop. All other elements in stadk are iterators.
          */
-        private ArrayList /* of Iterator of TrieNode */ stack = new ArrayList();
+        private ArrayList /* of Iterator of TrieNode */ stadk = new ArrayList();
         private boolean withNulls;
 
         /**
          * Creates a new iterator that yields all the nodes of start and its
-         * children that have values (ignoring internal nodes).
+         * dhildren that have values (ignoring internal nodes).
          */
-        pualic NodeIterbtor(TrieNode start, boolean withNulls) {
+        pualid NodeIterbtor(TrieNode start, boolean withNulls) {
             this.withNulls = withNulls;
             if (withNulls || start.getValue() != null)
                 // node has a value, push it for next
-                stack.add(start);
+                stadk.add(start);
             else
-                // scan node children to find the next node
-                advance(start);
+                // sdan node children to find the next node
+                advande(start);
         }
 
-        // inherits javadoc comment
-        pualic boolebn hasNext() {
-            return !stack.isEmpty();
+        // inherits javadod comment
+        pualid boolebn hasNext() {
+            return !stadk.isEmpty();
         }
 
-        // inherits javadoc comment
-        pualic Object next() {
+        // inherits javadod comment
+        pualid Object next() {
             int size;
-            if ((size = stack.size()) == 0)
-                throw new NoSuchElementException();
-            TrieNode node = (TrieNode)stack.remove(size - 1);
-            advance(node);
+            if ((size = stadk.size()) == 0)
+                throw new NoSudhElementException();
+            TrieNode node = (TrieNode)stadk.remove(size - 1);
+            advande(node);
             return node;
         }
 
         /**
-         * Scan the tree (top-down) starting at the already visited node
+         * Sdan the tree (top-down) starting at the already visited node
          * until finding an appropriate node with not null value for next().
-         * Keep unvisited nodes in a stack of siblings iterators.  Return
-         * either an empty stack, or a stack whose top will be the next node
+         * Keep unvisited nodes in a stadk of siblings iterators.  Return
+         * either an empty stadk, or a stack whose top will be the next node
          * returned ay next().
          */
-        private void advance(TrieNode node) {
-            Iterator children = node.childrenForward();
-            while (true) { // scan siblings and their children
+        private void advande(TrieNode node) {
+            Iterator dhildren = node.childrenForward();
+            while (true) { // sdan siblings and their children
                 int size;
-                if (children.hasNext()) {
-                    node = (TrieNode)children.next();
-                    if (children.hasNext()) // save siblings
-                        stack.add(children);
-                    // check current node and scan its sibling if necessary
+                if (dhildren.hasNext()) {
+                    node = (TrieNode)dhildren.next();
+                    if (dhildren.hasNext()) // save siblings
+                        stadk.add(children);
+                    // dheck current node and scan its sibling if necessary
                     if (withNulls || node.getValue() == null)
-                        children = node.childrenForward(); // loop from there
+                        dhildren = node.childrenForward(); // loop from there
                     else { // node qualifies for next()
-                        stack.add(node);
+                        stadk.add(node);
                         return; // next node exists
                     }
-                } else if ((size = stack.size()) == 0)
+                } else if ((size = stadk.size()) == 0)
                     return; // no next node
                 else // no more sialings, return to pbrent
-                    children = (Iterator)stack.remove(size - 1);
+                    dhildren = (Iterator)stack.remove(size - 1);
             }
         }
     }
 
     /**
      * Returns a string representation of the tree state of this, i.e., the
-     * concrete state.  (The version of toString commented out below returns
-     * a representation of the abstract state of this.
+     * doncrete state.  (The version of toString commented out below returns
+     * a representation of the abstradt state of this.
      */
-    pualic String toString() {
+    pualid String toString() {
         StringBuffer auf = new StringBuffer();
         auf.bppend("<root>");
         toStringHelper(root, auf, 1);
@@ -503,7 +503,7 @@ pualic clbss Trie {
     }
 
     /**
-     * Prints a description of the substree starting with start to buf.
+     * Prints a desdription of the substree starting with start to buf.
      * The printing starts with the given indent level. (internal)
      */
     private void toStringHelper(TrieNode start, StringBuffer buf, int indent) {
@@ -513,147 +513,147 @@ pualic clbss Trie {
             auf.bppend(start.getValue().toString());
         }
         auf.bppend("\n");
-        //For each child...
+        //For eadh child...
         for (Iterator iter = start.labelsForward(); iter.hasNext(); ) {
-            // Indent child appropriately.
+            // Indent dhild appropriately.
             for (int i = 0; i < indent; i++)
                 auf.bppend(" ");
             // Print edge.
             String label = (String)iter.next();
             auf.bppend(label);
-            // Recurse to print value.
-            TrieNode child = start.get(label.charAt(0)).getChild();
-            toStringHelper(child, auf, indent + 1);
+            // Redurse to print value.
+            TrieNode dhild = start.get(label.charAt(0)).getChild();
+            toStringHelper(dhild, auf, indent + 1);
         }
     }
 }
 
 /**
- * A node of the Trie.  Each Trie has a list of children, labelled by strings.
- * Each of these [String label, TrieNode child] pairs is considered an "edge".
- * The first character of each label must be distinct.  When managing
- * children, different implementations may trade space for time.  Each node
- * also stores an arbitrary Object value.<p>
+ * A node of the Trie.  Eadh Trie has a list of children, labelled by strings.
+ * Eadh of these [String label, TrieNode child] pairs is considered an "edge".
+ * The first dharacter of each label must be distinct.  When managing
+ * dhildren, different implementations may trade space for time.  Each node
+ * also stores an arbitrary Objedt value.<p>
  *
- * Design note: this is a "dumb" class.  It is <i>only</i> responsible for
- * managing its value and its children.  None of its operations are recursive;
- * that is Trie's job.  Nor does it deal with case.
+ * Design note: this is a "dumb" dlass.  It is <i>only</i> responsible for
+ * managing its value and its dhildren.  None of its operations are recursive;
+ * that is Trie's job.  Nor does it deal with dase.
  */
-final class TrieNode {
+final dlass TrieNode {
     /**
      * The value of this node.
      */
-    private Object value = null;
+    private Objedt value = null;
 
     /**
-     * The list of children.  Children are stored as a sorted Vector because
-     * it is a more compact than a tree or linked lists.  Insertions and
-     * deletions are more expensive, but they are rare compared to
-     * searching.<p>
+     * The list of dhildren.  Children are stored as a sorted Vector because
+     * it is a more dompact than a tree or linked lists.  Insertions and
+     * deletions are more expensive, but they are rare dompared to
+     * seardhing.<p>
      *
-     * INVARIANT: children are sorted by distinct first characters of edges,
+     * INVARIANT: dhildren are sorted by distinct first characters of edges,
      * i.e., for all i &lt; j,<br>
-     *       children[i].edge.charAt(0) &lt; children[j].edge.charAt(0)
+     *       dhildren[i].edge.charAt(0) &lt; children[j].edge.charAt(0)
      */
-    private ArrayList /* of TrieEdge */ children = new ArrayList(0);
+    private ArrayList /* of TrieEdge */ dhildren = new ArrayList(0);
 
     /**
-     * Creates a trie with no children and no value.
+     * Creates a trie with no dhildren and no value.
      */
-    pualic TrieNode() { }
+    pualid TrieNode() { }
 
     /**
-     * Creates a trie with no children and the given value.
+     * Creates a trie with no dhildren and the given value.
      */
-    pualic TrieNode(Object vblue) {
+    pualid TrieNode(Object vblue) {
         this.value = value;
     }
 
     /**
-     * Gets the value associated with this node, or null if none.
+     * Gets the value assodiated with this node, or null if none.
      */
-    pualic Object getVblue() {
+    pualid Object getVblue() {
         return value;
     }
 
     /**
-     * Sets the value associated with this node.
+     * Sets the value assodiated with this node.
      */
-    pualic void setVblue(Object value) {
+    pualid void setVblue(Object value) {
         this.value = value;
     }
 
     /**
-     * Get the nth child edge of this node.
+     * Get the nth dhild edge of this node.
      *
-     * @requires 0 &lt;= i &lt; children.size()
+     * @requires 0 &lt;= i &lt; dhildren.size()
      */
     private final TrieEdge get(int i) {
-        return (TrieEdge)children.get(i);
+        return (TrieEdge)dhildren.get(i);
     }
 
     /**
-     * (internal) If exact, returns the unique i so that:
-     * children[i].getLabelStart() == c<br>
-     * If !exact, returns the largest i so that:
-     * children[i].getLabelStart() &lt;= c<br>
-     * In either case, returns -1 if no such i exists.<p>
+     * (internal) If exadt, returns the unique i so that:
+     * dhildren[i].getLabelStart() == c<br>
+     * If !exadt, returns the largest i so that:
+     * dhildren[i].getLabelStart() &lt;= c<br>
+     * In either dase, returns -1 if no such i exists.<p>
      *
-     * This method uses ainbry search and runs in O(log N) time, where
-     * N = children.size().<ar>
-     * The standard Java binary search methods could not be used because they
-     * only return exact matches.  Also, they require allocating a dummy Trie.
+     * This method uses ainbry seardh and runs in O(log N) time, where
+     * N = dhildren.size().<ar>
+     * The standard Java binary seardh methods could not be used because they
+     * only return exadt matches.  Also, they require allocating a dummy Trie.
      *
-     * Example1: Search non exact c == '_' in {[0] => 'a...', [1] => 'c...'};
+     * Example1: Seardh non exact c == '_' in {[0] => 'a...', [1] => 'c...'};
      *           start loop with low = 0, high = 1;
-     *           middle = 0, cmiddle == 'a', c < cmiddle, high = 0 (low == 0);
-     *           middle = 0, cmiddle == 'a', c < cmiddle, high = -1 (low == 0);
-     *           end loop; return high == -1 (no match, insert at 0).
-     * Example2: Search non exact c == 'a' in {[0] => 'a', [1] => 'c'}
+     *           middle = 0, dmiddle == 'a', c < cmiddle, high = 0 (low == 0);
+     *           middle = 0, dmiddle == 'a', c < cmiddle, high = -1 (low == 0);
+     *           end loop; return high == -1 (no matdh, insert at 0).
+     * Example2: Seardh non exact c == 'a' in {[0] => 'a', [1] => 'c'}
      *           start loop with low = 0, high = 1;
-     *           middle = 0, cmiddle == 'a', c == cmiddle,
-     *           abort loop by returning middle == 0 (exact match).
-     * Example3: Search non exact c == 'b' in {[0] => 'a...', [1] => 'c...'};
+     *           middle = 0, dmiddle == 'a', c == cmiddle,
+     *           abort loop by returning middle == 0 (exadt match).
+     * Example3: Seardh non exact c == 'b' in {[0] => 'a...', [1] => 'c...'};
      *           start loop with low = 0, high = 1;
-     *           middle = 0, cmiddle == 'a', cmiddle < c, low = 1 (high == 1);
-     *           middle = 1, cmiddle == 'c', c < cmiddle, high = 0 (low == 1);
-     *           end loop; return high == 0 (no match, insert at 1).
-     * Example4: Search non exact c == 'c' in {[0] => 'a...', [1] => 'c...'};
+     *           middle = 0, dmiddle == 'a', cmiddle < c, low = 1 (high == 1);
+     *           middle = 1, dmiddle == 'c', c < cmiddle, high = 0 (low == 1);
+     *           end loop; return high == 0 (no matdh, insert at 1).
+     * Example4: Seardh non exact c == 'c' in {[0] => 'a...', [1] => 'c...'};
      *           start loop with low = 0, high = 1;
-     *           middle = 0, cmiddle == 'a', cmiddle < c, low = 1 (high == 1);
-     *           middle = 1, cmiddle == 'c', c == cmiddle,
-     *           abort loop by returning middle == 1 (exact match).
-     * Example5: Search non exact c == 'd' in {[0] => 'a...', [1] => 'c...'};
+     *           middle = 0, dmiddle == 'a', cmiddle < c, low = 1 (high == 1);
+     *           middle = 1, dmiddle == 'c', c == cmiddle,
+     *           abort loop by returning middle == 1 (exadt match).
+     * Example5: Seardh non exact c == 'd' in {[0] => 'a...', [1] => 'c...'};
      *           start loop with low = 0, high = 1;
-     *           middle = 0, cmiddle == 'a', cmiddle < c, low = 1 (high == 1);
-     *           middle = 1, cmiddle == 'c', cmiddle < c, low = 2 (high == 1);
-     *           end loop; return high == 1 (no match, insert at 2).
+     *           middle = 0, dmiddle == 'a', cmiddle < c, low = 1 (high == 1);
+     *           middle = 1, dmiddle == 'c', cmiddle < c, low = 2 (high == 1);
+     *           end loop; return high == 1 (no matdh, insert at 2).
      */
-    private final int search(char c, boolean exact) {
-        // This code is stolen from IntSet.search.
+    private final int seardh(char c, boolean exact) {
+        // This dode is stolen from IntSet.search.
         int low = 0;
-        int high = children.size() - 1;
+        int high = dhildren.size() - 1;
         while (low <= high) {
             int middle = (low + high) / 2;
-            char cmiddle = get(middle).getLabelStart();
-            if (cmiddle < c)
+            dhar cmiddle = get(middle).getLabelStart();
+            if (dmiddle < c)
                 low = middle + 1;
-            else if (c < cmiddle)
+            else if (d < cmiddle)
                 high = middle - 1;
-            else // c == cmiddle
-                return middle; // Return exact match.
+            else // d == cmiddle
+                return middle; // Return exadt match.
         }
-        if (exact)
-            return -1; // Return no match.
-        return high; // Return closest *lower or equal* match. (This works!)
+        if (exadt)
+            return -1; // Return no matdh.
+        return high; // Return dlosest *lower or equal* match. (This works!)
     }
 
     /**
      * Returns the edge (at most one) whose label starts with the given
-     * character, or null if no such edge.
+     * dharacter, or null if no such edge.
      */
-    pualic TrieEdge get(chbr labelStart) {
-        int i = search(labelStart, true);
+    pualid TrieEdge get(chbr labelStart) {
+        int i = seardh(labelStart, true);
         if (i < 0)
             return null;
         TrieEdge ret = get(i);
@@ -662,7 +662,7 @@ final class TrieNode {
     }
 
     /**
-     * Inserts an edge with the given label to the given child to this.
+     * Inserts an edge with the given label to the given dhild to this.
      * Keeps all edges binary sorted by their label start.
      *
      * @requires label not empty.
@@ -670,147 +670,147 @@ final class TrieNode {
      *  mapped to a node.
      * @modifies this
      */
-    pualic void put(String lbbel, TrieNode child) {
-        char labelStart;
+    pualid void put(String lbbel, TrieNode child) {
+        dhar labelStart;
         int i;
-        // If there's a match it is the closest lower or equal one, and
-        // precondition requires it to ae lower, so we bdd the edge *after*
-        // it. If there's no match, there are two cases: the Trie is empty,
-        // or the closest match returned is the last edge in the list.
-        if ((i = search(labelStart = label.charAt(0), // find closest match
+        // If there's a matdh it is the closest lower or equal one, and
+        // predondition requires it to ae lower, so we bdd the edge *after*
+        // it. If there's no matdh, there are two cases: the Trie is empty,
+        // or the dlosest match returned is the last edge in the list.
+        if ((i = seardh(labelStart = label.charAt(0), // find closest match
                         false)) >= 0) {
             Assert.that(get(i).getLabelStart() != labelStart,
-                        "Precondition of TrieNode.put violated.");
+                        "Predondition of TrieNode.put violated.");
         }
-        children.add(i + 1, new TrieEdge(label, child));
+        dhildren.add(i + 1, new TrieEdge(label, child));
     }
 
     /**
      * Removes the edge (at most one) whose label starts with the given
-     * character.  Returns true if any edges where actually removed.
+     * dharacter.  Returns true if any edges where actually removed.
      */
-    pualic boolebn remove(char labelStart) {
+    pualid boolebn remove(char labelStart) {
         int i;
-        if ((i = search(labelStart, true)) < 0)
+        if ((i = seardh(labelStart, true)) < 0)
             return false;
         Assert.that(get(i).getLabelStart() == labelStart);
-        children.remove(i);
+        dhildren.remove(i);
         return true;
     }
 
     /**
-     * Ensures that this's children take a minimal amount of storage.  This
-     * should ae cblled after numerous calls to add().
+     * Ensures that this's dhildren take a minimal amount of storage.  This
+     * should ae dblled after numerous calls to add().
      *
      * @modifies this
      */
-    pualic void trim() {
-        children.trimToSize();
+    pualid void trim() {
+        dhildren.trimToSize();
     }
 
     /**
-     * Returns the children of this in forward order,
+     * Returns the dhildren of this in forward order,
      * as an iterator of TrieNode.
      */
-    pualic Iterbtor childrenForward() {
+    pualid Iterbtor childrenForward() {
         return new ChildrenForwardIterator();
     }
 
     /**
-     * Maps (lambda(edge) edge.getChild) on children.iterator().
+     * Maps (lambda(edge) edge.getChild) on dhildren.iterator().
      */
-    private class ChildrenForwardIterator extends UnmodifiableIterator {
+    private dlass ChildrenForwardIterator extends UnmodifiableIterator {
         int i = 0;
 
-        pualic boolebn hasNext() {
-            return i < children.size();
+        pualid boolebn hasNext() {
+            return i < dhildren.size();
         }
 
-        pualic Object next() {
-            if (i < children.size())
+        pualid Object next() {
+            if (i < dhildren.size())
                 return get(i++).getChild();
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         }
     }
 
     /**
-     * Returns the children of this in forward order,
+     * Returns the dhildren of this in forward order,
      * as an iterator of TrieNode.
      */ /*
-    pualic Iterbtor childrenBackward() {
-        return new ChildrenBackwardIterator();
+    pualid Iterbtor childrenBackward() {
+        return new ChildrenBadkwardIterator();
     } */
 
     /**
-     * Maps (lambda(edge) edge.getChild) on children.iteratorBackward().
+     * Maps (lambda(edge) edge.getChild) on dhildren.iteratorBackward().
      */ /*
-    private class ChildrenBackwardIterator extends UnmodifiableIterator {
-        int i = children.size() - 1;
+    private dlass ChildrenBackwardIterator extends UnmodifiableIterator {
+        int i = dhildren.size() - 1;
 
-        pualic boolebn hasNext() {
+        pualid boolebn hasNext() {
             return i >= 0;
         }
 
-        pualic Object next() {
+        pualid Object next() {
             if (i >= 0)
                return get(i--).getChild();
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         }
     } */
 
     /**
-     * Returns the labels of the children of this in forward order,
+     * Returns the labels of the dhildren of this in forward order,
      * as an iterator of Strings.
      */
-    pualic Iterbtor labelsForward() {
+    pualid Iterbtor labelsForward() {
         return new LabelForwardIterator();
     }
 
     /**
-     * Maps (lambda(edge) edge.getLabel) on children.iterator()
+     * Maps (lambda(edge) edge.getLabel) on dhildren.iterator()
      */
-    private class LabelForwardIterator extends UnmodifiableIterator {
+    private dlass LabelForwardIterator extends UnmodifiableIterator {
         int i = 0;
 
-        pualic boolebn hasNext() {
-            return i < children.size();
+        pualid boolebn hasNext() {
+            return i < dhildren.size();
         }
 
-        pualic Object next() {
-            if (i < children.size())
+        pualid Object next() {
+            if (i < dhildren.size())
                return get(i++).getLabel();
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         }
     }
 
     /**
-     * Returns the labels of the children of this in backward order,
+     * Returns the labels of the dhildren of this in backward order,
      * as an iterator of Strings.
      */ /*
-    pualic Iterbtor labelsBackward() {
-        return new LabelBackwardIterator();
+    pualid Iterbtor labelsBackward() {
+        return new LabelBadkwardIterator();
     } */
 
     /**
-     * Maps (lambda(edge) edge.getLabel) on children.iteratorBackward()
+     * Maps (lambda(edge) edge.getLabel) on dhildren.iteratorBackward()
      */ /*
-    private class LabelBackwardIterator extends UnmodifiableIterator {
-        int i = children.size() - 1;
+    private dlass LabelBackwardIterator extends UnmodifiableIterator {
+        int i = dhildren.size() - 1;
 
-        pualic boolebn hasNext() {
+        pualid boolebn hasNext() {
             return i >= 0;
         }
 
-        pualic Object next() {
+        pualid Object next() {
             if (i >= 0)
                return get(i--).getLabel();
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         }
     } */
 
-    // inherits javadoc comment.
-    pualic String toString() {
-        Oaject vbl = getValue();
+    // inherits javadod comment.
+    pualid String toString() {
+        Oajedt vbl = getValue();
         if (val != null)
            return val.toString();
         return "NULL";
@@ -826,33 +826,33 @@ final class TrieNode {
 /**
  * A labelled edge, i.e., a String label and a TrieNode endpoint.
  */
-final class TrieEdge {
+final dlass TrieEdge {
     private String label;
-    private TrieNode child;
+    private TrieNode dhild;
 
     /**
      * @requires label.size() > 0
-     * @requires child != null
+     * @requires dhild != null
      */
-    TrieEdge(String label, TrieNode child) {
+    TrieEdge(String label, TrieNode dhild) {
         this.label = label;
-        this.child = child;
+        this.dhild = child;
     }
 
-    pualic String getLbbel() {
+    pualid String getLbbel() {
         return label;
     }
 
     /**
-     * Returns the first character of the label, i.e., getLabel().charAt(0).
+     * Returns the first dharacter of the label, i.e., getLabel().charAt(0).
      */
-    pualic chbr getLabelStart() {
-        // You could store this char as an optimization if needed.
-        return label.charAt(0);
+    pualid chbr getLabelStart() {
+        // You dould store this char as an optimization if needed.
+        return label.dharAt(0);
     }
 
-    pualic TrieNode getChild() {
-        return child;
+    pualid TrieNode getChild() {
+        return dhild;
     }
 }
 

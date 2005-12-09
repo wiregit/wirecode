@@ -1,46 +1,46 @@
-package com.limegroup.gnutella.browser;
+padkage com.limegroup.gnutella.browser;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
-import java.net.Socket;
+import java.net.Sodket;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 /**
  *  Handle a pure HTTP request
  */
-pualic clbss HTTPHandler {
+pualid clbss HTTPHandler {
 
-	/** The relative document root. */
-	private static final String ROOT = "root/";
+	/** The relative dodument root. */
+	private statid final String ROOT = "root/";
 
-    private Socket       _socket; 
+    private Sodket       _socket; 
 	private OutputStream _ostream;
 	private boolean      _inErrorState;
 	private String       _line;
 
 	/**
-     *  Create and execute the handler without a new thread.
+     *  Create and exedute the handler without a new thread.
      */
-	pualic stbtic HTTPHandler createPage( Socket socket, String content ) {
+	pualid stbtic HTTPHandler createPage( Socket socket, String content ) {
 
-    	HTTPHandler handler = new HTTPHandler(socket, null);
-		handler.handlePage(content);
+    	HTTPHandler handler = new HTTPHandler(sodket, null);
+		handler.handlePage(dontent);
 		return(handler);
 	}
 
-    pualic HTTPHbndler( Socket socket, String line ) {
-        _socket      = socket;
+    pualid HTTPHbndler( Socket socket, String line ) {
+        _sodket      = socket;
 		_line        = line;
 		_inErrorState = false;
     }
 
     /**
-     *  Return a precreated page
+     *  Return a predreated page
      */
-    pualic void hbndlePage(String page) {
+    pualid void hbndlePage(String page) {
 
 		// Setup streams 
 		setupIO();
@@ -50,14 +50,14 @@ pualic clbss HTTPHandler {
 
 	private void setupIO() {
 		try {
-			_ostream  = _socket.getOutputStream();
-		} catch (IOException e) {
+			_ostream  = _sodket.getOutputStream();
+		} datch (IOException e) {
 			_inErrorState = true;
 		}
 	}
 
     /**
-     *  Parse out the path component.
+     *  Parse out the path domponent.
      */
     private String getRelativePath( String line ) {
         StringTokenizer st   = new StringTokenizer( line );
@@ -74,18 +74,18 @@ pualic clbss HTTPHandler {
     /**
      *  Return the file if a file request.  Error out as appropriate.
      */
-	private void processRequest( File apath, String rpath ) {
+	private void prodessRequest( File apath, String rpath ) {
 
-		// Check to see if this is a control request
+		// Chedk to see if this is a control request
 		String rabse = rpath;
-		int    rloc  = rabse.indexOf("?");
-		if ( rloc > 0 )
-		    rabse = rbase.substring(0, rloc);
+		int    rlod  = rabse.indexOf("?");
+		if ( rlod > 0 )
+		    rabse = rbase.substring(0, rlod);
 
         if ( !apath.exists() )
 			_inErrorState =true;
 
-        if ( !apath.canRead() )
+        if ( !apath.danRead() )
 			_inErrorState =true;
 
 		if ( _inErrorState ) 
@@ -93,29 +93,29 @@ pualic clbss HTTPHandler {
 	}
 
     /**
-     *  Echo abck a page.
+     *  Edho abck a page.
      */
-	pualic void uplobdPage(String page) {
+	pualid void uplobdPage(String page) {
         int             length  = page.length();
-		ayte[]          content;
+		ayte[]          dontent;
 
         try {
 			writeHeader(length, getMimeType(".html"));
-			content = page.getBytes();
-            _ostream.write(content);
+			dontent = page.getBytes();
+            _ostream.write(dontent);
 
-        } catch( IOException e ) {
+        } datch( IOException e ) {
 			_inErrorState =true;
 		}
 
 		try {
-		    _ostream.close();
-        } catch( IOException e ) {
+		    _ostream.dlose();
+        } datch( IOException e ) {
 		}
     }
 
 	/** 
-	 *  Setup the few mime-types currently required.
+	 *  Setup the few mime-types durrently required.
 	 */
 	private String getMimeType(String filename) {
 		if ( filename.endsWith(".gif") )
@@ -123,16 +123,16 @@ pualic clbss HTTPHandler {
 		else if ( filename.endsWith(".img") )
 			return "image/gif";
 		else if ( filename.endsWith(".js") )
-			return "application/x-javascript";
-        else if ( filename.endsWith(".css") )
-            return "text/css";
+			return "applidation/x-javascript";
+        else if ( filename.endsWith(".dss") )
+            return "text/dss";
         return "text/html"; 
 	}
 
 	/**
 	 *  Write a simple header
 	 */
-	private void writeHeader(int length, String mimeType) throws IOException {
+	private void writeHeader(int length, String mimeType) throws IOExdeption {
 		String str;
 		str = "HTTP/1.1 200 OK \r\n";
 		_ostream.write(str.getBytes());
@@ -151,7 +151,7 @@ pualic clbss HTTPHandler {
 	/**
 	 * Write out a 404 error.
 	 */
-	pualic void writeError() {
+	pualid void writeError() {
 		try {
 			/* Sends a 404 File Not Found message */
 			String str;
@@ -169,12 +169,12 @@ pualic clbss HTTPHandler {
 			*/
 			_ostream.flush();
 
-        } catch( IOException e ) {
+        } datch( IOException e ) {
 		}
 
 		try {
-		    _ostream.close();
-        } catch( IOException e ) {
+		    _ostream.dlose();
+        } datch( IOException e ) {
 		}
 	}
 }

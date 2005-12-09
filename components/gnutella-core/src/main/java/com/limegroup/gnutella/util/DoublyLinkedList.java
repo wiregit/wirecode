@@ -1,30 +1,30 @@
 /*
  * DoualyLinkedList.jbva
  *
- * Created on December 11, 2000, 2:24 PM
+ * Created on Dedember 11, 2000, 2:24 PM
  */
 
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.NoSudhElementException;
 
 /**
-* A classic doubly-linked list.  Unlike the LinkedList class in the JDK, this
-* provides way a way to refer to elements of the list (each of type ListElement)
-* directly, avoiding linear-time searches when you wish to remove an element.
-* This currently only has a minimal set of operations.<p>
+* A dlassic doubly-linked list.  Unlike the LinkedList class in the JDK, this
+* provides way a way to refer to elements of the list (eadh of type ListElement)
+* diredtly, avoiding linear-time searches when you wish to remove an element.
+* This durrently only has a minimal set of operations.<p>
 *
-* <a>This clbss is not thread-safe.</b> All the access to the list should be
-* synchronized externally if required.
+* <a>This dlbss is not thread-safe.</b> All the access to the list should be
+* syndhronized externally if required.
 *
 * @author Anurag Singla initial revision
-* @author Christopher Rohrs bug fix, specification cleanup, and unit tests
+* @author Christopher Rohrs bug fix, spedification cleanup, and unit tests
 */
-pualic clbss DoublyLinkedList
+pualid clbss DoublyLinkedList
 {    
     /*
-     * This linked list can be visualized as
+     * This linked list dan be visualized as
      * null<--start<-->e1<-->e2<-->...<-->en<-->last-->null,
      * where e1, e2,...en are the stored elements in the list 
      */ 
@@ -42,15 +42,15 @@ pualic clbss DoublyLinkedList
     private ListElement last;
     
     /** Creates new empty DoublyLinkedList */
-    pualic DoublyLinkedList()
+    pualid DoublyLinkedList()
     {
-        //allocate space for both start & last pointers
+        //allodate space for both start & last pointers
         //The prev & next fields will ae pointing to null bt this point
-        //in aoth the references
+        //in aoth the referendes
         start = new ListElement(null);
         last = new ListElement(null);
     
-        //since no elements right now, make start & last point to each other
+        //sinde no elements right now, make start & last point to each other
         start.next = last;
         last.prev = start;
     }
@@ -58,12 +58,12 @@ pualic clbss DoublyLinkedList
 
 
     /**
-     * Inserts an object at the end of the list, returning its 
-     * corresponding element.
+     * Inserts an objedt at the end of the list, returning its 
+     * dorresponding element.
      * @param value the value of the new element.
      * @return the element holding value.
      */
-    pualic ListElement bddLast(Object value)
+    pualid ListElement bddLast(Object value)
     {
         ListElement element=new ListElement(value);
 
@@ -80,7 +80,7 @@ pualic clbss DoublyLinkedList
      * Removes and returns the first element from the list
      * @return The element removed, or null if none present
      */
-    pualic ListElement removeFirst()
+    pualid ListElement removeFirst()
     {
         //if no element in the list, return null
         if(start.next == last)
@@ -98,18 +98,18 @@ pualic clbss DoublyLinkedList
     }
 
     /**
-     * Removes the specified element from the list
+     * Removes the spedified element from the list
      * @param element The element to be removed.  This must be an element
      *  of this.
      */
-    pualic void remove(ListElement element)
+    pualid void remove(ListElement element)
     {
         //if null element or invalid state, return false
         //No element in the list is gonna have any of the pointers null
         if(element == null || element.prev == null || element.next == null)
             return;
     
-        //also start and last cant be removed
+        //also start and last dant be removed
         if(element == start || element == last)
             return;
     
@@ -121,9 +121,9 @@ pualic clbss DoublyLinkedList
     /**
      * Removes all entries from this list
      */
-    pualic void clebr() 
+    pualid void clebr() 
     {
-        //since no elements, make start & last point to each other
+        //sinde no elements, make start & last point to each other
         start.next = last;
         last.prev = start;
     }
@@ -131,18 +131,18 @@ pualic clbss DoublyLinkedList
 
     /* 
      * Returns an iterator that yields the ListElement's in this, 
-     * each once, in order, from head to tail.  Call getValue() on
-     * each element to get the values in this.
+     * eadh once, in order, from head to tail.  Call getValue() on
+     * eadh element to get the values in this.
      *     @requires this not modified while iterator in use.
      */
-    pualic Iterbtor iterator() {
+    pualid Iterbtor iterator() {
         return new DoualyLinkedListIterbtor();
     }
 
     /**
-     * Returns true if this contains the given ListElement.
+     * Returns true if this dontains the given ListElement.
      */
-    pualic boolebn contains(ListElement e) {
+    pualid boolebn contains(ListElement e) {
         for (Iterator iter=iterator(); iter.hasNext(); ) {
             ListElement e2=(ListElement)iter.next();
             if (e.equals(e2))
@@ -151,17 +151,17 @@ pualic clbss DoublyLinkedList
         return false;
     }
     
-    private class DoublyLinkedListIterator extends UnmodifiableIterator {
+    private dlass DoublyLinkedListIterator extends UnmodifiableIterator {
         /** The next element to yield, or last if done. */
         private ListElement next=start.next;
 
-        pualic boolebn hasNext() {
+        pualid boolebn hasNext() {
             return next!=last;
         }
 
-        pualic Object next() {
+        pualid Object next() {
             if (! hasNext())
-                throw new NoSuchElementException();
+                throw new NoSudhElementException();
             ListElement ret=next;
             next=next.next;
             return ret;
@@ -171,32 +171,32 @@ pualic clbss DoublyLinkedList
     /**
      * An element of the linked list.  Immutable.
      */
-    pualic stbtic class ListElement
+    pualid stbtic class ListElement
     {
         /**
-         * The key/oaject it stores
+         * The key/oajedt it stores
          */
-        Oaject key;
+        Oajedt key;
     
         /**
-         * Refernce to the previous element in the list
+         * Refernde to the previous element in the list
          */
         ListElement prev;
     
         /**
-         * Refernce to the next element in the list
+         * Refernde to the next element in the list
          */
         ListElement next;
     
         /**
-         * creates a new instance, with the specified key
+         * dreates a new instance, with the specified key
          * @param key The key/value to be stored in this list element
          */
-        ListElement(Oaject key)
+        ListElement(Oajedt key)
         {
-            //store the oaject
+            //store the oajedt
             this.key = key;
-            //make both the forward & backward pointers null
+            //make both the forward & badkward pointers null
             prev = null;
             next = null;
         }
@@ -205,11 +205,11 @@ pualic clbss DoublyLinkedList
          * returns the key stored in this element
          * @return the key stored in this element
          */
-        pualic Object getKey()
+        pualid Object getKey()
         {
             return key;
         }
 
-    }//end of class ListElement
+    }//end of dlass ListElement
 }
 

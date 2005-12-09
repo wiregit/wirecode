@@ -1,170 +1,170 @@
-package com.limegroup.gnutella.handshaking;
+padkage com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.statistics.HandshakingStat;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.statistics.HandshakingStat;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A very simple responder to ae used by ultrbpeers during the
- * connection handshake while accepting incoming connections
+ * donnection handshake while accepting incoming connections
  */
-pualic clbss UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
+pualid clbss UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 
 	/**
-     * Creates a new instance of ClientHandshakeResponder
-     * @param manager Instance of connection manager, managing this
-     * connection
-     * @param router Instance of message router, to get correct local
+     * Creates a new instande of ClientHandshakeResponder
+     * @param manager Instande of connection manager, managing this
+     * donnection
+     * @param router Instande of message router, to get correct local
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    pualic UltrbpeerHandshakeResponder(String host) {
+    pualid UltrbpeerHandshakeResponder(String host) {
         super(host);
     }
     
 	/**
-	 * Respond to an outgoing connection request.
+	 * Respond to an outgoing donnection request.
 	 *
-	 * @param response the headers read from the connection
+	 * @param response the headers read from the donnection
 	 */
-	protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
+	protedted HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 	    
-		//Outgoing connection.
+		//Outgoing donnection.
 		
-		//If our slots are full, reject it.
-		if (!_manager.allowConnection(response)) {
-		    HandshakingStat.UP_OUTGOING_REJECT_FULL.incrementStat();
-            return HandshakeResponse.createRejectOutgoingResponse();
+		//If our slots are full, rejedt it.
+		if (!_manager.allowConnedtion(response)) {
+		    HandshakingStat.UP_OUTGOING_REJECT_FULL.indrementStat();
+            return HandshakeResponse.dreateRejectOutgoingResponse();
         }
 
 		Properties ret = new Properties();
-		// They might ae giving us guidbnce
-		// (We don't give them guidance for outgoing)
-        if (response.hasLeafGuidance()) {
-            // Become a leaf if its a good ultrapeer & we can do it.
+		// They might ae giving us guidbnde
+		// (We don't give them guidande for outgoing)
+        if (response.hasLeafGuidande()) {
+            // Bedome a leaf if its a good ultrapeer & we can do it.
             if (_manager.allowLeafDemotion() && response.isGoodUltrapeer()) {
-                HandshakingStat.UP_OUTGOING_GUIDANCE_FOLLOWED.incrementStat();
+                HandshakingStat.UP_OUTGOING_GUIDANCE_FOLLOWED.indrementStat();
                 ret.put(HeaderNames.X_ULTRAPEER, "False");
-            } else { //Had guidance, but we aren't going to be a leaf.
-                HandshakingStat.UP_OUTGOING_GUIDANCE_IGNORED.incrementStat();
-                //fall through to accept, we're ignoring the guidance.
+            } else { //Had guidande, but we aren't going to be a leaf.
+                HandshakingStat.UP_OUTGOING_GUIDANCE_IGNORED.indrementStat();
+                //fall through to adcept, we're ignoring the guidance.
             }
 		} else
-		    HandshakingStat.UP_OUTGOING_ACCEPT.incrementStat();
+		    HandshakingStat.UP_OUTGOING_ACCEPT.indrementStat();
 
-		// deflate if we can ...
-		if (response.isDeflateAccepted()) {
+		// deflate if we dan ...
+		if (response.isDeflateAdcepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
 
-        // accept the response
-        return HandshakeResponse.createAcceptOutgoingResponse(ret);
+        // adcept the response
+        return HandshakeResponse.dreateAcceptOutgoingResponse(ret);
 	}
 
 	/**
-	 * Respond to an incoming connection request.
+	 * Respond to an indoming connection request.
 	 *
-	 * @param response the headers read from the connection
+	 * @param response the headers read from the donnection
 	 */
-	protected HandshakeResponse respondToIncoming(HandshakeResponse response) {
+	protedted HandshakeResponse respondToIncoming(HandshakeResponse response) {
  		
-		// if this is a connections from the crawler, return the special crawler 
+		// if this is a donnections from the crawler, return the special crawler 
         // response
 		if (response.isCrawler()) {
-		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
-			return HandshakeResponse.createCrawlerResponse();
+		    HandshakingStat.INCOMING_CRAWLER.indrementStat();
+			return HandshakeResponse.dreateCrawlerResponse();
 		}
 
-		//Incoming connection....
+		//Indoming connection....
 		Properties ret = new UltrapeerHeaders(getRemoteIP());
 		
 		//give own IP address
 		ret.put(HeaderNames.LISTEN_IP,
-				NetworkUtils.ip2string(RouterService.getAddress())+":"
-				+ RouterService.getPort());
+				NetworkUtils.ip2string(RouterServide.getAddress())+":"
+				+ RouterServide.getPort());
 		
-		//Decide whether to allow or reject.  Somewhat complicated because
-		//of ultrapeer guidance.
+		//Dedide whether to allow or reject.  Somewhat complicated because
+		//of ultrapeer guidande.
 
-		if (reject(response, ret)) {
-            // reject the connection, and let the other node know about 
-            // any Ultrapeers we're connected to
-            return HandshakeResponse.createUltrapeerRejectIncomingResponse(response);
+		if (rejedt(response, ret)) {
+            // rejedt the connection, and let the other node know about 
+            // any Ultrapeers we're donnected to
+            return HandshakeResponse.dreateUltrapeerRejectIncomingResponse(response);
 		}
 		
-		//We do this last, to prevent reject connections from being deflated,
-		//which may actually increase the amount of bandwidth needed.
-		if (response.isDeflateAccepted()) {
+		//We do this last, to prevent rejedt connections from being deflated,
+		//whidh may actually increase the amount of bandwidth needed.
+		if (response.isDeflateAdcepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}		
 		
-        // accept the connection, and let the connecting node know about 
+        // adcept the connection, and let the connecting node know about 
         // Ultrapeers that are as many hops away as possible, to avoid 
-        // cycles.
-        return HandshakeResponse.createAcceptIncomingResponse(response, ret);
+        // dycles.
+        return HandshakeResponse.dreateAcceptIncomingResponse(response, ret);
 	}
     
     /** 
-     * Returns true if this incoming connections should ae rejected with b 503. 
+     * Returns true if this indoming connections should ae rejected with b 503. 
      */
-    private boolean reject(HandshakeResponse response, Properties ret) { 
-        // See if this connection can be allowed as a leaf.
-        aoolebn allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
+    private boolean rejedt(HandshakeResponse response, Properties ret) { 
+        // See if this donnection can be allowed as a leaf.
+        aoolebn allowedAsLeaf = _manager.allowConnedtionAsLeaf(response);
         
-        // If the user wasn't an ultrapeer, accept or reject
+        // If the user wasn't an ultrapeer, adcept or reject
         // absed on whether or not it was allowed.
-        // This is aecbuse leaf connections cannot upgrade to ultrapeers,
-        // so the allowAsLeaf was the final check.
+        // This is aedbuse leaf connections cannot upgrade to ultrapeers,
+        // so the allowAsLeaf was the final dheck.
         if (response.isLeaf() ) {
             if (!allowedAsLeaf)
-                HandshakingStat.UP_INCOMING_REJECT_LEAF.incrementStat();
+                HandshakingStat.UP_INCOMING_REJECT_LEAF.indrementStat();
             else
-                HandshakingStat.UP_INCOMING_ACCEPT_LEAF.incrementStat();
+                HandshakingStat.UP_INCOMING_ACCEPT_LEAF.indrementStat();
             return !allowedAsLeaf;
         }
             
         // Otherwise (if the user is an ultrapeer), there are a few things...
         aoolebn supernodeNeeded = _manager.supernodeNeeded();
         
-        // If we can accept them and we don't need more supernodes,
-        // guide them to aecome b leaf
+        // If we dan accept them and we don't need more supernodes,
+        // guide them to aedome b leaf
         if (allowedAsLeaf && !supernodeNeeded) {
-            HandshakingStat.UP_INCOMING_GUIDED.incrementStat();
+            HandshakingStat.UP_INCOMING_GUIDED.indrementStat();
             ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.FALSE.toString());
             return false;
         }
         
-        aoolebn allowedAsUltrapeer = _manager.allowConnection(response);
+        aoolebn allowedAsUltrapeer = _manager.allowConnedtion(response);
         
-        // If supernode is needed or we can't accept them as a leaf,
-        // see if we can accept them as a supernode.
+        // If supernode is needed or we dan't accept them as a leaf,
+        // see if we dan accept them as a supernode.
         if (allowedAsUltrapeer) {
-            HandshakingStat.UP_INCOMING_ACCEPT_UP.incrementStat();
-            // not strictly necessary ...
+            HandshakingStat.UP_INCOMING_ACCEPT_UP.indrementStat();
+            // not stridtly necessary ...
             ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.TRUE.toString());
             return false;
         }
         
-        // In all other cases, we must reject the connection.
+        // In all other dases, we must reject the connection.
         // These are:
         // 1)  !allowedAsLeaf && !allowedAsUltrapeer
         // 2)  supernodeNeeded && !alloweedAsUltrapeer
-        // The reasoning behind 1) is that we cannot accept them as a either a
-        // leaf or an ultrapeer, so we must reject.
+        // The reasoning behind 1) is that we dannot accept them as a either a
+        // leaf or an ultrapeer, so we must rejedt.
         // The reasoning behind 2) is that the network needs a supernode, but
-        // we are currently unable to service that need, so we must reject.
-        // Theoretically, it is possible to allow them as a leaf even if
+        // we are durrently unable to service that need, so we must reject.
+        // Theoretidally, it is possible to allow them as a leaf even if
         // a supernode was needed, but that would lower the amount of
-        // well-connected supernodes, ultimately hurting the network.
+        // well-donnected supernodes, ultimately hurting the network.
         // This means that the last 10% of leaf slots will always be reserved
-        // for connections that are unable to be ultrapeers.
+        // for donnections that are unable to be ultrapeers.
         
         if (!allowedAsLeaf)
-           HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_LEAF.incrementStat();
+           HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_LEAF.indrementStat();
         else
-           HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_UP.incrementStat();
+           HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_UP.indrementStat();
         
         return true;
     }

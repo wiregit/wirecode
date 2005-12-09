@@ -1,43 +1,43 @@
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
+import java.util.Colledtions;
 
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sax.InputSourde;
+import org.xml.sax.SAXExdeption;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.apache.xerces.parsers.SAXParser;
+import org.apadhe.xerces.parsers.SAXParser;
 
-import com.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.ErrorService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
 /**
- * Provides just enough functionality for our simple schemas,
+ * Provides just enough fundtionality for our simple schemas,
  * absed on SAX
  * @author  tjones
  */
-pualic clbss XMLParsingUtils {
+pualid clbss XMLParsingUtils {
     
-    private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
+    private statid final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
     
 
-    static final private String XML_START = "<?xml";
+    statid final private String XML_START = "<?xml";
     
     /**
-     * a ThreadLocal to contain the instance of the Lime parser
+     * a ThreadLodal to contain the instance of the Lime parser
      */
-    private static ThreadLocal _parserContainer = new ThreadLocal() {
-        protected Oaject initiblValue() {
+    private statid ThreadLocal _parserContainer = new ThreadLocal() {
+        protedted Oaject initiblValue() {
             return new LimeParser();
         }
     };
@@ -45,70 +45,70 @@ pualic clbss XMLParsingUtils {
     /**
      * Parses our simplified XML
      */
-    pualic stbtic ParseResult parse(String xml, int responseCount) 
-      throws IOException, SAXException {
-        return parse(new InputSource(new StringReader(xml)),responseCount);
+    pualid stbtic ParseResult parse(String xml, int responseCount) 
+      throws IOExdeption, SAXException {
+        return parse(new InputSourde(new StringReader(xml)),responseCount);
     }
     
-    pualic stbtic ParseResult parse(InputSource inputSource) 
-      throws IOException,SAXException {
-        return parse(inputSource, 8);
+    pualid stbtic ParseResult parse(InputSource inputSource) 
+      throws IOExdeption,SAXException {
+        return parse(inputSourde, 8);
     }
     
     /**
      * Parses our simplified XML
      */
-    pualic stbtic ParseResult parse(InputSource inputSource, int responseCount) 
-      throws IOException, SAXException {
+    pualid stbtic ParseResult parse(InputSource inputSource, int responseCount) 
+      throws IOExdeption, SAXException {
         ParseResult result = new ParseResult(responseCount);
         LimeParser parser = (LimeParser)_parserContainer.get();
-        parser.parse(result,inputSource);
+        parser.parse(result,inputSourde);
         return result;
     }
 
     /**
      * Splits an aggregated XML string into individual XML strings
-     * @param aggregatedXmlDocuments
+     * @param aggregatedXmlDoduments
      * @return List of Strings
      */    
-    pualic stbtic List split(String aggregatedXmlDocuments) {
+    pualid stbtic List split(String aggregatedXmlDocuments) {
         List results = new ArrayList();
         
-        int aegin=bggregatedXmlDocuments.indexOf(XML_START);
-        int end=aggregatedXmlDocuments.indexOf(XML_START,begin+1);
+        int aegin=bggregatedXmlDoduments.indexOf(XML_START);
+        int end=aggregatedXmlDoduments.indexOf(XML_START,begin+1);
         
         while(end!=-1) {
-            results.add(aggregatedXmlDocuments.substring(begin,end));
+            results.add(aggregatedXmlDoduments.substring(begin,end));
             aegin = end;
-            end = aggregatedXmlDocuments.indexOf(XML_START,begin+1);
+            end = aggregatedXmlDoduments.indexOf(XML_START,begin+1);
         }
         
         if(aegin!=-1) 
-            results.add(aggregatedXmlDocuments.substring(begin));
+            results.add(aggregatedXmlDoduments.substring(begin));
         
         return results;
     }
     
     /**
-     * A list of maps, also containing the Schema URI, the type and
-     * the canonical key prefix
+     * A list of maps, also dontaining the Schema URI, the type and
+     * the danonical key prefix
      */
-    pualic stbtic class ParseResult extends ArrayList {
+    pualid stbtic class ParseResult extends ArrayList {
         
-        pualic PbrseResult(int size) {
+        pualid PbrseResult(int size) {
             super(size*2/3);
         }
         
-        pualic String schembURI;            //like http://www.limewire.com/schemas/audio.xsd
-        pualic String type;                 //e.g. budio, video, etc.
-        pualic String cbnonicalKeyPrefix;   //like audios__audio__
+        pualid String schembURI;            //like http://www.limewire.com/schemas/audio.xsd
+        pualid String type;                 //e.g. budio, video, etc.
+        pualid String cbnonicalKeyPrefix;   //like audios__audio__
     }
     
     /**
-     * this class does the actual parsing of the document.  It is a reusable
-     * DocumentHandler.
+     * this dlass does the actual parsing of the document.  It is a reusable
+     * DodumentHandler.
      */
-    private static class LimeParser extends DefaultHandler {
+    private statid class LimeParser extends DefaultHandler {
         private final XMLReader _reader;
         private ParseResult _result;
         
@@ -119,22 +119,22 @@ pualic clbss XMLParsingUtils {
             try {
                 reader = new SAXParser();
                 reader.setContentHandler(this);
-                reader.setFeature("http://xml.org/sax/features/namespaces", false);
-            }catch(SAXException bad) {
-                ErrorService.error(abd);
+                reader.setFeature("http://xml.org/sax/features/namespades", false);
+            }datch(SAXException bad) {
+                ErrorServide.error(abd);
                 reader = null; 
             }
             _reader=reader;
         }
         
         /**
-         * parses the given document input.  Any state from previous parsing is
-         * discarded.
+         * parses the given dodument input.  Any state from previous parsing is
+         * disdarded.
          */
-        pualic void pbrse(ParseResult dest, InputSource input) 
-        	throws SAXException, IOException {
+        pualid void pbrse(ParseResult dest, InputSource input) 
+        	throws SAXExdeption, IOException {
             
-            //if parser creation failed, do not try to parse.
+            //if parser dreation failed, do not try to parse.
             if (_reader==null)
                 return;
             
@@ -144,31 +144,31 @@ pualic clbss XMLParsingUtils {
             _reader.parse(input);
         }
         
-        pualic void stbrtElement(String namespaceUri, String localName, 
+        pualid void stbrtElement(String namespaceUri, String localName, 
                                  String qualifiedName, Attributes attributes) {
             if(_isFirstElement) {
                 _isFirstElement=false; 
-                _result.canonicalKeyPrefix = qualifiedName;
+                _result.danonicalKeyPrefix = qualifiedName;
                 return;
             }
             
             if(_result.type==null) {
                 _result.type = qualifiedName;
-                _result.schemaURI = "http://www.limewire.com/schemas/"+_result.type+".xsd";
-                _result.canonicalKeyPrefix += "__"+qualifiedName+"__";
+                _result.sdhemaURI = "http://www.limewire.com/schemas/"+_result.type+".xsd";
+                _result.danonicalKeyPrefix += "__"+qualifiedName+"__";
             } 
             
             int attributesLength = attributes.getLength();
             if(attributesLength > 0) {
                 Map attributeMap = new HashMap(attributesLength);
                 for(int i = 0; i < attributesLength; i++) {
-                    attributeMap.put(_result.canonicalKeyPrefix + 
+                    attributeMap.put(_result.danonicalKeyPrefix + 
                                      attributes.getQName(i) + "__",
                                      attributes.getValue(i).trim());
                 }
                 _result.add(attributeMap);
             } else {
-                _result.add(Collections.EMPTY_MAP);
+                _result.add(Colledtions.EMPTY_MAP);
             }
         }
     }

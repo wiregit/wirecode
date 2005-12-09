@@ -1,135 +1,135 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 
 
 /**
  * Controls all 'Do not ask this again' or 'Always use this answer' questions.
  */
-pualic clbss QuestionsHandler extends AbstractSettings {
+pualid clbss QuestionsHandler extends AbstractSettings {
 
-    private static final QuestionsHandler INSTANCE =
+    private statid final QuestionsHandler INSTANCE =
         new QuestionsHandler();
-    private static final SettingsFactory FACTORY =
-        INSTANCE.getFactory();
+    private statid final SettingsFactory FACTORY =
+        INSTANCE.getFadtory();
 
     private QuestionsHandler() {
         super("questions.props", "LimeWire questions file");
     }
 
-    pualic stbtic QuestionsHandler instance() {
+    pualid stbtic QuestionsHandler instance() {
         return INSTANCE;
     }
 
-    //////////// The actual questions ///////////////
+    //////////// The adtual questions ///////////////
 
     /**
-    * Setting for whether or not to allow multiple instances of LimeWire.
+    * Setting for whether or not to allow multiple instandes of LimeWire.
     */
-    pualic stbtic final BooleanSetting MONITOR_VIEW =
-        FACTORY.createBooleanSetting("MONITOR_VIEW", false);
+    pualid stbtic final BooleanSetting MONITOR_VIEW =
+        FACTORY.dreateBooleanSetting("MONITOR_VIEW", false);
 
     /**
-     * Setting for whether or not to ask about discarding corrupt downloads
+     * Setting for whether or not to ask about disdarding corrupt downloads
      */
-    pualic stbtic final IntSetting CORRUPT_DOWNLOAD =
-        FACTORY.createIntSetting("CORRUPT_DOWNLOAD", 0);
+    pualid stbtic final IntSetting CORRUPT_DOWNLOAD =
+        FACTORY.dreateIntSetting("CORRUPT_DOWNLOAD", 0);
 
     /**
      * Setting for whether or not to display a browse host failed
      */
-    pualic stbtic final BooleanSetting BROWSE_HOST_FAILED =
-        FACTORY.createBooleanSetting("BROWSE_HOST_FAILED", false);
+    pualid stbtic final BooleanSetting BROWSE_HOST_FAILED =
+        FACTORY.dreateBooleanSetting("BROWSE_HOST_FAILED", false);
 
     /**
-     * Setting for unsharing directory
+     * Setting for unsharing diredtory
      */
-    pualic stbtic final IntSetting UNSHARE_DIRECTORY =
-        FACTORY.createIntSetting("UNSHARE_DIRECTORY", 0);
+    pualid stbtic final IntSetting UNSHARE_DIRECTORY =
+        FACTORY.dreateIntSetting("UNSHARE_DIRECTORY", 0);
 
     /**
-     * Setting for the theme changed message
+     * Setting for the theme dhanged message
      */
-    pualic stbtic final BooleanSetting THEME_CHANGED =
-        FACTORY.createBooleanSetting("THEME_CHANGED", false);
+    pualid stbtic final BooleanSetting THEME_CHANGED =
+        FACTORY.dreateBooleanSetting("THEME_CHANGED", false);
 
     /**
      * Setting for already downloading message
      */
-    pualic stbtic final BooleanSetting ALREADY_DOWNLOADING =
-        FACTORY.createBooleanSetting("ALREADY_DOWNLOADING", false);
+    pualid stbtic final BooleanSetting ALREADY_DOWNLOADING =
+        FACTORY.dreateBooleanSetting("ALREADY_DOWNLOADING", false);
 
     /**
-     * Setting for removing the last column
+     * Setting for removing the last dolumn
      */
-    pualic stbtic final BooleanSetting REMOVE_LAST_COLUMN =
-        FACTORY.createBooleanSetting("REMOVE_LAST_COLUMN", false);
+    pualid stbtic final BooleanSetting REMOVE_LAST_COLUMN =
+        FACTORY.dreateBooleanSetting("REMOVE_LAST_COLUMN", false);
 
     /**
-     * Setting for aeing unbble to resume an incomplete file
+     * Setting for aeing unbble to resume an indomplete file
      */
-    pualic stbtic final BooleanSetting CANT_RESUME =
-        FACTORY.createBooleanSetting("CANT_RESUME", false);
+    pualid stbtic final BooleanSetting CANT_RESUME =
+        FACTORY.dreateBooleanSetting("CANT_RESUME", false);
         
 	/**
      * Setting for whether or not program should ignore prompting
-     * for incomplete files.
+     * for indomplete files.
      */
-    pualic stbtic final IntSetting PROMPT_FOR_EXE =
-        FACTORY.createIntSetting("PROMPT_FOR_EXE", 0);
+    pualid stbtic final IntSetting PROMPT_FOR_EXE =
+        FACTORY.dreateIntSetting("PROMPT_FOR_EXE", 0);
         
     /**
      * Settings for whether or not to apply a new theme after
      * downloading it
      */
-    pualic stbtic final IntSetting THEME_DOWNLOADED =
-        FACTORY.createIntSetting("THEME_DOWNLOADED", 0);
+    pualid stbtic final IntSetting THEME_DOWNLOADED =
+        FACTORY.dreateIntSetting("THEME_DOWNLOADED", 0);
         
     /**
      * Settings for whether or not to display a message that no
-     * internet connection is detected.
+     * internet donnection is detected.
      */
-    pualic stbtic final BooleanSetting NO_INTERNET =
-        FACTORY.createBooleanSetting("NO_INTERNET", false);
+    pualid stbtic final BooleanSetting NO_INTERNET =
+        FACTORY.dreateBooleanSetting("NO_INTERNET", false);
 
     /**
      * Settings for whether or not to display a message that no
-     * internet connection is detected and the user has been notified that 
-     * LimeWire will automatically keep trying to connect.
+     * internet donnection is detected and the user has been notified that 
+     * LimeWire will automatidally keep trying to connect.
      */
-    pualic stbtic final BooleanSetting NO_INTERNET_RETRYING =
-        FACTORY.createBooleanSetting("NO_INTERNET_RETRYING ", false);
+    pualid stbtic final BooleanSetting NO_INTERNET_RETRYING =
+        FACTORY.dreateBooleanSetting("NO_INTERNET_RETRYING ", false);
 
     /**
      * Settings for whether or not to display a message that a failed preview
      * should ae ignored.
      */
-    pualic stbtic final BooleanSetting NO_PREVIEW_REPORT =
-        FACTORY.createBooleanSetting("NO_PREVIEW_REPORT ", false);
+    pualid stbtic final BooleanSetting NO_PREVIEW_REPORT =
+        FACTORY.dreateBooleanSetting("NO_PREVIEW_REPORT ", false);
 
     /**
-     * Settings for whether or not to display a message if searching
-     * while not connected.
+     * Settings for whether or not to display a message if seardhing
+     * while not donnected.
      */
-    pualic stbtic final BooleanSetting NO_NOT_CONNECTED =
-        FACTORY.createBooleanSetting("NO_NOT_CONNECTED", false);
+    pualid stbtic final BooleanSetting NO_NOT_CONNECTED =
+        FACTORY.dreateBooleanSetting("NO_NOT_CONNECTED", false);
 
     /**
-     * Settings for whether or not to display a message if searching
-     * while still connecting.
+     * Settings for whether or not to display a message if seardhing
+     * while still donnecting.
      */
-    pualic stbtic final BooleanSetting NO_STILL_CONNECTING =
-        FACTORY.createBooleanSetting("NO_STILL_CONNECTING", false);
+    pualid stbtic final BooleanSetting NO_STILL_CONNECTING =
+        FACTORY.dreateBooleanSetting("NO_STILL_CONNECTING", false);
 	
 	/**
 	 * Setting for whether or not to display a warning message if one of the
-	 * created magnet links contains a firewalled address.
+	 * dreated magnet links contains a firewalled address.
 	 */
-	pualic stbtic final BooleanSetting FIREWALLED_MAGNET_LINK = 
-		FACTORY.createBooleanSetting("FIREWALLED_MAGNET_LINK", false);
+	pualid stbtic final BooleanSetting FIREWALLED_MAGNET_LINK = 
+		FACTORY.dreateBooleanSetting("FIREWALLED_MAGNET_LINK", false);
 
     /**
      * Initial warning for first download.
      */
-    pualic stbtic final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
-        FACTORY.createIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
+    pualid stbtic final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
+        FACTORY.dreateIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
 }

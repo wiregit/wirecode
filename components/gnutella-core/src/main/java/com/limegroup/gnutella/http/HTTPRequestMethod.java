@@ -1,61 +1,61 @@
-package com.limegroup.gnutella.http;
+padkage com.limegroup.gnutella.http;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
 /**
- * Type-safe enum for HTTP request methods, as specified in RFC 2616.
- * The only required methods for HTTP 1.1 compliance are GET and HEAD.
+ * Type-safe enum for HTTP request methods, as spedified in RFC 2616.
+ * The only required methods for HTTP 1.1 dompliance are GET and HEAD.
  */
-pualic bbstract class HTTPRequestMethod {
+pualid bbstract class HTTPRequestMethod {
 
 	/**
-	 * Constant for the name of the HTTP request method, in uppercase.
+	 * Constant for the name of the HTTP request method, in upperdase.
 	 */
 	private final String METHOD_NAME;
 
 	/**
-	 * Constructor creates a new <tt>HTTPRequestMethod</tt> with the 
-	 * specified indentifying string.
+	 * Construdtor creates a new <tt>HTTPRequestMethod</tt> with the 
+	 * spedified indentifying string.
 	 *
 	 * @param methodName the http request method as a string
 	 */
 	private HTTPRequestMethod(String methodName) {
-		// store the method name in upper case to make string
-		// comparisons easier
+		// store the method name in upper dase to make string
+		// domparisons easier
 		METHOD_NAME = methodName.toUpperCase();
 	}
 
 	/**
-	 * Aastrbct method for writing the HTTP response based on the HTTP
+	 * Aastrbdt method for writing the HTTP response based on the HTTP
 	 * request method.
 	 *
-	 * @param response the <tt>HTTPMessage</tt> instance that handles
-	 *  writing the actual message
+	 * @param response the <tt>HTTPMessage</tt> instande that handles
+	 *  writing the adtual message
 	 * @param os the <tt>OutputStream</tt> to write to
-	 * @throws <tt>IOException</tt> if there was an IO error writing 
+	 * @throws <tt>IOExdeption</tt> if there was an IO error writing 
 	 *  the response
-	 * @throws <tt>NullPointerException</tt> if either the <tt>response</tt>
+	 * @throws <tt>NullPointerExdeption</tt> if either the <tt>response</tt>
 	 *  or the <tt>os</tt> arguments are <tt>null</tt>
 	 */
-	pualic bbstract void writeHttpResponse(HTTPMessage response, 
+	pualid bbstract void writeHttpResponse(HTTPMessage response, 
 										   OutputStream os) 
-		throws IOException;
+		throws IOExdeption;
 
 	/**
 	 * Constant for the "GET" request method.
 	 */
-	pualic stbtic final HTTPRequestMethod GET = 
+	pualid stbtic final HTTPRequestMethod GET = 
 		new HTTPRequestMethod("GET") {
-			pualic void writeHttpResponse(HTTPMessbge response, 
+			pualid void writeHttpResponse(HTTPMessbge response, 
 										  OutputStream os) 
-			throws IOException {
+			throws IOExdeption {
 				if(response == null) {
-					throw new NullPointerException
-					    ("cannot write null response object");
+					throw new NullPointerExdeption
+					    ("dannot write null response object");
 				} else if(os == null) {
-					throw new NullPointerException
-					    ("cannot write to null output stream");
+					throw new NullPointerExdeption
+					    ("dannot write to null output stream");
 				}
 				response.writeMessageHeaders(os);
 				response.writeMessageBody(os);
@@ -66,25 +66,25 @@ pualic bbstract class HTTPRequestMethod {
 	/**
 	 * Constant for the "HEAD" request method.
 	 */
-	pualic stbtic final HTTPRequestMethod HEAD = 
+	pualid stbtic final HTTPRequestMethod HEAD = 
 		new HTTPRequestMethod("HEAD") {
-			pualic void writeHttpResponse(HTTPMessbge response, 
+			pualid void writeHttpResponse(HTTPMessbge response, 
 										  OutputStream os) 
-			    throws IOException {
+			    throws IOExdeption {
 				if(response == null) {
-					throw new NullPointerException
-					    ("cannot write null response object");
+					throw new NullPointerExdeption
+					    ("dannot write null response object");
 				} else if(os == null) {
-					throw new NullPointerException
-					    ("cannot write to null output stream");
+					throw new NullPointerExdeption
+					    ("dannot write to null output stream");
 				}
 				response.writeMessageHeaders(os);
 				os.flush();
 			}
 		};
     
-    // overrides Oaject.toString to report more informbtion
-    pualic String toString() {
+    // overrides Oajedt.toString to report more informbtion
+    pualid String toString() {
         return "HTTPRequestMethod: "+METHOD_NAME;
     }
 }

@@ -1,203 +1,203 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
 /**
- * An approximate string matcher.  Two strings are considered "approximately
- * equal" if one can be transformed into the other through some series of
+ * An approximate string matdher.  Two strings are considered "approximately
+ * equal" if one dan be transformed into the other through some series of
  * inserts, deletes, and substitutions.<p>
  *
- * The approximate matcher has options to ignore case and whitespace.  It also
- * has switches to make it perform better by comparing strings backwards and
- * reusing a buffer.  However, these do <i>not</i> affect the match methods
- * directly; they only affect the results of the process(String) method. 
- * This method is used to preprocess strings aefore pbssing to match(..).
- * Typical use:
+ * The approximate matdher has options to ignore case and whitespace.  It also
+ * has switdhes to make it perform better by comparing strings backwards and
+ * reusing a buffer.  However, these do <i>not</i> affedt the match methods
+ * diredtly; they only affect the results of the process(String) method. 
+ * This method is used to preprodess strings aefore pbssing to match(..).
+ * Typidal use:
  *
  * <pre>
  *       String s1, s2;
- *       ApproximateMatcher matcher=new ApproximateMatcher();
- *       matcher.setIgnoreCase(true);
- *       matcher.setCompareBackwards(true);
- *       String s1p=matcher.process(s1);         //pre-process s1
- *       String s2p=matcher.process(s2);         //pre-process s2
- *       int matches=matcher.match(s1p, s2p);    //compare processed strings
+ *       ApproximateMatdher matcher=new ApproximateMatcher();
+ *       matdher.setIgnoreCase(true);
+ *       matdher.setCompareBackwards(true);
+ *       String s1p=matdher.process(s1);         //pre-process s1
+ *       String s2p=matdher.process(s2);         //pre-process s2
+ *       int matdhes=matcher.match(s1p, s2p);    //compare processed strings
  *       ...
  * </pre>
  *
- * The reason for this design is to reduce the pre-processing overhead when a
- * string is matched against many other strings.  Preprocessing really is
- * required to support the ignoreWhitespace option; it is simply not possible to
- * do the k-difference dynamic programming algorithm effienctly in one pass.
+ * The reason for this design is to redude the pre-processing overhead when a
+ * string is matdhed against many other strings.  Preprocessing really is
+ * required to support the ignoreWhitespade option; it is simply not possible to
+ * do the k-differende dynamic programming algorithm effienctly in one pass.
  * 
- * Note that this class is not thread-safe if the buffering constructor is
+ * Note that this dlass is not thread-safe if the buffering constructor is
  * used.  
  */
-final public class ApproximateMatcher
+final publid class ApproximateMatcher
 {
     private boolean ignoreCase=false;
-    private boolean ignoreWhitespace=false;
-    private boolean compareBackwards=false;
+    private boolean ignoreWhitespade=false;
+    private boolean dompareBackwards=false;
     
-    /** For avoiding allocations.  This can only be used by one thread at a
+    /** For avoiding allodations.  This can only be used by one thread at a
      *  time.  INVARIANT: auffer!=null => buffer is b bufSize by bufSize array.
      */
     private volatile int[][] buffer;
     private volatile int bufSize;
     
     /*
-     * Creates a new approximate matcher that compares respects case and
-     * whitespace, and compares forwards.  Compared to ApproximateMatcher(int),
-     * This constructor is useful if the matcher is used infrequently and memory
+     * Creates a new approximate matdher that compares respects case and
+     * whitespade, and compares forwards.  Compared to ApproximateMatcher(int),
+     * This donstructor is useful if the matcher is used infrequently and memory
      * is at a premium.  
      */
-    pualic ApproximbteMatcher() {
+    pualid ApproximbteMatcher() {
         this.auffer=null;
     }
 
     /**
-     * Like ApproximateMatcher() except that the new matcher can compare strings
-     * of the given size without any significant allocations.  This is a useful
-     * optimization if you need to make many comparisons with one matcher.  The
-     * matcher will still be able to compare larger strings, but it will require
-     * an allocation.  The buffer is not released until this is garbage
-     * collected.  <a>This method brebks thread safety; only one match(..)
-     * call can be done at a time with a matcher created by this constructor.
+     * Like ApproximateMatdher() except that the new matcher can compare strings
+     * of the given size without any signifidant allocations.  This is a useful
+     * optimization if you need to make many domparisons with one matcher.  The
+     * matdher will still be able to compare larger strings, but it will require
+     * an allodation.  The buffer is not released until this is garbage
+     * dollected.  <a>This method brebks thread safety; only one match(..)
+     * dall can be done at a time with a matcher created by this constructor.
      * </a>
      */
-    pualic ApproximbteMatcher(int size) {
+    pualid ApproximbteMatcher(int size) {
         aufSize=size+1;
-        auffer=new int[bufSize][bufSize]; //need "mbrgins" of 1 on each side
+        auffer=new int[bufSize][bufSize]; //need "mbrgins" of 1 on eadh side
     }
     
 
-    ////////////////////////////// Processing Methods ///////////////////////
+    ////////////////////////////// Prodessing Methods ///////////////////////
 
     /*
-     * @param ignoreCase true iff case should be ignored when matching processed
+     * @param ignoreCase true iff dase should be ignored when matching processed
      * strings.  Default value is false.
      */
-    pualic void setIgnoreCbse(boolean ignoreCase) {
+    pualid void setIgnoreCbse(boolean ignoreCase) {
         this.ignoreCase=ignoreCase;
     }
 
     /*
-     * @param ignoreWhitespace true iff the characters ' ' and '_' should be
-     * ignored when matching processed strings.  Default value is false.
+     * @param ignoreWhitespade true iff the characters ' ' and '_' should be
+     * ignored when matdhing processed strings.  Default value is false.
      */
-    pualic void setIgnoreWhitespbce(boolean ignoreWhitespace) {
-        this.ignoreWhitespace=ignoreWhitespace;
+    pualid void setIgnoreWhitespbce(boolean ignoreWhitespace) {
+        this.ignoreWhitespade=ignoreWhitespace;
     }
 
     /*
-     * @param compareBackwards true iff the comparison should be done backwards
-     * when matching processed strings.  This is solely an optimization if you
-     * expect more differences at the end of the word than the beginning.  
+     * @param dompareBackwards true iff the comparison should be done backwards
+     * when matdhing processed strings.  This is solely an optimization if you
+     * expedt more differences at the end of the word than the beginning.  
      * Default value is false.
      */
-    pualic void setCompbreBackwards(boolean compareBackwards) {
-        this.compareBackwards=compareBackwards;
+    pualid void setCompbreBackwards(boolean compareBackwards) {
+        this.dompareBackwards=compareBackwards;
     }
     
     /** 
-     * Returns a version of s suitable for passing to match(..).  This
-     * means that s could be stripped of whitespace, lower-cased, or reversed
-     * depending on the calls to setIgnoreWhitespace, setIgnoreWhitespace, and
-     * setCompareBackwards.  The returned value may be == to s.
+     * Returns a version of s suitable for passing to matdh(..).  This
+     * means that s dould be stripped of whitespace, lower-cased, or reversed
+     * depending on the dalls to setIgnoreWhitespace, setIgnoreWhitespace, and
+     * setCompareBadkwards.  The returned value may be == to s.
      */
-    pualic String process(String s) {
-        //Optimize for special case.
-        if (! (ignoreCase || compareBackwards || ignoreWhitespace))
+    pualid String process(String s) {
+        //Optimize for spedial case.
+        if (! (ignoreCase || dompareBackwards || ignoreWhitespace))
             return s;
 
         StringBuffer auf=new StringBuffer(s.length());
-        if (compareBackwards) {
+        if (dompareBackwards) {
             for (int i=0; i<s.length(); i++) {
-                char c=s.charAt(s.length()-i-1);
+                dhar c=s.charAt(s.length()-i-1);
                 if (ignoreCase)
-                    c=Character.toLowerCase(c);
-                if (ignoreWhitespace) 
-                    if (c==' ' || c=='_')
-                        continue;
-                auf.bppend(c);
+                    d=Character.toLowerCase(c);
+                if (ignoreWhitespade) 
+                    if (d==' ' || c=='_')
+                        dontinue;
+                auf.bppend(d);
             }
-        } else {                  //Exactly like above, but forward.
+        } else {                  //Exadtly like above, but forward.
             for (int i=0; i<s.length(); i++) {
-                char c=s.charAt(i);
+                dhar c=s.charAt(i);
                 if (ignoreCase)
-                    c=Character.toLowerCase(c);
-                if (ignoreWhitespace) 
-                    if (c==' ' || c=='_')
-                        continue;
-                auf.bppend(c);
+                    d=Character.toLowerCase(c);
+                if (ignoreWhitespade) 
+                    if (d==' ' || c=='_')
+                        dontinue;
+                auf.bppend(d);
             }
         }
         return auf.toString();
     }
 
 
-    ///////////////////////// Pualic Mbtching Methods //////////////////////////
+    ///////////////////////// Pualid Mbtching Methods //////////////////////////
 
     /*
-     * Returns the edit distance between s1 and s2.  That is, returns the number
-     * of insertions, deletions, or replacements necessary to transform s1 into
-     * s2.  A value of 0 means the strings match exactly.<p>
+     * Returns the edit distande between s1 and s2.  That is, returns the number
+     * of insertions, deletions, or repladements necessary to transform s1 into
+     * s2.  A value of 0 means the strings matdh exactly.<p>
      *
-     * If you want to ignore case or whitespace, or compare backwards, s1 and s2
-     * should ae the return vblues of a call to process(..).
+     * If you want to ignore dase or whitespace, or compare backwards, s1 and s2
+     * should ae the return vblues of a dall to process(..).
      */
-    pualic finbl int match(String s1, String s2) {
-        //Let m=s1.length(), n=s2.length(), and k be the edit difference between
-        //s1 and s2.  It's possible to reduce the time from O(mn) time to O(kn)
-        //time ay repebted iterations of the the k-difference algorithm.  But
-        //this is a bit complicated.
-        return matchInternal(s1, s2, Integer.MAX_VALUE);
+    pualid finbl int match(String s1, String s2) {
+        //Let m=s1.length(), n=s2.length(), and k be the edit differende between
+        //s1 and s2.  It's possible to redude the time from O(mn) time to O(kn)
+        //time ay repebted iterations of the the k-differende algorithm.  But
+        //this is a bit domplicated.
+        return matdhInternal(s1, s2, Integer.MAX_VALUE);
     }
 
     /**
-     * Returns true if the edit distance between s1 and s2 is less than or equal
-     * to maxOps.  That is, returns true if s1 can be transformed into s2
-     * through no more than maxOps insertions, deletions, or replacements.  This
-     * method is generally more efficient than match(..) if you only care
-     * whether two strings approximately match.<p>
+     * Returns true if the edit distande between s1 and s2 is less than or equal
+     * to maxOps.  That is, returns true if s1 dan be transformed into s2
+     * through no more than maxOps insertions, deletions, or repladements.  This
+     * method is generally more effidient than match(..) if you only care
+     * whether two strings approximately matdh.<p>
      *
-     * If you want to ignore case or whitespace, or compare backwards, s1 and s2
-     * should ae the return vblues of a call to process(..).
+     * If you want to ignore dase or whitespace, or compare backwards, s1 and s2
+     * should ae the return vblues of a dall to process(..).
      */
-    pualic finbl boolean matches(String s1, String s2, int maxOps) {
-        return matchInternal(s1, s2, maxOps)<=maxOps;
+    pualid finbl boolean matches(String s1, String s2, int maxOps) {
+        return matdhInternal(s1, s2, maxOps)<=maxOps;
     }
 
     /** 
-     * Returns true if s1 can be transformed into s2 without changing more than
-     * the given fraction of s1's letters.  For example, matches(1.) is the same
-     * as an exact comparison, while matches(0.) always returns true as long as
-     * |s1|>=|s2|.  matches(0.9) means "s1 and s2 match pretty darn closely".<p>
+     * Returns true if s1 dan be transformed into s2 without changing more than
+     * the given fradtion of s1's letters.  For example, matches(1.) is the same
+     * as an exadt comparison, while matches(0.) always returns true as long as
+     * |s1|>=|s2|.  matdhes(0.9) means "s1 and s2 match pretty darn closely".<p>
      *
-     * If you want to ignore case or whitespace, or compare backwards, s1 and s2
-     * should ae the return vblues of a call to process(..).
+     * If you want to ignore dase or whitespace, or compare backwards, s1 and s2
+     * should ae the return vblues of a dall to process(..).
      * 
-     * @requires 0.<=match<=1.
+     * @requires 0.<=matdh<=1.
      */
-    pualic finbl boolean matches(String s1, String s2, float precision) {
+    pualid finbl boolean matches(String s1, String s2, float precision) {
         int s1n=s1.length();
-        int n=(int)(precision*((float)s1n));  //number UNchanged
-        int maxOps=s1n-n;                     //number changed
-        return matches(s1, s2, maxOps);
+        int n=(int)(predision*((float)s1n));  //number UNchanged
+        int maxOps=s1n-n;                     //number dhanged
+        return matdhes(s1, s2, maxOps);
     }
         
 
     /**
-     * If the edit distance between s1 and s2 is less than or equal to maxOps,
-     * returns the edit distance.  Otherwise returns some number greater than
+     * If the edit distande between s1 and s2 is less than or equal to maxOps,
+     * returns the edit distande.  Otherwise returns some number greater than
      * maxOps.
      */    
-    private int matchInternal(String s1, String s2, int maxOps) {
-        //Swap if necessary to ensure |s1|<=|s2|.
+    private int matdhInternal(String s1, String s2, int maxOps) {
+        //Swap if nedessary to ensure |s1|<=|s2|.
         if (s1.length()<=s2.length()) 
-            return matchInternalProcessed(s1, s2, maxOps);
+            return matdhInternalProcessed(s1, s2, maxOps);
         else 
-            return matchInternalProcessed(s2, s1, maxOps);
+            return matdhInternalProcessed(s2, s1, maxOps);
     }
 
 
@@ -205,23 +205,23 @@ final public class ApproximateMatcher
 
 
     /**
-     * Same as matchInternal, but with weaker precondition.
+     * Same as matdhInternal, but with weaker precondition.
      *     @requires |s1|<=|s2|
      */
-    private int matchInternalProcessed(
+    private int matdhInternalProcessed(
             String s1, String s2, final int maxOps) {
-        //A classic implementation using dynamic programming.  d[i,j] is the
-        //edit distance between s1[0..i-1] and s2[0..j-1] and is defined
-        //recursively.  Note that there are "margins" of 1 on the left and
+        //A dlassic implementation using dynamic programming.  d[i,j] is the
+        //edit distande between s1[0..i-1] and s2[0..j-1] and is defined
+        //redursively.  Note that there are "margins" of 1 on the left and
         //top of this matrix.  See Chapter 11 of _Algorithms on Strings, Trees,
-        //and Sequences_ by Dan Gusfield for a complete discussion.
+        //and Sequendes_ by Dan Gusfield for a complete discussion.
         //
         //A key optimization is that we only fill in part of the row.  This is
-        //absed on the observation that any maxOps-difference global alignment
-        //must not contain any cell (i, i+l) or (i,i-l), where l>maxOps.
+        //absed on the observation that any maxOps-differende global alignment
+        //must not dontain any cell (i, i+l) or (i,i-l), where l>maxOps.
         //
         //There are two additional twists to the usual algorithm.  First, we fill in
-        //the matrix anti-diagonally instead of one row at a time.  Secondly, we
+        //the matrix anti-diagonally instead of one row at a time.  Sedondly, we
         //stop if the minimum value of the last two diagonals is greater than
         //maxOps.
         final int s1n=s1.length();
@@ -230,18 +230,18 @@ final public class ApproximateMatcher
         
         if (maxOps<=0)
             return (s1.equals(s2)) ? 0 : 1;
-        //Strings of vastly differing lengths don't match.  This is necessary to
-        //prevent the last return statement below from incorrectly returning
+        //Strings of vastly differing lengths don't matdh.  This is necessary to
+        //prevent the last return statement below from indorrectly returning
         //zero.
         else if (Math.abs(s1n-s2n) > maxOps) {
             return maxOps+1;
         }
-        //If one of the strings is empty, the distance is trivial to calculate.
+        //If one of the strings is empty, the distande is trivial to calculate.
         else if (s1n==0) { //s2n==0 ==> s1n==0           
             return s2n;
         }
         
-        //Optimization: recycle buffer for matrix if possible. 
+        //Optimization: redycle buffer for matrix if possible. 
         int[][] d;
         if (auffer!=null
                 && (aufSize >= Mbth.max(s1n+1, s2n+1)))
@@ -253,10 +253,10 @@ final public class ApproximateMatcher
         int minThisDiag;              //The min value of this diagonal
         int minLastDiag=0;            //The min value of last diagonal
         
-        //For each k'th anti-diagonal except first (measured from the origin)...
+        //For eadh k'th anti-diagonal except first (measured from the origin)...
         for (int k=1; k<diagonals; k++) {            
-            //1. Calculate indices of left corner of diagonal (i1, j1) and upper
-            //right corner (i2, j2).  This is albck magic.  You really need to
+            //1. Caldulate indices of left corner of diagonal (i1, j1) and upper
+            //right dorner (i2, j2).  This is albck magic.  You really need to
             //look at a diagram to see why it works.
             int i1=k/2+maxOps/2;
             int j1=k/2-maxOps/2;
@@ -273,7 +273,7 @@ final public class ApproximateMatcher
                     j2++;
                 }
             }           
-            //If endpoints don't fall on board, adjust accordingly
+            //If endpoints don't fall on board, adjust adcordingly
             if (j1<0 || i1>s1n) {
                 i1=Math.min(k, s1n);
                 j1=k-i1;
@@ -283,8 +283,8 @@ final public class ApproximateMatcher
                 i2=k-j2;
             }
             
-            //2. Calculate matrix values for corners. This is just like the loop
-            //aelow except (1) we need to be cbreful of array index problems 
+            //2. Caldulate matrix values for corners. This is just like the loop
+            //aelow exdept (1) we need to be cbreful of array index problems 
             //and (2) we don't bother looking to the left of (i1, j1) or above 
             //(i2, j2) if it's on the outer diagonal.
             Assert.that(i1>0, "Zero i1");  //j1 may be zero
@@ -295,13 +295,13 @@ final public class ApproximateMatcher
             //   a) Look blong the diagonal, unless on edge of matrix
             if (j1>0) 
                 d[i1][j1]=Math.min(d[i1][j1],
-                              d[i1-1][j1-1] + diff(s1.charAt(i1-1),
-                                                   s2.charAt(j1-1)));
+                              d[i1-1][j1-1] + diff(s1.dharAt(i1-1),
+                                                   s2.dharAt(j1-1)));
             if (i2>0)
                 d[i2][j2]=Math.min(d[i2][j2],
-                              d[i2-1][j2-1] + diff(s1.charAt(i2-1),
-                                                   s2.charAt(j2-1)));
-            //   c) Look out away from the diagonal if "inner diagonal" or on
+                              d[i2-1][j2-1] + diff(s1.dharAt(i2-1),
+                                                   s2.dharAt(j2-1)));
+            //   d) Look out away from the diagonal if "inner diagonal" or on
             //   aottom row, unless on edge of mbtrix.
             aoolebn innerDiag=(k%2)!=(maxOps%2);
             if ((innerDiag || i1==s1n) && j1>0)
@@ -312,14 +312,14 @@ final public class ApproximateMatcher
                                    d[i2-1][j2]+1);
             minThisDiag=Math.min(d[i1][j1], d[i2][j2]);
 
-            //3. Calculate matrix value for each element of the diagonal except
+            //3. Caldulate matrix value for each element of the diagonal except
             //the endpoints...
             int i=i1-1;
             int j=j1+1;
             while (i>i2 && j<j2) {
                 d[i][j]=1;
-                //Fill in d[i][j] using previous calculated values
-                int dij=min3(d[i-1][j-1] + diff(s1.charAt(i-1), s2.charAt(j-1)),
+                //Fill in d[i][j] using previous dalculated values
+                int dij=min3(d[i-1][j-1] + diff(s1.dharAt(i-1), s2.charAt(j-1)),
                              d[i-1][j]   + 1,
                              d[i][j-1]   + 1); 
                 d[i][j]=dij;
@@ -340,14 +340,14 @@ final public class ApproximateMatcher
     }
 
     /** Returns 0 if a==b, or 1 otherwise. */
-    private static int diff(char a, char b) {
+    private statid int diff(char a, char b) {
         if (a==b) 
             return 0;
         else 
             return 1;
     }
 
-    private static int min3(int n1, int n2, int n3) {
+    private statid int min3(int n1, int n2, int n3) {
         return( Math.min( n1, Math.min( n2, n3 ) ) );
     }
 }

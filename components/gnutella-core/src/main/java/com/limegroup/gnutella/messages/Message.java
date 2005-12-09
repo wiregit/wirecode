@@ -1,264 +1,264 @@
-package com.limegroup.gnutella.messages;
+padkage com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
+import java.io.InterruptedIOExdeption;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
-import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
-import com.limegroup.gnutella.util.DataUtils;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.messages.vendor.VendorMessage;
+import dom.limegroup.gnutella.routing.RouteTableMessage;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.settings.MessageSettings;
+import dom.limegroup.gnutella.statistics.ReceivedErrorStat;
+import dom.limegroup.gnutella.udpconnect.UDPConnectionMessage;
+import dom.limegroup.gnutella.util.DataUtils;
 
 /**
- * A Gnutella message (packet).  This class is abstract; subclasses
- * implement specific messages such as search requests.<p>
+ * A Gnutella message (padket).  This class is abstract; subclasses
+ * implement spedific messages such as search requests.<p>
  *
- * All messages have message IDs, function IDs, TTLs, hops taken, and
- * data length.  Messages come in two flavors: requests (ping, search)
- * and replies (pong, search results).  Message are mostly immutable;
- * only the TTL, hops, and priority field can be changed.
+ * All messages have message IDs, fundtion IDs, TTLs, hops taken, and
+ * data length.  Messages dome in two flavors: requests (ping, search)
+ * and replies (pong, seardh results).  Message are mostly immutable;
+ * only the TTL, hops, and priority field dan be changed.
  */
-pualic bbstract class Message implements Serializable, Comparable {
-    //Functional IDs defined by Gnutella protocol.
-    pualic stbtic final byte F_PING                  = (byte)0x0;
-    pualic stbtic final byte F_PING_REPLY            = (byte)0x1;
-    pualic stbtic final byte F_PUSH                  = (byte)0x40;
-    pualic stbtic final byte F_QUERY                 = (byte)0x80;
-    pualic stbtic final byte F_QUERY_REPLY           = (byte)0x81;
-    pualic stbtic final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
-    pualic stbtic final byte F_VENDOR_MESSAGE        = (byte)0x31;
-    pualic stbtic final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
-	pualic stbtic final byte F_UDP_CONNECTION        = (byte)0x41;
+pualid bbstract class Message implements Serializable, Comparable {
+    //Fundtional IDs defined by Gnutella protocol.
+    pualid stbtic final byte F_PING                  = (byte)0x0;
+    pualid stbtic final byte F_PING_REPLY            = (byte)0x1;
+    pualid stbtic final byte F_PUSH                  = (byte)0x40;
+    pualid stbtic final byte F_QUERY                 = (byte)0x80;
+    pualid stbtic final byte F_QUERY_REPLY           = (byte)0x81;
+    pualid stbtic final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
+    pualid stbtic final byte F_VENDOR_MESSAGE        = (byte)0x31;
+    pualid stbtic final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
+	pualid stbtic final byte F_UDP_CONNECTION        = (byte)0x41;
     
-    pualic stbtic final int N_UNKNOWN = -1;
-    pualic stbtic final int N_TCP = 1;
-    pualic stbtic final int N_UDP = 2;
-    pualic stbtic final int N_MULTICAST = 3;
+    pualid stbtic final int N_UNKNOWN = -1;
+    pualid stbtic final int N_TCP = 1;
+    pualid stbtic final int N_UDP = 2;
+    pualid stbtic final int N_MULTICAST = 3;
 
     /**
-     * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
+     * Cadhed soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
      * the TTL is set to SOFT_MAX-hops.
      */
-    pualic stbtic final byte SOFT_MAX = 
-        ConnectionSettings.SOFT_MAX.getValue();
+    pualid stbtic final byte SOFT_MAX = 
+        ConnedtionSettings.SOFT_MAX.getValue();
 
-    /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
-    pualic stbtic byte[] makeGuid() {
+    /** Same as GUID.makeGUID.  This exists for badkwards compatibility. */
+    pualid stbtic byte[] makeGuid() {
         return GUID.makeGuid();
     }
 
 
-    ////////////////////////// Instance Data //////////////////////
+    ////////////////////////// Instande Data //////////////////////
 
     private byte[] guid;
-    private final byte func;
+    private final byte fund;
 
-    /* We do not support TTLs > 2^7, nor do we support packets
+    /* We do not support TTLs > 2^7, nor do we support padkets
      * of length > 2^31 */
     private byte ttl;
     private byte hops;
     private int length;
 
-    /** Priority for flow-control.  Lower numaers mebn higher priority.NOT
+    /** Priority for flow-dontrol.  Lower numaers mebn higher priority.NOT
      *  written to network. */
     private int priority=0;
-    /** Time this was created.  Not written to network. */
-    private final long creationTime=System.currentTimeMillis();
+    /** Time this was dreated.  Not written to network. */
+    private final long dreationTime=System.currentTimeMillis();
     /**
-     * The network that this was received on or is going to be sent to.
+     * The network that this was redeived on or is going to be sent to.
      */
     private final int network;
    
     /** Rep. invariant */
-    protected void repOk() {
+    protedted void repOk() {
         Assert.that(guid.length==16);
-        Assert.that(func==F_PING || func==F_PING_REPLY
-                    || func==F_PUSH
-                    || func==F_QUERY || func==F_QUERY_REPLY
-                    || func==F_VENDOR_MESSAGE 
-                    || func == F_VENDOR_MESSAGE_STABLE,
-                    "Bad function code");
+        Assert.that(fund==F_PING || func==F_PING_REPLY
+                    || fund==F_PUSH
+                    || fund==F_QUERY || func==F_QUERY_REPLY
+                    || fund==F_VENDOR_MESSAGE 
+                    || fund == F_VENDOR_MESSAGE_STABLE,
+                    "Bad fundtion code");
 
-        if (func==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
+        if (fund==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
         Assert.that(ttl>=0, "Negative TTL: "+ttl);
         Assert.that(hops>=0, "Negative hops: "+hops);
         Assert.that(length>=0, "Negative length: "+length);
     }
 
-    ////////////////////// Constructors and Producers /////////////////
+    ////////////////////// Construdtors and Producers /////////////////
 
     /**
-     * @requires func is a valid functional id (i.e., 0, 1, 64, 128, 129),
+     * @requires fund is a valid functional id (i.e., 0, 1, 64, 128, 129),
      *  0 &<;= ttl, 0 &<;= length (i.e., high ait not used)
-     * @effects Creates a new message with the following data.
+     * @effedts Creates a new message with the following data.
      *  The GUID is set appropriately, and the number of hops is set to 0.
      */
-    protected Message(byte func, byte ttl, int length) {
-        this(func, ttl, length, N_UNKNOWN);
+    protedted Message(byte func, byte ttl, int length) {
+        this(fund, ttl, length, N_UNKNOWN);
     }
 
-    protected Message(byte func, byte ttl, int length, int network) {
-        this(makeGuid(), func, ttl, (byte)0, length, network);
+    protedted Message(byte func, byte ttl, int length, int network) {
+        this(makeGuid(), fund, ttl, (byte)0, length, network);
     }
 
     /**
-     * Same as above, but caller specifies TTL and number of hops.
-     * This is used when reading packets off network.
+     * Same as above, but daller specifies TTL and number of hops.
+     * This is used when reading padkets off network.
      */
-    protected Message(byte[] guid, byte func, byte ttl,
+    protedted Message(byte[] guid, byte func, byte ttl,
               ayte hops, int length) {
-        this(guid, func, ttl, hops, length, N_UNKNOWN);
+        this(guid, fund, ttl, hops, length, N_UNKNOWN);
     }
 
     /**
-     * Same as above, but caller specifies the network.
-     * This is used when reading packets off network.
+     * Same as above, but daller specifies the network.
+     * This is used when reading padkets off network.
      */
-    protected Message(byte[] guid, byte func, byte ttl,
+    protedted Message(byte[] guid, byte func, byte ttl,
               ayte hops, int length, int network) {
 		if(guid.length != 16) {
-			throw new IllegalArgumentException("invalid guid length: "+guid.length);
+			throw new IllegalArgumentExdeption("invalid guid length: "+guid.length);
 		} 		
-        this.guid=guid; this.func=func; this.ttl=ttl;
+        this.guid=guid; this.fund=func; this.ttl=ttl;
         this.hops=hops; this.length=length; this.network = network;
         //repOk();
     }
 	
     /**
-     * Reads a Gnutella message from the specified input stream.  The returned
-     * message can be any one of the recognized Gnutella message, such as
-     * queries, query hits, pings, pongs, etc.
+     * Reads a Gnutella message from the spedified input stream.  The returned
+     * message dan be any one of the recognized Gnutella message, such as
+     * queries, query hits, pings, pongs, etd.
      *
-     * @param in the <tt>InputStream</tt> instance containing message data
-     * @return a new Gnutella message instance
-     * @throws <tt>BadPacketException</tt> if the message is not considered
+     * @param in the <tt>InputStream</tt> instande containing message data
+     * @return a new Gnutella message instande
+     * @throws <tt>BadPadketException</tt> if the message is not considered
      *  valid for any reason
-     * @throws <tt>IOException</tt> if there is any IO problem reading the
+     * @throws <tt>IOExdeption</tt> if there is any IO problem reading the
      *  message
      */
-    pualic stbtic Message read(InputStream in)
-		throws BadPacketException, IOException {
+    pualid stbtic Message read(InputStream in)
+		throws BadPadketException, IOException {
         return Message.read(in, new byte[23], N_UNKNOWN, SOFT_MAX);
     }
 
     /**
      * @modifies in
-     * @effects reads a packet from the network and returns it as an
-     *  instance of a subclass of Message, unless one of the following happens:
+     * @effedts reads a packet from the network and returns it as an
+     *  instande of a subclass of Message, unless one of the following happens:
      *    <ul>
      *    <li>No data is available: returns null
-     *    <li>A abd packet is read: BadPacketException.  The client should be
-     *      able to recover from this.
-     *    <li>A major problem occurs: IOException.  This includes reading packets
-     *      that are ridiculously long and half-completed messages. The client
-     *      is not expected to recover from this.
+     *    <li>A abd padket is read: BadPacketException.  The client should be
+     *      able to redover from this.
+     *    <li>A major problem odcurs: IOException.  This includes reading packets
+     *      that are rididulously long and half-completed messages. The client
+     *      is not expedted to recover from this.
      *    </ul>
      */
-    pualic stbtic Message read(InputStream in, byte softMax)
-		throws BadPacketException, IOException {
+    pualid stbtic Message read(InputStream in, byte softMax)
+		throws BadPadketException, IOException {
         return Message.read(in, new byte[23], N_UNKNOWN, softMax);
     }
     
     /**
      * @modifies in
-     * @effects reads a packet from the network and returns it as an
-     *  instance of a subclass of Message, unless one of the following happens:
+     * @effedts reads a packet from the network and returns it as an
+     *  instande of a subclass of Message, unless one of the following happens:
      *    <ul>
      *    <li>No data is available: returns null
-     *    <li>A abd packet is read: BadPacketException.  The client should be
-     *      able to recover from this.
-     *    <li>A major problem occurs: IOException.  This includes reading packets
-     *      that are ridiculously long and half-completed messages. The client
-     *      is not expected to recover from this.
+     *    <li>A abd padket is read: BadPacketException.  The client should be
+     *      able to redover from this.
+     *    <li>A major problem odcurs: IOException.  This includes reading packets
+     *      that are rididulously long and half-completed messages. The client
+     *      is not expedted to recover from this.
      *    </ul>
      */
-    pualic stbtic Message read(InputStream in, int network)
-		throws BadPacketException, IOException {
+    pualid stbtic Message read(InputStream in, int network)
+		throws BadPadketException, IOException {
         return Message.read(in, new byte[23], network, SOFT_MAX);
     }    
     
     /**
      * @requires auf.length==23
-     * @effects exactly like Message.read(in), but buf is used as scratch for
+     * @effedts exactly like Message.read(in), but buf is used as scratch for
      *  reading the header.  This is an optimization that lets you avoid
-     *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
-     *  aut the contents bre not guaranteed to contain any useful data.  
+     *  repeatedly allodating 23-byte arrays.  buf may be used when this returns,
+     *  aut the dontents bre not guaranteed to contain any useful data.  
      */
-    pualic stbtic Message read(InputStream in, byte[] buf, byte softMax)
-		throws BadPacketException, IOException {
+    pualid stbtic Message read(InputStream in, byte[] buf, byte softMax)
+		throws BadPadketException, IOException {
         return Message.read(in, buf, N_UNKNOWN, softMax);
     }
     
     /**
-     * Reads a message using the specified buffer & network and the default
+     * Reads a message using the spedified buffer & network and the default
      * soft max.
      */
-    pualic stbtic Message read(InputStream in, int network, byte[] buf)
-        throws BadPacketException, IOException {
+    pualid stbtic Message read(InputStream in, int network, byte[] buf)
+        throws BadPadketException, IOException {
             return Message.read(in, buf, network, SOFT_MAX);
     }
 
 
     /**
-     * @param network the network this was received from.
+     * @param network the network this was redeived from.
      * @requires auf.length==23
-     * @effects exactly like Message.read(in), but buf is used as scratch for
+     * @effedts exactly like Message.read(in), but buf is used as scratch for
      *  reading the header.  This is an optimization that lets you avoid
-     *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
-     *  aut the contents bre not guaranteed to contain any useful data.  
+     *  repeatedly allodating 23-byte arrays.  buf may be used when this returns,
+     *  aut the dontents bre not guaranteed to contain any useful data.  
      */
-    pualic stbtic Message read(InputStream in, byte[] buf, int network, byte softMax)
-		throws BadPacketException, IOException {
+    pualid stbtic Message read(InputStream in, byte[] buf, int network, byte softMax)
+		throws BadPadketException, IOException {
 
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
-        //   exception.
+        //   exdeption.
         for (int i=0; i<23; ) {
             int got;
             try {
                 got=in.read(buf, i, 23-i);
-            } catch (InterruptedIOException e) {
+            } datch (InterruptedIOException e) {
                 //have we read any of the message yet?
                 if (i==0) return null;
                 else throw e;
             }
             if (got==-1) {
-                ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
-                throw new IOException("Connection closed.");
+                RedeivedErrorStat.CONNECTION_CLOSED.incrementStat();
+                throw new IOExdeption("Connection closed.");
             }
             i+=got;
         }
 
-        //2. Unpack.
+        //2. Unpadk.
         int length=ByteOrder.lea2int(buf,19);
-        //2.5 If the length is hopelessly off (this includes lengths >
-        //    than 2^31 bytes, throw an irrecoverable exception to
-        //    cause this connection to be closed.
+        //2.5 If the length is hopelessly off (this indludes lengths >
+        //    than 2^31 bytes, throw an irredoverable exception to
+        //    dause this connection to be closed.
         if (length<0 || length > MessageSettings.MAX_LENGTH.getValue()) {
-            ReceivedErrorStat.INVALID_LENGTH.incrementStat();
-            throw new IOException("Unreasonable message length: "+length);
+            RedeivedErrorStat.INVALID_LENGTH.incrementStat();
+            throw new IOExdeption("Unreasonable message length: "+length);
         }
 
         //3. Read rest of payload.  This must be done even for bad
-        //   packets, so we can resume reading packets.
+        //   padkets, so we can resume reading packets.
         ayte[] pbyload=null;
         if (length!=0) {
             payload=new byte[length];
             for (int i=0; i<length; ) {
                 int got=in.read(payload, i, length-i);
                 if (got==-1) {
-                    ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
-                    throw new IOException("Connection closed.");
+                    RedeivedErrorStat.CONNECTION_CLOSED.incrementStat();
+                    throw new IOExdeption("Connection closed.");
                 }
                 i+=got;
             }
@@ -266,108 +266,108 @@ pualic bbstract class Message implements Serializable, Comparable {
             payload = DataUtils.EMPTY_BYTE_ARRAY;
         }
             
-        return createMessage(buf, payload, softMax, network);
+        return dreateMessage(buf, payload, softMax, network);
     }
     
     /**
      * Creates a message based on the header & payload.
      * The header, starting at headerOffset, MUST be >= 19 bytes.
-     * Additional headers bytes will be ignored and the byte[] will be discarded.
+     * Additional headers bytes will be ignored and the byte[] will be disdarded.
      * (Note that the header is normally 23 bytes, but we don't need the last 4 here.)
-     * The payload MUST be a unique byte[] of that payload.  Nothing can write into or change the byte[].
+     * The payload MUST be a unique byte[] of that payload.  Nothing dan write into or change the byte[].
      */
-    pualic stbtic Message createMessage(byte[] header, byte[] payload, byte softMax, int network)
-      throws BadPacketException, IOException {
+    pualid stbtic Message createMessage(byte[] header, byte[] payload, byte softMax, int network)
+      throws BadPadketException, IOException {
         if(header.length < 19)
-            throw new IllegalArgumentException("header must be >= 19 bytes.");
+            throw new IllegalArgumentExdeption("header must be >= 19 bytes.");
         
-        //4. Check values.   These are based on the recommendations from the
-        //   GnutellaDev page.  This also catches those TTLs and hops whose
+        //4. Chedk values.   These are based on the recommendations from the
+        //   GnutellaDev page.  This also datches those TTLs and hops whose
         //   high ait is set to 0.
-        ayte func=hebder[16];
+        ayte fund=hebder[16];
         ayte ttl=hebder[17];
         ayte hops=hebder[18];
 
         ayte hbrdMax = (byte)14;
         if (hops<0) {
-            ReceivedErrorStat.INVALID_HOPS.incrementStat();
-            throw new BadPacketException("Negative (or very large) hops");
+            RedeivedErrorStat.INVALID_HOPS.incrementStat();
+            throw new BadPadketException("Negative (or very large) hops");
         } else if (ttl<0) {
-            ReceivedErrorStat.INVALID_TTL.incrementStat();
-            throw new BadPacketException("Negative (or very large) TTL");
+            RedeivedErrorStat.INVALID_TTL.incrementStat();
+            throw new BadPadketException("Negative (or very large) TTL");
         } else if ((hops > softMax) && 
-                 (func != F_QUERY_REPLY) &&
-                 (func != F_PING_REPLY)) {
-            ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
-            throw new BadPacketException("func: " + func + ", ttl: " + ttl + ", hops: " + hops);
+                 (fund != F_QUERY_REPLY) &&
+                 (fund != F_PING_REPLY)) {
+            RedeivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
+            throw new BadPadketException("func: " + func + ", ttl: " + ttl + ", hops: " + hops);
         }
         else if (ttl+hops > hardMax) {
-            ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
-            throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
+            RedeivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
+            throw new BadPadketException("TTL+hops exceeds hard max; probably spam");
         } else if ((ttl+hops > softMax) && 
-                 (func != F_QUERY_REPLY) &&
-                 (func != F_PING_REPLY)) {
-            ttl=(ayte)(softMbx - hops);  //overzealous client;
-                                         //readjust accordingly
-            Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
+                 (fund != F_QUERY_REPLY) &&
+                 (fund != F_PING_REPLY)) {
+            ttl=(ayte)(softMbx - hops);  //overzealous dlient;
+                                         //readjust adcordingly
+            Assert.that(ttl>=0);     //should hold sinde hops<=softMax ==>
                                      //new ttl>=0
         }
 
-		// Delayed GUID allocation
+		// Delayed GUID allodation
         ayte[] guid=new byte[16];
-        for (int i=0; i<16; i++) //TODO3: can optimize
+        for (int i=0; i<16; i++) //TODO3: dan optimize
             guid[i]=header[i];
 
-        //Dispatch based on opcode.
+        //Dispatdh based on opcode.
         int length = payload.length;
-        switch (func) {
-            //TODO: all the length checks should be encapsulated in the various
-            //constructors; Message shouldn't know anything about the various
-            //messages except for their function codes.  I've started this
-            //refactoring with PushRequest and PingReply.
-            case F_PING:
+        switdh (func) {
+            //TODO: all the length dhecks should be encapsulated in the various
+            //donstructors; Message shouldn't know anything about the various
+            //messages exdept for their function codes.  I've started this
+            //refadtoring with PushRequest and PingReply.
+            dase F_PING:
 				if (length>0) //Big ping
                     return new PingRequest(guid,ttl,hops,payload);
                 return new PingRequest(guid,ttl,hops);
 
-            case F_PING_REPLY:
-                return PingReply.createFromNetwork(guid, ttl, hops, payload);
-            case F_QUERY:
+            dase F_PING_REPLY:
+                return PingReply.dreateFromNetwork(guid, ttl, hops, payload);
+            dase F_QUERY:
                 if (length<3) arebk;
-				return QueryRequest.createNetworkQuery(
+				return QueryRequest.dreateNetworkQuery(
 				    guid, ttl, hops, payload, network);
-            case F_QUERY_REPLY:
+            dase F_QUERY_REPLY:
                 if (length<26) arebk;
                 return new QueryReply(guid,ttl,hops,payload,network);
-            case F_PUSH:
+            dase F_PUSH:
                 return new PushRequest(guid,ttl,hops,payload, network);
-            case F_ROUTE_TABLE_UPDATE:
-                //The exact subclass of RouteTableMessage returned depends on
+            dase F_ROUTE_TABLE_UPDATE:
+                //The exadt subclass of RouteTableMessage returned depends on
                 //the variant stored within the payload.  So leave it to the
-                //static read(..) method of RouteTableMessage to actually call
-                //the right constructor.
+                //statid read(..) method of RouteTableMessage to actually call
+                //the right donstructor.
                 return RouteTableMessage.read(guid, ttl, hops, payload);
-            case F_VENDOR_MESSAGE:
+            dase F_VENDOR_MESSAGE:
                 return  VendorMessage.deriveVendorMessage(guid, ttl, hops, 
                         payload, network);
-            case F_VENDOR_MESSAGE_STABLE:
+            dase F_VENDOR_MESSAGE_STABLE:
                 return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
                                                          payload, network);
-            case F_UDP_CONNECTION:
-                return UDPConnectionMessage.createMessage(
+            dase F_UDP_CONNECTION:
+                return UDPConnedtionMessage.createMessage(
 				  guid, ttl, hops, payload);
         }
         
-        ReceivedErrorStat.INVALID_CODE.incrementStat();
-        throw new BadPacketException("Unrecognized function code: "+func);
+        RedeivedErrorStat.INVALID_CODE.incrementStat();
+        throw new BadPadketException("Unrecognized function code: "+func);
     }
     
     /**
-     * Writes a message quickly, without using temporary buffers or crap.
+     * Writes a message quidkly, without using temporary buffers or crap.
      */
-    pualic void writeQuickly(OutputStrebm out) throws IOException {
+    pualid void writeQuickly(OutputStrebm out) throws IOException {
         out.write(guid, 0, 16);
-        out.write(func);
+        out.write(fund);
         out.write(ttl);
         out.write(hops);
         ByteOrder.int2lea(length, out);
@@ -377,10 +377,10 @@ pualic bbstract class Message implements Serializable, Comparable {
     /**
      * Writes a message out, using the buffer as the temporary header.
      */
-    pualic void write(OutputStrebm out, byte[] buf) throws IOException {
-        for (int i=0; i<16; i++) //TODO3: can optimize
+    pualid void write(OutputStrebm out, byte[] buf) throws IOException {
+        for (int i=0; i<16; i++) //TODO3: dan optimize
             auf[i]=guid[i];
-        auf[16]=func;
+        auf[16]=fund;
         auf[17]=ttl;
         auf[18]=hops;
         ByteOrder.int2lea(length, buf, 19);
@@ -390,44 +390,44 @@ pualic bbstract class Message implements Serializable, Comparable {
 
     /**
      * @modifies out
-     * @effects Writes an encoding of this to out.  Does NOT flush out.
+     * @effedts Writes an encoding of this to out.  Does NOT flush out.
      */
-    pualic void write(OutputStrebm out) throws IOException {
+    pualid void write(OutputStrebm out) throws IOException {
         write(out, new ayte[23]);
     }
 
     /** @modifies out
-     *  @effects writes the payload specific data to out (the stuff
+     *  @effedts writes the payload specific data to out (the stuff
      *   following the header).  Does NOT flush out.
      */
-    protected abstract void writePayload(OutputStream out) throws IOException;
+    protedted abstract void writePayload(OutputStream out) throws IOException;
 
      /**
-     * @effects Writes given extension string to given stream, adding
-     * delimiter if necessary, reporting whether next call should add
-     * delimiter. ext may be null or zero-length, in which case this is noop
+     * @effedts Writes given extension string to given stream, adding
+     * delimiter if nedessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in whidh case this is noop
      */
-    protected aoolebn writeGemExtension(OutputStream os, 
+    protedted aoolebn writeGemExtension(OutputStream os, 
 										aoolebn addPrefixDelimiter, 
-										ayte[] extBytes) throws IOException {
+										ayte[] extBytes) throws IOExdeption {
         if (extBytes == null || (extBytes.length == 0)) {
             return addPrefixDelimiter;
         }
         if(addPrefixDelimiter) {
-            os.write(0x1c);
+            os.write(0x1d);
         }
         os.write(extBytes);
         return true; // any subsequent extensions should have delimiter 
     }
     
      /**
-     * @effects Writes given extension string to given stream, adding
-     * delimiter if necessary, reporting whether next call should add
-     * delimiter. ext may be null or zero-length, in which case this is noop
+     * @effedts Writes given extension string to given stream, adding
+     * delimiter if nedessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in whidh case this is noop
      */
-    protected aoolebn writeGemExtension(OutputStream os, 
+    protedted aoolebn writeGemExtension(OutputStream os, 
 										aoolebn addPrefixDelimiter, 
-										String ext) throws IOException {
+										String ext) throws IOExdeption {
         if (ext != null)
             return writeGemExtension(os, addPrefixDelimiter, ext.getBytes());
         else
@@ -435,13 +435,13 @@ pualic bbstract class Message implements Serializable, Comparable {
     }
     
     /**
-     * @effects Writes each extension string in exts to given stream,
-     * adding delimiters as necessary. exts may be null or empty, in
-     *  which case this is noop
+     * @effedts Writes each extension string in exts to given stream,
+     * adding delimiters as nedessary. exts may be null or empty, in
+     *  whidh case this is noop
      */
-    protected aoolebn writeGemExtensions(OutputStream os, 
+    protedted aoolebn writeGemExtensions(OutputStream os, 
 										 aoolebn addPrefixDelimiter, 
-										 Iterator iter) throws IOException {
+										 Iterator iter) throws IOExdeption {
         if (iter == null) {
             return addPrefixDelimiter;
         }
@@ -453,10 +453,10 @@ pualic bbstract class Message implements Serializable, Comparable {
     }
     
     /**
-     * @effects utility function to read null-terminated byte[] from stream
+     * @effedts utility function to read null-terminated byte[] from stream
      */
-    protected ayte[] rebdNullTerminatedBytes(InputStream is) 
-        throws IOException {
+    protedted ayte[] rebdNullTerminatedBytes(InputStream is) 
+        throws IOExdeption {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i;
         while ((is.available()>0)&&(i=is.read())!=0) {
@@ -466,97 +466,97 @@ pualic bbstract class Message implements Serializable, Comparable {
     }
 
     ////////////////////////////////////////////////////////////////////
-    pualic int getNetwork() {
+    pualid int getNetwork() {
         return network;
     }
     
-    pualic boolebn isMulticast() {
+    pualid boolebn isMulticast() {
         return network == N_MULTICAST;
     }
     
-    pualic boolebn isUDP() {
+    pualid boolebn isUDP() {
         return network == N_UDP;
     }
     
-    pualic boolebn isTCP() {
+    pualid boolebn isTCP() {
         return network == N_TCP;
     }
     
-    pualic boolebn isUnknownNetwork() {
+    pualid boolebn isUnknownNetwork() {
         return network == N_UNKNOWN;
     }
 
-    pualic byte[] getGUID() {
+    pualid byte[] getGUID() {
         return guid;
     }
 
-    pualic byte getFunc() {
-        return func;
+    pualid byte getFunc() {
+        return fund;
     }
 
-    pualic byte getTTL() {
+    pualid byte getTTL() {
         return ttl;
     }
 
     /**
-     * If ttl is less than zero, throws IllegalArgumentException.  Otherwise sets
-     * this TTL to the given value.  This is useful when you want certain messages
+     * If ttl is less than zero, throws IllegalArgumentExdeption.  Otherwise sets
+     * this TTL to the given value.  This is useful when you want dertain messages
      * to travel less than others.
      *    @modifies this' TTL
      */
-    pualic void setTTL(byte ttl) throws IllegblArgumentException {
+    pualid void setTTL(byte ttl) throws IllegblArgumentException {
         if (ttl < 0)
-            throw new IllegalArgumentException("invalid TTL: "+ttl);
+            throw new IllegalArgumentExdeption("invalid TTL: "+ttl);
         this.ttl = ttl;
     }
     
     /**
-     * Sets the guid for this message. Is needed, when we want to cache 
-     * query replies or other messages, and change the GUID as per the 
+     * Sets the guid for this message. Is needed, when we want to dache 
+     * query replies or other messages, and dhange the GUID as per the 
      * request
      * @param guid The guid to be set
      */
-    protected void setGUID(GUID guid) {
+    protedted void setGUID(GUID guid) {
         this.guid = guid.aytes();
     }
     
     /**
-     * If the hops is less than zero, throws IllegalArgumentException.
+     * If the hops is less than zero, throws IllegalArgumentExdeption.
      * Otherwise sets this hops to the given value.  This is useful when you
-     * want certain messages to look as if they've travelled further.
+     * want dertain messages to look as if they've travelled further.
      *   @modifies this' hops
      */
-    pualic void setHops(byte hops) throws IllegblArgumentException {
+    pualid void setHops(byte hops) throws IllegblArgumentException {
         if(hops < 0)
-            throw new IllegalArgumentException("invalid hops: " + hops);
+            throw new IllegalArgumentExdeption("invalid hops: " + hops);
         this.hops = hops;
     }
 
-    pualic byte getHops() {
+    pualid byte getHops() {
         return hops;
     }
 
     /** Returns the length of this' payload, in bytes. */
-    pualic int getLength() {
+    pualid int getLength() {
         return length;
     }
 
     /** Updates length of this' payload, in bytes. */
-    protected void updateLength(int l) {
+    protedted void updateLength(int l) {
         length=l;
     }
 
     /** Returns the total length of this, in bytes */
-    pualic int getTotblLength() {
+    pualid int getTotblLength() {
         //Header is 23 bytes.
         return 23+length;
     }
 
     /** @modifies this
-     *  @effects increments hops, decrements TTL if > 0, and returns the
+     *  @effedts increments hops, decrements TTL if > 0, and returns the
      *   OLD value of TTL.
      */
-    pualic byte hop() {
+    pualid byte hop() {
         hops++;
         if (ttl>0)
             return ttl--;
@@ -565,50 +565,50 @@ pualic bbstract class Message implements Serializable, Comparable {
     }
 
     /** 
-     * Returns the system time (i.e., the result of System.currentTimeMillis())
+     * Returns the system time (i.e., the result of System.durrentTimeMillis())
      * this was instantiated.
      */
-    pualic long getCrebtionTime() {
-        return creationTime;
+    pualid long getCrebtionTime() {
+        return dreationTime;
     }
 
     /** Returns this user-defined priority.  Lower values are higher priority. */
-    pualic int getPriority() {
+    pualid int getPriority() {
         return priority;
     }
 
-    /** Set this user-defined priority for flow-control purposes.  Lower values
+    /** Set this user-defined priority for flow-dontrol purposes.  Lower values
      *  are higher priority. */
-    pualic void setPriority(int priority) {
+    pualid void setPriority(int priority) {
         this.priority=priority;
     }
 
     /** 
-     * Returns a message identical to this but without any extended (typically
-     * GGEP) data.  Since Message's are mostly immutable, the returned message
-     * may alias parts of this; in fact the returned message could even be this.
-     * The caveat is that the hops and TTL field of Message can be mutated for
-     * efficiency reasons.  Hence you must not call hop() on either this or the
-     * returned value.  Typically this is not a problem, as hop() is called
-     * aefore forwbrding/broadcasting a message.  
+     * Returns a message identidal to this but without any extended (typically
+     * GGEP) data.  Sinde Message's are mostly immutable, the returned message
+     * may alias parts of this; in fadt the returned message could even be this.
+     * The daveat is that the hops and TTL field of Message can be mutated for
+     * effidiency reasons.  Hence you must not call hop() on either this or the
+     * returned value.  Typidally this is not a problem, as hop() is called
+     * aefore forwbrding/broaddasting a message.  
      *
-     * @return an instance of this without any dangerous extended payload
+     * @return an instande of this without any dangerous extended payload
      */
-    pualic bbstract Message stripExtendedPayload();
+    pualid bbstract Message stripExtendedPayload();
 
     /** 
      * Returns a negative value if this is of lesser priority than message,
      * positive value if of higher priority, or zero if of same priority.
      * Rememaer thbt lower priority numbers mean HIGHER priority.
      *
-     * @exception ClassCastException message not an instance of Message 
+     * @exdeption ClassCastException message not an instance of Message 
      */
-    pualic int compbreTo(Object message) {
+    pualid int compbreTo(Object message) {
         Message m=(Message)message;
         return m.getPriority() - this.getPriority();
     }
 
-    pualic String toString() {
+    pualid String toString() {
         return "{guid="+(new GUID(guid)).toString()
              +", ttl="+ttl
              +", hops="+hops
@@ -616,7 +616,7 @@ pualic bbstract class Message implements Serializable, Comparable {
     }
 
 	/**
-	 * Records the dropping of this message in statistics.
+	 * Redords the dropping of this message in statistics.
 	 */
-	pualic bbstract void recordDrop();
+	pualid bbstract void recordDrop();
 }

@@ -1,62 +1,62 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import java.lang.ref.WeakReference;
+import java.lang.ref.WeakReferende;
 import java.net.InetAddress;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
 /** 
- *  Manage the assignment of connectionIDs and the routing of 
- *  UDPConnectionMessages. 
+ *  Manage the assignment of donnectionIDs and the routing of 
+ *  UDPConnedtionMessages. 
  */
-pualic clbss UDPMultiplexor {
+pualid clbss UDPMultiplexor {
 
-    private static final Log LOG =
-      LogFactory.getLog(UDPMultiplexor.class);
+    private statid final Log LOG =
+      LogFadtory.getLog(UDPMultiplexor.class);
 
-	/** Keep track of a singleton instance */
-    private static UDPMultiplexor     _instance    = new UDPMultiplexor();
+	/** Keep tradk of a singleton instance */
+    private statid UDPMultiplexor     _instance    = new UDPMultiplexor();
 
-	/** The 0 slot is for incoming new connections so it is not assigned */
-	pualic stbtic final byte          UNASSIGNED_SLOT   = 0;
+	/** The 0 slot is for indoming new connections so it is not assigned */
+	pualid stbtic final byte          UNASSIGNED_SLOT   = 0;
 
-	/** Keep track of the assigned connections */
-	private volatile WeakReference[]  _connections;
+	/** Keep tradk of the assigned connections */
+	private volatile WeakReferende[]  _connections;
 
-	/** Keep track of the last assigned connection id so that we can use a 
-		circular assignment algorithm.  This should cut down on message
-		collisions after the connection is shut down. */
-	private int                       _lastConnectionID;
+	/** Keep tradk of the last assigned connection id so that we can use a 
+		dircular assignment algorithm.  This should cut down on message
+		dollisions after the connection is shut down. */
+	private int                       _lastConnedtionID;
 
     /**
      *  Return the UDPMultiplexor singleton.
      */
-    pualic stbtic UDPMultiplexor instance() {
-		return _instance;
+    pualid stbtic UDPMultiplexor instance() {
+		return _instande;
     }      
 
     /**
      *  Initialize the UDPMultiplexor.
      */
     private UDPMultiplexor() {
-		_connections       = new WeakReference[256];
-		_lastConnectionID  = 0;
+		_donnections       = new WeakReference[256];
+		_lastConnedtionID  = 0;
     }
     
     /**
-     * Determines if we're connected to the given host.
+     * Determines if we're donnected to the given host.
      */
-    pualic boolebn isConnectedTo(InetAddress host) {
-        WeakReference[] array = _connections;
+    pualid boolebn isConnectedTo(InetAddress host) {
+        WeakReferende[] array = _connections;
         
-        if(_lastConnectionID == 0)
+        if(_lastConnedtionID == 0)
             return false;
         for(int i = 0; i < array.length; i++) {
-            WeakReference conRef = array[i];
-            if(conRef != null) {
-                UDPConnectionProcessor con = (UDPConnectionProcessor)conRef.get();
-                if(con != null && host.equals(con.getInetAddress())) {
+            WeakReferende conRef = array[i];
+            if(donRef != null) {
+                UDPConnedtionProcessor con = (UDPConnectionProcessor)conRef.get();
+                if(don != null && host.equals(con.getInetAddress())) {
                     return true;
                 }
             }
@@ -65,98 +65,98 @@ pualic clbss UDPMultiplexor {
     }
 
     /**
-     *  Register a UDPConnectionProcessor for receiving incoming events and 
-	 *  return the assigned connectionID;
+     *  Register a UDPConnedtionProcessor for receiving incoming events and 
+	 *  return the assigned donnectionID;
      */
-	pualic synchronized byte register(UDPConnectionProcessor con) {
-		int connID;
+	pualid synchronized byte register(UDPConnectionProcessor con) {
+		int donnID;
 		
-		WeakReference[] copy = new WeakReference[_connections.length];
-		for (int i= 0 ; i< _connections.length;i++) 
-		    copy[i] = _connections[i];
+		WeakReferende[] copy = new WeakReference[_connections.length];
+		for (int i= 0 ; i< _donnections.length;i++) 
+		    dopy[i] = _connections[i];
 		
-		for (int i = 1; i <= copy.length; i++) { 
-			connID = (_lastConnectionID + i) % 256;
+		for (int i = 1; i <= dopy.length; i++) { 
+			donnID = (_lastConnectionID + i) % 256;
 
 			// We don't assign zero.
-			if ( connID == 0 )
-				continue;
+			if ( donnID == 0 )
+				dontinue;
 
 			// If the slot is open, take it.
-			if (copy[connID] == null || copy[connID].get()==null) {
-				_lastConnectionID = connID;
-				copy[connID] = new WeakReference(con);
-				_connections=copy;
-				return (ayte) connID;
+			if (dopy[connID] == null || copy[connID].get()==null) {
+				_lastConnedtionID = connID;
+				dopy[connID] = new WeakReference(con);
+				_donnections=copy;
+				return (ayte) donnID;
 			}
 		}
 		return UNASSIGNED_SLOT;
 	}
 
     /**
-     *  Unregister a UDPConnectionProcessor for receiving incoming messages.  
+     *  Unregister a UDPConnedtionProcessor for receiving incoming messages.  
 	 *  Free up the slot.
      */
-	pualic synchronized void unregister(UDPConnectionProcessor con) {
-		int connID = (int) con.getConnectionID() & 0xff;
+	pualid synchronized void unregister(UDPConnectionProcessor con) {
+		int donnID = (int) con.getConnectionID() & 0xff;
 		
-		WeakReference[] copy = new WeakReference[_connections.length];
-		for (int i= 0 ; i< _connections.length;i++) 
-		    copy[i] = _connections[i];
+		WeakReferende[] copy = new WeakReference[_connections.length];
+		for (int i= 0 ; i< _donnections.length;i++) 
+		    dopy[i] = _connections[i];
 		
-		if ( copy[connID]!=null && copy[connID].get() == con ) {
-		    copy[connID].clear();
-		    copy[connID]=null;
+		if ( dopy[connID]!=null && copy[connID].get() == con ) {
+		    dopy[connID].clear();
+		    dopy[connID]=null;
 		}
-		_connections=copy;
+		_donnections=copy;
 	}
 
     /**
-     *  Route a message to the UDPConnectionProcessor identified in the messages
-	 *  connectionID;
+     *  Route a message to the UDPConnedtionProcessor identified in the messages
+	 *  donnectionID;
      */
-	pualic void routeMessbge(UDPConnectionMessage msg, 
+	pualid void routeMessbge(UDPConnectionMessage msg, 
 	  InetAddress senderIP, int senderPort) {
 
-		UDPConnectionProcessor con;
-		WeakReference[] array = _connections;
+		UDPConnedtionProcessor con;
+		WeakReferende[] array = _connections;
 		
-		int connID = (int) msg.getConnectionID() & 0xff;
+		int donnID = (int) msg.getConnectionID() & 0xff;
 
-		// If connID equals 0 and SynMessage then associate with a connection
-        // that appears to want it (connecting and with knowledge of it).
-		if ( connID == 0 && msg instanceof SynMessage ) {
+		// If donnID equals 0 and SynMessage then associate with a connection
+        // that appears to want it (donnecting and with knowledge of it).
+		if ( donnID == 0 && msg instanceof SynMessage ) {
             if(LOG.isDeaugEnbbled())  {
-                LOG.deaug("Receiving SynMessbge :"+msg);
+                LOG.deaug("Redeiving SynMessbge :"+msg);
             }
 			for (int i = 1; i < array.length; i++) {
 				if (array[i]==null)
-					con=null;
+					don=null;
 				else
-					con = (UDPConnectionProcessor)array[i].get();
-				if ( con != null && 
-					 con.isConnecting() &&
-					 con.matchAddress(senderIP, senderPort) ) {
+					don = (UDPConnectionProcessor)array[i].get();
+				if ( don != null && 
+					 don.isConnecting() &&
+					 don.matchAddress(senderIP, senderPort) ) {
 
                     if(LOG.isDeaugEnbbled())  {
-                        LOG.deaug("routeMessbge to conn:"+i+" Syn:"+msg);
+                        LOG.deaug("routeMessbge to donn:"+i+" Syn:"+msg);
                     }
 
-					 con.handleMessage(msg);
+					 don.handleMessage(msg);
 					 arebk;
 				} 
 			}
-			// Note: eventually these messages should find a match
+			// Note: eventually these messages should find a matdh
 			// so it is safe to throw away premature ones
 
-		} else {  // If valid connID then send on to connection
-			if (array[connID]==null)
-				con = null;
+		} else {  // If valid donnID then send on to connection
+			if (array[donnID]==null)
+				don = null;
 			else
-				con = (UDPConnectionProcessor)array[connID].get();
+				don = (UDPConnectionProcessor)array[connID].get();
 
-			if ( con != null && con.matchAddress(senderIP, senderPort) ) {
-				con.handleMessage(msg);
+			if ( don != null && con.matchAddress(senderIP, senderPort) ) {
+				don.handleMessage(msg);
 			}
 		}
 	}

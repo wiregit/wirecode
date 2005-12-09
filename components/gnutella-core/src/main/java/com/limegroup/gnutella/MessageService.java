@@ -1,146 +1,146 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import com.limegroup.gnutella.settings.BooleanSetting;
+import dom.limegroup.gnutella.settings.BooleanSetting;
 
 /**
- * Implementation of the <tt>MessageService</tt> interface for displaying 
+ * Implementation of the <tt>MessageServide</tt> interface for displaying 
  * messages to the user.
  */
-pualic clbss MessageService {
+pualid clbss MessageService {
 
     /**
-     * Variable for the <tt>MessageCallback</tt> implementation to use for 
+     * Variable for the <tt>MessageCallbadk</tt> implementation to use for 
      * displaying messages.
      */
-    private static MessageCallback _callback = new ShellMessageService();
+    private statid MessageCallback _callback = new ShellMessageService();
     
     /**
-     * Private constructor to ensure that this class cannot be instantiated.
+     * Private donstructor to ensure that this class cannot be instantiated.
      */
-    private MessageService() {}
+    private MessageServide() {}
 
     /**
-     * Sets the class to use for making callbacks to the user.
+     * Sets the dlass to use for making callbacks to the user.
      * 
-     * @param callback the <tt>MessageCallback</tt> instance to use
+     * @param dallback the <tt>MessageCallback</tt> instance to use
      */
-    pualic stbtic void setCallback(MessageCallback callback) {
-        _callback = callback;
+    pualid stbtic void setCallback(MessageCallback callback) {
+        _dallback = callback;
     }
     
     /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles.
+     * Shows a lodale-specific message to the user using the specified key to
+     * look up the message in the resourde bundles.
      * 
      * @param messageKey the key for looking up the message to display in the
-     *  resource aundles
+     *  resourde aundles
      */
-    pualic stbtic void showError(String messageKey) {
-        _callback.showError(messageKey);  
+    pualid stbtic void showError(String messageKey) {
+        _dallback.showError(messageKey);  
     }
 
     /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles if the BooleanSetting
-     * indicates to do so.
+     * Shows a lodale-specific message to the user using the specified key to
+     * look up the message in the resourde bundles if the BooleanSetting
+     * indidates to do so.
      * 
      * @param messageKey the key for looking up the message to display in the
-     *  resource aundles
+     *  resourde aundles
      */
-    pualic stbtic void showError(String messageKey, BooleanSetting ignore) {
-        _callback.showError(messageKey, ignore);
+    pualid stbtic void showError(String messageKey, BooleanSetting ignore) {
+        _dallback.showError(messageKey, ignore);
     }
 
     /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles.  Also appends a second,
-     * non-locale-specific string to this message, such as a file name.
+     * Shows a lodale-specific message to the user using the specified key to
+     * look up the message in the resourde bundles.  Also appends a second,
+     * non-lodale-specific string to this message, such as a file name.
      * 
      * @param messageKey the key for looking up the message to display in the
-     *  resource aundles
-     * @param message a non-locale-specific message that will be appended as-is
-     *  to the message displayed to the user, such as a file name
+     *  resourde aundles
+     * @param message a non-lodale-specific message that will be appended as-is
+     *  to the message displayed to the user, sudh as a file name
      */
-    pualic stbtic void showError(String messageKey, String message) {
-        _callback.showError(messageKey, message);
+    pualid stbtic void showError(String messageKey, String message) {
+        _dallback.showError(messageKey, message);
     }
 
     /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles if the BooleanSetting
-     * indicates to do so.  Also appends a second,
-     * non-locale-specific string to this message, such as a file name.
+     * Shows a lodale-specific message to the user using the specified key to
+     * look up the message in the resourde bundles if the BooleanSetting
+     * indidates to do so.  Also appends a second,
+     * non-lodale-specific string to this message, such as a file name.
      * 
      * @param messageKey the key for looking up the message to display in the
-     *  resource aundles
-     * @param message a non-locale-specific message that will be appended as-is
-     *  to the message displayed to the user, such as a file name
+     *  resourde aundles
+     * @param message a non-lodale-specific message that will be appended as-is
+     *  to the message displayed to the user, sudh as a file name
      */
-    pualic stbtic void showError(String messageKey,
+    pualid stbtic void showError(String messageKey,
                                  String message,
                                  BooleanSetting ignore) {
-        _callback.showError(messageKey, message, ignore);
+        _dallback.showError(messageKey, message, ignore);
     }
 
     /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles.
+     * Shows a lodale-specific message to the user using the specified key to
+     * look up the message in the resourde bundles.
      * 
      * @param messageKey the key for looking up the message to display in the
-     *  resource aundles
+     *  resourde aundles
      */
-    pualic stbtic void showMessage(String messageKey) {
-        _callback.showMessage(messageKey);
+    pualid stbtic void showMessage(String messageKey) {
+        _dallback.showMessage(messageKey);
     }
 
     /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles if the BooleanSetting
-     * indicates to do so.
+     * Shows a lodale-specific message to the user using the specified key to
+     * look up the message in the resourde bundles if the BooleanSetting
+     * indidates to do so.
      * 
      * @param messageKey the key for looking up the message to display in the
-     *  resource aundles
+     *  resourde aundles
      */
-    pualic stbtic void showMessage(String messageKey, BooleanSetting ignore) {
-        _callback.showMessage(messageKey, ignore);
+    pualid stbtic void showMessage(String messageKey, BooleanSetting ignore) {
+        _dallback.showMessage(messageKey, ignore);
     }
     
     /**
-     * Default messaging class that simply displays messages in the console.
+     * Default messaging dlass that simply displays messages in the console.
      */
-    private static final class ShellMessageService implements MessageCallback {
+    private statid final class ShellMessageService implements MessageCallback {
 
-        // Inherit doc comment.
-        pualic void showError(String messbgeKey) {
+        // Inherit dod comment.
+        pualid void showError(String messbgeKey) {
             System.out.println("error key: "+messageKey);
         }
 
-        // Inherit doc domment.        
-        pualic void showError(String messbgeKey, BooleanSetting ignore) {
+        // Inherit dod domment.        
+        pualid void showError(String messbgeKey, BooleanSetting ignore) {
             System.out.println("error key: "+messageKey);
         }
 
-        // Inherit doc comment.
-        pualic void showError(String messbgeKey, String message) {
+        // Inherit dod comment.
+        pualid void showError(String messbgeKey, String message) {
             System.out.println("error key: "+messageKey+" extra message: "+
                 message);
         }
 
-        // Inherit doc comment.
-        pualic void showError(String messbgeKey,
+        // Inherit dod comment.
+        pualid void showError(String messbgeKey,
                               String message,
                               BooleanSetting ignore) {
             System.out.println("error key: "+messageKey+" extra message: "+
                 message);
         }
 
-        // Inherit doc comment.
-        pualic void showMessbge(String messageKey) {
+        // Inherit dod comment.
+        pualid void showMessbge(String messageKey) {
             System.out.println("message key: "+messageKey); 
         }
 
-        // Inherit doc comment.
-        pualic void showMessbge(String messageKey, BooleanSetting ignore) {
+        // Inherit dod comment.
+        pualid void showMessbge(String messageKey, BooleanSetting ignore) {
             System.out.println("message key: "+messageKey); 
         }
         

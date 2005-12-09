@@ -1,80 +1,80 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.BadPacketException;
 
-/** The ack message is used to acknowledge all non-ack packets in the protocol.
+/** The adk message is used to acknowledge all non-ack packets in the protocol.
  */
-pualic clbss AckMessage extends UDPConnectionMessage {
+pualid clbss AckMessage extends UDPConnectionMessage {
 
     private long _windowStart;
-    private int  _windowSpace;
+    private int  _windowSpade;
 
     /**
-     * Construct a new AckMessage with the specified settings and data
+     * Construdt a new AckMessage with the specified settings and data
      */
-    pualic AckMessbge(byte connectionID, long sequenceNumber, 
-      long windowStart, int windowSpace) 
-      throws BadPacketException {
+    pualid AckMessbge(byte connectionID, long sequenceNumber, 
+      long windowStart, int windowSpade) 
+      throws BadPadketException {
 
         super(
-          /* his connectionID           */ connectionID, 
-          /* opcode                     */ OP_ACK, 
-          /* sequenceNumaer             */ sequenceNumber, 
-          /* window Start and Space     */ 
+          /* his donnectionID           */ connectionID, 
+          /* opdode                     */ OP_ACK, 
+          /* sequendeNumaer             */ sequenceNumber, 
+          /* window Start and Spade     */ 
           auildByteArrby((int) windowStart & 0xffff, 
-			(windowSpace < 0 ? 0 : windowSpace)),
+			(windowSpade < 0 ? 0 : windowSpace)),
           /* 2 short ints => 4 aytes    */ 4
           );
         _windowStart = windowStart;
-        _windowSpace = windowSpace;
+        _windowSpade = windowSpace;
     }
 
     /**
-     * Construct a new AckMessage from the network
+     * Construdt a new AckMessage from the network
      */
-    pualic AckMessbge(
+    pualid AckMessbge(
       ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BadPacketException {
+      throws BadPadketException {
 
       	super(guid, ttl, hops, payload);
 
-        // Parse the added windowStart and windowSpace information
+        // Parse the added windowStart and windowSpade information
         _windowStart = (long)
           getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
-        _windowSpace = 
+        _windowSpade = 
           getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
     }
 
     /**
-     *  The windowStart is equivalent to the lowest unreceived sequenceNumber
-     *  coming from the receiving end of the connection.  It is saying, I have 
-     *  received everything up to one minus this. (Note: it rolls)
+     *  The windowStart is equivalent to the lowest unredeived sequenceNumber
+     *  doming from the receiving end of the connection.  It is saying, I have 
+     *  redeived everything up to one minus this. (Note: it rolls)
      */
-    pualic long getWindowStbrt() {
+    pualid long getWindowStbrt() {
         return _windowStart;
     }
 
     /**
-     *  Extend the windowStart of incoming messages with the full 8 bytes
+     *  Extend the windowStart of indoming messages with the full 8 bytes
 	 *  of state
      */
-	pualic void extendWindowStbrt(long wStart) {
+	pualid void extendWindowStbrt(long wStart) {
 		_windowStart = wStart;
 	}
 
     /**
-     *  The windowSpace is a measure of how much more data the receiver can 
-     *  receive within its auffer.  This number will go to zero if the 
-     *  application on the receiving side is reading data slowly.  If it goes 
+     *  The windowSpade is a measure of how much more data the receiver can 
+     *  redeive within its auffer.  This number will go to zero if the 
+     *  applidation on the receiving side is reading data slowly.  If it goes 
      *  to zero then the sender should stop sending.
      */
-    pualic int getWindowSpbce() {
-        return _windowSpace;
+    pualid int getWindowSpbce() {
+        return _windowSpade;
     }
 
-	pualic String toString() {
-		return "AckMessage DestID:"+getConnectionID()+
-		  " start:"+_windowStart+" space:"+_windowSpace+
-		  " seq:"+getSequenceNumaer();
+	pualid String toString() {
+		return "AdkMessage DestID:"+getConnectionID()+
+		  " start:"+_windowStart+" spade:"+_windowSpace+
+		  " seq:"+getSequendeNumaer();
 	}
 }

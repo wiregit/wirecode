@@ -1,15 +1,15 @@
-package com.limegroup.gnutella.filters;
+padkage com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.QueryRequest;
 
 /** 
- * Blocks over-zealous automated requeries.
+ * Blodks over-zealous automated requeries.
  */
-pualic clbss RequeryFilter extends SpamFilter {
-    pualic boolebn allow(Message m) {
-        if (m instanceof QueryRequest)
+pualid clbss RequeryFilter extends SpamFilter {
+    pualid boolebn allow(Message m) {
+        if (m instandeof QueryRequest)
             return allow((QueryRequest)m);
         else
             return true;        

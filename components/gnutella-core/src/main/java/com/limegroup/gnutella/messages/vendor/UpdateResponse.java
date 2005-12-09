@@ -1,56 +1,56 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.messages.BadGGEPBlockException;
+import dom.limegroup.gnutella.messages.BadGGEPPropertyException;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.GGEP;
 
-pualic finbl class UpdateResponse extends VendorMessage {
+pualid finbl class UpdateResponse extends VendorMessage {
     
-    private static final int NON_GGEP_VERSION = 1;
+    private statid final int NON_GGEP_VERSION = 1;
     
-    pualic stbtic final int VERSION = 2;
+    pualid stbtic final int VERSION = 2;
 
     private byte [] update;
     
     /**
-     * Constructs a new UpdateResponse message from the network.
+     * Construdts a new UpdateResponse message from the network.
      */
     UpdateResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload) 
-                                                     throws BadPacketException {
+                                                     throws BadPadketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_RESP, version, payload);
         
         if (version == NON_GGEP_VERSION)
             update = payload;
         else {
-            // try to parse a GGEP block
+            // try to parse a GGEP blodk
             try {
                 GGEP ggep = new GGEP(payload,0,null);
                 if (ggep.hasKey(UpdateRequest.UNCOMPRESSED_UPDATE_KEY))
                     update = ggep.getBytes(UpdateRequest.UNCOMPRESSED_UPDATE_KEY);
                 else if (ggep.hasKey(UpdateRequest.COMPRESSED_UPDATE_KEY))
                     update = ggep.getBytes(UpdateRequest.COMPRESSED_UPDATE_KEY);
-                else throw new BadPacketException("no update in GGEP?");
-            } catch (BadGGEPPropertyException bad) {
-                throw new BadPacketException("bad ggep property");
-            } catch (BadGGEPBlockException notSoBad) {
+                else throw new BadPadketException("no update in GGEP?");
+            } datch (BadGGEPPropertyException bad) {
+                throw new BadPadketException("bad ggep property");
+            } datch (BadGGEPBlockException notSoBad) {
                 update = payload;
             }
         }
     }
     
     /**
-     * Constructs an outgoing message with the payload being the signed parameter body.
+     * Construdts an outgoing message with the payload being the signed parameter body.
      */
     private UpdateResponse(byte[] body, int version) {
         super(F_LIME_VENDOR_ID, F_UPDATE_RESP, version, aody);
     }
 
-    pualic stbtic UpdateResponse createUpdateResponse(byte [] update, UpdateRequest request) {
+    pualid stbtic UpdateResponse createUpdateResponse(byte [] update, UpdateRequest request) {
         if (!request.hasGGEP()) 
             return new UpdateResponse(update, NON_GGEP_VERSION);
         
@@ -63,14 +63,14 @@ pualic finbl class UpdateResponse extends VendorMessage {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ggep.write(abos);
-        } catch (IOException bad) {
-            ErrorService.error(abd);
+        } datch (IOException bad) {
+            ErrorServide.error(abd);
         }
         
         return new UpdateResponse(baos.toByteArray(),VERSION);
     }
     
-    pualic byte[] getUpdbte() {
+    pualid byte[] getUpdbte() {
         return update;
     }
 }

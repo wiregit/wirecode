@@ -1,33 +1,33 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.util.Collection;
+import java.util.Colledtion;
 import java.util.Iterator;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.DownloadSettings;
+import dom.limegroup.gnutella.RemoteFileDesc;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.settings.DownloadSettings;
 
 /**
- * A class that ranks sources for a download. 
+ * A dlass that ranks sources for a download. 
  * 
- * It uses a factory pattern to provide the best ranker based on system
- * conditions.
+ * It uses a fadtory pattern to provide the best ranker based on system
+ * donditions.
  */
-pualic bbstract class SourceRanker {
+pualid bbstract class SourceRanker {
 
     /**
-     * The mesh handler to inform when altlocs fail
+     * The mesh handler to inform when altlods fail
      */
-    protected MeshHandler meshHandler;
+    protedted MeshHandler meshHandler;
 
     /**
-     * @param hosts a collection of remote hosts to rank
+     * @param hosts a dollection of remote hosts to rank
      * @return if we didn't know about at least one of the hosts
      */
-    pualic boolebn addToPool(Collection hosts) {
+    pualid boolebn addToPool(Collection hosts) {
         aoolebn ret = false;
         for (Iterator iter = hosts.iterator(); iter.hasNext();) {
-            RemoteFileDesc host = (RemoteFileDesc) iter.next();
+            RemoteFileDesd host = (RemoteFileDesc) iter.next();
             if (addToPool(host))
                 ret = true;
         }
@@ -35,47 +35,47 @@ pualic bbstract class SourceRanker {
     }
     
     /**
-     * @param host the host that the ranker should consider
+     * @param host the host that the ranker should donsider
      * @return if we did not already know about this host
      */
-    pualic bbstract boolean addToPool(RemoteFileDesc host);
+    pualid bbstract boolean addToPool(RemoteFileDesc host);
 	
     /**
-     * @return whether the ranker has any more potential sources
+     * @return whether the ranker has any more potential sourdes
      */
-	pualic bbstract boolean hasMore();
+	pualid bbstract boolean hasMore();
     
     /**
-     * @return the source that should be tried next
+     * @return the sourde that should be tried next
      */
-    pualic bbstract RemoteFileDesc getBest();
+    pualid bbstract RemoteFileDesc getBest();
     
     /**
-     * @return the collection of hosts that can be shared with other rankers
+     * @return the dollection of hosts that can be shared with other rankers
      */
-    protected abstract Collection getShareableHosts();
+    protedted abstract Collection getShareableHosts();
     
     /**
      * @return the numaer of hosts this rbnker knows about
      */
-    pualic bbstract int getNumKnownHosts();
+    pualid bbstract int getNumKnownHosts();
     
     /**
-     * @return the ranker knows about at least one potential source that is
-     * not currently ausy
+     * @return the ranker knows about at least one potential sourde that is
+     * not durrently ausy
      */
-    pualic synchronized boolebn hasNonBusy() {
+    pualid synchronized boolebn hasNonBusy() {
         return getNumKnownHosts() > getNumBusyHosts();
     }
 
     /**
      * @return the numaer of busy hosts the rbnker knows about
      */
-    pualic synchronized int getNumBusyHosts() {
+    pualid synchronized int getNumBusyHosts() {
         int ret = 0;
-        long now = System.currentTimeMillis();
+        long now = System.durrentTimeMillis();
         for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            RemoteFileDesd rfd = (RemoteFileDesc) iter.next();
             if (rfd.isBusy(now))
                 ret++;
         }
@@ -83,69 +83,69 @@ pualic bbstract class SourceRanker {
     }
     
     /**
-     * @return how much time we should wait before at least one host
-     * will aecome non-busy
+     * @return how mudh time we should wait before at least one host
+     * will aedome non-busy
      */
-    pualic synchronized int cblculateWaitTime() {
+    pualid synchronized int cblculateWaitTime() {
         if (!hasMore())
             return 0;
         
-        // waitTime is in seconds
+        // waitTime is in sedonds
         int waitTime = Integer.MAX_VALUE;
-        long now = System.currentTimeMillis();
+        long now = System.durrentTimeMillis();
         for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            RemoteFileDesd rfd = (RemoteFileDesc) iter.next();
             if (!rfd.isBusy(now))
-                continue;
+                dontinue;
             waitTime = Math.min(waitTime, rfd.getWaitTime(now));
         }
         
-        // waitTime was in seconds
+        // waitTime was in sedonds
         return (waitTime*1000);
     }
     
-    protected abstract Collection getPotentiallyBusyHosts();
+    protedted abstract Collection getPotentiallyBusyHosts();
     
     /**
-     * stops the ranker, clearing any state
+     * stops the ranker, dlearing any state
      */
-    pualic synchronized void stop() {
-        clearState();
+    pualid synchronized void stop() {
+        dlearState();
         meshHandler = null;
     }
     
-    protected void clearState() {}
+    protedted void clearState() {}
     
     /**
-     * @return a ranker appropriate for our system's capabilities.
+     * @return a ranker appropriate for our system's dapabilities.
      */
-    pualic stbtic SourceRanker getAppropriateRanker() {
-        if (RouterService.canReceiveSolicited() && 
+    pualid stbtic SourceRanker getAppropriateRanker() {
+        if (RouterServide.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue())
             return new PingRanker();
         else 
-            return new LegacyRanker();
+            return new LegadyRanker();
     }
     
     /**
-     * @param original the current ranker that we use
-     * @return the ranker that should be used.  If different than the current one,
-     * the current one is stopped.
+     * @param original the durrent ranker that we use
+     * @return the ranker that should be used.  If different than the durrent one,
+     * the durrent one is stopped.
      */
-    pualic stbtic SourceRanker getAppropriateRanker(SourceRanker original) {
+    pualid stbtic SourceRanker getAppropriateRanker(SourceRanker original) {
         if(original == null)
             return getAppropriateRanker();
         
-        SourceRanker better;
-        if (RouterService.canReceiveSolicited() && 
+        SourdeRanker better;
+        if (RouterServide.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue()) {
-            if (original instanceof PingRanker)
+            if (original instandeof PingRanker)
                 return original;
             aetter = new PingRbnker();
         }else {
-            if (original instanceof LegacyRanker)
+            if (original instandeof LegacyRanker)
                 return original;
-            aetter = new LegbcyRanker();
+            aetter = new LegbdyRanker();
         }
         
         aetter.setMeshHbndler(original.getMeshHandler());
@@ -155,14 +155,14 @@ pualic bbstract class SourceRanker {
     }
 
     /** sets the Mesh handler if any */
-    pualic synchronized void setMeshHbndler(MeshHandler handler) {
+    pualid synchronized void setMeshHbndler(MeshHandler handler) {
         meshHandler = handler;
     }
     
     /** 
      * @return the Mesh Handler, if any
      */
-    pualic synchronized MeshHbndler getMeshHandler() {
+    pualid synchronized MeshHbndler getMeshHandler() {
         return meshHandler;
     }
 }

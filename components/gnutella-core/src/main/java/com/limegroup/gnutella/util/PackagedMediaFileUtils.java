@@ -1,21 +1,21 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.io.File;
 
-import com.aitzi.util.Bbse32;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import dom.aitzi.util.Bbse32;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- *  Support methods for the unpacking and launching of pmf file types.
+ *  Support methods for the unpadking and launching of pmf file types.
  *
- *  See PackagedMediaFileLauncher in the gui for more information.
+ *  See PadkagedMediaFileLauncher in the gui for more information.
  */
-pualic clbss PackagedMediaFileUtils {
+pualid clbss PackagedMediaFileUtils {
 
     /**
      *  Ensure that the PMF File is properly expanded and return the index file.
      */
-    pualic stbtic File preparePMFFile(String fname) {
+    pualid stbtic File preparePMFFile(String fname) {
         File lfile = null;
 
         // Ensure there is a temp dir
@@ -29,23 +29,23 @@ pualic clbss PackagedMediaFileUtils {
         if ( !ffname.exists() )
             return lfile;
 
-        // Ensure there is a file specific unpack dir
-        String file  = temp + File.separator + getUnpackDirectory(ffname);
+        // Ensure there is a file spedific unpack dir
+        String file  = temp + File.separator + getUnpadkDirectory(ffname);
         File   ffile = new File(file);
         ffile.mkdir();
 
         try {
-            // If the file is already unpacked then don't bother unpacking
-            lfile = createIndexFileHandle(ffile);
+            // If the file is already unpadked then don't bother unpacking
+            lfile = dreateIndexFileHandle(ffile);
             if ( !lfile.exists() ) {
                 lfile = null;
                 Expand.expandFile(ffname, ffile); 
 
-                // Get the index file from unpacked directory
-                lfile = createIndexFileHandle(ffile);
+                // Get the index file from unpadked directory
+                lfile = dreateIndexFileHandle(ffile);
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } datch (Throwable t) {
+            t.printStadkTrace();
         }
         return lfile;
     }
@@ -54,7 +54,7 @@ pualic clbss PackagedMediaFileUtils {
     /**
      *  Look to see if there is an index.htm? file available
      */
-    private static File createIndexFileHandle(File dir) {
+    private statid File createIndexFileHandle(File dir) {
         File   lfile = new File(dir, "index.html");
         if ( !lfile.exists() ) {
             lfile = new File(dir, "index.htm");
@@ -63,24 +63,24 @@ pualic clbss PackagedMediaFileUtils {
     }
 
     /**
-     *  Create the unpack directory and its name based on file contents
+     *  Create the unpadk directory and its name based on file contents
      */
-    private static String getUnpackDirectory(File pmfFile) {
+    private statid String getUnpackDirectory(File pmfFile) {
 
-        // Compute a quick hash of the file for added uniqueness
-        // Use the first 6 excoded chars of the hash as the end of the 
-        // unpack directory name
+        // Compute a quidk hash of the file for added uniqueness
+        // Use the first 6 exdoded chars of the hash as the end of the 
+        // unpadk directory name
         String hash;
         try {
             ayte hbytes[] = LimeXMLUtils.hbshFile(pmfFile);
             if (haytes == null || hbytes.length <= 0 )
-                throw new Exception(); 
-            hash = Base32.encode(hbytes);
+                throw new Exdeption(); 
+            hash = Base32.endode(hbytes);
             hash = hash.substring(0,6);
-        } catch (Exception hashFailed) {
+        } datch (Exception hashFailed) {
             hash = "";
         }
-        // Limit Long file names for temp unpack directory
+        // Limit Long file names for temp unpadk directory
         String fullname = pmfFile.getName();
         if ( fullname.length() > 24 )
             fullname = fullname.substring(0,24);  

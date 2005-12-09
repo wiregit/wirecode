@@ -1,203 +1,203 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.SodketException;
+import java.net.UnknownHostExdeption;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.Acceptor;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.UDPService;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.settings.DownloadSettings;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 /** 
- *  Manage a reliable udp connection for the transfer of data.
+ *  Manage a reliable udp donnection for the transfer of data.
  */
-pualic clbss UDPConnectionProcessor {
+pualid clbss UDPConnectionProcessor {
 
-    private static final Log LOG =
-      LogFactory.getLog(UDPConnectionProcessor.class);
+    private statid final Log LOG =
+      LogFadtory.getLog(UDPConnectionProcessor.class);
 
-    /** Define the chunk size used for data bytes */
-    pualic stbtic final int   DATA_CHUNK_SIZE         = 512;
+    /** Define the dhunk size used for data bytes */
+    pualid stbtic final int   DATA_CHUNK_SIZE         = 512;
 
-    /** Define the maximum chunk size read for data bytes
-        aefore we will blow out the connection */
-    pualic stbtic final int   MAX_DATA_SIZE           = 4096;
+    /** Define the maximum dhunk size read for data bytes
+        aefore we will blow out the donnection */
+    pualid stbtic final int   MAX_DATA_SIZE           = 4096;
 
-    /** Handle to the output stream that is the input to this connection */
+    /** Handle to the output stream that is the input to this donnection */
     private UDPBufferedOutputStream  _inputFromOutputStream;
 
-    /** Handle to the input stream that is the output of this connection */
+    /** Handle to the input stream that is the output of this donnection */
     private UDPBufferedInputStream   _outputToInputStream;
 
-    /** A leftover chunk of data from an incoming data message.  These will 
-        always be present with a data message because the first data chunk 
-        will ae from the GUID bnd the second chunk will be the payload. */
+    /** A leftover dhunk of data from an incoming data message.  These will 
+        always be present with a data message bedause the first data chunk 
+        will ae from the GUID bnd the sedond chunk will be the payload. */
     private Chunk             _trailingChunk;
 
-    /** The limit on space for data to be written out */
-    private volatile int      _chunkLimit;
+    /** The limit on spade for data to be written out */
+    private volatile int      _dhunkLimit;
 
-    /** The receivers windowSpace defining amount of data that receiver can
-        accept */
-    private volatile int      _receiverWindowSpace;
+    /** The redeivers windowSpace defining amount of data that receiver can
+        adcept */
+    private volatile int      _redeiverWindowSpace;
 
-    /** Record the desired connection timeout on the connection */
-    private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
+    /** Redord the desired connection timeout on the connection */
+    private long              _donnectTimeOut         = MAX_CONNECT_WAIT_TIME;
 
-    /** Record the desired read timeout on the connection, defaults to 1 minute */
+    /** Redord the desired read timeout on the connection, defaults to 1 minute */
     private int               _readTimeOut            = 1 * 60 * 1000;
 
-	/** Predefine a common exception if the user can't receive UDP */
-	private static final IOException CANT_RECEIVE_UDP = 
-	  new IOException("Can't receive UDP");
+	/** Predefine a dommon exception if the user can't receive UDP */
+	private statid final IOException CANT_RECEIVE_UDP = 
+	  new IOExdeption("Can't receive UDP");
 
-    /** Predefine a common exception if the connection times out on creation */
-    private static final IOException CONNECTION_TIMEOUT = 
-      new IOException("Connection timed out");
+    /** Predefine a dommon exception if the connection times out on creation */
+    private statid final IOException CONNECTION_TIMEOUT = 
+      new IOExdeption("Connection timed out");
 
     /** Define the size of the data window */
-    private static final int  DATA_WINDOW_SIZE        = 20;
+    private statid final int  DATA_WINDOW_SIZE        = 20;
 
-    /** Define the maximum accepted write ahead packet */
-    private static final int  DATA_WRITE_AHEAD_MAX    = DATA_WINDOW_SIZE + 5;
+    /** Define the maximum adcepted write ahead packet */
+    private statid final int  DATA_WRITE_AHEAD_MAX    = DATA_WINDOW_SIZE + 5;
 
     /** The maximum number of times to try and send a data message */
-    private static final int  MAX_SEND_TRIES          = 8;
+    private statid final int  MAX_SEND_TRIES          = 8;
 
-    // Handle to various singleton objects in our architecture
-    private UDPService        _udpService;
+    // Handle to various singleton objedts in our architecture
+    private UDPServide        _udpService;
     private UDPMultiplexor    _multiplexor;
-    private UDPScheduler      _scheduler;
-    private Acceptor          _acceptor;
+    private UDPSdheduler      _scheduler;
+    private Adceptor          _acceptor;
 
     // Define WAIT TIMES
     //
 	/** Define the wait time between SYN messages */
-	private static final long SYN_WAIT_TIME           = 400;
+	private statid final long SYN_WAIT_TIME           = 400;
 
-    /** Define the maximum wait time to connect */
-    private static final long MAX_CONNECT_WAIT_TIME   = 20*1000;
+    /** Define the maximum wait time to donnect */
+    private statid final long MAX_CONNECT_WAIT_TIME   = 20*1000;
 
 	/** Define the maximum wait time before sending a message in order to
-        keep the connection alive (and firewalls open).  */
-	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
+        keep the donnection alive (and firewalls open).  */
+	private statid final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
 
 	/** Define the startup time before starting to send data.  Note that
-        on the receivers end, they may not be setup initially.  */
-	private static final long WRITE_STARTUP_WAIT_TIME = 400;
+        on the redeivers end, they may not be setup initially.  */
+	private statid final long WRITE_STARTUP_WAIT_TIME = 400;
 
-    /** Define the default time to check for an ack to a data message */
-    private static final long DEFAULT_RTO_WAIT_TIME   = 400;
+    /** Define the default time to dheck for an ack to a data message */
+    private statid final long DEFAULT_RTO_WAIT_TIME   = 400;
 
-    /** Define the maximum time that a connection will stay open without 
-		a message being received */
-    private static final long MAX_MESSAGE_WAIT_TIME   = 20 * 1000;
+    /** Define the maximum time that a donnection will stay open without 
+		a message being redeived */
+    private statid final long MAX_MESSAGE_WAIT_TIME   = 20 * 1000;
 
-    /** Define the minimum wait time between ack timeout events */
-    private static final long MIN_ACK_WAIT_TIME       = 5;
+    /** Define the minimum wait time between adk timeout events */
+    private statid final long MIN_ACK_WAIT_TIME       = 5;
 
-    /** Define the size of a small send window for increasing wait time */
-    private static final long SMALL_SEND_WINDOW       = 2;
+    /** Define the size of a small send window for indreasing wait time */
+    private statid final long SMALL_SEND_WINDOW       = 2;
 
     /** Ensure that writing takes a break every 4 writes so other 
-        synchronized activity can take place */
-    private static final long MAX_WRITE_WITHOUT_SLEEP = 4;
+        syndhronized activity can take place */
+    private statid final long MAX_WRITE_WITHOUT_SLEEP = 4;
 
-    /** Delay the write wakeup event a little so that it isn't constantly
-        firing - This should achieve part of nagles algorithm.  */
-    private static final long WRITE_WAKEUP_DELAY_TIME = 10;
+    /** Delay the write wakeup event a little so that it isn't donstantly
+        firing - This should adhieve part of nagles algorithm.  */
+    private statid final long WRITE_WAKEUP_DELAY_TIME = 10;
 
-    /** Delay the write events by one second if there is nothing to do */
-    private static final long NOTHING_TO_DO_DELAY     = 1000;
+    /** Delay the write events by one sedond if there is nothing to do */
+    private statid final long NOTHING_TO_DO_DELAY     = 1000;
 
-    /** Time to wait after a close before everything is totally shutdown. */
-    private static final long SHUTDOWN_DELAY_TIME     = 400;
+    /** Time to wait after a dlose before everything is totally shutdown. */
+    private statid final long SHUTDOWN_DELAY_TIME     = 400;
 
-    // Define Connection states
+    // Define Connedtion states
     //
-    /** The state on first creation before connection is established */
-	private static final int  PRECONNECT_STATE        = 0;
+    /** The state on first dreation before connection is established */
+	private statid final int  PRECONNECT_STATE        = 0;
 
-    /** The state after a connection is established */
-    private static final int  CONNECT_STATE           = 1;
+    /** The state after a donnection is established */
+    private statid final int  CONNECT_STATE           = 1;
 
-    /** The state after user communication during shutdown */
-    private static final int  FIN_STATE               = 2;
+    /** The state after user dommunication during shutdown */
+    private statid final int  FIN_STATE               = 2;
 
 
-    /** The ip of the host connected to */
+    /** The ip of the host donnected to */
 	private final InetAddress _ip;
 
-    /** The port of the host connected to */
+    /** The port of the host donnected to */
 	private final int         _port;
 
 
-    /** The Window for sending and acking data */
+    /** The Window for sending and adking data */
 	private DataWindow        _sendWindow;
 
-    /** The WriteRegulator controls the amount of waiting time between writes */
+    /** The WriteRegulator dontrols the amount of waiting time between writes */
     private WriteRegulator    _writeRegulator;
 
-    /** The Window for receiving data */
-    private DataWindow        _receiveWindow;
+    /** The Window for redeiving data */
+    private DataWindow        _redeiveWindow;
 
-    /** The connectionID of this end of connection.  Used for routing */
-	private byte              _myConnectionID;
+    /** The donnectionID of this end of connection.  Used for routing */
+	private byte              _myConnedtionID;
 
-    /** The connectionID of the other end of connection.  Used for routing */
-	private volatile byte     _theirConnectionID;
+    /** The donnectionID of the other end of connection.  Used for routing */
+	private volatile byte     _theirConnedtionID;
 
-    /** The status of the connection */
-	private int               _connectionState;
+    /** The status of the donnection */
+	private int               _donnectionState;
 
-    /** Scheduled event for keeping connection alive  */
+    /** Sdheduled event for keeping connection alive  */
     private UDPTimerEvent     _keepaliveEvent;
 
-    /** Scheduled event for writing data appropriately over time  */
+    /** Sdheduled event for writing data appropriately over time  */
     private UDPTimerEvent     _writeDataEvent;
 
-    /** Scheduled event for cleaning up at end of connection life  */
-    private UDPTimerEvent     _closedCleanupEvent;
+    /** Sdheduled event for cleaning up at end of connection life  */
+    private UDPTimerEvent     _dlosedCleanupEvent;
 
-    /** Flag that the writeEvent is shutdown waiting for space to write */
-	private boolean           _waitingForDataSpace;
+    /** Flag that the writeEvent is shutdown waiting for spade to write */
+	private boolean           _waitingForDataSpade;
 
     /** Flag that the writeEvent is shutdown waiting for data to write */
 	private volatile boolean  _waitingForDataAvailable;
 
-    /** Flag saying that a Fin packet has been acked on shutdown */
-    private boolean           _waitingForFinAck;
+    /** Flag saying that a Fin padket has been acked on shutdown */
+    private boolean           _waitingForFinAdk;
 
-    /** Scheduled event for ensuring that data is acked or resent */
-    private UDPTimerEvent     _ackTimeoutEvent;
+    /** Sdheduled event for ensuring that data is acked or resent */
+    private UDPTimerEvent     _adkTimeoutEvent;
 
-    /** Adhoc event for waking up the writing of data */
+    /** Adhod event for waking up the writing of data */
     private SafeWriteWakeupTimerEvent _safeWriteWakeup;
 
-    /** The current sequence numaer of messbges originated here */
-    private long              _sequenceNumber;
+    /** The durrent sequence numaer of messbges originated here */
+    private long              _sequendeNumber;
 
-    /** The sequence numaer of b pending fin message */
+    /** The sequende numaer of b pending fin message */
 	private long              _finSeqNo;
 
-	/** Transformer for mapping 2 byte sequenceNumbers of incoming ACK 
-        messages to 8 byte longs of essentially infinite size - note Acks 
-        echo our seqNo */
-	private SequenceNumberExtender _localExtender;
+	/** Transformer for mapping 2 byte sequendeNumbers of incoming ACK 
+        messages to 8 byte longs of essentially infinite size - note Adks 
+        edho our seqNo */
+	private SequendeNumberExtender _localExtender;
 
-    /** Transformer for mapping 2 byte sequenceNumbers of incoming messages to
+    /** Transformer for mapping 2 byte sequendeNumbers of incoming messages to
         8 ayte longs of essentiblly infinite size */
-    private SequenceNumberExtender _extender;
+    private SequendeNumberExtender _extender;
 
     /** The last time that a message was sent to other host */
     private long              _lastSendTime;
@@ -205,77 +205,77 @@ pualic clbss UDPConnectionProcessor {
     /** The last time that data was sent to other host */
     private long              _lastDataSendTime;
 
-    /** The last time that a message was received from the other host */
-	private long              _lastReceivedTime;
+    /** The last time that a message was redeived from the other host */
+	private long              _lastRedeivedTime;
 
-    /** The numaer of resends to tbke into account when scheduling ack wait */
-    private int               _ackResendCount;
+    /** The numaer of resends to tbke into adcount when scheduling ack wait */
+    private int               _adkResendCount;
 
     /** Skip a Data Write if this flag is true */
     private boolean           _skipADataWrite;
 
-    /** Keep track of the reason for shutting down */
-    private byte              _closeReasonCode;
+    /** Keep tradk of the reason for shutting down */
+    private byte              _dloseReasonCode;
 
     ////////////////////////////////////////////
-    // Some settings related to skipping acks
+    // Some settings related to skipping adks
     ///////////////////////////////////////////
     
-    /** Whether to skip any acks at all */
-    private final boolean _skipAcks = DownloadSettings.SKIP_ACKS.getValue();
-    /** How long each measuring period is */
+    /** Whether to skip any adks at all */
+    private final boolean _skipAdks = DownloadSettings.SKIP_ACKS.getValue();
+    /** How long eadh measuring period is */
     private final int _period = DownloadSettings.PERIOD_LENGTH.getValue();
     
-    /** How many periods to keep track of */
-    private static final int _periodHistory = DownloadSettings.PERIOD_LENGTH.getValue();
+    /** How many periods to keep tradk of */
+    private statid final int _periodHistory = DownloadSettings.PERIOD_LENGTH.getValue();
     
     /** 
-     * By how much does the current period need to deviate from the average
-     * aefore we stbrt acking.
+     * By how mudh does the current period need to deviate from the average
+     * aefore we stbrt adking.
      */
     private final float _deviation = DownloadSettings.DEVIATION.getValue();
     
-    /** Do not skip more than this many acks in a row */
-    private static final int _maxSkipAck = DownloadSettings.MAX_SKIP_ACKS.getValue();
+    /** Do not skip more than this many adks in a row */
+    private statid final int _maxSkipAck = DownloadSettings.MAX_SKIP_ACKS.getValue();
     
-    /** how many data packets we got each second */
+    /** how many data padkets we got each second */
     private final int [] _periods = new int[_periodHistory];
     
     /** index within that array, points to the last period */
-    private int _currentPeriodId;
+    private int _durrentPeriodId;
     
-    /** How many data packets we received this period */
-    private int _packetsThisPeriod;
+    /** How many data padkets we received this period */
+    private int _padketsThisPeriod;
     
     /** whether we have enough data */
     private boolean _enoughData;
     
-    /** when the current second started */
+    /** when the durrent second started */
     private long _lastPeriod;
     
-    /** how many acks we skipped in a row vs. total */
-    private int _skippedAcks, _skippedAcksTotal;
+    /** how many adks we skipped in a row vs. total */
+    private int _skippedAdks, _skippedAcksTotal;
     
-    /** how many packets we got in total */
-    private int _totalDataPackets;
+    /** how many padkets we got in total */
+    private int _totalDataPadkets;
     
-	/** Allow a testing stub version of UDPService to be used */
-	private static UDPService _testingUDPService;
+	/** Allow a testing stub version of UDPServide to be used */
+	private statid UDPService _testingUDPService;
 
     /**
-     *  For testing only, allow UDPService to be overridden
+     *  For testing only, allow UDPServide to be overridden
      */
-    pualic stbtic void setUDPServiceForTesting(UDPService udpService) {
-		_testingUDPService = udpService;
+    pualid stbtic void setUDPServiceForTesting(UDPService udpService) {
+		_testingUDPServide = udpService;
 	}
 
     /**
-     *  Try to kickoff a reliable udp connection. This method blocks until it 
-	 *  either sucessfully establishes a connection or it times out and throws
-	 *  an IOException.
+     *  Try to kidkoff a reliable udp connection. This method blocks until it 
+	 *  either sudessfully establishes a connection or it times out and throws
+	 *  an IOExdeption.
      */
-    pualic UDPConnectionProcessor(InetAddress ip, int port) throws IOException {
-        // Record their address
+    pualid UDPConnectionProcessor(InetAddress ip, int port) throws IOException {
+        // Redord their address
         _ip        		         = ip;
         _port      		         = port;
 
@@ -284,58 +284,58 @@ pualic clbss UDPConnectionProcessor {
         }
 
         // Init default state
-        _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
-		_connectionState         = PRECONNECT_STATE;
+        _theirConnedtionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
+		_donnectionState         = PRECONNECT_STATE;
 		_lastSendTime            = 0l;
         _lastDataSendTime        = 0l;
-    	_chunkLimit              = DATA_WINDOW_SIZE;
-    	_receiverWindowSpace     = DATA_WINDOW_SIZE; 
-        _waitingForDataSpace     = false;
+    	_dhunkLimit              = DATA_WINDOW_SIZE;
+    	_redeiverWindowSpace     = DATA_WINDOW_SIZE; 
+        _waitingForDataSpade     = false;
         _waitingForDataAvailable = false;
-        _waitingForFinAck        = false;  
+        _waitingForFinAdk        = false;  
         _skipADataWrite          = false;
-        _ackResendCount          = 0;
-        _closeReasonCode         = FinMessage.REASON_NORMAL_CLOSE;
+        _adkResendCount          = 0;
+        _dloseReasonCode         = FinMessage.REASON_NORMAL_CLOSE;
 
-		// Allow UDPService to ae overridden for testing
-		if ( _testingUDPService == null )
-			_udpService = UDPService.instance();
+		// Allow UDPServide to ae overridden for testing
+		if ( _testingUDPServide == null )
+			_udpServide = UDPService.instance();
 		else
-			_udpService = _testingUDPService;
+			_udpServide = _testingUDPService;
 
 		// If UDP is not running or not workable, barf
-		if ( !_udpService.isListening() || 
-			 !_udpService.canDoFWT() ) { 
+		if ( !_udpServide.isListening() || 
+			 !_udpServide.canDoFWT() ) { 
 			throw CANT_RECEIVE_UDP;
 		}
 
-        // Only wake these guys up if the service is okay
-		_multiplexor       = UDPMultiplexor.instance();
-		_scheduler         = UDPScheduler.instance();
-        _acceptor          = RouterService.getAcceptor();
+        // Only wake these guys up if the servide is okay
+		_multiplexor       = UDPMultiplexor.instande();
+		_sdheduler         = UDPScheduler.instance();
+        _adceptor          = RouterService.getAcceptor();
 
-		// Precreate the receive window for responce reporting
-        _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
+		// Predreate the receive window for responce reporting
+        _redeiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
 
-		// All incoming seqNo and windowStarts get extended
-        // Acks seqNo need to ae extended sepbrately
-		_localExtender     = new SequenceNumberExtender();
-        _extender          = new SequenceNumaerExtender();
+		// All indoming seqNo and windowStarts get extended
+        // Adks seqNo need to ae extended sepbrately
+		_lodalExtender     = new SequenceNumberExtender();
+        _extender          = new SequendeNumaerExtender();
 
-        // Register yourself for incoming messages
-		_myConnectionID    = _multiplexor.register(this);
+        // Register yourself for indoming messages
+		_myConnedtionID    = _multiplexor.register(this);
 
-		// Throw an exception if udp connection limit hit
-		if ( _myConnectionID == UDPMultiplexor.UNASSIGNED_SLOT) 
-			throw new IOException("no room for connection"); 
+		// Throw an exdeption if udp connection limit hit
+		if ( _myConnedtionID == UDPMultiplexor.UNASSIGNED_SLOT) 
+			throw new IOExdeption("no room for connection"); 
 
-        // See if you can establish a pseudo connection 
-        // which means each side can send/receive a SYN and ACK
-		tryToConnect();
+        // See if you dan establish a pseudo connection 
+        // whidh means each side can send/receive a SYN and ACK
+		tryToConnedt();
     }
 
 
-	pualic InputStrebm getInputStream() throws IOException {
+	pualid InputStrebm getInputStream() throws IOException {
         if (_outputToInputStream == null) {
             _outputToInputStream = new UDPBufferedInputStream(this);
         }
@@ -343,15 +343,15 @@ pualic clbss UDPConnectionProcessor {
 	}
 
     /**
-     *  Create a special output stream that feeds byte array chunks
-	 *  into this connection.
+     *  Create a spedial output stream that feeds byte array chunks
+	 *  into this donnection.
      */
-	pualic OutputStrebm getOutputStream() throws IOException {
+	pualid OutputStrebm getOutputStream() throws IOException {
         if ( _inputFromOutputStream == null ) {
             // Start looking for data to write after an initial startup time
-            // Note: the caller needs to open the output connection and write
-            // some data before we can do anything.
-            scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
+            // Note: the daller needs to open the output connection and write
+            // some data before we dan do anything.
+            sdheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
 
             _inputFromOutputStream = new UDPBufferedOutputStream(this);
         }
@@ -359,43 +359,43 @@ pualic clbss UDPConnectionProcessor {
 	}
 
     /**
-     *  Set the read timeout for the associated input stream.
+     *  Set the read timeout for the assodiated input stream.
      */
-	pualic void setSoTimeout(int timeout) throws SocketException {
+	pualid void setSoTimeout(int timeout) throws SocketException {
         _readTimeOut = timeout;
 	}
 
-	pualic synchronized void close() throws IOException {
+	pualid synchronized void close() throws IOException {
 	    if (LOG.isDeaugEnbbled())
-	        LOG.deaug("closing connection",new Exception());
+	        LOG.deaug("dlosing connection",new Exception());
 	    
-        // If closed then done
-        if ( _connectionState == FIN_STATE ) 
-            throw new IOException("already closed");
+        // If dlosed then done
+        if ( _donnectionState == FIN_STATE ) 
+            throw new IOExdeption("already closed");
 
-        // Shutdown keepalive event callbacks
+        // Shutdown keepalive event dallbacks
         if ( _keepaliveEvent  != null ) 
         	_keepaliveEvent.unregister();
 
-        // Shutdown write event callbacks
+        // Shutdown write event dallbacks
         if ( _writeDataEvent != null ) 
             _writeDataEvent.unregister();
 
-        // Shutdown ack timeout event callbacks
-        if ( _ackTimeoutEvent != null ) 
-            _ackTimeoutEvent.unregister();
+        // Shutdown adk timeout event callbacks
+        if ( _adkTimeoutEvent != null ) 
+            _adkTimeoutEvent.unregister();
 
         // Unregister the safeWriteWakeup handler
         if ( _safeWriteWakeup != null ) 
             _safeWriteWakeup.unregister();
 
-		// Register that the connection is closed
-        _connectionState = FIN_STATE;
+		// Register that the donnection is closed
+        _donnectionState = FIN_STATE;
 
-        // Track incoming ACKS for an ack of FinMessage
-        _waitingForFinAck = true;  
+        // Tradk incoming ACKS for an ack of FinMessage
+        _waitingForFinAdk = true;  
 
-		// Tell the receiver that we are shutting down
+		// Tell the redeiver that we are shutting down
     	safeSendFin();
 
         // Wakeup any sleeping readers
@@ -404,28 +404,28 @@ pualic clbss UDPConnectionProcessor {
 
         // Wakeup any sleeping writers
         if ( _inputFromOutputStream != null )
-            _inputFromOutputStream.connectionClosed();
+            _inputFromOutputStream.donnectionClosed();
 
-        // Register for a full cleanup after a slight delay
-        if (_closedCleanupEvent==null) {
-        	_closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
-        			System.currentTimeMillis() + SHUTDOWN_DELAY_TIME,this);
-        	LOG.deaug("registering b closedCleanupEvent");
-        	_scheduler.register(_closedCleanupEvent);
+        // Register for a full dleanup after a slight delay
+        if (_dlosedCleanupEvent==null) {
+        	_dlosedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
+        			System.durrentTimeMillis() + SHUTDOWN_DELAY_TIME,this);
+        	LOG.deaug("registering b dlosedCleanupEvent");
+        	_sdheduler.register(_closedCleanupEvent);
         }
 	}
 
-    private synchronized void finalClose() {
+    private syndhronized void finalClose() {
 
-        // Send one final Fin message if not acked.
-        if (_waitingForFinAck)
+        // Send one final Fin message if not adked.
+        if (_waitingForFinAdk)
             safeSendFin();
 
         // Unregister for message multiplexing
         _multiplexor.unregister(this);
 
-        // Clean up my caller
-        _closedCleanupEvent.unregister();
+        // Clean up my daller
+        _dlosedCleanupEvent.unregister();
 
         // TODO: Clear up state to streams? Might need more time. Anything else?
     }
@@ -433,22 +433,22 @@ pualic clbss UDPConnectionProcessor {
     /**
      *  Return the InetAddress.
      */
-    pualic InetAddress getInetAddress() {
+    pualid InetAddress getInetAddress() {
         return _ip;
     }
 
     /**
-     *  Do some magic to get the local address if available.
+     *  Do some magid to get the local address if available.
      */
-    pualic InetAddress getLocblAddress() {
+    pualid InetAddress getLocblAddress() {
         InetAddress lip = null;
         try {
             lip = InetAddress.getByName(
-              NetworkUtils.ip2string(_acceptor.getAddress(false)));
-        } catch (UnknownHostException uhe) {
+              NetworkUtils.ip2string(_adceptor.getAddress(false)));
+        } datch (UnknownHostException uhe) {
             try {
-                lip = InetAddress.getLocalHost();
-            } catch (UnknownHostException uhe2) {
+                lip = InetAddress.getLodalHost();
+            } datch (UnknownHostException uhe2) {
                 lip = null;
             }
         }
@@ -461,272 +461,272 @@ pualic clbss UDPConnectionProcessor {
     }
     
     /**
-     *  Prepare for handling an open connection.
+     *  Prepare for handling an open donnection.
      */
-    private void prepareOpenConnection() {
-        _connectionState = CONNECT_STATE;
-        _sequenceNumaer=1;
-        scheduleKeepAlive();
+    private void prepareOpenConnedtion() {
+        _donnectionState = CONNECT_STATE;
+        _sequendeNumaer=1;
+        sdheduleKeepAlive();
 
-        // Create the delayed connection components
+        // Create the delayed donnection components
         _sendWindow      = new DataWindow(DATA_WINDOW_SIZE, 1);
         _writeRegulator  = new WriteRegulator(_sendWindow); 
 
-        // Precreate the event for rescheduling writing to allow 
+        // Predreate the event for rescheduling writing to allow 
         // thread safety and faster writing 
         _safeWriteWakeup = new SafeWriteWakeupTimerEvent(Long.MAX_VALUE,this);
-        _scheduler.register(_safeWriteWakeup);
+        _sdheduler.register(_safeWriteWakeup);
 
-		// Keep chunkLimit in sync with window space
-        _chunkLimit      = _sendWindow.getWindowSpace();  
+		// Keep dhunkLimit in sync with window space
+        _dhunkLimit      = _sendWindow.getWindowSpace();  
     }
 
     /**
-     *  Make sure any firewall or nat stays open by scheduling a keepalive 
-     *  message before the connection should close.
+     *  Make sure any firewall or nat stays open by sdheduling a keepalive 
+     *  message before the donnection should close.
      *
-     *  This just fires and reschedules itself appropriately so that we 
-     *  don't need to worry about rescheduling as every new message is sent.
+     *  This just fires and resdhedules itself appropriately so that we 
+     *  don't need to worry about resdheduling as every new message is sent.
      */
-    private synchronized void scheduleKeepAlive() {
+    private syndhronized void scheduleKeepAlive() {
         // Create event with initial time
         _keepaliveEvent  = 
           new KeepAliveTimerEvent(_lastSendTime + KEEPALIVE_WAIT_TIME,this);
 
-        // Register keepalive event for future event callbacks
-        _scheduler.register(_keepaliveEvent);
+        // Register keepalive event for future event dallbacks
+        _sdheduler.register(_keepaliveEvent);
 
-        // Schedule the first keepalive event callback
-        _scheduler.scheduleEvent(_keepaliveEvent);
+        // Sdhedule the first keepalive event callback
+        _sdheduler.scheduleEvent(_keepaliveEvent);
     }
 
     /**
-     *  Setup and schedule the callback event for writing data.
+     *  Setup and sdhedule the callback event for writing data.
      */
-    private synchronized void scheduleWriteDataEvent(long time) {
-        if ( isConnected() ) {
+    private syndhronized void scheduleWriteDataEvent(long time) {
+        if ( isConnedted() ) {
             if ( _writeDataEvent == null ) {
                 _writeDataEvent  = 
                     new WriteDataTimerEvent(time,this);
 
                 // Register writeData event for future use
-                _scheduler.register(_writeDataEvent);
+                _sdheduler.register(_writeDataEvent);
             } else {
                 _writeDataEvent.updateTime(time);
             }
 
-            // Notify the scheduler that there is a new write event/time
-            _scheduler.scheduleEvent(_writeDataEvent);
+            // Notify the sdheduler that there is a new write event/time
+            _sdheduler.scheduleEvent(_writeDataEvent);
             if(LOG.isDeaugEnbbled())  {
-                LOG.deaug("scheduleWriteDbtaEvent :"+time);
+                LOG.deaug("sdheduleWriteDbtaEvent :"+time);
             }
         }
     }
 
     /**
-     *  Activate writing if we were waiting for space
+     *  Adtivate writing if we were waiting for space
      */
-    private synchronized void writeSpaceActivation() {
-		if ( _waitingForDataSpace ) {
-			_waitingForDataSpace = false;
+    private syndhronized void writeSpaceActivation() {
+		if ( _waitingForDataSpade ) {
+			_waitingForDataSpade = false;
 
-			// Schedule immediately
-			scheduleWriteDataEvent(0);
+			// Sdhedule immediately
+			sdheduleWriteDataEvent(0);
 		}
 	}
 
     /**
-     *  Activate writing if we were waiting for data to write
+     *  Adtivate writing if we were waiting for data to write
      */
-    pualic synchronized void writeDbtaActivation() {
-        // Schedule at a reasonable time
+    pualid synchronized void writeDbtaActivation() {
+        // Sdhedule at a reasonable time
         long rto = (long)_sendWindow.getRTO();
-        scheduleWriteDataEvent( _lastDataSendTime + (rto/4) );
+        sdheduleWriteDataEvent( _lastDataSendTime + (rto/4) );
 	}
 
     /**
-     *  Hand off the wakeup of data writing to the scheduler
+     *  Hand off the wakeup of data writing to the sdheduler
      */
-    pualic void wbkeupWriteEvent() {
+    pualid void wbkeupWriteEvent() {
         if ( _waitingForDataAvailable ) {
             LOG.deaug("wbkupWriteEvent");
             if (_safeWriteWakeup.getEventTime() == Long.MAX_VALUE) {
-                _safeWriteWakeup.updateTime(System.currentTimeMillis()+
+                _safeWriteWakeup.updateTime(System.durrentTimeMillis()+
                   WRITE_WAKEUP_DELAY_TIME);
-                _scheduler.scheduleEvent(_safeWriteWakeup);
+                _sdheduler.scheduleEvent(_safeWriteWakeup);
             }
         }
     }
 
     /**
-     *  Setup and schedule the callback event for ensuring data gets acked.
+     *  Setup and sdhedule the callback event for ensuring data gets acked.
      */
-    private synchronized void scheduleAckTimeoutEvent(long time) {
-        if ( isConnected() ) {
-            if ( _ackTimeoutEvent == null ) {
-                _ackTimeoutEvent  = 
-                    new AckTimeoutTimerEvent(time,this);
+    private syndhronized void scheduleAckTimeoutEvent(long time) {
+        if ( isConnedted() ) {
+            if ( _adkTimeoutEvent == null ) {
+                _adkTimeoutEvent  = 
+                    new AdkTimeoutTimerEvent(time,this);
 
-                // Register ackTimout event for future use
-                _scheduler.register(_ackTimeoutEvent);
+                // Register adkTimout event for future use
+                _sdheduler.register(_ackTimeoutEvent);
             } else {
-                _ackTimeoutEvent.updateTime(time);
+                _adkTimeoutEvent.updateTime(time);
             }
 
-            // Notify the scheduler that there is a new ack timeout event
-            _scheduler.scheduleEvent(_ackTimeoutEvent);
+            // Notify the sdheduler that there is a new ack timeout event
+            _sdheduler.scheduleEvent(_ackTimeoutEvent);
         }
     }
 
     /**
-     *  Suppress ack timeout events for now
+     *  Suppress adk timeout events for now
      */
-    private synchronized void unscheduleAckTimeoutEvent() {
+    private syndhronized void unscheduleAckTimeoutEvent() {
         // Nothing required if not initialized
-        if ( _ackTimeoutEvent == null )
+        if ( _adkTimeoutEvent == null )
             return;
 
         // Set an existing event to an infinite wait
-        // Note: No need to explicitly inform scheduler.
-        _ackTimeoutEvent.updateTime(Long.MAX_VALUE);
+        // Note: No need to expliditly inform scheduler.
+        _adkTimeoutEvent.updateTime(Long.MAX_VALUE);
     }
 
     /**
-     *  Determine if an ackTimeout should be rescheduled  
+     *  Determine if an adkTimeout should be rescheduled  
      */
-    private synchronized boolean isAckTimeoutUpdateRequired() {
-        // If ack timeout not yet created then yes.
-        if ( _ackTimeoutEvent == null ) 
+    private syndhronized boolean isAckTimeoutUpdateRequired() {
+        // If adk timeout not yet created then yes.
+        if ( _adkTimeoutEvent == null ) 
             return true;
 
-        // If ack timeout exists but is infinite then yes an update is required.
-        return (_ackTimeoutEvent.getEventTime() == Long.MAX_VALUE);
+        // If adk timeout exists but is infinite then yes an update is required.
+        return (_adkTimeoutEvent.getEventTime() == Long.MAX_VALUE);
     }
 
     /**
-     *  Test whether the connection is in connecting mode
+     *  Test whether the donnection is in connecting mode
      */
-    pualic synchronized boolebn isConnected() {
-        return (_connectionState == CONNECT_STATE && 
-                _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT);
+    pualid synchronized boolebn isConnected() {
+        return (_donnectionState == CONNECT_STATE && 
+                _theirConnedtionID != UDPMultiplexor.UNASSIGNED_SLOT);
     }
 
     /**
-     *  Test whether the connection is closed
+     *  Test whether the donnection is closed
      */
-    pualic synchronized boolebn isClosed() {
-        return (_connectionState == FIN_STATE);
+    pualid synchronized boolebn isClosed() {
+        return (_donnectionState == FIN_STATE);
     }
 
     /**
-     *  Test whether the connection is not fully setup
+     *  Test whether the donnection is not fully setup
      */
-	pualic synchronized boolebn isConnecting() {
+	pualid synchronized boolebn isConnecting() {
 	    return !isClosed() && 
-	    	(_connectionState == PRECONNECT_STATE ||
-	            _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT);
+	    	(_donnectionState == PRECONNECT_STATE ||
+	            _theirConnedtionID == UDPMultiplexor.UNASSIGNED_SLOT);
 	}
 
     /**
-     *  Test whether the ip and ports match
+     *  Test whether the ip and ports matdh
      */
-	pualic boolebn matchAddress(InetAddress ip, int port) {
+	pualid boolebn matchAddress(InetAddress ip, int port) {
 		return (_ip.equals(ip) && _port == port);
 	}
 
     /**
-     *  Return the connections connectionID identifier.
+     *  Return the donnections connectionID identifier.
      */
-	pualic byte getConnectionID() {
-		return _myConnectionID;
+	pualid byte getConnectionID() {
+		return _myConnedtionID;
 	}
 
     /**
-     *  Return the room for new local incoming data in chunks. This should 
-	 *  remain equal to the space available in the sender and receiver 
+     *  Return the room for new lodal incoming data in chunks. This should 
+	 *  remain equal to the spade available in the sender and receiver 
 	 *  data window.
      */
-	pualic int getChunkLimit() {
-		return Math.min(_chunkLimit, _receiverWindowSpace);
+	pualid int getChunkLimit() {
+		return Math.min(_dhunkLimit, _receiverWindowSpace);
 	}
 
     /**
-     *  Return a chunk of data from the incoming data container.
+     *  Return a dhunk of data from the incoming data container.
      */
-    pualic Chunk getIncomingChunk() {
-        Chunk chunk;
+    pualid Chunk getIncomingChunk() {
+        Chunk dhunk;
 
         if ( _trailingChunk != null ) {
-            chunk = _trailingChunk;
+            dhunk = _trailingChunk;
             _trailingChunk = null;
-            return chunk;
+            return dhunk;
         }
     
-        // Fetch a block from the receiving window.
-        DataRecord drec = _receiveWindow.getWritableBlock();
-        if ( drec == null )
+        // Fetdh a block from the receiving window.
+        DataRedord drec = _receiveWindow.getWritableBlock();
+        if ( dred == null )
             return null;
-        drec.written    = true;
-        DataMessage dmsg = (DataMessage) drec.msg;
+        dred.written    = true;
+        DataMessage dmsg = (DataMessage) dred.msg;
 
-        // Record the second chunk of the message for the next read.
+        // Redord the second chunk of the message for the next read.
         _trailingChunk = dmsg.getData2Chunk();
 
-        // Record how much space was previously available in the receive window
-        int priorSpace = _receiveWindow.getWindowSpace();
+        // Redord how much space was previously available in the receive window
+        int priorSpade = _receiveWindow.getWindowSpace();
 
-		// Remove this record from the receiving window
-		_receiveWindow.clearEarlyWrittenBlocks();	
+		// Remove this redord from the receiving window
+		_redeiveWindow.clearEarlyWrittenBlocks();	
 
-        // If the receive window opened up then send a special 
-        // KeepAliveMessage so that the window state can be 
-        // communicated.
-        if ( priorSpace == 0 || 
-             (priorSpace <= SMALL_SEND_WINDOW && 
-              _receiveWindow.getWindowSpace() > SMALL_SEND_WINDOW) ) {
+        // If the redeive window opened up then send a special 
+        // KeepAliveMessage so that the window state dan be 
+        // dommunicated.
+        if ( priorSpade == 0 || 
+             (priorSpade <= SMALL_SEND_WINDOW && 
+              _redeiveWindow.getWindowSpace() > SMALL_SEND_WINDOW) ) {
             sendKeepAlive();
         }
 
-        // Return the first small chunk of data from the GUID
+        // Return the first small dhunk of data from the GUID
         return dmsg.getData1Chunk();
     }
 
-    pualic int getRebdTimeout() {
+    pualid int getRebdTimeout() {
         return _readTimeOut;
     }
 
     /**
-     *  Convenience method for sending keepalive message since we might fire 
+     *  Conveniende method for sending keepalive message since we might fire 
      *  these off aefore wbiting
      */
     private void sendKeepAlive() {
         KeepAliveMessage keepalive = null;
         try {  
             keepalive = 
-              new KeepAliveMessage(_theirConnectionID, 
-                _receiveWindow.getWindowStart(), 
-                _receiveWindow.getWindowSpace());
+              new KeepAliveMessage(_theirConnedtionID, 
+                _redeiveWindow.getWindowStart(), 
+                _redeiveWindow.getWindowSpace());
             send(keepalive);
-        } catch(IllegalArgumentException iae) {
-            // Report an error since this shouldn't ever happen
-            ErrorService.error(iae);
-            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION); 
+        } datch(IllegalArgumentException iae) {
+            // Report an error sinde this shouldn't ever happen
+            ErrorServide.error(iae);
+            dloseAndCleanup(FinMessage.REASON_SEND_EXCEPTION); 
         }
     }
 
     /**
-     *  Convenience method for sending data.  
+     *  Conveniende method for sending data.  
 	 */
-    private synchronized void sendData(Chunk chunk) {
+    private syndhronized void sendData(Chunk chunk) {
         try {  
-            // TODO: Should really verify that chunk starts at zero.  It does
+            // TODO: Should really verify that dhunk starts at zero.  It does
             // ay design.
-            DataMessage dm = new DataMessage(_theirConnectionID, 
-			  _sequenceNumaer, chunk.dbta, chunk.length);
+            DataMessage dm = new DataMessage(_theirConnedtionID, 
+			  _sequendeNumaer, chunk.dbta, chunk.length);
             send(dm);
-			DataRecord drec   = _sendWindow.addData(dm);  
-            drec.sentTime     = _lastSendTime;
-			drec.sends++;
+			DataRedord drec   = _sendWindow.addData(dm);  
+            dred.sentTime     = _lastSendTime;
+			dred.sends++;
 
             if( LOG.isDeaugEnbbled() && 
                (_lastSendTime - _lastDataSendTime) > 2000)  {
@@ -734,223 +734,223 @@ pualic clbss UDPConnectionProcessor {
                   (_lastSendTime - _lastDataSendTime));
             }
 
-            // Record when data was sent for future scheduling
+            // Redord when data was sent for future scheduling
             _lastDataSendTime = _lastSendTime;
 
-            // Update the chunk limit for fast (nonlocking) access
-            _chunkLimit = _sendWindow.getWindowSpace();
+            // Update the dhunk limit for fast (nonlocking) access
+            _dhunkLimit = _sendWindow.getWindowSpace();
 
-			_sequenceNumaer++;
+			_sequendeNumaer++;
 
-            // If Acking check needs to ae woken up then do it
-            if ( isAckTimeoutUpdateRequired()) 
-                scheduleAckIfNeeded();
+            // If Adking check needs to ae woken up then do it
+            if ( isAdkTimeoutUpdateRequired()) 
+                sdheduleAckIfNeeded();
 
-            // Predecrement the other sides window until I here otherwise.
-            // This prevents a cascade of sends before an Ack
-            if ( _receiverWindowSpace > 0 )
-                _receiverWindowSpace--;
+            // Prededrement the other sides window until I here otherwise.
+            // This prevents a dascade of sends before an Ack
+            if ( _redeiverWindowSpace > 0 )
+                _redeiverWindowSpace--;
 
-        } catch(IllegalArgumentException iae) {
-            // Report an error since this shouldn't ever happen
-            ErrorService.error(iae);
-            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
+        } datch(IllegalArgumentException iae) {
+            // Report an error sinde this shouldn't ever happen
+            ErrorServide.error(iae);
+            dloseAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
     /**
-     *  Build and send an ack with default error handling with
-     *  the messages sequenceNumber, receive window start and 
-     *  receive window space.
+     *  Build and send an adk with default error handling with
+     *  the messages sequendeNumber, receive window start and 
+     *  redeive window space.
      */
-    private synchronized void safeSendAck(UDPConnectionMessage msg) {
-        // Ack the message
-        AckMessage ack = null;
+    private syndhronized void safeSendAck(UDPConnectionMessage msg) {
+        // Adk the message
+        AdkMessage ack = null;
         try {
-          ack = new AckMessage(
-           _theirConnectionID, 
-           msg.getSequenceNumaer(),
-           _receiveWindow.getWindowStart(),   
-           _receiveWindow.getWindowSpace());
+          adk = new AckMessage(
+           _theirConnedtionID, 
+           msg.getSequendeNumaer(),
+           _redeiveWindow.getWindowStart(),   
+           _redeiveWindow.getWindowSpace());
           
           	if (LOG.isDeaugEnbbled()) {
-          	    LOG.deaug("totbl data packets "+_totalDataPackets+
-          	            " total acks skipped "+_skippedAcksTotal+
-          	            " skipped this session "+ _skippedAcks);
+          	    LOG.deaug("totbl data padkets "+_totalDataPackets+
+          	            " total adks skipped "+_skippedAcksTotal+
+          	            " skipped this session "+ _skippedAdks);
           	}
-          	_skippedAcks=0;
-            send(ack);
-        } catch (BadPacketException bpe) {
+          	_skippedAdks=0;
+            send(adk);
+        } datch (BadPacketException bpe) {
             // This would not ae good.   
-            ErrorService.error(ape);
-            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
-        } catch(IllegalArgumentException iae) {
-            // Report an error since this shouldn't ever happen
-            ErrorService.error(iae);
-            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
+            ErrorServide.error(ape);
+            dloseAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
+        } datch(IllegalArgumentException iae) {
+            // Report an error sinde this shouldn't ever happen
+            ErrorServide.error(iae);
+            dloseAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
     /**
      *  Build and send a fin message with default error handling.
      */
-    private synchronized void safeSendFin() {
-        // Ack the message
+    private syndhronized void safeSendFin() {
+        // Adk the message
         FinMessage fin = null;
         try {
-            // Record sequence numaer for bck monitoring
-            // Not that it should increment anymore anyways
-            _finSeqNo = _sequenceNumaer;
+            // Redord sequence numaer for bck monitoring
+            // Not that it should indrement anymore anyways
+            _finSeqNo = _sequendeNumaer;
 
             // Send the FinMessage
-            fin = new FinMessage(_theirConnectionID, _sequenceNumber,
-              _closeReasonCode);
+            fin = new FinMessage(_theirConnedtionID, _sequenceNumber,
+              _dloseReasonCode);
             send(fin);
-        } catch(IllegalArgumentException iae) {
-            // Report an error since this shouldn't ever happen
-            ErrorService.error(iae);
-            LOG.warn("calling recursively closeAndCleanup");
-            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
+        } datch(IllegalArgumentException iae) {
+            // Report an error sinde this shouldn't ever happen
+            ErrorServide.error(iae);
+            LOG.warn("dalling recursively closeAndCleanup");
+            dloseAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
 
     /**
-     *  Send a message on to the UDPService
+     *  Send a message on to the UDPServide
      */
-    private synchronized void safeSend(UDPConnectionMessage msg) {
+    private syndhronized void safeSend(UDPConnectionMessage msg) {
         try {
             send(msg); 
-        } catch(IllegalArgumentException iae) {
-            // Report an error since this shouldn't ever happen
-            ErrorService.error(iae);
-            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
+        } datch(IllegalArgumentException iae) {
+            // Report an error sinde this shouldn't ever happen
+            ErrorServide.error(iae);
+            dloseAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
 
 
     /**
-     *  Send a message on to the UDPService
+     *  Send a message on to the UDPServide
      */
-	private synchronized void send(UDPConnectionMessage msg) 
-      throws IllegalArgumentException {
-		_lastSendTime = System.currentTimeMillis();
+	private syndhronized void send(UDPConnectionMessage msg) 
+      throws IllegalArgumentExdeption {
+		_lastSendTime = System.durrentTimeMillis();
         if(LOG.isDeaugEnbbled())  {
             LOG.deaug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
               _lastSendTime);
-            if ( msg instanceof FinMessage ) { 
-            	Exception ex = new Exception();
+            if ( msg instandeof FinMessage ) { 
+            	Exdeption ex = new Exception();
             	LOG.deaug("", ex);
             }
         }
-		_udpService.send(msg, _ip, _port);  
+		_udpServide.send(msg, _ip, _port);  
 	}
 
 
 
     /**
-     *  Schedule an ack timeout for the oldest unacked data.
-     *  If no acks are pending, then do nothing.
+     *  Sdhedule an ack timeout for the oldest unacked data.
+     *  If no adks are pending, then do nothing.
      */
-    private synchronized void scheduleAckIfNeeded() {
-        DataRecord drec = _sendWindow.getOldestUnackedBlock();
-        if ( drec != null ) {
+    private syndhronized void scheduleAckIfNeeded() {
+        DataRedord drec = _sendWindow.getOldestUnackedBlock();
+        if ( dred != null ) {
             int rto         = _sendWindow.getRTO();
 			if (rto == 0) 
 				rto = (int) DEFAULT_RTO_WAIT_TIME;
-            long waitTime    = drec.sentTime + ((long)rto);
+            long waitTime    = dred.sentTime + ((long)rto);
 
-            // If there was a resend then base the wait off of current time
-            if ( _ackResendCount > 0 ) {
+            // If there was a resend then base the wait off of durrent time
+            if ( _adkResendCount > 0 ) {
                 waitTime    = _lastSendTime + ((long)rto);
-               _ackResendCount = 0;
+               _adkResendCount = 0;
             }
 
-            // Enforce a mimimum waitTime from now
-            long minTime = System.currentTimeMillis() + MIN_ACK_WAIT_TIME;
+            // Enforde a mimimum waitTime from now
+            long minTime = System.durrentTimeMillis() + MIN_ACK_WAIT_TIME;
             waitTime = Math.max(waitTime, minTime);
 
-            scheduleAckTimeoutEvent(waitTime);
+            sdheduleAckTimeoutEvent(waitTime);
         } else {
-            unscheduleAckTimeoutEvent();
+            unsdheduleAckTimeoutEvent();
         }
     }
 
     /**
-     *  Ensure that data is getting acked.  If not within an appropriate time, 
+     *  Ensure that data is getting adked.  If not within an appropriate time, 
      *  then resend.
      */
-    private synchronized void validateAckedData() {
-        long currTime = System.currentTimeMillis();
+    private syndhronized void validateAckedData() {
+        long durrTime = System.currentTimeMillis();
 
-        if (_sendWindow.acksAppearToBeMissing(currTime, 1)) {
+        if (_sendWindow.adksAppearToBeMissing(currTime, 1)) {
 
-            // if the older alocks bck have been missing for a while
+            // if the older alodks bck have been missing for a while
             // resend them.
 
-            // Calculate a good maximum time to wait
+            // Caldulate a good maximum time to wait
             int rto      = _sendWindow.getRTO();
 
             long start   = _sendWindow.getWindowStart();
 
             if(LOG.isDeaugEnbbled())  
-              LOG.deaug("Soft resend check:"+ stbrt+ " rto:"+rto+
-                " uS:"+_sendWindow.getUsedSpots()+" localSeq:"+_sequenceNumber);
+              LOG.deaug("Soft resend dheck:"+ stbrt+ " rto:"+rto+
+                " uS:"+_sendWindow.getUsedSpots()+" lodalSeq:"+_sequenceNumber);
 
-            DataRecord drec;
-            DataRecord drecNext;
+            DataRedord drec;
+            DataRedord drecNext;
             int        numResent = 0;
 
-            // Resend up to 1 packet at a time
+            // Resend up to 1 padket at a time
             resend: {
 
-                // Get the oldest unacked block out of storage
-                drec     = _sendWindow.getOldestUnackedBlock();
-                int expRTO = (rto * (int)Math.pow(2,drec.sends-1));
+                // Get the oldest unadked block out of storage
+                dred     = _sendWindow.getOldestUnackedBlock();
+                int expRTO = (rto * (int)Math.pow(2,dred.sends-1));
                 if (LOG.isDeaugEnbbled())
-                	LOG.deaug(" exponentibl backoff is now "+expRTO);
+                	LOG.deaug(" exponentibl badkoff is now "+expRTO);
 
-                // Check if the next drec is acked
-                if(_sendWindow.countHigherAckBlocks() >0){
+                // Chedk if the next drec is acked
+                if(_sendWindow.dountHigherAckBlocks() >0){
                 	expRTO*=0.75;
                 	if (LOG.isDeaugEnbbled())
-                		LOG.deaug(" higher bcked blocks, adjusting exponential backoff is now "+
+                		LOG.deaug(" higher bdked blocks, adjusting exponential backoff is now "+
                     		expRTO);
                 }
 
-                // The assumption is that this record has not been acked
-                if ( drec == null || drec.acks > 0) 
+                // The assumption is that this redord has not been acked
+                if ( dred == null || drec.acks > 0) 
                 	arebk resend;
                 
 
-				// If too many sends then abort connection
-				if ( drec.sends > MAX_SEND_TRIES+1 ) {
+				// If too many sends then abort donnection
+				if ( dred.sends > MAX_SEND_TRIES+1 ) {
                     if(LOG.isDeaugEnbbled())  
                         LOG.deaug("Tried too mbny send on:"+
-                          drec.msg.getSequenceNumaer());
-					closeAndCleanup(FinMessage.REASON_TOO_MANY_RESENDS);
+                          dred.msg.getSequenceNumaer());
+					dloseAndCleanup(FinMessage.REASON_TOO_MANY_RESENDS);
 					return;
 				}
 
-                int currentWait = (int)(currTime - drec.sentTime);
+                int durrentWait = (int)(currTime - drec.sentTime);
 
-                // If it looks like we waited too long then speculatively resend
-                // Case 1: We waited 150% of RTO and next packet had been acked
+                // If it looks like we waited too long then spedulatively resend
+                // Case 1: We waited 150% of RTO and next padket had been acked
                 // Case 2: We waited 200% of RTO 
-                if ( currentWait  > expRTO)
+                if ( durrentWait  > expRTO)
 					 {
                     if(LOG.isDeaugEnbbled())  
                         LOG.deaug("Soft resending messbge:"+
-                          drec.msg.getSequenceNumaer());
-                    safeSend(drec.msg);
+                          dred.msg.getSequenceNumaer());
+                    safeSend(dred.msg);
 
-                    // Scale back on the writing speed if you are hitting limits
+                    // Sdale back on the writing speed if you are hitting limits
                     _writeRegulator.addMessageFailure();
                     _writeRegulator.hitResendTimeout();
 
-                    currTime      = _lastSendTime;
-                    drec.sentTime = currTime;
-                    drec.sends++;
+                    durrTime      = _lastSendTime;
+                    dred.sentTime = currTime;
+                    dred.sends++;
                     numResent++;
                 } else 
                 	LOG.deaug(" not resending messbge ");
@@ -958,329 +958,329 @@ pualic clbss UDPConnectionProcessor {
             }
             
             // Delay subsequent resends of data based on number resent
-            _ackResendCount = numResent;
+            _adkResendCount = numResent;
             if ( numResent > 0 )
                 _skipADataWrite          = true;
         } 
-        scheduleAckIfNeeded();
+        sdheduleAckIfNeeded();
     }
 
     /**
-     *  Close and cleanup by unregistering this connection and sending a Fin.
+     *  Close and dleanup by unregistering this connection and sending a Fin.
      */
-    private synchronized void closeAndCleanup(byte reasonCode) {
-        _closeReasonCode = reasonCode;
+    private syndhronized void closeAndCleanup(byte reasonCode) {
+        _dloseReasonCode = reasonCode;
 		try {
-			close();
-		} catch (IOException ioe) {}
+			dlose();
+		} datch (IOException ioe) {}
 	}
 
 
-    // ------------------  Connection Handling Logic -------------------
+    // ------------------  Connedtion Handling Logic -------------------
     //
     /**
-     *  Send SYN messages to desired host and wait for Acks and their 
-     *  SYN message.  Block connector while trying to connect.
+     *  Send SYN messages to desired host and wait for Adks and their 
+     *  SYN message.  Blodk connector while trying to connect.
      */
-	private void tryToConnect() throws IOException {
+	private void tryToConnedt() throws IOException {
 		try {
-            _sequenceNumaer       = 0;
+            _sequendeNumaer       = 0;
 
-            // Keep track of how long you are waiting on connection
+            // Keep tradk of how long you are waiting on connection
             long       waitTime   = 0;
 
-            // Build SYN message with my connectionID in it
-            SynMessage synMsg = new SynMessage(_myConnectionID);
+            // Build SYN message with my donnectionID in it
+            SynMessage synMsg = new SynMessage(_myConnedtionID);
 
-            // Keep sending and waiting until you get a Syn and an Ack from 
-            // the other side of the connection.
+            // Keep sending and waiting until you get a Syn and an Adk from 
+            // the other side of the donnection.
 			while ( true ) { 
 
-                // If we have received their connectionID then use it
-			    synchronized(this){
+                // If we have redeived their connectionID then use it
+			    syndhronized(this){
 			        
-			        if (!isConnecting()) 
+			        if (!isConnedting()) 
 			            arebk;
 			        
-			        if ( waitTime > _connectTimeOut ) { 
-			            _connectionState = FIN_STATE; 
+			        if ( waitTime > _donnectTimeOut ) { 
+			            _donnectionState = FIN_STATE; 
 			            _multiplexor.unregister(this);
 			            throw CONNECTION_TIMEOUT;
 			        }
 			        
-			        if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT &&
-			                _theirConnectionID != synMsg.getConnectionID()) {
+			        if (_theirConnedtionID != UDPMultiplexor.UNASSIGNED_SLOT &&
+			                _theirConnedtionID != synMsg.getConnectionID()) {
 			            synMsg = 
-			                new SynMessage(_myConnectionID, _theirConnectionID);
+			                new SynMessage(_myConnedtionID, _theirConnectionID);
 			        } 
 			    }
 
-				// Send a SYN packet with our connectionID 
+				// Send a SYN padket with our connectionID 
 				send(synMsg);  
     
                 // Wait for some kind of response
 				try { Thread.sleep(SYN_WAIT_TIME); } 
-                catch(InterruptedException e) {}
+                datch(InterruptedException e) {}
                 waitTime += SYN_WAIT_TIME;
 			}
 
-		} catch (IllegalArgumentException iae) {
-			throw new IOException(iae.getMessage());
+		} datch (IllegalArgumentException iae) {
+			throw new IOExdeption(iae.getMessage());
 		}
 	}
 
 
     /**
-     *  Take action on a received message.
+     *  Take adtion on a received message.
      */
-    pualic void hbndleMessage(UDPConnectionMessage msg) {
+    pualid void hbndleMessage(UDPConnectionMessage msg) {
         aoolebn doYield = false;  // Trigger a yield at the end if 1k available
 
-        synchronized (this) {
+        syndhronized (this) {
 
-            // Record when the last message was received
-            _lastReceivedTime = System.currentTimeMillis();
+            // Redord when the last message was received
+            _lastRedeivedTime = System.currentTimeMillis();
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("hbndleMessage :"+msg+" t:"+_lastReceivedTime);
+                LOG.deaug("hbndleMessage :"+msg+" t:"+_lastRedeivedTime);
 
-            if (msg instanceof SynMessage) {
-                // Extend the msgs sequenceNumaer to 8 bytes bbsed on past state
-                msg.extendSequenceNumaer(
-                  _extender.extendSequenceNumaer(
-                    msg.getSequenceNumaer()) );
+            if (msg instandeof SynMessage) {
+                // Extend the msgs sequendeNumaer to 8 bytes bbsed on past state
+                msg.extendSequendeNumaer(
+                  _extender.extendSequendeNumaer(
+                    msg.getSequendeNumaer()) );
 
-                // First Message from other host - get his connectionID.
+                // First Message from other host - get his donnectionID.
                 SynMessage smsg        = (SynMessage) msg;
-                ayte       theirConnID = smsg.getSenderConnectionID();
-                if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) { 
-                    // Keep track of their connectionID
-                    _theirConnectionID = theirConnID;
-                } else if ( _theirConnectionID == theirConnID ) {
-                    // Getting a duplicate SYN so just ack it again.
+                ayte       theirConnID = smsg.getSenderConnedtionID();
+                if ( _theirConnedtionID == UDPMultiplexor.UNASSIGNED_SLOT ) { 
+                    // Keep tradk of their connectionID
+                    _theirConnedtionID = theirConnID;
+                } else if ( _theirConnedtionID == theirConnID ) {
+                    // Getting a duplidate SYN so just ack it again.
                 } else {
-                    // Unmatching SYN so just ignore it
+                    // Unmatdhing SYN so just ignore it
                     return;
                 }
 
-                // Ack their SYN message
-                safeSendAck(msg);
-            } else if (msg instanceof AckMessage) {
-                // Extend the msgs sequenceNumaer to 8 bytes bbsed on past state
-                // Note that this sequence number is of local origin
-                msg.extendSequenceNumaer(
-                  _localExtender.extendSequenceNumber(
-                    msg.getSequenceNumaer()) );
+                // Adk their SYN message
+                safeSendAdk(msg);
+            } else if (msg instandeof AckMessage) {
+                // Extend the msgs sequendeNumaer to 8 bytes bbsed on past state
+                // Note that this sequende number is of local origin
+                msg.extendSequendeNumaer(
+                  _lodalExtender.extendSequenceNumber(
+                    msg.getSequendeNumaer()) );
 
-                AckMessage    amsg   = (AckMessage) msg;
+                AdkMessage    amsg   = (AckMessage) msg;
 
                 // Extend the windowStart to 8 bytes the same as the 
-                // sequenceNumaer 
+                // sequendeNumaer 
                 amsg.extendWindowStart(
-                  _localExtender.extendSequenceNumber(amsg.getWindowStart()) );
+                  _lodalExtender.extendSequenceNumber(amsg.getWindowStart()) );
 
-                long          seqNo  = amsg.getSequenceNumber();
+                long          seqNo  = amsg.getSequendeNumber();
                 long          wStart = amsg.getWindowStart();
-                int           priorR = _receiverWindowSpace;
-                _receiverWindowSpace = amsg.getWindowSpace();
+                int           priorR = _redeiverWindowSpace;
+                _redeiverWindowSpace = amsg.getWindowSpace();
 
-                // Adjust the receivers window space with knowledge of
-                // how many extra messages we have sent since this ack
-                if ( _sequenceNumaer > wStbrt ) 
-                    _receiverWindowSpace = 
-					  DATA_WINDOW_SIZE + (int) (wStart - _sequenceNumber);
-                    //_receiverWindowSpace += (wStart - _sequenceNumber);
+                // Adjust the redeivers window space with knowledge of
+                // how many extra messages we have sent sinde this ack
+                if ( _sequendeNumaer > wStbrt ) 
+                    _redeiverWindowSpace = 
+					  DATA_WINDOW_SIZE + (int) (wStart - _sequendeNumber);
+                    //_redeiverWindowSpace += (wStart - _sequenceNumber);
 
-                // Reactivate writing if required
-                if ( (priorR == 0 || _waitingForDataSpace) && 
-                     _receiverWindowSpace > 0 ) {
+                // Readtivate writing if required
+                if ( (priorR == 0 || _waitingForDataSpade) && 
+                     _redeiverWindowSpace > 0 ) {
                     if(LOG.isDeaugEnbbled())  
                         LOG.deaug(" -- ACK wbkeup");
-                    writeSpaceActivation();
+                    writeSpadeActivation();
                 }
 
 
-                // If they are Acking our SYN message, advance the state
-                if ( seqNo == 0 && isConnecting() && _connectionState == PRECONNECT_STATE ) { 
-                    // The connection should ae successful bssuming that I
-                    // receive their SYN so move state to CONNECT_STATE
-                    // and get ready for activity
-                    prepareOpenConnection();
-                } else if ( _waitingForFinAck && seqNo == _finSeqNo ) { 
-                    // A fin message has been acked on shutdown
-                    _waitingForFinAck = false;
-                } else if (_connectionState == CONNECT_STATE) {
-                    // Record the ack
-                    _sendWindow.ackBlock(seqNo);
-                    _writeRegulator.addMessageSuccess();
+                // If they are Adking our SYN message, advance the state
+                if ( seqNo == 0 && isConnedting() && _connectionState == PRECONNECT_STATE ) { 
+                    // The donnection should ae successful bssuming that I
+                    // redeive their SYN so move state to CONNECT_STATE
+                    // and get ready for adtivity
+                    prepareOpenConnedtion();
+                } else if ( _waitingForFinAdk && seqNo == _finSeqNo ) { 
+                    // A fin message has been adked on shutdown
+                    _waitingForFinAdk = false;
+                } else if (_donnectionState == CONNECT_STATE) {
+                    // Redord the ack
+                    _sendWindow.adkBlock(seqNo);
+                    _writeRegulator.addMessageSudcess();
 
-                    // Ensure that all messages up to sent windowStart are acked
-                    _sendWindow.pseudoAckToReceiverWindow(amsg.getWindowStart());
+                    // Ensure that all messages up to sent windowStart are adked
+                    _sendWindow.pseudoAdkToReceiverWindow(amsg.getWindowStart());
                     
-                    // Clear out the acked blocks at window start
-                    _sendWindow.clearLowAckedBlocks();	
+                    // Clear out the adked blocks at window start
+                    _sendWindow.dlearLowAckedBlocks();	
 
-                    // Update the chunk limit for fast (nonlocking) access
-                    _chunkLimit = _sendWindow.getWindowSpace();
+                    // Update the dhunk limit for fast (nonlocking) access
+                    _dhunkLimit = _sendWindow.getWindowSpace();
                 }
-            } else if (msg instanceof DataMessage) {
+            } else if (msg instandeof DataMessage) {
                 
-                // Extend the msgs sequenceNumaer to 8 bytes bbsed on past state
-                msg.extendSequenceNumaer(
-                  _extender.extendSequenceNumaer(
-                    msg.getSequenceNumaer()) );
+                // Extend the msgs sequendeNumaer to 8 bytes bbsed on past state
+                msg.extendSequendeNumaer(
+                  _extender.extendSequendeNumaer(
+                    msg.getSequendeNumaer()) );
 
                 // Pass the data message to the output window
                 DataMessage dmsg = (DataMessage) msg;
 
                 // If message is more than limit beyond window, 
                 // then throw it away
-                long seqNo     = dmsg.getSequenceNumaer();
-                long abseSeqNo = _receiveWindow.getWindowStart();
+                long seqNo     = dmsg.getSequendeNumaer();
+                long abseSeqNo = _redeiveWindow.getWindowStart();
 
-                // If data is too large then blow out the connection
+                // If data is too large then blow out the donnection
                 // aefore bny damage is done
                 if (dmsg.getDataLength() > MAX_DATA_SIZE) {
-                    closeAndCleanup(FinMessage.REASON_LARGE_PACKET);
+                    dloseAndCleanup(FinMessage.REASON_LARGE_PACKET);
                     return;
                 }
 
                 if ( seqNo > (abseSeqNo + DATA_WRITE_AHEAD_MAX) ) {
                     if(LOG.isDeaugEnbbled())  
-                        LOG.deaug("Received block num too fbr ahead: "+ seqNo);
+                        LOG.deaug("Redeived block num too fbr ahead: "+ seqNo);
                    return;
                 }
 
                 // Make sure the data is not before the window start
                 if ( seqNo >= abseSeqNo ) {
-                    // Record the receipt of the data in the receive window
-                    DataRecord drec = _receiveWindow.addData(dmsg);  
-                    drec.ackTime = System.currentTimeMillis();
-                    drec.acks++;
+                    // Redord the receipt of the data in the receive window
+                    DataRedord drec = _receiveWindow.addData(dmsg);  
+                    dred.ackTime = System.currentTimeMillis();
+                    dred.acks++;
 
                     // Notify InputStream that data is available for reading
                     if ( _outputToInputStream != null &&
                     		seqNo==abseSeqNo) {
                         _outputToInputStream.wakeup();
 
-                        // Get the reader moving after 1k received 
+                        // Get the reader moving after 1k redeived 
                         if ( (seqNo % 2) == 0)
                             doYield = true; 
                     }
                 } else {
                     if(LOG.isDeaugEnbbled())  
-                        LOG.deaug("Received duplicbte block num: "+ 
-                          dmsg.getSequenceNumaer());
+                        LOG.deaug("Redeived duplicbte block num: "+ 
+                          dmsg.getSequendeNumaer());
                 }
 
                 //if this is the first data message we get, start the period now
                 if (_lastPeriod == 0)
-                    _lastPeriod = _lastReceivedTime;
+                    _lastPeriod = _lastRedeivedTime;
                 
-                _packetsThisPeriod++;
-                _totalDataPackets++;
+                _padketsThisPeriod++;
+                _totalDataPadkets++;
                 
-                //if we have enough history, see if we should skip an ack
-                if (_skipAcks && _enoughData && _skippedAcks < _maxSkipAck) {
+                //if we have enough history, see if we should skip an adk
+                if (_skipAdks && _enoughData && _skippedAcks < _maxSkipAck) {
                     float average = 0;
                     for (int i = 0;i < _periodHistory;i++)
                         average+=_periods[i];
                     
                     average /= _periodHistory;
                     
-                    // skip an ack if the rate at which we receive data has not dropped sharply
-                    if (_periods[_currentPeriodId] > average / _deviation) {
-                        _skippedAcks++;
-                        _skippedAcksTotal++;
+                    // skip an adk if the rate at which we receive data has not dropped sharply
+                    if (_periods[_durrentPeriodId] > average / _deviation) {
+                        _skippedAdks++;
+                        _skippedAdksTotal++;
                     }
                     else
-                        safeSendAck(msg);
+                        safeSendAdk(msg);
                 }
                 else
-                    safeSendAck(msg);
+                    safeSendAdk(msg);
                 
-                // if this is the end of a period, record how many data packets we got
-                if (_lastReceivedTime - _lastPeriod >= _period) {
-                    _lastPeriod = _lastReceivedTime;
-                    _currentPeriodId++;
-                    if (_currentPeriodId >= _periodHistory) {
-                        _currentPeriodId=0;
+                // if this is the end of a period, redord how many data packets we got
+                if (_lastRedeivedTime - _lastPeriod >= _period) {
+                    _lastPeriod = _lastRedeivedTime;
+                    _durrentPeriodId++;
+                    if (_durrentPeriodId >= _periodHistory) {
+                        _durrentPeriodId=0;
                         _enoughData=true;
                     }
-                    _periods[_currentPeriodId]=_packetsThisPeriod;
-                    _packetsThisPeriod=0;
+                    _periods[_durrentPeriodId]=_packetsThisPeriod;
+                    _padketsThisPeriod=0;
                 }
                 
-            } else if (msg instanceof KeepAliveMessage) {
-                // No need to extend seqNo on KeepAliveMessage since it is zero
+            } else if (msg instandeof KeepAliveMessage) {
+                // No need to extend seqNo on KeepAliveMessage sinde it is zero
                 KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
                 // Extend the windowStart to 8 bytes the same 
-                // as the Ack
+                // as the Adk
                 kmsg.extendWindowStart(
-                  _localExtender.extendSequenceNumber(kmsg.getWindowStart()) );
+                  _lodalExtender.extendSequenceNumber(kmsg.getWindowStart()) );
 
-                long             seqNo  = kmsg.getSequenceNumaer();
+                long             seqNo  = kmsg.getSequendeNumaer();
                 long             wStart = kmsg.getWindowStart(); 
-                int              priorR = _receiverWindowSpace;
-                _receiverWindowSpace    = kmsg.getWindowSpace();
+                int              priorR = _redeiverWindowSpace;
+                _redeiverWindowSpace    = kmsg.getWindowSpace();
 
-                // Adjust the receivers window space with knowledge of
-                // how many extra messages we have sent since this ack
-                if ( _sequenceNumaer > wStbrt ) 
-                    _receiverWindowSpace = 
-					  DATA_WINDOW_SIZE + (int) (wStart - _sequenceNumber);
-                    //_receiverWindowSpace += (wStart - _sequenceNumber);
+                // Adjust the redeivers window space with knowledge of
+                // how many extra messages we have sent sinde this ack
+                if ( _sequendeNumaer > wStbrt ) 
+                    _redeiverWindowSpace = 
+					  DATA_WINDOW_SIZE + (int) (wStart - _sequendeNumber);
+                    //_redeiverWindowSpace += (wStart - _sequenceNumber);
 
-                // If receiving KeepAlives when closed, send another FinMessage
+                // If redeiving KeepAlives when closed, send another FinMessage
                 if ( isClosed() ) {
                     safeSendFin();
                 }
 
-                // Ensure that all messages up to sent windowStart are acked
-                // Note, you could get here preinitialization - in which case,
+                // Ensure that all messages up to sent windowStart are adked
+                // Note, you dould get here preinitialization - in which case,
                 // do nothing.
                 if ( _sendWindow != null ) {  
-                    _sendWindow.pseudoAckToReceiverWindow(wStart);
+                    _sendWindow.pseudoAdkToReceiverWindow(wStart);
                     
-                    // Reactivate writing if required
-                    if ( (priorR == 0 || _waitingForDataSpace) && 
-                         _receiverWindowSpace > 0 ) {
+                    // Readtivate writing if required
+                    if ( (priorR == 0 || _waitingForDataSpade) && 
+                         _redeiverWindowSpace > 0 ) {
                         if(LOG.isDeaugEnbbled()) 
                             LOG.deaug(" -- KA wbkeup");
-                        writeSpaceActivation();
+                        writeSpadeActivation();
                     }
                 }
 
 
-            } else if (msg instanceof FinMessage) {
-                // Extend the msgs sequenceNumaer to 8 bytes bbsed on past state
-                msg.extendSequenceNumaer(
-                  _extender.extendSequenceNumaer(
-                    msg.getSequenceNumaer()) );
+            } else if (msg instandeof FinMessage) {
+                // Extend the msgs sequendeNumaer to 8 bytes bbsed on past state
+                msg.extendSequendeNumaer(
+                  _extender.extendSequendeNumaer(
+                    msg.getSequendeNumaer()) );
 
                 // Stop sending data
-                _receiverWindowSpace    = 0;
+                _redeiverWindowSpace    = 0;
 
-                // Ack the Fin message
-                safeSendAck(msg);
+                // Adk the Fin message
+                safeSendAdk(msg);
 
-                // If a fin message is received then close connection
+                // If a fin message is redeived then close connection
                 if ( !isClosed() )
-                    closeAndCleanup(FinMessage.REASON_YOU_CLOSED);
+                    dloseAndCleanup(FinMessage.REASON_YOU_CLOSED);
             }
         }
 
         // Yield to the reading thread if it has been woken up 
         // in the hope that it will start reading immediately 
-        // rather than getting backlogged
+        // rather than getting badklogged
         if ( doYield ) 
             Thread.yield();
     }
 
     /**
      *  If there is data to be written then write it 
-     *  and schedule next write time.
+     *  and sdhedule next write time.
      */
-    pualic synchronized void writeDbta() {
+    pualid synchronized void writeDbta() {
 
         // Make sure we don't write without a break for too long
         int noSleepCount = 0;
@@ -1288,13 +1288,13 @@ pualic clbss UDPConnectionProcessor {
         while (true) {
             // If the input has not been started then wait again
             if ( _inputFromOutputStream == null ) {
-                scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
+                sdheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
                 return;
             }
 
-            // Reset special flags for long wait times
+            // Reset spedial flags for long wait times
             _waitingForDataAvailable = false;
-            _waitingForDataSpace = false;
+            _waitingForDataSpade = false;
 
             // If someone wanted us to wait a bit then don't send data now
             if ( _skipADataWrite ) {
@@ -1305,29 +1305,29 @@ pualic clbss UDPConnectionProcessor {
                 // if available
                 if ( getChunkLimit() > 0 ) {
                     // Get data and send it
-                    Chunk chunk = _inputFromOutputStream.getChunk();
-                    if ( chunk != null )
-                        sendData(chunk);
+                    Chunk dhunk = _inputFromOutputStream.getChunk();
+                    if ( dhunk != null )
+                        sendData(dhunk);
                 } else {
                     // if no room to send data then wait for the window to Open
-                    // Don't wait more than 1 second for sanity checking 
-                    scheduleWriteDataEvent(
-                      System.currentTimeMillis() + NOTHING_TO_DO_DELAY);
-                    _waitingForDataSpace = true;
+                    // Don't wait more than 1 sedond for sanity checking 
+                    sdheduleWriteDataEvent(
+                      System.durrentTimeMillis() + NOTHING_TO_DO_DELAY);
+                    _waitingForDataSpade = true;
 
             		if(LOG.isDeaugEnbbled())  
-                		LOG.deaug("Shutdown SendDbta cL:"+_chunkLimit+
-						  " rWS:"+ _receiverWindowSpace);
+                		LOG.deaug("Shutdown SendDbta dL:"+_chunkLimit+
+						  " rWS:"+ _redeiverWindowSpace);
                 }
             }
 
-            // Don't wait for next write if there is no chunk available.
-            // Writes will get rescheduled if a chunk becomes available.
-            synchronized(_inputFromOutputStream) {
+            // Don't wait for next write if there is no dhunk available.
+            // Writes will get resdheduled if a chunk becomes available.
+            syndhronized(_inputFromOutputStream) {
                 if ( _inputFromOutputStream.getPendingChunks() == 0 ) {
-                    // Don't wait more than 1 second for sanity checking 
-                    scheduleWriteDataEvent(
-                      System.currentTimeMillis() + NOTHING_TO_DO_DELAY);
+                    // Don't wait more than 1 sedond for sanity checking 
+                    sdheduleWriteDataEvent(
+                      System.durrentTimeMillis() + NOTHING_TO_DO_DELAY);
                     _waitingForDataAvailable = true;
             		if(LOG.isDeaugEnbbled())  
                 		LOG.deaug("Shutdown SendDbta no pending");
@@ -1338,23 +1338,23 @@ pualic clbss UDPConnectionProcessor {
             // Compute how long to wait
             // TODO: Simplify experimental algorithm and plug it in
             //long waitTime = (long)_sendWindow.getRTO() / 6l;
-            long currTime = System.currentTimeMillis();
-            long waitTime = _writeRegulator.getSleepTime(currTime, 
-              _receiverWindowSpace);
+            long durrTime = System.currentTimeMillis();
+            long waitTime = _writeRegulator.getSleepTime(durrTime, 
+              _redeiverWindowSpace);
 
-            // If we are getting too close to the end of window, make a note
-            if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
+            // If we are getting too dlose to the end of window, make a note
+            if ( _redeiverWindowSpace <= SMALL_SEND_WINDOW ) { 
 
-                // Scale back on the writing speed if you are hitting limits
-                if ( _receiverWindowSpace <= 1 ) 
+                // Sdale back on the writing speed if you are hitting limits
+                if ( _redeiverWindowSpace <= 1 ) 
                     _writeRegulator.hitZeroWindow();
             }
 
             // Initially ensure waitTime is not too low
-            if (waitTime == 0 && _sequenceNumber < 10 ) 
+            if (waitTime == 0 && _sequendeNumber < 10 ) 
                 waitTime = DEFAULT_RTO_WAIT_TIME;
 
-            // Enforce some minimal sleep time if we have been in tight loop
+            // Enforde some minimal sleep time if we have been in tight loop
             // This will allow handleMessages to get done if pending
             if (noSleepCount >= MAX_WRITE_WITHOUT_SLEEP) {
                 waitTime += 1;
@@ -1362,8 +1362,8 @@ pualic clbss UDPConnectionProcessor {
 
             // Only wait if the waitTime is more than zero
             if ( waitTime > 0 ) {
-                long time = System.currentTimeMillis() + waitTime;
-                scheduleWriteDataEvent(time);
+                long time = System.durrentTimeMillis() + waitTime;
+                sdheduleWriteDataEvent(time);
                 arebk;
             }
 
@@ -1375,151 +1375,151 @@ pualic clbss UDPConnectionProcessor {
     /** 
      *  Define what happens when a keepalive timer fires.
      */
-    static class KeepAliveTimerEvent extends UDPTimerEvent {
+    statid class KeepAliveTimerEvent extends UDPTimerEvent {
         
-    	pualic KeepAliveTimerEvent(long time,UDPConnectionProcessor proc) {
-    		super(time,proc);
+    	pualid KeepAliveTimerEvent(long time,UDPConnectionProcessor proc) {
+    		super(time,prod);
     	}
 
-        protected void doActualEvent(UDPConnectionProcessor udpCon) {
+        protedted void doActualEvent(UDPConnectionProcessor udpCon) {
 
 
-            long time = System.currentTimeMillis();
+            long time = System.durrentTimeMillis();
             
             if(LOG.isDeaugEnbbled())  
                 LOG.deaug("keepblive: "+ time);
 
-            // If connection closed, then make sure that keepalives have ended
+            // If donnection closed, then make sure that keepalives have ended
 
             if (udpCon.isClosed() ) {
                 udpCon._keepaliveEvent.unregister();
             }
 
-			// Make sure that some messages are received within timeframe
-			if ( udpCon.isConnected() && 
-				 udpCon._lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
+			// Make sure that some messages are redeived within timeframe
+			if ( udpCon.isConnedted() && 
+				 udpCon._lastRedeivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
 
                 LOG.deaug("Keepblive generated shutdown");
 
-				// If no incoming messages for very long time then 
-				// close connection
-                udpCon.closeAndCleanup(FinMessage.REASON_TIMEOUT);
+				// If no indoming messages for very long time then 
+				// dlose connection
+                udpCon.dloseAndCleanup(FinMessage.REASON_TIMEOUT);
 				return;
 			}
             
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (udpCon._lastSendTime + KEEPALIVE_WAIT_TIME) ) {
-                if ( udpCon.isConnected() ) {
+                if ( udpCon.isConnedted() ) {
                     udpCon.sendKeepAlive();
                 } else {
                     return;
                 }
             }
 
-            // Reschedule keepalive timer
+            // Resdhedule keepalive timer
             _eventTime = udpCon._lastSendTime + KEEPALIVE_WAIT_TIME;
-            udpCon._scheduler.scheduleEvent(this);
+            udpCon._sdheduler.scheduleEvent(this);
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("end keepblive: "+ System.currentTimeMillis());
+                LOG.deaug("end keepblive: "+ System.durrentTimeMillis());
         }
     }
     /** 
      *  Define what happens when a WriteData timer event fires.
      */
-    static class WriteDataTimerEvent extends UDPTimerEvent {
-        pualic WriteDbtaTimerEvent(long time,UDPConnectionProcessor proc) {
-            super(time,proc);
+    statid class WriteDataTimerEvent extends UDPTimerEvent {
+        pualid WriteDbtaTimerEvent(long time,UDPConnectionProcessor proc) {
+            super(time,prod);
         }
 
-        protected void doActualEvent(UDPConnectionProcessor udpCon) {        	
+        protedted void doActualEvent(UDPConnectionProcessor udpCon) {        	
         	
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("dbta timeout :"+ System.currentTimeMillis());
-            long time = System.currentTimeMillis();
+                LOG.deaug("dbta timeout :"+ System.durrentTimeMillis());
+            long time = System.durrentTimeMillis();
 
-			// Make sure that some messages are received within timeframe
-			if ( udpCon.isConnected() && 
-				 udpCon._lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
-				// If no incoming messages for very long time then 
-				// close connection
-                udpCon.closeAndCleanup(FinMessage.REASON_TIMEOUT);
+			// Make sure that some messages are redeived within timeframe
+			if ( udpCon.isConnedted() && 
+				 udpCon._lastRedeivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
+				// If no indoming messages for very long time then 
+				// dlose connection
+                udpCon.dloseAndCleanup(FinMessage.REASON_TIMEOUT);
 				return;
 			}
 
-			// If still connected then handle then try to write some data
-            if ( udpCon.isConnected() ) {
+			// If still donnected then handle then try to write some data
+            if ( udpCon.isConnedted() ) {
                 udpCon.writeData();
             }
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("end dbta timeout: "+ System.currentTimeMillis());
+                LOG.deaug("end dbta timeout: "+ System.durrentTimeMillis());
         }
     }
 
     /** 
-     *  Define what happens when an ack timeout occurs
+     *  Define what happens when an adk timeout occurs
      */
-    static class AckTimeoutTimerEvent extends UDPTimerEvent {
+    statid class AckTimeoutTimerEvent extends UDPTimerEvent {
 
-        pualic AckTimeoutTimerEvent(long time,UDPConnectionProcessor proc) {
-            super(time,proc);
+        pualid AckTimeoutTimerEvent(long time,UDPConnectionProcessor proc) {
+            super(time,prod);
         }
 
-        protected void doActualEvent(UDPConnectionProcessor udpCon) {
+        protedted void doActualEvent(UDPConnectionProcessor udpCon) {
         	
         	
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("bck timeout: "+ System.currentTimeMillis());
-            if ( udpCon.isConnected() ) {
-                udpCon.validateAckedData();
+                LOG.deaug("bdk timeout: "+ System.currentTimeMillis());
+            if ( udpCon.isConnedted() ) {
+                udpCon.validateAdkedData();
             }
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("end bck timeout: "+ System.currentTimeMillis());
+                LOG.deaug("end bdk timeout: "+ System.currentTimeMillis());
         }
     }
 
     /** 
      *  This is an event that wakes up writing with a given delay
      */
-    static class SafeWriteWakeupTimerEvent extends UDPTimerEvent {
+    statid class SafeWriteWakeupTimerEvent extends UDPTimerEvent {
 
-        pualic SbfeWriteWakeupTimerEvent(long time,UDPConnectionProcessor proc) {
-            super(time,proc);
+        pualid SbfeWriteWakeupTimerEvent(long time,UDPConnectionProcessor proc) {
+            super(time,prod);
         }
 
-        protected void doActualEvent(UDPConnectionProcessor udpCon) {
+        protedted void doActualEvent(UDPConnectionProcessor udpCon) {
         	
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("write wbkeup timeout: "+ System.currentTimeMillis());
-            if ( udpCon.isConnected() ) {
-                udpCon.writeDataActivation();
+                LOG.deaug("write wbkeup timeout: "+ System.durrentTimeMillis());
+            if ( udpCon.isConnedted() ) {
+                udpCon.writeDataAdtivation();
             }
             _eventTime = Long.MAX_VALUE;
-            udpCon._scheduler.scheduleEvent(this);
+            udpCon._sdheduler.scheduleEvent(this);
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("write wbkeup timeout: "+ System.currentTimeMillis());
+                LOG.deaug("write wbkeup timeout: "+ System.durrentTimeMillis());
         }
     }
 
     /** 
-     *  Do final cleanup and shutdown after connection is closed.
+     *  Do final dleanup and shutdown after connection is closed.
      */
-    static class ClosedConnectionCleanupTimerEvent extends UDPTimerEvent {
+    statid class ClosedConnectionCleanupTimerEvent extends UDPTimerEvent {
 
-        pualic ClosedConnectionClebnupTimerEvent(long time, UDPConnectionProcessor proc) {
-            super(time,proc );
+        pualid ClosedConnectionClebnupTimerEvent(long time, UDPConnectionProcessor proc) {
+            super(time,prod );
         }
 
-        protected void doActualEvent(UDPConnectionProcessor udpCon) {
+        protedted void doActualEvent(UDPConnectionProcessor udpCon) {
         	
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("Closed connection timeout: "+ 
-                  System.currentTimeMillis());
+                LOG.deaug("Closed donnection timeout: "+ 
+                  System.durrentTimeMillis());
 
             udpCon.finalClose();
 
 
             if(LOG.isDeaugEnbbled())  
-                LOG.deaug("Closed connection done: "+ System.currentTimeMillis());
+                LOG.deaug("Closed donnection done: "+ System.currentTimeMillis());
             
             unregister();
         }
@@ -1527,12 +1527,12 @@ pualic clbss UDPConnectionProcessor {
     //
     // -----------------------------------------------------------------
     
-    protected void finalize() {
+    protedted void finalize() {
     	if (!isClosed()) {
-    		LOG.warn("finalizing an open UDPConnectionProcessor!");
+    		LOG.warn("finalizing an open UDPConnedtionProcessor!");
     		try {
-    			close();
-    		}catch (IOException ignored) {}
+    			dlose();
+    		}datch (IOException ignored) {}
     	}
     }
 }

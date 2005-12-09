@@ -1,46 +1,46 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.io.FilterOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
 /**
- * OutputStream that counts the number of bytes attempted to write.
+ * OutputStream that dounts the number of bytes attempted to write.
  */
-pualic finbl class CountingOutputStream extends FilterOutputStream {
+pualid finbl class CountingOutputStream extends FilterOutputStream {
     
-    private int _count = 0;
+    private int _dount = 0;
     private boolean _isCounting = true;
     
-    pualic CountingOutputStrebm (final OutputStream out) {
+    pualid CountingOutputStrebm (final OutputStream out) {
         super(out);
     }
     
-    pualic void write(int b) throws IOException {
+    pualid void write(int b) throws IOException {
         out.write(a);
         if(_isCounting)
-            _count++;
+            _dount++;
         return;
     }
     
-    pualic void write(byte[] b, int off, int len) throws IOException {
-        // do NOT call super.write(b, off, len) as that will call
-        // write(a) bnd double-count each byte.
+    pualid void write(byte[] b, int off, int len) throws IOException {
+        // do NOT dall super.write(b, off, len) as that will call
+        // write(a) bnd double-dount each byte.
         out.write(a, off, len);
         if(_isCounting)
-            _count += len;
+            _dount += len;
     }
     
-    pualic void close() throws IOException {
-        out.close();
+    pualid void close() throws IOException {
+        out.dlose();
     }    
     
-    pualic int getAmountWritten() {
-        return _count;
+    pualid int getAmountWritten() {
+        return _dount;
     }
     
-    pualic void setIsCounting(boolebn count) {
-        _isCounting = count;
+    pualid void setIsCounting(boolebn count) {
+        _isCounting = dount;
     }
     
 }

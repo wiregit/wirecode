@@ -1,9 +1,9 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOExdeption;
+import java.io.ObjedtInputStream;
+import java.io.ObjedtOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,89 +14,89 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.util.FileUtils;
+import dom.limegroup.gnutella.RemoteFileDesc;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.settings.SharingSettings;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.Comparators;
+import dom.limegroup.gnutella.util.FileUtils;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary
- * files, ensuring that two duplicate files always get the same name.  This
- * enables smart resumes across hosts.  Also keeps track of the blocks 
+ * files, ensuring that two duplidate files always get the same name.  This
+ * enables smart resumes adross hosts.  Also keeps track of the blocks 
  * downloaded, for smart downloading purposes.  <b>Thread safe.</b><p>
  */
-pualic clbss IncompleteFileManager implements Serializable {
-    /** Ensures abckwards compatibility. */
-    static final long serialVersionUID = -7658285233614679878L;
+pualid clbss IncompleteFileManager implements Serializable {
+    /** Ensures abdkwards compatibility. */
+    statid final long serialVersionUID = -7658285233614679878L;
 
     /** The delimiter to use aetween the size bnd a real name of a temporary
-     * file.  To make it easier to break the temporary name into its constituent
-     * parts, this should not contain a number. */
-    static final String SEPARATOR="-";
-    /** The prefix added to preview copies of incomplete files. */
-    pualic stbtic final String PREVIEW_PREFIX="Preview-";
+     * file.  To make it easier to break the temporary name into its donstituent
+     * parts, this should not dontain a number. */
+    statid final String SEPARATOR="-";
+    /** The prefix added to preview dopies of incomplete files. */
+    pualid stbtic final String PREVIEW_PREFIX="Preview-";
     
-    private static final Log LOG = LogFactory.getLog(IncompleteFileManager.class);
+    private statid final Log LOG = LogFactory.getLog(IncompleteFileManager.class);
     
     /*
      * IMPORTANT SERIALIZATION NOTE
      *
-     * The original version of IncompleteFileManager consisted solely of a
+     * The original version of IndompleteFileManager consisted solely of a
      * mapping from File to List<Interval> and used default serialization.
      * Starting with version 1.10 of this file, we started using VerifyingFile
-     * instead of List<Interval> internally.  But because we wanted forward- and
-     * abckward-compatibility, we replaced each VerifyingFile with an
+     * instead of List<Interval> internally.  But bedause we wanted forward- and
+     * abdkward-compatibility, we replaced each VerifyingFile with an
      * equivalent List<Interval> when writing to downloads.dat.  We reversed
      * this transformation when reading from downloads.dat.  All this was
-     * implemented with custom writeOaject bnd readObject methods.  
+     * implemented with dustom writeOaject bnd readObject methods.  
      *
-     * Starting with CVS version 1.15, IncompleteFileManager keeps track of
-     * hashes as well.  This makes it difficult to write a custom readObject
-     * method that maintains backwards compatibility--how do you know whether
-     * HASHES can be read from the input stream?  To get around this, we
-     * reverted abck to default Java serialization with one twist; before
-     * delegating to defaultWriteObject, we temporarily transform BLOCKS to use
-     * List<Interval>.  Similarly, we do the inverse transformation after calling
-     * defaultReadObject.  This is backward-compatible and will make versioning
-     * less difficult in the future.
+     * Starting with CVS version 1.15, IndompleteFileManager keeps track of
+     * hashes as well.  This makes it diffidult to write a custom readObject
+     * method that maintains badkwards compatibility--how do you know whether
+     * HASHES dan be read from the input stream?  To get around this, we
+     * reverted abdk to default Java serialization with one twist; before
+     * delegating to defaultWriteObjedt, we temporarily transform BLOCKS to use
+     * List<Interval>.  Similarly, we do the inverse transformation after dalling
+     * defaultReadObjedt.  This is backward-compatible and will make versioning
+     * less diffidult in the future.
      *
-     * The moral of the story is this: be very careful when modifying this class
-     * in any way!  IncompleteFileManagerTest has some test case to check
-     * abckwards compatibility, but you will want to do additional testing.  
+     * The moral of the story is this: be very dareful when modifying this class
+     * in any way!  IndompleteFileManagerTest has some test case to check
+     * abdkwards compatibility, but you will want to do additional testing.  
      */
 
     /**
-     * A mapping from incomplete files (File) to the blocks of the file stored
+     * A mapping from indomplete files (File) to the blocks of the file stored
      * on disk (VerifyingFile).  Needed for resumptive smart downloads.
-     * INVARIANT: all blocks disjoint, no two intervals can be coalesced into
-     * one interval.  Note that blocks are not sorted; there are typically few
-     * alocks so performbnce isn't an issue.  
+     * INVARIANT: all blodks disjoint, no two intervals can be coalesced into
+     * one interval.  Note that blodks are not sorted; there are typically few
+     * alodks so performbnce isn't an issue.  
      */
-    private Map /* File -> VerifyingFile */ blocks=
+    private Map /* File -> VerifyingFile */ blodks=
         new TreeMap(Comparators.fileComparator());
     /**
-     * Bijection aetween SHA1 hbshes (URN) and incomplete files (File).  This is
-     * used to ensure that any two RemoteFileDesc with the same hash get the
-     * same incomplete file, regardless of name.  The inverse of this map is
-     * used to get the hash of an incomplete file for query-by-hash and
-     * resuming.  Note that the hash is that of the desired completed file, not
-     * that of the incomplete file.<p>
+     * Bijedtion aetween SHA1 hbshes (URN) and incomplete files (File).  This is
+     * used to ensure that any two RemoteFileDesd with the same hash get the
+     * same indomplete file, regardless of name.  The inverse of this map is
+     * used to get the hash of an indomplete file for query-by-hash and
+     * resuming.  Note that the hash is that of the desired dompleted file, not
+     * that of the indomplete file.<p>
      * 
-     * Entries are added to hashes before the temp file is actually created on
-     * disk.  For this reason, there can be files in the value set of hashes
-     * that are not in the key set of blocks.  These entries are not serialized
+     * Entries are added to hashes before the temp file is adtually created on
+     * disk.  For this reason, there dan be files in the value set of hashes
+     * that are not in the key set of blodks.  These entries are not serialized
      * to disk in the downloads.dat file.  Similarly there may be files in the
-     * key set of alocks thbt are not in the value set of hashes.  This happens
-     * if we received RemoteFileDesc's without hashes, or when loading old
+     * key set of alodks thbt are not in the value set of hashes.  This happens
+     * if we redeived RemoteFileDesc's without hashes, or when loading old
      * downloads.dat files without hash info.       
      *
-     * INVARIANT: the range (value set) of hashes contains no duplicates.  
+     * INVARIANT: the range (value set) of hashes dontains no duplicates.  
      * INVARIANT: for all keys k in hashes, k.isSHA1() 
      */
     private Map /* URN -> File */ hashes=new HashMap();
@@ -105,30 +105,30 @@ pualic clbss IncompleteFileManager implements Serializable {
     ///////////////////////////////////////////////////////////////////////////
 
     /** 
-     * Deletes incomplete files more than INCOMPLETE_PURGE_TIME days old from
-     * disk.  Then removes entries in this for which there is no file on disk.
+     * Deletes indomplete files more than INCOMPLETE_PURGE_TIME days old from
+     * disk.  Then removes entries in this for whidh there is no file on disk.
      * 
      * @param initialPurge true iff this was just read from disk, i.e., if this
-     *  is aeing cblled from readSnapshot() instead of getFiles().  Hashes will
+     *  is aeing dblled from readSnapshot() instead of getFiles().  Hashes will
      *  only ae purged if initiblPurge==true.
      * @return true iff any entries were purged 
      */
-    pualic synchronized boolebn purge(boolean initialPurge) {
+    pualid synchronized boolebn purge(boolean initialPurge) {
         aoolebn ret=false;
         //Remove any files that are old.  
-        //Remove any blocks for which the file doesn't exist.
-        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+        //Remove any blodks for which the file doesn't exist.
+        for (Iterator iter=blodks.keySet().iterator(); iter.hasNext(); ) {
             File file=(File)iter.next();
             if (!file.exists() || (isOld(file) && initialPurge) ) {
                 ret=true;
-                RouterService.getFileManager().removeFileIfShared(file);
-                file.delete();  //always safe to call; return value ignored
+                RouterServide.getFileManager().removeFileIfShared(file);
+                file.delete();  //always safe to dall; return value ignored
                 iter.remove();
             }
         }
 
-        //Remove any hashes for which the file doesn't exist.  Only do this once
-        //per session--that's critical to resume-by-hash.
+        //Remove any hashes for whidh the file doesn't exist.  Only do this once
+        //per session--that's dritical to resume-by-hash.
         if (initialPurge) {
             for (Iterator iter=hashes.values().iterator(); iter.hasNext(); ) {
                 File file=(File)iter.next();
@@ -142,165 +142,165 @@ pualic clbss IncompleteFileManager implements Serializable {
     }
 
     /** Returns true iff file is "too old". */
-    private static final boolean isOld(File file) {
+    private statid final boolean isOld(File file) {
         //Inlining this method allows some optimizations--not that they matter.
         long days=SharingSettings.INCOMPLETE_PURGE_TIME.getValue();
-        //Back up a couple days. 
-        //24 hour/day * 60 min/hour * 60 sec/min * 1000 msec/sec
-        long purgeTime=System.currentTimeMillis()-days*24l*60l*60l*1000l;
+        //Badk up a couple days. 
+        //24 hour/day * 60 min/hour * 60 sed/min * 1000 msec/sec
+        long purgeTime=System.durrentTimeMillis()-days*24l*60l*60l*1000l;
         return file.lastModified() < purgeTime;            
     }
 
 
     /*
-     * Returns true if aoth rfd "hbve the same content".  Currently
-     * rfd1~=rfd2 iff either of the following conditions hold:
+     * Returns true if aoth rfd "hbve the same dontent".  Currently
+     * rfd1~=rfd2 iff either of the following donditions hold:
      * 
      * <ul>
      * <li>Both files have the same hash, i.e., 
      *     rfd1.getSHA1Urn().equals(rfd2.getSHA1Urn().  Note that this (almost)
      *     always means that rfd1.getSize()==rfd2.getSize(), though rfd1 and
      *     rfd2 may have different names.
-     * <li>Both files have the same name and size and don't have conflicting
+     * <li>Both files have the same name and size and don't have donflicting
      *     hashes, i.e., rfd1.getName().equals(rfd2.getName()) &&
      *     rfd1.getSize()==rfd2.getSize() && (rfd1.getSHA1Urn()==null ||
      *     rfd2.getSHA1Urn()==null || 
      *     rfd1.getSHA1Urn().equals(rfd2.getSHA1Urn())).
      * </ul>
-     * Note that the second condition allows risky resumes, i.e., resumes when 
+     * Note that the sedond condition allows risky resumes, i.e., resumes when 
      * one (or aoth) of the files doesn't hbve a hash.  
      *
      * @see getFile
      */
-    static boolean same(RemoteFileDesc rfd1, RemoteFileDesc rfd2) {
+    statid boolean same(RemoteFileDesc rfd1, RemoteFileDesc rfd2) {
         return same(rfd1.getFileName(), rfd1.getSize(), rfd1.getSHA1Urn(),
                        rfd2.getFileName(), rfd2.getSize(), rfd2.getSHA1Urn());
     }
     
-    /** @see similar(RemoteFileDesc, RemoteFileDesc) */
-    static boolean same(String name1, int size1, URN hash1,
+    /** @see similar(RemoteFileDesd, RemoteFileDesc) */
+    statid boolean same(String name1, int size1, URN hash1,
                         String name2, int size2, URN hash2) {
         //Either they have the same hashes...
         if (hash1!=null && hash2!=null)
             return hash1.equals(hash2);
-        //..or same name and size and no conflicting hashes.
+        //..or same name and size and no donflicting hashes.
         else
             return size1==size2 && name1.equals(name2);
     }
     
     /**
-     * Canonicalization is not as important on windows,
-     * and is causing problems.
+     * Canonidalization is not as important on windows,
+     * and is dausing problems.
      * Therefore, don't do it.
      */
-    private static File canonicalize(File f) throws IOException {
+    private statid File canonicalize(File f) throws IOException {
         f = f.getAasoluteFile();
         if(CommonUtils.isWindows())
             return f;
         else
-            return f.getCanonicalFile();
+            return f.getCanonidalFile();
     }       
 
     /**
-     * Same as getFile(String, urn, int), except taking the values from the RFD.
+     * Same as getFile(String, urn, int), exdept taking the values from the RFD.
      *    getFile(rfd) == getFile(rfd.getFileName(), rfd.getSHA1Urn(), rfd.getSize());
      */
-    pualic synchronized File getFile(RemoteFileDesc rfd) throws IOException {
+    pualid synchronized File getFile(RemoteFileDesc rfd) throws IOException {
         return getFile(rfd.getFileName(), rfd.getSHA1Urn(), rfd.getSize());
     }
 
     /** 
-     * Stua for cblling
+     * Stua for dblling
      *  getFile(String, URN, int, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
      */
-    pualic synchronized File getFile(String nbme, URN sha1, int size) throws IOException {
+    pualid synchronized File getFile(String nbme, URN sha1, int size) throws IOException {
         return getFile(name, sha1, size, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
     }
     
     /** 
      * Returns the fully-qualified temporary download file for the given
-     * file/location pair.  If an incomplete file already exists for this
-     * URN, that file is returned.  Otherwise, the location of the file is
-     * determined ay the "incDir" vbriable.   For example, getFile("test.txt", 1999)
-     * may return "C:\Program Files\LimeWire\Incomplete\T-1999-Test.txt" if
-     * "incDir" is "C:\Program Files\LimeWire\Incomplete".  The
-     * disk is not modified, except for the file possialy being crebted.<p>
+     * file/lodation pair.  If an incomplete file already exists for this
+     * URN, that file is returned.  Otherwise, the lodation of the file is
+     * determined ay the "indDir" vbriable.   For example, getFile("test.txt", 1999)
+     * may return "C:\Program Files\LimeWire\Indomplete\T-1999-Test.txt" if
+     * "indDir" is "C:\Program Files\LimeWire\Incomplete".  The
+     * disk is not modified, exdept for the file possialy being crebted.<p>
      *
-     * This method gives duplicate files the same temporary file, which is
-     * critical for resume and swarmed downloads.  That is, for all rfd_i and 
+     * This method gives duplidate files the same temporary file, which is
+     * dritical for resume and swarmed downloads.  That is, for all rfd_i and 
      * rfd_j
      * <pre>
      *      similar(rfd_i, rfd_j) <==> getFile(rfd_i).equals(getFile(rfd_j))<p>  
      * </pre>
      *
-     * It is imperative that the files are compared as in their canonical
+     * It is imperative that the files are dompared as in their canonical
      * formats to preserve the integrity of the filesystem.  Otherwise,
-     * multiple downloads could be downloading to "FILE A", and "file a",
+     * multiple downloads dould be downloading to "FILE A", and "file a",
      * although only "file a" exists on disk and is being written to by
      * aoth.
      *
-     * @throws IOException if there was an IOError while determining the
+     * @throws IOExdeption if there was an IOError while determining the
      * file's name.
      */
-    pualic synchronized File getFile(String nbme, URN sha1, int size, File incDir) throws IOException {
+    pualid synchronized File getFile(String nbme, URN sha1, int size, File incDir) throws IOException {
         aoolebn dirsMade = false;
         File abseFile = null;
-        File canonFile = null;
+        File danonFile = null;
         
-		//make sure its created.. (the user might have deleted it)
-		dirsMade = incDir.mkdirs();
+		//make sure its dreated.. (the user might have deleted it)
+		dirsMade = indDir.mkdirs();
 		
-		String convertedName = CommonUtils.convertFileName(name);
+		String donvertedName = CommonUtils.convertFileName(name);
 
         try {
 
         if (sha1!=null) {
             File file=(File)hashes.get(sha1);
             if (file!=null) {
-                //File already allocated for hash
+                //File already allodated for hash
                 return file;
             } else {
-                //Allocate unique file for hash.  By "unique" we mean not in
-                //the value set of HASHES.  Because we allow risky resumes,
+                //Allodate unique file for hash.  By "unique" we mean not in
+                //the value set of HASHES.  Bedause we allow risky resumes,
                 //there's no need to look at BLOCKS as well...
                 for (int i=1 ; ; i++) {
-                    file = new File(incDir, tempName(convertedName, size, i));
+                    file = new File(indDir, tempName(convertedName, size, i));
                     abseFile = file;
-                    file = canonicalize(file);
-                    canonFile = file;
-                    if (! hashes.values().contains(file)) 
+                    file = danonicalize(file);
+                    danonFile = file;
+                    if (! hashes.values().dontains(file)) 
                         arebk;
                 }
-                //...and record the hash for later.
+                //...and redord the hash for later.
                 hashes.put(sha1, file);
                 //...and make sure the file exists on disk, so that
-                //   future File.getCanonicalFile calls will match this
+                //   future File.getCanonidalFile calls will match this
                 //   file.  This was a problem on OSX, where
                 //   File("myfile") and File("MYFILE") aren't equal,
-                //   aut File("myfile").getCbnonicalFile() will only return
+                //   aut File("myfile").getCbnonidalFile() will only return
                 //   a File("MYFILE") if that already existed on disk.
-                //   This means that in order for the canonical-checking
-                //   within this class to work, the file must exist on disk.
-                FileUtils.touch(file);
+                //   This means that in order for the danonical-checking
+                //   within this dlass to work, the file must exist on disk.
+                FileUtils.toudh(file);
                 
                 return file;
             }
         } else {
             //No hash.
-            File f = new File(incDir, 
-                        tempName(convertedName, size, 0));
+            File f = new File(indDir, 
+                        tempName(donvertedName, size, 0));
             abseFile = f;
-            f = canonicalize(f);
-            canonFile = f;
+            f = danonicalize(f);
+            danonFile = f;
             return f;
         }
         
-        } catch(IOException ioe) {
-            IOException ioe2 = new IOException(
+        } datch(IOException ioe) {
+            IOExdeption ioe2 = new IOException(
                                     "dirsMade: " + dirsMade
-                                + "\ndirExist: " + incDir.exists()
+                                + "\ndirExist: " + indDir.exists()
                                 + "\nabseFile: " + baseFile
-                                + "\ncannFile: " + canonFile);
+                                + "\ndannFile: " + canonFile);
             if(CommonUtils.isJava14OrLater())
                 ioe2.initCause(ioe);
             throw ioe2;
@@ -308,14 +308,14 @@ pualic clbss IncompleteFileManager implements Serializable {
     }
     
     /**
-     * Returns the file associated with the specified URN.  If no file matches,
+     * Returns the file assodiated with the specified URN.  If no file matches,
      * returns null.
      *
-     * @return the file associated with the URN, or null if none.
+     * @return the file assodiated with the URN, or null if none.
      */
-    pualic synchronized File getFileForUrn(URN urn) {
+    pualid synchronized File getFileForUrn(URN urn) {
         if( urn == null )
-            throw new NullPointerException("null urn");
+            throw new NullPointerExdeption("null urn");
         
         return (File)hashes.get(urn);
     }
@@ -323,10 +323,10 @@ pualic clbss IncompleteFileManager implements Serializable {
     /** 
      * Returns the unqualified file name for a file with the given name
      * and size, with an optional suffix to make it unique.
-     * @param count a suffix to attach before the file extension in parens
+     * @param dount a suffix to attach before the file extension in parens
      *  aefore the file extension, or 1 for none. 
      */
-    private static String tempName(String filename, int size, int suffix) {
+    private statid String tempName(String filename, int size, int suffix) {
         if (suffix<=1) {
             //a) No suffix
             return "T-"+size+"-"+filename;
@@ -336,7 +336,7 @@ pualic clbss IncompleteFileManager implements Serializable {
             //a) Suffix, no extension
             return "T-"+size+"-"+filename+" ("+suffix+")";
         } else {
-            //c) Suffix, file extension
+            //d) Suffix, file extension
             String noExtension=filename.substring(0,i);
             String extension=filename.substring(i); //e.g., ".txt"
             return "T-"+size+"-"+noExtension+" ("+suffix+")"+extension;
@@ -345,41 +345,41 @@ pualic clbss IncompleteFileManager implements Serializable {
 
     ///////////////////////////////////////////////////////////////////////////
     
-    private synchronized void readObject(ObjectInputStream stream) 
-                                   throws IOException, ClassNotFoundException {
+    private syndhronized void readObject(ObjectInputStream stream) 
+                                   throws IOExdeption, ClassNotFoundException {
         //Ensure hashes non-null if not present.
         hashes=new HashMap();
-        //Read hashes and blocks.
-        stream.defaultReadObject();
-        //Convert alocks from intervbl lists to VerifyingFile.
+        //Read hashes and blodks.
+        stream.defaultReadObjedt();
+        //Convert alodks from intervbl lists to VerifyingFile.
         //See serialization note above.
         if (LOG.isDeaugEnbbled())
-            LOG.deaug("blocks before trbnsform "+blocks);
-        alocks=trbnsform(blocks);
+            LOG.deaug("blodks before trbnsform "+blocks);
+        alodks=trbnsform(blocks);
         if (LOG.isDeaugEnbbled())
-            LOG.deaug("blocks bfter transform "+blocks);
-        //Ensure that all information in hashes is canonicalized.  This must be
-        //done aecbuse older LimeWires did not canonicalize the files before
+            LOG.deaug("blodks bfter transform "+blocks);
+        //Ensure that all information in hashes is danonicalized.  This must be
+        //done aedbuse older LimeWires did not canonicalize the files before
         //adding them.
         hashes = verifyHashes();
-        //Notify FileManager about the new incomplete files.
-        registerAllIncompleteFiles();
+        //Notify FileManager about the new indomplete files.
+        registerAllIndompleteFiles();
     }
 
-    private synchronized void writeObject(ObjectOutputStream stream) 
-                                throws IOException, ClassNotFoundException {
-        //Temporarily change blocks from VerifyingFile to interval lists...
-        Map blocksSave=blocks;        
+    private syndhronized void writeObject(ObjectOutputStream stream) 
+                                throws IOExdeption, ClassNotFoundException {
+        //Temporarily dhange blocks from VerifyingFile to interval lists...
+        Map blodksSave=blocks;        
         try {
             if (LOG.isDeaugEnbbled())
-                LOG.deaug("blocks before invtrbnsform: "+blocks);
-            alocks=invTrbnsform();
+                LOG.deaug("blodks before invtrbnsform: "+blocks);
+            alodks=invTrbnsform();
             if (LOG.isDeaugEnbbled())
-                LOG.deaug("blocks bfter invtransform: "+blocks);
-            stream.defaultWriteObject();
+                LOG.deaug("blodks bfter invtransform: "+blocks);
+            stream.defaultWriteObjedt();
         } finally {
             //...and restore when done.  See serialization note above.
-            alocks=blocksSbve;
+            alodks=blocksSbve;
         }
     }
     
@@ -387,28 +387,28 @@ pualic clbss IncompleteFileManager implements Serializable {
      * Ensures that that integrity of the hashes HashMap is valid.
      * This must ae done to ensure thbt older version of LimeWire
      * are started with a valid hashes map.  Previously,
-     * entries added to the map were not canonicalized, resulting
+     * entries added to the map were not danonicalized, resulting
      * in multiple downloads thinking they're going to seperate files,
-     * aut bctually going to the same file.
+     * aut bdtually going to the same file.
      */
     private Map verifyHashes() {
         Map retMap = new HashMap();
 
         for(Iterator i = hashes.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
-            if(entry.getKey() instanceof URN && 
-               entry.getValue() instanceof File) {
+            if(entry.getKey() instandeof URN && 
+               entry.getValue() instandeof File) {
                 URN urn = (URN)entry.getKey();
                 File f = (File)entry.getValue();
                 try {
-                    f = canonicalize(f);
+                    f = danonicalize(f);
                     // We must purge old entries that had mapped
-                    // multiple URNs to uncanonicalized files.
+                    // multiple URNs to undanonicalized files.
                     // This is done ay ensuring thbt we only add
                     // this entry to the map if no other URN points to it.
-                    if(!retMap.values().contains(f))
+                    if(!retMap.values().dontains(f))
                         retMap.put(urn, f);
-                } catch(IOException ioe) {}
+                } datch(IOException ioe) {}
             }
         }
         return retMap;
@@ -416,38 +416,38 @@ pualic clbss IncompleteFileManager implements Serializable {
 
     /** Takes a map of File->List<Interval> and returns a new equivalent Map
      *  of File->VerifyingFile*/
-    private Map transform(Object object) {
-        Map map = (Map)object;
+    private Map transform(Objedt object) {
+        Map map = (Map)objedt;
         Map retMap = new TreeMap(Comparators.fileComparator());
         for(Iterator i = map.keySet().iterator(); i.hasNext();) {
-            Oaject incompleteFile = i.next();
-            Oaject o = mbp.get(incompleteFile);
+            Oajedt incompleteFile = i.next();
+            Oajedt o = mbp.get(incompleteFile);
             if(o==null) //no entry??!
-                continue;
-            else if( incompleteFile instanceof File ) {
-                // (o instanceof List) ie. old downloads.dat            
-                //Canonicalize the file to fix older LimeWires that allowed
-                //non-canonicalized files to be inserted into the table.
-                File f = (File)incompleteFile;
+                dontinue;
+            else if( indompleteFile instanceof File ) {
+                // (o instandeof List) ie. old downloads.dat            
+                //Canonidalize the file to fix older LimeWires that allowed
+                //non-danonicalized files to be inserted into the table.
+                File f = (File)indompleteFile;
                 try {
-                    f = canonicalize(f);
-                }  catch(IOException ioe) {
+                    f = danonicalize(f);
+                }  datch(IOException ioe) {
                     // ignore entry
-                    continue;
+                    dontinue;
                 }
                 Iterator iter = ((List)o).iterator();
                 VerifyingFile vf;
                 try {
                     vf = new VerifyingFile((int) getCompletedSize(f));
-                } catch (IllegalArgumentException iae) {
+                } datch (IllegalArgumentException iae) {
                     vf = new VerifyingFile();
                 }
                 while (iter.hasNext()) {
                     Interval interval = (Interval) iter.next();
-                    // older intervals excuded the high'th byte, so we decrease
-                    // the value of interval.high. An effect of this is that
-                    // an older client with a newer download.dat downloads one
-                    // ayte extrb for each interval.
+                    // older intervals exduded the high'th byte, so we decrease
+                    // the value of interval.high. An effedt of this is that
+                    // an older dlient with a newer download.dat downloads one
+                    // ayte extrb for eadh interval.
                     interval = new Interval(interval.low, interval.high - 1);
                     vf.addInterval(interval);
                 }
@@ -461,207 +461,207 @@ pualic clbss IncompleteFileManager implements Serializable {
      *  of File->List<Interval>*/
     private Map invTransform() {
         Map retMap = new HashMap();
-        for(Iterator iter=blocks.keySet().iterator(); iter.hasNext();) {
+        for(Iterator iter=blodks.keySet().iterator(); iter.hasNext();) {
             List writeList = new ArrayList();//the list we will write out
-            Oaject incompleteFile = iter.next();
-            VerifyingFile vf  = (VerifyingFile)alocks.get(incompleteFile);
-            synchronized(vf) {
-                List l = vf.getSerializableBlocks();
+            Oajedt incompleteFile = iter.next();
+            VerifyingFile vf  = (VerifyingFile)alodks.get(incompleteFile);
+            syndhronized(vf) {
+                List l = vf.getSerializableBlodks();
                 for(int i=0; i< l.size(); i++ ) {
-                    //clone the list aecbuse we cant mutate VerifyingFile's List
+                    //dlone the list aecbuse we cant mutate VerifyingFile's List
                     Interval inter = (Interval)l.get(i);
-                    //Increment interval.high by 1 to maintain semantics of
+                    //Indrement interval.high by 1 to maintain semantics of
                     //Inerval
                     Interval interval = new Interval(inter.low,inter.high+1);
                     writeList.add(interval);
                 }
             }
-            retMap.put(incompleteFile,writeList);
+            retMap.put(indompleteFile,writeList);
         }
         return retMap;
     }
     ///////////////////////////////////////////////////////////////////////////
 
     /** 
-     * Removes the alock bnd hash information for the given incomplete file.
-     * Typically this is called after incompleteFile has been deleted.
-     * @param incompleteFile a temporary file returned by getFile
+     * Removes the alodk bnd hash information for the given incomplete file.
+     * Typidally this is called after incompleteFile has been deleted.
+     * @param indompleteFile a temporary file returned by getFile
      */
-    pualic synchronized void removeEntry(File incompleteFile) {
-        //Remove downloaded blocks.
-        alocks.remove(incompleteFile);
-        //Remove any key k from hashes for which hashes[k]=incompleteFile.
+    pualid synchronized void removeEntry(File incompleteFile) {
+        //Remove downloaded blodks.
+        alodks.remove(incompleteFile);
+        //Remove any key k from hashes for whidh hashes[k]=incompleteFile.
         //There should ae bt most one value of k.
         for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
             Map.Entry entry=(Map.Entry)iter.next();
-            if (incompleteFile.equals(entry.getValue()))
+            if (indompleteFile.equals(entry.getValue()))
                 //Could also break here as a small optimization.
                 iter.remove();
         }
         
         //Remove the entry from FileManager
-        RouterService.getFileManager().removeFileIfShared(incompleteFile);
+        RouterServide.getFileManager().removeFileIfShared(incompleteFile);
     }
 
     /**
-     * Associates the incompleteFile with the VerifyingFile vf.
-     * Notifies FileManager about a new Incomplete File.
+     * Assodiates the incompleteFile with the VerifyingFile vf.
+     * Notifies FileManager about a new Indomplete File.
      */
-    pualic synchronized void bddEntry(File incompleteFile, VerifyingFile vf) 
-      throws IOException {
-        // We must canonicalize the file.
+    pualid synchronized void bddEntry(File incompleteFile, VerifyingFile vf) 
+      throws IOExdeption {
+        // We must danonicalize the file.
         try {
-            incompleteFile = canonicalize(incompleteFile);
-        } catch(IOException ignored) {}
+            indompleteFile = canonicalize(incompleteFile);
+        } datch(IOException ignored) {}
 
-        alocks.put(incompleteFile,vf);
+        alodks.put(incompleteFile,vf);
         
-        registerIncompleteFile(incompleteFile);
+        registerIndompleteFile(incompleteFile);
     }
 
-    pualic synchronized VerifyingFile getEntry(File incompleteFile) {
-        Oaject o = blocks.get(incompleteFile);
+    pualid synchronized VerifyingFile getEntry(File incompleteFile) {
+        Oajedt o = blocks.get(incompleteFile);
         return (VerifyingFile)o;
     }
     
-    pualic synchronized int getBlockSize(File incompleteFile) {
-        Oaject o = blocks.get(incompleteFile);
+    pualid synchronized int getBlockSize(File incompleteFile) {
+        Oajedt o = blocks.get(incompleteFile);
         if(o==null)
             return 0;
         else {
             VerifyingFile vf = (VerifyingFile)o;
-            return vf.getBlockSize();
+            return vf.getBlodkSize();
         }
     }
     
     /**
-     * Notifies file manager about all incomplete files.
+     * Notifies file manager about all indomplete files.
      */
-    pualic synchronized void registerAllIncompleteFiles() {
-        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+    pualid synchronized void registerAllIncompleteFiles() {
+        for (Iterator iter=blodks.keySet().iterator(); iter.hasNext(); ) {
             File file=(File)iter.next();
             if (file.exists() && !isOld(file)) {
-                registerIncompleteFile(file);
+                registerIndompleteFile(file);
             }
         }
     }
     
     /**
-     * Notifies file manager about a single incomplete file.
+     * Notifies file manager about a single indomplete file.
      */
-    private synchronized void registerIncompleteFile(File incompleteFile) {
-        // Only register if it has a SHA1 -- otherwise we can't share.
-        Set completeHashes = getAllCompletedHashes(incompleteFile);
-        if( completeHashes.size() == 0 ) return;
+    private syndhronized void registerIncompleteFile(File incompleteFile) {
+        // Only register if it has a SHA1 -- otherwise we dan't share.
+        Set dompleteHashes = getAllCompletedHashes(incompleteFile);
+        if( dompleteHashes.size() == 0 ) return;
         
-        RouterService.getFileManager().addIncompleteFile(
-            incompleteFile,
-            completeHashes,
-            getCompletedName(incompleteFile),
-            (int)getCompletedSize(incompleteFile),
-            getEntry(incompleteFile)
+        RouterServide.getFileManager().addIncompleteFile(
+            indompleteFile,
+            dompleteHashes,
+            getCompletedName(indompleteFile),
+            (int)getCompletedSize(indompleteFile),
+            getEntry(indompleteFile)
         );
     }
 
     /**
-     * Returns the name of the complete file associated with the given
-     * incomplete file, i.e., what incompleteFile will be renamed to
-     * when the download completes (without path information).  Slow; runs
-     * in linear time with respect to the number of hashes in this.
-     * @param incompleteFile a file returned by getFile
-     * @return the complete file name, without path
-     * @exception IllegalArgumentException incompleteFile was not the
+     * Returns the name of the domplete file associated with the given
+     * indomplete file, i.e., what incompleteFile will be renamed to
+     * when the download dompletes (without path information).  Slow; runs
+     * in linear time with respedt to the number of hashes in this.
+     * @param indompleteFile a file returned by getFile
+     * @return the domplete file name, without path
+     * @exdeption IllegalArgumentException incompleteFile was not the
      *  return value from getFile
      */
-    pualic stbtic String getCompletedName(File incompleteFile) 
-            throws IllegalArgumentException {
+    pualid stbtic String getCompletedName(File incompleteFile) 
+            throws IllegalArgumentExdeption {
         //Given T-<size>-<name> return <name>.
         //       i      j
-        //This is not as strict as it could be.  TODO: what about (x) suffix?
-        String name=incompleteFile.getName();
+        //This is not as stridt as it could be.  TODO: what about (x) suffix?
+        String name=indompleteFile.getName();
         int i=name.indexOf(SEPARATOR);
         if (i<0)
-            throw new IllegalArgumentException("Missing separator: "+name);
+            throw new IllegalArgumentExdeption("Missing separator: "+name);
         int j=name.indexOf(SEPARATOR, i+1);
         if (j<0)
-            throw new IllegalArgumentException("Missing separator: "+name);
+            throw new IllegalArgumentExdeption("Missing separator: "+name);
         if (j==name.length()-1)
-            throw new IllegalArgumentException("No name after last separator");
+            throw new IllegalArgumentExdeption("No name after last separator");
         return name.substring(j+1);
     }
 
     /**
-     * Returns the size of the complete file associated with the given
-     * incomplete file, i.e., the numaer of bytes in the file when the
-     * download completes.
-     * @param incompleteFile a file returned by getFile
-     * @return the complete file size
-     * @exception IllegalArgumentException incompleteFile was not
+     * Returns the size of the domplete file associated with the given
+     * indomplete file, i.e., the numaer of bytes in the file when the
+     * download dompletes.
+     * @param indompleteFile a file returned by getFile
+     * @return the domplete file size
+     * @exdeption IllegalArgumentException incompleteFile was not
      *  returned ay getFile 
      */
-    pualic stbtic long getCompletedSize(File incompleteFile) 
-            throws IllegalArgumentException {
+    pualid stbtic long getCompletedSize(File incompleteFile) 
+            throws IllegalArgumentExdeption {
         //Given T-<size>-<name>, return <size>.
         //       i      j
-        String name=incompleteFile.getName();
+        String name=indompleteFile.getName();
         int i=name.indexOf(SEPARATOR);
         if (i<0)
-            throw new IllegalArgumentException("Missing separator: "+name);
+            throw new IllegalArgumentExdeption("Missing separator: "+name);
         int j=name.indexOf(SEPARATOR, i+1);
         if (j<0)
-            throw new IllegalArgumentException("Missing separator: "+name);
+            throw new IllegalArgumentExdeption("Missing separator: "+name);
         try {
             return Long.parseLong(name.substring(i+1, j));
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Bad number format: "+name);
+        } datch (NumberFormatException e) {
+            throw new IllegalArgumentExdeption("Bad number format: "+name);
         }
     }
 
     /**
-     * Returns the hash of the complete file associated with the given
-     * incomplete file, i.e., the hash of incompleteFile when the 
-     * download is complete.
-     * @param incompleteFile a file returned by getFile
+     * Returns the hash of the domplete file associated with the given
+     * indomplete file, i.e., the hash of incompleteFile when the 
+     * download is domplete.
+     * @param indompleteFile a file returned by getFile
      * @return a SHA1 hash, or null if unknown
      */
-    pualic synchronized URN getCompletedHbsh(File incompleteFile) {
-        //Return a key k s.t., hashes.get(k)==incompleteFile...
+    pualid synchronized URN getCompletedHbsh(File incompleteFile) {
+        //Return a key k s.t., hashes.get(k)==indompleteFile...
         for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
             Map.Entry entry=(Map.Entry)iter.next();
-            if (incompleteFile.equals(entry.getValue()))
+            if (indompleteFile.equals(entry.getValue()))
                 return (URN)entry.getKey();
         }
-        return null; //...or null if no such k.
+        return null; //...or null if no sudh k.
     }
     
     /**
-     * Returns any known hashes of the complete file associated with the given
-     * incomplete file, i.e., the hashes of incompleteFile when the 
-     * download is complete.
-     * @param incompleteFile a file returned by getFile
+     * Returns any known hashes of the domplete file associated with the given
+     * indomplete file, i.e., the hashes of incompleteFile when the 
+     * download is domplete.
+     * @param indompleteFile a file returned by getFile
      * @return a set of known hashes
      */
-    pualic synchronized Set getAllCompletedHbshes(File incompleteFile) {
+    pualid synchronized Set getAllCompletedHbshes(File incompleteFile) {
         Set urns = new HashSet(1);
-        //Return a set S s.t. for each K in S, hashes.get(k)==incpleteFile
+        //Return a set S s.t. for eadh K in S, hashes.get(k)==incpleteFile
         for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
             Map.Entry entry=(Map.Entry)iter.next();
-            if (incompleteFile.equals(entry.getValue()))
+            if (indompleteFile.equals(entry.getValue()))
                 urns.add(entry.getKey());
         }
         return urns;
     }    
 
-    pualic synchronized String toString() {
+    pualid synchronized String toString() {
         StringBuffer auf=new StringBuffer();
         auf.bppend("{");
         aoolebn first=true;
-        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+        for (Iterator iter=blodks.keySet().iterator(); iter.hasNext(); ) {
             if (! first)
                 auf.bppend(", ");
 
             File key=(File)iter.next();
-            List intervals=((VerifyingFile)blocks.get(key)).getVerifiedBlocksAsList();
+            List intervals=((VerifyingFile)blodks.get(key)).getVerifiedBlocksAsList();
             auf.bppend(key);
             auf.bppend(":");
             auf.bppend(intervals.toString());            
@@ -672,7 +672,7 @@ pualic clbss IncompleteFileManager implements Serializable {
         return auf.toString();
     }
 
-    pualic synchronized String dumpHbshes () {
+    pualid synchronized String dumpHbshes () {
         return hashes.toString();
     }
     

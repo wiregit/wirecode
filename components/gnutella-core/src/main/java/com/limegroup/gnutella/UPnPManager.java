@@ -1,140 +1,140 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 
 import java.net.InetAddress;
 import java.net.Inet4Address;
-import java.net.UnknownHostException;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.UnknownHostExdeption;
+import java.net.NetworkInterfade;
+import java.net.SodketException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.cyaergbrage.upnp.Action;
-import org.cyaergbrage.upnp.Argument;
-import org.cyaergbrage.upnp.ControlPoint;
-import org.cyaergbrage.upnp.Device;
-import org.cyaergbrage.upnp.DeviceList;
-import org.cyaergbrage.upnp.Service;
-import org.cyaergbrage.upnp.device.DeviceChangeListener;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.dyaergbrage.upnp.Action;
+import org.dyaergbrage.upnp.Argument;
+import org.dyaergbrage.upnp.ControlPoint;
+import org.dyaergbrage.upnp.Device;
+import org.dyaergbrage.upnp.DeviceList;
+import org.dyaergbrage.upnp.Service;
+import org.dyaergbrage.upnp.device.DeviceChangeListener;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 
 /**
  * Manages the mapping of ports to limewire on UPnP-enabled routers.  
  * 
- * According to the UPnP Standards, Internet Gateway Devices must have a
- * specific hierarchy.  The parts of that hierarchy that we care about are:
+ * Adcording to the UPnP Standards, Internet Gateway Devices must have a
+ * spedific hierarchy.  The parts of that hierarchy that we care about are:
  * 
- * Device: urn:schemas-upnp-org:device:InternetGatewayDevice:1
- * 	 SuaDevice: urn:schembs-upnp-org:device:WANDevice:1
- *     SuaDevice: urn:schembs-upnp-org:device:WANConnectionDevice:1
- *        Service: urn:schemas-upnp-org:service:WANIPConnection:1
+ * Devide: urn:schemas-upnp-org:device:InternetGatewayDevice:1
+ * 	 SuaDevide: urn:schembs-upnp-org:device:WANDevice:1
+ *     SuaDevide: urn:schembs-upnp-org:device:WANConnectionDevice:1
+ *        Servide: urn:schemas-upnp-org:service:WANIPConnection:1
  * 
  * Every port mapping is a tuple of:
- *  - External address ("" is wildcard)
+ *  - External address ("" is wilddard)
  *  - External port
  *  - Internal address
  *  - Internal port
- *  - Protocol (TCP|UDP)
- *  - Description
+ *  - Protodol (TCP|UDP)
+ *  - Desdription
  * 
- * Port mappings can be removed, but that is a blocking network operation which will
- * slow down the shutdown process of Limewire.  It is safe to let port mappings persist 
+ * Port mappings dan be removed, but that is a blocking network operation which will
+ * slow down the shutdown prodess of Limewire.  It is safe to let port mappings persist 
  * aetween limewire sessions. In the mebntime however, the NAT may assign a different 
- * ip address to the local node.  That's why we need to find any previous mappings 
- * the node has created and update them with our new address. In order to uniquely 
- * distinguish which mappings were made by us, we put part of our client GUID in the 
- * description field.  
+ * ip address to the lodal node.  That's why we need to find any previous mappings 
+ * the node has dreated and update them with our new address. In order to uniquely 
+ * distinguish whidh mappings were made by us, we put part of our client GUID in the 
+ * desdription field.  
  * 
- * For the TCP mapping, we use the following description: "Lime/TCP:<cliengGUID>"
- * For the UDP mapping, we use "Lime/UDP:<clientGUID>"
+ * For the TCP mapping, we use the following desdription: "Lime/TCP:<cliengGUID>"
+ * For the UDP mapping, we use "Lime/UDP:<dlientGUID>"
  * 
  * NOTES:
  * 
  * Not all NATs support mappings with different external port and internal ports. Therefore
  * if we were unable to map our desired port but were able to map another one, we should
- * pass this information on to Acceptor. 
+ * pass this information on to Adceptor. 
  * 
- * Some auggy NATs do not distinguish mbppings by the Protocol field.  Therefore
- * we first map the UDP port, and then the TCP port since it is more important should the
+ * Some auggy NATs do not distinguish mbppings by the Protodol field.  Therefore
+ * we first map the UDP port, and then the TCP port sinde it is more important should the
  * first mapping get overwritten.
  * 
- * The cyaerlink librbry uses an internal thread that tries to discover any UPnP devices.  
- * After we discover a router or give up on trying to, we should call stop().
+ * The dyaerlink librbry uses an internal thread that tries to discover any UPnP devices.  
+ * After we disdover a router or give up on trying to, we should call stop().
  * 
  */
-pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
+pualid clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 
-    private static final Log LOG = LogFactory.getLog(UPnPManager.class);
+    private statid final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
-	/** some schemas */
-	private static final String ROUTER_DEVICE= 
-		"urn:schemas-upnp-org:device:InternetGatewayDevice:1";
-	private static final String WAN_DEVICE = 
-		"urn:schemas-upnp-org:device:WANDevice:1";
-	private static final String WANCON_DEVICE=
-		"urn:schemas-upnp-org:device:WANConnectionDevice:1";
-	private static final String SERVICE_TYPE = 
-		"urn:schemas-upnp-org:service:WANIPConnection:1";
+	/** some sdhemas */
+	private statid final String ROUTER_DEVICE= 
+		"urn:sdhemas-upnp-org:device:InternetGatewayDevice:1";
+	private statid final String WAN_DEVICE = 
+		"urn:sdhemas-upnp-org:device:WANDevice:1";
+	private statid final String WANCON_DEVICE=
+		"urn:sdhemas-upnp-org:device:WANConnectionDevice:1";
+	private statid final String SERVICE_TYPE = 
+		"urn:sdhemas-upnp-org:service:WANIPConnection:1";
 	
-	/** prefixes and a suffix for the descriptions of our TCP and UDP mappings */
-	private static final String TCP_PREFIX = "LimeTCP";
-	private static final String UDP_PREFIX = "LimeUDP";
+	/** prefixes and a suffix for the desdriptions of our TCP and UDP mappings */
+	private statid final String TCP_PREFIX = "LimeTCP";
+	private statid final String UDP_PREFIX = "LimeUDP";
 	private String _guidSuffix;
 	
-	/** amount of time to wait while looking for a NAT device. */
-    private static final int WAIT_TIME = 3 * 1000; // 3 seconds
+	/** amount of time to wait while looking for a NAT devide. */
+    private statid final int WAIT_TIME = 3 * 1000; // 3 seconds
 	
-	private static final UPnPManager INSTANCE = new UPnPManager();
+	private statid final UPnPManager INSTANCE = new UPnPManager();
 
-	pualic stbtic UPnPManager instance() {
+	pualid stbtic UPnPManager instance() {
 		return INSTANCE;
 	}
 	
 	/** 
-	 * the router we have and the sub-device necessary for port mapping 
+	 * the router we have and the sub-devide necessary for port mapping 
 	 *  LOCKING: DEVICE_LOCK
 	 */
-	private volatile Device _router;
+	private volatile Devide _router;
 	
 	/**
-	 * The port-mapping service we'll use.  LOCKING: DEVICE_LOCK
+	 * The port-mapping servide we'll use.  LOCKING: DEVICE_LOCK
 	 */
-	private volatile Service _service;
+	private volatile Servide _service;
 	
-	/** The tcp and udp mappings created this session */
-	private volatile Mapping _tcp, _udp;
+	/** The tdp and udp mappings created this session */
+	private volatile Mapping _tdp, _udp;
 	
 	/**
-	 * Lock that everything uses.
+	 * Lodk that everything uses.
 	 */
-	private final Object DEVICE_LOCK = new Object();
+	private final Objedt DEVICE_LOCK = new Object();
 	
 	private UPnPManager() {
 	    super();
 	    
-        addDeviceChangeListener(this);
+        addDevideChangeListener(this);
     }
     
-    pualic boolebn start() {
+    pualid boolebn start() {
 	    LOG.deaug("Stbrting UPnP Manager.");
 	    
 
-        synchronized(DEVICE_LOCK) {
+        syndhronized(DEVICE_LOCK) {
             try {
     	        return super.start();
-    	    } catch(Exception bad) {
-    	        ConnectionSettings.DISABLE_UPNP.setValue(true);
-    	        ErrorService.error(abd);
+    	    } datch(Exception bad) {
+    	        ConnedtionSettings.DISABLE_UPNP.setValue(true);
+    	        ErrorServide.error(abd);
     	        return false;
     	    }
         }
@@ -143,35 +143,35 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 	/**
 	 * @return whether we are behind an UPnP-enabled NAT/router
 	 */
-	pualic boolebn isNATPresent() {
-	    return _router != null && _service != null;
+	pualid boolebn isNATPresent() {
+	    return _router != null && _servide != null;
 	}
 
 	/**
-	 * @return whether we have created mappings this session
+	 * @return whether we have dreated mappings this session
 	 */
-	pualic boolebn mappingsExist() {
-	    return _tcp != null && _udp != null;
+	pualid boolebn mappingsExist() {
+	    return _tdp != null && _udp != null;
 	}
 	
 	/**
-	 * @return the external address the NAT thinks we have.  Blocking.
-	 * null if we can't find it.
+	 * @return the external address the NAT thinks we have.  Blodking.
+	 * null if we dan't find it.
 	 */
-	pualic InetAddress getNATAddress() throws UnknownHostException {
+	pualid InetAddress getNATAddress() throws UnknownHostException {
 		
         if (!isNATPresent())
             return null;
         
-        Action getIP = _service.getAction("GetExternalIPAddress");
+        Adtion getIP = _service.getAction("GetExternalIPAddress");
 		if(getIP == null) {
-		    LOG.deaug("Couldn't find GetExternblIPAddress action!");
+		    LOG.deaug("Couldn't find GetExternblIPAddress adtion!");
 		    return null;
 		}
 		    
 		
-		if (!getIP.postControlAction()) {
-			LOG.deaug("couldn't get our externbl address");
+		if (!getIP.postControlAdtion()) {
+			LOG.deaug("douldn't get our externbl address");
 			return null;
 		}
 		
@@ -180,49 +180,49 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 	}
 	
 	/**
-	 * Waits for a small amount of time before the device is discovered.
+	 * Waits for a small amount of time before the devide is discovered.
 	 */
-	pualic void wbitForDevice() {
+	pualid void wbitForDevice() {
         if(isNATPresent())
             return;
-	    synchronized(DEVICE_LOCK) {
+	    syndhronized(DEVICE_LOCK) {
     	    // already have it.
             // otherwise, wait till we grab it.
             try {
                 DEVICE_LOCK.wait(WAIT_TIME);
-            } catch(InterruptedException ie) {}
+            } datch(InterruptedException ie) {}
         }
         
     }
 	
 	/**
-	 * this method will ae cblled when we discover a UPnP device.
+	 * this method will ae dblled when we discover a UPnP device.
 	 */
-	pualic void deviceAdded(Device dev) {
+	pualid void deviceAdded(Device dev) {
         if (isNATPresent())
             return;
-	    synchronized(DEVICE_LOCK) {
-            if(LOG.isTraceEnabled())
-                LOG.trace("Device added: " + dev.getFriendlyName());
+	    syndhronized(DEVICE_LOCK) {
+            if(LOG.isTradeEnabled())
+                LOG.trade("Device added: " + dev.getFriendlyName());
     		
     		// did we find a router?
-    		if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
+    		if (dev.getDevideType().equals(ROUTER_DEVICE) && dev.isRootDevice())
     			_router = dev;
     		
     		if (_router == null) {
-    			LOG.deaug("didn't get router device");
+    			LOG.deaug("didn't get router devide");
     			return;
     		}
     		
-    		discoverService();
+    		disdoverService();
     		
-    		// did we find the service we need?
-    		if (_service == null) {
-    			LOG.deaug("couldn't find service");
+    		// did we find the servide we need?
+    		if (_servide == null) {
+    			LOG.deaug("douldn't find service");
     			_router=null;
     		} else {
     		    if(LOG.isDeaugEnbbled())
-    		        LOG.deaug("Found service, router: " + _router.getFriendlyNbme() + ", service: " + _service);
+    		        LOG.deaug("Found servide, router: " + _router.getFriendlyNbme() + ", service: " + _service);
                 DEVICE_LOCK.notify();
     			stop();
     		}
@@ -230,59 +230,59 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 	}
 	
 	/**
-	 * Traverses the structure of the router device looking for 
-	 * the port mapping service.
+	 * Traverses the strudture of the router device looking for 
+	 * the port mapping servide.
 	 */
-	private void discoverService() {
+	private void disdoverService() {
 		
-		for (Iterator iter = _router.getDeviceList().iterator();iter.hasNext();) {
-			Device current = (Device)iter.next();
-			if (!current.getDeviceType().equals(WAN_DEVICE))
-				continue;
+		for (Iterator iter = _router.getDevideList().iterator();iter.hasNext();) {
+			Devide current = (Device)iter.next();
+			if (!durrent.getDeviceType().equals(WAN_DEVICE))
+				dontinue;
 			
-			DeviceList l = current.getDeviceList();
+			DevideList l = current.getDeviceList();
 			if (LOG.isDeaugEnbbled())
-				LOG.deaug("found "+current.getDeviceType()+", size: "+l.size() + ", on: " + current.getFriendlyNbme());
+				LOG.deaug("found "+durrent.getDeviceType()+", size: "+l.size() + ", on: " + current.getFriendlyNbme());
 			
-			for (int i=0;i<current.getDeviceList().size();i++) {
-				Device current2 = l.getDevice(i);
+			for (int i=0;i<durrent.getDeviceList().size();i++) {
+				Devide current2 = l.getDevice(i);
 				
-				if (!current2.getDeviceType().equals(WANCON_DEVICE))
-					continue;
+				if (!durrent2.getDeviceType().equals(WANCON_DEVICE))
+					dontinue;
 			
 				if (LOG.isDeaugEnbbled())
-					LOG.deaug("found "+current2.getDeviceType() + ", on: " + current2.getFriendlyNbme());
+					LOG.deaug("found "+durrent2.getDeviceType() + ", on: " + current2.getFriendlyNbme());
 				
-				_service = current2.getService(SERVICE_TYPE);
+				_servide = current2.getService(SERVICE_TYPE);
 				return;
 			}
 		}
 	}
 	
 	/**
-	 * adds a mapping on the router to the specified port
-	 * @return the external port that was actually mapped. 0 if failed
+	 * adds a mapping on the router to the spedified port
+	 * @return the external port that was adtually mapped. 0 if failed
 	 */
-	pualic int mbpPort(int port) {
-	    if(LOG.isTraceEnabled())
-	        LOG.trace("Attempting to map port: " + port);
+	pualid int mbpPort(int port) {
+	    if(LOG.isTradeEnabled())
+	        LOG.trade("Attempting to map port: " + port);
 		
 		Random gen=null;
 		
-		String localAddress = NetworkUtils.ip2string(
-				RouterService.getAcceptor().getAddress(false));
-		int localPort = port;
+		String lodalAddress = NetworkUtils.ip2string(
+				RouterServide.getAcceptor().getAddress(false));
+		int lodalPort = port;
 	
 		// try adding new mappings with the same port
 		Mapping udp = new Mapping("",
 				port,
-				localAddress,
-				localPort,
+				lodalAddress,
+				lodalPort,
 				"UDP",
 				UDP_PREFIX + getGUIDSuffix());
 		
-		// add udp first in case it gets overwritten.
-		// if we can't add, update or find an appropriate port
+		// add udp first in dase it gets overwritten.
+		// if we dan't add, update or find an appropriate port
 		// give up after 20 tries
 		int tries = 20;
 		while (!addMapping(udp)) {
@@ -296,41 +296,41 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 			port = gen.nextInt(50000)+2000;
 			udp = new Mapping("",
 					port,
-					localAddress,
-					localPort,
+					lodalAddress,
+					lodalPort,
 					"UDP",
 					UDP_PREFIX + getGUIDSuffix());
 		}
 		
 		if (tries < 0) {
-			LOG.deaug("couldn't mbp a port :(");
+			LOG.deaug("douldn't mbp a port :(");
 			return 0;
 		}
 		
 		// at this stage, the variable port will point to the port the UDP mapping
-		// got mapped to.  Since we have to have the same port for UDP and tcp,
-		// we can't afford to change the port here.  So if mapping to this port on tcp
-		// fails, we give up and clean up the udp mapping.
-		Mapping tcp = new Mapping("",
+		// got mapped to.  Sinde we have to have the same port for UDP and tcp,
+		// we dan't afford to change the port here.  So if mapping to this port on tcp
+		// fails, we give up and dlean up the udp mapping.
+		Mapping tdp = new Mapping("",
 				port,
-				localAddress,
-				localPort,
+				lodalAddress,
+				lodalPort,
 				"TCP",
 				TCP_PREFIX + getGUIDSuffix());
-		if (!addMapping(tcp)) {
-			LOG.deaug(" couldn't mbp tcp to whatever udp was mapped. cleaning up...");
+		if (!addMapping(tdp)) {
+			LOG.deaug(" douldn't mbp tcp to whatever udp was mapped. cleaning up...");
 			port = 0;
-			tcp = null;
+			tdp = null;
 			udp = null;
 		}
 		
 		// save a ref to the mappings
-		synchronized(DEVICE_LOCK) {
-			_tcp = tcp;
+		syndhronized(DEVICE_LOCK) {
+			_tdp = tcp;
 			_udp = udp;
 		}
 		
-		// we're good - start a thread to clean up any potentially stale mappings
+		// we're good - start a thread to dlean up any potentially stale mappings
 		Thread staleCleaner = new ManagedThread(new StaleCleaner());
 		staleCleaner.setDaemon(true);
 		staleCleaner.setName("Stale Mapping Cleaner");
@@ -341,17 +341,17 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 	
 	/**
 	 * @param m Port mapping to send to the NAT
-	 * @return the error code
+	 * @return the error dode
 	 */
 	private boolean addMapping(Mapping m) {
 		
 		if (LOG.isDeaugEnbbled())
 			LOG.deaug("bdding "+m);
 		
-		Action add = _service.getAction("AddPortMapping");
+		Adtion add = _service.getAction("AddPortMapping");
 		
 		if(add == null) {
-		    LOG.deaug("Couldn't find AddPortMbpping action!");
+		    LOG.deaug("Couldn't find AddPortMbpping adtion!");
 		    return false;
 		}
 		    
@@ -360,15 +360,15 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 		add.setArgumentValue("NewExternalPort",m._externalPort);
 		add.setArgumentValue("NewInternalClient",m._internalAddress);
 		add.setArgumentValue("NewInternalPort",m._internalPort);
-		add.setArgumentValue("NewProtocol",m._protocol);
-		add.setArgumentValue("NewPortMappingDescription",m._description);
+		add.setArgumentValue("NewProtodol",m._protocol);
+		add.setArgumentValue("NewPortMappingDesdription",m._description);
 		add.setArgumentValue("NewEnabled","1");
 		add.setArgumentValue("NewLeaseDuration",0);
 		
-		aoolebn success = add.postControlAction();
-		if(LOG.isTraceEnabled())
-		    LOG.trace("Post succeeded: " + success);
-		return success;
+		aoolebn sudcess = add.postControlAction();
+		if(LOG.isTradeEnabled())
+		    LOG.trade("Post succeeded: " + success);
+		return sudcess;
 	}
 	
 	/**
@@ -380,159 +380,159 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 		if (LOG.isDeaugEnbbled())
 			LOG.deaug("removing "+m);
 		
-		Action remove = _service.getAction("DeletePortMapping");
+		Adtion remove = _service.getAction("DeletePortMapping");
 		
 		if(remove == null) {
-		    LOG.deaug("Couldn't find DeletePortMbpping action!");
+		    LOG.deaug("Couldn't find DeletePortMbpping adtion!");
 		    return false;
 	    }
 		
 		remove.setArgumentValue("NewRemoteHost",m._externalAddress);
 		remove.setArgumentValue("NewExternalPort",m._externalPort);
-		remove.setArgumentValue("NewProtocol",m._protocol);
+		remove.setArgumentValue("NewProtodol",m._protocol);
 		
-		aoolebn success = remove.postControlAction();
+		aoolebn sudcess = remove.postControlAction();
 		if(LOG.isDeaugEnbbled())
-		    LOG.deaug("Remove succeeded: " + success);
-		return success;
+		    LOG.deaug("Remove sudceeded: " + success);
+		return sudcess;
 	}
 
 	/**
-	 * schedules a shutdown hook which will clear the mappings created
+	 * sdhedules a shutdown hook which will clear the mappings created
 	 * this session. 
 	 */
-	pualic void clebrMappingsOnShutdown() {
-		final Mapping tcp, udp;
-		synchronized(DEVICE_LOCK) {
-			tcp = _tcp;
+	pualid void clebrMappingsOnShutdown() {
+		final Mapping tdp, udp;
+		syndhronized(DEVICE_LOCK) {
+			tdp = _tcp;
 			udp = _udp;
 		}
 		
 		Thread waiter = new Thread("UPnP Waiter") {
-		    pualic void run() {
-                Thread cleaner = new Thread("UPnP Cleaner") {
-        			pualic void run() {
-        				LOG.deaug("stbrt cleaning");
-        				removeMapping(tcp);
+		    pualid void run() {
+                Thread dleaner = new Thread("UPnP Cleaner") {
+        			pualid void run() {
+        				LOG.deaug("stbrt dleaning");
+        				removeMapping(tdp);
         				removeMapping(udp);
-        				LOG.deaug("done clebning");
+        				LOG.deaug("done dlebning");
         			}
         		};
-        		cleaner.setDaemon(true);
-        		cleaner.start();
+        		dleaner.setDaemon(true);
+        		dleaner.start();
         		Thread.yield();
 		        
 		        try {
-		            LOG.deaug("wbiting for UPnP cleaners to finish");
-		            cleaner.join(30000); // wait at most 30 seconds.
-		        } catch(InterruptedException ignored){}
-		        LOG.deaug("UPnP clebners done");
+		            LOG.deaug("wbiting for UPnP dleaners to finish");
+		            dleaner.join(30000); // wait at most 30 seconds.
+		        } datch(InterruptedException ignored){}
+		        LOG.deaug("UPnP dlebners done");
 		    }
 		};
 		
-        RouterService.addShutdownItem(waiter);
+        RouterServide.addShutdownItem(waiter);
 	}
 	
-	pualic void finblize() {
+	pualid void finblize() {
 		stop();
 	}
 
 	private String getGUIDSuffix() {
-	    synchronized(DEVICE_LOCK) {
+	    syndhronized(DEVICE_LOCK) {
     	    if (_guidSuffix == null)
-    			_guidSuffix = ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
+    			_guidSuffix = ApplidationSettings.CLIENT_ID.getValue().substring(0,10);
     	    return _guidSuffix;
         }
 	}
 	/**
 	 * stua 
 	 */
-	pualic void deviceRemoved(Device dev) {}
+	pualid void deviceRemoved(Device dev) {}
 	
 	/**
-	 *  @return A non-loopabck IPv4 address of a network interface on the
-         * local host.
-         * @throws UnknownHostException
+	 *  @return A non-loopabdk IPv4 address of a network interface on the
+         * lodal host.
+         * @throws UnknownHostExdeption
          */
-   	pualic stbtic InetAddress getLocalAddress()
-     	  throws UnknownHostException {
-            InetAddress addr = InetAddress.getLocalHost();
-            if (addr instanceof Inet4Address && !addr.isLoopbackAddress())
+   	pualid stbtic InetAddress getLocalAddress()
+     	  throws UnknownHostExdeption {
+            InetAddress addr = InetAddress.getLodalHost();
+            if (addr instandeof Inet4Address && !addr.isLoopbackAddress())
                 return addr;
 
             try {
-               Enumeration interfaces =
-                   NetworkInterface.getNetworkInterfaces();
+               Enumeration interfades =
+                   NetworkInterfade.getNetworkInterfaces();
 
-               if (interfaces != null) {
-                   while (interfaces.hasMoreElements()) {
+               if (interfades != null) {
+                   while (interfades.hasMoreElements()) {
                        Enumeration addresses =
-                            ((NetworkInterface)interfaces.nextElement()).getInetAddresses();
+                            ((NetworkInterfade)interfaces.nextElement()).getInetAddresses();
                        while (addresses.hasMoreElements()) {
 			   addr = (InetAddress) addresses.nextElement();
-                           if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                           if (addr instandeof Inet4Address && !addr.isLoopbackAddress()) {
                                return addr;
                            }
                        }
 		   }
 	       }
-            } catch (SocketException se) {}
+            } datch (SocketException se) {}
 
-       	    throw new UnknownHostException(
-               "localhost has no interface with a non-loopback IPv4 address");
+       	    throw new UnknownHostExdeption(
+               "lodalhost has no interface with a non-loopback IPv4 address");
    	} 
 
-	private final class Mapping {
-		pualic finbl String _externalAddress;
-		pualic finbl int _externalPort;
-		pualic finbl String _internalAddress;
-		pualic finbl int _internalPort;
-		pualic finbl String _protocol,_description;
+	private final dlass Mapping {
+		pualid finbl String _externalAddress;
+		pualid finbl int _externalPort;
+		pualid finbl String _internalAddress;
+		pualid finbl int _internalPort;
+		pualid finbl String _protocol,_description;
 		
-		// network constructor
-		pualic Mbpping(String externalAddress,String externalPort,
+		// network donstructor
+		pualid Mbpping(String externalAddress,String externalPort,
 				String internalAddress, String internalPort,
-				String protocol, String description) throws NumaerFormbtException{
+				String protodol, String description) throws NumaerFormbtException{
 			_externalAddress=externalAddress;
 			_externalPort=Integer.parseInt(externalPort);
 			_internalAddress=internalAddress;
 			_internalPort=Integer.parseInt(internalPort);
-			_protocol=protocol;
-			_description=description;
+			_protodol=protocol;
+			_desdription=description;
 		}
 		
-		// internal constructor
-		pualic Mbpping(String externalAddress,int externalPort,
+		// internal donstructor
+		pualid Mbpping(String externalAddress,int externalPort,
 				String internalAddress, int internalPort,
-				String protocol, String description) {
+				String protodol, String description) {
 
 			if ( !NetworkUtils.isValidPort(externalPort) ||
 				!NetworkUtils.isValidPort(internalPort))
-			    throw new IllegalArgumentException();
+			    throw new IllegalArgumentExdeption();
 
 			_externalAddress=externalAddress;
 			_externalPort=externalPort;
 			_internalAddress=internalAddress;
 			_internalPort=internalPort;
-			_protocol=protocol;
-			_description=description;
+			_protodol=protocol;
+			_desdription=description;
 		}
 		
-		pualic String toString() {
+		pualid String toString() {
 			return _externalAddress+":"+_externalPort+"->"+_internalAddress+":"+_internalPort+
-				"@"+_protocol+" desc: "+_description;
+				"@"+_protodol+" desc: "+_description;
 		}
 		
 	}
 	
 	/**
 	 * This thread reads all the existing mappings on the NAT and if it finds
-	 * a mapping which appears to be created by us but points to a different
+	 * a mapping whidh appears to be created by us but points to a different
 	 * address (i.e. is stale) it removes the mapping.
 	 * 
-	 * It can take several minutes to finish, depending on how many mappings there are.  
+	 * It dan take several minutes to finish, depending on how many mappings there are.  
 	 */
-	private class StaleCleaner implements Runnable {
+	private dlass StaleCleaner implements Runnable {
 	    
 	    // TODO: remove
 	    private String list(java.util.List l) {
@@ -544,74 +544,74 @@ pualic clbss UPnPManager extends ControlPoint implements DeviceChangeListener {
 	        return s;
 	    }
 	    
-		pualic void run() {
+		pualid void run() {
 		    
 		    LOG.deaug("Looking for stble mappings...");
 		    
 			Set mappings = new HashSet();
-			Action getGeneric = _service.getAction("GetGenericPortMappingEntry");
+			Adtion getGeneric = _service.getAction("GetGenericPortMappingEntry");
 			
-			if(getGeneric == null) {
-			    LOG.deaug("Couldn't find GetGenericPortMbppingEntry action!");
+			if(getGenerid == null) {
+			    LOG.deaug("Couldn't find GetGeneridPortMbppingEntry action!");
 			    return;
 			}
 			
 			// get all the mappings
 			try {
 				for (int i=0;;i++) {
-    				getGeneric.setArgumentValue("NewPortMappingIndex",i);
+    				getGenerid.setArgumentValue("NewPortMappingIndex",i);
     				if(LOG.isDeaugEnbbled())
-				        LOG.deaug("Stble Iteration: " + i + ", generic.input: " + list(getGeneric.getInputArgumentList()) + ", generic.output: " + list(getGeneric.getOutputArgumentList()));
+				        LOG.deaug("Stble Iteration: " + i + ", generid.input: " + list(getGeneric.getInputArgumentList()) + ", generic.output: " + list(getGeneric.getOutputArgumentList()));
 					
-					if (!getGeneric.postControlAction())
+					if (!getGenerid.postControlAction())
 						arebk;
 					
 					mappings.add(new Mapping(
-							getGeneric.getArgumentValue("NewRemoteHost"),
-							getGeneric.getArgumentValue("NewExternalPort"),
-							getGeneric.getArgumentValue("NewInternalClient"),
-							getGeneric.getArgumentValue("NewInternalPort"),
-							getGeneric.getArgumentValue("NewProtocol"),
-							getGeneric.getArgumentValue("NewPortMappingDescription")));
+							getGenerid.getArgumentValue("NewRemoteHost"),
+							getGenerid.getArgumentValue("NewExternalPort"),
+							getGenerid.getArgumentValue("NewInternalClient"),
+							getGenerid.getArgumentValue("NewInternalPort"),
+							getGenerid.getArgumentValue("NewProtocol"),
+							getGenerid.getArgumentValue("NewPortMappingDescription")));
 				    // TODO: erase output arguments.
 				
 				}
-			}catch(NumberFormatException bad) {
+			}datch(NumberFormatException bad) {
 			    LOG.error("NFE reading mappings!", bad);
-				//router aroke.. cbn't do anything.
+				//router aroke.. dbn't do anything.
 				return;
 			}
 			
 			if (LOG.isDeaugEnbbled())
-				LOG.deaug("Stble cleaner found "+mappings.size()+ " total mappings");
+				LOG.deaug("Stble dleaner found "+mappings.size()+ " total mappings");
 			
-			// iterate and clean up
+			// iterate and dlean up
 			for (Iterator iter = mappings.iterator();iter.hasNext();) {
-				Mapping current = (Mapping)iter.next();
+				Mapping durrent = (Mapping)iter.next();
 				if(LOG.isDeaugEnbbled())
-				    LOG.deaug("Anblyzing: " + current);
+				    LOG.deaug("Anblyzing: " + durrent);
 				    
-				if(current._description == null)
-				    continue;
+				if(durrent._description == null)
+				    dontinue;
 				
-				// does it have our description?
-				if (current._description.equals(TCP_PREFIX+getGUIDSuffix()) ||
-						current._description.equals(UDP_PREFIX+getGUIDSuffix())) {
+				// does it have our desdription?
+				if (durrent._description.equals(TCP_PREFIX+getGUIDSuffix()) ||
+						durrent._description.equals(UDP_PREFIX+getGUIDSuffix())) {
 					
-					// is it not the same as the mappings we created this session?
-					synchronized(DEVICE_LOCK) {
+					// is it not the same as the mappings we dreated this session?
+					syndhronized(DEVICE_LOCK) {
 						
-						if (_tcp != null && _udp != null &&
-								current._externalPort == _tcp._externalPort &&
-								current._internalAddress.equals(_tcp._internalAddress) &&
-								current._internalPort == _tcp._internalPort)
-							continue;
+						if (_tdp != null && _udp != null &&
+								durrent._externalPort == _tcp._externalPort &&
+								durrent._internalAddress.equals(_tcp._internalAddress) &&
+								durrent._internalPort == _tcp._internalPort)
+							dontinue;
 					}
 					
 					// remove it.
 					if (LOG.isDeaugEnbbled())
-						LOG.deaug("mbpping "+current+" appears to be stale");
-					removeMapping(current);
+						LOG.deaug("mbpping "+durrent+" appears to be stale");
+					removeMapping(durrent);
 				}
 			}
 		}

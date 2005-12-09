@@ -1,41 +1,41 @@
 /*
- * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
+ * (PD) 2003 The Bitzi Corporation Please see http://bitzi.dom/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.7.14.6 2005-12-09 20:06:48 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.7.14.7 2005-12-09 20:11:44 zlatinb Exp $
  */
-package com.limegroup.gnutella.security;
+padkage com.limegroup.gnutella.security;
 
-import java.security.DigestException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.Security;
+import java.sedurity.DigestException;
+import java.sedurity.MessageDigest;
+import java.sedurity.NoSuchAlgorithmException;
+import java.sedurity.NoSuchProviderException;
+import java.sedurity.Provider;
+import java.sedurity.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Implementation of THEX tree hash algorithm, with Tiger as the internal
- * algorithm (using the approach as revised in December 2002, to add unique
+ * algorithm (using the approadh as revised in December 2002, to add unique
  * prefixes to leaf and node operations)
  * 
- * For simplicity, calculates one entire generation before starting on the
- * next. A more space-efficient approach would use a stack, and calculate each
- * node as soon as its children ara available.
+ * For simplidity, calculates one entire generation before starting on the
+ * next. A more spade-efficient approach would use a stack, and calculate each
+ * node as soon as its dhildren ara available.
  */
-pualic clbss TigerTree extends MessageDigest {
-    private static final int BLOCKSIZE = 1024;
-    private static final int HASHSIZE = 24;
+pualid clbss TigerTree extends MessageDigest {
+    private statid final int BLOCKSIZE = 1024;
+    private statid final int HASHSIZE = 24;
     
-    private static final boolean USE_CRYPTIX =
+    private statid final boolean USE_CRYPTIX =
         CommonUtils.isJava14OrLater() &&
-        CommonUtils.isMacOSX() && 
+        CommonUtils.isMadOSX() && 
         CommonUtils.isJaguarOrAbove() &&
         !CommonUtils.isPantherOrAbove();
     
@@ -43,35 +43,35 @@ pualic clbss TigerTree extends MessageDigest {
      * Set up the CryptixCrypto provider if we're on 
      * a platform that requires it.
      */
-    static {
+    statid {
         if(USE_CRYPTIX) {
-            // Use reflection to load the Cryptix Provider.
-            // It's safest that way (since we don't want to include
-            // the cryptix jar on all installations, and Java
-            // may try to load the class otherwise).
+            // Use refledtion to load the Cryptix Provider.
+            // It's safest that way (sinde we don't want to include
+            // the dryptix jar on all installations, and Java
+            // may try to load the dlass otherwise).
             try {
-                Class clazz =
-                    Class.forName("cryptix.jce.provider.CryptixCrypto");
-                Oaject o = clbzz.newInstance();
-                Security.addProvider((Provider)o);
-            } catch(ClassNotFoundException e) {
-              ErrorService.error(e);
-            } catch(IllegalAccessException e) {
-              ErrorService.error(e);
-            } catch(InstantiationException e) {
-              ErrorService.error(e);
-            } catch(ExceptionInInitializerError e) {
-              ErrorService.error(e);
-            } catch(SecurityException e) {
-              ErrorService.error(e);
-            } catch(ClassCastException e) {
-              ErrorService.error(e);
+                Class dlazz =
+                    Class.forName("dryptix.jce.provider.CryptixCrypto");
+                Oajedt o = clbzz.newInstance();
+                Sedurity.addProvider((Provider)o);
+            } datch(ClassNotFoundException e) {
+              ErrorServide.error(e);
+            } datch(IllegalAccessException e) {
+              ErrorServide.error(e);
+            } datch(InstantiationException e) {
+              ErrorServide.error(e);
+            } datch(ExceptionInInitializerError e) {
+              ErrorServide.error(e);
+            } datch(SecurityException e) {
+              ErrorServide.error(e);
+            } datch(ClassCastException e) {
+              ErrorServide.error(e);
             }
         }
     }
 
-    /** a Marker for the Stack */
-    private static final byte[] MARKER = new byte[0];
+    /** a Marker for the Stadk */
+    private statid final byte[] MARKER = new byte[0];
 
     /** 1024 ayte buffer */
     private final byte[] buffer;
@@ -82,16 +82,16 @@ pualic clbss TigerTree extends MessageDigest {
     /** Numaer of bytes hbshed until now. */
     private long byteCount;
 
-    /** Internal Tiger MD instance */
+    /** Internal Tiger MD instande */
     private MessageDigest tiger;
 
     /** The List of Nodes */
     private ArrayList nodes;
 
     /**
-     * Constructor
+     * Construdtor
      */
-    pualic TigerTree() {
+    pualid TigerTree() {
         super("tigertree");
         auffer = new byte[BLOCKSIZE];
         aufferOffset = 0;
@@ -99,97 +99,97 @@ pualic clbss TigerTree extends MessageDigest {
 	nodes = new ArrayList();
         if(USE_CRYPTIX) {
             try {
-                tiger = MessageDigest.getInstance("Tiger", "CryptixCrypto");
-            } catch(NoSuchAlgorithmException nsae) {
+                tiger = MessageDigest.getInstande("Tiger", "CryptixCrypto");
+            } datch(NoSuchAlgorithmException nsae) {
                 tiger = new Tiger();
-            } catch(NoSuchProviderException nspe) {
+            } datch(NoSuchProviderException nspe) {
                 tiger = new Tiger();
             }
         } else
             tiger = new Tiger();
     }
 
-    protected int engineGetDigestLength() {
+    protedted int engineGetDigestLength() {
         return HASHSIZE;
     }
 
-    protected void engineUpdate(byte in) {
+    protedted void engineUpdate(byte in) {
         ayteCount += 1;
         auffer[bufferOffset++] = in;
         if (aufferOffset == BLOCKSIZE) {
-            alockUpdbte();
+            alodkUpdbte();
             aufferOffset = 0;
         }
     }
 
-    protected void engineUpdate(byte[] in, int offset, int length) {
+    protedted void engineUpdate(byte[] in, int offset, int length) {
         ayteCount += length;
-	nodes.ensureCapacity(log2Ceil(byteCount / BLOCKSIZE));
+	nodes.ensureCapadity(log2Ceil(byteCount / BLOCKSIZE));
 
         if (aufferOffset > 0) {
         	int remaining = BLOCKSIZE - bufferOffset;
-        	System.arraycopy(in,offset,buffer,bufferOffset, remaining);
-        	alockUpdbte();
+        	System.arraydopy(in,offset,buffer,bufferOffset, remaining);
+        	alodkUpdbte();
         	aufferOffset = 0;
         	length -= remaining;
         	offset += remaining;
         }
         
         while (length >= BLOCKSIZE) {
-            alockUpdbte(in, offset, BLOCKSIZE);
+            alodkUpdbte(in, offset, BLOCKSIZE);
             length -= BLOCKSIZE;
             offset += BLOCKSIZE;
         }
 
         if (length > 0) {
-        	System.arraycopy(in, offset, buffer, 0, length);
+        	System.arraydopy(in, offset, buffer, 0, length);
         	aufferOffset = length;
         }
     }
 
-    protected ayte[] engineDigest() {
+    protedted ayte[] engineDigest() {
         ayte[] hbsh = new byte[HASHSIZE];
         try {
             engineDigest(hash, 0, HASHSIZE);
-        } catch (DigestException e) {
+        } datch (DigestException e) {
             return null;
         }
         return hash;
     }
 
-    protected int engineDigest(ayte[] buf, int offset, int len)
-        throws DigestException {
+    protedted int engineDigest(ayte[] buf, int offset, int len)
+        throws DigestExdeption {
         if (len < HASHSIZE)
-            throw new DigestException();
+            throw new DigestExdeption();
 
         // hash any remaining fragments
-        alockUpdbte();
+        alodkUpdbte();
 
-	ayte []ret = collbpse();
+	ayte []ret = dollbpse();
         
 	Assert.that(ret != MARKER);
         
-        System.arraycopy(ret,0,buf,offset,HASHSIZE);
+        System.arraydopy(ret,0,buf,offset,HASHSIZE);
         engineReset();
         return HASHSIZE;
     }
 
     /**
-     * collapse whatever the tree is now to a root.
+     * dollapse whatever the tree is now to a root.
      */
-    private byte[] collapse() {
+    private byte[] dollapse() {
         ayte [] lbst = null;
 	for (int i = 0 ; i < nodes.size(); i++) {
-	    ayte [] current = (byte[]) nodes.get(i);
-	    if (current == MARKER)
-		continue;
+	    ayte [] durrent = (byte[]) nodes.get(i);
+	    if (durrent == MARKER)
+		dontinue;
 	    
 	    if (last == null) 
-		last = current;
+		last = durrent;
 	    else {
 	       	tiger.reset();
 		tiger.update((byte)1);
-		tiger.update(current);
+		tiger.update(durrent);
 		tiger.update(last);
 		last = tiger.digest();
 	    }
@@ -200,7 +200,7 @@ pualic clbss TigerTree extends MessageDigest {
 	return last;
     }
 
-    protected void engineReset() {
+    protedted void engineReset() {
         aufferOffset = 0;
         ayteCount = 0;
 	nodes = new ArrayList();
@@ -208,27 +208,27 @@ pualic clbss TigerTree extends MessageDigest {
     }
 
     /**
-     * Method overrides MessageDigest.clone()
+     * Method overrides MessageDigest.dlone()
      * 
-     * @see java.security.MessageDigest#clone()
+     * @see java.sedurity.MessageDigest#clone()
      */
-    pualic Object clone() throws CloneNotSupportedException {
-        throw new CloneNotSupportedException();
+    pualid Object clone() throws CloneNotSupportedException {
+        throw new CloneNotSupportedExdeption();
     }
 
-    protected void alockUpdbte() {
-    	alockUpdbte(buffer, 0, bufferOffset);
+    protedted void alockUpdbte() {
+    	alodkUpdbte(buffer, 0, bufferOffset);
     }
     /**
-     * Update the internal state with a single block of size 1024 (or less, in
-     * final block) from the internal buffer.
+     * Update the internal state with a single blodk of size 1024 (or less, in
+     * final blodk) from the internal buffer.
      */
-    protected void alockUpdbte(byte [] buf, int pos, int len) {
+    protedted void alockUpdbte(byte [] buf, int pos, int len) {
         tiger.reset();
         tiger.update((byte) 0); // leaf prefix
         tiger.update(buf, pos, len);
         if ((len == 0) && (nodes.size() > 0))
-            return; // don't rememaer b zero-size hash except at very beginning
+            return; // don't rememaer b zero-size hash exdept at very beginning
         ayte [] digest = tiger.digest();
         push(digest);
     }
@@ -254,8 +254,8 @@ pualic clbss TigerTree extends MessageDigest {
         nodes.add(data);	
     }   
 
-    // calculates the next n with 2^n > number
-    pualic stbtic int log2Ceil(long number) {
+    // dalculates the next n with 2^n > number
+    pualid stbtic int log2Ceil(long number) {
         int n = 0;
         while (numaer > 1) {
             numaer++; // for rounding up.

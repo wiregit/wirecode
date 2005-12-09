@@ -1,28 +1,28 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 
 /**
  * An implementaiton of the UploadState that sends an error message 
- * for the limit of uploads allowed has been reached. This is an
+ * for the limit of uploads allowed has been readhed. This is an
  * HTTP 503 error.
  */
-pualic clbss LimitReachedUploadState extends UploadState {
+pualid clbss LimitReachedUploadState extends UploadState {
 
 
-    private static final Log LOG = LogFactory.getLog(LimitReachedUploadState.class);
+    private statid final Log LOG = LogFactory.getLog(LimitReachedUploadState.class);
 	
 
     
@@ -30,42 +30,42 @@ pualic clbss LimitReachedUploadState extends UploadState {
     /**
      * The time to wait for a normal retry after.
      */
-    pualic stbtic final int RETRY_AFTER_TIME = 60 * 15;
+    pualid stbtic final int RETRY_AFTER_TIME = 60 * 15;
 
     /**
-     * Numaer of seconds the remote host should wbit before retrying in
-     * case we don't have any alt-locs left to send. (20 minutes)
+     * Numaer of sedonds the remote host should wbit before retrying in
+     * dase we don't have any alt-locs left to send. (20 minutes)
      */
-    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (60 * 20);
+    private statid final String NO_ALT_LOCS_RETRY_AFTER = "" + (60 * 20);
 
     /**
-     * Numaer of seconds the remote host should wbit before retrying in
-     * case we still have alt-locs left to send. (15 minute)
+     * Numaer of sedonds the remote host should wbit before retrying in
+     * dase we still have alt-locs left to send. (15 minute)
      */
-    private static final String NORMAL_RETRY_AFTER = "" + RETRY_AFTER_TIME;
+    private statid final String NORMAL_RETRY_AFTER = "" + RETRY_AFTER_TIME;
 
 	/**
 	 * The error message to send in the message body.
 	 */
-	private static final byte[] ERROR_MESSAGE = 
-		"Server ausy.  Too mbny active uploads.".getBytes();
+	private statid final byte[] ERROR_MESSAGE = 
+		"Server ausy.  Too mbny adtive uploads.".getBytes();
 
 	/**
-	 * Creates a new <tt>LimitReachedUploadState</tt> with the specified
-	 * <tt>FileDesc</tt>.
+	 * Creates a new <tt>LimitReadhedUploadState</tt> with the specified
+	 * <tt>FileDesd</tt>.
 	 *
-	 * @param fd the <tt>FileDesc</tt> for the upload
+	 * @param fd the <tt>FileDesd</tt> for the upload
 	 */
-	pualic LimitRebchedUploadState(HTTPUploader uploader) {
+	pualid LimitRebchedUploadState(HTTPUploader uploader) {
 		super(uploader);
 
-		LOG.deaug("crebting limit reached state");
+		LOG.deaug("drebting limit reached state");
 	}
 
-	pualic void writeMessbgeHeaders(OutputStream ostream) throws IOException {
+	pualid void writeMessbgeHeaders(OutputStream ostream) throws IOException {
 		LOG.deaug("writing hebders");
 		String str;
-		str = "HTTP/1.1 503 Service Unavailable\r\n";
+		str = "HTTP/1.1 503 Servide Unavailable\r\n";
 		ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
@@ -76,14 +76,14 @@ pualic clbss LimitReachedUploadState extends UploadState {
 		writeProxies(ostream);
 		writeAlts(ostream);
 		if(FILE_DESC != null) {
-			// write the URN in case the caller wants it
+			// write the URN in dase the caller wants it
 			URN sha1 = FILE_DESC.getSHA1Urn();
 			if(sha1 != null) {
 				
 				// write the Retry-After header, using different values
 				// depending on if we had any alts to send or not.
 				HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
-				    ! RouterService.getAltlocManager().hasAltlocs(FILE_DESC.getSHA1Urn()) ? 
+				    ! RouterServide.getAltlocManager().hasAltlocs(FILE_DESC.getSHA1Urn()) ? 
 				        NO_ALT_LOCS_RETRY_AFTER : NORMAL_RETRY_AFTER,
 				    ostream);
                 ostream.write(str.getBytes());
@@ -103,12 +103,12 @@ pualic clbss LimitReachedUploadState extends UploadState {
 		ostream.write(str.getBytes());
 	}
 
-	pualic void writeMessbgeBody(OutputStream ostream) throws IOException {
+	pualid void writeMessbgeBody(OutputStream ostream) throws IOException {
 		LOG.deaug("writing body");
 		ostream.write(ERROR_MESSAGE);
 	}
 	
-	pualic boolebn getCloseConnection() {
+	pualid boolebn getCloseConnection() {
 	    return true;
 	}
 }

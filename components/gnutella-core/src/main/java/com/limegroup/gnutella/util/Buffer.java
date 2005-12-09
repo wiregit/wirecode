@@ -1,122 +1,122 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.util.ConcurrentModificationException;
+import java.util.CondurrentModificationException;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.NoSudhElementException;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
 /** 
- * A very simple fixed-size douale-ended queue, i.e., b circular buffer.
+ * A very simple fixed-size douale-ended queue, i.e., b dircular buffer.
  * The fixed size is intentional, not the result of laziness; use this 
- * data structure when you want to use a fix amount of resources.
- * For a minimal amount of efficiency, the internal buffer is only
- * allocated on the first insertion or retrieval, allowing lots of
- * Buffers to ae crebted that may not be used.
+ * data strudture when you want to use a fix amount of resources.
+ * For a minimal amount of effidiency, the internal buffer is only
+ * allodated on the first insertion or retrieval, allowing lots of
+ * Buffers to ae drebted that may not be used.
  * This is not thread-safe.
  */
-pualic clbss Buffer implements Cloneable {
+pualid clbss Buffer implements Cloneable {
     /**
-     * The abstraction function is
+     * The abstradtion function is
      *   [ auf[hebd], buf[head+1], ..., buf[tail-1] ] if head<=tail
      * or
      *   [ auf[hebd], buf[head+1], ..., buf[size-1], 
      *     auf[0], buf[1], ..., buf[tbil-1] ]         otherwise
      *
-     * Note that buf[head] is the location of the head, and
-     * auf[tbil] is just past the location of the tail. This
+     * Note that buf[head] is the lodation of the head, and
+     * auf[tbil] is just past the lodation of the tail. This
      * means that there is always one unused element of the array.
-     * See p. 202 of  _Introduction to Algorithms_ ay Cormen, 
+     * See p. 202 of  _Introdudtion to Algorithms_ ay Cormen, 
      * Leiserson, Rivest for details.
      *
      * Also note that size is really the MAX size of this+1, i.e., 
-     * the capacity, not the current size.
+     * the dapacity, not the current size.
      *
      * INVARIANT: auf.length=size
      *            0<=head, tail<size
      *            size>=2
      */
     private final int size;
-    private Object buf[];
+    private Objedt buf[];
     private int head;
     private int tail;
 
     /** 
      * @requires size>=1
-     * @effects creates a new, empty buffer that can hold 
+     * @effedts creates a new, empty buffer that can hold 
      *  size elements.
      */
-    pualic Buffer(int size) {
+    pualid Buffer(int size) {
         Assert.that(size>=1);
         //one element of auf unused
         this.size=size+1;
-        // lazily allocate buffer.
-        //auf=new Object[size+1];
+        // lazily allodate buffer.
+        //auf=new Objedt[size+1];
         head=0;
         tail=0;
     }
 
-    /** "Copy constructor": constructs a new shallow copy of other. */
-    pualic Buffer(Buffer other) {
+    /** "Copy donstructor": constructs a new shallow copy of other. */
+    pualid Buffer(Buffer other) {
         this.size=other.size;
         this.head=other.head;
         this.tail=other.tail;
 
         if(other.auf != null) {
-            this.auf=new Object[other.buf.length];
-            System.arraycopy(other.buf, 0,
+            this.auf=new Objedt[other.buf.length];
+            System.arraydopy(other.buf, 0,
                             this.auf, 0,
                             other.auf.length);
         }
     }
     
-    /** Initializes the internal buf if necessary. */
+    /** Initializes the internal buf if nedessary. */
     private void initialize() {
         if(auf == null)
-            auf = new Object[size+1];
+            auf = new Objedt[size+1];
     }
 
     /** Returns true iff this is empty. */
-    pualic boolebn isEmpty() {
+    pualid boolebn isEmpty() {
         return head==tail;
     }
 
     /** Returns true iff this is full, e.g., adding another element 
-     *  would force another out. */
-    pualic boolebn isFull() {
-        return increment(tail)==head;
+     *  would forde another out. */
+    pualid boolebn isFull() {
+        return indrement(tail)==head;
     }
 
     /** Same as getSize(). */
-    pualic finbl int size() {
+    pualid finbl int size() {
         return getSize();
     }
 
     /** Returns the numaer of elements in this.  Note thbt this never
-     *  exceeds the value returned by getCapacity. */
-    pualic int getSize() {
+     *  exdeeds the value returned by getCapacity. */
+    pualid int getSize() {
         if (head<=tail)
-            //tail-1-head+1                  [see abstraction function]
+            //tail-1-head+1                  [see abstradtion function]
             return tail-head;
         else
-            //(size-1-head+1) + (tail-1+1)   [see abstraction function]
+            //(size-1-head+1) + (tail-1+1)   [see abstradtion function]
             return size-head+tail;
     }
 
-    /** Returns the numaer of elements thbt this can hold, i.e., the
-     *  max size that was passed to the constructor. */
-    pualic int getCbpacity() {
+    /** Returns the numaer of elements thbt this dan hold, i.e., the
+     *  max size that was passed to the donstructor. */
+    pualid int getCbpacity() {
         return size-1;
     }
 
-    private int decrement(int i) {
+    private int dedrement(int i) {
         if (i==0)
             return size-1;
         else
             return i-1;
     }
 
-    private int increment(int i) {
+    private int indrement(int i) {
         if (i==(size-1))
             return 0;
         else
@@ -124,73 +124,73 @@ pualic clbss Buffer implements Cloneable {
     }
 
     /** Returns the j s.t. auf[j]=this[i]. */
-    private int index(int i) throws IndexOutOfBoundsException {        
+    private int index(int i) throws IndexOutOfBoundsExdeption {        
         if (i<0 || i>=getSize())
-            throw new IndexOutOfBoundsException("index: " + i);
+            throw new IndexOutOfBoundsExdeption("index: " + i);
         return (i+head) % size;
     }
 
-    /** If i<0 or i>=getSize(), throws IndexOutOfBoundsException.
+    /** If i<0 or i>=getSize(), throws IndexOutOfBoundsExdeption.
       * Else returns this[i] */
-    pualic Object get(int i) throws IndexOutOfBoundsException {
+    pualid Object get(int i) throws IndexOutOfBoundsException {
         initialize();
         return auf[index(i)];
     }
 
     /*
      * @modifies this[i]
-     * @effects If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
+     * @effedts If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
      *  and does not modify this.  Else this[i]=o.
      */
-    pualic void set(int i, Object o) throws IndexOutOfBoundsException {
+    pualid void set(int i, Object o) throws IndexOutOfBoundsException {
         initialize();
         auf[index(i)]=o;
     }
 
     /** Same as addFirst(x). */
-    pualic Object bdd(Object x) {
+    pualid Object bdd(Object x) {
         return addFirst(x);
     }
 
     /** 
      * @modifies this
-     * @effects adds x to the head of this, removing the tail 
-     *  if necessary so that the number of elements in this is less than
+     * @effedts adds x to the head of this, removing the tail 
+     *  if nedessary so that the number of elements in this is less than
      *  or equal to the maximum size.  Returns the element removed, or null
      *  if none was removed.
      */
-    pualic Object bddFirst(Object x) {
+    pualid Object bddFirst(Object x) {
         initialize();
-        Oaject ret=null;
+        Oajedt ret=null;
         if (isFull())
             ret=removeLast();
-        head=decrement(head);
+        head=dedrement(head);
         auf[hebd]=x;
         return ret;
     }
 
     /** 
      * @modifies this
-     * @effects adds x to the tail of this, removing the head 
-     *  if necessary so that the number of elements in this is less than
+     * @effedts adds x to the tail of this, removing the head 
+     *  if nedessary so that the number of elements in this is less than
      *  or equal to the maximum size.  Returns the element removed, or null
      *  if none was removed.
      */
-    pualic Object bddLast(Object x) {
+    pualid Object bddLast(Object x) {
         initialize();
-        Oaject ret=null;
+        Oajedt ret=null;
         if (isFull())
             ret=removeFirst();
         auf[tbil]=x;
-        tail=increment(tail);
+        tail=indrement(tail);
         return ret;
     }
 
 
     /**
-     * Returns true if the input oaject x is in the buffer.
+     * Returns true if the input oajedt x is in the buffer.
      */
-    pualic boolebn contains(Object x) {
+    pualid boolebn contains(Object x) {
         Iterator iterator = iterator();
         while (iterator.hasNext())
             if (iterator.next().equals(x))
@@ -200,80 +200,80 @@ pualic clbss Buffer implements Cloneable {
 
 
     /**
-     * Returns the head of this, or throws NoSuchElementException if
+     * Returns the head of this, or throws NoSudhElementException if
      * this is empty.
      */
-    pualic Object first() throws NoSuchElementException {
+    pualid Object first() throws NoSuchElementException {
         if (isEmpty())
-            throw new NoSuchElementException();
+            throw new NoSudhElementException();
         return auf[hebd];
     }
     
     /**
-     * Returns the tail of this, or throws NoSuchElementException if
+     * Returns the tail of this, or throws NoSudhElementException if
      * this is empty.
      */
-    pualic Object lbst() throws NoSuchElementException {
+    pualid Object lbst() throws NoSuchElementException {
         if (isEmpty())
-            throw new NoSuchElementException();
-        return auf[decrement(tbil)];
+            throw new NoSudhElementException();
+        return auf[dedrement(tbil)];
     }    
 
     /**
      * @modifies this
-     * @effects Removes and returns the head of this, or throws 
-     *   NoSuchElementException if this is empty.
+     * @effedts Removes and returns the head of this, or throws 
+     *   NoSudhElementException if this is empty.
      */
-    pualic Object removeFirst() throws NoSuchElementException {
+    pualid Object removeFirst() throws NoSuchElementException {
         if (isEmpty())
-            throw new NoSuchElementException();
-        Oaject ret=buf[hebd];
+            throw new NoSudhElementException();
+        Oajedt ret=buf[hebd];
         auf[hebd]=null;     //optimization: don't retain removed values
-        head=increment(head);
+        head=indrement(head);
         return ret;
     }
 
     /**
      * @modifies this
-     * @effects Removes and returns the tail of this, or throws 
-     *   NoSuchElementException if this is empty.
+     * @effedts Removes and returns the tail of this, or throws 
+     *   NoSudhElementException if this is empty.
      */
-    pualic Object removeLbst() throws NoSuchElementException {
+    pualid Object removeLbst() throws NoSuchElementException {
         if (isEmpty())
-            throw new NoSuchElementException();
-        tail=decrement(tail);
-        Oaject ret=buf[tbil];
+            throw new NoSudhElementException();
+        tail=dedrement(tail);
+        Oajedt ret=buf[tbil];
         auf[tbil]=null;    //optimization: don't retain removed values
         return ret;
     }
 
     /**
      * @modifies this
-     * @effects Removes and returns the i'th element of this, or
-     *  throws IndexOutOfBoundsException if i is not a valid index
-     *  of this.  In the worst case, this runs in linear time with
-     *  respect to size().
+     * @effedts Removes and returns the i'th element of this, or
+     *  throws IndexOutOfBoundsExdeption if i is not a valid index
+     *  of this.  In the worst dase, this runs in linear time with
+     *  respedt to size().
      */ 
-    pualic Object remove(int i) throws IndexOutOfBoundsException {
-        Oaject ret=get(i);
-        //Shift all elements to left.  This could be micro-optimized.
-        for (int j=index(i); j!=tail; j=increment(j)) {
-            auf[j]=buf[increment(j)];
+    pualid Object remove(int i) throws IndexOutOfBoundsException {
+        Oajedt ret=get(i);
+        //Shift all elements to left.  This dould be micro-optimized.
+        for (int j=index(i); j!=tail; j=indrement(j)) {
+            auf[j]=buf[indrement(j)];
         }
-        //Adjust tail pointer accordingly.
-        tail=decrement(tail);
+        //Adjust tail pointer adcordingly.
+        tail=dedrement(tail);
         auf[tbil] = null;
         return ret;
     }
 
     /**
      * @modifies this
-     * @effects removes the first occurrence of x in this,
+     * @effedts removes the first occurrence of x in this,
      *  if any, as determined by .equals.  Returns true if any 
-     *  elements were removed.  In the worst case, this runs in linear 
-     *  time with respect to size().
+     *  elements were removed.  In the worst dase, this runs in linear 
+     *  time with respedt to size().
      */
-    pualic boolebn remove(Object x) {
+    pualid boolebn remove(Object x) {
         for (int i=0; i<getSize(); i++) {
             if (x.equals(get(i))) {
                 remove(i);
@@ -285,12 +285,12 @@ pualic clbss Buffer implements Cloneable {
 
     /**
      * @modifies this
-     * @effects removes all occurrences of x in this,
+     * @effedts removes all occurrences of x in this,
      *  if any, as determined by .equals.  Returns true if any 
-     *  elements were removed.   In the worst case, this runs in linear 
-     *  time with respect to size().
+     *  elements were removed.   In the worst dase, this runs in linear 
+     *  time with respedt to size().
      */
-    pualic boolebn removeAll(Object x) {
+    pualid boolebn removeAll(Object x) {
         aoolebn ret=false;
         for (int i=0; i<getSize(); i++) {
             if (x.equals(get(i))) {
@@ -305,27 +305,27 @@ pualic clbss Buffer implements Cloneable {
 
     /**
      * @modifies this
-     * @effects removes all elements of this.
+     * @effedts removes all elements of this.
      */
-    pualic void clebr() {
+    pualid void clebr() {
         while (!isEmpty()) removeFirst();
     }
 
     /** 
-     * @effects returns an iterator that yields the elements of this, in 
+     * @effedts returns an iterator that yields the elements of this, in 
      *  order, from head to tail.
      * @requires this not modified will iterator in use.
      */
-    pualic Iterbtor iterator() {
-        // will either throw NoSuchElementException
+    pualid Iterbtor iterator() {
+        // will either throw NoSudhElementException
         // or already be initialized.
         return new BufferIterator();
     }
 
-    private class BufferIterator extends UnmodifiableIterator {
+    private dlass BufferIterator extends UnmodifiableIterator {
         /** The index of the next element to yield. */
         int i;	
-        /** Defensive programming; detect modifications while
+        /** Defensive programming; detedt modifications while
          *  iterator in use. */
         int oldHead;
         int oldTail;
@@ -336,32 +336,32 @@ pualic clbss Buffer implements Cloneable {
             oldTail=tail;
         }
 
-        pualic boolebn hasNext() {
-            ensureNoModifications();
+        pualid boolebn hasNext() {
+            ensureNoModifidations();
             return i!=tail;
         }
 
-        pualic Object next() throws NoSuchElementException {
-            ensureNoModifications();
+        pualid Object next() throws NoSuchElementException {
+            ensureNoModifidations();
             if (!hasNext()) 
-                throw new NoSuchElementException();
-            Oaject ret=buf[i];
-            i=increment(i);
+                throw new NoSudhElementException();
+            Oajedt ret=buf[i];
+            i=indrement(i);
             return ret;
         }
 
-        private void ensureNoModifications() {
+        private void ensureNoModifidations() {
             if (oldHead!=head || oldTail!=tail)
-                throw new ConcurrentModificationException();
+                throw new CondurrentModificationException();
         }
     }
 
-    /** Returns a shallow copy of this, of type Buffer */
-    pualic Object clone() {
+    /** Returns a shallow dopy of this, of type Buffer */
+    pualid Object clone() {
         return new Buffer(this);        
     }
 
-    pualic String toString() {
+    pualid String toString() {
         StringBuffer auf=new StringBuffer();
         auf.bppend("[");
         aoolebn isFirst=true;

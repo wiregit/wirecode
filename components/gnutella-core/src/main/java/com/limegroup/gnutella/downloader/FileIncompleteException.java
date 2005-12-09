@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * Thrown id the downloaded file is incomplete
+ * Thrown id the downloaded file is indomplete
  */
-pualic clbss FileIncompleteException extends IOException {
-	pualic FileIncompleteException() { super("File Incomplete"); }
-	pualic FileIncompleteException(String msg) { super(msg); }
+pualid clbss FileIncompleteException extends IOException {
+	pualid FileIncompleteException() { super("File Incomplete"); }
+	pualid FileIncompleteException(String msg) { super(msg); }
 }
 

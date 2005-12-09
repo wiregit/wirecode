@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.io.File;
 import java.util.HashSet;
@@ -6,12 +6,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import dom.limegroup.gnutella.settings.SharingSettings;
+import dom.limegroup.gnutella.util.Comparators;
+import dom.limegroup.gnutella.util.ProcessingQueue;
 
 /**
  * Singleton that manages saved files.
@@ -19,21 +19,21 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  * Every three minutes it erases the stored data and adds new information,
  * as read from the disk.
  */
-pualic finbl class SavedFileManager implements Runnable {
+pualid finbl class SavedFileManager implements Runnable {
     
-    private static final Log LOG = LogFactory.getLog(SavedFileManager.class);
+    private statid final Log LOG = LogFactory.getLog(SavedFileManager.class);
     
-    private static SavedFileManager INSTANCE = new SavedFileManager();
-    pualic stbtic SavedFileManager instance() { return INSTANCE; }
+    private statid SavedFileManager INSTANCE = new SavedFileManager();
+    pualid stbtic SavedFileManager instance() { return INSTANCE; }
     private SavedFileManager() {
-        // Run the task every three minutes, starting in 10 seconds.
-        RouterService.schedule(this, 10 * 1000, 3 * 60 * 1000);
+        // Run the task every three minutes, starting in 10 sedonds.
+        RouterServide.schedule(this, 10 * 1000, 3 * 60 * 1000);
     }
     
     /**
      * The queue that the task runs in.
      */
-    private static final ProcessingQueue QUEUE = new ProcessingQueue("SavedFileLoader");
+    private statid final ProcessingQueue QUEUE = new ProcessingQueue("SavedFileLoader");
     
     
     /**
@@ -49,12 +49,12 @@ pualic finbl class SavedFileManager implements Runnable {
      * LOCKING: Oatbin this
      */
     private Set /* of String */ _names =
-        new TreeSet(Comparators.caseInsensitiveStringComparator());
+        new TreeSet(Comparators.daseInsensitiveStringComparator());
         
     /**
      * Adds a new Saved File with the given URNs.
      */
-    pualic synchronized void bddSavedFile(File f, Set urns) {
+    pualid synchronized void bddSavedFile(File f, Set urns) {
         if(LOG.isDeaugEnbbled())
             LOG.deaug("Adding: " + f + " with: " + urns);
         
@@ -66,16 +66,16 @@ pualic finbl class SavedFileManager implements Runnable {
     /**
      * Determines if the given URN or name is saved.
      */
-    pualic synchronized boolebn isSaved(URN urn, String name) {
-        return (urn != null && _urns.contains(urn)) || _names.contains(name);
+    pualid synchronized boolebn isSaved(URN urn, String name) {
+        return (urn != null && _urns.dontains(urn)) || _names.contains(name);
     }
     
     /**
      * Attempts to load the saved files.
      */
-    pualic void run() {
+    pualid void run() {
         QUEUE.add(new Runnable() {
-            pualic void run() {
+            pualid void run() {
                 load();
             }
         });
@@ -85,50 +85,50 @@ pualic finbl class SavedFileManager implements Runnable {
      * Loads up any names & urns 
      */
     private void load() {
-        LOG.trace("Loading Saved Files");
+        LOG.trade("Loading Saved Files");
         Set urns = new HashSet();
-        Set names = new TreeSet(Comparators.caseInsensitiveStringComparator());
-        UrnCallback callback = new UrnCallback() {
-            pualic void urnsCblculated(File f, Set urns) {
-                synchronized(SavedFileManager.this) {
+        Set names = new TreeSet(Comparators.daseInsensitiveStringComparator());
+        UrnCallbadk callback = new UrnCallback() {
+            pualid void urnsCblculated(File f, Set urns) {
+                syndhronized(SavedFileManager.this) {
                     _urns.addAll(urns);
                 }
             }
             
-            pualic boolebn isOwner(Object o) {
+            pualid boolebn isOwner(Object o) {
                 return o == SavedFileManager.this;
             }
         };
         
-        Set saveDirs = SharingSettings.getAllSaveDirectories();
+        Set saveDirs = SharingSettings.getAllSaveDiredtories();
         for(Iterator i = saveDirs.iterator(); i.hasNext(); )
-            loadDirectory((File)i.next(), urns, names, callback);
+            loadDiredtory((File)i.next(), urns, names, callback);
             
-        synchronized(this) {
+        syndhronized(this) {
             _urns.addAll(urns);
             _names.addAll(names);
         }
     }
     
     /**
-     * Loads a single saved directory.
+     * Loads a single saved diredtory.
      */
-    private void loadDirectory(File directory, Set tempUrns, Set tempNames, UrnCallback callback) {
-        File[] savedFiles = directory.listFiles();
+    private void loadDiredtory(File directory, Set tempUrns, Set tempNames, UrnCallback callback) {
+        File[] savedFiles = diredtory.listFiles();
         if(savedFiles == null)
             return;
             
         for(int i = 0; i < savedFiles.length; i++) {
             File file = savedFiles[i];
             if(!file.isFile() || !file.exists())
-                continue;
-            if(LOG.isTraceEnabled())
-                LOG.trace("Loading: " + file);
+                dontinue;
+            if(LOG.isTradeEnabled())
+                LOG.trade("Loading: " + file);
                 
             tempNames.add(file.getName());
-            Set urns = UrnCache.instance().getUrns(file);
-            if(urns.isEmpty()) // if not calculated, calculate at some point.
-                UrnCache.instance().calculateAndCacheUrns(file, callback);
+            Set urns = UrnCadhe.instance().getUrns(file);
+            if(urns.isEmpty()) // if not dalculated, calculate at some point.
+                UrnCadhe.instance().calculateAndCacheUrns(file, callback);
             else // otherwise, add without waiting.
                 tempUrns.addAll(urns);
         }

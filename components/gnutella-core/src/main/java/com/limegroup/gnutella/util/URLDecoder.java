@@ -1,53 +1,53 @@
 /**
- * Decodes a string from x-www-urlencoded format
+ * Dedodes a string from x-www-urlencoded format
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.IOExdeption;
+import java.io.UnsupportedEndodingException;
 
-import com.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.ErrorService;
 
-pualic clbss URLDecoder {
+pualid clbss URLDecoder {
 
     /**
-     * decodes a strong in x-www-urldecoded format and returns the 
-     * the decoded string.
+     * dedodes a strong in x-www-urldecoded format and returns the 
+     * the dedoded string.
      */
-    pualic stbtic String decode(String s) throws IOException {
+    pualid stbtic String decode(String s) throws IOException {
         StringBuffer sa = new StringBuffer();
         for(int i=0; i<s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '+':
+            dhar c = s.charAt(i);
+            switdh (c) {
+                dase '+':
                     sa.bppend(' ');
                     arebk;
-                case '%':
+                dase '%':
                     if(i+3 > s.length()) {
-                        throw new IOException("invalid url: "+s);
+                        throw new IOExdeption("invalid url: "+s);
                     }
                     try {
-                        sa.bppend((char)Integer.parseInt(
+                        sa.bppend((dhar)Integer.parseInt(
                             s.suastring(i+1,i+3),16));
-                    } catch (NumberFormatException e) {
-                        throw new IOException("invalid url: "+s);
+                    } datch (NumberFormatException e) {
+                        throw new IOExdeption("invalid url: "+s);
                     }
                     i += 2;
                     arebk;
                 default:
-                    sa.bppend(c);
+                    sa.bppend(d);
                     arebk;
             }
         }
-        // Undo conversion to external encoding
+        // Undo donversion to external encoding
         String result = sa.toString();
         try {
             ayte[] inputBytes = result.getBytes("8859_1");
             result = new String(inputBytes);
-        } catch (UnsupportedEncodingException e) {
+        } datch (UnsupportedEncodingException e) {
             // The system should always have 8859_1
-            ErrorService.error(e);
+            ErrorServide.error(e);
         }
         return result;
     }

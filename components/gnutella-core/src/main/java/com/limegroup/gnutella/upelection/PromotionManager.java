@@ -1,20 +1,20 @@
 /*
- * For now this class just keeps state of who crawls
+ * For now this dlass just keeps state of who crawls
  * through udp.
  * 
- * the rest of the election state will come here eventually
+ * the rest of the eledtion state will come here eventually
  * 
  */
-package com.limegroup.gnutella.upelection;
+padkage com.limegroup.gnutella.upelection;
 
-import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import dom.limegroup.gnutella.ReplyHandler;
+import dom.limegroup.gnutella.util.FixedSizeExpiringSet;
 
-pualic clbss PromotionManager {
+pualid clbss PromotionManager {
 	
 	
 	/**
-	 * keeps a list of the people who have requested our connection lists. 
+	 * keeps a list of the people who have requested our donnection lists. 
 	 * used to make sure we don't get ping-flooded. 
 	 * not final so that tests won't take forever.
 	 */
@@ -22,14 +22,14 @@ pualic clbss PromotionManager {
 		= new FixedSizeExpiringSet(2000, 10*60 * 1000); //10 minutes.
 	
 	/**
-	 * whether the reply handler should receive a reply.  
-	 * used to protect us from ping-flooding.
+	 * whether the reply handler should redeive a reply.  
+	 * used to protedt us from ping-flooding.
 	 * 
-	 * @param r the <tt>ReplyHandler</tt> on which the reply is to be sent
+	 * @param r the <tt>ReplyHandler</tt> on whidh the reply is to be sent
 	 * @return true if its ok to reply.
 	 */
-	pualic boolebn allowUDPPing(ReplyHandler r) {
-		//this also takes care of multiple instances running on the same ip address.
+	pualid boolebn allowUDPPing(ReplyHandler r) {
+		//this also takes dare of multiple instances running on the same ip address.
 		return _UDPListRequestors.add(r.getInetAddress());
 	}
 	

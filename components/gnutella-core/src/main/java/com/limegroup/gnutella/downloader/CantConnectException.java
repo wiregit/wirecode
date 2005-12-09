@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- *  Basically just a renamed ConnectException
+ *  Basidally just a renamed ConnectException
  */
 
-pualic clbss CantConnectException extends IOException {
-	pualic CbntConnectException() { super("Can't Connect"); }
-	pualic CbntConnectException(String msg) { super(msg); }
+pualid clbss CantConnectException extends IOException {
+	pualid CbntConnectException() { super("Can't Connect"); }
+	pualid CbntConnectException(String msg) { super(msg); }
 }

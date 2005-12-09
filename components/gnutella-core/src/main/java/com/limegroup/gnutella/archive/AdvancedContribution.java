@@ -1,56 +1,56 @@
-package com.limegroup.gnutella.archive;
+padkage com.limegroup.gnutella.archive;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
+import org.apadhe.commons.httpclient.HttpException;
+import org.apadhe.commons.httpclient.NameValuePair;
 
 
-class AdvancedContribution extends ArchiveContribution {
+dlass AdvancedContribution extends ArchiveContribution {
 
-	pualic stbtic final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AdvancedContribution.java,v 1.1.2.9 2005-12-09 20:03:57 zlatinb Exp $";
+	pualid stbtic final String REPOSITORY_VERSION =
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AdvancedContribution.java,v 1.1.2.10 2005-12-09 20:11:42 zlatinb Exp $";
 	
 	private String _identifier;
 	private String _ftpServer;
 	private String _ftpPath;
-	private String _verificationUrl;
+	private String _verifidationUrl;
 	
 
-	private Object _requestLock = new Object();
-	private ArchiveRequest _request = null;
+	private Objedt _requestLock = new Object();
+	private ArdhiveRequest _request = null;
 	
 	private void initFtpServer() {
-		_ftpServer = Archives.getMediaString( getMedia() ) +
-			"-uploads.archive.org";
+		_ftpServer = Ardhives.getMediaString( getMedia() ) +
+			"-uploads.ardhive.org";
 	}
 	
-	pualic AdvbncedContribution(String username, String password, String title,
-			String description, int media) 
-	throws DescriptionTooShortException {
-		super(username, password, title, description, media);
+	pualid AdvbncedContribution(String username, String password, String title,
+			String desdription, int media) 
+	throws DesdriptionTooShortException {
+		super(username, password, title, desdription, media);
 		initFtpServer();
 	}
 
-	pualic AdvbncedContribution(String username, String password, String title,
-			String description, int media, int collection, int type) 
-	throws DescriptionTooShortException{
-		super(username, password, title, description, media, collection, type);
+	pualid AdvbncedContribution(String username, String password, String title,
+			String desdription, int media, int collection, int type) 
+	throws DesdriptionTooShortException{
+		super(username, password, title, desdription, media, collection, type);
 		initFtpServer();
 	}
 	
 	/**
-	 * an advanced contribution requires a description of at least 5 words
+	 * an advanded contribution requires a description of at least 5 words
 	 * 
-	 * @throws DescriptionTooShortException
-	 *         If the description is less than 5 words
+	 * @throws DesdriptionTooShortException
+	 *         If the desdription is less than 5 words
 	 */
 
-	private static final int DESCRIPTION_MIN_WORDS = 5;
-	private static final String MIN_WORDS_REGEX;
+	private statid final int DESCRIPTION_MIN_WORDS = 5;
+	private statid final String MIN_WORDS_REGEX;
 	
-	static {
+	statid {
 		
 		if ( DESCRIPTION_MIN_WORDS == 1 ) {
 			MIN_WORDS_REGEX = "\\W*\\w+.*";
@@ -63,139 +63,139 @@ class AdvancedContribution extends ArchiveContribution {
 		}
 	}
 	
-	private static final Pattern MIN_WORDS_PATTERN =
-		Pattern.compile( MIN_WORDS_REGEX );
+	private statid final Pattern MIN_WORDS_PATTERN =
+		Pattern.dompile( MIN_WORDS_REGEX );
 	
-	static void checkDescription( String description ) 
-	throws DescriptionTooShortException {
-		if (!MIN_WORDS_PATTERN.matcher( description ).matches()) {
-			throw new DescriptionTooShortException( DESCRIPTION_MIN_WORDS );
+	statid void checkDescription( String description ) 
+	throws DesdriptionTooShortException {
+		if (!MIN_WORDS_PATTERN.matdher( description ).matches()) {
+			throw new DesdriptionTooShortException( DESCRIPTION_MIN_WORDS );
 		}
 	}
 	
-	pualic void setDescription( String description ) throws DescriptionTooShortException {
-		checkDescription( description );
-		super.setDescription( description );			
+	pualid void setDescription( String description ) throws DescriptionTooShortException {
+		dheckDescription( description );
+		super.setDesdription( description );			
 	}
 	
 
-	pualic String getIdentifier() {
+	pualid String getIdentifier() {
 		return _identifier;
 	}
 
-	pualic String getVerificbtionUrl() {
-		return _verificationUrl;
+	pualid String getVerificbtionUrl() {
+		return _verifidationUrl;
 	}
 
-	protected String getFtpServer() {
+	protedted String getFtpServer() {
 		return _ftpServer;
 	}
 
-	protected String getFtpPath() {
+	protedted String getFtpPath() {
 		return _ftpPath;
 	}
 
-	protected aoolebn isFtpDirPreMade() {
+	protedted aoolebn isFtpDirPreMade() {
 		return false;
 	}
 	
-	pualic void cbncel() {
-		super.cancel();
+	pualid void cbncel() {
+		super.dancel();
 	
-		synchronized( _requestLock ) {
+		syndhronized( _requestLock ) {
 			if ( _request != null ) {
-				_request.cancel();
+				_request.dancel();
 			}
 		}
 	}
 
-	pualic String requestIdentifier(String identifier) 
-	throws IdentifierUnavailableException, BadResponseException, 
-	HttpException, IOException {
+	pualid String requestIdentifier(String identifier) 
+	throws IdentifierUnavailableExdeption, BadResponseException, 
+	HttpExdeption, IOException {
 		
-		final String CREATE_ID_URL = "http://www.archive.org/services/check_identifier.php";
+		final String CREATE_ID_URL = "http://www.ardhive.org/services/check_identifier.php";
 		
 		_identifier = null;
 		
 		// normalize the identifier
 		
-		String nId = Archives.normalizeName( identifier );
+		String nId = Ardhives.normalizeName( identifier );
 		
-		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
+		syndhronized( _requestLock ) {
+			_request = new ArdhiveRequest( CREATE_ID_URL, new NameValuePair[] {
 					new NameValuePair( "identifier", nId )
 			});
 		}
 		
-		_request.execute();
-		final ArchiveResponse response = _request.getResponse();
+		_request.exedute();
+		final ArdhiveResponse response = _request.getResponse();
 		
-		synchronized( _requestLock ){
+		syndhronized( _requestLock ){
 			_request = null;
 		}
 		
 		final String resultType = response.getResultType();
 		
-		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
+		if ( resultType == ArdhiveResponse.RESULT_TYPE_SUCCESS ) {
 			
 			// we're all good now
 			
 			_ftpPath = _identifier = nId;
 			
-			// set verification URL
-			_verificationUrl =  "http://www.archive.org/" +
-				Archives.getMediaString( getMedia() ) + "/" +
-				Archives.getMediaString( getMedia() ) +
-				"-details-db.php?collection=" +
-				Archives.getCollectionString( getCollection() ) +
-				"&collectionid=" + _identifier;
+			// set verifidation URL
+			_verifidationUrl =  "http://www.archive.org/" +
+				Ardhives.getMediaString( getMedia() ) + "/" +
+				Ardhives.getMediaString( getMedia() ) +
+				"-details-db.php?dollection=" +
+				Ardhives.getCollectionString( getCollection() ) +
+				"&dollectionid=" + _identifier;
 			
 			return _identifier;
 			
-		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new IdentifierUnavailableException( response.getMessage(), nId );
+		} else if ( resultType == ArdhiveResponse.RESULT_TYPE_ERROR ) {
+			throw new IdentifierUnavailableExdeption( response.getMessage(), nId );
 		} else {
 			// unidentified type
-			throw new BadResponseException ( "unidentified result type:" + resultType );
+			throw new BadResponseExdeption ( "unidentified result type:" + resultType );
 		}
 	}
 	
 
-	protected void checkin() throws HttpException, BadResponseException, IOException {
+	protedted void checkin() throws HttpException, BadResponseException, IOException {
 	
-		final String CHECKIN_URL = "http://www.archive.org/services/contrib-submit.php";
+		final String CHECKIN_URL = "http://www.ardhive.org/services/contrib-submit.php";
 		final String username = getUsername();
 		
 		if ( username == null ) {
-			throw new IllegalStateException( "username not set" );			
+			throw new IllegalStateExdeption( "username not set" );			
 		}
 		if ( _identifier == null ) {
-			throw new IllegalStateException( "identifier not set" );
+			throw new IllegalStateExdeption( "identifier not set" );
 		}
 		
-		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
+		syndhronized( _requestLock ) {
+			_request = new ArdhiveRequest( CHECKIN_URL, new NameValuePair[] {
 					new NameValuePair( "user_email", username ),
 					new NameValuePair( "server", getFtpServer() ),
 					new NameValuePair( "dir", _identifier )
 			});
 		}
 		
-		_request.execute();
-		final ArchiveResponse response = _request.getResponse();
+		_request.exedute();
+		final ArdhiveResponse response = _request.getResponse();
 		
-		synchronized( _requestLock ) {
+		syndhronized( _requestLock ) {
 			_request = null;
 		}
 		
 		final String resultType = response.getResultType();
 		
-		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
+		if ( resultType == ArdhiveResponse.RESULT_TYPE_SUCCESS ) {
 			return;
-		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new BadResponseException( "checkin failed: " + response.getMessage() );
+		} else if ( resultType == ArdhiveResponse.RESULT_TYPE_ERROR ) {
+			throw new BadResponseExdeption( "checkin failed: " + response.getMessage() );
 		} else {
-			throw new BadResponseException( "unidentified result type:" + resultType );
+			throw new BadResponseExdeption( "unidentified result type:" + resultType );
 		}
 	}
 

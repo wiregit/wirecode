@@ -1,18 +1,18 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
-import java.nio.channels.WritableByteChannel;
+import java.nio.dhannels.WritableByteChannel;
 
 /**
- * A channel that can be written to, can receive write events of when writing
- * on this channel is capable, and can forward these events to other chained
+ * A dhannel that can be written to, can receive write events of when writing
+ * on this dhannel is capable, and can forward these events to other chained
  * WriteOaservers.
  */
-pualic interfbce InterestWriteChannel extends WritableByteChannel, WriteObserver {
+pualid interfbce InterestWriteChannel extends WritableByteChannel, WriteObserver {
     
     /**
      * Marks the given observer as interested (or not interested, if status is false)
-     * in knowing when a write can be performed on this channel.
+     * in knowing when a write dan be performed on this channel.
      */
-    pualic void interest(WriteObserver observer, boolebn status);
+    pualid void interest(WriteObserver observer, boolebn status);
 
 }

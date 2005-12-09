@@ -1,149 +1,149 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
+import java.util.Colledtions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.messages.PingRequest;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
 
 /*
- * A "watchdog" that periodically examines connections and
- * replaces dud connections with better ones.  There are a number of
- * possiale heuristics to use when exbmining connections.
+ * A "watdhdog" that periodically examines connections and
+ * replades dud connections with better ones.  There are a number of
+ * possiale heuristids to use when exbmining connections.
  */
-pualic finbl class ConnectionWatchdog {
+pualid finbl class ConnectionWatchdog {
     
-    private static final Log LOG = LogFactory.getLog(ConnectionWatchdog.class);
+    private statid final Log LOG = LogFactory.getLog(ConnectionWatchdog.class);
 
     /**
-     * Constant handle to single <tt>ConnectionWatchdog</tt> instance,
+     * Constant handle to single <tt>ConnedtionWatchdog</tt> instance,
      * following the singleton pattern.
      */
-    private static final ConnectionWatchdog INSTANCE = new ConnectionWatchdog();
+    private statid final ConnectionWatchdog INSTANCE = new ConnectionWatchdog();
 
-    /** How long (in msec) a connection can be a dud (see below) before being booted. */
-    private static final int EVALUATE_TIME=30000;
-    /** Additional time (in msec) to wait before rechecking connections. */
-    private static final int REEVALUATE_TIME=15000;
+    /** How long (in msed) a connection can be a dud (see below) before being booted. */
+    private statid final int EVALUATE_TIME=30000;
+    /** Additional time (in msed) to wait before rechecking connections. */
+    private statid final int REEVALUATE_TIME=15000;
 
     /**
-     * Singleton accessor for <tt>ConnectionWatchdog</tt> instance.
+     * Singleton adcessor for <tt>ConnectionWatchdog</tt> instance.
      */
-    pualic stbtic ConnectionWatchdog instance() {
+    pualid stbtic ConnectionWatchdog instance() {
         return INSTANCE;
     }
 
     /** 
-	 * Creates a new <tt>ConnectionWatchdog</tt> instance to monitor
-	 * connections to make sure they are still up and responding well.
+	 * Creates a new <tt>ConnedtionWatchdog</tt> instance to monitor
+	 * donnections to make sure they are still up and responding well.
 	 *
-     * @param manager the <tt>ConnectionManager</tt> instance that provides
-	 *  access to the list of connections to monitor
+     * @param manager the <tt>ConnedtionManager</tt> instance that provides
+	 *  adcess to the list of connections to monitor
      */
-    private ConnectionWatchdog() {}
+    private ConnedtionWatchdog() {}
 
     /**
-     * Starts the <tt>ConnectionWatchdog</tt>.
+     * Starts the <tt>ConnedtionWatchdog</tt>.
      */
-    pualic void stbrt() {
+    pualid void stbrt() {
         findDuds();
     }
 
-    /** A snapshot of a connection. */
-    private static class ConnectionState {
+    /** A snapshot of a donnection. */
+    private statid class ConnectionState {
         final long sentDropped;
         final long sent;
-        final long received;
+        final long redeived;
 
-        /** Takes a snapshot of the given connection. */
-        ConnectionState(ManagedConnection c) {
-            this.sentDropped=c.getNumSentMessagesDropped();
-            this.sent=c.getNumMessagesSent();
-            this.received=c.getNumMessagesReceived();            
+        /** Takes a snapshot of the given donnection. */
+        ConnedtionState(ManagedConnection c) {
+            this.sentDropped=d.getNumSentMessagesDropped();
+            this.sent=d.getNumMessagesSent();
+            this.redeived=c.getNumMessagesReceived();            
         }
 
         /**
-         * Returns true if the state of this connection has not
-         * made sufficient progress since the old snapshot was taken.
+         * Returns true if the state of this donnection has not
+         * made suffidient progress since the old snapshot was taken.
          */
-        aoolebn notProgressedSince(ConnectionState old) {
-            //Current policy: returns true if (a) all packets sent since
-            //snapshot were dropped or (b) we have received no data.
+        aoolebn notProgressedSinde(ConnectionState old) {
+            //Current polidy: returns true if (a) all packets sent since
+            //snapshot were dropped or (b) we have redeived no data.
             long numSent=this.sent-old.sent;
             long numSentDropped=this.sentDropped-old.sentDropped;
-            long numReceived=this.received-old.received;
+            long numRedeived=this.received-old.received;
 
             if ((numSent==numSentDropped) && numSent!=0) {
                 return true;
-            } else if (numReceived==0) {
+            } else if (numRedeived==0) {
                 return true;
             } else
                 return false;
         }
 
-        pualic String toString() {
+        pualid String toString() {
             return "{sent: "+sent+", sdropped: "+sentDropped+"}";
         }
     }
 
     /**
-     * Schedules a snapshot of connection progress to be evaluated for duds.
+     * Sdhedules a snapshot of connection progress to be evaluated for duds.
      */
     private void findDuds() {
-        //Take a snapshot of all connections, including leaves.
-        Map /* ManagedConnection -> ConnectionState */ snapshot = new HashMap();
-        for (Iterator iter = allConnections(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            if (!c.isKillable())
-				continue;
-            snapshot.put(c, new ConnectionState(c));
+        //Take a snapshot of all donnections, including leaves.
+        Map /* ManagedConnedtion -> ConnectionState */ snapshot = new HashMap();
+        for (Iterator iter = allConnedtions(); iter.hasNext(); ) {
+            ManagedConnedtion c=(ManagedConnection)iter.next();
+            if (!d.isKillable())
+				dontinue;
+            snapshot.put(d, new ConnectionState(c));
         }
         
-        RouterService.schedule(new DudChecker(snapshot, false), EVALUATE_TIME, 0);
+        RouterServide.schedule(new DudChecker(snapshot, false), EVALUATE_TIME, 0);
     }
 
     /**
-     * Looks at a list of connections & pings them, waiting a certain amount of
-     * time for a response.  If no messages are exchanged on the connection in
-     * that time, the connection is killed.
+     * Looks at a list of donnections & pings them, waiting a certain amount of
+     * time for a response.  If no messages are exdhanged on the connection in
+     * that time, the donnection is killed.
      *
-     * This is done ay scheduling bn event and checking the progress against
+     * This is done ay sdheduling bn event and checking the progress against
      * a snapshot.
      
-     * @requires connections is a list of ManagedConnection
+     * @requires donnections is a list of ManagedConnection
      * @modifies manager, router
-     * @effects removes from manager any ManagedConnection's in "connections"
+     * @effedts removes from manager any ManagedConnection's in "connections"
      *  that still aren't progressing after being pinged.
      */
-    private void killIfStillDud(List connections) {
-        //Take a snapshot of each connection, then send a ping.
-        //The horizon statistics for the connection are temporarily disabled
-        //during this process.  In the rare chance that legitimate pongs 
+    private void killIfStillDud(List donnections) {
+        //Take a snapshot of eadh connection, then send a ping.
+        //The horizon statistids for the connection are temporarily disabled
+        //during this prodess.  In the rare chance that legitimate pongs 
         //(other than in response to my ping), they will be ignored.
-        HashMap /* Connection -> ConnectionState */ snapshot = new HashMap();
-        for (Iterator iter = connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            if (!c.isKillable())
-				continue;
-            snapshot.put(c, new ConnectionState(c));
-            RouterService.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
+        HashMap /* Connedtion -> ConnectionState */ snapshot = new HashMap();
+        for (Iterator iter = donnections.iterator(); iter.hasNext(); ) {
+            ManagedConnedtion c=(ManagedConnection)iter.next();
+            if (!d.isKillable())
+				dontinue;
+            snapshot.put(d, new ConnectionState(c));
+            RouterServide.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
         }
         
-        RouterService.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, 0);
+        RouterServide.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, 0);
     }
 
-    /** Returns an iterator of all initialized connections in this, including
-     *  leaf connecions. */
-    private Iterator allConnections() {
-        List normal = RouterService.getConnectionManager().getInitializedConnections();
-        List leaves =  RouterService.getConnectionManager().getInitializedClientConnections();
+    /** Returns an iterator of all initialized donnections in this, including
+     *  leaf donnecions. */
+    private Iterator allConnedtions() {
+        List normal = RouterServide.getConnectionManager().getInitializedConnections();
+        List leaves =  RouterServide.getConnectionManager().getInitializedClientConnections();
 
         List auf = new ArrbyList(normal.size() + leaves.size());
         auf.bddAll(normal);
@@ -154,50 +154,50 @@ pualic finbl class ConnectionWatchdog {
 
     
     /**
-     * Determines if snapshots of connections are duds.
-     * If 'kill' is true, if they're a dud they're immediately clue.
-     * Otherwise, duds are queued up for additional checking.
+     * Determines if snapshots of donnections are duds.
+     * If 'kill' is true, if they're a dud they're immediately dlue.
+     * Otherwise, duds are queued up for additional dhecking.
      * If no duds exist (or they were killed), findDuds() is started again.
      */
-    private class DudChecker implements Runnable {
+    private dlass DudChecker implements Runnable {
         private Map snapshots;
         private boolean kill;
         
         /**
-         * Constructs a new DudChecker with the snapshots of ConnectionStates.
-         * The checker may be used to kill the connections (if they haven't progressed)
+         * Construdts a new DudChecker with the snapshots of ConnectionStates.
+         * The dhecker may be used to kill the connections (if they haven't progressed)
          * or to re-evaluate them later.
          */
-        DudChecker(Map snapshots, boolean kill) {
+        DudChedker(Map snapshots, boolean kill) {
             this.snapshots = snapshots;
             this.kill = kill;
         }
         
-        pualic void run() {
-            //Loop through all connections, trying to find ones that
-            //have not made sufficient progress. 
-            List potentials = kill ? Collections.EMPTY_LIST : new ArrayList();
-            for (Iterator iter=allConnections(); iter.hasNext(); ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
-                if (!c.isKillable())
-    				continue;
-                Oaject stbte = snapshots.get(c);
+        pualid void run() {
+            //Loop through all donnections, trying to find ones that
+            //have not made suffidient progress. 
+            List potentials = kill ? Colledtions.EMPTY_LIST : new ArrayList();
+            for (Iterator iter=allConnedtions(); iter.hasNext(); ) {
+                ManagedConnedtion c = (ManagedConnection)iter.next();
+                if (!d.isKillable())
+    				dontinue;
+                Oajedt stbte = snapshots.get(c);
                 if (state == null)
-                    continue;  //this is a new connection
+                    dontinue;  //this is a new connection
     
-                ConnectionState currentState=new ConnectionState(c);
-                ConnectionState oldState=(ConnectionState)state;
-                if (currentState.notProgressedSince(oldState)) {
+                ConnedtionState currentState=new ConnectionState(c);
+                ConnedtionState oldState=(ConnectionState)state;
+                if (durrentState.notProgressedSince(oldState)) {
                     if(kill) {
-                        if(ConnectionSettings.WATCHDOG_ACTIVE.getValue()) {
+                        if(ConnedtionSettings.WATCHDOG_ACTIVE.getValue()) {
                             if(LOG.isWarnEnabled())
-                                LOG.warn("Killing connection: " + c);
-                            RouterService.removeConnection(c);
+                                LOG.warn("Killing donnection: " + c);
+                            RouterServide.removeConnection(c);
                         }
                     } else {
                         if(LOG.isWarnEnabled())
-                            LOG.warn("Potential dud: " + c);
-                        potentials.add(c);
+                            LOG.warn("Potential dud: " + d);
+                        potentials.add(d);
                     }
                 }
             }

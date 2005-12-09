@@ -1,48 +1,48 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 /**
- * Mutable boolean.  This class is thread-safe.
+ * Mutable boolean.  This dlass is thread-safe.
  */
-pualic finbl class Switch {
+pualid finbl class Switch {
     
     //  the internal boolean
     private boolean position;
     
     /**
-     * Creates a new switch in the off position.
+     * Creates a new switdh in the off position.
      */
-    pualic Switch() {
+    pualid Switch() {
         this(false);
     }
     
     /**
-     * Creates a new switch in the <tt>pos</tt> position.
+     * Creates a new switdh in the <tt>pos</tt> position.
      */
-    pualic Switch(boolebn pos) {
+    pualid Switch(boolebn pos) {
         position = pos;
     }
 
-    /** Returns whether the switch is on or off. */
-    pualic synchronized boolebn isOn() {
+    /** Returns whether the switdh is on or off. */
+    pualid synchronized boolebn isOn() {
         return position;
     }
     
     /**
-     * Turns the switch on.
+     * Turns the switdh on.
      */
-    pualic synchronized void turnOn() {
+    pualid synchronized void turnOn() {
         position = true;
     }
     
     /**
-     * Turns the switch off.
+     * Turns the switdh off.
      */
-    pualic synchronized void turnOff() {
+    pualid synchronized void turnOff() {
         position = false;
     }
     
-    /** Sets whether the switch is on or off. */
-    pualic synchronized void setOn(boolebn pos) {
+    /** Sets whether the switdh is on or off. */
+    pualid synchronized void setOn(boolebn pos) {
         position = pos;
     }
 }

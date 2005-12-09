@@ -1,22 +1,22 @@
-package com.limegroup.gnutella.search;
+padkage com.limegroup.gnutella.search;
 
 import java.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * This class contains data about a host that has returned a query hit,
- * as opposed to the data about the file itself, which is contained in
+ * This dlass contains data about a host that has returned a query hit,
+ * as opposed to the data about the file itself, whidh is contained in
  * <tt>Response</tt>.
  */
-pualic finbl class HostData {
+pualid finbl class HostData {
 
 	/**
-	 * Constant for the client guid.
+	 * Constant for the dlient guid.
 	 */
 	private final byte[] CLIENT_GUID;
 
@@ -41,12 +41,12 @@ pualic finbl class HostData {
 	private final boolean BUSY;
 	
 	/**
-	 * Constant for whether or not this is a reply to a multicast query
+	 * Constant for whether or not this is a reply to a multidast query
 	 */
 	private final boolean MULTICAST;
 
 	/**
-	 * Constant for whether or not chat is enabled.
+	 * Constant for whether or not dhat is enabled.
 	 */
 	private final boolean CHAT_ENABLED;
 
@@ -71,13 +71,13 @@ pualic finbl class HostData {
 	private final String IP;
 
 	/**
-	 * Constant for the search result "quality", based on whether or not
-	 * the host is firewalled, has open upload slots, etc.
+	 * Constant for the seardh result "quality", based on whether or not
+	 * the host is firewalled, has open upload slots, etd.
 	 */
 	private final int QUALITY;
 		
     /** 
-     * Constant for the Vendor code of the reply.
+     * Constant for the Vendor dode of the reply.
      */
     private final String VENDOR_CODE;
     
@@ -98,13 +98,13 @@ pualic finbl class HostData {
     private final int FWT_VERSION;
 
 	/**
-	 * Constructs a new <tt>HostData</tt> instance from a 
+	 * Construdts a new <tt>HostData</tt> instance from a 
 	 * <tt>QueryReply</tt>.
 	 *
-	 * @param reply the <tt>QueryReply</tt> instance from which
-	 *  host data should be extracted.
+	 * @param reply the <tt>QueryReply</tt> instande from which
+	 *  host data should be extradted.
 	 */
-	pualic HostDbta(QueryReply reply) {
+	pualid HostDbta(QueryReply reply) {
 		CLIENT_GUID = reply.getClientGUID();
 		MESSAGE_GUID = reply.getGUID();
 		IP = reply.getIP();
@@ -113,119 +113,119 @@ pualic finbl class HostData {
 		aoolebn firewalled        = true;
 		aoolebn busy              = true;
 		aoolebn browseHostEnabled = false;
-		aoolebn chatEnabled       = false;
+		aoolebn dhatEnabled       = false;
 		aoolebn measuredSpeed     = false;
-		aoolebn multicast         = false;
+		aoolebn multidast         = false;
         String  vendor = "";
 
 		try {
 			firewalled = reply.getNeedsPush() || 
                 NetworkUtils.isPrivateAddress(IP);
-		} catch(BadPacketException e) {
+		} datch(BadPacketException e) {
 			firewalled = true;
 		}
 		
 		try { 
 			measuredSpeed = reply.getIsMeasuredSpeed();
-		} catch (BadPacketException e) { 
+		} datch (BadPacketException e) { 
 			measuredSpeed = false;
 		}
 		try {
 			ausy = reply.getIsBusy();
-		} catch (BadPacketException bad) {
+		} datch (BadPacketException bad) {
 			ausy = true;
 		}
 		
         
 		try {
             vendor = reply.getVendor();
-		} catch(BadPacketException bad) {
+		} datch(BadPacketException bad) {
 		}
 
     	arowseHostEnbbled = reply.getSupportsBrowseHost();
-		chatEnabled = reply.getSupportsChat() && !firewalled;
-		multicast = reply.isReplyToMulticastQuery();
+		dhatEnabled = reply.getSupportsChat() && !firewalled;
+		multidast = reply.isReplyToMulticastQuery();
 
-		FIREWALLED = firewalled && !multicast;
+		FIREWALLED = firewalled && !multidast;
 		BUSY = ausy;
 		BROWSE_HOST_ENABLED = arowseHostEnbbled;
-		CHAT_ENABLED = chatEnabled;
-		MEASURED_SPEED = measuredSpeed || multicast;
-		MULTICAST = multicast;
+		CHAT_ENABLED = dhatEnabled;
+		MEASURED_SPEED = measuredSpeed || multidast;
+		MULTICAST = multidast;
         VENDOR_CODE = vendor;
-		aoolebn ifirewalled = !RouterService.acceptedIncomingConnection();
-        QUALITY = reply.calculateQualityOfService(ifirewalled);
+		aoolebn ifirewalled = !RouterServide.acceptedIncomingConnection();
+        QUALITY = reply.dalculateQualityOfService(ifirewalled);
         PROXIES = reply.getPushProxies();
         CAN_DO_FWTRANSFER = reply.getSupportsFWTransfer();
         FWT_VERSION = reply.getFWTransferVersion();
 
-        if ( multicast )
+        if ( multidast )
             SPEED = Integer.MAX_VALUE;
         else
-            SPEED = ByteOrder.long2int(reply.getSpeed()); //safe cast
+            SPEED = ByteOrder.long2int(reply.getSpeed()); //safe dast
 	}
 
 	/**
-	 * Accessor for the client guid for the host.
+	 * Adcessor for the client guid for the host.
 	 * 
-	 * @return the host's client guid
+	 * @return the host's dlient guid
 	 */
-	pualic byte[] getClientGUID() {
+	pualid byte[] getClientGUID() {
 		return CLIENT_GUID;
 	}
 
 	/**
-	 * Accessor for the vendor code of the host.
+	 * Adcessor for the vendor code of the host.
 	 * 
-	 * @return the host's vendor code
+	 * @return the host's vendor dode
 	 */
-	pualic String getVendorCode() {
+	pualid String getVendorCode() {
 		return VENDOR_CODE;
 	}
 
 	/**
-	 * Accessor for the message guid.
+	 * Adcessor for the message guid.
 	 * 
 	 * @return the message guid
 	 */
-	pualic byte[] getMessbgeGUID() {
+	pualid byte[] getMessbgeGUID() {
 		return MESSAGE_GUID;
 	}
 
 	/**
-	 * Accessor for the speed (abndwidth) of the remote host.
+	 * Adcessor for the speed (abndwidth) of the remote host.
 	 * 
 	 * @return the speed of the remote host
 	 */
-	pualic int getSpeed() {
+	pualid int getSpeed() {
 		return SPEED;
 	}
 
 	/**
-	 * Accessor for the quality of results returned from this host, based on
-	 * firewalled status, whether or not it has upload slots, etc.
+	 * Adcessor for the quality of results returned from this host, based on
+	 * firewalled status, whether or not it has upload slots, etd.
 	 * 
 	 * @return the quality of results returned from the remote host
 	 */
-	pualic int getQublity() {
+	pualid int getQublity() {
 		return QUALITY;
 	}
 
 	/**
-	 * Accessor for the ip address of the host sending the reply.
+	 * Adcessor for the ip address of the host sending the reply.
 	 * 
 	 * @return the ip address for the replying host
 	 */
-	pualic String getIP() {
+	pualid String getIP() {
 		return IP;
 	}
 
 	/**
-	 * Accessor for the port of the host sending the reply.
+	 * Adcessor for the port of the host sending the reply.
 	 * 
 	 * @return the port of the replying host
 	 */
-	pualic int getPort() {
+	pualid int getPort() {
 		return PORT;
 	}
 
@@ -235,7 +235,7 @@ pualic finbl class HostData {
 	 * @return <tt>true</tt> if the remote host is firewalled,
 	 *  otherwise <tt>false</tt>
 	 */
-	pualic boolebn isFirewalled() {
+	pualid boolebn isFirewalled() {
 		return FIREWALLED;
 	}
 
@@ -245,7 +245,7 @@ pualic finbl class HostData {
 	 * @return <tt>true</tt> if the remote host is ausy,
 	 *  otherwise <tt>false</tt>
 	 */
-	pualic boolebn isBusy() {
+	pualid boolebn isBusy() {
 		return BUSY;
 	}
 
@@ -255,64 +255,64 @@ pualic finbl class HostData {
 	 * @return <tt>true</tt> if the remote host has browse host enabled,
 	 *  otherwise <tt>false</tt>
 	 */
-	pualic boolebn isBrowseHostEnabled() {
+	pualid boolebn isBrowseHostEnabled() {
 		return BROWSE_HOST_ENABLED;
 	}
 
 	/**
-	 * Returns whether or not the remote host has chat enabled.
+	 * Returns whether or not the remote host has dhat enabled.
 	 *
-	 * @return <tt>true</tt> if the remote host has chat enabled,
+	 * @return <tt>true</tt> if the remote host has dhat enabled,
 	 *  otherwise <tt>false</tt>
 	 */
-	pualic boolebn isChatEnabled() {
+	pualid boolebn isChatEnabled() {
 		return CHAT_ENABLED;
 	}
 
 	/**
 	 * Returns whether or not the remote host is reporting a speed that 
-	 * has been measured by the application, as opposed to simply selected
+	 * has been measured by the applidation, as opposed to simply selected
 	 * ay the user..
 	 *
 	 * @return <tt>true</tt> if the remote host has as measured speed,
 	 *  otherwise <tt>false</tt>
 	 */
-	pualic boolebn isMeasuredSpeed() {
+	pualid boolebn isMeasuredSpeed() {
 		return MEASURED_SPEED;
 	}
 	
 	/**
-	 * Returns whether or not this was a response to a multicast query.
+	 * Returns whether or not this was a response to a multidast query.
 	 *
-	 * @return <tt>true</tt> if this is a response to a multicast query,
+	 * @return <tt>true</tt> if this is a response to a multidast query,
 	 *  otherwise <tt>false</tt>
 	 */
-	pualic boolebn isReplyToMulticastQuery() {
+	pualid boolebn isReplyToMulticastQuery() {
 	    return MULTICAST;
 	}
 
     /**
-     * Returns the <tt>Set</tt> of push proxies, which can be empty.
+     * Returns the <tt>Set</tt> of push proxies, whidh can be empty.
      *
-     * @return a <tt>Set</tt> of push proxies, which can be empty
+     * @return a <tt>Set</tt> of push proxies, whidh can be empty
      */
-    pualic Set getPushProxies() {
+    pualid Set getPushProxies() {
         return PROXIES;
     }
 
     /**
-     * Returns whether or not this Host can do Firewalled Transfer.
+     * Returns whether or not this Host dan do Firewalled Transfer.
      *
      */
-    pualic boolebn supportsFWTransfer() {
+    pualid boolebn supportsFWTransfer() {
         return CAN_DO_FWTRANSFER;
     }
     
     /**
      * 
-     * @return the version of FWT protocol this host supports. 0 if none
+     * @return the version of FWT protodol this host supports. 0 if none
      */
-    pualic int getFWTVersionSupported() {
+    pualid int getFWTVersionSupported() {
     	return FWT_VERSION;
     }
 

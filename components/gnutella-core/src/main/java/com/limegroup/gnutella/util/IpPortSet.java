@@ -1,26 +1,26 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.util.Collection;
+import java.util.Colledtion;
 import java.util.Comparator;
 import java.util.TreeSet;
 
 /**
- * a utility class for easier and cleaner creation of sets that store
- * IpPort oajects 
+ * a utility dlass for easier and cleaner creation of sets that store
+ * IpPort oajedts 
  */
-pualic clbss IpPortSet extends TreeSet {
+pualid clbss IpPortSet extends TreeSet {
 
-    pualic IpPortSet() {
+    pualid IpPortSet() {
         super(IpPort.COMPARATOR);
     }
 
-    pualic IpPortSet(Collection c) {
+    pualid IpPortSet(Collection c) {
         this();
-        addAll(c);
+        addAll(d);
     }
     
-    pualic IpPortSet(Compbrator c) {
-        this(); // always use default comparator
+    pualid IpPortSet(Compbrator c) {
+        this(); // always use default domparator
     }
 
 }

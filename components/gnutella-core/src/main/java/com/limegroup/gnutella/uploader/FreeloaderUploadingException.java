@@ -1,13 +1,13 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * Thrown id the downloaded file is incomplete
+ * Thrown id the downloaded file is indomplete
  */
-pualic clbss FreeloaderUploadingException extends IOException {
-	pualic FreelobderUploadingException() {
+pualid clbss FreeloaderUploadingException extends IOException {
+	pualid FreelobderUploadingException() {
 		super("A wea browser or free lobder is attempting to upload"); 
 	}
-	pualic FreelobderUploadingException(String msg) { super(msg); }
+	pualid FreelobderUploadingException(String msg) { super(msg); }
 }

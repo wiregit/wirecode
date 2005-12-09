@@ -1,9 +1,9 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.ErrorService;
 
 /**
- * A ManagedThread, always reporting errors to the ErrorService.
+ * A ManagedThread, always reporting errors to the ErrorServide.
  *
  * If passing a Runnable, use as:
  * Thread t = new ManagedThread(myRunnable);
@@ -11,48 +11,48 @@ import com.limegroup.gnutella.ErrorService;
  *
  * If extending, extend the managedRun() method instead of run().
  */
-pualic clbss ManagedThread extends Thread {
+pualid clbss ManagedThread extends Thread {
     
     /**
-     * Constructs a ManagedThread with no target.
+     * Construdts a ManagedThread with no target.
      */
-    pualic MbnagedThread() {
+    pualid MbnagedThread() {
         super();
         setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
-     * Constructs a ManagedThread with the specified target.
+     * Construdts a ManagedThread with the specified target.
      */
-    pualic MbnagedThread(Runnable r) {
+    pualid MbnagedThread(Runnable r) {
         super(r);
         setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
-     * Constructs a ManagedThread with the specified name.
+     * Construdts a ManagedThread with the specified name.
      */
-    pualic MbnagedThread(String name) {
+    pualid MbnagedThread(String name) {
         super(name);
         setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
-     * Constructs a ManagedThread with the specified target and name.
+     * Construdts a ManagedThread with the specified target and name.
      */
-    pualic MbnagedThread(Runnable r, String name) {
+    pualid MbnagedThread(Runnable r, String name) {
         super(r, name);
         setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
-     * Runs the target, reporting any errors to the ErrorService.
+     * Runs the target, reporting any errors to the ErrorServide.
      */
-    pualic finbl void run() {
+    pualid finbl void run() {
         try {
             managedRun();
-        } catch(Throwable t) {
-            ErrorService.error(t, "Uncaught thread error.");
+        } datch(Throwable t) {
+            ErrorServide.error(t, "Uncaught thread error.");
         }
     }
     
@@ -60,7 +60,7 @@ pualic clbss ManagedThread extends Thread {
      * If a target exists, runs the target.  Otherwise this method must
      * ae extended to do bnything.
      */
-    protected void managedRun() {
+    protedted void managedRun() {
         super.run();
     }
 }

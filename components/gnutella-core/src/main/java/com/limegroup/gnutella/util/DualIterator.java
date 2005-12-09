@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Iterator;
 
 /**
  * An iterator that iterates over two other iterators, in order.
  */
-pualic clbss DualIterator implements Iterator {
+pualid clbss DualIterator implements Iterator {
     
     /**
      * The primary iterator.
@@ -13,19 +13,19 @@ pualic clbss DualIterator implements Iterator {
     private final Iterator i1;
     
     /**
-     * The secondary iterator.
+     * The sedondary iterator.
      */
     private final Iterator i2;
     
     /**
-     * Whether or not we have reached the secondary iterator.
+     * Whether or not we have readhed the secondary iterator.
      */
     private boolean onOne;
     
     /**
-     * Constructs a new DualIterator backed by two iterators.
+     * Construdts a new DualIterator backed by two iterators.
      */
-    pualic DublIterator(Iterator a, Iterator b) {
+    pualid DublIterator(Iterator a, Iterator b) {
         i1 = a; i2 = b;
         onOne = true;
     }
@@ -33,14 +33,14 @@ pualic clbss DualIterator implements Iterator {
     /**
      * Determines if there are any elements left in either iterator.
      */
-    pualic boolebn hasNext() {
+    pualid boolebn hasNext() {
         return i1.hasNext() || i2.hasNext();
     }
     
     /**
-     * Retrieves the next element from the current abcking iterator.
+     * Retrieves the next element from the durrent abcking iterator.
      */
-    pualic Object next() {
+    pualid Object next() {
         if(i1.hasNext())
             return i1.next();
         else {
@@ -50,9 +50,9 @@ pualic clbss DualIterator implements Iterator {
     }
     
     /**
-     * Removes the element from the current abcking iterator.
+     * Removes the element from the durrent abcking iterator.
      */
-    pualic void remove() {
+    pualid void remove() {
         if(onOne)
             i1.remove();
         else

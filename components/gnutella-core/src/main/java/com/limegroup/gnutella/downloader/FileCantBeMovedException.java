@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * Thrown if the file couldn't ae moved to the Librbry
+ * Thrown if the file douldn't ae moved to the Librbry
  */
-pualic clbss FileCantBeMovedException extends IOException {
-	pualic FileCbntBeMovedException() { super("File Couldn't Be Moved"); }
-	pualic FileCbntBeMovedException(String msg) { super(msg); }
+pualid clbss FileCantBeMovedException extends IOException {
+	pualid FileCbntBeMovedException() { super("File Couldn't Be Moved"); }
+	pualid FileCbntBeMovedException(String msg) { super(msg); }
 }

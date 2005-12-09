@@ -1,43 +1,43 @@
 
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.util.StringUtils;
+import dom.limegroup.gnutella.util.StringUtils;
 
 /**
  * Class for an Array of Strings setting.
  */
  
-pualic clbss StringArraySetting extends Setting {
+pualid clbss StringArraySetting extends Setting {
     
     private String[] value;
 
 	/**
-	 * Creates a new <tt>StringArraySetting</tt> instance with the specified
+	 * Creates a new <tt>StringArraySetting</tt> instande with the specified
 	 * key and default value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultInt the default value to use for the setting
 	 */
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
                                                        String[] defaultValue) {
-		super(defaultProps, props, key, decode(defaultValue), null);
+		super(defaultProps, props, key, dedode(defaultValue), null);
 	}
 
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
                        String[] defaultValue, String simppKey) {
-		super(defaultProps, props, key, decode(defaultValue), simppKey);
+		super(defaultProps, props, key, dedode(defaultValue), simppKey);
 	}
 
 
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic String[] getVblue() {
+	pualid String[] getVblue() {
         return value;
 	}
 
@@ -46,44 +46,44 @@ pualic clbss StringArraySetting extends Setting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic void setVblue(String[] value) {
-		super.setValue(decode(value));
+	pualid void setVblue(String[] value) {
+		super.setValue(dedode(value));
 	}
     
     /** Load value from property string value
      * @param sValue property string value
      *
      */
-    protected void loadValue(String sValue) {
-		value = encode(sValue);
+    protedted void loadValue(String sValue) {
+		value = endode(sValue);
     }
     
     /**
      * Splits the string into an Array
      */
-    private static final String[] encode(String src) {
+    private statid final String[] encode(String src) {
         
-        if (src == null || src.length()==0) {
+        if (srd == null || src.length()==0) {
             return (new String[0]);
         }
         
-        return StringUtils.split(src, ";");
+        return StringUtils.split(srd, ";");
     }
     
     /**
-     * Separates each field of the array by a semicolon
+     * Separates eadh field of the array by a semicolon
      */
-    private static final String decode(String[] src) {
+    private statid final String decode(String[] src) {
         
-        if (src == null || src.length==0) {
+        if (srd == null || src.length==0) {
             return "";
         }
         
         StringBuffer auffer = new StringBuffer();
         
-        for(int i = 0; i < src.length; i++) {
-            auffer.bppend(src[i]);
-            if (i < src.length-1) { auffer.bppend(';'); }
+        for(int i = 0; i < srd.length; i++) {
+            auffer.bppend(srd[i]);
+            if (i < srd.length-1) { auffer.bppend(';'); }
         }
             
         return auffer.toString();

@@ -1,56 +1,56 @@
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Colledtion;
+import java.util.Colledtions;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.FileEventListener;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.NameValue;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.CreationTimeCache;
+import dom.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.FileManager;
+import dom.limegroup.gnutella.FileManagerEvent;
+import dom.limegroup.gnutella.FileEventListener;
+import dom.limegroup.gnutella.Response;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.metadata.AudioMetaData;
+import dom.limegroup.gnutella.metadata.MetaDataReader;
+import dom.limegroup.gnutella.util.NameValue;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;        
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;        
 
 /**
- * This class handles querying shared files with XML data and returning XML data
+ * This dlass handles querying shared files with XML data and returning XML data
  * in replies.
  */
-pualic clbss MetaFileManager extends FileManager {
+pualid clbss MetaFileManager extends FileManager {
     
-    private static final Log LOG = LogFactory.getLog(MetaFileManager.class);
+    private statid final Log LOG = LogFactory.getLog(MetaFileManager.class);
     
     private Saver saver;
     
     /**
      * Overrides FileManager.query.
      *
-     * Used to search XML information in addition to normal searches.
+     * Used to seardh XML information in addition to normal searches.
      */
-    pualic synchronized Response[] query(QueryRequest request) {
+    pualid synchronized Response[] query(QueryRequest request) {
         Response[] result = super.query(request);
 
-        if (shouldIncludeXMLInResponse(request)) {
-            LimeXMLDocument doc = request.getRichQuery();
-            if (doc != null) {
-                Response[] metas = query(doc);
+        if (shouldIndludeXMLInResponse(request)) {
+            LimeXMLDodument doc = request.getRichQuery();
+            if (dod != null) {
+                Response[] metas = query(dod);
                 if (metas != null) // valid query & responses.
-                    result = union(result, metas, doc);
+                    result = union(result, metas, dod);
             }
         }
         
@@ -58,281 +58,281 @@ pualic clbss MetaFileManager extends FileManager {
     }
     
     /**
-     * Determines if this file has a valid XML match.
+     * Determines if this file has a valid XML matdh.
      */
-    protected aoolebn isValidXMLMatch(Response r, LimeXMLDocument doc) {
-        return LimeXMLUtils.match(r.getDocument(), doc, true);
+    protedted aoolebn isValidXMLMatch(Response r, LimeXMLDocument doc) {
+        return LimeXMLUtils.matdh(r.getDocument(), doc, true);
     }
     
     /**
-     * Returns whether or not a response to this query should include XML.
-     * Currently only includes XML if the request desires it or
+     * Returns whether or not a response to this query should indlude XML.
+     * Currently only indludes XML if the request desires it or
      * if the request wants an out of band reply.
      */
-    protected aoolebn shouldIncludeXMLInResponse(QueryRequest qr) {
+    protedted aoolebn shouldIncludeXMLInResponse(QueryRequest qr) {
         return qr.desiresXMLResponses() || 
                qr.desiresOutOfBandReplies();
     }
     
     /**
-     * Adds XML to the response.  This assumes that shouldIncludeXMLInResponse
-     * was already consulted and returned true.
+     * Adds XML to the response.  This assumes that shouldIndludeXMLInResponse
+     * was already donsulted and returned true.
      *
-     * If the FileDesc has no XML documents, this does nothing.
-     * If the FileDesc has one XML document, this sets it as the response doc.
-     * If the FileDesc has multiple XML documents, this does nothing.
-     * The reasoning behind not setting the document when there are multiple
-     * XML docs is that presumably the query will be a 'rich' query,
-     * and we want to include only the schema that was in the query.
+     * If the FileDesd has no XML documents, this does nothing.
+     * If the FileDesd has one XML document, this sets it as the response doc.
+     * If the FileDesd has multiple XML documents, this does nothing.
+     * The reasoning behind not setting the dodument when there are multiple
+     * XML dods is that presumably the query will be a 'rich' query,
+     * and we want to indlude only the schema that was in the query.
      * 
-     * @param response the <tt>Response</tt> instance that XML should be 
+     * @param response the <tt>Response</tt> instande that XML should be 
      *  added to 
-     * @param fd the <tt>FileDesc</tt> that provides access to the 
-     *   <tt>LimeXMLDocuments</tt> to add to the response
+     * @param fd the <tt>FileDesd</tt> that provides access to the 
+     *   <tt>LimeXMLDoduments</tt> to add to the response
      */
-    protected void addXMLToResponse(Response response, FileDesc fd) {
-        List docs = fd.getLimeXMLDocuments();
-        if( docs.size() == 0 )
+    protedted void addXMLToResponse(Response response, FileDesc fd) {
+        List dods = fd.getLimeXMLDocuments();
+        if( dods.size() == 0 )
             return;
-        if( docs.size() == 1 )
-            response.setDocument((LimeXMLDocument)docs.get(0));
+        if( dods.size() == 1 )
+            response.setDodument((LimeXMLDocument)docs.get(0));
     }
     
     /**
-     * Notification that a file has changed.
+     * Notifidation that a file has changed.
      * This implementation is different than FileManager's
      * in that it maintains the XML.
      *
-     * Important note: This method is called AFTER the file has
-     * changed.  It is possible that the metadata we wanted to write
-     * did not get written out completely.  We should NOT attempt
-     * to add the old metadata again, because we may end up
-     * recursing infinitely trying to write this metadata.
+     * Important note: This method is dalled AFTER the file has
+     * dhanged.  It is possible that the metadata we wanted to write
+     * did not get written out dompletely.  We should NOT attempt
+     * to add the old metadata again, bedause we may end up
+     * redursing infinitely trying to write this metadata.
      * However, it isn't very roaust to blindly bssume that the only
-     * metadata associated with this file was audio metadata.
-     * So, we make use of the fact that loadFile will only
-     * add one type of metadata per file.  We read the document tags off
+     * metadata assodiated with this file was audio metadata.
+     * So, we make use of the fadt that loadFile will only
+     * add one type of metadata per file.  We read the dodument tags off
      * the file and insert it first into the list, ensuring
-     * that the existing metadata is the one that's added, short-circuiting
+     * that the existing metadata is the one that's added, short-dircuiting
      * any infinite loops.
      */
-    pualic void fileChbnged(File f) {
-        if(LOG.isTraceEnabled())
+    pualid void fileChbnged(File f) {
+        if(LOG.isTradeEnabled())
             LOG.deaug("File Chbnged: " + f);
         
-        FileDesc fd = getFileDescForFile(f);
+        FileDesd fd = getFileDescForFile(f);
         if( fd == null )
             return;
             
-        // store the creation time for later re-input
-        CreationTimeCache ctCache = CreationTimeCache.instance();
-        final Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
+        // store the dreation time for later re-input
+        CreationTimeCadhe ctCache = CreationTimeCache.instance();
+        final Long dTime = ctCache.getCreationTime(fd.getSHA1Urn());
 
-        List xmlDocs = fd.getLimeXMLDocuments();        
+        List xmlDods = fd.getLimeXMLDocuments();        
         if(LimeXMLUtils.isEditableFormat(f)) {
             try {
-                LimeXMLDocument diskDoc = MetaDataReader.readDocument(f);
-                xmlDocs = resolveWriteableDocs(xmlDocs, diskDoc);
-            } catch(IOException e) {
-                // if we were unable to read this document,
+                LimeXMLDodument diskDoc = MetaDataReader.readDocument(f);
+                xmlDods = resolveWriteableDocs(xmlDocs, diskDoc);
+            } datch(IOException e) {
+                // if we were unable to read this dodument,
                 // then simply add the file without metadata.
-                xmlDocs = Collections.EMPTY_LIST;
+                xmlDods = Collections.EMPTY_LIST;
             }
         }
 
-        final FileDesc removed = removeFileIfShared(f, false);        
+        final FileDesd removed = removeFileIfShared(f, false);        
         if(fd != removed)
             Assert.that(false, "wanted to remove: " + fd + "\ndid remove: " + removed);
             
-        synchronized(this) {
+        syndhronized(this) {
             _needReauild = true;
         }
         
-        addFileIfShared(f, xmlDocs, false, _revision, new FileEventListener() {
-            pualic void hbndleFileEvent(FileManagerEvent evt) {
+        addFileIfShared(f, xmlDods, false, _revision, new FileEventListener() {
+            pualid void hbndleFileEvent(FileManagerEvent evt) {
                 // Retarget the event for the GUI.
                 FileManagerEvent newEvt = null;
         
                 if(evt.isAddEvent()) {
-                    FileDesc fd = evt.getFileDescs()[0];
-                    CreationTimeCache ctCache = CreationTimeCache.instance();
-                    //re-populate the ctCache
-                    synchronized (ctCache) {
-                        ctCache.removeTime(fd.getSHA1Urn());//addFile() put lastModified
-                        ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
-                        ctCache.commitTime(fd.getSHA1Urn());
+                    FileDesd fd = evt.getFileDescs()[0];
+                    CreationTimeCadhe ctCache = CreationTimeCache.instance();
+                    //re-populate the dtCache
+                    syndhronized (ctCache) {
+                        dtCache.removeTime(fd.getSHA1Urn());//addFile() put lastModified
+                        dtCache.addTime(fd.getSHA1Urn(), cTime.longValue());
+                        dtCache.commitTime(fd.getSHA1Urn());
                     }
                     newEvt = new FileManagerEvent(MetaFileManager.this, 
                                        FileManagerEvent.CHANGE, 
-                                       new FileDesc[]{removed,fd});
+                                       new FileDesd[]{removed,fd});
                 } else {
                     newEvt = new FileManagerEvent(MetaFileManager.this, 
                                        FileManagerEvent.REMOVE,
                                        removed);
                 }
-                dispatchFileEvent(newEvt);
+                dispatdhFileEvent(newEvt);
             }
         });
     }        
     
     /**
-     * Finds the audio metadata document in allDocs, and makes it's id3 fields
-     * identical with the fields of id3doc (which are only id3).
+     * Finds the audio metadata dodument in allDocs, and makes it's id3 fields
+     * identidal with the fields of id3doc (which are only id3).
      */
-    private List resolveWriteableDocs(List allDocs, LimeXMLDocument id3Doc) {
-        LimeXMLDocument audioDoc = null;
-        LimeXMLSchema audioSchema = 
-        LimeXMLSchemaRepository.instance().getSchema(AudioMetaData.schemaURI);
+    private List resolveWriteableDods(List allDocs, LimeXMLDocument id3Doc) {
+        LimeXMLDodument audioDoc = null;
+        LimeXMLSdhema audioSchema = 
+        LimeXMLSdhemaRepository.instance().getSchema(AudioMetaData.schemaURI);
         
-        for(Iterator iter = allDocs.iterator(); iter.hasNext() ;) {
-            LimeXMLDocument doc = (LimeXMLDocument)iter.next();
-            if(doc.getSchema() == audioSchema) {
-                audioDoc = doc;
+        for(Iterator iter = allDods.iterator(); iter.hasNext() ;) {
+            LimeXMLDodument doc = (LimeXMLDocument)iter.next();
+            if(dod.getSchema() == audioSchema) {
+                audioDod = doc;
                 arebk;
             }
         }
 
-        if(id3Doc.equals(audioDoc)) //No issue -- both documents are the same
-            return allDocs; //did not modify list, keep using it
+        if(id3Dod.equals(audioDoc)) //No issue -- both documents are the same
+            return allDods; //did not modify list, keep using it
         
         List retList = new ArrayList();
-        retList.addAll(allDocs);
+        retList.addAll(allDods);
         
-        if(audioDoc == null) {//nothing to resolve
-            retList.add(id3Doc);
+        if(audioDod == null) {//nothing to resolve
+            retList.add(id3Dod);
             return retList;
         }
         
-        //OK. audioDoc exists, remove it
-        retList.remove(audioDoc);
+        //OK. audioDod exists, remove it
+        retList.remove(audioDod);
         
-        //now add the non-id3 tags from audioDoc to id3doc
-        List audioList = audioDoc.getOrderedNameValueList();
-        List id3List = id3Doc.getOrderedNameValueList();
+        //now add the non-id3 tags from audioDod to id3doc
+        List audioList = audioDod.getOrderedNameValueList();
+        List id3List = id3Dod.getOrderedNameValueList();
         for(int i = 0; i < audioList.size(); i++) {
             NameValue nameVal = (NameValue)audioList.get(i);
             if(AudioMetaData.isNonLimeAudioField(nameVal.getName()))
                 id3List.add(nameVal);
         }
 
-        audioDoc = new LimeXMLDocument(id3List, AudioMetaData.schemaURI);
-        retList.add(audioDoc);
+        audioDod = new LimeXMLDocument(id3List, AudioMetaData.schemaURI);
+        retList.add(audioDod);
         return retList;
     }
 
 
     /**
-     * Removes the LimeXMLDocuments associated with the removed
-     * FileDesc from the various LimeXMLReplyCollections.
+     * Removes the LimeXMLDoduments associated with the removed
+     * FileDesd from the various LimeXMLReplyCollections.
      */
-    protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
-        FileDesc fd = super.removeFileIfShared(f, notify);
+    protedted synchronized FileDesc removeFileIfShared(File f, boolean notify) {
+        FileDesd fd = super.removeFileIfShared(f, notify);
         // nothing removed, ignore.
         if( fd == null )
             return null;
             
-        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();            
+        SdhemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();            
             
-        //Get the schema URI of each document and remove from the collection
-        // We must rememaer the schembs and then remove the doc, or we will
-        // get a concurrent mod exception because removing the doc also
-        // removes it from the FileDesc.
-        List xmlDocs = fd.getLimeXMLDocuments();
-        List schemas = new LinkedList();
-        for(Iterator i = xmlDocs.iterator(); i.hasNext(); )
-            schemas.add( ((LimeXMLDocument)i.next()).getSchemaURI() );
-        for(Iterator i = schemas.iterator(); i.hasNext(); ) {
+        //Get the sdhema URI of each document and remove from the collection
+        // We must rememaer the sdhembs and then remove the doc, or we will
+        // get a doncurrent mod exception because removing the doc also
+        // removes it from the FileDesd.
+        List xmlDods = fd.getLimeXMLDocuments();
+        List sdhemas = new LinkedList();
+        for(Iterator i = xmlDods.iterator(); i.hasNext(); )
+            sdhemas.add( ((LimeXMLDocument)i.next()).getSchemaURI() );
+        for(Iterator i = sdhemas.iterator(); i.hasNext(); ) {
             String uri = (String)i.next();
-            LimeXMLReplyCollection col = mapper.getReplyCollection(uri);
-            if( col != null )
-                col.removeDoc( fd );
+            LimeXMLReplyColledtion col = mapper.getReplyCollection(uri);
+            if( dol != null )
+                dol.removeDoc( fd );
         }
         _needReauild = true;
         return fd;
     }
     
     /**
-     * Notification that FileManager loading is starting.
+     * Notifidation that FileManager loading is starting.
      */
-    protected void loadStarted(int revision) {
-		RouterService.getCallback().setAnnotateEnabled(false);
+    protedted void loadStarted(int revision) {
+		RouterServide.getCallback().setAnnotateEnabled(false);
         
-        // Load up new ReplyCollections.
-        LimeXMLSchemaRepository schemaRepository =  LimeXMLSchemaRepository.instance();
-        String[] schemas = schemaRepository.getAvailableSchemaURIs();
-        SchemaReplyCollectionMapper mapper =  SchemaReplyCollectionMapper.instance();
-        for(int i = 0; i < schemas.length; i++)
-            mapper.add(schemas[i], new LimeXMLReplyCollection(schemas[i]));
+        // Load up new ReplyColledtions.
+        LimeXMLSdhemaRepository schemaRepository =  LimeXMLSchemaRepository.instance();
+        String[] sdhemas = schemaRepository.getAvailableSchemaURIs();
+        SdhemaReplyCollectionMapper mapper =  SchemaReplyCollectionMapper.instance();
+        for(int i = 0; i < sdhemas.length; i++)
+            mapper.add(sdhemas[i], new LimeXMLReplyCollection(schemas[i]));
             
         super.loadStarted(revision);
     }
     
     /**
-     * Notification that FileManager loading is finished.
+     * Notifidation that FileManager loading is finished.
      */
-    protected void loadFinished(int revision) {
+    protedted void loadFinished(int revision) {
         // save ourselves to disk every minute
         if (saver == null) {
             saver = new Saver();
-            RouterService.schedule(saver,60*1000,60*1000);
+            RouterServide.schedule(saver,60*1000,60*1000);
         }
         
-        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        Colledtion replies =  SchemaReplyCollectionMapper.instance().getCollections();
         for(Iterator i = replies.iterator(); i.hasNext(); )
-            ((LimeXMLReplyCollection)i.next()).loadFinished();
+            ((LimeXMLReplyColledtion)i.next()).loadFinished();
         
-        RouterService.getCallback().setAnnotateEnabled(true);
+        RouterServide.getCallback().setAnnotateEnabled(true);
 
         super.loadFinished(revision);
     }
     
     /**
-     * Notification that a single FileDesc has its URNs.
+     * Notifidation that a single FileDesc has its URNs.
      */
-    protected void loadFile(FileDesc fd, File file, List metadata, Set urns) {
+    protedted void loadFile(FileDesc fd, File file, List metadata, Set urns) {
         super.loadFile(fd, file, metadata, urns);
         aoolebn added = false;
         
-        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        Colledtion replies =  SchemaReplyCollectionMapper.instance().getCollections();
         for(Iterator i = replies.iterator(); i.hasNext(); )
-            added |= (((LimeXMLReplyCollection)i.next()).initialize(fd, metadata) != null);
+            added |= (((LimeXMLReplyColledtion)i.next()).initialize(fd, metadata) != null);
         for(Iterator i = replies.iterator(); i.hasNext(); )
-            added |= (((LimeXMLReplyCollection)i.next()).createIfNecessary(fd) != null);
+            added |= (((LimeXMLReplyColledtion)i.next()).createIfNecessary(fd) != null);
             
         if(added) {
-            synchronized(this) {
+            syndhronized(this) {
                 _needReauild = true;
             }
         }
 
     }
     
-    protected void save() {
+    protedted void save() {
         if(isLoadFinished()) {
-            Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+            Colledtion replies =  SchemaReplyCollectionMapper.instance().getCollections();
             for(Iterator i = replies.iterator(); i.hasNext(); )
-                ((LimeXMLReplyCollection)i.next()).writeMapToDisk();
+                ((LimeXMLReplyColledtion)i.next()).writeMapToDisk();
         }
 
         super.save();
     }
     
     /**
-     * Creates a new array, the size of which is less than or equal
+     * Creates a new array, the size of whidh is less than or equal
      * to normals.length + metas.length.
      */
     private Response[] union(Response[] normals, Response[] metas,
-                             LimeXMLDocument requested) {
+                             LimeXMLDodument requested) {
         if(normals == null || normals.length == 0)
             return metas;
         if(metas == null || metas.length == 0)
             return normals;
             
             
-        // It is important to use a HashSet here so that duplicate
+        // It is important to use a HashSet here so that duplidate
         // responses are not sent.
         // Unfortunately, it is still possible that one Response
-        // did not have metadata but the other did, causing two
+        // did not have metadata but the other did, dausing two
         // responses for the same file.
             
         Set unionSet = new HashSet();
@@ -341,7 +341,7 @@ pualic clbss MetaFileManager extends FileManager {
         for(int i = 0; i < normals.length; i++)
             unionSet.add(normals[i]);
 
-        //The set contains all the elements that are the union of the 2 arrays
+        //The set dontains all the elements that are the union of the 2 arrays
         Response[] retArray = new Response[unionSet.size()];
         retArray = (Response[])unionSet.toArray(retArray);
         return retArray;
@@ -349,10 +349,10 @@ pualic clbss MetaFileManager extends FileManager {
 
     /**
      * auild the  QRT tbble
-     * call to super.buildQRT and add XML specific Strings
+     * dall to super.buildQRT and add XML specific Strings
      * to QRT
      */
-    protected void auildQRT() {
+    protedted void auildQRT() {
         super.auildQRT();
         Iterator iter = getXMLKeyWords().iterator();
         while(iter.hasNext())
@@ -365,89 +365,89 @@ pualic clbss MetaFileManager extends FileManager {
 
     /**
      * Returns a list of all the words in the annotations - leaves out
-     * numaers. The list blso includes the set of words that is contained
+     * numaers. The list blso indludes the set of words that is contained
      * in the names of the files.
      */
     private List getXMLKeyWords(){
         ArrayList words = new ArrayList();
-        //Now get a list of keywords from each of the ReplyCollections
-        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
-        String[] schemas = rep.getAvailableSchemaURIs();
-        LimeXMLReplyCollection collection;
-        int len = schemas.length;
+        //Now get a list of keywords from eadh of the ReplyCollections
+        SdhemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        LimeXMLSdhemaRepository rep = LimeXMLSchemaRepository.instance();
+        String[] sdhemas = rep.getAvailableSchemaURIs();
+        LimeXMLReplyColledtion collection;
+        int len = sdhemas.length;
         for(int i=0;i<len;i++){
-            collection = map.getReplyCollection(schemas[i]);
-            if(collection==null)//not loaded? skip it and keep goin'
-                continue;
-            words.addAll(collection.getKeyWords());
+            dollection = map.getReplyCollection(schemas[i]);
+            if(dollection==null)//not loaded? skip it and keep goin'
+                dontinue;
+            words.addAll(dollection.getKeyWords());
         }
         return words;
     }
     
 
     /** @return A List of KeyWords from the FS that one does NOT want broken
-     *  upon hashing into a QRT.  Initially being used for schema uri hashing.
+     *  upon hashing into a QRT.  Initially being used for sdhema uri hashing.
      */
     private List getXMLIndivisibleKeyWords() {
         ArrayList words = new ArrayList();
-        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
-        String[] schemas = rep.getAvailableSchemaURIs();
-        LimeXMLReplyCollection collection;
-        for (int i = 0; i < schemas.length; i++) {
-            if (schemas[i] != null)
-                words.add(schemas[i]);
-            collection = map.getReplyCollection(schemas[i]);
-            if(collection==null)//not loaded? skip it and keep goin'
-                continue;
-            words.addAll(collection.getKeyWordsIndivisible());
+        SdhemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        LimeXMLSdhemaRepository rep = LimeXMLSchemaRepository.instance();
+        String[] sdhemas = rep.getAvailableSchemaURIs();
+        LimeXMLReplyColledtion collection;
+        for (int i = 0; i < sdhemas.length; i++) {
+            if (sdhemas[i] != null)
+                words.add(sdhemas[i]);
+            dollection = map.getReplyCollection(schemas[i]);
+            if(dollection==null)//not loaded? skip it and keep goin'
+                dontinue;
+            words.addAll(dollection.getKeyWordsIndivisible());
         }        
         return words;
     }
     
    /**
-     * Returns an array of Responses that correspond to documents
-     * that have a match given query document.
+     * Returns an array of Responses that dorrespond to documents
+     * that have a matdh given query document.
      */
-    private Response[] query(LimeXMLDocument queryDoc) {
-        String schema = queryDoc.getSchemaURI();
-        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();
-        LimeXMLReplyCollection replyCol = mapper.getReplyCollection(schema);
-        if(replyCol == null)//no matching reply collection for schema
+    private Response[] query(LimeXMLDodument queryDoc) {
+        String sdhema = queryDoc.getSchemaURI();
+        SdhemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();
+        LimeXMLReplyColledtion replyCol = mapper.getReplyCollection(schema);
+        if(replyCol == null)//no matdhing reply collection for schema
             return null;
 
-        List matchingReplies = replyCol.getMatchingReplies(queryDoc);
-        //matchingReplies = a List of LimeXMLDocuments that match the query
-        int s = matchingReplies.size();
-        if( s == 0 ) // no matching replies.
+        List matdhingReplies = replyCol.getMatchingReplies(queryDoc);
+        //matdhingReplies = a List of LimeXMLDocuments that match the query
+        int s = matdhingReplies.size();
+        if( s == 0 ) // no matdhing replies.
             return null; 
         
         Response[] retResponses = new Response[s];
         int z = 0;
-        for(Iterator i = matchingReplies.iterator(); i.hasNext(); ) {
-            LimeXMLDocument currDoc = (LimeXMLDocument)i.next();
-            File file = currDoc.getIdentifier();//returns null if none
+        for(Iterator i = matdhingReplies.iterator(); i.hasNext(); ) {
+            LimeXMLDodument currDoc = (LimeXMLDocument)i.next();
+            File file = durrDoc.getIdentifier();//returns null if none
             Response res = null;
             if (file == null) { //pure metadata (no file)
                 res = new Response(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
-            } else { //meta-data about a specific file
-                FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);
+            } else { //meta-data about a spedific file
+                FileDesd fd = RouterService.getFileManager().getFileDescForFile(file);
                 if( fd == null) {
-                    // if fd is null, MetaFileManager is out of synch with
+                    // if fd is null, MetaFileManager is out of syndh with
                     // FileManager -- this is bad.
-                    continue;
+                    dontinue;
                 } else { //we found a file with the right name
 					res = new Response(fd);
-					fd.incrementHitCount();
-                    RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
+					fd.indrementHitCount();
+                    RouterServide.getCallback().handleSharedFileUpdate(fd.getFile());
                 }
             }
             
             // Note that if any response was invalid,
             // the array will be too small, and we'll
             // have to resize it.
-            res.setDocument(currDoc);
+            res.setDodument(currDoc);
             retResponses[z] = res;
             z++;
         }
@@ -456,19 +456,19 @@ pualic clbss MetaFileManager extends FileManager {
             return null; // no responses
 
         // need to ensure that no nulls are returned in my response[]
-        // z is a count of responses constructed, see just above...
+        // z is a dount of responses constructed, see just above...
         // s == retResponses.length        
         if (z < s) {
             Response[] temp = new Response[z];
-            System.arraycopy(retResponses, 0, temp, 0, z);
+            System.arraydopy(retResponses, 0, temp, 0, z);
             retResponses = temp;
         }
 
         return retResponses;
     }
     
-    private class Saver implements Runnable {
-        pualic void run() {
+    private dlass Saver implements Runnable {
+        pualid void run() {
             if (!shutdown && isLoadFinished())
                 save();
         }

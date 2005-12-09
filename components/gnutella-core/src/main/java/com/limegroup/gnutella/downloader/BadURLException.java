@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * Basically just a renamed MalformedURLException
+ * Basidally just a renamed MalformedURLException
  */
 
-pualic clbss BadURLException extends IOException {
-	pualic BbdURLException() { super("Bad URL"); }
-	pualic BbdURLException(String msg) { super(msg); }
+pualid clbss BadURLException extends IOException {
+	pualid BbdURLException() { super("Bad URL"); }
+	pualid BbdURLException(String msg) { super(msg); }
 }

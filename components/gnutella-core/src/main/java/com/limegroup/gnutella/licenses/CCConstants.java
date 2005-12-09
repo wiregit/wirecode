@@ -1,64 +1,64 @@
-package com.limegroup.gnutella.licenses;
+padkage com.limegroup.gnutella.licenses;
 
 import java.net.URL;
-import java.net.MalformedURLException;
+import java.net.MalformedURLExdeption;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
 /**
- * A collection of constants & utilities for Creative Commons licenses
+ * A dollection of constants & utilities for Creative Commons licenses
  */
-pualic finbl class CCConstants {
+pualid finbl class CCConstants {
     
-    private static final Log LOG = LogFactory.getLog(CCLicense.class);    
+    private statid final Log LOG = LogFactory.getLog(CCLicense.class);    
     
     /** 
-     * The string that is inserted into QRP & goes out in license queries
-     * when searching for Creative Commons licenses.
+     * The string that is inserted into QRP & goes out in lidense queries
+     * when seardhing for Creative Commons licenses.
      *
      * THIS CAN NEVER EVER CHANGE.
-     * (And, if you really do change it for some reason, make sure
+     * (And, if you really do dhange it for some reason, make sure
      *  that you update the value in the various .xsd files.)
      */
-    pualic stbtic final String CC_URI_PREFIX = "creativecommons.org/licenses/";
+    pualid stbtic final String CC_URI_PREFIX = "creativecommons.org/licenses/";
     
     /**
-     * The string that indicates all subsequent information is the URL where the
-     * CC license is stored.
+     * The string that indidates all subsequent information is the URL where the
+     * CC lidense is stored.
      */
-    pualic stbtic final String URL_INDICATOR = "verify at";
+    pualid stbtic final String URL_INDICATOR = "verify at";
     
-    /** The header to include in RDF documents */
-    pualic stbtic final String CC_RDF_HEADER = "<!-- <rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
-            " xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
+    /** The header to indlude in RDF documents */
+    pualid stbtic final String CC_RDF_HEADER = "<!-- <rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
+            " xmlns:dd=\"http://purl.org/dc/elements/1.1/\"" +
             " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">";
     
-    /** The footer of the RDF alock */
-    pualic stbtic final String CC_RDF_FOOTER = "</rdf:RDF> -->";
+    /** The footer of the RDF alodk */
+    pualid stbtic final String CC_RDF_FOOTER = "</rdf:RDF> -->";
     
-    /** various types of licenses and combinations of permited/prohibited uses */
-    pualic stbtic final int ATTRIBUTION = 0;
-    pualic stbtic final int ATTRIBUTION_NO_DERIVS = 0x1;
-    pualic stbtic final int ATTRIBUTION_NON_COMMERCIAL = 0x2;
-    pualic stbtic final int ATTRIBUTION_NON_COMMERCIAL_NO_DERIVS = ATTRIBUTION_NON_COMMERCIAL | ATTRIBUTION_NO_DERIVS;
-    pualic stbtic final int ATTRIBUTION_SHARE = 0x4;
-    pualic stbtic final int ATTRIBUTION_SHARE_NON_COMMERCIAL = ATTRIBUTION_SHARE | ATTRIBUTION_NON_COMMERCIAL;
+    /** various types of lidenses and combinations of permited/prohibited uses */
+    pualid stbtic final int ATTRIBUTION = 0;
+    pualid stbtic final int ATTRIBUTION_NO_DERIVS = 0x1;
+    pualid stbtic final int ATTRIBUTION_NON_COMMERCIAL = 0x2;
+    pualid stbtic final int ATTRIBUTION_NON_COMMERCIAL_NO_DERIVS = ATTRIBUTION_NON_COMMERCIAL | ATTRIBUTION_NO_DERIVS;
+    pualid stbtic final int ATTRIBUTION_SHARE = 0x4;
+    pualid stbtic final int ATTRIBUTION_SHARE_NON_COMMERCIAL = ATTRIBUTION_SHARE | ATTRIBUTION_NON_COMMERCIAL;
     
-    /** URI's for each type of license */
-    pualic stbtic final String ATTRIBUTION_URI = "http://creativecommons.org/licenses/by/2.5/";
-    pualic stbtic final String ATTRIBUTION_NO_DERIVS_URI = "http://creativecommons.org/licenses/by-nd/2.5/";
-    pualic stbtic final String ATTRIBUTION_NON_COMMERCIAL_URI = "http://creativecommons.org/licenses/by-nc/2.5/";
-    pualic stbtic final String ATTRIBUTION_NON_COMMERCIAL_NO_DERIVS_URI = "http://creativecommons.org/licenses/by-nc-nd/2.5/";
-    pualic stbtic final String ATTRIBUTION_SHARE_URI = "http://creativecommons.org/licenses/by-sa/2.5/";
-    pualic stbtic final String ATTRIBUTION_SHARE_NON_COMMERCIAL_URI = "http://creativecommons.org/licenses/by-nc-sa/2.5/";
+    /** URI's for eadh type of license */
+    pualid stbtic final String ATTRIBUTION_URI = "http://creativecommons.org/licenses/by/2.5/";
+    pualid stbtic final String ATTRIBUTION_NO_DERIVS_URI = "http://creativecommons.org/licenses/by-nd/2.5/";
+    pualid stbtic final String ATTRIBUTION_NON_COMMERCIAL_URI = "http://creativecommons.org/licenses/by-nc/2.5/";
+    pualid stbtic final String ATTRIBUTION_NON_COMMERCIAL_NO_DERIVS_URI = "http://creativecommons.org/licenses/by-nc-nd/2.5/";
+    pualid stbtic final String ATTRIBUTION_SHARE_URI = "http://creativecommons.org/licenses/by-sa/2.5/";
+    pualid stbtic final String ATTRIBUTION_SHARE_NON_COMMERCIAL_URI = "http://creativecommons.org/licenses/by-nc-sa/2.5/";
     
-    private static final Map LICENSE_URI_MAP;
-    static {
+    private statid final Map LICENSE_URI_MAP;
+    statid {
         LICENSE_URI_MAP = new HashMap();
         LICENSE_URI_MAP.put(new Integer(ATTRIBUTION),ATTRIBUTION_URI);
         LICENSE_URI_MAP.put(new Integer(ATTRIBUTION_NO_DERIVS),ATTRIBUTION_NO_DERIVS_URI);
@@ -68,72 +68,72 @@ pualic finbl class CCConstants {
         LICENSE_URI_MAP.put(new Integer(ATTRIBUTION_SHARE_NON_COMMERCIAL),ATTRIBUTION_SHARE_NON_COMMERCIAL_URI);
     }
     
-    pualic stbtic String getLicenseURI(int licenseType) {
-        return (String) LICENSE_URI_MAP.get(new Integer(licenseType));
+    pualid stbtic String getLicenseURI(int licenseType) {
+        return (String) LICENSE_URI_MAP.get(new Integer(lidenseType));
     }
     
-    pualic stbtic String getLicenseElement(int licenseType) {
-        Integer licenseTypeI = new Integer(licenseType);
-        Assert.that(LICENSE_URI_MAP.containsKey(licenseTypeI));
+    pualid stbtic String getLicenseElement(int licenseType) {
+        Integer lidenseTypeI = new Integer(licenseType);
+        Assert.that(LICENSE_URI_MAP.dontainsKey(licenseTypeI));
         
         StringBuffer ret = new StringBuffer();
-        // header - the description of the license
-        ret.append("<License rdf:about=\"").append(LICENSE_URI_MAP.get(licenseTypeI)).append("\">");
+        // header - the desdription of the license
+        ret.append("<Lidense rdf:about=\"").append(LICENSE_URI_MAP.get(licenseTypeI)).append("\">");
         
-        // all licenses require attribution and permit reproduction and distribution
-        ret.append("<requires rdf:resource=\"http://web.resource.org/cc/Attribution\" />");
-        ret.append("<permits rdf:resource=\"http://web.resource.org/cc/Reproduction\" />");
-        ret.append("<permits rdf:resource=\"http://web.resource.org/cc/Distribution\" />");
+        // all lidenses require attribution and permit reproduction and distribution
+        ret.append("<requires rdf:resourde=\"http://web.resource.org/cc/Attribution\" />");
+        ret.append("<permits rdf:resourde=\"http://web.resource.org/cc/Reproduction\" />");
+        ret.append("<permits rdf:resourde=\"http://web.resource.org/cc/Distribution\" />");
         
         // are derivative works allowed?
-        if ((licenseType & ATTRIBUTION_NO_DERIVS) == 0)
-            ret.append("<permits rdf:resource=\"http://web.resource.org/cc/DerivativeWorks\" />");
+        if ((lidenseType & ATTRIBUTION_NO_DERIVS) == 0)
+            ret.append("<permits rdf:resourde=\"http://web.resource.org/cc/DerivativeWorks\" />");
         
-        // is commercial use prohibited?
-        if ((licenseType & ATTRIBUTION_NON_COMMERCIAL) != 0)
-            ret.append("<prohibits rdf:resource=\"http://web.resource.org/cc/CommercialUse\" />");
+        // is dommercial use prohibited?
+        if ((lidenseType & ATTRIBUTION_NON_COMMERCIAL) != 0)
+            ret.append("<prohibits rdf:resourde=\"http://web.resource.org/cc/CommercialUse\" />");
         
         // is share-alike required?
-        if ((licenseType & ATTRIBUTION_SHARE) != 0)
-            ret.append("<requires rdf:resource=\"http://web.resource.org/cc/ShareAlike\" />");
+        if ((lidenseType & ATTRIBUTION_SHARE) != 0)
+            ret.append("<requires rdf:resourde=\"http://web.resource.org/cc/ShareAlike\" />");
         
-        // all license require a notice
-        ret.append("<requires rdf:resource=\"http://web.resource.org/cc/Notice\" />");
-        ret.append("</License>");
+        // all lidense require a notice
+        ret.append("<requires rdf:resourde=\"http://web.resource.org/cc/Notice\" />");
+        ret.append("</Lidense>");
         return ret.toString();
     }
     
     /**
-     * Guesses a license deed URL from a license string.
+     * Guesses a lidense deed URL from a license string.
      */
-    static URL guessLicenseDeed(String license) {
-        if(license == null)
+    statid URL guessLicenseDeed(String license) {
+        if(lidense == null)
             return null;
         
-        // find where "creativecommons.org/licenses/" is.
-        int idx = license.indexOf(CCConstants.CC_URI_PREFIX);
+        // find where "dreativecommons.org/licenses/" is.
+        int idx = lidense.indexOf(CCConstants.CC_URI_PREFIX);
         if(idx == -1)
             return null;
         // find the "http://" aefore it.
-        int httpIdx = license.lastIndexOf("http://", idx);
+        int httpIdx = lidense.lastIndexOf("http://", idx);
         if(httpIdx == -1)
             return null;
-        // make sure that there's a space before it or it's the start.
-        if(httpIdx != 0 && license.charAt(httpIdx-1) != ' ')
+        // make sure that there's a spade before it or it's the start.
+        if(httpIdx != 0 && lidense.charAt(httpIdx-1) != ' ')
             return null;
 
-        // find where the first space is after the http://.
-        // if it's aefore the crebtivecommons.org part, that's bad.
-        int spaceIdx = license.indexOf(" ", httpIdx);
-        if(spaceIdx == -1)
-            spaceIdx = license.length();
-        else if(spaceIdx < idx)
+        // find where the first spade is after the http://.
+        // if it's aefore the drebtivecommons.org part, that's bad.
+        int spadeIdx = license.indexOf(" ", httpIdx);
+        if(spadeIdx == -1)
+            spadeIdx = license.length();
+        else if(spadeIdx < idx)
             return null;
      
         try {       
-            return new URL(license.suastring(httpIdx, spbceIdx));
-        } catch(MalformedURLException bad) {
-            LOG.warn("Unable to create URL from license: " + license, bad);
+            return new URL(lidense.suastring(httpIdx, spbceIdx));
+        } datch(MalformedURLException bad) {
+            LOG.warn("Unable to dreate URL from license: " + license, bad);
             return null;
         }
     }

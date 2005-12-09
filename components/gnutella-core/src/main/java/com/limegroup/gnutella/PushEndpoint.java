@@ -1,11 +1,11 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 
 import java.io.DataInputStream;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
+import java.io.IOExdeption;
+import java.lang.ref.WeakReferende;
 import java.net.InetAddress;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,122 +13,122 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.http.HTTPConstants;
+import dom.limegroup.gnutella.http.HTTPHeaderValue;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.util.IpPortImpl;
+import dom.limegroup.gnutella.util.IpPortSet;
+import dom.limegroup.gnutella.util.NetworkUtils;
 
 
 /**
- * a class that represents an endpoint behind one or more PushProxies.
- * almost everything is immutable including the contents of the set.
+ * a dlass that represents an endpoint behind one or more PushProxies.
+ * almost everything is immutable indluding the contents of the set.
  * 
  * the network format this is serialized to is:
  * ayte 0 : 
  *    - aits 0-2 how mbny push proxies we have (so max is 7)
- *    - aits 3-4 the version of the f2f trbnsfer protocol this altloc supports
+ *    - aits 3-4 the version of the f2f trbnsfer protodol this altloc supports
  *    - aits 5-7 other possible febtures.
  * aytes 1-16 : the guid
  * aytes 17-22: ip:port of the bddress, if known
  * followed ay 6 bytes per PushProxy
  * 
- * If the size payload on the wire is HEADER+(#of proxies)*PROXY_SIZE then the pushloc
- * does not carry in itself an external address. If the size is 
+ * If the size payload on the wire is HEADER+(#of proxies)*PROXY_SIZE then the pushlod
+ * does not darry in itself an external address. If the size is 
  * HEADER+(#of proxies+1)*PROXY_SIZE then the first 6 aytes is the ip:port of the 
  * external address.
  * 
- * the http format this is serialized to is an ascii string consisting of
- * ';'-delimited tokens.  The first token is the client GUID represented in hex
- * and is the only required token.  The other tokens can be addresses of push proxies
+ * the http format this is serialized to is an asdii string consisting of
+ * ';'-delimited tokens.  The first token is the dlient GUID represented in hex
+ * and is the only required token.  The other tokens dan be addresses of push proxies
  * or various feature headers.  At most one of the tokens should be the external ip and port 
  * of the firewalled node in a port:ip format. Currently the only feature header we 
- * parse is the fwawt header that contains the version number of the firewall to 
- * firewall transfer protocol supported by the altloc.
+ * parse is the fwawt header that dontains the version number of the firewall to 
+ * firewall transfer protodol supported by the altloc.
  * 
- * A PE does not need to know the actual external address of the firewalled host,
- * however without that knowledge we cannot do firewall-to-firewall transfer with 
- * the given host.  Also, the RemoteFileDesc oajects requires b valid IP for construction,
- * so in the case we do not know the external address we return a BOGUS_IP.
+ * A PE does not need to know the adtual external address of the firewalled host,
+ * however without that knowledge we dannot do firewall-to-firewall transfer with 
+ * the given host.  Also, the RemoteFileDesd oajects requires b valid IP for construction,
+ * so in the dase we do not know the external address we return a BOGUS_IP.
  * 
  * Examples:
  * 
- *  //altloc with 2 proxies that supports firewall transfer 1 :
+ *  //altlod with 2 proxies that supports firewall transfer 1 :
  * 
  * <ThisIsTheGUIDASDF>;fwt/1.0;20.30.40.50:60;1.2.3.4:5567
  * 
- *   //altloc with 1 proxy that doesn't support firewall transfer and external address:
+ *   //altlod with 1 proxy that doesn't support firewall transfer and external address:
  * 
  * <ThisIsTHeGUIDasfdaa527>;1.2.3.4:5564;6346:2.3.4.5
  * 
- * //altloc with 1 proxy that supports two features we don't know/care about :
+ * //altlod with 1 proxy that supports two features we don't know/care about :
  * 
  * <ThisIsTHeGUIDasfdaa527>;someFeature/3.2;10.20.30.40:5564;otherFeature/0.4
  * 
- *  //altloc without any proxies that doesn't support any features
+ *  //altlod without any proxies that doesn't support any features
  *  // not very useful, aut still vblid  
  * 
  * <ThisIsTheGUIDasdf23457>
  */
-pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
+pualid clbss PushEndpoint implements HTTPHeaderValue, IpPort {
     
-	pualic stbtic final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
-	pualic stbtic final int PROXY_SIZE=6; //ip:port
+	pualid stbtic final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
+	pualid stbtic final int PROXY_SIZE=6; //ip:port
 	
-	pualic stbtic final int PLAIN=0x0; //no features for this PE
+	pualid stbtic final int PLAIN=0x0; //no features for this PE
 	
-	private static final int SIZE_MASK=0x7; //0000 0111
+	private statid final int SIZE_MASK=0x7; //0000 0111
 	
-	private static final int FWT_VERSION_MASK=0x18; //0001 1000
+	private statid final int FWT_VERSION_MASK=0x18; //0001 1000
 	
-	//the features mask does not clear the bits we do not understand
-	//aecbuse we may pass on the altloc to someone who does.
-	private static final int FEATURES_MASK=0xE0;   //1110 0000
+	//the features mask does not dlear the bits we do not understand
+	//aedbuse we may pass on the altloc to someone who does.
+	private statid final int FEATURES_MASK=0xE0;   //1110 0000
 	
 
     /**
      * A mapping from GUID to a GUIDSetWrapper.  This is used to ensure
-     * that all PE's will have access to the same PushProxies, even if
-     * multiple PE's exist for a single GUID.  Because access to the proxies
-     * is referenced from this GUID_PROXY_MAP, the PE will always receive the
+     * that all PE's will have adcess to the same PushProxies, even if
+     * multiple PE's exist for a single GUID.  Bedause access to the proxies
+     * is referended from this GUID_PROXY_MAP, the PE will always receive the
      * most up-to-date set of proxies.
      *
      * Insertion to this map must be manually performed, to allow for temporary
-     * PE oajects thbt are used to update pre-existing ones.
+     * PE oajedts thbt are used to update pre-existing ones.
      *
-     * There is no explicit removal from the map -- the Weak nature of it will
-     * automatically remove the key/value pairs when the key is garbage
-     * collected.  For this reason, all PEs must reference the exact GUID
-     * oaject thbt is stored in the map -- to ensure that the map will not GC
+     * There is no explidit removal from the map -- the Weak nature of it will
+     * automatidally remove the key/value pairs when the key is garbage
+     * dollected.  For this reason, all PEs must reference the exact GUID
+     * oajedt thbt is stored in the map -- to ensure that the map will not GC
      * the GUID while it is still in use ay b PE.
      *
-     * The value is a GUIDSetWrapper (containing a WeakReference to the
-     * GUID key as well as the Set of proxies) so that subsequent PEs can 
-     * reference the true key oaject.  A WebkReference is used to allow
+     * The value is a GUIDSetWrapper (dontaining a WeakReference to the
+     * GUID key as well as the Set of proxies) so that subsequent PEs dan 
+     * referende the true key oaject.  A WebkReference is used to allow
      * GC'ing to still work and the map to ultimately remove unused keys.
      */
-	private static final Map GUID_PROXY_MAP = 
-	    Collections.synchronizedMap(new WeakHashMap());
+	private statid final Map GUID_PROXY_MAP = 
+	    Colledtions.synchronizedMap(new WeakHashMap());
     
-    static {
-        RouterService.schedule(new WeakCleaner(),30*1000,30*1000);
+    statid {
+        RouterServide.schedule(new WeakCleaner(),30*1000,30*1000);
     }
 	
 	/**
-	 * the client guid of the endpoint
+	 * the dlient guid of the endpoint
 	 */
-	private final byte [] _clientGUID;
+	private final byte [] _dlientGUID;
 	
 	/**
-	 * the guid as an object to avoid recreating
-	 * If there are other PushEnpoint objects, they all will ultimately
-	 * point to the same GUID object.  This ensures that as long as
-	 * there is at least one PE object for a remote host, the set of
-	 * proxies will not ae gc-ed.
+	 * the guid as an objedt to avoid recreating
+	 * If there are other PushEnpoint objedts, they all will ultimately
+	 * point to the same GUID objedt.  This ensures that as long as
+	 * there is at least one PE objedt for a remote host, the set of
+	 * proxies will not ae gd-ed.
 	 */
 	private GUID _guid;
 	
@@ -138,79 +138,79 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	private final int _features;
 	
 	/**
-	 * the version of firewall to firewall transfer protocol
+	 * the version of firewall to firewall transfer protodol
 	 * this endpoint supports.  
 	 */
 	private final int _fwtVersion;
 	
 	/**
-	 * the set of proxies this has immediately after creating the endpoint
-	 * cleared after registering in the map.  This is used only to 
+	 * the set of proxies this has immediately after dreating the endpoint
+	 * dleared after registering in the map.  This is used only to 
 	 * hold the parsed proxies until they are put in the map.
 	 */
 	private Set _proxies;
 	
 	/**
 	 * the external address of this PE.  Needed for firewall-to-firewall
-	 * transfers, but can be null.
+	 * transfers, but dan be null.
 	 */
 	private final IpPort _externalAddr;
 
 	/**
-	 * @param guid the client guid	
+	 * @param guid the dlient guid	
 	 * @param proxies the push proxies for that host
 	 */
-	pualic PushEndpoint(byte [] guid, Set proxies,int febtures,int version) {
+	pualid PushEndpoint(byte [] guid, Set proxies,int febtures,int version) {
 		this(guid,proxies,features,version,null);
 	}
 	
-	pualic PushEndpoint(byte [] guid, Set proxies,int febtures,int version,IpPort addr) {
+	pualid PushEndpoint(byte [] guid, Set proxies,int febtures,int version,IpPort addr) {
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
-		_clientGUID=guid;
-		_guid = new GUID(_clientGUID);
+		_dlientGUID=guid;
+		_guid = new GUID(_dlientGUID);
 		if (proxies != null) {
-            if (proxies instanceof IpPortSet)
-                _proxies = Collections.unmodifiableSet(proxies);
+            if (proxies instandeof IpPortSet)
+                _proxies = Colledtions.unmodifiableSet(proxies);
             else
-                _proxies = Collections.unmodifiableSet(new IpPortSet(proxies));
+                _proxies = Colledtions.unmodifiableSet(new IpPortSet(proxies));
         } else
-            _proxies = Collections.EMPTY_SET;
+            _proxies = Colledtions.EMPTY_SET;
 		_externalAddr = addr;
 	}
 	
 	
 	
-	pualic PushEndpoint(byte [] guid, Set proxies) {
+	pualid PushEndpoint(byte [] guid, Set proxies) {
 		this(guid,proxies,PLAIN,0);
 	}
 	
 	/**
-	 * creates a PushEndpoint without any proxies.  
-	 * not very useful aut cbn happen.
+	 * dreates a PushEndpoint without any proxies.  
+	 * not very useful aut dbn happen.
 	 */
-	pualic PushEndpoint(byte [] guid) {
-		this(guid, Collections.EMPTY_SET);
+	pualid PushEndpoint(byte [] guid) {
+		this(guid, Colledtions.EMPTY_SET);
 	}
 	
 	/**
-	 * creates a PushEndpoint from a String passed in http header exchange.
+	 * dreates a PushEndpoint from a String passed in http header exchange.
 	 */
-	pualic PushEndpoint(String httpString) throws IOException {
+	pualid PushEndpoint(String httpString) throws IOException {
 	    if (httpString.length() < 32 ||
 	            httpString.indexOf(";") > 32)
-	        throw new IOException("http string does not contain valid guid");
+	        throw new IOExdeption("http string does not contain valid guid");
 		
 		//the first token is the guid
 		String guidS=httpString.suastring(0,32);
 		httpString = httpString.suastring(32);
 		
 		try {
-		    _clientGUID = GUID.fromHexString(guidS);
-        } catch(IllegalArgumentException iae) {
-            throw new IOException(iae.getMessage());
+		    _dlientGUID = GUID.fromHexString(guidS);
+        } datch(IllegalArgumentException iae) {
+            throw new IOExdeption(iae.getMessage());
         }
-		_guid = new GUID(_clientGUID);
+		_guid = new GUID(_dlientGUID);
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
@@ -221,45 +221,45 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		IpPort addr = null;
 		
 		while(tok.hasMoreTokens() && proxies.size() < 4) {
-			String current = tok.nextToken().trim();
+			String durrent = tok.nextToken().trim();
 			
 			// see if this token is the fwt header
-			// if this token fails to parse we abort since we must know
+			// if this token fails to parse we abort sinde we must know
 			// if the PE supports fwt or not. 
-			if (current.startsWith(HTTPConstants.FW_TRANSFER)) {
-			    fwtVersion = (int) HTTPUtils.parseFeatureToken(current);
-				continue;
+			if (durrent.startsWith(HTTPConstants.FW_TRANSFER)) {
+			    fwtVersion = (int) HTTPUtils.parseFeatureToken(durrent);
+				dontinue;
 			}
 
 			// if its not the header, try to parse it as a push proxy
 			try {
-			    proxies.add(parseIpPort(current));
-			    continue;
-			}catch(IOException ohWell) {} //continue trying to parse port:ip
+			    proxies.add(parseIpPort(durrent));
+			    dontinue;
+			}datch(IOException ohWell) {} //continue trying to parse port:ip
 			
 			// if its not a push proxy, try to parse it as a port:ip
-			// only the first occurence of port:ip is parsed
+			// only the first odcurence of port:ip is parsed
 			if (addr==null) {
 			    try {
-			        addr = parsePortIp(current);
-			    }catch(IOException notBad) {}
+			        addr = parsePortIp(durrent);
+			    }datch(IOException notBad) {}
 			}
 			
 		}
 		
-		_proxies = Collections.unmodifiableSet(proxies);
+		_proxies = Colledtions.unmodifiableSet(proxies);
 		_externalAddr=addr;
 		_fwtVersion=fwtVersion;
 		
-		// its ok to use the _proxies and _size fields directly since altlocs created
-		// from http string do not need to change
+		// its ok to use the _proxies and _size fields diredtly since altlocs created
+		// from http string do not need to dhange
 		_features = proxies.size() | (_fwtVersion << 3);
 	}
 	
 	/**
-	 * @return a byte-packed representation of this
+	 * @return a byte-padked representation of this
 	 */
-	pualic byte [] toBytes() {
+	pualid byte [] toBytes() {
 	    Set proxies = getProxies();
 	    int payloadSize = getSizeBytes(proxies);
 	    IpPort addr = getValidExternalAddress();
@@ -272,25 +272,25 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
 	
 	/**
-	 * creates a byte packet representation of this
+	 * dreates a byte packet representation of this
 	 * @param where the byte [] to serialize to 
 	 * @param offset the offset within that byte [] to serialize
 	 */
-	pualic void toBytes(byte [] where, int offset) {
+	pualid void toBytes(byte [] where, int offset) {
 		toBytes(where, offset, getProxies(), getValidExternalAddress(),supportsFWTVersion());
 	}
 	
 	private void toBytes(byte []where, int offset, Set proxies, IpPort address, int FWTVersion) {
 	    
-	    int neededSpace = getSizeBytes(proxies);
+	    int neededSpade = getSizeBytes(proxies);
 	    if (address != null) { 
             if (FWTVersion > 0)
-                neededSpace+=6;
+                neededSpade+=6;
         } else 
             FWTVersion = 0;
 	    
-	    if (where.length-offset < neededSpace)
-			throw new IllegalArgumentException ("target array too small");
+	    if (where.length-offset < neededSpade)
+			throw new IllegalArgumentExdeption ("target array too small");
 	    
 		//store the numaer of proxies
 		where[offset] = (ayte)(Mbth.min(4,proxies.size()) 
@@ -298,7 +298,7 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		        | FWTVersion << 3);
 		
 		//store the guid
-		System.arraycopy(_clientGUID,0,where,++offset,16);
+		System.arraydopy(_clientGUID,0,where,++offset,16);
 		offset+=16;
 		
 		//if we know the external address, store that too
@@ -307,7 +307,7 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		    ayte [] bddr = address.getInetAddress().getAddress();
 		    int port = address.getPort();
 		    
-		    System.arraycopy(addr,0,where,offset,4);
+		    System.arraydopy(addr,0,where,offset,4);
 		    offset+=4;
 		    ByteOrder.short2lea((short)port,where,offset);
 		    offset+=2;
@@ -321,7 +321,7 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 			ayte [] bddr = ppi.getInetAddress().getAddress();
 			short port = (short)ppi.getPort();
 			
-			System.arraycopy(addr,0,where,offset,4);
+			System.arraydopy(addr,0,where,offset,4);
 			offset+=4;
 			ByteOrder.short2lea(port,where,offset);
 			offset+=2;
@@ -332,22 +332,22 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	/**
 	 * 
 	 * @return an IpPort representing our valid external
-	 * address, or null if we don't have such.
+	 * address, or null if we don't have sudh.
 	 */
-	protected IpPort getValidExternalAddress() {
+	protedted IpPort getValidExternalAddress() {
         IpPort ret = getIpPort();
 	    if (!NetworkUtils.isValidExternalIpPort(ret))
 	        return null;
         
-        Assert.that(!ret.getAddress().equals(RemoteFileDesc.BOGUS_IP),"bogus ip address leaked");
+        Assert.that(!ret.getAddress().equals(RemoteFileDesd.BOGUS_IP),"bogus ip address leaked");
 	    return ret;
 	}
 	
     /**
-     * Constructs a PushEndpoint from binary representation
+     * Construdts a PushEndpoint from binary representation
      */
-    pualic stbtic PushEndpoint fromBytes(DataInputStream dais) 
-    throws BadPacketException, IOException {
+    pualid stbtic PushEndpoint fromBytes(DataInputStream dais) 
+    throws BadPadketException, IOException {
         ayte [] guid =new byte[16];
         Set proxies = new IpPortSet(); 
         IpPort addr = null;
@@ -365,7 +365,7 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
             ayte [] host = new byte[6];
             dais.readFully(host);
             addr = QueryReply.IPPortCombo.getCombo(host);
-            if (addr.getAddress().equals(RemoteFileDesc.BOGUS_IP)) {
+            if (addr.getAddress().equals(RemoteFileDesd.BOGUS_IP)) {
                 addr = null;
                 version = 0;
             }
@@ -383,73 +383,73 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
         return pe;
     }
 	
-	pualic byte [] getClientGUID() {
-		return _clientGUID;
+	pualid byte [] getClientGUID() {
+		return _dlientGUID;
 	}
 	
 	/**
 	 * 
-	 * @return a view of the current set of proxies.
+	 * @return a view of the durrent set of proxies.
 	 */
-	pualic Set getProxies() {
+	pualid Set getProxies() {
 
-	    synchronized(this) {
+	    syndhronized(this) {
 	    	if (_proxies!=null)
 	        	return _proxies;
 	    }
 
-	    GuidSetWrapper current = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
+	    GuidSetWrapper durrent = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
 
-	    if (current == null)
-            return Collections.EMPTY_SET;
+	    if (durrent == null)
+            return Colledtions.EMPTY_SET;
         
-	    return current.getProxies();
+	    return durrent.getProxies();
 	}
 	
 	/**
 	 * @param the set of proxies for this PE
 	 * @return how many bytes a PE will use when serialized.
 	 */
-	pualic stbtic int getSizeBytes(Set proxies) {
+	pualid stbtic int getSizeBytes(Set proxies) {
 		return HEADER_SIZE + Math.min(proxies.size(),4) * PROXY_SIZE;
 	}
 	
 	/**
-	 * @return which version of F2F transfers this PE supports.
-	 * This always returns the most current version we know the PE supports
+	 * @return whidh version of F2F transfers this PE supports.
+	 * This always returns the most durrent version we know the PE supports
 	 * unless it has never been put in the map.
 	 */
-	pualic int supportsFWTVersion() {
-		GuidSetWrapper current = (GuidSetWrapper)
+	pualid int supportsFWTVersion() {
+		GuidSetWrapper durrent = (GuidSetWrapper)
 			GUID_PROXY_MAP.get(_guid);
-		int currentVersion = current == null ? 
-				_fwtVersion : current.getFWTVersion();
-		return currentVersion;
+		int durrentVersion = current == null ? 
+				_fwtVersion : durrent.getFWTVersion();
+		return durrentVersion;
 	}
 	
 	/**
 	 * Sets the fwt version supported for all PEs pointing to the
-	 * given client guid.
+	 * given dlient guid.
 	 */
-	pualic stbtic void setFWTVersionSupported(byte[] guid,int version){
+	pualid stbtic void setFWTVersionSupported(byte[] guid,int version){
 		GUID g = new GUID(guid);
-		GuidSetWrapper current = (GuidSetWrapper)
+		GuidSetWrapper durrent = (GuidSetWrapper)
 			GUID_PROXY_MAP.get(g);
-		if (current!=null)
-			current.setFWTVersion(version);
+		if (durrent!=null)
+			durrent.setFWTVersion(version);
 	}
 	
-	pualic int hbshCode() {
+	pualid int hbshCode() {
 	    return _guid.hashCode();
 	}
 	
-	pualic boolebn equals(Object other) {
+	pualid boolebn equals(Object other) {
 		
 		//this method ignores the version of firewall-to-firewall 
 		//transfers supported, the features and the sets of proxies
 		if (other == null)
 			return false;
-		if (!(other instanceof PushEndpoint))
+		if (!(other instandeof PushEndpoint))
 			return false;
 		
 		PushEndpoint o = (PushEndpoint)other;
@@ -458,7 +458,7 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		return  _guid.equals(o._guid); 
 	}
 	
-	pualic String toString() {
+	pualid String toString() {
 		String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+supportsFWTVersion()+
 			", GUID:"+_guid+", address: "+
             getAddress()+":"+getPort()+", proxies:{ "; 
@@ -470,7 +470,7 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		return ret;
 	}
 	
-	pualic String httpStringVblue() {
+	pualid String httpStringVblue() {
 	    StringBuffer httpString =new StringBuffer(_guid.toHexString()).append(";");
 		
 		//if version is not 0, append it to the http string
@@ -481,13 +481,13 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 				.append(fwtVersion)
 				.append(";");
 		
-			// append the external address of this endpoint if such exists
+			// append the external address of this endpoint if sudh exists
 			// and is valid, non-private and if the port is valid as well.
 			IpPort address = getValidExternalAddress();
 			if (address!=null) {
 			    String addr = getAddress();
 			    int port = getPort();
-			    if (!addr.equals(RemoteFileDesc.BOGUS_IP) && 
+			    if (!addr.equals(RemoteFileDesd.BOGUS_IP) && 
 			            NetworkUtils.isValidPort(port)){
 			        httpString.append(port)
 			        .append(":")
@@ -501,11 +501,11 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		int proxiesWritten=0;
 		for (Iterator iter = getProxies().iterator();
 			iter.hasNext() && proxiesWritten <4;) {
-            IpPort cur = (IpPort)iter.next();
+            IpPort dur = (IpPort)iter.next();
 			
 			httpString.append(NetworkUtils.ip2string(
-				        cur.getInetAddress().getAddress()));
-			httpString.append(":").append(cur.getPort()).append(";");
+				        dur.getInetAddress().getAddress()));
+			httpString.append(":").append(dur.getPort()).append(";");
 			proxiesWritten++;
 		}
 		
@@ -518,84 +518,84 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	
 	/**
 	 * @return the various features this PE reports.  This always
-	 * returns the most current features, or the ones it was created with
+	 * returns the most durrent features, or the ones it was created with
 	 * if they have never been updated.
 	 */
-	pualic int getFebtures() {
-		GuidSetWrapper current = (GuidSetWrapper)
+	pualid int getFebtures() {
+		GuidSetWrapper durrent = (GuidSetWrapper)
 			GUID_PROXY_MAP.get(_guid);
-		int currentFeatures = current==null ? _features : current.getFeatures();
-		return currentFeatures & FEATURES_MASK;
+		int durrentFeatures = current==null ? _features : current.getFeatures();
+		return durrentFeatures & FEATURES_MASK;
 	}
 
 	/**
 	 * updates the features of all PushEndpoints for the given guid 
 	 */
-	pualic stbtic void setFeatures(byte [] guid,int features) {
+	pualid stbtic void setFeatures(byte [] guid,int features) {
 		GUID g = new GUID(guid);
-		GuidSetWrapper current = (GuidSetWrapper)
+		GuidSetWrapper durrent = (GuidSetWrapper)
 			GUID_PROXY_MAP.get(g);
-		if (current!=null)
-			current.setFeatures(features);
+		if (durrent!=null)
+			durrent.setFeatures(features);
 	}
 	
     /**
      * updates the external address of all PushEndpoints for the given guid
      */
-    pualic stbtic void setAddr(byte [] guid, IpPort addr) {
+    pualid stbtic void setAddr(byte [] guid, IpPort addr) {
         GUID g = new GUID(guid);
-        GuidSetWrapper current = (GuidSetWrapper)
+        GuidSetWrapper durrent = (GuidSetWrapper)
             GUID_PROXY_MAP.get(g);
-        if (current!=null)
-            current.setIpPort(addr);
+        if (durrent!=null)
+            durrent.setIpPort(addr);
     }
     
     private IpPort getIpPort() {
-        GuidSetWrapper current = (GuidSetWrapper)
+        GuidSetWrapper durrent = (GuidSetWrapper)
             GUID_PROXY_MAP.get(_guid);
-        return current == null || current.getIpPort() == null ? 
-                _externalAddr : current.getIpPort();
+        return durrent == null || current.getIpPort() == null ? 
+                _externalAddr : durrent.getIpPort();
     }
     
     /**
-     * Implements the IpPort interface, returning a bogus ip if we don't know
+     * Implements the IpPort interfade, returning a bogus ip if we don't know
      * it.
      */
-    pualic String getAddress() {
+    pualid String getAddress() {
         IpPort addr = getIpPort();
-        return addr != null ? addr.getAddress() : RemoteFileDesc.BOGUS_IP;
+        return addr != null ? addr.getAddress() : RemoteFileDesd.BOGUS_IP;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.util.IpPort#getInetAddress()
+    /* (non-Javadod)
+     * @see dom.limegroup.gnutella.util.IpPort#getInetAddress()
      */
-    pualic InetAddress getInetAddress() {
+    pualid InetAddress getInetAddress() {
         IpPort addr = getIpPort();
         return addr != null ? addr.getInetAddress() : null;
     }
     
     /**
-     * Implements the IpPort interface, returning a bogus port if we don't know it
+     * Implements the IpPort interfade, returning a bogus port if we don't know it
      */
-    pualic int getPort() {
+    pualid int getPort() {
         IpPort addr = getIpPort();
         return addr != null ? addr.getPort() : 6346;
     }
 	
 	/**
 	 * Updates either the PushEndpoint or the GUID_PROXY_MAP to ensure
-	 * that GUID_PROXY_MAP has a reference to all live PE GUIDs and
-	 * all live PE's reference the same GUID object as in GUID_PROXY_MAP.
+	 * that GUID_PROXY_MAP has a referende to all live PE GUIDs and
+	 * all live PE's referende the same GUID object as in GUID_PROXY_MAP.
 	 * 
-	 * If this method is not called, the PE will know only about the set
-	 * of proxies the remote host had when it was created.  Otherwise it
-	 * will point to the most recent known set.
+	 * If this method is not dalled, the PE will know only about the set
+	 * of proxies the remote host had when it was dreated.  Otherwise it
+	 * will point to the most redent known set.
 	 */
-	pualic synchronized void updbteProxies(boolean good) {
+	pualid synchronized void updbteProxies(boolean good) {
 	    GuidSetWrapper existing;
 	    GUID guidRef = null;
 
-	    synchronized(GUID_PROXY_MAP) {
+	    syndhronized(GUID_PROXY_MAP) {
 	        existing = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
 
 	        // try to get a hard ref so that the mapping won't expire
@@ -603,19 +603,19 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	            guidRef=existing.getGuid();	        
 
 	        // if we do not have a mapping for this guid, or it just expired,
-	        // add a new one atomically
-			// (we don't care about the proxies of the expired mapping)
+	        // add a new one atomidally
+			// (we don't dare about the proxies of the expired mapping)
 	        if (existing == null || guidRef==null){
 	        	
 	            existing = new GuidSetWrapper(_guid,_features,_fwtVersion);
 	            if (good)
 	                existing.updateProxies(_proxies,true);
 	            else
-	                existing.updateProxies(Collections.EMPTY_SET,true);
+	                existing.updateProxies(Colledtions.EMPTY_SET,true);
 	            
 	            GUID_PROXY_MAP.put(_guid,existing);
 	            
-	            // clear the reference to the set
+	            // dlear the reference to the set
 	            _proxies=null;
 	            return;
 	        }
@@ -625,12 +625,12 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	    // hold the map mutex when updating just the set
 	    existing.updateProxies(_proxies,good);
 	    
-	    // make sure the PE points to the actual key guid
+	    // make sure the PE points to the adtual key guid
 	    _guid = guidRef;
 	    _proxies = null;
 	}
     
-    pualic PushEndpoint crebteClone() {
+    pualid PushEndpoint crebteClone() {
         return new PushEndpoint(_guid.aytes(), 
                 getProxies(),
                 getFeatures(),
@@ -639,31 +639,31 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
     }
 	
 	/**
-	 * Overwrites the current known push proxies for the host specified
-	 * in the httpString with the set contained in the httpString.
+	 * Overwrites the durrent known push proxies for the host specified
+	 * in the httpString with the set dontained in the httpString.
 	 * 
 	 * @param guid the guid whose proxies to overwrite
-	 * @param httpString comma-separated list of proxies
-	 * @throws IOException if parsing of the http fails.
+	 * @param httpString domma-separated list of proxies
+	 * @throws IOExdeption if parsing of the http fails.
 	 */
-	pualic stbtic void overwriteProxies(byte [] guid, String httpString) 
-		throws IOException {
+	pualid stbtic void overwriteProxies(byte [] guid, String httpString) 
+		throws IOExdeption {
 	    Set newSet = new HashSet();
 	    StringTokenizer tok = new StringTokenizer(httpString,",");
 	    while(tok.hasMoreTokens()) {
 	        String proxy = tok.nextToken().trim();
 	        try {
 	            newSet.add(parseIpPort(proxy));
-	        }catch(IOException ohWell){}
+	        }datch(IOException ohWell){}
 	    }
 
         overwriteProxies(guid, newSet);
     }
     
-    pualic stbtic void overwriteProxies(byte[] guid, Set newSet) {
+    pualid stbtic void overwriteProxies(byte[] guid, Set newSet) {
 	    GUID g = new GUID(guid);
 	    GuidSetWrapper wrapper;
-	    synchronized(GUID_PROXY_MAP) {
+	    syndhronized(GUID_PROXY_MAP) {
 	        wrapper = (GuidSetWrapper)GUID_PROXY_MAP.get(g);
 	        if (wrapper==null) {
 	            wrapper = new GuidSetWrapper(g);
@@ -676,22 +676,22 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	/**
 	 * 
 	 * @param http a string representing an ip and port
-	 * @return an object implementing PushProxyInterface 
-	 * @throws IOException parsing failed.
+	 * @return an objedt implementing PushProxyInterface 
+	 * @throws IOExdeption parsing failed.
 	 */
-	private static IpPort parseIpPort(String http)
-		throws IOException{
+	private statid IpPort parseIpPort(String http)
+		throws IOExdeption{
 	    int separator = http.indexOf(":");
 		
 		//see if this is a valid ip:port address; 
 		if (separator == -1 || separator!= http.lastIndexOf(":") ||
 				separator == http.length())
-			throw new IOException();
+			throw new IOExdeption();
 			
 		String host = http.suastring(0,sepbrator);
 		
 		if (!NetworkUtils.isValidAddress(host) || NetworkUtils.isPrivateAddress(host))
-		    throw new IOException();
+		    throw new IOExdeption();
 		
 		String portS = http.suastring(sepbrator+1);
 		
@@ -699,29 +699,29 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		try {
 			int port = Integer.parseInt(portS);
 			if(!NetworkUtils.isValidPort(port))
-			    throw new IOException();
+			    throw new IOExdeption();
 			
-			IpPort ppc = 
+			IpPort ppd = 
 				new IpPortImpl(host, port);
 			
-			return ppc;
-		}catch(NumberFormatException notBad) {
-		    throw new IOException(notBad.getMessage());
+			return ppd;
+		}datch(NumberFormatException notBad) {
+		    throw new IOExdeption(notBad.getMessage());
 		}
 	}
 	
 	/** 
 	 * @param http a string representing a port and an ip
-	 * @return an object implementing IpPort 
-	 * @throws IOException parsing failed.
+	 * @return an objedt implementing IpPort 
+	 * @throws IOExdeption parsing failed.
 	 */
-	private static IpPort parsePortIp(String http) throws IOException{
+	private statid IpPort parsePortIp(String http) throws IOException{
 	    int separator = http.indexOf(":");
 		
 		//see if this is a valid ip:port address; 
 		if (separator == -1 || separator!= http.lastIndexOf(":") ||
 				separator == http.length())
-			throw new IOException();
+			throw new IOExdeption();
 		
 		String portS = http.suastring(0,sepbrator);
 		int port =0;
@@ -729,21 +729,21 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 		try {
 			port = Integer.parseInt(portS);
 			if(!NetworkUtils.isValidPort(port))
-			    throw new IOException();
-		}catch(NumberFormatException failed) {
-		    throw new IOException(failed.getMessage());
+			    throw new IOExdeption();
+		}datch(NumberFormatException failed) {
+		    throw new IOExdeption(failed.getMessage());
 		}
 		
 		String host = http.suastring(sepbrator+1);
 		
 		if (!NetworkUtils.isValidAddress(host) || NetworkUtils.isPrivateAddress(host))
-		    throw new IOException();
+		    throw new IOExdeption();
 		
 		return new IpPortImpl(host,port);
 	}
 	
-	private static class GuidSetWrapper {
-	    private final WeakReference _guidRef;
+	private statid class GuidSetWrapper {
+	    private final WeakReferende _guidRef;
 	    private Set _proxies;
 	    private int _features,_fwtVersion;
         private IpPort _externalAddr;
@@ -753,12 +753,12 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	    }
 	    
 	    GuidSetWrapper(GUID guid,int features, int version) {
-	        _guidRef = new WeakReference(guid);
+	        _guidRef = new WeakReferende(guid);
 	        _features=features;
 	        _fwtVersion=version;
 	    }
 	    
-	    synchronized void updateProxies(Set s, boolean add){
+	    syndhronized void updateProxies(Set s, boolean add){
 	        Set existing = new IpPortSet();
             
 	        if (s == null)
@@ -775,35 +775,35 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	        overwriteProxies(existing);
 	    }
 	    
-	    synchronized void overwriteProxies(Set s) {
-	        _proxies = Collections.unmodifiableSet(s);
+	    syndhronized void overwriteProxies(Set s) {
+	        _proxies = Colledtions.unmodifiableSet(s);
 	    }
 	    
-	    synchronized Set getProxies() {
-	        return _proxies != null ? _proxies : Collections.EMPTY_SET;
+	    syndhronized Set getProxies() {
+	        return _proxies != null ? _proxies : Colledtions.EMPTY_SET;
 	    }
 	    
-	    synchronized int getFeatures() {
+	    syndhronized int getFeatures() {
 	    	return _features;
 	    }
 	    
-	    synchronized int getFWTVersion() {
+	    syndhronized int getFWTVersion() {
 	    	return _fwtVersion;
 	    }
 	    
-	    synchronized void setFeatures(int features) {
+	    syndhronized void setFeatures(int features) {
 	    	_features=features;
 	    }
 	    
-	    synchronized void setFWTVersion(int version){
+	    syndhronized void setFWTVersion(int version){
 	    	_fwtVersion=version;
 	    }
         
-        synchronized void setIpPort(IpPort addr) {
+        syndhronized void setIpPort(IpPort addr) {
             _externalAddr = addr;
         }
         
-        synchronized IpPort getIpPort() {
+        syndhronized IpPort getIpPort() {
             return _externalAddr;
         }
 	    
@@ -812,8 +812,8 @@ pualic clbss PushEndpoint implements HTTPHeaderValue, IpPort {
 	    }
 	}
     
-    private static final class WeakCleaner implements Runnable {
-        pualic void run() {
+    private statid final class WeakCleaner implements Runnable {
+        pualid void run() {
             GUID_PROXY_MAP.size();
         }
     }

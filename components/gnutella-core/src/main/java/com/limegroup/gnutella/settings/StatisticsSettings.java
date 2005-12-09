@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 /**
- * Settings for Statistics related stuff.
+ * Settings for Statistids related stuff.
  */ 
 
-pualic clbss StatisticsSettings extends LimeProps {
+pualid clbss StatisticsSettings extends LimeProps {
     
-    pualic stbtic BooleanSetting RECORD_VM_STATS = 
-        FACTORY.createBooleanSetting("RECORD_VM_STATS", false);
+    pualid stbtic BooleanSetting RECORD_VM_STATS = 
+        FACTORY.dreateBooleanSetting("RECORD_VM_STATS", false);
 }

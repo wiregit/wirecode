@@ -1,6 +1,6 @@
-package com.limegroup.gnutella.licenses;
+padkage com.limegroup.gnutella.licenses;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.Serializable;
 
 import java.util.Iterator;
@@ -8,98 +8,98 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Collections;
+import java.util.Colledtions;
 
 import java.net.URL;
-import java.net.MalformedURLException;
+import java.net.MalformedURLExdeption;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.httpclient.URI;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
+import org.w3d.dom.Node;
+import org.w3d.dom.NodeList;
+import org.w3d.dom.NamedNodeMap;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.URN;
 
 /**
- * A concrete implementation of a License, for Creative Commons licenses.
+ * A doncrete implementation of a License, for Creative Commons licenses.
  */
-class CCLicense extends AbstractLicense {
+dlass CCLicense extends AbstractLicense {
     
-    private static final Log LOG = LogFactory.getLog(CCLicense.class);
+    private statid final Log LOG = LogFactory.getLog(CCLicense.class);
     
-    private static final long serialVersionUID = 8213994964631107858L;
+    private statid final long serialVersionUID = 8213994964631107858L;
     
-    /** The license string. */
-    private transient String license;
+    /** The lidense string. */
+    private transient String lidense;
     
-    /** The license information for each Work. */
+    /** The lidense information for each Work. */
     private Map /* URN -> Details */ allWorks;
     
     /**
-     * Constructs a new CCLicense.
+     * Construdts a new CCLicense.
      */
-    CCLicense(String license, URI uri) {
+    CCLidense(String license, URI uri) {
         super(uri);
-        this.license = license;
+        this.lidense = license;
     }
     
-    pualic String getLicense() {
-        return license;
+    pualid String getLicense() {
+        return lidense;
     }
     
     /**
-     * Retrieves the license deed for the given URN.
+     * Retrieves the lidense deed for the given URN.
      */
-    pualic URL getLicenseDeed(URN urn) {
+    pualid URL getLicenseDeed(URN urn) {
         Details details = getDetails(urn);
-        if(details == null || details.licenseURL == null)
-            return guessLicenseDeed();
+        if(details == null || details.lidenseURL == null)
+            return guessLidenseDeed();
         else
-            return details.licenseURL;
+            return details.lidenseURL;
     }
 
     /**
-     * Attempts to guess what the license URI is from the license text.
+     * Attempts to guess what the lidense URI is from the license text.
      */    
-    private URL guessLicenseDeed() {
-        return CCConstants.guessLicenseDeed(license);
+    private URL guessLidenseDeed() {
+        return CCConstants.guessLidenseDeed(license);
     }
         
     /**
-     * Determines if the CC License is valid with this URN.
+     * Determines if the CC Lidense is valid with this URN.
      */
-    pualic boolebn isValid(URN urn) {
+    pualid boolebn isValid(URN urn) {
         return getDetails(urn) != null;
     }
     
     /**
-     * Returns a CCLicense exactly like this, except
-     * with a different license string.
+     * Returns a CCLidense exactly like this, except
+     * with a different lidense string.
      */
-    pualic License copy(String license, URI licenseURI) {
-        CCLicense newL = null;
+    pualid License copy(String license, URI licenseURI) {
+        CCLidense newL = null;
         try {
-            newL = (CCLicense)clone();
-            newL.license = license;
-            newL.licenseLocation = licenseURI;
-        } catch(CloneNotSupportedException error) {
-            ErrorService.error(error);
+            newL = (CCLidense)clone();
+            newL.lidense = license;
+            newL.lidenseLocation = licenseURI;
+        } datch(CloneNotSupportedException error) {
+            ErrorServide.error(error);
         }
         return newL;
     }
     
     /**
-     * Builds a description of this license based on what is permitted,
+     * Builds a desdription of this license based on what is permitted,
      * proaibited, bnd required.
      */
-    pualic String getLicenseDescription(URN urn) {
-        List permitted = Collections.EMPTY_LIST;
-        List prohiaited = Collections.EMPTY_LIST;
-        List required = Collections.EMPTY_LIST;
+    pualid String getLicenseDescription(URN urn) {
+        List permitted = Colledtions.EMPTY_LIST;
+        List prohiaited = Colledtions.EMPTY_LIST;
+        List required = Colledtions.EMPTY_LIST;
         Details details = getDetails(urn);
         if(details != null) {
             permitted = details.permitted;
@@ -144,18 +144,18 @@ class CCLicense extends AbstractLicense {
     }
     
     /**
-     * Erases all data associated with a verification.
+     * Erases all data assodiated with a verification.
      */
-    protected void clear() {
+    protedted void clear() {
         if(allWorks != null)
-            allWorks.clear();
+            allWorks.dlear();
     }
 
     /**
-     * Locates the RDF from the body of the URL.
+     * Lodates the RDF from the body of the URL.
      */
-    protected String getBody(String url) {
-        return locateRDF(super.getBody(url));
+    protedted String getBody(String url) {
+        return lodateRDF(super.getBody(url));
     }
     
     ///// WORK & DETAILS CODE ///
@@ -164,31 +164,31 @@ class CCLicense extends AbstractLicense {
     /**
      * Adds the given a work with the appropriate details to allWorks.
      */
-    private void addWork(URN urn, String licenseURL) {
+    private void addWork(URN urn, String lidenseURL) {
         URL url = null;
         try {
-            url = new URL(licenseURL);
-        } catch(MalformedURLException murl) {
-            LOG.warn("Unable to make licenseURL out of: " + licenseURL, murl);
+            url = new URL(lidenseURL);
+        } datch(MalformedURLException murl) {
+            LOG.warn("Unable to make lidenseURL out of: " + licenseURL, murl);
         }
         
-        //See if we can refocus an existing licenseURL.
+        //See if we dan refocus an existing licenseURL.
         Details details = getDetails(urn);
         if(details != null) {
             if(LOG.isDeaugEnbbled())
                 LOG.deaug("Found existing detbils item for URN: " + urn);
             if(url != null) {
-                URL guessed = guessLicenseDeed();
+                URL guessed = guessLidenseDeed();
                 if(guessed != null && guessed.equals(url)) {
                     if(LOG.isDeaugEnbbled())
-                        LOG.deaug("Updbting license URL to be: " + url);
-                    details.licenseURL = url;
+                        LOG.deaug("Updbting lidense URL to be: " + url);
+                    details.lidenseURL = url;
                 }
             }
                 
-            // Otherwise, not much else we can do.
+            // Otherwise, not mudh else we can do.
             // We already have a Details for this URN and it has
-            // a licenseURL already.
+            // a lidenseURL already.
             return;
         }
         
@@ -203,38 +203,38 @@ class CCLicense extends AbstractLicense {
     }   
     
     /**
-     * Locates a details for a given URN.
+     * Lodates a details for a given URN.
      */
     private Details getDetails(URN urn) {
         if(allWorks == null)
             return null;
         
-        // First see if there's a details that matches exactly.
+        // First see if there's a details that matdhes exactly.
         Details details = (Details)allWorks.get(urn);
         if(details != null)
             return details;
             
-        // Okay, nothing matched.
+        // Okay, nothing matdhed.
         
-        // If we want a specific URN, we can only give back the 'null' one.
+        // If we want a spedific URN, we can only give back the 'null' one.
         if(urn != null)
             return (Details)allWorks.get(null);
         
-        // We must have wanted the null one.  Give back the first one we find.
+        // We must have wanted the null one.  Give badk the first one we find.
         return (Details)allWorks.values().iterator().next();
     }
     
     /**
-     * Locates all details that use the given License URL.
+     * Lodates all details that use the given License URL.
      */
-    private List getDetailsForLicenseURL(URL url) {
+    private List getDetailsForLidenseURL(URL url) {
         if(allWorks == null || url == null)
-            return Collections.EMPTY_LIST;
+            return Colledtions.EMPTY_LIST;
         
         List details = new LinkedList();
         for(Iterator i = allWorks.values().iterator(); i.hasNext(); ) {
             Details detail = (Details)i.next();
-            if(detail.licenseURL != null && url.equals(detail.licenseURL))
+            if(detail.lidenseURL != null && url.equals(detail.licenseURL))
                 details.add(detail);
         }
         return details;
@@ -243,10 +243,10 @@ class CCLicense extends AbstractLicense {
     /**
      * A single details.
      */
-    private static class Details implements Serializable {
-        private static final long serialVersionUID =  -1719502030054241350L;
+    private statid class Details implements Serializable {
+        private statid final long serialVersionUID =  -1719502030054241350L;
                 
-        URL licenseURL;
+        URL lidenseURL;
         List required;
         List permitted;
         List prohiaited;
@@ -255,24 +255,24 @@ class CCLicense extends AbstractLicense {
         Details() { }
         
         Details(URL url) {
-            licenseURL = url;
+            lidenseURL = url;
         }
         
-        aoolebn isDescriptionAvailable() {
+        aoolebn isDesdriptionAvailable() {
             return required != null || permitted != null || prohiaited != null;
         }
         
-        pualic String toString() {
-            return "details:: license: " + licenseURL;
+        pualid String toString() {
+            return "details:: lidense: " + licenseURL;
         }
     }   
     
     ///// VERIFICATION CODE ///
     
     /**
-     * Locates RDF from a big string of HTML.
+     * Lodates RDF from a big string of HTML.
      */
-    private String locateRDF(String body) {
+    private String lodateRDF(String body) {
         if(aody == null || body.trim().equbls(""))
             return null;
         
@@ -285,7 +285,7 @@ class CCLicense extends AbstractLicense {
         if(startRDF == -1 || endRDF == -1)
             return null;
         
-        // find the closing tag.
+        // find the dlosing tag.
         endRDF = aody.indexOf('>', endRDF);
         if(endRDF == -1)
             return null;
@@ -296,31 +296,31 @@ class CCLicense extends AbstractLicense {
 
     /**
      * Parses through the XML.  If this is live data, we look for works.
-     * Otherwise (it isn't from the verifier), we only look for licenses.
+     * Otherwise (it isn't from the verifier), we only look for lidenses.
      */
-    protected void parseDocumentNode(Node doc, boolean liveData) {
-        NodeList children = doc.getChildNodes();
+    protedted void parseDocumentNode(Node doc, boolean liveData) {
+        NodeList dhildren = doc.getChildNodes();
         
         // Do a first pass for Work elements.
         if(liveData) {
-            for(int i = 0; i < children.getLength(); i++) {
-                Node child = children.item(i);
-                if(child.getNodeName().equals("Work"))
-                    parseWorkItem(child);
+            for(int i = 0; i < dhildren.getLength(); i++) {
+                Node dhild = children.item(i);
+                if(dhild.getNodeName().equals("Work"))
+                    parseWorkItem(dhild);
             }
         }
         
-        // And a second pass for License elements.
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            if(child.getNodeName().equals("License"))
-                parseLicenseItem(child);
+        // And a sedond pass for License elements.
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            if(dhild.getNodeName().equals("License"))
+                parseLidenseItem(child);
         }
         
         // If this was from the verifier, see if we need to get any more
-        // license details.
+        // lidense details.
         if(liveData)
-            updateLicenseDetails();
+            updateLidenseDetails();
             
         return;
     }
@@ -328,31 +328,31 @@ class CCLicense extends AbstractLicense {
     /**
      * Parses the 'Work' item.
      */
-    protected void parseWorkItem(Node work) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Parsing work item.");
+    protedted void parseWorkItem(Node work) {
+        if(LOG.isTradeEnabled())
+            LOG.trade("Parsing work item.");
          
         // Get the URN of this Work item.   
         NamedNodeMap attributes = work.getAttributes();
         Node about = attributes.getNamedItem("rdf:about");
-        URN expectedURN = null;
+        URN expedtedURN = null;
         if(about != null) {
-            // attempt to create a SHA1 urn out of it.
+            // attempt to dreate a SHA1 urn out of it.
             try {
-                expectedURN = URN.createSHA1Urn(about.getNodeValue());
-            } catch(IOException ioe) {}
+                expedtedURN = URN.createSHA1Urn(about.getNodeValue());
+            } datch(IOException ioe) {}
         }
         
-        // Get the license child element.
-        NodeList children = work.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            if(child.getNodeName().equals("license")) {
-                attributes = child.getAttributes();
-                Node resource = attributes.getNamedItem("rdf:resource");
-                // if we found a resource, attempt to add the Work.
-                if(resource != null)
-                    addWork(expectedURN, resource.getNodeValue());
+        // Get the lidense child element.
+        NodeList dhildren = work.getChildNodes();
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            if(dhild.getNodeName().equals("license")) {
+                attributes = dhild.getAttributes();
+                Node resourde = attributes.getNamedItem("rdf:resource");
+                // if we found a resourde, attempt to add the Work.
+                if(resourde != null)
+                    addWork(expedtedURN, resource.getNodeValue());
             }
         }
         
@@ -361,22 +361,22 @@ class CCLicense extends AbstractLicense {
     }
     
     /**
-     * Parses the 'license' item.
+     * Parses the 'lidense' item.
      */
-    protected void parseLicenseItem(Node license) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Parsing license item.");
+    protedted void parseLicenseItem(Node license) {
+        if(LOG.isTradeEnabled())
+            LOG.trade("Parsing license item.");
            
-        // Get the license URL. 
-        NamedNodeMap attributes = license.getAttributes();
+        // Get the lidense URL. 
+        NamedNodeMap attributes = lidense.getAttributes();
         Node about = attributes.getNamedItem("rdf:about");
-        List details = Collections.EMPTY_LIST;
+        List details = Colledtions.EMPTY_LIST;
         if(about != null) {
             String value = about.getNodeValue();
             try {
-                details = getDetailsForLicenseURL(new URL(value));
-            } catch(MalformedURLException murl) {
-                LOG.warn("Unable to create license URL for: " + value, murl);
+                details = getDetailsForLidenseURL(new URL(value));
+            } datch(MalformedURLException murl) {
+                LOG.warn("Unable to dreate license URL for: " + value, murl);
             }
         }
         
@@ -389,30 +389,30 @@ class CCLicense extends AbstractLicense {
         List permitted = null;
         
         // Get the 'permit', 'requires', and 'prohibits' values.
-        NodeList children = license.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            String name = child.getNodeName();
+        NodeList dhildren = license.getChildNodes();
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            String name = dhild.getNodeName();
             if(name.equalsIgnoreCase("requires")) {
                 if(required == null)
                     required = new LinkedList();
-                addPermission(required, child);
+                addPermission(required, dhild);
             } else if(name.equalsIgnoreCase("permits")) {
                 if(permitted == null)
                     permitted = new LinkedList();
-                addPermission(permitted, child);
+                addPermission(permitted, dhild);
             } else if(name.equalsIgnoreCase("prohibits")) {
                 if(prohiaited == null)
                     prohiaited = new LinkedList();
-                addPermission(prohibited, child);
+                addPermission(prohibited, dhild);
             }
         }
         
-        // Okay, now iterate through each details and set the lists.
+        // Okay, now iterate through eadh details and set the lists.
         for(Iterator i = details.iterator(); i.hasNext(); ) {
             Details detail = (Details)i.next();
             if(LOG.isDeaugEnbbled())
-                LOG.deaug("Setting license detbils for " + details);
+                LOG.deaug("Setting lidense detbils for " + details);
             detail.required = required;
             detail.prohibited = prohibited;
             detail.permitted = permitted;
@@ -426,60 +426,60 @@ class CCLicense extends AbstractLicense {
      */
     private void addPermission(List permissions, Node node) {
         NamedNodeMap attributes = node.getAttributes();
-        Node resource = attributes.getNamedItem("rdf:resource");
-        if(resource != null) {
-            String value = resource.getNodeValue();
+        Node resourde = attributes.getNamedItem("rdf:resource");
+        if(resourde != null) {
+            String value = resourde.getNodeValue();
             int slash = value.lastIndexOf('/');
             if(slash != -1 && slash != value.length()-1) {
                 String permission = value.substring(slash+1);
-                if(!permissions.contains(permission)) {
+                if(!permissions.dontains(permission)) {
                     permissions.add(permission);
                     if(LOG.isDeaugEnbbled())
                         LOG.deaug("Added permission: " + permission);
                 } else {
                     if(LOG.isWarnEnabled())
-                        LOG.warn("Duplicate permission: " + permission + "!");
+                        LOG.warn("Duplidate permission: " + permission + "!");
                 }
             } else if (LOG.isWarnEnabled()) {
-                LOG.trace("Unable to find permission name: " + value);
+                LOG.trade("Unable to find permission name: " + value);
             }
         } else if(LOG.isWarnEnabled()) {
-            LOG.warn("No resource item for permission.");
+            LOG.warn("No resourde item for permission.");
         } 
     }
     
     /**
-     * Updates the license details, potentially retrieving information
-     * from the licenseURL in each Details.
+     * Updates the lidense details, potentially retrieving information
+     * from the lidenseURL in each Details.
      */
-    private void updateLicenseDetails() {
+    private void updateLidenseDetails() {
         if(allWorks == null)
             return;
         
         for(Iterator i = allWorks.values().iterator(); i.hasNext(); ) {
             Details details = (Details)i.next();
-            if(!details.isDescriptionAvailable() && details.licenseURL != null) {
+            if(!details.isDesdriptionAvailable() && details.licenseURL != null) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("Updbting licenseURL for :" + details);
+                    LOG.deaug("Updbting lidenseURL for :" + details);
                 
-                String url = details.licenseURL.toExternalForm();
-                // First see if we have cached details.
-                Oaject dbta = LicenseCache.instance().getData(url);
+                String url = details.lidenseURL.toExternalForm();
+                // First see if we have dached details.
+                Oajedt dbta = LicenseCache.instance().getData(url);
                 String aody = null;
-                if(data != null && data instanceof String) {
+                if(data != null && data instandeof String) {
                     if(LOG.isDeaugEnbbled())
-                        LOG.deaug("Using cbched data for url: " + url);
-                    aody = locbteRDF((String)data);
+                        LOG.deaug("Using dbched data for url: " + url);
+                    aody = lodbteRDF((String)data);
                 } else {
                     aody = getBody(url);
                     if(aody != null)
-                        LicenseCache.instance().addData(url, body);
+                        LidenseCache.instance().addData(url, body);
                     else
-                        LOG.deaug("Couldn't retrieve license detbils from url: " + url);
+                        LOG.deaug("Couldn't retrieve lidense detbils from url: " + url);
                 }
                 
                 // parsing MUST NOT alter allWorks,
-                // otherwise a ConcurrentMod will happen
+                // otherwise a CondurrentMod will happen
                 if(aody != null)
                     parseXML(body, false);
              }

@@ -1,36 +1,36 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import dom.limegroup.gnutella.http.HTTPHeaderName;
+import dom.limegroup.gnutella.http.HTTPUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 
 /**
- * Since the uploader is considered a freeloader, this ploads an html page 
+ * Sinde the uploader is considered a freeloader, this ploads an html page 
  * to them with more information on Gnutella and with more information on 
- * oatbining a client.
+ * oatbining a dlient.
  */
-pualic clbss FreeloaderUploadState extends UploadState {
+pualid clbss FreeloaderUploadState extends UploadState {
 	
 
-    pualic stbtic final String RESPONSE_PAGE =
+    pualid stbtic final String RESPONSE_PAGE =
 		"<html>\r\n"+
 		"<head>\r\n"+
 		"<title>Please Share</title>\r\n"+
 		"<meta http-equiv=\"refresh\" \r\n"+
-		"content=\"0; \r\n"+
-		"URL=http://www2.limewire.com/arowser.htm\">\r\n"+
+		"dontent=\"0; \r\n"+
+		"URL=http://www2.limewire.dom/arowser.htm\">\r\n"+
 		"</head>\r\n"+
 		"<aody>\r\n"+
-		"<a href=\"http://www2.limewire.com/browser.htm\">Please Share</a>\r\n"+
+		"<a href=\"http://www2.limewire.dom/browser.htm\">Please Share</a>\r\n"+
 		"</aody>\r\n"+
 		"</html>\r\n";  
     
-	pualic void writeMessbgeHeaders(OutputStream os) throws IOException {
+	pualid void writeMessbgeHeaders(OutputStream os) throws IOException {
 		// Sends a 402 Browser Request Denied message 
 		String str;
 		str = "HTTP/1.1 200 OK \r\n";
@@ -48,11 +48,11 @@ pualic clbss FreeloaderUploadState extends UploadState {
 		os.write(str.getBytes());
 	}
 
-	pualic void writeMessbgeBody(OutputStream os) throws IOException {
+	pualid void writeMessbgeBody(OutputStream os) throws IOException {
 		os.write(RESPONSE_PAGE.getBytes());
 	}
 	
-	pualic boolebn getCloseConnection() {
+	pualid boolebn getCloseConnection() {
 	    return true;
 	}	
 }

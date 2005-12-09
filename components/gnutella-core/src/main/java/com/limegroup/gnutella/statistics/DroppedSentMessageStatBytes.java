@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 
 /**
- * This class contains a type-safe enumeration of statistics for
+ * This dlass contains a type-safe enumeration of statistics for
  * individual Gnutella messages that have been sent from other 
- * nodes on the network.  Each statistic maintains its own history, 
- * all messages sent over a specific number of time intervals, 
- * etc.
+ * nodes on the network.  Eadh statistic maintains its own history, 
+ * all messages sent over a spedific number of time intervals, 
+ * etd.
  */
-pualic clbss DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
+pualid clbss DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 
 	/**
-	 * Constructs a new <tt>DroppedSentMessageStatBytes</tt> instance.
+	 * Construdts a new <tt>DroppedSentMessageStatBytes</tt> instance.
 	 */
 	private DroppedSentMessageStatBytes() {}
 
 	/**
-	 * Private class for the total number of bytes in sent 
+	 * Private dlass for the total number of bytes in sent 
 	 * UDP messages.
 	 */
-	private static class UDPDroppedSentMessageStatBytes 
+	private statid class UDPDroppedSentMessageStatBytes 
 		extends DroppedSentMessageStatBytes {
-		pualic void bddData(int data) {
+		pualid void bddData(int data) {
 			super.addData(data);
 			ALL_MESSAGES.addData(data);
 			UDP_ALL_MESSAGES.addData(data);
@@ -29,12 +29,12 @@ pualic clbss DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	}
 
 	/**
-	 * Private class for the total number of bytes in sent 
+	 * Private dlass for the total number of bytes in sent 
 	 * TCP messages.
 	 */
-	private static class TCPDroppedSentMessageStatBytes 
+	private statid class TCPDroppedSentMessageStatBytes 
 		extends DroppedSentMessageStatBytes {
-		pualic void bddData(int data) {
+		pualid void bddData(int data) {
 			super.addData(data);
 			ALL_MESSAGES.addData(data);
 			TCP_ALL_MESSAGES.addData(data);
@@ -42,12 +42,12 @@ pualic clbss DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	}
 
 	/**
-	 * Private class for the total number of bytes in sent 
-	 * Multicast messages.
+	 * Private dlass for the total number of bytes in sent 
+	 * Multidast messages.
 	 */
-	private static class MulticastDroppedSentMessageStatBytes 
+	private statid class MulticastDroppedSentMessageStatBytes 
 		extends DroppedSentMessageStatBytes {
-		pualic void bddData(int data) {
+		pualid void bddData(int data) {
 			super.addData(data);
 			ALL_MESSAGES.addData(data);
 			MULTICAST_ALL_MESSAGES.addData(data);
@@ -56,160 +56,160 @@ pualic clbss DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 
 
 	/**
-	 * <tt>Statistic</tt> for all messages sent.
+	 * <tt>Statistid</tt> for all messages sent.
 	 */
-	pualic stbtic final Statistic ALL_MESSAGES =
+	pualid stbtic final Statistic ALL_MESSAGES =
 		new DroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for all UPD messages sent.
+	 * <tt>Statistid</tt> for all UPD messages sent.
 	 */
-	pualic stbtic final Statistic UDP_ALL_MESSAGES =
+	pualid stbtic final Statistic UDP_ALL_MESSAGES =
 		new DroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for all TCP messages sent.
+	 * <tt>Statistid</tt> for all TCP messages sent.
 	 */
-	pualic stbtic final Statistic TCP_ALL_MESSAGES =
+	pualid stbtic final Statistic TCP_ALL_MESSAGES =
 		new DroppedSentMessageStatBytes();
 		
 	/**
-	 * <tt>Statistic</tt> for all MULTICAST messages sent.
+	 * <tt>Statistid</tt> for all MULTICAST messages sent.
 	 */
-	pualic stbtic final Statistic MULTICAST_ALL_MESSAGES =
+	pualid stbtic final Statistic MULTICAST_ALL_MESSAGES =
 		new DroppedSentMessageStatBytes();		
 
 	/**
-	 * <tt>Statistic</tt> for all filtered messages.
+	 * <tt>Statistid</tt> for all filtered messages.
 	 */
-	pualic stbtic final Statistic ALL_FILTERED_MESSAGES =
+	pualid stbtic final Statistic ALL_FILTERED_MESSAGES =
 		new DroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pings sent over UDP.
+	 * <tt>Statistid</tt> for Gnutella pings sent over UDP.
 	 */
-	pualic stbtic final Statistic UDP_PING_REQUESTS = 
+	pualid stbtic final Statistic UDP_PING_REQUESTS = 
 	    new UDPDroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pings sent over TCP.
+	 * <tt>Statistid</tt> for Gnutella pings sent over TCP.
 	 */
-	pualic stbtic final Statistic TCP_PING_REQUESTS = 
+	pualid stbtic final Statistic TCP_PING_REQUESTS = 
 	    new TCPDroppedSentMessageStatBytes();
 	    
 	/**
-	 * <tt>Statistic</tt> for Gnutella pings sent over MULTICAST.
+	 * <tt>Statistid</tt> for Gnutella pings sent over MULTICAST.
 	 */
-	pualic stbtic final Statistic MULTICAST_PING_REQUESTS = 
-	    new MulticastDroppedSentMessageStatBytes();	    
+	pualid stbtic final Statistic MULTICAST_PING_REQUESTS = 
+	    new MultidastDroppedSentMessageStatBytes();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pongs sent over UDP.
+	 * <tt>Statistid</tt> for Gnutella pongs sent over UDP.
 	 */
-	pualic stbtic final Statistic UDP_PING_REPLIES = 
+	pualid stbtic final Statistic UDP_PING_REPLIES = 
 	    new UDPDroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella pongs sent over TCP.
+	 * <tt>Statistid</tt> for Gnutella pongs sent over TCP.
 	 */
-	pualic stbtic final Statistic TCP_PING_REPLIES = 
+	pualid stbtic final Statistic TCP_PING_REPLIES = 
 	    new TCPDroppedSentMessageStatBytes();
 	    
 	/**
-	 * <tt>Statistic</tt> for Gnutella pongs sent over MULTICAST.
+	 * <tt>Statistid</tt> for Gnutella pongs sent over MULTICAST.
 	 */
-	pualic stbtic final Statistic MULTICAST_PING_REPLIES = 
-	    new MulticastDroppedSentMessageStatBytes();	    
+	pualid stbtic final Statistic MULTICAST_PING_REPLIES = 
+	    new MultidastDroppedSentMessageStatBytes();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query requests sent over 
+	 * <tt>Statistid</tt> for Gnutella query requests sent over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_QUERY_REQUESTS = 
+	pualid stbtic final Statistic UDP_QUERY_REQUESTS = 
 	    new UDPDroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query requests sent over 
+	 * <tt>Statistid</tt> for Gnutella query requests sent over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_QUERY_REQUESTS = 
+	pualid stbtic final Statistic TCP_QUERY_REQUESTS = 
 	    new TCPDroppedSentMessageStatBytes();
 	    
 	/**
-	 * <tt>Statistic</tt> for Gnutella query requests sent over 
-	 * Multicast.
+	 * <tt>Statistid</tt> for Gnutella query requests sent over 
+	 * Multidast.
 	 */
-	pualic stbtic final Statistic MULTICAST_QUERY_REQUESTS = 
-	    new MulticastDroppedSentMessageStatBytes();
+	pualid stbtic final Statistic MULTICAST_QUERY_REQUESTS = 
+	    new MultidastDroppedSentMessageStatBytes();
 	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query replies sent over 
+	 * <tt>Statistid</tt> for Gnutella query replies sent over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_QUERY_REPLIES = 
+	pualid stbtic final Statistic UDP_QUERY_REPLIES = 
 	    new UDPDroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query replies sent over 
+	 * <tt>Statistid</tt> for Gnutella query replies sent over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_QUERY_REPLIES = 
+	pualid stbtic final Statistic TCP_QUERY_REPLIES = 
 	    new TCPDroppedSentMessageStatBytes();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query replies sent over 
-	 * Multicast.
+	 * <tt>Statistid</tt> for Gnutella query replies sent over 
+	 * Multidast.
 	 */
-	pualic stbtic final Statistic MULTICAST_QUERY_REPLIES = 
-	    new MulticastDroppedSentMessageStatBytes();	    
+	pualid stbtic final Statistic MULTICAST_QUERY_REPLIES = 
+	    new MultidastDroppedSentMessageStatBytes();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella push requests sent over 
+	 * <tt>Statistid</tt> for Gnutella push requests sent over 
 	 * UDP.
 	 */
-	pualic stbtic final Statistic UDP_PUSH_REQUESTS = 
+	pualid stbtic final Statistic UDP_PUSH_REQUESTS = 
 	    new UDPDroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella push requests sent over 
+	 * <tt>Statistid</tt> for Gnutella push requests sent over 
 	 * TCP.
 	 */
-	pualic stbtic final Statistic TCP_PUSH_REQUESTS = 
+	pualid stbtic final Statistic TCP_PUSH_REQUESTS = 
 	    new TCPDroppedSentMessageStatBytes();
 	    
 	/**
-	 * <tt>Statistic</tt> for Gnutella push requests sent over 
-	 * Multicast.
+	 * <tt>Statistid</tt> for Gnutella push requests sent over 
+	 * Multidast.
 	 */
-	pualic stbtic final Statistic MULTICAST_PUSH_REQUESTS = 
-	    new MulticastDroppedSentMessageStatBytes();	    
+	pualid stbtic final Statistic MULTICAST_PUSH_REQUESTS = 
+	    new MultidastDroppedSentMessageStatBytes();	    
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella route table messages sent 
+	 * <tt>Statistid</tt> for Gnutella route table messages sent 
 	 * over UDP.
 	 */
-	pualic stbtic final Statistic UDP_ROUTE_TABLE_MESSAGES = 
+	pualid stbtic final Statistic UDP_ROUTE_TABLE_MESSAGES = 
 	    new UDPDroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella reset route table messages sent 
+	 * <tt>Statistid</tt> for Gnutella reset route table messages sent 
 	 * over TCP.
 	 */
-	pualic stbtic final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	pualid stbtic final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
 	    new TCPDroppedSentMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella patch route table messages sent 
+	 * <tt>Statistid</tt> for Gnutella patch route table messages sent 
 	 * over TCP.
 	 */
-	pualic stbtic final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	pualid stbtic final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
 	    new TCPDroppedSentMessageStatBytes();
 	    
     /**
-	 * <tt>Statistic</tt> for Gnutella route table messages sent 
-	 * over Multicast.
+	 * <tt>Statistid</tt> for Gnutella route table messages sent 
+	 * over Multidast.
 	 */
-	pualic stbtic final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
-	    new MulticastDroppedSentMessageStatBytes();	    
+	pualid stbtic final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new MultidastDroppedSentMessageStatBytes();	    
 }

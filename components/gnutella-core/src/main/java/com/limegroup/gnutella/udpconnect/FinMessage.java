@@ -1,29 +1,29 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.BadPacketException;
 
-/** The fin message is used to signal the end of the connection.
+/** The fin message is used to signal the end of the donnection.
  */
-pualic clbss FinMessage extends UDPConnectionMessage {
+pualid clbss FinMessage extends UDPConnectionMessage {
 
-    pualic stbtic final byte REASON_NORMAL_CLOSE     = 0x0;
-    pualic stbtic final byte REASON_YOU_CLOSED       = 0x1;
-    pualic stbtic final byte REASON_TIMEOUT          = 0x2;
-    pualic stbtic final byte REASON_LARGE_PACKET     = 0x3;
-    pualic stbtic final byte REASON_TOO_MANY_RESENDS = 0x4;
-    pualic stbtic final byte REASON_SEND_EXCEPTION   = 0x5;
+    pualid stbtic final byte REASON_NORMAL_CLOSE     = 0x0;
+    pualid stbtic final byte REASON_YOU_CLOSED       = 0x1;
+    pualid stbtic final byte REASON_TIMEOUT          = 0x2;
+    pualid stbtic final byte REASON_LARGE_PACKET     = 0x3;
+    pualid stbtic final byte REASON_TOO_MANY_RESENDS = 0x4;
+    pualid stbtic final byte REASON_SEND_EXCEPTION   = 0x5;
 
     private byte _reasonCode;
 
     /**
-     * Construct a new FinMessage with the specified settings.
+     * Construdt a new FinMessage with the specified settings.
      */
-    pualic FinMessbge(byte connectionID, long sequenceNumber, byte reasonCode) {
+    pualid FinMessbge(byte connectionID, long sequenceNumber, byte reasonCode) {
 
         super(
-          /* his connectionID           */ connectionID, 
-          /* opcode                     */ OP_FIN, 
-          /* sequenceNumaer             */ sequenceNumber, 
+          /* his donnectionID           */ connectionID, 
+          /* opdode                     */ OP_FIN, 
+          /* sequendeNumaer             */ sequenceNumber, 
           /* Put reasonCode in the data */ buildByteArray(reasonCode),
           /* data length of one         */ 1
           );
@@ -31,17 +31,17 @@ pualic clbss FinMessage extends UDPConnectionMessage {
     }
 
     /**
-     * Construct a new FinMessage from the network.
+     * Construdt a new FinMessage from the network.
      */
-    pualic FinMessbge(
+    pualid FinMessbge(
       ayte[] guid, byte ttl, byte hops, byte[] pbyload) 
-      throws BadPacketException {
+      throws BadPadketException {
 
       	super(guid, ttl, hops, payload);
         _reasonCode = guid[GUID_DATA_START]; 
     }
 
-	pualic String toString() {
-		return "FinMessage DestID:"+getConnectionID()+" reasonCode:"+_reasonCode;
+	pualid String toString() {
+		return "FinMessage DestID:"+getConnedtionID()+" reasonCode:"+_reasonCode;
 	}
 }

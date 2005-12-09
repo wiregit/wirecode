@@ -1,23 +1,23 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
 /**
  * Outline of a Throttle.
  */
-pualic interfbce Throttle {
+pualid interfbce Throttle {
     
     /**
-     * Interests this listener in receiving a bandwidthAvailable callback.
+     * Interests this listener in redeiving a bandwidthAvailable callback.
      */
-    pualic void interest(ThrottleListener writer);
+    pualid void interest(ThrottleListener writer);
     
     /**
      * Requests some data for writing from this Throttle.
      */
-    pualic int request();
+    pualid int request();
     
     /**
-     * Releases some unwritten requested data back to the throttle.
+     * Releases some unwritten requested data badk to the throttle.
      */
-    pualic void relebse(int amount);
+    pualid void relebse(int amount);
 }
     

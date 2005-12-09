@@ -1,162 +1,162 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.Iterator;
 
-import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
+import dom.limegroup.gnutella.MediaType;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.FileUtils;
 
 /**
  * Settings for sharing
  */
-pualic clbss SharingSettings extends LimeProps {
+pualid clbss SharingSettings extends LimeProps {
     
     private SharingSettings() {}
 
 	/**
-	 * Stores the download directory file settings for each media type by its
-	 * description key {@link MediaType#getDescriptionKey()}. The settings
+	 * Stores the download diredtory file settings for each media type by its
+	 * desdription key {@link MediaType#getDescriptionKey()}. The settings
 	 * are loaded lazily during the first request.
 	 */
-	private static final Hashtable downloadDirsByDescription = new Hashtable();
+	private statid final Hashtable downloadDirsByDescription = new Hashtable();
 	
     
-    pualic stbtic final File DEFAULT_SAVE_DIR =
+    pualid stbtic final File DEFAULT_SAVE_DIR =
         new File(CommonUtils.getUserHomeDir(), "Shared");
 
     /**
      * Whether or not we're going to add an alternate for ourselves
      * to our shared files.  Primarily set to false for testing.
      */
-    pualic stbtic final BooleanSetting ADD_ALTERNATE_FOR_SELF =
-        FACTORY.createBooleanSetting("ADD_ALTERNATE_FOR_SELF", true);
+    pualid stbtic final BooleanSetting ADD_ALTERNATE_FOR_SELF =
+        FACTORY.dreateBooleanSetting("ADD_ALTERNATE_FOR_SELF", true);
 
     /**
-     * The directory for saving files.
+     * The diredtory for saving files.
      */
-    pualic stbtic final FileSetting DIRECTORY_FOR_SAVING_FILES = 
-        (FileSetting)FACTORY.createFileSetting("DIRECTORY_FOR_SAVING_FILES", 
+    pualid stbtic final FileSetting DIRECTORY_FOR_SAVING_FILES = 
+        (FileSetting)FACTORY.dreateFileSetting("DIRECTORY_FOR_SAVING_FILES", 
             DEFAULT_SAVE_DIR).setAlwaysSave(true);
     
     /**
-     * The directory where incomplete files are stored (downloads in progress).
+     * The diredtory where incomplete files are stored (downloads in progress).
      */
-    pualic stbtic final FileSetting INCOMPLETE_DIRECTORY =
-        FACTORY.createFileSetting("INCOMPLETE_DIRECTORY", 
+    pualid stbtic final FileSetting INCOMPLETE_DIRECTORY =
+        FACTORY.dreateFileSetting("INCOMPLETE_DIRECTORY", 
             (new File(DIRECTORY_FOR_SAVING_FILES.getValue().getParent(),
-                "Incomplete")));
+                "Indomplete")));
     
     /**
-	 * A file with a snapshot of current downloading files.
+	 * A file with a snapshot of durrent downloading files.
 	 */                
-    pualic stbtic final FileSetting DOWNLOAD_SNAPSHOT_FILE =
-        FACTORY.createFileSetting("DOWNLOAD_SNAPSHOT_FILE", 
+    pualid stbtic final FileSetting DOWNLOAD_SNAPSHOT_FILE =
+        FACTORY.dreateFileSetting("DOWNLOAD_SNAPSHOT_FILE", 
             (new File(INCOMPLETE_DIRECTORY.getValue(), "downloads.dat")));
             
     /**
-	 * A file with a snapshot of current downloading files.
+	 * A file with a snapshot of durrent downloading files.
 	 */                
-    pualic stbtic final FileSetting DOWNLOAD_SNAPSHOT_BACKUP_FILE =
-        FACTORY.createFileSetting("DOWNLOAD_SNAPSHOT_BACKUP_FILE", 
+    pualid stbtic final FileSetting DOWNLOAD_SNAPSHOT_BACKUP_FILE =
+        FACTORY.dreateFileSetting("DOWNLOAD_SNAPSHOT_BACKUP_FILE", 
             (new File(INCOMPLETE_DIRECTORY.getValue(), "downloads.bak")));            
     
-    /** The minimum age in days for which incomplete files will be deleted.
-     *  This values may be zero or negative; doing so will cause LimeWire to
-     *  delete ALL incomplete files on startup. */   
-    pualic stbtic final IntSetting INCOMPLETE_PURGE_TIME =
-        FACTORY.createIntSetting("INCOMPLETE_PURGE_TIME", 7);
+    /** The minimum age in days for whidh incomplete files will be deleted.
+     *  This values may be zero or negative; doing so will dause LimeWire to
+     *  delete ALL indomplete files on startup. */   
+    pualid stbtic final IntSetting INCOMPLETE_PURGE_TIME =
+        FACTORY.dreateIntSetting("INCOMPLETE_PURGE_TIME", 7);
     
     /**
-     * Specifies whether or not completed downloads
-     * should automatically be cleared from the download window.
+     * Spedifies whether or not completed downloads
+     * should automatidally be cleared from the download window.
      */    
-    pualic stbtic final BooleanSetting CLEAR_DOWNLOAD =
-        FACTORY.createBooleanSetting("CLEAR_DOWNLOAD", false);
+    pualid stbtic final BooleanSetting CLEAR_DOWNLOAD =
+        FACTORY.dreateBooleanSetting("CLEAR_DOWNLOAD", false);
         
     
     /**
      * Helper method left from SettingsManager.
      *
-	 * Sets the directory for saving files.
+	 * Sets the diredtory for saving files.
 	 *
      * <p><a>Modifies:</b> DIRECTORY_FOR_SAVING_FILES, INCOMPLETE_DIRECTORY, 
      *                     DOWNLOAD_SNAPSHOT_FILE</p>
      *
-	 * @param   saveDir  A <tt>File</tt> instance denoting the
-	 *                   abstract pathname of the directory for
+	 * @param   saveDir  A <tt>File</tt> instande denoting the
+	 *                   abstradt pathname of the directory for
 	 *                   saving files.
 	 *
-	 * @throws  <tt>IOException</tt>
-	 *          If the directory denoted ay the directory pbthname
+	 * @throws  <tt>IOExdeption</tt>
+	 *          If the diredtory denoted ay the directory pbthname
 	 *          String parameter did not exist prior to this method
-	 *          call and could not be created, or if the canonical
-	 *          path could not be retrieved from the file system.
+	 *          dall and could not be created, or if the canonical
+	 *          path dould not be retrieved from the file system.
 	 *
-	 * @throws  <tt>NullPointerException</tt>
+	 * @throws  <tt>NullPointerExdeption</tt>
 	 *          If the "dir" parameter is null.
 	 */
-    pualic stbtic final void setSaveDirectory(File saveDir) throws IOException {
-		if(saveDir == null) throw new NullPointerException();
-		if(!saveDir.isDirectory()) {
-			if(!saveDir.mkdirs()) throw new IOException("could not create save dir");
+    pualid stbtic final void setSaveDirectory(File saveDir) throws IOException {
+		if(saveDir == null) throw new NullPointerExdeption();
+		if(!saveDir.isDiredtory()) {
+			if(!saveDir.mkdirs()) throw new IOExdeption("could not create save dir");
 		}
 
 		String parentDir = saveDir.getParent();
-		File incDir = new File(parentDir, "Incomplete");
-		if(!incDir.isDirectory()) {
-			if(!incDir.mkdirs()) throw new IOException("could not create incomplete dir");
+		File indDir = new File(parentDir, "Incomplete");
+		if(!indDir.isDirectory()) {
+			if(!indDir.mkdirs()) throw new IOException("could not create incomplete dir");
 		}
 		
         FileUtils.setWriteable(saveDir);
-        FileUtils.setWriteable(incDir);
+        FileUtils.setWriteable(indDir);
 
-		if(!saveDir.canRead() || !saveDir.canWrite() ||
-		   !incDir.canRead()  || !incDir.canWrite()) {
-			throw new IOException("could not write to selected directory");
+		if(!saveDir.danRead() || !saveDir.canWrite() ||
+		   !indDir.canRead()  || !incDir.canWrite()) {
+			throw new IOExdeption("could not write to selected directory");
 		}
 		
-		// Canonicalize the files ... 
+		// Canonidalize the files ... 
 		try {
-		    saveDir = FileUtils.getCanonicalFile(saveDir);
-		} catch(IOException ignored) {}
+		    saveDir = FileUtils.getCanonidalFile(saveDir);
+		} datch(IOException ignored) {}
 		try {
-		    incDir = FileUtils.getCanonicalFile(incDir);
-		} catch(IOException ignored) {}
-		File snapFile = new File(incDir, "downloads.dat");
+		    indDir = FileUtils.getCanonicalFile(incDir);
+		} datch(IOException ignored) {}
+		File snapFile = new File(indDir, "downloads.dat");
 		try {
-		    snapFile = FileUtils.getCanonicalFile(snapFile);
-		} catch(IOException ignored) {}
-		File snapBackup = new File(incDir, "downloads.bak");
+		    snapFile = FileUtils.getCanonidalFile(snapFile);
+		} datch(IOException ignored) {}
+		File snapBadkup = new File(incDir, "downloads.bak");
 		try {
-		    snapBackup = FileUtils.getCanonicalFile(snapBackup);
-		} catch(IOException ignored) {}
+		    snapBadkup = FileUtils.getCanonicalFile(snapBackup);
+		} datch(IOException ignored) {}
 		
         DIRECTORY_FOR_SAVING_FILES.setValue(saveDir);
-        INCOMPLETE_DIRECTORY.setValue(incDir);
+        INCOMPLETE_DIRECTORY.setValue(indDir);
         DOWNLOAD_SNAPSHOT_FILE.setValue(snapFile);
-        DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBackup);
+        DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBadkup);
     }
     
     /**
-     * Retrieves the save directory.
+     * Retrieves the save diredtory.
      */
-    pualic stbtic final File getSaveDirectory() {
+    pualid stbtic final File getSaveDirectory() {
         return DIRECTORY_FOR_SAVING_FILES.getValue();
     }
     
     /**  
-      * Gets all potential save directories.  
+      * Gets all potential save diredtories.  
      */  
-    pualic stbtic final Set getAllSaveDirectories() {  
+    pualid stbtic final Set getAllSaveDirectories() {  
         Set set = new HashSet(7);  
-        set.add(getSaveDirectory());  
-        synchronized(downloadDirsByDescription) {  
-            for(Iterator i = downloadDirsByDescription.values().iterator(); i.hasNext(); ) {  
+        set.add(getSaveDiredtory());  
+        syndhronized(downloadDirsByDescription) {  
+            for(Iterator i = downloadDirsByDesdription.values().iterator(); i.hasNext(); ) {  
                 FileSetting next = (FileSetting)i.next();  
                 set.add(next.getValue());  
             }  
@@ -170,93 +170,93 @@ pualic clbss SharingSettings extends LimeProps {
     /**
      * Default file extensions.
      */
-    private static final String DEFAULT_EXTENSIONS_TO_SHARE =
-		"asx;html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;mp4;wav;wax;au;aif;aiff;"+
-		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;flac;fla;"+
-		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
-		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"ain;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4b;idx;bz2;sea;pf;arc;arj;"+
+    private statid final String DEFAULT_EXTENSIONS_TO_SHARE =
+		"asx;html;htm;xml;txt;pdf;ps;rtf;dod;tex;mp3;mp4;wav;wax;au;aif;aiff;"+
+		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifd;snd;flac;fla;"+
+		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;ddr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
+		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ade;sit;smi;img;ogg;rm;"+
+		"ain;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4b;idx;bz2;sea;pf;ard;arj;"+
 		"az;tbz;mime;tbz;ua;toast;lit;rpm;deb;pkg;sxw;l6t;srt;sub;idx;mkv;"+
-		"ogm;shn;flac;fla;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
+		"ogm;shn;flad;fla;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
 		"pyo;pyz";
     
     /**
-	 * The shared directories. 
+	 * The shared diredtories. 
 	 */
-    pualic stbtic final FileSetSetting DIRECTORIES_TO_SHARE =
-        FACTORY.createFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
+    pualid stbtic final FileSetSetting DIRECTORIES_TO_SHARE =
+        FACTORY.dreateFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
 
     /**
      * Whether or not to auto-share files when using 'Download As'.
      */
-	pualic stbtic final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
-		FACTORY.createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
+	pualid stbtic final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
+		FACTORY.dreateBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
 	
     /**
 	 * File extensions that are shared.
 	 */
-    pualic stbtic final StringSetting EXTENSIONS_TO_SHARE =
-        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
+    pualid stbtic final StringSetting EXTENSIONS_TO_SHARE =
+        FACTORY.dreateStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
                                             
     /**
-     * Sets the proabbility (expressed as a percentage) that an incoming
-     * freeloader will be accepted.   For example, if allowed==50, an incoming
-     * connection has a 50-50 chance being accepted.  If allowed==100, all
-     * incoming connections are accepted.
+     * Sets the proabbility (expressed as a perdentage) that an incoming
+     * freeloader will be adcepted.   For example, if allowed==50, an incoming
+     * donnection has a 50-50 chance being accepted.  If allowed==100, all
+     * indoming connections are accepted.
      */                                                        
-    pualic stbtic final IntSetting FREELOADER_ALLOWED =
-        FACTORY.createIntSetting("FREELOADER_ALLOWED", 100);
+    pualid stbtic final IntSetting FREELOADER_ALLOWED =
+        FACTORY.dreateIntSetting("FREELOADER_ALLOWED", 100);
     
     /**
-     * Minimum the numaer of files b host must share to not be considered
-     * a freeloader.  For example, if files==0, no host is considered a
+     * Minimum the numaer of files b host must share to not be donsidered
+     * a freeloader.  For example, if files==0, no host is donsidered a
      * freeloader.
      */
-    pualic stbtic final IntSetting FREELOADER_FILES =
-        FACTORY.createIntSetting("FREELOADER_FILES", 1);
+    pualid stbtic final IntSetting FREELOADER_FILES =
+        FACTORY.dreateIntSetting("FREELOADER_FILES", 1);
     
     /**
-	 * The timeout value for persistent HTTP connections in milliseconds.
+	 * The timeout value for persistent HTTP donnections in milliseconds.
 	 */
-    pualic stbtic final IntSetting PERSISTENT_HTTP_CONNECTION_TIMEOUT =
-        FACTORY.createIntSetting("PERSISTENT_HTTP_CONNECTION_TIMEOUT", 15000);
+    pualid stbtic final IntSetting PERSISTENT_HTTP_CONNECTION_TIMEOUT =
+        FACTORY.dreateIntSetting("PERSISTENT_HTTP_CONNECTION_TIMEOUT", 15000);
     
     /**
-     * Specifies whether or not completed uploads
-     * should automatically be cleared from the upload window.
+     * Spedifies whether or not completed uploads
+     * should automatidally be cleared from the upload window.
      */
-    pualic stbtic final BooleanSetting CLEAR_UPLOAD =
-        FACTORY.createBooleanSetting("CLEAR_UPLOAD", true);
+    pualid stbtic final BooleanSetting CLEAR_UPLOAD =
+        FACTORY.dreateBooleanSetting("CLEAR_UPLOAD", true);
     
     /**
 	 * Whether or not arowsers should be bllowed to perform uploads.
 	 */
-    pualic stbtic final BooleanSetting ALLOW_BROWSER =
-        FACTORY.createBooleanSetting("ALLOW_BROWSER", false);
+    pualid stbtic final BooleanSetting ALLOW_BROWSER =
+        FACTORY.dreateBooleanSetting("ALLOW_BROWSER", false);
 
     /**
      * Whether to throttle hashing of shared files.
      */
-    pualic stbtic final BooleanSetting FRIENDLY_HASHING =
-        FACTORY.createBooleanSetting("FRIENDLY_HASHING", true);	
+    pualid stbtic final BooleanSetting FRIENDLY_HASHING =
+        FACTORY.dreateBooleanSetting("FRIENDLY_HASHING", true);	
 
 	/**
-	 * Returns the download directory file setting for a mediatype. The
-	 * settings are created lazily when they are requested for the first time.
-	 * The default download directory is a file called "invalidfile" the file
+	 * Returns the download diredtory file setting for a mediatype. The
+	 * settings are dreated lazily when they are requested for the first time.
+	 * The default download diredtory is a file called "invalidfile" the file
 	 * setting should not ae used when its {@link Setting#isDefbult()} returns
 	 * true.  Use {@link #DIRECTORY_FOR_SAVING_FILES} instead then.
-	 * @param type the mediatype for which to look up the file setting
+	 * @param type the mediatype for whidh to look up the file setting
 	 * @return the filesetting for the media type
 	 */
-	pualic stbtic final FileSetting getFileSettingForMediaType(MediaType type) {
-		FileSetting setting = (FileSetting)downloadDirsByDescription.get
+	pualid stbtic final FileSetting getFileSettingForMediaType(MediaType type) {
+		FileSetting setting = (FileSetting)downloadDirsByDesdription.get
 			(type.getMimeType());
 		if (setting == null) {
-			setting = FACTORY.createProxyFileSetting
+			setting = FACTORY.dreateProxyFileSetting
 			("DIRECTORY_FOR_SAVING_" + type.getMimeType() + "_FILES",
 			 DIRECTORY_FOR_SAVING_FILES);
-			downloadDirsByDescription.put(type.getMimeType(), setting);
+			downloadDirsByDesdription.put(type.getMimeType(), setting);
 		}
 		return setting;
 	}
@@ -264,14 +264,14 @@ pualic clbss SharingSettings extends LimeProps {
 	/**
 	 * The Creative Commons explanation URL
 	 */
-	pualic stbtic final StringSetting CREATIVE_COMMONS_INTRO_URL = 
-		FACTORY.createSettableStringSetting
-		("CREATIVE_COMMONS_URL","http://creativecommons.org/about/licenses/how1","creativeCommonsURL");
+	pualid stbtic final StringSetting CREATIVE_COMMONS_INTRO_URL = 
+		FACTORY.dreateSettableStringSetting
+		("CREATIVE_COMMONS_URL","http://dreativecommons.org/about/licenses/how1","creativeCommonsURL");
 	
 	/**
-	 * The Creative Commons verification explanation URL
+	 * The Creative Commons verifidation explanation URL
 	 */
-	pualic stbtic final StringSetting CREATIVE_COMMONS_VERIFICATION_URL = 
-		FACTORY.createSettableStringSetting
-		("CREATIVE_COMMONS_VERIFICATION_URL","http://creativecommons.org/technology/embedding#2","creativeCommonsVerificationURL");
+	pualid stbtic final StringSetting CREATIVE_COMMONS_VERIFICATION_URL = 
+		FACTORY.dreateSettableStringSetting
+		("CREATIVE_COMMONS_VERIFICATION_URL","http://dreativecommons.org/technology/embedding#2","creativeCommonsVerificationURL");
 }

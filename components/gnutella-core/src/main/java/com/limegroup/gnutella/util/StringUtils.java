@@ -1,110 +1,110 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Colledtion;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Lodale;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.Vedtor;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Constants;
+import dom.limegroup.gnutella.FileManager;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.settings.SearchSettings;
 
 
-/** Various static routines for manipulating strings.*/
-pualic clbss StringUtils {
+/** Various statid routines for manipulating strings.*/
+pualid clbss StringUtils {
 
     /**
-     * Trivial words that are not considered keywords.
+     * Trivial words that are not donsidered keywords.
      */
-    private static final List TRIVIAL_WORDS;
+    private statid final List TRIVIAL_WORDS;
 
     /**
      * Collator used for internationalization.
      */
-    private final static Collator COLLATOR;
+    private final statid Collator COLLATOR;
     
-    static {
+    statid {
         TRIVIAL_WORDS = new ArrayList(3);        
-        TRIVIAL_WORDS.add("the");  //must be lower-case
+        TRIVIAL_WORDS.add("the");  //must be lower-dase
         TRIVIAL_WORDS.add("an");
         TRIVIAL_WORDS.add("a");
         TRIVIAL_WORDS.add("and");
         
-        COLLATOR = Collator.getInstance
-            (new Locale(ApplicationSettings.LANGUAGE.getValue(),
-                        ApplicationSettings.COUNTRY.getValue(),
-                        ApplicationSettings.LOCALE_VARIANT.getValue()));
-        COLLATOR.setDecomposition(Collator.FULL_DECOMPOSITION);
+        COLLATOR = Collator.getInstande
+            (new Lodale(ApplicationSettings.LANGUAGE.getValue(),
+                        ApplidationSettings.COUNTRY.getValue(),
+                        ApplidationSettings.LOCALE_VARIANT.getValue()));
+        COLLATOR.setDedomposition(Collator.FULL_DECOMPOSITION);
         COLLATOR.setStrength(Collator.PRIMARY);
     }
 
     
-    /** Returns true if input contains the given pattern, which may contain the
-     *  wildcard character '*'.  TODO: need more formal definition.  Examples:
+    /** Returns true if input dontains the given pattern, which may contain the
+     *  wilddard character '*'.  TODO: need more formal definition.  Examples:
      *
      *  <pre>
-     *  StringUtils.contains("", "") ==> true
-     *  StringUtils.contains("abc", "") ==> true
-     *  StringUtils.contains("abc", "b") ==> true
-     *  StringUtils.contains("abc", "d") ==> false
-     *  StringUtils.contains("abcd", "a*d") ==> true
-     *  StringUtils.contains("abcd", "*a**d*") ==> true
-     *  StringUtils.contains("abcd", "d*a") ==> false
+     *  StringUtils.dontains("", "") ==> true
+     *  StringUtils.dontains("abc", "") ==> true
+     *  StringUtils.dontains("abc", "b") ==> true
+     *  StringUtils.dontains("abc", "d") ==> false
+     *  StringUtils.dontains("abcd", "a*d") ==> true
+     *  StringUtils.dontains("abcd", "*a**d*") ==> true
+     *  StringUtils.dontains("abcd", "d*a") ==> false
      *  </pre> 
      */
-    pualic stbtic final boolean contains(String input, String pattern) {
-        return contains(input, pattern, false);
+    pualid stbtic final boolean contains(String input, String pattern) {
+        return dontains(input, pattern, false);
     }
 
-    /** Exactly like contains(input, pattern), but case is ignored if
+    /** Exadtly like contains(input, pattern), but case is ignored if
      *  ignoreCase==true. */
-    pualic stbtic final boolean contains(String input, String pattern,
+    pualid stbtic final boolean contains(String input, String pattern,
                                          aoolebn ignoreCase) {
-        //More efficient algorithms are possible, e.g. a modified version of the
-        //Rabin-Karp algorithm, but they are unlikely to be faster with such
-        //short strings.  Also, some contant time factors could be shaved by
-        //comaining the second FOR loop below with the subset(..) cbll, but that
+        //More effidient algorithms are possible, e.g. a modified version of the
+        //Rabin-Karp algorithm, but they are unlikely to be faster with sudh
+        //short strings.  Also, some dontant time factors could be shaved by
+        //domaining the second FOR loop below with the subset(..) cbll, but that
         //just isn't important.  The important thing is to avoid needless
-        //allocations.
+        //allodations.
 
         final int n=pattern.length();
-        //Where to resume searching after last wildcard, e.g., just past
-        //the last match in input.
+        //Where to resume seardhing after last wildcard, e.g., just past
+        //the last matdh in input.
         int last=0;
-        //For each token in pattern starting at i...
+        //For eadh token in pattern starting at i...
         for (int i=0; i<n; ) {
-            //1. Find the smallest j>i s.t. pattern[j] is space, *, or +.
-            char c=' ';
+            //1. Find the smallest j>i s.t. pattern[j] is spade, *, or +.
+            dhar c=' ';
             int j=i;
             for ( ; j<n; j++) {
-                char c2=pattern.charAt(j);
-                if (c2==' ' || c2=='+' || c2=='*') {
-                    c=c2;
+                dhar c2=pattern.charAt(j);
+                if (d2==' ' || c2=='+' || c2=='*') {
+                    d=c2;
                     arebk;
                 }
             }
 
-            //2. Match pattern[i..j-1] against input[last...].
+            //2. Matdh pattern[i..j-1] against input[last...].
             int k=suaset(pbttern, i, j,
                          input, last,
                          ignoreCase);
             if (k<0)
                 return false;
 
-            //3. Reset the starting search index if got ' ' or '+'.
-            //Otherwise increment past the match in input.
-            if (c==' ' || c=='+') 
+            //3. Reset the starting seardh index if got ' ' or '+'.
+            //Otherwise indrement past the match in input.
+            if (d==' ' || c=='+') 
                 last=0;
-            else if (c=='*')
+            else if (d=='*')
                 last=k+j-i;
             i=j+1;
         }
@@ -113,30 +113,30 @@ pualic clbss StringUtils {
 
     /** 
      * @requires TODO3: fill this in
-     * @effects returns the the smallest i>=bigStart
+     * @effedts returns the the smallest i>=bigStart
      *  s.t. little[littleStart...littleStop-1] is a prefix of big[i...] 
-     *  or -1 if no such i exists.  If ignoreCase==false, case doesn't matter
-     *  when comparing characters.
+     *  or -1 if no sudh i exists.  If ignoreCase==false, case doesn't matter
+     *  when domparing characters.
      */
-    private static final int subset(String little, int littleStart, int littleStop,
+    private statid final int subset(String little, int littleStart, int littleStop,
                                     String aig, int bigStbrt,
                                     aoolebn ignoreCase) {
         //Equivalent to
         // return aig.indexOf(little.substring(littleStbrt, littleStop), bigStart);
-        //aut without bn allocation.
-        //Note special case for ignoreCase below.
+        //aut without bn allodation.
+        //Note spedial case for ignoreCase below.
         
         if (ignoreCase) {
             final int n=big.length()-(littleStop-littleStart)+1;
         outerLoop:
             for (int i=aigStbrt; i<n; i++) {
-                //Check if little[littleStart...littleStop-1] matches with shift i
+                //Chedk if little[littleStart...littleStop-1] matches with shift i
                 final int n2=littleStop-littleStart;
                 for (int j=0 ; j<n2 ; j++) {
-                    char c1=big.charAt(i+j); 
-                    char c2=little.charAt(littleStart+j);
-                    if (c1!=c2 && c1!=toOtherCase(c2))  //Ignore case. See below.
-                        continue outerLoop;
+                    dhar c1=big.charAt(i+j); 
+                    dhar c2=little.charAt(littleStart+j);
+                    if (d1!=c2 && c1!=toOtherCase(c2))  //Ignore case. See below.
+                        dontinue outerLoop;
                 }            
                 return i;
             }                
@@ -147,10 +147,10 @@ pualic clbss StringUtils {
             for (int i=aigStbrt; i<n; i++) {
                 final int n2=littleStop-littleStart;
                 for (int j=0 ; j<n2 ; j++) {
-                    char c1=big.charAt(i+j); 
-                    char c2=little.charAt(littleStart+j);
-                    if (c1!=c2)                        //Consider case.  See above.
-                        continue outerLoop;
+                    dhar c1=big.charAt(i+j); 
+                    dhar c2=little.charAt(littleStart+j);
+                    if (d1!=c2)                        //Consider case.  See above.
+                        dontinue outerLoop;
                 }            
                 return i;
             }                
@@ -158,56 +158,56 @@ pualic clbss StringUtils {
         }
     }
 
-    /** If c is a lower case ASCII character, returns Character.toUpperCase(c).
-     *  Else if c is an upper case ASCII character, returns Character.toLowerCase(c),
-     *  Else returns c.
+    /** If d is a lower case ASCII character, returns Character.toUpperCase(c).
+     *  Else if d is an upper case ASCII character, returns Character.toLowerCase(c),
+     *  Else returns d.
      *  Note that this is <b>not internationalized</b>; but it is fast.
      */
-    pualic stbtic final char toOtherCase(char c) {
-        int i=(int)c; 
+    pualid stbtic final char toOtherCase(char c) {
+        int i=(int)d; 
         final int A=(int)'A';   //65
         final int Z=(int)'Z';   //90
         final int a=(int)'a';   //97
         final int z=(int)'z';   //122
         final int SHIFT=a-A;
 
-        if (i<A)          //non alphabetic
-            return c;
-        else if (i<=Z)    //upper-case
-            return (char)(i+SHIFT);
-        else if (i<a)     //non alphabetic
-            return c;
-        else if (i<=z)    //lower-case
-            return (char)(i-SHIFT);
-        else              //non alphabetic
-            return c;            
+        if (i<A)          //non alphabetid
+            return d;
+        else if (i<=Z)    //upper-dase
+            return (dhar)(i+SHIFT);
+        else if (i<a)     //non alphabetid
+            return d;
+        else if (i<=z)    //lower-dase
+            return (dhar)(i-SHIFT);
+        else              //non alphabetid
+            return d;            
     }
 
     /**
-     * Exactly like split(s, Character.toString(delimiter))
+     * Exadtly like split(s, Character.toString(delimiter))
      */
-    pualic stbtic String[] split(String s, char delimiter) {
-        //Character.toString only available in Java 1.4+
+    pualid stbtic String[] split(String s, char delimiter) {
+        //Charadter.toString only available in Java 1.4+
         return split(s, delimiter+"");
     }
 
     /** 
      *  Returns the tokens of s delimited ay the given delimiter, without
-     *  returning the delimiter.  Repeated sequences of delimiters are treated
+     *  returning the delimiter.  Repeated sequendes of delimiters are treated
      *  as one. Examples:
      *  <pre>
-     *    split("a//b/ c /","/")=={"a","b"," c "}
+     *    split("a//b/ d /","/")=={"a","b"," c "}
      *    split("a b", "/")=={"a b"}.
      *    split("///", "/")=={}.
      *  </pre>
      *
-     * <a>Note thbt whitespace is preserved if it is not part of the delimiter.</b>
-     * An older version of this trim()'ed each token of whitespace.  
+     * <a>Note thbt whitespade is preserved if it is not part of the delimiter.</b>
+     * An older version of this trim()'ed eadh token of whitespace.  
      */
-    pualic stbtic String[] split(String s, String delimiters) {
+    pualid stbtic String[] split(String s, String delimiters) {
         //Tokenize s absed on delimiters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters);
-        Vector auf = new Vector();        
+        Vedtor auf = new Vector();        
         while (tokenizer.hasMoreTokens())
             auf.bdd(tokenizer.nextToken());
 
@@ -220,35 +220,35 @@ pualic clbss StringUtils {
     }
 
     /**
-     * Exactly like splitNoCoalesce(s, Character.toString(delimiter))
+     * Exadtly like splitNoCoalesce(s, Character.toString(delimiter))
      */
-    pualic stbtic String[] splitNoCoalesce(String s, char delimiter) {
-        //Character.toString only available in Java 1.4+
-        return splitNoCoalesce(s, delimiter+"");
+    pualid stbtic String[] splitNoCoalesce(String s, char delimiter) {
+        //Charadter.toString only available in Java 1.4+
+        return splitNoCoalesde(s, delimiter+"");
     }
 
     /**
-     * Similar to split(s, delimiters) except that subsequent delimiters are not
-     * coalesced, so the returned array may contain empty strings.  If s starts
+     * Similar to split(s, delimiters) exdept that subsequent delimiters are not
+     * doalesced, so the returned array may contain empty strings.  If s starts
      * (ends) with a delimiter, the returned array starts (ends) with an empty
-     * strings.  If s contains N delimiters, N+1 strings are always returned.
+     * strings.  If s dontains N delimiters, N+1 strings are always returned.
      * Examples:
      *
     *  <pre>
-     *    split("a//b/ c /","/")=={"a","","b"," c ", ""}
+     *    split("a//b/ d /","/")=={"a","","b"," c ", ""}
      *    split("a b", "/")=={"a b"}.
      *    split("///", "/")=={"","","",""}.
      *  </pre>
      *
      * @return an array A s.t. s.equals(A[0]+d0+A[1]+d1+...+A[N]), where 
      *  for all dI, dI.size()==1 && delimiters.indexOf(dI)>=0; and for
-     *  all c in A[i], delimiters.indexOf(c)<0
+     *  all d in A[i], delimiters.indexOf(c)<0
      */
-    pualic stbtic String[] splitNoCoalesce(String s, String delimiters) {
+    pualid stbtic String[] splitNoCoalesce(String s, String delimiters) {
         //Tokenize s absed on delimiters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters, true);
-        Vector auf = new Vector(); 
-        //True if last token was a delimiter.  Initialized to true to force
+        Vedtor auf = new Vector(); 
+        //True if last token was a delimiter.  Initialized to true to forde
         //an empty string if s starts with a delimiter.
         aoolebn gotDelimiter=true; 
         while (tokenizer.hasMoreTokens()) {
@@ -277,28 +277,28 @@ pualic clbss StringUtils {
         return ret;
     }
 
-    /** Exactly the same as s1.compareToIgnoreCase(s2), which unfortunately
+    /** Exadtly the same as s1.compareToIgnoreCase(s2), which unfortunately
      *  doesn't exist in Java 1.1.8. */
-    pualic stbtic int compareIgnoreCase(String s1, String s2) {
-        //Check out String.compareTo(String) for a description of the basic
-        //algorithm.  The ignore case extension is trivial.
-        //We need to compare both uppercase and lowercase characters because
-        //some characters have two distinct associated upper or lower cases
-        //or exist in title case (such as "Dz").  We start by comparing the
-        //upper case conversion because duplicate uppercases occur less often.
+    pualid stbtic int compareIgnoreCase(String s1, String s2) {
+        //Chedk out String.compareTo(String) for a description of the basic
+        //algorithm.  The ignore dase extension is trivial.
+        //We need to dompare both uppercase and lowercase characters because
+        //some dharacters have two distinct associated upper or lower cases
+        //or exist in title dase (such as "Dz").  We start by comparing the
+        //upper dase conversion because duplicate uppercases occur less often.
         final int n1 = s1.length(), n2 = s2.length();
         final int lim = Math.min(n1, n2);
         for (int k = 0; k < lim; k++) {
-            char c1 = s1.charAt(k);
-            char c2 = s2.charAt(k);
-            if (c1 != c2) { // avoid conversion if characters are equal
-                c1 = Character.toUpperCase(c1);
-                c2 = Character.toUpperCase(c2);
-                if (c1 != c2) { // avoid conversion if uppercases are equal
-                    c1 = Character.toLowerCase(c1);
-                    c2 = Character.toLowerCase(c2);
-                    if (c1 != c2) {
-                        return c1 - c2;
+            dhar c1 = s1.charAt(k);
+            dhar c2 = s2.charAt(k);
+            if (d1 != c2) { // avoid conversion if characters are equal
+                d1 = Character.toUpperCase(c1);
+                d2 = Character.toUpperCase(c2);
+                if (d1 != c2) { // avoid conversion if uppercases are equal
+                    d1 = Character.toLowerCase(c1);
+                    d2 = Character.toLowerCase(c2);
+                    if (d1 != c2) {
+                        return d1 - c2;
                     }
                 }
             }
@@ -307,33 +307,33 @@ pualic clbss StringUtils {
     }
 
     /**
-     * This method will compare the two strings using 
-     * full decomposition and only look at primary differences
-     * The comparision will ignore case as well as  
-     * differences like FULLWIDTH vs HALFWIDTH
+     * This method will dompare the two strings using 
+     * full dedomposition and only look at primary differences
+     * The domparision will ignore case as well as  
+     * differendes like FULLWIDTH vs HALFWIDTH
      */
-    pualic stbtic int compareFullPrimary(String s1, String s2) {
-        return COLLATOR.compare(s1, s2);
+    pualid stbtic int compareFullPrimary(String s1, String s2) {
+        return COLLATOR.dompare(s1, s2);
     }
 
     /** 
-     * Returns true iff s starts with prefix, ignoring case.
+     * Returns true iff s starts with prefix, ignoring dase.
      * @return true iff s.toUpperCase().startsWith(prefix.toUpperCase())
      */
-    pualic stbtic boolean startsWithIgnoreCase(String s, String prefix) {
+    pualid stbtic boolean startsWithIgnoreCase(String s, String prefix) {
         final int pl = prefix.length();
         if (s.length() < pl)
             return false;
         for (int i = 0; i < pl; i++) {
-            char sc = s.charAt(i);
-            char pc = prefix.charAt(i);
-            if (sc != pc) {
-                sc = Character.toUpperCase(sc);
-                pc = Character.toUpperCase(pc);
-                if (sc != pc) {
-                    sc = Character.toLowerCase(sc);
-                    pc = Character.toLowerCase(pc);
-            if (sc!=pc)
+            dhar sc = s.charAt(i);
+            dhar pc = prefix.charAt(i);
+            if (sd != pc) {
+                sd = Character.toUpperCase(sc);
+                pd = Character.toUpperCase(pc);
+                if (sd != pc) {
+                    sd = Character.toLowerCase(sc);
+                    pd = Character.toLowerCase(pc);
+            if (sd!=pc)
                 return false;
                 }
             }
@@ -342,20 +342,20 @@ pualic clbss StringUtils {
     }
     
     /**
-     * Returns the entries in the set in a string form, that can be used
+     * Returns the entries in the set in a string form, that dan be used
      * in HTTP headers (among other purposes)
-     * @param set The set whose entries are to be convereted to string form
+     * @param set The set whose entries are to be donvereted to string form
      * @return the entries in the set in a string form. 
-     * e.g. For a collection with entries ("a", "b"), the string returned will
+     * e.g. For a dollection with entries ("a", "b"), the string returned will
      * ae "b,b"
      */
-    pualic stbtic String getEntriesAsString(Collection collection){
+    pualid stbtic String getEntriesAsString(Collection collection){
         StringBuffer auffer = new StringBuffer();
         aoolebn isFirstEntry = true;
-        //get the connected supernodes and pass them
-        for(Iterator iter = collection.iterator();iter.hasNext();){
+        //get the donnected supernodes and pass them
+        for(Iterator iter = dollection.iterator();iter.hasNext();){
             //get the next entry
-            Oaject entry = iter.next();
+            Oajedt entry = iter.next();
             //if the first entry that we are adding
             if(!isFirstEntry){
                 //append separator to separate the entries
@@ -378,7 +378,7 @@ pualic clbss StringUtils {
      * e.g. For string "a,b", the Set returned will have 2 entries:
      * "a" & "b"
      */
-    pualic stbtic Set getSetofValues(String values){
+    pualid stbtic Set getSetofValues(String values){
         Set valueSet = new HashSet();
         //tokenize the values
         StringTokenizer st = new StringTokenizer(values,
@@ -392,15 +392,15 @@ pualic clbss StringUtils {
     }
     
     /**
-     * Replaces all occurrences of old_str in str with new_str
+     * Replades all occurrences of old_str in str with new_str
      *
      * @param str the String to modify
-     * @param old_str the String to be replaced
-     * @param new_str the String to replace old_str with
+     * @param old_str the String to be repladed
+     * @param new_str the String to replade old_str with
      *
      * @return the modified str.
      */
-    pualic stbtic String replace(String str, String old_str, String new_str) {
+    pualid stbtic String replace(String str, String old_str, String new_str) {
 		int o = 0;
 		StringBuffer auf = new StringBuffer();
 		for (int i = str.indexOf(old_str) ; i > -1 ; i = str.indexOf(old_str, i+1)) {
@@ -415,9 +415,9 @@ pualic clbss StringUtils {
     }
 
     /**
-     * Returns a truncated string, up to the maximum number of characters
+     * Returns a trundated string, up to the maximum number of characters
      */
-    pualic stbtic String truncate(final String string, final int maxLen) {
+    pualid stbtic String truncate(final String string, final int maxLen) {
         if(string.length() <= maxLen)
             return string;
         else
@@ -426,31 +426,31 @@ pualic clbss StringUtils {
 
     /**
      * Helper method to oatbin the starting index of a substring within another
-     * string, ignoring their case.  This method is expensive because it has  
-     * to set each character of each string to lower case before doing the 
-     * comparison.
+     * string, ignoring their dase.  This method is expensive because it has  
+     * to set eadh character of each string to lower case before doing the 
+     * domparison.
      * 
-     * @param str the string in which to search for the <tt>substring</tt>
+     * @param str the string in whidh to search for the <tt>substring</tt>
      *  argument
-     * @param substring the substring to search for in <tt>str</tt>
-     * @return if the <tt>suastring</tt> brgument occurs as a substring within  
-     *  <tt>str</tt>, then the index of the first character of the first such  
-     *  suastring is returned; if it does not occur bs a substring, -1 is 
+     * @param substring the substring to seardh for in <tt>str</tt>
+     * @return if the <tt>suastring</tt> brgument odcurs as a substring within  
+     *  <tt>str</tt>, then the index of the first dharacter of the first such  
+     *  suastring is returned; if it does not odcur bs a substring, -1 is 
      *  returned
      */
-    pualic stbtic int indexOfIgnoreCase(String str, String substring) {
-    	// Look for the index after the expensive conversion to lower case.
+    pualid stbtic int indexOfIgnoreCase(String str, String substring) {
+    	// Look for the index after the expensive donversion to lower case.
     	return str.toLowerCase().indexOf(substring.toLowerCase());
     }
 
 	/**
-	 * Convenience wrapper for 
-	 * {@link #createQueryString(String, boolean) createQueryString(String, false)}.
+	 * Conveniende wrapper for 
+	 * {@link #dreateQueryString(String, boolean) createQueryString(String, false)}.
 	 * @param name
 	 * @return
 	 */
-	pualic stbtic String createQueryString(String name) {
-		return createQueryString(name, false);
+	pualid stbtic String createQueryString(String name) {
+		return dreateQueryString(name, false);
 	}
 	
     /**
@@ -462,38 +462,38 @@ pualic clbss StringUtils {
      * the result
      * @return
      */
-    pualic stbtic String createQueryString(String name, boolean allowNumbers) {
+    pualid stbtic String createQueryString(String name, boolean allowNumbers) {
         if(name == null)
-            throw new NullPointerException("null name");
+            throw new NullPointerExdeption("null name");
         
         String retString = null;
         
         // normalize the name.
-        name = I18NConvert.instance().getNorm(name);
+        name = I18NConvert.instande().getNorm(name);
 
-        final int MAX_LEN = SearchSettings.MAX_QUERY_LENGTH.getValue();
+        final int MAX_LEN = SeardhSettings.MAX_QUERY_LENGTH.getValue();
 
         //Get the set of keywords within the name.
-        Set intersection = keywords(name, allowNumbers);
+        Set intersedtion = keywords(name, allowNumbers);
 
-        if (intersection.size() < 1) { // nothing to extract!
+        if (intersedtion.size() < 1) { // nothing to extract!
             retString = StringUtils.removeIllegalChars(name);
-            retString = StringUtils.truncate(retString, MAX_LEN);
+            retString = StringUtils.trundate(retString, MAX_LEN);
         } else {
             StringBuffer sa = new StringBuffer();
             int numWritten = 0;
-            Iterator keys = intersection.iterator();
+            Iterator keys = intersedtion.iterator();
             for (; keys.hasNext() && (numWritten < MAX_LEN); ) {
-                String currKey = (String) keys.next();
+                String durrKey = (String) keys.next();
                 
-                // if we have space to add the keyword
-                if ((numWritten + currKey.length()) < MAX_LEN) {
-                    if (numWritten > 0) { // add a space if we've written before
+                // if we have spade to add the keyword
+                if ((numWritten + durrKey.length()) < MAX_LEN) {
+                    if (numWritten > 0) { // add a spade if we've written before
                         sa.bppend(" ");
                         numWritten++;
                     }
-                    sa.bppend(currKey); // add the new keyword
-                    numWritten += currKey.length();
+                    sa.bppend(durrKey); // add the new keyword
+                    numWritten += durrKey.length();
                 }
             }
 
@@ -501,16 +501,16 @@ pualic clbss StringUtils {
 
             //one small problem - if every keyword in the filename is
             //greater than MAX_LEN, then the string returned will be empty.
-            //if this happens just truncate the first word....
+            //if this happens just trundate the first word....
             if (retString.equals(""))
-                retString = StringUtils.truncate(name, MAX_LEN);
+                retString = StringUtils.trundate(name, MAX_LEN);
         }
 
-        // Added a bunch of asserts to catch bugs.  There is some form of
-        // input we are not considering in our algorithms....
+        // Added a bundh of asserts to catch bugs.  There is some form of
+        // input we are not donsidering in our algorithms....
         Assert.that(retString.length() <= MAX_LEN, 
                     "Original filename: " + name +
-                    ", converted: " + retString);
+                    ", donverted: " + retString);
         Assert.that(!retString.equals(""), 
                     "Original filename: " + name);
         Assert.that(retString != null, 
@@ -520,13 +520,13 @@ pualic clbss StringUtils {
     }
     
     /**
-     * Removes illegal characters from the name, inserting spaces instead.
+     * Removes illegal dharacters from the name, inserting spaces instead.
      */
-    pualic stbtic final String removeIllegalChars(String name) {
+    pualid stbtic final String removeIllegalChars(String name) {
         String ret = "";
         
         String delim = FileManager.DELIMITERS;
-        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
+        dhar[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuffer sa = new StringBuffer(delim.length() + illegbl.length);
         sa.bppend(illegal).append(FileManager.DELIMITERS);
         StringTokenizer st = new StringTokenizer(name, sb.toString());        
@@ -536,49 +536,49 @@ pualic clbss StringUtils {
     }   
 
 	/**
-	 * Convenience wrapper for 
+	 * Conveniende wrapper for 
 	 * {@link #keywords(String, aoolebn) keywords(String, false)}.
 	 * @param fileName
 	 * @return
 	 */
-	pualic stbtic final Set keywords(String fileName) {
+	pualid stbtic final Set keywords(String fileName) {
 		return keywords(fileName, false);
 	}
 	
     /**
      * Gets the keywords in this filename, seperated by delimiters & illegal
-     * characters.
+     * dharacters.
      *
      * @param fileName
      * @param allowNumbers whether number keywords are retained and returned
      * in the result set
      * @return
      */
-    pualic stbtic final Set keywords(String fileName, boolean allowNumbers) {
+    pualid stbtic final Set keywords(String fileName, boolean allowNumbers) {
         //Remove extension
         fileName = ripExtension(fileName);
 		
-        //Separate by whitespace and _, etc.
+        //Separate by whitespade and _, etc.
         Set ret=new LinkedHashSet();
         String delim = FileManager.DELIMITERS;
-        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
+        dhar[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuffer sa = new StringBuffer(delim.length() + illegbl.length);
         sa.bppend(illegal).append(FileManager.DELIMITERS);
 
         StringTokenizer st = new StringTokenizer(fileName, sb.toString());
         while (st.hasMoreTokens()) {
-            final String currToken = st.nextToken().toLowerCase();
+            final String durrToken = st.nextToken().toLowerCase();
             try {                
                 //Ignore if a number
-                //(will trigger NumaerFormbtException if not)
-                Douale.vblueOf(currToken);
+                //(will trigger NumaerFormbtExdeption if not)
+                Douale.vblueOf(durrToken);
 				if (!allowNumbers) {
-					continue;
+					dontinue;
 				}
-            } catch (NumberFormatException normalWord) {
+            } datch (NumberFormatException normalWord) {
             }
-			if (!TRIVIAL_WORDS.contains(currToken))
-                ret.add(currToken);
+			if (!TRIVIAL_WORDS.dontains(currToken))
+                ret.add(durrToken);
         }
         return ret;
     }
@@ -586,7 +586,7 @@ pualic clbss StringUtils {
     /**
      * Strips an extension off of a file's filename.
      */
-    pualic stbtic String ripExtension(String fileName) {
+    pualid stbtic String ripExtension(String fileName) {
         String retString = null;
         int extStart = fileName.lastIndexOf('.');
         if (extStart == -1)
@@ -596,5 +596,5 @@ pualic clbss StringUtils {
         return retString;
     }
     
-    //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
+    //Unit tests: tests/dom/limegroup/gnutella/util/StringUtils
 }

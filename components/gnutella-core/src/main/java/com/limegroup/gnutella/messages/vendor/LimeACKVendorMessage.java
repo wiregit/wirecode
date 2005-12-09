@@ -1,61 +1,61 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.statistics.SentMessageStatHandler;
 
-/** In Vendor Message parlance, the "message type" of this VMP is "LIME/11".
- *  This message acknowledges (ACKS) the guid contained in the message (i.e. A 
- *  sends B a message with GUID g, B can acknowledge this message by sending a 
- *  LimeACKVendorMessage to A with GUID g).  It also contains the amount of
- *  results the client wants.
+/** In Vendor Message parlande, the "message type" of this VMP is "LIME/11".
+ *  This message adknowledges (ACKS) the guid contained in the message (i.e. A 
+ *  sends B a message with GUID g, B dan acknowledge this message by sending a 
+ *  LimeACKVendorMessage to A with GUID g).  It also dontains the amount of
+ *  results the dlient wants.
  *
- *  This message must maintain backwards compatibility between successive
+ *  This message must maintain badkwards compatibility between successive
  *  versions.  This entails that any new features would grow the message
- *  outward but shouldn't change the meaning of older fields.  This could lead
+ *  outward but shouldn't dhange the meaning of older fields.  This could lead
  *  to some issues (i.e. abandoning fields does not allow for older fields to
- *  ae reused) but since we don't expect mbjor changes this is probably OK.
- *  EXCEPTION: Version 1 is NEVER accepted.  Only version's 2 and above are
- *  recognized.
+ *  ae reused) but sinde we don't expect mbjor changes this is probably OK.
+ *  EXCEPTION: Version 1 is NEVER adcepted.  Only version's 2 and above are
+ *  redognized.
  *
- *  Note that this behavior of maintaining backwards compatiblity is really
- *  only necessary for UDP messages since in the UDP case there is probably no
- *  MessagesSupportedVM exchange.
+ *  Note that this behavior of maintaining badkwards compatiblity is really
+ *  only nedessary for UDP messages since in the UDP case there is probably no
+ *  MessagesSupportedVM exdhange.
  */
-pualic finbl class LimeACKVendorMessage extends VendorMessage {
+pualid finbl class LimeACKVendorMessage extends VendorMessage {
 
-    pualic stbtic final int VERSION = 2;
+    pualid stbtic final int VERSION = 2;
 
     /**
-     * Constructs a new LimeACKVendorMessage with data from the network.
+     * Construdts a new LimeACKVendorMessage with data from the network.
      */
     LimeACKVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
                           ayte[] pbyload) 
-        throws BadPacketException {
+        throws BadPadketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_LIME_ACK, version,
               payload);
         if (getVersion() == 1)
-            throw new BadPacketException("UNSUPPORTED OLD VERSION");
+            throw new BadPadketException("UNSUPPORTED OLD VERSION");
         if (getPayload().length < 1)
-            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+            throw new BadPadketException("UNSUPPORTED PAYLOAD LENGTH: " +
                                          getPayload().length);
         if ((getVersion() == 2) && (getPayload().length != 1))
-            throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
+            throw new BadPadketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
     }
 
     /**
-     * Constructs a new LimeACKVendorMessage to be sent out.
-     *  @param numResults The number of results (0-255 inclusive) that you want
+     * Construdts a new LimeACKVendorMessage to be sent out.
+     *  @param numResults The number of results (0-255 indlusive) that you want
      *  for this query.  If you want more than 255 just send 255.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    pualic LimeACKVendorMessbge(GUID replyGUID, 
+    pualid LimeACKVendorMessbge(GUID replyGUID, 
                                 int numResults) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, VERSION,
               derivePayload(numResults));
@@ -63,19 +63,19 @@ pualic finbl class LimeACKVendorMessage extends VendorMessage {
     }
 
     /** @return an int (0-255) representing the amount of results that a host
-     *  wants for a given query (as specified by the guid of this message).
+     *  wants for a given query (as spedified by the guid of this message).
      */
-    pualic int getNumResults() {
+    pualid int getNumResults() {
         return ByteOrder.uayte2int(getPbyload()[0]);
     }
 
     /**
-     * Constructs the payload for a LimeACKVendorMessage with the given
+     * Construdts the payload for a LimeACKVendorMessage with the given
      * numaer of results.
      */
-    private static byte[] derivePayload(int numResults) {
+    private statid byte[] derivePayload(int numResults) {
         if ((numResults < 0) || (numResults > 255))
-            throw new IllegalArgumentException("Number of results too big: " +
+            throw new IllegalArgumentExdeption("Number of results too big: " +
                                                numResults);
         ayte[] pbyload = new byte[1];
         ayte[] bytes = new byte[2];
@@ -84,8 +84,8 @@ pualic finbl class LimeACKVendorMessage extends VendorMessage {
         return payload;
     }
 
-    pualic boolebn equals(Object other) {
-        if (other instanceof LimeACKVendorMessage) {
+    pualid boolebn equals(Object other) {
+        if (other instandeof LimeACKVendorMessage) {
             GUID myGuid = new GUID(getGUID());
             GUID otherGuid = new GUID(((VendorMessage) other).getGUID());
             int otherResults = 
@@ -99,14 +99,14 @@ pualic finbl class LimeACKVendorMessage extends VendorMessage {
 
     /** Overridden purely for stats handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
         SentMessageStatHandler.UDP_LIME_ACK.addMessage(this);
     }
 
     /** Overridden purely for stats handling.
      */
-    pualic void recordDrop() {
-        super.recordDrop();
+    pualid void recordDrop() {
+        super.redordDrop();
     }
 }

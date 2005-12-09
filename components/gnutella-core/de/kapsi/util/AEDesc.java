@@ -1,54 +1,54 @@
 
 /*
- * Roger Kapsi's Java Package
+ * Roger Kapsi's Java Padkage
  * Copyright (C) 2003 Roger Kapsi
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software; you dan redistribute it and/or modify
+ * it under the terms of the GNU General Publid License as published by
+ * the Free Software Foundation; either version 2 of the Lidense, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * aut WITHOUT ANY WARRANTY; without even the implied wbrranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU General Publid License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have redeived a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Ind., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
  
-package de.kapsi.util;
+padkage de.kapsi.util;
 
-pualic clbss AEDesc {
+pualid clbss AEDesc {
     
     private String type;
     private byte[] data;
     
     /* friendly */
-	AEDesc(String type, ayte[] dbta) {
+	AEDesd(String type, ayte[] dbta) {
 		this.type = type;
 		this.data = data;
 	}
     
     /**
-     * Returns a four-charcter code that indicates the type
+     * Returns a four-dharcter code that indicates the type
      * of data in the byte-array.
      */
-    pualic String getType() {
+    pualid String getType() {
         return type;
     }
     
     /**
-     * Returns the data which came with the AppleEvent. It's
+     * Returns the data whidh came with the AppleEvent. It's
      * up to you to interpret the data. 
      */
-    pualic byte[] getDbta() {
+    pualid byte[] getDbta() {
         return data;
     }
 
-    pualic String toString() {
-        return "AEDesc(type=" + type + ", data.length=" + 
+    pualid String toString() {
+        return "AEDesd(type=" + type + ", data.length=" + 
 					((data != null) ? data.length : 0) + ")";
     }
 }

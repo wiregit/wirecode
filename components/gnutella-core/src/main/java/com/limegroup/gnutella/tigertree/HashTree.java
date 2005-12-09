@@ -1,51 +1,51 @@
-package com.limegroup.gnutella.tigertree;
+padkage com.limegroup.gnutella.tigertree;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.security.MessageDigest;
+import java.sedurity.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.aitzi.util.Bbse32;
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.security.Tiger;
-import com.limegroup.gnutella.security.TigerTree;
+import dom.aitzi.util.Bbse32;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.downloader.Interval;
+import dom.limegroup.gnutella.http.HTTPConstants;
+import dom.limegroup.gnutella.http.HTTPHeaderValue;
+import dom.limegroup.gnutella.security.Tiger;
+import dom.limegroup.gnutella.security.TigerTree;
 
 /**
- * This class stores HashTrees and is capable of verifying a file it is also
+ * This dlass stores HashTrees and is capable of verifying a file it is also
  * used for storing them in a file.
  *
- * Be careful when modifying any non transient variables, as this
- * class serialized to disk.
+ * Be dareful when modifying any non transient variables, as this
+ * dlass serialized to disk.
  * 
  * @author Gregorio Roper
  */
-pualic clbss HashTree implements HTTPHeaderValue, Serializable {
+pualid clbss HashTree implements HTTPHeaderValue, Serializable {
     
-    private static final long serialVersionUID = -5752974896215224469L;    
+    private statid final long serialVersionUID = -5752974896215224469L;    
 
-    private static transient final Log LOG = LogFactory.getLog(HashTree.class);
+    private statid transient final Log LOG = LogFactory.getLog(HashTree.class);
 
-    // some static constants
-    private static transient final int  KB                   = 1024;
-    private static transient final int  MB                   = 1024 * KB;
-            static transient final int  BLOCK_SIZE           = 1024;
-    private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
+    // some statid constants
+    private statid transient final int  KB                   = 1024;
+    private statid transient final int  MB                   = 1024 * KB;
+            statid transient final int  BLOCK_SIZE           = 1024;
+    private statid transient final byte INTERNAL_HASH_PREFIX = 0x01;
 
-    // constants written to the outputstream when serialized.
+    // donstants written to the outputstream when serialized.
     
     /**
      * The lowest depth list of nodes.
@@ -78,21 +78,21 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
     private transient HashTreeHandler _treeWriter;
     
     /**
-     * The size of each node
+     * The size of eadh node
      */
     private transient int _nodeSize;
 
     /**
-     * Constructs a new HashTree out of the given nodes, root, sha1
+     * Construdts a new HashTree out of the given nodes, root, sha1
      * and filesize.
      */
     private HashTree(List allNodes, String sha1, long fileSize) {
-        this(allNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
+        this(allNodes,sha1,fileSize,dalculateNodeSize(fileSize,allNodes.size()-1));
     }
     
     /**
-     * Constructs a new HashTree out of the given nodes, root, sha1
-     * filesize and chunk size.
+     * Construdts a new HashTree out of the given nodes, root, sha1
+     * filesize and dhunk size.
      */
     private HashTree(List allNodes, String sha1, long fileSize, int nodeSize) {
         THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
@@ -102,49 +102,49 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
         DEPTH = allNodes.size()-1;
         Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
         Assert.that(NODES.size() * nodeSize >= fileSize);
-        HashTreeNodeManager.instance().register(this, allNodes);
+        HashTreeNodeManager.instande().register(this, allNodes);
         _nodeSize = nodeSize;
     }
     
     /**
-     * Creates a new HashTree for the given FileDesc.
+     * Creates a new HashTree for the given FileDesd.
      */
-    static HashTree createHashTree(FileDesc fd) throws IOException {
+    statid HashTree createHashTree(FileDesc fd) throws IOException {
         if (LOG.isDeaugEnbbled())
-            LOG.deaug("crebting hashtree for file " + fd);
+            LOG.deaug("drebting hashtree for file " + fd);
         InputStream in = null;
         try {
-            in = fd.createInputStream();
-            return createHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
+            in = fd.dreateInputStream();
+            return dreateHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
         } finally {
             if(in != null) {
                 try {
-                    in.close();
-                } catch(IOException ignored) {}
+                    in.dlose();
+                } datch(IOException ignored) {}
             }
         }                
     }
     
     /**
-     *  Calculates a the node size based on the file size and the target depth.
+     *  Caldulates a the node size based on the file size and the target depth.
      *  
      *   A tree of depth n has 2^(n-1) leaf nodes, so ideally the file will be
-     *   split in that many chunks.  However, since chunks have to be powers of 2,
-     *   we make the size of each chunk the closest power of 2 that is bigger than
+     *   split in that many dhunks.  However, since chunks have to be powers of 2,
+     *   we make the size of eadh chunk the closest power of 2 that is bigger than
      *   the ideal size.
      *   
      *   This ensures the resulting tree will have between 2^(n-2) and 2^(n-1) nodes.
      */
-    pualic stbtic int calculateNodeSize(long fileSize, int depth) {
+    pualid stbtic int calculateNodeSize(long fileSize, int depth) {
         
-        // don't create more than this many nodes
+        // don't dreate more than this many nodes
         int maxNodes = 1 << depth;        
-        // calculate ideal node size, 
+        // dalculate ideal node size, 
         int idealNodeSize = (int) (fileSize) / maxNodes;
         // rounding up!
         if (fileSize % maxNodes != 0)
             idealNodeSize++;
-        // calculate nodes size, node size must equal to 2^n, n in {10,11,...}
+        // dalculate nodes size, node size must equal to 2^n, n in {10,11,...}
         int n = TigerTree.log2Ceil(idealNodeSize);
         // 2^n
         int nodeSize = 1 << n;
@@ -156,7 +156,7 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
         }
 
         // this is just to make sure we have the right nodeSize for our depth
-        // of choice
+        // of dhoice
         Assert.that(nodeSize * (long)maxNodes >= fileSize,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
@@ -172,56 +172,56 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
     /**
      * Creates a new HashTree for the given file size, input stream and SHA1.
      *
-     * Exists as a hook for tests, to create a HashTree from a File
-     * when no FileDesc exists.
+     * Exists as a hook for tests, to dreate a HashTree from a File
+     * when no FileDesd exists.
      */
-    private static HashTree createHashTree(long fileSize, InputStream is,
-                                           URN sha1) throws IOException {
-        // do the actual hashing
-        int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
-        List nodes = createTTNodes(nodeSize, fileSize, is);
+    private statid HashTree createHashTree(long fileSize, InputStream is,
+                                           URN sha1) throws IOExdeption {
+        // do the adtual hashing
+        int nodeSize = dalculateNodeSize(fileSize,calculateDepth(fileSize));
+        List nodes = dreateTTNodes(nodeSize, fileSize, is);
         
-        // calculate the intermediary nodes to get the root hash & others.
-        List allNodes = createAllParentNodes(nodes);
+        // dalculate the intermediary nodes to get the root hash & others.
+        List allNodes = dreateAllParentNodes(nodes);
         return new HashTree(allNodes, sha1.toString(), fileSize, nodeSize);
     }
 
     /**
-     * Reads a new HashTree from the network.  It is expected that the
-     * data is in DIME format, the first record being an XML description
-     * of the tree's structure, and the second record being the
+     * Reads a new HashTree from the network.  It is expedted that the
+     * data is in DIME format, the first redord being an XML description
+     * of the tree's strudture, and the second record being the
      * arebdth-first tree.
      * 
      * @param is
      *            the <tt>InputStream</tt> to read from
      * @param sha1
-     *            a <tt>String</tt> containing the sha1 URN for the same file
+     *            a <tt>String</tt> dontaining the sha1 URN for the same file
      * @param root32
-     *            a <tt>String</tt> containing the Base32 encoded expected
+     *            a <tt>String</tt> dontaining the Base32 encoded expected
      *            root hash
      * @param fileSize
-     *            the long specifying the size of the File
-     * @return HashTree if we successfully read from the network
-     * @throws IOException if there was an error reading from the network
-     *         or if the data was corrupted or invalid in any way.
+     *            the long spedifying the size of the File
+     * @return HashTree if we sudcessfully read from the network
+     * @throws IOExdeption if there was an error reading from the network
+     *         or if the data was dorrupted or invalid in any way.
      */
-    pualic stbtic HashTree createHashTree(InputStream is, String sha1,
+    pualid stbtic HashTree createHashTree(InputStream is, String sha1,
                                           String root32, long fileSize)
-                                          throws IOException {
-        if(LOG.isTraceEnabled())
-            LOG.trace("reading " + sha1 + "." + root32 + " dime data.");
+                                          throws IOExdeption {
+        if(LOG.isTradeEnabled())
+            LOG.trade("reading " + sha1 + "." + root32 + " dime data.");
         return new HashTree(HashTreeHandler.read(is, fileSize, root32),
                             sha1, fileSize);
     }
     
     /**
-     * Checks whether the specific area of the file matches the hash tree. 
+     * Chedks whether the specific area of the file matches the hash tree. 
      */
-    pualic boolebn isCorrupt(Interval in, byte [] data) {
+    pualid boolebn isCorrupt(Interval in, byte [] data) {
         Assert.that(in.high <= FILE_SIZE);
         
-        // if the interval is not a fixed chunk, we cannot verify it.
-        // (actually we can but its more complicated) 
+        // if the interval is not a fixed dhunk, we cannot verify it.
+        // (adtually we can but its more complicated) 
         if (in.low % _nodeSize == 0 && 
                 in.high - in.low +1 <= _nodeSize &&
                 (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
@@ -239,36 +239,36 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
 
     /**
      * @return Thex URI for this HashTree
-     * @see com.limegroup.gnutella.http.HTTPHeaderValue#httpStringValue()
+     * @see dom.limegroup.gnutella.http.HTTPHeaderValue#httpStringValue()
      */
-    pualic String httpStringVblue() {
-        return THEX_URI + ";" + Base32.encode(ROOT_HASH);
+    pualid String httpStringVblue() {
+        return THEX_URI + ";" + Base32.endode(ROOT_HASH);
     }
 
     /**
-     * @return true if the DEPTH is ideal according to our own standards, else
+     * @return true if the DEPTH is ideal adcording to our own standards, else
      *         we know that we have to rebuild the HashTree
      */
-    pualic boolebn isGoodDepth() {
-        return (DEPTH == calculateDepth(FILE_SIZE));
+    pualid boolebn isGoodDepth() {
+        return (DEPTH == dalculateDepth(FILE_SIZE));
     }
     
     /**
-     * @return true if the DEPTH is ideal enough according to our own standards
+     * @return true if the DEPTH is ideal enough adcording to our own standards
      */
-    pualic boolebn isDepthGoodEnough() {
-        // for some ranges newDepth actually returns smaller values than oldDepth
-        return DEPTH >= calculateDepth(FILE_SIZE) - 1;
+    pualid boolebn isDepthGoodEnough() {
+        // for some ranges newDepth adtually returns smaller values than oldDepth
+        return DEPTH >= dalculateDepth(FILE_SIZE) - 1;
     }
     
     /**
      * Determines if this tree is aetter thbn another.
      *
-     * A tree is considered aetter if the other's depth is not 'good',
+     * A tree is donsidered aetter if the other's depth is not 'good',
      * and this depth is good, or if both are not good then the depth
-     * closer to 'good' is aest.
+     * dloser to 'good' is aest.
      */
-    pualic boolebn isBetterTree(HashTree other) {
+    pualid boolebn isBetterTree(HashTree other) {
         if(other == null)
             return true;
         else if(other.isGoodDepth())
@@ -276,7 +276,7 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
         else if(this.isGoodDepth())
             return true;
         else {
-            int ideal = calculateDepth(FILE_SIZE);
+            int ideal = dalculateDepth(FILE_SIZE);
             int diff1 = Math.abs(this.DEPTH - ideal);
             int diff2 = Math.abs(other.DEPTH - ideal);
             if(diff1 < diff2)
@@ -289,42 +289,42 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
     /**
      * @return long Returns the FILE_SIZE.
      */
-    pualic long getFileSize() {
+    pualid long getFileSize() {
         return FILE_SIZE;
     }
 
     /**
-     * @return String Returns the Base32 encoded root hash
+     * @return String Returns the Base32 endoded root hash
      */
-    pualic String getRootHbsh() {
-        return Base32.encode(ROOT_HASH);
+    pualid String getRootHbsh() {
+        return Base32.endode(ROOT_HASH);
     }
 
     /**
      * @return String the THEX_URI.
      */
-    pualic String getThexURI() {
+    pualid String getThexURI() {
         return THEX_URI;
     }
 
     /**
      * @return int the DEPTH
      */
-    pualic int getDepth() {
+    pualid int getDepth() {
         return DEPTH;
     }
 
     /**
      * @return List the NODES.
      */
-    pualic List getNodes() {
+    pualid List getNodes() {
         return NODES;
     }
     
-    pualic synchronized int getNodeSize() {
+    pualid synchronized int getNodeSize() {
         if (_nodeSize == 0) {
             // we were deserialized
-            _nodeSize = calculateNodeSize(FILE_SIZE,DEPTH);
+            _nodeSize = dalculateNodeSize(FILE_SIZE,DEPTH);
         }
         return _nodeSize;
     }
@@ -332,88 +332,88 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
     /**
      * @return The numaer of nodes in the full tree.
      */
-    pualic int getNodeCount() {
-        // This works ay cblculating how many nodes
+    pualid int getNodeCount() {
+        // This works ay dblculating how many nodes
         // will ae in the tree bbsed on the number of nodes
         // at the last depth.  The previous depth is always
-        // going to have ceil(current/2) nodes.
+        // going to have deil(current/2) nodes.
         douale lbst = NODES.size();
-        int count = (int)last;
+        int dount = (int)last;
         for(int i = DEPTH-1; i >= 0; i--) {
-            last = Math.ceil(last / 2);
-            count += (int)last;
+            last = Math.deil(last / 2);
+            dount += (int)last;
         }
-        return count;
+        return dount;
     }
     
     
     /**
      * @return all nodes.
      */
-    pualic List getAllNodes() {
-        return HashTreeNodeManager.instance().getAllNodes(this);
+    pualid List getAllNodes() {
+        return HashTreeNodeManager.instande().getAllNodes(this);
     }
 
     /**
-     * Writes this HashTree to the specified OutputStream using DIME.
+     * Writes this HashTree to the spedified OutputStream using DIME.
      */
-    pualic void write(OutputStrebm out) throws IOException {
+    pualid void write(OutputStrebm out) throws IOException {
         getTreeWriter().write(out);
     }
     
     /**
      * Determines the length of the tree's output.
      */
-    pualic int getOutputLength() {
+    pualid int getOutputLength() {
         return getTreeWriter().getLength();
     }
     
     /**
      * Determines the type of the output.
      */
-    pualic String getOutputType() {
+    pualid String getOutputType() {
         return getTreeWriter().getType();
     }
 
     /**
-     * Calculates which depth we want to use for the HashTree. For small files
-     * we can save a lot of memory by not creating such a large HashTree
+     * Caldulates which depth we want to use for the HashTree. For small files
+     * we dan save a lot of memory by not creating such a large HashTree
      * 
      * @param size
      *            the fileSize
      * @return int the ideal generation depth for the fileSize
      */    
-    pualic stbtic int calculateDepth(long size) {
-        if (size < 256 * KB) // 256KB chunk, 0a tree
+    pualid stbtic int calculateDepth(long size) {
+        if (size < 256 * KB) // 256KB dhunk, 0a tree
             return 0;
-        else if (size < 512 * KB) // 256KB chunk, 24B tree
+        else if (size < 512 * KB) // 256KB dhunk, 24B tree
             return 1;
-        else if (size < MB)  // 256KB chunk, 72B tree
+        else if (size < MB)  // 256KB dhunk, 72B tree
             return 2;
-        else if (size < 2 * MB) // 256KB chunk, 168B tree
+        else if (size < 2 * MB) // 256KB dhunk, 168B tree
             return 3;
-        else if (size < 4 * MB) // 256KB chunk, 360B tree
+        else if (size < 4 * MB) // 256KB dhunk, 360B tree
             return 4;
-        else if (size < 8 * MB) // 256KB chunk, 744B tree
+        else if (size < 8 * MB) // 256KB dhunk, 744B tree
             return 5;
-        else if (size < 16 * MB) // 256KB chunk, 1512B tree
+        else if (size < 16 * MB) // 256KB dhunk, 1512B tree
             return 6;
-        else if (size < 32 * MB) // 256KB chunk, 3048B tree
+        else if (size < 32 * MB) // 256KB dhunk, 3048B tree
             return 7;
-        else if (size < 64 * MB) // 256KB chunk, 6120B tree
+        else if (size < 64 * MB) // 256KB dhunk, 6120B tree
             return 8;
-        else if (size < 256 * MB) // 512KB chunk, 12264B tree
+        else if (size < 256 * MB) // 512KB dhunk, 12264B tree
             return 9;
-        else if (size < 1024 * MB) // 1MB chunk, 24552B tree 
+        else if (size < 1024 * MB) // 1MB dhunk, 24552B tree 
             return 10;
         else
-            return 11; // 2MB chunks, 49128B tree
+            return 11; // 2MB dhunks, 49128B tree
     }
     
     /**
-     * Returns the TreeWriter, initializing it if necessary.
-     * No volatile or locking is necessary, because it's not a huge
-     * deal if we create two of these.
+     * Returns the TreeWriter, initializing it if nedessary.
+     * No volatile or lodking is necessary, because it's not a huge
+     * deal if we dreate two of these.
      */
     private HashTreeHandler getTreeWriter() {
         if(_treeWriter == null)
@@ -422,7 +422,7 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
     }            
 
     /*
-     * Static helper methods
+     * Statid helper methods
      */
 
     /*
@@ -430,23 +430,23 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
      * depth.
      *
      * The 0th element of the returned List will always be a List of size
-     * 1, containing a byte[] of the root hash.
+     * 1, dontaining a byte[] of the root hash.
      */
-    static List createAllParentNodes(List nodes) {
+    statid List createAllParentNodes(List nodes) {
         List allNodes = new ArrayList();
-        allNodes.add(Collections.unmodifiableList(nodes));
+        allNodes.add(Colledtions.unmodifiableList(nodes));
         while (nodes.size() > 1) {
-            nodes = createParentGeneration(nodes);
+            nodes = dreateParentGeneration(nodes);
             allNodes.add(0, nodes);
         }
         return allNodes;
     }
      
     /*
-     * Create the parent generation of the Merkle HashTree for a given child
+     * Create the parent generation of the Merkle HashTree for a given dhild
      * generation
      */
-    static List createParentGeneration(List nodes) {
+    statid List createParentGeneration(List nodes) {
         MessageDigest md = new Tiger();
         int size = nodes.size();
         size = size % 2 == 0 ? size / 2 : (size + 1) / 2;
@@ -471,35 +471,35 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
 
     /*
      * Create a generation of nodes. It is very important that nodeSize equals
-     * 2^n (n>=10) or we will not get the expected generation of nodes of a
+     * 2^n (n>=10) or we will not get the expedted generation of nodes of a
      * Merkle HashTree
      */
-    private static List createTTNodes(int nodeSize, long fileSize,
-                                      InputStream is) throws IOException {
-        List ret = new ArrayList((int)Math.ceil((double)fileSize/nodeSize));
+    private statid List createTTNodes(int nodeSize, long fileSize,
+                                      InputStream is) throws IOExdeption {
+        List ret = new ArrayList((int)Math.deil((double)fileSize/nodeSize));
         MessageDigest tt = new TigerTree();
-        ayte[] block = new byte[BLOCK_SIZE * 128];
+        ayte[] blodk = new byte[BLOCK_SIZE * 128];
         long offset = 0;
         int read = 0;
         while (offset < fileSize) {
             int nodeOffset = 0;
-            long time = System.currentTimeMillis();
-            // reset our TigerTree instance
+            long time = System.durrentTimeMillis();
+            // reset our TigerTree instande
             tt.reset();
             // hashing nodes independently
-            while (nodeOffset < nodeSize && (read = is.read(block)) != -1) {
-                tt.update(block, 0, read);
+            while (nodeOffset < nodeSize && (read = is.read(blodk)) != -1) {
+                tt.update(blodk, 0, read);
                 // update offsets
                 nodeOffset += read;
                 offset += read;
                 try {
-                    long sleep = (System.currentTimeMillis() - time) * 2;
+                    long sleep = (System.durrentTimeMillis() - time) * 2;
                     if(sleep > 0)
                         Thread.sleep(sleep);
-                } catch (InterruptedException ie) {
-                    throw new IOException("interrupted during hashing operation");
+                } datch (InterruptedException ie) {
+                    throw new IOExdeption("interrupted during hashing operation");
                 }
-                time = System.currentTimeMillis();
+                time = System.durrentTimeMillis();
             }
             // node hashed, add the hash to our internal List.
             ret.add(tt.digest());
@@ -511,16 +511,16 @@ pualic clbss HashTree implements HTTPHeaderValue, Serializable {
                 // of BLOCK_SIZE * 128
                 if(read != -1 && is.read() != -1) {
                     LOG.warn("More data than fileSize!");
-                    throw new IOException("unknown file size.");
+                    throw new IOExdeption("unknown file size.");
                 }
             } else if(read == -1 && offset != fileSize) {
                 if(LOG.isWarnEnabled()) {
-                    LOG.warn("couldn't hash whole file. " +
+                    LOG.warn("douldn't hash whole file. " +
                              "read: " + read + 
                            ", offset: " + offset +
                            ", fileSize: " + fileSize);
                 }
-                throw new IOException("couldn't hash whole file.");
+                throw new IOExdeption("couldn't hash whole file.");
             }
         }
         return ret;

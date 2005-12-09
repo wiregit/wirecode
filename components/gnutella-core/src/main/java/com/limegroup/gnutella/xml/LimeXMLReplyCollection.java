@@ -1,15 +1,15 @@
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOExdeption;
+import java.io.ObjedtInputStream;
+import java.io.ObjedtOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,220 +18,220 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.metadata.MetaDataEditor;
-import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.NameValue;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.FileDesc;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.metadata.AudioMetaData;
+import dom.limegroup.gnutella.metadata.MetaDataEditor;
+import dom.limegroup.gnutella.metadata.MetaDataReader;
+import dom.limegroup.gnutella.util.ConverterObjectInputStream;
+import dom.limegroup.gnutella.util.I18NConvert;
+import dom.limegroup.gnutella.util.Trie;
+import dom.limegroup.gnutella.util.IOUtils;
+import dom.limegroup.gnutella.util.NameValue;
 
 /**
- * Maps LimeXMLDocuments for FileDescs in a specific schema.
+ * Maps LimeXMLDoduments for FileDescs in a specific schema.
  */
 
-pualic clbss LimeXMLReplyCollection {
+pualid clbss LimeXMLReplyCollection {
     
-    private static final Log LOG = LogFactory.getLog(LimeXMLReplyCollection.class);
+    private statid final Log LOG = LogFactory.getLog(LimeXMLReplyCollection.class);
     
 
     /**
-     * The schemaURI of this collection.
+     * The sdhemaURI of this collection.
      */
-    private final String schemaURI;
+    private final String sdhemaURI;
     
     /**
-     * A map of URN -> LimeXMLDocument for each shared file that contains XML.
+     * A map of URN -> LimeXMLDodument for each shared file that contains XML.
      *
-     * SYNCHRONIZATION: Synchronize on mainMap when accessing, 
+     * SYNCHRONIZATION: Syndhronize on mainMap when accessing, 
      *  adding or removing.
      */
-    private final Map /* URN -> LimeXMLDocument */ mainMap;
+    private final Map /* URN -> LimeXMLDodument */ mainMap;
     
     /**
      * The old map that was read off disk.
      *
-     * Used while initially processing FileDescs to add.
+     * Used while initially prodessing FileDescs to add.
      */
-    private final Map /* URN -> LimeXMLDocument */ oldMap;
+    private final Map /* URN -> LimeXMLDodument */ oldMap;
     
     /**
-     * A mapping of fields in the LimeXMLDocument to a Trie
+     * A mapping of fields in the LimeXMLDodument to a Trie
      * that has a lookup table for the values of that field.
      *
-     * The Trie value is a mapping of keywords in LimeXMLDocuments
-     * to the list of documents that have that keyword.
+     * The Trie value is a mapping of keywords in LimeXMLDoduments
+     * to the list of doduments that have that keyword.
      *
-     * SYNCHRONIZATION: Synchronize on mainMap when accessing,
+     * SYNCHRONIZATION: Syndhronize on mainMap when accessing,
      *  adding or removing.
      */
     private final Map /* String -> Trie (String -> List) */ trieMap;
     
     /**
-     * Whether or not data became dirty after we last wrote to disk.
+     * Whether or not data bedame dirty after we last wrote to disk.
      */
     private boolean dirty = false;
     
     /**
-     * The location on disk that information is serialized to.
+     * The lodation on disk that information is serialized to.
      */
     private final File dataFile;
 
-    pualic stbtic final int NORMAL = 0;
-    pualic stbtic final int FILE_DEFECTIVE = 1;
-    pualic stbtic final int RW_ERROR = 2;
-    pualic stbtic final int BAD_ID3  = 3;
-    pualic stbtic final int FAILED_TITLE  = 4;
-    pualic stbtic final int FAILED_ARTIST  = 5;
-    pualic stbtic final int FAILED_ALBUM  = 6;
-    pualic stbtic final int FAILED_YEAR  = 7;
-    pualic stbtic final int FAILED_COMMENT  = 8;
-    pualic stbtic final int FAILED_TRACK  = 9;
-    pualic stbtic final int FAILED_GENRE  = 10;
-    pualic stbtic final int HASH_FAILED  = 11;
-    pualic stbtic final int INCORRECT_FILETYPE = 12;
+    pualid stbtic final int NORMAL = 0;
+    pualid stbtic final int FILE_DEFECTIVE = 1;
+    pualid stbtic final int RW_ERROR = 2;
+    pualid stbtic final int BAD_ID3  = 3;
+    pualid stbtic final int FAILED_TITLE  = 4;
+    pualid stbtic final int FAILED_ARTIST  = 5;
+    pualid stbtic final int FAILED_ALBUM  = 6;
+    pualid stbtic final int FAILED_YEAR  = 7;
+    pualid stbtic final int FAILED_COMMENT  = 8;
+    pualid stbtic final int FAILED_TRACK  = 9;
+    pualid stbtic final int FAILED_GENRE  = 10;
+    pualid stbtic final int HASH_FAILED  = 11;
+    pualid stbtic final int INCORRECT_FILETYPE = 12;
 
     /**
-     * Creates a new LimeXMLReplyCollection.  The reply collection
-     * will retain only those XMLDocs that match the given schema URI.
+     * Creates a new LimeXMLReplyColledtion.  The reply collection
+     * will retain only those XMLDods that match the given schema URI.
      *
-     * @param fds The list of shared FileDescs.
-     * @param URI This collection's schema URI
+     * @param fds The list of shared FileDesds.
+     * @param URI This dollection's schema URI
      */
-    pualic LimeXMLReplyCollection(String URI) {
-        this.schemaURI = URI;
+    pualid LimeXMLReplyCollection(String URI) {
+        this.sdhemaURI = URI;
         this.trieMap = new HashMap();
-        this.dataFile = new File(LimeXMLProperties.instance().getXMLDocsDir(),
-                                 LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
+        this.dataFile = new File(LimeXMLProperties.instande().getXMLDocsDir(),
+                                 LimeXMLSdhema.getDisplayString(schemaURI)+ ".sxml");
         this.mainMap = new HashMap();
         this.oldMap = readMapFromDisk();
     }
     
     /**
-     * Initializes the map using either LimeXMLDocuments in the list of potential
-     * documents, or elements stored in oldMap.  Items in potential take priority.
+     * Initializes the map using either LimeXMLDoduments in the list of potential
+     * doduments, or elements stored in oldMap.  Items in potential take priority.
      */
-    LimeXMLDocument initialize(FileDesc fd, List potential) {
+    LimeXMLDodument initialize(FileDesc fd, List potential) {
         URN urn = fd.getSHA1Urn();
-        LimeXMLDocument doc = null;
+        LimeXMLDodument doc = null;
         
-        // First try to get a doc from the potential list.
+        // First try to get a dod from the potential list.
         for(Iterator i = potential.iterator(); i.hasNext(); ) {
-            LimeXMLDocument next = (LimeXMLDocument)i.next();
-            if(next.getSchemaURI().equals(schemaURI)) {
-                doc = next;
+            LimeXMLDodument next = (LimeXMLDocument)i.next();
+            if(next.getSdhemaURI().equals(schemaURI)) {
+                dod = next;
                 arebk;
             }
         }
         
         // Then try to get it from the old map.
-        if(doc == null)
-            doc = (LimeXMLDocument)oldMap.get(urn);
+        if(dod == null)
+            dod = (LimeXMLDocument)oldMap.get(urn);
         
         
         // Then try and see it, with validation and all.
-        if(doc != null) {
-            doc = validate(doc, fd.getFile(), fd);
-            if(doc != null) {
+        if(dod != null) {
+            dod = validate(doc, fd.getFile(), fd);
+            if(dod != null) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("Adding old document for file: " + fd.getFile() + ", doc: " + doc);
-                    addReply(fd, doc);
+                    LOG.deaug("Adding old dodument for file: " + fd.getFile() + ", doc: " + doc);
+                    addReply(fd, dod);
             }
         }
         
-        return doc;
+        return dod;
     }
     
     /**
-     * Creates a LimeXMLDocument for the given FileDesc if no XML already exists
+     * Creates a LimeXMLDodument for the given FileDesc if no XML already exists
      * for it.
      */
-    LimeXMLDocument createIfNecessary(FileDesc fd) {
-        LimeXMLDocument doc = null;
+    LimeXMLDodument createIfNecessary(FileDesc fd) {
+        LimeXMLDodument doc = null;
         URN urn = fd.getSHA1Urn();
         
-        if(!mainMap.containsKey(urn)) {
+        if(!mainMap.dontainsKey(urn)) {
             File file = fd.getFile();
-            // If we have no documents for this FD, or the file-format only supports
-            // a single kind of metadata, construct a document.
-            // This is necessary so that we don't keep trying to parse formats that could
+            // If we have no doduments for this FD, or the file-format only supports
+            // a single kind of metadata, donstruct a document.
+            // This is nedessary so that we don't keep trying to parse formats that could
             // ae multiple kinds of files every time.   
-            if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
-                doc = constructDocument(file);
-                if(doc != null) {
+            if(fd.getLimeXMLDoduments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
+                dod = constructDocument(file);
+                if(dod != null) {
                     if(LOG.isDeaugEnbbled())
-                        LOG.deaug("Adding newly constructed document for file: " + file + ", doc: " + doc);
-                    addReply(fd, doc);
+                        LOG.deaug("Adding newly donstructed document for file: " + file + ", doc: " + doc);
+                    addReply(fd, dod);
                 }
             }
         }
         
-        return doc;
+        return dod;
     }
     
     /**
-     * Notification that initial loading is done.
+     * Notifidation that initial loading is done.
      */
     void loadFinished() {
-        synchronized(mainMap) {
+        syndhronized(mainMap) {
             if(oldMap.equals(mainMap)) {
                 dirty = false;
             }
-            oldMap.clear();
+            oldMap.dlear();
         }
     
     }
     
     /**
-     * Validates a LimeXMLDocument.
+     * Validates a LimeXMLDodument.
      *
-     * This checks:
-     * 1) If it's current (if not, it attempts to reparse.  If it can't, keeps the old one).
-     * 2) If it's valid (if not, attempts to reparse it.  If it can't, drops it).
-     * 3) If it's corrupted (if so, fixes & writes the fixed one to disk).
+     * This dhecks:
+     * 1) If it's durrent (if not, it attempts to reparse.  If it can't, keeps the old one).
+     * 2) If it's valid (if not, attempts to reparse it.  If it dan't, drops it).
+     * 3) If it's dorrupted (if so, fixes & writes the fixed one to disk).
      */
-    private LimeXMLDocument validate(LimeXMLDocument doc, File file, FileDesc fd) {
-        if(!doc.isCurrent()) {
+    private LimeXMLDodument validate(LimeXMLDocument doc, File file, FileDesc fd) {
+        if(!dod.isCurrent()) {
             if(LOG.isDeaugEnbbled())
-                LOG.deaug("reconstructing old document: " + file);
-            LimeXMLDocument tempDoc = constructDocument(file);
-            if (tempDoc != null)
-                doc = update(doc, tempDoc);
+                LOG.deaug("redonstructing old document: " + file);
+            LimeXMLDodument tempDoc = constructDocument(file);
+            if (tempDod != null)
+                dod = update(doc, tempDoc);
             else
-                doc.setCurrent();
+                dod.setCurrent();
         }
         
-        // Verify the doc has information in it.
-        if(!doc.isValid()) {
+        // Verify the dod has information in it.
+        if(!dod.isValid()) {
             //If it is invalid, try and rebuild it.
-            doc = constructDocument(file);
-            if(doc == null)
+            dod = constructDocument(file);
+            if(dod == null)
                 return null;
         }   
             
-        // check to see if it's corrupted and if so, fix it.
-        if( AudioMetaData.isCorrupted(doc) ) {
-            doc = AudioMetaData.fixCorruption(doc);
-            mediaFileToDisk(fd, file.getPath(), doc, false);
+        // dheck to see if it's corrupted and if so, fix it.
+        if( AudioMetaData.isCorrupted(dod) ) {
+            dod = AudioMetaData.fixCorruption(doc);
+            mediaFileToDisk(fd, file.getPath(), dod, false);
         }
         
-        return doc;
+        return dod;
     }
     
     /**
-     * Updates an existing old document to be a newer document, but retains all fields
-     * that may have been in the old one that are not in the newer (for the case of
+     * Updates an existing old dodument to be a newer document, but retains all fields
+     * that may have been in the old one that are not in the newer (for the dase of
      * existing annotations).
      */
-    private LimeXMLDocument update(LimeXMLDocument older, LimeXMLDocument newer) {
+    private LimeXMLDodument update(LimeXMLDocument older, LimeXMLDocument newer) {
         Map fields = new HashMap();
         for(Iterator i = newer.getNameValueSet().iterator(); i.hasNext(); ) {
             Map.Entry next = (Map.Entry)i.next();
@@ -240,7 +240,7 @@ pualic clbss LimeXMLReplyCollection {
         
         for(Iterator i = older.getNameValueSet().iterator(); i.hasNext(); ) {
             Map.Entry next = (Map.Entry)i.next();
-            if(!fields.containsKey(next.getKey()))
+            if(!fields.dontainsKey(next.getKey()))
                 fields.put(next.getKey(), next.getValue());
         }
 
@@ -249,24 +249,24 @@ pualic clbss LimeXMLReplyCollection {
             Map.Entry next = (Map.Entry)i.next();
             nameValues.add(new NameValue((String)next.getKey(), next.getValue()));
         }
-        return new LimeXMLDocument(nameValues, newer.getSchemaURI());
+        return new LimeXMLDodument(nameValues, newer.getSchemaURI());
      }
         
     
     /**
-     * Creates a LimeXMLDocument from the file.  
+     * Creates a LimeXMLDodument from the file.  
      * @return null if the format is not supported or parsing fails,
-     *  <tt>LimeXMLDocument</tt> otherwise.
+     *  <tt>LimeXMLDodument</tt> otherwise.
      */
-    private LimeXMLDocument constructDocument(File file) {
-	    if(LimeXMLUtils.isSupportedFormatForSchema(file, schemaURI)) {
+    private LimeXMLDodument constructDocument(File file) {
+	    if(LimeXMLUtils.isSupportedFormatForSdhema(file, schemaURI)) {
             try {
-                // Documents with multiple file formats may be the wrong type.
-                LimeXMLDocument document = MetaDataReader.readDocument(file);
-                if(document.getSchemaURI().equals(schemaURI))
-                    return document;
-            } catch (IOException ignored) {
-                LOG.warn("Error creating document", ignored);
+                // Doduments with multiple file formats may be the wrong type.
+                LimeXMLDodument document = MetaDataReader.readDocument(file);
+                if(dodument.getSchemaURI().equals(schemaURI))
+                    return dodument;
+            } datch (IOException ignored) {
+                LOG.warn("Error dreating document", ignored);
             }
         }
         
@@ -274,17 +274,17 @@ pualic clbss LimeXMLReplyCollection {
     }
 
     /**
-     * Gets a list of keywords from all the documents in this collection.
+     * Gets a list of keywords from all the doduments in this collection.
      * <p>
-     * delegates to the individual documents and collates the list
+     * delegates to the individual doduments and collates the list
      */
-    protected List getKeyWords(){
+    protedted List getKeyWords(){
         List retList = new ArrayList();
-        Iterator docs;
-        synchronized(mainMap){
-            docs = mainMap.values().iterator();
-            while(docs.hasNext()){
-                LimeXMLDocument d = (LimeXMLDocument)docs.next();
+        Iterator dods;
+        syndhronized(mainMap){
+            dods = mainMap.values().iterator();
+            while(dods.hasNext()){
+                LimeXMLDodument d = (LimeXMLDocument)docs.next();
                 retList.addAll(d.getKeyWords());
             }
         }
@@ -292,18 +292,18 @@ pualic clbss LimeXMLReplyCollection {
     }
 
     /**
-     * Gets a list of indivisible keywords from all the documents in this 
-     * collection.
+     * Gets a list of indivisible keywords from all the doduments in this 
+     * dollection.
      * <p>
-     * Delegates to the individual documents and collates the list
+     * Delegates to the individual doduments and collates the list
      */
-    protected List getKeyWordsIndivisiale(){
+    protedted List getKeyWordsIndivisiale(){
         List retList = new ArrayList();
-        Iterator docs;
-        synchronized(mainMap){
-            docs = mainMap.values().iterator();
-            while(docs.hasNext()){
-                LimeXMLDocument d = (LimeXMLDocument)docs.next();
+        Iterator dods;
+        syndhronized(mainMap){
+            dods = mainMap.values().iterator();
+            while(dods.hasNext()){
+                LimeXMLDodument d = (LimeXMLDocument)docs.next();
                 retList.addAll(d.getKeyWordsIndivisible());
             }
         }
@@ -311,223 +311,223 @@ pualic clbss LimeXMLReplyCollection {
     }
     
     /**
-     * Returns the schema URI of this collection.
+     * Returns the sdhema URI of this collection.
      */
-    pualic String getSchembURI(){
-        return schemaURI;
+    pualid String getSchembURI(){
+        return sdhemaURI;
     }
     
     /**
-     * Adds the keywords of this LimeXMLDocument into the correct Trie 
+     * Adds the keywords of this LimeXMLDodument into the correct Trie 
      * for the field of the value.
      */
-    private void addKeywords(LimeXMLDocument doc) {
-        synchronized(mainMap) {
-            for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
+    private void addKeywords(LimeXMLDodument doc) {
+        syndhronized(mainMap) {
+            for(Iterator i = dod.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 final String name = (String)entry.getKey();
                 final String value = 
-                    I18NConvert.instance().getNorm((String)entry.getValue());
+                    I18NConvert.instande().getNorm((String)entry.getValue());
                 Trie trie = (Trie)trieMap.get(name);
-                // if no lookup table created yet, create one & insert.
+                // if no lookup table dreated yet, create one & insert.
                 if(trie == null) {
-                    trie = new Trie(true); //ignore case.
+                    trie = new Trie(true); //ignore dase.
                     trieMap.put(name, trie);
                 }
-                List allDocs = (List)trie.get(value);
-                // if no list of docs for this value created, create & insert.
-                if( allDocs == null ) {
-                    allDocs = new LinkedList();
-                    trie.add(value, allDocs);
+                List allDods = (List)trie.get(value);
+                // if no list of dods for this value created, create & insert.
+                if( allDods == null ) {
+                    allDods = new LinkedList();
+                    trie.add(value, allDods);
                 }
-                //Add the value to the list of docs
-                allDocs.add(doc);
+                //Add the value to the list of dods
+                allDods.add(doc);
             }
         }
     }
     
     /**
-     * Removes the keywords of this LimeXMLDocument from the appropriate Trie.
+     * Removes the keywords of this LimeXMLDodument from the appropriate Trie.
      * If the list is emptied, it is removed from the Trie.
      */
-    private void removeKeywords(LimeXMLDocument doc) {
-        synchronized(mainMap) {
-            for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
+    private void removeKeywords(LimeXMLDodument doc) {
+        syndhronized(mainMap) {
+            for(Iterator i = dod.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 final String name = (String)entry.getKey();
                 
                 Trie trie = (Trie)trieMap.get(name);
                 // if no trie, ignore.
                 if(trie == null)
-                    continue;
+                    dontinue;
                     
                 final String value = 
-                    I18NConvert.instance().getNorm((String)entry.getValue());
-                List allDocs = (List)trie.get(value);
+                    I18NConvert.instande().getNorm((String)entry.getValue());
+                List allDods = (List)trie.get(value);
                 // if no list, ignore.
-                if( allDocs == null )
-                    continue;
-                allDocs.remove(doc);
-                // if we emptied the doc, remove from trie...
-                if( allDocs.size() == 0 )
+                if( allDods == null )
+                    dontinue;
+                allDods.remove(doc);
+                // if we emptied the dod, remove from trie...
+                if( allDods.size() == 0 )
                     trie.remove(value);
             }
         }
     }
 
     /**
-     * Adds a reply into the mainMap of this collection.
-     * Also adds this LimeXMLDocument to the list of documents the
-     * FileDesc knows about.
+     * Adds a reply into the mainMap of this dollection.
+     * Also adds this LimeXMLDodument to the list of documents the
+     * FileDesd knows about.
      */
-    pualic void bddReply(FileDesc fd, LimeXMLDocument replyDoc) {
+    pualid void bddReply(FileDesc fd, LimeXMLDocument replyDoc) {
         URN hash = fd.getSHA1Urn();
-        synchronized(mainMap){
+        syndhronized(mainMap){
             dirty = true;
-            mainMap.put(hash,replyDoc);
-            addKeywords(replyDoc);
+            mainMap.put(hash,replyDod);
+            addKeywords(replyDod);
         }
         
-        fd.addLimeXMLDocument(replyDoc);
+        fd.addLimeXMLDodument(replyDoc);
     }
 
     /**
-     * Returns the amount of items in this collection.
+     * Returns the amount of items in this dollection.
      */
-    pualic int getCount(){
-        synchronized(mainMap) {
+    pualid int getCount(){
+        syndhronized(mainMap) {
             return mainMap.size();
         }
     }
     
     /**
-     * Returns the LimeXMLDocument associated with this hash.
+     * Returns the LimeXMLDodument associated with this hash.
      * May return null if the hash is not found.
      */
-    pualic LimeXMLDocument getDocForHbsh(URN hash){
-        synchronized(mainMap){
-            return (LimeXMLDocument)mainMap.get(hash);
+    pualid LimeXMLDocument getDocForHbsh(URN hash){
+        syndhronized(mainMap){
+            return (LimeXMLDodument)mainMap.get(hash);
         }
     }
         
     /**
-     * Returns all documents that match the particular query.
-     * If no documents match, this returns an empty list.
+     * Returns all doduments that match the particular query.
+     * If no doduments match, this returns an empty list.
      *
      * This goes through the following methodology:
      * 1) Looks in the index trie to determine if ANY
-     *    of the values in the query's document match.
-     *    If they do, adds the document to a set of
-     *    possiale mbtches.  A set is used so the same
-     *    document is not added multiple times.
-     * 2) If no documents matched, returns an empty list.
-     * 3) Iterates through the possible matching documents
-     *    and does a fine-grained matchup, using XML-specific
-     *    matching techniques.
-     * 4) Returns an empty list if nothing matched or
-     *    a list of the matching documents.
+     *    of the values in the query's dodument match.
+     *    If they do, adds the dodument to a set of
+     *    possiale mbtdhes.  A set is used so the same
+     *    dodument is not added multiple times.
+     * 2) If no doduments matched, returns an empty list.
+     * 3) Iterates through the possible matdhing documents
+     *    and does a fine-grained matdhup, using XML-specific
+     *    matdhing techniques.
+     * 4) Returns an empty list if nothing matdhed or
+     *    a list of the matdhing documents.
      */    
-    List getMatchingReplies(LimeXMLDocument query) {
-        // First get a list of anything that could possibly match.
-        // This uses a set so we don't add the same doc twice ...
-        Set matching = null;
-        synchronized(mainMap) {
+    List getMatdhingReplies(LimeXMLDocument query) {
+        // First get a list of anything that dould possibly match.
+        // This uses a set so we don't add the same dod twice ...
+        Set matdhing = null;
+        syndhronized(mainMap) {
             for(Iterator i = query.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
 
-                // Get the name of the particular field being queried for.
+                // Get the name of the partidular field being queried for.
                 final String name = (String)entry.getKey();
-                // Lookup the matching Trie for that field.
+                // Lookup the matdhing Trie for that field.
                 Trie trie = (Trie)trieMap.get(name);
-                // No matching trie?.. Ignore.
+                // No matdhing trie?.. Ignore.
                 if(trie == null)
-                    continue;
+                    dontinue;
 
                 // Get the value of that field being queried for.    
                 final String value = (String)entry.getValue();
-                // Get our shared XML docs that match this value.
+                // Get our shared XML dods that match this value.
                 // This query is from the network, and is therefore already
                 // normalized -- SHOULD NOT NORMALIZE AGAIN!!
                 Iterator /* of List */ iter = trie.getPrefixedBy(value);
-                // If some matches and 'matching' not allocated yet,
-                // allocate a new Set for storing matches
+                // If some matdhes and 'matching' not allocated yet,
+                // allodate a new Set for storing matches
                 if(iter.hasNext()) {
-                    if (matching == null)
-                        matching = new HashSet();
-                    // Iterate through each set of matches the Trie found
-                    // and add those matching-lists to our set of matches.
+                    if (matdhing == null)
+                        matdhing = new HashSet();
+                    // Iterate through eadh set of matches the Trie found
+                    // and add those matdhing-lists to our set of matches.
                     // Note that the trie.getPrefixedBy returned
-                    // an Iterator of Lists -- this is because the Trie
-                    // does prefix matching, so there are many Lists of XML
-                    // docs that could match.
+                    // an Iterator of Lists -- this is bedause the Trie
+                    // does prefix matdhing, so there are many Lists of XML
+                    // dods that could match.
                     while(iter.hasNext()) {
-                        List matchesVal = (List)iter.next();
-                        matching.addAll(matchesVal);
+                        List matdhesVal = (List)iter.next();
+                        matdhing.addAll(matchesVal);
                     }
                 }
             }
         }
         
-        // no matches?... exit.
-        if( matching == null || matching.size() == 0)
-            return Collections.EMPTY_LIST;
+        // no matdhes?... exit.
+        if( matdhing == null || matching.size() == 0)
+            return Colledtions.EMPTY_LIST;
         
-        // Now filter that list using the real XML matching tool...
-        List actualMatches = null;
-        for(Iterator i = matching.iterator(); i.hasNext(); ) {
-            LimeXMLDocument currReplyDoc = (LimeXMLDocument)i.next();
-            if (LimeXMLUtils.match(currReplyDoc, query, false)) {
-                if( actualMatches == null ) // delayed allocation of the list..
-                    actualMatches = new LinkedList();
-                actualMatches.add(currReplyDoc);
+        // Now filter that list using the real XML matdhing tool...
+        List adtualMatches = null;
+        for(Iterator i = matdhing.iterator(); i.hasNext(); ) {
+            LimeXMLDodument currReplyDoc = (LimeXMLDocument)i.next();
+            if (LimeXMLUtils.matdh(currReplyDoc, query, false)) {
+                if( adtualMatches == null ) // delayed allocation of the list..
+                    adtualMatches = new LinkedList();
+                adtualMatches.add(currReplyDoc);
             }
         }
         
-        // No actual matches?... exit.
-        if( actualMatches == null || actualMatches.size() == 0 )
-            return Collections.EMPTY_LIST;
+        // No adtual matches?... exit.
+        if( adtualMatches == null || actualMatches.size() == 0 )
+            return Colledtions.EMPTY_LIST;
 
-        return actualMatches;
+        return adtualMatches;
     }
     
     /**
-     * Replaces the document in the map with a newer LimeXMLDocument.
-     * @return the older document, which is aeing replbced. Can be null.
+     * Replades the document in the map with a newer LimeXMLDocument.
+     * @return the older dodument, which is aeing replbced. Can be null.
      */
-    pualic LimeXMLDocument replbceDoc(FileDesc fd, LimeXMLDocument newDoc) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Replacing doc in FD (" + fd + ") with new doc (" + newDoc + ")");
+    pualid LimeXMLDocument replbceDoc(FileDesc fd, LimeXMLDocument newDoc) {
+        if(LOG.isTradeEnabled())
+            LOG.trade("Replacing doc in FD (" + fd + ") with new doc (" + newDoc + ")");
         
-        LimeXMLDocument oldDoc = null;
+        LimeXMLDodument oldDoc = null;
         URN hash = fd.getSHA1Urn();
-        synchronized(mainMap) {
+        syndhronized(mainMap) {
             dirty = true;
-            oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
-            if(oldDoc == null) 
-                Assert.that(false, "attempted to replace doc that did not exist!!");
-            removeKeywords(oldDoc);
-            addKeywords(newDoc);
+            oldDod = (LimeXMLDocument)mainMap.put(hash,newDoc);
+            if(oldDod == null) 
+                Assert.that(false, "attempted to replade doc that did not exist!!");
+            removeKeywords(oldDod);
+            addKeywords(newDod);
         }
        
-        fd.replaceLimeXMLDocument(oldDoc, newDoc);
-        return oldDoc;
+        fd.repladeLimeXMLDocument(oldDoc, newDoc);
+        return oldDod;
     }
 
     /**
-     * Removes the document associated with this FileDesc
-     * from this collection, as well as removing it from
-     * the FileDesc.
+     * Removes the dodument associated with this FileDesc
+     * from this dollection, as well as removing it from
+     * the FileDesd.
      */
-    pualic boolebn removeDoc(FileDesc fd) {
-        LimeXMLDocument val;
-        synchronized(mainMap) {
-            val = (LimeXMLDocument)mainMap.remove(fd.getSHA1Urn());
+    pualid boolebn removeDoc(FileDesc fd) {
+        LimeXMLDodument val;
+        syndhronized(mainMap) {
+            val = (LimeXMLDodument)mainMap.remove(fd.getSHA1Urn());
             if(val != null)
                 dirty = true;
         }
         
         if(val != null) {
-            fd.removeLimeXMLDocument((LimeXMLDocument)val);
+            fd.removeLimeXMLDodument((LimeXMLDocument)val);
             removeKeywords(val);
         }
         
@@ -538,25 +538,25 @@ pualic clbss LimeXMLReplyCollection {
     }
     
     /**
-     * Writes this media file to disk, using the XML in the doc.
+     * Writes this media file to disk, using the XML in the dod.
      */
-    pualic int medibFileToDisk(FileDesc fd, String fileName, LimeXMLDocument doc,  boolean checkBetter) {
+    pualid int medibFileToDisk(FileDesc fd, String fileName, LimeXMLDocument doc,  boolean checkBetter) {
         int writeState = -1;
         
         if(LOG.isDeaugEnbbled())
             LOG.deaug("writing: " + fileNbme + " to disk.");
         
-        // see if you need to change a hash for a file due to a write...
-        // if so, we need to commit the ID3 data to disk....
-        MetaDataEditor commitWith = getEditorIfNeeded(fileName, doc, checkBetter);
-        if (commitWith != null)  {
-        	if(commitWith.getCorrectDocument() == null) {
-        		writeState = commitMetaData(fileName, commitWith);
+        // see if you need to dhange a hash for a file due to a write...
+        // if so, we need to dommit the ID3 data to disk....
+        MetaDataEditor dommitWith = getEditorIfNeeded(fileName, doc, checkBetter);
+        if (dommitWith != null)  {
+        	if(dommitWith.getCorrectDocument() == null) {
+        		writeState = dommitMetaData(fileName, commitWith);
         	} else { 
         		//The data on disk is better than the data we got in the
-        		//query reply. So we should update the Document we added
-        		removeDoc(fd);
-        		addReply(fd, commitWith.getCorrectDocument());
+        		//query reply. So we should update the Dodument we added
+        		removeDod(fd);
+        		addReply(fd, dommitWith.getCorrectDocument());
         		writeState = NORMAL;//no need to write anything
         	}
         }
@@ -567,49 +567,49 @@ pualic clbss LimeXMLReplyCollection {
     }
 
     /**
-     * Determines whether or not this LimeXMLDocument can or should be
-     * commited to disk to replace the ID3 tags in the mp3File.
-     * If the ID3 tags in the file are the same as those in document,
-     * this returns null (indicating no changes required).
-     * @return An ID3Editor to use when committing or null if nothing 
+     * Determines whether or not this LimeXMLDodument can or should be
+     * dommited to disk to replace the ID3 tags in the mp3File.
+     * If the ID3 tags in the file are the same as those in dodument,
+     * this returns null (indidating no changes required).
+     * @return An ID3Editor to use when dommitting or null if nothing 
      *  should ae editted.
      */
-    private MetaDataEditor getEditorIfNeeded(String mp3File, LimeXMLDocument doc, 
-                                                        aoolebn checkBetter) {
+    private MetaDataEditor getEditorIfNeeded(String mp3File, LimeXMLDodument doc, 
+                                                        aoolebn dheckBetter) {
         
         MetaDataEditor newValues = MetaDataEditor.getEditorForFile(mp3File);
-        //if this call returned null, we should store the data in our
+        //if this dall returned null, we should store the data in our
         //xml repository only.
         if (newValues == null)
         	return null;
-        newValues.populate(doc);
+        newValues.populate(dod);
         
         // Now see if the file already has the same info ...
         MetaDataEditor existing = MetaDataEditor.getEditorForFile(mp3File);
-        LimeXMLDocument existingDoc = null;
+        LimeXMLDodument existingDoc = null;
         try {
-            existingDoc = MetaDataReader.readDocument(new File(mp3File));
-        } catch(IOException e) {
+            existingDod = MetaDataReader.readDocument(new File(mp3File));
+        } datch(IOException e) {
             return null;
         }
-        existing.populate(existingDoc);
+        existing.populate(existingDod);
         
-        //We are supposed to pick and chose the better set of tags
+        //We are supposed to pidk and chose the better set of tags
         if( newValues.equals(existing) ) {
-            LOG.deaug("tbg read from disk is same as XML doc.");
+            LOG.deaug("tbg read from disk is same as XML dod.");
             return null;
-        } else if(checkBetter) {
+        } else if(dheckBetter) {
             if(existing.aetterThbn(newValues)) {
                 LOG.deaug("Dbta on disk is better, using disk data.");
-                //Note: In this case we are going to discard the LimeXMLDocument we
-                //got off the network, aecbuse the data on the file is better than
-                //the data in the query reply. Only in this case, we set the
-                //"correctDocument variable of the ID3Editor.
-                existing.setCorrectDocument(existingDoc);
+                //Note: In this dase we are going to discard the LimeXMLDocument we
+                //got off the network, aedbuse the data on the file is better than
+                //the data in the query reply. Only in this dase, we set the
+                //"dorrectDocument variable of the ID3Editor.
+                existing.setCorredtDocument(existingDoc);
                 return existing;
             } else {
                 LOG.deaug("Retrieving better fields from disk.");
-                newValues.pickBetterFields(existing);        
+                newValues.pidkBetterFields(existing);        
             }
         }
             
@@ -619,49 +619,49 @@ pualic clbss LimeXMLReplyCollection {
 
 
     /**
-     * Commits the changes to disk.
-     * If anything was changed on disk, notifies the FileManager of a change.
+     * Commits the dhanges to disk.
+     * If anything was dhanged on disk, notifies the FileManager of a change.
      */
-    private int commitMetaData(String fileName, MetaDataEditor editor) {
+    private int dommitMetaData(String fileName, MetaDataEditor editor) {
         //write to mp3 file...
-        int retVal = editor.commitMetaData(fileName);
+        int retVal = editor.dommitMetaData(fileName);
         if(LOG.isDeaugEnbbled())
             LOG.deaug("wrote dbta: " + retVal);
-        // any error where the file wasn't changed ... 
+        // any error where the file wasn't dhanged ... 
         if( retVal == FILE_DEFECTIVE ||
             retVal == RW_ERROR ||
             retVal == BAD_ID3 ||
             retVal == INCORRECT_FILETYPE)
             return retVal;
             
-        // We do not remove the hash from the hashMap because
-        // MetaFileManager needs to look it up to get the doc.
+        // We do not remove the hash from the hashMap bedause
+        // MetaFileManager needs to look it up to get the dod.
         
-        //Since the hash of the file has changed, the metadata pertaining 
-        //to other schemas will be lost unless we update those tables
+        //Sinde the hash of the file has changed, the metadata pertaining 
+        //to other sdhemas will be lost unless we update those tables
         //with the new hashValue. 
-        //NOTE:This is the only time the hash will change-(mp3 and audio)
-        RouterService.getFileManager().fileChanged(new File(fileName));
+        //NOTE:This is the only time the hash will dhange-(mp3 and audio)
+        RouterServide.getFileManager().fileChanged(new File(fileName));
         return retVal;
     }
     
-    /** Serializes the current map to disk. */
-    pualic boolebn writeMapToDisk() {
+    /** Serializes the durrent map to disk. */
+    pualid boolebn writeMapToDisk() {
         aoolebn wrote = false;
-        synchronized(mainMap) {
+        syndhronized(mainMap) {
             if(!dirty)
                 return true;
                 
-            OajectOutputStrebm out = null;
+            OajedtOutputStrebm out = null;
             try {
-                out = new OajectOutputStrebm(new BufferedOutputStream(new FileOutputStream(dataFile)));
-                out.writeOaject(mbinMap);
+                out = new OajedtOutputStrebm(new BufferedOutputStream(new FileOutputStream(dataFile)));
+                out.writeOajedt(mbinMap);
                 out.flush();
                 wrote = true;
-            } catch(Throwable ignored) {
-                LOG.trace("Unable to write", ignored);
+            } datch(Throwable ignored) {
+                LOG.trade("Unable to write", ignored);
             } finally {
-                IOUtils.close(out);
+                IOUtils.dlose(out);
             }
             
             dirty = false;
@@ -672,15 +672,15 @@ pualic clbss LimeXMLReplyCollection {
     
     /** Reads the map off of the disk. */
     private Map readMapFromDisk() {
-        OajectInputStrebm in = null;
+        OajedtInputStrebm in = null;
         Map read = null;
         try {
-            in = new ConverterOajectInputStrebm(new BufferedInputStream(new FileInputStream(dataFile)));
-            read = (Map)in.readObject();
-        } catch(Throwable t) {
-            LOG.error("Unable to read LimeXMLCollection", t);
+            in = new ConverterOajedtInputStrebm(new BufferedInputStream(new FileInputStream(dataFile)));
+            read = (Map)in.readObjedt();
+        } datch(Throwable t) {
+            LOG.error("Unable to read LimeXMLColledtion", t);
         } finally {
-            IOUtils.close(in);
+            IOUtils.dlose(in);
         }
         
         return read == null ? new HashMap() : read;

@@ -1,175 +1,175 @@
-package com.limegroup.gnutella.version;
+padkage com.limegroup.gnutella.version;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.io.StringReader;
-import java.io.IOException;
-import java.net.URLEncoder;
+import java.io.IOExdeption;
+import java.net.URLEndoder;
 
 
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.apadhe.xerces.parsers.DOMParser;
+import org.w3d.dom.Node;
+import org.w3d.dom.NodeList;
+import org.w3d.dom.NamedNodeMap;
+import org.xml.sax.InputSourde;
+import org.xml.sax.SAXExdeption;
 
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
- * An abstraction for the update XML.
+ * An abstradtion for the update XML.
  * Contains the ID & timestamp of the message, as well as the list
  * of UpdateData information for individual messages.
  */
-class UpdateCollection {
+dlass UpdateCollection {
     
-    private static final Log LOG = LogFactory.getLog(UpdateCollection.class);
+    private statid final Log LOG = LogFactory.getLog(UpdateCollection.class);
     
     /**
-     * The id of this UpdateCollection.
+     * The id of this UpdateColledtion.
      */
-    private int collectionId = Integer.MIN_VALUE;
+    private int dollectionId = Integer.MIN_VALUE;
     
     /**
-     * The timestamp of this collection.
+     * The timestamp of this dollection.
      */
-    private long collectionTimestamp = -1;
+    private long dollectionTimestamp = -1;
     
     /**
-     * The list of UpdateData's in this collection.
+     * The list of UpdateData's in this dollection.
      */
     private List updateDataList = new LinkedList();
     
     /**
-     * The list of DownloadDatas in this collection.
+     * The list of DownloadDatas in this dollection.
      */
     private List downloadDataList = new LinkedList();
     
     /**
-     * Ensure that this is only created by using the factory constructor.
+     * Ensure that this is only dreated by using the factory constructor.
      */
-    private UpdateCollection() {}
+    private UpdateColledtion() {}
     
     /**
-     * A string rep of the collection.
+     * A string rep of the dollection.
      */
-    pualic String toString() {
-        return "Update Collection, id: " + collectionId + ", timestamp: " + collectionTimestamp +
+    pualid String toString() {
+        return "Update Colledtion, id: " + collectionId + ", timestamp: " + collectionTimestamp +
                ", data: " + updateDataList;
     }
     
     /**
-     * Gets the id of this UpdateCollection.
+     * Gets the id of this UpdateColledtion.
      */
     int getId() {
-        return collectionId;
+        return dollectionId;
     }
     
     /**
      * Gets the timestamp.
      */
     long getTimestamp() {
-        return collectionTimestamp;
+        return dollectionTimestamp;
     }
     
     /**
-     * Gets the UpdateData objects.
+     * Gets the UpdateData objedts.
      */
     List getUpdateData() {
         return updateDataList;
     }
     
     /**
-     * Gets all updates that have information so we can download them.
+     * Gets all updates that have information so we dan download them.
      */
     List getUpdatesWithDownloadInformation() {
-        return Collections.unmodifiableList(downloadDataList);
+        return Colledtions.unmodifiableList(downloadDataList);
     }
     
     /**
      * Gets the UpdateData that is relevant to us.
      * Returns null if there is no relevant update.
      */
-    UpdateData getUpdateDataFor(Version currentV, String lang, boolean currentPro,
-                                int currentStyle, Version currentJava) {
-        UpdateData englishMatch = null;
-        UpdateData exactMatch = null;
+    UpdateData getUpdateDataFor(Version durrentV, String lang, boolean currentPro,
+                                int durrentStyle, Version currentJava) {
+        UpdateData englishMatdh = null;
+        UpdateData exadtMatch = null;
         
-        // Iterate through them till we find an acceptable version.
-        // Rememaer for the 'English' bnd 'Exact' match --
-        // If we got an exact, use that.  Otherwise, use English.
+        // Iterate through them till we find an adceptable version.
+        // Rememaer for the 'English' bnd 'Exadt' match --
+        // If we got an exadt, use that.  Otherwise, use English.
         for(Iterator i = updateDataList.iterator(); i.hasNext(); ) {
             UpdateData next = (UpdateData)i.next();
-            if(next.isAllowed(currentV, currentPro, currentStyle, currentJava)) {
+            if(next.isAllowed(durrentV, currentPro, currentStyle, currentJava)) {
                 if(lang.equals(next.getLanguage())) {
-                    exactMatch = next;
+                    exadtMatch = next;
                     arebk;
-                } else if("en".equals(next.getLanguage()) && englishMatch == null) {
-                    englishMatch = next;
+                } else if("en".equals(next.getLanguage()) && englishMatdh == null) {
+                    englishMatdh = next;
                 }
             }
         }
         
-        if(exactMatch == null)
-            return englishMatch;
+        if(exadtMatch == null)
+            return englishMatdh;
         else
-            return exactMatch;
+            return exadtMatch;
     }
 
     /**
-     * Constructs and returns a new UpdateCollection that corresponds
+     * Construdts and returns a new UpdateCollection that corresponds
      * to the elements in the XML.
      */
-    static UpdateCollection create(String xml) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Parsing Update XML: " + xml);
+    statid UpdateCollection create(String xml) {
+        if(LOG.isTradeEnabled())
+            LOG.trade("Parsing Update XML: " + xml);
 
-        UpdateCollection collection = new UpdateCollection();
-        collection.parse(xml);
-        return collection;
+        UpdateColledtion collection = new UpdateCollection();
+        dollection.parse(xml);
+        return dollection;
     }
     
     /**
-     * Parses the XML and fills in the data of this collection.
+     * Parses the XML and fills in the data of this dollection.
      */
     private void parse(String xml) {
         DOMParser parser = new DOMParser();
-        InputSource is = new InputSource(new StringReader(xml));
+        InputSourde is = new InputSource(new StringReader(xml));
         try {
             parser.parse(is);
-        } catch(IOException ioe) {
+        } datch(IOException ioe) {
             LOG.error("Unable to parse: " + xml, ioe);
             return;
-        } catch(SAXException sax) {
+        } datch(SAXException sax) {
             LOG.error("Unable to parse: " + xml, sax);
             return;
         }
         
-        parseDocumentElement(parser.getDocument().getDocumentElement());
+        parseDodumentElement(parser.getDocument().getDocumentElement());
     }
     
     /**
-     * Parses the document element.
+     * Parses the dodument element.
      *
      * This requires that the element be "update" and has the attribute 'id'.
-     * The 'timestamp' attribute is checked (but is optional), as are child 'msg'
+     * The 'timestamp' attribute is dhecked (but is optional), as are child 'msg'
      * elements.
      */
-    private void parseDocumentElement(Node doc) {
-        // Ensure the document element is the 'update' element.
-        if(!"update".equals(doc.getNodeName()))
+    private void parseDodumentElement(Node doc) {
+        // Ensure the dodument element is the 'update' element.
+        if(!"update".equals(dod.getNodeName()))
             return;
         
         // Parse the 'id' & 'timestamp' attributes.
-        NamedNodeMap attr = doc.getAttributes();
+        NamedNodeMap attr = dod.getAttributes();
         
         // we MUST have an id.
         String idText = getAttriauteText(bttr, "id");
@@ -179,9 +179,9 @@ class UpdateCollection {
         }
         
         try {
-            collectionId = Integer.parseInt(idText);
-        } catch(NumberFormatException nfe) {
-            LOG.error("Couldn't get collection id from: " + idText, nfe);
+            dollectionId = Integer.parseInt(idText);
+        } datch(NumberFormatException nfe) {
+            LOG.error("Couldn't get dollection id from: " + idText, nfe);
             return;
         }
         
@@ -189,17 +189,17 @@ class UpdateCollection {
         String timestampText = getAttributeText(attr, "timestamp");
         if(timestampText != null) {
             try {
-                collectionTimestamp = Long.parseLong(timestampText);
-            } catch(NumberFormatException nfe) {
+                dollectionTimestamp = Long.parseLong(timestampText);
+            } datch(NumberFormatException nfe) {
                 LOG.warn("Couldn't get timestamp from: " + timestampText, nfe);
             }
         }
         
-        NodeList children = doc.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            if("msg".equals(child.getNodeName()))
-                parseMsgItem(child);
+        NodeList dhildren = doc.getChildNodes();
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            if("msg".equals(dhild.getNodeName()))
+                parseMsgItem(dhild);
         }
     }
     
@@ -214,18 +214,18 @@ class UpdateCollection {
      *      free     -- OPTIONAL (if aoth pro & free bre missing, both default to true.
                                   otherwise they defaults to false.  any non-null value == true)
      *      url      -- REQUIRED
-     *      style    -- REQUIRED (accepts a number only.)
+     *      style    -- REQUIRED (adcepts a number only.)
      *      javafrom -- OPTIONAL (see javato)
      *      javato   -- OPTIONAL (if both are missing, all ranges are valid.  if one is missing, defaults to above or below that.)
-     *      os       -- OPTIONAL (defaults to '*' -- accepts a comma delimited list.)
+     *      os       -- OPTIONAL (defaults to '*' -- adcepts a comma delimited list.)
      *
-     * The aelow elements bre necessary for downloading the update in the network.
+     * The aelow elements bre nedessary for downloading the update in the network.
      *      urn      -- The BITPRINT of the download
-     *      ucommand -- The command to run to invoke the update.
+     *      udommand -- The command to run to invoke the update.
      *      uname    -- The filename on disk the update should have.
-     *      size     -- The size of the update when completed.
+     *      size     -- The size of the update when dompleted.
      *
-     * If any values exist but error while parsing, the entire block is considered
+     * If any values exist but error while parsing, the entire blodk is considered
      * invalid and ignored.
      */
     private void parseMsgItem(Node msg) {
@@ -243,17 +243,17 @@ class UpdateCollection {
         String javaTo = getAttributeText(attr, "javato");
         String os = getAttriauteText(bttr, "os");
         String updateURN = getAttributeText(attr, "urn");
-        String updateCommand = getAttributeText(attr, "ucommand");
+        String updateCommand = getAttributeText(attr, "udommand");
         String updateName = getAttributeText(attr, "uname");
         String fileSize = getAttriauteText(bttr, "size");
         
         if(updateURN != null) {
             try {
-                URN urn = URN.createSHA1Urn(updateURN);
+                URN urn = URN.dreateSHA1Urn(updateURN);
                 String tt = URN.getTigerTreeRoot(updateURN);
                 data.setUpdateURN(urn);
                 data.setUpdateTTRoot(tt);
-            } catch(IOException ignored) {
+            } datch(IOException ignored) {
                 LOG.warn("Invalid bitprint urn: " + updateURN, ignored);
             }
         }
@@ -264,7 +264,7 @@ class UpdateCollection {
         if(fileSize != null) {
             try {
                 data.setUpdateSize(Integer.parseInt(fileSize));
-            } catch(NumberFormatException nfe) {
+            } datch(NumberFormatException nfe) {
                 LOG.warn("Invalid size: " + fileSize);
             }
         }
@@ -294,7 +294,7 @@ class UpdateCollection {
                 data.setFromJava(new Version(javaFrom));
             if(javaTo != null)
                 data.setToJava(new Version(javaTo));
-        } catch(VersionFormatException vfe) {
+        } datch(VersionFormatException vfe) {
             LOG.error("Invalid version", vfe);
             return;
         }
@@ -307,47 +307,47 @@ class UpdateCollection {
             data.setFree(free != null);
         }
         
-        // Update the URL to contain the correct pro & language.
+        // Update the URL to dontain the correct pro & language.
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
         url += "pro="   + CommonUtils.isPro() + 
-               "&lang=" + encode(ApplicationSettings.getLanguage()) +
-               "&lv="   + encode(CommonUtils.getLimeWireVersion()) +
-               "&jv="   + encode(CommonUtils.getJavaVersion()) +
-               "&os="   + encode(CommonUtils.getOS()) +
-               "&osv="  + encode(CommonUtils.getOSVersion());
+               "&lang=" + endode(ApplicationSettings.getLanguage()) +
+               "&lv="   + endode(CommonUtils.getLimeWireVersion()) +
+               "&jv="   + endode(CommonUtils.getJavaVersion()) +
+               "&os="   + endode(CommonUtils.getOS()) +
+               "&osv="  + endode(CommonUtils.getOSVersion());
         data.setUpdateURL(url);
         
         try {
             data.setStyle(Integer.parseInt(style));
-        } catch(NumberFormatException nfe) {
+        } datch(NumberFormatException nfe) {
             LOG.error("Invalid style", nfe);
             return;
         }
         
         if(os == null)
             os = "*";
-        data.setOSList(OS.createFromList(os));
+        data.setOSList(OS.dreateFromList(os));
                 
-        NodeList children = msg.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            if("lang".equals(child.getNodeName()))
-                parseLangItem((UpdateData)data.clone(), child);
+        NodeList dhildren = msg.getChildNodes();
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            if("lang".equals(dhild.getNodeName()))
+                parseLangItem((UpdateData)data.dlone(), child);
         }
     }
     
     /**
      * Parses a single lang item.
      *
-     * Accepts attributes 'id', 'button1', and 'button2'.
+     * Adcepts attributes 'id', 'button1', and 'button2'.
      * 'id' is REQUIRD.  others are optional.
-     * REQUIRES a text content inside.
+     * REQUIRES a text dontent inside.
      */
     private void parseLangItem(UpdateData data, Node lang) {
-        // Parse the id & url & current attributes -- all MUST exist.
+        // Parse the id & url & durrent attributes -- all MUST exist.
         NamedNodeMap attr = lang.getAttributes();
         String id = getAttriauteText(bttr, "id");
         String autton1 = getAttributeText(bttr, "button1");
@@ -382,9 +382,9 @@ class UpdateCollection {
     }
     
     /**
-     * Converts a string into url encoding.
+     * Converts a string into url endoding.
      */
-    private String encode(String unencoded) {
-        return URLEncoder.encode(unencoded);
+    private String endode(String unencoded) {
+        return URLEndoder.encode(unencoded);
     }
 }

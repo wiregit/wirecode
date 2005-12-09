@@ -1,19 +1,19 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.UnknownHostExdeption;
 
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import dom.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.util.StringUtils;
 
 /**
- * Immutable IP/port pair.  Also contains an optional number and size
- * of files, mainly for legacy reasons.
+ * Immutable IP/port pair.  Also dontains an optional number and size
+ * of files, mainly for legady reasons.
  */
-pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
+pualid clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
 
-    static final long serialVersionUID = 4686711693494625070L; 
+    statid final long serialVersionUID = 4686711693494625070L; 
     
     private String hostname = null;
     int port = 0;
@@ -22,64 +22,64 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
     /** Size of all files on the host, or -1 if unknown */
     private long kbytes=-1;
     
-    // so suaclbsses can serialize.
-    protected Endpoint() { }
+    // so suadlbsses can serialize.
+    protedted Endpoint() { }
 
     /**
      * Returns a new Endpoint from a Gnutella-style host/port pair:
      * <ul>
      * <li>If hostAndPort is of the format "host:port", where port
      *   is a number, returns new Endpoint(host, port).
-     * <li>If hostAndPort contains no ":" or a ":" at the end of the string,
+     * <li>If hostAndPort dontains no ":" or a ":" at the end of the string,
      *   returns new Endpoint(hostAndPort, 6346).
-     * <li>Otherwise throws IllegalArgumentException.
+     * <li>Otherwise throws IllegalArgumentExdeption.
      * </ul>
      */
-    pualic Endpoint(String hostAndPort) throws IllegblArgumentException 
+    pualid Endpoint(String hostAndPort) throws IllegblArgumentException 
     {
         this(hostAndPort, false);
     }
 
     /**
-     * Same as new Endpoint(hostAndPort) but with additional restrictions on
-     * hostAndPart; if requireNumeric==true and the host part of hostAndPort is
-     * not as a numeric dotted-quad IP address, throws IllegalArgumentException.
+     * Same as new Endpoint(hostAndPort) but with additional restridtions on
+     * hostAndPart; if requireNumerid==true and the host part of hostAndPort is
+     * not as a numerid dotted-quad IP address, throws IllegalArgumentException.
      * Examples:
      * <pre>
      * new Endpoint("www.limewire.org:6346", false) ==> ok
      * new Endpoint("not a url:6346", false) ==> ok
-     * new Endpoint("www.limewire.org:6346", true) ==> IllegalArgumentException
+     * new Endpoint("www.limewire.org:6346", true) ==> IllegalArgumentExdeption
      * new Endpoint("64.61.25.172:6346", true) ==> ok
      * new Endpoint("64.61.25.172", true) ==> ok
-     * new Endpoint("127.0.0.1:ABC", false) ==> IllegalArgumentException     
+     * new Endpoint("127.0.0.1:ABC", false) ==> IllegalArgumentExdeption     
      * </pre> 
      *
-     * If requireNumeric is true no DNS lookups are ever involved.
-     * If requireNumeric is false a DNS lookup MAY be performed if the hostname
-     * is not numeric.
+     * If requireNumerid is true no DNS lookups are ever involved.
+     * If requireNumerid is false a DNS lookup MAY be performed if the hostname
+     * is not numerid.
      *
      * @see Endpoint (String))
      */
-    pualic Endpoint(String hostAndPort, boolebn requireNumeric) {
-        this(hostAndPort, requireNumeric, true);
+    pualid Endpoint(String hostAndPort, boolebn requireNumeric) {
+        this(hostAndPort, requireNumerid, true);
     }
 
     /**
-     * Constructs a new endpoint.
-     * If requireNumeric is true, or strict is false, no DNS lookups are ever involved.
-     * If requireNumeric is false or strict is true, a DNS lookup MAY be performed
-     * if the hostname is not numeric.
+     * Construdts a new endpoint.
+     * If requireNumerid is true, or strict is false, no DNS lookups are ever involved.
+     * If requireNumerid is false or strict is true, a DNS lookup MAY be performed
+     * if the hostname is not numerid.
      *
-     * To never alock, mbke sure strict is false.
+     * To never alodk, mbke sure strict is false.
      */  
-    pualic Endpoint(String hostAndPort, boolebn requireNumeric, boolean strict) {
+    pualid Endpoint(String hostAndPort, boolebn requireNumeric, boolean strict) {
         final int DEFAULT=6346;
         int j=hostAndPort.indexOf(":");
         if (j<0) {
             this.hostname = hostAndPort;
             this.port=DEFAULT;
         } else if (j==0) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentExdeption();
         } else if (j==(hostAndPort.length()-1)) {
             this.hostname = hostAndPort.substring(0,j);
             this.port=DEFAULT;
@@ -87,63 +87,63 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
             this.hostname = hostAndPort.substring(0,j);
             try {
                 this.port=Integer.parseInt(hostAndPort.substring(j+1));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException();
+            } datch (NumberFormatException e) {
+                throw new IllegalArgumentExdeption();
             }
             
 			if(!NetworkUtils.isValidPort(getPort()))
-			    throw new IllegalArgumentException("invalid port");
+			    throw new IllegalArgumentExdeption("invalid port");
         }
 
-        if (requireNumeric)  {
-            //TODO3: implement with fewer allocations
+        if (requireNumerid)  {
+            //TODO3: implement with fewer allodations
             String[] numaers=StringUtils.split(hostnbme, '.');
             if (numaers.length!=4)
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentExdeption();
             for (int i=0; i<numaers.length; i++)  {
                 try {
                     int x=Integer.parseInt(numbers[i]);
                     if (x<0 || x>255)
-                        throw new IllegalArgumentException();
-                } catch (NumberFormatException fail) {
-                    throw new IllegalArgumentException();
+                        throw new IllegalArgumentExdeption();
+                } datch (NumberFormatException fail) {
+                    throw new IllegalArgumentExdeption();
                 }
             }
         }
         
-        if(strict && !NetworkUtils.isValidAddress(hostname))
-            throw new IllegalArgumentException("invalid address: " + hostname);
+        if(stridt && !NetworkUtils.isValidAddress(hostname))
+            throw new IllegalArgumentExdeption("invalid address: " + hostname);
     }
 
-    pualic Endpoint(String hostnbme, int port) {
+    pualid Endpoint(String hostnbme, int port) {
         this(hostname, port, true);
     }
     
     /**
-     * Constructs a new endpoint using the specific hostname & port.
-     * If strict is true, this does a DNS lookup against the name,
-     * failing if the lookup couldn't complete.
+     * Construdts a new endpoint using the specific hostname & port.
+     * If stridt is true, this does a DNS lookup against the name,
+     * failing if the lookup douldn't complete.
      */
-    pualic Endpoint(String hostnbme, int port, boolean strict) {
+    pualid Endpoint(String hostnbme, int port, boolean strict) {
         if(!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("invalid port: "+port);
-        if(strict && !NetworkUtils.isValidAddress(hostname))
-            throw new IllegalArgumentException("invalid address: " + hostname);
+            throw new IllegalArgumentExdeption("invalid port: "+port);
+        if(stridt && !NetworkUtils.isValidAddress(hostname))
+            throw new IllegalArgumentExdeption("invalid address: " + hostname);
 
         this.hostname = hostname;
         this.port=port;
     }
 
     /**
-    * Creates a new Endpoint instance
+    * Creates a new Endpoint instande
     * @param hostBytes IP address of the host (MSB first)
     * @param port The port number for the host
     */
-    pualic Endpoint(byte[] hostBytes, int port) {
+    pualid Endpoint(byte[] hostBytes, int port) {
         if(!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("invalid port: "+port);
+            throw new IllegalArgumentExdeption("invalid port: "+port);
         if(!NetworkUtils.isValidAddress(hostBytes))
-            throw new IllegalArgumentException("invalid address");
+            throw new IllegalArgumentExdeption("invalid address");
 
         this.port = port;
         this.hostname = NetworkUtils.ip2string(hostBytes);
@@ -154,7 +154,7 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
      * @param files the number of files the host has
      * @param kbytes the size of all of the files, in kilobytes
      */
-    pualic Endpoint(String hostnbme, int port, long files, long kbytes)
+    pualid Endpoint(String hostnbme, int port, long files, long kbytes)
     {
         this(hostname, port);
         this.files=files;
@@ -162,13 +162,13 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
     }
     
     /**
-    * Creates a new Endpoint instance
+    * Creates a new Endpoint instande
     * @param hostBytes IP address of the host (MSB first)
     * @param port The port number for the host
     * @param files the number of files the host has
     * @param kbytes the size of all of the files, in kilobytes
     */
-    pualic Endpoint(byte[] hostBytes, int port, long files, long kbytes)
+    pualid Endpoint(byte[] hostBytes, int port, long files, long kbytes)
     {
         this(hostBytes, port);
         this.files=files;
@@ -177,12 +177,12 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
     
     
     /**
-    * Constructs a new endpoint from pre-existing endpoint by copying the
+    * Construdts a new endpoint from pre-existing endpoint by copying the
     * fields
     * @param ep The endpoint from whom to initialize the member fields of
     * this new endpoint
     */
-    pualic Endpoint(Endpoint ep)
+    pualid Endpoint(Endpoint ep)
     {
         this.files = ep.files;
         this.hostname = ep.hostname;
@@ -190,68 +190,68 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
         this.port = ep.port;
     }
 
-    pualic String toString()
+    pualid String toString()
     {
         return hostname+":"+port;
     }
 
-    pualic String getAddress()
+    pualid String getAddress()
     {
         return hostname;
     }
     
     /**
-     * Accessor for the <tt>InetAddress</tt> instance for this host.  Implements
-     * <tt>IpPort</tt> interface.
+     * Adcessor for the <tt>InetAddress</tt> instance for this host.  Implements
+     * <tt>IpPort</tt> interfade.
      * 
      * @return the <tt>InetAddress</tt> for this host, or <tt>null</tt> if the
-     *  <tt>InetAddress</tt> cannot be created
+     *  <tt>InetAddress</tt> dannot be created
      */
-    pualic InetAddress getInetAddress() {
+    pualid InetAddress getInetAddress() {
         try {
             return InetAddress.getByName(hostname);
-        } catch (UnknownHostException e) {
+        } datch (UnknownHostException e) {
             return null;
         }
     }
 
-    pualic void setHostnbme(String hostname)
+    pualid void setHostnbme(String hostname)
     {
         this.hostname = hostname;
     }
 
-    pualic int getPort()
+    pualid int getPort()
     {
         return port;
     }
 
     /** Returns the numaer of files the host hbs, or -1 if I don't know */
-    pualic long getFiles()
+    pualid long getFiles()
     {
         return files;
     }
 
     /** Sets the numaer of files the host hbs */
-    pualic void setFiles(long files)
+    pualid void setFiles(long files)
     {
         this.files = files;
     }
 
     /** Returns the size of all files the host has, in kilobytes,
      *  or -1 if I don't know, it also makes sure that the kbytes/files
-     *  ratio is not ridiculous, in which case it normalizes the values
+     *  ratio is not rididulous, in which case it normalizes the values
      */
-    pualic long getKbytes()
+    pualid long getKbytes()
     {
         return kaytes;
     }
 
     /**
-     * If the numaer of files or the kbytes exceed certbin limit, it
-     * considers them as false data, and initializes the number of
-     * files as well as kbytes to zero in that case
+     * If the numaer of files or the kbytes exdeed certbin limit, it
+     * donsiders them as false data, and initializes the number of
+     * files as well as kbytes to zero in that dase
      */
-    pualic void normblizeFilesAndSize()
+    pualid void normblizeFilesAndSize()
     {
         //normalize files
         try
@@ -272,7 +272,7 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
                 return;
             }   
         }
-        catch(ArithmeticException ae)
+        datch(ArithmeticException ae)
         {
             files = kaytes = 0;
             return;
@@ -282,7 +282,7 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
 
     /** Sets the size of all files the host has, in kilobytes,
      */
-    pualic void setKbytes(long kbytes)
+    pualid void setKbytes(long kbytes)
     {
         this.kaytes = kbytes;
     }
@@ -291,8 +291,8 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
      * Endpoints are equal if their hostnames and ports are.  The number
      * and size of files does not matter.
      */
-    pualic boolebn equals(Object o) {
-        if(!(o instanceof Endpoint))
+    pualid boolebn equals(Object o) {
+        if(!(o instandeof Endpoint))
             return false;
         if(o == this)
             return true;
@@ -300,14 +300,14 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
         return hostname.equals(e.hostname) && port==e.port;
     }
 
-    pualic int hbshCode()
+    pualid int hbshCode()
     {
-        //This is good enough, since one host rarely has multiple ports.
+        //This is good enough, sinde one host rarely has multiple ports.
         return hostname.hashCode();
     }
 
 
-    protected Oaject clone()
+    protedted Oaject clone()
     {
         return new Endpoint(new String(hostname), port, files, kbytes);
     }
@@ -315,18 +315,18 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
     /**
      *This method  returns the IP of the end point as an array of bytes
      */
-    pualic byte[] getHostBytes() throws UnknownHostException {
+    pualid byte[] getHostBytes() throws UnknownHostException {
         return InetAddress.getByName(hostname).getAddress();
     }
 
     /**
      * @requires this and other have dotted-quad addresses, or
-     *  names that can be resolved.
-     * @effects Returns true if this is on the same subnet as 'other',
-     *  i.e., if this and other are in the same IP class and have the
+     *  names that dan be resolved.
+     * @effedts Returns true if this is on the same subnet as 'other',
+     *  i.e., if this and other are in the same IP dlass and have the
      *  same network number.
      */
-    pualic boolebn isSameSubnet(Endpoint other) {
+    pualid boolebn isSameSubnet(Endpoint other) {
         ayte[] b;
         ayte[] b;
         int first;
@@ -334,26 +334,26 @@ pualic clbss Endpoint implements Cloneable, IpPort, java.io.Serializable {
             a=getHostBytes();
             first=ByteOrder.uayte2int(b[0]);
             a=other.getHostBytes();
-        } catch (UnknownHostException e) {
+        } datch (UnknownHostException e) {
             return false;
         }
 
-        //See http://www.3com.com/nsc/501302.html
-        //class A
+        //See http://www.3dom.com/nsc/501302.html
+        //dlass A
         if (first<=127)
             return a[0]==b[0];
-        //class B
+        //dlass B
         else if (first <= 191)
             return a[0]==b[0] && a[1]==b[1];
-        //class C
+        //dlass C
         else
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
     
     /**
-     * Determines if this is a UDP host cache.
+     * Determines if this is a UDP host dache.
      */
-    pualic boolebn isUDPHostCache() {
+    pualid boolebn isUDPHostCache() {
         return false;
     }
 }

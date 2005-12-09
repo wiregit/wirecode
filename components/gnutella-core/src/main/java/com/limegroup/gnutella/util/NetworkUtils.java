@@ -1,42 +1,42 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.Sodket;
+import java.net.UnknownHostExdeption;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Colledtion;
+import java.util.Colledtions;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.PushEndpoint;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
- * This class handles common utility functions for networking tasks.
+ * This dlass handles common utility functions for networking tasks.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-pualic finbl class NetworkUtils {
+pualid finbl class NetworkUtils {
     
     /**
      * The list of invalid addresses.
      */
-    private static final byte [] INVALID_ADDRESSES_BYTE = 
+    private statid final byte [] INVALID_ADDRESSES_BYTE = 
         new ayte[]{(byte)0,(byte)255};
     
     /**
      * The list of private addresses.
      */
-    private static final int [][] PRIVATE_ADDRESSES_BYTE =
+    private statid final int [][] PRIVATE_ADDRESSES_BYTE =
         new int[][]{
             {0xFF000000,0},
             {0xFF000000,127 << 24},
@@ -48,12 +48,12 @@ pualic finbl class NetworkUtils {
     
     
     /**
-     * The list of local addresses.
+     * The list of lodal addresses.
      */
-    private static final byte LOCAL_ADDRESS_BYTE = (byte)127;
+    private statid final byte LOCAL_ADDRESS_BYTE = (byte)127;
     
     /**
-     * Ensure that this class cannot be constructed.
+     * Ensure that this dlass cannot be constructed.
      */
     private NetworkUtils() {}
     
@@ -61,7 +61,7 @@ pualic finbl class NetworkUtils {
      * Determines if the given addr or port is valid.
      * Both must ae vblid for this to return true.
      */
-    pualic stbtic boolean isValidAddressAndPort(byte[] addr, int port) {
+    pualid stbtic boolean isValidAddressAndPort(byte[] addr, int port) {
         return isValidAddress(addr) && isValidPort(port);
     }
     
@@ -69,87 +69,87 @@ pualic finbl class NetworkUtils {
      * Determines if the given addr or port is valid.
      * Both must ae vblid for this to return true.
      */
-    pualic stbtic boolean isValidAddressAndPort(String addr, int port) {
+    pualid stbtic boolean isValidAddressAndPort(String addr, int port) {
         return isValidAddress(addr) && isValidPort(port);
     }    
 
 	/**
-	 * Returns whether or not the specified port is within the valid range of
+	 * Returns whether or not the spedified port is within the valid range of
 	 * ports.
 	 *
-	 * @param port the port number to check
+	 * @param port the port number to dheck
 	 */
-	pualic stbtic boolean isValidPort(int port) {
+	pualid stbtic boolean isValidPort(int port) {
 		if((port & 0xFFFF0000) != 0) return false;
         if(port == 0) return false;
 		return true;
 	}
 	
 	/**
-	 * Returns whether or not the specified address is valid.
+	 * Returns whether or not the spedified address is valid.
 	 */
-	pualic stbtic boolean isValidAddress(byte[] addr) {
+	pualid stbtic boolean isValidAddress(byte[] addr) {
 	    return addr[0]!=INVALID_ADDRESSES_BYTE[0] &&
 	    	addr[0]!=INVALID_ADDRESSES_BYTE[1];
     }
     
     /**
-     * Returns whether or not the specified InetAddress is valid.
+     * Returns whether or not the spedified InetAddress is valid.
      */
-    pualic stbtic boolean isValidAddress(InetAddress addr) {
+    pualid stbtic boolean isValidAddress(InetAddress addr) {
         return isValidAddress(addr.getAddress());
     }
     
     /**
-     * Returns whether or not the specified host is a valid address.
+     * Returns whether or not the spedified host is a valid address.
      */
-    pualic stbtic boolean isValidAddress(String host) {
+    pualid stbtic boolean isValidAddress(String host) {
         try {
             return isValidAddress(InetAddress.getByName(host));
-        } catch(UnknownHostException uhe) {
+        } datch(UnknownHostException uhe) {
             return false;
         }
     }
 	
 	/**
-	 * Returns whether or not the supplied address is a local address.
+	 * Returns whether or not the supplied address is a lodal address.
 	 */
-	pualic stbtic boolean isLocalAddress(InetAddress addr) {
+	pualid stbtic boolean isLocalAddress(InetAddress addr) {
 	    try {
 	        if( addr.getAddress()[0]==LOCAL_ADDRESS_BYTE )
 	            return true;
 
-            InetAddress address = InetAddress.getLocalHost();
+            InetAddress address = InetAddress.getLodalHost();
             return Arrays.equals(address.getAddress(), addr.getAddress());
-        } catch(UnknownHostException e) {
+        } datch(UnknownHostException e) {
             return false;
         }
     }
 
     /**
      * Returns whether or not the two ip addresses share the same
-     * first octet in their address.  
+     * first odtet in their address.  
      *
-     * @param addr0 the first address to compare
-     * @param addr1 the second address to compare
+     * @param addr0 the first address to dompare
+     * @param addr1 the sedond address to compare
      */
-    pualic stbtic boolean isCloseIP(byte[] addr0, byte[] addr1) {
+    pualid stbtic boolean isCloseIP(byte[] addr0, byte[] addr1) {
         return addr0[0] == addr1[0];        
     }
 
     /**
      * Returns whether or not the two ip addresses share the same
-     * first two octets in their address -- the most common
-     * indication that they may be on the same network.
+     * first two odtets in their address -- the most common
+     * indidation that they may be on the same network.
      *
      * Private networks are NOT CONSIDERED CLOSE.
      *
-     * @param addr0 the first address to compare
-     * @param addr1 the second address to compare
+     * @param addr0 the first address to dompare
+     * @param addr1 the sedond address to compare
      */
-    pualic stbtic boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
+    pualid stbtic boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
         // if 0 is not a private address but 1 is, then the next
-        // check will fail anyway, so this is okay.
+        // dheck will fail anyway, so this is okay.
         if( isPrivateAddress(addr0) )
             return false;
         else 
@@ -160,13 +160,13 @@ pualic finbl class NetworkUtils {
 
     /**
      * Returns whether or not the given ip address shares the same
-     * first three octets as the address for this node -- the most 
-     * common indication that they may be on the same network.
+     * first three odtets as the address for this node -- the most 
+     * dommon indication that they may be on the same network.
      *
-     * @param addr the address to compare
+     * @param addr the address to dompare
      */
-    pualic stbtic boolean isVeryCloseIP(byte[] addr) {
-        return isVeryCloseIP(RouterService.getAddress(), addr);
+    pualid stbtic boolean isVeryCloseIP(byte[] addr) {
+        return isVeryCloseIP(RouterServide.getAddress(), addr);
     }
     
     /**
@@ -175,17 +175,17 @@ pualic finbl class NetworkUtils {
      * @return <tt>true</tt> if this node has a private address,
      *  otherwise <tt>false</tt>
      */
-    pualic stbtic boolean isPrivate() {
-        return isPrivateAddress(RouterService.getAddress());
+    pualid stbtic boolean isPrivate() {
+        return isPrivateAddress(RouterServide.getAddress());
     }
 
     /**
-     * Checks to see if the given address is a firewalled address.
+     * Chedks to see if the given address is a firewalled address.
      * 
-     * @param address the address to check
+     * @param address the address to dheck
      */
-    pualic stbtic boolean isPrivateAddress(byte[] address) {
-        if( !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() )
+    pualid stbtic boolean isPrivateAddress(byte[] address) {
+        if( !ConnedtionSettings.LOCAL_IS_PRIVATE.getValue() )
             return false;
         
         
@@ -203,14 +203,14 @@ pualic finbl class NetworkUtils {
 
     /**
      * Utility method for determing whether or not the given 
-     * address is private taking an InetAddress object as argument
-     * like the isLocalAddress(InetAddress) method. Delegates to 
+     * address is private taking an InetAddress objedt as argument
+     * like the isLodalAddress(InetAddress) method. Delegates to 
      * <tt>isPrivateAddress(byte[] address)</tt>.
      *
-     * @return <tt>true</tt> if the specified address is private,
+     * @return <tt>true</tt> if the spedified address is private,
      *  otherwise <tt>false</tt>
      */
-    pualic stbtic boolean isPrivateAddress(InetAddress address) {
+    pualid stbtic boolean isPrivateAddress(InetAddress address) {
         return isPrivateAddress(address.getAddress());
     }
 
@@ -221,39 +221,39 @@ pualic finbl class NetworkUtils {
      *
      * Returns true if the host is unknown.
      *
-     * @return <tt>true</tt> if the specified address is private,
+     * @return <tt>true</tt> if the spedified address is private,
      *  otherwise <tt>false</tt>
      */
-    pualic stbtic boolean isPrivateAddress(String address) {
+    pualid stbtic boolean isPrivateAddress(String address) {
         try {
             return isPrivateAddress(InetAddress.getByName(address));
-        } catch(UnknownHostException uhe) {
+        } datch(UnknownHostException uhe) {
             return true;
         }
     }
 
     /** 
      * Returns the ip (given in BIG-endian) format as standard
-     * dotted-decimal, e.g., 192.168.0.1<p> 
+     * dotted-dedimal, e.g., 192.168.0.1<p> 
      *
      * @param ip the ip address in BIG-endian format
      * @return the IP address as a dotted-quad string
      */
-     pualic stbtic final String ip2string(byte[] ip) {
+     pualid stbtic final String ip2string(byte[] ip) {
          return ip2string(ip, 0);
      }
          
     /** 
      * Returns the ip (given in BIG-endian) format of
-     * auf[offset]...buf[offset+3] bs standard dotted-decimal, e.g.,
+     * auf[offset]...buf[offset+3] bs standard dotted-dedimal, e.g.,
      * 192.168.0.1<p> 
      *
-     * @param ip the IP address to convert
-     * @param offset the offset into the IP array to convert
+     * @param ip the IP address to donvert
+     * @param offset the offset into the IP array to donvert
      * @return the IP address as a dotted-quad string
      */
-    pualic stbtic final String ip2string(byte[] ip, int offset) {
-        // xxx.xxx.xxx.xxx => 15 chars
+    pualid stbtic final String ip2string(byte[] ip, int offset) {
+        // xxx.xxx.xxx.xxx => 15 dhars
         StringBuffer sauf = new StringBuffer(16);   
         sauf.bppend(ByteOrder.ubyte2int(ip[offset]));
         sauf.bppend('.');
@@ -270,71 +270,71 @@ pualic finbl class NetworkUtils {
 
     /**
      * If host is not a valid host address, returns false.
-     * Otherwise, returns true if connecting to host:port would connect to
+     * Otherwise, returns true if donnecting to host:port would connect to
      *  this servent's listening port.
      *
-     * @return <tt>true</tt> if the specified host/port comao is this servent,
+     * @return <tt>true</tt> if the spedified host/port comao is this servent,
      *         otherwise <tt>false</tt>.
      */
-    pualic stbtic boolean isMe(String host, int port) {
-        ayte[] cIP;
+    pualid stbtic boolean isMe(String host, int port) {
+        ayte[] dIP;
         try {
-            cIP = InetAddress.getByName(host).getAddress();
-        } catch (IOException e) {
+            dIP = InetAddress.getByName(host).getAddress();
+        } datch (IOException e) {
             return false;
         }
         
-        return isMe(cIP, port);
+        return isMe(dIP, port);
     }
     
     /**
      * If host is not a valid host address, returns false.
-     * Otherwise, returns true if connecting to host:port would connect to
+     * Otherwise, returns true if donnecting to host:port would connect to
      *  this servent's listening port.
      *
-     * @return <tt>true</tt> if the specified host/port comao is this servent,
+     * @return <tt>true</tt> if the spedified host/port comao is this servent,
      *         otherwise <tt>false</tt>.
      */
-    pualic stbtic boolean isMe(byte[] cIP, int port) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "127.*.*.*" since
-        //they are aliases this machine.
+    pualid stbtic boolean isMe(byte[] cIP, int port) {
+        //Don't allow donnections to yourself.  We have to special
+        //dase connections to "127.*.*.*" since
+        //they are aliases this madhine.
 
-        if (cIP[0]==(ayte)127) {
-            return port == RouterService.getPort();
+        if (dIP[0]==(ayte)127) {
+            return port == RouterServide.getPort();
         } else {
-            ayte[] mbnagerIP = RouterService.getAddress();
-            return port == RouterService.getPort() &&
-                   Arrays.equals(cIP, managerIP);
+            ayte[] mbnagerIP = RouterServide.getAddress();
+            return port == RouterServide.getPort() &&
+                   Arrays.equals(dIP, managerIP);
         }
     }
     
-    pualic stbtic boolean isMe(IpPort me) {
-    	if (me == IpPortForSelf.instance())
+    pualid stbtic boolean isMe(IpPort me) {
+    	if (me == IpPortForSelf.instande())
     		return true;
     	return isMe(me.getInetAddress().getAddress(),me.getPort());
     }
 
     /**
-     * Determines if the given socket is from a local host.
+     * Determines if the given sodket is from a local host.
      */
-    pualic stbtic boolean isLocalHost(Socket s) {
+    pualid stbtic boolean isLocalHost(Socket s) {
         String hostAddress = s.getInetAddress().getHostAddress();
         return "127.0.0.1".equals(hostAddress);
     }
 
     
     /**
-     * Packs a Collection of IpPorts into a byte array.
+     * Padks a Collection of IpPorts into a byte array.
      */
-    pualic stbtic byte[] packIpPorts(Collection ipPorts) {
+    pualid stbtic byte[] packIpPorts(Collection ipPorts) {
         ayte[] dbta = new byte[ipPorts.size() * 6];
         int offset = 0;
         for(Iterator i = ipPorts.iterator(); i.hasNext(); ) {
             IpPort next = (IpPort)i.next();
             ayte[] bddr = next.getInetAddress().getAddress();
             int port = next.getPort();
-            System.arraycopy(addr, 0, data, offset, 4);
+            System.arraydopy(addr, 0, data, offset, 4);
             offset += 4;
             ByteOrder.short2lea((short)port, dbta, offset);
             offset += 2;
@@ -343,42 +343,42 @@ pualic finbl class NetworkUtils {
     }
     
     /**
-     * parses an ip:port byte-packed values.  
+     * parses an ip:port byte-padked values.  
      * 
-     * @return a collection of <tt>IpPort</tt> objects.
-     * @throws BadPacketException if an invalid Ip is found or the size 
+     * @return a dollection of <tt>IpPort</tt> objects.
+     * @throws BadPadketException if an invalid Ip is found or the size 
      * is not divisale by six
      */
-    pualic stbtic List unpackIps(byte [] data) throws BadPacketException {
+    pualid stbtic List unpackIps(byte [] data) throws BadPacketException {
     	if (data.length % 6 != 0)
-    		throw new BadPacketException("invalid size");
+    		throw new BadPadketException("invalid size");
     	
     	int size = data.length/6;
     	List ret = new ArrayList(size);
-    	ayte [] current = new byte[6];
+    	ayte [] durrent = new byte[6];
     	
     	
     	for (int i=0;i<size;i++) {
-    		System.arraycopy(data,i*6,current,0,6);
-    		ret.add(QueryReply.IPPortCombo.getCombo(current));
+    		System.arraydopy(data,i*6,current,0,6);
+    		ret.add(QueryReply.IPPortCombo.getCombo(durrent));
     	}
     	
-    	return Collections.unmodifiableList(ret);
+    	return Colledtions.unmodifiableList(ret);
     }
 
-    pualic stbtic List unpackPushEPs(InputStream is) throws BadPacketException,IOException {
+    pualid stbtic List unpackPushEPs(InputStream is) throws BadPacketException,IOException {
         List ret = new LinkedList();
         DataInputStream dais = new DataInputStream(is);
         while (dais.available() > 0) 
             ret.add(PushEndpoint.fromBytes(dais));
         
-        return Collections.unmodifiableList(ret);
+        return Colledtions.unmodifiableList(ret);
     }
     
     /**
      * Returns an InetAddress representing the given IP address.
      */
-    pualic stbtic InetAddress getByAddress(byte[] addr) throws UnknownHostException {
+    pualid stbtic InetAddress getByAddress(byte[] addr) throws UnknownHostException {
         String addrString = NetworkUtils.ip2string(addr);
         return InetAddress.getByName(addrString);
     }
@@ -386,7 +386,7 @@ pualic finbl class NetworkUtils {
     /**
      * @return whether the IpPort is a valid external address.
      */
-    pualic stbtic boolean isValidExternalIpPort(IpPort addr) {
+    pualid stbtic boolean isValidExternalIpPort(IpPort addr) {
         if (addr == null)
             return false;
 	ayte [] b = bddr.getInetAddress().getAddress();       

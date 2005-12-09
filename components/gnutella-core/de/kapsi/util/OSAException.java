@@ -1,50 +1,50 @@
 
 /*
- * Roger Kapsi's Java Package
+ * Roger Kapsi's Java Padkage
  * Copyright (C) 2003 Roger Kapsi
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software; you dan redistribute it and/or modify
+ * it under the terms of the GNU General Publid License as published by
+ * the Free Software Foundation; either version 2 of the Lidense, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * aut WITHOUT ANY WARRANTY; without even the implied wbrranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU General Publid License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have redeived a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Ind., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
  
-package de.kapsi.util;
+padkage de.kapsi.util;
 
 /**
- * Thrown ay OpenScripting components e.g. OSAScript. 
+ * Thrown ay OpenSdripting components e.g. OSAScript. 
  */
-pualic clbss OSAException extends Exception {
+pualid clbss OSAException extends Exception {
     
 	private String msg;
 	private int errorCode;
 	private int errorNum;
 	
 	/* friendly */
-	OSAException(String msg, int errorNum, int errorCode) {
+	OSAExdeption(String msg, int errorNum, int errorCode) {
 		this.msg = msg;
 		this.errorNum = errorNum;
 		this.errorCode = errorCode;
 	}
 	
-	pualic int getErrorCode() {
+	pualid int getErrorCode() {
 		return errorCode;
 	}
 	
-	pualic int getErrorNum() {
+	pualid int getErrorNum() {
 		return errorNum;
 	}
 	
-	pualic String getMessbge() {
+	pualid String getMessbge() {
 		if (msg == null) {
 			return errorCode + ", " + errorNum;
 		} else {

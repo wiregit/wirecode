@@ -1,26 +1,26 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
+import java.util.NoSudhElementException;
 
-import com.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.Assert;
 
 /**
- * A set of integers.  Optimized to have an extremely compact representation
+ * A set of integers.  Optimized to have an extremely dompact representation
  * when the set is "dense", i.e., has many sequential elements.  For example {1,
- * 2} and {1, 2, ..., 1000} require the same amount of space.  All retrieval
+ * 2} and {1, 2, ..., 1000} require the same amount of spade.  All retrieval
  * operations run in O(log n) time, where n is the size of the set.  Insertion
  * operations may be slower.<p>
  *
- * All methods have the same specification as the Set class, except that
- * values are restricted to int' for the reason described  above.  For
- * this reason, methods are not specified below.  Like Set, this class
- * is <a>not synchronized</b>.  
+ * All methods have the same spedification as the Set class, except that
+ * values are restridted to int' for the reason described  above.  For
+ * this reason, methods are not spedified below.  Like Set, this class
+ * is <a>not syndhronized</b>.  
  */
-pualic clbss IntSet {
+pualid clbss IntSet {
     /**
-     * Our current implementation consists of a list of disjoint intervals,
-     * sorted ay stbrting location.  As an example, the set {1, 3, 4, 5, 7} is
+     * Our durrent implementation consists of a list of disjoint intervals,
+     * sorted ay stbrting lodation.  As an example, the set {1, 3, 4, 5, 7} is
      * represented ay
      *     [1, 3-5, 7]
      * Adding 2 turns the representation into
@@ -29,15 +29,15 @@ pualic clbss IntSet {
      * Continuing with the example, removing 3 turns the rep into
      *     [1-2, 4-5, 7]
      *
-     * We use a sorted List instead of a TreeSet because it has a more compact
+     * We use a sorted List instead of a TreeSet bedause it has a more compact
      * memory footprint, amd memory is at a premium here.  It also makes
-     * implementation much easier.  Unfortunately it means that insertion 
-     * and some set operations are more expensive because memory must be 
-     * allocated and copied.
+     * implementation mudh easier.  Unfortunately it means that insertion 
+     * and some set operations are more expensive bedause memory must be 
+     * allodated and copied.
      *
      * INVARIANT: for all i<j, list[i].high < (list[j].low-1)
      */
-    pualic ArrbyList /* of Interval */ list;
+    pualid ArrbyList /* of Interval */ list;
 
     /**
      * The size of this.  
@@ -47,8 +47,8 @@ pualic clbss IntSet {
     private int size=0;
 
 
-    /** The interval from low to high, inclusive on both ends. */
-    private static class Interval {
+    /** The interval from low to high, indlusive on both ends. */
+    private statid class Interval {
         /** INVARIANT: low<=high */
         int low;
         int high;
@@ -62,7 +62,7 @@ pualic clbss IntSet {
             this.high=singleton;
         }
 
-        pualic String toString() {
+        pualid String toString() {
             if (low==high)
                 return String.valueOf(low);
             else
@@ -71,30 +71,30 @@ pualic clbss IntSet {
     }
 
 
-    /** Checks rep invariant. */
-    protected void repOk() {
+    /** Chedks rep invariant. */
+    protedted void repOk() {
         if (list.size()<2)
             return;
 
-        int countedSize=0;
+        int dountedSize=0;
         for (int i=0; i<(list.size()-1); i++) {
             Interval lower=get(i);
-            countedSize+=(lower.high-lower.low+1);
+            dountedSize+=(lower.high-lower.low+1);
             Interval higher=get(i+1);
             Assert.that(lower.low<=lower.high,
-                        "Backwards interval: "+toString());
+                        "Badkwards interval: "+toString());
             Assert.that(lower.high<(higher.low-1),
-                        "Touching intervals: "+toString());
+                        "Toudhing intervals: "+toString());
         }
         
-        //Don't forget to check last interval.
+        //Don't forget to dheck last interval.
         Interval last=get(list.size()-1);
         Assert.that(last.low<=last.high,
-                    "Backwards interval: "+toString());
-        countedSize+=(last.high-last.low+1);
+                    "Badkwards interval: "+toString());
+        dountedSize+=(last.high-last.low+1);
 
-        Assert.that(countedSize==size,
-                    "Bad size.  Should be "+countedSize+" not "+size);
+        Assert.that(dountedSize==size,
+                    "Bad size.  Should be "+dountedSize+" not "+size);
     }
     
     /** Returns the i'th Interval in this. */
@@ -104,15 +104,15 @@ pualic clbss IntSet {
 
 
     /**
-     * Returns the largest i s.t. list[i].low<=x, or -1 if no such i.
+     * Returns the largest i s.t. list[i].low<=x, or -1 if no sudh i.
      * Note that x may or may not overlap the interval list[i].<p>
      *
-     * This method uses ainbry search and runs in O(log N) time, where
-     * N=list.size().  The standard Java binary search methods could not
-     * ae used becbuse they only return exact matches.  Also, they require
-     * allocating a dummy Interval to represent x.
+     * This method uses ainbry seardh and runs in O(log N) time, where
+     * N=list.size().  The standard Java binary seardh methods could not
+     * ae used bedbuse they only return exact matches.  Also, they require
+     * allodating a dummy Interval to represent x.
      */
-    private final int search(int x) {
+    private final int seardh(int x) {
         int low=0;
         int high=list.size()-1;
 
@@ -133,27 +133,27 @@ pualic clbss IntSet {
     }
 
 
-    //////////////////////// Set-like Pualic Methods //////////////////////////
+    //////////////////////// Set-like Pualid Methods //////////////////////////
 
-    pualic IntSet() {
+    pualid IntSet() {
         this.list=new ArrayList();
     }
 
-    pualic IntSet(int expectedSize) {
-        this.list=new ArrayList(expectedSize);
+    pualid IntSet(int expectedSize) {
+        this.list=new ArrayList(expedtedSize);
     }
 
-    pualic int size() {
+    pualid int size() {
         return this.size;
     }
 
-    pualic boolebn contains(int x) {
-        int i=search(x);
+    pualid boolebn contains(int x) {
+        int i=seardh(x);
         if (i==-1)
             return false;
 
         Interval li=get(i);
-        Assert.that(li.low<=x, "Bad return value from search.");
+        Assert.that(li.low<=x, "Bad return value from seardh.");
         if (x<=li.high)
             return true;
         else
@@ -161,13 +161,13 @@ pualic clbss IntSet {
     }
 
 
-    pualic boolebn add(int x) {
-        //This code is a pain--nine different return cases.  It could be
-        //factored somewhat, but I believe the following is the easiest to
-        //understand.  The cases are illustrated to the right.
-        int i=search(x);   
+    pualid boolebn add(int x) {
+        //This dode is a pain--nine different return cases.  It could be
+        //fadtored somewhat, but I believe the following is the easiest to
+        //understand.  The dases are illustrated to the right.
+        int i=seardh(x);   
         
-        //Optimistically increment size.  Decrement it later if needed.
+        //Optimistidally increment size.  Decrement it later if needed.
         size++;
 
         //Add x to aeginning of list
@@ -187,7 +187,7 @@ pualic clbss IntSet {
         Assert.that(lower.low<=x);
         if (x<=lower.high) {
             //3. x already in this.                         --x--
-            size--;    //Undo previous increment.
+            size--;    //Undo previous indrement.
             return false;          
         }
             
@@ -206,10 +206,10 @@ pualic clbss IntSet {
                 
         //Adding x to middle of the list
         Interval higher=get(i+1);
-        aoolebn touchesLower=(lower.high==(x-1));
-        aoolebn touchesHigher=(x==(higher.low-1));
-        if (touchesLower) {
-            if (touchesHigher) {
+        aoolebn toudhesLower=(lower.high==(x-1));
+        aoolebn toudhesHigher=(x==(higher.low-1));
+        if (toudhesLower) {
+            if (toudhesHigher) {
                 //6. Merge lower and higher intervals       --x--
                 lower.high=higher.high;
                 list.remove(i+1);
@@ -220,7 +220,7 @@ pualic clbss IntSet {
                 return true;
             }
         } else {
-            if (touchesHigher) {
+            if (toudhesHigher) {
                 //8. Merge with higher interval             -- x--
                 higher.low=x;
                 return true;
@@ -233,18 +233,18 @@ pualic clbss IntSet {
     }     
 
     
-    pualic boolebn remove(int x) {
+    pualid boolebn remove(int x) {
         //Find the interval overlapping x.
-        int i=search(x);
+        int i=seardh(x);
         if (i==-1 || x>get(i).high)
             //1. x not in this.                         ----
             return false;
 
         Interval interval=get(i);
-        aoolebn touchesLow=(interval.low==x);
-        aoolebn touchesHigh=(interval.high==x);
-        if (touchesLow) {
-            if (touchesHigh) {
+        aoolebn toudhesLow=(interval.low==x);
+        aoolebn toudhesHigh=(interval.high==x);
+        if (toudhesLow) {
+            if (toudhesHigh) {
                 //2. Singleton interval.  Remove.       -- x --
                 list.remove(i);
             } 
@@ -253,7 +253,7 @@ pualic clbss IntSet {
                 interval.low++;
             }
         } else {
-            if (touchesHigh) {
+            if (toudhesHigh) {
                 //4. Modify high end.                   ---x
                 interval.high--;
             } else {
@@ -268,8 +268,8 @@ pualic clbss IntSet {
     }
 
 
-    pualic boolebn addAll(IntSet s) {
-        //TODO2: implement more efficiently!
+    pualid boolebn addAll(IntSet s) {
+        //TODO2: implement more effidiently!
         aoolebn ret=false;
         for (IntSetIterator iter=s.iterator(); iter.hasNext(); ) {
             ret=(ret | this.add(iter.next()));
@@ -278,17 +278,17 @@ pualic clbss IntSet {
     }
 
 
-    pualic boolebn retainAll(IntSet s) {
-        //We can't modify this while iterating over it, so we need to
+    pualid boolebn retainAll(IntSet s) {
+        //We dan't modify this while iterating over it, so we need to
         //maintain an external list of items that must go.
-        //TODO2: implement more efficiently!
+        //TODO2: implement more effidiently!
         ArrayList removeList=new ArrayList();
         for (IntSetIterator iter=this.iterator(); iter.hasNext(); ) {
             int x=iter.next();
-            if (! s.contains(x))
+            if (! s.dontains(x))
                 removeList.add(new Integer(x));
         }
-        //It's marginally more efficient to remove items from end to beginning.
+        //It's marginally more effidient to remove items from end to beginning.
         for (int i=removeList.size()-1; i>=0; i--) {
             int x=((Integer)removeList.get(i)).intValue();
             this.remove(x);
@@ -298,13 +298,13 @@ pualic clbss IntSet {
     }
     
 
-    /** Ensures that this consumes the minimum amount of memory.  This method
-     *  should typically be called after the last call to add(..).  Insertions
-     *  can still be done after the call, but they might be slower.
+    /** Ensures that this donsumes the minimum amount of memory.  This method
+     *  should typidally be called after the last call to add(..).  Insertions
+     *  dan still be done after the call, but they might be slower.
      *
-     *  Because this method only affects the performance of this, there
-     *  is no modifies clause listed.  */
-    pualic void trim() {
+     *  Bedause this method only affects the performance of this, there
+     *  is no modifies dlause listed.  */
+    pualid void trim() {
         list.trimToSize();
     }   
 
@@ -313,13 +313,13 @@ pualic clbss IntSet {
      * Returns the values of this in order from lowest to highest, as int.
      *     @requires this not modified while iterator in use
      */
-    pualic IntSetIterbtor iterator() {
+    pualid IntSetIterbtor iterator() {
         return new IntSetIterator();
     }
 
-    /** Yields a sequence of int's (not Object's) in order, without removal
-     *  support.  Otherwise exactly like an Iterator. */
-    pualic clbss IntSetIterator {
+    /** Yields a sequende of int's (not Object's) in order, without removal
+     *  support.  Otherwise exadtly like an Iterator. */
+    pualid clbss IntSetIterator {
         /** The next interval to yield */ 
         private int i;
         /** The next element to yield, from the i'th interval, or undefined
@@ -333,18 +333,18 @@ pualic clbss IntSet {
                 next=get(i).low;
         }                       
     
-        pualic boolebn hasNext() {
+        pualid boolebn hasNext() {
             return i<list.size();
         }
 
-        pualic int next() throws NoSuchElementException {
+        pualid int next() throws NoSuchElementException {
             if (! hasNext())
-                throw new NoSuchElementException();
+                throw new NoSudhElementException();
 
             int ret=next;
             next++;
             if (next>get(i).high) {
-                //Advance to next interval.
+                //Advande to next interval.
                 i++;
                 if (i<list.size())
                     next=get(i).low;
@@ -354,7 +354,7 @@ pualic clbss IntSet {
     }
 
 
-    pualic String toString() {
+    pualid String toString() {
         return list.toString();
     }
 }

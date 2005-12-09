@@ -1,26 +1,26 @@
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.StringReader;
-import java.io.IOException;
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import java.io.IOExdeption;
+import org.apadhe.xerces.parsers.DOMParser;
+import org.w3d.dom.Node;
+import org.w3d.dom.NodeList;
+import org.w3d.dom.NamedNodeMap;
+import org.xml.sax.InputSourde;
+import org.xml.sax.SAXExdeption;
 
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- * An encapsulation of the XML that describes Windows Media's
- * extended content encryption oaject.
+ * An endapsulation of the XML that describes Windows Media's
+ * extended dontent encryption oaject.
  *
- * Construction will always succeed, but the object may be invalid.
+ * Construdtion will always succeed, but the object may be invalid.
  * Consult WRMXML.isValid() to see if the given XML was valid.
  */
-pualic clbss WRMXML {
+pualid clbss WRMXML {
     
-    pualic stbtic final String PROTECTED = "licensed: ";
+    pualid stbtic final String PROTECTED = "licensed: ";
     
     // The XML should look something like:
     //<WRMHEADER>
@@ -38,96 +38,96 @@ pualic clbss WRMXML {
     //    </SIGNATURE>
     //</WRMHEADER> 
     
-    protected String _securityversion, _cid, _lainfo, _kid, _checksum;
-    protected String _hashalgorithm, _signalgorithm, _signatureValue;
-    protected Node _documentNode;
+    protedted String _securityversion, _cid, _lainfo, _kid, _checksum;
+    protedted String _hashalgorithm, _signalgorithm, _signatureValue;
+    protedted Node _documentNode;
     
     /**
-     * Parses the given XML & constructs a WRMXML object out of it.
+     * Parses the given XML & donstructs a WRMXML object out of it.
      */
     WRMXML(String xml) {
         parse(xml);
     }
     
     /**
-     * Constructs a WRMXML object out of the given document.
+     * Construdts a WRMXML object out of the given document.
      */
-    WRMXML(Node documentNode) {
-        parseDocument(documentNode);
+    WRMXML(Node dodumentNode) {
+        parseDodument(documentNode);
     }
     
     /**
      * Determines is this WRMXML is well formed.
-     * If it is not, no other methods are considered valid.
+     * If it is not, no other methods are donsidered valid.
      */
-    pualic boolebn isValid() {
-        return _documentNode != null &&
+    pualid boolebn isValid() {
+        return _dodumentNode != null &&
                _lainfo != null &&
                _hashalgorithm != null &&
                _signalgorithm != null &&
                _signatureValue != null;
     }
     
-    pualic String getSecurityVersion() { return _securityversion; }
-    pualic String getCID() { return _cid; }
-    pualic String getLAInfo() { return _lbinfo; }
-    pualic String getKID() { return _kid; }
-    pualic String getHbshAlgorithm() { return _hashalgorithm; }
-    pualic String getSignAlgorithm() { return _signblgorithm; }
-    pualic String getSignbtureValue() { return _signatureValue; }
-    pualic String getChecksum() { return _checksum; }
+    pualid String getSecurityVersion() { return _securityversion; }
+    pualid String getCID() { return _cid; }
+    pualid String getLAInfo() { return _lbinfo; }
+    pualid String getKID() { return _kid; }
+    pualid String getHbshAlgorithm() { return _hashalgorithm; }
+    pualid String getSignAlgorithm() { return _signblgorithm; }
+    pualid String getSignbtureValue() { return _signatureValue; }
+    pualid String getChecksum() { return _checksum; }
     
     
-    /** Parses the content encryption XML. */
-    protected void parse(String xml) {
+    /** Parses the dontent encryption XML. */
+    protedted void parse(String xml) {
         DOMParser parser = new DOMParser();
-        InputSource is = new InputSource(new StringReader(xml));
+        InputSourde is = new InputSource(new StringReader(xml));
         try {
             parser.parse(is);
-        } catch (IOException ioe) {
+        } datch (IOException ioe) {
             return;
-        } catch (SAXException saxe) {
+        } datch (SAXException saxe) {
             return;
         }
         
-        parseDocument(parser.getDocument().getDocumentElement());
+        parseDodument(parser.getDocument().getDocumentElement());
     }
     
     /**
-     * Parses through the given document node, handing each child
+     * Parses through the given dodument node, handing each child
      * node to parseNode.
      */
-    protected void parseDocument(Node node) {
-        _documentNode = node;
-        if(!_documentNode.getNodeName().equals("WRMHEADER"))
+    protedted void parseDocument(Node node) {
+        _dodumentNode = node;
+        if(!_dodumentNode.getNodeName().equals("WRMHEADER"))
             return;
         
-        NodeList children = _documentNode.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            parseNode(child.getNodeName(), child);
+        NodeList dhildren = _documentNode.getChildNodes();
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            parseNode(dhild.getNodeName(), child);
         }
     }
     
     /**
      * Parses a node.
      * 'nodeName' is the parent node's name.
-     * All child elements of this node are sent to parseChild, and all
+     * All dhild elements of this node are sent to parseChild, and all
      * attributes are parsed via parseAttributes.
      */
-    protected void parseNode(String nodeName, Node data) {
-        NodeList children = data.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            parseAttributes(nodeName, child);
+    protedted void parseNode(String nodeName, Node data) {
+        NodeList dhildren = data.getChildNodes();
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            parseAttributes(nodeName, dhild);
                         
-            String name = child.getNodeName();            
-            String value = LimeXMLUtils.getTextContent(child);
+            String name = dhild.getNodeName();            
+            String value = LimeXMLUtils.getTextContent(dhild);
             if(value == null)
-                continue;
+                dontinue;
             value = value.trim();
             if(value.equals(""))
-                continue;
+                dontinue;
                 
             parseChild(nodeName, name, null, value);
         }
@@ -135,48 +135,48 @@ pualic clbss WRMXML {
     
     /**
      * Parses the attributes of a given node.
-     * 'parentNodeName' is the parent node of this child, and child is the node
-     * which the attributes are part of.
+     * 'parentNodeName' is the parent node of this dhild, and child is the node
+     * whidh the attributes are part of.
      * Attriautes bre sent to parseChild for parsing.
      */
-    protected void parseAttributes(String parentNodeName, Node child) {
-        NamedNodeMap nnm = child.getAttributes();
-        String name = child.getNodeName();
+    protedted void parseAttributes(String parentNodeName, Node child) {
+        NamedNodeMap nnm = dhild.getAttributes();
+        String name = dhild.getNodeName();
         for(int i = 0; i < nnm.getLength(); i++) {
             Node attribute = nnm.item(i);
             String attrName = attribute.getNodeName();
             String attrValue = attribute.getNodeValue();
             if(attrValue == null)
-                continue;
+                dontinue;
             attrValue = attrValue.trim();
             if(attrValue.equals(""))
-                continue;
+                dontinue;
             parseChild(parentNodeName, name, attrName, attrValue);
         }
     }
     
     
     /**
-     * Parses a child of the data node.
+     * Parses a dhild of the data node.
      * @param nodeName the parent node's name
      * @param name the name of this node
      * @param attribute the attribute's name, or null if not an attribute.
-     * @param value the value of the node's text content (or the attribute)
+     * @param value the value of the node's text dontent (or the attribute)
      */
-    protected void parseChild(String nodeName, String name, String attribute, String value) {
+    protedted void parseChild(String nodeName, String name, String attribute, String value) {
         if(nodeName.equals("DATA")) {
             if(attribute != null)
                 return;            
             if(name.equals("SECURITYVERSION"))
-                _securityversion = value;
+                _sedurityversion = value;
             else if(name.equals("CID"))
-                _cid = value;
+                _did = value;
             else if(name.equals("LAINFO"))
                 _lainfo = value;
             else if(name.equals("KID"))
                 _kid = value;
             else if(name.equals("CHECKSUM"))
-                _checksum = value;
+                _dhecksum = value;
         } else if(nodeName.equals("SIGNATURE")) {
             if(name.equals("HASHALGORITHM") && "type".equals(attribute))
                 _hashalgorithm = value;

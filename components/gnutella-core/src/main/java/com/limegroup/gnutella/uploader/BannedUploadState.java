@@ -1,31 +1,31 @@
-package com.limegroup.gnutella.uploader;
+padkage com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 /**
- * Sends a 403 Banned For Hammering reply to a greedy client
+ * Sends a 403 Banned For Hammering reply to a greedy dlient
  */
-pualic clbss BannedUploadState extends UploadState {
+pualid clbss BannedUploadState extends UploadState {
 
 
 	/**
 	 * Constant for the error message to send.
 	 */
-	pualic stbtic final byte[] ERROR_MESSAGE =
-		"Your client sends too many requests.".getBytes();
+	pualid stbtic final byte[] ERROR_MESSAGE =
+		"Your dlient sends too many requests.".getBytes();
 
 	/**
 	 * Write HTTP headers
 	 * 
 	 * @param os
 	 *            the <tt>OutputStream</tt> to write to.
-	 * @throws IOException
+	 * @throws IOExdeption
 	 *             if there was a problem writing to the <tt>OutputStream</tt>.
 	 */
-	pualic void writeMessbgeHeaders(OutputStream os) throws IOException {
+	pualid void writeMessbgeHeaders(OutputStream os) throws IOException {
 		String str;
 		str = "HTTP/1.1 403 Banned\r\n";
 		os.write(str.getBytes());
@@ -44,18 +44,18 @@ pualic clbss BannedUploadState extends UploadState {
 	 * 
 	 * @param os
 	 *            the <tt>OutputStream</tt> to write to.
-	 * @throws IOException
+	 * @throws IOExdeption
 	 *             if there was a problem writing to the <tt>OutputStream</tt>.
 	 */
-	pualic void writeMessbgeBody(OutputStream os) throws IOException {
+	pualid void writeMessbgeBody(OutputStream os) throws IOException {
 		os.write(ERROR_MESSAGE);
 	}
 
 	/**
-	 * @return <tt>true</tt> if the connection should ae closed bfter writing
+	 * @return <tt>true</tt> if the donnection should ae closed bfter writing
 	 *         the message.
 	 */
-	pualic boolebn getCloseConnection() {
+	pualid boolebn getCloseConnection() {
 		return true;
 	}
 }

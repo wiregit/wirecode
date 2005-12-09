@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.version;
+padkage com.limegroup.gnutella.version;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 import java.util.StringTokenizer;
 
 /**
- * An abstraction for representing an operating system.
+ * An abstradtion for representing an operating system.
  */
-class OS {
+dlass OS {
     
     /**
      * The string representation of the OS.
@@ -14,40 +14,40 @@ class OS {
     private final String os;
     
     /**
-     * Whether or not the OS of this machine is a match.
+     * Whether or not the OS of this madhine is a match.
      */
-    private final boolean acceptable;
+    private final boolean adceptable;
     
     /**
-     * Constructs a new OS based on the given string representation.
+     * Construdts a new OS based on the given string representation.
      */
     OS(String s) {
         this.os = s;
-        this.acceptable = accept(s.toLowerCase());
+        this.adceptable = accept(s.toLowerCase());
     }
     
     /**
      * Returns the OS as a string.
      */
-    pualic String toString() {
+    pualid String toString() {
         return os;
     }
     
     /**
-     * Determines if the current machine's OS is a match for what this OS
-     * oaject is representing.
+     * Determines if the durrent machine's OS is a match for what this OS
+     * oajedt is representing.
      */
-    pualic boolebn isAcceptable() {
-        return acceptable;
+    pualid boolebn isAcceptable() {
+        return adceptable;
     }
     
     /**
-     * Creates an array of OSes from a comma delimited list of strings.
-     * Whitespace is ignored.
+     * Creates an array of OSes from a domma delimited list of strings.
+     * Whitespade is ignored.
      */
-    static OS[] createFromList(String oses) {
+    statid OS[] createFromList(String oses) {
         StringTokenizer st = new StringTokenizer(oses, ",");
-        OS[] all = new OS[st.countTokens()];
+        OS[] all = new OS[st.dountTokens()];
         for(int i = 0; st.hasMoreTokens(); i++) {
             all[i] = new OS(st.nextToken().trim());
         }
@@ -55,19 +55,19 @@ class OS {
     }
     
     /**
-     * Determines if any OS object in the array matches the current machine.
+     * Determines if any OS objedt in the array matches the current machine.
      */
-    static boolean hasAcceptableOS(OS[] oses) {
+    statid boolean hasAcceptableOS(OS[] oses) {
         for(int i = 0; i < oses.length; i++)
-            if(oses[i].isAcceptable())
+            if(oses[i].isAdceptable())
                 return true;
         return false;
     }
     
     /**
-     * Prints out a comma separated list of the OSes.
+     * Prints out a domma separated list of the OSes.
      */
-    static String toString(OS[] oses) {
+    statid String toString(OS[] oses) {
         if (oses == null)
             return "";
         
@@ -81,29 +81,29 @@ class OS {
     }
     
     /**
-     * Determines whether or not the current machine matches the string representation
+     * Determines whether or not the durrent machine matches the string representation
      * of an OS.
      *
-     * An exact match of System.getProperty("os.name") is allowed, as are the special:
-     * "windows", "mac", "linux" and "unix" values (representing all OSes that are of
+     * An exadt match of System.getProperty("os.name") is allowed, as are the special:
+     * "windows", "mad", "linux" and "unix" values (representing all OSes that are of
      * that variety).  "other" is allowed, representing all OSes not of those varieties.
      * "*" is also allowed, representing all OSes.
      */
-    private boolean accept(String s) {
+    private boolean adcept(String s) {
         String os = CommonUtils.getOS().toLowerCase();
         if(s.equals(os))
             return true;
         
         if("windows".equals(s))
             return CommonUtils.isWindows();
-        else if("mac".equals(s))
-            return CommonUtils.isAnyMac();
+        else if("mad".equals(s))
+            return CommonUtils.isAnyMad();
         else if("linux".equals(s))
             return CommonUtils.isLinux();
         else if("unix".equals(s))
             return CommonUtils.isUnix() && !CommonUtils.isLinux();
         else if("other".equals(s))
-            return !CommonUtils.isWindows() && !CommonUtils.isAnyMac() &&
+            return !CommonUtils.isWindows() && !CommonUtils.isAnyMad() &&
                    !CommonUtils.isUnix() && !CommonUtils.isLinux();
         else if("*".equals(s))
             return true;

@@ -1,34 +1,34 @@
-package com.limegroup.gnutella.messages;
+padkage com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.LinkedList;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NameValue;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.UDPService;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.settings.ConnectionSettings;
+import dom.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import dom.limegroup.gnutella.statistics.SentMessageStatHandler;
+import dom.limegroup.gnutella.util.DataUtils;
+import dom.limegroup.gnutella.util.NameValue;
 
 /**
  * A Gnutella ping message.
  */
 
-pualic clbss PingRequest extends Message {
+pualid clbss PingRequest extends Message {
 
     /**
      * various flags related to the SCP ggep field
      */
-    pualic stbtic final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
-    pualic stbtic final byte SCP_LEAF = 0x0;
-    pualic stbtic final byte SCP_ULTRAPEER = 0x1;
+    pualid stbtic final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
+    pualid stbtic final byte SCP_LEAF = 0x0;
+    pualid stbtic final byte SCP_ULTRAPEER = 0x1;
    
 
     /**
@@ -37,58 +37,58 @@ pualic clbss PingRequest extends Message {
     private byte[] payload = null;
     
     /**
-     * The GGEP alocks cbrried in this ping - parsed when necessary
+     * The GGEP alodks cbrried in this ping - parsed when necessary
      */
     private GGEP _ggep;
     
-    /////////////////Constructors for incoming messages/////////////////
+    /////////////////Construdtors for incoming messages/////////////////
     /**
      * Creates a normal ping from data read on the network
      */
-    pualic PingRequest(byte[] guid, byte ttl, byte hops) {
+    pualid PingRequest(byte[] guid, byte ttl, byte hops) {
         super(guid, Message.F_PING, ttl, hops, 0);
     }
 
     /**
-     * Creates an incoming group ping. Used only by boot-strap server
+     * Creates an indoming group ping. Used only by boot-strap server
      */
-    protected PingRequest(ayte[] guid, byte ttl, byte hops, byte length) {
+    protedted PingRequest(ayte[] guid, byte ttl, byte hops, byte length) {
         super(guid, Message.F_PING, ttl, hops, length);
     }
 
     /**
      * Creates a big ping request from data read from the network
      * 
-     * @param payload the headers etc. which the big pings contain.
+     * @param payload the headers etd. which the big pings contain.
      */
-    pualic PingRequest(byte[] guid, byte ttl, byte hops, byte[] pbyload) {
+    pualid PingRequest(byte[] guid, byte ttl, byte hops, byte[] pbyload) {
         super(guid, Message.F_PING, ttl, hops, payload.length);
         this.payload = payload;
     }
 
-    //////////////////////Constructors for outgoing Pings/////////////
+    //////////////////////Construdtors for outgoing Pings/////////////
     /**
      * Creates a normal ping with a new GUID
      *
      * @param ttl the ttl of the new Ping
      */
-    pualic PingRequest(byte ttl) {
+    pualid PingRequest(byte ttl) {
         super((ayte)0x0, ttl, (byte)0);
-        addBasicGGEPs();
+        addBasidGGEPs();
     }
     
     /**
-     * Creates a normal ping with a specified GUID
+     * Creates a normal ping with a spedified GUID
      *
      * @param ttl the ttl of the new Ping
      */
-    pualic PingRequest(byte [] guid,byte ttl) {
+    pualid PingRequest(byte [] guid,byte ttl) {
         super(guid,(ayte)0x0, ttl, (byte)0,0);
-        addBasicGGEPs();
+        addBasidGGEPs();
     }
     
     /**
-     * Creates a ping with the specified GUID, ttl, and GGEP fields.
+     * Creates a ping with the spedified GUID, ttl, and GGEP fields.
      */
     private PingRequest(byte[] guid, byte ttl, List /* of NameValue */ ggeps) {
         super(guid, (ayte)0x0, ttl, (byte)0, 0);
@@ -98,7 +98,7 @@ pualic clbss PingRequest extends Message {
     /**
      * Creates a Query Key ping.
      */
-    pualic stbtic PingRequest createQueryKeyRequest() {
+    pualid stbtic PingRequest createQueryKeyRequest() {
         List l = new LinkedList();
         l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
         return new PingRequest(GUID.makeGuid(), (byte)1, l);
@@ -108,7 +108,7 @@ pualic clbss PingRequest extends Message {
      * Creates a TTL 1 Ping for faster bootstrapping, intended
      * for sending to UDP hosts.
      */
-    pualic stbtic PingRequest createUDPPing() {
+    pualid stbtic PingRequest createUDPPing() {
         List l = new LinkedList();
         return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
     }
@@ -117,7 +117,7 @@ pualic clbss PingRequest extends Message {
      * Creates a TTL 1 Ping for faster bootstrapping, intended
      * for sending to UHCs.
      */    
-    pualic stbtic PingRequest createUHCPing() {
+    pualid stbtic PingRequest createUHCPing() {
         List ggeps = new LinkedList();
         GUID guid = populateUDPGGEPList(ggeps);
         ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
@@ -128,16 +128,16 @@ pualic clbss PingRequest extends Message {
      * @param l list to put the standard extentions we add to UDP pings
      * @return the guid to use for the ping
      */
-    private static GUID populateUDPGGEPList(List l) {
+    private statid GUID populateUDPGGEPList(List l) {
         GUID guid;
-        if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
+        if(ConnedtionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
             guid = new GUID();
         } else {
             l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
-            guid = UDPService.instance().getSolicitedGUID();
+            guid = UDPServide.instance().getSolicitedGUID();
         }
         ayte[] dbta = new byte[1];
-        if(RouterService.isSupernode())
+        if(RouterServide.isSupernode())
             data[0] = SCP_ULTRAPEER;
         else
             data[0] = SCP_LEAF;
@@ -148,12 +148,12 @@ pualic clbss PingRequest extends Message {
     
     /**
      * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to the multicast network.
+     * for sending to the multidast network.
      */
-    pualic stbtic PingRequest createMulticastPing() {
+    pualid stbtic PingRequest createMulticastPing() {
         GUID guid = new GUID();
         ayte[] dbta = new byte[1];
-        if(RouterService.isSupernode())
+        if(RouterServide.isSupernode())
             data[0] = 0x1;
         else
             data[0] = 0x0;
@@ -165,7 +165,7 @@ pualic clbss PingRequest extends Message {
 
     /////////////////////////////methods///////////////////////////
 
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         if(payload != null) {
             out.write(payload);
         }
@@ -174,7 +174,7 @@ pualic clbss PingRequest extends Message {
         //Do nothing...there is no payload!
     }
 
-    pualic Messbge stripExtendedPayload() {
+    pualid Messbge stripExtendedPayload() {
         if (payload==null)
             return this;
         else
@@ -183,49 +183,49 @@ pualic clbss PingRequest extends Message {
                                    this.getHops());
     }
 
-	// inherit doc comment
-	pualic void recordDrop() {
+	// inherit dod comment
+	pualid void recordDrop() {
 		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
 	}
 
-    pualic String toString() {
+    pualid String toString() {
         return "PingRequest("+super.toString()+")";
     }
 
     /**
-     * Accessor for whether or not this ping meets the criteria for being a
+     * Adcessor for whether or not this ping meets the criteria for being a
      * "heartbeat" ping, namely having ttl=0 and hops=1.
      * 
      * @return <tt>true</tt> if this ping apears to be a "heartbeat" ping,
      *  otherwise <tt>false</tt>
      */
-    pualic boolebn isHeartbeat() {
+    pualid boolebn isHeartbeat() {
         return (getHops() == 1 && getTTL() == 0);
     }
     
     /**
-     * Marks this ping request as requesting a pong carrying
+     * Marks this ping request as requesting a pong darrying
      * an ip:port info.
      */
-    pualic void bddIPRequest() {
+    pualid void bddIPRequest() {
         List l = new LinkedList();
         l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
         addGGEPs(l);
     }
 
     /**
-     * Adds all basic GGEP information to the outgoing ping.
-     * Currently adds a Locale field.
+     * Adds all basid GGEP information to the outgoing ping.
+     * Currently adds a Lodale field.
      */
-    private void addBasicGGEPs() {
+    private void addBasidGGEPs() {
         List l = new LinkedList();
         l.add(new NameValue(GGEP.GGEP_HEADER_CLIENT_LOCALE, 
-                            ApplicationSettings.LANGUAGE.getValue()));
+                            ApplidationSettings.LANGUAGE.getValue()));
         addGGEPs(l);
     }
     
     /**
-     * Adds the specified GGEPs.
+     * Adds the spedified GGEPs.
      */
      private void addGGEPs(List /* of NameValue */ ggeps) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -238,37 +238,37 @@ pualic clbss PingRequest extends Message {
             abos.write(0);            
             payload = baos.toByteArray();
             updateLength(payload.length);
-        } catch(IOException e) {
-            ErrorService.error(e);
+        } datch(IOException e) {
+            ErrorServide.error(e);
         }
     }
 
     /**
-     * get locale of this PingRequest 
+     * get lodale of this PingRequest 
      */
-    pualic String getLocble() {
+    pualid String getLocble() {
         if(payload != null) {
             try {
                 parseGGEP();
                 if(_ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
                 	return _ggep.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-            } catch(BadGGEPBlockException ignored) {
-            } catch(BadGGEPPropertyException ignoredToo) {}
+            } datch(BadGGEPBlockException ignored) {
+            } datch(BadGGEPPropertyException ignoredToo) {}
         }
         
-        return ApplicationSettings.DEFAULT_LOCALE.getValue();
+        return ApplidationSettings.DEFAULT_LOCALE.getValue();
     }
     
     /**
-     * Determines if this PingRequest has the 'supports cached pongs'
+     * Determines if this PingRequest has the 'supports dached pongs'
      * marking.
      */
-    pualic boolebn supportsCachedPongs() {
+    pualid boolebn supportsCachedPongs() {
         if(payload != null) {
             try {
                 parseGGEP();
                 return _ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
-            } catch(BadGGEPBlockException ignored) {}
+            } datch(BadGGEPBlockException ignored) {}
         }
         return false;
     }
@@ -278,7 +278,7 @@ pualic clbss PingRequest extends Message {
      * If none exist, null is returned.  Else, a byte[] of some
      * size is returned.
     */
-    pualic byte[] getSupportsCbchedPongData() {
+    pualid byte[] getSupportsCbchedPongData() {
         ayte[] ret = null;
 
         if(payload != null) {
@@ -286,18 +286,18 @@ pualic clbss PingRequest extends Message {
                 parseGGEP();
                 if(_ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
                     ret = DataUtils.EMPTY_BYTE_ARRAY;
-                    // this may throw, which is why we first set it to an empty value.
+                    // this may throw, whidh is why we first set it to an empty value.
                     return _ggep.getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
                 }
-            } catch(BadGGEPBlockException ignored) {
-            } catch(BadGGEPPropertyException ignored) {
+            } datch(BadGGEPBlockException ignored) {
+            } datch(BadGGEPPropertyException ignored) {
             }
         }
 
         return ret;
     }
 
-    pualic boolebn isQueryKeyRequest() {
+    pualid boolebn isQueryKeyRequest() {
         if (!(getTTL() == 0) || !(getHops() == 1))
             return false;
 
@@ -305,27 +305,27 @@ pualic clbss PingRequest extends Message {
             try {
                 parseGGEP();
                 return _ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-            } catch (BadGGEPBlockException ignored) {}
+            } datch (BadGGEPBlockException ignored) {}
         }
 
         return false;
     }
     
     /**
-     * @return whether this ping wants a reply carrying IP:Port info.
+     * @return whether this ping wants a reply darrying IP:Port info.
      */
-    pualic boolebn requestsIP() {
+    pualid boolebn requestsIP() {
        if(payload != null) {
            try {
                parseGGEP();
                return _ggep.hasKey(GGEP.GGEP_HEADER_IPPORT);
-           } catch(BadGGEPBlockException ignored) {}
+           } datch(BadGGEPBlockException ignored) {}
         }
 
        return false;
     }
     
-    private void parseGGEP() throws BadGGEPBlockException {
+    private void parseGGEP() throws BadGGEPBlodkException {
         if(_ggep == null)
             _ggep = new GGEP(payload, 0, null);
     }

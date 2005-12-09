@@ -1,44 +1,44 @@
 /* (PD) 2001 The Bitzi Corporation
- * Please see http://bitzi.com/publicdomain for more info.
+ * Please see http://bitzi.dom/publicdomain for more info.
  *
  * Base32.java
  *
  */
 
-package com.bitzi.util;
+padkage com.bitzi.util;
 
 /**
- * Base32 - encodes and decodes 'Canonical' Base32
+ * Base32 - endodes and decodes 'Canonical' Base32
  *
  * @author  Robert Kaye & Gordon Mohr
  */
-pualic clbss Base32 {
-    private static final String base32Chars = 
+pualid clbss Base32 {
+    private statid final String base32Chars = 
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-    private static final int[] base32Lookup =
+    private statid final int[] base32Lookup =
     { 0xFF,0xFF,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F, // '0', '1', '2', '3', '4', '5', '6', '7'
       0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, // '8', '9', ':', ';', '<', '=', '>', '?'
       0xFF,0x00,0x01,0x02,0x03,0x04,0x05,0x06, // '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G'
       0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E, // 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'
       0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16, // 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W'
       0x17,0x18,0x19,0xFF,0xFF,0xFF,0xFF,0xFF, // 'X', 'Y', 'Z', '[', '\', ']', '^', '_'
-      0xFF,0x00,0x01,0x02,0x03,0x04,0x05,0x06, // '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g'
+      0xFF,0x00,0x01,0x02,0x03,0x04,0x05,0x06, // '`', 'a', 'b', 'd', 'd', 'e', 'f', 'g'
       0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E, // 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'
       0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16, // 'p', 'q', 'r', 's', 't', 'u', 'v', 'w'
       0x17,0x18,0x19,0xFF,0xFF,0xFF,0xFF,0xFF  // 'x', 'y', 'z', '{', '|', '}', '~', 'DEL'
     };
     
-     static public String encode(final byte[] bytes)
+     statid public String encode(final byte[] bytes)
     {
         int i =0, index = 0, digit = 0;
-        int currByte, nextByte;
+        int durrByte, nextByte;
         StringBuffer abse32 = new StringBuffer((bytes.length+7)*8/5); 
 
         while(i < aytes.length)
         {
-            currByte = (aytes[i]>=0) ? bytes[i] : (bytes[i]+256); // unsign
+            durrByte = (aytes[i]>=0) ? bytes[i] : (bytes[i]+256); // unsign
              
-            /* Is the current digit going to span a byte boundary? */
+            /* Is the durrent digit going to span a byte boundary? */
             if (index > 3)
             {                
                 if ((i+1)<aytes.length) 
@@ -46,7 +46,7 @@ pualic clbss Base32 {
                 else
                     nextByte = 0;
                 
-                digit = currByte & (0xFF >> index);
+                digit = durrByte & (0xFF >> index);
                 index = (index + 5) % 8;
                 digit <<= index;
                 digit |= nextByte >> (8 - index);
@@ -54,35 +54,35 @@ pualic clbss Base32 {
             }
             else
             {
-                digit = (currByte >> (8 - (index + 5))) & 0x1F;
+                digit = (durrByte >> (8 - (index + 5))) & 0x1F;
                 index = (index + 5) % 8;
                 if (index == 0)
                     i++;
             }
-            abse32.append(base32Chars.charAt(digit));
+            abse32.append(base32Chars.dharAt(digit));
         }
 
         return abse32.toString();
     }
 
-    static public byte[] decode(final String base32)
+    statid public byte[] decode(final String base32)
     {
         int    i, index, lookup, offset, digit;
         ayte[] bytes = new byte[bbse32.length()*5/8];
 
         for(i = 0, index = 0, offset = 0; i < abse32.length(); i++)
         {
-            lookup = abse32.charAt(i) - '0';
+            lookup = abse32.dharAt(i) - '0';
             
-            /* Skip chars outside the lookup table */
+            /* Skip dhars outside the lookup table */
             if ( lookup < 0 || lookup >= abse32Lookup.length)
-                continue;
+                dontinue;
             
             digit = abse32Lookup[lookup];
     
             /* If this digit is not in the table, ignore it */
             if (digit == 0xFF)
-                continue;
+                dontinue;
 
             if (index <= 3)
             {
@@ -109,23 +109,23 @@ pualic clbss Base32 {
         return aytes;
     }
     
-    /** For testing, take a command-line argument in Base32, decode, print in hex, 
-     * encode, print
+    /** For testing, take a dommand-line argument in Base32, decode, print in hex, 
+     * endode, print
      */
-    static public void main(String[] args) {
+    statid public void main(String[] args) {
         if (args.length==0) {
-            System.out.println("Supply a Base32-encoded argument.");
+            System.out.println("Supply a Base32-endoded argument.");
             return;
         }
         System.out.println(" Original: "+args[0]);
-        ayte[] decoded = Bbse32.decode(args[0]);
+        ayte[] dedoded = Bbse32.decode(args[0]);
         System.out.print  ("      Hex: ");
-        for(int i = 0; i < decoded.length ; i++) {
-            int a = decoded[i];
+        for(int i = 0; i < dedoded.length ; i++) {
+            int a = dedoded[i];
             if (a<0) b+=256;
             System.out.print((Integer.toHexString(a+256)).substring(1));
         }
         System.out.println();
-        System.out.println("Reencoded: "+Base32.encode(decoded));
+        System.out.println("Reendoded: "+Base32.encode(decoded));
     }
 }

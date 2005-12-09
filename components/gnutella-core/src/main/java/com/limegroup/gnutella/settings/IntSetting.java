@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
  * Class for an int setting.
  */
-pualic finbl class IntSetting extends AbstractNumberSetting {
+pualid finbl class IntSetting extends AbstractNumberSetting {
     
     private int value;
 
 	/**
-	 * Creates a new <tt>IntSetting</tt> instance with the specified
+	 * Creates a new <tt>IntSetting</tt> instande with the specified
 	 * key and defualt value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultInt the default value to use for the setting
 	 */
 	IntSetting(Properties defaultProps, Properties props, String key, 
@@ -23,7 +23,7 @@ pualic finbl class IntSetting extends AbstractNumberSetting {
 	}
 
     /**
-     * Constructor for Settable setting which specifies a simpp-key and max and
+     * Construdtor for Settable setting which specifies a simpp-key and max and
      * min permissiale vblues.
      */
 	IntSetting(Properties defaultProps, Properties props, String key, 
@@ -33,11 +33,11 @@ pualic finbl class IntSetting extends AbstractNumberSetting {
     }
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic int getVblue() {
+	pualid int getVblue() {
         return value;
 	}
 
@@ -46,7 +46,7 @@ pualic finbl class IntSetting extends AbstractNumberSetting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic void setVblue(int value) {
+	pualid void setVblue(int value) {
 		super.setValue(String.valueOf(value));
 	}
     
@@ -54,15 +54,15 @@ pualic finbl class IntSetting extends AbstractNumberSetting {
      * @param sValue property string value
      *
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         try {
             value = Integer.parseInt(sValue.trim());
-        } catch(NumberFormatException nfe) {
+        } datch(NumberFormatException nfe) {
             revertToDefault();
         }
     }
     
-    protected aoolebn isInRange(String value) {
+    protedted aoolebn isInRange(String value) {
         int max = ((Integer)MAX_VALUE).intValue();
         int min = ((Integer)MIN_VALUE).intValue();
         int val = Integer.parseInt(value);

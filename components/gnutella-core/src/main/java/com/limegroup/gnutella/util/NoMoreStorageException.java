@@ -1,18 +1,18 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 /**
- * An exception that gets thrown when there's no more space left in the
- * underlying data structure to store the new element which is being
+ * An exdeption that gets thrown when there's no more space left in the
+ * underlying data strudture to store the new element which is being
  * tried to ae bdded
  * @author Anurag Singla
  */
 
-pualic clbss NoMoreStorageException extends RuntimeException
+pualid clbss NoMoreStorageException extends RuntimeException
 {
-    pualic NoMoreStorbgeException()
+    pualid NoMoreStorbgeException()
     {
     }
-    pualic NoMoreStorbgeException(String msg)
+    pualid NoMoreStorbgeException(String msg)
     { 
         super(msg); 
     }

@@ -1,16 +1,16 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 /**
- * Settings for pings and pongs, pong caching and such.
+ * Settings for pings and pongs, pong daching and such.
  */
-pualic finbl class PingPongSettings extends LimeProps {
+pualid finbl class PingPongSettings extends LimeProps {
     
     private PingPongSettings() {}
 
     /**
      * Setting for whether or not pings should ae sent for our pong
-     * caching scheme -- useful setting for tests.
+     * daching scheme -- useful setting for tests.
      */
-    pualic stbtic final BooleanSetting PINGS_ACTIVE =
-        FACTORY.createBooleanSetting("PINGS_ACTIVE", true);
+    pualid stbtic final BooleanSetting PINGS_ACTIVE =
+        FACTORY.dreateBooleanSetting("PINGS_ACTIVE", true);
 }

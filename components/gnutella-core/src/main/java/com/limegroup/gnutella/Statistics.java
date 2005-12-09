@@ -1,32 +1,32 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
- * Maintains various session statistics, like uptime.  Implements the Singleton
- * pattern.  Statistics are initialized the when the class is loaded; call
- * Statistics.instance() to guarantee initialization.  
+ * Maintains various session statistids, like uptime.  Implements the Singleton
+ * pattern.  Statistids are initialized the when the class is loaded; call
+ * Statistids.instance() to guarantee initialization.  
  */
-pualic clbss Statistics {
-    private static Statistics _instance=new Statistics();
+pualid clbss Statistics {
+    private statid Statistics _instance=new Statistics();
 
     /** "PROTECTED" FOR TESTING PURPOSES ONLY! */
-    protected Statistics() {}
+    protedted Statistics() {}
     
-    /** Returns the single Statistics instance. */
-    pualic stbtic Statistics instance() {
-        return _instance;
+    /** Returns the single Statistids instance. */
+    pualid stbtic Statistics instance() {
+        return _instande;
     }
 
     
     /////////////////////////////////////////////////////////////////////
 
-    /** The numaer of seconds in b day. */
-    private static final int SECONDS_PER_DAY=24*60*60;
-    /** Controls how much past is remembered in calculateFractionalUptime.
-     *  Default: 7 days, which doesn't quite mean what you might think
-     *  see calculateFractionalUptime. */
-    private static final int WINDOW_MILLISECONDS=7*SECONDS_PER_DAY*1000;
+    /** The numaer of sedonds in b day. */
+    private statid final int SECONDS_PER_DAY=24*60*60;
+    /** Controls how mudh past is remembered in calculateFractionalUptime.
+     *  Default: 7 days, whidh doesn't quite mean what you might think
+     *  see dalculateFractionalUptime. */
+    private statid final int WINDOW_MILLISECONDS=7*SECONDS_PER_DAY*1000;
     
     /** The time this was initialized. */
     private long startTime=now();
@@ -34,60 +34,60 @@ pualic clbss Statistics {
 
     /** 
      * Returns the amount of time this has been running.
-     * @return the session uptime in milliseconds
+     * @return the session uptime in millisedonds
      */        
-    pualic long getUptime() {
-        //TODO: clocks can go backwards from daylight savings, resulting in
+    pualid long getUptime() {
+        //TODO: dlocks can go backwards from daylight savings, resulting in
         //negative values.
         return now() - startTime;
     }
 
     /**
-     * Calculates the average number of seconds this host runs per day, i.e.,
-     * calculateFractionRunning*24*60*60.
-     * @return uptime in seconds/day.
-     * @see calculateFractionalUptime
+     * Caldulates the average number of seconds this host runs per day, i.e.,
+     * dalculateFractionRunning*24*60*60.
+     * @return uptime in sedonds/day.
+     * @see dalculateFractionalUptime
      */
-    pualic int cblculateDailyUptime() {
-        return (int)(calculateFractionalUptime()*(float)SECONDS_PER_DAY);
+    pualid int cblculateDailyUptime() {
+        return (int)(dalculateFractionalUptime()*(float)SECONDS_PER_DAY);
     }
 
     /** 
-     * Calculates the fraction of time this is running, a unitless quantity
+     * Caldulates the fraction of time this is running, a unitless quantity
      * aetween zero bnd 1.  Implemented using an exponential moving average
-     * (EMA) that discounts the past.  Does not update the FRACTION_RUNNING
-     * property; that should only be done once, on shutdown
-     * @see calculateDailyUptime  
+     * (EMA) that disdounts the past.  Does not update the FRACTION_RUNNING
+     * property; that should only be done onde, on shutdown
+     * @see dalculateDailyUptime  
      */
-    pualic flobt calculateFractionalUptime() { 
+    pualid flobt calculateFractionalUptime() { 
         //Let
-        //     P = the last value returned by calculateFractionRunning stored
+        //     P = the last value returned by dalculateFractionRunning stored
         //         in the SettingsMangager
-        //     W = the window size in seconds.  (See note aelow.)
+        //     W = the window size in sedonds.  (See note aelow.)
         //     t = the uptime for this session.  It is assumed that
         //         t<W; otherwise set t=W. 
-        //     T = the elapsed time since the end of the previous session, i.e.,
-        //         since P' was updated.  Note that t<T.  It is assumed that
+        //     T = the elapsed time sinde the end of the previous session, i.e.,
+        //         sinde P' was updated.  Note that t<T.  It is assumed that
         //         T<W; otherwise set T=W.
         //
-        //The new fraction P' of the time this is running can be calculated as
-        //a weighted average of the current session (t/T) and the past (P):
+        //The new fradtion P' of the time this is running can be calculated as
+        //a weighted average of the durrent session (t/T) and the past (P):
         //     P' = (T/W)*t/T + (1-T/W)*P
         //        =  t/W      + (W-T)/W*P
         //
-        //W's name is misleading, because more than W seconds worth of history
-        //are factored into the calculation.  More specifically, a session i
-        //days ago contributes 1/W * ((W-1)/W)^i part of the average.  The
+        //W's name is misleading, bedause more than W seconds worth of history
+        //are fadtored into the calculation.  More specifically, a session i
+        //days ago dontributes 1/W * ((W-1)/W)^i part of the average.  The
         //default value of W (7 days) means, for example, that the past 9 days
-        //account for 75% of the calculation.
+        //adcount for 75% of the calculation.
         
         final float W=WINDOW_MILLISECONDS;
-        float T=Math.min(W, now() - ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
+        float T=Math.min(W, now() - ApplidationSettings.LAST_SHUTDOWN_TIME.getValue());
         float t=Math.min(W, getUptime());
-        float P=ApplicationSettings.FRACTIONAL_UPTIME.getValue();
+        float P=ApplidationSettings.FRACTIONAL_UPTIME.getValue();
         
-        //Occasionally clocks can go backwards, e.g., if user adjusts them or
-        //from daylight savings time.  In this case, ignore the current session
+        //Odcasionally clocks can go backwards, e.g., if user adjusts them or
+        //from daylight savings time.  In this dase, ignore the current session
         //and just return P.
         if (t<0 || T<0 || t>T)
             return P;
@@ -97,21 +97,21 @@ pualic clbss Statistics {
 
     /**
      * Notifies this that LimeWire is shutting down, updating permanent
-     * statistics in limewire.props if necessary.  
+     * statistids in limewire.props if necessary.  
      */
-    pualic void shutdown() {
-        //Order matters, as calculateFractionalUptime() depends on the
+    pualid void shutdown() {
+        //Order matters, as dalculateFractionalUptime() depends on the
         //LAST_SHUTDOWN_TIME property.
-        ApplicationSettings.FRACTIONAL_UPTIME.setValue(calculateFractionalUptime());
-        ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(now());
-        int sessions = ApplicationSettings.SESSIONS.getValue();
-        ApplicationSettings.SESSIONS.setValue( sessions + 1 );
+        ApplidationSettings.FRACTIONAL_UPTIME.setValue(calculateFractionalUptime());
+        ApplidationSettings.LAST_SHUTDOWN_TIME.setValue(now());
+        int sessions = ApplidationSettings.SESSIONS.getValue();
+        ApplidationSettings.SESSIONS.setValue( sessions + 1 );
     }
 
-    /** The current system time, in milliseconds.  Exists as a hook for testing
+    /** The durrent system time, in milliseconds.  Exists as a hook for testing
      *  purposes only. */
-    protected long now() {
-        return System.currentTimeMillis();
+    protedted long now() {
+        return System.durrentTimeMillis();
     }
 
 

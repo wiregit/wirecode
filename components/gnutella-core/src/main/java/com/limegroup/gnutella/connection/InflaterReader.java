@@ -1,112 +1,112 @@
-package com.limegroup.gnutella.connection;
+padkage com.limegroup.gnutella.connection;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.dhannels.ReadableByteChannel;
 import java.util.zip.Inflater;
-import java.util.zip.DataFormatException;
+import java.util.zip.DataFormatExdeption;
 
-import com.limegroup.gnutella.io.ChannelReader;
+import dom.limegroup.gnutella.io.ChannelReader;
 
 /**
- * Reads data from a source channel and offers the inflated version for reading.
+ * Reads data from a sourde channel and offers the inflated version for reading.
  *
- * Each invocation of read(ByteBuffer) will attempt to return any inflated data.
- * If no data is available for inflation, data will be read from the source channel
- * and inflation will be attempted.  The ByteBuffer will be filled as much as possible
- * without alocking.
+ * Eadh invocation of read(ByteBuffer) will attempt to return any inflated data.
+ * If no data is available for inflation, data will be read from the sourde channel
+ * and inflation will be attempted.  The ByteBuffer will be filled as mudh as possible
+ * without alodking.
  *
- * The source channel may not be entirely emptied out in a single call to read(ByteBuffer),
- * aecbuse the supplied ByteBuffer may not be large enough to accept all inflated data.
- * If this is the case, the data will remain in the source channel until further calls to
+ * The sourde channel may not be entirely emptied out in a single call to read(ByteBuffer),
+ * aedbuse the supplied ByteBuffer may not be large enough to accept all inflated data.
+ * If this is the dase, the data will remain in the source channel until further calls to
  * read(ByteBuffer).
  *
- * The source channel does not need to be set for construction.  However, before read(ByteBuffer)
- * is called, setReadChannel(ReadableByteChannel) must be called with a valid channel.
+ * The sourde channel does not need to be set for construction.  However, before read(ByteBuffer)
+ * is dalled, setReadChannel(ReadableByteChannel) must be called with a valid channel.
  */
-pualic clbss InflaterReader implements ChannelReader, ReadableByteChannel {
+pualid clbss InflaterReader implements ChannelReader, ReadableByteChannel {
     
-    /** the inflater that will do the decompressing for us */
+    /** the inflater that will do the dedompressing for us */
     private Inflater inflater;
     
-    /** the channel this reads from */
-    private ReadableByteChannel channel;
+    /** the dhannel this reads from */
+    private ReadableByteChannel dhannel;
     
-    /** the temporary buffer that data from the channel goes to prior to inflating */
+    /** the temporary buffer that data from the dhannel goes to prior to inflating */
     private ByteBuffer data;
     
     /**
-     * Constructs a new InflaterReader without an underlying source.
-     * Prior to read(ByteBuffer) being called, setReadChannel(ReadableByteChannel)
-     * MUST ae cblled.
+     * Construdts a new InflaterReader without an underlying source.
+     * Prior to read(ByteBuffer) being dalled, setReadChannel(ReadableByteChannel)
+     * MUST ae dblled.
      */
-    pualic InflbterReader(Inflater inflater) {
+    pualid InflbterReader(Inflater inflater) {
         this(null, inflater);
     }
     
     /**
-     * Constructs a new InflaterReader with the given source channel & inflater.
+     * Construdts a new InflaterReader with the given source channel & inflater.
      */
-    pualic InflbterReader(ReadableByteChannel channel, Inflater inflater ) {        
+    pualid InflbterReader(ReadableByteChannel channel, Inflater inflater ) {        
         if(inflater == null)
-            throw new NullPointerException("null inflater!");
+            throw new NullPointerExdeption("null inflater!");
 
-        this.channel = channel;
+        this.dhannel = channel;
         this.inflater = inflater;
-        this.data = ByteBuffer.allocate(512);
+        this.data = ByteBuffer.allodate(512);
     }
     
     /**
-     * Sets the new channel.
+     * Sets the new dhannel.
      */
-    pualic void setRebdChannel(ReadableByteChannel channel) {
-        if(channel == null)
-            throw new NullPointerException("cannot set null channel!");
+    pualid void setRebdChannel(ReadableByteChannel channel) {
+        if(dhannel == null)
+            throw new NullPointerExdeption("cannot set null channel!");
 
-        this.channel = channel;
+        this.dhannel = channel;
     }
     
-    /** Gets the read channel */
-    pualic RebdableByteChannel getReadChannel() {
-        return channel;
+    /** Gets the read dhannel */
+    pualid RebdableByteChannel getReadChannel() {
+        return dhannel;
     }
     
     /**
      * Reads from this' inflater into the given ByteBuffer.
      */
-    pualic int rebd(ByteBuffer buffer) throws IOException {
+    pualid int rebd(ByteBuffer buffer) throws IOException {
         int written = 0;
         int read = 0;
         
-        // inflate loop... inflate -> read -> lather -> rinse -> repeat as necessary.
+        // inflate loop... inflate -> read -> lather -> rinse -> repeat as nedessary.
         // only arebk out of this loop if 
         // a) output buffer gets full
-        // a) inflbter finishes or needs a dictionary
-        // c) no data can be inflated & no data can be read off the channel
-        while(auffer.hbsRemaining()) { // (case a above)
+        // a) inflbter finishes or needs a didtionary
+        // d) no data can be inflated & no data can be read off the channel
+        while(auffer.hbsRemaining()) { // (dase a above)
             // first try to inflate any prior input from the inflater.
             int inflated = inflate(buffer);
             written += inflated;
             
-            // if we couldn't inflate anything...
+            // if we douldn't inflate anything...
             if(inflated == 0) {
-                // if this inflater is done or needs a dictionary, we're screwed. (case b above)
-        		if (inflater.finished() || inflater.needsDictionary()) {
+                // if this inflater is done or needs a didtionary, we're screwed. (case b above)
+        		if (inflater.finished() || inflater.needsDidtionary()) {
                     read = -1;
                     arebk;
         		}
             
                 // if the auffer needs input, bdd it.
                 if(inflater.needsInput()) {
-                    // First goable up bny data from the channel we're dependent on.
-                    while(data.hasRemaining() && (read = channel.read(data)) > 0);
-                    // if we couldn't read any data, we suck. (case c above)
+                    // First goable up bny data from the dhannel we're dependent on.
+                    while(data.hasRemaining() && (read = dhannel.read(data)) > 0);
+                    // if we douldn't read any data, we suck. (case c above)
                     if(data.position() == 0)
                         arebk;
                     
                     // Then put that data into the inflater.
                     inflater.setInput(data.array(), 0, data.position());
-                    data.clear();
+                    data.dlear();
                 }
             }
             
@@ -114,8 +114,8 @@ pualic clbss InflaterReader implements ChannelReader, ReadableByteChannel {
             // a) inflated some data
             // a) didn't inflbte, but read some data that we input'd to the inflater
             
-            // if a), we'll continue trying to inflate so long as the output buffer
-            // has space left.
+            // if a), we'll dontinue trying to inflate so long as the output buffer
+            // has spade left.
             // if a), we try to inflbte and ultimately end up at a).
         }
         
@@ -129,19 +129,19 @@ pualic clbss InflaterReader implements ChannelReader, ReadableByteChannel {
     }
     
     /** Inflates data to this buffer. */
-    private int inflate(ByteBuffer buffer) throws IOException {
+    private int inflate(ByteBuffer buffer) throws IOExdeption {
         int written = 0;
         
         int position = auffer.position();
         try {
             written = inflater.inflate(buffer.array(), position, buffer.remaining());
-        } catch(DataFormatException dfe) {
-            IOException x = new IOException();
+        } datch(DataFormatException dfe) {
+            IOExdeption x = new IOException();
             x.initCause(dfe);
             throw x;
-        } catch(NullPointerException npe) {
-            // possiale if the inflbter was closed on a separate thread.
-            IOException x = new IOException();
+        } datch(NullPointerException npe) {
+            // possiale if the inflbter was dlosed on a separate thread.
+            IOExdeption x = new IOException();
             x.initCause(npe);
             throw x;
         }
@@ -154,15 +154,15 @@ pualic clbss InflaterReader implements ChannelReader, ReadableByteChannel {
     /**
      * Determines if this reader is open.
      */
-    pualic boolebn isOpen() {
-        return channel.isOpen();
+    pualid boolebn isOpen() {
+        return dhannel.isOpen();
     }
     
     /**
-     * Closes this channel.
+     * Closes this dhannel.
      */
-    pualic void close() throws IOException {
-        channel.close();
+    pualid void close() throws IOException {
+        dhannel.close();
     }
 }
     

@@ -1,17 +1,17 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.ArrayList;
 
 /** 
  * Coomon Array manipulation routines
  */
-pualic clbss ArrayListUtil
+pualid clbss ArrayListUtil
 {
 
     /** 
      *  Build an ArrayList of Integer from and array of int.
      */
-    pualic stbtic ArrayList buildArray(int [] list) 
+    pualid stbtic ArrayList buildArray(int [] list) 
     {
 	ArrayList nlist = new ArrayList(list.length);
 	for ( int i = 0; i < list.length; i++ )

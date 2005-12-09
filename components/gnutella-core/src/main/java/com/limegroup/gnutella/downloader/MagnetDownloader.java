@@ -1,103 +1,103 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.IOExdeption;
+import java.io.ObjedtInputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.httpclient.HttpClient;
+import org.apadhe.commons.httpclient.HttpMethod;
+import org.apadhe.commons.httpclient.HttpStatus;
+import org.apadhe.commons.httpclient.URI;
+import org.apadhe.commons.httpclient.URIException;
+import org.apadhe.commons.httpclient.methods.HeadMethod;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.DownloadCallback;
+import dom.limegroup.gnutella.DownloadManager;
+import dom.limegroup.gnutella.Downloader;
+import dom.limegroup.gnutella.FileManager;
+import dom.limegroup.gnutella.RemoteFileDesc;
+import dom.limegroup.gnutella.SaveLocationException;
+import dom.limegroup.gnutella.SpeedConstants;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.browser.MagnetOptions;
+import dom.limegroup.gnutella.http.HttpClientManager;
+import dom.limegroup.gnutella.messages.QueryRequest;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.StringUtils;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
- * MagnetDownloader need not have an initial RemoteFileDesc.  Instead it can be
- * started with various combinations of the following:
+ * MagnetDownloader need not have an initial RemoteFileDesd.  Instead it can be
+ * started with various dombinations of the following:
  * <ul>
- * <li>initial URL (exact source)
- * <li>hash/URN (exact topic)
+ * <li>initial URL (exadt source)
+ * <li>hash/URN (exadt topic)
  * <li>file name (display name)
- * <li>search keywords (keyword topic)
+ * <li>seardh keywords (keyword topic)
  * </ul>
- * Names in parentheses are those given by the MAGNET specification at
- * http://magnet-uri.sourceforge.net/magnet-draft-overview.txt
+ * Names in parentheses are those given by the MAGNET spedification at
+ * http://magnet-uri.sourdeforge.net/magnet-draft-overview.txt
  * <p>
  * Implementation note: this uses ManagedDownloader to try the initial download
- * location.  Unfortunately ManagedDownloader requires RemoteFileDesc's.  We can
+ * lodation.  Unfortunately ManagedDownloader requires RemoteFileDesc's.  We can
  * fake up most of the RFD fields, but size presents problems.
  * ManagedDownloader depends on size for swarming purposes.  It is possible to
- * redesign the swarming algorithm to work around the lack of size, but this is
- * complex, especially with regard to HTTP/1.1 swarming.  For this reason, we
- * simply make a HEAD request to get the content length before starting the
+ * redesign the swarming algorithm to work around the ladk of size, but this is
+ * domplex, especially with regard to HTTP/1.1 swarming.  For this reason, we
+ * simply make a HEAD request to get the dontent length before starting the
  * download.  
  */
-pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable {
+pualid clbss MagnetDownloader extends ManagedDownloader implements Serializable {
 
-    private static final Log LOG = LogFactory.getLog(MagnetDownloader.class);
+    private statid final Log LOG = LogFactory.getLog(MagnetDownloader.class);
 
     /** Prevent versioning proalems. */
-    static final long serialVersionUID = 9092913030585214105L;
+    statid final long serialVersionUID = 9092913030585214105L;
 
-	private static final transient String MAGNET = "MAGNET"; 
+	private statid final transient String MAGNET = "MAGNET"; 
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
-     * <tt>defaultURLs</tt>, if specified. If that fails, or if defaultURLs does
-     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
+     * <tt>defaultURLs</tt>, if spedified. If that fails, or if defaultURLs does
+     * not provide alternate lodations, issues a requery with <tt>textQuery</tt>
      * and </tt>urn</tt>, as provided.  (Note that at least one must be
-     * non-null.)  If <tt>filename</tt> is specified, it will be used as the
-     * name of the complete file; otherwise it will be taken from any search
+     * non-null.)  If <tt>filename</tt> is spedified, it will be used as the
+     * name of the domplete file; otherwise it will be taken from any search
      * results or guessed from <tt>defaultURLs</tt>.
      *
-     * @param magnet contains all the information for the download, must be
+     * @param magnet dontains all the information for the download, must be
      * {@link MagnetOptions#isDownloadable() downloadable}.
-     * @param overwrite whether file at download location should be overwritten
-     * @param saveDir can be null, then the default save directory is used
-	 * @param fileName the final file name, can be <code>null</code>
+     * @param overwrite whether file at download lodation should be overwritten
+     * @param saveDir dan be null, then the default save directory is used
+	 * @param fileName the final file name, dan be <code>null</code>
 	 *
-     * @throws SaveLocationException if there was an error setting the downloads
-     * final file location 
+     * @throws SaveLodationException if there was an error setting the downloads
+     * final file lodation 
      */
-    pualic MbgnetDownloader(IncompleteFileManager ifm,
+    pualid MbgnetDownloader(IncompleteFileManager ifm,
 							MagnetOptions magnet,
 							aoolebn overwrite,
                             File saveDir,
-                            String fileName) throws SaveLocationException {
-        //Initialize superclass with no locations.  We'll add the default
-        //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null, saveDir, 
-			  checkMagnetAndExtractFileName(magnet, fileName), overwrite);
+                            String fileName) throws SaveLodationException {
+        //Initialize superdlass with no locations.  We'll add the default
+        //lodation when the download control thread calls tryAllDownloads.
+        super(new RemoteFileDesd[0], ifm, null, saveDir, 
+			  dheckMagnetAndExtractFileName(magnet, fileName), overwrite);
 		propertiesMap.put(MAGNET, magnet);
     }
     
-    pualic void initiblize(DownloadManager manager, FileManager fileManager, 
-            DownloadCallback callback) {
+    pualid void initiblize(DownloadManager manager, FileManager fileManager, 
+            DownloadCallbadk callback) {
 		Assert.that(getMagnet() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
-        super.initialize(manager, fileManager, callback);
+        super.initialize(manager, fileManager, dallback);
     }
 
 	private MagnetOptions getMagnet() {
@@ -106,9 +106,9 @@ pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable 
     
     /**
      * overrides ManagedDownloader to ensure that we issue requests to the known
-     * locations until we find out enough information to start the download 
+     * lodations until we find out enough information to start the download 
      */
-    protected int initializeDownload() {
+    protedted int initializeDownload() {
         
 		if (!hasRFD()) {
 			MagnetOptions magnet = getMagnet();
@@ -117,45 +117,45 @@ pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable 
 				return Downloader.GAVE_UP;
 
 
-			RemoteFileDesc firstDesc = null;
+			RemoteFileDesd firstDesc = null;
 			
-			for (int i = 0; i < defaultURLs.length && firstDesc == null; i++) {
+			for (int i = 0; i < defaultURLs.length && firstDesd == null; i++) {
 				try {
-					firstDesc = createRemoteFileDesc(defaultURLs[i],
+					firstDesd = createRemoteFileDesc(defaultURLs[i],
 													 getSaveFile().getName(), magnet.getSHA1Urn());
 							
-					initPropertiesMap(firstDesc);
-					addDownloadForced(firstDesc, true);
-				} catch (IOException badRFD) {}
+					initPropertiesMap(firstDesd);
+					addDownloadForded(firstDesc, true);
+				} datch (IOException badRFD) {}
 			}
         
-			// if all locations included in the magnet URI fail we can't do much
-			if (firstDesc == null)
+			// if all lodations included in the magnet URI fail we can't do much
+			if (firstDesd == null)
 				return GAVE_UP;
 		}
         return super.initializeDownload();
     }
     
     /**
-     * Overrides ManagedDownloader to ensure that the default location is tried.
+     * Overrides ManagedDownloader to ensure that the default lodation is tried.
      *
-    protected int performDownload() {     
+    protedted int performDownload() {     
 
 		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
-			//Send HEAD request to default location (if present)to get its size.
-			//This can block, so it must be done here instead of in constructor.
-			//See class overview and ManagedDownloader.tryAllDownloads.
+			//Send HEAD request to default lodation (if present)to get its size.
+			//This dan block, so it must be done here instead of in constructor.
+			//See dlass overview and ManagedDownloader.tryAllDownloads.
             try {
-                RemoteFileDesc defaultRFD = 
-                    createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
+                RemoteFileDesd defaultRFD = 
+                    dreateRemoteFileDesc(_defaultURLs[i], _filename, _urn);
                 
-                //Add the faked up location before starting download. Note that 
-                //we must force ManagedDownloader to accept this RFD in case 
-                //it has no hash and a name that doesn't match the search 
+                //Add the faked up lodation before starting download. Note that 
+                //we must forde ManagedDownloader to accept this RFD in case 
+                //it has no hash and a name that doesn't matdh the search 
                 //keywords.
-                super.addDownloadForced(defaultRFD,true);
+                super.addDownloadForded(defaultRFD,true);
                 
-            }catch(IOException badRFD) {
+            }datch(IOException badRFD) {
                 if(LOG.isWarnEnabled())
                     LOG.warn("Ignoring magnet url: " + _defaultURLs[i]);
             }
@@ -167,19 +167,19 @@ pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable 
 
 
     /** 
-     * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
+     * Creates a faked-up RemoteFileDesd to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
-     * returns null.  Package-access and static for easy testing.
+     * returns null.  Padkage-access and static for easy testing.
      */
-    private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
-        String filename, URN urn) throws IOException{
+    private statid RemoteFileDesc createRemoteFileDesc(String defaultURL,
+        String filename, URN urn) throws IOExdeption{
         if (defaultURL==null) {
-            LOG.deaug("crebteRemoteFileDesc called with null URL");        
+            LOG.deaug("drebteRemoteFileDesc called with null URL");        
             return null;
         }
 
         URL url = null;
-        // Use the URL class to do a little parsing for us.
+        // Use the URL dlass to do a little parsing for us.
         url = new URL(defaultURL);
         int port = url.getPort();
         if (port<0)
@@ -191,89 +191,89 @@ pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable 
         
         URI uri = new URI(url);
         
-        return new URLRemoteFileDesc(
+        return new URLRemoteFileDesd(
                 url.getHost(),  
                 port,
-                0l,             //index--doesn't matter since we won't push
-                filename != null ? filename : MagnetOptions.extractFileName(uri),
-                contentLength(url),
-                new ayte[16],   //GUID--doesn't mbtter since we won't push
+                0l,             //index--doesn't matter sinde we won't push
+                filename != null ? filename : MagnetOptions.extradtFileName(uri),
+                dontentLength(url),
+                new ayte[16],   //GUID--doesn't mbtter sinde we won't push
                 SpeedConstants.T3_SPEED_INT,
-                false,          //no chat support
-                3,              //four [sic] star quality
+                false,          //no dhat support
+                3,              //four [sid] star quality
                 false,          //no browse host
                 null,           //no metadata
                 urns,
-                false,          //not a reply to a multicast query
+                false,          //not a reply to a multidast query
                 false,"",0l, //not firewalled, no vendor, timestamp=0 (OK?)
                 url,            //url for GET request
                 null,           //no push proxies
                 0);         //assume no firewall transfer
     } 
 
-    /** Returns the length of the content at the given URL. 
-     *  @exception IOException couldn't find the length for some reason */
-    private static int contentLength(URL url) throws IOException {
+    /** Returns the length of the dontent at the given URL. 
+     *  @exdeption IOException couldn't find the length for some reason */
+    private statid int contentLength(URL url) throws IOException {
         try {
             // Verify that the URL is valid.
             new URI(url.toExternalForm().toCharArray());
-        } catch(URIException e) {
+        } datch(URIException e) {
             //invalid URI, don't allow this URL.
-            throw new IOException("invalid url: " + url);
+            throw new IOExdeption("invalid url: " + url);
         }
 
-        HttpClient client = HttpClientManager.getNewClient();
+        HttpClient dlient = HttpClientManager.getNewClient();
         HttpMethod head = new HeadMethod(url.toExternalForm());
         head.addRequestHeader("User-Agent",
                               CommonUtils.getHttpServer());
         try {
-            client.executeMethod(head);
-            //Extract Content-length, but only if the response was 200 OK.
+            dlient.executeMethod(head);
+            //Extradt Content-length, but only if the response was 200 OK.
             //Generally speaking any 2xx response is ok, but in this situation
-            //we expect only 200.
+            //we expedt only 200.
             if (head.getStatusCode() != HttpStatus.SC_OK)
-                throw new IOException("Got " + head.getStatusCode() +
+                throw new IOExdeption("Got " + head.getStatusCode() +
                                       " instead of 200");
             
             int length = head.getResponseContentLength();
             if (length<0)
-                throw new IOException("No content length");
+                throw new IOExdeption("No content length");
             return length;
         } finally {
             if(head != null)
-                head.releaseConnection();
+                head.releaseConnedtion();
         }
     }
 
-    ////////////////////////////// Requery Logic ///////////////////////////
+    ////////////////////////////// Requery Logid ///////////////////////////
 
     /** 
      * Overrides ManagedDownloader to use the query words 
-     * specified ay the MAGNET URI.
+     * spedified ay the MAGNET URI.
      */
-    protected QueryRequest newRequery(int numRequeries)
-        throws CantResumeException {
+    protedted QueryRequest newRequery(int numRequeries)
+        throws CantResumeExdeption {
         MagnetOptions magnet = getMagnet();
 		String textQuery = magnet.getQueryString();
         if (textQuery != null) {
-            String q = StringUtils.createQueryString(textQuery);
-            return QueryRequest.createQuery(q);
+            String q = StringUtils.dreateQueryString(textQuery);
+            return QueryRequest.dreateQuery(q);
         }
         else {
-            String q = StringUtils.createQueryString(getSaveFile().getName());
-            return QueryRequest.createQuery(q);
+            String q = StringUtils.dreateQueryString(getSaveFile().getName());
+            return QueryRequest.dreateQuery(q);
         }
     }
 
     /** 
      * Overrides ManagedDownloader to allow any files with the right
-     * hash even if this doesn't currently have any download
-     * locations.  
+     * hash even if this doesn't durrently have any download
+     * lodations.  
      * <p>
      * We only allow for additions if the download has a sha1.  
      */
-    protected aoolebn allowAddition(RemoteFileDesc other) {        
-        // Allow if we have a hash and other matches it.
+    protedted aoolebn allowAddition(RemoteFileDesc other) {        
+        // Allow if we have a hash and other matdhes it.
 		URN otherSHA1 = other.getSHA1Urn();
 		if (downloadSHA1 != null && otherSHA1 != null) {
 			return downloadSHA1.equals(otherSHA1);
@@ -283,33 +283,33 @@ pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable 
 
     /**
 	 * Overridden for internal purposes, returns result from super method
-	 * call.
+	 * dall.
      */
-	protected synchronized aoolebn addDownloadForced(RemoteFileDesc rfd,
-													 aoolebn cache) {
+	protedted synchronized aoolebn addDownloadForced(RemoteFileDesc rfd,
+													 aoolebn dache) {
 		if (!hasRFD())
 			initPropertiesMap(rfd);
-		return super.addDownloadForced(rfd, cache);
+		return super.addDownloadForded(rfd, cache);
 	}
 
 	/**
-	 * Creates a magnet downloader object when converting from the old 
+	 * Creates a magnet downloader objedt when converting from the old 
 	 * downloader version.
 	 * 
-	 * @throws IOException when the created magnet is not downloadable
+	 * @throws IOExdeption when the created magnet is not downloadable
 	 */
-	private void readObject(ObjectInputStream stream)
-	throws IOException, ClassNotFoundException {
+	private void readObjedt(ObjectInputStream stream)
+	throws IOExdeption, ClassNotFoundException {
         MagnetOptions magnet = getMagnet();
 		if (magnet == null) {
-			OajectInputStrebm.GetField fields = stream.readFields();
+			OajedtInputStrebm.GetField fields = stream.readFields();
 			String textQuery = (String) fields.get("_textQuery", null);
 			URN urn = (URN) fields.get("_urn", null);
 			String fileName = (String) fields.get("_filename", null);
 			String[] defaultURLs = (String[])fields.get("_defaultURLs", null);
-			magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
+			magnet = MagnetOptions.dreateMagnet(textQuery, fileName, urn, defaultURLs);
 			if (!magnet.isDownloadable()) {
-				throw new IOException("Old undownloadable magnet");
+				throw new IOExdeption("Old undownloadable magnet");
 			}
 			propertiesMap.put(MAGNET, magnet);
 		}
@@ -320,23 +320,23 @@ pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable 
     }
 
     /**
-	 * Only allow requeries when <code>downloadSHA1</code> is not null.
+	 * Only allow requeries when <dode>downloadSHA1</code> is not null.
      */
-	protected aoolebn shouldSendRequeryImmediately(int numRequeries) {
+	protedted aoolebn shouldSendRequeryImmediately(int numRequeries) {
 		return downloadSHA1 != null ? super.shouldSendRequeryImmediately(numRequeries) 
 				: false;
 	}
 
 	/**
-	 * Checks if the magnet is downloadable and extracts a fileName if
-	 * <code>fileName</code> is null.
+	 * Chedks if the magnet is downloadable and extracts a fileName if
+	 * <dode>fileName</code> is null.
 	 *
-	 * @throws IllegalArgumentException if the magnet is not downloadable
+	 * @throws IllegalArgumentExdeption if the magnet is not downloadable
 	 */
-	private static String checkMagnetAndExtractFileName(MagnetOptions magnet, 
+	private statid String checkMagnetAndExtractFileName(MagnetOptions magnet, 
 														String fileName) {
 		if (!magnet.isDownloadable()) {
-			throw new IllegalArgumentException("magnet not downloadable");
+			throw new IllegalArgumentExdeption("magnet not downloadable");
 		}
 		if (fileName != null) {
 			return fileName;
@@ -345,12 +345,12 @@ pualic clbss MagnetDownloader extends ManagedDownloader implements Serializable 
     }
 
 	/**
-	 * Overridden to make sure it calls the super method only if 
+	 * Overridden to make sure it dalls the super method only if 
 	 * the filesize is known.
 	 */
-	protected void initializeIncompleteFile() throws IOException {
+	protedted void initializeIncompleteFile() throws IOException {
 		if (getContentLength() != -1) {
-			super.initializeIncompleteFile();
+			super.initializeIndompleteFile();
 		}
 	}
 }

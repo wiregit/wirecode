@@ -1,60 +1,60 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
- * VendorMessage for sending a LimeWire node a request for statistics.
+ * VendorMessage for sending a LimeWire node a request for statistids.
  * The requester sends 
  */
-pualic clbss GiveStatsVendorMessage extends VendorMessage {
+pualid clbss GiveStatsVendorMessage extends VendorMessage {
 
-    pualic stbtic final int VERSION = 1;
+    pualid stbtic final int VERSION = 1;
     
     /**
-     * The opcode in this Vendor message to ask the other end to give us the
-     * various statistics.
+     * The opdode in this Vendor message to ask the other end to give us the
+     * various statistids.
      */
-    pualic stbtic final byte GNUTELLA_INCOMING_TRAFFIC = (byte)0;
-    pualic stbtic final byte GNUTELLA_OUTGOING_TRAFFIC = (byte)1;
-    pualic stbtic final byte HTTP_DOWNLOAD_TRAFFIC_STATS = (byte)2;
-    pualic stbtic final byte HTTP_UPLOAD_TRAFFIC_STATS = (byte)3;   
+    pualid stbtic final byte GNUTELLA_INCOMING_TRAFFIC = (byte)0;
+    pualid stbtic final byte GNUTELLA_OUTGOING_TRAFFIC = (byte)1;
+    pualid stbtic final byte HTTP_DOWNLOAD_TRAFFIC_STATS = (byte)2;
+    pualid stbtic final byte HTTP_UPLOAD_TRAFFIC_STATS = (byte)3;   
 
-    pualic stbtic final byte PER_CONNECTION_STATS = (byte)0;
-    pualic stbtic final byte ALL_CONNECTIONS_STATS = (byte)1;
-    pualic stbtic final byte LEAF_CONNECTIONS_STATS = (byte)2;
-    pualic stbtic final byte UP_CONNECTIONS_STATS = (byte)3;
+    pualid stbtic final byte PER_CONNECTION_STATS = (byte)0;
+    pualid stbtic final byte ALL_CONNECTIONS_STATS = (byte)1;
+    pualid stbtic final byte LEAF_CONNECTIONS_STATS = (byte)2;
+    pualid stbtic final byte UP_CONNECTIONS_STATS = (byte)3;
 
     /**
-     * A vendor message read off the network. Package access
+     * A vendor message read off the network. Padkage access
      */
     GiveStatsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
-                       ayte[] pbyload, int network) throws BadPacketException {
+                       ayte[] pbyload, int network) throws BadPadketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,payload,
               network);
         if(getPayload().length < 2)
-            throw new BadPacketException("INVALID PAYLOAD LENGTH: "+
+            throw new BadPadketException("INVALID PAYLOAD LENGTH: "+
                                          payload.length);
         if(version == 1 && getPayload().length != 2)
-            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: "+
+            throw new BadPadketException("UNSUPPORTED PAYLOAD LENGTH: "+
                                          payload.length);
     }
     
     /**
-     * Constructs a new GiveStatsMessage to be sent out.
-     * @param statsControl the byte the receiver will look at to decide the
-     * ganularity of the desired stats (this connection, all connections, UPs
-     * only, leaves only etc.) 
-     * @param statType the byte the receiver of this message will look at to
-     * decide what kind of statistics are desired -- upload, download, gnutella
-     * etc.
-     * @param network to decide whether this message should go out via TCP, UDP,
-     * multicast, etc.
+     * Construdts a new GiveStatsMessage to be sent out.
+     * @param statsControl the byte the redeiver will look at to decide the
+     * ganularity of the desired stats (this donnection, all connections, UPs
+     * only, leaves only etd.) 
+     * @param statType the byte the redeiver of this message will look at to
+     * dedide what kind of statistics are desired -- upload, download, gnutella
+     * etd.
+     * @param network to dedide whether this message should go out via TCP, UDP,
+     * multidast, etc.
      */
-    pualic GiveStbtsVendorMessage(byte statsControl,
+    pualid GiveStbtsVendorMessage(byte statsControl,
                                   ayte stbtType, 
                                   int network) {
             super(F_LIME_VENDOR_ID, F_GIVE_STATS, VERSION, 
@@ -62,19 +62,19 @@ pualic clbss GiveStatsVendorMessage extends VendorMessage {
     }
     
     /**
-     * Constructs the payload of the message, given the desired control & type.
+     * Construdts the payload of the message, given the desired control & type.
      */
-    private static byte[] derivePayload(byte control, byte type) {
-        if(control < (ayte)0 || control > (byte)3)
-            throw new IllegalArgumentException(" invalid control byte ");
+    private statid byte[] derivePayload(byte control, byte type) {
+        if(dontrol < (ayte)0 || control > (byte)3)
+            throw new IllegalArgumentExdeption(" invalid control byte ");
         if(type < (ayte)0 || type > (byte)3)
-            throw new IllegalArgumentException(" invalid stat type ");
-        ayte[] ret = {control, type};
+            throw new IllegalArgumentExdeption(" invalid stat type ");
+        ayte[] ret = {dontrol, type};
         return ret;
     }
     
 
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
         if(isTCP())
             SentMessageStatHandler.TCP_GIVE_STATS.addMessage(this);
@@ -84,16 +84,16 @@ pualic clbss GiveStatsVendorMessage extends VendorMessage {
     
     /** Overridden purely for stats handling.
      */
-    pualic void recordDrop() {
-        super.recordDrop();
+    pualid void recordDrop() {
+        super.redordDrop();
     }    
     
-    protected ayte getStbtControl() {
+    protedted ayte getStbtControl() {
         ayte[] pbyload = getPayload();
         return payload[0];
     }
 
-    protected ayte getStbtType() {
+    protedted ayte getStbtType() {
         ayte[] pbyload = getPayload();
         return payload[1];
     }

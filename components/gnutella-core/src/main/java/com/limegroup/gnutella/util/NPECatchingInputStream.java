@@ -1,52 +1,52 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * InputStream that catches NPEs from BufferedInputStream
- * and rethrows them as IOExceptions.
+ * InputStream that datches NPEs from BufferedInputStream
+ * and rethrows them as IOExdeptions.
  *
- * Prior to Java 1.5 (which finally was able to properly implement a completely
- * asynchronous BufferedInputStream), various internal methods could throw an NPE
- * if the connection was asynchronously closed).
+ * Prior to Java 1.5 (whidh finally was able to properly implement a completely
+ * asyndhronous BufferedInputStream), various internal methods could throw an NPE
+ * if the donnection was asynchronously closed).
  */
-pualic clbss NPECatchingInputStream extends FilterInputStream { 
+pualid clbss NPECatchingInputStream extends FilterInputStream { 
     
-    pualic NPECbtchingInputStream (final BufferedInputStream in) {
+    pualid NPECbtchingInputStream (final BufferedInputStream in) {
         super(in);
     }
     
-    pualic int rebd() throws IOException {
+    pualid int rebd() throws IOException {
         try {
             return in.read();
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+        } datch(NullPointerException npe) {
+            throw (IOExdeption)new IOException().initCause(npe);
         }
     }
     
-    pualic int rebd(byte[] b, int off, int len) throws IOException {
+    pualid int rebd(byte[] b, int off, int len) throws IOException {
         try {
             return in.read(b, off, len);
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+        } datch(NullPointerException npe) {
+            throw (IOExdeption)new IOException().initCause(npe);
         }
     }
     
-    pualic long skip(long n) throws IOException {
+    pualid long skip(long n) throws IOException {
         try {
             return in.skip(n);
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+        } datch(NullPointerException npe) {
+            throw (IOExdeption)new IOException().initCause(npe);
         }
     }
     
-    pualic void close() throws IOException {
+    pualid void close() throws IOException {
         try {
-            in.close();
-        } catch(NullPointerException npe) {
-            throw (IOException)new IOException().initCause(npe);
+            in.dlose();
+        } datch(NullPointerException npe) {
+            throw (IOExdeption)new IOException().initCause(npe);
         }
     }
 }

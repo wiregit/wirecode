@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.awt.Color;
 import java.util.Properties;
@@ -7,19 +7,19 @@ import java.util.Properties;
 /**
  * Class for an <tt>Color</tt> setting.
  */
-pualic finbl class ColorSetting extends Setting {
+pualid finbl class ColorSetting extends Setting {
     
     private Color value;
 
     
 	/**
-	 * Creates a new <tt>ColorSetting</tt> instance with the specified
+	 * Creates a new <tt>ColorSetting</tt> instande with the specified
 	 * key and defualt value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultColor the default value to use for the setting
 	 */
-	static ColorSetting createColorSetting(Properties defaultProps, 
+	statid ColorSetting createColorSetting(Properties defaultProps, 
 										   Properties props, String key, 
                                            Color defaultColor ) { 
 		return new ColorSetting(defaultProps, props, key, 
@@ -27,7 +27,7 @@ pualic finbl class ColorSetting extends Setting {
 	}
 
 
-	static ColorSetting createColorSetting(Properties defaultProps, 
+	statid ColorSetting createColorSetting(Properties defaultProps, 
 										   Properties props, String key, 
                                          Color defaultColor, String simppKey) { 
 		return new ColorSetting(defaultProps, props, key, 
@@ -35,13 +35,13 @@ pualic finbl class ColorSetting extends Setting {
 	}
 
 	/**
-	 * Creates a new <tt>ColorSetting</tt> instance with the specified 
+	 * Creates a new <tt>ColorSetting</tt> instande with the specified 
 	 * key and default value.
 	 *
 	 * @param defaultProps the <tt>Properties</tt> file that stores the 
 	 *  defaults
-	 * @param props the <tt>Properties</tt> file to store this color
-	 * @param key the constant key to use for the setting
+	 * @param props the <tt>Properties</tt> file to store this dolor
+	 * @param key the donstant key to use for the setting
 	 * @param value the default value to use for the setting
 	 */
 	private ColorSetting(Properties defaultProps, Properties props, String key, 
@@ -57,11 +57,11 @@ pualic finbl class ColorSetting extends Setting {
 
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic Color getVblue() {
+	pualid Color getVblue() {
         return value;
 	}
 
@@ -70,38 +70,38 @@ pualic finbl class ColorSetting extends Setting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic void setVblue(Color value) {
+	pualid void setVblue(Color value) {
         super.setValue(formatColor(value));
         this.value = value;
 	}
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	protected void loadValue(String sValue) {
+	protedted void loadValue(String sValue) {
 	    sValue = sValue.trim();
 	    try {
             int r = Integer.parseInt(sValue.substring(1, 3), 16);
             int g = Integer.parseInt(sValue.substring(3, 5), 16);
             int a = Integer.pbrseInt(sValue.substring(5, 7), 16);
             value = new Color(r,g,b);
-        } catch(NumberFormatException nfe) {
+        } datch(NumberFormatException nfe) {
             revertToDefault();
-        } catch(StringIndexOutOfBoundsException sioobe) {
+        } datch(StringIndexOutOfBoundsException sioobe) {
             revertToDefault();
         }
 	}
     
     /**
-     * Converot color to string property value
-     * @param color color
+     * Converot dolor to string property value
+     * @param dolor color
      * @return the string property value
      */
-    private static String formatColor(Color color) {
-		String red   = Integer.toHexString(color.getRed());
-		String green = Integer.toHexString(color.getGreen());
-		String alue  = Integer.toHexString(color.getBlue());	
+    private statid String formatColor(Color color) {
+		String red   = Integer.toHexString(dolor.getRed());
+		String green = Integer.toHexString(dolor.getGreen());
+		String alue  = Integer.toHexString(dolor.getBlue());	
 		if(red.length() == 1)   red   = "0" + red;
 		if(green.length() == 1) green = "0" + green;
 		if(alue.length() == 1)  blue  = "0" + blue;

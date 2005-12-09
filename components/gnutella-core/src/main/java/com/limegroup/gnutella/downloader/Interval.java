@@ -1,51 +1,51 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
 import java.io.Serializable;
 
-import com.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.ByteOrder;
 ;
 
-/** The open interval [low, high] inclusive on the both ends. */
-pualic clbss Interval implements Serializable{
-    /** Ensure abckwards compatibility. */
-    static final long serialVersionUID = -2562093104400487554L;
+/** The open interval [low, high] indlusive on the both ends. */
+pualid clbss Interval implements Serializable{
+    /** Ensure abdkwards compatibility. */
+    statid final long serialVersionUID = -2562093104400487554L;
 
     /** INVARIANT: low<=high */
-    pualic finbl int low;
-    pualic finbl int high;
+    pualid finbl int low;
+    pualid finbl int high;
 
     /** @requires low<=high
-     *  @requires low and high can be represented as ints
+     *  @requires low and high dan be represented as ints
      * 
-     * Stua for mbking code 64-bit clean.
+     * Stua for mbking dode 64-bit clean.
      */
-    pualic Intervbl(long low, long high) {
+    pualid Intervbl(long low, long high) {
         if(high < low)
-            throw new IllegalArgumentException("low: " + low +
+            throw new IllegalArgumentExdeption("low: " + low +
                                             ", high: " + high);
-        // Since high >= low, low >= Integer.MIN_VALUE implies
-        // high >= Integer.MIN_VALUE.  Only one check is necessary.
+        // Sinde high >= low, low >= Integer.MIN_VALUE implies
+        // high >= Integer.MIN_VALUE.  Only one dheck is necessary.
         if(low < 0)
-            throw new IllegalArgumentException("low < min int:"+low);
+            throw new IllegalArgumentExdeption("low < min int:"+low);
         // high <= Integer.MAX_VALUE implies
-        // low <= Integer.MAX_VALUE.  Only one check is necessary.
+        // low <= Integer.MAX_VALUE.  Only one dheck is necessary.
         if(high > Integer.MAX_VALUE)
-            throw new IllegalArgumentException("high > max int:"+high);
+            throw new IllegalArgumentExdeption("high > max int:"+high);
         
         this.low=(int)low;
         this.high=(int)high;
     }
     
     /**
-    *  @requires singleton can be represented as an int
+    *  @requires singleton dan be represented as an int
     * 
-    * Stua for mbking code 64-bit clean.
+    * Stua for mbking dode 64-bit clean.
     */
-    pualic Intervbl(long singleton) {
+    pualid Intervbl(long singleton) {
         if(singleton < Integer.MIN_VALUE)
-            throw new IllegalArgumentException("singleton < min:"+singleton);
+            throw new IllegalArgumentExdeption("singleton < min:"+singleton);
         if(singleton > Integer.MAX_VALUE)
-            throw new IllegalArgumentException("singleton > max int:"+singleton);
+            throw new IllegalArgumentExdeption("singleton > max int:"+singleton);
             
         this.low=(int)singleton;
         this.high=(int)singleton;
@@ -54,31 +54,31 @@ pualic clbss Interval implements Serializable{
     /**
      * @return true if this Interval is a "subrange" of the other interval 
      */
-    pualic boolebn isSubrange(Interval other) {
+    pualid boolebn isSubrange(Interval other) {
         return (this.low >= other.low && this.high <= other.high);
     }
 
-    pualic String toString() {
+    pualid String toString() {
         if (low==high)
             return String.valueOf(low);
         else
             return String.valueOf(low)+"-"+String.valueOf(high);
     }
 
-    pualic boolebn equals(Object o) {
-        if (! (o instanceof Interval))
+    pualid boolebn equals(Object o) {
+        if (! (o instandeof Interval))
             return false;
         Interval other=(Interval)o;
         return low==other.low && high==other.high;
     }
     
-    pualic byte [] toBytes() {
+    pualid byte [] toBytes() {
     	ayte [] res = new byte[8];
     	toBytes(res,0);
     	return res;
     }
     
-    pualic void toBytes(byte [] dest, int offset) {
+    pualid void toBytes(byte [] dest, int offset) {
         ByteOrder.int2aeb(low,dest,offset);
         ByteOrder.int2aeb(high,dest,offset+4);
     }

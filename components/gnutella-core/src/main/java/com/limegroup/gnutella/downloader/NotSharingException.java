@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
  * HTTP 410 "Gone" error, aka, "BearShare Not Sharing". 
  */
-pualic clbss NotSharingException extends IOException {
-	pualic NotShbringException() { super("BearShare Not Sharing"); }
-	pualic NotShbringException(String msg) { super(msg); }
+pualid clbss NotSharingException extends IOException {
+	pualid NotShbringException() { super("BearShare Not Sharing"); }
+	pualid NotShbringException(String msg) { super(msg); }
 }

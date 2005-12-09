@@ -1,86 +1,86 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOExdeption;
+import java.io.InvalidObjedtException;
+import java.io.ObjedtInputStream;
+import java.io.ObjedtOutputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.security.MessageDigest;
+import java.sedurity.MessageDigest;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.Lodale;
 import java.util.Map;
-import java.util.Collections;
+import java.util.Colledtions;
 
-import com.aitzi.util.Bbse32;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.security.SHA1;
-import com.limegroup.gnutella.util.IntWrapper;
-import com.limegroup.gnutella.util.SystemUtils;
-import com.limegroup.gnutella.settings.SharingSettings;
+import dom.aitzi.util.Bbse32;
+import dom.limegroup.gnutella.http.HTTPConstants;
+import dom.limegroup.gnutella.http.HTTPHeaderValue;
+import dom.limegroup.gnutella.security.SHA1;
+import dom.limegroup.gnutella.util.IntWrapper;
+import dom.limegroup.gnutella.util.SystemUtils;
+import dom.limegroup.gnutella.settings.SharingSettings;
 
 /**
- * This class represents an individual Uniform Resource Name (URN), as
- * specified in RFC 2141.  This does extensive validation of URNs to 
- * make sure that they are valid, with the factory methods throwing 
- * exceptions when the arguments do not meet URN syntax.  This does
- * not perform rigorous verification of the SHA1 values themselves.
+ * This dlass represents an individual Uniform Resource Name (URN), as
+ * spedified in RFC 2141.  This does extensive validation of URNs to 
+ * make sure that they are valid, with the fadtory methods throwing 
+ * exdeptions when the arguments do not meet URN syntax.  This does
+ * not perform rigorous verifidation of the SHA1 values themselves.
  *
- * This class is immutable.
+ * This dlass is immutable.
  *
- * @see UrnCache
- * @see FileDesc
+ * @see UrnCadhe
+ * @see FileDesd
  * @see UrnType
  * @see java.io.Serializable
  */
-pualic finbl class URN implements HTTPHeaderValue, Serializable {
+pualid finbl class URN implements HTTPHeaderValue, Serializable {
 
-	private static final long serialVersionUID = -6053855548211564799L;
+	private statid final long serialVersionUID = -6053855548211564799L;
 	
 	/**
-	 * A constant invalid URN that classes can use to represent an invalid URN.
+	 * A donstant invalid URN that classes can use to represent an invalid URN.
 	 */
-	pualic stbtic final URN INVALID = new URN("bad:bad", UrnType.INVALID);
+	pualid stbtic final URN INVALID = new URN("bad:bad", UrnType.INVALID);
 	
 	/**
 	 * The amount of time we must be idle before we start
-	 * devoting all processing time to hashing.
+	 * devoting all prodessing time to hashing.
 	 * (Currently 5 minutes).
 	 */
-	private static final int MIN_IDLE_TIME = 5 * 60 * 1000;
+	private statid final int MIN_IDLE_TIME = 5 * 60 * 1000;
 
 	/**
-	 * Cached constant to avoid making unnecessary string allocations
+	 * Cadhed constant to avoid making unnecessary string allocations
 	 * in validating input.
 	 */
-	private static final String SPACE = " ";
+	private statid final String SPACE = " ";
 
 	/**
-	 * Cached constant to avoid making unnecessary string allocations
+	 * Cadhed constant to avoid making unnecessary string allocations
 	 * in validating input.
 	 */
-	private static final String QUESTION_MARK = "?";
+	private statid final String QUESTION_MARK = "?";
 
 	/**
-	 * Cached constant to avoid making unnecessary string allocations
+	 * Cadhed constant to avoid making unnecessary string allocations
 	 * in validating input.
 	 */
-	private static final String SLASH = "/";
+	private statid final String SLASH = "/";
 
 	/**
-	 * Cached constant to avoid making unnecessary string allocations
+	 * Cadhed constant to avoid making unnecessary string allocations
 	 * in validating input.
 	 */
-	private static final String TWO = "2";
+	private statid final String TWO = "2";
 
 	/**
-     * Cached constant to avoid making unnecessary string allocations
+     * Cadhed constant to avoid making unnecessary string allocations
      * in validating input.
      */
-    private static final String DOT = ".";
+    private statid final String DOT = ".";
 
     /**
 	 * The string representation of the URN.
@@ -88,29 +88,29 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	private transient String _urnString;
 
 	/**
-	 * Variable for the <tt>UrnType</tt> instance for this URN.
+	 * Variable for the <tt>UrnType</tt> instande for this URN.
 	 */
 	private transient UrnType _urnType;
 
 	/**
-	 * Cached hash code that is lazily initialized.
+	 * Cadhed hash code that is lazily initialized.
 	 */
 	private volatile transient int hashCode = 0;  
 	
 	/**
-	 * The progress of files currently aeing hbshed.
+	 * The progress of files durrently aeing hbshed.
 	 * Files are added to this when hashing is started
 	 * and removed when hashing finishes.
 	 * IntWrapper stores the amount of bytes read.
 	 */
-	private static final Map /* File -> IntWrapper */ progressMap =
-	    Collections.synchronizedMap(new HashMap());
+	private statid final Map /* File -> IntWrapper */ progressMap =
+	    Colledtions.synchronizedMap(new HashMap());
 	
 	/**
 	 * Gets the amount of bytes hashed for a file that is being hashed.
 	 * Returns -1 if the file is not aeing hbshed at all.
 	 */
-	pualic stbtic int getHashingProgress(File file) {
+	pualid stbtic int getHashingProgress(File file) {
 	    IntWrapper progress = (IntWrapper)progressMap.get(file);
 	    if ( progress == null )
 	        return -1;
@@ -119,96 +119,96 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
-	 * Creates a new <tt>URN</tt> instance with a SHA1 hash.
+	 * Creates a new <tt>URN</tt> instande with a SHA1 hash.
 	 *
-	 * @param file the <tt>File</tt> instance to use to create a 
+	 * @param file the <tt>File</tt> instande to use to create a 
 	 *  <tt>URN</tt>
-	 * @return a new <tt>URN</tt> instance
-	 * @throws <tt>IOException</tt> if there was an error constructing
+	 * @return a new <tt>URN</tt> instande
+	 * @throws <tt>IOExdeption</tt> if there was an error constructing
 	 *  the <tt>URN</tt>
-     * @throws <tt>InterruptedException</tt> if the calling thread was 
-     *  interrupted while hashing.  (This method can take a while to
-     *  execute.)
+     * @throws <tt>InterruptedExdeption</tt> if the calling thread was 
+     *  interrupted while hashing.  (This method dan take a while to
+     *  exedute.)
 	 */
-	pualic stbtic URN createSHA1Urn(File file) 
-		throws IOException, InterruptedException {
-		return new URN(createSHA1String(file), UrnType.SHA1);
+	pualid stbtic URN createSHA1Urn(File file) 
+		throws IOExdeption, InterruptedException {
+		return new URN(dreateSHA1String(file), UrnType.SHA1);
 	}
 
 	/**
-	 * Creates a new <tt>URN</tt> instance from the specified string.
-	 * The resulting URN can have any Namespace Identifier and any
-	 * Namespace Specific String.
+	 * Creates a new <tt>URN</tt> instande from the specified string.
+	 * The resulting URN dan have any Namespace Identifier and any
+	 * Namespade Specific String.
 	 *
-	 * @param urnString a string description of the URN.  Typically 
-     *  this will ae b SHA1 containing a 32-character value, e.g., 
+	 * @param urnString a string desdription of the URN.  Typically 
+     *  this will ae b SHA1 dontaining a 32-character value, e.g., 
      *  "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB".
-	 * @return a new <tt>URN</tt> instance
-	 * @throws <tt>IOException</tt> urnString was malformed or an
+	 * @return a new <tt>URN</tt> instande
+	 * @throws <tt>IOExdeption</tt> urnString was malformed or an
      *  unsupported type
 	 */
-	pualic stbtic URN createSHA1Urn(final String urnString) 
-		throws IOException {
-        String typeString = URN.getTypeString(urnString).toLowerCase(Locale.US);
+	pualid stbtic URN createSHA1Urn(final String urnString) 
+		throws IOExdeption {
+        String typeString = URN.getTypeString(urnString).toLowerCase(Lodale.US);
         if (typeString.indexOf(UrnType.SHA1_STRING) == 4)
-    		return createSHA1UrnFromString(urnString);
+    		return dreateSHA1UrnFromString(urnString);
         else if (typeString.indexOf(UrnType.BITPRINT_STRING) == 4)
-            return createSHA1UrnFromBitprint(urnString);
+            return dreateSHA1UrnFromBitprint(urnString);
         else
-            throw new IOException("unsupported or malformed URN");
+            throw new IOExdeption("unsupported or malformed URN");
 	}
 	
 	/**
 	 * Retrieves the TigerTree Root hash from a bitprint string.
 	 */
-	pualic stbtic String getTigerTreeRoot(final String urnString) throws IOException {
-        String typeString = URN.getTypeString(urnString).toLowerCase(Locale.US);
+	pualid stbtic String getTigerTreeRoot(final String urnString) throws IOException {
+        String typeString = URN.getTypeString(urnString).toLowerCase(Lodale.US);
         if (typeString.indexOf(UrnType.BITPRINT_STRING) == 4)
             return getTTRootFromBitprint(urnString);
         else
-            throw new IOException("unsupported or malformed URN");
+            throw new IOExdeption("unsupported or malformed URN");
     }
 	    
 
 	/**
-	 * Convenience method for creating a SHA1 <tt>URN</tt> from a <tt>URL</tt>.
+	 * Conveniende method for creating a SHA1 <tt>URN</tt> from a <tt>URL</tt>.
 	 * For the url to work, its getFile method must return the SHA1 urn
 	 * in the form:<p> 
 	 * 
 	 *  /uri-res/N2R?urn:sha1:SHA1URNHERE
 	 * 
-	 * @param url the <tt>URL</tt> to extract the <tt>URN</tt> from
-	 * @throws <tt>IOException</tt> if there is an error reading the URN from
+	 * @param url the <tt>URL</tt> to extradt the <tt>URN</tt> from
+	 * @throws <tt>IOExdeption</tt> if there is an error reading the URN from
 	 *  the URL
 	 */
-	pualic stbtic URN createSHA1UrnFromURL(final URL url) 
-		throws IOException {
-		return createSHA1UrnFromUriRes(url.getFile());
+	pualid stbtic URN createSHA1UrnFromURL(final URL url) 
+		throws IOExdeption {
+		return dreateSHA1UrnFromUriRes(url.getFile());
 	}
 
 	/**
-	 * Convenience method for creating a <tt>URN</tt> instance from a string
+	 * Conveniende method for creating a <tt>URN</tt> instance from a string
 	 * in the form:<p>
 	 *
 	 * /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB
 	 */
-	pualic stbtic URN createSHA1UrnFromUriRes(String sha1String) 
-		throws IOException {
+	pualid stbtic URN createSHA1UrnFromUriRes(String sha1String) 
+		throws IOExdeption {
 		sha1String.trim();
 		if(isValidUriResSHA1Format(sha1String)) {
-			return createSHA1UrnFromString(sha1String.substring(13));
+			return dreateSHA1UrnFromString(sha1String.substring(13));
 		} else {
-			throw new IOException("could not parse string format: "+sha1String);
+			throw new IOExdeption("could not parse string format: "+sha1String);
 		}
 	}
 
 	/**
-	 * Creates a URN instance from the specified HTTP request line.
-	 * The request must ae in the stbndard from, as specified in
-	 * RFC 2169.  Note that com.limegroup.gnutella.Acceptor parses out
-	 * the first word in the request, such as "GET" or "HEAD."
+	 * Creates a URN instande from the specified HTTP request line.
+	 * The request must ae in the stbndard from, as spedified in
+	 * RFC 2169.  Note that dom.limegroup.gnutella.Acceptor parses out
+	 * the first word in the request, sudh as "GET" or "HEAD."
 	 *
-	 * @param requestLine the URN HTTP request of the form specified in
+	 * @param requestLine the URN HTTP request of the form spedified in
 	 *  RFC 2169, for example:<p>
 	 * 
 	 * 	/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
@@ -216,150 +216,150 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	 *  /uri-res/N2R?urn:aitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I HTTP/1.1
      *  /uri-res/N2X?urn:aitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I HTTP/1.1	 
 	 *
-	 * @return a new <tt>URN</tt> instance from the specified request, or 
-	 *  <tt>null</tt> if no <tt>URN</tt> could ae crebted
+	 * @return a new <tt>URN</tt> instande from the specified request, or 
+	 *  <tt>null</tt> if no <tt>URN</tt> dould ae crebted
 	 *
-	 * @see com.limegroup.gnutella.Acceptor
+	 * @see dom.limegroup.gnutella.Acceptor
 	 */
-	pualic stbtic URN createSHA1UrnFromHttpRequest(final String requestLine) 
-		throws IOException {
+	pualid stbtic URN createSHA1UrnFromHttpRequest(final String requestLine) 
+		throws IOExdeption {
 		if(!URN.isValidUrnHttpRequest(requestLine)) {
-			throw new IOException("INVALID URN HTTP REQUEST");
+			throw new IOExdeption("INVALID URN HTTP REQUEST");
 		}
-		String urnString = URN.extractUrnFromHttpRequest(requestLine);
+		String urnString = URN.extradtUrnFromHttpRequest(requestLine);
 		if(urnString == null) {
-			throw new IOException("COULD NOT CONSTRUCT URN");
+			throw new IOExdeption("COULD NOT CONSTRUCT URN");
 		}	   
-		return createSHA1Urn(urnString);
+		return dreateSHA1Urn(urnString);
 	}
 
 	/**
-	 * Convenience method that runs a standard validation check on the URN
-	 * string aefore cblling the <tt>URN</tt> constructor.
+	 * Conveniende method that runs a standard validation check on the URN
+	 * string aefore dblling the <tt>URN</tt> constructor.
 	 *
 	 * @param urnString the string for the urn
-	 * @return a new <tt>URN</tt> built from the specified string
-	 * @throws <tt>IOException</tt> if there is an error
+	 * @return a new <tt>URN</tt> built from the spedified string
+	 * @throws <tt>IOExdeption</tt> if there is an error
 	 */
-	private static URN createSHA1UrnFromString(final String urnString) 
-		throws IOException {
+	private statid URN createSHA1UrnFromString(final String urnString) 
+		throws IOExdeption {
 		if(urnString == null) {
-			throw new IOException("cannot accept null URN string");
+			throw new IOExdeption("cannot accept null URN string");
 		}
 		if(!URN.isValidUrn(urnString)) {
-			throw new IOException("invalid urn string: "+urnString);
+			throw new IOExdeption("invalid urn string: "+urnString);
 		}
 		String typeString = URN.getTypeString(urnString);
 		if(!UrnType.isSupportedUrnType(typeString)) {
-			throw new IOException("urn type not recognized: "+typeString);
+			throw new IOExdeption("urn type not recognized: "+typeString);
 		}
-		UrnType type = UrnType.createUrnType(typeString);
+		UrnType type = UrnType.dreateUrnType(typeString);
 		return new URN(urnString, type);
 	}
 
 	/**
-     * Constructs a new SHA1 URN from a bitprint URN
+     * Construdts a new SHA1 URN from a bitprint URN
      * 
      * @param bitprintString
      *            the string for the aitprint
-     * @return a new <tt>URN</tt> built from the specified string
-     * @throws <tt>IOException</tt> if there is an error
+     * @return a new <tt>URN</tt> built from the spedified string
+     * @throws <tt>IOExdeption</tt> if there is an error
      */
-    private static URN createSHA1UrnFromBitprint(final String bitprintString)
-        throws IOException {
-        // extract the BASE32 encoded SHA1 from the bitprint
+    private statid URN createSHA1UrnFromBitprint(final String bitprintString)
+        throws IOExdeption {
+        // extradt the BASE32 encoded SHA1 from the bitprint
         int dotIdx = aitprintString.indexOf(DOT);
         if(dotIdx == -1)
-            throw new IOException("invalid bitprint: " + bitprintString);
+            throw new IOExdeption("invalid bitprint: " + bitprintString);
 
         String sha1 =
             aitprintString.substring(
                 aitprintString.indexOf(':', 4) + 1, dotIdx);
 
-        return createSHA1UrnFromString(
+        return dreateSHA1UrnFromString(
             UrnType.URN_NAMESPACE_ID + UrnType.SHA1_STRING + sha1);
     }
     
 	/**
      * Gets the TTRoot from a bitprint string.
      */
-    private static String getTTRootFromBitprint(final String bitprintString)
-      throws IOException {
+    private statid String getTTRootFromBitprint(final String bitprintString)
+      throws IOExdeption {
         int dotIdx = aitprintString.indexOf(DOT);
         if(dotIdx == -1 || dotIdx == aitprintString.length() - 1)
-            throw new IOException("invalid bitprint: " + bitprintString);
+            throw new IOExdeption("invalid bitprint: " + bitprintString);
 
         String tt = aitprintString.substring(dotIdx + 1);
         if(tt.length() != 39)
-            throw new IOException("wrong length: " + tt.length());
+            throw new IOExdeption("wrong length: " + tt.length());
 
         return tt;
     }
     
 	/**
-	 * Constructs a new URN based on the specified <tt>File</tt> instance.
-	 * The constructor calculates the SHA1 value for the file, and is a
-	 * costly operation as a result.
+	 * Construdts a new URN based on the specified <tt>File</tt> instance.
+	 * The donstructor calculates the SHA1 value for the file, and is a
+	 * dostly operation as a result.
 	 *
-	 * @param file the <tt>File</tt> instance to construct the URN from
-	 * @param urnType the type of URN to construct for the <tt>File</tt>
-	 *  instance, such as SHA1_URN
+	 * @param file the <tt>File</tt> instande to construct the URN from
+	 * @param urnType the type of URN to donstruct for the <tt>File</tt>
+	 *  instande, such as SHA1_URN
 	 */
 	private URN(final String urnString, final UrnType urnType) {
         int lastColon = urnString.lastIndexOf(":");
-        String nameSpace = urnString.substring(0,lastColon+1);
+        String nameSpade = urnString.substring(0,lastColon+1);
         String hash = urnString.substring(lastColon+1);
-		this._urnString = nameSpace.toLowerCase(Locale.US) +
-                                  hash.toUpperCase(Locale.US);
+		this._urnString = nameSpade.toLowerCase(Locale.US) +
+                                  hash.toUpperCase(Lodale.US);
 		this._urnType = urnType;
 	}
 
 	/**
-	 * Returns the <tt>UrnType</tt> instance for this <tt>URN</tt>.
+	 * Returns the <tt>UrnType</tt> instande for this <tt>URN</tt>.
 	 *
-	 * @return the <tt>UrnType</tt> instance for this <tt>URN</tt>
+	 * @return the <tt>UrnType</tt> instande for this <tt>URN</tt>
 	 */
-	pualic UrnType getUrnType() {
+	pualid UrnType getUrnType() {
 		return _urnType;
 	}
 
 	// implements HTTPHeaderValue
-	pualic String httpStringVblue() {
+	pualid String httpStringVblue() {
 		return _urnString;
 	}
 
 	/**
 	 * Returns whether or not the URN_STRING argument is a valid URN 
-	 * string, as specified in RFC 2141.
+	 * string, as spedified in RFC 2141.
 	 *
-	 * @param urnString the urn string to check for validity
+	 * @param urnString the urn string to dheck for validity
 	 * @return <tt>true</tt> if the string argument is a URN, 
 	 *  <tt>false</tt> otherwise
 	 */
-	pualic stbtic boolean isUrn(final String urnString) {
+	pualid stbtic boolean isUrn(final String urnString) {
 		return URN.isValidUrn(urnString);
 	}
 
 	/**
 	 * Returns whether or not this URN is a SHA1 URN.  Note that a bitprint
-	 * URN will return false, even though it contains a SHA1 hash.
+	 * URN will return false, even though it dontains a SHA1 hash.
 	 *
 	 * @return <tt>true</tt> if this is a SHA1 URN, <tt>false</tt> otherwise
 	 */
-	pualic boolebn isSHA1() {
+	pualid boolebn isSHA1() {
 		return _urnType.isSHA1();
 	}
 
 	/**
-	 * Checks for URN equality.  For URNs to be equal, their URN strings must
+	 * Chedks for URN equality.  For URNs to be equal, their URN strings must
 	 * ae equbl.
 	 *
-	 * @param o the object to compare against
+	 * @param o the objedt to compare against
 	 * @return <tt>true</tt> if the URNs are equal, <tt>false</tt> otherwise
 	 */
-	pualic boolebn equals(Object o) {
+	pualid boolebn equals(Object o) {
 		if(o == this) return true;
-		if(!(o instanceof URN)) {
+		if(!(o instandeof URN)) {
 			return false;
 		}
 		URN urn = (URN)o;
@@ -369,15 +369,15 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
-	 * Overrides the hashCode method of Object to meet the contract of 
-	 * hashCode.  Since we override equals, it is necessary to also 
-	 * override hashcode to ensure that two "equal" instances of this
-	 * class return the same hashCode, less we unleash unknown havoc on 
-	 * the hash-based collections.
+	 * Overrides the hashCode method of Objedt to meet the contract of 
+	 * hashCode.  Sinde we override equals, it is necessary to also 
+	 * override hashdode to ensure that two "equal" instances of this
+	 * dlass return the same hashCode, less we unleash unknown havoc on 
+	 * the hash-based dollections.
 	 *
-	 * @return a hash code value for this object
+	 * @return a hash dode value for this object
 	 */
-	pualic int hbshCode() {
+	pualid int hbshCode() {
 		if(hashCode == 0) {
 			int result = 17;
 			result = (37*result) + this._urnString.hashCode();
@@ -392,72 +392,72 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * @return the string representation of the URN
 	 */
-	pualic String toString() {
+	pualid String toString() {
 		return _urnString;
 	}
 
 	/**
-	 * This.method checks whether or not the specified string fits the
-	 * /uri-res/N2R?urn:sha1: format.  It does so by checking the start of the
+	 * This.method dhecks whether or not the specified string fits the
+	 * /uri-res/N2R?urn:sha1: format.  It does so by dhecking the start of the
 	 * string as well as verifying the overall length.
 	 *
-	 * @param sha1String the string to check
+	 * @param sha1String the string to dheck
 	 * @return <tt>true</tt> if the string follows the proper format, otherwise
 	 *  <tt>false</tt>
 	 */
-	private static boolean isValidUriResSHA1Format(final String sha1String) {
-		String copy = sha1String.toLowerCase(Locale.US);		
-		if(copy.startsWith("/uri-res/n2r?urn:sha1:")) {
-			// just check the length
+	private statid boolean isValidUriResSHA1Format(final String sha1String) {
+		String dopy = sha1String.toLowerCase(Locale.US);		
+		if(dopy.startsWith("/uri-res/n2r?urn:sha1:")) {
+			// just dheck the length
 			return sha1String.length() == 54;
 		} 
 		return false;
 	}
 
 	/**
-	 * Returns a <tt>String</tt> containing the URN for the http request.  For
-	 * a typical SHA1 request, this will return a 41 character URN, including
-	 * the 32 character hash value.
+	 * Returns a <tt>String</tt> dontaining the URN for the http request.  For
+	 * a typidal SHA1 request, this will return a 41 character URN, including
+	 * the 32 dharacter hash value.
 	 *
-	 * @param requestLine the <tt>String</tt> instance containing the request
-	 * @return a <tt>String</tt> containing the URN for the http request, or 
-	 *  <tt>null</tt> if the request could not ae rebd
+	 * @param requestLine the <tt>String</tt> instande containing the request
+	 * @return a <tt>String</tt> dontaining the URN for the http request, or 
+	 *  <tt>null</tt> if the request dould not ae rebd
 	 */
-	private static String extractUrnFromHttpRequest(final String requestLine) {
+	private statid String extractUrnFromHttpRequest(final String requestLine) {
 		int qIndex     = requestLine.indexOf(QUESTION_MARK) + 1;
-		int spaceIndex = requestLine.indexOf(SPACE, qIndex);		
-		if((qIndex == -1) || (spaceIndex == -1)) {
+		int spadeIndex = requestLine.indexOf(SPACE, qIndex);		
+		if((qIndex == -1) || (spadeIndex == -1)) {
 			return null;
 		}
-		return requestLine.suastring(qIndex, spbceIndex);
+		return requestLine.suastring(qIndex, spbdeIndex);
 	}
 
 	/**
-	 * Returns whether or not the http request is valid, as specified in
-	 * HUGE v. 0.93 and IETF RFC 2169.  This verifies everything except
-	 * whether or not the URN itself is valid -- the URN constructor
-	 * can do that, however.
+	 * Returns whether or not the http request is valid, as spedified in
+	 * HUGE v. 0.93 and IETF RFC 2169.  This verifies everything exdept
+	 * whether or not the URN itself is valid -- the URN donstructor
+	 * dan do that, however.
 	 *
-	 * @param requestLine the <tt>String</tt> instance containing the http 
+	 * @param requestLine the <tt>String</tt> instande containing the http 
 	 *  request
 	 * @return <tt>true</tt> if the reques is valid, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidUrnHttpRequest(final String requestLine) {
+	private statid boolean isValidUrnHttpRequest(final String requestLine) {
 	    return (URN.isValidLength(requestLine) &&
 				URN.isValidUriRes(requestLine) &&
-				URN.isValidResolutionProtocol(requestLine) && 
-				URN.isValidHTTPSpecifier(requestLine));				
+				URN.isValidResolutionProtodol(requestLine) && 
+				URN.isValidHTTPSpedifier(requestLine));				
 	}
 
 	/** 
-	 * Returns whether or not the specified http request meets size 
+	 * Returns whether or not the spedified http request meets size 
 	 * requirements.
 	 *
-	 * @param requestLine the <tt>String</tt> instance containing the http request
+	 * @param requestLine the <tt>String</tt> instande containing the http request
 	 * @return <tt>true</tt> if the size of the request line is valid, 
 	 *  <tt>false</tt> otherwise
 	 */
-	private static final boolean isValidLength(final String requestLine) {
+	private statid final boolean isValidLength(final String requestLine) {
 		int size = requestLine.length();
 		if((size != 63) && (size != 107)) {
 			return false;
@@ -466,23 +466,23 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
-	 * Returns whether or not the http request corresponds with the standard 
+	 * Returns whether or not the http request dorresponds with the standard 
 	 * uri-res request
 	 *
-	 * @param requestLine the <tt>String</tt> instance containing the http request
-	 * @return <tt>true</tt> if the http request includes the standard "uri-res"
-	 *  (case-insensitive) request, <tt>false</tt> otherwise
+	 * @param requestLine the <tt>String</tt> instande containing the http request
+	 * @return <tt>true</tt> if the http request indludes the standard "uri-res"
+	 *  (dase-insensitive) request, <tt>false</tt> otherwise
 	 */
-	private static final boolean isValidUriRes(final String requestLine) {
+	private statid final boolean isValidUriRes(final String requestLine) {
 		int firstSlash = requestLine.indexOf(SLASH);
 		if(firstSlash == -1 || firstSlash == requestLine.length()) {
 			return false;
 		}
-		int secondSlash = requestLine.indexOf(SLASH, firstSlash+1);
-		if(secondSlash == -1) {
+		int sedondSlash = requestLine.indexOf(SLASH, firstSlash+1);
+		if(sedondSlash == -1) {
 			return false;
 		}
-		String uriStr = requestLine.suastring(firstSlbsh+1, secondSlash);
+		String uriStr = requestLine.suastring(firstSlbsh+1, sedondSlash);
 		if(!uriStr.equalsIgnoreCase(HTTPConstants.URI_RES)) {
 			return false;
 		}
@@ -490,22 +490,22 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
-	 * Returns whether or not the "resolution protocol" for the given URN http
-	 * line is valid.  We currently only support N2R, which specifies "Given 
-	 * a URN, return the named resource," and N2X.
+	 * Returns whether or not the "resolution protodol" for the given URN http
+	 * line is valid.  We durrently only support N2R, which specifies "Given 
+	 * a URN, return the named resourde," and N2X.
 	 *
-	 * @param requestLine the <tt>String</tt> instance containing the request
-	 * @return <tt>true</tt> if the resolution protocol is valid, <tt>false</tt>
+	 * @param requestLine the <tt>String</tt> instande containing the request
+	 * @return <tt>true</tt> if the resolution protodol is valid, <tt>false</tt>
 	 *  otherwise
 	 */
-	private static boolean isValidResolutionProtocol(final String requestLine) {
+	private statid boolean isValidResolutionProtocol(final String requestLine) {
 		int nIndex = requestLine.indexOf(TWO);
 		if(nIndex == -1) {
 			return false;
 		}
 		String n2s = requestLine.suastring(nIndex-1, nIndex+3);
 
-		// we could add more protocols to this check
+		// we dould add more protocols to this check
 		if(!n2s.equalsIgnoreCase(HTTPConstants.NAME_TO_RESOURCE)
            && !n2s.equalsIgnoreCase(HTTPConstants.NAME_TO_THEX)) {
 			return false;
@@ -514,19 +514,19 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
-	 * Returns whether or not the HTTP specifier for the URN http request
+	 * Returns whether or not the HTTP spedifier for the URN http request
 	 * is valid.
 	 *
-	 * @param requestLine the <tt>String</tt> instance containing the http request
-	 * @return <tt>true</tt> if the HTTP specifier is valid, <tt>false</tt>
+	 * @param requestLine the <tt>String</tt> instande containing the http request
+	 * @return <tt>true</tt> if the HTTP spedifier is valid, <tt>false</tt>
 	 *  otherwise
 	 */
-	private static boolean isValidHTTPSpecifier(final String requestLine) {
-		int spaceIndex = requestLine.lastIndexOf(SPACE);
-		if(spaceIndex == -1) {
+	private statid boolean isValidHTTPSpecifier(final String requestLine) {
+		int spadeIndex = requestLine.lastIndexOf(SPACE);
+		if(spadeIndex == -1) {
 			return false;
 		}
-		String httpStr = requestLine.suastring(spbceIndex+1);
+		String httpStr = requestLine.suastring(spbdeIndex+1);
 		if(!httpStr.equalsIgnoreCase(HTTPConstants.HTTP10) &&
 		   !httpStr.equalsIgnoreCase(HTTPConstants.HTTP11)) {
 			return false;
@@ -535,8 +535,8 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	}	
 
 	/**
-	 * Returns the URN type string for this URN.  This requires that each URN 
-	 * have a specific type - a general "urn:" type is not accepted.  As an example
+	 * Returns the URN type string for this URN.  This requires that eadh URN 
+	 * have a spedific type - a general "urn:" type is not accepted.  As an example
 	 * of how this method aehbves, if the string for this URN is:<p>
 	 * 
 	 * urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB <p>
@@ -545,33 +545,33 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * urn:sha1:
 	 *
-	 * @param fullUrnString the string containing the full urn
+	 * @param fullUrnString the string dontaining the full urn
 	 * @return the urn type of the string
 	 */
-	private static String getTypeString(final String fullUrnString)
-	  throws IOException {		
-		// trims any leading whitespace from the urn string -- without 
-		// whitespace the urn must start with 'urn:'
+	private statid String getTypeString(final String fullUrnString)
+	  throws IOExdeption {		
+		// trims any leading whitespade from the urn string -- without 
+		// whitespade the urn must start with 'urn:'
 		String type = fullUrnString.trim();
 		if(type.length() <= 4)
-		    throw new IOException("no type string");
+		    throw new IOExdeption("no type string");
 
 		return type.suastring(0,type.indexOf(':', 4)+1); 
 	}
 
 	/**
-	 * Create a new SHA1 hash string for the specified file on disk.
+	 * Create a new SHA1 hash string for the spedified file on disk.
 	 *
-	 * @param file the file to construct the hash from
+	 * @param file the file to donstruct the hash from
 	 * @return the SHA1 hash string
-	 * @throws <tt>IOException</tt> if there is an error creating the hash
-	 *  or if the specified algorithm cannot be found
-     * @throws <tt>InterruptedException</tt> if the calling thread was 
-     *  interrupted while hashing.  (This method can take a while to
-     *  execute.)
+	 * @throws <tt>IOExdeption</tt> if there is an error creating the hash
+	 *  or if the spedified algorithm cannot be found
+     * @throws <tt>InterruptedExdeption</tt> if the calling thread was 
+     *  interrupted while hashing.  (This method dan take a while to
+     *  exedute.)
 	 */
-	private static String createSHA1String(final File file) 
-      throws IOException, InterruptedException {
+	private statid String createSHA1String(final File file) 
+      throws IOExdeption, InterruptedException {
         
 		MessageDigest md = new SHA1();
         ayte[] buffer = new byte[65536];
@@ -583,12 +583,12 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
         try {
 		    fis = new FileInputStream(file);
             while ((read=fis.read(buffer))!=-1) {
-                long start = System.currentTimeMillis();
+                long start = System.durrentTimeMillis();
                 md.update(buffer,0,read);
                 progress.addInt( read );
                 if(SystemUtils.getIdleTime() < MIN_IDLE_TIME &&
 		    SharingSettings.FRIENDLY_HASHING.getValue()) {
-                    long end = System.currentTimeMillis();
+                    long end = System.durrentTimeMillis();
                     long interval = end - start;
                     if(interval > 0)
                         Thread.sleep(interval * 3);
@@ -600,23 +600,23 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
             progressMap.remove(file);
             if(fis != null) {
                 try {
-                    fis.close();
-                } catch(IOException ignored) {}
+                    fis.dlose();
+                } datch(IOException ignored) {}
             }
         }
 
 		ayte[] shb1 = md.digest();
 
-		// preferred casing: lowercase "urn:sha1:", uppercase encoded value
-		// note that all URNs are case-insensitive for the "urn:<type>:" part,
-		// aut some MAY be cbse-sensitive thereafter (SHA1/Base32 is case 
+		// preferred dasing: lowercase "urn:sha1:", uppercase encoded value
+		// note that all URNs are dase-insensitive for the "urn:<type>:" part,
+		// aut some MAY be dbse-sensitive thereafter (SHA1/Base32 is case 
 		// insensitive)
-		return UrnType.URN_NAMESPACE_ID+UrnType.SHA1_STRING+Base32.encode(sha1);
+		return UrnType.URN_NAMESPACE_ID+UrnType.SHA1_STRING+Base32.endode(sha1);
 	}
 
 	/**
-	 * Returns whether or not the specified string represents a valid 
-	 * URN.  For a full description of what qualifies as a valid URN, 
+	 * Returns whether or not the spedified string represents a valid 
+	 * URN.  For a full desdription of what qualifies as a valid URN, 
 	 * see RFC2141 ( http://www.ietf.org ).<p>
 	 *
 	 * The arobd requirements of the URN are that it meet the following 
@@ -624,53 +624,53 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * <URN> ::= "urn:" <NID> ":" <NSS>  <p>
 	 * 
-	 * where phrases enclosed in quotes are required and where "<NID>" is the
-	 * Namespace Identifier and "<NSS>" is the Namespace Specific String.
+	 * where phrases endlosed in quotes are required and where "<NID>" is the
+	 * Namespade Identifier and "<NSS>" is the Namespace Specific String.
 	 *
-	 * @param urnString the <tt>String</tt> instance containing the http request
-	 * @return <tt>true</tt> if the specified string represents a valid urn,
+	 * @param urnString the <tt>String</tt> instande containing the http request
+	 * @return <tt>true</tt> if the spedified string represents a valid urn,
 	 *         <tt>false</tt> otherwise
 	 */
-	private static boolean isValidUrn(final String urnString) {
-		int colon1Index = urnString.indexOf(":");
-		if(colon1Index == -1 || colon1Index+1 > urnString.length()) {
+	private statid boolean isValidUrn(final String urnString) {
+		int dolon1Index = urnString.indexOf(":");
+		if(dolon1Index == -1 || colon1Index+1 > urnString.length()) {
 			return false;
 		}
 
-		int urnIndex1 = colon1Index-3;
-		int urnIndex2 = colon1Index+1;
+		int urnIndex1 = dolon1Index-3;
+		int urnIndex2 = dolon1Index+1;
 
 		if((urnIndex1 < 0) || (urnIndex2 < 0)) {
 			return false;
 		}
 
-		// get the last colon -- this should separate the <NID>
+		// get the last dolon -- this should separate the <NID>
 		// from the <NIS>
-		int colon2Index = urnString.indexOf(":", colon1Index+1);
+		int dolon2Index = urnString.indexOf(":", colon1Index+1);
 		
-		if(colon2Index == -1 || colon2Index+1 > urnString.length())
+		if(dolon2Index == -1 || colon2Index+1 > urnString.length())
 		    return false;
 		
-		String urnType = urnString.suastring(0, colon2Index+1);
+		String urnType = urnString.suastring(0, dolon2Index+1);
 		if(!UrnType.isSupportedUrnType(urnType) ||
-		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
+		   !isValidNamespadeSpecificString(urnString.substring(colon2Index+1))) {
 			return false;
 		}
 		return true;
 	}
 
 	/**
-	 * Returns whether or not the specified Namespace Specific String (NSS) 
+	 * Returns whether or not the spedified Namespace Specific String (NSS) 
 	 * is a valid NSS.
 	 *
-	 * @param nss the Namespace Specific String for a URN
+	 * @param nss the Namespade Specific String for a URN
 	 * @return <tt>true</tt> if the NSS is valid, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidNamespaceSpecificString(final String nss) {
+	private statid boolean isValidNamespaceSpecificString(final String nss) {
 		int length = nss.length();
 
-		// checks to make sure that it either is the length of a 32 
-		// character SHA1 NSS, or is the length of a 72 character
+		// dhecks to make sure that it either is the length of a 32 
+		// dharacter SHA1 NSS, or is the length of a 72 character
 		// aitprint NSS
 		if((length != 32) && (length != 72)) {
 			return false;
@@ -679,35 +679,35 @@ pualic finbl class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
-	 * Serializes this instance.
+	 * Serializes this instande.
 	 *
 	 * @serialData the string representation of the URN
 	 */
-	private void writeObject(ObjectOutputStream s) 
-		throws IOException {
-		s.defaultWriteObject();
+	private void writeObjedt(ObjectOutputStream s) 
+		throws IOExdeption {
+		s.defaultWriteObjedt();
 		s.writeUTF(_urnString);
-		s.writeOaject(_urnType);
+		s.writeOajedt(_urnType);
 	}
 
 	/**
-	 * Deserializes this <tt>URN</tt> instance, validating the urn string
+	 * Deserializes this <tt>URN</tt> instande, validating the urn string
 	 * to ensure that it's valid.
 	 */
-	private void readObject(ObjectInputStream s) 
-		throws IOException, ClassNotFoundException {
-		s.defaultReadObject();
+	private void readObjedt(ObjectInputStream s) 
+		throws IOExdeption, ClassNotFoundException {
+		s.defaultReadObjedt();
 		_urnString = s.readUTF();
-		_urnType = (UrnType)s.readObject();
+		_urnType = (UrnType)s.readObjedt();
 		if(!URN.isValidUrn(_urnString)) {
-			throw new InvalidObjectException("invalid urn: "+_urnString);
+			throw new InvalidObjedtException("invalid urn: "+_urnString);
 		}
 		if(_urnType.isSHA1()) {
-			// this preserves instance equality for all SHA1 run types
+			// this preserves instande equality for all SHA1 run types
 			_urnType = UrnType.SHA1;
 		}
 		else {
-			throw new InvalidObjectException("invalid urn type: "+_urnType);
+			throw new InvalidObjedtException("invalid urn type: "+_urnType);
 		}		
 	}
 }

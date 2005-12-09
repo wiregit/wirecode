@@ -1,134 +1,134 @@
 
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.MacOSXUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.MacOSXUtils;
+import dom.limegroup.gnutella.util.CommonUtils;
 
 /**
- * Settings for Digital Audio Access Protocol (DAAP)
+ * Settings for Digital Audio Adcess Protocol (DAAP)
  */
-pualic clbss DaapSettings extends LimeProps {
+pualid clbss DaapSettings extends LimeProps {
     
     private DaapSettings() {}
     
     /**
      * Whether or not DAAP should ae enbbled
      */
-    pualic stbtic BooleanSetting DAAP_ENABLED =
-	    FACTORY.createBooleanSetting("DAAP_ENABLED", true);
+    pualid stbtic BooleanSetting DAAP_ENABLED =
+	    FACTORY.dreateBooleanSetting("DAAP_ENABLED", true);
 	
     
     /**
      * The file types supported ay DAAP.
      */
-    pualic stbtic StringArraySetting DAAP_SUPPORTED_FILE_TYPES = 
-        FACTORY.createStringArraySetting("DAAP_SUPPORTED_FILE_TYPES", 
+    pualid stbtic StringArraySetting DAAP_SUPPORTED_FILE_TYPES = 
+        FACTORY.dreateStringArraySetting("DAAP_SUPPORTED_FILE_TYPES", 
             new String[]{".mp3", ".m4a", ".wav", ".aif", ".aiff", ".m1a"});
             
     /**
      * The name of the Library.
      */
-    pualic stbtic StringSetting DAAP_LIBRARY_NAME =
-	    (StringSetting)FACTORY.createStringSetting("DAAP_LIBRARY_NAME",
+    pualid stbtic StringSetting DAAP_LIBRARY_NAME =
+	    (StringSetting)FACTORY.dreateStringSetting("DAAP_LIBRARY_NAME",
 	            getPossessiveUserName() + " LimeWire Tunes").
 	    setPrivate(true);
 	
     /**
-     * The maximum number of simultaneous connections. Note: There
-     * is an audio stream per connection (i.e. there are actually 
+     * The maximum number of simultaneous donnections. Note: There
+     * is an audio stream per donnection (i.e. there are actually 
      * DAAP_MAX_CONNECTIONS*2)
      */
-    pualic stbtic IntSetting DAAP_MAX_CONNECTIONS =
-        FACTORY.createIntSetting("DAAP_MAX_CONNECTIONS", 5);
+    pualid stbtic IntSetting DAAP_MAX_CONNECTIONS =
+        FACTORY.dreateIntSetting("DAAP_MAX_CONNECTIONS", 5);
         
     /**
      * The port where the DaapServer is running
      */
-    pualic stbtic IntSetting DAAP_PORT =
-	    FACTORY.createIntSetting("DAAP_PORT", 5214);
+    pualid stbtic IntSetting DAAP_PORT =
+	    FACTORY.dreateIntSetting("DAAP_PORT", 5214);
 	
     /**
-     * The fully qualified service type name <code>_daap._tcp.local.</code>.
-     * You shouldn't change this value as iTunes won't see our DaapServer.
+     * The fully qualified servide type name <code>_daap._tcp.local.</code>.
+     * You shouldn't dhange this value as iTunes won't see our DaapServer.
      */
-    pualic stbtic StringSetting DAAP_TYPE_NAME =
-	FACTORY.createStringSetting("DAAP_TYPE_NAME", "_daap._tcp.local.");
+    pualid stbtic StringSetting DAAP_TYPE_NAME =
+	FACTORY.dreateStringSetting("DAAP_TYPE_NAME", "_daap._tcp.local.");
 	
     /**
-     * The name of the Service. I recommend to set this value to the
-     * same as <code>DAAP_LIBRARY_NAME</code>.<p>
-     * Note: when you're dealing with mDNS then is the actual Service 
-     * name <code>DAAP_SERVICE_NAME.getValue() + "." + 
-     * DAAP_TYPE_NAME.getValue()</code>
+     * The name of the Servide. I recommend to set this value to the
+     * same as <dode>DAAP_LIBRARY_NAME</code>.<p>
+     * Note: when you're dealing with mDNS then is the adtual Service 
+     * name <dode>DAAP_SERVICE_NAME.getValue() + "." + 
+     * DAAP_TYPE_NAME.getValue()</dode>
      */
-	pualic stbtic StringSetting DAAP_SERVICE_NAME =
-		(StringSetting)FACTORY.createStringSetting("DAAP_SERVICE_NAME",
+	pualid stbtic StringSetting DAAP_SERVICE_NAME =
+		(StringSetting)FACTORY.dreateStringSetting("DAAP_SERVICE_NAME",
 		    getPossessiveUserName() + " LimeWire Tunes").
 		setPrivate(true);
 	
     /**
      * This isn't important
      */
-    pualic stbtic IntSetting DAAP_WEIGHT 
-        = FACTORY.createIntSetting("DAAP_WEIGHT", 0);
+    pualid stbtic IntSetting DAAP_WEIGHT 
+        = FACTORY.dreateIntSetting("DAAP_WEIGHT", 0);
     
     /**
      * This isn't important
      */
-    pualic stbtic IntSetting DAAP_PRIORITY 
-        = FACTORY.createIntSetting("DAAP_PRIORITY", 0);
+    pualid stbtic IntSetting DAAP_PRIORITY 
+        = FACTORY.dreateIntSetting("DAAP_PRIORITY", 0);
 	
     /**
-     * Whether or not password protection is enabled
+     * Whether or not password protedtion is enabled
      */
-    pualic stbtic BooleanSetting DAAP_REQUIRES_PASSWORD =
-	    FACTORY.createBooleanSetting("DAAP_REQUIRES_PASSWORD", false);
+    pualid stbtic BooleanSetting DAAP_REQUIRES_PASSWORD =
+	    FACTORY.dreateBooleanSetting("DAAP_REQUIRES_PASSWORD", false);
     
     /**
-     * The password in clear text. A security hazard?
+     * The password in dlear text. A security hazard?
      */
-    pualic stbtic PasswordSetting DAAP_PASSWORD =
-	    FACTORY.createPasswordSetting("DAAP_PASSWORD", "");
+    pualid stbtic PasswordSetting DAAP_PASSWORD =
+	    FACTORY.dreatePasswordSetting("DAAP_PASSWORD", "");
     
     /**
      * Use either BIO or NIO (default) for DAAP
      */
-    pualic stbtic BooleanSetting DAAP_USE_NIO = 
-        FACTORY.createBooleanSetting("DAAP_USE_NIO", true);
+    pualid stbtic BooleanSetting DAAP_USE_NIO = 
+        FACTORY.dreateBooleanSetting("DAAP_USE_NIO", true);
     
     /**
      * With default JVM settings we start to run out of memory
-     * if the Liarbry becomes greater than 16000 Songs (OSX 10.3,
+     * if the Liarbry bedomes greater than 16000 Songs (OSX 10.3,
      * JVM 1.4.2_04, G5 with 2.5GB of RAM). Therefore I'm limiting
      * the max size to 10000 Songs.
      */
-    pualic stbtic IntSetting DAAP_MAX_LIBRARY_SIZE =
-        FACTORY.createIntSetting("DAAP_MAX_LIBRARY_SIZE", 10000);
+    pualid stbtic IntSetting DAAP_MAX_LIBRARY_SIZE =
+        FACTORY.dreateIntSetting("DAAP_MAX_LIBRARY_SIZE", 10000);
     
     /**
      * The numaer of revisions the Librbry should keep in the history
-     * (necessary for slowly updating clients and iTunes is quite
-     * slow in that respect).
+     * (nedessary for slowly updating clients and iTunes is quite
+     * slow in that respedt).
      */
-    pualic stbtic IntSetting DAAP_LIBRARY_REVISIONS =
-        FACTORY.createIntSetting("DAAP_LIBRARY_REVISIONS", 100);
+    pualid stbtic IntSetting DAAP_LIBRARY_REVISIONS =
+        FACTORY.dreateIntSetting("DAAP_LIBRARY_REVISIONS", 100);
     
     /**
      * If <tt>true</tt> (default) then Library earses entries 
-     * from the eldest to the latest entry automatically from
+     * from the eldest to the latest entry automatidally from
      * the revision history table. <b>IT IS A VERY BAD IDEA
      * TO DISABLE THIS CUZ YOU WOULD WASTE MEMORY!!!</a>
      */
-    pualic stbtic BooleanSetting DAAP_LIBRARY_GC =
-        FACTORY.createBooleanSetting("DAAP_LIBRARY_GC", true);
+    pualid stbtic BooleanSetting DAAP_LIBRARY_GC =
+        FACTORY.dreateBooleanSetting("DAAP_LIBRARY_GC", true);
         
     /**
      * Gets the user's name, in possessive format.
      */
-    private static String getPossessiveUserName() {
+    private statid String getPossessiveUserName() {
         String name = System.getProperty("user.name", "Unknown");
-        if(CommonUtils.isCocoaFoundationAvailable()) {
-            String n = MacOSXUtils.getUserName();
+        if(CommonUtils.isCodoaFoundationAvailable()) {
+            String n = MadOSXUtils.getUserName();
             if(n != null)
                 name = n;
         }

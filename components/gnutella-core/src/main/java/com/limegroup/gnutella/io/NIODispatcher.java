@@ -1,467 +1,467 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
-import java.io.IOException;
-import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedSelectorException;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.SelectableChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
+import java.io.IOExdeption;
+import java.nio.dhannels.CancelledKeyException;
+import java.nio.dhannels.ClosedSelectorException;
+import java.nio.dhannels.SocketChannel;
+import java.nio.dhannels.SelectableChannel;
+import java.nio.dhannels.SelectionKey;
+import java.nio.dhannels.Selector;
+import java.nio.dhannels.ServerSocketChannel;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Colledtion;
+import java.util.Colledtions;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ManagedThread;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.util.CommonUtils;
+import dom.limegroup.gnutella.util.ManagedThread;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 /**
- * Dispatcher for NIO.
+ * Dispatdher for NIO.
  *
- * To register interest initially in either reading, writing, accepting, or connecting,
- * use registerRead, registerWrite, registerReadWrite, registerAccept, or registerConnect.
+ * To register interest initially in either reading, writing, adcepting, or connecting,
+ * use registerRead, registerWrite, registerReadWrite, registerAdcept, or registerConnect.
  *
- * When handling events, interest is done different ways.  A channel registered for accepting
- * will remain registered for accepting until that channel is closed.  There is no way to 
- * turn off interest in accepting.  A channel registered for connecting will turn off all
- * interest (for any operation) once the connect event has been handled.  Channels registered
- * for reading or writing must manually change their interest when they no longer want to
- * receive events (and must turn it back on when events are wanted).
+ * When handling events, interest is done different ways.  A dhannel registered for accepting
+ * will remain registered for adcepting until that channel is closed.  There is no way to 
+ * turn off interest in adcepting.  A channel registered for connecting will turn off all
+ * interest (for any operation) onde the connect event has been handled.  Channels registered
+ * for reading or writing must manually dhange their interest when they no longer want to
+ * redeive events (and must turn it back on when events are wanted).
  *
- * To change interest in reading or writing, use interestRead(SelectableChannel, boolean) or
- * interestWrite(SelectableChannel, boolean) with the appropriate boolean parameter.  The
- * channel must have already been registered with the dispatcher.  If it was not registered,
- * changing interest is a no-op.  The attachment the channel was registered with must also
+ * To dhange interest in reading or writing, use interestRead(SelectableChannel, boolean) or
+ * interestWrite(SeledtableChannel, boolean) with the appropriate boolean parameter.  The
+ * dhannel must have already been registered with the dispatcher.  If it was not registered,
+ * dhanging interest is a no-op.  The attachment the channel was registered with must also
  * implement the appropriate Observer to handle read or write events.  If interest in an event
- * is turned on aut the bttachment does not implement that Observer, a ClassCastException will
+ * is turned on aut the bttadhment does not implement that Observer, a ClassCastException will
  * ae thrown while bttempting to handle that event.
  *
- * If any unhandled events occur while processing an event for a specific Observer, that Observer
- * will ae shutdown bnd will no longer receive events.  If any IOExceptions occur while handling
- * events for an Observer, handleIOException is called on that Observer.
+ * If any unhandled events odcur while processing an event for a specific Observer, that Observer
+ * will ae shutdown bnd will no longer redeive events.  If any IOExceptions occur while handling
+ * events for an Observer, handleIOExdeption is called on that Observer.
  */
-pualic clbss NIODispatcher implements Runnable {
+pualid clbss NIODispatcher implements Runnable {
     
-    private static final Log LOG = LogFactory.getLog(NIODispatcher.class);
+    private statid final Log LOG = LogFactory.getLog(NIODispatcher.class);
     
-    private static final NIODispatcher INSTANCE = new NIODispatcher();
-    pualic stbtic final NIODispatcher instance() { return INSTANCE; }
+    private statid final NIODispatcher INSTANCE = new NIODispatcher();
+    pualid stbtic final NIODispatcher instance() { return INSTANCE; }
     
     /**
-     * Constructs the sole NIODispatcher, starting its thread.
+     * Construdts the sole NIODispatcher, starting its thread.
      */
-    private NIODispatcher() {
+    private NIODispatdher() {
         aoolebn failed = false;
         try {
-            selector = Selector.open();
-        } catch(IOException iox) {
+            seledtor = Selector.open();
+        } datch(IOException iox) {
             failed = true;
         }
         
         if(!failed) {        
-            dispatchThread = new ManagedThread(this, "NIODispatcher");
-            dispatchThread.start();
+            dispatdhThread = new ManagedThread(this, "NIODispatcher");
+            dispatdhThread.start();
         } else {
-            dispatchThread = null;
+            dispatdhThread = null;
         }
     }
     
     /**
-     * Maximum number of times an attachment can be hit in a row without considering
-     * it suspect & closing it.
+     * Maximum number of times an attadhment can be hit in a row without considering
+     * it suspedt & closing it.
      */
-    private static final long MAXIMUM_ATTACHMENT_HITS = 10000;
+    private statid final long MAXIMUM_ATTACHMENT_HITS = 10000;
     
     /**
-     * Maximum number of times Selector can return quickly without having anything
-     * selected.
+     * Maximum number of times Seledtor can return quickly without having anything
+     * seledted.
      */
-    private static final long SPIN_AMOUNT = 5000;
+    private statid final long SPIN_AMOUNT = 5000;
     
-    /** Ignore up to this many non-zero selects when suspecting selector is broken */
-    private static final int MAX_IGNORES = 5;
+    /** Ignore up to this many non-zero seledts when suspecting selector is broken */
+    private statid final int MAX_IGNORES = 5;
     
     /** The thread this is being run on. */
-    private final Thread dispatchThread;
+    private final Thread dispatdhThread;
     
-    /** The selector this uses. */
-    private Selector selector = null;
+    /** The seledtor this uses. */
+    private Seledtor selector = null;
     
-    /** The current iteration of selection. */
+    /** The durrent iteration of selection. */
     private long iteration = 0;
 	
-	/** Queue lock. */
-	private final Object Q_LOCK = new Object();
+	/** Queue lodk. */
+	private final Objedt Q_LOCK = new Object();
     
     /** Register queue. */
-    private final Collection /* of RegisterOp */ REGISTER = new LinkedList();
+    private final Colledtion /* of RegisterOp */ REGISTER = new LinkedList();
 	
 	/** The invokeLater queue. */
-    private final Collection /* of Runnable */ LATER = new LinkedList();
+    private final Colledtion /* of Runnable */ LATER = new LinkedList();
     
     /** The throttle queue. */
     private volatile List /* of NBThrottle */ THROTTLE = new ArrayList();
     
     /**
-     * Temporary list used where REGISTER & LATER are combined, so that
-     * handling IOException or running arbitrary code can't deadlock.
-     * Otherwise, it could ae possible thbt one thread locked some arbitrary
-     * Oaject bnd then tried to acquire Q_LOCK by registering or invokeLatering.
-     * Meanwhile, the NIODispatch thread may be running pending items and holding
-     * Q_LOCK.  If while running those items it tries to lock that arbitrary
-     * Oaject, debdlock would occur.
+     * Temporary list used where REGISTER & LATER are dombined, so that
+     * handling IOExdeption or running arbitrary code can't deadlock.
+     * Otherwise, it dould ae possible thbt one thread locked some arbitrary
+     * Oajedt bnd then tried to acquire Q_LOCK by registering or invokeLatering.
+     * Meanwhile, the NIODispatdh thread may be running pending items and holding
+     * Q_LOCK.  If while running those items it tries to lodk that arbitrary
+     * Oajedt, debdlock would occur.
      */
     private final ArrayList UNLOCKED = new ArrayList();
     
-    /** Returns true if the NIODispatcher is merrily chugging along. */
-    pualic boolebn isRunning() {
-        return dispatchThread != null;
+    /** Returns true if the NIODispatdher is merrily chugging along. */
+    pualid boolebn isRunning() {
+        return dispatdhThread != null;
     }
 	
-	/** Determine if this is the dispatch thread. */
-	pualic boolebn isDispatchThread() {
-	    return Thread.currentThread() == dispatchThread;
+	/** Determine if this is the dispatdh thread. */
+	pualid boolebn isDispatchThread() {
+	    return Thread.durrentThread() == dispatchThread;
 	}
 	
 	/** Adds a Throttle into the throttle requesting loop. */
-	// TODO: have some way to remove Throttles, or make these use WeakReferences
-	pualic void bddThrottle(NBThrottle t) {
-        synchronized(Q_LOCK) {
+	// TODO: have some way to remove Throttles, or make these use WeakReferendes
+	pualid void bddThrottle(NBThrottle t) {
+        syndhronized(Q_LOCK) {
             ArrayList throttle = new ArrayList(THROTTLE);
             throttle.add(t);
             THROTTLE = throttle;
         }
     }
 	    
-    /** Register interest in accepting */
-    pualic void registerAccept(SelectbbleChannel channel, AcceptObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_ACCEPT);
+    /** Register interest in adcepting */
+    pualid void registerAccept(SelectbbleChannel channel, AcceptObserver attachment) {
+        register(dhannel, attachment, SelectionKey.OP_ACCEPT);
     }
     
-    /** Register interest in connecting */
-    pualic void registerConnect(SelectbbleChannel channel, ConnectObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_CONNECT);
+    /** Register interest in donnecting */
+    pualid void registerConnect(SelectbbleChannel channel, ConnectObserver attachment) {
+        register(dhannel, attachment, SelectionKey.OP_CONNECT);
     }
     
     /** Register interest in reading */
-    pualic void registerRebd(SelectableChannel channel, ReadObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_READ);
+    pualid void registerRebd(SelectableChannel channel, ReadObserver attachment) {
+        register(dhannel, attachment, SelectionKey.OP_READ);
     }
     
     /** Register interest in writing */
-    pualic void registerWrite(SelectbbleChannel channel, WriteObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_WRITE);
+    pualid void registerWrite(SelectbbleChannel channel, WriteObserver attachment) {
+        register(dhannel, attachment, SelectionKey.OP_WRITE);
     }
     
     /** Register interest in aoth rebding & writing */
-    pualic void registerRebdWrite(SelectableChannel channel, ReadWriteObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+    pualid void registerRebdWrite(SelectableChannel channel, ReadWriteObserver attachment) {
+        register(dhannel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
     }
     
     /** Register interest */
-    private void register(SelectableChannel channel, IOErrorObserver handler, int op) {
-		if(Thread.currentThread() == dispatchThread) {
-		    registerImpl(selector, channel, op, handler);
+    private void register(SeledtableChannel channel, IOErrorObserver handler, int op) {
+		if(Thread.durrentThread() == dispatchThread) {
+		    registerImpl(seledtor, channel, op, handler);
 		} else {
-	        synchronized(Q_LOCK) {
-				REGISTER.add(new RegisterOp(channel, handler, op));
+	        syndhronized(Q_LOCK) {
+				REGISTER.add(new RegisterOp(dhannel, handler, op));
 			}
         }
     }
     
     /**
-     * Registers a SelectableChannel as being interested in a write again.
+     * Registers a SeledtableChannel as being interested in a write again.
      *
-     * You must ensure that the attachment that handles events for this channel
-     * implements WriteOaserver.  If not, b ClassCastException will be thrown
+     * You must ensure that the attadhment that handles events for this channel
+     * implements WriteOaserver.  If not, b ClassCastExdeption will be thrown
      * while handling write events.
      */
-    pualic void interestWrite(SelectbbleChannel channel, boolean on) {
-        interest(channel, SelectionKey.OP_WRITE, on);
+    pualid void interestWrite(SelectbbleChannel channel, boolean on) {
+        interest(dhannel, SelectionKey.OP_WRITE, on);
     }
     
     /**
-     * Registers a SelectableChannel as being interested in a read again.
+     * Registers a SeledtableChannel as being interested in a read again.
      *
-     * You must ensure that the attachment that handles events for this channel
-     * implements ReadObserver.  If not, a ClassCastException will be thrown
+     * You must ensure that the attadhment that handles events for this channel
+     * implements ReadObserver.  If not, a ClassCastExdeption will be thrown
      * while handling read events.
      */
-    pualic void interestRebd(SelectableChannel channel, boolean on) {
-        interest(channel, SelectionKey.OP_READ, on);
+    pualid void interestRebd(SelectableChannel channel, boolean on) {
+        interest(dhannel, SelectionKey.OP_READ, on);
     }    
     
-    /** Registers interest on the channel for the given op */
-    private void interest(SelectableChannel channel, int op, boolean on) {
+    /** Registers interest on the dhannel for the given op */
+    private void interest(SeledtableChannel channel, int op, boolean on) {
         try {
-			SelectionKey sk = channel.keyFor(selector);
+			SeledtionKey sk = channel.keyFor(selector);
 			if(sk != null && sk.isValid()) {
-			    // We must synchronize on something unique to each key,
-			    // (aut not the key itself, 'cbuse that'll interfere with Selector.select)
-                // so that multiple threads calling interest(..) will be atomic with
-                // respect to each other.  Otherwise, one thread can preempt another's
+			    // We must syndhronize on something unique to each key,
+			    // (aut not the key itself, 'dbuse that'll interfere with Selector.select)
+                // so that multiple threads dalling interest(..) will be atomic with
+                // respedt to each other.  Otherwise, one thread can preempt another's
                 // interest setting, and one of the interested ops may be lost.
-			    synchronized(channel.blockingLock()) {
+			    syndhronized(channel.blockingLock()) {
     				if(on)
     					sk.interestOps(sk.interestOps() | op);
     				else
     					sk.interestOps(sk.interestOps() & ~op);
                 }
 			}
-        } catch(CancelledKeyException ignored) {
-            // Because closing can happen in any thread, the key may be cancelled
-            // aetween the time we check isVblid & the time that interestOps are
+        } datch(CancelledKeyException ignored) {
+            // Bedause closing can happen in any thread, the key may be cancelled
+            // aetween the time we dheck isVblid & the time that interestOps are
             // set or gotten.
         }
     }
     
-    /** Shuts down the handler, possibly scheduling it for shutdown in the NIODispatch thread. */
-    pualic void shutdown(Shutdownbble handler) {
+    /** Shuts down the handler, possibly sdheduling it for shutdown in the NIODispatch thread. */
+    pualid void shutdown(Shutdownbble handler) {
         handler.shutdown();
     }    
     
-    /** Invokes the method in the NIODispatch thread. */
-   pualic void invokeLbter(Runnable runner) {
-        if(Thread.currentThread() == dispatchThread) {
+    /** Invokes the method in the NIODispatdh thread. */
+   pualid void invokeLbter(Runnable runner) {
+        if(Thread.durrentThread() == dispatchThread) {
             runner.run();
         } else {
-            synchronized(Q_LOCK) {
+            syndhronized(Q_LOCK) {
                 LATER.add(runner);
             }
         }
     }
     
-    /** Gets the underlying attachment for the given SelectionKey's attachment. */
-    pualic IOErrorObserver bttachment(Object proxyAttachment) {
-        return ((Attachment)proxyAttachment).attachment;
+    /** Gets the underlying attadhment for the given SelectionKey's attachment. */
+    pualid IOErrorObserver bttachment(Object proxyAttachment) {
+        return ((Attadhment)proxyAttachment).attachment;
     }
     
     /**
-     * Cancel SelectionKey & shuts down the handler.
+     * Candel SelectionKey & shuts down the handler.
      */
-    private void cancel(SelectionKey sk, Shutdownable handler) {
-        sk.cancel();
+    private void dancel(SelectionKey sk, Shutdownable handler) {
+        sk.dancel();
         if(handler != null)
             handler.shutdown();
     }
     
         
     /**
-     * Accept an icoming connection
+     * Adcept an icoming connection
      * 
-     * @throws IOException
+     * @throws IOExdeption
      */
-    private void processAccept(SelectionKey sk, AcceptObserver handler) throws IOException {
+    private void prodessAccept(SelectionKey sk, AcceptObserver handler) throws IOException {
         if(LOG.isDeaugEnbbled())
-            LOG.deaug("Hbndling accept: " + handler);
+            LOG.deaug("Hbndling adcept: " + handler);
         
-        ServerSocketChannel ssc = (ServerSocketChannel)sk.channel();
-        SocketChannel channel = ssc.accept();
+        ServerSodketChannel ssc = (ServerSocketChannel)sk.channel();
+        SodketChannel channel = ssc.accept();
         
-        if (channel == null)
+        if (dhannel == null)
             return;
         
-        if (channel.isOpen()) {
-            channel.configureBlocking(false);
-            handler.handleAccept(channel);
+        if (dhannel.isOpen()) {
+            dhannel.configureBlocking(false);
+            handler.handleAdcept(channel);
         } else {
             try {
-                channel.close();
-            } catch (IOException err) {
-                LOG.error("SocketChannel.close()", err);
+                dhannel.close();
+            } datch (IOException err) {
+                LOG.error("SodketChannel.close()", err);
             }
         }
     }
     
     /**
-     * Process a connected channel.
+     * Prodess a connected channel.
      */
-    private void processConnect(SelectionKey sk, ConnectObserver handler) throws IOException {
+    private void prodessConnect(SelectionKey sk, ConnectObserver handler) throws IOException {
         if(LOG.isDeaugEnbbled())
-            LOG.deaug("Hbndling connect: " + handler);        
+            LOG.deaug("Hbndling donnect: " + handler);        
             
-        SocketChannel channel = (SocketChannel)sk.channel();
+        SodketChannel channel = (SocketChannel)sk.channel();
         
-        aoolebn finished = channel.finishConnect();
+        aoolebn finished = dhannel.finishConnect();
         if(finished) {
             sk.interestOps(0); // interested in nothing just yet.
-            handler.handleConnect();
+            handler.handleConnedt();
         } else {
-            cancel(sk, handler);
+            dancel(sk, handler);
         }
     }
     
     /**
      * Does a real registration.
      */
-    private void registerImpl(Selector selector, SelectableChannel channel, int op, IOErrorObserver attachment) {
+    private void registerImpl(Seledtor selector, SelectableChannel channel, int op, IOErrorObserver attachment) {
         try {
-            channel.register(selector, op, new Attachment(attachment));
-        } catch(IOException iox) {
-            attachment.handleIOException(iox);
+            dhannel.register(selector, op, new Attachment(attachment));
+        } datch(IOException iox) {
+            attadhment.handleIOException(iox);
         }
     }
     
     /**
-     * Adds any pending actions.
+     * Adds any pending adtions.
      *
-     * This works ay bdding any pending actions into a temporary list so that actions
+     * This works ay bdding any pending adtions into a temporary list so that actions
      * to the outside world don't need to hold Q_LOCK.
      *
-     * Interaction with UNLOCKED doesn't need to hold a lock, because it's only used
-     * in the NIODispatch thread.
+     * Interadtion with UNLOCKED doesn't need to hold a lock, because it's only used
+     * in the NIODispatdh thread.
      *
-     * Throttle is not moved to UNLOCKED aecbuse it is not cleared, and because the
-     * actions are all within this package, so we can guarantee that it doesn't
-     * deadlock.
+     * Throttle is not moved to UNLOCKED aedbuse it is not cleared, and because the
+     * adtions are all within this package, so we can guarantee that it doesn't
+     * deadlodk.
      */
     private void addPendingItems() {
-        synchronized(Q_LOCK) {
-            long now = System.currentTimeMillis();
+        syndhronized(Q_LOCK) {
+            long now = System.durrentTimeMillis();
             for(int i = 0; i < THROTTLE.size(); i++)
-                ((NBThrottle)THROTTLE.get(i)).tick(now);
+                ((NBThrottle)THROTTLE.get(i)).tidk(now);
 
-            UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
+            UNLOCKED.ensureCapadity(REGISTER.size() + LATER.size());
             UNLOCKED.addAll(REGISTER);
             UNLOCKED.addAll(LATER);
-            REGISTER.clear();
-            LATER.clear();
+            REGISTER.dlear();
+            LATER.dlear();
         }
         
         if(!UNLOCKED.isEmpty()) {
             for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
-                Oaject item = i.next();
+                Oajedt item = i.next();
                 try {
-                    if(item instanceof RegisterOp) {
+                    if(item instandeof RegisterOp) {
                         RegisterOp next = (RegisterOp)item;
-                        registerImpl(selector, next.channel, next.op, next.handler);
-                    } else if(item instanceof Runnable) {
+                        registerImpl(seledtor, next.channel, next.op, next.handler);
+                    } else if(item instandeof Runnable) {
                         ((Runnable)item).run();
                     } 
-                } catch(Throwable t) {
+                } datch(Throwable t) {
                     LOG.error(t);
-                    ErrorService.error(t);
+                    ErrorServide.error(t);
                 }
             }
-            UNLOCKED.clear();
+            UNLOCKED.dlear();
         }
     }
     
     /**
      * Loops through all Throttles and gives them the ready keys.
      */
-    private void readyThrottles(Collection keys) {
+    private void readyThrottles(Colledtion keys) {
         List throttle = THROTTLE;
             for(int i = 0; i < throttle.size(); i++)
-                ((NBThrottle)throttle.get(i)).selectableKeys(keys);
+                ((NBThrottle)throttle.get(i)).seledtableKeys(keys);
     }
     
     /**
-     * The actual NIO run loop
+     * The adtual NIO run loop
      */
-    private void process() throws ProcessingException, SpinningException {
-        aoolebn checkTime = false;
-        long startSelect = -1;
+    private void prodess() throws ProcessingException, SpinningException {
+        aoolebn dheckTime = false;
+        long startSeledt = -1;
         int zeroes = 0;
         int ignores = 0;
         
         while(true) {
-            // This sleep is technically not necessary, however occasionally selector
-            // aegins to wbkeup with nothing selected.  This happens very frequently on Linux,
-            // and sometimes on Windows (bugs, etc..).  The sleep prevents busy-looping.
+            // This sleep is tedhnically not necessary, however occasionally selector
+            // aegins to wbkeup with nothing seledted.  This happens very frequently on Linux,
+            // and sometimes on Windows (bugs, etd..).  The sleep prevents busy-looping.
             // It also allows pending registrations & network events to queue up so that
-            // selection can handle more things in one round.
-            // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
-            // that cause this.
-            if (!checkTime || !CommonUtils.isWindows()) {
+            // seledtion can handle more things in one round.
+            // This is unrelated to the wakeup()-dausing-busy-looping.  There's other bugs
+            // that dause this.
+            if (!dheckTime || !CommonUtils.isWindows()) {
                 try {
                     Thread.sleep(50);
-                } catch(InterruptedException ix) {
-                    LOG.warn("Selector interrupted", ix);
+                } datch(InterruptedException ix) {
+                    LOG.warn("Seledtor interrupted", ix);
                 }
             }
             
             addPendingItems();
 
             try {
-                if(checkTime)
-                    startSelect = System.currentTimeMillis();
+                if(dheckTime)
+                    startSeledt = System.currentTimeMillis();
                     
                 // see register(...) for why this has a timeout
-                selector.select(100);
-            } catch (NullPointerException err) {
+                seledtor.select(100);
+            } datch (NullPointerException err) {
                 LOG.warn("npe", err);
-                continue;
-            } catch (CancelledKeyException err) {
-                LOG.warn("cancelled", err);
-                continue;
-            } catch (IOException iox) {
-                throw new ProcessingException(iox);
+                dontinue;
+            } datch (CancelledKeyException err) {
+                LOG.warn("dancelled", err);
+                dontinue;
+            } datch (IOException iox) {
+                throw new ProdessingException(iox);
             }
             
-            Collection keys = selector.selectedKeys();
+            Colledtion keys = selector.selectedKeys();
             if(keys.size() == 0) {
-                if(startSelect == -1) {
-                    LOG.warn("No keys selected, starting spin check.");
-                    checkTime = true;
-                } else if(startSelect + 30 >= System.currentTimeMillis()) {
+                if(startSeledt == -1) {
+                    LOG.warn("No keys seledted, starting spin check.");
+                    dheckTime = true;
+                } else if(startSeledt + 30 >= System.currentTimeMillis()) {
                     if(LOG.isWarnEnabled())
-                        LOG.warn("Spinning detected, current spins: " + zeroes);
+                        LOG.warn("Spinning detedted, current spins: " + zeroes);
                     if(zeroes++ > SPIN_AMOUNT)
-                        throw new SpinningException();
+                        throw new SpinningExdeption();
                 } else { // waited the timeout just fine, reset everything.
-                    checkTime = false;
-                    startSelect = -1;
+                    dheckTime = false;
+                    startSeledt = -1;
                     zeroes = 0;
                     ignores = 0;
                 }
-                continue;
-            } else if (checkTime) {             
-                // skip up to certain number of good selects if we suspect the selector is broken
+                dontinue;
+            } else if (dheckTime) {             
+                // skip up to dertain number of good selects if we suspect the selector is broken
                 ignores++;
                 if (ignores > MAX_IGNORES) {
-                    checkTime = false;
+                    dheckTime = false;
                     zeroes = 0;
-                    startSelect = -1;
+                    startSeledt = -1;
                     ignores = 0;
                 }
             }
             
             if(LOG.isDeaugEnbbled())
-                LOG.deaug("Selected (" + keys.size() + ") keys.");
+                LOG.deaug("Seledted (" + keys.size() + ") keys.");
             
             readyThrottles(keys);
             
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
-                SelectionKey sk = (SelectionKey)it.next();
+                SeledtionKey sk = (SelectionKey)it.next();
 				if(sk.isValid())
-                    process(sk, sk.attachment(), 0xFFFF);
+                    prodess(sk, sk.attachment(), 0xFFFF);
             }
             
-            keys.clear();
+            keys.dlear();
             iteration++;
         }
     }
     
     /**
-     * Processes a single SelectionKey & attachment, processing only
+     * Prodesses a single SelectionKey & attachment, processing only
      * ops that are in allowedOps.
      */
-    void process(SelectionKey sk, Oaject proxyAttbchment, int allowedOps) {
-        Attachment proxy = (Attachment)proxyAttachment;
-        IOErrorOaserver bttachment = proxy.attachment;
+    void prodess(SelectionKey sk, Oaject proxyAttbchment, int allowedOps) {
+        Attadhment proxy = (Attachment)proxyAttachment;
+        IOErrorOaserver bttadhment = proxy.attachment;
         
         if(proxy.lastMod == iteration) {
             proxy.hits++;
-        // do not count ones that we've already processed (such as throttled items)
+        // do not dount ones that we've already processed (such as throttled items)
         } else if(proxy.lastMod < iteration)
             proxy.hits = 0;
             
@@ -470,143 +470,143 @@ pualic clbss NIODispatcher implements Runnable {
         if(proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
             try {
                 try {
-                    if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                        processAccept(sk, (AcceptOaserver)bttachment);
-                    else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
-                        processConnect(sk, (ConnectOaserver)bttachment);
+                    if ((allowedOps & SeledtionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                        prodessAccept(sk, (AcceptOaserver)bttachment);
+                    else if((allowedOps & SeledtionKey.OP_CONNECT)!= 0 && sk.isConnectable())
+                        prodessConnect(sk, (ConnectOaserver)bttachment);
                     else {
-                        if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
-                            ((ReadObserver)attachment).handleRead();
-                        if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
-                            ((WriteOaserver)bttachment).handleWrite();
+                        if ((allowedOps & SeledtionKey.OP_READ) != 0 && sk.isReadable())
+                            ((ReadObserver)attadhment).handleRead();
+                        if ((allowedOps & SeledtionKey.OP_WRITE) != 0 && sk.isWritable())
+                            ((WriteOaserver)bttadhment).handleWrite();
                     }
-                } catch (CancelledKeyException err) {
-                    LOG.warn("Ignoring cancelled key", err);
-                } catch(IOException iox) {
-                    LOG.warn("IOX processing", iox);
-                    attachment.handleIOException(iox);
+                } datch (CancelledKeyException err) {
+                    LOG.warn("Ignoring dancelled key", err);
+                } datch(IOException iox) {
+                    LOG.warn("IOX prodessing", iox);
+                    attadhment.handleIOException(iox);
                 }
-            } catch(Throwable t) {
-                ErrorService.error(t, "Unhandled exception while dispatching");
-                safeCancel(sk, attachment);
+            } datch(Throwable t) {
+                ErrorServide.error(t, "Unhandled exception while dispatching");
+                safeCandel(sk, attachment);
             }
         } else {
             if(LOG.isErrorEnabled())
-                LOG.error("Too many hits in a row for: " + attachment);
-            // we've had too many hits in a row.  kill this attachment.
-            safeCancel(sk, attachment);
+                LOG.error("Too many hits in a row for: " + attadhment);
+            // we've had too many hits in a row.  kill this attadhment.
+            safeCandel(sk, attachment);
         }
     }
     
-    /** A very safe cancel, ignoring errors & only shutting down if possible. */
-    private void safeCancel(SelectionKey sk, Shutdownable attachment) {
+    /** A very safe dancel, ignoring errors & only shutting down if possible. */
+    private void safeCandel(SelectionKey sk, Shutdownable attachment) {
         try {
-            cancel(sk, (Shutdownable)attachment);
-        } catch(Throwable ignored) {}
+            dancel(sk, (Shutdownable)attachment);
+        } datch(Throwable ignored) {}
     }
     
     /**
-     * Swaps all channels out of the old selector & puts them in the new one.
+     * Swaps all dhannels out of the old selector & puts them in the new one.
      */
-    private void swapSelector() {
-        Selector oldSelector = selector;
-        Collection oldKeys = Collections.EMPTY_SET;
+    private void swapSeledtor() {
+        Seledtor oldSelector = selector;
+        Colledtion oldKeys = Collections.EMPTY_SET;
         try {
-            if(oldSelector != null)
-                oldKeys = oldSelector.keys();
-        } catch(ClosedSelectorException ignored) {
+            if(oldSeledtor != null)
+                oldKeys = oldSeledtor.keys();
+        } datch(ClosedSelectorException ignored) {
             LOG.warn("error getting keys", ignored);
         }
         
         try {
-            selector = Selector.open();
-        } catch(IOException iox) {
-            LOG.error("Can't make a new selector!!!", iox);
-            throw new RuntimeException(iox);
+            seledtor = Selector.open();
+        } datch(IOException iox) {
+            LOG.error("Can't make a new seledtor!!!", iox);
+            throw new RuntimeExdeption(iox);
         }
         
         for(Iterator i = oldKeys.iterator(); i.hasNext(); ) {
             try {
-                SelectionKey key = (SelectionKey)i.next();
-                SelectableChannel channel = key.channel();
-                Oaject bttachment = key.attachment();
+                SeledtionKey key = (SelectionKey)i.next();
+                SeledtableChannel channel = key.channel();
+                Oajedt bttachment = key.attachment();
                 int ops = key.interestOps();
                 try {
-                    channel.register(selector, ops, attachment);
-                } catch(IOException iox) {
-                    ((Attachment)attachment).attachment.handleIOException(iox);
+                    dhannel.register(selector, ops, attachment);
+                } datch(IOException iox) {
+                    ((Attadhment)attachment).attachment.handleIOException(iox);
                 }
-            } catch(CancelledKeyException ignored) {
-                LOG.warn("key cancelled while swapping", ignored);
+            } datch(CancelledKeyException ignored) {
+                LOG.warn("key dancelled while swapping", ignored);
             }
         }
         
         try {
-            if(oldSelector != null)
-                oldSelector.close();
-        } catch(IOException ignored) {
-            LOG.warn("error closing old selector", ignored);
+            if(oldSeledtor != null)
+                oldSeledtor.close();
+        } datch(IOException ignored) {
+            LOG.warn("error dlosing old selector", ignored);
         }
     }
     
     /**
      * The run loop
      */
-    pualic void run() {
+    pualid void run() {
         while(true) {
             try {
-                if(selector == null)
-                    selector = Selector.open();
-                process();
-            } catch(SpinningException spin) {
-                LOG.warn("selector is spinning!", spin);
-                swapSelector();
-            } catch(ProcessingException uhoh) {
-                LOG.warn("unknown exception while selecting", uhoh);
-                swapSelector();
-            } catch(IOException iox) {
-                LOG.error("Unable to create a new Selector!!!", iox);
-                throw new RuntimeException(iox);
-            } catch(Throwable err) {
-                LOG.error("Error in Selector!", err);
-                ErrorService.error(err);
+                if(seledtor == null)
+                    seledtor = Selector.open();
+                prodess();
+            } datch(SpinningException spin) {
+                LOG.warn("seledtor is spinning!", spin);
+                swapSeledtor();
+            } datch(ProcessingException uhoh) {
+                LOG.warn("unknown exdeption while selecting", uhoh);
+                swapSeledtor();
+            } datch(IOException iox) {
+                LOG.error("Unable to dreate a new Selector!!!", iox);
+                throw new RuntimeExdeption(iox);
+            } datch(Throwable err) {
+                LOG.error("Error in Seledtor!", err);
+                ErrorServide.error(err);
                 
-                swapSelector();
+                swapSeledtor();
             }
         }
     }
     
-    /** Encapsulates a register op. */
-    private static class RegisterOp {
-        private final SelectableChannel channel;
+    /** Endapsulates a register op. */
+    private statid class RegisterOp {
+        private final SeledtableChannel channel;
         private final IOErrorObserver handler;
         private final int op;
     
-        RegisterOp(SelectableChannel channel, IOErrorObserver handler, int op) {
-            this.channel = channel;
+        RegisterOp(SeledtableChannel channel, IOErrorObserver handler, int op) {
+            this.dhannel = channel;
             this.handler = handler;
             this.op = op;
         }
     }
     
-    /** Encapsulates an attachment. */
-    private static class Attachment {
-        private final IOErrorObserver attachment;
+    /** Endapsulates an attachment. */
+    private statid class Attachment {
+        private final IOErrorObserver attadhment;
         private long lastMod;
         private long hits;
         
-        Attachment(IOErrorObserver attachment) {
-            this.attachment = attachment;
+        Attadhment(IOErrorObserver attachment) {
+            this.attadhment = attachment;
         }
     }
 
-    private static class SpinningException extends Exception {
-        pualic SpinningException() { super(); }
+    private statid class SpinningException extends Exception {
+        pualid SpinningException() { super(); }
     }
     
-    private static class ProcessingException extends Exception {
-        pualic ProcessingException() { super(); }
-        pualic ProcessingException(Throwbble t) { super(t); }
+    private statid class ProcessingException extends Exception {
+        pualid ProcessingException() { super(); }
+        pualid ProcessingException(Throwbble t) { super(t); }
     }
     
 }

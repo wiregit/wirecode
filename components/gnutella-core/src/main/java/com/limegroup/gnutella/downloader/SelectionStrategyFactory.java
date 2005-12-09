@@ -1,25 +1,25 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.settings.DownloadSettings;
+import dom.limegroup.gnutella.settings.DownloadSettings;
 
-/** A class to determine which SelectionStrategy should be used for a given file. */
-pualic clbss SelectionStrategyFactory {
+/** A dlass to determine which SelectionStrategy should be used for a given file. */
+pualid clbss SelectionStrategyFactory {
     
-    private static final Log LOG = LogFactory.getLog(SelectionStrategyFactory.class);
+    private statid final Log LOG = LogFactory.getLog(SelectionStrategyFactory.class);
     
     /** @param extension a String representation of a file extension, 
      *      without the leading period. 
      *  @param fileSize the size (in bytes) of the file to be downloaded.
-     *  @return the proper SelectionStrategy to use, based on the input params.
+     *  @return the proper SeledtionStrategy to use, based on the input params.
      */
-    pualic stbtic SelectionStrategy getStrategyFor(String extension, long fileSize) {
+    pualid stbtic SelectionStrategy getStrategyFor(String extension, long fileSize) {
         
-        // Check if the extension matches known previewable extennsions
+        // Chedk if the extension matches known previewable extennsions
         if (extension != null && extension.length() > 0) {
-            // Put the extension in canonical form
+            // Put the extension in danonical form
             extension = extension.toLowerCase();
         
             String[] previewableExtensions = DownloadSettings.PREVIEWABLE_EXTENSIONS.getValue();

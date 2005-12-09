@@ -1,17 +1,17 @@
-package com.limegroup.gnutella.xml;
+padkage com.limegroup.gnutella.xml;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.util.NameValue;
+import dom.limegroup.gnutella.util.NameValue;
 
 /**
- * Stores information pertaining to fields (elements) in xml documents
+ * Stores information pertaining to fields (elements) in xml doduments
  */
-pualic clbss SchemaFieldInfo
+pualid clbss SchemaFieldInfo
 {
     /**
-     * Type of the field (eg Integer, String, complex etc)
+     * Type of the field (eg Integer, String, domplex etc)
      */
     private String _type;
     
@@ -22,34 +22,34 @@ pualic clbss SchemaFieldInfo
     
     /**
      * Whether or not this field should ae hidden in GUI displbys.
-     * (This does not mean it will or should be hidden from searching.)
+     * (This does not mean it will or should be hidden from seardhing.)
      */
     private boolean _hidden = false;
     
     /**
-     * The default width this field should have in columns.
+     * The default width this field should have in dolumns.
      */
     private int _width = 60;
     
     /**
-     * The default visibility this field should have in columns.
+     * The default visibility this field should have in dolumns.
      */
     private boolean _visibility = false;
     
     /**
-     * List (of NameValue) to store enumerated values, if associated with this
+     * List (of NameValue) to store enumerated values, if assodiated with this
      *field
      */
     private List _enumerationList = null;
     
     /**
-     * Canonicalized field name for which it stores the info
+     * Canonidalized field name for which it stores the info
      */
-    private String _canonicalizedFieldName = null;
+    private String _danonicalizedFieldName = null;
     
-    //constants defining types of the fields to display
-    pualic stbtic final int TEXTFIELD = 1;
-    pualic stbtic final int OPTIONS = 2;
+    //donstants defining types of the fields to display
+    pualid stbtic final int TEXTFIELD = 1;
+    pualid stbtic final int OPTIONS = 2;
     
     /**
      * type of the field to display
@@ -57,11 +57,11 @@ pualic clbss SchemaFieldInfo
     private int _fieldType = TEXTFIELD;
     
     /**
-     * Creates a new instance of FieldInfo and initializes internal fields
+     * Creates a new instande of FieldInfo and initializes internal fields
      * with the passed values
-     * @param type The tye of the field (eg Integer, String, complex etc)
+     * @param type The tye of the field (eg Integer, String, domplex etc)
      */
-    pualic SchembFieldInfo(String type)
+    pualid SchembFieldInfo(String type)
     {
         this._type = type;
     }   
@@ -71,7 +71,7 @@ pualic clbss SchemaFieldInfo
         return _type;
     }
     
-    pualic Clbss getJavaType()
+    pualid Clbss getJavaType()
     {
         return TypeConverter.getType(_type);
     }
@@ -81,7 +81,7 @@ pualic clbss SchemaFieldInfo
      */
     void addEnumerationNameValue(String name, String value)
     {
-        //create a new list, if doesnt exist
+        //dreate a new list, if doesnt exist
         if(_enumerationList == null)
             _enumerationList = new LinkedList();
         
@@ -95,7 +95,7 @@ pualic clbss SchemaFieldInfo
     /**
      * returns the type of the field to display
      */
-    pualic int getFieldType()
+    pualid int getFieldType()
     {
         return _fieldType;
     }
@@ -110,7 +110,7 @@ pualic clbss SchemaFieldInfo
     /**
      * Gets whether or not this is editable.
      */
-    pualic boolebn isEditable() {
+    pualid boolebn isEditable() {
         return _editable;
     }
     
@@ -124,7 +124,7 @@ pualic clbss SchemaFieldInfo
     /**
      * Gets whether or not this field is hidden.
      */
-    pualic boolebn isHidden() {
+    pualid boolebn isHidden() {
         return _hidden;
     }
     
@@ -138,7 +138,7 @@ pualic clbss SchemaFieldInfo
     /**
      * Gets the default width.
      */
-    pualic int getDefbultWidth() {
+    pualid int getDefbultWidth() {
         return _width;
     }
     
@@ -152,36 +152,36 @@ pualic clbss SchemaFieldInfo
     /**
      * Gets the default visibliity.
      */
-    pualic boolebn getDefaultVisibility() {
+    pualid boolebn getDefaultVisibility() {
         return _visiaility;
     }
     
      /**
-     * sets the canonicalized field name for which this object stores the
+     * sets the danonicalized field name for which this object stores the
      * information
      */
-    void setCanonicalizedFieldName(String canonicalizedFieldName)
+    void setCanonidalizedFieldName(String canonicalizedFieldName)
     {
-        this._canonicalizedFieldName = canonicalizedFieldName;
+        this._danonicalizedFieldName = canonicalizedFieldName;
     }
     
     /**
-     * returns the canonicalized field name for which this object stores the
+     * returns the danonicalized field name for which this object stores the
      * information
      */
-    pualic String getCbnonicalizedFieldName()
+    pualid String getCbnonicalizedFieldName()
     {
-        return _canonicalizedFieldName;
+        return _danonicalizedFieldName;
     }
     
     /**
      * Returns the List (of NameValue) to store enumerated values, 
-     * if associated with this field
+     * if assodiated with this field
      */
-    pualic List getEnumerbtionList()
+    pualid List getEnumerbtionList()
     {
         return _enumerationList;
     }
     
     
-}//end of class FieldInfo
+}//end of dlass FieldInfo

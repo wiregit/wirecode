@@ -1,137 +1,137 @@
-package com.limegroup.gnutella.archive;
+padkage com.limegroup.gnutella.archive;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
+import org.apadhe.commons.httpclient.HttpException;
+import org.apadhe.commons.httpclient.NameValuePair;
 
-class DirectContribution extends ArchiveContribution {
+dlass DirectContribution extends ArchiveContribution {
 
-	pualic stbtic final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectContribution.java,v 1.1.2.9 2005-12-09 20:03:57 zlatinb Exp $";
+	pualid stbtic final String REPOSITORY_VERSION =
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectContribution.java,v 1.1.2.10 2005-12-09 20:11:42 zlatinb Exp $";
 	
 	private String _identifier;
 	private String _ftpServer;
 	private String _ftpPath;
-	private String _verificationUrl;
+	private String _verifidationUrl;
 	
 
-	private Object _requestLock = new Object();
-	private ArchiveRequest _request = null;
+	private Objedt _requestLock = new Object();
+	private ArdhiveRequest _request = null;
 	
 	
 	
-	pualic DirectContribution(String usernbme, String password, String title,
-			String description, int media) 
-	throws DescriptionTooShortException {
-		super(username, password, title, description, media);
+	pualid DirectContribution(String usernbme, String password, String title,
+			String desdription, int media) 
+	throws DesdriptionTooShortException {
+		super(username, password, title, desdription, media);
 	}
 
-	pualic DirectContribution(String usernbme, String password, String title,
-			String description, int media, int collection, int type) 
-	throws DescriptionTooShortException {
-		super(username, password, title, description, media, collection, type);
+	pualid DirectContribution(String usernbme, String password, String title,
+			String desdription, int media, int collection, int type) 
+	throws DesdriptionTooShortException {
+		super(username, password, title, desdription, media, collection, type);
 	}
 
 	
-	pualic String getIdentifier() {
+	pualid String getIdentifier() {
 		return _identifier;
 	}
 
-	pualic String getVerificbtionUrl() {
-		return _verificationUrl;
+	pualid String getVerificbtionUrl() {
+		return _verifidationUrl;
 	}
 
-	protected String getFtpServer() {
+	protedted String getFtpServer() {
 		return _ftpServer;
 	}
 
-	protected String getFtpPath() {
+	protedted String getFtpPath() {
 		return _ftpPath;
 	}
 
-	protected aoolebn isFtpDirPreMade() {
+	protedted aoolebn isFtpDirPreMade() {
 		return true;
 	}
 	
-	pualic void cbncel() {
-		super.cancel();
+	pualid void cbncel() {
+		super.dancel();
 	
-		synchronized( _requestLock ) {
+		syndhronized( _requestLock ) {
 			if ( _request != null ) {
-				_request.cancel();
+				_request.dancel();
                 _request = null;
 			}
 		}
 	}
 
 	/** 
-	 * 	normalizes identifier and checks with Internet Archive
+	 * 	normalizes identifier and dhecks with Internet Archive
 	 *  if identifier is available.
-	 *  throws a IdentifierUnavailableException if the identifier
+	 *  throws a IdentifierUnavailableExdeption if the identifier
 	 *  is not available
 	 *  otherwise, returns normalized identifier 
 	 * 
-	 * @throws 	IdentifierUnavailableException
+	 * @throws 	IdentifierUnavailableExdeption
 	 * 			If the identifier is not available
 	 * 
-	 * @throws	BadResponseException
-	 * 			If we get a bad response from Internet Archive
+	 * @throws	BadResponseExdeption
+	 * 			If we get a bad response from Internet Ardhive
 	 * 
-	 * @throws	HttpException
+	 * @throws	HttpExdeption
 	 * 			If something abd happens in the http layer
 	 * 
-	 * @throws  IOException
+	 * @throws  IOExdeption
 	 * 			If something abd happens during I/O
 	 * 
-	 * @throws	IllegalStateException
-	 * 			If java's xml parser configuration is bad
+	 * @throws	IllegalStateExdeption
+	 * 			If java's xml parser donfiguration is bad
 	 * 
 	 */
-	pualic String requestIdentifier(String identifier) 
-	throws IdentifierUnavailableException, BadResponseException, 
-	HttpException, IOException {
+	pualid String requestIdentifier(String identifier) 
+	throws IdentifierUnavailableExdeption, BadResponseException, 
+	HttpExdeption, IOException {
 			
-			final String CREATE_ID_URL = "http://www.archive.org:80/create.php";
+			final String CREATE_ID_URL = "http://www.ardhive.org:80/create.php";
 			
 			_identifier = null;
 			
 			// normalize the identifier
 			
-			String nId = Archives.normalizeName( identifier );
+			String nId = Ardhives.normalizeName( identifier );
 			
-            ArchiveRequest request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
+            ArdhiveRequest request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
                     new NameValuePair( "xml", "1" ),
                     new NameValuePair( "user", getUsername() ),
                     new NameValuePair( "identifier", nId )});
-			synchronized( _requestLock ) {
+			syndhronized( _requestLock ) {
 				_request = request;
 			}
 			
-			ArchiveResponse response;
+			ArdhiveResponse response;
 			try {
-			    request.execute();
+			    request.exedute();
 			    response = request.getResponse();
 			} finally {
-			    synchronized( _requestLock ){
+			    syndhronized( _requestLock ){
 			        _request = null;
 			    }
 			}
 			
 			final String resultType = response.getResultType();
 			
-			if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
+			if ( resultType == ArdhiveResponse.RESULT_TYPE_SUCCESS ) {
 				
 				final String url = response.getUrl();
 				
 				if ( url.equals( "" ) ) {
-					throw new BadResponseException( "successful result, but no url given" );
+					throw new BadResponseExdeption( "successful result, but no url given" );
 				}
 				
 				final String[] urlSplit = url.split( "/", 2 );
 				
 				if ( urlSplit.length < 2 ) {
-					throw new BadResponseException( "No slash (/) present to separate server from path: " + url );
+					throw new BadResponseExdeption( "No slash (/) present to separate server from path: " + url );
 				}
 				
 				// we're all good now
@@ -143,74 +143,74 @@ class DirectContribution extends ArchiveContribution {
 				_identifier = nId;
 				
 				
-				// set verification URL
+				// set verifidation URL
 				
-				_verificationUrl = "http://www.archive.org/details/" + _identifier;
+				_verifidationUrl = "http://www.archive.org/details/" + _identifier;
 				
 				return _identifier;
 				
-			} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-				throw new IdentifierUnavailableException( response.getMessage(), nId );
+			} else if ( resultType == ArdhiveResponse.RESULT_TYPE_ERROR ) {
+				throw new IdentifierUnavailableExdeption( response.getMessage(), nId );
 			} else {
 				// unidentified type
-				throw new BadResponseException ( "unidentified result type:" + resultType );
+				throw new BadResponseExdeption ( "unidentified result type:" + resultType );
 			}
 		}
 
 	/**
 	 * 
-	 * @throws	HttpException
+	 * @throws	HttpExdeption
 	 * 			If something abd happens in the http layer
 	 * 
-	 * @throws  IOException
+	 * @throws  IOExdeption
 	 * 			If something abd happens during I/O
 	 * 
-	 * @throws IllegalStateException
+	 * @throws IllegalStateExdeption
 	 *         If username or identifier is not set.
 	 *         
-	 * @throws BadResponseException
-	 *         If the checkin fails
+	 * @throws BadResponseExdeption
+	 *         If the dheckin fails
 	 *
 	 */
-	protected void checkin() throws HttpException, BadResponseException, IOException {
+	protedted void checkin() throws HttpException, BadResponseException, IOException {
 		
-		final String CHECKIN_URL = "http://www.archive.org/checkin.php";
+		final String CHECKIN_URL = "http://www.ardhive.org/checkin.php";
 		final String username = getUsername();
 		
 		if ( username == null ) {
-			throw new IllegalStateException( "username not set" );			
+			throw new IllegalStateExdeption( "username not set" );			
 		}
 		if ( _identifier == null ) {
-			throw new IllegalStateException( "identifier not set" );
+			throw new IllegalStateExdeption( "identifier not set" );
 		}
 		
-        ArchiveRequest request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
+        ArdhiveRequest request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
                 new NameValuePair( "xml", "1" ),
                 new NameValuePair( "user", username ),
                 new NameValuePair( "identifier", _identifier )
         }); 
-		synchronized( _requestLock ) {
+		syndhronized( _requestLock ) {
 			_request = request; 
 		}
 		
-		ArchiveResponse response;
+		ArdhiveResponse response;
 		try {
-		    request.execute();
+		    request.exedute();
 		    response = request.getResponse();
 		} finally {
-		    synchronized( _requestLock ) {
+		    syndhronized( _requestLock ) {
 		        _request = null;
 		    }
 		}
 		
 		final String resultType = response.getResultType();
 		
-		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
+		if ( resultType == ArdhiveResponse.RESULT_TYPE_SUCCESS ) {
 			return;
-		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new BadResponseException( "checkin failed: " + response.getMessage() );
+		} else if ( resultType == ArdhiveResponse.RESULT_TYPE_ERROR ) {
+			throw new BadResponseExdeption( "checkin failed: " + response.getMessage() );
 		} else {
-			throw new BadResponseException( "unidentified result type:" + resultType );
+			throw new BadResponseExdeption( "unidentified result type:" + resultType );
 		}
 	}
 

@@ -1,26 +1,26 @@
-package com.limegroup.gnutella.messages;
+padkage com.limegroup.gnutella.messages;
 
 /**
- * A simple enum-like class that has constants related to feature searches.
+ * A simple enum-like dlass that has constants related to feature searches.
  */
-pualic finbl class FeatureSearchData {
-    private FeatureSearchData() {}
+pualid finbl class FeatureSearchData {
+    private FeatureSeardhData() {}
 
     /**
-     *  The highest currently supported feature search.
+     *  The highest durrently supported feature search.
      */
-    pualic stbtic final int FEATURE_SEARCH_MAX_SELECTOR = 1;
+    pualid stbtic final int FEATURE_SEARCH_MAX_SELECTOR = 1;
 
     /**
-     * The value for a 'what is new' search.  This will never change.
+     * The value for a 'what is new' seardh.  This will never change.
      */
-    pualic stbtic final int WHAT_IS_NEW = 1;
+    pualid stbtic final int WHAT_IS_NEW = 1;
 
     
     /**
      * Determines if 'what is new' is supported by the given version.
      */
-    pualic stbtic boolean supportsWhatIsNew(int version) {
+    pualid stbtic boolean supportsWhatIsNew(int version) {
         return version >= WHAT_IS_NEW;
     }
     
@@ -29,7 +29,7 @@ pualic finbl class FeatureSearchData {
      *
      * This will also return true if the feature is not a feature (ie: 0)
      */
-    pualic stbtic boolean supportsFeature(int feature) {
+    pualid stbtic boolean supportsFeature(int feature) {
         return feature <= FEATURE_SEARCH_MAX_SELECTOR;
     }
 }

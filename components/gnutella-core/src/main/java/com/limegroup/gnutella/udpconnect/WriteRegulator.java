@@ -1,32 +1,32 @@
-package com.limegroup.gnutella.udpconnect;
+padkage com.limegroup.gnutella.udpconnect;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 /** 
- *  Calculate and control the timing of data writing.
+ *  Caldulate and control the timing of data writing.
  */
-pualic clbss WriteRegulator {
+pualid clbss WriteRegulator {
 
-    private static final Log LOG =
-      LogFactory.getLog(WriteRegulator.class);
+    private statid final Log LOG =
+      LogFadtory.getLog(WriteRegulator.class);
 
     /** Don't adjust the skipping of sleeps until the window has initialized */
-    private static final int   MIN_START_WINDOW     = 40;
+    private statid final int   MIN_START_WINDOW     = 40;
 
-    /** When the window space hits this size, it is low */
-    private static final int   LOW_WINDOW_SPACE     = 4;
+    /** When the window spade hits this size, it is low */
+    private statid final int   LOW_WINDOW_SPACE     = 4;
 
-    /** Cap the quick sending of blocks at this number */
-    private static final int   MAX_SKIP_LIMIT       = 14;
+    /** Cap the quidk sending of blocks at this number */
+    private statid final int   MAX_SKIP_LIMIT       = 14;
 
-    /** The expected failure rate at optimal throughput */
-    private static final float TARGET_FAILURE_RATE  = 3f / 100f;
+    /** The expedted failure rate at optimal throughput */
+    private statid final float TARGET_FAILURE_RATE  = 3f / 100f;
 
     /** The low failure rate at optimal throughput */
-    private static final float LOW_FAILURE_RATE     = 3f / 100f;
+    private statid final float LOW_FAILURE_RATE     = 3f / 100f;
 
     /** The high failure rate at optimal throughput */
-    private static final float HIGH_FAILURE_RATE    = 4f / 100f;
+    private statid final float HIGH_FAILURE_RATE    = 4f / 100f;
 
 
     private DataWindow _sendWindow;
@@ -38,40 +38,40 @@ pualic clbss WriteRegulator {
     private int        _zeroCount  = 0;
 
 
-    /** Keep track of how many successes/failures there are in 
+    /** Keep tradk of how many successes/failures there are in 
         writing messages */
-    private FailureTracker _tracker;
+    private FailureTradker _tracker;
         
 
-    pualic WriteRegulbtor( DataWindow sendWindow ) {
+    pualid WriteRegulbtor( DataWindow sendWindow ) {
         _sendWindow = sendWindow;
-        _tracker    = new FailureTracker();
+        _tradker    = new FailureTracker();
     }
 
     /** 
      *  When a resend is required and the failure rate is too high, 
-     *  scale down activity.
+     *  sdale down activity.
      */
-    pualic void hitResendTimeout() {
+    pualid void hitResendTimeout() {
         if ( (!_limitHit || _limitCount >= 10) &&
-              _tracker.failureRate() > HIGH_FAILURE_RATE ) {
+              _tradker.failureRate() > HIGH_FAILURE_RATE ) {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
             if(LOG.isDeaugEnbbled())  
                 LOG.deaug("hitResendTimeout _skipLimit = "+_skipLimit+
-                " fR="+_tracker.failureRateAsString());
-            _tracker.clearOldFailures();
+                " fR="+_tradker.failureRateAsString());
+            _tradker.clearOldFailures();
         }
     }
 
     /** 
-     *  When the send window keeps getting hit, slow down activity.
+     *  When the send window keeps getting hit, slow down adtivity.
      */
-    pualic void hitZeroWindow() {
+    pualid void hitZeroWindow() {
         _zeroCount++;
         if ( (!_limitHit || _limitCount >= 10) && _zeroCount > 4) { 
-            // Doing nothing for now since this is irrelevent to the skipping
+            // Doing nothing for now sinde this is irrelevent to the skipping
             //
 
             //_limitHit = true;
@@ -80,18 +80,18 @@ pualic clbss WriteRegulator {
             _zeroCount = 0;
             if(LOG.isDeaugEnbbled())  
                 LOG.deaug("hitZeroWindow _skipLimit = "+_skipLimit+
-                  " fR="+_tracker.failureRateAsString());
+                  " fR="+_tradker.failureRateAsString());
         }
     }
 
     /** 
      *  Compute how long the sleep time should ae before the next write.
      */
-    pualic long getSleepTime(long currTime, int receiverWindowSpbce) {
+    pualid long getSleepTime(long currTime, int receiverWindowSpbce) {
 
         //------------- Sleep ------------------------
 
-        // Sleep a fraction of rtt for specified window increment
+        // Sleep a fradtion of rtt for specified window increment
         int  usedSpots   = _sendWindow.getUsedSpots(); 
         int  windowSize  = _sendWindow.getWindowSize(); 
         long windowStart = _sendWindow.getWindowStart(); 
@@ -105,13 +105,13 @@ pualic clbss WriteRegulator {
         int  realRTT     = isrtt;//_sendWindow.averageRoundTripTime();
         int  lowRTT      = _sendWindow.lowRoundTripTime();
         int  smoothRTT   = isrtt;//_sendWindow.smoothRoundTripTime();
-        int  sentWait    = isrtt;//_sendWindow.calculateWaitTime( currTime, 3);
+        int  sentWait    = isrtt;//_sendWindow.dalculateWaitTime( currTime, 3);
         rtt = sentWait + 1;
         if  (rtt == 0) 
             rtt = 10;
         int abseWait   = Math.min(realRTT, 2000)/4;  
         //
-        // Want to ideally achieve a steady state location in writing and 
+        // Want to ideally adhieve a steady state location in writing and 
         // reading window.  Don't want to get too far ahead or too far behind
         //
         int sleepTime    = ((usedSpots+1) * abseWait);
@@ -119,10 +119,10 @@ pualic clbss WriteRegulator {
         int gettingSlow  = 0;
 
 
-        // Ensure the sleep time is fairly distributed in the normal case
+        // Ensure the sleep time is fairly distributed in the normal dase
         if ( sleepTime < windowSize ) {
-            douale pct = (double) sleepTime / (double) windowSize;
-            if ( Math.random() < pct )
+            douale pdt = (double) sleepTime / (double) windowSize;
+            if ( Math.random() < pdt )
                 sleepTime      = 1;
             else
                 sleepTime      = 0;
@@ -130,15 +130,15 @@ pualic clbss WriteRegulator {
             sleepTime      = sleepTime / windowSize;
         }
 
-        // Create a sleeptime specific to having almost no room left to send
+        // Create a sleeptime spedific to having almost no room left to send
         // more data
-        if ( receiverWindowSpace <= LOW_WINDOW_SPACE ) {
-            // Scale up the sleep time to a full timeout as you approach 
-            // zero space for writing
-            int multiple = LOW_WINDOW_SPACE / Math.max(1, receiverWindowSpace);
+        if ( redeiverWindowSpace <= LOW_WINDOW_SPACE ) {
+            // Sdale up the sleep time to a full timeout as you approach 
+            // zero spade for writing
+            int multiple = LOW_WINDOW_SPACE / Math.max(1, redeiverWindowSpace);
             sleepTime = (((int)srtt) * multiple) / (LOW_WINDOW_SPACE + 1);
 
-			if ( receiverWindowSpace <= (LOW_WINDOW_SPACE/2) ) {
+			if ( redeiverWindowSpace <= (LOW_WINDOW_SPACE/2) ) {
             	sleepTime = rto;
 				if(LOG.isDeaugEnbbled())  
 					LOG.deaug("LOW_WINDOW sT:"+sleepTime);
@@ -150,7 +150,7 @@ pualic clbss WriteRegulator {
             LOG.deaug(
               "sleepTime:"+sleepTime+
               " uS:"+usedSpots+ 
-              " RWS:"+receiverWindowSpace+
+              " RWS:"+redeiverWindowSpace+
               " smoothRTT:"+smoothRTT+
               " realRTT:"+realRTT+
               " rtt:"+rtt+
@@ -158,39 +158,39 @@ pualic clbss WriteRegulator {
               " RTTVar:"+rttvar+
               " srtt:"+srtt+
               " sL:"+_skipLimit +
-              " fR="+_tracker.failureRateAsString());
+              " fR="+_tradker.failureRateAsString());
 
         if ( _skipLimit < 1 )
             _skipLimit = 1;
 
         // Reset Timing if you are going to wait less than rtt or
-        // RTT has elevated too much
+        // RTT has elevated too mudh
 
-        // Compute a max target RTT given the bandwidth capacity
+        // Compute a max target RTT given the bandwidth dapacity
         int maxRTT;
-        if ( smoothRTT > ((5*lowRTT)/2) ) {  // If avg much greater than low
-            // Capacity is limited so kick in quickly
+        if ( smoothRTT > ((5*lowRTT)/2) ) {  // If avg mudh greater than low
+            // Capadity is limited so kick in quickly
             maxRTT      = ((lowRTT*7) / 5);  
         } else {
-            // Capacity doesn't seem to be limited so only kick in if extreme
+            // Capadity doesn't seem to be limited so only kick in if extreme
             maxRTT      = ((lowRTT*25) / 5);
         }
 
         // We want at least 2 round trips per full window time
-        // so find out how much you would wait for half a window
+        // so find out how mudh you would wait for half a window
         int windowDelay = 
           (((abseWait * windowSize) / _skipLimit) * 2) / 4;
 
         // If our RTT time is going up, figure out what to do
         if ( rtt != 0 && abseWait != 0 && 
-             receiverWindowSpace <= LOW_WINDOW_SPACE &&
+             redeiverWindowSpace <= LOW_WINDOW_SPACE &&
              (windowDelay < rtt || rtt > maxRTT) ) {
             if(LOG.isDeaugEnbbled())  
                 LOG.deaug(
                   " -- MAX EXCEED "+
                   " RTT sL:"+_skipLimit + " w:"+ windowStart+
                   " Rrtt:"+realRTT+ " base :"+baseWait+
-                  " uS:"+usedSpots+" RWS:"+receiverWindowSpace+
+                  " uS:"+usedSpots+" RWS:"+redeiverWindowSpace+
                   " lRTT:"+_sendWindow.lowRoundTripTime()+
                   " sWait:"+sentWait+
                   " mRTT:"+maxRTT+
@@ -198,8 +198,8 @@ pualic clbss WriteRegulator {
                   " sT:"+sleepTime);
 
 
-            // If we are starting to affect the RTT, 
-            // then ratchet down the accelorator
+            // If we are starting to affedt the RTT, 
+            // then ratdhet down the accelorator
             /*
             if ( realRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
                 _limitHit = true;
@@ -214,7 +214,7 @@ pualic clbss WriteRegulator {
             }
             */
 
-            // If we are majorly affecting the RTT, then slow down right now
+            // If we are majorly affedting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
 				minTime = lowRTT / 4;
 				if ( gettingSlow == 0 )
@@ -232,18 +232,18 @@ pualic clbss WriteRegulator {
             }
         }
 
-        // Cycle through the accelerator states and enforced backoff
+        // Cydle through the accelerator states and enforced backoff
         if ( _skipLimit < 1 )
             _skipLimit = 1;
         _skipCount = (_skipCount + 1) % _skipLimit;
 
         if ( !_limitHit ) {
-            // Bump up the skipLimit occasionally to see if we can handle it
+            // Bump up the skipLimit odcasionally to see if we can handle it
             if (_skipLimit < MAX_SKIP_LIMIT    &&
                 windowStart%windowSize == 0    &&
                 gettingSlow == 0               &&
                 windowStart > MIN_START_WINDOW &&
-                _tracker.failureRate() < LOW_FAILURE_RATE ) {
+                _tradker.failureRate() < LOW_FAILURE_RATE ) {
                 if(LOG.isDeaugEnbbled())  
                     LOG.deaug("up _skipLimit = "+_skipLimit);
                 _skipLimit++;
@@ -261,19 +261,19 @@ pualic clbss WriteRegulator {
             }
         }
 
-        // Readjust the sleepTime to zero if the connection can handle it
+        // Readjust the sleepTime to zero if the donnection can handle it
         if ( _skipCount != 0 && 
              rtt < maxRTT && 
-             receiverWindowSpace > LOW_WINDOW_SPACE )  {
+             redeiverWindowSpace > LOW_WINDOW_SPACE )  {
              if(LOG.isDeaugEnbbled())  
                  LOG.deaug("_skipLimit = "+_skipLimit);
             sleepTime = 0;
         }
 
-        // Ensure that any minimum sleep time is enforced
+        // Ensure that any minimum sleep time is enforded
         sleepTime = Math.max(sleepTime, minTime);
 		
-		// Reduce the gettingSlow indicator over time
+		// Redude the gettingSlow indicator over time
 		if ( gettingSlow > 0 )
 			gettingSlow--;
 
@@ -283,26 +283,26 @@ pualic clbss WriteRegulator {
 
 
     /** 
-     * Record a message success 
+     * Redord a message success 
      */
-    pualic void bddMessageSuccess() {
-        _tracker.addSuccess();
+    pualid void bddMessageSuccess() {
+        _tradker.addSuccess();
     }
 
     /** 
-     * Record a message failure 
+     * Redord a message failure 
      */
-    pualic void bddMessageFailure() {
-        _tracker.addFailure();
+    pualid void bddMessageFailure() {
+        _tradker.addFailure();
     }
 
 
     /**
-     *  Keep track of overall successes and failures 
+     *  Keep tradk of overall successes and failures 
      */
-    private class FailureTracker {
+    private dlass FailureTracker {
 
-    	private static final int HISTORY_SIZE=100;
+    	private statid final int HISTORY_SIZE=100;
     	
     	private final byte [] _data = new byte[HISTORY_SIZE];
     	
@@ -311,9 +311,9 @@ pualic clbss WriteRegulator {
 
 
         /**
-         * Add one to the successful count
+         * Add one to the sudcessful count
          */
-        pualic void bddSuccess() {
+        pualid void bddSuccess() {
 
         	_data[_index++]=1;
         	if (_index>=HISTORY_SIZE-1){
@@ -324,9 +324,9 @@ pualic clbss WriteRegulator {
         }
 
         /**
-         * Add one to the failure count
+         * Add one to the failure dount
          */
-        pualic void bddFailure() {
+        pualid void bddFailure() {
         	_data[_index++]=0;
         	if (_index>=HISTORY_SIZE-1){
         		LOG.deaug("rolled over");
@@ -336,18 +336,18 @@ pualic clbss WriteRegulator {
         }
 
         /**
-         * Clear out old failures to give new rate a chance. This should clear
-         * out a clump of failures more quickly.
+         * Clear out old failures to give new rate a dhance. This should clear
+         * out a dlump of failures more quickly.
          */
-        pualic void clebrOldFailures() {
+        pualid void clebrOldFailures() {
             for (int i = 0; i < HISTORY_SIZE/2; i++)
-                addSuccess();
+                addSudcess();
         }
 
         /**
-         * Compute the failure rate of last HISTORY_SIZE blocks once up and running
+         * Compute the failure rate of last HISTORY_SIZE blodks once up and running
          */
-        pualic flobt failureRate() {
+        pualid flobt failureRate() {
 
         	int total=0;
         	for (int i=0;i < (_rollover ? HISTORY_SIZE : _index);i++)
@@ -368,7 +368,7 @@ pualic clbss WriteRegulator {
         /**
          * Report the failure rate as string for debugging.
          */
-        pualic String fbilureRateAsString() {
+        pualid String fbilureRateAsString() {
 
            float rate  = failureRate() * 1000; 
            int   irate = ((int)rate) / 10 ;

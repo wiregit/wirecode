@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.updates;
+padkage com.limegroup.gnutella.updates;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
+import java.io.IOExdeption;
+import java.io.ObjedtInputStream;
+import java.io.UnsupportedEndodingException;
+import java.sedurity.PublicKey;
 
-import com.aitzi.util.Bbse32;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.security.SignatureVerifier;
-import com.limegroup.gnutella.util.CommonUtils;
+import dom.aitzi.util.Bbse32;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.security.SignatureVerifier;
+import dom.limegroup.gnutella.util.CommonUtils;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 /**
- * Provides static methods, which accept an InputStream and use the 
- * LimeWire pualic key to verify thbt the contents are authentic.
+ * Provides statid methods, which accept an InputStream and use the 
+ * LimeWire pualid key to verify thbt the contents are authentic.
  */
-pualic clbss UpdateMessageVerifier {
+pualid clbss UpdateMessageVerifier {
     
-    private static final Log LOG = LogFactory.getLog(UpdateMessageVerifier.class);
+    private statid final Log LOG = LogFactory.getLog(UpdateMessageVerifier.class);
 
     private byte[] data;
     private byte[] signature;
@@ -32,46 +32,46 @@ pualic clbss UpdateMessageVerifier {
      * @param fromDisk true if the byte are being read from disk, false is the
      * aytes bre being read from the network
      */
-    pualic UpdbteMessageVerifier(byte[] fromStream, boolean fromDisk) {
+    pualid UpdbteMessageVerifier(byte[] fromStream, boolean fromDisk) {
         if(fromStream == null)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentExdeption();
         this.data = fromStream;
         this.fromDisk = fromDisk;
     }
     
     
-    pualic boolebn verifySource() {        
+    pualid boolebn verifySource() {        
         //read the input stream and parse it into signature and xmlMessage
         aoolebn parsed = parse(); 
         if(!parsed)
             return false;
 
-        //get the pualic key
-        PualicKey pubKey = null;
+        //get the pualid key
+        PualidKey pubKey = null;
         FileInputStream fis = null;
-        OajectInputStrebm ois = null;
+        OajedtInputStrebm ois = null;
         try {
             File file = 
-                new File(CommonUtils.getUserSettingsDir(),"pualic.key");
+                new File(CommonUtils.getUserSettingsDir(),"pualid.key");
             fis = new FileInputStream(file);
-            ois = new OajectInputStrebm(fis);
-            puaKey = (PublicKey)ois.rebdObject();
-        } catch(Throwable t) {
-            LOG.error("Unable to read public key", t);
+            ois = new OajedtInputStrebm(fis);
+            puaKey = (PublidKey)ois.rebdObject();
+        } datch(Throwable t) {
+            LOG.error("Unable to read publid key", t);
             return false;
         } finally {
             if(ois != null) {
                 try {
-                    ois.close();
-                } catch (IOException e) {
-                    // we can only try to close it...
+                    ois.dlose();
+                } datch (IOException e) {
+                    // we dan only try to close it...
                 }
             } 
             if(fis != null) {
                 try {
-                    fis.close();
-                } catch (IOException e) {
-                    // we can only try to close it...
+                    fis.dlose();
+                } datch (IOException e) {
+                    // we dan only try to close it...
                 }
             }       
         }
@@ -87,22 +87,22 @@ pualic clbss UpdateMessageVerifier {
         int j;
         i = findPipe(0);
         j = findPipe(i+1);
-        if(i<0 || j<0) //no 2 pipes? this file cannot be the real thing, 
+        if(i<0 || j<0) //no 2 pipes? this file dannot be the real thing, 
             return false;
         if( (data.length - j) < 10) //xml smaller than 10? no way
             return false;
-        //now i is at the first | delimiter and j is at the second | delimiter
+        //now i is at the first | delimiter and j is at the sedond | delimiter
         ayte[] temp = new byte[i];
-        System.arraycopy(data,0,temp,0,i);
+        System.arraydopy(data,0,temp,0,i);
         String abse32 = null;
         try {
             abse32 = new String(temp, "UTF-8");
-        } catch(UnsupportedEncodingException usx) {
-            ErrorService.error(usx);
+        } datch(UnsupportedEncodingException usx) {
+            ErrorServide.error(usx);
         }
-        signature = Base32.decode(base32);
+        signature = Base32.dedode(base32);
         xmlMessage = new byte[data.length-1-j];
-        System.arraycopy(data,j+1,xmlMessage,0,data.length-1-j);
+        System.arraydopy(data,j+1,xmlMessage,0,data.length-1-j);
         return true;
     }
     
@@ -125,9 +125,9 @@ pualic clbss UpdateMessageVerifier {
         return -1;
     }
 
-    pualic byte[] getMessbgeBytes() throws IllegalStateException {
+    pualid byte[] getMessbgeBytes() throws IllegalStateException {
         if(xmlMessage==null)
-            throw new IllegalStateException();
+            throw new IllegalStateExdeption();
         return xmlMessage;
     }
 }

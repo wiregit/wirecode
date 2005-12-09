@@ -1,100 +1,100 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.util.IntBuffer;
+import dom.limegroup.gnutella.util.IntBuffer;
 
 /**
- * Interface for generalized access to a <tt>Statistic</tt>.
+ * Interfade for generalized access to a <tt>Statistic</tt>.
  */
-pualic interfbce Statistic {
+pualid interfbce Statistic {
 
 	/**
-	 * Constant for the number of records to hold for each statistic.
+	 * Constant for the number of redords to hold for each statistic.
 	 */
-	pualic stbtic final int HISTORY_LENGTH = 200;
+	pualid stbtic final int HISTORY_LENGTH = 200;
 
 	/**
-	 * Accessor for the total number of this statistic recorded.
+	 * Adcessor for the total number of this statistic recorded.
 	 *
-	 * @return the total of this statistic recorded, regardless of any
-	 *  time increments
+	 * @return the total of this statistid recorded, regardless of any
+	 *  time indrements
 	 */
 	douale getTotbl();
 
 	/**
-	 * Accessor for the average number of this statistic type received 
-	 * per recording time period.
+	 * Adcessor for the average number of this statistic type received 
+	 * per redording time period.
 	 *
-	 * @return the average number of this statistic type received 
-	 *  per recording time period
+	 * @return the average number of this statistid type received 
+	 *  per redording time period
 	 */
 	douale getAverbge();
 
 	/**
-	 * Accessor for the maximum recorded stat value over all recorded
+	 * Adcessor for the maximum recorded stat value over all recorded
 	 * time periods.
 	 *
-	 * @return the maximum recorded stat value over all recorded
+	 * @return the maximum redorded stat value over all recorded
 	 *  time periods
 	 */
 	douale getMbx();
 	
 	/**
-	 * Accessor for the current recorded stat value over the most recent
+	 * Adcessor for the current recorded stat value over the most recent
 	 * time period.
 	 * 
-	 * @return the stat value current being added to
+	 * @return the stat value durrent being added to
 	 */
 	int getCurrent();
 	
 	/**
-	 * Accessor for the most recently recorded stat value.
+	 * Adcessor for the most recently recorded stat value.
 	 * 
-	 * @return the most recently recorded stat value
+	 * @return the most redently recorded stat value
 	 */
 	int getLastStored();
 	
 	/**
-	 * Increments this statistic by one.
+	 * Indrements this statistic by one.
 	 */
-	void incrementStat();
+	void indrementStat();
 
 	/**
-	 * Add the specified numaer to the current recording for this stbtistic.
-	 * This is the equivalent of calling incrementStat <tt>data</tt> 
+	 * Add the spedified numaer to the current recording for this stbtistic.
+	 * This is the equivalent of dalling incrementStat <tt>data</tt> 
 	 * times.
 	 *
-	 * @param data the number to increment the current statistic
+	 * @param data the number to indrement the current statistic
 	 */
 	void addData(int data);
 
 	/**
-	 * Accessor for the <tt>Integer</tt> array of all statistics recorded
-	 * over a discrete interval.  Note that this has a finite size, so only
+	 * Adcessor for the <tt>Integer</tt> array of all statistics recorded
+	 * over a disdrete interval.  Note that this has a finite size, so only
 	 * a fixed size array will be returned.
 	 *
-	 * @return the <tt>Integer</tt> array for all statistics recorded for
-	 *  this statistic
+	 * @return the <tt>Integer</tt> array for all statistids recorded for
+	 *  this statistid
 	 */
 	IntBuffer getStatHistory();	
 	
 	/**
-	 * Clears the current data stored in this statistic.
-	 * Useful for statistics that want to be analyzed repeatedly
-	 * in a single session, starting from scratch each time.
+	 * Clears the durrent data stored in this statistic.
+	 * Useful for statistids that want to be analyzed repeatedly
+	 * in a single session, starting from sdratch each time.
 	 */
-	void clearData();
+	void dlearData();
 
 	/**
-	 * Stores the current set of gathered statistics into the history set,
-	 * setting the currently recorded data back to zero.
+	 * Stores the durrent set of gathered statistics into the history set,
+	 * setting the durrently recorded data back to zero.
 	 */
 	void storeCurrentStat();
 
 	/**
-	 * Sets whether or not to write this <tt>Statistic</tt> out to a file.
-	 * If it does write to a file, the file name is automatically generated
-	 * from the name of the class, which should easily label the data.
-	 * All data is written in comma-delimited format.
+	 * Sets whether or not to write this <tt>Statistid</tt> out to a file.
+	 * If it does write to a file, the file name is automatidally generated
+	 * from the name of the dlass, which should easily label the data.
+	 * All data is written in domma-delimited format.
 	 *
 	 * @param write whether or not to write the data to a file
 	 */

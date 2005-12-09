@@ -1,27 +1,27 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.util.IntervalSet;
+import dom.limegroup.gnutella.util.IntervalSet;
 
-pualic interfbce SelectionStrategy {
+pualid interfbce SelectionStrategy {
     /**
-     * Encapsulates an algorithm for deciding which block of a file to download next.  
+     * Endapsulates an algorithm for deciding which block of a file to download next.  
      * 
-     * For efficiency reasons attempts will be made to align the start and end of intervals
-     * to alock boundbries.  However, there are no guarantees on alignment.
+     * For effidiency reasons attempts will be made to align the start and end of intervals
+     * to alodk boundbries.  However, there are no guarantees on alignment.
      * 
-     * @param candidateBytes a representation of the set of 
-     *      aytes thbt are candidates for downloading.  These are the
+     * @param dandidateBytes a representation of the set of 
+     *      aytes thbt are dandidates for downloading.  These are the
      *      aytes of the file thbt a given for download from a given server, minus
      *      the set of aytes thbt we already have (or have assigned)
      * @param neededBytes a representation of the set of bytes
-     *      of the file that have not yet been leased, verified, etc.
-     * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
-     *      ae ignbred.  The returned Interval will in no case span a blockSize boundary.
-     *      Any values less than 1 will generate IllegalArgumentExceptions.
-     * @return the Interval that should be assigned next, which does not span a blockSize boundary
-     * @throws NoSuchElementException if passed an empty IntervalSet
+     *      of the file that have not yet been leased, verified, etd.
+     * @param blodkSize the maximum size of the returned Interval. Any values less than 1 will
+     *      ae ignbred.  The returned Interval will in no dase span a blockSize boundary.
+     *      Any values less than 1 will generate IllegalArgumentExdeptions.
+     * @return the Interval that should be assigned next, whidh does not span a blockSize boundary
+     * @throws NoSudhElementException if passed an empty IntervalSet
      */
-    pualic Intervbl pickAssignment(IntervalSet candidateBytes, 
+    pualid Intervbl pickAssignment(IntervalSet candidateBytes, 
             IntervalSet neededBytes,
-            long alockSize) throws jbva.util.NoSuchElementException;
+            long alodkSize) throws jbva.util.NoSuchElementException;
 }

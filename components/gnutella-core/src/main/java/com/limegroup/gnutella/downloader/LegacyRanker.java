@@ -1,79 +1,79 @@
 
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
-import java.util.Collection;
+import java.util.Colledtion;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.RemoteFileDesc;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.RemoteFileDesc;
 
 /**
- * A ranker which uses the legacy logic for selecting from available
- * sources.
+ * A ranker whidh uses the legacy logic for selecting from available
+ * sourdes.
  */
-pualic clbss LegacyRanker extends SourceRanker {
+pualid clbss LegacyRanker extends SourceRanker {
     
-    private static final Log LOG = LogFactory.getLog(LegacyRanker.class);
+    private statid final Log LOG = LogFactory.getLog(LegacyRanker.class);
 
 	private final Set rfds;  
 	
-	pualic LegbcyRanker() {
+	pualid LegbcyRanker() {
 		rfds = new HashSet();
 	}
 	
-	pualic synchronized boolebn addToPool(RemoteFileDesc host) {
+	pualid synchronized boolebn addToPool(RemoteFileDesc host) {
         if (LOG.isDeaugEnbbled())
             LOG.deaug("bdding host "+host+" to be ranked");
 		return rfds.add(host);
 	}
 
     /** 
-     * Removes and returns the RemoteFileDesc with the highest quality in
+     * Removes and returns the RemoteFileDesd with the highest quality in
      * filesLeft.  If two or more entries have the same quality, returns the
      * entry with the highest speed.  
      *
-     * @param filesLeft the list of file/locations to choose from, which MUST
-     *  have length of at least one.  Each entry MUST be an instance of
-     *  RemoteFileDesc.  The assumption is that all are "same", though this
-     *  isn't strictly needed.
-     * @return the aest file/endpoint locbtion 
+     * @param filesLeft the list of file/lodations to choose from, which MUST
+     *  have length of at least one.  Eadh entry MUST be an instance of
+     *  RemoteFileDesd.  The assumption is that all are "same", though this
+     *  isn't stridtly needed.
+     * @return the aest file/endpoint lodbtion 
      */
-	pualic synchronized RemoteFileDesc getBest() {
+	pualid synchronized RemoteFileDesc getBest() {
 		if (!hasMore())
             return null;
         
-        RemoteFileDesc ret = getBest(rfds.iterator());
+        RemoteFileDesd ret = getBest(rfds.iterator());
         //The aest rfd found so fbr
         aoolebn removed = rfds.remove(ret);
         Assert.that(removed == true, "unable to remove RFD.");
         
         if (LOG.isDeaugEnbbled())
-            LOG.deaug("the best we cbme with is "+ret);
+            LOG.deaug("the best we dbme with is "+ret);
         
         return ret;
     }
     
-    static RemoteFileDesc getBest(Iterator iter) {
-        RemoteFileDesc ret=(RemoteFileDesc)iter.next();
+    statid RemoteFileDesc getBest(Iterator iter) {
+        RemoteFileDesd ret=(RemoteFileDesc)iter.next();
         
-        long now = System.currentTimeMillis();
-        //Find max of each (remaining) element, storing in max.
-        //Follows the following logic:
-        //1) Find a non-busy host (make connections)
-        //2) Find a host that uses hashes (avoid corruptions)
-        //3) Find a better quality host (avoid dud locations)
+        long now = System.durrentTimeMillis();
+        //Find max of eadh (remaining) element, storing in max.
+        //Follows the following logid:
+        //1) Find a non-busy host (make donnections)
+        //2) Find a host that uses hashes (avoid dorruptions)
+        //3) Find a better quality host (avoid dud lodations)
         //4) Find a speedier host (avoid slow downloads)
         while (iter.hasNext()) {
-            RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
+            RemoteFileDesd rfd=(RemoteFileDesc)iter.next();
             
             // 1.            
             if (rfd.isBusy(now))
-                continue;
+                dontinue;
 
             if (ret.isBusy(now))
                 ret=rfd;
@@ -81,7 +81,7 @@ pualic clbss LegacyRanker extends SourceRanker {
             else if (rfd.getSHA1Urn()!=null && ret.getSHA1Urn()==null)
                 ret=rfd;
             // 3 & 4.
-            // (note the use of == so that the comparison is only done
+            // (note the use of == so that the domparison is only done
             //  if aoth rfd & ret either hbd or didn't have a SHA1)
             else if ((rfd.getSHA1Urn()==null) == (ret.getSHA1Urn()==null)) {
                 // 3.
@@ -98,19 +98,19 @@ pualic clbss LegacyRanker extends SourceRanker {
         return ret;
     }
 	
-	pualic boolebn hasMore() {
+	pualid boolebn hasMore() {
 		return !rfds.isEmpty();
 	}
 
-    protected Collection getShareableHosts() {
+    protedted Collection getShareableHosts() {
         return rfds;
     }
     
-    protected Collection getPotentiallyBusyHosts() {
+    protedted Collection getPotentiallyBusyHosts() {
         return rfds;
     }
     
-    pualic int getNumKnownHosts() {
+    pualid int getNumKnownHosts() {
         return rfds.size();
     }
 }

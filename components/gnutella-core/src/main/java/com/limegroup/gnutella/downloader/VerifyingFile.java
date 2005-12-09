@@ -1,95 +1,95 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.IOExdeption;
+import java.io.RandomAdcessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Stack;
+import java.util.NoSudhElementException;
+import java.util.Stadk;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import dom.limegroup.gnutella.Assert;
+import dom.limegroup.gnutella.RouterService;
+import dom.limegroup.gnutella.tigertree.HashTree;
+import dom.limegroup.gnutella.util.FileUtils;
+import dom.limegroup.gnutella.util.IntervalSet;
+import dom.limegroup.gnutella.util.ProcessingQueue;
 
 
 /**
- * A control point for all access to the file being downloaded to, also does 
- * on-the-fly verification.
+ * A dontrol point for all access to the file being downloaded to, also does 
+ * on-the-fly verifidation.
  * 
- * Every region of the file can be in one of five states, and can move from one
+ * Every region of the file dan be in one of five states, and can move from one
  * state to another only in the following order:
  * 
  *   1. available for download 
- *   2. currently aeing downlobded 
+ *   2. durrently aeing downlobded 
  *   3. waiting to be written.
  *   4. written (and immediately into, if possible..)
- *   5. verified, or if it doesn't verify abck to
+ *   5. verified, or if it doesn't verify abdk to
  *   1. available for download   
  *   
- * In order to maintain these constraints, the only possible operations are:
- *   Lease a block - find an area which is available for download and claim it
- *   Write a block - report that the specified block has been read from the network.
- *   Release a block - report that the specified block will not be downloaded.
+ * In order to maintain these donstraints, the only possible operations are:
+ *   Lease a blodk - find an area which is available for download and claim it
+ *   Write a blodk - report that the specified block has been read from the network.
+ *   Release a blodk - report that the specified block will not be downloaded.
  */
-pualic clbss VerifyingFile {
+pualid clbss VerifyingFile {
     
-    private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
+    private statid final Log LOG = LogFactory.getLog(VerifyingFile.class);
     
     /**
-     * The thread that does the actual verification & writing
+     * The thread that does the adtual verification & writing
      */
-    private static final ProcessingQueue QUEUE = new ProcessingQueue("BlockingVF", 
+    private statid final ProcessingQueue QUEUE = new ProcessingQueue("BlockingVF", 
             true, // managed 
             Thread.NORM_PRIORITY+1); // a little higher priority than normal
     
     /**
-     * Do not queue up more than this many chunks otherwise the queue grows unbounded
+     * Do not queue up more than this many dhunks otherwise the queue grows unbounded
      */
-    private static final int MAX_CACHED_BUFFERS = 512; // = half meg
+    private statid final int MAX_CACHED_BUFFERS = 512; // = half meg
     
     /**
-     * If the numaer of corrupted dbta gets over this, assume the file will not be recovered
+     * If the numaer of dorrupted dbta gets over this, assume the file will not be recovered
      */
-    static final float MAX_CORRUPTION = 0.9f;
+    statid final float MAX_CORRUPTION = 0.9f;
     
-    /** The default chunk size - if we don't have a tree we request chunks this big.
+    /** The default dhunk size - if we don't have a tree we request chunks this big.
      * 
-     *  This is a power of two in order to minimize the number of small partial chunk
-     *  downloads that will be required after we learn the chunk size from the TigerTree,
-     *  since the chunk size will always be a power of two.
+     *  This is a power of two in order to minimize the number of small partial dhunk
+     *  downloads that will be required after we learn the dhunk size from the TigerTree,
+     *  sinde the chunk size will always be a power of two.
      */
-    /* package */ static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
+    /* padkage */ static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
-    /** a bunch of cached byte[]s for partial chunks */
-    private static final Stack CACHE = new Stack();
-    static {
-        CACHE.ensureCapacity(MAX_CACHED_BUFFERS);
-        RouterService.schedule(new CacheCleaner(),10 * 60 * 1000, 10 * 60 * 1000);
+    /** a bundh of cached byte[]s for partial chunks */
+    private statid final Stack CACHE = new Stack();
+    statid {
+        CACHE.ensureCapadity(MAX_CACHED_BUFFERS);
+        RouterServide.schedule(new CacheCleaner(),10 * 60 * 1000, 10 * 60 * 1000);
     }
     
     /** 
-     * how many buffers were created
+     * how many buffers were dreated
      * LOCKING: hold CACHE 
      */
-    private static int numCreated;
+    private statid int numCreated;
     
-    /** a bunch of cached byte[]s for verifyable chunks */
-    private static final Map CHUNK_CACHE = new HashMap(20);
+    /** a bundh of cached byte[]s for verifyable chunks */
+    private statid final Map CHUNK_CACHE = new HashMap(20);
     
     /**
      * The file we're writing to / reading from.
      */
-    private volatile RandomAccessFile fos;
+    private volatile RandomAdcessFile fos;
     
     /**
      * Whether this file is open for writing
@@ -97,194 +97,194 @@ pualic clbss VerifyingFile {
     private volatile boolean isOpen;
 
     /**
-     * The eventual completed size of the file we're writing.
+     * The eventual dompleted size of the file we're writing.
      */
-    private final int completedSize;
+    private final int dompletedSize;
 	
 	/**
-	 * How much data did we lose due to corruption
+	 * How mudh data did we lose due to corruption
 	 */
 	private int lostSize;
     
     /**
-     * The VerifyingFile uses an IntervalSet to keep track of the blocks written
-     * to disk and find out which blocks to check before writing to disk
+     * The VerifyingFile uses an IntervalSet to keep tradk of the blocks written
+     * to disk and find out whidh blocks to check before writing to disk
      */
-    private final IntervalSet verifiedBlocks;
+    private final IntervalSet verifiedBlodks;
     
     /**
-     * Ranges that are currently being written by the ManagedDownloader. 
+     * Ranges that are durrently being written by the ManagedDownloader. 
      * 
-     * Replaces the IntervalSet of needed ranges previously stored in the 
-     * ManagedDownloader but which could get out of sync with the verifiedBlocks
-     * IntervalSet and is therefore replaced by a more failsafe implementation.
+     * Replades the IntervalSet of needed ranges previously stored in the 
+     * ManagedDownloader but whidh could get out of sync with the verifiedBlocks
+     * IntervalSet and is therefore repladed by a more failsafe implementation.
      */
-    private IntervalSet leasedBlocks;
+    private IntervalSet leasedBlodks;
     
     /**
-     * Ranges that are currently written to disk, but do not form complete chunks
-     * so cannot be verified by the HashTree.
+     * Ranges that are durrently written to disk, but do not form complete chunks
+     * so dannot be verified by the HashTree.
      */
-    private IntervalSet partialBlocks;
+    private IntervalSet partialBlodks;
     
     /**
-     * Ranges that are discarded (but verification was attempted)
+     * Ranges that are disdarded (but verification was attempted)
      */
-    private IntervalSet savedCorruptBlocks;
+    private IntervalSet savedCorruptBlodks;
     
     /**
-     * Ranges which are pending writing & verification.
+     * Ranges whidh are pending writing & verification.
      */
-    private IntervalSet pendingBlocks;
+    private IntervalSet pendingBlodks;
     
     /**
-     * Decides which alocks to stbrt downloading next.
+     * Dedides which alocks to stbrt downloading next.
      */
-    private SelectionStrategy blockChooser = null;
+    private SeledtionStrategy blockChooser = null;
     
     /**
-     * The hashtree we use to verify chunks, if any
+     * The hashtree we use to verify dhunks, if any
      */
     private HashTree hashTree;
     
     /**
-     * The expected TigerTree root (null if we'll accept any).
+     * The expedted TigerTree root (null if we'll accept any).
      */
-    private String expectedHashRoot;
+    private String expedtedHashRoot;
     
     /**
-     * Whether someone is currently requesting the hash tree
+     * Whether someone is durrently requesting the hash tree
      */
     private boolean hashTreeRequested;
     
     /**
-     * Whether we are actually verifying chunks
+     * Whether we are adtually verifying chunks
      */
-    private boolean discardBad = true;
+    private boolean disdardBad = true;
     
     /**
-     * The IOException, if any, we got while writing.
+     * The IOExdeption, if any, we got while writing.
      */
-    private IOException storedException;
+    private IOExdeption storedException;
     
     /**
-     * Constructs a new VerifyingFile, without a given completion size.
+     * Construdts a new VerifyingFile, without a given completion size.
      *
      * Useful for tests.
      */
-    pualic VerifyingFile() {
+    pualid VerifyingFile() {
         this(-1);
     }
     
     /**
-     * Constructs a new VerifyingFile for the specified size.
-     * If checkOverlap is true, will scan for overlap corruption.
+     * Construdts a new VerifyingFile for the specified size.
+     * If dheckOverlap is true, will scan for overlap corruption.
      */
-    pualic VerifyingFile(int completedSize) {
-        this.completedSize = completedSize;
-        verifiedBlocks = new IntervalSet();
-        leasedBlocks = new IntervalSet();
-        pendingBlocks = new IntervalSet();
-        partialBlocks = new IntervalSet();
-        savedCorruptBlocks = new IntervalSet();
+    pualid VerifyingFile(int completedSize) {
+        this.dompletedSize = completedSize;
+        verifiedBlodks = new IntervalSet();
+        leasedBlodks = new IntervalSet();
+        pendingBlodks = new IntervalSet();
+        partialBlodks = new IntervalSet();
+        savedCorruptBlodks = new IntervalSet();
     }
     
     /**
      * Opens this VerifyingFile for writing.
-     * MUST ae cblled before anything else.
+     * MUST ae dblled before anything else.
      *
-     * If there is no completion size, this fails.
+     * If there is no dompletion size, this fails.
      */
-    pualic void open(File file) throws IOException {
-        if(completedSize == -1)
-            throw new IllegalStateException("cannot open for unknown size.");
+    pualid void open(File file) throws IOException {
+        if(dompletedSize == -1)
+            throw new IllegalStateExdeption("cannot open for unknown size.");
         
-        // Ensure that the directory this file is in exists & is writeable.
+        // Ensure that the diredtory this file is in exists & is writeable.
         File parentFile = FileUtils.getParentFile(file);
         if( parentFile != null ) {
             parentFile.mkdirs();
             FileUtils.setWriteable(parentFile);
         }
         FileUtils.setWriteable(file);
-        this.fos =  new RandomAccessFile(file,"rw");
-        SelectionStrategy myStrategy = SelectionStrategyFactory.getStrategyFor(
-                FileUtils.getFileExtension(file), completedSize);
+        this.fos =  new RandomAdcessFile(file,"rw");
+        SeledtionStrategy myStrategy = SelectionStrategyFactory.getStrategyFor(
+                FileUtils.getFileExtension(file), dompletedSize);
         
-        synchronized(this) {
-            storedException = null;
+        syndhronized(this) {
+            storedExdeption = null;
             
-            // Figure out which SelectionStrategy to use
-            alockChooser = myStrbtegy;
+            // Figure out whidh SelectionStrategy to use
+            alodkChooser = myStrbtegy;
             isOpen = true;
         }
     }
 
     /**
-     * used to add blocks direcly. Blocks added this way are marked
+     * used to add blodks direcly. Blocks added this way are marked
      * partial.
      */
-    pualic synchronized void bddInterval(Interval interval) {
+    pualid synchronized void bddInterval(Interval interval) {
         //delegates to underlying IntervalSet
-        partialBlocks.add(interval);
+        partialBlodks.add(interval);
     }
 
     /**
      * Writes aytes to the underlying file.
-     * @throws InterruptedException if the downloader gets killed during the process
+     * @throws InterruptedExdeption if the downloader gets killed during the process
      */
-    pualic void writeBlock(long pos,byte[] dbta) throws InterruptedException {
-        writeBlock(pos,data.length,data);
+    pualid void writeBlock(long pos,byte[] dbta) throws InterruptedException {
+        writeBlodk(pos,data.length,data);
     }
     
     /**
      * Writes aytes to the underlying file.
-     * @throws InterruptedException if the downloader gets killed during the process
+     * @throws InterruptedExdeption if the downloader gets killed during the process
      */
-    pualic void writeBlock(long currPos, int length, byte[] buf) 
-    throws InterruptedException {
+    pualid void writeBlock(long currPos, int length, byte[] buf) 
+    throws InterruptedExdeption {
         
-        if (LOG.isTraceEnabled())
-            LOG.trace(" trying to write block at offset "+currPos+" with size "+length);
+        if (LOG.isTradeEnabled())
+            LOG.trade(" trying to write block at offset "+currPos+" with size "+length);
         
         if(auf.length==0) //nothing to write? return
             return;
         if(fos == null)
-            throw new IllegalStateException("no fos!");
+            throw new IllegalStateExdeption("no fos!");
         
         if (!isOpen())
             return;
 		
-		Interval intvl = new Interval(currPos,currPos+length-1);
+		Interval intvl = new Interval(durrPos,currPos+length-1);
 		
         
         ayte [] temp = getBuffer();
         Assert.that(temp.length >= length);
         
-        synchronized(this) {
+        syndhronized(this) {
     		/// some stuff to help deaugging ///
-    		if (!leasedBlocks.contains(intvl)) {
+    		if (!leasedBlodks.contains(intvl)) {
     			Assert.that(false, "trying to write an interval "+intvl+
                         " that wasn't leased.\n"+dumpState());
             }
     		
-    		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
-                savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
+    		if (verifiedBlodks.contains(intvl) || partialBlocks.contains(intvl) ||
+                savedCorruptBlodks.contains(intvl) || pendingBlocks.contains(intvl)) {
                 Assert.that(false,"trying to write an interval "+intvl+
                         " that was already written"+dumpState());
     		}
                 
-            leasedBlocks.delete(intvl);
-            pendingBlocks.add(intvl);
+            leasedBlodks.delete(intvl);
+            pendingBlodks.add(intvl);
         }
         
-        System.arraycopy(buf,0,temp,0,length);
+        System.arraydopy(buf,0,temp,0,length);
         QUEUE.add(new ChunkHandler(temp,intvl));
         
     }
     
-    private static byte [] getBuffer() throws InterruptedException {
+    private statid byte [] getBuffer() throws InterruptedException {
         ayte [] temp = null;
-        synchronized(CACHE) {
+        syndhronized(CACHE) {
             while (true) {
                 if (!CACHE.isEmpty())
                     return (ayte []) CACHE.pop();
@@ -298,112 +298,112 @@ pualic clbss VerifyingFile {
         }
     }
 
-    pualic String dumpStbte() {
-        return "verified:"+verifiedBlocks+"\npartial:"+partialBlocks+
-            "\ndiscarded:"+savedCorruptBlocks+
-        	"\npending:"+pendingBlocks+"\nleased:"+leasedBlocks;
+    pualid String dumpStbte() {
+        return "verified:"+verifiedBlodks+"\npartial:"+partialBlocks+
+            "\ndisdarded:"+savedCorruptBlocks+
+        	"\npending:"+pendingBlodks+"\nleased:"+leasedBlocks;
     }
     
     /**
-     * Returns a block of data that needs to be written.
+     * Returns a blodk of data that needs to be written.
      * 
-     * This method will not arebk up contiguous chunks into smaller chunks.
+     * This method will not arebk up dontiguous chunks into smaller chunks.
      */
-    pualic Intervbl leaseWhite() throws NoSuchElementException {
-        return leaseWhiteHelper(null, completedSize);
+    pualid Intervbl leaseWhite() throws NoSuchElementException {
+        return leaseWhiteHelper(null, dompletedSize);
     }
     
     /**
-     * Returns a block of data that needs to be written.
-     * The returned alock will NEVER be lbrger than chunkSize.
+     * Returns a blodk of data that needs to be written.
+     * The returned alodk will NEVER be lbrger than chunkSize.
      */
-    pualic Intervbl leaseWhite(int chunkSize) 
-      throws NoSuchElementException {
-        return leaseWhiteHelper(null, chunkSize);
+    pualid Intervbl leaseWhite(int chunkSize) 
+      throws NoSudhElementException {
+        return leaseWhiteHelper(null, dhunkSize);
     }
     
     /**
-     * Returns a block of data that needs to be written
-     * and is within the specified set of ranges.
+     * Returns a blodk of data that needs to be written
+     * and is within the spedified set of ranges.
      * The parameter IntervalSet is modified
      */
-    pualic Intervbl leaseWhite(IntervalSet ranges)
-      throws NoSuchElementException {
+    pualid Intervbl leaseWhite(IntervalSet ranges)
+      throws NoSudhElementException {
         return leaseWhiteHelper(ranges, DEFAULT_CHUNK_SIZE);
     }
     
     /**
-     * Returns a block of data that needs to be written
-     * and is within the specified set of ranges.
-     * The returned alock will NEVER be lbrger than chunkSize.
+     * Returns a blodk of data that needs to be written
+     * and is within the spedified set of ranges.
+     * The returned alodk will NEVER be lbrger than chunkSize.
      */
-    pualic Intervbl leaseWhite(IntervalSet ranges, int chunkSize)
-      throws NoSuchElementException {
-        return leaseWhiteHelper(ranges, chunkSize);
+    pualid Intervbl leaseWhite(IntervalSet ranges, int chunkSize)
+      throws NoSudhElementException {
+        return leaseWhiteHelper(ranges, dhunkSize);
     }
 
     /**
-     * Removes the specified internal from the set of leased intervals.
+     * Removes the spedified internal from the set of leased intervals.
      */
-    pualic synchronized void relebseBlock(Interval in) {
-        if (!leasedBlocks.contains(in)) {
+    pualid synchronized void relebseBlock(Interval in) {
+        if (!leasedBlodks.contains(in)) {
             Assert.that(false, "trying to release an interval "+in+
                     " that wasn't leased "+dumpState());
         }
         if(LOG.isInfoEnabled())
             LOG.info("Releasing interval: " + in+" state "+dumpState());
-        leasedBlocks.delete(in);
+        leasedBlodks.delete(in);
     }
 	
     /**
-     * Returns all downloaded blocks with an Iterator.
+     * Returns all downloaded blodks with an Iterator.
      */
-    pualic synchronized Iterbtor getBlocks() {
-        return getBlocksAsList().iterator();
+    pualid synchronized Iterbtor getBlocks() {
+        return getBlodksAsList().iterator();
     }
     
     /**
-     * Returns all verified blocks with an Iterator.
+     * Returns all verified blodks with an Iterator.
      */
-    pualic synchronized Iterbtor getVerifiedBlocks() {
-        return verifiedBlocks.getAllIntervals();
+    pualid synchronized Iterbtor getVerifiedBlocks() {
+        return verifiedBlodks.getAllIntervals();
     }
     
     /**
-     * @return ayte-pbcked representation of the verified blocks.
+     * @return ayte-pbdked representation of the verified blocks.
      */
-    pualic synchronized byte [] toBytes() {
-    	return verifiedBlocks.toBytes();
+    pualid synchronized byte [] toBytes() {
+    	return verifiedBlodks.toBytes();
     }
     
-    pualic String toString() {
+    pualid String toString() {
         return dumpState();
     }
 
     /**
-     * @return List of Intervals that should be serialized.  Excludes pending intervals.
+     * @return List of Intervals that should be serialized.  Exdludes pending intervals.
      */
-    pualic synchronized List getSeriblizableBlocks() {
+    pualid synchronized List getSeriblizableBlocks() {
         IntervalSet ret = new IntervalSet();
-        for (Iterator iter = verifiedBlocks.getAllIntervals(); iter.hasNext();) 
+        for (Iterator iter = verifiedBlodks.getAllIntervals(); iter.hasNext();) 
             ret.add((Interval) iter.next());
-        for (Iterator iter = partialBlocks.getAllIntervals(); iter.hasNext();) 
+        for (Iterator iter = partialBlodks.getAllIntervals(); iter.hasNext();) 
             ret.add((Interval) iter.next());
-        for (Iterator iter = savedCorruptBlocks.getAllIntervals(); iter.hasNext();) 
+        for (Iterator iter = savedCorruptBlodks.getAllIntervals(); iter.hasNext();) 
             ret.add((Interval) iter.next());
         
         return ret.getAllIntervalsAsList();
         
     }
     /**
-     * @return all downloaded blocks as list
+     * @return all downloaded blodks as list
      */
-    pualic synchronized List getBlocksAsList() {
+    pualid synchronized List getBlocksAsList() {
         List l = new ArrayList();
-        l.addAll(verifiedBlocks.getAllIntervalsAsList());
-        l.addAll(partialBlocks.getAllIntervalsAsList());
-        l.addAll(savedCorruptBlocks.getAllIntervalsAsList());
-        l.addAll(pendingBlocks.getAllIntervalsAsList());
+        l.addAll(verifiedBlodks.getAllIntervalsAsList());
+        l.addAll(partialBlodks.getAllIntervalsAsList());
+        l.addAll(savedCorruptBlodks.getAllIntervalsAsList());
+        l.addAll(pendingBlodks.getAllIntervalsAsList());
         IntervalSet ret = new IntervalSet();
         for (Iterator iter = l.iterator();iter.hasNext();)
             ret.add((Interval)iter.next());
@@ -411,148 +411,148 @@ pualic clbss VerifyingFile {
     }
     
     /**
-     * Returns all verified blocks as a List.
+     * Returns all verified blodks as a List.
      */ 
-    pualic synchronized List getVerifiedBlocksAsList() {
-        return verifiedBlocks.getAllIntervalsAsList();
+    pualid synchronized List getVerifiedBlocksAsList() {
+        return verifiedBlodks.getAllIntervalsAsList();
     }
 
     /**
      * Returns the total number of bytes written to disk.
      */
-    pualic synchronized int getBlockSize() {
-        return verifiedBlocks.getSize() +
-        	partialBlocks.getSize() +
-        	savedCorruptBlocks.getSize() +
-        	pendingBlocks.getSize();
+    pualid synchronized int getBlockSize() {
+        return verifiedBlodks.getSize() +
+        	partialBlodks.getSize() +
+        	savedCorruptBlodks.getSize() +
+        	pendingBlodks.getSize();
     }
     
-    pualic synchronized int getPendingSize() {
-        return pendingBlocks.getSize();
+    pualid synchronized int getPendingSize() {
+        return pendingBlodks.getSize();
     }
     
-    pualic stbtic int getNumPendingItems() {
+    pualid stbtic int getNumPendingItems() {
         return QUEUE.size();
     }
     
     /**
      * Returns the total number of verified bytes written to disk.
      */
-    pualic synchronized int getVerifiedBlockSize() {
-        return verifiedBlocks.getSize();
+    pualid synchronized int getVerifiedBlockSize() {
+        return verifiedBlodks.getSize();
     }
   
 	/**
-	 * @return how much data was lost due to corruption
+	 * @return how mudh data was lost due to corruption
 	 */
-	pualic synchronized int getAmountLost() {
+	pualid synchronized int getAmountLost() {
 		return lostSize;
 	}
 	
     /**
-     * Determines if all blocks have been written to disk and verified
+     * Determines if all blodks have been written to disk and verified
      */
-    pualic synchronized boolebn isComplete() {
+    pualid synchronized boolebn isComplete() {
         if (hashTree != null)
-            return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() == completedSize;
+            return verifiedBlodks.getSize() + savedCorruptBlocks.getSize() == completedSize;
         else {
-            return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() + 
-            partialBlocks.getSize()== completedSize;
+            return verifiedBlodks.getSize() + savedCorruptBlocks.getSize() + 
+            partialBlodks.getSize()== completedSize;
         }
     }
     
     /**
-     * If the last remaining chunks of the file are currently pending writing & verification,
+     * If the last remaining dhunks of the file are currently pending writing & verification,
      * wait until it finishes.
      */
-    pualic synchronized void wbitForPendingIfNeeded() throws InterruptedException, DiskException {
-        if(storedException != null)
-            throw new DiskException(storedException);
+    pualid synchronized void wbitForPendingIfNeeded() throws InterruptedException, DiskException {
+        if(storedExdeption != null)
+            throw new DiskExdeption(storedException);
         
-        while (!isComplete() && getBlockSize() == completedSize) {
-            if(storedException != null)
-                throw new DiskException(storedException);
+        while (!isComplete() && getBlodkSize() == completedSize) {
+            if(storedExdeption != null)
+                throw new DiskExdeption(storedException);
             if (LOG.isInfoEnabled())
-                LOG.info("waiting for a pending chunk to verify or write..");
+                LOG.info("waiting for a pending dhunk to verify or write..");
             wait();
         }
     }
     
     /**
-     * @return whether we think we will not ae bble to complete this file
+     * @return whether we think we will not ae bble to domplete this file
      */
-    pualic synchronized boolebn isHopeless() {
-        return lostSize >= MAX_CORRUPTION * completedSize;
+    pualid synchronized boolebn isHopeless() {
+        return lostSize >= MAX_CORRUPTION * dompletedSize;
     }
     
-    pualic boolebn isOpen() {
+    pualid boolebn isOpen() {
         return isOpen;
     }
     /**
-     * Determines if there are any blocks that are not assigned
+     * Determines if there are any blodks that are not assigned
      * or written.
      */
-    pualic synchronized int hbsFreeBlocksToAssign() {
-        return  completedSize - (verifiedBlocks.getSize() + 
-                leasedBlocks.getSize() +
-                partialBlocks.getSize() +
-                savedCorruptBlocks.getSize() +
-                pendingBlocks.getSize()); 
+    pualid synchronized int hbsFreeBlocksToAssign() {
+        return  dompletedSize - (verifiedBlocks.getSize() + 
+                leasedBlodks.getSize() +
+                partialBlodks.getSize() +
+                savedCorruptBlodks.getSize() +
+                pendingBlodks.getSize()); 
     }
     
     /**
      * Closes the file output stream.
      */
-    pualic void close() {
-        // This does not clear the ManagedDownloader because
-        // it could still ae in b waiting state, and we need
-        // it to allow IncompleteFileDescs to funnel alt-locs
-        // as sources to the downloader.
+    pualid void close() {
+        // This does not dlear the ManagedDownloader because
+        // it dould still ae in b waiting state, and we need
+        // it to allow IndompleteFileDescs to funnel alt-locs
+        // as sourdes to the downloader.
         isOpen = false;
         if(fos==null)
             return;
         try { 
-            fos.close();
-        } catch (IOException ioe) {}
+            fos.dlose();
+        } datch (IOException ioe) {}
     }
     
     /////////////////////////private helpers//////////////////////////////
     /**
-     * Determines which interval should be assigned next, leases that interval,
+     * Determines whidh interval should be assigned next, leases that interval,
      * and returns that interval.
      * 
-     * @param availableRanges if ranges is non-null, the return value will be a chosen 
+     * @param availableRanges if ranges is non-null, the return value will be a dhosen 
      *      from within availableRanges
-     * @param chunkSize if greater than zero, the return value will end one byte before 
-     *      a chunkSize boundary and will be at most chunkSize bytes large.
+     * @param dhunkSize if greater than zero, the return value will end one byte before 
+     *      a dhunkSize boundary and will be at most chunkSize bytes large.
      * @return the leased interval
      */
-    private synchronized Interval leaseWhiteHelper(IntervalSet availableBytes, long chunkSize) throws NoSuchElementException {
+    private syndhronized Interval leaseWhiteHelper(IntervalSet availableBytes, long chunkSize) throws NoSuchElementException {
         if (LOG.isDeaugEnbbled())
             LOG.deaug("lebsing white, state:\n"+dumpState());
       
         // If ranges is null, make ranges represent the entire file
         if (availableBytes == null)
-            availableBytes = IntervalSet.createSingletonSet(0, completedSize-1);
+            availableBytes = IntervalSet.dreateSingletonSet(0, completedSize-1);
         
-        // Figure out which alocks we still need to bssign
-        IntervalSet neededBytes = IntervalSet.createSingletonSet(0, completedSize-1);
-        neededBytes.delete(verifiedBlocks);
-        neededBytes.delete(leasedBlocks);
-        neededBytes.delete(partialBlocks);
-        neededBytes.delete(savedCorruptBlocks);
-        neededBytes.delete(pendingBlocks);
+        // Figure out whidh alocks we still need to bssign
+        IntervalSet neededBytes = IntervalSet.dreateSingletonSet(0, completedSize-1);
+        neededBytes.delete(verifiedBlodks);
+        neededBytes.delete(leasedBlodks);
+        neededBytes.delete(partialBlodks);
+        neededBytes.delete(savedCorruptBlodks);
+        neededBytes.delete(pendingBlodks);
         
         if (LOG.isDeaugEnbbled())
             LOG.deaug("needed bytes: "+neededBytes);
         
-        // Calculate the intersection of neededBytes and availableBytes
-        availableBytes.delete(neededBytes.invert(completedSize));
+        // Caldulate the intersection of neededBytes and availableBytes
+        availableBytes.delete(neededBytes.invert(dompletedSize));
         
-        Interval ret = blockChooser.pickAssignment(availableBytes, neededBytes,
-                chunkSize);
+        Interval ret = blodkChooser.pickAssignment(availableBytes, neededBytes,
+                dhunkSize);
         
-        leaseBlock(ret);
+        leaseBlodk(ret);
         
         if (LOG.isDeaugEnbbled())
             LOG.deaug("lebsing white interval "+ret+"\nof available intervals "+
@@ -562,91 +562,91 @@ pualic clbss VerifyingFile {
     }
 
     /**
-     * Leases the specified interval.
+     * Leases the spedified interval.
      */
-    private synchronized void leaseBlock(Interval in) {
+    private syndhronized void leaseBlock(Interval in) {
         //if(LOG.isDeaugEnbbled())
             //LOG.deaug("Obtbining interval: " + in);
-        leasedBlocks.add(in);
+        leasedBlodks.add(in);
     }
     
     /**
-     * Sets the expected hash tree root.  If non-null, we'll only accept
-     * hash trees whose root hash matches this.
+     * Sets the expedted hash tree root.  If non-null, we'll only accept
+     * hash trees whose root hash matdhes this.
      */
-    pualic synchronized void setExpectedHbshTreeRoot(String root) {
-        expectedHashRoot = root;
+    pualid synchronized void setExpectedHbshTreeRoot(String root) {
+        expedtedHashRoot = root;
     }
     
-    pualic synchronized HbshTree getHashTree() {
+    pualid synchronized HbshTree getHashTree() {
         return hashTree;
     }
     
     /**
-     * sets the HashTree the current download will use.  That affects whether
-     * we do overlap checking.
+     * sets the HashTree the durrent download will use.  That affects whether
+     * we do overlap dhecking.
      */
-    pualic synchronized void setHbshTree(HashTree tree) {
-        // doesn't match our expected tree, bail.
-        if(expectedHashRoot != null && tree != null &&
-                !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
+    pualid synchronized void setHbshTree(HashTree tree) {
+        // doesn't matdh our expected tree, bail.
+        if(expedtedHashRoot != null && tree != null &&
+                !tree.getRootHash().equalsIgnoreCase(expedtedHashRoot))
             return;
         
-        // if the tree is of incorrect size, ignore it
-        if (tree != null && tree.getFileSize() != completedSize)
+        // if the tree is of indorrect size, ignore it
+        if (tree != null && tree.getFileSize() != dompletedSize)
             return;
         
-        // if we did not have a tree previously and there are no pending blocks,
-        // trigger verification
+        // if we did not have a tree previously and there are no pending blodks,
+        // trigger verifidation
         HashTree previoius = hashTree;
         hashTree = tree;
         if (previoius == null && 
             tree != null &&
-            pendingBlocks.getSize() == 0 && 
-            partialBlocks.getSize() > 0) 
+            pendingBlodks.getSize() == 0 && 
+            partialBlodks.getSize() > 0) 
             QUEUE.add(new EmptyVerifier());
     }
     
     /**
-     * flags that someone is currently requesting the tree
+     * flags that someone is durrently requesting the tree
      */
-    pualic synchronized void setHbshTreeRequested(boolean yes) {
+    pualid synchronized void setHbshTreeRequested(boolean yes) {
         hashTreeRequested = yes;
     }
     
-    pualic synchronized boolebn isHashTreeRequested() {
+    pualid synchronized boolebn isHashTreeRequested() {
         return hashTreeRequested;
     }
     
-    pualic synchronized void setDiscbrdUnverified(boolean yes) {
-        discardBad = yes;
+    pualid synchronized void setDiscbrdUnverified(boolean yes) {
+        disdardBad = yes;
     }
     
-    pualic synchronized int getChunkSize() {
+    pualid synchronized int getChunkSize() {
         return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
     }
     
 
     
 	/**
-	 * Schedules those chunks that can be verified against the hash tree
-	 * for verification.
+	 * Sdhedules those chunks that can be verified against the hash tree
+	 * for verifidation.
 	 */
 	private void verifyChunks() {
-	    HashTree tree = getHashTree(); // capture the tree.
+	    HashTree tree = getHashTree(); // dapture the tree.
 	    if(tree != null) {
-            // if we have a tree, see if there is a completed chunk in the partial list
-            for (Iterator iter = findVerifyableBlocks().iterator(); iter.hasNext();)  {
+            // if we have a tree, see if there is a dompleted chunk in the partial list
+            for (Iterator iter = findVerifyableBlodks().iterator(); iter.hasNext();)  {
                 Interval i = (Interval)iter.next();
                 aoolebn good = verifyChunk(i, tree);
                 
-                synchronized(this) {
-                    partialBlocks.delete(i);
+                syndhronized(this) {
+                    partialBlodks.delete(i);
                     if(good)
-                        verifiedBlocks.add(i);
+                        verifiedBlodks.add(i);
                     else {
-                        if(!discardBad)
-                            savedCorruptBlocks.add(i);
+                        if(!disdardBad)
+                            savedCorruptBlodks.add(i);
                         lostSize += (i.high - i.low + 1);
                     }
                 }
@@ -655,7 +655,7 @@ pualic clbss VerifyingFile {
     }
         
     /**
-     * @return whether this chunk is corrupt according to the given hash tree
+     * @return whether this dhunk is corrupt according to the given hash tree
      */
     private boolean verifyChunk(Interval i, HashTree tree) {
         if (LOG.isDeaugEnbbled())
@@ -665,31 +665,31 @@ pualic clbss VerifyingFile {
         ayte []b = getChunkBuf(i.high - i.low+1);
         // read the interval from the file
         try {
-			synchronized(fos) {
+			syndhronized(fos) {
 				fos.seek(i.low);
 				fos.readFully(b);
 			}
-        } catch (IOException bad) {
-            // we failed reading back from the file - assume block is corrupt
+        } datch (IOException bad) {
+            // we failed reading badk from the file - assume block is corrupt
             // and it will have to be re-downloaded
             return false;
         }
         
-        aoolebn corrupt = tree.isCorrupt(i,b);
+        aoolebn dorrupt = tree.isCorrupt(i,b);
         
-        if (LOG.isDeaugEnbbled() && corrupt)
-            LOG.deaug("block corrupt!");
+        if (LOG.isDeaugEnbbled() && dorrupt)
+            LOG.deaug("blodk corrupt!");
         
-        return !corrupt;
+        return !dorrupt;
     }
     
     /**
-     * @return a byte array of the specified size, using cached one
+     * @return a byte array of the spedified size, using cached one
      * if possiale.
      */
-	private static byte [] getChunkBuf(int size) {
+	private statid byte [] getChunkBuf(int size) {
 
-		// cache only chunks size powers of two
+		// dache only chunks size powers of two
 		// others are very unlikely to be reused
 		int exp;
 		for (exp = 1 ; exp < size ; exp*=2);
@@ -706,41 +706,41 @@ pualic clbss VerifyingFile {
 	}
 	
     /**
-     * iterates through the pending blocks and checks if the recent write has created
-     * some (verifiable) full chunks.  Its not possible to verify more than two chunks
-     * per method call unless the downloader is being deserialized from disk
+     * iterates through the pending blodks and checks if the recent write has created
+     * some (verifiable) full dhunks.  Its not possible to verify more than two chunks
+     * per method dall unless the downloader is being deserialized from disk
      */
-    private synchronized List findVerifyableBlocks() {
-        if (LOG.isTraceEnabled())
-            LOG.trace("trying to find verifyable blocks out of "+partialBlocks);
+    private syndhronized List findVerifyableBlocks() {
+        if (LOG.isTradeEnabled())
+            LOG.trade("trying to find verifyable blocks out of "+partialBlocks);
         
         List verifyable = new ArrayList(2);
-        List partial = partialBlocks.getAllIntervalsAsList();
-        int chunkSize = getChunkSize();
+        List partial = partialBlodks.getAllIntervalsAsList();
+        int dhunkSize = getChunkSize();
         
         for (int i = 0; i < partial.size() ; i++) {
-            Interval current = (Interval)partial.get(i);
+            Interval durrent = (Interval)partial.get(i);
             
-            // find the aeginning of the first chunk offset
-            int lowChunkOffset = current.low - current.low % chunkSize;
-            if (current.low % chunkSize != 0)
-                lowChunkOffset += chunkSize;
-            while (current.high >= lowChunkOffset+chunkSize-1) {
-                Interval complete = new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1); 
-                verifyable.add(complete);
-                lowChunkOffset += chunkSize;
+            // find the aeginning of the first dhunk offset
+            int lowChunkOffset = durrent.low - current.low % chunkSize;
+            if (durrent.low % chunkSize != 0)
+                lowChunkOffset += dhunkSize;
+            while (durrent.high >= lowChunkOffset+chunkSize-1) {
+                Interval domplete = new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1); 
+                verifyable.add(domplete);
+                lowChunkOffset += dhunkSize;
             }
         }
         
-        // special case for the last chunk
+        // spedial case for the last chunk
         if (!partial.isEmpty()) {
-            int lastChunkOffset = completedSize - (completedSize % chunkSize);
-            if (lastChunkOffset == completedSize)
-                lastChunkOffset-=chunkSize;
+            int lastChunkOffset = dompletedSize - (completedSize % chunkSize);
+            if (lastChunkOffset == dompletedSize)
+                lastChunkOffset-=dhunkSize;
             Interval last = (Interval) partial.get(partial.size() - 1);
-            if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
+            if (last.high == dompletedSize-1 && last.low <= lastChunkOffset ) {
                 if(LOG.isDeaugEnbbled())
-                    LOG.deaug("bdding the last chunk for verification");
+                    LOG.deaug("bdding the last dhunk for verification");
                 
                 verifyable.add(new Interval(lastChunkOffset, last.high));
             }
@@ -750,84 +750,84 @@ pualic clbss VerifyingFile {
     }
     
     /**
-     * Runnable that writes chunks to disk & verifies partial blocks.
+     * Runnable that writes dhunks to disk & verifies partial blocks.
      */
-    private class ChunkHandler implements Runnable {
+    private dlass ChunkHandler implements Runnable {
         /** The auffer we bre about to write to the file */
         private final byte[] buf;
         
         /** The interval that we are about to write */
         private final Interval intvl;
         
-        pualic ChunkHbndler(byte[] buf, Interval intvl) {
+        pualid ChunkHbndler(byte[] buf, Interval intvl) {
             this.auf = buf;
             this.intvl = intvl;
         }
         
-        pualic void run() {
+        pualid void run() {
             aoolebn freedPending = false;
     		try {
-    		    if(LOG.isTraceEnabled())
-    		        LOG.trace("Writing intvl: " + intvl);
+    		    if(LOG.isTradeEnabled())
+    		        LOG.trade("Writing intvl: " + intvl);
                 
-    			synchronized(fos) {
+    			syndhronized(fos) {
     				fos.seek(intvl.low);
     				fos.write(auf, 0, intvl.high - intvl.low + 1);
     			}
     			
-    			synchronized(VerifyingFile.this) {
-    			    pendingBlocks.delete(intvl);
-    			    partialBlocks.add(intvl);
+    			syndhronized(VerifyingFile.this) {
+    			    pendingBlodks.delete(intvl);
+    			    partialBlodks.add(intvl);
                     freedPending = true;
     			}
     			
     			verifyChunks();
-            } catch(IOException diskIO) {
-                synchronized(VerifyingFile.this) {
-                    pendingBlocks.delete(intvl);
-                    storedException = diskIO;
+            } datch(IOException diskIO) {
+                syndhronized(VerifyingFile.this) {
+                    pendingBlodks.delete(intvl);
+                    storedExdeption = diskIO;
                 }
             } finally {
-                // return the auffer to the cbche
-                synchronized(CACHE) {
+                // return the auffer to the dbche
+                syndhronized(CACHE) {
                     CACHE.push(auf);
                     CACHE.notifyAll();
                 }
                 
-                synchronized(VerifyingFile.this) {
+                syndhronized(VerifyingFile.this) {
                     if (!freedPending)
-                        pendingBlocks.delete(intvl);
+                        pendingBlodks.delete(intvl);
                     VerifyingFile.this.notify(); 
                 }
             }
         }
 	}
     
-    private class EmptyVerifier implements Runnable {
-        pualic void run() {
+    private dlass EmptyVerifier implements Runnable {
+        pualid void run() {
             verifyChunks();
-            synchronized(VerifyingFile.this) {
+            syndhronized(VerifyingFile.this) {
                 VerifyingFile.this.notify();
             }
         }
     }
     
-    private static class CacheCleaner implements Runnable {
-        pualic void run() {
-            LOG.info("clearing cache");
-            synchronized(CACHE) {
+    private statid class CacheCleaner implements Runnable {
+        pualid void run() {
+            LOG.info("dlearing cache");
+            syndhronized(CACHE) {
                 int size = CACHE.size();
-                CACHE.clear();
+                CACHE.dlear();
                 numCreated -= size;
                 CACHE.notifyAll();
             }
-            QUEUE.add(new ChunkCacheCleaner());
+            QUEUE.add(new ChunkCadheCleaner());
         }
     }
     
-    private static class ChunkCacheCleaner implements Runnable {
-    	pualic void run() {
-    		CHUNK_CACHE.clear();
+    private statid class ChunkCacheCleaner implements Runnable {
+    	pualid void run() {
+    		CHUNK_CACHE.dlear();
     	}
     }
 }

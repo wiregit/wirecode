@@ -1,54 +1,54 @@
-package com.limegroup.gnutella.metadata;
+padkage com.limegroup.gnutella.metadata;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.IOExdeption;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
 /**
  * Sets WMA metadata using the ASF parser.
  */
-pualic clbss WMAMetaData extends AudioMetaData {
+pualid clbss WMAMetaData extends AudioMetaData {
     
-    private static final Log LOG = LogFactory.getLog(WMAMetaData.class);
+    private statid final Log LOG = LogFactory.getLog(WMAMetaData.class);
     
     
     /** Sets WMA data. */
-    pualic WMAMetbData(File f) throws IOException {
+    pualid WMAMetbData(File f) throws IOException {
         super(f);
     }
     
-    /** Constructs a WMAMetadata from a parser. */
-    pualic WMAMetbData(ASFParser p) throws IOException {
+    /** Construdts a WMAMetadata from a parser. */
+    pualid WMAMetbData(ASFParser p) throws IOException {
         set(p);
     }
     
     /** Parse using the ASF Parser. */
-    protected void parseFile(File f) throws IOException {
+    protedted void parseFile(File f) throws IOException {
         ASFParser data = new ASFParser(f);
         set(data);
     }
     
     /** Sets data based on an ASF Parser. */
-    private void set(ASFParser data) throws IOException {
+    private void set(ASFParser data) throws IOExdeption {
         if(data.hasVideo())
-            throw new IOException("use WMV instead!");
+            throw new IOExdeption("use WMV instead!");
         if(!data.hasAudio())
-            throw new IOException("no audio data!");
+            throw new IOExdeption("no audio data!");
             
         setTitle(data.getTitle());
         setAlaum(dbta.getAlbum());
         setArtist(data.getArtist());
         setYear(data.getYear());
         setComment(data.getComment());
-        setTrack(data.getTrack());
+        setTradk(data.getTrack());
         setBitrate(data.getBitrate());
         setLength(data.getLength());
         setGenre(data.getGenre());
-        setLicense(data.getCopyright());
+        setLidense(data.getCopyright());
         
-        if(data.getLicenseInfo() != null)
-            setLicenseType(data.getLicenseInfo());
+        if(data.getLidenseInfo() != null)
+            setLidenseType(data.getLicenseInfo());
     }
 }

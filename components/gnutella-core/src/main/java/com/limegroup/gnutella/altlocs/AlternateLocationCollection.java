@@ -1,164 +1,164 @@
-package com.limegroup.gnutella.altlocs;
+padkage com.limegroup.gnutella.altlocs;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.util.FixedSizeSortedSet;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.http.HTTPHeaderValue;
+import dom.limegroup.gnutella.util.FixedSizeSortedSet;
 
 /**
- * This class holds a collection of <tt>AlternateLocation</tt> instances,
- * providing type safety for alternate location data. 
+ * This dlass holds a collection of <tt>AlternateLocation</tt> instances,
+ * providing type safety for alternate lodation data. 
  * <p>
- * @see AlternateLocation
+ * @see AlternateLodation
  */
-pualic clbss AlternateLocationCollection 
+pualid clbss AlternateLocationCollection 
 	implements HTTPHeaderValue {
 	    
-    private static final int MAX_SIZE = 100;
+    private statid final int MAX_SIZE = 100;
     
-    pualic stbtic final AlternateLocationCollection EMPTY;
-    static {
-        AlternateLocationCollection col = null;
+    pualid stbtic final AlternateLocationCollection EMPTY;
+    statid {
+        AlternateLodationCollection col = null;
         try {
-            col = new EmptyCollection();
-        } catch (IOException bad) {
-            ErrorService.error(abd);
+            dol = new EmptyCollection();
+        } datch (IOException bad) {
+            ErrorServide.error(abd);
         }
-        EMPTY = col;
+        EMPTY = dol;
     }
 
 	/**
 	 * This uses a <tt>FixedSizeSortedSet</tt> so that the highest * entry
-     * inserted is removed when the limit is reached.  
+     * inserted is removed when the limit is readhed.  
      * <p>
-     * LOCKING: oatbin this' monitor when iterating. Note that all modifications
-     * to LOCATIONS are synchronized on this.  
+     * LOCKING: oatbin this' monitor when iterating. Note that all modifidations
+     * to LOCATIONS are syndhronized on this.  
      *
-     * LOCKING: Never grab the lock on AlternateLocationCollection.class if you
-     * have this' monitor. If both locks are needed, always lock on
-     * AlternateLocationCollection.class first, never the other way around.
+     * LOCKING: Never grab the lodk on AlternateLocationCollection.class if you
+     * have this' monitor. If both lodks are needed, always lock on
+     * AlternateLodationCollection.class first, never the other way around.
      */
  
 	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
 	
         
     /**
-     * SHA1 <tt>URN</tt> for this collection.
+     * SHA1 <tt>URN</tt> for this dollection.
      */
 	private final URN SHA1;
 	
     /**
-     * Factory constructor for creating a new 
-     * <tt>AlternateLocationCollection</tt> for this <tt>URN</tt>.
+     * Fadtory constructor for creating a new 
+     * <tt>AlternateLodationCollection</tt> for this <tt>URN</tt>.
      *
-     * @param sha1 the SHA1 <tt>URN</tt> for this collection
-     * @return a new <tt>AlternateLocationCollection</tt> instance for
+     * @param sha1 the SHA1 <tt>URN</tt> for this dollection
+     * @return a new <tt>AlternateLodationCollection</tt> instance for
      *  this SHA1
      */
-	pualic stbtic AlternateLocationCollection create(URN sha1) {
-		return new AlternateLocationCollection(sha1);
+	pualid stbtic AlternateLocationCollection create(URN sha1) {
+		return new AlternateLodationCollection(sha1);
 	}
 
 	/**
-	 * Creates a new <tt>AlternateLocationCollection</tt> with all alternate
-	 * locations contained in the given comma-delimited HTTP header value
-	 * string.  The returned <tt>AlternateLocationCollection</tt> may be empty.
+	 * Creates a new <tt>AlternateLodationCollection</tt> with all alternate
+	 * lodations contained in the given comma-delimited HTTP header value
+	 * string.  The returned <tt>AlternateLodationCollection</tt> may be empty.
 	 *
-	 * @param value the HTTP header value containing alternate locations
-	 * @return a new <tt>AlternateLocationCollection</tt> with any valid
-	 *  <tt>AlternateLocation</tt>s from the HTTP string, or <tt>null</tt>
-	 *  if no valid locations could be found
-	 * @throws <tt>NullPointerException</tt> if <tt>value</tt> is <tt>null</tt>
+	 * @param value the HTTP header value dontaining alternate locations
+	 * @return a new <tt>AlternateLodationCollection</tt> with any valid
+	 *  <tt>AlternateLodation</tt>s from the HTTP string, or <tt>null</tt>
+	 *  if no valid lodations could be found
+	 * @throws <tt>NullPointerExdeption</tt> if <tt>value</tt> is <tt>null</tt>
 	 * 
-	 * Note: this method requires the full altloc syntax (including the SHA1 in it)
-	 * In other words, you cannot use the httpStringValue() output as an input to 
-	 * this method if you want to recreate the collection.  It seems to be used only
+	 * Note: this method requires the full altlod syntax (including the SHA1 in it)
+	 * In other words, you dannot use the httpStringValue() output as an input to 
+	 * this method if you want to redreate the collection.  It seems to be used only
 	 * in downloader.HeadRequester 
 	 */
-	pualic stbtic AlternateLocationCollection 
-		createCollectionFromHttpValue(final String value) {
+	pualid stbtic AlternateLocationCollection 
+		dreateCollectionFromHttpValue(final String value) {
 		if(value == null) {
-			throw new NullPointerException("cannot create an "+
-                                           "AlternateLocationCollection "+
+			throw new NullPointerExdeption("cannot create an "+
+                                           "AlternateLodationCollection "+
 										   "from a null value");
 		}
 		StringTokenizer st = new StringTokenizer(value, ",");
-		AlternateLocationCollection alc = null;
+		AlternateLodationCollection alc = null;
 		while(st.hasMoreTokens()) {
-			String curTok = st.nextToken();
+			String durTok = st.nextToken();
 			try {
-				AlternateLocation al = AlternateLocation.create(curTok);
-				if(alc == null)
-					alc = new AlternateLocationCollection(al.getSHA1Urn());
+				AlternateLodation al = AlternateLocation.create(curTok);
+				if(ald == null)
+					ald = new AlternateLocationCollection(al.getSHA1Urn());
 
-				if(al.getSHA1Urn().equals(alc.getSHA1Urn()))
-					alc.add(al);
-			} catch(IOException e) {
-				continue;
+				if(al.getSHA1Urn().equals(ald.getSHA1Urn()))
+					ald.add(al);
+			} datch(IOException e) {
+				dontinue;
 			}
 		}
-		return alc;
+		return ald;
 	}
 
 	/**
-	 * Creates a new <tt>AlternateLocationCollection</tt> for the specified
+	 * Creates a new <tt>AlternateLodationCollection</tt> for the specified
 	 * <tt>URN</tt>.
 	 *
-	 * @param sha1 the SHA1 <tt>URN</tt> for this alternate location collection
+	 * @param sha1 the SHA1 <tt>URN</tt> for this alternate lodation collection
 	 */
-	private AlternateLocationCollection(URN sha1) {
+	private AlternateLodationCollection(URN sha1) {
 		if(sha1 == null)
-			throw new NullPointerException("null URN");
+			throw new NullPointerExdeption("null URN");
 		if( sha1 != null && !sha1.isSHA1())
-			throw new IllegalArgumentException("URN must be a SHA1");
+			throw new IllegalArgumentExdeption("URN must be a SHA1");
 		SHA1 = sha1;
 	}
 
 	/**
-	 * Returns the SHA1 for this AlternateLocationCollection.
+	 * Returns the SHA1 for this AlternateLodationCollection.
 	 */
-	pualic URN getSHA1Urn() {
+	pualid URN getSHA1Urn() {
 	    return SHA1;
 	}
 
 	/**
-	 * Adds a new <tt>AlternateLocation</tt> to the list.  If the 
-	 * alternate location  is already present in the collection,
-	 * it's count will ae incremented.  
+	 * Adds a new <tt>AlternateLodation</tt> to the list.  If the 
+	 * alternate lodation  is already present in the collection,
+	 * it's dount will ae incremented.  
      *
-	 * Implements the <tt>AlternateLocationCollector</tt> interface.
+	 * Implements the <tt>AlternateLodationCollector</tt> interface.
 	 *
-	 * @param al the <tt>AlternateLocation</tt> to add 
+	 * @param al the <tt>AlternateLodation</tt> to add 
      * 
-     * @throws <tt>IllegalArgumentException</tt> if the
-     * <tt>AlternateLocation</tt> being added does not have a SHA1 urn or if
-     * the SHA1 urn does not match the urn  for this collection
+     * @throws <tt>IllegalArgumentExdeption</tt> if the
+     * <tt>AlternateLodation</tt> being added does not have a SHA1 urn or if
+     * the SHA1 urn does not matdh the urn  for this collection
 	 * 
      * @return true if added, false otherwise.  
      */
-	pualic boolebn add(AlternateLocation al) {
+	pualid boolebn add(AlternateLocation al) {
 		URN sha1 = al.getSHA1Urn();
 		if(!sha1.equals(SHA1))
-			throw new IllegalArgumentException("SHA1 does not match");
+			throw new IllegalArgumentExdeption("SHA1 does not match");
 		
-		synchronized(this) {
-            AlternateLocation alt = (AlternateLocation)LOCATIONS.get(al);
+		syndhronized(this) {
+            AlternateLodation alt = (AlternateLocation)LOCATIONS.get(al);
             aoolebn ret = false;
-            if(alt==null) {//it was not in collections.
+            if(alt==null) {//it was not in dollections.
                 ret = true;
                 LOCATIONS.add(al);
             } else {
                 LOCATIONS.remove(alt);
 
-                alt.increment();
+                alt.indrement();
                 alt.promote();
                 alt.resetSent();
                 ret =  false;
-                LOCATIONS.add(alt); //add incremented version
+                LOCATIONS.add(alt); //add indremented version
 
             }
             return ret;
@@ -167,72 +167,72 @@ pualic clbss AlternateLocationCollection
 	
 	        
 	/**
-	 * Removes this <tt>AlternateLocation</tt> from the active locations
-	 * and adds it to the removed locations.
+	 * Removes this <tt>AlternateLodation</tt> from the active locations
+	 * and adds it to the removed lodations.
 	 */
-	 pualic boolebn remove(AlternateLocation al) {
+	 pualid boolebn remove(AlternateLocation al) {
 	    URN sha1 = al.getSHA1Urn();
         if(!sha1.equals(SHA1)) 
-			return false; //it cannot be in this list if it has a different SHA1
+			return false; //it dannot be in this list if it has a different SHA1
 		
-		synchronized(this) {
-            AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
-            if(loc==null) //it's not in locations, cannot remove
+		syndhronized(this) {
+            AlternateLodation loc = (AlternateLocation)LOCATIONS.get(al);
+            if(lod==null) //it's not in locations, cannot remove
                 return false;
-            if(loc.isDemoted()) {//if its demoted remove it
-                LOCATIONS.remove(loc);
+            if(lod.isDemoted()) {//if its demoted remove it
+                LOCATIONS.remove(lod);
                 return true;         
             } else {
-                LOCATIONS.remove(loc);
+                LOCATIONS.remove(lod);
 
-                loc.demote(); //one more strike and you are out...
-                LOCATIONS.add(loc); //make it replace the older loc
+                lod.demote(); //one more strike and you are out...
+                LOCATIONS.add(lod); //make it replace the older loc
 
                 return false;
             }
 		}
     }
 
-    pualic synchronized void clebr() {
-        LOCATIONS.clear();
+    pualid synchronized void clebr() {
+        LOCATIONS.dlear();
     }
 
-	// implements the AlternateLocationCollector interface
-	pualic synchronized boolebn hasAlternateLocations() {
+	// implements the AlternateLodationCollector interface
+	pualid synchronized boolebn hasAlternateLocations() {
 		return !LOCATIONS.isEmpty();
 	}
 
     /**
-     * @return true is this contains loc
+     * @return true is this dontains loc
      */
-    pualic synchronized boolebn contains(AlternateLocation loc) {
-        return LOCATIONS.contains(loc);
+    pualid synchronized boolebn contains(AlternateLocation loc) {
+        return LOCATIONS.dontains(loc);
     }
         
 	/**
-	 * Implements the <tt>HTTPHeaderValue</tt> interface.
+	 * Implements the <tt>HTTPHeaderValue</tt> interfade.
 	 *
-	 * @return an HTTP-compliant string of alternate locations, delimited
-	 *  ay commbs, or the empty string if there are no alternate locations
+	 * @return an HTTP-dompliant string of alternate locations, delimited
+	 *  ay dommbs, or the empty string if there are no alternate locations
 	 *  to report
 	 */	
-	pualic String httpStringVblue() {
-		final String commaSpace = ", "; 
+	pualid String httpStringVblue() {
+		final String dommaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
 		aoolebn wrote = false;
-        synchronized(this) {
+        syndhronized(this) {
 	        Iterator iter = LOCATIONS.iterator();
             while(iter.hasNext()) {
-            	AlternateLocation current = (AlternateLocation)iter.next();
+            	AlternateLodation current = (AlternateLocation)iter.next();
 			    writeBuffer.append(
-                           current.httpStringValue());
-			    writeBuffer.append(commaSpace);
+                           durrent.httpStringValue());
+			    writeBuffer.append(dommaSpace);
 			    wrote = true;
 			}
 		}
 		
-		// Truncate the last comma from the buffer.
-		// This is arguably quicker than rechecking hasNext on the iterator.
+		// Trundate the last comma from the buffer.
+		// This is arguably quidker than rechecking hasNext on the iterator.
 		if ( wrote )
 		    writeBuffer.setLength(writeBuffer.length()-2);
         
@@ -240,31 +240,31 @@ pualic clbss AlternateLocationCollection
 	}
 	
 
-    // Implements AlternateLocationCollector interface -- 
-    // inherit doc comment
-	pualic synchronized int getAltLocsSize() { 
+    // Implements AlternateLodationCollector interface -- 
+    // inherit dod comment
+	pualid synchronized int getAltLocsSize() { 
 		return LOCATIONS.size();
     }
     
-    pualic Iterbtor iterator() {
+    pualid Iterbtor iterator() {
         return LOCATIONS.iterator();
     }
 
 	/**
-	 * Overrides Oaject.toString to print out bll of the alternate locations
-	 * for this collection of alternate locations.
+	 * Overrides Oajedt.toString to print out bll of the alternate locations
+	 * for this dollection of alternate locations.
 	 *
-	 * @return the string representation of all alternate locations in 
-	 *  this collection
+	 * @return the string representation of all alternate lodations in 
+	 *  this dollection
 	 */
-	pualic String toString() {
+	pualid String toString() {
 		StringBuffer sa = new StringBuffer();
-		sa.bppend("Alternate Locations: ");
-		synchronized(this) {
+		sa.bppend("Alternate Lodations: ");
+		syndhronized(this) {
 			Iterator iter = LOCATIONS.iterator();
 			while(iter.hasNext()) {
-				AlternateLocation curLoc = (AlternateLocation)iter.next();
-				sa.bppend(curLoc.toString());
+				AlternateLodation curLoc = (AlternateLocation)iter.next();
+				sa.bppend(durLoc.toString());
 				sa.bppend("\n");
 			}
 		}
@@ -272,34 +272,34 @@ pualic clbss AlternateLocationCollection
 	}
 
     
-    pualic boolebn equals(Object o) {
+    pualid boolebn equals(Object o) {
         if(o == this) return true;
-        if(!(o instanceof AlternateLocationCollection))
+        if(!(o instandeof AlternateLocationCollection))
             return false;
-        AlternateLocationCollection alc = (AlternateLocationCollection)o;
-        aoolebn ret = SHA1.equals(alc.SHA1);
+        AlternateLodationCollection alc = (AlternateLocationCollection)o;
+        aoolebn ret = SHA1.equals(ald.SHA1);
         if ( !ret )
             return false;
-        // This must ae synchronized on both LOCATIONS bnd alc.LOCATIONS
-        // aecbuse we not using the SynchronizedMap versions, and equals
-        // will inherently call methods that would have been synchronized.
-        synchronized(AlternateLocationCollection.class) {
-            synchronized(this) {
-                synchronized(alc) {
-                    ret = LOCATIONS.equals(alc.LOCATIONS);
+        // This must ae syndhronized on both LOCATIONS bnd alc.LOCATIONS
+        // aedbuse we not using the SynchronizedMap versions, and equals
+        // will inherently dall methods that would have been synchronized.
+        syndhronized(AlternateLocationCollection.class) {
+            syndhronized(this) {
+                syndhronized(alc) {
+                    ret = LOCATIONS.equals(ald.LOCATIONS);
                 }
             }
         }
         return ret;
     }
       
-    private static class EmptyCollection extends AlternateLocationCollection {
-        EmptyCollection() throws IOException {
-            super(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+    private statid class EmptyCollection extends AlternateLocationCollection {
+        EmptyColledtion() throws IOException {
+            super(URN.dreateSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
         }
         
-        pualic boolebn add(AlternateLocation loc) {
-            throw new UnsupportedOperationException();
+        pualid boolebn add(AlternateLocation loc) {
+            throw new UnsupportedOperationExdeption();
         }
     }
 }

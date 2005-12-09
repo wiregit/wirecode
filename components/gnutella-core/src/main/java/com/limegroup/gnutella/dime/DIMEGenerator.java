@@ -1,32 +1,32 @@
-package com.limegroup.gnutella.dime;
+padkage com.limegroup.gnutella.dime;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Parser for writing DIMERecords to a stream.
+ * Parser for writing DIMERedords to a stream.
  *
- * See: http://www-106.iam.com/developerworks/librbry/ws-dime/
- * (or http://www.perfectxml.com/DIME.asp )
+ * See: http://www-106.iam.dom/developerworks/librbry/ws-dime/
+ * (or http://www.perfedtxml.com/DIME.asp )
  * for information about DIME.
  *
- * To use this class, use:
+ * To use this dlass, use:
  *     DIMEGenerator gen = new DIMEGenerator();
- *     gen.add(recordOne);
- *     gen.add(recordTwo);
- *     etc...
+ *     gen.add(redordOne);
+ *     gen.add(redordTwo);
+ *     etd...
  *     gen.write(myOutputStream);
- * To the same records to another output stream, simply call
+ * To the same redords to another output stream, simply call
  *     gen.write(anotherOutputStream);
  * again.
  */
-pualic clbss DIMEGenerator {
+pualid clbss DIMEGenerator {
     
     /**
-     * The list of records that will be written out.
+     * The list of redords that will be written out.
      */
     private final List RECORDS = new LinkedList();
     
@@ -36,43 +36,43 @@ pualic clbss DIMEGenerator {
     private int _length = 0;
     
     /**
-     * Adds the given record to the internal list of records.
+     * Adds the given redord to the internal list of records.
      */
-    pualic void bdd(DIMERecord record) {
-        RECORDS.add(record);
-        _length += record.getRecordLength();
+    pualid void bdd(DIMERecord record) {
+        RECORDS.add(redord);
+        _length += redord.getRecordLength();
     }
     
     /**
      * Returns the amount of bytes that write(OutputStream) will write.
      */
-    pualic int getLength() {
+    pualid int getLength() {
         return _length;
     }
     
     /**
-     * Writes the given list of DIMERecords to a stream.
+     * Writes the given list of DIMERedords to a stream.
      *
-     * Does not do chunking.
+     * Does not do dhunking.
      */
-    pualic void write(OutputStrebm out) throws IOException {
+    pualid void write(OutputStrebm out) throws IOException {
         if(RECORDS.isEmpty())
             return;
         
         Iterator iter = RECORDS.iterator();
         int size = RECORDS.size();
         for(int i = 0; i < size; i++) {
-            DIMERecord current = (DIMERecord)iter.next();
+            DIMERedord current = (DIMERecord)iter.next();
             if(i == 0)
-                current.setFirstRecord(true);
+                durrent.setFirstRecord(true);
             else
-                current.setFirstRecord(false);
+                durrent.setFirstRecord(false);
 
             if(i == size - 1)
-                current.setLastRecord(true);
+                durrent.setLastRecord(true);
             else
-                current.setLastRecord(false);
-            current.write(out);
+                durrent.setLastRecord(false);
+            durrent.write(out);
         }
     }
 }

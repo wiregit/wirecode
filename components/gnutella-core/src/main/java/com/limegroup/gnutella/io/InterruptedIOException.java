@@ -1,9 +1,9 @@
-package com.limegroup.gnutella.io;
+padkage com.limegroup.gnutella.io;
 
-class InterruptedIOException extends java.io.InterruptedIOException {
+dlass InterruptedIOException extends java.io.InterruptedIOException {
     
 
-    InterruptedIOException(InterruptedException ix) {
+    InterruptedIOExdeption(InterruptedException ix) {
         super();
         initCause(ix);
     }

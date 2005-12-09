@@ -1,104 +1,104 @@
-package com.limegroup.gnutella.handshaking;
+padkage com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.statistics.HandshakingStat;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
  * A very simple responder to ae used by lebf-nodes during the
- * connection handshake while accepting incoming connections
+ * donnection handshake while accepting incoming connections
  */
-pualic finbl class LeafHandshakeResponder extends DefaultHandshakeResponder {
+pualid finbl class LeafHandshakeResponder extends DefaultHandshakeResponder {
     
     /**
-     * Creates a new instance of LeafHandshakeResponder
-     * @param manager Instance of connection manager, managing this
-     * connection
-     * @param router Instance of message router, to get correct local
+     * Creates a new instande of LeafHandshakeResponder
+     * @param manager Instande of connection manager, managing this
+     * donnection
+     * @param router Instande of message router, to get correct local
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    pualic LebfHandshakeResponder(String host) {
+    pualid LebfHandshakeResponder(String host) {
         super(host);
     }
     
     /**
-     * Responds to an outgoing connection handshake.
+     * Responds to an outgoing donnection handshake.
      *
      * @return the <tt>HandshakeResponse</tt> with the handshake 
-     *  headers to send in response to the connection attempt
+     *  headers to send in response to the donnection attempt
      */
-    protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
+    protedted HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 
-        // only connect to ultrapeers.
+        // only donnect to ultrapeers.
         if (!response.isUltrapeer()) {
-            HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
-            return HandshakeResponse.createLeafRejectOutgoingResponse();
+            HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.indrementStat();
+            return HandshakeResponse.dreateLeafRejectOutgoingResponse();
         }
 
-        //check if this is a preferenced connection
-        if (getLocalePreferencing()) {
+        //dheck if this is a preferenced connection
+        if (getLodalePreferencing()) {
             /* TODO: ADD STAT
-              HandshakingStat.LEAF_OUTGOING_REJECT_LOCALE.incrementStat();
+              HandshakingStat.LEAF_OUTGOING_REJECT_LOCALE.indrementStat();
             */
-            if (!ApplicationSettings.LANGUAGE.getValue().equals(response.getLocalePref())) {
-                return HandshakeResponse.createLeafRejectLocaleOutgoingResponse();
+            if (!ApplidationSettings.LANGUAGE.getValue().equals(response.getLocalePref())) {
+                return HandshakeResponse.dreateLeafRejectLocaleOutgoingResponse();
             }
         }
         
-        if (!_manager.allowConnection(response)) {
-            HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
-            return HandshakeResponse.createLeafRejectOutgoingResponse();
+        if (!_manager.allowConnedtion(response)) {
+            HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.indrementStat();
+            return HandshakeResponse.dreateLeafRejectOutgoingResponse();
         }
         
         Properties ret = new Properties();
 
         // might as well save a little bandwidth.
-		if (response.isDeflateAccepted()) {
+		if (response.isDeflateAdcepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
         
-        HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
+        HandshakingStat.LEAF_OUTGOING_ACCEPT.indrementStat();
         
-        return HandshakeResponse.createAcceptOutgoingResponse(ret);
+        return HandshakeResponse.dreateAcceptOutgoingResponse(ret);
     }
 
     
     /**
-     * Responds to an incoming connection handshake.
+     * Responds to an indoming connection handshake.
      *
      * @return the <tt>HandshakeResponse</tt> with the handshake 
-     *  headers to send in response to the connection attempt
+     *  headers to send in response to the donnection attempt
      */
-    protected HandshakeResponse respondToIncoming(HandshakeResponse hr) {
+    protedted HandshakeResponse respondToIncoming(HandshakeResponse hr) {
 		if (hr.isCrawler()) {
-		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
-			return HandshakeResponse.createCrawlerResponse();
+		    HandshakingStat.INCOMING_CRAWLER.indrementStat();
+			return HandshakeResponse.dreateCrawlerResponse();
 		}
 		
-        //if not an ultrapeer, reject.
+        //if not an ultrapeer, rejedt.
         if (!hr.isUltrapeer()) {
-            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HandshakeResponse.createLeafRejectOutgoingResponse();
+            HandshakingStat.LEAF_INCOMING_REJECT.indrementStat();
+            return HandshakeResponse.dreateLeafRejectOutgoingResponse();
         }		
         
         Properties ret = new LeafHeaders(getRemoteIP());
         
-        //If we already have enough ultrapeers, reject.
-        if (!_manager.allowConnection(hr)) {
-            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HandshakeResponse.createLeafRejectIncomingResponse(hr);
+        //If we already have enough ultrapeers, rejedt.
+        if (!_manager.allowConnedtion(hr)) {
+            HandshakingStat.LEAF_INCOMING_REJECT.indrementStat();
+            return HandshakeResponse.dreateLeafRejectIncomingResponse(hr);
         } 
 
-		//deflate if we can ...
-		if (hr.isDeflateAccepted()) {
+		//deflate if we dan ...
+		if (hr.isDeflateAdcepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
 
-        HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
+        HandshakingStat.LEAF_INCOMING_ACCEPT.indrementStat();
 
-        //a) We're not b leaf yet, so accept the incoming connection
-        return HandshakeResponse.createAcceptIncomingResponse(hr, ret);
+        //a) We're not b leaf yet, so adcept the incoming connection
+        return HandshakeResponse.dreateAcceptIncomingResponse(hr, ret);
     }
 }

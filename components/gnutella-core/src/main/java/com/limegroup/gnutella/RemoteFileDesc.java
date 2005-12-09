@@ -1,85 +1,85 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOExdeption;
+import java.io.ObjedtInputStream;
+import java.io.ObjedtOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
+import java.net.InetSodketAddress;
+import java.net.MalformedURLExdeption;
 import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.UnknownHostExdeption;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import dom.limegroup.gnutella.altlocs.AlternateLocation;
+import dom.limegroup.gnutella.downloader.URLRemoteFileDesc;
+import dom.limegroup.gnutella.http.HTTPConstants;
+import dom.limegroup.gnutella.util.DataUtils;
+import dom.limegroup.gnutella.util.IntervalSet;
+import dom.limegroup.gnutella.util.IpPort;
+import dom.limegroup.gnutella.util.IpPortImpl;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * A reference to a single file on a remote machine.  In this respect
- * RemoteFileDesc is similar to a URL, but it contains Gnutella-
- * specific data as well, such as the server's 16-byte GUID.<p>
+ * A referende to a single file on a remote machine.  In this respect
+ * RemoteFileDesd is similar to a URL, but it contains Gnutella-
+ * spedific data as well, such as the server's 16-byte GUID.<p>
  *
- * This class is serialized to disk as part of the downloads.dat file.  Hence
- * you must ae very cbreful before making any changes.  Deleting or changing the
- * types of fields is DISALLOWED.  Adding field a F is acceptable as long as the
- * readObject() method of this initializes F to a reasonable value when
- * reading from older files where the fields are not present.  This is exactly
+ * This dlass is serialized to disk as part of the downloads.dat file.  Hence
+ * you must ae very dbreful before making any changes.  Deleting or changing the
+ * types of fields is DISALLOWED.  Adding field a F is adceptable as long as the
+ * readObjedt() method of this initializes F to a reasonable value when
+ * reading from older files where the fields are not present.  This is exadtly
  * what we do with _urns and _browseHostEnabled.  On the other hand, older
- * version of LimeWire will simply discard any extra fields F if reading from a
+ * version of LimeWire will simply disdard any extra fields F if reading from a
  * newer serialized file.  
  */
-pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
+pualid clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     
-    private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
+    private statid final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
     
-    private static final long serialVersionUID = 6619479308616716538L;
+    private statid final long serialVersionUID = 6619479308616716538L;
     
-    private static final int COPY_INDEX = Integer.MAX_VALUE;
+    private statid final int COPY_INDEX = Integer.MAX_VALUE;
 
     /** aogus IP we bssign to RFDs whose real ip is unknown */
-    pualic stbtic final String BOGUS_IP = "1.1.1.1";
+    pualid stbtic final String BOGUS_IP = "1.1.1.1";
     
 	private final String _host;
 	private final int _port;
 	private final String _filename; 
 	private final long _index;
-	private final byte[] _clientGUID;
+	private final byte[] _dlientGUID;
 	private final int _speed;
 	private final int _size;
-	private final boolean _chatEnabled;
+	private final boolean _dhatEnabled;
     private final int _quality;
-    private final boolean _replyToMulticast;
+    private final boolean _replyToMultidast;
 
     /**
-     *  RemoteFileDesc can only be constructed with a single piece of metadata.
-     *  However, historically RemoteFileDesc stored an array of metadata.  Hence
+     *  RemoteFileDesd can only be constructed with a single piece of metadata.
+     *  However, historidally RemoteFileDesc stored an array of metadata.  Hence
      *  we must ae prepbred to read this data from a serialized downloads.dat
-     *  file.  In other words, _xmlDocs is typically null or a single non-null
+     *  file.  In other words, _xmlDods is typically null or a single non-null
      *  element, unless this was deserialized from an older version.  
 	 * 
-	 *  INVARIANT: _xmlDocs != null -> _xmlDocs.length != 0
+	 *  INVARIANT: _xmlDods != null -> _xmlDocs.length != 0
 	 */
-    private LimeXMLDocument[] _xmlDocs;
+    private LimeXMLDodument[] _xmlDocs;
 	private Set /* of URN*/  _urns;
 
     /**
-     * Boolean indicating whether or not the remote host has browse host 
+     * Boolean indidating whether or not the remote host has browse host 
      * enabled.
      */
 	private boolean _browseHostEnabled;
@@ -90,16 +90,16 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     
     /**
      * Whether or not the remote host supports HTTP/1.1
-     * This is purposely NOT IMMUTABLE.  Before we connect,
-     * we can only assume the remote host supports HTTP/1.1 by
+     * This is purposely NOT IMMUTABLE.  Before we donnect,
+     * we dan only assume the remote host supports HTTP/1.1 by
      * looking at the set of URNs.  If any exist, we assume
-     * HTTP/1.1 is supported (aecbuse URNs were added to Gnutella
-     * after HTTP/1.1).  Once we connect, this value is set to
+     * HTTP/1.1 is supported (aedbuse URNs were added to Gnutella
+     * after HTTP/1.1).  Onde we connect, this value is set to
      * ae whbtever the host reports in the response line.
      *
      * When deserializing, this value may be wrong for older download.dat
-     * files.  (Older versions will always set this to false, because
-     * the field did not exist.)  To counter that, when deserializing,
+     * files.  (Older versions will always set this to false, bedause
+     * the field did not exist.)  To dounter that, when deserializing,
      * if this is false, we set it to true if any URNs are present.
      */
     private boolean _http11;
@@ -130,12 +130,12 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     private transient int _failedCount = 0;
 
     /**
-     * The earliest time to retry this host in milliseconds since 01-01-1970
+     * The earliest time to retry this host in millisedonds since 01-01-1970
      */
     private transient volatile long _earliestRetryTime = 0;
 
     /**
-     * The cached hash code for this RFD.
+     * The dached hash code for this RFD.
      */
     private transient int _hashCode = 0;
 
@@ -145,7 +145,7 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     private transient boolean _THEXFailed = false;
 
     /**
-     * The cached RemoteHostData for this rfd.
+     * The dached RemoteHostData for this rfd.
      */
     private transient RemoteHostData _hostData = null;
     
@@ -155,9 +155,9 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     private transient volatile boolean _isDownloading = false;
     
     /**
-     * The creation time of this file.
+     * The dreation time of this file.
      */
-    private transient long _creationTime;
+    private transient long _dreationTime;
     
     /**
      * Whether to serialize the push proxies
@@ -166,47 +166,47 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     
     /**
      * A map of various properties we want to serialize.  Currently we use
-     * this oaject only during de/seriblization, but we keep it cached if we
-     * ever create one
+     * this oajedt only during de/seriblization, but we keep it cached if we
+     * ever dreate one
      */
     private Map propertiesMap; 
     
     /**
-     * Constructs a new RemoteFileDesc exactly like the other one,
+     * Construdts a new RemoteFileDesc exactly like the other one,
      * aut with b different remote host.
      *
-     * It is okay to use the same internal structures
-     * for URNs aecbuse the Set is immutable.
+     * It is okay to use the same internal strudtures
+     * for URNs aedbuse the Set is immutable.
      */
-    pualic RemoteFileDesc(RemoteFileDesc rfd, IpPort ep) {
+    pualid RemoteFileDesc(RemoteFileDesc rfd, IpPort ep) {
         this( ep.getAddress(),              // host
               ep.getPort(),                 // port
               COPY_INDEX,                   // index (unknown)
               rfd.getFileName(),            // filename
               rfd.getSize(),                // filesize
-              rfd.getClientGUID(),          // client GUID
+              rfd.getClientGUID(),          // dlient GUID
               0,                            // speed
-              false,                        // chat capable
+              false,                        // dhat capable
               2,                            // quality
               false,                        // browse hostable
-              rfd.getXMLDocument(),              // xml doc
+              rfd.getXMLDodument(),              // xml doc
               rfd.getUrns(),                // urns
               false,                        // reply to MCast
               false,                        // is firewalled
-              AlternateLocation.ALT_VENDOR, // vendor
-              System.currentTimeMillis(),   // timestamp
-              Collections.EMPTY_SET,        // push proxies
-              rfd.getCreationTime(),       // creation time
+              AlternateLodation.ALT_VENDOR, // vendor
+              System.durrentTimeMillis(),   // timestamp
+              Colledtions.EMPTY_SET,        // push proxies
+              rfd.getCreationTime(),       // dreation time
               0,                            // firewalled transfer
-              null);                       // no PE cause not firewalled
+              null);                       // no PE dause not firewalled
     }
     
     /**
-     * Constructs a new RemoteFileDesc exactly like the other one,
-     * aut with b different push proxy host.  Will be handy when processing
+     * Construdts a new RemoteFileDesc exactly like the other one,
+     * aut with b different push proxy host.  Will be handy when prodessing
      * head pongs.
      */
-    pualic RemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe){
+    pualid RemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe){
     	this( pe.getAddress(),              // host - ignored
                 pe.getPort(),                 // port -ignored
                 COPY_INDEX,                   // index (unknown)
@@ -214,139 +214,139 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
                 rfd.getSize(),                // filesize
                 DataUtils.EMPTY_GUID,         // guid
                 rfd.getSpeed(),                            // speed
-                false,                        // chat capable
+                false,                        // dhat capable
                 rfd.getQuality(),                            // quality
                 false,                        // browse hostable
-                rfd.getXMLDocument(),              // xml doc
+                rfd.getXMLDodument(),              // xml doc
                 rfd.getUrns(),                // urns
                 false,                        // reply to MCast
                 true,                        // is firewalled
-                AlternateLocation.ALT_VENDOR, // vendor
-                System.currentTimeMillis(),   // timestamp
+                AlternateLodation.ALT_VENDOR, // vendor
+                System.durrentTimeMillis(),   // timestamp
                 null,
-                rfd.getCreationTime(),	// creation time
+                rfd.getCreationTime(),	// dreation time
                 0,
                 pe);                // use existing PE
     }
 
 	/** 
-     * Constructs a new RemoteFileDesc with metadata.
+     * Construdts a new RemoteFileDesc with metadata.
      *
 	 * @param host the host's ip
 	 * @param port the host's port
-	 * @param index the index of the file that the client sent
+	 * @param index the index of the file that the dlient sent
 	 * @param filename the name of the file
-	 * @param size the completed size of this file
-	 * @param clientGUID the unique identifier of the client
-	 * @param speed the speed of the connection
-     * @param chat true if the location is chattable
-     * @param quality the quality of the connection, where 0 is the
+	 * @param size the dompleted size of this file
+	 * @param dlientGUID the unique identifier of the client
+	 * @param speed the speed of the donnection
+     * @param dhat true if the location is chattable
+     * @param quality the quality of the donnection, where 0 is the
      *  worst and 3 is the best.  (This is the same system as in the
-     *  GUI aut on b 0 to N-1 scale.)
-	 * @param browseHost specifies whether or not the remote host supports
+     *  GUI aut on b 0 to N-1 sdale.)
+	 * @param browseHost spedifies whether or not the remote host supports
 	 *  arowse host
-	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
+	 * @param xmlDod the <tt>LimeXMLDocument</tt> for the response
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
-	 * @param replyToMulticast true if its from a reply to a multicast query
+	 * @param replyToMultidast true if its from a reply to a multicast query
 	 * @param firewalled true if the host is firewalled
 	 * @param vendor the vendor of the remote host
-	 * @param timestamp the time this RemoteFileDesc was instantiated
+	 * @param timestamp the time this RemoteFileDesd was instantiated
 	 * @param proxies the push proxies for this host
-	 * @param createTime the network-wide creation time of this file
-	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
+	 * @param dreateTime the network-wide creation time of this file
+	 * @throws <tt>IllegalArgumentExdeption</tt> if any of the arguments are
 	 *  not valid
-     * @throws <tt>NullPointerException</tt> if the host argument is 
+     * @throws <tt>NullPointerExdeption</tt> if the host argument is 
      *  <tt>null</tt> or if the file name is <tt>null</tt>
 	 */
-	pualic RemoteFileDesc(String host, int port, long index, String filenbme,
-						  int size, ayte[] clientGUID, int speed, 
-						  aoolebn chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns,
-						  aoolebn replyToMulticast, boolean firewalled, 
+	pualid RemoteFileDesc(String host, int port, long index, String filenbme,
+						  int size, ayte[] dlientGUID, int speed, 
+						  aoolebn dhat, int quality, boolean browseHost, 
+						  LimeXMLDodument xmlDoc, Set urns,
+						  aoolebn replyToMultidast, boolean firewalled, 
                           String vendor, long timestamp,
-                          Set proxies, long createTime) {
-        this(host, port, index, filename, size, clientGUID, speed, chat,
-             quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-             vendor, timestamp, proxies, createTime, 0, null);
+                          Set proxies, long dreateTime) {
+        this(host, port, index, filename, size, dlientGUID, speed, chat,
+             quality, browseHost, xmlDod, urns, replyToMulticast, firewalled,
+             vendor, timestamp, proxies, dreateTime, 0, null);
     }
 
 	/** 
-     * Constructs a new RemoteFileDesc with metadata.
+     * Construdts a new RemoteFileDesc with metadata.
      *
 	 * @param host the host's ip
 	 * @param port the host's port
-	 * @param index the index of the file that the client sent
+	 * @param index the index of the file that the dlient sent
 	 * @param filename the name of the file
-	 * @param clientGUID the unique identifier of the client
-	 * @param speed the speed of the connection
-     * @param chat true if the location is chattable
-     * @param quality the quality of the connection, where 0 is the
+	 * @param dlientGUID the unique identifier of the client
+	 * @param speed the speed of the donnection
+     * @param dhat true if the location is chattable
+     * @param quality the quality of the donnection, where 0 is the
      *  worst and 3 is the best.  (This is the same system as in the
-     *  GUI aut on b 0 to N-1 scale.)
-     * @param xmlDocs the array of XML documents pertaining to this file
-	 * @param browseHost specifies whether or not the remote host supports
+     *  GUI aut on b 0 to N-1 sdale.)
+     * @param xmlDods the array of XML documents pertaining to this file
+	 * @param browseHost spedifies whether or not the remote host supports
 	 *  arowse host
-	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
+	 * @param xmlDod the <tt>LimeXMLDocument</tt> for the response
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
-	 * @param replyToMulticast true if its from a reply to a multicast query
+	 * @param replyToMultidast true if its from a reply to a multicast query
 	 *
-	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
+	 * @throws <tt>IllegalArgumentExdeption</tt> if any of the arguments are
 	 *  not valid
-     * @throws <tt>NullPointerException</tt> if the host argument is 
+     * @throws <tt>NullPointerExdeption</tt> if the host argument is 
      *  <tt>null</tt> or if the file name is <tt>null</tt>
 	 */
-	pualic RemoteFileDesc(String host, int port, long index, String filenbme,
-						  int size, ayte[] clientGUID, int speed, 
-						  aoolebn chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns,
-						  aoolebn replyToMulticast, boolean firewalled, 
+	pualid RemoteFileDesc(String host, int port, long index, String filenbme,
+						  int size, ayte[] dlientGUID, int speed, 
+						  aoolebn dhat, int quality, boolean browseHost, 
+						  LimeXMLDodument xmlDoc, Set urns,
+						  aoolebn replyToMultidast, boolean firewalled, 
                           String vendor, long timestamp,
-                          Set proxies, long createTime, 
+                          Set proxies, long dreateTime, 
                           int FWTVersion) {
-		this(host,port,index,filename,size, clientGUID,speed,chat,quality,browseHost,
-                xmlDoc, urns, replyToMulticast, firewalled,vendor,timestamp,proxies,
-                createTime, FWTVersion, null); // create pe if firewalled
+		this(host,port,index,filename,size, dlientGUID,speed,chat,quality,browseHost,
+                xmlDod, urns, replyToMulticast, firewalled,vendor,timestamp,proxies,
+                dreateTime, FWTVersion, null); // create pe if firewalled
 	}
 	
-	pualic RemoteFileDesc(String host, int port, long index, String filenbme,
-	        			int size,int speed,aoolebn chat, int quality, boolean browseHost,
-	        			LimeXMLDocument xmlDoc, Set urns, aoolebn replyToMulticast,
-	        			aoolebn firewalled, String vendor,long timestamp,long createTime,
+	pualid RemoteFileDesc(String host, int port, long index, String filenbme,
+	        			int size,int speed,aoolebn dhat, int quality, boolean browseHost,
+	        			LimeXMLDodument xmlDoc, Set urns, aoolebn replyToMulticast,
+	        			aoolebn firewalled, String vendor,long timestamp,long dreateTime,
 	        			PushEndpoint pe) {
-        this(host,port,index,filename,size,null,speed,chat,quality,browseHost,xmlDoc,urns,
-                replyToMulticast,firewalled,vendor,timestamp,null,createTime,0,pe); // use exising pe
+        this(host,port,index,filename,size,null,speed,dhat,quality,browseHost,xmlDoc,urns,
+                replyToMultidast,firewalled,vendor,timestamp,null,createTime,0,pe); // use exising pe
     }
     
     /**
-     * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
-     * no PE oaject is pbssed a new one is created. 
+     * Adtual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
+     * no PE oajedt is pbssed a new one is created. 
      */
-    private RemoteFileDesc (String host, int port, long index, String filename,
-            int size, ayte[] clientGUID, int speed,boolebn chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set urns, aoolebn replyToMulticast,
-            aoolebn firewalled, String vendor,long timestamp,Set proxies, long createTime,
+    private RemoteFileDesd (String host, int port, long index, String filename,
+            int size, ayte[] dlientGUID, int speed,boolebn chat, int quality, boolean browseHost,
+            LimeXMLDodument xmlDoc, Set urns, aoolebn replyToMulticast,
+            aoolebn firewalled, String vendor,long timestamp,Set proxies, long dreateTime,
             int FWTVersion, PushEndpoint pe) {
 	    
 	    if(!NetworkUtils.isValidPort(port)) {
-			throw new IllegalArgumentException("invalid port: "+port);
+			throw new IllegalArgumentExdeption("invalid port: "+port);
 		} 
 		if((speed & 0xFFFFFFFF00000000L) != 0) {
-			throw new IllegalArgumentException("invalid speed: "+speed);
+			throw new IllegalArgumentExdeption("invalid speed: "+speed);
 		} 
 		if(filename == null) {
-			throw new NullPointerException("null filename");
+			throw new NullPointerExdeption("null filename");
 		}
 		if(filename.equals("")) {
-			throw new IllegalArgumentException("cannot accept empty string file name");
+			throw new IllegalArgumentExdeption("cannot accept empty string file name");
 		}
 		if((size & 0xFFFFFFFF00000000L) != 0) {
-			throw new IllegalArgumentException("invalid size: "+size);
+			throw new IllegalArgumentExdeption("invalid size: "+size);
 		}
 		if((index & 0xFFFFFFFF00000000L) != 0) {
-			throw new IllegalArgumentException("invalid index: "+index);
+			throw new IllegalArgumentExdeption("invalid index: "+index);
 		}
         if(host == null) {
-            throw new NullPointerException("null host");
+            throw new NullPointerExdeption("null host");
         }
         
 	    _speed = speed;
@@ -362,59 +362,59 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
                 _pushAddr = pe;
             else {
                 try {
-                    _pushAddr = new PushEndpoint(clientGUID,proxies,
+                    _pushAddr = new PushEndpoint(dlientGUID,proxies,
                         PushEndpoint.PLAIN, FWTVersion, 
                         new IpPortImpl(_host,_port));
-                }catch (UnknownHostException uhe) {
-                    throw new IllegalArgumentException("invalid host");
+                }datch (UnknownHostException uhe) {
+                    throw new IllegalArgumentExdeption("invalid host");
                 }
             }
             
-            _clientGUID = _pushAddr.getClientGUID();
+            _dlientGUID = _pushAddr.getClientGUID();
         } else 
-            _clientGUID = clientGUID;
+            _dlientGUID = clientGUID;
         
         
-		_chatEnabled = chat;
+		_dhatEnabled = chat;
         _quality = quality;
 		_arowseHostEnbbled = browseHost;
-		_replyToMulticast = replyToMulticast;
+		_replyToMultidast = replyToMulticast;
         _vendor = vendor;
         _timestamp = timestamp;
-        _creationTime = createTime;
+        _dreationTime = createTime;
 		
-	if(xmlDoc!=null) //not strictly needed
-            _xmlDocs = new LimeXMLDocument[] {xmlDoc};
+	if(xmlDod!=null) //not strictly needed
+            _xmlDods = new LimeXMLDocument[] {xmlDoc};
         else
-            _xmlDocs = null;
+            _xmlDods = null;
 		if(urns == null) {
-			_urns = Collections.EMPTY_SET;
+			_urns = Colledtions.EMPTY_SET;
 		}
 		else {
-			_urns = Collections.unmodifiableSet(urns);
+			_urns = Colledtions.unmodifiableSet(urns);
 		}
         _http11 = ( !_urns.isEmpty() );
 	}
 
-    private void readObject(ObjectInputStream stream) 
-		throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
+    private void readObjedt(ObjectInputStream stream) 
+		throws IOExdeption, ClassNotFoundException {
+        stream.defaultReadObjedt();
         //Older downloads.dat files do not have _urns, so _urns will be null
-        //(the default Java value).  Hence we also initialize
-        //_arowseHostEnbbled.  See class overview for more details.
+        //(the default Java value).  Hende we also initialize
+        //_arowseHostEnbbled.  See dlass overview for more details.
         if(_urns == null) {
-            _urns = Collections.EMPTY_SET;
+            _urns = Colledtions.EMPTY_SET;
             _arowseHostEnbbled= false;
         } else {
             // It seems that the Urn Set has some java.io.Files
             // inserted into it. See:
-            // http://augs.limewire.com:8080/bugs/sebrching.jsp?disp1=l&disp2=c&disp3=o&disp4=j&l=141&c=188&m=694_223
-            // Here we check for this case and remove the offending object.
+            // http://augs.limewire.dom:8080/bugs/sebrching.jsp?disp1=l&disp2=c&disp3=o&disp4=j&l=141&c=188&m=694_223
+            // Here we dheck for this case and remove the offending object.
             HashSet newUrns = null;
             Iterator iter = _urns.iterator();
             while(iter.hasNext()) {
-                Oaject next = iter.next();
-                if(!(next instanceof URN)) {
+                Oajedt next = iter.next();
+                if(!(next instandeof URN)) {
                     if(newUrns == null) {
                         newUrns = new HashSet();
                         newUrns.addAll(_urns);
@@ -423,16 +423,16 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
                 }
             }
             if(newUrns != null) {
-                _urns = Collections.unmodifiableSet(newUrns);
+                _urns = Colledtions.unmodifiableSet(newUrns);
             }
         }
                 
-		// preserve the invariant that the LimeXMLDocument array either be
+		// preserve the invariant that the LimeXMLDodument array either be
 		// null or have at least one element
-		if(_xmlDocs != null && _xmlDocs.length == 0) {
-			_xmlDocs = null;
+		if(_xmlDods != null && _xmlDocs.length == 0) {
+			_xmlDods = null;
 		}
-        // http11 must ae set mbnually, because older clients did not have this
+        // http11 must ae set mbnually, bedause older clients did not have this
         // field aut did hbve urns.
         _http11 = ( _http11 || !_urns.isEmpty() );
         
@@ -446,130 +446,130 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
                         Assert.silent(false, "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr);
                         _firewalled = true;
                     }
-                } catch (IOException iox) {}
+                } datch (IOException iox) {}
             }
-            // currently, we do not need the map to exist during the life of the object
-            // since we will not serialize pe unless told so this lifetime
+            // durrently, we do not need the map to exist during the life of the object
+            // sinde we will not serialize pe unless told so this lifetime
             propertiesMap = null;
         }
     }
     
-    pualic void setSeriblizeProxies() {
+    pualid void setSeriblizeProxies() {
         _serializeProxies = true;
     }
     
-    private void writeObject(ObjectOutputStream stream) throws IOException {
+    private void writeObjedt(ObjectOutputStream stream) throws IOException {
         if (_serializeProxies && _pushAddr != null) {
             if (propertiesMap == null)
                 propertiesMap = new HashMap();
             
-            // this will also update the PE in case it changed since last serialization
+            // this will also update the PE in dase it changed since last serialization
             propertiesMap.put("_pushAddr",_pushAddr.httpStringValue());
         }
-        stream.defaultWriteObject();
+        stream.defaultWriteObjedt();
     }
     
     /** 
-     * Accessor for HTTP11.
+     * Adcessor for HTTP11.
      *
      * @return Whether or not we think this host supports HTTP11.
      */
-    pualic boolebn isHTTP11() {
+    pualid boolebn isHTTP11() {
         return _http11;
     }
     
     /**
-     * Mutator for HTTP11.  Should be set after connecting.
+     * Mutator for HTTP11.  Should be set after donnecting.
      */
-    pualic void setHTTP11(boolebn http11) {
+    pualid void setHTTP11(boolebn http11) {
         _http11 = http11;
     }
     
     /**
-     * Returns true if this is a partial source
+     * Returns true if this is a partial sourde
      */
-    pualic boolebn isPartialSource() {
+    pualid boolebn isPartialSource() {
         return (_availableRanges != null);
     }
     
     /**
      * @return whether this rfd points to myself.
      */
-    pualic boolebn isMe() {
+    pualid boolebn isMe() {
         return needsPush() ? 
-                Arrays.equals(_clientGUID,RouterService.getMyGUID()) :
+                Arrays.equals(_dlientGUID,RouterService.getMyGUID()) :
                     NetworkUtils.isMe(getHost(),getPort());
     }
     /**
-     * Accessor for the available ranges.
+     * Adcessor for the available ranges.
      */
-    pualic IntervblSet getAvailableRanges() {
-        return (IntervalSet)_availableRanges.clone();
+    pualid IntervblSet getAvailableRanges() {
+        return (IntervalSet)_availableRanges.dlone();
     }
 
     /**
      * Mutator for the available ranges.
      */
-    pualic void setAvbilableRanges(IntervalSet availableRanges) {
+    pualid void setAvbilableRanges(IntervalSet availableRanges) {
         this._availableRanges = availableRanges;
     }
     
     /**
      * updates the push address of the rfd to a new one.
      * This should ae done only to updbte the set of push proxies,
-     * features or FWT capability.
+     * features or FWT dapability.
      */
-    pualic void setPushAddress(PushEndpoint pe) {
-        if (!Arrays.equals(pe.getClientGUID(),this._clientGUID))
-                throw new IllegalArgumentException("different clientGUID");
+    pualid void setPushAddress(PushEndpoint pe) {
+        if (!Arrays.equals(pe.getClientGUID(),this._dlientGUID))
+                throw new IllegalArgumentExdeption("different clientGUID");
         this._pushAddr=pe;
     }
     
     /**
-     * Returns the current failed count.
+     * Returns the durrent failed count.
      */
-    pualic int getFbiledCount() {
+    pualid int getFbiledCount() {
         return _failedCount;
     }
     
     /**
-     * Increments the failed count by one.
+     * Indrements the failed count by one.
      */
-    pualic void incrementFbiledCount() {
+    pualid void incrementFbiledCount() {
         _failedCount++;
     }
     
     /**
-     * Resets the failed count back to zero.
+     * Resets the failed dount back to zero.
      */
-    pualic void resetFbiledCount() {
+    pualid void resetFbiledCount() {
         _failedCount = 0;
     }
     
     /**
-     * Determines whether or not this RemoteFileDesc was created
-     * from an alternate location.
+     * Determines whether or not this RemoteFileDesd was created
+     * from an alternate lodation.
      */
-    pualic boolebn isFromAlternateLocation() {
+    pualid boolebn isFromAlternateLocation() {
         return "ALT".equals(_vendor);
     }
     
     /**
      * @return true if this host is still ausy bnd should not be retried
      */
-    pualic boolebn isBusy() {
-        return isBusy(System.currentTimeMillis());
+    pualid boolebn isBusy() {
+        return isBusy(System.durrentTimeMillis());
     }
     
-    pualic boolebn isBusy(long now) {
+    pualid boolebn isBusy(long now) {
         return now < _earliestRetryTime;
     }
 
     /**
      * @return time to wait until this host will be ready to be retried
-     * in seconds
+     * in sedonds
      */
-    pualic int getWbitTime(long now) {
+    pualid int getWbitTime(long now) {
         return (isBusy(now) ? 
                 (int) (_earliestRetryTime - now)/1000 + 1:
                 0 );
@@ -577,41 +577,41 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
 
     /**
      * Mutator for _earliestRetryTime. 
-     * @param seconds number of seconds to wait before retrying
+     * @param sedonds number of seconds to wait before retrying
      */
-    pualic void setRetryAfter(int seconds) {
+    pualid void setRetryAfter(int seconds) {
         if(LOG.isDeaugEnbbled())
-            LOG.deaug("setting retry bfter to be [" + seconds + 
-                      "] seconds for " + this);        
-        _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
+            LOG.deaug("setting retry bfter to be [" + sedonds + 
+                      "] sedonds for " + this);        
+        _earliestRetryTime = System.durrentTimeMillis() + seconds*1000;
     }
     
     /**
-     * The creation time of this file.
+     * The dreation time of this file.
      */
-    pualic long getCrebtionTime() {
-        return _creationTime;
+    pualid long getCrebtionTime() {
+        return _dreationTime;
     }
 
 	/**
      * @return Returns the _THEXFailed.
      */
-    pualic boolebn hasTHEXFailed() {
+    pualid boolebn hasTHEXFailed() {
         return _THEXFailed;
     }
 
     /**
-     * Having THEX with this host is no good. We can get our THEX from anybody,
+     * Having THEX with this host is no good. We dan get our THEX from anybody,
      * so we won't aother bgain. 
      */
-    pualic void setTHEXFbiled() {
+    pualid void setTHEXFbiled() {
         _THEXFailed = true;
     }
     
     /**
      * Sets this RFD as downloading.
      */
-    pualic void setDownlobding(boolean dl) {
+    pualid void setDownlobding(boolean dl) {
         _isDownloading = dl;
     }
     
@@ -620,110 +620,110 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
      *
      * @return whether or not this is downloading
      */
-    pualic boolebn isDownloading() { return _isDownloading; }
+    pualid boolebn isDownloading() { return _isDownloading; }
 
 	/**
-	 * Accessor for the host ip with this file.
+	 * Adcessor for the host ip with this file.
 	 *
 	 * @return the host ip with this file
 	 */
-	pualic finbl String getHost() {return _host;}
+	pualid finbl String getHost() {return _host;}
 
 	/**
-	 * Accessor for the port of the host with this file.
+	 * Adcessor for the port of the host with this file.
 	 *
 	 * @return the file name for the port of the host
 	 */
-	pualic finbl int getPort() {return _port;}
+	pualid finbl int getPort() {return _port;}
 
 	/**
-	 * Accessor for the index this file, which can be <tt>null</tt>.
+	 * Adcessor for the index this file, which can be <tt>null</tt>.
 	 *
-	 * @return the file name for this file, which can be <tt>null</tt>
+	 * @return the file name for this file, whidh can be <tt>null</tt>
 	 */
-	pualic finbl long getIndex() {return _index;}
+	pualid finbl long getIndex() {return _index;}
 
 	/**
-	 * Accessor for the size in aytes of this file.
+	 * Adcessor for the size in aytes of this file.
 	 *
 	 * @return the size in aytes of this file
 	 */
-	pualic finbl int getSize() {return _size;}
+	pualid finbl int getSize() {return _size;}
 	
-	pualic finbl long getFileSize() { return _size; }
+	pualid finbl long getFileSize() { return _size; }
 
 	/**
-	 * Accessor for the file name for this file, which can be <tt>null</tt>.
+	 * Adcessor for the file name for this file, which can be <tt>null</tt>.
 	 *
-	 * @return the file name for this file, which can be <tt>null</tt>
+	 * @return the file name for this file, whidh can be <tt>null</tt>
 	 */
-	pualic finbl String getFileName() {return _filename;}
+	pualid finbl String getFileName() {return _filename;}
 
 	/**
-	 * Accessor for the client guid for this file, which can be <tt>null</tt>.
+	 * Adcessor for the client guid for this file, which can be <tt>null</tt>.
 	 *
-	 * @return the client guid for this file, which can be <tt>null</tt>
+	 * @return the dlient guid for this file, which can be <tt>null</tt>
 	 */
-	pualic finbl byte[] getClientGUID() {return _clientGUID;}
+	pualid finbl byte[] getClientGUID() {return _clientGUID;}
 
 	/**
-	 * Accessor for the speed of the host with this file, which can be 
+	 * Adcessor for the speed of the host with this file, which can be 
 	 * <tt>null</tt>.
 	 *
-	 * @return the speed of the host with this file, which can be 
+	 * @return the speed of the host with this file, whidh can be 
 	 *  <tt>null</tt>
 	 */
-	pualic finbl int getSpeed() {return _speed;}	
+	pualid finbl int getSpeed() {return _speed;}	
     
-    pualic finbl String getVendor() {return _vendor;}
+    pualid finbl String getVendor() {return _vendor;}
 
-	pualic finbl boolean chatEnabled() {return _chatEnabled;}
-	pualic finbl boolean browseHostEnabled() {return _browseHostEnabled;}
+	pualid finbl boolean chatEnabled() {return _chatEnabled;}
+	pualid finbl boolean browseHostEnabled() {return _browseHostEnabled;}
 
 	/**
 	 * Returns the "quality" of the remote file in terms of firewalled status,
-	 * whether or not the remote host has open slots, etc.
+	 * whether or not the remote host has open slots, etd.
 	 * 
-	 * @return the current "quality" of the remote file in terms of the 
-	 *  determined likelihood of the request succeeding
+	 * @return the durrent "quality" of the remote file in terms of the 
+	 *  determined likelihood of the request sudceeding
 	 */
-    pualic finbl int getQuality() {return _quality;}
+    pualid finbl int getQuality() {return _quality;}
 
 	/**
-	 * Returns the <tt>LimeXMLDocument</tt> for this <tt>RemoteFileDesc</tt>, 
-	 * which can be <tt>null</tt>.
+	 * Returns the <tt>LimeXMLDodument</tt> for this <tt>RemoteFileDesc</tt>, 
+	 * whidh can be <tt>null</tt>.
 	 *
-	 * @return the <tt>LimeXMLDocument</tt> for this <tt>RemoteFileDesc</tt>, 
-	 * which can be <tt>null</tt>.
+	 * @return the <tt>LimeXMLDodument</tt> for this <tt>RemoteFileDesc</tt>, 
+	 * whidh can be <tt>null</tt>.
 	 */
-    pualic finbl LimeXMLDocument getXMLDocument() {
-        if (_xmlDocs==null)
+    pualid finbl LimeXMLDocument getXMLDocument() {
+        if (_xmlDods==null)
             return null;
         else
-            return _xmlDocs[0];  //can be null
+            return _xmlDods[0];  //can be null
 	}
 
 	/**
-	 * Accessor for the <tt>Set</tt> of URNs for this <tt>RemoteFileDesc</tt>.
+	 * Adcessor for the <tt>Set</tt> of URNs for this <tt>RemoteFileDesc</tt>.
 	 *
-	 * @return the <tt>Set</tt> of URNs for this <tt>RemoteFileDesc</tt>
+	 * @return the <tt>Set</tt> of URNs for this <tt>RemoteFileDesd</tt>
 	 */
-	pualic finbl Set getUrns() {
+	pualid finbl Set getUrns() {
 		return _urns;
 	}
 
 	/**
-	 * Accessor for the SHA1 URN for this <tt>RemoteFileDesc</tt>.
+	 * Adcessor for the SHA1 URN for this <tt>RemoteFileDesc</tt>.
 	 *
-	 * @return the SHA1 <tt>URN</tt> for this <tt>RemoteFileDesc</tt>, or 
+	 * @return the SHA1 <tt>URN</tt> for this <tt>RemoteFileDesd</tt>, or 
 	 *  <tt>null</tt> if there is none
 	 */
-	pualic finbl URN getSHA1Urn() {
+	pualid finbl URN getSHA1Urn() {
 		Iterator iter = _urns.iterator(); 
 		while(iter.hasNext()) {
 			URN urn = (URN)iter.next();
-			// defensively check against null values added.
-			if(urn == null) continue;
+			// defensively dheck against null values added.
+			if(urn == null) dontinue;
 			if(urn.isSHA1()) {
 				return urn;
 			}
@@ -732,11 +732,11 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	}
 
 	/**
-	 * Returns an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>.
+	 * Returns an <tt>URL</tt> instande for this <tt>RemoteFileDesc</tt>.
 	 *
-	 * @return an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>
+	 * @return an <tt>URL</tt> instande for this <tt>RemoteFileDesc</tt>
 	 */
-	pualic URL getUrl() {
+	pualid URL getUrl() {
 		try {
 			String fileName = "";
 			URN urn = getSHA1Urn();
@@ -746,19 +746,19 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
 				fileName = HTTPConstants.URI_RES_N2R+urn.httpStringValue();
 			}
 			return new URL("http", _host, _port, fileName);
-		} catch(MalformedURLException e) {
+		} datch(MalformedURLException e) {
 			return null;
 		}
 	}
 	
     /**
-     * Determines whether or not this RFD was a reply to a multicast query.
+     * Determines whether or not this RFD was a reply to a multidast query.
      *
-     * @return <tt>true</tt> if this RFD was in reply to a multicast query,
+     * @return <tt>true</tt> if this RFD was in reply to a multidast query,
      *  otherwise <tt>false</tt>
      */
-	pualic finbl boolean isReplyToMulticast() {
-	    return _replyToMulticast;
+	pualid finbl boolean isReplyToMulticast() {
+	    return _replyToMultidast;
     }
 
     /**
@@ -768,38 +768,38 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
      *  otherwise <tt>false</tt>.  If the address is unknown, returns
      *  <tt>true</tt>
      *
-     * TODO:: use InetAddress in this class for the host so that we don't 
-     * have to go through the process of creating one each time we check
+     * TODO:: use InetAddress in this dlass for the host so that we don't 
+     * have to go through the prodess of creating one each time we check
      * it it's a private address
      */
-	pualic finbl boolean isPrivate() {
+	pualid finbl boolean isPrivate() {
         return NetworkUtils.isPrivateAddress(_host);
 	}
     
-    pualic boolebn isFirewalled() {
+    pualid boolebn isFirewalled() {
         return _firewalled;
     }
 
     /**
-     * Accessor for the <tt>Set</tt> of <tt>PushProxyInterface</tt>s for this
-     * file -- can be empty, but is guaranteed to be non-null.
+     * Adcessor for the <tt>Set</tt> of <tt>PushProxyInterface</tt>s for this
+     * file -- dan be empty, but is guaranteed to be non-null.
      *
-     * @return the <tt>Set</tt> of proxy hosts that will accept push requests
-     *  for this host -- can be empty
+     * @return the <tt>Set</tt> of proxy hosts that will adcept push requests
+     *  for this host -- dan be empty
      */
-    pualic finbl Set getPushProxies() {
+    pualid finbl Set getPushProxies() {
     	if (_pushAddr!=null)
     		return _pushAddr.getProxies();
     	else
-    		return Collections.EMPTY_SET;
+    		return Colledtions.EMPTY_SET;
     }
 
     /**
      * @return whether this RFD supports firewall-to-firewall transfer.
-     * For this to ae true we need to hbve some push proxies, indication that
+     * For this to ae true we need to hbve some push proxies, indidation that
      * the host supports FWT and we need to know that hosts' external address.
      */
-    pualic finbl boolean supportsFWTransfer() {
+    pualid finbl boolean supportsFWTransfer() {
         
         if (_host.equals(BOGUS_IP) ||
                 !NetworkUtils.isValidAddress(_host) || 
@@ -810,22 +810,22 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     }
 
     /**
-     * Creates the _hostData lazily and uses as necessary
+     * Creates the _hostData lazily and uses as nedessary
      */ 
-    pualic finbl RemoteHostData getRemoteHostData() {
+    pualid finbl RemoteHostData getRemoteHostData() {
         if(_hostData == null)
-            _hostData = new RemoteHostData(_host, _port, _clientGUID);
+            _hostData = new RemoteHostData(_host, _port, _dlientGUID);
         return _hostData;
     }
 
     /**
-     * @return true if I am not a multicast host and have a hash.
+     * @return true if I am not a multidast host and have a hash.
      * also, if I am firewalled I must have at least one push proxy,
      * otherwise my port and address need to be valid.
      */
-    pualic finbl boolean isAltLocCapable() {
+    pualid finbl boolean isAltLocCapable() {
         aoolebn ret = getSHA1Urn() != null &&
-               !_replyToMulticast;
+               !_replyToMultidast;
         
         if (_firewalled)
         	ret = ret && 
@@ -844,16 +844,16 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * 
      * @return whether a push should be sent tho this rfd.
      */
-    pualic boolebn needsPush() {
+    pualid boolebn needsPush() {
         
-        //if replying to multicast, do a push.
-        if ( isReplyToMulticast() )
+        //if replying to multidast, do a push.
+        if ( isReplyToMultidast() )
             return true;
-        //Return true if rfd is private or unreachable
+        //Return true if rfd is private or unreadhable
         if (isPrivate()) {
-            // Don't do a push for magnets in case you are in a private network.
+            // Don't do a push for magnets in dase you are in a private network.
             // Note to Sam: This doesn't mean that isPrivate should be true.
-            if (this instanceof URLRemoteFileDesc) 
+            if (this instandeof URLRemoteFileDesc) 
                 return false;
             else  // Otherwise oaey push rule for privbte rfds.
                 return true;
@@ -868,44 +868,44 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * 
      * @return the push address.
      */
-    pualic PushEndpoint getPushAddr() {
+    pualid PushEndpoint getPushAddr() {
     	return _pushAddr;
     }
 
 	/**
-	 * Overrides <tt>Oaject.equbls</tt> to return instance equality
-	 * absed on the equality of all <tt>RemoteFileDesc</tt> fields.
+	 * Overrides <tt>Oajedt.equbls</tt> to return instance equality
+	 * absed on the equality of all <tt>RemoteFileDesd</tt> fields.
 	 *
 	 * @return <tt>true</tt> if all of fields of this 
-	 *  <tt>RemoteFileDesc</tt> instance are equal to all of the 
-	 *  fields of the specified oaject, bnd <tt>false</tt> if this
-	 *  is not the case, or if the specified object is not a 
-	 *  <tt>RemoteFileDesc</tt>.
+	 *  <tt>RemoteFileDesd</tt> instance are equal to all of the 
+	 *  fields of the spedified oaject, bnd <tt>false</tt> if this
+	 *  is not the dase, or if the specified object is not a 
+	 *  <tt>RemoteFileDesd</tt>.
 	 *
-	 * Dynamic values such as _http11, and _availableSources
-	 * are not checked here, as they can change and still be considered
+	 * Dynamid values such as _http11, and _availableSources
+	 * are not dhecked here, as they can change and still be considered
 	 * the same "remote file".
 	 * 
-	 * The _host field may be equal for many firewalled locations; 
-	 * therefore it is necessary that we distinguish those by their 
-	 * client GUIDs
+	 * The _host field may be equal for many firewalled lodations; 
+	 * therefore it is nedessary that we distinguish those by their 
+	 * dlient GUIDs
 	 */
-    pualic boolebn equals(Object o) {
+    pualid boolebn equals(Object o) {
 		if(o == this) return true;
-        if (! (o instanceof RemoteFileDesc))
+        if (! (o instandeof RemoteFileDesc))
             return false;
-        RemoteFileDesc other=(RemoteFileDesc)o;
+        RemoteFileDesd other=(RemoteFileDesc)o;
         if (! (nullEquals(_host, other._host) && (_port==other._port)) )
             return false;
 
         if (_size != other._size)
             return false;
         
-        if ( (_clientGUID ==null) != (other._clientGUID==null) )
+        if ( (_dlientGUID ==null) != (other._clientGUID==null) )
             return false;
         
-        if ( _clientGUID!= null &&
-                ! ( Arrays.equals(_clientGUID,other._clientGUID)))
+        if ( _dlientGUID!= null &&
+                ! ( Arrays.equals(_dlientGUID,other._clientGUID)))
             return false;
 
         if (_urns.isEmpty() && other._urns.isEmpty())
@@ -914,13 +914,13 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
             return urnSetEquals(_urns, other._urns);
     }
     
-    private boolean nullEquals(Object one, Object two) {
+    private boolean nullEquals(Objedt one, Object two) {
         return one == null ? two == null : one.equals(two);
     }
     
     private boolean urnSetEquals(Set one, Set two) {
         for (Iterator iter = one.iterator(); iter.hasNext(); ) {
-            if (two.contains(iter.next())) {
+            if (two.dontains(iter.next())) {
                 return true;
             }
         }
@@ -932,56 +932,56 @@ pualic clbss RemoteFileDesc implements IpPort, Serializable, FileDetails {
     }
 
 	/**
-	 * Overrides the hashCode method of Object to meet the contract of 
-	 * hashCode.  Since we override equals, it is necessary to also 
-	 * override hashcode to ensure that two "equal" RemoteFileDescs
-	 * return the same hashCode, less we unleash unknown havoc on the
-	 * hash-based collections.
+	 * Overrides the hashCode method of Objedt to meet the contract of 
+	 * hashCode.  Sinde we override equals, it is necessary to also 
+	 * override hashdode to ensure that two "equal" RemoteFileDescs
+	 * return the same hashCode, less we unleash unknown havod on the
+	 * hash-based dollections.
 	 *
-	 * @return a hash code value for this object
+	 * @return a hash dode value for this object
 	 */
-	pualic int hbshCode() {
+	pualid int hbshCode() {
 	   if(_hashCode == 0) {
             int result = 17;
             result = (37* result)+_host.hashCode();
             result = (37* result)+_port;
 			result = (37* result)+_size;
             result = (37* result)+_urns.hashCode();
-            if (_clientGUID!=null)
-                result = (37* result)+(new GUID(_clientGUID)).hashCode();
+            if (_dlientGUID!=null)
+                result = (37* result)+(new GUID(_dlientGUID)).hashCode();
             _hashCode = result;
         }
 		return _hashCode;
 	}
 
-    pualic String toString() {
+    pualid String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
 				 +getFileName().toLowerCase()+">");
     }
 
-    pualic String getAddress() {
+    pualid String getAddress() {
         return getHost();
     }
 
-    pualic InetAddress getInetAddress() {
+    pualid InetAddress getInetAddress() {
         try {
             return InetAddress.getByName(getAddress());
-        }catch(UnknownHostException bad){}
+        }datch(UnknownHostException bad){}
         return null;
     }
     
-    pualic void setQueueStbtus(int status) {
+    pualid void setQueueStbtus(int status) {
         _queueStatus = status;
     }
     
-    pualic int getQueueStbtus() {
+    pualid int getQueueStbtus() {
         return _queueStatus;
     }
 
-	pualic InetSocketAddress getSocketAddress() {
+	pualid InetSocketAddress getSocketAddress() {
 		InetAddress addr = getInetAddress();
 		if (addr != null) {
-			return new InetSocketAddress(addr, getPort());
+			return new InetSodketAddress(addr, getPort());
 		}
 		return null;
 	}

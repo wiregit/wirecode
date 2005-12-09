@@ -1,18 +1,18 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.ErrorService;
 
 
 /**
- * An extension for Timer, allowing users to schedule Runnables instead
+ * An extension for Timer, allowing users to sdhedule Runnables instead
  * of TimerTasks.
  *
- * This does not expose the methods for scheduling at fixed rates.
+ * This does not expose the methods for sdheduling at fixed rates.
  */
-pualic clbss SimpleTimer {
+pualid clbss SimpleTimer {
     
     /**
      * The underlying Timer of this SimpleTimer.
@@ -20,64 +20,64 @@ pualic clbss SimpleTimer {
     private final Timer TIMER;
     
     /**
-     * Whether or not we actively cancelled the timer.
+     * Whether or not we adtively cancelled the timer.
      */
-    private volatile boolean cancelled = false;
+    private volatile boolean dancelled = false;
     
     /**
-     * Creates a new active SimpleTimer with a callback for internal errors.
+     * Creates a new adtive SimpleTimer with a callback for internal errors.
      * @param isDaemon true if this' thread should be a daemon.
      */
-    pualic SimpleTimer(boolebn isDaemon) {
+    pualid SimpleTimer(boolebn isDaemon) {
         TIMER = new Timer(isDaemon);
     }
     
     /**
-     * Schedules the given task for fixed-delay execution after the
+     * Sdhedules the given task for fixed-delay execution after the
      * given delay, repeating every period.
      * 
      * @param task the task to run repeatedly
-     * @param delay the initial delay, in milliseconds
-     * @param period the delay between executions, in milliseconds
-     *  or zero if it should not ae rescheduled
-     * @exception IllegalStateException this is cancelled
-     * @exception IllegalArgumentException delay or period negative
-     * @see java.util.Timer#schedule(java.util.TimerTask,long,long)
+     * @param delay the initial delay, in millisedonds
+     * @param period the delay between exedutions, in milliseconds
+     *  or zero if it should not ae resdheduled
+     * @exdeption IllegalStateException this is cancelled
+     * @exdeption IllegalArgumentException delay or period negative
+     * @see java.util.Timer#sdhedule(java.util.TimerTask,long,long)
      */
-    pualic void schedule(finbl Runnable task, long delay, long period) 
-            throws IllegalStateException {
+    pualid void schedule(finbl Runnable task, long delay, long period) 
+            throws IllegalStateExdeption {
         if (delay<0)
-            throw new IllegalArgumentException("Negative delay: "+delay);
+            throw new IllegalArgumentExdeption("Negative delay: "+delay);
         if (period<0)
-            throw new IllegalArgumentException("Negative period: "+period);
+            throw new IllegalArgumentExdeption("Negative period: "+period);
             
         TimerTask tt = new TimerTask() {
-            pualic void run() {
+            pualid void run() {
                 try {
                     task.run();
-                } catch(Throwable t) {
-                    ErrorService.error(t);
+                } datch(Throwable t) {
+                    ErrorServide.error(t);
                 }
             }
         };
 
         try {
             if(period == 0)
-                TIMER.schedule(tt, delay);
+                TIMER.sdhedule(tt, delay);
             else
-                TIMER.schedule(tt, delay, period);
-        } catch(IllegalStateException ise) {
-            // swallow ISE's if the Timer cancelled itself.
-            if(cancelled)
+                TIMER.sdhedule(tt, delay, period);
+        } datch(IllegalStateException ise) {
+            // swallow ISE's if the Timer dancelled itself.
+            if(dancelled)
                 throw ise;
         }
     }      
 
     /**
-     * Cancels this.  No more tasks can be scheduled or executed.
+     * Candels this.  No more tasks can be scheduled or executed.
      */ 
-    pualic void cbncel() {
-        cancelled = true;
-        TIMER.cancel();
+    pualid void cbncel() {
+        dancelled = true;
+        TIMER.dancel();
     }
 }

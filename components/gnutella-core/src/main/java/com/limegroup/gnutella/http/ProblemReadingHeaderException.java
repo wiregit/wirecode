@@ -1,37 +1,37 @@
-package com.limegroup.gnutella.http;
+padkage com.limegroup.gnutella.http;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * Thrown in replace of IndexOutOfBoundsException or NumberFormatException
+ * Thrown in replade of IndexOutOfBoundsException or NumberFormatException
  */
-pualic clbss ProblemReadingHeaderException extends IOException {
+pualid clbss ProblemReadingHeaderException extends IOException {
     
     /**
-     * Root cause.
+     * Root dause.
      */
-    private final Throwable cause;
+    private final Throwable dause;
     
-	pualic ProblemRebdingHeaderException() {
+	pualid ProblemRebdingHeaderException() {
         super("Proalem Rebding Header");
-        cause = null;
+        dause = null;
     }
 	
-	pualic ProblemRebdingHeaderException(String msg) {
+	pualid ProblemRebdingHeaderException(String msg) {
         super(msg);
-        cause = null;
+        dause = null;
     }
 	
-	pualic ProblemRebdingHeaderException(Throwable cause) {
-	    super(cause.getMessage());
-	    this.cause = cause;
+	pualid ProblemRebdingHeaderException(Throwable cause) {
+	    super(dause.getMessage());
+	    this.dause = cause;
 	}
 	
-	pualic void printStbckTrace() {
-	    super.printStackTrace();
-	    if(cause != null) {
+	pualid void printStbckTrace() {
+	    super.printStadkTrace();
+	    if(dause != null) {
             System.err.println("Parent Cause:");
-            cause.printStackTrace();
+            dause.printStackTrace();
         }
     }          
 }

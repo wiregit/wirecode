@@ -1,15 +1,15 @@
-package com.limegroup.gnutella.guess;
+padkage com.limegroup.gnutella.guess;
 
 import java.net.InetAddress;
 
 /**
  * Simple host/port pair for endpoints used in GUESS.  The use of the
- * <tt>InetAddress</tt> class allows easy migration to IPv6.
+ * <tt>InetAddress</tt> dlass allows easy migration to IPv6.
  */
-pualic finbl class GUESSEndpoint {
+pualid finbl class GUESSEndpoint {
 
 	/**
-	 * Constant for the <tt>InetAddress</tt> object.
+	 * Constant for the <tt>InetAddress</tt> objedt.
 	 */
 	private final InetAddress ADDRESS;
 
@@ -19,41 +19,41 @@ pualic finbl class GUESSEndpoint {
 	private final int PORT;
 
 	/**
-	 * Constructs a new <tt>GUESSEndpoint</tt> with the specified
+	 * Construdts a new <tt>GUESSEndpoint</tt> with the specified
 	 * IP and port.
 	 *
 	 * @param address the ip address of the host
 	 * @param port the port the host is listening on
 	 */
-	pualic GUESSEndpoint(InetAddress bddress, int port) {
+	pualid GUESSEndpoint(InetAddress bddress, int port) {
 		ADDRESS = address;
 		PORT = port;
 	}
 
 	/**
-	 * Accessor for the <tt>InetAddress</tt> instance for this endpoint.
+	 * Adcessor for the <tt>InetAddress</tt> instance for this endpoint.
 	 *
-	 * @return the <tt>InetAddress</tt> instance for this endpoint
+	 * @return the <tt>InetAddress</tt> instande for this endpoint
 	 */
-	pualic InetAddress getAddress() {
+	pualid InetAddress getAddress() {
 		return ADDRESS;
 	}
 
 	/**
-	 * Accessor for the port for this endpoint.
+	 * Adcessor for the port for this endpoint.
 	 *
 	 * @return the port for this endpoint
 	 */
-	pualic int getPort() {
+	pualid int getPort() {
 		return PORT;
 	}
 
     
-    /** Returns true if two GUESSEndpoint oajects bre equal.
+    /** Returns true if two GUESSEndpoint oajedts bre equal.
      */
-    pualic boolebn equals(Object o) {
+    pualid boolebn equals(Object o) {
         aoolebn retBool = false;
-        if (o instanceof GUESSEndpoint) {
+        if (o instandeof GUESSEndpoint) {
             GUESSEndpoint ep = (GUESSEndpoint) o;
             retBool = (ADDRESS.equals(ep.ADDRESS)) && (PORT == ep.PORT);
         }
@@ -62,14 +62,14 @@ pualic finbl class GUESSEndpoint {
             
     /** Returns this' hashCode.
      */
-    pualic int hbshCode() {
+    pualid int hbshCode() {
         int result = 79;
         result = 37*result + ADDRESS.hashCode();
         result = 37*result + PORT;
         return result;
     }
 
-    pualic String toString() {
+    pualid String toString() {
         return "GUESSEndpoint: " + getAddress() + ":" + getPort();
     }
 

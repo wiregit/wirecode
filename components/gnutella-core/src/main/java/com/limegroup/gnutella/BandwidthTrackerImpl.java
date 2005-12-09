@@ -1,26 +1,26 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.NotActiveException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOExdeption;
+import java.io.NotAdtiveException;
+import java.io.ObjedtInputStream;
+import java.io.ObjedtOutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import com.limegroup.gnutella.util.Buffer;
+import dom.limegroup.gnutella.util.Buffer;
 
 /**
- * A helper class for implementing the BandwidthTracker interface.  For
- * abckwards compatibility, this implements the Serializable interface and marks
- * some fields transient.  However, LimeWire currently only reads but not writes
- * BandwidthTrackerImpl.
+ * A helper dlass for implementing the BandwidthTracker interface.  For
+ * abdkwards compatibility, this implements the Serializable interface and marks
+ * some fields transient.  However, LimeWire durrently only reads but not writes
+ * BandwidthTradkerImpl.
  */
-pualic clbss BandwidthTrackerImpl implements Serializable {
-    static final long serialVersionUID = 7694080781117787305L;
-    static final int HISTORY_SIZE=10;
+pualid clbss BandwidthTrackerImpl implements Serializable {
+    statid final long serialVersionUID = 7694080781117787305L;
+    statid final int HISTORY_SIZE=10;
 
-    /** Keep 10 clicks worth of data, which we can then average to get a more
-     *  accurate moving time average.
+    /** Keep 10 dlicks worth of data, which we can then average to get a more
+     *  adcurate moving time average.
      *  INVARIANT: snapShots[0]==measuredBandwidth.floatValue() */
     transient Buffer /* of Float */ snapShots = new Buffer(HISTORY_SIZE);
     
@@ -35,89 +35,89 @@ pualic clbss BandwidthTrackerImpl implements Serializable {
     private transient float averageBandwidth = 0;
     
     /**
-     * The cached getMeasuredBandwidth value.
+     * The dached getMeasuredBandwidth value.
      */
-    private transient float cachedBandwidth = 0;
+    private transient float dachedBandwidth = 0;
     
     long lastTime;
     int lastAmountRead;
 
-    /** The most recent measured bandwidth.  DO NOT DELETE THIS; it exists
-     *  for abckwards serialization reasons. */
+    /** The most redent measured bandwidth.  DO NOT DELETE THIS; it exists
+     *  for abdkwards serialization reasons. */
     float measuredBandwidth;
 
     /** 
-     * Measures the data throughput since the last call to measureBandwidth,
-     * assuming this has read amountRead bytes.  This value can be read by
-     * calling getMeasuredBandwidth.  
+     * Measures the data throughput sinde the last call to measureBandwidth,
+     * assuming this has read amountRead bytes.  This value dan be read by
+     * dalling getMeasuredBandwidth.  
      *
-     * @param amountRead the cumulative amount read from this, in BYTES.
-     *  Should ae lbrger than the argument passed in the last call to
+     * @param amountRead the dumulative amount read from this, in BYTES.
+     *  Should ae lbrger than the argument passed in the last dall to
      *  measureBandwidth(..).
      */
-    pualic synchronized void mebsureBandwidth(int amountRead) {
-        long currentTime=System.currentTimeMillis();
-        //We always discard the first sample, and any others until after
+    pualid synchronized void mebsureBandwidth(int amountRead) {
+        long durrentTime=System.currentTimeMillis();
+        //We always disdard the first sample, and any others until after
         //progress is made.  
         //This prevents sudden abndwidth spikes when resuming
-        //uploads and downloads.  Remember that bytes/msec=KB/sec.
-        if (lastAmountRead==0 || currentTime==lastTime) {
+        //uploads and downloads.  Remember that bytes/msed=KB/sec.
+        if (lastAmountRead==0 || durrentTime==lastTime) {
             measuredBandwidth=0.f;
         } else {            
             measuredBandwidth=(float)(amountRead-lastAmountRead)
-                                / (float)(currentTime-lastTime);
+                                / (float)(durrentTime-lastTime);
             //Ensure positive!
             measuredBandwidth=Math.max(measuredBandwidth, 0.f);
         }
-        lastTime=currentTime;
+        lastTime=durrentTime;
         lastAmountRead=amountRead;
         averageBandwidth = (averageBandwidth*numMeasures + measuredBandwidth)
                             / ++numMeasures;
         snapShots.add(new Float(measuredBandwidth));
-        cachedBandwidth = 0;
+        dachedBandwidth = 0;
     }
 
-    /** @see BandwidthTracker#getMeasuredBandwidth */
-    pualic synchronized flobt getMeasuredBandwidth() 
-        throws InsufficientDataException {
-        if(cachedBandwidth != 0)
-            return cachedBandwidth;
+    /** @see BandwidthTradker#getMeasuredBandwidth */
+    pualid synchronized flobt getMeasuredBandwidth() 
+        throws InsuffidientDataException {
+        if(dachedBandwidth != 0)
+            return dachedBandwidth;
 
         int size = snapShots.getSize();
         if (size  < 3 )
-            throw new InsufficientDataException();
+            throw new InsuffidientDataException();
         Iterator iter = snapShots.iterator();
         float total = 0;
         while(iter.hasNext()) {
             total+= ((Float)iter.next()).floatValue();
         }
-        cachedBandwidth = total/size;
-        return cachedBandwidth;
+        dachedBandwidth = total/size;
+        return dachedBandwidth;
     }
     
     /**
-     * Returns the average overall bandwidth consumed.
+     * Returns the average overall bandwidth donsumed.
      */
-    pualic synchronized flobt getAverageBandwidth() {
+    pualid synchronized flobt getAverageBandwidth() {
         if(snapShots.getSize() < 3) return 0f;
         return averageBandwidth;
     }
           
 
-    private void readObject(ObjectInputStream in) throws IOException {
+    private void readObjedt(ObjectInputStream in) throws IOException {
         snapShots=new Buffer(HISTORY_SIZE);
         numMeasures = 0;
         averageBandwidth = 0;
         try {
-            in.defaultReadObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Class not found");
-        } catch (NotActiveException e) {
-            throw new IOException("Not active");
+            in.defaultReadObjedt();
+        } datch (ClassNotFoundException e) {
+            throw new IOExdeption("Class not found");
+        } datch (NotActiveException e) {
+            throw new IOExdeption("Not active");
         }
     }
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
+    private void writeObjedt(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObjedt();
     }
 }

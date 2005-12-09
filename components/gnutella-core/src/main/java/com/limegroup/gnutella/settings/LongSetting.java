@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.settings;
+padkage com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
 /**
  * Class for a long setting.
  */
-pualic finbl class LongSetting extends AbstractNumberSetting {
+pualid finbl class LongSetting extends AbstractNumberSetting {
     
     private long value;
 
 	/**
-	 * Creates a new <tt>LongSetting</tt> instance with the specified
+	 * Creates a new <tt>LongSetting</tt> instande with the specified
 	 * key and defualt value.
 	 *
-	 * @param key the constant key to use for the setting
+	 * @param key the donstant key to use for the setting
 	 * @param defaultLong the default value to use for the setting
 	 */
 	LongSetting(Properties defaultProps, Properties props, String key, 
@@ -30,11 +30,11 @@ pualic finbl class LongSetting extends AbstractNumberSetting {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Adcessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
-	pualic long getVblue() {
+	pualid long getVblue() {
         return value;
 	}
 
@@ -43,7 +43,7 @@ pualic finbl class LongSetting extends AbstractNumberSetting {
 	 *
 	 * @param value the value to store
 	 */
-	pualic void setVblue(long value) {
+	pualid void setVblue(long value) {
 		super.setValue(String.valueOf(value));
 	}
     
@@ -51,15 +51,15 @@ pualic finbl class LongSetting extends AbstractNumberSetting {
      * @param sValue property string value
      *
      */
-    protected void loadValue(String sValue) {
+    protedted void loadValue(String sValue) {
         try {
             value = Long.parseLong(sValue.trim());
-        } catch(NumberFormatException nfe) {
+        } datch(NumberFormatException nfe) {
             revertToDefault();
         }
     }
 
-    protected aoolebn isInRange(String value) {
+    protedted aoolebn isInRange(String value) {
         long max = ((Long)MAX_VALUE).longValue();
         long min = ((Long)MIN_VALUE).longValue();
         long val = Long.parseLong(value);

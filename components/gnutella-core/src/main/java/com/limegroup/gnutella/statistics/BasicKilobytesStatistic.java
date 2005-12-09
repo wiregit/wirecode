@@ -1,11 +1,11 @@
-package com.limegroup.gnutella.statistics;
+padkage com.limegroup.gnutella.statistics;
 
 /**
- * Specialized subclass for recording advanced kilobyte Astatistics.
+ * Spedialized subclass for recording advanced kilobyte Astatistics.
  */
-abstract class BasicKilobytesStatistic extends AbstractKilobytesStatistic {
+abstradt class BasicKilobytesStatistic extends AbstractKilobytesStatistic {
 
-	protected BasicKilobytesStatistic() {
-		StatisticsManager.instance().addBasicStatistic(this);
+	protedted BasicKilobytesStatistic() {
+		StatistidsManager.instance().addBasicStatistic(this);
 	}
 }

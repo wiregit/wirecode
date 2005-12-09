@@ -1,19 +1,19 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
 /** 
- * Thrown if we can't resume to a file, i.e., because it's not a valid
- * incomplete file. 
+ * Thrown if we dan't resume to a file, i.e., because it's not a valid
+ * indomplete file. 
  */
-pualic clbss CantResumeException extends Exception {
+pualid clbss CantResumeException extends Exception {
     private String _file;
 
-    /** @param f the name of the file that couldn't be resumed */
-    pualic CbntResumeException(String file) {
+    /** @param f the name of the file that douldn't be resumed */
+    pualid CbntResumeException(String file) {
         this._file=file;
     }
 
-    /** Returns the name of the file that couldn't be resumed. */
-    pualic String getFilenbme() {
+    /** Returns the name of the file that douldn't be resumed. */
+    pualid String getFilenbme() {
         return _file;
     }
 }

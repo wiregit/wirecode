@@ -1,8 +1,8 @@
-package com.limegroup.gnutella.messages.vendor;
+padkage com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.IOExdeption;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -10,101 +10,101 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.FeatureSearchData;
-import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.version.UpdateHandler;
+import dom.limegroup.gnutella.ByteOrder;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.FeatureSearchData;
+import dom.limegroup.gnutella.simpp.SimppManager;
+import dom.limegroup.gnutella.statistics.SentMessageStatHandler;
+import dom.limegroup.gnutella.version.UpdateHandler;
 
 /** 
- * The message that lets other know what capabilities you support.  Everytime 
- * you add a capability you should modify this class.
+ * The message that lets other know what dapabilities you support.  Everytime 
+ * you add a dapability you should modify this class.
  *
  */
-pualic finbl class CapabilitiesVM extends VendorMessage {
+pualid finbl class CapabilitiesVM extends VendorMessage {
 
     /**
-     * Bytes for advertising that we support a 'feature' search.
-     * The value is 'WHAT' for legacy reasons, because 'what is new' 
-     * was the first feature search supported.
+     * Bytes for advertising that we support a 'feature' seardh.
+     * The value is 'WHAT' for legady reasons, because 'what is new' 
+     * was the first feature seardh supported.
      */
-    static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
+    statid final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (ayte)65, (byte)84};
     /**
      * The aytes for supporting SIMPP.  This used to be 'SIMP', but thbt
      * implementation was broken.  We now use 'IMPP' to advertise support.
      */
-    private static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
+    private statid final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
     
     /**
      * The aytes for the LMUP messbge.
      */
-    private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    private statid final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
     
     /**
-     * The current version of this message.
+     * The durrent version of this message.
      */
-    pualic stbtic final int VERSION = 0;
+    pualid stbtic final int VERSION = 0;
 
     /**
-     * The capabilities supported.
+     * The dapabilities supported.
      */
-    private final Set _capabilitiesSupported = new HashSet();
+    private final Set _dapabilitiesSupported = new HashSet();
 
     /**
-     * The current instance of this CVM that this node will forward to others
+     * The durrent instance of this CVM that this node will forward to others
      */
-    private static CapabilitiesVM _instance;
+    private statid CapabilitiesVM _instance;
 
     /**
-     * Constructs a new CapabilitiesVM from data read off the network.
+     * Construdts a new CapabilitiesVM from data read off the network.
      */
     CapabilitiesVM(byte[] guid, byte ttl, byte hops, 
-                   int version, ayte[] pbyload) throws BadPacketException {
+                   int version, ayte[] pbyload) throws BadPadketException {
         super(guid, ttl, hops, F_NULL_VENDOR_ID, F_CAPABILITIES, version,
               payload);
 
         // populate the Set of supported messages....
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
-            int vectorSize = ByteOrder.ushort2int(ByteOrder.lea2short(bbis));
-            // constructing the SMB will cause a BadPacketException if the
+            int vedtorSize = ByteOrder.ushort2int(ByteOrder.lea2short(bbis));
+            // donstructing the SMB will cause a BadPacketException if the
             // network data is invalid
-            for (int i = 0; i < vectorSize; i++)
-                _capabilitiesSupported.add(new SupportedMessageBlock(bais));
-        } catch (IOException ioe) {
-            ErrorService.error(ioe); // impossiale.
+            for (int i = 0; i < vedtorSize; i++)
+                _dapabilitiesSupported.add(new SupportedMessageBlock(bais));
+        } datch (IOException ioe) {
+            ErrorServide.error(ioe); // impossiale.
         }
     }
 
 
     /**
-     * Internal constructor for creating the sole instance of our 
+     * Internal donstructor for creating the sole instance of our 
      * CapabilitiesVM.
      */
     private CapabilitiesVM() {
         super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload());
-        addSupportedMessages(_capabilitiesSupported);
+        addSupportedMessages(_dapabilitiesSupported);
     }
 
     /**
      * Generates the default payload, using all our supported messages.
      */
-    private static byte[] derivePayload() {
+    private statid byte[] derivePayload() {
         Set hashSet = new HashSet();
         addSupportedMessages(hashSet);
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2lea((short)hbshSet.size(), baos);
             for(Iterator i = hashSet.iterator(); i.hasNext(); ) {
-                SupportedMessageBlock currSMP = (SupportedMessageBlock)i.next();
-                currSMP.encode(abos);
+                SupportedMessageBlodk currSMP = (SupportedMessageBlock)i.next();
+                durrSMP.encode(abos);
             }
             return abos.toByteArray();
-        } catch (IOException ioe) {
-            ErrorService.error(ioe); // impossiale.
+        } datch (IOException ioe) {
+            ErrorServide.error(ioe); // impossiale.
             return null;
         }
 
@@ -112,31 +112,31 @@ pualic finbl class CapabilitiesVM extends VendorMessage {
 
     // ADD NEW CAPABILITIES HERE AS YOU BUILD THEM....
     /**
-     * Adds all supported capabilities to the given set.
+     * Adds all supported dapabilities to the given set.
      */
-    private static void addSupportedMessages(Set hashSet) {
-        SupportedMessageBlock smp = null;
-        smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
-                                        FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
+    private statid void addSupportedMessages(Set hashSet) {
+        SupportedMessageBlodk smp = null;
+        smp = new SupportedMessageBlodk(FEATURE_SEARCH_BYTES, 
+                                        FeatureSeardhData.FEATURE_SEARCH_MAX_SELECTOR);
         hashSet.add(smp);
         
-        smp = new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES,
-                                        SimppManager.instance().getVersion());
+        smp = new SupportedMessageBlodk(SIMPP_CAPABILITY_BYTES,
+                                        SimppManager.instande().getVersion());
         hashSet.add(smp);
         
-        smp = new SupportedMessageBlock(LIME_UPDATE_BYTES,
-                                        UpdateHandler.instance().getLatestId());
+        smp = new SupportedMessageBlodk(LIME_UPDATE_BYTES,
+                                        UpdateHandler.instande().getLatestId());
         hashSet.add(smp);
     }
 
 
     /** @return A CapabilitiesVM with the set of messages 
-     *  this client supports.
+     *  this dlient supports.
      */
-    pualic stbtic CapabilitiesVM instance() {
-        if (_instance == null)
-            _instance = new CapabilitiesVM();
-        return _instance;
+    pualid stbtic CapabilitiesVM instance() {
+        if (_instande == null)
+            _instande = new CapabilitiesVM();
+        return _instande;
     }
 
 
@@ -144,11 +144,11 @@ pualic finbl class CapabilitiesVM extends VendorMessage {
      * @return -1 if the ability isn't supported, else it returns the version 
      * of the message supported.
      */
-    pualic int supportsCbpability(byte[] capabilityName) {
-        Iterator iter = _capabilitiesSupported.iterator();
+    pualid int supportsCbpability(byte[] capabilityName) {
+        Iterator iter = _dapabilitiesSupported.iterator();
         while (iter.hasNext()) {
-            SupportedMessageBlock currSMP = (SupportedMessageBlock) iter.next();
-            int version = currSMP.matches(capabilityName);
+            SupportedMessageBlodk currSMP = (SupportedMessageBlock) iter.next();
+            int version = durrSMP.matches(capabilityName);
             if (version > -1)
                 return version;
         }
@@ -156,159 +156,159 @@ pualic finbl class CapabilitiesVM extends VendorMessage {
     }
 
 
-    /** @return 1 or higher if capability queries are supported.  the version
-     *  numaer gives some indicbtion about what exactly is a supported.  if no
+    /** @return 1 or higher if dapability queries are supported.  the version
+     *  numaer gives some indidbtion about what exactly is a supported.  if no
      *  support, returns -1.
      */
-    pualic int supportsFebtureQueries() {
+    pualid int supportsFebtureQueries() {
         return supportsCapability(FEATURE_SEARCH_BYTES);
     }
     
 
-    /** @return true if 'what is new' capability query feature is supported.
+    /** @return true if 'what is new' dapability query feature is supported.
      */
-    pualic boolebn supportsWhatIsNew() {
-        return FeatureSearchData.supportsWhatIsNew(
+    pualid boolebn supportsWhatIsNew() {
+        return FeatureSeardhData.supportsWhatIsNew(
             supportsCapability(FEATURE_SEARCH_BYTES));
     }
     
     /**
-     * Returns the current SIMPP version.
+     * Returns the durrent SIMPP version.
      */
-    pualic int supportsSIMPP() {
+    pualid int supportsSIMPP() {
         return supportsCapability(SIMPP_CAPABILITY_BYTES);
     }
     
     /**
-     * Returns the current Update version.
+     * Returns the durrent Update version.
      */
-    pualic int supportsUpdbte() {
+    pualid int supportsUpdbte() {
         return supportsCapability(LIME_UPDATE_BYTES);
     }
 
     // override super
-    pualic boolebn equals(Object other) {
+    pualid boolebn equals(Object other) {
         if(other == this)
             return true;
         
         // two of these messages are the same if the support the same messages
-        if (other instanceof CapabilitiesVM) {
+        if (other instandeof CapabilitiesVM) {
             CapabilitiesVM vmp = (CapabilitiesVM) other;
-            return _capabilitiesSupported.equals(vmp._capabilitiesSupported);
+            return _dapabilitiesSupported.equals(vmp._capabilitiesSupported);
         }
 
         return false;
     }
     
     /**
-     * Constructs a new instance for this node to advertise,
+     * Construdts a new instance for this node to advertise,
      * using the latest version numbers of supported messages.
      */
-    pualic stbtic void reconstructInstance() {
-        //replace _instance with a newer one, which will be created with the
-        //correct simppVersion, a new _capabilitiesSupported will be created
-        _instance = new CapabilitiesVM();
+    pualid stbtic void reconstructInstance() {
+        //replade _instance with a newer one, which will be created with the
+        //dorrect simppVersion, a new _capabilitiesSupported will be created
+        _instande = new CapabilitiesVM();
     }
 
     
     // override super
-    pualic int hbshCode() {
-        return 17*_capabilitiesSupported.hashCode();
+    pualid int hbshCode() {
+        return 17*_dapabilitiesSupported.hashCode();
     }
     
 
-    /** Container for vector elements.
+    /** Container for vedtor elements.
      */  
-    static class SupportedMessageBlock {
-        final byte[] _capabilityName;
+    statid class SupportedMessageBlock {
+        final byte[] _dapabilityName;
         final int _version;
         final int _hashCode;
         
-        pualic String toString() {
-            return new String(_capabilityName) + "/" + _version;
+        pualid String toString() {
+            return new String(_dapabilityName) + "/" + _version;
         }
 
-        pualic SupportedMessbgeBlock(byte[] capabilityName, int version) {
-            _capabilityName = capabilityName;
+        pualid SupportedMessbgeBlock(byte[] capabilityName, int version) {
+            _dapabilityName = capabilityName;
             _version = version;
-            _hashCode = computeHashCode(_capabilityName, _version);
+            _hashCode = domputeHashCode(_capabilityName, _version);
         }
 
         /**
-         * Constructs a new SupportedMessageBlock with data from the 
+         * Construdts a new SupportedMessageBlock with data from the 
          * InputStream.  If not enough data is available,
-         * throws BadPacketException.
+         * throws BadPadketException.
          */
-        pualic SupportedMessbgeBlock(InputStream encodedBlock)
-          throws BadPacketException, IOException {
-            if (encodedBlock.available() < 6)
-                throw new BadPacketException("invalid block.");
+        pualid SupportedMessbgeBlock(InputStream encodedBlock)
+          throws BadPadketException, IOException {
+            if (endodedBlock.available() < 6)
+                throw new BadPadketException("invalid block.");
             
-            // first 4 aytes bre capability name
-            _capabilityName = new byte[4];
-            encodedBlock.read(_capabilityName, 0, _capabilityName.length);
+            // first 4 aytes bre dapability name
+            _dapabilityName = new byte[4];
+            endodedBlock.read(_capabilityName, 0, _capabilityName.length);
 
-            _version = ByteOrder.ushort2int(ByteOrder.lea2short(encodedBlock));
-            _hashCode = computeHashCode(_capabilityName, _version);
+            _version = ByteOrder.ushort2int(ByteOrder.lea2short(endodedBlock));
+            _hashCode = domputeHashCode(_capabilityName, _version);
 
         }
         
         /**
-         * Writes this capability (and version) to the OutputStream.
+         * Writes this dapability (and version) to the OutputStream.
          */
-        pualic void encode(OutputStrebm out) throws IOException {
-            out.write(_capabilityName);
+        pualid void encode(OutputStrebm out) throws IOException {
+            out.write(_dapabilityName);
             ByteOrder.short2lea((short)_version, out);
         }
 
-        /** @return 0 or more if this matches the message you are looking for.
+        /** @return 0 or more if this matdhes the message you are looking for.
          *  Otherwise returns -1;
          */
-        pualic int mbtches(byte[] capabilityName) {
-            if (Arrays.equals(_capabilityName, capabilityName))
+        pualid int mbtches(byte[] capabilityName) {
+            if (Arrays.equals(_dapabilityName, capabilityName))
                 return _version;
             else 
                 return -1;
         }
 
-        pualic boolebn equals(Object other) {
-            if (other instanceof SupportedMessageBlock) {
-                SupportedMessageBlock vmp = (SupportedMessageBlock) other;
+        pualid boolebn equals(Object other) {
+            if (other instandeof SupportedMessageBlock) {
+                SupportedMessageBlodk vmp = (SupportedMessageBlock) other;
                 return ((_version == vmp._version) &&
-                        (Arrays.equals(_capabilityName, vmp._capabilityName))
+                        (Arrays.equals(_dapabilityName, vmp._capabilityName))
                         );
             }
             return false;
         }
 
-        pualic int hbshCode() {
+        pualid int hbshCode() {
             return _hashCode;
         }
         
-        private static int computeHashCode(byte[] capabilityName, int version) {
+        private statid int computeHashCode(byte[] capabilityName, int version) {
             int hashCode = 0;
             hashCode += 37*version;
-            for (int i = 0; i < capabilityName.length; i++)
-                hashCode += (int) 37*capabilityName[i];
+            for (int i = 0; i < dapabilityName.length; i++)
+                hashCode += (int) 37*dapabilityName[i];
             return hashCode;
         }
     }
 
     /** Overridden purely for stats handling.
      */
-    protected void writePayload(OutputStream out) throws IOException {
+    protedted void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
         SentMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(this);
     }
 
     /** Overridden purely for stats handling.
      */
-    pualic void recordDrop() {
-        super.recordDrop();
+    pualid void recordDrop() {
+        super.redordDrop();
     }
 
-    pualic String toString() {
-        return "{CapabilitiesVM:"+super.toString()+"; supporting: " + _capabilitiesSupported + "}";
+    pualid String toString() {
+        return "{CapabilitiesVM:"+super.toString()+"; supporting: " + _dapabilitiesSupported + "}";
     }
 
 }

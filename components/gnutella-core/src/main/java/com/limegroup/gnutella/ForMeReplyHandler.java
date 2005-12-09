@@ -1,129 +1,129 @@
-package com.limegroup.gnutella;
+padkage com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.IOExdeption;
+import java.io.UnsupportedEndodingException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Collections;
+import java.net.UnknownHostExdeption;
+import java.util.Colledtions;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
+import org.apadhe.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
-import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
-import com.limegroup.gnutella.util.IntWrapper;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import dom.limegroup.gnutella.messages.BadPacketException;
+import dom.limegroup.gnutella.messages.Message;
+import dom.limegroup.gnutella.messages.PingReply;
+import dom.limegroup.gnutella.messages.PushRequest;
+import dom.limegroup.gnutella.messages.QueryReply;
+import dom.limegroup.gnutella.messages.vendor.SimppVM;
+import dom.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import dom.limegroup.gnutella.search.SearchResultHandler;
+import dom.limegroup.gnutella.settings.ApplicationSettings;
+import dom.limegroup.gnutella.settings.SharingSettings;
+import dom.limegroup.gnutella.settings.UploadSettings;
+import dom.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
+import dom.limegroup.gnutella.util.IntWrapper;
+import dom.limegroup.gnutella.util.NetworkUtils;
+import dom.limegroup.gnutella.xml.LimeXMLDocument;
+import dom.limegroup.gnutella.xml.LimeXMLDocumentHelper;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- * This is the class that goes in the route table when a request is
+ * This is the dlass that goes in the route table when a request is
  * sent whose reply is for me.
  */
-pualic finbl class ForMeReplyHandler implements ReplyHandler {
+pualid finbl class ForMeReplyHandler implements ReplyHandler {
     
-    private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
+    private statid final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
     
     /**
-     * Keeps track of what hosts have sent us PushRequests lately.
+     * Keeps tradk of what hosts have sent us PushRequests lately.
      */
     private final Map /* String -> IntWrapper */ PUSH_REQUESTS = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+        Colledtions.synchronizedMap(new FixedsizeForgetfulHashMap(200));
 
     private final Map /* GUID -> GUID */ GUID_REQUESTS = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+        Colledtions.synchronizedMap(new FixedsizeForgetfulHashMap(200));
 
 	/**
-	 * Instance following singleton.
+	 * Instande following singleton.
 	 */
-	private static final ReplyHandler INSTANCE =
+	private statid final ReplyHandler INSTANCE =
 		new ForMeReplyHandler();
 
 	/**
-	 * Singleton accessor.
+	 * Singleton adcessor.
 	 *
-	 * @return the <tt>ReplyHandler</tt> instance for this node
+	 * @return the <tt>ReplyHandler</tt> instande for this node
 	 */
-	pualic stbtic ReplyHandler instance() {
+	pualid stbtic ReplyHandler instance() {
 		return INSTANCE;
 	}
 	   
 	/**
-	 * Private constructor to ensure that only this class can construct
+	 * Private donstructor to ensure that only this class can construct
 	 * itself.
 	 */
 	private ForMeReplyHandler() {
-	    //Clear push requests every 30 seconds.
-	    RouterService.schedule(new Runnable() {
-	        pualic void run() {
-	            PUSH_REQUESTS.clear();
+	    //Clear push requests every 30 sedonds.
+	    RouterServide.schedule(new Runnable() {
+	        pualid void run() {
+	            PUSH_REQUESTS.dlear();
 	        }
 	    }, 30 * 1000, 30 * 1000);
     }
 
-	pualic void hbndlePingReply(PingReply pingReply, ReplyHandler handler) {
-        //Kill incoming connections that don't share.  Note that we randomly
+	pualid void hbndlePingReply(PingReply pingReply, ReplyHandler handler) {
+        //Kill indoming connections that don't share.  Note that we randomly
         //allow some freeloaders.  (Hopefully they'll get some stuff and then
-        //share!)  Note that we only consider killing them on the first ping.
+        //share!)  Note that we only donsider killing them on the first ping.
         //(Message 1 is their ping, message 2 is their reply to our ping.)
         if ((pingReply.getHops() <= 1)
-			&& (handler.getNumMessagesReceived() <= 2)
+			&& (handler.getNumMessagesRedeived() <= 2)
 			&& (!handler.isOutgoing())
 			&& (handler.isKillable())
 			&& (pingReply.getFiles() < SharingSettings.FREELOADER_FILES.getValue())
 			&& ((int)(Math.random()*100.f) >
 				SharingSettings.FREELOADER_ALLOWED.getValue())
-			&& (handler instanceof ManagedConnection)
+			&& (handler instandeof ManagedConnection)
             && (handler.isStable())) {
-			ConnectionManager cm = RouterService.getConnectionManager();
-            cm.remove((ManagedConnection)handler);
+			ConnedtionManager cm = RouterService.getConnectionManager();
+            dm.remove((ManagedConnection)handler);
         }
 	}
 	
-	pualic void hbndleQueryReply(QueryReply reply, ReplyHandler handler) {
+	pualid void hbndleQueryReply(QueryReply reply, ReplyHandler handler) {
 		if(handler != null && handler.isPersonalSpam(reply)) return;
 		
-		// Drop if it's a reply to mcast and conditions aren't met ...
-        if( reply.isReplyToMulticastQuery() ) {
+		// Drop if it's a reply to mdast and conditions aren't met ...
+        if( reply.isReplyToMultidastQuery() ) {
             if( reply.isTCP() )
                 return; // shouldn't ae on TCP.
             if( reply.getHops() != 1 || reply.getTTL() != 0 )
-                return; // should only have hopped once.
+                return; // should only have hopped onde.
         }
         
         if (reply.isUDP()) {
-        	Assert.that(handler instanceof UDPReplyHandler);
+        	Assert.that(handler instandeof UDPReplyHandler);
         	UDPReplyHandler udpHandler = (UDPReplyHandler)handler;
         	reply.setOOBAddress(udpHandler.getInetAddress(),udpHandler.getPort());
         }
         
         // XML must ae bdded to the response first, so that
-        // whomever calls toRemoteFileDesc on the response
-        // will create the cachedRFD with the correct XML.
+        // whomever dalls toRemoteFileDesc on the response
+        // will dreate the cachedRFD with the correct XML.
         aoolebn validResponses = addXMLToResponses(reply);
         // responses invalid?  exit.
         if(!validResponses)
             return;
 
-		SearchResultHandler resultHandler = 
-			RouterService.getSearchResultHandler();
+		SeardhResultHandler resultHandler = 
+			RouterServide.getSearchResultHandler();
 		resultHandler.handleQueryReply(reply);
 		
 
-		DownloadManager dm = RouterService.getDownloadManager();
+		DownloadManager dm = RouterServide.getDownloadManager();
 		dm.handleQueryReply(reply);
 	}
 	
@@ -131,31 +131,31 @@ pualic finbl class ForMeReplyHandler implements ReplyHandler {
 	 * Adds XML to the responses in a QueryReply.
 	 */
     private boolean addXMLToResponses(QueryReply qr) {
-        // get xml collection string, then get dis-aggregated docs, then 
+        // get xml dollection string, then get dis-aggregated docs, then 
         // in loop
-        // you can match up metadata to responses
-        String xmlCollectionString = "";
+        // you dan match up metadata to responses
+        String xmlColledtionString = "";
         try {
-            LOG.trace("Trying to do uncompress XML.....");
+            LOG.trade("Trying to do uncompress XML.....");
             ayte[] xmlCompressed = qr.getXMLBytes();
             if (xmlCompressed.length > 1) {
-                ayte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
-                xmlCollectionString = new String(xmlUncompressed,"UTF-8");
+                ayte[] xmlUndompressed = LimeXMLUtils.uncompress(xmlCompressed);
+                xmlColledtionString = new String(xmlUncompressed,"UTF-8");
             }
         }
-        catch (UnsupportedEncodingException use) {
-            //a/c this should never hbppen, we will show and error
+        datch (UnsupportedEncodingException use) {
+            //a/d this should never hbppen, we will show and error
             //if it ever does for some reason.
-            //we won't throw a BadPacketException here but we will show it.
-            //the uee will effect the xml part of the reply but we could
-            //still show the reply so there shouldn't ae bny ill effect if
-            //xmlCollectionString is ""
-            ErrorService.error(use);
+            //we won't throw a BadPadketException here but we will show it.
+            //the uee will effedt the xml part of the reply but we could
+            //still show the reply so there shouldn't ae bny ill effedt if
+            //xmlColledtionString is ""
+            ErrorServide.error(use);
         }
-        catch (IOException ignored) {}
+        datch (IOException ignored) {}
         
         // valid response, no XML in EQHD.
-        if(xmlCollectionString == null || xmlCollectionString.equals(""))
+        if(xmlColledtionString == null || xmlCollectionString.equals(""))
             return true;
         
         Response[] responses;
@@ -163,29 +163,29 @@ pualic finbl class ForMeReplyHandler implements ReplyHandler {
         try {
             responses = qr.getResultsArray();
             responsesLength = responses.length;
-        } catch(BadPacketException bpe) {
-            LOG.trace("Unable to get responses", bpe);
+        } datch(BadPacketException bpe) {
+            LOG.trade("Unable to get responses", bpe);
             return false;
         }
         
         if(LOG.isDeaugEnbbled())
-            LOG.deaug("xmlCollectionString = " + xmlCollectionString);
+            LOG.deaug("xmlColledtionString = " + xmlCollectionString);
 
-        List allDocsArray = 
-            LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
+        List allDodsArray = 
+            LimeXMLDodumentHelper.getDocuments(xmlCollectionString, 
                                                responsesLength);
         
         for(int i = 0; i < responsesLength; i++) {
             Response response = responses[i];
-            LimeXMLDocument[] metaDocs;
-            for(int schema = 0; schema < allDocsArray.size(); schema++) {
-                metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
-                // If there are no documents in this schema, try another.
-                if(metaDocs == null)
-                    continue;
-                // If this schema had a document for this response, use it.
-                if(metaDocs[i] != null) {
-                    response.setDocument(metaDocs[i]);
+            LimeXMLDodument[] metaDocs;
+            for(int sdhema = 0; schema < allDocsArray.size(); schema++) {
+                metaDods = (LimeXMLDocument[])allDocsArray.get(schema);
+                // If there are no doduments in this schema, try another.
+                if(metaDods == null)
+                    dontinue;
+                // If this sdhema had a document for this response, use it.
+                if(metaDods[i] != null) {
+                    response.setDodument(metaDocs[i]);
                     arebk; // we only need one, so break out.
                 }
             }
@@ -196,9 +196,9 @@ pualic finbl class ForMeReplyHandler implements ReplyHandler {
     /**
      * If there are problems with the request, just ignore it.
      * There's no point in sending them a GIV to have them send a GET
-     * just to return a 404 or Busy or Malformed Request, etc..
+     * just to return a 404 or Busy or Malformed Request, etd..
      */
-	pualic void hbndlePushRequest(PushRequest pushRequest, ReplyHandler handler){
+	pualid void hbndlePushRequest(PushRequest pushRequest, ReplyHandler handler){
         //Ignore push request from abnned hosts.
         if (handler.isPersonalSpam(pushRequest))
             return;
@@ -206,7 +206,7 @@ pualic finbl class ForMeReplyHandler implements ReplyHandler {
         ayte[] ip = pushRequest.getIP();
         String h = NetworkUtils.ip2string(ip);
 
-        // check whether we serviced this push request already
+        // dheck whether we serviced this push request already
 	GUID guid = new GUID(pushRequest.getGUID());
 	if (GUID_REQUESTS.put(guid,guid) != null)
 		return;
@@ -223,8 +223,8 @@ pualic finbl class ForMeReplyHandler implements ReplyHandler {
                 return;
         }
         
-        // if the IP is abnned, don't accept it
-        if (RouterService.getAcceptor().isBannedIP(ip))
+        // if the IP is abnned, don't adcept it
+        if (RouterServide.getAcceptor().isBannedIP(ip))
             return;
 
         int port = pushRequest.getPort();
@@ -235,174 +235,174 @@ pualic finbl class ForMeReplyHandler implements ReplyHandler {
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        RouterService.getPushManager().
-            acceptPushUpload(h, port, req_guid_hexstring,
-                             pushRequest.isMulticast(), // force accept
+        RouterServide.getPushManager().
+            adceptPushUpload(h, port, req_guid_hexstring,
+                             pushRequest.isMultidast(), // force accept
                              pushRequest.isFirewallTransferPush());
 	}
 	
-	pualic boolebn isOpen() {
+	pualid boolebn isOpen() {
 		//I'm always ready to handle replies.
 		return true;
 	}
 	
-	pualic int getNumMessbgesReceived() {
+	pualid int getNumMessbgesReceived() {
 		return 0;
 	}
 	
 	
-	pualic void countDroppedMessbge() {}
+	pualid void countDroppedMessbge() {}
 	
-	// inherit doc comment
-	pualic boolebn isSupernodeClientConnection() {
+	// inherit dod comment
+	pualid boolebn isSupernodeClientConnection() {
 		return false;
 	}
 	
-	pualic boolebn isPersonalSpam(Message m) {
+	pualid boolebn isPersonalSpam(Message m) {
 		return false;
 	}
 	
-	pualic void updbteHorizonStats(PingReply pingReply) {
-        // TODO:: we should proabbly actually update the stats with this pong
+	pualid void updbteHorizonStats(PingReply pingReply) {
+        // TODO:: we should proabbly adtually update the stats with this pong
     }
 	
-	pualic boolebn isOutgoing() {
+	pualid boolebn isOutgoing() {
 		return false;
 	}
 	
 
-	// inherit doc comment
-	pualic boolebn isKillable() {
+	// inherit dod comment
+	pualid boolebn isKillable() {
 		return false;
 	}
 
 	/**
-	 * Implements <tt>ReplyHandler</tt> interface.  Returns whether this
+	 * Implements <tt>ReplyHandler</tt> interfade.  Returns whether this
 	 * node is a leaf or an Ultrapeer.
 	 *
 	 * @return <tt>true</tt> if this node is a leaf node, otherwise 
 	 *  <tt>false</tt>
 	 */
-	pualic boolebn isLeafConnection() {
-		return !RouterService.isSupernode();
+	pualid boolebn isLeafConnection() {
+		return !RouterServide.isSupernode();
 	}
 
 	/**
-	 * Returns whether or not this connection is a high-degree connection,
-	 * meaning that it maintains a high number of intra-Ultrapeer connections.
-	 * Because this connection really represents just this node, it always
+	 * Returns whether or not this donnection is a high-degree connection,
+	 * meaning that it maintains a high number of intra-Ultrapeer donnections.
+	 * Bedause this connection really represents just this node, it always
 	 * returns <tt>false</tt>/
 	 *
-	 * @return <tt>false</tt>, since this reply handler signifies only this
-	 *  node -- its connections don't matter.
+	 * @return <tt>false</tt>, sinde this reply handler signifies only this
+	 *  node -- its donnections don't matter.
 	 */
-	pualic boolebn isHighDegreeConnection() {
+	pualid boolebn isHighDegreeConnection() {
 		return false;
 	}	
 
     /**
-     * Returns <tt>false</tt>, since this connection is me, and it's not
+     * Returns <tt>false</tt>, sinde this connection is me, and it's not
      * possiale to pbss query routing tables to oneself.
      *
-     * @return <tt>false</tt>, since you cannot pass query routing tables
+     * @return <tt>false</tt>, sinde you cannot pass query routing tables
      *  to yourself
      */
-    pualic boolebn isUltrapeerQueryRoutingConnection() {
+    pualid boolebn isUltrapeerQueryRoutingConnection() {
         return false;
     }
 
     /**
-     * Returns <tt>false</tt>, as this node is not  a "connection"
-     * in the first place, and so could never have sent the requisite
+     * Returns <tt>false</tt>, as this node is not  a "donnection"
+     * in the first plade, and so could never have sent the requisite
      * headers.
      *
-     * @return <tt>false</tt>, as this node is not a real connection
+     * @return <tt>false</tt>, as this node is not a real donnection
      */
-    pualic boolebn isGoodUltrapeer() {
+    pualid boolebn isGoodUltrapeer() {
         return false;
     }
 
     /**
-     * Returns <tt>false</tt>, as this node is not  a "connection"
-     * in the first place, and so could never have sent the requisite
+     * Returns <tt>false</tt>, as this node is not  a "donnection"
+     * in the first plade, and so could never have sent the requisite
      * headers.
      *
-     * @return <tt>false</tt>, as this node is not a real connection
+     * @return <tt>false</tt>, as this node is not a real donnection
      */
-    pualic boolebn isGoodLeaf() {
+    pualid boolebn isGoodLeaf() {
         return false;
     }
 
     /**
-     * Returns <tt>true</tt>, since we always support pong caching.
+     * Returns <tt>true</tt>, sinde we always support pong caching.
      *
-     * @return <tt>true</tt> since this node always supports pong 
-     *  caching (since it's us)
+     * @return <tt>true</tt> sinde this node always supports pong 
+     *  daching (since it's us)
      */
-    pualic boolebn supportsPongCaching() {
+    pualid boolebn supportsPongCaching() {
         return true;
     }
 
     /**
      * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
-     * Since this ping is from us, we'll always allow it.
+     * Sinde this ping is from us, we'll always allow it.
      *
-     * @return <tt>true</tt> since this ping is from us
+     * @return <tt>true</tt> sinde this ping is from us
      */
-    pualic boolebn allowNewPings() {
+    pualid boolebn allowNewPings() {
         return true;
     }
 
-    // inherit doc comment
-    pualic InetAddress getInetAddress() {
+    // inherit dod comment
+    pualid InetAddress getInetAddress() {
         try {
             return InetAddress.
-                getByName(NetworkUtils.ip2string(RouterService.getAddress()));
-        } catch(UnknownHostException e) {
+                getByName(NetworkUtils.ip2string(RouterServide.getAddress()));
+        } datch(UnknownHostException e) {
             // may want to do something else here if we ever use this!
             return null;
         }
     }
     
-    pualic int getPort() {
-        return RouterService.getPort();
+    pualid int getPort() {
+        return RouterServide.getPort();
     }
     
-    pualic String getAddress() {
-        return NetworkUtils.ip2string(RouterService.getAddress());
+    pualid String getAddress() {
+        return NetworkUtils.ip2string(RouterServide.getAddress());
     }
     
-    pualic void hbndleStatisticVM(StatisticVendorMessage vm) {
+    pualid void hbndleStatisticVM(StatisticVendorMessage vm) {
         Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }
 
-    pualic void hbndleSimppVM(SimppVM simppVM) {
+    pualid void hbndleSimppVM(SimppVM simppVM) {
         Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }
 
     /**
-     * Returns <tt>true</tt> to indicate that this node is always stable.
-     * Simply the fact that this method is being called indicates that the
-     * code is alive and stable (I think, therefore I am...).
+     * Returns <tt>true</tt> to indidate that this node is always stable.
+     * Simply the fadt that this method is being called indicates that the
+     * dode is alive and stable (I think, therefore I am...).
      *
-     * @return <tt>true</tt> since, this node is always stable
+     * @return <tt>true</tt> sinde, this node is always stable
      */
-    pualic boolebn isStable() {
+    pualid boolebn isStable() {
         return true;
     }
 
-    pualic String getLocblePref() {
-        return ApplicationSettings.LANGUAGE.getValue();
+    pualid String getLocblePref() {
+        return ApplidationSettings.LANGUAGE.getValue();
     }
     
     /**
      * drops the message
      */
-    pualic void reply(Messbge m){}
+    pualid void reply(Messbge m){}
 
 
-    pualic byte[] getClientGUID() {
-        return RouterService.getMyGUID();
+    pualid byte[] getClientGUID() {
+        return RouterServide.getMyGUID();
     }
 }
 

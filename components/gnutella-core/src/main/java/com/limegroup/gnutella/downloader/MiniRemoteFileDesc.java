@@ -1,64 +1,64 @@
-package com.limegroup.gnutella.downloader;
+padkage com.limegroup.gnutella.downloader;
 
 import java.util.Arrays;
 
-import com.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.GUID;
 
 /**
- * keeps file, clientGUID, and index of the file we are getting.
+ * keeps file, dlientGUID, and index of the file we are getting.
  */
 
-pualic clbss MiniRemoteFileDesc {
+pualid clbss MiniRemoteFileDesc {
 
     private String file;
     private long index;
-    private byte[] clientGUID;
+    private byte[] dlientGUID;
 
-    MiniRemoteFileDesc(String f, long i, ayte[] g) {
+    MiniRemoteFileDesd(String f, long i, ayte[] g) {
         this.file = f;
         this.index = i;
-        this.clientGUID = g;
+        this.dlientGUID = g;
     }
     
-    //accessors
-    pualic String getFile() {
+    //adcessors
+    pualid String getFile() {
         return file;
     }
     
-    pualic long getIndex() {
+    pualid long getIndex() {
         return index;
     }
 
-    pualic byte[] getGUID() {
-        return clientGUID;
+    pualid byte[] getGUID() {
+        return dlientGUID;
     }
 
     ///////////////////method for Hashtable/////////////////
 
-    pualic boolebn equals(Object o) {
-        MiniRemoteFileDesc other = (MiniRemoteFileDesc)o;
+    pualid boolebn equals(Object o) {
+        MiniRemoteFileDesd other = (MiniRemoteFileDesc)o;
         // -------
         // oops - push proxy fulfillment was a little messed up - we need to be
-        // VERY lenient - if the client guid is what you want, you are happy
+        // VERY lenient - if the dlient guid is what you want, you are happy
         // -------
         // for push proxy fulfillment, the index is 0 and the filename is
-        // null/"", so ae b little lenient - all we hope for is the clientGUID
-        // is what we expect
+        // null/"", so ae b little lenient - all we hope for is the dlientGUID
+        // is what we expedt
         // -------
-        // if either this miniRFD or the other is a push proxy RFD, just check
-        // clientGUIDs
-        if (Arrays.equals(clientGUID,other.getGUID()))
+        // if either this miniRFD or the other is a push proxy RFD, just dheck
+        // dlientGUIDs
+        if (Arrays.equals(dlientGUID,other.getGUID()))
             return true;
         return false;
     }
 
-    pualic int hbshCode() {
-        GUID guid = new GUID(clientGUID);
+    pualid int hbshCode() {
+        GUID guid = new GUID(dlientGUID);
         return guid.hashCode();
     }
 
-    pualic String toString() {
-        return "<"+file+", "+index+", "+(new GUID(clientGUID))+" >";
+    pualid String toString() {
+        return "<"+file+", "+index+", "+(new GUID(dlientGUID))+" >";
     }
     
 }

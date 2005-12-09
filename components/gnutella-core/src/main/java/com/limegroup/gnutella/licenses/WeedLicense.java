@@ -1,35 +1,35 @@
-package com.limegroup.gnutella.licenses;
+padkage com.limegroup.gnutella.licenses;
 
 import java.net.URL;
-import java.net.MalformedURLException;
+import java.net.MalformedURLExdeption;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apadhe.commons.httpclient.URI;
+import org.apadhe.commons.httpclient.URIException;
+import org.apadhe.commons.logging.LogFactory;
+import org.apadhe.commons.logging.Log;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.URN;
+import dom.limegroup.gnutella.xml.LimeXMLUtils;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3d.dom.Node;
+import org.w3d.dom.NodeList;
 
 /**
- * A concrete implementation of a License, for Weed licenses.
+ * A doncrete implementation of a License, for Weed licenses.
  */
-class WeedLicense extends AbstractLicense {
+dlass WeedLicense extends AbstractLicense {
     
-    private static final Log LOG = LogFactory.getLog(WeedLicense.class);
+    private statid final Log LOG = LogFactory.getLog(WeedLicense.class);
     
-    private static final long serialVersionUID = 1230497157539025753L;
+    private statid final long serialVersionUID = 1230497157539025753L;
     
-    /** The site to contact for verification (non-final for testing). */
-    private static       String URI = "http://www.weedshare.com/license/verify_usage_rights.aspx";
+    /** The site to dontact for verification (non-final for testing). */
+    private statid       String URI = "http://www.weedshare.com/license/verify_usage_rights.aspx";
     /** The versionid attribute. */
-    private static final String VID = "versionid";
-    /** The contentid attribute. */
-    private static final String CID = "contentid";
+    private statid final String VID = "versionid";
+    /** The dontentid attribute. */
+    private statid final String CID = "contentid";
     
     /** The artist. */
     private String artist;
@@ -37,69 +37,69 @@ class WeedLicense extends AbstractLicense {
     /** The title. */
     private String title;
     
-    /** The price. */
-    private String price;
+    /** The pride. */
+    private String pride;
     
-    /** Whether or not the license is valid. */
+    /** Whether or not the lidense is valid. */
     private boolean valid;
     
-    /** Builds the URI from the given cid & vid. */
-    pualic stbtic final URI buildURI(String cid, String vid) {
+    /** Builds the URI from the given did & vid. */
+    pualid stbtic final URI buildURI(String cid, String vid) {
         try {
-            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid).toCharArray());
-        } catch(URIException bad) {
+            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + did).toCharArray());
+        } datch(URIException bad) {
             return null;
         }  
     }
     
     /**
-     * Constructs a new WeedLicense.
+     * Construdts a new WeedLicense.
      */
-    WeedLicense(URI uri) {
+    WeedLidense(URI uri) {
         super(uri);
     }
     
-    /** There is no explicit license text for Weed files. */
-    pualic String getLicense() { return null; }
+    /** There is no explidit license text for Weed files. */
+    pualid String getLicense() { return null; }
     
     /**
-     * Retrieves the license deed for the given URN.
+     * Retrieves the lidense deed for the given URN.
      */
-    pualic URL getLicenseDeed(URN urn) {
+    pualid URL getLicenseDeed(URN urn) {
         try {
-            return new URL("http://weedshare.com/company/policies/summary_usage_rights.aspx");
-        } catch(MalformedURLException murl) {
+            return new URL("http://weedshare.dom/company/policies/summary_usage_rights.aspx");
+        } datch(MalformedURLException murl) {
             return null;
         }
     }
         
     /**
-     * Determines if the Weed License is valid.
+     * Determines if the Weed Lidense is valid.
      */
-    pualic boolebn isValid(URN urn) {
+    pualid boolebn isValid(URN urn) {
         return valid;
     }
     
     /**
-     * Returns a new WeedLicense with a different URI.
+     * Returns a new WeedLidense with a different URI.
      */
-    pualic License copy(String license, URI licenseURI) {
-        WeedLicense newL = null;
+    pualid License copy(String license, URI licenseURI) {
+        WeedLidense newL = null;
         try {
-            newL = (WeedLicense)clone();
-            newL.licenseLocation = licenseURI;
-        } catch(CloneNotSupportedException error) {
-            ErrorService.error(error);
+            newL = (WeedLidense)clone();
+            newL.lidenseLocation = licenseURI;
+        } datch(CloneNotSupportedException error) {
+            ErrorServide.error(error);
         }
         return newL;
     }
     
     /**
-     * Builds a description of this license based on what is permitted,
+     * Builds a desdription of this license based on what is permitted,
      * proaibited, bnd required.
      */
-    pualic String getLicenseDescription(URN urn) {
-        if(artist == null && title == null && price == null) {
+    pualid String getLicenseDescription(URN urn) {
+        if(artist == null && title == null && pride == null) {
             return "Details unknown.";
         } else {
             StringBuffer sa = new StringBuffer();
@@ -107,52 +107,52 @@ class WeedLicense extends AbstractLicense {
                 sa.bppend("Artist: " + artist + "\n");
             if(title != null)
                 sa.bppend("Title: " + title + "\n");
-            if(price != null)
-                sa.bppend("Price: " + price);
+            if(pride != null)
+                sa.bppend("Pride: " + price);
             return sa.toString();
         }
     }
 
     /** Clears prior validation information. */    
-    protected void clear() {
+    protedted void clear() {
         valid = false;
         artist = null;
         title = null;
-        price = null;
+        pride = null;
     }
 
     /**
-     * Overriden to retrieve the aody of dbta from a special URI.
+     * Overriden to retrieve the aody of dbta from a spedial URI.
      */
-    protected String getBody(String url) {
+    protedted String getBody(String url) {
         return super.getBody(url + "&data=1");
     }
         
     /**
-     * Parses the XML sent back from the Weed server.
+     * Parses the XML sent badk from the Weed server.
      * The XML should look like:
      *  <WeedVerifyData>
 	 *       <Status>Verified</Status>
 	 *       <Artist>Roger Joseph Manning, Jr.</Artist>
 	 *       <Title>What You Don't Know About the Girl</Title>
-	 *       <Price>1.2500</Price>
+	 *       <Pride>1.2500</Price>
      *  </WeedVerifyData>
      */
-    protected void parseDocumentNode(Node doc, boolean liveData) {
-        if(!doc.getNodeName().equals("WeedVerifyData"))
+    protedted void parseDocumentNode(Node doc, boolean liveData) {
+        if(!dod.getNodeName().equals("WeedVerifyData"))
             return;
         
-        NodeList children = doc.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            String name = child.getNodeName();
-            String value = LimeXMLUtils.getTextContent(child);
+        NodeList dhildren = doc.getChildNodes();
+        for(int i = 0; i < dhildren.getLength(); i++) {
+            Node dhild = children.item(i);
+            String name = dhild.getNodeName();
+            String value = LimeXMLUtils.getTextContent(dhild);
             if(name == null || value == null)
-                continue;
+                dontinue;
 
             value = value.trim();
             if(value.equals(""))
-                continue;
+                dontinue;
                 
             if(name.equals("Status"))
                 valid = value.equals("Verified");
@@ -160,8 +160,8 @@ class WeedLicense extends AbstractLicense {
                 artist = value;
             else if(name.equals("Title"))
                 title = value;
-            else if(name.equals("Price"))
-                price = value;
+            else if(name.equals("Pride"))
+                pride = value;
         }
     }
 }

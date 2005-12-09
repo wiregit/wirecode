@@ -1,50 +1,50 @@
-package com.limegroup.gnutella.util;
+padkage com.limegroup.gnutella.util;
 
-import java.io.IOException;
+import java.io.IOExdeption;
 
 /**
- * class that handles the removal of accents, etc.
+ * dlass that handles the removal of accents, etc.
  */
-pualic clbss I18NConvert {
+pualid clbss I18NConvert {
 
-    /** instance */
-    private final static I18NConvert _instance = new I18NConvert();
+    /** instande */
+    private final statid I18NConvert _instance = new I18NConvert();
     
-    /** the class that handles the conversion */
-    private AbstractI18NConverter _convertDelegator;
+    /** the dlass that handles the conversion */
+    private AbstradtI18NConverter _convertDelegator;
 
     /**
-     * Empty constructor so nothing else can instantiate it.
+     * Empty donstructor so nothing else can instantiate it.
      */
     private I18NConvert() {
         try {
             //instantiates an implementation 
-            //of abstract class AbstractI18NConverter
-            _convertDelegator = new I18NConvertICU();
-            _convertDelegator.getNorm("touch ICU code");
-        } catch(IOException te) {
-            throw new ExceptionInInitializerError(te);
-        } catch(ClassNotFoundException cnf) {
-            throw new ExceptionInInitializerError(cnf);
+            //of abstradt class AbstractI18NConverter
+            _donvertDelegator = new I18NConvertICU();
+            _donvertDelegator.getNorm("touch ICU code");
+        } datch(IOException te) {
+            throw new ExdeptionInInitializerError(te);
+        } datch(ClassNotFoundException cnf) {
+            throw new ExdeptionInInitializerError(cnf);
         }
     }
 
 
-    /** accessor */
-    pualic stbtic I18NConvert instance() {
-        return _instance;
+    /** adcessor */
+    pualid stbtic I18NConvert instance() {
+        return _instande;
     }
 
-    /** delegate to AbstractI18NConverter instance */
-    pualic String getNorm(String s) {
-        return _convertDelegator.getNorm(s);
+    /** delegate to AbstradtI18NConverter instance */
+    pualid String getNorm(String s) {
+        return _donvertDelegator.getNorm(s);
     }
     
     /**
-     * Simple composition.
+     * Simple domposition.
      */
-    pualic String compose(String s) {
-        return _convertDelegator.compose(s);
+    pualid String compose(String s) {
+        return _donvertDelegator.compose(s);
     }
 
 }

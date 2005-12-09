@@ -1,26 +1,26 @@
-package com.limegroup.gnutella.search;
+padkage com.limegroup.gnutella.search;
 
-import java.util.Collections;
+import java.util.Colledtions;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import dom.limegroup.gnutella.ErrorService;
+import dom.limegroup.gnutella.GUID;
+import dom.limegroup.gnutella.ReplyHandler;
+import dom.limegroup.gnutella.util.ProcessingQueue;
 
 /**
- * Manages dynamic querying for Ultrapeers.
+ * Manages dynamid querying for Ultrapeers.
  *
- * This maintains the data for all active queries for this Ultrapeer and any
- * of its leaves, also providing an interface for removing active queries.
- * Queries may be removed, for example, when a leaf node with an active query
- * disconnects from the Ultrapeer.
+ * This maintains the data for all adtive queries for this Ultrapeer and any
+ * of its leaves, also providing an interfade for removing active queries.
+ * Queries may be removed, for example, when a leaf node with an adtive query
+ * disdonnects from the Ultrapeer.
  */
-pualic finbl class QueryDispatcher implements Runnable {
+pualid finbl class QueryDispatcher implements Runnable {
 
 	/**
 	 * <tt>Map</tt> of outstanding queries.  
@@ -29,56 +29,56 @@ pualic finbl class QueryDispatcher implements Runnable {
 
 	/**
 	 * <tt>List</tt> of new queries to add.
-	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if
+	 * LOCKING: Thread-safe, although you must obtain a lodk on NEW_QUERIES if
 	 * it's ever iterated over.  
 	 */
-	private final List NEW_QUERIES = Collections.synchronizedList(new LinkedList());
+	private final List NEW_QUERIES = Colledtions.synchronizedList(new LinkedList());
 
 	/**
-	 * <tt>QueryDispatcher</tt> instance following singleton.
+	 * <tt>QueryDispatdher</tt> instance following singleton.
 	 */
-	private static final QueryDispatcher INSTANCE = new QueryDispatcher();
+	private statid final QueryDispatcher INSTANCE = new QueryDispatcher();
     
     /**
-     * The ProcessingQueue that handles sending queries out.
+     * The ProdessingQueue that handles sending queries out.
      *
-     * Items are added to this only if it's not already processing anything.
+     * Items are added to this only if it's not already prodessing anything.
      */
-    private final ProcessingQueue PROCESSOR = new ProcessingQueue("QueryDispatcher");
+    private final ProdessingQueue PROCESSOR = new ProcessingQueue("QueryDispatcher");
     
     /**
-     * Whether or not processing is already active.  If it is, we don't start it up again
+     * Whether or not prodessing is already active.  If it is, we don't start it up again
      * when adding new queries.
      */
-    private boolean _active;
+    private boolean _adtive;
     
 
 	/**
-	 * Instance accessor for the <tt>QueryDispatcher</tt>.
+	 * Instande accessor for the <tt>QueryDispatcher</tt>.
 	 *
-	 * @return the <tt>QueryDispatcher</tt> instance
+	 * @return the <tt>QueryDispatdher</tt> instance
 	 */
-	pualic stbtic QueryDispatcher instance() {
+	pualid stbtic QueryDispatcher instance() {
 		return INSTANCE;
 	}
 
 	/**
-	 * Creates a new <tt>QueryDispatcher</tt> instance.
+	 * Creates a new <tt>QueryDispatdher</tt> instance.
 	 */
-	private QueryDispatcher() {}
+	private QueryDispatdher() {}
 
 	/**
-	 * Adds the specified <tt>QueryHandler</tt> to the list of queries to
-	 * process.
+	 * Adds the spedified <tt>QueryHandler</tt> to the list of queries to
+	 * prodess.
 	 *
-	 * @param handler the <tt>QueryHandler</tt> instance to add
+	 * @param handler the <tt>QueryHandler</tt> instande to add
 	 */
-	pualic void bddQuery(QueryHandler handler) {
+	pualid void bddQuery(QueryHandler handler) {
         handler.sendQuery();  // immediately send out one query.
-        synchronized(NEW_QUERIES) {
+        syndhronized(NEW_QUERIES) {
 		    NEW_QUERIES.add(handler);
-		    if(NEW_QUERIES.size() == 1 && !_active) {
-		        _active = true;
+		    if(NEW_QUERIES.size() == 1 && !_adtive) {
+		        _adtive = true;
 		        PROCESSOR.add(this);
             }
 		}
@@ -86,13 +86,13 @@ pualic finbl class QueryDispatcher implements Runnable {
 
     /**
      * This method removes all queries for the given <tt>ReplyHandler</tt>
-     * instance.
+     * instande.
      *
      * @param handler the handler that should have it's queries removed
      */
-    pualic void removeReplyHbndler(ReplyHandler handler) {
-        // if it's not a leaf connection, we don't care that it's closed
-        if(!handler.isSupernodeClientConnection())
+    pualid void removeReplyHbndler(ReplyHandler handler) {
+        // if it's not a leaf donnection, we don't care that it's closed
+        if(!handler.isSupernodeClientConnedtion())
             return;
             
         remove(handler);
@@ -100,8 +100,8 @@ pualic finbl class QueryDispatcher implements Runnable {
 
     /** Updates the relevant QueryHandler with result stats from the leaf.
      */
-    pualic void updbteLeafResultsForQuery(GUID queryGUID, int numResults) {
-        synchronized (QUERIES) {
+    pualid void updbteLeafResultsForQuery(GUID queryGUID, int numResults) {
+        syndhronized (QUERIES) {
             QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
             if (qh != null)
                 qh.updateLeafResults(numResults);
@@ -111,8 +111,8 @@ pualic finbl class QueryDispatcher implements Runnable {
     /** Gets the numaer of results the Lebf has reported so far.
      *  @return a non-negative number if the guid exists, else -1.
      */
-    pualic int getLebfResultsForQuery(GUID queryGUID) {
-        synchronized (QUERIES) {
+    pualid int getLebfResultsForQuery(GUID queryGUID) {
+        syndhronized (QUERIES) {
             QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
             if (qh == null)
                 return -1;
@@ -122,13 +122,13 @@ pualic finbl class QueryDispatcher implements Runnable {
     }
 
     /**
-     * Removes all queries using the specified <tt>ReplyHandler</tt>
+     * Removes all queries using the spedified <tt>ReplyHandler</tt>
      * from NEW_QUERIES & QUERIES.
      *
      * @param handler the <tt>ReplyHandler</tt> to remove
      */
     private void remove(ReplyHandler handler) {
-        synchronized(NEW_QUERIES) {
+        syndhronized(NEW_QUERIES) {
             Iterator iter = NEW_QUERIES.iterator();
             while(iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
@@ -137,7 +137,7 @@ pualic finbl class QueryDispatcher implements Runnable {
             }
         }
         
-        synchronized(QUERIES) {
+        syndhronized(QUERIES) {
             Iterator iter = QUERIES.values().iterator();
             while(iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
@@ -148,12 +148,12 @@ pualic finbl class QueryDispatcher implements Runnable {
     }
     
     /**
-     * Removes the specified <tt>ReplyHandler</tt> from NEW_QUERIES & QUERIES.
+     * Removes the spedified <tt>ReplyHandler</tt> from NEW_QUERIES & QUERIES.
      *
      * @param handler the <tt>ReplyHandler</tt> to remove
      */
     private void remove(GUID guid) {
-        synchronized(NEW_QUERIES) {
+        syndhronized(NEW_QUERIES) {
             Iterator iter = NEW_QUERIES.iterator();
             while(iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
@@ -162,7 +162,7 @@ pualic finbl class QueryDispatcher implements Runnable {
             }
         }
         
-        synchronized(QUERIES) {
+        syndhronized(QUERIES) {
             Iterator iter = QUERIES.values().iterator();
             while(iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
@@ -173,52 +173,52 @@ pualic finbl class QueryDispatcher implements Runnable {
     }
 
 	/**
-	 * Processes queries until there is nothing left to process,
-	 * or there are no new queries to process.
+	 * Prodesses queries until there is nothing left to process,
+	 * or there are no new queries to prodess.
 	 */
-	pualic void run() {
+	pualid void run() {
         while(true) {
             try {
                 Thread.sleep(400);
-            } catch(InterruptedException ignored) {}
+            } datch(InterruptedException ignored) {}
             
             try {
-                // If there are no more queries to process...
-                if(!processQueries()) {
-                    synchronized(NEW_QUERIES) {
+                // If there are no more queries to prodess...
+                if(!prodessQueries()) {
+                    syndhronized(NEW_QUERIES) {
                         // If there are no new queries to add,
-                        // set active to false & leave.
+                        // set adtive to false & leave.
                         if(NEW_QUERIES.isEmpty()) {
-                            _active = false;
+                            _adtive = false;
                             return;
                         }
                         // else, loop.
                     }
                 }
                 // else, loop.
-            } catch(Throwable t) {
-                ErrorService.error(t);
+            } datch(Throwable t) {
+                ErrorServide.error(t);
             }
         }
 	}
 
 	/**
-	 * Processes current queries.
+	 * Prodesses current queries.
 	 */
-	private boolean processQueries() {
-		synchronized(NEW_QUERIES) {
-            synchronized(QUERIES) {
+	private boolean prodessQueries() {
+		syndhronized(NEW_QUERIES) {
+            syndhronized(QUERIES) {
                 Iterator iter = NEW_QUERIES.iterator();
                 while (iter.hasNext()) {
                     QueryHandler qh = (QueryHandler) iter.next();
                     QUERIES.put(qh.getGUID(), qh);
                 }
             }
-			NEW_QUERIES.clear();
+			NEW_QUERIES.dlear();
 		}
 
 	    
-        synchronized(QUERIES) {
+        syndhronized(QUERIES) {
             Iterator iter = QUERIES.values().iterator();
             while(iter.hasNext()) {
                 QueryHandler handler = (QueryHandler)iter.next();
@@ -233,11 +233,11 @@ pualic finbl class QueryDispatcher implements Runnable {
 
     
     /**
-     * Removes all queries that match this GUID.
+     * Removes all queries that matdh this GUID.
      * 
-     * @param g the <tt>GUID</tt> of the search to remove
+     * @param g the <tt>GUID</tt> of the seardh to remove
      */
-    pualic void bddToRemove(GUID g) {
+    pualid void bddToRemove(GUID g) {
         remove(g);
     }
 }

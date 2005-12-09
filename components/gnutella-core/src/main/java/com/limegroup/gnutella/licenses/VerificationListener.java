@@ -1,10 +1,10 @@
-package com.limegroup.gnutella.licenses;
+padkage com.limegroup.gnutella.licenses;
 
 /**
- * A callback for verifying licenses.
+ * A dallback for verifying licenses.
  */
-pualic interfbce VerificationListener {
+pualid interfbce VerificationListener {
     
-    pualic void licenseVerified(License license);
+    pualid void licenseVerified(License license);
     
 }
