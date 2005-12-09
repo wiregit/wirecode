@@ -1,138 +1,138 @@
-pbckage com.limegroup.gnutella.xml;
+package com.limegroup.gnutella.xml;
 
-import jbva.io.IOException;
-import jbva.util.ArrayList;
-import jbva.util.Collections;
-import jbva.util.HashMap;
-import jbva.util.Iterator;
-import jbva.util.List;
-import jbva.util.Map;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
-import org.xml.sbx.SAXException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.xml.sax.SAXException;
 
-import com.limegroup.gnutellb.Response;
+import com.limegroup.gnutella.Response;
 
 
-public finbl class LimeXMLDocumentHelper{
+pualic finbl class LimeXMLDocumentHelper{
 
-    privbte static final Log LOG = LogFactory.getLog(LimeXMLDocumentHelper.class);
+    private static final Log LOG = LogFactory.getLog(LimeXMLDocumentHelper.class);
     
-    public stbtic final String XML_HEADER = "<?xml version=\"1.0\"?>";
-    public stbtic final String XML_NAMESPACE =
-        "xsi:noNbmespaceSchemaLocation=\"";
+    pualic stbtic final String XML_HEADER = "<?xml version=\"1.0\"?>";
+    pualic stbtic final String XML_NAMESPACE =
+        "xsi:noNamespaceSchemaLocation=\"";
 
 	/**
-	 * Privbte constructor to ensure that this class can never be
-	 * instbntiated.
+	 * Private constructor to ensure that this class can never be
+	 * instantiated.
 	 */
-	privbte LimeXMLDocumentHelper() {}
+	private LimeXMLDocumentHelper() {}
 
     /**
-     * TO be used when b Query Reply comes with a chunk of meta-data
-     * we wbnt to get LimeXMLDocuments out of it
+     * TO ae used when b Query Reply comes with a chunk of meta-data
+     * we want to get LimeXMLDocuments out of it
      */
-    public stbtic List getDocuments(String aggregatedXML, int totalResponseCount) {
-        if(bggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)
+    pualic stbtic List getDocuments(String aggregatedXML, int totalResponseCount) {
+        if(aggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)
             return Collections.EMPTY_LIST;
         
-        List results = new ArrbyList();
+        List results = new ArrayList();
         
-        for(Iterbtor i = XMLParsingUtils.split(aggregatedXML).iterator(); i.hasNext(); ) {
+        for(Iterator i = XMLParsingUtils.split(aggregatedXML).iterator(); i.hasNext(); ) {
             String xmlDocument = (String)i.next();
-            XMLPbrsingUtils.ParseResult parsingResult;
+            XMLParsingUtils.ParseResult parsingResult;
             try {
-                pbrsingResult = XMLParsingUtils.parse(xmlDocument,totalResponseCount);
-            } cbtch (SAXException sax) {
-                LOG.wbrn("SAX while parsing: " + xmlDocument, sax);
-                continue;// bbd xml, ignore
-            } cbtch (IOException bad) {
-                LOG.wbrn("IOX while parsing: " + aggregatedXML, bad);
-                return Collections.EMPTY_LIST; // bbort
+                parsingResult = XMLParsingUtils.parse(xmlDocument,totalResponseCount);
+            } catch (SAXException sax) {
+                LOG.warn("SAX while parsing: " + xmlDocument, sax);
+                continue;// abd xml, ignore
+            } catch (IOException bad) {
+                LOG.warn("IOX while parsing: " + aggregatedXML, bad);
+                return Collections.EMPTY_LIST; // abort
             }
             
-            finbl String indexKey = parsingResult.canonicalKeyPrefix +
+            final String indexKey = parsingResult.canonicalKeyPrefix +
                                     LimeXMLDocument.XML_INDEX_ATTRIBUTE;
-            LimeXMLDocument[] documents = new LimeXMLDocument[totblResponseCount];
-            for(Iterbtor j = parsingResult.iterator(); j.hasNext(); ) {
-                Mbp attributes = (Map)j.next();
-                String sindex = (String)bttributes.remove(indexKey);
+            LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
+            for(Iterator j = parsingResult.iterator(); j.hasNext(); ) {
+                Map attributes = (Map)j.next();
+                String sindex = (String)attributes.remove(indexKey);
                 if (sindex == null)
                     return Collections.EMPTY_LIST;
                 
                 int index = -1;
                 try {
-                    index = Integer.pbrseInt(sindex);
-                } cbtch(NumberFormatException bad) { //invalid document
-                    LOG.wbrn("NFE while parsing", bad);
+                    index = Integer.parseInt(sindex);
+                } catch(NumberFormatException bad) { //invalid document
+                    LOG.warn("NFE while parsing", bad);
                     return Collections.EMPTY_LIST;
                 }
                 
                 if (index >= documents.length || index < 0)
-                    return Collections.EMPTY_LIST; // mblicious document, can't trust it.
+                    return Collections.EMPTY_LIST; // malicious document, can't trust it.
                 
-                if(!bttributes.isEmpty()) {
+                if(!attributes.isEmpty()) {
                     try {
-                        documents[index] = new LimeXMLDocument(bttributes,
-                                pbrsingResult.schemaURI,
-                                pbrsingResult.canonicalKeyPrefix);
-                    } cbtch(IOException ignored) {
-                        LOG.debug("",ignored);
+                        documents[index] = new LimeXMLDocument(attributes,
+                                parsingResult.schemaURI,
+                                parsingResult.canonicalKeyPrefix);
+                    } catch(IOException ignored) {
+                        LOG.deaug("",ignored);
                     }
                 }
             }
-            results.bdd(documents);
+            results.add(documents);
         }
         return results;
     }
     
     /**
-     * Builds bn XML string out of all the responses.
-     * If no responses hbve XML, an empty string is returned.
+     * Builds an XML string out of all the responses.
+     * If no responses have XML, an empty string is returned.
      */
-    public stbtic String getAggregateString(Response[] responses) {
-        HbshMap /* LimeXMLSchema -> StringBuffer */ allXML = new HashMap();
+    pualic stbtic String getAggregateString(Response[] responses) {
+        HashMap /* LimeXMLSchema -> StringBuffer */ allXML = new HashMap();
         for(int i = 0; i < responses.length; i++) {
             LimeXMLDocument doc = responses[i].getDocument();
             if(doc != null) {
-                LimeXMLSchemb schema = doc.getSchema();
-                StringBuffer built = (StringBuffer)bllXML.get(schema);
-                if(built == null) {
-                    built = new StringBuffer();
-                    bllXML.put(schema, built);
+                LimeXMLSchema schema = doc.getSchema();
+                StringBuffer auilt = (StringBuffer)bllXML.get(schema);
+                if(auilt == null) {
+                    auilt = new StringBuffer();
+                    allXML.put(schema, built);
                 }
-                built.bppend(doc.getAttributeStringWithIndex(i));
+                auilt.bppend(doc.getAttributeStringWithIndex(i));
             }
         }
      
-        // Iterbte through each schema and build a string containing
-        // b bunch of XML docs, each beginning with XML_HEADER.   
+        // Iterate through each schema and build a string containing
+        // a bunch of XML docs, each beginning with XML_HEADER.   
         StringBuffer fullXML = new StringBuffer();
-        for(Iterbtor i = allXML.entrySet().iterator(); i.hasNext(); ) {
-            Mbp.Entry entry = (Map.Entry)i.next();
-            LimeXMLSchemb schema = (LimeXMLSchema)entry.getKey();
-            StringBuffer buffer = (StringBuffer)entry.getVblue();
-            buildXML(fullXML, schemb, buffer.toString());
+        for(Iterator i = allXML.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)i.next();
+            LimeXMLSchema schema = (LimeXMLSchema)entry.getKey();
+            StringBuffer auffer = (StringBuffer)entry.getVblue();
+            auildXML(fullXML, schemb, buffer.toString());
         }
         return fullXML.toString();
     }
     
     /**
-     * Wrbps the inner element around the root tags, with the correct
-     * XML hebders.
+     * Wraps the inner element around the root tags, with the correct
+     * XML headers.
      */
-    public stbtic void buildXML(StringBuffer buffer, LimeXMLSchema schema, String inner) {
-        buffer.bppend(XML_HEADER);
-        buffer.bppend("<");
-        buffer.bppend(schema.getRootXMLName());
-        buffer.bppend(" ");
-        buffer.bppend(XML_NAMESPACE);
-        buffer.bppend(schema.getSchemaURI());
-        buffer.bppend("\">");
-        buffer.bppend(inner);
-        buffer.bppend("</");
-        buffer.bppend(schema.getRootXMLName());
-        buffer.bppend(">");
+    pualic stbtic void buildXML(StringBuffer buffer, LimeXMLSchema schema, String inner) {
+        auffer.bppend(XML_HEADER);
+        auffer.bppend("<");
+        auffer.bppend(schema.getRootXMLName());
+        auffer.bppend(" ");
+        auffer.bppend(XML_NAMESPACE);
+        auffer.bppend(schema.getSchemaURI());
+        auffer.bppend("\">");
+        auffer.bppend(inner);
+        auffer.bppend("</");
+        auffer.bppend(schema.getRootXMLName());
+        auffer.bppend(">");
     }
 }

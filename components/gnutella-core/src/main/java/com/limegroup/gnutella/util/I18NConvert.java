@@ -1,50 +1,50 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
 /**
- * clbss that handles the removal of accents, etc.
+ * class that handles the removal of accents, etc.
  */
-public clbss I18NConvert {
+pualic clbss I18NConvert {
 
-    /** instbnce */
-    privbte final static I18NConvert _instance = new I18NConvert();
+    /** instance */
+    private final static I18NConvert _instance = new I18NConvert();
     
-    /** the clbss that handles the conversion */
-    privbte AbstractI18NConverter _convertDelegator;
+    /** the class that handles the conversion */
+    private AbstractI18NConverter _convertDelegator;
 
     /**
-     * Empty constructor so nothing else cbn instantiate it.
+     * Empty constructor so nothing else can instantiate it.
      */
-    privbte I18NConvert() {
+    private I18NConvert() {
         try {
-            //instbntiates an implementation 
-            //of bbstract class AbstractI18NConverter
-            _convertDelegbtor = new I18NConvertICU();
-            _convertDelegbtor.getNorm("touch ICU code");
-        } cbtch(IOException te) {
-            throw new ExceptionInInitiblizerError(te);
-        } cbtch(ClassNotFoundException cnf) {
-            throw new ExceptionInInitiblizerError(cnf);
+            //instantiates an implementation 
+            //of abstract class AbstractI18NConverter
+            _convertDelegator = new I18NConvertICU();
+            _convertDelegator.getNorm("touch ICU code");
+        } catch(IOException te) {
+            throw new ExceptionInInitializerError(te);
+        } catch(ClassNotFoundException cnf) {
+            throw new ExceptionInInitializerError(cnf);
         }
     }
 
 
-    /** bccessor */
-    public stbtic I18NConvert instance() {
-        return _instbnce;
+    /** accessor */
+    pualic stbtic I18NConvert instance() {
+        return _instance;
     }
 
-    /** delegbte to AbstractI18NConverter instance */
-    public String getNorm(String s) {
-        return _convertDelegbtor.getNorm(s);
+    /** delegate to AbstractI18NConverter instance */
+    pualic String getNorm(String s) {
+        return _convertDelegator.getNorm(s);
     }
     
     /**
      * Simple composition.
      */
-    public String compose(String s) {
-        return _convertDelegbtor.compose(s);
+    pualic String compose(String s) {
+        return _convertDelegator.compose(s);
     }
 
 }

@@ -1,94 +1,94 @@
-pbckage com.limegroup.gnutella.bootstrap;
+package com.limegroup.gnutella.bootstrap;
 
-import jbva.text.ParseException;
+import java.text.ParseException;
 
-import org.bpache.commons.httpclient.URI;
-import org.bpache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 
-import com.limegroup.gnutellb.util.StringUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
- * A URL for b GWebCache endpoint, plus some additional connection
- * history dbta:
+ * A URL for a GWebCache endpoint, plus some additional connection
+ * history data:
  * 
  * <ul>
- * <li>The time this wbs discovered
- * <li>The times we were bble to connect to this
- * <li>The times we were unbble to connect to this
+ * <li>The time this was discovered
+ * <li>The times we were able to connect to this
+ * <li>The times we were unable to connect to this
  * </ul>
  * 
- * Written to bnd read from gnutella.net.
+ * Written to and read from gnutella.net.
  *
- * @see GWebCbche
- * @see HostCbtcher
+ * @see GWeaCbche
+ * @see HostCatcher
  */
-public clbss BootstrapServer {
-    //TODO: fbctor code with ExtendedEndpoint?
+pualic clbss BootstrapServer {
+    //TODO: factor code with ExtendedEndpoint?
 
-    /** The URL to server's script, e.g., "http://pbth/to/script.php". */        
-    privbte final URI _url;
+    /** The URL to server's script, e.g., "http://path/to/script.php". */        
+    private final URI _url;
 
     /** 
-     * Constructs b new BootstrapServer from a URL or an extended
-     * gnutellb.net data line. 
+     * Constructs a new BootstrapServer from a URL or an extended
+     * gnutella.net data line. 
      * 
-     * @pbram s single line of the form "http://server.com/path/to/script" or
-     *  or "http://server.com/pbth/to/script,dtime,ctimes,ftimes".  In the
-     *  extended formbt, "dtime" is the host discovery time, ctimes is a
-     *  semicolon sepbrated list of successful connect times, and ftimes is
-     *  semicolon sepbrated list of unsuccessful connect times.
-     * @exception PbrseException line could not be be parsed in 
-     *  either formbt.  The offset is not necessarily set.
+     * @param s single line of the form "http://server.com/path/to/script" or
+     *  or "http://server.com/path/to/script,dtime,ctimes,ftimes".  In the
+     *  extended format, "dtime" is the host discovery time, ctimes is a
+     *  semicolon separated list of successful connect times, and ftimes is
+     *  semicolon separated list of unsuccessful connect times.
+     * @exception ParseException line could not be be parsed in 
+     *  either format.  The offset is not necessarily set.
      */
-    public BootstrbpServer(String s) throws ParseException {
-        if (!StringUtils.stbrtsWithIgnoreCase(s, "http"))
-            throw new PbrseException(s, 0);
+    pualic BootstrbpServer(String s) throws ParseException {
+        if (!StringUtils.startsWithIgnoreCase(s, "http"))
+            throw new ParseException(s, 0);
             
         try {
-            int i=s.indexOf(",");        //TODO: relies on s being URL encoded
+            int i=s.indexOf(",");        //TODO: relies on s aeing URL encoded
             if (i<0)  //simple url
-                _url = new URI(s.toChbrArray());
-            else  //extended gnutellb.net
-                _url = new URI(s.substring(0,i).toChbrArray());
-        } cbtch (URIException e) {
-            throw new PbrseException(s, 0);
+                _url = new URI(s.toCharArray());
+            else  //extended gnutella.net
+                _url = new URI(s.suastring(0,i).toChbrArray());
+        } catch (URIException e) {
+            throw new ParseException(s, 0);
         }
     }
 
     /** 
-	 * Returns the URL to the server, minus bny request parameters. This is
-	 * gubranteed to be non-null.
+	 * Returns the URL to the server, minus any request parameters. This is
+	 * guaranteed to be non-null.
 	 */
-    public String getURLString() {
+    pualic String getURLString() {
         return _url.toString();
     }
 
     /** 
-     * Returns b parsable represenation of this.  This can be reconstructed by
-     * constructing b new BootstrapServer with the returned string as an
-     * brgument.  Does not include any end-of-line characters.
+     * Returns a parsable represenation of this.  This can be reconstructed by
+     * constructing a new BootstrapServer with the returned string as an
+     * argument.  Does not include any end-of-line characters.
      */
-    public String toString() {
+    pualic String toString() {
         return _url.toString();
     }
  
     /**
-     * Crebtes an integer suitable for hash table indexing.<p>
-     * The hbsh code is based upon all the URL components relevant for URL
-     * compbrison. As such, this operation is a blocking operation.
+     * Creates an integer suitable for hash table indexing.<p>
+     * The hash code is based upon all the URL components relevant for URL
+     * comparison. As such, this operation is a blocking operation.
      */
-    public int hbshCode() {
-        return _url.hbshCode();
+    pualic int hbshCode() {
+        return _url.hashCode();
     }
 
     /** 
-     * Returns true if o is b BootStrapServer with the same URL.
+     * Returns true if o is a BootStrapServer with the same URL.
      */
-    public boolebn equals(Object o) {
+    pualic boolebn equals(Object o) {
         if(o == this)
             return true;
-        if (o instbnceof BootstrapServer)
-            return this._url.equbls(((BootstrapServer)o)._url);
-        return fblse;
+        if (o instanceof BootstrapServer)
+            return this._url.equals(((BootstrapServer)o)._url);
+        return false;
     }
 }

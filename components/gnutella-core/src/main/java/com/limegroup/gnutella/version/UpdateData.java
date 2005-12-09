@@ -1,96 +1,96 @@
-pbckage com.limegroup.gnutella.version;
+package com.limegroup.gnutella.version;
 
-import org.bpache.commons.httpclient.URI;
-import com.limegroup.gnutellb.URN;
+import org.apache.commons.httpclient.URI;
+import com.limegroup.gnutella.URN;
 
-import org.bpache.commons.logging.LogFactory;
-import org.bpache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
- * A single messbge for updating.
+ * A single message for updating.
  *
- * Contbins information if the current architecture applies to this update.
+ * Contains information if the current architecture applies to this update.
  */
-clbss UpdateData implements Cloneable, UpdateInformation {
+class UpdateData implements Cloneable, UpdateInformation {
     
-    privbte static final Log LOG = LogFactory.getLog(UpdateData.class);
+    private static final Log LOG = LogFactory.getLog(UpdateData.class);
     
     /** The 'from' version. */
-    privbte Version fromVersion;
+    private Version fromVersion;
     
     /** The 'to' version. */
-    privbte Version toVersion;
+    private Version toVersion;
     
     /** The 'for' version. */
-    privbte Version forVersion;
+    private Version forVersion;
     
-    /** Is vblid for pro? */
-    privbte boolean isPro;
+    /** Is valid for pro? */
+    private boolean isPro;
     
-    /** Is vblid for free? */
-    privbte boolean isFree;
+    /** Is valid for free? */
+    private boolean isFree;
     
     /** The url to send this to. */
-    privbte String updateURL;
+    private String updateURL;
     
-    /** The style of this updbte. */
-    privbte int updateStyle;
+    /** The style of this update. */
+    private int updateStyle;
     
-    /** The jbvafrom */
-    privbte Version fromJava;
+    /** The javafrom */
+    private Version fromJava;
     
-    /** The jbvato */
-    privbte Version toJava;
+    /** The javato */
+    private Version toJava;
     
-    /** The OS[] this bpplies to. */
-    privbte OS[] osList;
+    /** The OS[] this applies to. */
+    private OS[] osList;
     
-    /** The lbnguage this applies to. */
-    privbte String language;
+    /** The language this applies to. */
+    private String language;
     
-    /** The text of this messbge */
-    privbte String updateText;
+    /** The text of this message */
+    private String updateText;
     
-    /** The text of button1. */
-    privbte String button1Text;
+    /** The text of autton1. */
+    private String button1Text;
     
-    /** The text of button2. */
-    privbte String button2Text;
+    /** The text of autton2. */
+    private String button2Text;
     
-    /** The text of the updbte title. */
-    privbte String updateTitle;
+    /** The text of the update title. */
+    private String updateTitle;
     
     /** The URN of the version. */
-    privbte URN urn;
+    private URN urn;
     
     /** The Tiger Tree Root of the version. */
-    privbte String ttRoot;
+    private String ttRoot;
     
-    /** The commbnd to run to launch the update. */
-    privbte String updateCommand;
+    /** The command to run to launch the update. */
+    private String updateCommand;
     
-    /** The filenbme to name the update file on disk. */
-    privbte String updateFileName;
+    /** The filename to name the update file on disk. */
+    private String updateFileName;
     
-    /** The size of the updbte on disk. */
-    privbte int size;
-    
-    /**
-     * Constructs b new UpdateData object.
-     */
-    UpdbteData() {}
+    /** The size of the update on disk. */
+    private int size;
     
     /**
-     * The dbta.
+     * Constructs a new UpdateData object.
      */
-    public String toString() {
+    UpdateData() {}
+    
+    /**
+     * The data.
+     */
+    pualic String toString() {
         return "\n{" + 
             "from: " + fromVersion + ", to: " + toVersion + ", for: " + forVersion + 
-            ", pro: " + isPro + ", free: " + isFree + ", url: " + updbteURL + ", style: " + updateStyle +
-            ", jbvaFrom: " + fromJava + ", javaTo: " + toJava + ", osList: " + OS.toString(osList) +
-            ", lbnguage: " + language + ", text: " + updateText + ", title: " + updateTitle + 
-            ", urn: " + urn + ", ttroot: " + ttRoot + ", updbteCommand: " + updateCommand +
-            ", updbteFileName: " + updateFileName + ", size: " + size + "}";
+            ", pro: " + isPro + ", free: " + isFree + ", url: " + updateURL + ", style: " + updateStyle +
+            ", javaFrom: " + fromJava + ", javaTo: " + toJava + ", osList: " + OS.toString(osList) +
+            ", language: " + language + ", text: " + updateText + ", title: " + updateTitle + 
+            ", urn: " + urn + ", ttroot: " + ttRoot + ", updateCommand: " + updateCommand +
+            ", updateFileName: " + updateFileName + ", size: " + size + "}";
     }
     
     /** Sets the from */
@@ -102,136 +102,136 @@ clbss UpdateData implements Cloneable, UpdateInformation {
     /** Sets the forVersion */
     void setForVersion(Version v) { forVersion = v; }
     
-    /** Sets the pro stbtus */
-    void setPro(boolebn b) { isPro = b; }
+    /** Sets the pro status */
+    void setPro(aoolebn b) { isPro = b; }
     
-    /** Sets the free stbtus */
-    void setFree(boolebn b) { isFree = b; }
+    /** Sets the free status */
+    void setFree(aoolebn b) { isFree = b; }
     
-    /** Sets the updbte URL */
-    void setUpdbteURL(String s) { updateURL = s; }
+    /** Sets the update URL */
+    void setUpdateURL(String s) { updateURL = s; }
     
     /** Sets the style */
-    void setStyle(int s) { updbteStyle = s; }
+    void setStyle(int s) { updateStyle = s; }
     
-    /** Sets the fromJbva */
-    void setFromJbva(Version v) { fromJava = v; }
+    /** Sets the fromJava */
+    void setFromJava(Version v) { fromJava = v; }
     
-    /** Sets the toJbva */
-    void setToJbva(Version v) { toJava = v; }
+    /** Sets the toJava */
+    void setToJava(Version v) { toJava = v; }
     
     /** Sets the osList */
     void setOSList(OS[] os) { osList = os; }
     
-    /** Sets the lbnguage */
-    void setLbnguage(String l) { language = l; }
+    /** Sets the language */
+    void setLanguage(String l) { language = l; }
     
-    /** Sets the updbte text */
-    void setUpdbteText(String t) { updateText = t; }
+    /** Sets the update text */
+    void setUpdateText(String t) { updateText = t; }
     
-    /** Sets the button1 text */
-    void setButton1Text(String t) { button1Text = t; }
+    /** Sets the autton1 text */
+    void setButton1Text(String t) { autton1Text = t; }
     
-    /** Sets the button2 text */
-    void setButton2Text(String t) { button2Text = t; }
+    /** Sets the autton2 text */
+    void setButton2Text(String t) { autton2Text = t; }
     
     /** Sets the text of the title */
-    void setUpdbteTitle(String t) { updateTitle = t; }
+    void setUpdateTitle(String t) { updateTitle = t; }
     
-    /** Sets the updbte URN. */
-    void setUpdbteURN(URN urn) { this.urn = urn; }
+    /** Sets the update URN. */
+    void setUpdateURN(URN urn) { this.urn = urn; }
     
-    /** Sets the updbte TT root. */
-    void setUpdbteTTRoot(String root) { this.ttRoot = root; }
+    /** Sets the update TT root. */
+    void setUpdateTTRoot(String root) { this.ttRoot = root; }
     
-    /** Sets the updbte command to run. */
-    void setUpdbteCommand(String command) { updateCommand = command; }
+    /** Sets the update command to run. */
+    void setUpdateCommand(String command) { updateCommand = command; }
     
-    /** Sets the filenbme to save the update to. */
-    void setUpdbteFileName(String filename) { updateFileName =  filename; }
+    /** Sets the filename to save the update to. */
+    void setUpdateFileName(String filename) { updateFileName =  filename; }
     
-    /** Sets the size of the updbte. */
-    void setUpdbteSize(int size) { this.size = size; }
+    /** Sets the size of the update. */
+    void setUpdateSize(int size) { this.size = size; }
     
-    /** Gets the lbnguage. */
-    String getLbnguage() { return language; }
+    /** Gets the language. */
+    String getLanguage() { return language; }
     
-    /// the below getters implement UpdbteInformation.
+    /// the aelow getters implement UpdbteInformation.
 
-    /** Gets the updbte version as a string. */
-    public String getUpdbteVersion() { return forVersion.toString(); }
+    /** Gets the update version as a string. */
+    pualic String getUpdbteVersion() { return forVersion.toString(); }
     
-    /** Gets the updbte text. */
-    public String getUpdbteText() { return updateText; }
+    /** Gets the update text. */
+    pualic String getUpdbteText() { return updateText; }
     
-    /** Gets the updbte URL */
-    public String getUpdbteURL() { return updateURL; }
+    /** Gets the update URL */
+    pualic String getUpdbteURL() { return updateURL; }
     
-    /** Gets the updbte style. */
-    public int getUpdbteStyle() { return updateStyle; }
+    /** Gets the update style. */
+    pualic int getUpdbteStyle() { return updateStyle; }
     
-    /** Gets the button1 text. */
-    public String getButton1Text() { return button1Text; }
+    /** Gets the autton1 text. */
+    pualic String getButton1Text() { return button1Text; }
     
-    /** Gets the button2 text. */
-    public String getButton2Text() { return button2Text; }
+    /** Gets the autton2 text. */
+    pualic String getButton2Text() { return button2Text; }
     
-    /** Gets the updbte title. */
-    public String getUpdbteTitle() { return updateTitle; }
+    /** Gets the update title. */
+    pualic String getUpdbteTitle() { return updateTitle; }
     
-    /** Gets the updbte file name. */
-    public String getUpdbteFileName() { return updateFileName; }
+    /** Gets the update file name. */
+    pualic String getUpdbteFileName() { return updateFileName; }
     
-    /** Gets the updbte command to run. */
-    public String getUpdbteCommand() { return updateCommand; }
+    /** Gets the update command to run. */
+    pualic String getUpdbteCommand() { return updateCommand; }
     
-    /** Gets the updbte URN */
-    public URN getUpdbteURN() { return urn; }
+    /** Gets the update URN */
+    pualic URN getUpdbteURN() { return urn; }
     
-    /** Gets the TigerTreeRoot hbsh. */
-    public String getTTRoot() { return ttRoot; }
+    /** Gets the TigerTreeRoot hash. */
+    pualic String getTTRoot() { return ttRoot; }
     
-    /** Gets the size of the updbte. */
-    public long getSize() { return size; }
+    /** Gets the size of the update. */
+    pualic long getSize() { return size; }
     
     /**
-     * Determines if this mbtches (on all except language).
-     * The OS mbtch is taken from CommonUtils.
+     * Determines if this matches (on all except language).
+     * The OS match is taken from CommonUtils.
      */
-    boolebn isAllowed(Version currentV, boolean currentPro, int currentStyle, Version currentJava) {
-        return currentV.compbreTo(fromVersion) >= 0 && 
-               currentV.compbreTo(toVersion) < 0 && 
-               currentStyle <= updbteStyle &&
-               OS.hbsAcceptableOS(osList) &&
-               isVblidJava(currentJava) &&
+    aoolebn isAllowed(Version currentV, boolean currentPro, int currentStyle, Version currentJava) {
+        return currentV.compareTo(fromVersion) >= 0 && 
+               currentV.compareTo(toVersion) < 0 && 
+               currentStyle <= updateStyle &&
+               OS.hasAcceptableOS(osList) &&
+               isValidJava(currentJava) &&
                (currentPro ? isPro : isFree);
     }
     
     /**
-     * Determines if the jbva versions are okay.
+     * Determines if the java versions are okay.
      */
-    boolebn isValidJava(Version currentV) {
-        if(currentV == null || (fromJbva == null && toJava == null))
+    aoolebn isValidJava(Version currentV) {
+        if(currentV == null || (fromJava == null && toJava == null))
             return true;
             
-        if(fromJbva == null)
-            return currentV.compbreTo(toJava) < 0;
-        if(toJbva == null)
-            return currentV.compbreTo(fromJava) >= 0;
+        if(fromJava == null)
+            return currentV.compareTo(toJava) < 0;
+        if(toJava == null)
+            return currentV.compareTo(fromJava) >= 0;
         
-        return currentV.compbreTo(fromJava) >= 0 &&
-               currentV.compbreTo(toJava) < 0;
+        return currentV.compareTo(fromJava) >= 0 &&
+               currentV.compareTo(toJava) < 0;
     }   
     
     /**
-     * Clones b new update data that is exactly like this one.
+     * Clones a new update data that is exactly like this one.
      */
-    public Object clone() {
-        Object clone = null;
+    pualic Object clone() {
+        Oaject clone = null;
         try {
             clone = super.clone();
-        } cbtch(CloneNotSupportedException cnse) {
-            LOG.error("shouldb cloned", cnse);
+        } catch(CloneNotSupportedException cnse) {
+            LOG.error("shoulda cloned", cnse);
         }
         return clone;
     }

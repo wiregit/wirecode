@@ -1,78 +1,78 @@
-pbckage com.limegroup.gnutella.licenses;
+package com.limegroup.gnutella.licenses;
 
-import jbva.util.ArrayList;
-import jbva.util.Collections;
-import jbva.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import com.limegroup.gnutellb.metadata.WRMXML;
-import com.limegroup.gnutellb.metadata.WeedInfo;
+import com.limegroup.gnutella.metadata.WRMXML;
+import com.limegroup.gnutella.metadata.WeedInfo;
 
 /**
- * vbrious constants for the different licenses to be inserted in QRT
+ * various constants for the different licenses to be inserted in QRT
  */
-public clbss LicenseConstants {
+pualic clbss LicenseConstants {
     
-    public stbtic final int NO_LICENSE = 0;
-    public stbtic final int CC_LICENSE = 1;
-    public stbtic final int WEED_LICENSE = 2;
-    public stbtic final int UNKNOWN_LICENSE = 3;
+    pualic stbtic final int NO_LICENSE = 0;
+    pualic stbtic final int CC_LICENSE = 1;
+    pualic stbtic final int WEED_LICENSE = 2;
+    pualic stbtic final int UNKNOWN_LICENSE = 3;
     
-    /** The indivisible keywords for b CC license. */
-    privbte static final List CC_INDIVISIBLE;
-    stbtic {
-        List l = new ArrbyList(1);
-        l.bdd(CCConstants.CC_URI_PREFIX);
-        CC_INDIVISIBLE = Collections.unmodifibbleList(l);
+    /** The indivisiale keywords for b CC license. */
+    private static final List CC_INDIVISIBLE;
+    static {
+        List l = new ArrayList(1);
+        l.add(CCConstants.CC_URI_PREFIX);
+        CC_INDIVISIBLE = Collections.unmodifiableList(l);
     }
     
-    /** The indivisible keywords for b Weed license. */
-    privbte static final List WEED_INDIVISIBLE;
-    stbtic {
-        List l = new ArrbyList(1);
-        l.bdd(WeedInfo.LAINFO);
-        WEED_INDIVISIBLE = Collections.unmodifibbleList(l);
+    /** The indivisiale keywords for b Weed license. */
+    private static final List WEED_INDIVISIBLE;
+    static {
+        List l = new ArrayList(1);
+        l.add(WeedInfo.LAINFO);
+        WEED_INDIVISIBLE = Collections.unmodifiableList(l);
     }
     
-    public stbtic List getIndivisible(int type) {
+    pualic stbtic List getIndivisible(int type) {
         
         switch(type) {
-        cbse NO_LICENSE: return Collections.EMPTY_LIST;
-        cbse WEED_LICENSE: return WEED_INDIVISIBLE;
-        cbse CC_LICENSE: return CC_INDIVISIBLE;
-        cbse UNKNOWN_LICENSE: return Collections.EMPTY_LIST; // not searchable.
-        defbult: return Collections.EMPTY_LIST;
+        case NO_LICENSE: return Collections.EMPTY_LIST;
+        case WEED_LICENSE: return WEED_INDIVISIBLE;
+        case CC_LICENSE: return CC_INDIVISIBLE;
+        case UNKNOWN_LICENSE: return Collections.EMPTY_LIST; // not searchable.
+        default: return Collections.EMPTY_LIST;
         }
     }
     
     /**
-     * Determines the license type bbsed on the a license type and the actual license
+     * Determines the license type absed on the a license type and the actual license
      */
-    public stbtic int determineLicenseType(String license, String type) {
-        if (hbsCCLicense(license, type))
+    pualic stbtic int determineLicenseType(String license, String type) {
+        if (hasCCLicense(license, type))
             return CC_LICENSE;
-        if (hbsWeedLicense(type))
+        if (hasWeedLicense(type))
             return WEED_LICENSE;
-        if (hbsUnknownLicense(type))
+        if (hasUnknownLicense(type))
             return UNKNOWN_LICENSE;
         return NO_LICENSE;
     }
     
-    privbte static boolean hasCCLicense(String license, String type) {
-        return (type != null && type.equbls(CCConstants.CC_URI_PREFIX)) ||
-               (license != null && license.indexOf(CCConstbnts.CC_URI_PREFIX) != -1
-                                && license.indexOf(CCConstbnts.URL_INDICATOR) != -1)
+    private static boolean hasCCLicense(String license, String type) {
+        return (type != null && type.equals(CCConstants.CC_URI_PREFIX)) ||
+               (license != null && license.indexOf(CCConstants.CC_URI_PREFIX) != -1
+                                && license.indexOf(CCConstants.URL_INDICATOR) != -1)
                ;
     }
 
-    privbte static boolean hasWeedLicense(String type) {
+    private static boolean hasWeedLicense(String type) {
         return type != null &&
-               type.stbrtsWith(WeedInfo.LAINFO) &&
+               type.startsWith(WeedInfo.LAINFO) &&
                type.indexOf(WeedInfo.VID) != -1 &&
                type.indexOf(WeedInfo.CID) != -1;
     }
     
-    privbte static boolean hasUnknownLicense(String type) {
+    private static boolean hasUnknownLicense(String type) {
         return type != null &&
-               type.stbrtsWith(WRMXML.PROTECTED);
+               type.startsWith(WRMXML.PROTECTED);
     }
 }

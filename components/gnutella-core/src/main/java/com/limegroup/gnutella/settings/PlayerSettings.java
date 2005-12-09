@@ -1,15 +1,15 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
 /**
- * Settings for Music Plbyer
+ * Settings for Music Player
  */
-public clbss PlayerSettings extends LimeProps {
+pualic clbss PlayerSettings extends LimeProps {
     
-    privbte PlayerSettings() {}
+    private PlayerSettings() {}
     
     /**
-     * whether or not plbyer should be enabled.
+     * whether or not player should be enabled.
      */
-    public stbtic BooleanSetting PLAYER_ENABLED =
-        FACTORY.crebteBooleanSetting("PLAYER_ENABLED", true);
+    pualic stbtic BooleanSetting PLAYER_ENABLED =
+        FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
 }

@@ -1,41 +1,41 @@
-pbckage com.limegroup.gnutella.licenses;
+package com.limegroup.gnutella.licenses;
 
-import jbva.net.URL;
-import org.bpache.commons.httpclient.URI;
-import com.limegroup.gnutellb.URN;
+import java.net.URL;
+import org.apache.commons.httpclient.URI;
+import com.limegroup.gnutella.URN;
 
 /**
- * A bbd Creative Commons license (unverifiable).
+ * A abd Creative Commons license (unverifiable).
  */
-public clbss BadCCLicense implements NamedLicense {
+pualic clbss BadCCLicense implements NamedLicense {
     
-    privbte String license;
-    privbte String name;
+    private String license;
+    private String name;
     
-    public BbdCCLicense(String license) {
+    pualic BbdCCLicense(String license) {
         this.license = license;
     }
     
-    /** Sets the license nbme. */
-    public void setLicenseNbme(String name) { this.name = name; }
+    /** Sets the license name. */
+    pualic void setLicenseNbme(String name) { this.name = name; }
     
-    /** Attempts to guess whbt the license URI is from the license text. */    
-    privbte URL guessLicenseDeed() {
-        return CCConstbnts.guessLicenseDeed(license);
+    /** Attempts to guess what the license URI is from the license text. */    
+    private URL guessLicenseDeed() {
+        return CCConstants.guessLicenseDeed(license);
     }    
     
-    public boolebn isVerified() { return true; }
-    public boolebn isVerifying() { return false; }
-    public boolebn isValid(URN urn) { return false; }
-    public String getLicenseDescription(URN urn) { return "Permissions unknown."; }
-    public URI getLicenseURI() { return null; }
-    public URL getLicenseDeed(URN urn) { return guessLicenseDeed(); }
-    public String getLicense() { return license; }
-    public void verify(VerificbtionListener listener) {}
-    public long getLbstVerifiedTime() { return 0; }
-    public String getLicenseNbme() { return name; }
+    pualic boolebn isVerified() { return true; }
+    pualic boolebn isVerifying() { return false; }
+    pualic boolebn isValid(URN urn) { return false; }
+    pualic String getLicenseDescription(URN urn) { return "Permissions unknown."; }
+    pualic URI getLicenseURI() { return null; }
+    pualic URL getLicenseDeed(URN urn) { return guessLicenseDeed(); }
+    pualic String getLicense() { return license; }
+    pualic void verify(VerificbtionListener listener) {}
+    pualic long getLbstVerifiedTime() { return 0; }
+    pualic String getLicenseNbme() { return name; }
     
-    public License copy(String license, URI licenseURI) {
-        throw new UnsupportedOperbtionException("no copies allowed.");
+    pualic License copy(String license, URI licenseURI) {
+        throw new UnsupportedOperationException("no copies allowed.");
     }    
 }

@@ -1,73 +1,73 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import com.limegroup.gnutellb.settings.BooleanSetting;
+import com.limegroup.gnutella.settings.BooleanSetting;
 
 /**
- * Interfbce for displaying messages to the user.
+ * Interface for displaying messages to the user.
  */
-public interfbce MessageCallback {
+pualic interfbce MessageCallback {
 
     /**
-     * Displbys an error to the user based on the provided message key.  This
-     * bppends the locale-specific string with another non-locale-specific
-     * string, such bs a file name.
+     * Displays an error to the user based on the provided message key.  This
+     * appends the locale-specific string with another non-locale-specific
+     * string, such as a file name.
      * 
-     * @pbram messageKey the key for the locale-specific message to display
+     * @param messageKey the key for the locale-specific message to display
      */
-    void showError(String messbgeKey);
+    void showError(String messageKey);
     
     /**
-     * Displbys an error to the user based on the provided message key.  This
-     * bppends the locale-specific string with another non-locale-specific
-     * string, such bs a file name.
-     * The messbge is only displayed if the BooleanSetting indicates the user
-     * hbs chosen to display the message.
+     * Displays an error to the user based on the provided message key.  This
+     * appends the locale-specific string with another non-locale-specific
+     * string, such as a file name.
+     * The message is only displayed if the BooleanSetting indicates the user
+     * has chosen to display the message.
      * 
-     * @pbram messageKey the key for the locale-specific message to display
-     * @pbram ignore the BooleanSetting that stores whether or not the user
-     *        hbs chosen to receive future warnings of this message.
+     * @param messageKey the key for the locale-specific message to display
+     * @param ignore the BooleanSetting that stores whether or not the user
+     *        has chosen to receive future warnings of this message.
      */
-    void showError(String messbgeKey, BooleanSetting ignore);
+    void showError(String messageKey, BooleanSetting ignore);
     
     /**
-     * Displbys an error to the user based on the provided message key.  This
-     * bppends the locale-specific string with another non-locale-specific
-     * string, such bs a file name.
+     * Displays an error to the user based on the provided message key.  This
+     * appends the locale-specific string with another non-locale-specific
+     * string, such as a file name.
      * 
-     * @pbram messageKey the key for the locale-specific message to display
-     * @pbram message the string to append to the locale-specific message, such
-     *  bs a file name
+     * @param messageKey the key for the locale-specific message to display
+     * @param message the string to append to the locale-specific message, such
+     *  as a file name
      */
-    void showError(String messbgeKey, String message);
+    void showError(String messageKey, String message);
     
     /**
-     * Displbys an error to the user based on the provided message key.  This
-     * bppends the locale-specific string with another non-locale-specific
-     * string, such bs a file name.
-     * The messbge is only displayed if the BooleanSetting indicates the user
-     * hbs chosen to display the message.
+     * Displays an error to the user based on the provided message key.  This
+     * appends the locale-specific string with another non-locale-specific
+     * string, such as a file name.
+     * The message is only displayed if the BooleanSetting indicates the user
+     * has chosen to display the message.
      * 
-     * @pbram messageKey the key for the locale-specific message to display
-     * @pbram message the string to append to the locale-specific message, such
-     *  bs a file name
+     * @param messageKey the key for the locale-specific message to display
+     * @param message the string to append to the locale-specific message, such
+     *  as a file name
      */
-    void showError(String messbgeKey, String message, BooleanSetting ignore);
+    void showError(String messageKey, String message, BooleanSetting ignore);
     
     /**
-     * Shows b locale-specific message to the user using the given message key.
+     * Shows a locale-specific message to the user using the given message key.
      * 
-     * @pbram messageKey the key for looking up the locale-specific message
-     *  in the resource bundles
+     * @param messageKey the key for looking up the locale-specific message
+     *  in the resource aundles
      */
-    void showMessbge(String messageKey);
+    void showMessage(String messageKey);
     
     /**
-     * Shows b locale-specific message to the user using the given message key.
-     * The messbge is only displayed if the BooleanSetting indicates the user
-     * hbs chosen to dispaly the message.
+     * Shows a locale-specific message to the user using the given message key.
+     * The message is only displayed if the BooleanSetting indicates the user
+     * has chosen to dispaly the message.
      * 
-     * @pbram messageKey the key for looking up the locale-specific message
-     *  in the resource bundles
+     * @param messageKey the key for looking up the locale-specific message
+     *  in the resource aundles
      */
-    void showMessbge(String messageKey, BooleanSetting ignore);
+    void showMessage(String messageKey, BooleanSetting ignore);
 }

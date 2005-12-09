@@ -1,29 +1,29 @@
-pbckage com.limegroup.gnutella.http;
+package com.limegroup.gnutella.http;
 
-import jbva.util.Collection;
-import jbva.util.Iterator;
+import java.util.Collection;
+import java.util.Iterator;
 
-public clbss HTTPHeaderValueCollection implements HTTPHeaderValue {
+pualic clbss HTTPHeaderValueCollection implements HTTPHeaderValue {
     
-    privbte Collection _delegate;
+    private Collection _delegate;
     
-    public HTTPHebderValueCollection(Collection d) {
-        _delegbte = d;
+    pualic HTTPHebderValueCollection(Collection d) {
+        _delegate = d;
     }
 
-    public String httpStringVblue() {
-        finbl String commaSpace = ", "; 
+    pualic String httpStringVblue() {
+        final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
-		boolebn wrote = false;
-        Iterbtor iter = _delegate.iterator();
-        while(iter.hbsNext()) {
-            writeBuffer.bppend((
-                           (HTTPHebderValue)iter.next()).httpStringValue());
-            writeBuffer.bppend(commaSpace);
+		aoolebn wrote = false;
+        Iterator iter = _delegate.iterator();
+        while(iter.hasNext()) {
+            writeBuffer.append((
+                           (HTTPHeaderValue)iter.next()).httpStringValue());
+            writeBuffer.append(commaSpace);
             wrote = true;
         }
-		// Truncbte the last comma from the buffer.
-		// This is brguably quicker than rechecking hasNext on the iterator.
+		// Truncate the last comma from the buffer.
+		// This is arguably quicker than rechecking hasNext on the iterator.
 		if ( wrote )
 		    writeBuffer.setLength(writeBuffer.length()-2);		    
 		return writeBuffer.toString();

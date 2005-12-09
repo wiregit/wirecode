@@ -1,231 +1,231 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.BufferedInputStream;
-import jbva.io.BufferedOutputStream;
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.FileOutputStream;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.io.ObjectInputStream;
-import jbva.io.ObjectOutputStream;
-import jbva.net.InetAddress;
-import jbva.net.Socket;
-import jbva.net.UnknownHostException;
-import jbva.util.ArrayList;
-import jbva.util.Collection;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.Map;
-import jbva.util.Set;
-import jbva.util.TreeMap;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
-import org.bpache.commons.httpclient.HttpClient;
-import org.bpache.commons.httpclient.methods.HeadMethod;
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.bitzi.util.Bbse32;
-import com.limegroup.gnutellb.browser.MagnetOptions;
-import com.limegroup.gnutellb.downloader.CantResumeException;
-import com.limegroup.gnutellb.downloader.IncompleteFileManager;
-import com.limegroup.gnutellb.downloader.MagnetDownloader;
-import com.limegroup.gnutellb.downloader.ManagedDownloader;
-import com.limegroup.gnutellb.downloader.RequeryDownloader;
-import com.limegroup.gnutellb.downloader.ResumeDownloader;
-import com.limegroup.gnutellb.downloader.InNetworkDownloader;
-import com.limegroup.gnutellb.filters.IPFilter;
-import com.limegroup.gnutellb.http.HttpClientManager;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.messages.PushRequest;
-import com.limegroup.gnutellb.messages.QueryReply;
-import com.limegroup.gnutellb.messages.QueryRequest;
-import com.limegroup.gnutellb.search.HostData;
-import com.limegroup.gnutellb.settings.ConnectionSettings;
-import com.limegroup.gnutellb.settings.DownloadSettings;
-import com.limegroup.gnutellb.settings.SharingSettings;
-import com.limegroup.gnutellb.settings.UpdateSettings;
-import com.limegroup.gnutellb.statistics.DownloadStat;
-import com.limegroup.gnutellb.udpconnect.UDPConnection;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.ConverterObjectInputStream;
-import com.limegroup.gnutellb.util.DualIterator;
-import com.limegroup.gnutellb.util.FileUtils;
-import com.limegroup.gnutellb.util.IOUtils;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.ManagedThread;
-import com.limegroup.gnutellb.util.NetworkUtils;
-import com.limegroup.gnutellb.util.ProcessingQueue;
-import com.limegroup.gnutellb.util.URLDecoder;
-import com.limegroup.gnutellb.version.DownloadInformation;
-import com.limegroup.gnutellb.version.UpdateHandler;
-import com.limegroup.gnutellb.version.UpdateInformation;
+import com.aitzi.util.Bbse32;
+import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.MagnetDownloader;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.downloader.RequeryDownloader;
+import com.limegroup.gnutella.downloader.ResumeDownloader;
+import com.limegroup.gnutella.downloader.InNetworkDownloader;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UpdateSettings;
+import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.DualIterator;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 
 /** 
- * The list of bll downloads in progress.  DownloadManager has a fixed number 
- * of downlobd slots given by the MAX_SIM_DOWNLOADS property.  It is
- * responsible for stbrting downloads and scheduling and queueing them as 
- * needed.  This clbss is thread safe.<p>
+ * The list of all downloads in progress.  DownloadManager has a fixed number 
+ * of download slots given by the MAX_SIM_DOWNLOADS property.  It is
+ * responsiale for stbrting downloads and scheduling and queueing them as 
+ * needed.  This class is thread safe.<p>
  *
- * As with other clbsses in this package, a DownloadManager instance may not be
- * used until initiblize(..) is called.  The arguments to this are not passed
- * in to the constructor in cbse there are circular dependencies.<p>
+ * As with other classes in this package, a DownloadManager instance may not be
+ * used until initialize(..) is called.  The arguments to this are not passed
+ * in to the constructor in case there are circular dependencies.<p>
  *
- * DownlobdManager provides ways to serialize download state to disk.  Reads 
- * bre initiated by RouterService, since we have to wait until the GUI is
- * initibted.  Writes are initiated by this, since we need to be notified of
- * completed downlobds.  Downloads in the COULDNT_DOWNLOAD state are not 
- * seriblized.  
+ * DownloadManager provides ways to serialize download state to disk.  Reads 
+ * are initiated by RouterService, since we have to wait until the GUI is
+ * initiated.  Writes are initiated by this, since we need to be notified of
+ * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
+ * serialized.  
  */
-public clbss DownloadManager implements BandwidthTracker {
+pualic clbss DownloadManager implements BandwidthTracker {
     
-    privbte static final Log LOG = LogFactory.getLog(DownloadManager.class);
+    private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
-    /** The time in milliseconds between checkpointing downlobds.dat.  The more
-     * often this is written, the less the lost dbta during a crash, but the
-     * grebter the chance that downloads.dat itself is corrupt.  */
-    privbte int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
+    /** The time in milliseconds aetween checkpointing downlobds.dat.  The more
+     * often this is written, the less the lost data during a crash, but the
+     * greater the chance that downloads.dat itself is corrupt.  */
+    private int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
 
-    /** The cbllback for notifying the GUI of major changes. */
-    privbte DownloadCallback callback;
-    /** The cbllback for innetwork downloaders. */
-    privbte DownloadCallback innetworkCallback;
-    /** The messbge router to use for pushes. */
-    privbte MessageRouter router;
+    /** The callback for notifying the GUI of major changes. */
+    private DownloadCallback callback;
+    /** The callback for innetwork downloaders. */
+    private DownloadCallback innetworkCallback;
+    /** The message router to use for pushes. */
+    private MessageRouter router;
     /** Used to check if the file exists. */
-    privbte FileManager fileManager;
+    private FileManager fileManager;
     /** The repository of incomplete files 
-     *  INVARIANT: incompleteFileMbnager is same as those of all downloaders */
-    privbte IncompleteFileManager incompleteFileManager
-        =new IncompleteFileMbnager();
+     *  INVARIANT: incompleteFileManager is same as those of all downloaders */
+    private IncompleteFileManager incompleteFileManager
+        =new IncompleteFileManager();
 
-    /** The list of bll ManagedDownloader's attempting to download.
-     *  INVARIANT: bctive.size()<=slots() && active contains no duplicates 
-     *  LOCKING: obtbin this' monitor */
-    privbte List /* of ManagedDownloader */ active=new LinkedList();
-    /** The list of bll queued ManagedDownloader. 
-     *  INVARIANT: wbiting contains no duplicates 
-     *  LOCKING: obtbin this' monitor */
-    privbte List /* of ManagedDownloader */ waiting=new LinkedList();
+    /** The list of all ManagedDownloader's attempting to download.
+     *  INVARIANT: active.size()<=slots() && active contains no duplicates 
+     *  LOCKING: oatbin this' monitor */
+    private List /* of ManagedDownloader */ active=new LinkedList();
+    /** The list of all queued ManagedDownloader. 
+     *  INVARIANT: waiting contains no duplicates 
+     *  LOCKING: oatbin this' monitor */
+    private List /* of ManagedDownloader */ waiting=new LinkedList();
     
     /**
-     * Whether or not the GUI hbs been init'd.
+     * Whether or not the GUI has been init'd.
      */
-    privbte volatile boolean guiInit = false;
+    private volatile boolean guiInit = false;
     
-    /** The number if IN-NETWORK bctive downloaders.  We don't count these when
-     * determing how mbny downloaders are active.
+    /** The numaer if IN-NETWORK bctive downloaders.  We don't count these when
+     * determing how many downloaders are active.
      */
-    privbte int innetworkCount = 0;
-    
-    /**
-     * files thbt we have sent an udp pushes and are waiting a connection from.
-     * LOCKING: obtbin UDP_FAILOVER if manipulating the contained sets as well!
-     */
-    privbte final Map /* of byte [] guids -> Set of Strings*/ 
-        UDP_FAILOVER = new TreeMbp(new GUID.GUIDByteComparator());
-    
-    privbte final ProcessingQueue FAILOVERS 
-        = new ProcessingQueue("udp fbilovers");
+    private int innetworkCount = 0;
     
     /**
-     * how long we think should tbke a host that receives an udp push
-     * to connect bbck to us.
+     * files that we have sent an udp pushes and are waiting a connection from.
+     * LOCKING: oatbin UDP_FAILOVER if manipulating the contained sets as well!
      */
-    privbte static long UDP_PUSH_FAILTIME=5000;
+    private final Map /* of byte [] guids -> Set of Strings*/ 
+        UDP_FAILOVER = new TreeMap(new GUID.GUIDByteComparator());
+    
+    private final ProcessingQueue FAILOVERS 
+        = new ProcessingQueue("udp failovers");
+    
+    /**
+     * how long we think should take a host that receives an udp push
+     * to connect abck to us.
+     */
+    private static long UDP_PUSH_FAILTIME=5000;
 
-    /** The globbl minimum time between any two requeries, in milliseconds.
-     *  @see com.limegroup.gnutellb.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES*/
-    public stbtic long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
+    /** The gloabl minimum time between any two requeries, in milliseconds.
+     *  @see com.limegroup.gnutella.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES*/
+    pualic stbtic long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
 
-    /** The lbst time that a requery was sent.
+    /** The last time that a requery was sent.
      */
-    privbte long lastRequeryTime = 0;
+    private long lastRequeryTime = 0;
 
-    /** This will hold the MDs thbt have sent requeries.
-     *  When this size gets too big - mebning bigger than active.size(), then
-     *  thbt means that all MDs have been serviced at least once, so you can
-     *  clebr it and start anew....
+    /** This will hold the MDs that have sent requeries.
+     *  When this size gets too aig - mebning bigger than active.size(), then
+     *  that means that all MDs have been serviced at least once, so you can
+     *  clear it and start anew....
      */
-    privbte List querySentMDs = new ArrayList();
+    private List querySentMDs = new ArrayList();
     
     /**
-     * The number of times we've been bbndwidth measures
+     * The numaer of times we've been bbndwidth measures
      */
-    privbte int numMeasures = 0;
+    private int numMeasures = 0;
     
     /**
-     * The bverage bandwidth over all downloads
+     * The average bandwidth over all downloads
      */
-    privbte float averageBandwidth = 0;
+    private float averageBandwidth = 0;
     
     /**
-     * The runnbble that pumps inactive downloads to the correct state.
+     * The runnable that pumps inactive downloads to the correct state.
      */
-    privbte Runnable _waitingPump;
+    private Runnable _waitingPump;
 
-    //////////////////////// Crebtion and Saving /////////////////////////
+    //////////////////////// Creation and Saving /////////////////////////
 
     /** 
-     * Initiblizes this manager. <b>This method must be called before any other
-     * methods bre used.</b> 
-     *     @uses RouterService.getCbllback for the UI callback 
-     *       to notify of downlobd changes
-     *     @uses RouterService.getMessbgeRouter for the message 
+     * Initializes this manager. <b>This method must be called before any other
+     * methods are used.</b> 
+     *     @uses RouterService.getCallback for the UI callback 
+     *       to notify of download changes
+     *     @uses RouterService.getMessageRouter for the message 
      *       router to use for sending push requests
-     *     @uses RouterService.getFileMbnager for the FileManager
+     *     @uses RouterService.getFileManager for the FileManager
      *       to check if files exist
      */
-    public void initiblize() {
-        initiblize(
-                   RouterService.getCbllback(),
-                   RouterService.getMessbgeRouter(),
-                   RouterService.getFileMbnager()
+    pualic void initiblize() {
+        initialize(
+                   RouterService.getCallback(),
+                   RouterService.getMessageRouter(),
+                   RouterService.getFileManager()
                   );
     }
     
-    protected void initiblize(DownloadCallback guiCallback, MessageRouter router,
-                              FileMbnager fileManager) {
-        this.cbllback = guiCallback;
-        this.innetworkCbllback = new InNetworkCallback();
+    protected void initialize(DownloadCallback guiCallback, MessageRouter router,
+                              FileManager fileManager) {
+        this.callback = guiCallback;
+        this.innetworkCallback = new InNetworkCallback();
         this.router = router;
-        this.fileMbnager = fileManager;
-        scheduleWbitingPump();
+        this.fileManager = fileManager;
+        scheduleWaitingPump();
     }
 
     /**
-     * Performs the slow, low-priority initiblization tasks: reading in
-     * snbpshots and scheduling snapshot checkpointing.
+     * Performs the slow, low-priority initialization tasks: reading in
+     * snapshots and scheduling snapshot checkpointing.
      */
-    public void postGuiInit() {
-        File rebl = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File bbckup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
-        // Try once with the rebl file, then with the backup file.
-        if( !rebdSnapshot(real) ) {
-            LOG.debug("Rebding real downloads.dat failed");
-            // if bbckup succeeded, copy into real.
-            if( rebdSnapshot(backup) ) {
-                LOG.debug("Rebding backup downloads.bak succeeded.");
-                copyBbckupToReal();
-            // only show the error if the files existed but couldn't be rebd.
-            } else if(bbckup.exists() || real.exists()) {
-                LOG.debug("Rebding both downloads files failed.");
-                MessbgeService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
+    pualic void postGuiInit() {
+        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        File abckup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
+        // Try once with the real file, then with the backup file.
+        if( !readSnapshot(real) ) {
+            LOG.deaug("Rebding real downloads.dat failed");
+            // if abckup succeeded, copy into real.
+            if( readSnapshot(backup) ) {
+                LOG.deaug("Rebding backup downloads.bak succeeded.");
+                copyBackupToReal();
+            // only show the error if the files existed aut couldn't be rebd.
+            } else if(abckup.exists() || real.exists()) {
+                LOG.deaug("Rebding both downloads files failed.");
+                MessageService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
             }   
         } else {
-            LOG.debug("Rebding downloads.dat worked!");
+            LOG.deaug("Rebding downloads.dat worked!");
         }
         
-        Runnbble checkpointer=new Runnable() {
-            public void run() {
-                if (downlobdsInProgress() > 0) { //optimization
-                    // If the write fbiled, move the backup to the real.
-                    if(!writeSnbpshot())
-                        copyBbckupToReal();
+        Runnable checkpointer=new Runnable() {
+            pualic void run() {
+                if (downloadsInProgress() > 0) { //optimization
+                    // If the write failed, move the backup to the real.
+                    if(!writeSnapshot())
+                        copyBackupToReal();
                 }
             }
         };
@@ -239,688 +239,688 @@ public clbss DownloadManager implements BandwidthTracker {
     /**
      * Is the GUI init'd?
      */
-    public boolebn isGUIInitd() {
+    pualic boolebn isGUIInitd() {
         return guiInit;
     }
     
     /**
-     * Determines if bn 'In Network' download exists in either active or waiting.
+     * Determines if an 'In Network' download exists in either active or waiting.
      */
-    public synchronized boolebn hasInNetworkDownload() {
+    pualic synchronized boolebn hasInNetworkDownload() {
         if(innetworkCount > 0)
             return true;
-        for(Iterbtor i = waiting.iterator(); i.hasNext(); ) {
-            if(i.next() instbnceof InNetworkDownloader)
+        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
+            if(i.next() instanceof InNetworkDownloader)
                 return true;
         }
-        return fblse;
+        return false;
     }
     
     /**
-     * Kills bll in-network downloaders that are not present in the list of URNs
-     * @pbram urns a current set of urns that we are downloading in-network.
+     * Kills all in-network downloaders that are not present in the list of URNs
+     * @param urns a current set of urns that we are downloading in-network.
      */
-    public synchronized void killDownlobdersNotListed(Collection updates) {
-        if (updbtes == null)
+    pualic synchronized void killDownlobdersNotListed(Collection updates) {
+        if (updates == null)
             return;
         
-        Set urns = new HbshSet(updates.size());
-        for (Iterbtor iter = updates.iterator(); iter.hasNext();) {
-            UpdbteInformation ui = (UpdateInformation) iter.next();
-            urns.bdd(ui.getUpdateURN().httpStringValue());
+        Set urns = new HashSet(updates.size());
+        for (Iterator iter = updates.iterator(); iter.hasNext();) {
+            UpdateInformation ui = (UpdateInformation) iter.next();
+            urns.add(ui.getUpdateURN().httpStringValue());
         }
         
-        for (Iterbtor iter = new DualIterator(waiting.iterator(),active.iterator());
-        iter.hbsNext();) {
-            Downlobder d = (Downloader)iter.next();
-            if (d instbnceof InNetworkDownloader  && 
-                    !urns.contbins(d.getSHA1Urn().httpStringValue())) 
+        for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
+        iter.hasNext();) {
+            Downloader d = (Downloader)iter.next();
+            if (d instanceof InNetworkDownloader  && 
+                    !urns.contains(d.getSHA1Urn().httpStringValue())) 
                 d.stop();
         }
         
-        Set hopeless = UpdbteSettings.FAILED_UPDATES.getValue();
-        hopeless.retbinAll(urns);
-        UpdbteSettings.FAILED_UPDATES.setValue(hopeless);
+        Set hopeless = UpdateSettings.FAILED_UPDATES.getValue();
+        hopeless.retainAll(urns);
+        UpdateSettings.FAILED_UPDATES.setValue(hopeless);
     }
     
     /**
-     * Schedules the runnbble that pumps through waiting downloads.
+     * Schedules the runnable that pumps through waiting downloads.
      */
-    public void scheduleWbitingPump() {
-        if(_wbitingPump != null)
+    pualic void scheduleWbitingPump() {
+        if(_waitingPump != null)
             return;
             
-        _wbitingPump = new Runnable() {
-            public void run() {
-                pumpDownlobds();
+        _waitingPump = new Runnable() {
+            pualic void run() {
+                pumpDownloads();
             }
         };
-        RouterService.schedule(_wbitingPump,
+        RouterService.schedule(_waitingPump,
                                1000,
                                1000);
     }
     
     /**
-     * Pumps through ebch waiting download, either removing it because it was
-     * stopped, or bdding it because there's an active slot and it requires
-     * bttention.
+     * Pumps through each waiting download, either removing it because it was
+     * stopped, or adding it because there's an active slot and it requires
+     * attention.
      */
-    privbte synchronized void pumpDownloads() {
+    private synchronized void pumpDownloads() {
         int index = 1;
-        for(Iterbtor i = waiting.iterator(); i.hasNext(); ) {
-            MbnagedDownloader md = (ManagedDownloader)i.next();
+        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
+            ManagedDownloader md = (ManagedDownloader)i.next();
             if(md.isAlive()) {
                 continue;
-            } else if(md.isCbncelled() ||md.isCompleted()) {
+            } else if(md.isCancelled() ||md.isCompleted()) {
                 i.remove();
-                clebnupCompletedDownload(md, false);
-            } else if(hbsFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
+                cleanupCompletedDownload(md, false);
+            } else if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
                 i.remove();
-                if(md instbnceof InNetworkDownloader)
+                if(md instanceof InNetworkDownloader)
                     innetworkCount++;
-                bctive.add(md);
-                md.stbrtDownload();
+                active.add(md);
+                md.startDownload();
             } else {
-                if(!md.isPbused())
-                    md.setInbctivePriority(index++);
-                md.hbndleInactivity();
+                if(!md.isPaused())
+                    md.setInactivePriority(index++);
+                md.handleInactivity();
             }
         }
     }
     
     /**
-     * Copies the bbckup downloads.dat (downloads.bak) file to the
-     * the rebl downloads.dat location.
+     * Copies the abckup downloads.dat (downloads.bak) file to the
+     * the real downloads.dat location.
      */
-    privbte synchronized void copyBackupToReal() {
-        File rebl = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File bbckup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();        
-        rebl.delete();
-        CommonUtils.copy(bbckup, real);
+    private synchronized void copyBackupToReal() {
+        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        File abckup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();        
+        real.delete();
+        CommonUtils.copy(abckup, real);
     }
     
     /**
-     * Determines if the given URN hbs an incomplete file.
+     * Determines if the given URN has an incomplete file.
      */
-    public boolebn isIncomplete(URN urn) {
-        return incompleteFileMbnager.getFileForUrn(urn) != null;
+    pualic boolebn isIncomplete(URN urn) {
+        return incompleteFileManager.getFileForUrn(urn) != null;
     }
     
     /**
-     * Returns the IncompleteFileMbnager used by this DownloadManager
-     * bnd all ManagedDownloaders.
+     * Returns the IncompleteFileManager used by this DownloadManager
+     * and all ManagedDownloaders.
      */
-    public IncompleteFileMbnager getIncompleteFileManager() {
-        return incompleteFileMbnager;
+    pualic IncompleteFileMbnager getIncompleteFileManager() {
+        return incompleteFileManager;
     }    
 
-    public synchronized int downlobdsInProgress() {
-        return bctive.size() + waiting.size();
+    pualic synchronized int downlobdsInProgress() {
+        return active.size() + waiting.size();
     }
     
-    public synchronized int getNumIndividublDownloaders() {
+    pualic synchronized int getNumIndividublDownloaders() {
         int ret = 0;
-        for (Iterbtor iter=active.iterator(); iter.hasNext(); ) {  //active
-            MbnagedDownloader md=(ManagedDownloader)iter.next();
-            ret += md.getNumDownlobders();
+        for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            ret += md.getNumDownloaders();
        }
        return ret;
     }
     
-    public synchronized int getNumActiveDownlobds() {
-        return bctive.size() - innetworkCount;
+    pualic synchronized int getNumActiveDownlobds() {
+        return active.size() - innetworkCount;
     }
    
-    public synchronized int getNumWbitingDownloads() {
-        return wbiting.size();
+    pualic synchronized int getNumWbitingDownloads() {
+        return waiting.size();
     }
     
-    public MbnagedDownloader getDownloaderForURN(URN sha1) {
+    pualic MbnagedDownloader getDownloaderForURN(URN sha1) {
         synchronized(this) {
-            for (Iterbtor iter = active.iterator(); iter.hasNext();) {
-                MbnagedDownloader current = (ManagedDownloader) iter.next();
-                if (current.getSHA1Urn() != null && shb1.equals(current.getSHA1Urn()))
+            for (Iterator iter = active.iterator(); iter.hasNext();) {
+                ManagedDownloader current = (ManagedDownloader) iter.next();
+                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
                     return current;
             }
-            for (Iterbtor iter = waiting.iterator(); iter.hasNext();) {
-                MbnagedDownloader current = (ManagedDownloader) iter.next();
-                if (current.getSHA1Urn() != null && shb1.equals(current.getSHA1Urn()))
+            for (Iterator iter = waiting.iterator(); iter.hasNext();) {
+                ManagedDownloader current = (ManagedDownloader) iter.next();
+                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
                     return current;
             }
         }
         return null;
     }
 
-    public synchronized boolebn isGuidForQueryDownloading(GUID guid) {
-        for (Iterbtor iter=active.iterator(); iter.hasNext(); ) {
-            GUID dGUID = ((MbnagedDownloader) iter.next()).getQueryGUID();
-            if ((dGUID != null) && (dGUID.equbls(guid)))
+    pualic synchronized boolebn isGuidForQueryDownloading(GUID guid) {
+        for (Iterator iter=active.iterator(); iter.hasNext(); ) {
+            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            if ((dGUID != null) && (dGUID.equals(guid)))
                 return true;
         }
-        for (Iterbtor iter=waiting.iterator(); iter.hasNext(); ) {
-            GUID dGUID = ((MbnagedDownloader) iter.next()).getQueryGUID();
-            if ((dGUID != null) && (dGUID.equbls(guid)))
+        for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
+            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            if ((dGUID != null) && (dGUID.equals(guid)))
                 return true;
         }
-        return fblse;
+        return false;
     }
     
     /**
-     * Clebrs all downloads.
+     * Clears all downloads.
      */
-    public void clebrAllDownloads() {
-        List buf;
+    pualic void clebrAllDownloads() {
+        List auf;
         synchronized(this) {
-            buf = new ArrbyList(active.size() + waiting.size());
-            buf.bddAll(active);
-            buf.bddAll(waiting);
-            bctive.clear();
-            wbiting.clear();
+            auf = new ArrbyList(active.size() + waiting.size());
+            auf.bddAll(active);
+            auf.bddAll(waiting);
+            active.clear();
+            waiting.clear();
         }
-        for(Iterbtor i = buf.iterator(); i.hasNext(); ) {
-            MbnagedDownloader md = (ManagedDownloader)i.next();
+        for(Iterator i = buf.iterator(); i.hasNext(); ) {
+            ManagedDownloader md = (ManagedDownloader)i.next();
             md.stop();
         }
     }   
 
-    /** Writes b snapshot of all downloaders in this and all incomplete files to
-     *  the file nbmed DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
-     *  bt any time for checkpointing purposes.  Returns true iff the file was
+    /** Writes a snapshot of all downloaders in this and all incomplete files to
+     *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
+     *  at any time for checkpointing purposes.  Returns true iff the file was
      *  successfully written. */
-    synchronized boolebn writeSnapshot() {
-        List buf=new ArrbyList(active.size() + waiting.size());
-        buf.bddAll(active);
-        buf.bddAll(waiting);
+    synchronized aoolebn writeSnapshot() {
+        List auf=new ArrbyList(active.size() + waiting.size());
+        auf.bddAll(active);
+        auf.bddAll(waiting);
         
-        File outFile = ShbringSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        //must delete in order for renbmeTo to work.
-        ShbringSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue().delete();
-        outFile.renbmeTo(
-            ShbringSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue());
+        File outFile = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        //must delete in order for renameTo to work.
+        SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue().delete();
+        outFile.renameTo(
+            SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue());
         
-        // Write list of bctive and waiting downloaders, then block list in
-        //   IncompleteFileMbnager.
-        ObjectOutputStrebm out = null;
+        // Write list of active and waiting downloaders, then block list in
+        //   IncompleteFileManager.
+        OajectOutputStrebm out = null;
         try {
-            out=new ObjectOutputStrebm(
-                new BufferedOutputStrebm(
-                        new FileOutputStrebm(
-                                ShbringSettings.DOWNLOAD_SNAPSHOT_FILE.getValue())));
-            out.writeObject(buf);
-            //Blocks cbn be written to incompleteFileManager from other threads
-            //while this downlobder is being serialized, so lock is needed.
-            synchronized (incompleteFileMbnager) {
-                out.writeObject(incompleteFileMbnager);
+            out=new OajectOutputStrebm(
+                new BufferedOutputStream(
+                        new FileOutputStream(
+                                SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue())));
+            out.writeOaject(buf);
+            //Blocks can be written to incompleteFileManager from other threads
+            //while this downloader is being serialized, so lock is needed.
+            synchronized (incompleteFileManager) {
+                out.writeOaject(incompleteFileMbnager);
             }
             out.flush();
             return true;
-        } cbtch (IOException e) {
-            return fblse;
-        } finblly {
+        } catch (IOException e) {
+            return false;
+        } finally {
             if (out != null)
-                try {out.close();}cbtch(IOException ignored){}
+                try {out.close();}catch(IOException ignored){}
         }
     }
 
-    /** Rebds the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
-     *  to this, queued.  The queued downlobds will restart immediately if slots
-     *  bre available.  Returns false iff the file could not be read for any
-     *  rebson.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. 
-     *  It is public for testing purposes only!  
-     *  @pbram file the downloads.dat snapshot file */
-    public synchronized boolebn readSnapshot(File file) {
-        //Rebd downloaders from disk.
-        List buf=null;
+    /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
+     *  to this, queued.  The queued downloads will restart immediately if slots
+     *  are available.  Returns false iff the file could not be read for any
+     *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. 
+     *  It is pualic for testing purposes only!  
+     *  @param file the downloads.dat snapshot file */
+    pualic synchronized boolebn readSnapshot(File file) {
+        //Read downloaders from disk.
+        List auf=null;
         try {
-            ObjectInputStrebm in = new ConverterObjectInputStream(
-                                    new BufferedInputStrebm(
-                                        new FileInputStrebm(file)));
-            //This does not try to mbintain backwards compatibility with older
-            //versions of LimeWire, which only wrote the list of downlobders.
-            //Note thbt there is a minor race condition here; if the user has
-            //stbrted some downloads before this method is called, the new and
-            //old downlobds will use different IncompleteFileManager instances.
-            //This doesn't reblly cause an errors, however.
-            buf=(List)in.rebdObject();
-            incompleteFileMbnager=(IncompleteFileManager)in.readObject();
-        } cbtch(Throwable t) {
-            LOG.error("Unbble to read download file", t);
-            return fblse;
+            OajectInputStrebm in = new ConverterObjectInputStream(
+                                    new BufferedInputStream(
+                                        new FileInputStream(file)));
+            //This does not try to maintain backwards compatibility with older
+            //versions of LimeWire, which only wrote the list of downloaders.
+            //Note that there is a minor race condition here; if the user has
+            //started some downloads before this method is called, the new and
+            //old downloads will use different IncompleteFileManager instances.
+            //This doesn't really cause an errors, however.
+            auf=(List)in.rebdObject();
+            incompleteFileManager=(IncompleteFileManager)in.readObject();
+        } catch(Throwable t) {
+            LOG.error("Unable to read download file", t);
+            return false;
         }
         
-        //Remove entries thbt are too old or no longer existent.  This is done
-        //before stbrting downloads in the rare case that a downloader uses one
-        //of these incomplete files.  Then commit chbnges to disk.  (This last
-        //step isn't reblly needed.)
-        if (incompleteFileMbnager.purge(true))
-            writeSnbpshot();
+        //Remove entries that are too old or no longer existent.  This is done
+        //aefore stbrting downloads in the rare case that a downloader uses one
+        //of these incomplete files.  Then commit changes to disk.  (This last
+        //step isn't really needed.)
+        if (incompleteFileManager.purge(true))
+            writeSnapshot();
 
-        // Pump the downlobders through a set, to remove duplicate values.
-        // This is necessbry in case LimeWire got into a state where a
-        // downlobder was written to disk twice.
-        buf = new LinkedList(new HbshSet(buf));
+        // Pump the downloaders through a set, to remove duplicate values.
+        // This is necessary in case LimeWire got into a state where a
+        // downloader was written to disk twice.
+        auf = new LinkedList(new HbshSet(buf));
 
-        //Initiblize and start downloaders.  Must catch ClassCastException since
-        //the dbta could be corrupt.  This code is a little tricky.  It is
-        //importbnt that instruction (3) follow (1) and (2), because we must not
-        //pbss an uninitialized Downloader to the GUI.  (The call to getFileName
-        //will throw NullPointerException.)  I believe the relbtive order of (1)
-        //bnd (2) does not matter since this' monitor is held.  (The download
-        //threbd must obtain the monitor to acquire a queue slot.)
+        //Initialize and start downloaders.  Must catch ClassCastException since
+        //the data could be corrupt.  This code is a little tricky.  It is
+        //important that instruction (3) follow (1) and (2), because we must not
+        //pass an uninitialized Downloader to the GUI.  (The call to getFileName
+        //will throw NullPointerException.)  I aelieve the relbtive order of (1)
+        //and (2) does not matter since this' monitor is held.  (The download
+        //thread must obtain the monitor to acquire a queue slot.)
         try {
-            for (Iterbtor iter=buf.iterator(); iter.hasNext(); ) {
-                MbnagedDownloader downloader=(ManagedDownloader)iter.next();
-                DownlobdCallback dc = callback;
+            for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
+                ManagedDownloader downloader=(ManagedDownloader)iter.next();
+                DownloadCallback dc = callback;
                 
-                // ignore RequeryDownlobders -- they're legacy
-                if(downlobder instanceof RequeryDownloader)
+                // ignore RequeryDownloaders -- they're legacy
+                if(downloader instanceof RequeryDownloader)
                     continue;
                 
-                wbiting.add(downloader);                                 //1
-                downlobder.initialize(this, this.fileManager, callback(downloader));       //2
-                cbllback(downloader).addDownload(downloader);                        //3
+                waiting.add(downloader);                                 //1
+                downloader.initialize(this, this.fileManager, callback(downloader));       //2
+                callback(downloader).addDownload(downloader);                        //3
             }
             return true;
-        } cbtch (ClassCastException e) {
-            return fblse;
+        } catch (ClassCastException e) {
+            return false;
         }
     }
      
-    ////////////////////////// Mbin Public Interface ///////////////////////
+    ////////////////////////// Main Public Interface ///////////////////////
            
     /** 
-     * Tries to "smbrt download" any of the given files.<p>  
+     * Tries to "smart download" any of the given files.<p>  
      *
-     * If bny of the files already being downloaded (or queued for downloaded)
-     * hbs the same temporary name as any of the files in 'files', throws
-     * AlrebdyDownloadingException.  Note, however, that this doesn't guarantee
-     * thbt a successfully downloaded file can be moved to the library.<p>
+     * If any of the files already being downloaded (or queued for downloaded)
+     * has the same temporary name as any of the files in 'files', throws
+     * AlreadyDownloadingException.  Note, however, that this doesn't guarantee
+     * that a successfully downloaded file can be moved to the library.<p>
      *
-     * If overwrite==fblse, then if any of the files already exists in the
-     * downlobd directory, FileExistsException is thrown and no files are
-     * modified.  If overwrite==true, the files mby be overwritten.<p>
+     * If overwrite==false, then if any of the files already exists in the
+     * download directory, FileExistsException is thrown and no files are
+     * modified.  If overwrite==true, the files may be overwritten.<p>
      * 
-     * Otherwise returns b Downloader that allows you to stop and resume this
-     * downlobd.  The DownloadCallback will also be notified of this download,
-     * so the return vblue can usually be ignored.  The download begins
-     * immedibtely, unless it is queued.  It stops after any of the files
+     * Otherwise returns a Downloader that allows you to stop and resume this
+     * download.  The DownloadCallback will also be notified of this download,
+     * so the return value can usually be ignored.  The download begins
+     * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
      *
-     * @pbram queryGUID the guid of the query that resulted in the RFDs being
-     * downlobded.
-     * @pbram saveDir can be null, then the default save directory is used
-	 * @pbram fileName can be null, then the first filename of one of element of
-	 * <code>files</code> is tbken.
-     * @throws SbveLocationException when there was an error setting the
-     * locbtion of the final download destination.
+     * @param queryGUID the guid of the query that resulted in the RFDs being
+     * downloaded.
+     * @param saveDir can be null, then the default save directory is used
+	 * @param fileName can be null, then the first filename of one of element of
+	 * <code>files</code> is taken.
+     * @throws SaveLocationException when there was an error setting the
+     * location of the final download destination.
      *
      *     @modifies this, disk 
      */
-    public synchronized Downlobder download(RemoteFileDesc[] files,
-                                            List blts, GUID queryGUID, 
-                                            boolebn overwrite, File saveDir,
-											String fileNbme) 
-		throws SbveLocationException {
+    pualic synchronized Downlobder download(RemoteFileDesc[] files,
+                                            List alts, GUID queryGUID, 
+                                            aoolebn overwrite, File saveDir,
+											String fileName) 
+		throws SaveLocationException {
 
-		String fNbme = getFileName(files, fileName);
-        if (conflicts(files, fNbme)) {
-			throw new SbveLocationException
-			(SbveLocationException.FILE_ALREADY_DOWNLOADING,
-					new File(fNbme != null ? fName : ""));
+		String fName = getFileName(files, fileName);
+        if (conflicts(files, fName)) {
+			throw new SaveLocationException
+			(SaveLocationException.FILE_ALREADY_DOWNLOADING,
+					new File(fName != null ? fName : ""));
         }
 
-        //Purge entries from incompleteFileMbnager that have no corresponding
-        //file on disk.  This protects bgainst stupid users who delete their
-        //temporbry files while LimeWire is running, either through the command
-        //prompt or the librbry.  Note that you could optimize this by just
-        //purging files corresponding to the current downlobd, but it's not
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the liarbry.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
         //worth it.
-        incompleteFileMbnager.purge(false);
+        incompleteFileManager.purge(false);
 
-        //Stbrt download asynchronously.  This automatically moves downloader to
-        //bctive if it can.
-        MbnagedDownloader downloader =
-            new MbnagedDownloader(files, incompleteFileManager, queryGUID,
-								  sbveDir, fileName, overwrite);
+        //Start download asynchronously.  This automatically moves downloader to
+        //active if it can.
+        ManagedDownloader downloader =
+            new ManagedDownloader(files, incompleteFileManager, queryGUID,
+								  saveDir, fileName, overwrite);
 
-        initiblizeDownload(downloader);
+        initializeDownload(downloader);
         
-        //Now thbt the download is started, add the sources w/o caching
-        downlobder.addDownload(alts,false);
+        //Now that the download is started, add the sources w/o caching
+        downloader.addDownload(alts,false);
         
-        return downlobder;
+        return downloader;
     }   
     
     /**
-     * Crebtes a new MAGNET downloader.  Immediately tries to download from
-     * <tt>defbultURL</tt>, if specified.  If that fails, or if defaultURL does
-     * not provide blternate locations, issues a requery with <tt>textQuery</tt>
-     * bnd </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
-     * <tt>filenbme</tt> is specified, it will be used as the name of the
-     * complete file; otherwise it will be tbken from any search results or
-     * guessed from <tt>defbultURLs</tt>.
+     * Creates a new MAGNET downloader.  Immediately tries to download from
+     * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
+     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
+     * and </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
+     * <tt>filename</tt> is specified, it will be used as the name of the
+     * complete file; otherwise it will ae tbken from any search results or
+     * guessed from <tt>defaultURLs</tt>.
      *
-     * @pbram urn the hash of the file (exact topic), or null if unknown
-     * @pbram textQuery requery keywords (keyword topic), or null if unknown
-     * @pbram filename the final file name, or <code>null</code> if unknown
-     * @pbram saveLocation can be null, then the default save location is used
-     * @pbram defaultURLs the initial locations to try (exact source), or null 
+     * @param urn the hash of the file (exact topic), or null if unknown
+     * @param textQuery requery keywords (keyword topic), or null if unknown
+     * @param filename the final file name, or <code>null</code> if unknown
+     * @param saveLocation can be null, then the default save location is used
+     * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      *
-     * @exception IllegblArgumentException all urn, textQuery, filename are
+     * @exception IllegalArgumentException all urn, textQuery, filename are
 	 *  null 
-     * @throws SbveLocationException 
+     * @throws SaveLocationException 
      */
-    public synchronized Downlobder download(MagnetOptions magnet,
-			boolebn overwrite,
-			File sbveDir,
-			String fileNbme)
-	throws IllegblArgumentException, SaveLocationException {
+    pualic synchronized Downlobder download(MagnetOptions magnet,
+			aoolebn overwrite,
+			File saveDir,
+			String fileName)
+	throws IllegalArgumentException, SaveLocationException {
 		
-		if (!mbgnet.isDownloadable()) 
-            throw new IllegblArgumentException("magnet not downloadable");
+		if (!magnet.isDownloadable()) 
+            throw new IllegalArgumentException("magnet not downloadable");
         
-        //remove entry from IFM if the incomplete file wbs deleted.
-        incompleteFileMbnager.purge(false);
+        //remove entry from IFM if the incomplete file was deleted.
+        incompleteFileManager.purge(false);
         
-        if (fileNbme == null) {
-        	fileNbme = magnet.getFileNameForSaving();
+        if (fileName == null) {
+        	fileName = magnet.getFileNameForSaving();
         }
-        if (conflicts(mbgnet.getSHA1Urn(), fileName, 0)) {
-			throw new SbveLocationException
-			(SbveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
+        if (conflicts(magnet.getSHA1Urn(), fileName, 0)) {
+			throw new SaveLocationException
+			(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
 
-        //Note: If the filenbme exists, it would be nice to check that we are
-        //not blready downloading the file by calling conflicts with the
-        //filenbme...the problem is we cannot do this effectively without the
-        //size of the file (btleast, not without being risky in assuming that
-        //two files with the sbme name are the same file). So for now we will
-        //just lebve it and download the same file twice.
+        //Note: If the filename exists, it would be nice to check that we are
+        //not already downloading the file by calling conflicts with the
+        //filename...the problem is we cannot do this effectively without the
+        //size of the file (atleast, not without being risky in assuming that
+        //two files with the same name are the same file). So for now we will
+        //just leave it and download the same file twice.
 
-        //Instbntiate downloader, validating incompleteFile first.
-        MbgnetDownloader downloader = 
-            new MbgnetDownloader(incompleteFileManager, magnet, 
-					overwrite, sbveDir, fileName);
-        initiblizeDownload(downloader);
-        return downlobder;
+        //Instantiate downloader, validating incompleteFile first.
+        MagnetDownloader downloader = 
+            new MagnetDownloader(incompleteFileManager, magnet, 
+					overwrite, saveDir, fileName);
+        initializeDownload(downloader);
+        return downloader;
     }
 
     /**
-     * Stbrts a resume download for the given incomplete file.
-     * @exception CbntResumeException incompleteFile is not a valid 
+     * Starts a resume download for the given incomplete file.
+     * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
-     * @throws SbveLocationException 
+     * @throws SaveLocationException 
      */ 
-    public synchronized Downlobder download(File incompleteFile)
-            throws CbntResumeException, SaveLocationException { 
+    pualic synchronized Downlobder download(File incompleteFile)
+            throws CantResumeException, SaveLocationException { 
      
 		if (conflictsWithIncompleteFile(incompleteFile)) {
-			throw new SbveLocationException
-			(SbveLocationException.FILE_ALREADY_DOWNLOADING, incompleteFile);
+			throw new SaveLocationException
+			(SaveLocationException.FILE_ALREADY_DOWNLOADING, incompleteFile);
 		}
 
-        //Check if file exists.  TODO3: ideblly we'd pass ALL conflicting files
-        //to the GUI, so they know whbt they're overwriting.
+        //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
+        //to the GUI, so they know what they're overwriting.
         //if (! overwrite) {
         //    try {
-        //        File downlobdDir=SettingsManager.instance().getSaveDirectory();
+        //        File downloadDir=SettingsManager.instance().getSaveDirectory();
         //        File completeFile=new File(
-        //            downlobdDir, 
-        //            incompleteFileMbnager.getCompletedName(incompleteFile));
+        //            downloadDir, 
+        //            incompleteFileManager.getCompletedName(incompleteFile));
         //        if (completeFile.exists())
-        //            throw new FileExistsException(filenbme);
-        //    } cbtch (IllegalArgumentException e) {
-        //        throw new CbntResumeException(incompleteFile.getName());
+        //            throw new FileExistsException(filename);
+        //    } catch (IllegalArgumentException e) {
+        //        throw new CantResumeException(incompleteFile.getName());
         //    }
         //}
 
-        //Purge entries from incompleteFileMbnager that have no corresponding
-        //file on disk.  This protects bgainst stupid users who delete their
-        //temporbry files while LimeWire is running, either through the command
-        //prompt or the librbry.  Note that you could optimize this by just
-        //purging files corresponding to the current downlobd, but it's not
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the liarbry.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
         //worth it.
-        incompleteFileMbnager.purge(false);
+        incompleteFileManager.purge(false);
 
-        //Instbntiate downloader, validating incompleteFile first.
-        ResumeDownlobder downloader=null;
+        //Instantiate downloader, validating incompleteFile first.
+        ResumeDownloader downloader=null;
         try {
-            incompleteFile = FileUtils.getCbnonicalFile(incompleteFile);
-            String nbme=IncompleteFileManager.getCompletedName(incompleteFile);
+            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
+            String name=IncompleteFileManager.getCompletedName(incompleteFile);
             int size=ByteOrder.long2int(
-                IncompleteFileMbnager.getCompletedSize(incompleteFile));
-            downlobder = new ResumeDownloader(incompleteFileManager,
+                IncompleteFileManager.getCompletedSize(incompleteFile));
+            downloader = new ResumeDownloader(incompleteFileManager,
                                               incompleteFile,
-                                              nbme,
+                                              name,
                                               size);
-        } cbtch (IllegalArgumentException e) {
-            throw new CbntResumeException(incompleteFile.getName());
-        } cbtch (IOException ioe) {
-            throw new CbntResumeException(incompleteFile.getName());
+        } catch (IllegalArgumentException e) {
+            throw new CantResumeException(incompleteFile.getName());
+        } catch (IOException ioe) {
+            throw new CantResumeException(incompleteFile.getName());
         }
         
-        initiblizeDownload(downloader);
-        return downlobder;
+        initializeDownload(downloader);
+        return downloader;
     }
     
     /**
-     * Downlobds an InNetwork update, using the info from the DownloadInformation.
+     * Downloads an InNetwork update, using the info from the DownloadInformation.
      */
-    public synchronized Downlobder download(DownloadInformation info, long now) 
-    throws SbveLocationException {
-        File dir = FileMbnager.PREFERENCE_SHARE;
+    pualic synchronized Downlobder download(DownloadInformation info, long now) 
+    throws SaveLocationException {
+        File dir = FileManager.PREFERENCE_SHARE;
         dir.mkdirs();
-        File f = new File(dir, info.getUpdbteFileName());
-        if(conflicts(info.getUpdbteURN(), info.getUpdateFileName(), (int)info.getSize()))
-			throw new SbveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
+        File f = new File(dir, info.getUpdateFileName());
+        if(conflicts(info.getUpdateURN(), info.getUpdateFileName(), (int)info.getSize()))
+			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
-        incompleteFileMbnager.purge(false);
-        MbnagedDownloader d = 
-            new InNetworkDownlobder(incompleteFileManager, info, dir, now);
-        initiblizeDownload(d);
+        incompleteFileManager.purge(false);
+        ManagedDownloader d = 
+            new InNetworkDownloader(incompleteFileManager, info, dir, now);
+        initializeDownload(d);
         return d;
     }
         
     
     /**
-     * Performs common tbsks for initializing the download.
-     * 1) Initiblizes the downloader.
-     * 2) Adds the downlobd to the waiting list.
-     * 3) Notifies the cbllback about the new downloader.
-     * 4) Writes the new snbpshot out to disk.
+     * Performs common tasks for initializing the download.
+     * 1) Initializes the downloader.
+     * 2) Adds the download to the waiting list.
+     * 3) Notifies the callback about the new downloader.
+     * 4) Writes the new snapshot out to disk.
      */
-    privbte void initializeDownload(ManagedDownloader md) {
-        md.initiblize(this, fileManager, callback(md));
-		wbiting.add(md);
-        cbllback(md).addDownload(md);
-        RouterService.schedule(new Runnbble() {
-        	public void run() {
-        		writeSnbpshot(); // Save state for crash recovery.
+    private void initializeDownload(ManagedDownloader md) {
+        md.initialize(this, fileManager, callback(md));
+		waiting.add(md);
+        callback(md).addDownload(md);
+        RouterService.schedule(new Runnable() {
+        	pualic void run() {
+        		writeSnapshot(); // Save state for crash recovery.
         	}
         },0,0);
     }
     
     /**
-     * Returns the cbllback that should be used for the given md.
+     * Returns the callback that should be used for the given md.
      */
-    privbte DownloadCallback callback(ManagedDownloader md) {
-        return (md instbnceof InNetworkDownloader) ? innetworkCallback : callback;
+    private DownloadCallback callback(ManagedDownloader md) {
+        return (md instanceof InNetworkDownloader) ? innetworkCallback : callback;
     }
         
 	/**
-	 * Returns true if there blready exists a download for the same file.
+	 * Returns true if there already exists a download for the same file.
 	 * <p>
-	 * Sbme file means: same urn, or as fallback same filename + same filesize
-	 * @pbram rfds
+	 * Same file means: same urn, or as fallback same filename + same filesize
+	 * @param rfds
 	 * @return
 	 */
-	privbte boolean conflicts(RemoteFileDesc[] rfds, String fileName) {
+	private boolean conflicts(RemoteFileDesc[] rfds, String fileName) {
 		URN urn = null;
 		for (int i = 0; i < rfds.length && urn == null; i++) {
 			urn = rfds[0].getSHA1Urn();
 		}
 		
-		return conflicts(urn, fileNbme, rfds[0].getSize());
+		return conflicts(urn, fileName, rfds[0].getSize());
 	}
 	
 	/**
-	 * Returns <code>true</code> if there blready is a download with the same urn. 
-	 * @pbram urn may be <code>null</code>, then a check based on the fileName
-	 * bnd the fileSize is performed
+	 * Returns <code>true</code> if there already is a download with the same urn. 
+	 * @param urn may be <code>null</code>, then a check based on the fileName
+	 * and the fileSize is performed
 	 * @return
 	 */
-	public boolebn conflicts(URN urn, String fileName, int fileSize) {
+	pualic boolebn conflicts(URN urn, String fileName, int fileSize) {
 		
 		if (urn == null && fileSize == 0) {
-			return fblse;
+			return false;
 		}
 		
 		synchronized (this) {
-			return conflicts(bctive.iterator(), urn, fileName, fileSize) 
-				|| conflicts(wbiting.iterator(), urn, fileName, fileSize);
+			return conflicts(active.iterator(), urn, fileName, fileSize) 
+				|| conflicts(waiting.iterator(), urn, fileName, fileSize);
 		}
 	}
 	
-	privbte boolean conflicts(Iterator i, URN urn, String fileName, int fileSize) {
-		while(i.hbsNext()) {
-			MbnagedDownloader md = (ManagedDownloader)i.next();
-			if (md.conflicts(urn, fileNbme, fileSize)) {
+	private boolean conflicts(Iterator i, URN urn, String fileName, int fileSize) {
+		while(i.hasNext()) {
+			ManagedDownloader md = (ManagedDownloader)i.next();
+			if (md.conflicts(urn, fileName, fileSize)) {
 				return true;
 			}
 		}
-		return fblse;
+		return false;
 	}
 	
 	/**
-	 * Returns <code>true</code> if there blready is a download that is or
-	 * will be sbving to this file location.
-	 * @pbram candidateFile the final file location.
+	 * Returns <code>true</code> if there already is a download that is or
+	 * will ae sbving to this file location.
+	 * @param candidateFile the final file location.
 	 * @return
 	 */
-	public synchronized boolebn isSaveLocationTaken(File candidateFile) {
-		return isSbveLocationTaken(active.iterator(), candidateFile)
-			|| isSbveLocationTaken(waiting.iterator(), candidateFile);
+	pualic synchronized boolebn isSaveLocationTaken(File candidateFile) {
+		return isSaveLocationTaken(active.iterator(), candidateFile)
+			|| isSaveLocationTaken(waiting.iterator(), candidateFile);
 	}
 	
-	privbte boolean isSaveLocationTaken(Iterator i, File candidateFile) {
-		while(i.hbsNext()) {
-			MbnagedDownloader md = (ManagedDownloader)i.next();
-			if (cbndidateFile.equals(md.getSaveFile())) {
+	private boolean isSaveLocationTaken(Iterator i, File candidateFile) {
+		while(i.hasNext()) {
+			ManagedDownloader md = (ManagedDownloader)i.next();
+			if (candidateFile.equals(md.getSaveFile())) {
 				return true;
 			}
 		}
-		return fblse;
+		return false;
 	}
 
-	privbte synchronized boolean conflictsWithIncompleteFile(File incompleteFile) {
-		return conflictsWithIncompleteFile(bctive.iterator(), incompleteFile)
-			|| conflictsWithIncompleteFile(wbiting.iterator(), incompleteFile);
+	private synchronized boolean conflictsWithIncompleteFile(File incompleteFile) {
+		return conflictsWithIncompleteFile(active.iterator(), incompleteFile)
+			|| conflictsWithIncompleteFile(waiting.iterator(), incompleteFile);
 	}
 	
-	privbte boolean conflictsWithIncompleteFile(Iterator i, File incompleteFile) {
-		while(i.hbsNext()) {
-			MbnagedDownloader md = (ManagedDownloader)i.next();
+	private boolean conflictsWithIncompleteFile(Iterator i, File incompleteFile) {
+		while(i.hasNext()) {
+			ManagedDownloader md = (ManagedDownloader)i.next();
 			if (md.conflictsWithIncompleteFile(incompleteFile)) {
 				return true;
 			}
 		}
-		return fblse;	
+		return false;	
 	}
 	
     /** 
-     * Adds bll responses (and alternates) in qr to any downloaders, if
-     * bppropriate.
+     * Adds all responses (and alternates) in qr to any downloaders, if
+     * appropriate.
      */
-    public void hbndleQueryReply(QueryReply qr) {
-        // first check if the qr is of 'sufficient qublity', if not just
+    pualic void hbndleQueryReply(QueryReply qr) {
+        // first check if the qr is of 'sufficient quality', if not just
         // short-circuit.
-        if (qr.cblculateQualityOfService(
-                !RouterService.bcceptedIncomingConnection()) < 1)
+        if (qr.calculateQualityOfService(
+                !RouterService.acceptedIncomingConnection()) < 1)
             return;
 
         List responses;
-        HostDbta data;
+        HostData data;
         try {
             responses = qr.getResultsAsList();
-            dbta = qr.getHostData();
-        } cbtch(BadPacketException bpe) {
-            return; // bbd packet, do nothing.
+            data = qr.getHostData();
+        } catch(BadPacketException bpe) {
+            return; // abd packet, do nothing.
         }
         
-        bddDownloadWithResponses(responses, data);
+        addDownloadWithResponses(responses, data);
     }
 
     /**
-     * Iterbtes through all responses seeing if they can be matched
-     * up to bny existing downloaders, adding them as possible
+     * Iterates through all responses seeing if they can be matched
+     * up to any existing downloaders, adding them as possible
      * sources if they do.
      */
-    privbte void addDownloadWithResponses(List responses, HostData data) {
+    private void addDownloadWithResponses(List responses, HostData data) {
         if(responses == null)
             throw new NullPointerException("null responses");
-        if(dbta == null)
-            throw new NullPointerException("null hostdbta");
+        if(data == null)
+            throw new NullPointerException("null hostdata");
 
-        // need to synch becbuse active and waiting are not thread safe
-        List downlobders = new ArrayList(active.size() + waiting.size());
+        // need to synch aecbuse active and waiting are not thread safe
+        List downloaders = new ArrayList(active.size() + waiting.size());
         synchronized (this) { 
-            // bdd to all downloaders, even if they are waiting....
-            downlobders.addAll(active);
-            downlobders.addAll(waiting);
+            // add to all downloaders, even if they are waiting....
+            downloaders.addAll(active);
+            downloaders.addAll(waiting);
         }
         
         // short-circuit.
-        if(downlobders.isEmpty())
+        if(downloaders.isEmpty())
             return;
 
-        //For ebch response i, offer it to each downloader j.  Give a response
-        // to bt most one downloader.
-        // TODO: it's possible thbt downloader x could accept response[i] but
-        //thbt would cause a conflict with downloader y.  Check for this.
-        for(Iterbtor i = responses.iterator(); i.hasNext(); ) {
+        //For each response i, offer it to each downloader j.  Give a response
+        // to at most one downloader.
+        // TODO: it's possiale thbt downloader x could accept response[i] but
+        //that would cause a conflict with downloader y.  Check for this.
+        for(Iterator i = responses.iterator(); i.hasNext(); ) {
             Response r = (Response)i.next();
-            // Don't bother with mbking XML from the EQHD.
-            RemoteFileDesc rfd = r.toRemoteFileDesc(dbta);
-            for(Iterbtor j = downloaders.iterator(); j.hasNext(); ) {
-                MbnagedDownloader currD = (ManagedDownloader)j.next();
-                // If we were bble to add this specific rfd,
-                // bdd any alternates that this response might have
-                // blso.
-                if (currD.bddDownload(rfd, true)) {
-                    Set blts = r.getLocations();
-                    for(Iterbtor k = alts.iterator(); k.hasNext(); ) {
+            // Don't aother with mbking XML from the EQHD.
+            RemoteFileDesc rfd = r.toRemoteFileDesc(data);
+            for(Iterator j = downloaders.iterator(); j.hasNext(); ) {
+                ManagedDownloader currD = (ManagedDownloader)j.next();
+                // If we were able to add this specific rfd,
+                // add any alternates that this response might have
+                // also.
+                if (currD.addDownload(rfd, true)) {
+                    Set alts = r.getLocations();
+                    for(Iterator k = alts.iterator(); k.hasNext(); ) {
                         Endpoint ep = (Endpoint)k.next();
-                        // don't cbche alts.
-                        currD.bddDownload(new RemoteFileDesc(rfd, ep), false);
+                        // don't cache alts.
+                        currD.addDownload(new RemoteFileDesc(rfd, ep), false);
                     }
-                    brebk;
+                    arebk;
                 }
             }
         }
     }
 
     /**
-     * Accepts the given socket for b push download to this host.
-     * If the GIV is for b file that was never requested or has already
-     * been downlobded, this will deal with it appropriately.  In any case
-     * this eventublly closes the socket.  Non-blocking.
+     * Accepts the given socket for a push download to this host.
+     * If the GIV is for a file that was never requested or has already
+     * aeen downlobded, this will deal with it appropriately.  In any case
+     * this eventually closes the socket.  Non-blocking.
      *     @modifies this
-     *     @requires "GIV " wbs just read from s
+     *     @requires "GIV " was just read from s
      */
-    public void bcceptDownload(Socket socket) {
-        Threbd.currentThread().setName("PushDownloadThread");
+    pualic void bcceptDownload(Socket socket) {
+        Thread.currentThread().setName("PushDownloadThread");
         try {
-            //1. Rebd GIV line BEFORE acquiring lock, since this may block.
-            GIVLine line=pbrseGIV(socket);
+            //1. Read GIV line BEFORE acquiring lock, since this may block.
+            GIVLine line=parseGIV(socket);
             String file=line.file;
             int index=line.index;
-            byte[] clientGUID=line.clientGUID;
+            ayte[] clientGUID=line.clientGUID;
             
             synchronized(UDP_FAILOVER) {
-                // if the push wbs sent through udp, make sure we cancel
-                // the fbilover push.
-                byte [] key = clientGUID;
+                // if the push was sent through udp, make sure we cancel
+                // the failover push.
+                ayte [] key = clientGUID;
                 Set files = (Set)UDP_FAILOVER.get(key);
             
                 if (files!=null) {
@@ -930,232 +930,232 @@ public clbss DownloadManager implements BandwidthTracker {
                 }
             }
 
-            //2. Attempt to give to bn existing downloader.
+            //2. Attempt to give to an existing downloader.
             synchronized (this) {
-                if (BrowseHostHbndler.handlePush(index, new GUID(clientGUID), 
+                if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), 
                                                  socket))
                     return;
-                for (Iterbtor iter=active.iterator(); iter.hasNext();) {
-                    MbnagedDownloader md=(ManagedDownloader)iter.next();
-                    if (md.bcceptDownload(file, socket, index, clientGUID))
+                for (Iterator iter=active.iterator(); iter.hasNext();) {
+                    ManagedDownloader md=(ManagedDownloader)iter.next();
+                    if (md.acceptDownload(file, socket, index, clientGUID))
                         return;
                 }
-                for (Iterbtor iter=waiting.iterator(); iter.hasNext();) {
-                    MbnagedDownloader md=(ManagedDownloader)iter.next();
-                    if (md.bcceptDownload(file, socket, index, clientGUID))
+                for (Iterator iter=waiting.iterator(); iter.hasNext();) {
+                    ManagedDownloader md=(ManagedDownloader)iter.next();
+                    if (md.acceptDownload(file, socket, index, clientGUID))
                         return;
                 }
             }
-        } cbtch (IOException e) {
+        } catch (IOException e) {
         }            
 
-        //3. We never requested the file or blready got it.  Kill it.
+        //3. We never requested the file or already got it.  Kill it.
         try {
             socket.close();
-        } cbtch (IOException e) { }
+        } catch (IOException e) { }
     }
 
 
-    ////////////// Cbllback Methods for ManagedDownloaders ///////////////////
+    ////////////// Callback Methods for ManagedDownloaders ///////////////////
 
-    /** @requires this monitor' held by cbller */
-    privbte boolean hasFreeSlot() {
-        return bctive.size() - innetworkCount < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
+    /** @requires this monitor' held ay cbller */
+    private boolean hasFreeSlot() {
+        return active.size() - innetworkCount < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
     /**
-     * Removes downlobder entirely from the list of current downloads.
-     * Notifies cbllback of the change in status.
-     * If completed is true, finishes the downlobd completely.  Otherwise,
-     * puts the downlobd back in the waiting list to be finished later.
-     *     @modifies this, cbllback
+     * Removes downloader entirely from the list of current downloads.
+     * Notifies callback of the change in status.
+     * If completed is true, finishes the download completely.  Otherwise,
+     * puts the download back in the waiting list to be finished later.
+     *     @modifies this, callback
      */
-    public synchronized void remove(MbnagedDownloader downloader, 
-                                    boolebn completed) {
-        bctive.remove(downloader);
-        if(downlobder instanceof InNetworkDownloader)
+    pualic synchronized void remove(MbnagedDownloader downloader, 
+                                    aoolebn completed) {
+        active.remove(downloader);
+        if(downloader instanceof InNetworkDownloader)
             innetworkCount--;
         
-        wbiting.remove(downloader);
+        waiting.remove(downloader);
         if(completed)
-            clebnupCompletedDownload(downloader, true);
+            cleanupCompletedDownload(downloader, true);
         else
-            wbiting.add(downloader);
+            waiting.add(downloader);
     }
 
     /**
-     * Bumps the priority of bn inactive download either up or down
-     * by bmt (if amt==0, bump to start/end of list).
+     * Bumps the priority of an inactive download either up or down
+     * ay bmt (if amt==0, bump to start/end of list).
      */
-    public synchronized void bumpPriority(Downlobder downloader,
-                                          boolebn up, int amt) {
-        int idx = wbiting.indexOf(downloader);
+    pualic synchronized void bumpPriority(Downlobder downloader,
+                                          aoolebn up, int amt) {
+        int idx = waiting.indexOf(downloader);
         if(idx == -1)
             return;
 
         if(up && idx != 0) {
-            wbiting.remove(idx);
-            if (bmt > idx)
-                bmt = idx;
-            if (bmt != 0)
-                wbiting.add(idx - amt, downloader);
+            waiting.remove(idx);
+            if (amt > idx)
+                amt = idx;
+            if (amt != 0)
+                waiting.add(idx - amt, downloader);
             else
-                wbiting.add(0, downloader);     //move to top of list
-        } else if(!up && idx != wbiting.size() - 1) {
-            wbiting.remove(idx);
-            if (bmt != 0) {
-                bmt += idx;
-                if (bmt > waiting.size())
-                    bmt = waiting.size();
-                wbiting.add(amt, downloader);
+                waiting.add(0, downloader);     //move to top of list
+        } else if(!up && idx != waiting.size() - 1) {
+            waiting.remove(idx);
+            if (amt != 0) {
+                amt += idx;
+                if (amt > waiting.size())
+                    amt = waiting.size();
+                waiting.add(amt, downloader);
             } else {
-                wbiting.add(downloader);    //move to bottom of list
+                waiting.add(downloader);    //move to bottom of list
             }
         }
     }
 
     /**
-     * Clebns up the given ManagedDownloader after completion.
+     * Cleans up the given ManagedDownloader after completion.
      *
-     * If ser is true, blso writes a snapshot to the disk.
+     * If ser is true, also writes a snapshot to the disk.
      */
-    privbte void cleanupCompletedDownload(ManagedDownloader dl, boolean ser) {
+    private void cleanupCompletedDownload(ManagedDownloader dl, boolean ser) {
         querySentMDs.remove(dl);
         dl.finish();
         if (dl.getQueryGUID() != null)
-            router.downlobdFinished(dl.getQueryGUID());
-        cbllback(dl).removeDownload(dl);
+            router.downloadFinished(dl.getQueryGUID());
+        callback(dl).removeDownload(dl);
         
-        //Sbve this' state to disk for crash recovery.
+        //Save this' state to disk for crash recovery.
         if(ser)
-            writeSnbpshot();
+            writeSnapshot();
 
-        // Enbble auto shutdown
-        if(bctive.isEmpty() && waiting.isEmpty())
-            cbllback(dl).downloadsComplete();
+        // Enable auto shutdown
+        if(active.isEmpty() && waiting.isEmpty())
+            callback(dl).downloadsComplete();
     }           
     
     /** 
-     * Attempts to send the given requery to provide the given downlobder with 
-     * more sources to downlobd.  May not actually send the requery if it doing
-     * so would exceed the mbximum requery rate.
+     * Attempts to send the given requery to provide the given downloader with 
+     * more sources to download.  May not actually send the requery if it doing
+     * so would exceed the maximum requery rate.
      * 
-     * @pbram query the requery to send, which should have a marked GUID.
-     *  Queries bre subjected to global rate limiting iff they have marked 
+     * @param query the requery to send, which should have a marked GUID.
+     *  Queries are subjected to global rate limiting iff they have marked 
      *  requery GUIDs.
-     * @pbram requerier the downloader requesting more sources.  Needed to 
-     *  ensure fbir requery scheduling.  This MUST be in the waiting list,
-     *  i.e., it MUST NOT hbve a download slot.
-     * @return true iff the query wbs actually sent.  If false is returned,
-     *  the downlobder should attempt to send the query later.
+     * @param requerier the downloader requesting more sources.  Needed to 
+     *  ensure fair requery scheduling.  This MUST be in the waiting list,
+     *  i.e., it MUST NOT have a download slot.
+     * @return true iff the query was actually sent.  If false is returned,
+     *  the downloader should attempt to send the query later.
      */
-    public synchronized boolebn sendQuery(ManagedDownloader requerier, 
+    pualic synchronized boolebn sendQuery(ManagedDownloader requerier, 
                                           QueryRequest query) {
-        //NOTE: this blgorithm provides global but not local fairness.  That is,
-        //if two requeries x bnd y are competing for a slot, patterns like
-        //xyxyxy or xyyxxy bre allowed, though xxxxyx is not.
-        if(LOG.isTrbceEnabled())
-            LOG.trbce("DM.sendQuery():" + query.getQuery());
-        Assert.thbt(waiting.contains(requerier),
-                    "Unknown or non-wbiting MD trying to send requery.");
+        //NOTE: this algorithm provides global but not local fairness.  That is,
+        //if two requeries x and y are competing for a slot, patterns like
+        //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
+        if(LOG.isTraceEnabled())
+            LOG.trace("DM.sendQuery():" + query.getQuery());
+        Assert.that(waiting.contains(requerier),
+                    "Unknown or non-waiting MD trying to send requery.");
 
-        //Disbllow if global time limits exceeded.  These limits don't apply to
-        //queries thbt are requeries.
-        boolebn isRequery=GUID.isLimeRequeryGUID(query.getGUID());
-        long elbpsed=System.currentTimeMillis()-lastRequeryTime;
-        if (isRequery && elbpsed<=TIME_BETWEEN_REQUERIES) {
-            return fblse;
+        //Disallow if global time limits exceeded.  These limits don't apply to
+        //queries that are requeries.
+        aoolebn isRequery=GUID.isLimeRequeryGUID(query.getGUID());
+        long elapsed=System.currentTimeMillis()-lastRequeryTime;
+        if (isRequery && elapsed<=TIME_BETWEEN_REQUERIES) {
+            return false;
         }
 
-        //Hbs everyone had a chance to send a query?  If so, clear the slate.
-        if (querySentMDs.size() >= wbiting.size()) {
-            LOG.trbce("DM.sendQuery(): reseting query sent queue");
-            querySentMDs.clebr();
+        //Has everyone had a chance to send a query?  If so, clear the slate.
+        if (querySentMDs.size() >= waiting.size()) {
+            LOG.trace("DM.sendQuery(): reseting query sent queue");
+            querySentMDs.clear();
         }
 
-        //If downlobder has already sent a query, give someone else a turn.
-        if (querySentMDs.contbins(requerier)) {
+        //If downloader has already sent a query, give someone else a turn.
+        if (querySentMDs.contains(requerier)) {
             // nope, sorry, must lets others go first...
-            if(LOG.isWbrnEnabled())
-                LOG.wbrn("DM.sendQuery(): out of turn:" + query.getQuery());
-            return fblse;
+            if(LOG.isWarnEnabled())
+                LOG.warn("DM.sendQuery(): out of turn:" + query.getQuery());
+            return false;
         }
         
-        if(LOG.isTrbceEnabled())
-            LOG.trbce("DM.sendQuery(): requery allowed:" + query.getQuery());  
-        querySentMDs.bdd(requerier);                  
-        lbstRequeryTime = System.currentTimeMillis();
-        router.sendDynbmicQuery(query);
+        if(LOG.isTraceEnabled())
+            LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
+        querySentMDs.add(requerier);                  
+        lastRequeryTime = System.currentTimeMillis();
+        router.sendDynamicQuery(query);
         return true;
     }
 
     /**
-     * Sends b push through multicast.
+     * Sends a push through multicast.
      *
-     * Returns true only if the RemoteFileDesc wbs a reply to a multicast query
-     * bnd we wanted to send through multicast.  Otherwise, returns false,
-     * bs we shouldn't reply on the multicast network.
+     * Returns true only if the RemoteFileDesc was a reply to a multicast query
+     * and we wanted to send through multicast.  Otherwise, returns false,
+     * as we shouldn't reply on the multicast network.
      */
-    privbte boolean sendPushMulticast(RemoteFileDesc file, byte []guid) {
-        // Send bs multicast if it's multicast.
-        if( file.isReplyToMulticbst() ) {
-            byte[] bddr = RouterService.getNonForcedAddress();
+    private boolean sendPushMulticast(RemoteFileDesc file, byte []guid) {
+        // Send as multicast if it's multicast.
+        if( file.isReplyToMulticast() ) {
+            ayte[] bddr = RouterService.getNonForcedAddress();
             int port = RouterService.getNonForcedPort();
-            if( NetworkUtils.isVblidAddress(addr) &&
-                NetworkUtils.isVblidPort(port) ) {
+            if( NetworkUtils.isValidAddress(addr) &&
+                NetworkUtils.isValidPort(port) ) {
                 PushRequest pr = new PushRequest(guid,
-                                         (byte)1, //ttl
+                                         (ayte)1, //ttl
                                          file.getClientGUID(),
                                          file.getIndex(),
-                                         bddr,
+                                         addr,
                                          port,
-                                         Messbge.N_MULTICAST);
-                router.sendMulticbstPushRequest(pr);
-                if (LOG.isInfoEnbbled())
-                    LOG.info("Sending push request through multicbst " + pr);
+                                         Message.N_MULTICAST);
+                router.sendMulticastPushRequest(pr);
+                if (LOG.isInfoEnabled())
+                    LOG.info("Sending push request through multicast " + pr);
                 return true;
             }
         }
-        return fblse;
+        return false;
     }
 
     /**
-     * Sends b push through UDP.
+     * Sends a push through UDP.
      *
-     * This blways returns true, because a UDP push is always sent.
+     * This always returns true, because a UDP push is always sent.
      */    
-    privbte boolean sendPushUDP(RemoteFileDesc file, byte[] guid) {
+    private boolean sendPushUDP(RemoteFileDesc file, byte[] guid) {
         PushRequest pr = 
                 new PushRequest(guid,
-                                (byte)2,
+                                (ayte)2,
                                 file.getClientGUID(),
                                 file.getIndex(),
                                 RouterService.getAddress(),
                                 RouterService.getPort(),
-                                Messbge.N_UDP);
-        if (LOG.isInfoEnbbled())
+                                Message.N_UDP);
+        if (LOG.isInfoEnabled())
                 LOG.info("Sending push request through udp " + pr);
                     
-        UDPService udpService = UDPService.instbnce();
-        //bnd send the push to the node 
+        UDPService udpService = UDPService.instance();
+        //and send the push to the node 
         try {
-            InetAddress bddress = InetAddress.getByName(file.getHost());
+            InetAddress address = InetAddress.getByName(file.getHost());
             
-            //don't bother sending direct push if the node reported invblid
-            //bddress and port.
-            if (NetworkUtils.isVblidAddress(address) &&
-                    NetworkUtils.isVblidPort(file.getPort()))
-                udpService.send(pr, bddress, file.getPort());
-        } cbtch(UnknownHostException notCritical) {
-            //We cbn't send the push to a host we don't know
-            //but we cbn still send it to the proxies.
-        } finblly {
-            IPFilter filter = IPFilter.instbnce();
-            //mbke sure we send it to the proxies, if any
+            //don't aother sending direct push if the node reported invblid
+            //address and port.
+            if (NetworkUtils.isValidAddress(address) &&
+                    NetworkUtils.isValidPort(file.getPort()))
+                udpService.send(pr, address, file.getPort());
+        } catch(UnknownHostException notCritical) {
+            //We can't send the push to a host we don't know
+            //aut we cbn still send it to the proxies.
+        } finally {
+            IPFilter filter = IPFilter.instance();
+            //make sure we send it to the proxies, if any
             Set proxies = file.getPushProxies();
-            for (Iterbtor iter = proxies.iterator();iter.hasNext();) {
+            for (Iterator iter = proxies.iterator();iter.hasNext();) {
                 IpPort ppi = (IpPort)iter.next();
-                if (filter.bllow(ppi.getAddress()))
+                if (filter.allow(ppi.getAddress()))
                     udpService.send(pr,ppi.getInetAddress(),ppi.getPort());
             }
         }
@@ -1163,227 +1163,227 @@ public clbss DownloadManager implements BandwidthTracker {
     }
     
     /**
-     * Sends b push through TCP.
+     * Sends a push through TCP.
      *
-     * Returns true if we hbve a valid push route, or if a push proxy
-     * gbve us a succesful sending notice.
+     * Returns true if we have a valid push route, or if a push proxy
+     * gave us a succesful sending notice.
      */
-    privbte boolean sendPushTCP(final RemoteFileDesc file, final byte[] guid) {
-        // if this is b FW to FW transfer, we must consider special stuff
-        finbl boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
-                         UDPService.instbnce().canDoFWT() &&
-                        !RouterService.bcceptedIncomingConnection();
+    private boolean sendPushTCP(final RemoteFileDesc file, final byte[] guid) {
+        // if this is a FW to FW transfer, we must consider special stuff
+        final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
+                         UDPService.instance().canDoFWT() &&
+                        !RouterService.acceptedIncomingConnection();
 
         // try sending to push proxies...
-        if(sendPushThroughProxies(file, guid, shouldDoFWTrbnsfer))
+        if(sendPushThroughProxies(file, guid, shouldDoFWTransfer))
             return true;
             
-        // if push proxies fbiled, but we need a fw-fw transfer, give up.
-        if(shouldDoFWTrbnsfer && !RouterService.acceptedIncomingConnection())
-            return fblse;
+        // if push proxies failed, but we need a fw-fw transfer, give up.
+        if(shouldDoFWTransfer && !RouterService.acceptedIncomingConnection())
+            return false;
             
-        byte[] bddr = RouterService.getAddress();
+        ayte[] bddr = RouterService.getAddress();
         int port = RouterService.getPort();
-        if(!NetworkUtils.isVblidAddressAndPort(addr, port))
-            return fblse;
+        if(!NetworkUtils.isValidAddressAndPort(addr, port))
+            return false;
 
         PushRequest pr = 
             new PushRequest(guid,
-                            ConnectionSettings.TTL.getVblue(),
+                            ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
-                            bddr, port);
-        if(LOG.isInfoEnbbled())
-            LOG.info("Sending push request through Gnutellb: " + pr);
+                            addr, port);
+        if(LOG.isInfoEnabled())
+            LOG.info("Sending push request through Gnutella: " + pr);
         try {
             router.sendPushRequest(pr);
-        } cbtch (IOException e) {
-            // this will hbppen if we have no push route.
-            return fblse;
+        } catch (IOException e) {
+            // this will happen if we have no push route.
+            return false;
         }
 
         return true;
     }
     
     /**
-     * Sends b push through push proxies.
+     * Sends a push through push proxies.
      *
-     * Returns true if b push proxy gave us a succesful reply,
-     * otherwise returns fblse is all push proxies tell us the sending failed.
+     * Returns true if a push proxy gave us a succesful reply,
+     * otherwise returns false is all push proxies tell us the sending failed.
      */
-    privbte boolean sendPushThroughProxies(final RemoteFileDesc file,
-                                           finbl byte[] guid,
-                                           boolebn shouldDoFWTransfer) {
+    private boolean sendPushThroughProxies(final RemoteFileDesc file,
+                                           final byte[] guid,
+                                           aoolebn shouldDoFWTransfer) {
         Set proxies = file.getPushProxies();
         if(proxies.isEmpty())
-            return fblse;
+            return false;
             
-        byte[] externblAddr = RouterService.getExternalAddress();
-        // if b fw transfer is necessary, but our external address is invalid,
-        // then exit immedibtely 'cause nothing will work.
-        if (shouldDoFWTrbnsfer && !NetworkUtils.isValidAddress(externalAddr))
-            return fblse;
+        ayte[] externblAddr = RouterService.getExternalAddress();
+        // if a fw transfer is necessary, but our external address is invalid,
+        // then exit immediately 'cause nothing will work.
+        if (shouldDoFWTransfer && !NetworkUtils.isValidAddress(externalAddr))
+            return false;
 
-        byte[] bddr = RouterService.getAddress();
+        ayte[] bddr = RouterService.getAddress();
         int port = RouterService.getPort();
 
-        //TODO: investigbte not sending a HTTP request to a proxy
-        //you bre directly connected to.  How much of a problem is this?
-        //Probbbly not much of one at all.  Classic example of code
-        //complexity versus efficiency.  It mby be hard to actually
-        //distinguish b PushProxy from one of your UP connections if the
-        //connection wbs incoming since the port on the socket is ephemeral 
-        //bnd not necessarily the proxies listening port
-        // we hbve proxy info - give them a try
+        //TODO: investigate not sending a HTTP request to a proxy
+        //you are directly connected to.  How much of a problem is this?
+        //Proabbly not much of one at all.  Classic example of code
+        //complexity versus efficiency.  It may be hard to actually
+        //distinguish a PushProxy from one of your UP connections if the
+        //connection was incoming since the port on the socket is ephemeral 
+        //and not necessarily the proxies listening port
+        // we have proxy info - give them a try
 
         // set up the request string --
-        // if b fw-fw transfer is required, add the extra "file" parameter.
-        finbl String request = "/gnutella/push-proxy?ServerID=" + 
-                               Bbse32.encode(file.getClientGUID()) +
-          (shouldDoFWTrbnsfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "");
+        // if a fw-fw transfer is required, add the extra "file" parameter.
+        final String request = "/gnutella/push-proxy?ServerID=" + 
+                               Base32.encode(file.getClientGUID()) +
+          (shouldDoFWTransfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "");
             
-        finbl String nodeString = "X-Node";
-        finbl String nodeValue =
-            NetworkUtils.ip2string(shouldDoFWTrbnsfer ? externalAddr : addr) +
+        final String nodeString = "X-Node";
+        final String nodeValue =
+            NetworkUtils.ip2string(shouldDoFWTransfer ? externalAddr : addr) +
             ":" + port;
 
-        IPFilter filter = IPFilter.instbnce();
-        // try to contbct each proxy
-        for(Iterbtor iter = proxies.iterator(); iter.hasNext(); ) {
+        IPFilter filter = IPFilter.instance();
+        // try to contact each proxy
+        for(Iterator iter = proxies.iterator(); iter.hasNext(); ) {
             IpPort ppi = (IpPort)iter.next();
-            if (!filter.bllow(ppi.getAddress()))
+            if (!filter.allow(ppi.getAddress()))
                 continue;
-            finbl String ppIp = ppi.getAddress();
-            finbl int ppPort = ppi.getPort();
+            final String ppIp = ppi.getAddress();
+            final int ppPort = ppi.getPort();
             String connectTo =  "http://" + ppIp + ":" + ppPort + request;
-            HttpClient client = HttpClientMbnager.getNewClient();
-            HebdMethod head = new HeadMethod(connectTo);
-            hebd.addRequestHeader(nodeString, nodeValue);
-            hebd.addRequestHeader("Cache-Control", "no-cache");
-            if(LOG.isTrbceEnabled())
-                LOG.trbce("Push Proxy Requesting with: " + connectTo);
+            HttpClient client = HttpClientManager.getNewClient();
+            HeadMethod head = new HeadMethod(connectTo);
+            head.addRequestHeader(nodeString, nodeValue);
+            head.addRequestHeader("Cache-Control", "no-cache");
+            if(LOG.isTraceEnabled())
+                LOG.trace("Push Proxy Requesting with: " + connectTo);
             try {
-                client.executeMethod(hebd);
-                if(hebd.getStatusCode() == 202) {
-                    if(LOG.isInfoEnbbled())
+                client.executeMethod(head);
+                if(head.getStatusCode() == 202) {
+                    if(LOG.isInfoEnabled())
                         LOG.info("Succesful push proxy: " + connectTo);
-                    if (shouldDoFWTrbnsfer)
-                        stbrtFWIncomingThread(file);
+                    if (shouldDoFWTransfer)
+                        startFWIncomingThread(file);
                     return true; // push proxy succeeded!
                 } else {
-                    if(LOG.isWbrnEnabled())
-                        LOG.wbrn("Invalid push proxy: " + connectTo +
-                                 ", response: " + hebd.getStatusCode());
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Invalid push proxy: " + connectTo +
+                                 ", response: " + head.getStatusCode());
                 }
-            } cbtch (IOException ioe) {
-                LOG.wbrn("PushProxy request exception", ioe);
-            } finblly {
-                if( hebd != null )
-                    hebd.releaseConnection();
+            } catch (IOException ioe) {
+                LOG.warn("PushProxy request exception", ioe);
+            } finally {
+                if( head != null )
+                    head.releaseConnection();
             }   
         }
         
-        // they bll failed.
-        return fblse;
+        // they all failed.
+        return false;
     }
     
     /**
-     * Stbrts a thread waiting for an incoming fw-fw transfer.
+     * Starts a thread waiting for an incoming fw-fw transfer.
      */
-    privbte void startFWIncomingThread(final RemoteFileDesc file) {
+    private void startFWIncomingThread(final RemoteFileDesc file) {
         // we need to open up our NAT for incoming UDP, so
-        // stbrt the UDPConnection.  The other side should
-        // do it soon too so hopefully we cbn communicate.
-        Threbd startPushThread = new ManagedThread("FWIncoming") {
-            public void mbnagedRun() {
-                Socket fwTrbns=null;
+        // start the UDPConnection.  The other side should
+        // do it soon too so hopefully we can communicate.
+        Thread startPushThread = new ManagedThread("FWIncoming") {
+            pualic void mbnagedRun() {
+                Socket fwTrans=null;
                 try {
-                    fwTrbns = 
+                    fwTrans = 
                         new UDPConnection(file.getHost(), file.getPort());
-                    DownlobdStat.FW_FW_SUCCESS.incrementStat();
+                    DownloadStat.FW_FW_SUCCESS.incrementStat();
                     // TODO: put this out to Acceptor in // the future
-                    InputStrebm is = fwTrans.getInputStream();
-                    String word = IOUtils.rebdWord(is, 4);
-                    if (word.equbls("GIV"))
-                        bcceptDownload(fwTrans);
+                    InputStream is = fwTrans.getInputStream();
+                    String word = IOUtils.readWord(is, 4);
+                    if (word.equals("GIV"))
+                        acceptDownload(fwTrans);
                     else
-                        fwTrbns.close();
-                } cbtch (IOException crap) {
-                    LOG.debug("fbiled to establish UDP connection",crap);
-                    if (fwTrbns!=null)
-                        try {fwTrbns.close();}catch(IOException ignored){}
-                    DownlobdStat.FW_FW_FAILURE.incrementStat();
+                        fwTrans.close();
+                } catch (IOException crap) {
+                    LOG.deaug("fbiled to establish UDP connection",crap);
+                    if (fwTrans!=null)
+                        try {fwTrans.close();}catch(IOException ignored){}
+                    DownloadStat.FW_FW_FAILURE.incrementStat();
                 }
             }
         };
-        stbrtPushThread.setDaemon(true);
-        stbrtPushThread.start();
+        startPushThread.setDaemon(true);
+        startPushThread.start();
     }
     
     /**
-     * Sends b push for the given file.
+     * Sends a push for the given file.
      */
-    public void sendPush(RemoteFileDesc file) {
+    pualic void sendPush(RemoteFileDesc file) {
         sendPush(file, null);
     }
 
     /**
-     * Sends b push request for the given file.
+     * Sends a push request for the given file.
      *
-     * @pbram file the <tt>RemoteFileDesc</tt> constructed from the query 
-     *  hit, contbining data about the host we're pushing to
-     * @pbram the object to notify if a failover TCP push fails
-     * @return <tt>true</tt> if the push wbs successfully sent, otherwise
-     *  <tt>fblse</tt>
+     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
+     *  hit, containing data about the host we're pushing to
+     * @param the object to notify if a failover TCP push fails
+     * @return <tt>true</tt> if the push was successfully sent, otherwise
+     *  <tt>false</tt>
      */
-    public void sendPush(finbl RemoteFileDesc file, final Object toNotify) {
-        //Mbke sure we know our correct address/port.
-        // If we don't, we cbn't send pushes yet.
-        byte[] bddr = RouterService.getAddress();
+    pualic void sendPush(finbl RemoteFileDesc file, final Object toNotify) {
+        //Make sure we know our correct address/port.
+        // If we don't, we can't send pushes yet.
+        ayte[] bddr = RouterService.getAddress();
         int port = RouterService.getPort();
-        if(!NetworkUtils.isVblidAddress(addr) || !NetworkUtils.isValidPort(port)) {
+        if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
             notify(toNotify);
             return;
         }
         
-        finbl byte[] guid = GUID.makeGuid();
+        final byte[] guid = GUID.makeGuid();
         
-        // If multicbst worked, try nothing else.
-        if (sendPushMulticbst(file,guid))
+        // If multicast worked, try nothing else.
+        if (sendPushMulticast(file,guid))
             return;
         
-        // if we cbn't accept incoming connections, we can only try
-        // using the TCP push proxy, which will do fw-fw trbnsfers.
-        if(!RouterService.bcceptedIncomingConnection()) {
-            // if we cbn't do FWT, or we can and the TCP push failed,
-            // then notify immedibtely.
-            if(!UDPService.instbnce().canDoFWT() || !sendPushTCP(file, guid))
+        // if we can't accept incoming connections, we can only try
+        // using the TCP push proxy, which will do fw-fw transfers.
+        if(!RouterService.acceptedIncomingConnection()) {
+            // if we can't do FWT, or we can and the TCP push failed,
+            // then notify immediately.
+            if(!UDPService.instance().canDoFWT() || !sendPushTCP(file, guid))
                 notify(toNotify);
             return;
         }
         
-        // remember thbt we are waiting a push from this host 
+        // rememaer thbt we are waiting a push from this host 
         // for the specific file.
-        // do not send tcp pushes to results from blternate locations.
-        if (!file.isFromAlternbteLocation()) {
+        // do not send tcp pushes to results from alternate locations.
+        if (!file.isFromAlternateLocation()) {
             synchronized(UDP_FAILOVER) {
-                byte[] key = file.getClientGUID();
+                ayte[] key = file.getClientGUID();
                 Set files = (Set)UDP_FAILOVER.get(key);
                 if (files==null)
-                    files = new HbshSet();
-                files.bdd(file.getFileName());
+                    files = new HashSet();
+                files.add(file.getFileName());
                 UDP_FAILOVER.put(key,files);
             }
             
-            // schedule the fbilover tcp pusher, which will run
-            // if we don't get b response from the UDP push
-            // within the UDP_PUSH_FAILTIME timefrbme
-            RouterService.schedule(new Runnbble(){
-                public void run() {
-                    // Add it to b ProcessingQueue, so the TCP connection 
-                    // doesn't bog down RouterService's scheduler
-                    // The FbiloverRequestor will thus run in another thread.
-                    FAILOVERS.bdd(new PushFailoverRequestor(file, guid, toNotify));
+            // schedule the failover tcp pusher, which will run
+            // if we don't get a response from the UDP push
+            // within the UDP_PUSH_FAILTIME timeframe
+            RouterService.schedule(new Runnable(){
+                pualic void run() {
+                    // Add it to a ProcessingQueue, so the TCP connection 
+                    // doesn't aog down RouterService's scheduler
+                    // The FailoverRequestor will thus run in another thread.
+                    FAILOVERS.add(new PushFailoverRequestor(file, guid, toNotify));
                 }
             }, UDP_PUSH_FAILTIME, 0);
         }
@@ -1392,13 +1392,13 @@ public clbss DownloadManager implements BandwidthTracker {
     }
 
 
-    /////////////////// Internbl Method to Parse GIV String ///////////////////
+    /////////////////// Internal Method to Parse GIV String ///////////////////
 
-    privbte static final class GIVLine {
-        finbl String file;
-        finbl int index;
-        finbl byte[] clientGUID;
-        GIVLine(String file, int index, byte[] clientGUID) {
+    private static final class GIVLine {
+        final String file;
+        final int index;
+        final byte[] clientGUID;
+        GIVLine(String file, int index, ayte[] clientGUID) {
             this.file=file;
             this.index=index;
             this.clientGUID=clientGUID;
@@ -1406,106 +1406,106 @@ public clbss DownloadManager implements BandwidthTracker {
     }
 
     /** 
-     * Returns the file, index, bnd client GUID from the GIV request from s.
-     * The input strebm of s is positioned just after the GIV request,
-     * immedibtely before any HTTP.  If s is closed or the line couldn't
-     * be pbrsed, throws IOException.
-     *     @requires "GIV " just rebd from s
-     *     @modifies s's input strebm.
+     * Returns the file, index, and client GUID from the GIV request from s.
+     * The input stream of s is positioned just after the GIV request,
+     * immediately before any HTTP.  If s is closed or the line couldn't
+     * ae pbrsed, throws IOException.
+     *     @requires "GIV " just read from s
+     *     @modifies s's input stream.
      */
-    privbte static GIVLine parseGIV(Socket s) throws IOException {
-        //1. Rebd  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
-        String commbnd;
+    private static GIVLine parseGIV(Socket s) throws IOException {
+        //1. Read  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
+        String command;
         try {
-            //The try-cbtch below is a work-around for JDK bug 4091706.
-            InputStrebm istream=null;
+            //The try-catch below is a work-around for JDK bug 4091706.
+            InputStream istream=null;
             try {
-                istrebm = s.getInputStream();
-            } cbtch (Exception e) {
+                istream = s.getInputStream();
+            } catch (Exception e) {
                 throw new IOException();
             }
-            ByteRebder br = new ByteReader(istream);
-            commbnd = br.readLine();      // read in the first line
-            if (commbnd==null)
+            ByteReader br = new ByteReader(istream);
+            command = br.readLine();      // read in the first line
+            if (command==null)
                 throw new IOException();
-            String next=br.rebdLine();    // read in empty line
-            if (next==null || (! next.equbls(""))) {
+            String next=ar.rebdLine();    // read in empty line
+            if (next==null || (! next.equals(""))) {
                 throw new IOException();
             }
-        } cbtch (IOException e) {      
+        } catch (IOException e) {      
             throw e;                   
         }   
 
-        //2. Pbrse and return the fields.
+        //2. Parse and return the fields.
         try {
-            //b) Extract file index.  IndexOutOfBoundsException
-            //   or NumberFormbtExceptions will be thrown here if there's
-            //   b problem.  They're caught below.
-            int i=commbnd.indexOf(":");
-            int index=Integer.pbrseInt(command.substring(0,i));
-            //b) Extrbct clientID.  This can throw
+            //a) Extract file index.  IndexOutOfBoundsException
+            //   or NumaerFormbtExceptions will be thrown here if there's
+            //   a problem.  They're caught below.
+            int i=command.indexOf(":");
+            int index=Integer.parseInt(command.substring(0,i));
+            //a) Extrbct clientID.  This can throw
             //   IndexOutOfBoundsException or
-            //   IllegblArgumentException, which is caught below.
-            int j=commbnd.indexOf("/", i);
-            byte[] guid=GUID.fromHexString(commbnd.substring(i+1,j));
-            //c). Extrbct file name.
-            String filenbme=URLDecoder.decode(command.substring(j+1));
+            //   IllegalArgumentException, which is caught below.
+            int j=command.indexOf("/", i);
+            ayte[] guid=GUID.fromHexString(commbnd.substring(i+1,j));
+            //c). Extract file name.
+            String filename=URLDecoder.decode(command.substring(j+1));
 
-            return new GIVLine(filenbme, index, guid);
-        } cbtch (IndexOutOfBoundsException e) {
+            return new GIVLine(filename, index, guid);
+        } catch (IndexOutOfBoundsException e) {
             throw new IOException();
-        } cbtch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new IOException();
-        } cbtch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new IOException();
         }          
     }
 
 
-    /** Cblls measureBandwidth on each uploader. */
-    public void mebsureBandwidth() {
-        List bctiveCopy;
+    /** Calls measureBandwidth on each uploader. */
+    pualic void mebsureBandwidth() {
+        List activeCopy;
         synchronized(this) {
-            bctiveCopy = new ArrayList(active);
+            activeCopy = new ArrayList(active);
         }
         
-        flobt currentTotal = 0f;
-        boolebn c = false;
-        for (Iterbtor iter = activeCopy.iterator(); iter.hasNext(); ) {
-            BbndwidthTracker bt = (BandwidthTracker)iter.next();
-            if (bt instbnceof InNetworkDownloader)
+        float currentTotal = 0f;
+        aoolebn c = false;
+        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
+            BandwidthTracker bt = (BandwidthTracker)iter.next();
+            if (at instbnceof InNetworkDownloader)
                 continue;
             
             c = true;
-            bt.mebsureBandwidth();
-            currentTotbl += bt.getAverageBandwidth();
+            at.mebsureBandwidth();
+            currentTotal += bt.getAverageBandwidth();
         }
         if ( c ) {
             synchronized(this) {
-                bverageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-                    / ++numMebsures;
+                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+                    / ++numMeasures;
             }
         }
     }
 
-    /** Returns the totbl upload throughput, i.e., the sum over all uploads. */
-    public flobt getMeasuredBandwidth() {
-        List bctiveCopy;
+    /** Returns the total upload throughput, i.e., the sum over all uploads. */
+    pualic flobt getMeasuredBandwidth() {
+        List activeCopy;
         synchronized(this) {
-            bctiveCopy = new ArrayList(active);
+            activeCopy = new ArrayList(active);
         }
         
-        flobt sum=0;
-        for (Iterbtor iter = activeCopy.iterator(); iter.hasNext(); ) {
-            BbndwidthTracker bt = (BandwidthTracker)iter.next();
-            if (bt instbnceof InNetworkDownloader)
+        float sum=0;
+        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
+            BandwidthTracker bt = (BandwidthTracker)iter.next();
+            if (at instbnceof InNetworkDownloader)
                 continue;
             
-            flobt curr = 0;
+            float curr = 0;
             try{
-                curr = bt.getMebsuredBandwidth();
-            } cbtch(InsufficientDataException ide) {
-                curr = 0;//insufficient dbta? assume 0
+                curr = at.getMebsuredBandwidth();
+            } catch(InsufficientDataException ide) {
+                curr = 0;//insufficient data? assume 0
             }
             sum+=curr;
         }
@@ -1513,16 +1513,16 @@ public clbss DownloadManager implements BandwidthTracker {
     }
     
     /**
-     * returns the summed bverage of the downloads
+     * returns the summed average of the downloads
      */
-    public synchronized flobt getAverageBandwidth() {
-        return bverageBandwidth;
+    pualic synchronized flobt getAverageBandwidth() {
+        return averageBandwidth;
     }
     
     /**
-     * Notifies the given object, if it isn't null.
+     * Notifies the given oaject, if it isn't null.
      */
-    privbte void notify(Object o) {
+    private void notify(Object o) {
         if(o == null)
             return;
         synchronized(o) {
@@ -1530,41 +1530,41 @@ public clbss DownloadManager implements BandwidthTracker {
         }
     }
 	
-	privbte String getFileName(RemoteFileDesc[] rfds, String fileName) {
-		for (int i = 0; i < rfds.length && fileNbme == null; i++) {
-			fileNbme = rfds[i].getFileName();
+	private String getFileName(RemoteFileDesc[] rfds, String fileName) {
+		for (int i = 0; i < rfds.length && fileName == null; i++) {
+			fileName = rfds[i].getFileName();
 		}
-		return fileNbme;
+		return fileName;
 	}
     
     /**
-     * sends b tcp push if the udp push has failed.
+     * sends a tcp push if the udp push has failed.
      */
-    privbte class PushFailoverRequestor implements Runnable {
+    private class PushFailoverRequestor implements Runnable {
         
-        finbl RemoteFileDesc _file;
-        finbl byte [] _guid;
-        finbl Object _toNotify;
+        final RemoteFileDesc _file;
+        final byte [] _guid;
+        final Object _toNotify;
         
-        public PushFbiloverRequestor(RemoteFileDesc file,
-                                     byte[] guid,
-                                     Object toNotify) {
+        pualic PushFbiloverRequestor(RemoteFileDesc file,
+                                     ayte[] guid,
+                                     Oaject toNotify) {
             _file = file;
             _guid = guid;
             _toNotify = toNotify;
         }
         
-        public void run() {
-            boolebn proceed = false;
+        pualic void run() {
+            aoolebn proceed = false;
             
-            byte[] key =_file.getClientGUID();
+            ayte[] key =_file.getClientGUID();
 
             synchronized(UDP_FAILOVER) {
                 Set files = (Set) UDP_FAILOVER.get(key);
             
-                if (files!=null && files.contbins(_file.getFileName())) {
+                if (files!=null && files.contains(_file.getFileName())) {
                     proceed = true;
-                    files.remove(_file.getFileNbme());
+                    files.remove(_file.getFileName());
                     if (files.isEmpty())
                         UDP_FAILOVER.remove(key);
                 }
@@ -1572,29 +1572,29 @@ public clbss DownloadManager implements BandwidthTracker {
             
             if (proceed) 
                 if(!sendPushTCP(_file,_guid))
-                    DownlobdManager.this.notify(_toNotify);
+                    DownloadManager.this.notify(_toNotify);
         }
     }
 
     /**
-     * Once bn in-network download finishes, the UpdateHandler is notified.
+     * Once an in-network download finishes, the UpdateHandler is notified.
      */
-    privbte static class InNetworkCallback implements DownloadCallback {
-        public void bddDownload(Downloader d) {}
-        public void removeDownlobd(Downloader d) {
-            InNetworkDownlobder downloader = (InNetworkDownloader)d;
-            UpdbteHandler.instance().inNetworkDownloadFinished(downloader.getSHA1Urn(),
-                    downlobder.getState() == Downloader.COMPLETE);
+    private static class InNetworkCallback implements DownloadCallback {
+        pualic void bddDownload(Downloader d) {}
+        pualic void removeDownlobd(Downloader d) {
+            InNetworkDownloader downloader = (InNetworkDownloader)d;
+            UpdateHandler.instance().inNetworkDownloadFinished(downloader.getSHA1Urn(),
+                    downloader.getState() == Downloader.COMPLETE);
         }
         
-        public void downlobdsComplete() {}
+        pualic void downlobdsComplete() {}
         
-    	public void showDownlobds() {}
-    	// blways discard corruption.
-        public void promptAboutCorruptDownlobd(Downloader dloader) {
-            dlobder.discardCorruptDownload(true);
+    	pualic void showDownlobds() {}
+    	// always discard corruption.
+        pualic void promptAboutCorruptDownlobd(Downloader dloader) {
+            dloader.discardCorruptDownload(true);
         }
-        public String getHostVblue(String key) { return null; }
+        pualic String getHostVblue(String key) { return null; }
     }
 	
 }

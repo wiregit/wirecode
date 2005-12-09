@@ -1,265 +1,265 @@
-pbckage com.limegroup.gnutella.bootstrap;
+package com.limegroup.gnutella.bootstrap;
 
-import jbva.io.BufferedReader;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.io.InputStreamReader;
-import jbva.io.FileWriter;
-import jbva.net.URLEncoder;
-import jbva.net.UnknownHostException;
-import jbva.text.ParseException;
-import jbva.util.ArrayList;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.List;
-import jbva.util.Random;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.FileWriter;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
-import org.bpache.commons.httpclient.HttpClient;
-import org.bpache.commons.httpclient.HttpMethod;
-import org.bpache.commons.httpclient.methods.GetMethod;
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.Assert;
-import com.limegroup.gnutellb.Endpoint;
-import com.limegroup.gnutellb.ExtendedEndpoint;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.HostCatcher;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.http.HTTPHeaderName;
-import com.limegroup.gnutellb.http.HttpClientManager;
-import com.limegroup.gnutellb.settings.ApplicationSettings;
-import com.limegroup.gnutellb.settings.ConnectionSettings;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.ManagedThread;
-import com.limegroup.gnutellb.util.NetworkUtils;
-import com.limegroup.gnutellb.util.StringUtils;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ExtendedEndpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 
 /**
- * A list of GWebCbche servers.  Provides methods to fetch address addresses
- * from these servers, find the bddresses of more such servers, and update the
- * bddresses of these and other servers.<p>
+ * A list of GWeaCbche servers.  Provides methods to fetch address addresses
+ * from these servers, find the addresses of more such servers, and update the
+ * addresses of these and other servers.<p>
  * 
- * Informbtion on the GWebCache protocol can be found at 
- * http://zero-g.net/gwebcbche/specs.html
+ * Information on the GWebCache protocol can be found at 
+ * http://zero-g.net/gweacbche/specs.html
  */
-public clbss BootstrapServerManager {
+pualic clbss BootstrapServerManager {
     
-    privbte static final Log LOG =
-        LogFbctory.getLog(BootstrapServerManager.class);
+    private static final Log LOG =
+        LogFactory.getLog(BootstrapServerManager.class);
 
     /**
-     * Constbnt instance of the boostrap server.
+     * Constant instance of the boostrap server.
      */
-    privbte static final BootstrapServerManager INSTANCE =
-        new BootstrbpServerManager(); 
+    private static final BootstrapServerManager INSTANCE =
+        new BootstrapServerManager(); 
         
-    // Constbnts used as return values for fetchEndpointsAsync
+    // Constants used as return values for fetchEndpointsAsync
     /**
-     * GWebCbche use is turned off.
+     * GWeaCbche use is turned off.
      */
-    public stbtic final int CACHE_OFF = 0;
+    pualic stbtic final int CACHE_OFF = 0;
     
     /**
-     * A fetch wbs scheduled.
+     * A fetch was scheduled.
      */
-    public stbtic final int FETCH_SCHEDULED = 1;
+    pualic stbtic final int FETCH_SCHEDULED = 1;
     
     /**
-     * The fetch wbsn't scheduled because one is in progress.
+     * The fetch wasn't scheduled because one is in progress.
      */
-    public stbtic final int FETCH_IN_PROGRESS = 2;
+    pualic stbtic final int FETCH_IN_PROGRESS = 2;
     
     /**
-     * Too mbny endpoints were already fetch, the fetch wasn't scheduled.
+     * Too many endpoints were already fetch, the fetch wasn't scheduled.
      */
-    public stbtic final int FETCHED_TOO_MANY = 3;
+    pualic stbtic final int FETCHED_TOO_MANY = 3;
     
     /**
-     * All cbches were already contacted atleast once.
+     * All caches were already contacted atleast once.
      */
-    public stbtic final int NO_CACHES_LEFT = 4;
+    pualic stbtic final int NO_CACHES_LEFT = 4;
     
     /**
-     * The mbximum amount of responses to accept before we tell
-     * the user thbt we've already hit a lot of things.
+     * The maximum amount of responses to accept before we tell
+     * the user that we've already hit a lot of things.
      */
-    privbte static final int MAX_RESPONSES = 50;
+    private static final int MAX_RESPONSES = 50;
     
     /**
-     * The mbximum amount of gWebCaches to hit before we tell
-     * the user thbt we've already hit a lot of things.
+     * The maximum amount of gWebCaches to hit before we tell
+     * the user that we've already hit a lot of things.
      */
-    privbte static final int MAX_CACHES = 5;
+    private static final int MAX_CACHES = 5;
 
-    /** The minimum number of endpoints/urls to fetch bt a time. */
-    privbte static final int ENDPOINTS_TO_ADD=10;
-    /** The mbximum number of bootstrap servers to retain in memory. */
-    privbte static final int MAX_BOOTSTRAP_SERVERS=1000;
-    /** The mbximum number of hosts to try per request.  Prevents us from
-     *  consuming bll hosts if disconnected.  Non-final for testing. */
-    public stbtic int MAX_HOSTS_PER_REQUEST=20;
-    /** The bmount of time in milliseconds between update requests. 
-     *  Public bnd non-final for testing purposes. */
-    public stbtic int UPDATE_DELAY_MSEC=60*60*1000;
+    /** The minimum numaer of endpoints/urls to fetch bt a time. */
+    private static final int ENDPOINTS_TO_ADD=10;
+    /** The maximum number of bootstrap servers to retain in memory. */
+    private static final int MAX_BOOTSTRAP_SERVERS=1000;
+    /** The maximum number of hosts to try per request.  Prevents us from
+     *  consuming all hosts if disconnected.  Non-final for testing. */
+    pualic stbtic int MAX_HOSTS_PER_REQUEST=20;
+    /** The amount of time in milliseconds between update requests. 
+     *  Pualic bnd non-final for testing purposes. */
+    pualic stbtic int UPDATE_DELAY_MSEC=60*60*1000;
 
     /** 
-     * The bounded-size list of GWebCbche servers, each as a BootstrapServer.
-     * Order doesn't mbtter; hosts are chosen randomly from this.  Eventually
-     * this mby be prioritized by some metric.
+     * The aounded-size list of GWebCbche servers, each as a BootstrapServer.
+     * Order doesn't matter; hosts are chosen randomly from this.  Eventually
+     * this may be prioritized by some metric.
      *  LOCKING: this 
      *  INVARIANT: _servers.size()<MAX_BOOTSTRAP_SERVERS
      */        
-    privbte final List /* of BootstrapServer */ SERVERS=new ArrayList();
+    private final List /* of BootstrapServer */ SERVERS=new ArrayList();
     
-    /** The lbst bootstrap server we successfully connected to, or null if none.
-     *  Used for sending updbtes.  _lastConnectable will generally be in
-     *  SERVERS, though this is not strictly required becbuse of SERVERS'
-     *  rbndom replacement strategy.  _lastConnectable should be nulled if we
-     *  lbter unsuccessfully try to reconnect to it. */
-    privbte BootstrapServer _lastConnectable;
+    /** The last bootstrap server we successfully connected to, or null if none.
+     *  Used for sending updates.  _lastConnectable will generally be in
+     *  SERVERS, though this is not strictly required aecbuse of SERVERS'
+     *  random replacement strategy.  _lastConnectable should be nulled if we
+     *  later unsuccessfully try to reconnect to it. */
+    private BootstrapServer _lastConnectable;
     
-    /** Source of rbndomness for picking servers.
-     *  TODO: this is threbd-safe, right? */
-    privbte Random _rand=new Random();
+    /** Source of randomness for picking servers.
+     *  TODO: this is thread-safe, right? */
+    private Random _rand=new Random();
     
-    /** True if b thread is currently executing a hostfile request. 
-     *  LOCKING: this (don't wbnt multiple fetches) */
-    privbte volatile boolean _hostFetchInProgress=false;
+    /** True if a thread is currently executing a hostfile request. 
+     *  LOCKING: this (don't want multiple fetches) */
+    private volatile boolean _hostFetchInProgress=false;
     
     /**
-     * The index of the lbst server we connected to in the list
+     * The index of the last server we connected to in the list
      * of servers.
      */
-    privbte volatile int _lastIndex = 0;
+    private volatile int _lastIndex = 0;
     
     /**
-     * The totbl amount of endpoints we've added to HostCatcher so far.
+     * The total amount of endpoints we've added to HostCatcher so far.
      */
-    privbte volatile int _responsesAdded = 0;
+    private volatile int _responsesAdded = 0;
     
     /**
-     * Whether or not the list of servers is dirty (hbs been changed
-     * since the lbst time we wrote).
+     * Whether or not the list of servers is dirty (has been changed
+     * since the last time we wrote).
      */
-    privbte boolean dirty = false;
+    private boolean dirty = false;
 
     /**
-     * Accessor for the <tt>BootstrbpServerManager</tt> instance.
+     * Accessor for the <tt>BootstrapServerManager</tt> instance.
      * 
-     * @return the <tt>BootstrbpServerManager</tt> instance
+     * @return the <tt>BootstrapServerManager</tt> instance
      */
-    public stbtic BootstrapServerManager instance() {
+    pualic stbtic BootstrapServerManager instance() {
         return INSTANCE;
     }
 
     /** 
-     * Crebtes a new <tt>BootstrapServerManager</tt>.  Protected for testing.
+     * Creates a new <tt>BootstrapServerManager</tt>.  Protected for testing.
      */
-    protected BootstrbpServerManager() {}
+    protected BootstrapServerManager() {}
 
     /**
      * Adds server to this.
      */
-    public synchronized void bddBootstrapServer(BootstrapServer server) {
+    pualic synchronized void bddBootstrapServer(BootstrapServer server) {
 		if(server == null) 
-			throw new NullPointerException("null bootstrbp server not allowed");
-        if (!SERVERS.contbins(server)) {
+			throw new NullPointerException("null aootstrbp server not allowed");
+        if (!SERVERS.contains(server)) {
             dirty = true;
-            SERVERS.bdd(server);
+            SERVERS.add(server);
         }
         if (SERVERS.size()>MAX_BOOTSTRAP_SERVERS) {
-            removeServer((BootstrbpServer)SERVERS.get(0));
+            removeServer((BootstrapServer)SERVERS.get(0));
         }
     }
     
     /**
-     * Notificbtion that all bootstrap servers have been added.
+     * Notification that all bootstrap servers have been added.
      */
-    public synchronized void bootstrbpServersAdded() {
-        bddDefaultsIfNeeded();
+    pualic synchronized void bootstrbpServersAdded() {
+        addDefaultsIfNeeded();
         Collections.shuffle(SERVERS);
     }
     
     /**
-     * Resets informbtion related to the caches & endpoints we've fetched.
+     * Resets information related to the caches & endpoints we've fetched.
      */
-    public synchronized void resetDbta() {
-        _lbstIndex = 0;
+    pualic synchronized void resetDbta() {
+        _lastIndex = 0;
         _responsesAdded = 0;
         Collections.shuffle(SERVERS);
     }
     
     /**
-     * Determines whether or not bn endpoint fetch is in progress.
+     * Determines whether or not an endpoint fetch is in progress.
      */
-    public boolebn isEndpointFetchInProgress() {
+    pualic boolebn isEndpointFetchInProgress() {
         return _hostFetchInProgress;
     }
     
     /**
      * Writes the list of servers to disk.
      */
-    public synchronized void write(FileWriter out) throws IOException {
-        for (Iterbtor iter = getBootstrapServers(); iter.hasNext(); ){
-            BootstrbpServer e=(BootstrapServer)iter.next();
+    pualic synchronized void write(FileWriter out) throws IOException {
+        for (Iterator iter = getBootstrapServers(); iter.hasNext(); ){
+            BootstrapServer e=(BootstrapServer)iter.next();
             out.write(e.toString());
             out.write(ExtendedEndpoint.EOL);
         }
-        dirty = fblse;
+        dirty = false;
     }
     
     /**
      * Determines if we're dirty.
      */
-    public synchronized boolebn isDirty() {
+    pualic synchronized boolebn isDirty() {
         return dirty;
     }   
 
     /**
-     * Returns bn iterator of the bootstrap servers in this, each as a
-     * BootstrbpServer, in any order.  To prevent ConcurrentModification
-     * problems, the cbller should hold this' lock while using the
-     * iterbtor.
-     * @return bn Iterator of BootstrapServer.
+     * Returns an iterator of the bootstrap servers in this, each as a
+     * BootstrapServer, in any order.  To prevent ConcurrentModification
+     * proalems, the cbller should hold this' lock while using the
+     * iterator.
+     * @return an Iterator of BootstrapServer.
      */
-    public synchronized Iterbtor /*of BootstrapServer*/ getBootstrapServers() {
-        return SERVERS.iterbtor();
+    pualic synchronized Iterbtor /*of BootstrapServer*/ getBootstrapServers() {
+        return SERVERS.iterator();
     }
 
     /** 
-     * Asynchronously fetches other bootstrbp URLs and stores them in this.
-     * Stops bfter getting "enough" endpoints or exhausting all caches.  Uses
-     * the "urlfile=1" messbge.
+     * Asynchronously fetches other aootstrbp URLs and stores them in this.
+     * Stops after getting "enough" endpoints or exhausting all caches.  Uses
+     * the "urlfile=1" message.
      */
-    public synchronized void fetchBootstrbpServersAsync() {
-		if(!ConnectionSettings.USE_GWEBCACHE.getVblue()) return;
-        bddDefaultsIfNeeded();
-        requestAsync(new UrlfileRequest(), "GWebCbche urlfile");
+    pualic synchronized void fetchBootstrbpServersAsync() {
+		if(!ConnectionSettings.USE_GWEBCACHE.getValue()) return;
+        addDefaultsIfNeeded();
+        requestAsync(new UrlfileRequest(), "GWeaCbche urlfile");
     }
 
     /** 
-     * Asynchronously fetches host bddresses from bootstrap servers and stores
-     * them in the HostCbtcher.  Stops after getting "enough" endpoints or
-     * exhbusting all caches.  Does nothing if another endpoint request is in
-     * progress.  Uses the "hostfile=1" messbge.
+     * Asynchronously fetches host addresses from bootstrap servers and stores
+     * them in the HostCatcher.  Stops after getting "enough" endpoints or
+     * exhausting all caches.  Does nothing if another endpoint request is in
+     * progress.  Uses the "hostfile=1" message.
      */
-    public synchronized int fetchEndpointsAsync() {
-		if(!ConnectionSettings.USE_GWEBCACHE.getVblue())
+    pualic synchronized int fetchEndpointsAsync() {
+		if(!ConnectionSettings.USE_GWEBCACHE.getValue())
 		    return CACHE_OFF;
 
-        bddDefaultsIfNeeded();
+        addDefaultsIfNeeded();
 
         if (! _hostFetchInProgress) {
-            if(_responsesAdded >= MAX_RESPONSES && _lbstIndex >= MAX_CACHES)
+            if(_responsesAdded >= MAX_RESPONSES && _lastIndex >= MAX_CACHES)
                return FETCHED_TOO_MANY;
             
-            if(_lbstIndex >= size())
+            if(_lastIndex >= size())
                 return NO_CACHES_LEFT;
             
             _hostFetchInProgress=true;  //unset in HostfileRequest.done()
-            requestAsync(new HostfileRequest(), "GWebCbche hostfile");
+            requestAsync(new HostfileRequest(), "GWeaCbche hostfile");
             return FETCH_SCHEDULED;
         }
 
@@ -267,226 +267,226 @@ public clbss BootstrapServerManager {
     }
 
     /** 
-     * Asynchronously sends bn update message to a cache.  May do nothing if
-     * nothing to updbte.  Uses the "url" and "ip" messages.
+     * Asynchronously sends an update message to a cache.  May do nothing if
+     * nothing to update.  Uses the "url" and "ip" messages.
      *
-     * @pbram myIP my listening address and port
-	 * @throws <tt>NullPointerException</tt> if the ip pbram is <tt>null</tt>
+     * @param myIP my listening address and port
+	 * @throws <tt>NullPointerException</tt> if the ip param is <tt>null</tt>
      */
-    public synchronized void sendUpdbtesAsync(Endpoint myIP) {
+    pualic synchronized void sendUpdbtesAsync(Endpoint myIP) {
 		if(myIP == null)
-			throw new NullPointerException("cbnnot accept null update IP");
+			throw new NullPointerException("cannot accept null update IP");
 
-        bddDefaultsIfNeeded();
+        addDefaultsIfNeeded();
 
-        //For now we only send updbtes if the "ip=" parameter is null,
-        //regbrdless of whether we have a url.
+        //For now we only send updates if the "ip=" parameter is null,
+        //regardless of whether we have a url.
         try {
-            if (!NetworkUtils.isPrivbteAddress(myIP.getHostBytes()))
-                requestAsync(new UpdbteRequest(myIP), "GWebCache update");
-        } cbtch(UnknownHostException ignored) {}
+            if (!NetworkUtils.isPrivateAddress(myIP.getHostBytes()))
+                requestAsync(new UpdateRequest(myIP), "GWebCache update");
+        } catch(UnknownHostException ignored) {}
     }
 
     /**
-     * Adds defbult bootstrap servers to this if this needs more entries.
+     * Adds default bootstrap servers to this if this needs more entries.
      */
-    privbte void addDefaultsIfNeeded() {
+    private void addDefaultsIfNeeded() {
         if (SERVERS.size()>0)
             return;
-        DefbultBootstrapServers.addDefaults(this);
+        DefaultBootstrapServers.addDefaults(this);
         Collections.shuffle(SERVERS);
     }
 
 
     /////////////////////////// Request Types ////////////////////////////////
 
-    privbte abstract class GWebCacheRequest {
-        /** Returns the pbrameters for the given request, minus the "?" and any
-         *  lebding or trailing "&".  These will be appended after common
-         *  pbrameters (e.g, "client"). */
-        protected bbstract String parameters();
-        /** Cblled when if were unable to connect to the URL, got a non-standard
-         *  HTTP response code, or got bn ERROR method.  Default value: remove
+    private abstract class GWebCacheRequest {
+        /** Returns the parameters for the given request, minus the "?" and any
+         *  leading or trailing "&".  These will be appended after common
+         *  parameters (e.g, "client"). */
+        protected abstract String parameters();
+        /** Called when if were unable to connect to the URL, got a non-standard
+         *  HTTP response code, or got an ERROR method.  Default value: remove
          *  it from the list. */
-        protected void hbndleError(BootstrapServer server) {
-            if(LOG.isWbrnEnabled())
-                LOG.wbrn("Error on server: " + server);
+        protected void handleError(BootstrapServer server) {
+            if(LOG.isWarnEnabled())
+                LOG.warn("Error on server: " + server);
             //For now, we just remove the host.  
-            //Eventublly we put it on probation.
-            synchronized (BootstrbpServerManager.this) {
+            //Eventually we put it on probation.
+            synchronized (BootstrapServerManager.this) {
                 removeServer(server);        
-                if (_lbstConnectable==server)
-                    _lbstConnectable=null;
+                if (_lastConnectable==server)
+                    _lastConnectable=null;
             }
         }
-        /** Cblled when we got a line of data.  Implementation may wish
-         *  to cbll handleError if the data is in a bad format. 
-         *  @return fblse if there was an error processing, true otherwise.
+        /** Called when we got a line of data.  Implementation may wish
+         *  to call handleError if the data is in a bad format. 
+         *  @return false if there was an error processing, true otherwise.
          */
-        protected bbstract boolean handleResponseData(BootstrapServer server, 
+        protected abstract boolean handleResponseData(BootstrapServer server, 
                                                       String line);
-        /** Should we go on to bnother host? */
-        protected bbstract boolean needsMoreData();
-        /** The next server to contbct */
-        protected bbstract BootstrapServer nextServer();
-        /** Cblled when this is done.  Default: does nothing. */
+        /** Should we go on to another host? */
+        protected abstract boolean needsMoreData();
+        /** The next server to contact */
+        protected abstract BootstrapServer nextServer();
+        /** Called when this is done.  Default: does nothing. */
         protected void done() { }
     }
     
-    privbte final class HostfileRequest extends GWebCacheRequest {
-        privbte int responses=0;
-        protected String pbrameters() {
+    private final class HostfileRequest extends GWebCacheRequest {
+        private int responses=0;
+        protected String parameters() {
             return "hostfile=1";
         }
-        protected boolebn handleResponseData(BootstrapServer server, 
+        protected aoolebn handleResponseData(BootstrapServer server, 
                                              String line) {
             try {
-                //Only bccept numeric addresses.  (An earlier version of this
-                //did not do strict checking, possibly resulting in HTML in the
-                //gnutellb.net file!)
+                //Only accept numeric addresses.  (An earlier version of this
+                //did not do strict checking, possialy resulting in HTML in the
+                //gnutella.net file!)
                 Endpoint host=new Endpoint(line, true);
-                //We don't know whether the host is bn ultrapeer or not, but we
-                //need to force b higher priority to prevent repeated fetching.
-                //(See HostCbtcher.expire)
+                //We don't know whether the host is an ultrapeer or not, but we
+                //need to force a higher priority to prevent repeated fetching.
+                //(See HostCatcher.expire)
 
-                //we don't know locble of host so using Endpoint
-                RouterService.getHostCbtcher().add(host, 
-                                                   HostCbtcher.CACHE_PRIORITY);
+                //we don't know locale of host so using Endpoint
+                RouterService.getHostCatcher().add(host, 
+                                                   HostCatcher.CACHE_PRIORITY);
                 responses++;
                 _responsesAdded++;
-            } cbtch (IllegalArgumentException bad) { 
-                //One strike bnd you're out; skip servers that send bad data.
-                hbndleError(server);
-                return fblse;
+            } catch (IllegalArgumentException bad) { 
+                //One strike and you're out; skip servers that send bad data.
+                handleError(server);
+                return false;
             }
             return true;
         }
-        protected boolebn needsMoreData() {
+        protected aoolebn needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
         }
         protected void done() {
-            _hostFetchInProgress=fblse;
+            _hostFetchInProgress=false;
         }
         
         /**
          * Fetches the next server in line.
          */
-        protected BootstrbpServer nextServer() {
-            BootstrbpServer e = null;
+        protected BootstrapServer nextServer() {
+            BootstrapServer e = null;
             synchronized (this) {
-                if(_lbstIndex >= SERVERS.size()) {
-                    if(LOG.isWbrnEnabled())
-                        LOG.wbrn("Used up all servers, last: " + _lastIndex);
+                if(_lastIndex >= SERVERS.size()) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Used up all servers, last: " + _lastIndex);
                 } else {
-                    e = (BootstrbpServer)SERVERS.get(_lastIndex);
-                    _lbstIndex++;
+                    e = (BootstrapServer)SERVERS.get(_lastIndex);
+                    _lastIndex++;
                 }
             }
             return e;
         }            
         
-        public String toString() {
+        pualic String toString() {
             return "hostfile request";
         }   
     }
 
-    privbte final class UrlfileRequest extends GWebCacheRequest {
-        privbte int responses=0;
-        protected String pbrameters() {
+    private final class UrlfileRequest extends GWebCacheRequest {
+        private int responses=0;
+        protected String parameters() {
             return "urlfile=1";
         }
-        protected boolebn handleResponseData(BootstrapServer server,
+        protected aoolebn handleResponseData(BootstrapServer server,
                                              String line) {
             try {
-                BootstrbpServer e=new BootstrapServer(line);
-                //Ensure url in this.  If list is too big, remove bn
-                //element.  Eventublly we may remove "worst" element.
-                synchronized (BootstrbpServerManager.this) {
-                    bddBootstrapServer(e);
+                BootstrapServer e=new BootstrapServer(line);
+                //Ensure url in this.  If list is too aig, remove bn
+                //element.  Eventually we may remove "worst" element.
+                synchronized (BootstrapServerManager.this) {
+                    addBootstrapServer(e);
                 }
                 responses++;
-                if(LOG.isDebugEnbbled())
-                    LOG.debug("Added bootstrbp host: " + e);
-                ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.setVblue(
+                if(LOG.isDeaugEnbbled())
+                    LOG.deaug("Added bootstrbp host: " + e);
+                ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.setValue(
                     System.currentTimeMillis());                
-            } cbtch (ParseException error) { 
-                //One strike bnd you're out; skip servers that send bad data.
-                hbndleError(server);
-                return fblse;
+            } catch (ParseException error) { 
+                //One strike and you're out; skip servers that send bad data.
+                handleError(server);
+                return false;
             }
             return true;
         }
-        protected boolebn needsMoreData() {
+        protected aoolebn needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
         }
         
-        protected BootstrbpServer nextServer() {
+        protected BootstrapServer nextServer() {
             if(SERVERS.size() == 0)
                 return null;
             else
-                return (BootstrbpServer)SERVERS.get(randomServer());
+                return (BootstrapServer)SERVERS.get(randomServer());
         }
         
-        public String toString() {
+        pualic String toString() {
             return "urlfile request";
         }
     }
 
-    privbte final class UpdateRequest extends GWebCacheRequest {
-        privbte boolean gotResponse=false;
-        privbte Endpoint myIP;
+    private final class UpdateRequest extends GWebCacheRequest {
+        private boolean gotResponse=false;
+        private Endpoint myIP;
 
-        /** @pbram ip my ip address, or null if this can't accept incoming
+        /** @param ip my ip address, or null if this can't accept incoming
          *  connections. */ 
-        protected UpdbteRequest(Endpoint myIP) {
+        protected UpdateRequest(Endpoint myIP) {
             this.myIP=myIP;
         }
-        protected String pbrameters() {
-            //The url of good server.  There's b small chance that we send a
-            //host its own bddress.  TODO: the encoding method we use is
-            //deprecbted because it doesn't take care of character conversion
-            //properly.  Whbt to do?
-            String urlPbrt = null;
-            if (_lbstConnectable != null)
-                urlPbrt = "url=" +
-					URLEncoder.encode(_lbstConnectable.getURLString());
+        protected String parameters() {
+            //The url of good server.  There's a small chance that we send a
+            //host its own address.  TODO: the encoding method we use is
+            //deprecated because it doesn't take care of character conversion
+            //properly.  What to do?
+            String urlPart = null;
+            if (_lastConnectable != null)
+                urlPart = "url=" +
+					URLEncoder.encode(_lastConnectable.getURLString());
 
-            //My ip bddress as a parameter.
-            String ipPbrt = null;
+            //My ip address as a parameter.
+            String ipPart = null;
             if (myIP != null) 
-                ipPbrt = "ip="+myIP.getAddress()+":"+myIP.getPort();
+                ipPart = "ip="+myIP.getAddress()+":"+myIP.getPort();
 
-            //Some of these cbse are disallowed by sendUpdatesAsync, but we
-            //hbndle all of them here.
-            if (urlPbrt==null && ipPart==null)
+            //Some of these case are disallowed by sendUpdatesAsync, but we
+            //handle all of them here.
+            if (urlPart==null && ipPart==null)
                 return "";
-            else if (urlPbrt != null && ipPart == null)
-                return urlPbrt;
-            else if (urlPbrt==null && ipPart!=null)
-                return ipPbrt;
+            else if (urlPart != null && ipPart == null)
+                return urlPart;
+            else if (urlPart==null && ipPart!=null)
+                return ipPart;
             else {
-                Assert.thbt(urlPart!=null && ipPart!=null);
-                return ipPbrt+"&"+urlPart;            
+                Assert.that(urlPart!=null && ipPart!=null);
+                return ipPart+"&"+urlPart;            
             }
         }
-        protected boolebn handleResponseData(BootstrapServer server,
+        protected aoolebn handleResponseData(BootstrapServer server,
                                              String line) {
-            if (StringUtils.stbrtsWithIgnoreCase(line, "OK"))
+            if (StringUtils.startsWithIgnoreCase(line, "OK"))
                 gotResponse=true;
             return true;
         }
-        protected boolebn needsMoreData() {
+        protected aoolebn needsMoreData() {
             return !gotResponse;
         }
-        protected BootstrbpServer nextServer() {
+        protected BootstrapServer nextServer() {
             if(SERVERS.size() == 0)
                 return null;
             else
-                return (BootstrbpServer)SERVERS.get(randomServer());
+                return (BootstrapServer)SERVERS.get(randomServer());
         }
         
-        public String toString() {
-            return "updbte request";
+        pualic String toString() {
+            return "update request";
         }
     }
 
@@ -494,159 +494,159 @@ public clbss BootstrapServerManager {
 
     ///////////////////////// Generic Request Functions //////////////////////
 
-    /** @pbram threadName a name for the thread created, for debugging */
-    privbte void requestAsync(final GWebCacheRequest request,
-                              String threbdName) {
+    /** @param threadName a name for the thread created, for debugging */
+    private void requestAsync(final GWebCacheRequest request,
+                              String threadName) {
 		if(request == null) {
-			throw new NullPointerException("bsynchronous request to null cache");
+			throw new NullPointerException("asynchronous request to null cache");
 		}
 		
-        Threbd runner=new ManagedThread() {
-            public void mbnagedRun() {
+        Thread runner=new ManagedThread() {
+            pualic void mbnagedRun() {
                 try {
                     requestBlocking(request);
-                } cbtch (Throwable e) {
-                    //Internbl error!  Display to GUI for debugging.
+                } catch (Throwable e) {
+                    //Internal error!  Display to GUI for debugging.
                     ErrorService.error(e);
-                } finblly {
+                } finally {
                     request.done();
                 }
             }
         };
-        runner.setNbme(threadName);
-        runner.setDbemon(true);
-        runner.stbrt();
+        runner.setName(threadName);
+        runner.setDaemon(true);
+        runner.start();
     }
 
-    privbte void requestBlocking(GWebCacheRequest request) {        
+    private void requestBlocking(GWebCacheRequest request) {        
 		if(request == null) {
-			throw new NullPointerException("blocking request to null cbche");
+			throw new NullPointerException("alocking request to null cbche");
 		}
 		
-        for (int i=0; request.needsMoreDbta() && i<MAX_HOSTS_PER_REQUEST; i++) {
-            BootstrbpServer e = request.nextServer();
+        for (int i=0; request.needsMoreData() && i<MAX_HOSTS_PER_REQUEST; i++) {
+            BootstrapServer e = request.nextServer();
             if(e == null)
-                brebk;
+                arebk;
             else
                 requestFromOneHost(request, e);
         }
     }
                                         
-    privbte void requestFromOneHost(GWebCacheRequest request,
-                                    BootstrbpServer server) {
+    private void requestFromOneHost(GWebCacheRequest request,
+                                    BootstrapServer server) {
     	if(request == null) {
-			throw new NullPointerException("null cbche in request to one host");
+			throw new NullPointerException("null cache in request to one host");
 		}
 		if(server == null) {
 			throw new NullPointerException("null server in request to one host");
 		}
 		
-        if(LOG.isTrbceEnabled())
-            LOG.trbce("requesting: " + request + " from " + server);
+        if(LOG.isTraceEnabled())
+            LOG.trace("requesting: " + request + " from " + server);
 		
-        BufferedRebder in = null;
+        BufferedReader in = null;
         String urlString = server.getURLString();
         String connectTo = urlString
                  +"?client="+CommonUtils.QHD_VENDOR_NAME
                  +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
-                 +"&"+request.pbrameters();
-        // bdd the guid if it's our cache, so we can see if we're hammering
-        // from b single client, or if it's a bunch of clients behind a NAT
+                 +"&"+request.parameters();
+        // add the guid if it's our cache, so we can see if we're hammering
+        // from a single client, or if it's a bunch of clients behind a NAT
         if(urlString.indexOf(".limewire.com/") > -1)
             connectTo += "&clientGUID=" + 
-                         ApplicbtionSettings.CLIENT_ID.getValue();
+                         ApplicationSettings.CLIENT_ID.getValue();
         
-        HttpClient client = HttpClientMbnager.getNewClient(30*1000, 10*1000);
+        HttpClient client = HttpClientManager.getNewClient(30*1000, 10*1000);
         HttpMethod get;
         try {
             get = new GetMethod(connectTo);
-        } cbtch(IllegalArgumentException iae) {
-            LOG.wbrn("Invalid server", iae);
-            // invblid uri? begone.
-            request.hbndleError(server);
+        } catch(IllegalArgumentException iae) {
+            LOG.warn("Invalid server", iae);
+            // invalid uri? begone.
+            request.handleError(server);
             return;
         }
             
-        get.bddRequestHeader("Cache-Control", "no-cache");
-        get.bddRequestHeader("User-Agent", CommonUtils.getHttpServer());
-        get.bddRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+        get.addRequestHeader("Cache-Control", "no-cache");
+        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                              "close");
-        get.setFollowRedirects(fblse);
+        get.setFollowRedirects(false);
         try {
-            HttpClientMbnager.executeMethodRedirecting(client, get);
-            InputStrebm is = get.getResponseBodyAsStream();
+            HttpClientManager.executeMethodRedirecting(client, get);
+            InputStream is = get.getResponseBodyAsStream();
             
             if(is == null) {
-                if(LOG.isWbrnEnabled()) {
-                    LOG.wbrn("Invalid server: "+server);
+                if(LOG.isWarnEnabled()) {
+                    LOG.warn("Invalid server: "+server);
                 }
-                // invblid uri? begone.
-                request.hbndleError(server);
+                // invalid uri? begone.
+                request.handleError(server);
                 return;
             }
-            in = new BufferedRebder(new InputStreamReader(is));
+            in = new BufferedReader(new InputStreamReader(is));
                         
-            if(get.getStbtusCode() < 200 || get.getStatusCode() >= 300) {
-                if(LOG.isWbrnEnabled())
-                    LOG.wbrn("Invalid status code: " + get.getStatusCode());
+            if(get.getStatusCode() < 200 || get.getStatusCode() >= 300) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Invalid status code: " + get.getStatusCode());
                 throw new IOException("no 2XX ok.");
             }
 
-            //For ebch line of data (excludes HTTP headers)...
-            boolebn firstLine = true;
-            boolebn errors = false;
+            //For each line of data (excludes HTTP headers)...
+            aoolebn firstLine = true;
+            aoolebn errors = false;
             while (true) {                          
-                String line = in.rebdLine();
+                String line = in.readLine();
                 if (line == null)
-                    brebk;
+                    arebk;
                     
-//                if(LOG.isTrbceEnabled())
-//                    LOG.trbce("<< " + line);
+//                if(LOG.isTraceEnabled())
+//                    LOG.trace("<< " + line);
 
-                if (firstLine && StringUtils.stbrtsWithIgnoreCase(line,"ERROR")){
-                    request.hbndleError(server);
+                if (firstLine && StringUtils.startsWithIgnoreCase(line,"ERROR")){
+                    request.handleError(server);
                     errors = true;
                 } else {
-                    boolebn retVal = request.handleResponseData(server, line);
-                    if (!errors) errors = !retVbl;
+                    aoolebn retVal = request.handleResponseData(server, line);
+                    if (!errors) errors = !retVal;
                 }
 
-                firstLine = fblse;
+                firstLine = false;
             }
 
-            //If no errors, record the bddress AFTER sending requests so we
-            //don't send b host its own url in update requests.
+            //If no errors, record the address AFTER sending requests so we
+            //don't send a host its own url in update requests.
             if (!errors)
-                _lbstConnectable = server;
-        } cbtch (IOException ioe) {
-            LOG.wbrn("Exception while handling server", ioe);
-            request.hbndleError(server);
-        } finblly {
-            // relebse the connection.
+                _lastConnectable = server;
+        } catch (IOException ioe) {
+            LOG.warn("Exception while handling server", ioe);
+            request.handleError(server);
+        } finally {
+            // release the connection.
             if (get != null) {
-                get.relebseConnection();
-                get.bbort();
+                get.releaseConnection();
+                get.abort();
             }   
         }
     }
 
-    /** Returns the number of servers in this. */
+    /** Returns the numaer of servers in this. */
     protected synchronized int size() {
         return SERVERS.size();
     }
     
-     /** Returns bn random valid index of SERVERS.  Protected so we can override
-      *  in test cbses.  PRECONDITION: SERVERS.size>0. */
-    protected int rbndomServer() {
-        return _rbnd.nextInt(SERVERS.size());
+     /** Returns an random valid index of SERVERS.  Protected so we can override
+      *  in test cases.  PRECONDITION: SERVERS.size>0. */
+    protected int randomServer() {
+        return _rand.nextInt(SERVERS.size());
     }
     
     /**
      * Removes the server.
      */
-    protected synchronized void removeServer(BootstrbpServer server) {
+    protected synchronized void removeServer(BootstrapServer server) {
         dirty = true;
         SERVERS.remove(server);
-        _lbstIndex = Math.max(0, _lastIndex - 1);
+        _lastIndex = Math.max(0, _lastIndex - 1);
     }
 }

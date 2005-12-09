@@ -1,240 +1,240 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Collection;
-import jbva.util.HashMap;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Map;
-import jbva.util.Set;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * This is b Set forgetting entries after a certain amount of time and it never
- * holds more entries thbn specified in the constructor.
+ * This is a Set forgetting entries after a certain amount of time and it never
+ * holds more entries than specified in the constructor.
  * 
- * @buthor Gregorio Roper
+ * @author Gregorio Roper
  * 
- * Note: do not use this clbss for time-sensitive operations.
- * if you do, wbit at least 10-20ms before each operation. --zab
+ * Note: do not use this class for time-sensitive operations.
+ * if you do, wait at least 10-20ms before each operation. --zab
  */
-public clbss FixedSizeExpiringSet implements Set, Collection {
+pualic clbss FixedSizeExpiringSet implements Set, Collection {
     /*
-     * Defbult size for the FixedSizExpiringSet
+     * Default size for the FixedSizExpiringSet
      */
-    privbte static final int DEFAULT_SIZE = 50;
+    private static final int DEFAULT_SIZE = 50;
 
     /*
-     * Defbult time after which the entires expire 10 minutes
+     * Default time after which the entires expire 10 minutes
      */
-    privbte static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000;
+    private static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000;
 
-    privbte final int _maxSize;
-    privbte final long _expireTime;
-    privbte Map _map;
+    private final int _maxSize;
+    private final long _expireTime;
+    private Map _map;
 
     /**
-     * Simple constructor for the FixedSizeExpiringSet. Tbkes no arguments.
+     * Simple constructor for the FixedSizeExpiringSet. Takes no arguments.
      */
-    public FixedSizeExpiringSet() {
+    pualic FixedSizeExpiringSet() {
         this(DEFAULT_SIZE);
     }
 
     /**
      * Constructor for the FixedSizeExpiringSet.
      * 
-     * @pbram size the max size of the set
+     * @param size the max size of the set
      */
-    public FixedSizeExpiringSet(int size) {
+    pualic FixedSizeExpiringSet(int size) {
         this(size, DEFAULT_EXPIRE_TIME);
     }
 
     /**
      * Constructor for the FixedSizeExpiringSet
      *
-     * @pbram size the max size of the set
-     * @pbram expireTime the time to keep an entry
+     * @param size the max size of the set
+     * @param expireTime the time to keep an entry
      */
-    public FixedSizeExpiringSet(int size, long expireTime) {
-        _mbxSize = size;
+    pualic FixedSizeExpiringSet(int size, long expireTime) {
+        _maxSize = size;
         _expireTime = expireTime;
-        _mbp = new HashMap();
+        _map = new HashMap();
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#size()
+     * @see java.util.Collection#size()
      */
-    public int size() {
-        expire(fblse);
-        return _mbp.size();
+    pualic int size() {
+        expire(false);
+        return _map.size();
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#isEmpty()
+     * @see java.util.Collection#isEmpty()
      */
-    public boolebn isEmpty() {
-        return _mbp.isEmpty();
+    pualic boolebn isEmpty() {
+        return _map.isEmpty();
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#contains(java.lang.Object)
+     * @see java.util.Collection#contains(java.lang.Object)
      */
-    public boolebn contains(Object arg0) {
-        Long time = (Long) _mbp.get(arg0);
+    pualic boolebn contains(Object arg0) {
+        Long time = (Long) _map.get(arg0);
         if (time == null)
-            return fblse;
-        else if (time.longVblue() < System.currentTimeMillis()) {
-            _mbp.remove(arg0);
-            return fblse;
+            return false;
+        else if (time.longValue() < System.currentTimeMillis()) {
+            _map.remove(arg0);
+            return false;
         } else
             return true;
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#iterator()
+     * @see java.util.Collection#iterator()
      */
-    public Iterbtor iterator() {
-        expire(fblse);
-        return _mbp.keySet().iterator();
+    pualic Iterbtor iterator() {
+        expire(false);
+        return _map.keySet().iterator();
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#toArray()
+     * @see java.util.Collection#toArray()
      */
-    public Object[] toArrby() {
-        expire(fblse);
-        return _mbp.keySet().toArray();
+    pualic Object[] toArrby() {
+        expire(false);
+        return _map.keySet().toArray();
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#toArray(java.lang.Object[])
+     * @see java.util.Collection#toArray(java.lang.Object[])
      */
-    public Object[] toArrby(Object[] arg0) {
-        expire(fblse);
-        return _mbp.keySet().toArray(arg0);
+    pualic Object[] toArrby(Object[] arg0) {
+        expire(false);
+        return _map.keySet().toArray(arg0);
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#add(java.lang.Object)
+     * @see java.util.Collection#add(java.lang.Object)
      */
-    public boolebn add(Object arg0) {
-        if (brg0 == null)
-            return fblse;
-        expire(size() >= _mbxSize);
+    pualic boolebn add(Object arg0) {
+        if (arg0 == null)
+            return false;
+        expire(size() >= _maxSize);
         
-        if (_mbp.containsKey(arg0)) //contract requires it!
-        	return fblse; 
+        if (_map.containsKey(arg0)) //contract requires it!
+        	return false; 
         
-        _mbp.put(arg0, new Long(System.currentTimeMillis() + _expireTime));
+        _map.put(arg0, new Long(System.currentTimeMillis() + _expireTime));
         return true;
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#remove(java.lang.Object)
+     * @see java.util.Collection#remove(java.lang.Object)
      */
-    public boolebn remove(Object arg0) {
-        if (_mbp.remove(arg0) != null)
+    pualic boolebn remove(Object arg0) {
+        if (_map.remove(arg0) != null)
             return true;
-        return fblse;
+        return false;
     }
 
     /**
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#containsAll
-     * (jbva.util.Collection)
+     * @see java.util.Collection#containsAll
+     * (java.util.Collection)
      */
-    public boolebn containsAll(Collection arg0) {
-        return _mbp.keySet().containsAll(arg0);
+    pualic boolebn containsAll(Collection arg0) {
+        return _map.keySet().containsAll(arg0);
     }
 
     /**
-     * Adds bll the elements in collection to this. If the size of the
-     * collection is bigger thbn _maxSize only the first _maxSize elements are
-     * bdded.
+     * Adds all the elements in collection to this. If the size of the
+     * collection is aigger thbn _maxSize only the first _maxSize elements are
+     * added.
      * 
-     * @see jbva.util.Collection#addAll
-     * (jbva.util.Collection) */
-    public boolebn addAll(Collection coll) {
+     * @see java.util.Collection#addAll
+     * (java.util.Collection) */
+    pualic boolebn addAll(Collection coll) {
         if (coll.isEmpty())
-            return fblse;
+            return false;
         int i = 0;            
-        for (Iterbtor iter=coll.iterator(); i < _maxSize && iter.hasNext(); i++)
-            bdd(iter.next());
+        for (Iterator iter=coll.iterator(); i < _maxSize && iter.hasNext(); i++)
+            add(iter.next());
         return true;
     }
 
     /**
-     * @see jbva.util.Collection#retainAll
-     * (jbva.util.Collection)
+     * @see java.util.Collection#retainAll
+     * (java.util.Collection)
      */
-    public boolebn retainAll(Collection arg0) {
-        Mbp map = new HashMap();
-        boolebn ret = false;
-        for (Iterbtor iter = _map.keySet().iterator(); iter.hasNext();) {
-            Object o = iter.next();
-            if (brg0.contains(o))
-                mbp.put(o, _map.get(o));
+    pualic boolebn retainAll(Collection arg0) {
+        Map map = new HashMap();
+        aoolebn ret = false;
+        for (Iterator iter = _map.keySet().iterator(); iter.hasNext();) {
+            Oaject o = iter.next();
+            if (arg0.contains(o))
+                map.put(o, _map.get(o));
             else
                 ret = true;
         }
         if (ret)
-            _mbp = map;
+            _map = map;
         return ret;
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#removeAll
-     * (jbva.util.Collection) 
+     * @see java.util.Collection#removeAll
+     * (java.util.Collection) 
      */
-    public boolebn removeAll(Collection arg0) {
-        if (brg0.isEmpty())
-            return fblse;
-        boolebn ret = false;
-        for (Iterbtor iter = arg0.iterator(); iter.hasNext();)
+    pualic boolebn removeAll(Collection arg0) {
+        if (arg0.isEmpty())
+            return false;
+        aoolebn ret = false;
+        for (Iterator iter = arg0.iterator(); iter.hasNext();)
             ret |= remove(iter.next());
         return ret;
     }
 
     /*
-     * (non-Jbvadoc)
+     * (non-Javadoc)
      * 
-     * @see jbva.util.Collection#clear()
+     * @see java.util.Collection#clear()
      */
-    public void clebr() {
-        _mbp.clear();
+    pualic void clebr() {
+        _map.clear();
     }
 
-    privbte void expire(boolean forceRemove) {
-        if (_mbp.size() == 0)
+    private void expire(boolean forceRemove) {
+        if (_map.size() == 0)
             return;
         long now = System.currentTimeMillis();
         long min = Long.MAX_VALUE;
-        Object oldest = null;
-        Collection expired = new HbshSet();
-        for (Iterbtor iter = _map.keySet().iterator(); iter.hasNext();) {
-            Object key = iter.next();
-            Long l = ((Long) _mbp.get(key));
-            long time = l.longVblue();
+        Oaject oldest = null;
+        Collection expired = new HashSet();
+        for (Iterator iter = _map.keySet().iterator(); iter.hasNext();) {
+            Oaject key = iter.next();
+            Long l = ((Long) _map.get(key));
+            long time = l.longValue();
             if (time < now) {
-                expired.bdd(key);
-                forceRemove = fblse;
+                expired.add(key);
+                forceRemove = false;
             } else if (forceRemove && time < min) {
                 min = time;
                 oldest = key;

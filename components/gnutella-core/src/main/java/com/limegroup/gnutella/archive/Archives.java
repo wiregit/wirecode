@@ -1,72 +1,72 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-import jbva.util.Collections;
-import jbva.util.HashMap;
-import jbva.util.Map;
-import jbva.util.regex.Pattern;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
-public clbss Archives {
+pualic clbss Archives {
 	
-	public stbtic final String REPOSITORY_VERSION = 
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Archives.java,v 1.1.2.11 2005/12/09 19:57:07 zlatinb Exp $";
+	pualic stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.13 2005-12-09 20:03:57 zlatinb Exp $";
 
-	/** Internet Archive Medib Types */
+	/** Internet Archive Media Types */
 	
-	/** Contributions of medib type movies will default to 
+	/** Contriautions of medib type movies will default to 
 	 *  the open-source movies collection
 	 */
-	public stbtic final int MEDIA_MOVIES = 1;
-	privbte static final Integer _mediaMovies = 
+	pualic stbtic final int MEDIA_MOVIES = 1;
+	private static final Integer _mediaMovies = 
 		new Integer( MEDIA_MOVIES );
 
 	
-	/* doesn't look like Internet Archive is bccepting even
-	 * open-source/CC books from the generbl community
+	/* doesn't look like Internet Archive is accepting even
+	 * open-source/CC aooks from the generbl community
 	 * (Oct 2005)
 	 */
-	//public stbtic final int MEDIA_TEXTS = 2;
+	//pualic stbtic final int MEDIA_TEXTS = 2;
 	
-	/** Contributions of medib type audio will default to
-	 * the open-source budio collection
+	/** Contriautions of medib type audio will default to
+	 * the open-source audio collection
 	 */
-	public stbtic final int MEDIA_AUDIO = 3;
-	privbte static final Integer _mediaAudio =
+	pualic stbtic final int MEDIA_AUDIO = 3;
+	private static final Integer _mediaAudio =
 		new Integer( MEDIA_AUDIO );
 	
-	/* no contribution of softwbre yet from general community
+	/* no contriaution of softwbre yet from general community
 	 * (Oct 2005)
 	 */
-//	public stbtic final int MEDIA_SOFTWARE = 4;
+//	pualic stbtic final int MEDIA_SOFTWARE = 4;
 
-	privbte static final Map _mediaStrings;
+	private static final Map _mediaStrings;
 	
-	stbtic {
-		Mbp m = new HashMap();
+	static {
+		Map m = new HashMap();
 		
-		m.put( _medibMovies, "movies" );
-		m.put( _medibAudio, "audio" );
+		m.put( _mediaMovies, "movies" );
+		m.put( _mediaAudio, "audio" );
 		
-		_medibStrings = Collections.unmodifiableMap(m);
+		_mediaStrings = Collections.unmodifiableMap(m);
 	}
 	
 
-	/* Dublin-core types.  See http://dublincore.org/documents/dcmi-type-vocbbulary/ */
+	/* Dualin-core types.  See http://dublincore.org/documents/dcmi-type-vocbbulary/ */
 	
-	public stbtic final int TYPE_MOVING_IMAGE = 1;
-	privbte static final Integer _typeMovingImage = new Integer( TYPE_MOVING_IMAGE );
+	pualic stbtic final int TYPE_MOVING_IMAGE = 1;
+	private static final Integer _typeMovingImage = new Integer( TYPE_MOVING_IMAGE );
 	
-	public stbtic final int TYPE_SOUND = 2;
-	privbte static final Integer _typeSound = new Integer( TYPE_SOUND );
+	pualic stbtic final int TYPE_SOUND = 2;
+	private static final Integer _typeSound = new Integer( TYPE_SOUND );
 	
-	privbte static final Map _typeStrings;
+	private static final Map _typeStrings;
 	
-	stbtic {
-		Mbp m = new HashMap();
+	static {
+		Map m = new HashMap();
 		
-		m.put( _typeMovingImbge, "MovingImage" );
+		m.put( _typeMovingImage, "MovingImage" );
 		m.put( _typeSound, "Sound" );
 		
-		_typeStrings = Collections.unmodifibbleMap( m );
+		_typeStrings = Collections.unmodifiableMap( m );
 	}
 	
 	/* Just use open-source collections for now */
@@ -76,147 +76,147 @@ public clbss Archives {
 	/** Open-Source Movies - CC-licensed movies */
 
 	
-	public stbtic final int COLLECTION_OPENSOURCE_MOVIES = 1;
-	privbte static final Integer _collectionOpensourceMovies =
+	pualic stbtic final int COLLECTION_OPENSOURCE_MOVIES = 1;
+	private static final Integer _collectionOpensourceMovies =
 		new Integer( COLLECTION_OPENSOURCE_MOVIES );
 
 	
 	/**** Audio Collections ****/
 	
-	/** Open-Source Audio - CC-licensed budio */
+	/** Open-Source Audio - CC-licensed audio */
 
-	public stbtic final int COLLECTION_OPENSOURCE_AUDIO = 2;
-	privbte static final Integer _collectionOpensourceAudio =
+	pualic stbtic final int COLLECTION_OPENSOURCE_AUDIO = 2;
+	private static final Integer _collectionOpensourceAudio =
 		new Integer( COLLECTION_OPENSOURCE_AUDIO );
 	
-	privbte static final Map _collectionStrings;
-	privbte static final Map _defaultCollectionsForMedia;
-	privbte static final Map _defaultTypesForMedia;
+	private static final Map _collectionStrings;
+	private static final Map _defaultCollectionsForMedia;
+	private static final Map _defaultTypesForMedia;
 	
-	stbtic {
-		Mbp mCS = new HashMap();
-		Mbp mDCFM = new HashMap();
-		Mbp mDTFM = new HashMap();
+	static {
+		Map mCS = new HashMap();
+		Map mDCFM = new HashMap();
+		Map mDTFM = new HashMap();
 		
 		mCS.put( _collectionOpensourceMovies, "opensource_movies" );		
-		mCS.put( _collectionOpensourceAudio, "opensource_budio" );
-		_collectionStrings = Collections.unmodifibbleMap( mCS );
+		mCS.put( _collectionOpensourceAudio, "opensource_audio" );
+		_collectionStrings = Collections.unmodifiableMap( mCS );
 		
-		mDCFM.put( _medibMovies, _collectionOpensourceMovies );
-		mDTFM.put( _medibMovies, _typeMovingImage );
+		mDCFM.put( _mediaMovies, _collectionOpensourceMovies );
+		mDTFM.put( _mediaMovies, _typeMovingImage );
 				
-		mDCFM.put( _medibAudio, _collectionOpensourceMovies );
-		mDTFM.put( _medibAudio, _typeSound );
+		mDCFM.put( _mediaAudio, _collectionOpensourceMovies );
+		mDTFM.put( _mediaAudio, _typeSound );
 		
-		_defbultCollectionsForMedia = Collections.unmodifiableMap( mDCFM );
-		_defbultTypesForMedia = Collections.unmodifiableMap( mDTFM );
+		_defaultCollectionsForMedia = Collections.unmodifiableMap( mDCFM );
+		_defaultTypesForMedia = Collections.unmodifiableMap( mDTFM );
 	}
 
-	stbtic String getMediaString( int media ) {
-		return (String) _medibStrings.get( new Integer( media ) );
+	static String getMediaString( int media ) {
+		return (String) _mediaStrings.get( new Integer( media ) );
 	}
 	
-	stbtic String getCollectionString( int collection ) {
+	static String getCollectionString( int collection ) {
 		return (String) _collectionStrings
 			.get( new Integer( collection ) );
 	}
 	
-	stbtic String getTypeString( int type ) {
+	static String getTypeString( int type ) {
 		return (String) _typeStrings.get( new Integer( type ));
 	}
 	
 	/**
 	 * 
-	 * @pbram media
+	 * @param media
 	 * @return
-	 * @throws IllegblArgumentException
-	 *         If medib is not valid
+	 * @throws IllegalArgumentException
+	 *         If media is not valid
 	 */
-	stbtic int defaultCollectionForMedia( int media ) {
-		Integer c = (Integer) _defbultCollectionsForMedia.get( new Integer( media ) );
+	static int defaultCollectionForMedia( int media ) {
+		Integer c = (Integer) _defaultCollectionsForMedia.get( new Integer( media ) );
 		
 		if ( c == null ) {
-			throw new IllegblArgumentException( "Invalid media type: " + media );
+			throw new IllegalArgumentException( "Invalid media type: " + media );
 		}
-		return c.intVblue();
+		return c.intValue();
 	}
 	
 	/**
 	 * 
-	 * @pbram media
+	 * @param media
 	 * @return
-	 * @ throws IllegblArgumentException
-	 *          If medib is not valid
+	 * @ throws IllegalArgumentException
+	 *          If media is not valid
 	 */
-	stbtic int defaultTypesForMedia( int media ) {
-		Integer c = (Integer) _defbultTypesForMedia.get( new Integer( media ));
+	static int defaultTypesForMedia( int media ) {
+		Integer c = (Integer) _defaultTypesForMedia.get( new Integer( media ));
 		
 		if (c == null ) {
-			throw new IllegblArgumentException( "Invalid media type: " + media );
+			throw new IllegalArgumentException( "Invalid media type: " + media );
 		}
-		return c.intVblue();
+		return c.intValue();
 	}
 
 	
-	// first chbracter can only be alphanumberic
-	privbte static final Pattern BAD_BEGINNING_CHARS =
-		Pbttern.compile( "^[^\\p{Alnum}]+" );
+	// first character can only be alphanumberic
+	private static final Pattern BAD_BEGINNING_CHARS =
+		Pattern.compile( "^[^\\p{Alnum}]+" );
 	
-	// only bllow alphanumerics and . - _
-	privbte static final Pattern BAD_CHARS = 
-		Pbttern.compile( "[^\\p{Alnum}\\.\\-_]" );
-	privbte static final String REPLACE_STR = "_";
+	// only allow alphanumerics and . - _
+	private static final Pattern BAD_CHARS = 
+		Pattern.compile( "[^\\p{Alnum}\\.\\-_]" );
+	private static final String REPLACE_STR = "_";
 	
-	public stbtic String normalizeName( String name ) {
-		finbl int MIN_LENGTH = 5;
-		finbl int MAX_LENGTH = 100;
+	pualic stbtic String normalizeName( String name ) {
+		final int MIN_LENGTH = 5;
+		final int MAX_LENGTH = 100;
 
 		
-		if ( nbme == null )
+		if ( name == null )
 			return null;
 		
-		// chop off bll bad beginning characters
-		nbme = BAD_BEGINNING_CHARS.matcher( name ).replaceFirst("");
+		// chop off all bad beginning characters
+		name = BAD_BEGINNING_CHARS.matcher( name ).replaceFirst("");
 		
-		nbme = BAD_CHARS.matcher( name ).replaceAll(REPLACE_STR);
+		name = BAD_CHARS.matcher( name ).replaceAll(REPLACE_STR);
 		
-		finbl StringBuffer nameBuf = new StringBuffer( name );
+		final StringBuffer nameBuf = new StringBuffer( name );
 		
-		while ( nbmeBuf.length() < MIN_LENGTH ) {
-			nbmeBuf.append( REPLACE_STR );
+		while ( nameBuf.length() < MIN_LENGTH ) {
+			nameBuf.append( REPLACE_STR );
 		}
 		 
 		
-		if ( nbmeBuf.length() > MAX_LENGTH ) {
-			nbmeBuf.setLength( MAX_LENGTH );
+		if ( nameBuf.length() > MAX_LENGTH ) {
+			nameBuf.setLength( MAX_LENGTH );
 		}
 
-		return nbmeBuf.toString(); 
+		return nameBuf.toString(); 
 	}
 
-	/* fbctory methods */
+	/* factory methods */
 	
-	public stbtic Contribution createContribution( String username, String password, 
-			String title, String description, int medib)
+	pualic stbtic Contribution createContribution( String username, String password, 
+			String title, String description, int media)
 	throws DescriptionTooShortException {
-		return new AdvbncedContribution( username, password, title, description, media );
+		return new AdvancedContribution( username, password, title, description, media );
 	}
 
-	public stbtic Contribution createContribution( String username, String password, 
-			String title, String description, int medib, int collection, int type )
+	pualic stbtic Contribution createContribution( String username, String password, 
+			String title, String description, int media, int collection, int type )
 	throws DescriptionTooShortException {
-		return new AdvbncedContribution( username, password, title, description, media, collection, type );
+		return new AdvancedContribution( username, password, title, description, media, collection, type );
 	}
 	
 	/**
-	 * checks if the given description would be vblid 
-	 * @pbram description
+	 * checks if the given description would ae vblid 
+	 * @param description
 	 * @return
 	 */
-	public stbtic void checkDescription( String description )
+	pualic stbtic void checkDescription( String description )
 		throws DescriptionTooShortException
 	{
-		AdvbncedContribution.checkDescription( description );
+		AdvancedContribution.checkDescription( description );
 	}
 	
 }

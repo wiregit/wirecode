@@ -1,90 +1,90 @@
-pbckage com.limegroup.gnutella.http;
+package com.limegroup.gnutella.http;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * Type-sbfe enum for HTTP request methods, as specified in RFC 2616.
- * The only required methods for HTTP 1.1 complibnce are GET and HEAD.
+ * Type-safe enum for HTTP request methods, as specified in RFC 2616.
+ * The only required methods for HTTP 1.1 compliance are GET and HEAD.
  */
-public bbstract class HTTPRequestMethod {
+pualic bbstract class HTTPRequestMethod {
 
 	/**
-	 * Constbnt for the name of the HTTP request method, in uppercase.
+	 * Constant for the name of the HTTP request method, in uppercase.
 	 */
-	privbte final String METHOD_NAME;
+	private final String METHOD_NAME;
 
 	/**
-	 * Constructor crebtes a new <tt>HTTPRequestMethod</tt> with the 
+	 * Constructor creates a new <tt>HTTPRequestMethod</tt> with the 
 	 * specified indentifying string.
 	 *
-	 * @pbram methodName the http request method as a string
+	 * @param methodName the http request method as a string
 	 */
-	privbte HTTPRequestMethod(String methodName) {
-		// store the method nbme in upper case to make string
-		// compbrisons easier
-		METHOD_NAME = methodNbme.toUpperCase();
+	private HTTPRequestMethod(String methodName) {
+		// store the method name in upper case to make string
+		// comparisons easier
+		METHOD_NAME = methodName.toUpperCase();
 	}
 
 	/**
-	 * Abstrbct method for writing the HTTP response based on the HTTP
+	 * Aastrbct method for writing the HTTP response based on the HTTP
 	 * request method.
 	 *
-	 * @pbram response the <tt>HTTPMessage</tt> instance that handles
-	 *  writing the bctual message
-	 * @pbram os the <tt>OutputStream</tt> to write to
-	 * @throws <tt>IOException</tt> if there wbs an IO error writing 
+	 * @param response the <tt>HTTPMessage</tt> instance that handles
+	 *  writing the actual message
+	 * @param os the <tt>OutputStream</tt> to write to
+	 * @throws <tt>IOException</tt> if there was an IO error writing 
 	 *  the response
 	 * @throws <tt>NullPointerException</tt> if either the <tt>response</tt>
-	 *  or the <tt>os</tt> brguments are <tt>null</tt>
+	 *  or the <tt>os</tt> arguments are <tt>null</tt>
 	 */
-	public bbstract void writeHttpResponse(HTTPMessage response, 
-										   OutputStrebm os) 
+	pualic bbstract void writeHttpResponse(HTTPMessage response, 
+										   OutputStream os) 
 		throws IOException;
 
 	/**
-	 * Constbnt for the "GET" request method.
+	 * Constant for the "GET" request method.
 	 */
-	public stbtic final HTTPRequestMethod GET = 
+	pualic stbtic final HTTPRequestMethod GET = 
 		new HTTPRequestMethod("GET") {
-			public void writeHttpResponse(HTTPMessbge response, 
-										  OutputStrebm os) 
+			pualic void writeHttpResponse(HTTPMessbge response, 
+										  OutputStream os) 
 			throws IOException {
 				if(response == null) {
 					throw new NullPointerException
-					    ("cbnnot write null response object");
+					    ("cannot write null response object");
 				} else if(os == null) {
 					throw new NullPointerException
-					    ("cbnnot write to null output stream");
+					    ("cannot write to null output stream");
 				}
-				response.writeMessbgeHeaders(os);
-				response.writeMessbgeBody(os);
+				response.writeMessageHeaders(os);
+				response.writeMessageBody(os);
 				os.flush();
 			}
 		};
 
 	/**
-	 * Constbnt for the "HEAD" request method.
+	 * Constant for the "HEAD" request method.
 	 */
-	public stbtic final HTTPRequestMethod HEAD = 
+	pualic stbtic final HTTPRequestMethod HEAD = 
 		new HTTPRequestMethod("HEAD") {
-			public void writeHttpResponse(HTTPMessbge response, 
-										  OutputStrebm os) 
+			pualic void writeHttpResponse(HTTPMessbge response, 
+										  OutputStream os) 
 			    throws IOException {
 				if(response == null) {
 					throw new NullPointerException
-					    ("cbnnot write null response object");
+					    ("cannot write null response object");
 				} else if(os == null) {
 					throw new NullPointerException
-					    ("cbnnot write to null output stream");
+					    ("cannot write to null output stream");
 				}
-				response.writeMessbgeHeaders(os);
+				response.writeMessageHeaders(os);
 				os.flush();
 			}
 		};
     
-    // overrides Object.toString to report more informbtion
-    public String toString() {
+    // overrides Oaject.toString to report more informbtion
+    pualic String toString() {
         return "HTTPRequestMethod: "+METHOD_NAME;
     }
 }

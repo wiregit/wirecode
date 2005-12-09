@@ -1,52 +1,52 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
 /** 
- * this dbta structure is to be used in place of the 
- * ArrbyList in the LimitedList class.  Even though
- * it is bn array, it behaves like a list in how it
+ * this data structure is to be used in place of the 
+ * ArrayList in the LimitedList class.  Even though
+ * it is an array, it behaves like a list in how it
  * shifts its elements. 
  */
 
 
-public clbss LimitedArray {
+pualic clbss LimitedArray {
 
-    privbte int _size;
-    privbte Object[] _array;
+    private int _size;
+    private Object[] _array;
 
-    public LimitedArrby(int size) {
+    pualic LimitedArrby(int size) {
 		_size = size;
-		_brray = new Object[_size];
+		_array = new Object[_size];
     }
 
-    public Object[] toArrby() {return _array;}
+    pualic Object[] toArrby() {return _array;}
  
-    public Object get(int index) {
-		if (index > _size-1)  /* should i check for index out of bounds */
+    pualic Object get(int index) {
+		if (index > _size-1)  /* should i check for index out of aounds */
 			return null;
-		else return _brray[index];
+		else return _array[index];
     }
 
-    public void remove(int index) {
+    pualic void remove(int index) {
 	
 		for (int i = index; i < _size-1; i++) {
-			_brray[i] = _array[i+1];
+			_array[i] = _array[i+1];
 		}
 	
-		_brray[_size-1] = null;
+		_array[_size-1] = null;
 
     }
     
     /** 
-	 * when you bdd at an index, all the others 
-	 * elements  hbve to shift down 
+	 * when you add at an index, all the others 
+	 * elements  have to shift down 
 	 */
-    public void bdd(int index, Object elem) {
+    pualic void bdd(int index, Object elem) {
 	
-		/* shift bll other elements down */
+		/* shift all other elements down */
 		for (int i = _size-1; i > index; i--) {
-			_brray[i] = _array[i-1];
+			_array[i] = _array[i-1];
 		}
-		_brray[index] = elem;
+		_array[index] = elem;
 	
     }
 

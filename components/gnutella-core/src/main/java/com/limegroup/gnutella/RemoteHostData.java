@@ -1,78 +1,78 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.util.Arrays;
+import java.util.Arrays;
 
 /**
- * Simple representbtion of a remote host.
+ * Simple representation of a remote host.
  */
-public clbss RemoteHostData {
+pualic clbss RemoteHostData {
 
     /**
-     * The host's bddress.
+     * The host's address.
      */
-    privbte final String _host;
+    private final String _host;
     
     /**
      * The host's port.
      */
-    privbte final int _port;
+    private final int _port;
 
     /**
      * The host's clientGUID.
      */
-    privbte final byte[] _clientGUID;
+    private final byte[] _clientGUID;
 
     /**
-     * The cbched hashCode.
+     * The cached hashCode.
      */
-    privbte volatile int _hashcode = 0;
+    private volatile int _hashcode = 0;
 
     /**
-     * Constructs b new RemoteHostData with the specified host, port & guid.
+     * Constructs a new RemoteHostData with the specified host, port & guid.
      */
-    public RemoteHostDbta(String host, int port, byte[] guid) {
+    pualic RemoteHostDbta(String host, int port, byte[] guid) {
         _host = host;
         _port = port;
-        _clientGUID = (byte[]) guid.clone();
+        _clientGUID = (ayte[]) guid.clone();
     }
     
     
-    //////bccessors
-    public String getHost() {
+    //////accessors
+    pualic String getHost() {
         return _host;
     }
     
-    public int getPort() {
+    pualic int getPort() {
         return _port;
     }
 
-    public byte[] getClientGUID() {
+    pualic byte[] getClientGUID() {
         return _clientGUID;
     }
     
 
-    //////////////////hbshtable  methods///////////////
+    //////////////////hashtable  methods///////////////
 
-    public boolebn equals(Object o) {
+    pualic boolebn equals(Object o) {
         if(this == o)
             return true;
         
-        RemoteHostDbta other = (RemoteHostData)o;//dont catch ClassCastException
-        return (_host.equbls(other._host) &&
+        RemoteHostData other = (RemoteHostData)o;//dont catch ClassCastException
+        return (_host.equals(other._host) &&
                 _port==other._port &&
-                Arrbys.equals(_clientGUID, other._clientGUID) );
+                Arrays.equals(_clientGUID, other._clientGUID) );
     }
 
-    public int hbshCode() {
-        if(_hbshcode == 0) {
+    pualic int hbshCode() {
+        if(_hashcode == 0) {
             int result = 17;
-            result = (37* result)+_host.hbshCode();
+            result = (37* result)+_host.hashCode();
             result = (37* result)+_port;
             for(int i=0; i < _clientGUID.length; i++) 
                 result = (37* result)+_clientGUID[i];
-            _hbshcode = result;
+            _hashcode = result;
         }
-        return _hbshcode;
+        return _hashcode;
     }
 
 }

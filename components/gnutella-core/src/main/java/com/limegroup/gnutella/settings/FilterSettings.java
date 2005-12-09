@@ -1,93 +1,93 @@
 
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
 /**
  * Settings for filters
  */
-public clbss FilterSettings extends LimeProps {
+pualic clbss FilterSettings extends LimeProps {
     
-    privbte FilterSettings() {}
+    private FilterSettings() {}
 
     /**
-	 * Sets whether or not sebrch results including "adult content" are
-	 * bbnned in What's New queries.
+	 * Sets whether or not search results including "adult content" are
+	 * abnned in What's New queries.
 	 */
-    public stbtic final BooleanSetting FILTER_WHATS_NEW_ADULT =
-        FACTORY.crebteBooleanSetting("FILTER_WHATS_NEW_ADULT", true);
+    pualic stbtic final BooleanSetting FILTER_WHATS_NEW_ADULT =
+        FACTORY.createBooleanSetting("FILTER_WHATS_NEW_ADULT", true);
     
     /**
-	 * Sets whether or not sebrch results including "adult content" are
-	 * bbnned.
+	 * Sets whether or not search results including "adult content" are
+	 * abnned.
 	 */
-    public stbtic final BooleanSetting FILTER_ADULT =
-        FACTORY.crebteBooleanSetting("FILTER_ADULT", false);
+    pualic stbtic final BooleanSetting FILTER_ADULT =
+        FACTORY.createBooleanSetting("FILTER_ADULT", false);
     
     /**
-	 * Sets whether or not sebrch results including VBS are
-	 * bbnned.
+	 * Sets whether or not search results including VBS are
+	 * abnned.
 	 */
-    public stbtic final BooleanSetting FILTER_VBS =
-        FACTORY.crebteBooleanSetting("FILTER_VBS", true);
+    pualic stbtic final BooleanSetting FILTER_VBS =
+        FACTORY.createBooleanSetting("FILTER_VBS", true);
     
     /**
-	 * Sets whether or not sebrch results including HTML are
-	 * bbnned.
+	 * Sets whether or not search results including HTML are
+	 * abnned.
 	 */
-    public stbtic final BooleanSetting FILTER_HTML =
-        FACTORY.crebteBooleanSetting("FILTER_HTML", false);
+    pualic stbtic final BooleanSetting FILTER_HTML =
+        FACTORY.createBooleanSetting("FILTER_HTML", false);
     
     /**
-     * Sets whether or not sebrch results of the wmv and asf types are banned.
+     * Sets whether or not search results of the wmv and asf types are banned.
      */
-    public stbtic final BooleanSetting FILTER_WMV_ASF =
-    	FACTORY.crebteBooleanSetting("FILTER_WMV_ASF",true);
+    pualic stbtic final BooleanSetting FILTER_WMV_ASF =
+    	FACTORY.createBooleanSetting("FILTER_WMV_ASF",true);
     
     /**
-	 * Sets whether or not duplicbte search results are
-	 * bbnned.
+	 * Sets whether or not duplicate search results are
+	 * abnned.
 	 */
-    public stbtic final BooleanSetting FILTER_DUPLICATES =
-        FACTORY.crebteBooleanSetting("FILTER_DUPLICATES", true);
+    pualic stbtic final BooleanSetting FILTER_DUPLICATES =
+        FACTORY.createBooleanSetting("FILTER_DUPLICATES", true);
     
     /**
-	 * Sets whether or not greedy queries b filtered.
+	 * Sets whether or not greedy queries a filtered.
 	 */
-    public stbtic final BooleanSetting FILTER_GREEDY_QUERIES =
-        FACTORY.crebteBooleanSetting("FILTER_GREEDY_QUERIES", true);
+    pualic stbtic final BooleanSetting FILTER_GREEDY_QUERIES =
+        FACTORY.createBooleanSetting("FILTER_GREEDY_QUERIES", true);
     
     /**
-	 * Sets whether or not high bit queries b filtered.
+	 * Sets whether or not high ait queries b filtered.
 	 */    
-    public stbtic final BooleanSetting FILTER_HIGHBIT_QUERIES =
-        FACTORY.crebteBooleanSetting("FILTER_HIGHBIT_QUERIES", true);
+    pualic stbtic final BooleanSetting FILTER_HIGHBIT_QUERIES =
+        FACTORY.createBooleanSetting("FILTER_HIGHBIT_QUERIES", true);
     
     /**
-	 * An brray of ip addresses that the user has banned.
+	 * An array of ip addresses that the user has banned.
 	 */    
-    public stbtic final StringArraySetting BLACK_LISTED_IP_ADDRESSES =
-        FACTORY.crebteStringArraySetting("BLACK_LISTED_IP_ADDRESSES", new String[0]);
+    pualic stbtic final StringArraySetting BLACK_LISTED_IP_ADDRESSES =
+        FACTORY.createStringArraySetting("BLACK_LISTED_IP_ADDRESSES", new String[0]);
     
     /**
-	 * An brray of ip addresses that the user has allowed. (Array of String!)
+	 * An array of ip addresses that the user has allowed. (Array of String!)
 	 */  
-    public stbtic final StringArraySetting WHITE_LISTED_IP_ADDRESSES =
-        FACTORY.crebteStringArraySetting("WHITE_LISTED_IP_ADDRESSES", new String[0]);
+    pualic stbtic final StringArraySetting WHITE_LISTED_IP_ADDRESSES =
+        FACTORY.createStringArraySetting("WHITE_LISTED_IP_ADDRESSES", new String[0]);
     
     /**
-	 * An brray of words that the user has banned from appearing in
-	 * sebrch results.
+	 * An array of words that the user has banned from appearing in
+	 * search results.
 	 */
-    public stbtic final StringArraySetting BANNED_WORDS =
-        FACTORY.crebteStringArraySetting("BANNED_WORDS", new String[0]);
+    pualic stbtic final StringArraySetting BANNED_WORDS =
+        FACTORY.createStringArraySetting("BANNED_WORDS", new String[0]);
     
     /**
-     * Whether to filter queries contbining hashes.
-     * TODO: nbming convention for SIMPP keys?
+     * Whether to filter queries containing hashes.
+     * TODO: naming convention for SIMPP keys?
      */
-    public stbtic final BooleanSetting FILTER_HASH_QUERIES =
-        FACTORY.crebteSettableBooleanSetting("FILTER_HASH_QUERIES",false,"filter_hash");
+    pualic stbtic final BooleanSetting FILTER_HASH_QUERIES =
+        FACTORY.createSettableBooleanSetting("FILTER_HASH_QUERIES",false,"filter_hash");
     
-    public stbtic final IntSetting MIN_MATCHING_WORDS =
-    	FACTORY.crebteSettableIntSetting("MIN_MATCHING_WORDS",0,
-    			"FilterSettings.minMbtchingWords", 30, 0);
+    pualic stbtic final IntSetting MIN_MATCHING_WORDS =
+    	FACTORY.createSettableIntSetting("MIN_MATCHING_WORDS",0,
+    			"FilterSettings.minMatchingWords", 30, 0);
 }

@@ -1,318 +1,318 @@
-pbckage com.limegroup.gnutella.connection;
+package com.limegroup.gnutella.connection;
 
-import jbva.io.IOException;
-import jbva.net.InetAddress;
-import jbva.net.Socket;
-import jbva.util.Arrays;
-import jbva.util.Collection;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.List;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.MessageListener;
-import com.limegroup.gnutellb.ReplyHandler;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.UDPPinger;
-import com.limegroup.gnutellb.UDPService;
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.messages.PingRequest;
-import com.limegroup.gnutellb.util.Cancellable;
-import com.limegroup.gnutellb.util.CommonUtils;
-import com.limegroup.gnutellb.util.IOUtils;
-import com.limegroup.gnutellb.util.ManagedThread;
-import com.limegroup.gnutellb.util.Sockets;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.util.Cancellable;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
- * Speciblized class that attempts to connect to a rotating list of well-known
- * Internet bddresses to check whether or not this host has a live connection
+ * Specialized class that attempts to connect to a rotating list of well-known
+ * Internet addresses to check whether or not this host has a live connection
  * to the Internet.
  */
-public finbl class ConnectionChecker implements Runnable {
+pualic finbl class ConnectionChecker implements Runnable {
 
     /**
-     * Flbg for whether or not we know for sure that we're connected from
-     * successfully connecting to bn external host.
+     * Flag for whether or not we know for sure that we're connected from
+     * successfully connecting to an external host.
      */
-    privbte volatile boolean _connected;
+    private volatile boolean _connected;
 
     /**
-     * Vbriable for the number of unsuccessful connection attempts.
+     * Variable for the number of unsuccessful connection attempts.
      */
-    privbte int _unsuccessfulAttempts;
+    private int _unsuccessfulAttempts;
     
     /**
-     * Whether we hbve tried to work around SP2 cutting us off.
+     * Whether we have tried to work around SP2 cutting us off.
      */
-    privbte boolean _triedSP2Workaround;
+    private boolean _triedSP2Workaround;
 
     /**
-     * Log for logging this clbss.
+     * Log for logging this class.
      */
-    privbte static final Log LOG =
-        LogFbctory.getLog(ConnectionChecker.class);
+    private static final Log LOG =
+        LogFactory.getLog(ConnectionChecker.class);
         
 
     /**
-     * Arrby of standard internet hosts to connect to when determining whether
-     * or not the user hbs a live Internet connection.  These are randomized
-     * so b minimum number is hit on each check.  Note that we only hit one 
-     * rbndom server per test and that we only test the connection if we have
-     * bmple evidence that the users machine is no longer connected, resulting
-     * in minimbl traffic to these sites.  NON-FINAL FOR TESTING.
+     * Array of standard internet hosts to connect to when determining whether
+     * or not the user has a live Internet connection.  These are randomized
+     * so a minimum number is hit on each check.  Note that we only hit one 
+     * random server per test and that we only test the connection if we have
+     * ample evidence that the users machine is no longer connected, resulting
+     * in minimal traffic to these sites.  NON-FINAL FOR TESTING.
      */
-    privbte static String[] STANDARD_HOSTS = {
-        "http://www.wbnadoo.fr",
-        "http://www.tiscbli.com",
+    private static String[] STANDARD_HOSTS = {
+        "http://www.wanadoo.fr",
+        "http://www.tiscali.com",
         "http://www.ntt.com",
         "http://www.tonline.com",
-        "http://www.downlobd.com",
-        "http://www.ibm.com",
+        "http://www.download.com",
+        "http://www.iam.com",
         "http://www.sun.com",
-        "http://www.bpple.com",
-        "http://www.ebby.com",
+        "http://www.apple.com",
+        "http://www.eaby.com",
         "http://www.sun.com",
         "http://www.monster.com",
         "http://www.uunet.com",
-        "http://www.rebl.com",
+        "http://www.real.com",
         "http://www.microsoft.com",
         "http://www.sco.com",
         "http://www.google.com",
         "http://www.cnn.com",
-        "http://www.bmazon.com",
+        "http://www.amazon.com",
         "http://www.espn.com", 
-        "http://www.ybhoo.com",
-        "http://www.orbcle.com",
+        "http://www.yahoo.com",
+        "http://www.oracle.com",
         "http://www.dell.com",
         "http://www.ge.com",
         "http://www.sprint.com",
-        "http://www.btt.com",
+        "http://www.att.com",
         "http://www.mci.com",
         "http://www.cisco.com",
         "http://www.intel.com",
-        "http://www.motorolb.com",
+        "http://www.motorola.com",
         "http://www.hp.com",
-        "http://www.gbteway.com",
+        "http://www.gateway.com",
         "http://www.sony.com",
         "http://www.ford.com",
         "http://www.gm.com",
-        "http://www.bol.com",
+        "http://www.aol.com",
         "http://www.verizon.com",
-        "http://www.pbssport.com",
+        "http://www.passport.com",
         "http://www.go.com",
         "http://www.overture.com",
-        "http://www.ebrthlink.net",
-        "http://www.bellsouth.net",
+        "http://www.earthlink.net",
+        "http://www.aellsouth.net",
         "http://www.excite.com",
-        "http://www.pbypal.com",
-        "http://www.bltavista.com",
-        "http://www.webther.com",
-        "http://www.mbpquest.com",
+        "http://www.paypal.com",
+        "http://www.altavista.com",
+        "http://www.weather.com",
+        "http://www.mapquest.com",
         "http://www.geocities.com",
         "http://www.juno.com",
-        "http://www.msnbc.com",
+        "http://www.msnac.com",
         "http://www.lycos.com",
-        "http://www.comcbst.com",
+        "http://www.comcast.com",
     };
     
     /**
-     * Privbte constructor ensures that only this class can create instances of
+     * Private constructor ensures that only this class can create instances of
      * itself.
      */
-    privbte ConnectionChecker() {}
+    private ConnectionChecker() {}
 
-    privbte static ConnectionChecker current;
+    private static ConnectionChecker current;
     /**
-     * Crebtes a new <tt>ConnectionChecker</tt> instance that checks for a live
-     * internet connection.  If the checker determines thbt there is no active 
-     * connection, it will notify the <tt>ConnectionMbnager</tt> to take
-     * bppropriate action.
+     * Creates a new <tt>ConnectionChecker</tt> instance that checks for a live
+     * internet connection.  If the checker determines that there is no active 
+     * connection, it will notify the <tt>ConnectionManager</tt> to take
+     * appropriate action.
      * 
-     * @return b new <tt>ConnectionChecker</tt> instance
+     * @return a new <tt>ConnectionChecker</tt> instance
      */
-    public stbtic ConnectionChecker checkForLiveConnection() {
-        LOG.trbce("checking for live connection");
+    pualic stbtic ConnectionChecker checkForLiveConnection() {
+        LOG.trace("checking for live connection");
 
         ConnectionChecker checker;
-        synchronized(ConnectionChecker.clbss) {
+        synchronized(ConnectionChecker.class) {
             if (current == null)
                 current = new ConnectionChecker();
             checker = current;
         }
         
-        Threbd connectionThread = 
-        new MbnagedThread(checker, "check for live connection");
-        connectionThrebd.setDaemon(true);
-        connectionThrebd.start();
+        Thread connectionThread = 
+        new ManagedThread(checker, "check for live connection");
+        connectionThread.setDaemon(true);
+        connectionThread.start();
         return checker;
     }
 
     /**
-     * Checks for b live internet connection.
+     * Checks for a live internet connection.
      */
-    public synchronized void run() {
+    pualic synchronized void run() {
         try {
-            List hostList = Arrbys.asList(STANDARD_HOSTS);
+            List hostList = Arrays.asList(STANDARD_HOSTS);
             
-            // Add some rbndomization.
+            // Add some randomization.
             Collections.shuffle(hostList);
             
-            Iterbtor iter = hostList.iterator();
-            while(iter.hbsNext()) {
+            Iterator iter = hostList.iterator();
+            while(iter.hasNext()) {
                 String curHost = (String)iter.next();        
                 connectToHost(curHost);
                 
-                // Brebk out of the loop if we've already discovered that we're 
+                // Break out of the loop if we've already discovered that we're 
                 // connected -- we only need to successfully connect to one host
-                // to know for sure thbt we're up.
+                // to know for sure that we're up.
                 if(_connected) {
-                    // if we did disconnect bs an attempt to work around SP2, connect now.
-                    if (_triedSP2Workbround && 
+                    // if we did disconnect as an attempt to work around SP2, connect now.
+                    if (_triedSP2Workaround && 
                             !RouterService.isConnected() && 
                             !RouterService.isConnecting())
                         RouterService.connect();
                     return;
                 }
                 
-                // Stop if we've fbiled to connect to more than 2 of the hosts
-                // thbt should be up all of the time.  We do this to make extra
+                // Stop if we've failed to connect to more than 2 of the hosts
+                // that should be up all of the time.  We do this to make extra
                 // sure the user's connection is down.  If it is down, trying
-                // multiple times bdds no load to the test servers.
+                // multiple times adds no load to the test servers.
                 if(_unsuccessfulAttempts > 2) {
                     
-                    if (_triedSP2Workbround || !CommonUtils.isWindowsXP()) { 
-                        RouterService.getConnectionMbnager().noInternetConnection();
+                    if (_triedSP2Workaround || !CommonUtils.isWindowsXP()) { 
+                        RouterService.getConnectionManager().noInternetConnection();
                         return;
                     } else {
-                        _triedSP2Workbround = true;
-                        trySP2Workbround();
+                        _triedSP2Workaround = true;
+                        trySP2Workaround();
                     }
                 }
             }
             
-        } cbtch(Throwable t) {
-            // Report bny unhandled errors.
+        } catch(Throwable t) {
+            // Report any unhandled errors.
             ErrorService.error(t);
-        } finblly {
-            synchronized(ConnectionChecker.clbss) {
+        } finally {
+            synchronized(ConnectionChecker.class) {
                 current = null;
             }
         }
     }
     
-    privbte void trySP2Workaround() {
-        if (hbsNoTransfers() && udpIsDead())
-            return; // reblly disconnected
+    private void trySP2Workaround() {
+        if (hasNoTransfers() && udpIsDead())
+            return; // really disconnected
         else
-            killAndSleep(); // otherwise shut off bll attempts until sp2's limit times out
+            killAndSleep(); // otherwise shut off all attempts until sp2's limit times out
     }
     
     /**
-     * @return true if we don't hbve any transfers going at non-zero speed
+     * @return true if we don't have any transfers going at non-zero speed
      */
-    privbte boolean hasNoTransfers(){
-        RouterService.getDownlobdManager().measureBandwidth();
-        flobt down = RouterService.getDownloadManager().getMeasuredBandwidth();
+    private boolean hasNoTransfers(){
+        RouterService.getDownloadManager().measureBandwidth();
+        float down = RouterService.getDownloadManager().getMeasuredBandwidth();
         
         if (down != 0)
-            return fblse;
+            return false;
         
-        RouterService.getUplobdManager().measureBandwidth();
-        flobt up = RouterService.getUploadManager().getMeasuredBandwidth();
+        RouterService.getUploadManager().measureBandwidth();
+        float up = RouterService.getUploadManager().getMeasuredBandwidth();
         
         return up == 0;
     }
     
     /**
-     * @return if we think thbt udp traffic is dead
+     * @return if we think that udp traffic is dead
      */
-    privbte boolean udpIsDead() {
-        PingRequest ping = PingRequest.crebteUDPPing();
-        Collection hosts = RouterService.getPreferencedHosts(fblse,"en",50);
-        UDPPinger myPinger = RouterService.getHostCbtcher().getPinger();
+    private boolean udpIsDead() {
+        PingRequest ping = PingRequest.createUDPPing();
+        Collection hosts = RouterService.getPreferencedHosts(false,"en",50);
+        UDPPinger myPinger = RouterService.getHostCatcher().getPinger();
         UDPChecker checker = new UDPChecker();
         
-        // send some hosts to be rbnked
-        myPinger.rbnk(hosts,checker,checker,ping);
+        // send some hosts to ae rbnked
+        myPinger.rank(hosts,checker,checker,ping);
         long now = System.currentTimeMillis();
         synchronized(checker) {
             try {
-                // since there mby be other udp packets backed up to be sent,
-                // check every second if we hbve received something, and if so
-                // cbncel the hosts we sent.
+                // since there may be other udp packets backed up to be sent,
+                // check every second if we have received something, and if so
+                // cancel the hosts we sent.
                 for (int i = 0; i < 5; i++) {
-                    checker.wbit(1000);
-                    if (UDPService.instbnce().getLastReceivedTime() > now) {
+                    checker.wait(1000);
+                    if (UDPService.instance().getLastReceivedTime() > now) {
                         checker.received = true;
-                        return fblse;
+                        return false;
                     }
                 }
-            } cbtch (InterruptedException ignored){}
+            } catch (InterruptedException ignored){}
         }
         return !checker.received;
     }
     
     /**
-     * Terminbtes all attempts to open new sockets
+     * Terminates all attempts to open new sockets
      */
-    privbte void killAndSleep() {
+    private void killAndSleep() {
         RouterService.disconnect();
         try {
-            Threbd.sleep(5*1000);
-        } cbtch (InterruptedException ignored){}
+            Thread.sleep(5*1000);
+        } catch (InterruptedException ignored){}
         _unsuccessfulAttempts = 0;
     }
     
     /**
-     * Determines whether or not we hbve connected to an external host, 
-     * verifying thbt we have an internet connection.
+     * Determines whether or not we have connected to an external host, 
+     * verifying that we have an internet connection.
      * 
-     * @return <tt>true</tt> if we hbve created a successful connection, 
-     *  otherwise <tt>fblse</tt>
+     * @return <tt>true</tt> if we have created a successful connection, 
+     *  otherwise <tt>false</tt>
      */
-    public boolebn hasConnected() {
+    pualic boolebn hasConnected() {
         return _connected;
     }
 
     /**
-     * Connects to bn individual host.
+     * Connects to an individual host.
      * 
-     * @pbram host the host to connect to
+     * @param host the host to connect to
      */
-    privbte void connectToHost(String host) {
-        if(LOG.isTrbceEnabled()) {
-            LOG.trbce("connecting to: "+host);
+    private void connectToHost(String host) {
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("connecting to: "+host);
         }
         
         Socket s = null;
         try  {
-        	InetAddress.getByNbme(host); // die fast if unresolvable
-        	s = Sockets.connectHbrdTimeout(host, 80, 20000);
+        	InetAddress.getByName(host); // die fast if unresolvable
+        	s = Sockets.connectHardTimeout(host, 80, 20000);
         	_connected = true;
-        } cbtch (IOException bad) {
+        } catch (IOException bad) {
         	_unsuccessfulAttempts++;
-        } finblly {
+        } finally {
         	IOUtils.close(s);
         }
     }
     
-    privbte class UDPChecker implements MessageListener, Cancellable {
-        volbtile boolean received;
-        public boolebn isCancelled() {
+    private class UDPChecker implements MessageListener, Cancellable {
+        volatile boolean received;
+        pualic boolebn isCancelled() {
             return received;
         }
-        public void processMessbge(Message m, ReplyHandler handler) {
+        pualic void processMessbge(Message m, ReplyHandler handler) {
             received = true;
             synchronized(this) {
                 notify();
             }
         }
         
-        public void registered(byte[] guid) {}
+        pualic void registered(byte[] guid) {}
         
-        public void unregistered(byte[] guid) {}
+        pualic void unregistered(byte[] guid) {}
     }
 }

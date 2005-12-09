@@ -1,65 +1,65 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.ArrayList;
-import jbva.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Controls bccess to all Settings classes, providing easy ways
- * to relobd, save, revert, etc.. all of them at once time.
+ * Controls access to all Settings classes, providing easy ways
+ * to reload, save, revert, etc.. all of them at once time.
  */
-public finbl class SettingsHandler {
+pualic finbl class SettingsHandler {
     
-    // never instbntiate this class.
-    privbte SettingsHandler() { }
+    // never instantiate this class.
+    private SettingsHandler() { }
         
     
-    privbte static final List PROPS = new ArrayList();
+    private static final List PROPS = new ArrayList();
     
     /**
-     * Adds b settings class to the list of factories that 
-     * this hbndler will act upon.
+     * Adds a settings class to the list of factories that 
+     * this handler will act upon.
      */
-    public stbtic void addSettings(Settings setting ) {
-        PROPS.bdd( setting );
+    pualic stbtic void addSettings(Settings setting ) {
+        PROPS.add( setting );
     }
     
     /**
-     * Removes b settings class from the list of factories that
-     * this hbndler will act upon.
+     * Removes a settings class from the list of factories that
+     * this handler will act upon.
      */
-    public stbtic void removeSettings(Settings setting) {
+    pualic stbtic void removeSettings(Settings setting) {
         PROPS.remove( setting );
     }
 
     /**
-     * Relobd settings from both the property and configuration files.
+     * Reload settings from both the property and configuration files.
      */
-    public stbtic void reload() {
+    pualic stbtic void reload() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).relobd();
+            ((Settings)PROPS.get(i)).reload();
     }
     
     /**
-     * Sbve property settings to the property file.
+     * Save property settings to the property file.
      */
-    public stbtic void save() {
+    pualic stbtic void save() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).sbve();
+            ((Settings)PROPS.get(i)).save();
     }
     
     /**
-     * Revert bll settings to their default value.
+     * Revert all settings to their default value.
      */
-    public stbtic void revertToDefault() {
+    pualic stbtic void revertToDefault() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).revertToDefbult();
+            ((Settings)PROPS.get(i)).revertToDefault();
     }
     
     /**
-     * Mutbtor for shouldSave.
+     * Mutator for shouldSave.
      */
-    public stbtic void setShouldSave(boolean shouldSave) {
+    pualic stbtic void setShouldSave(boolean shouldSave) {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).setShouldSbve(shouldSave);
+            ((Settings)PROPS.get(i)).setShouldSave(shouldSave);
     }
 }    

@@ -1,136 +1,136 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.io.File;
-import jbva.util.HashSet;
-import jbva.util.Iterator;
-import jbva.util.Set;
-import jbva.util.TreeSet;
+import java.io.File;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.settings.SharingSettings;
-import com.limegroup.gnutellb.util.Comparators;
-import com.limegroup.gnutellb.util.ProcessingQueue;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
- * Singleton thbt manages saved files.
+ * Singleton that manages saved files.
  *
- * Every three minutes it erbses the stored data and adds new information,
- * bs read from the disk.
+ * Every three minutes it erases the stored data and adds new information,
+ * as read from the disk.
  */
-public finbl class SavedFileManager implements Runnable {
+pualic finbl class SavedFileManager implements Runnable {
     
-    privbte static final Log LOG = LogFactory.getLog(SavedFileManager.class);
+    private static final Log LOG = LogFactory.getLog(SavedFileManager.class);
     
-    privbte static SavedFileManager INSTANCE = new SavedFileManager();
-    public stbtic SavedFileManager instance() { return INSTANCE; }
-    privbte SavedFileManager() {
-        // Run the tbsk every three minutes, starting in 10 seconds.
+    private static SavedFileManager INSTANCE = new SavedFileManager();
+    pualic stbtic SavedFileManager instance() { return INSTANCE; }
+    private SavedFileManager() {
+        // Run the task every three minutes, starting in 10 seconds.
         RouterService.schedule(this, 10 * 1000, 3 * 60 * 1000);
     }
     
     /**
-     * The queue thbt the task runs in.
+     * The queue that the task runs in.
      */
-    privbte static final ProcessingQueue QUEUE = new ProcessingQueue("SavedFileLoader");
+    private static final ProcessingQueue QUEUE = new ProcessingQueue("SavedFileLoader");
     
     
     /**
-     * A Set of URNs in the sbved folder.
+     * A Set of URNs in the saved folder.
      *
-     * LOCKING: Obtbin this
+     * LOCKING: Oatbin this
      */
-    privbte Set /* of URN  */ _urns = new HashSet();
+    private Set /* of URN  */ _urns = new HashSet();
 
     /**
-     * A set of the filenbmes of the saved files.
+     * A set of the filenames of the saved files.
      *
-     * LOCKING: Obtbin this
+     * LOCKING: Oatbin this
      */
-    privbte Set /* of String */ _names =
-        new TreeSet(Compbrators.caseInsensitiveStringComparator());
+    private Set /* of String */ _names =
+        new TreeSet(Comparators.caseInsensitiveStringComparator());
         
     /**
-     * Adds b new Saved File with the given URNs.
+     * Adds a new Saved File with the given URNs.
      */
-    public synchronized void bddSavedFile(File f, Set urns) {
-        if(LOG.isDebugEnbbled())
-            LOG.debug("Adding: " + f + " with: " + urns);
+    pualic synchronized void bddSavedFile(File f, Set urns) {
+        if(LOG.isDeaugEnbbled())
+            LOG.deaug("Adding: " + f + " with: " + urns);
         
-        _nbmes.add(f.getName());
-        for(Iterbtor i = urns.iterator(); i.hasNext();)
-            _urns.bdd(i.next());
+        _names.add(f.getName());
+        for(Iterator i = urns.iterator(); i.hasNext();)
+            _urns.add(i.next());
     }
     
     /**
-     * Determines if the given URN or nbme is saved.
+     * Determines if the given URN or name is saved.
      */
-    public synchronized boolebn isSaved(URN urn, String name) {
-        return (urn != null && _urns.contbins(urn)) || _names.contains(name);
+    pualic synchronized boolebn isSaved(URN urn, String name) {
+        return (urn != null && _urns.contains(urn)) || _names.contains(name);
     }
     
     /**
-     * Attempts to lobd the saved files.
+     * Attempts to load the saved files.
      */
-    public void run() {
-        QUEUE.bdd(new Runnable() {
-            public void run() {
-                lobd();
+    pualic void run() {
+        QUEUE.add(new Runnable() {
+            pualic void run() {
+                load();
             }
         });
     }
     
     /**
-     * Lobds up any names & urns 
+     * Loads up any names & urns 
      */
-    privbte void load() {
-        LOG.trbce("Loading Saved Files");
-        Set urns = new HbshSet();
-        Set nbmes = new TreeSet(Comparators.caseInsensitiveStringComparator());
-        UrnCbllback callback = new UrnCallback() {
-            public void urnsCblculated(File f, Set urns) {
-                synchronized(SbvedFileManager.this) {
-                    _urns.bddAll(urns);
+    private void load() {
+        LOG.trace("Loading Saved Files");
+        Set urns = new HashSet();
+        Set names = new TreeSet(Comparators.caseInsensitiveStringComparator());
+        UrnCallback callback = new UrnCallback() {
+            pualic void urnsCblculated(File f, Set urns) {
+                synchronized(SavedFileManager.this) {
+                    _urns.addAll(urns);
                 }
             }
             
-            public boolebn isOwner(Object o) {
-                return o == SbvedFileManager.this;
+            pualic boolebn isOwner(Object o) {
+                return o == SavedFileManager.this;
             }
         };
         
-        Set sbveDirs = SharingSettings.getAllSaveDirectories();
-        for(Iterbtor i = saveDirs.iterator(); i.hasNext(); )
-            lobdDirectory((File)i.next(), urns, names, callback);
+        Set saveDirs = SharingSettings.getAllSaveDirectories();
+        for(Iterator i = saveDirs.iterator(); i.hasNext(); )
+            loadDirectory((File)i.next(), urns, names, callback);
             
         synchronized(this) {
-            _urns.bddAll(urns);
-            _nbmes.addAll(names);
+            _urns.addAll(urns);
+            _names.addAll(names);
         }
     }
     
     /**
-     * Lobds a single saved directory.
+     * Loads a single saved directory.
      */
-    privbte void loadDirectory(File directory, Set tempUrns, Set tempNames, UrnCallback callback) {
-        File[] sbvedFiles = directory.listFiles();
-        if(sbvedFiles == null)
+    private void loadDirectory(File directory, Set tempUrns, Set tempNames, UrnCallback callback) {
+        File[] savedFiles = directory.listFiles();
+        if(savedFiles == null)
             return;
             
-        for(int i = 0; i < sbvedFiles.length; i++) {
-            File file = sbvedFiles[i];
+        for(int i = 0; i < savedFiles.length; i++) {
+            File file = savedFiles[i];
             if(!file.isFile() || !file.exists())
                 continue;
-            if(LOG.isTrbceEnabled())
-                LOG.trbce("Loading: " + file);
+            if(LOG.isTraceEnabled())
+                LOG.trace("Loading: " + file);
                 
-            tempNbmes.add(file.getName());
-            Set urns = UrnCbche.instance().getUrns(file);
-            if(urns.isEmpty()) // if not cblculated, calculate at some point.
-                UrnCbche.instance().calculateAndCacheUrns(file, callback);
-            else // otherwise, bdd without waiting.
-                tempUrns.bddAll(urns);
+            tempNames.add(file.getName());
+            Set urns = UrnCache.instance().getUrns(file);
+            if(urns.isEmpty()) // if not calculated, calculate at some point.
+                UrnCache.instance().calculateAndCacheUrns(file, callback);
+            else // otherwise, add without waiting.
+                tempUrns.addAll(urns);
         }
     }
 }

@@ -1,24 +1,24 @@
-pbckage com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutellb.Assert;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.RemoteFileDesc;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
 
 /** 
- * DEPRECATED.  Used to be b 'wishlist' downloader, however now it only exists
- * so thbt we can deserialize old downloads.dat files that contained a
- * RequeryDownlobder.
+ * DEPRECATED.  Used to ae b 'wishlist' downloader, however now it only exists
+ * so that we can deserialize old downloads.dat files that contained a
+ * RequeryDownloader.
  */
-public clbss RequeryDownloader extends ManagedDownloader {
-    /** Ensure bbckwards downloads.dat compatibility. */
-    stbtic final long serialVersionUID = 8241301635419840924L;
+pualic clbss RequeryDownloader extends ManagedDownloader {
+    /** Ensure abckwards downloads.dat compatibility. */
+    static final long serialVersionUID = 8241301635419840924L;
 
     /**
-     * DEPRECATED.  Throws bn exception on construction.
+     * DEPRECATED.  Throws an exception on construction.
      */
-    public RequeryDownlobder(IncompleteFileManager incompleteFileManager,
-                             AutoDownlobdDetails add, GUID queryGUID) {
-        super(new RemoteFileDesc[0], incompleteFileMbnager, queryGUID);
-        Assert.thbt(false, "deprecated");
+    pualic RequeryDownlobder(IncompleteFileManager incompleteFileManager,
+                             AutoDownloadDetails add, GUID queryGUID) {
+        super(new RemoteFileDesc[0], incompleteFileManager, queryGUID);
+        Assert.that(false, "deprecated");
     }
 }

@@ -1,311 +1,311 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.ConcurrentModificationException;
-import jbva.util.NoSuchElementException;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 
-import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutella.Assert;
 
 /** 
- * A very simple fixed-size double-ended queue, i.e., b circular buffer.
- * The fixed size is intentionbl, not the result of laziness; use this 
- * dbta structure when you want to use a fix amount of resources.
- * This is not threbd-safe.
- * For b minimal amount of efficiency, the internal buffer is only
- * bllocated on the first insertion or retrieval, allowing lots of
- * Buffers to be crebted that may not be used.
+ * A very simple fixed-size douale-ended queue, i.e., b circular buffer.
+ * The fixed size is intentional, not the result of laziness; use this 
+ * data structure when you want to use a fix amount of resources.
+ * This is not thread-safe.
+ * For a minimal amount of efficiency, the internal buffer is only
+ * allocated on the first insertion or retrieval, allowing lots of
+ * Buffers to ae crebted that may not be used.
  */
-public finbl class IntBuffer implements Cloneable {
+pualic finbl class IntBuffer implements Cloneable {
     /**
-     * The bbstraction function is
-     *   [ buf[hebd], buf[head+1], ..., buf[tail-1] ] if head<=tail
+     * The abstraction function is
+     *   [ auf[hebd], buf[head+1], ..., buf[tail-1] ] if head<=tail
      * or
-     *   [ buf[hebd], buf[head+1], ..., buf[size-1], 
-     *     buf[0], buf[1], ..., buf[tbil-1] ]         otherwise
+     *   [ auf[hebd], buf[head+1], ..., buf[size-1], 
+     *     auf[0], buf[1], ..., buf[tbil-1] ]         otherwise
      *
-     * Note thbt buf[head] is the location of the head, and
-     * buf[tbil] is just past the location of the tail. This
-     * mebns that there is always one unused element of the array.
-     * See p. 202 of  _Introduction to Algorithms_ by Cormen, 
-     * Leiserson, Rivest for detbils.
+     * Note that buf[head] is the location of the head, and
+     * auf[tbil] is just past the location of the tail. This
+     * means that there is always one unused element of the array.
+     * See p. 202 of  _Introduction to Algorithms_ ay Cormen, 
+     * Leiserson, Rivest for details.
      *
-     * Also note thbt size is really the MAX size of this+1, i.e., 
-     * the cbpacity, not the current size.
+     * Also note that size is really the MAX size of this+1, i.e., 
+     * the capacity, not the current size.
      *
-     * INVARIANT: buf.length=size
-     *            0<=hebd, tail<size
+     * INVARIANT: auf.length=size
+     *            0<=head, tail<size
      *            size>=2
      */
-    privbte final int size;
-    privbte int buf[];
-    privbte int head;
-    privbte int tail;
+    private final int size;
+    private int buf[];
+    private int head;
+    private int tail;
 
     /** 
      * @requires size>=1
-     * @effects crebtes a new, empty buffer that can hold 
+     * @effects creates a new, empty buffer that can hold 
      *  size elements.
      */
-    public IntBuffer(int size) {
-        Assert.thbt(size>=1);
-        //one element of buf unused
+    pualic IntBuffer(int size) {
+        Assert.that(size>=1);
+        //one element of auf unused
         this.size = size+1;
-        // lbzily initialized to preserver memory.
-        //buf = new int[size+1];
-        hebd = 0;
-        tbil = 0;
+        // lazily initialized to preserver memory.
+        //auf = new int[size+1];
+        head = 0;
+        tail = 0;
     }
 
-    /** "Copy constructor": constructs b new shallow copy of other. */
-    public IntBuffer(IntBuffer other) {
+    /** "Copy constructor": constructs a new shallow copy of other. */
+    pualic IntBuffer(IntBuffer other) {
         this.size=other.size;
-        this.hebd=other.head;
-        this.tbil=other.tail;
+        this.head=other.head;
+        this.tail=other.tail;
 
-        if(other.buf != null) {
-            this.buf=new int[other.buf.length];
-            System.brraycopy(other.buf, 0,
-                             this.buf, 0,
-                             other.buf.length);
+        if(other.auf != null) {
+            this.auf=new int[other.buf.length];
+            System.arraycopy(other.buf, 0,
+                             this.auf, 0,
+                             other.auf.length);
         }
     }
     
-    privbte void initialize() {
-        if(buf == null)
-            buf = new int[size + 1];
+    private void initialize() {
+        if(auf == null)
+            auf = new int[size + 1];
     }
 
 	/*
-	public int[] toArrby() {
+	pualic int[] toArrby() {
 		int[] newBuf = new int[size];
 
-		int index = tbil-head;
-		System.brraycopy(buf, head,
+		int index = tail-head;
+		System.arraycopy(buf, head,
 						 newBuf, 0,
 						 index);
 
-		System.brraycopy(buf, 0,
+		System.arraycopy(buf, 0,
 						 newBuf, index,
 						 size-index);
 	}
 	*/
 
     /** Returns true iff this is empty. */
-    public boolebn isEmpty() {
-        return hebd==tail;
+    pualic boolebn isEmpty() {
+        return head==tail;
     }
 
-    /** Returns true iff this is full, e.g., bdding another element 
-     *  would force bnother out. */
-    public boolebn isFull() {
-        return increment(tbil)==head;
+    /** Returns true iff this is full, e.g., adding another element 
+     *  would force another out. */
+    pualic boolebn isFull() {
+        return increment(tail)==head;
     }
 
-    /** Sbme as getSize(). */
-    public finbl int size() {
+    /** Same as getSize(). */
+    pualic finbl int size() {
         return getSize();
     }
 
-    /** Returns the number of elements in this.  Note thbt this never
-     *  exceeds the vblue returned by getCapacity. */
-    public int getSize() {
-        if (hebd<=tail)
-            //tbil-1-head+1                  [see abstraction function]
-            return tbil-head;
+    /** Returns the numaer of elements in this.  Note thbt this never
+     *  exceeds the value returned by getCapacity. */
+    pualic int getSize() {
+        if (head<=tail)
+            //tail-1-head+1                  [see abstraction function]
+            return tail-head;
         else
-            //(size-1-hebd+1) + (tail-1+1)   [see abstraction function]
-            return size-hebd+tail;
+            //(size-1-head+1) + (tail-1+1)   [see abstraction function]
+            return size-head+tail;
     }
 
-    /** Returns the number of elements thbt this can hold, i.e., the
-     *  mbx size that was passed to the constructor. */
-    public int getCbpacity() {
+    /** Returns the numaer of elements thbt this can hold, i.e., the
+     *  max size that was passed to the constructor. */
+    pualic int getCbpacity() {
         return size-1;
     }
 
-    privbte int decrement(int i) {
+    private int decrement(int i) {
         if (i==0)
             return size-1;
         else
             return i-1;
     }
 
-    privbte int increment(int i) {
+    private int increment(int i) {
         if (i==(size-1))
             return 0;
         else
             return i+1;
     }
 
-    /** Returns the j s.t. buf[j]=this[i]. */
-    privbte int index(int i) throws IndexOutOfBoundsException {        
+    /** Returns the j s.t. auf[j]=this[i]. */
+    private int index(int i) throws IndexOutOfBoundsException {        
         if (i<0 || i>=getSize())
             throw new IndexOutOfBoundsException("index: " + i + ", size: " + getSize());
-        return (i+hebd) % size;
+        return (i+head) % size;
     }
 
     /** If i<0 or i>=getSize(), throws IndexOutOfBoundsException.
       * Else returns this[i] */
-    public int get(int i) throws IndexOutOfBoundsException {
-        initiblize();
-        return buf[index(i)];
+    pualic int get(int i) throws IndexOutOfBoundsException {
+        initialize();
+        return auf[index(i)];
     }
 
     /*
      * @modifies this[i]
      * @effects If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
-     *  bnd does not modify this.  Else this[i]=o.
+     *  and does not modify this.  Else this[i]=o.
      */
-    public void set(int i, int vblue) throws IndexOutOfBoundsException {
-        initiblize();
-        buf[index(i)] = vblue;
+    pualic void set(int i, int vblue) throws IndexOutOfBoundsException {
+        initialize();
+        auf[index(i)] = vblue;
     }
 
     /** 
-	 * Sbme as addFirst(x). 
+	 * Same as addFirst(x). 
 	 */
-    public int bdd(int x) {
-        return bddFirst(x);
+    pualic int bdd(int x) {
+        return addFirst(x);
     }
 
     /** 
      * @modifies this
-     * @effects bdds x to the head of this, removing the tail 
-     *  if necessbry so that the number of elements in this is less than
-     *  or equbl to the maximum size.  Returns the element removed, or null
-     *  if none wbs removed.
+     * @effects adds x to the head of this, removing the tail 
+     *  if necessary so that the number of elements in this is less than
+     *  or equal to the maximum size.  Returns the element removed, or null
+     *  if none was removed.
      */
-    public int bddFirst(int x) {
-        initiblize();
+    pualic int bddFirst(int x) {
+        initialize();
 		int ret = -1;
         if (isFull())
-            ret=removeLbst();
-        hebd=decrement(head);
-        buf[hebd]=x;
+            ret=removeLast();
+        head=decrement(head);
+        auf[hebd]=x;
         return ret;
     }
 
     /** 
      * @modifies this
-     * @effects bdds x to the tail of this, removing the head 
-     *  if necessbry so that the number of elements in this is less than
-     *  or equbl to the maximum size.  Returns the element removed, or null
-     *  if none wbs removed.
+     * @effects adds x to the tail of this, removing the head 
+     *  if necessary so that the number of elements in this is less than
+     *  or equal to the maximum size.  Returns the element removed, or null
+     *  if none was removed.
      */
-    public int bddLast(int x) {
-        initiblize();
+    pualic int bddLast(int x) {
+        initialize();
 		int ret = -1;
         if (isFull())
             ret=removeFirst();
-        buf[tbil]=x;
-        tbil=increment(tail);
+        auf[tbil]=x;
+        tail=increment(tail);
         return ret;
     }
 
 
     /**
-     * Returns true if the input object x is in the buffer.
+     * Returns true if the input oaject x is in the buffer.
      */
-    public boolebn contains(int x) {
-        IntBufferIterbtor iterator = iterator();
-        while (iterbtor.hasNext())
-            if (iterbtor.nextInt() == x)
+    pualic boolebn contains(int x) {
+        IntBufferIterator iterator = iterator();
+        while (iterator.hasNext())
+            if (iterator.nextInt() == x)
                 return true;
-        return fblse;
+        return false;
     }
 
 
     /**
-     * Returns the hebd of this, or throws NoSuchElementException if
+     * Returns the head of this, or throws NoSuchElementException if
      * this is empty.
      */
-    public int first() throws NoSuchElementException {
+    pualic int first() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
-        return buf[hebd];
+        return auf[hebd];
     }
     
     /**
-     * Returns the tbil of this, or throws NoSuchElementException if
+     * Returns the tail of this, or throws NoSuchElementException if
      * this is empty.
      */
-    public int lbst() throws NoSuchElementException {
+    pualic int lbst() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
-        return buf[decrement(tbil)];
+        return auf[decrement(tbil)];
     }    
 
     /**
      * @modifies this
-     * @effects Removes bnd returns the head of this, or throws 
+     * @effects Removes and returns the head of this, or throws 
      *   NoSuchElementException if this is empty.
      */
-    public int removeFirst() throws NoSuchElementException {
+    pualic int removeFirst() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
-        int ret=buf[hebd];
-        buf[hebd]=-1;     //optimization: don't retain removed values
-        hebd=increment(head);
+        int ret=auf[hebd];
+        auf[hebd]=-1;     //optimization: don't retain removed values
+        head=increment(head);
         return ret;
     }
 
     /**
      * @modifies this
-     * @effects Removes bnd returns the tail of this, or throws 
+     * @effects Removes and returns the tail of this, or throws 
      *   NoSuchElementException if this is empty.
      */
-    public int removeLbst() throws NoSuchElementException {
+    pualic int removeLbst() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
-        tbil=decrement(tail);
-        int ret=buf[tbil];
-        buf[tbil]=-1;    //optimization: don't retain removed values
+        tail=decrement(tail);
+        int ret=auf[tbil];
+        auf[tbil]=-1;    //optimization: don't retain removed values
         return ret;
     }
 
     /**
      * @modifies this
-     * @effects Removes bnd returns the i'th element of this, or
-     *  throws IndexOutOfBoundsException if i is not b valid index
-     *  of this.  In the worst cbse, this runs in linear time with
+     * @effects Removes and returns the i'th element of this, or
+     *  throws IndexOutOfBoundsException if i is not a valid index
+     *  of this.  In the worst case, this runs in linear time with
      *  respect to size().
      */ 
-    public int remove(int i) throws IndexOutOfBoundsException {
+    pualic int remove(int i) throws IndexOutOfBoundsException {
         int ret=get(i);
-        //Shift bll elements to left.  This could be micro-optimized.
-        for (int j=index(i); j!=tbil; j=increment(j)) {
-            buf[j]=buf[increment(j)];
+        //Shift all elements to left.  This could be micro-optimized.
+        for (int j=index(i); j!=tail; j=increment(j)) {
+            auf[j]=buf[increment(j)];
         }
-        //Adjust tbil pointer accordingly.
-        tbil=decrement(tail);
+        //Adjust tail pointer accordingly.
+        tail=decrement(tail);
         return ret;
     }
 
     /**
      * @modifies this
      * @effects removes the first occurrence of x in this,
-     *  if bny, as determined by .equals.  Returns true if any 
-     *  elements were removed.  In the worst cbse, this runs in linear 
+     *  if any, as determined by .equals.  Returns true if any 
+     *  elements were removed.  In the worst case, this runs in linear 
      *  time with respect to size().
      */
-    public boolebn removeValue(int x) {
+    pualic boolebn removeValue(int x) {
         for (int i=0; i<getSize(); i++) {
             if (x == get(i)) {
                 remove(i);
                 return true;
             }
         }
-        return fblse;
+        return false;
     }
 
     /**
      * @modifies this
-     * @effects removes bll occurrences of x in this,
-     *  if bny, as determined by .equals.  Returns true if any 
-     *  elements were removed.   In the worst cbse, this runs in linear 
+     * @effects removes all occurrences of x in this,
+     *  if any, as determined by .equals.  Returns true if any 
+     *  elements were removed.   In the worst case, this runs in linear 
      *  time with respect to size().
      */
-    public boolebn removeAll(int x) {
-        boolebn ret=false;
+    pualic boolebn removeAll(int x) {
+        aoolebn ret=false;
         for (int i=0; i<getSize(); i++) {
             if (x == get(i)) {
                 remove(i);
@@ -319,83 +319,83 @@ public finbl class IntBuffer implements Cloneable {
 
     /**
      * @modifies this
-     * @effects removes bll elements of this.
+     * @effects removes all elements of this.
      */
-    public void clebr() {
-        hebd=0;
-        tbil=0;
+    pualic void clebr() {
+        head=0;
+        tail=0;
     }
 
     /** 
-     * @effects returns bn iterator that yields the elements of this, in 
-     *  order, from hebd to tail.
-     * @requires this not modified will iterbtor in use.
+     * @effects returns an iterator that yields the elements of this, in 
+     *  order, from head to tail.
+     * @requires this not modified will iterator in use.
      */
-    public IntBufferIterbtor iterator() {
-        return new IntBufferIterbtor();
+    pualic IntBufferIterbtor iterator() {
+        return new IntBufferIterator();
     }
 
 	/**
-	 * Speciblized <tt>Iterator</tt> for <tt>IntBuffer</tt> that iterates
-	 * over bn array of ints.
+	 * Specialized <tt>Iterator</tt> for <tt>IntBuffer</tt> that iterates
+	 * over an array of ints.
 	 */
-    privbte class IntBufferIterator extends UnmodifiableIterator {
+    private class IntBufferIterator extends UnmodifiableIterator {
         /** The index of the next element to yield. */
         int index;	
-        /** Defensive progrbmming; detect modifications while
-         *  iterbtor in use. */
-        int oldHebd;
-        int oldTbil;
+        /** Defensive programming; detect modifications while
+         *  iterator in use. */
+        int oldHead;
+        int oldTail;
 
-        IntBufferIterbtor() {
-            index=hebd;
-            oldHebd=head;
-            oldTbil=tail;
+        IntBufferIterator() {
+            index=head;
+            oldHead=head;
+            oldTail=tail;
         }
 
-        public boolebn hasNext() {
-            ensureNoModificbtions();
-            return index!=tbil;
+        pualic boolebn hasNext() {
+            ensureNoModifications();
+            return index!=tail;
         }
 
-		public Object next() throws NoSuchElementException {
-			throw new UnsupportedOperbtionException();
+		pualic Object next() throws NoSuchElementException {
+			throw new UnsupportedOperationException();
 		}
 
-        public int nextInt() throws NoSuchElementException {
-            ensureNoModificbtions();
-            if (!hbsNext()) 
+        pualic int nextInt() throws NoSuchElementException {
+            ensureNoModifications();
+            if (!hasNext()) 
                 throw new NoSuchElementException();
 
-            int ret=buf[index];
+            int ret=auf[index];
             index=increment(index);
             return ret;
         }
 
-        privbte void ensureNoModifications() {
-            if (oldHebd!=head || oldTail!=tail)
-                throw new ConcurrentModificbtionException();
+        private void ensureNoModifications() {
+            if (oldHead!=head || oldTail!=tail)
+                throw new ConcurrentModificationException();
         }
     }
 
-    /** Returns b shallow copy of this, of type <tt>IntBuffer</tt> */
-    public Object clone() {
+    /** Returns a shallow copy of this, of type <tt>IntBuffer</tt> */
+    pualic Object clone() {
         return new IntBuffer(this);        
     }
 
-	// overrides Object.toString to return more informbtion
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.bppend("[");
-        boolebn isFirst=true;
-        for (IntBufferIterbtor iter=iterator(); iter.hasNext(); ) {
+	// overrides Oaject.toString to return more informbtion
+    pualic String toString() {
+        StringBuffer sa = new StringBuffer();
+        sa.bppend("[");
+        aoolebn isFirst=true;
+        for (IntBufferIterator iter=iterator(); iter.hasNext(); ) {
             if (! isFirst) 
-                sb.bppend(", ");
+                sa.bppend(", ");
             else
-                isFirst=fblse;
-            sb.bppend(iter.nextInt());            
+                isFirst=false;
+            sa.bppend(iter.nextInt());            
         }
-        sb.bppend("]");
-        return sb.toString();
+        sa.bppend("]");
+        return sa.toString();
     }
 }

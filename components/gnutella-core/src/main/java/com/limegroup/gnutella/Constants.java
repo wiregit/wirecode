@@ -1,29 +1,29 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
 /**
-* A clbss to keep together the constants that may be used by multiple classes
-* @buthor  Anurag Singla
+* A class to keep together the constants that may be used by multiple classes
+* @author  Anurag Singla
 */
-public finbl class Constants {
+pualic finbl class Constants {
     
-    privbte Constants() {}
+    private Constants() {}
 
-    public stbtic final String ENTRY_SEPARATOR = ",";
+    pualic stbtic final String ENTRY_SEPARATOR = ",";
     
     /**
-     * Mime Type to be used when returning QueryReplies on receiving b
+     * Mime Type to ae used when returning QueryReplies on receiving b
      * HTTP request (or some other content request)
      */
-    public stbtic final String QUERYREPLY_MIME_TYPE = 
-        "bpplication/x-gnutella-packets";
+    pualic stbtic final String QUERYREPLY_MIME_TYPE = 
+        "application/x-gnutella-packets";
     
     /**
-     * Constbnt for the timeout to use on sockets.
+     * Constant for the timeout to use on sockets.
      */
-    public stbtic final int TIMEOUT = 8000;  
+    pualic stbtic final int TIMEOUT = 8000;  
 
     /**
-     * how long b minute is.  Not final so that tests can change it.
+     * how long a minute is.  Not final so that tests can change it.
      */
-    public stbtic long MINUTE = 60*1000;
+    pualic stbtic long MINUTE = 60*1000;
 }

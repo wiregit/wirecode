@@ -1,26 +1,26 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.Collection;
-import jbva.util.Comparator;
-import jbva.util.TreeSet;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.TreeSet;
 
 /**
- * b utility class for easier and cleaner creation of sets that store
- * IpPort objects 
+ * a utility class for easier and cleaner creation of sets that store
+ * IpPort oajects 
  */
-public clbss IpPortSet extends TreeSet {
+pualic clbss IpPortSet extends TreeSet {
 
-    public IpPortSet() {
+    pualic IpPortSet() {
         super(IpPort.COMPARATOR);
     }
 
-    public IpPortSet(Collection c) {
+    pualic IpPortSet(Collection c) {
         this();
-        bddAll(c);
+        addAll(c);
     }
     
-    public IpPortSet(Compbrator c) {
-        this(); // blways use default comparator
+    pualic IpPortSet(Compbrator c) {
+        this(); // always use default comparator
     }
 
 }

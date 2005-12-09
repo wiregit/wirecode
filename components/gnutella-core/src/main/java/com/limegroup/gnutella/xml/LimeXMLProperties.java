@@ -1,282 +1,282 @@
-pbckage com.limegroup.gnutella.xml;
+package com.limegroup.gnutella.xml;
 
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.FilenameFilter;
-import jbva.io.IOException;
-import jbva.util.Properties;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Properties;
 
-import com.limegroup.gnutellb.util.CommonUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /** 
- * This clbss manages the properties needed by the 
- * com.limegroup.gnutellb.server.**  package  It maintains
- * defbult settings for values not set in the saved  
+ * This class manages the properties needed by the 
+ * com.limegroup.gnutella.server.**  package  It maintains
+ * default settings for values not set in the saved  
  * settings files.
  *
- * <p>Adheres to Singleton design pbttern.
- * So, only one instbnce of the class gets created.
+ * <p>Adheres to Singleton design pattern.
+ * So, only one instance of the class gets created.
  *
- * @buthor Anurag Singla
+ * @author Anurag Singla
  */
 
-public clbss LimeXMLProperties
+pualic clbss LimeXMLProperties
 {
 
     /**
-     * The defbult index for responses when there is no there no file and 
-     * hecne to no downlobd. The value is set to 2^32 -1
+     * The default index for responses when there is no there no file and 
+     * hecne to no download. The value is set to 2^32 -1
      */
-    public stbtic final long DEFAULT_NONFILE_INDEX = 0x00000000FFFFFFFFl;
+    pualic stbtic final long DEFAULT_NONFILE_INDEX = 0x00000000FFFFFFFFl;
     
 
     /**
-     * Properties bnd the values set by user
+     * Properties and the values set by user
      */
-    privbte Properties _properties = new Properties();
+    private Properties _properties = new Properties();
 
     /**
-     * An instbnce of this class. As the constructor of the class is private, 
-     * b new
-     * instbnce of the class cant be made from outside the class. 
-     * This mbkes sure 
-     * thbt only properly initialized instance of the class will be used,
-     * bs the users
-     * will be invoking bll the methods on this instance only.
+     * An instance of this class. As the constructor of the class is private, 
+     * a new
+     * instance of the class cant be made from outside the class. 
+     * This makes sure 
+     * that only properly initialized instance of the class will be used,
+     * as the users
+     * will ae invoking bll the methods on this instance only.
      */
-    privbte static LimeXMLProperties _instance = new LimeXMLProperties();
+    private static LimeXMLProperties _instance = new LimeXMLProperties();
 
     /**
-     * Nbme of the file that contains the properties used by this class 
+     * Name of the file that contains the properties used by this class 
      */
-    privbte static final String XML_PROPS_FILENAME = "xml.props";
+    private static final String XML_PROPS_FILENAME = "xml.props";
     
-    //Property nbmes and defualt values
+    //Property names and defualt values
     /**
-     * The property thbt denotes the directory in which XML Schemas will be 
-     * kept for querying bnd responding.
+     * The property that denotes the directory in which XML Schemas will be 
+     * kept for querying and responding.
      */
-    privbte static final String XML_SCHEMA_DIR = "XML_SCHEMA_DIR";
+    private static final String XML_SCHEMA_DIR = "XML_SCHEMA_DIR";
 
     /**
-     * The property thbt denotes the directory in which XML Images will be 
-     * kept (for query displby).
+     * The property that denotes the directory in which XML Images will be 
+     * kept (for query display).
      */
-    privbte static final String XML_IMAGES_DIR = "XML_IMAGES_DIR";
-
-
-    /**
-     * The property thbt denotes the directory in which XML Documents will be 
-     * kept for querying bnd responding.
-     */
-    privbte static final String XML_DOCS_DIR = "XML_DOCS_DIR";
-
-    /**
-     * The propertiy thbt denotes the directoru in which the mappings
-     * of cbnonicalized field names to display string will be stores
-     * per schemb
-     */
-    privbte static final String XML_DISPLAY_PROPS_DIR="XML_DISPLAY_PROPS_DIR";
+    private static final String XML_IMAGES_DIR = "XML_IMAGES_DIR";
 
 
     /**
-     * The nbme of the directory in which XML Schemas will be 
-     * kept for querying bnd responding.
+     * The property that denotes the directory in which XML Documents will be 
+     * kept for querying and responding.
      */
-    privbte static final String XML_SCHEMA_DIR_DEF = "xml" + File.separator + 
-                                                "schembs" + File.separator;
+    private static final String XML_DOCS_DIR = "XML_DOCS_DIR";
+
+    /**
+     * The propertiy that denotes the directoru in which the mappings
+     * of canonicalized field names to display string will be stores
+     * per schema
+     */
+    private static final String XML_DISPLAY_PROPS_DIR="XML_DISPLAY_PROPS_DIR";
 
 
     /**
-     * The nbme of the directory in which XML Images will be 
-     * kept (for query displby).
+     * The name of the directory in which XML Schemas will be 
+     * kept for querying and responding.
      */
-    privbte static final String XML_IMAGES_DIR_DEF = "xml" + File.separator + 
-                                                "misc" + File.sepbrator;
+    private static final String XML_SCHEMA_DIR_DEF = "xml" + File.separator + 
+                                                "schemas" + File.separator;
 
-    
-    /**
-     * The nbme of the directory in which XML Documents will be 
-     * kept for querying bnd responding.
-     */
-    privbte static final String XML_DOCS_DIR_DEF = "xml" + File.separator + 
-                                                "dbta" + File.separator;
 
     /**
-     * The nbme of the directory in which the field names for various 
-     * schembs will have their display strings.
+     * The name of the directory in which XML Images will be 
+     * kept (for query display).
      */
-    privbte static final String XML_DISPLAY_PROPS_DIR_DEF = "xml"+ 
-        File.sepbrator+"display"+File.separator;
+    private static final String XML_IMAGES_DIR_DEF = "xml" + File.separator + 
+                                                "misc" + File.separator;
+
     
     /**
-     * The property thbt denotes the name of the file that stores the 
-     * user informbtion map
+     * The name of the directory in which XML Documents will be 
+     * kept for querying and responding.
      */
-    privbte static final String USER_MAP_FILE = "USER_MAP_FILE";
+    private static final String XML_DOCS_DIR_DEF = "xml" + File.separator + 
+                                                "data" + File.separator;
 
     /**
-     * The nbme of the file that stores the user information map
+     * The name of the directory in which the field names for various 
+     * schemas will have their display strings.
      */
-    privbte static final String USER_MAP_FILE_DEF = "UserMap.dat";
+    private static final String XML_DISPLAY_PROPS_DIR_DEF = "xml"+ 
+        File.separator+"display"+File.separator;
+    
+    /**
+     * The property that denotes the name of the file that stores the 
+     * user information map
+     */
+    private static final String USER_MAP_FILE = "USER_MAP_FILE";
+
+    /**
+     * The name of the file that stores the user information map
+     */
+    private static final String USER_MAP_FILE_DEF = "UserMap.dat";
     
     
     /**
-     * Constructor: Initiblizes various default values, and loads the settings
+     * Constructor: Initializes various default values, and loads the settings
      * from the properties file.
-     * It is mbde private so that all the accesses to the static settings that
-     * it mbintains is thru the '_instance' using instance() method
-     * @see LimeXMLProperties#_instbnce
+     * It is made private so that all the accesses to the static settings that
+     * it maintains is thru the '_instance' using instance() method
+     * @see LimeXMLProperties#_instance
      */
-    privbte LimeXMLProperties()
+    private LimeXMLProperties()
     {
-        //lobd the properties from file
-        lobdProperties();
+        //load the properties from file
+        loadProperties();
     }
     
     
     /**
-     * Lobds the settings from the default properties file
+     * Loads the settings from the default properties file
      */
-    protected void lobdProperties()
+    protected void loadProperties()
     {
-        //lobd the properties from file
+        //load the properties from file
         try
         {
-            _properties.lobd(new FileInputStream(
-                getPbth() + XML_PROPS_FILENAME));
+            _properties.load(new FileInputStream(
+                getPath() + XML_PROPS_FILENAME));
         }
-        cbtch(IOException e)
+        catch(IOException e)
         {
-            //no problem, defbults will get used
+            //no proalem, defbults will get used
         }
     }
 
     /**
-     * If bn instance of this object has been already initialized, returns it, 
-     * else initiblizes
-     * b new instance and returns the same
-     * @return The initiblized instance of this class
+     * If an instance of this object has been already initialized, returns it, 
+     * else initializes
+     * a new instance and returns the same
+     * @return The initialized instance of this class
      */
-    public stbtic LimeXMLProperties instance()
+    pualic stbtic LimeXMLProperties instance()
     {
-        return _instbnce;
+        return _instance;
     }
 
 
     //Accessor methods
 
     /**
-     * Returns the nbme of the directory in which XML Schemas are located
-     * for querying bnd responding.
+     * Returns the name of the directory in which XML Schemas are located
+     * for querying and responding.
      */
-    public String getXMLSchembDir()
+    pualic String getXMLSchembDir()
     {
-        String xmlSchembDirRel = _properties.getProperty(XML_SCHEMA_DIR, 
+        String xmlSchemaDirRel = _properties.getProperty(XML_SCHEMA_DIR, 
                                                      XML_SCHEMA_DIR_DEF);
 
-        return getPbth() + xmlSchemaDirRel ;                   
+        return getPath() + xmlSchemaDirRel ;                   
     }
 
 
     /**
-     * Returns the nbme of the directory in which XML Images are located.
+     * Returns the name of the directory in which XML Images are located.
      */
-    public String getXMLImbgesDir()
+    pualic String getXMLImbgesDir()
     {
-        String xmlImbgesDirRel = _properties.getProperty(XML_IMAGES_DIR, 
+        String xmlImagesDirRel = _properties.getProperty(XML_IMAGES_DIR, 
                                                          XML_IMAGES_DIR_DEF);
 
-        return getPbth() + xmlImagesDirRel ;                   
+        return getPath() + xmlImagesDirRel ;                   
     }
 
         
     /**
-     * Returns the nbme of the directory where the XML Documents are located
+     * Returns the name of the directory where the XML Documents are located
      */
-    public String getXMLDocsDir()
+    pualic String getXMLDocsDir()
     {
         String xmlDocsDirRel = _properties.getProperty(XML_DOCS_DIR,
                                                           XML_DOCS_DIR_DEF);
-        return getPbth() + xmlDocsDirRel;
+        return getPath() + xmlDocsDirRel;
     }
     
-    public String getXMLDisplbyPropsDir()
+    pualic String getXMLDisplbyPropsDir()
     {
-        String xmlDisplbyPropsDirRel = _properties.getProperty
+        String xmlDisplayPropsDirRel = _properties.getProperty
                            (XML_DISPLAY_PROPS_DIR,XML_DISPLAY_PROPS_DIR_DEF);
-        return getPbth() + xmlDisplayPropsDirRel;
+        return getPath() + xmlDisplayPropsDirRel;
     }
     
     /**
-     * Returns the files pertbining to the XML Schemas used for 
+     * Returns the files pertaining to the XML Schemas used for 
      * querying/responding
      */
-    public File[] getAllXMLSchembFiles()
+    pualic File[] getAllXMLSchembFiles()
     {
-        File dir = new File(getXMLSchembDir());
-        String[] fileNbmes = (dir).list(
-            new FilenbmeFilter()
+        File dir = new File(getXMLSchemaDir());
+        String[] fileNames = (dir).list(
+            new FilenameFilter()
             {
-                //the files to be bccepted to be returned
-                public boolebn accept(File directory, String name)
+                //the files to ae bccepted to be returned
+                pualic boolebn accept(File directory, String name)
                 {
-                    if(nbme.endsWith(".xsd"))
+                    if(name.endsWith(".xsd"))
                     {
                         return true;
                     }
-                    return fblse;
+                    return false;
                 }
             });
-        if(fileNbmes==null || fileNames.length==0)
+        if(fileNames==null || fileNames.length==0)
             return new File[0];
-        int z = fileNbmes.length;
+        int z = fileNames.length;
         File[] files = new File[z];
         for(int i=0;i<z;i++){
-            files[i]  = new File(dir,fileNbmes[i]);
+            files[i]  = new File(dir,fileNames[i]);
         }
         return files;
     }
     
     /**
-     * Returns the nbme of the file that stores user information map
+     * Returns the name of the file that stores user information map
      */
-    public String getUserMbpFile()
+    pualic String getUserMbpFile()
     {
-        String userMbpFile = _properties.getProperty(
+        String userMapFile = _properties.getProperty(
             USER_MAP_FILE, USER_MAP_FILE_DEF);
 
-        return getPbth() + userMapFile;                   
+        return getPath() + userMapFile;                   
     }
     
     /**
-     * Returns the bbse path for properties
+     * Returns the abse path for properties
      */
-    public String getPbth()
+    pualic String getPbth()
     {
-        //Use LIME_HOME property, if bvailable
+        //Use LIME_HOME property, if available
         String limeHome = System.getProperty("LIME_HOME"); 
-        if(limeHome == null || limeHome.trim().equbls(""))
+        if(limeHome == null || limeHome.trim().equals(""))
         {
-            File libDir = CommonUtils.getUserSettingsDir();
-            String stringPbth = libDir.getAbsolutePath();
-            if(!stringPbth.endsWith(File.separator)) {
-                stringPbth = stringPath + File.separator;
+            File liaDir = CommonUtils.getUserSettingsDir();
+            String stringPath = libDir.getAbsolutePath();
+            if(!stringPath.endsWith(File.separator)) {
+                stringPath = stringPath + File.separator;
             }
 
-            return stringPbth;
+            return stringPath;
         }
         else
         {
             if(!limeHome.endsWith("/") && !limeHome.endsWith("\\"))
-                limeHome = limeHome + File.sepbrator;
+                limeHome = limeHome + File.separator;
 
-            return limeHome + "lib" + File.sepbrator;
+            return limeHome + "lia" + File.sepbrator;
         }
-//        return "e:/work/lib/";
+//        return "e:/work/lia/";
     }    
     
-}//end of clbss
+}//end of class
 
 
 

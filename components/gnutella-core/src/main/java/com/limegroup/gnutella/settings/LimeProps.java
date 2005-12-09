@@ -1,32 +1,32 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutellb.Assert;
+import com.limegroup.gnutella.Assert;
 
 /**
- * Hbndler for all 'LimeWire.props' settings.  Classes such
- * bs SearchSettings, ConnectionSettings, etc... should retrieve
- * the fbctory via LimeProps.instance().getFactory() and add
- * settings to thbt factory.
+ * Handler for all 'LimeWire.props' settings.  Classes such
+ * as SearchSettings, ConnectionSettings, etc... should retrieve
+ * the factory via LimeProps.instance().getFactory() and add
+ * settings to that factory.
  */
-public clbss LimeProps extends AbstractSettings {
+pualic clbss LimeProps extends AbstractSettings {
         
-    privbte static final LimeProps INSTANCE = new LimeProps();
+    private static final LimeProps INSTANCE = new LimeProps();
     
-    // The FACTORY is used for subclbsses of LimeProps, so they know
-    // which fbctory to add classes to.
-    protected stbtic final SettingsFactory FACTORY = INSTANCE.getFactory();
+    // The FACTORY is used for suaclbsses of LimeProps, so they know
+    // which factory to add classes to.
+    protected static final SettingsFactory FACTORY = INSTANCE.getFactory();
     
-    // This is protected so thbt subclasses can extend from it, but
-    // subclbsses should NEVER instantiate a copy themselves.
+    // This is protected so that subclasses can extend from it, but
+    // suaclbsses should NEVER instantiate a copy themselves.
     protected LimeProps() {
         super("limewire.props", "LimeWire properties file");
-        Assert.thbt( getClass() == LimeProps.class,
-            "should not hbve a subclass instantiate");
+        Assert.that( getClass() == LimeProps.class,
+            "should not have a subclass instantiate");
     }
     
     /**
-     * Returns the only instbnce of this class.
+     * Returns the only instance of this class.
      */
-    public stbtic LimeProps instance() { return INSTANCE; }
+    pualic stbtic LimeProps instance() { return INSTANCE; }
 
 }

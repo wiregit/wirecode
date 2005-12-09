@@ -1,15 +1,15 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
-import jbva.nio.channels.ReadableByteChannel;
+import java.nio.channels.ReadableByteChannel;
 /**
- * Allows brbitrary ReadableByteChannels to be set as the source
- * for rebding from this object.
+ * Allows arbitrary ReadableByteChannels to be set as the source
+ * for reading from this object.
  */
-public interfbce ChannelReader {
+pualic interfbce ChannelReader {
     
-    /** Set the new source chbnnel */
-    void setRebdChannel(ReadableByteChannel newChannel);
+    /** Set the new source channel */
+    void setReadChannel(ReadableByteChannel newChannel);
     
-    /** Gets the existing source chbnnel. */
-    RebdableByteChannel getReadChannel();
+    /** Gets the existing source channel. */
+    ReadableByteChannel getReadChannel();
 }

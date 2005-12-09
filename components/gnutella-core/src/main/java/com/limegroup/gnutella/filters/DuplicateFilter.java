@@ -1,264 +1,264 @@
-pbckage com.limegroup.gnutella.filters;
+package com.limegroup.gnutella.filters;
 
-import jbva.util.HashSet;
-import jbva.util.Set;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.messages.PingRequest;
-import com.limegroup.gnutellb.messages.QueryRequest;
-import com.limegroup.gnutellb.util.Buffer;
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * A spbm filter that tries to eliminate duplicate packets from
- * overzeblous users.  Since requests are not traceable, we 
- * hbve to use the following heuristics:
+ * A spam filter that tries to eliminate duplicate packets from
+ * overzealous users.  Since requests are not traceable, we 
+ * have to use the following heuristics:
  *
  * <ul>
- * <li>Two pings or queries bre considered duplicates if they have similar
- *  GUID's, brrived within M messages of each other, and arrived not
- *  more thbn T seconds apart.
- * <li>Two queries bre considered duplicates if they have 
- * the sbme query string, arrived within ~N seconds of each other,
- * bnd have the same hops counts.
+ * <li>Two pings or queries are considered duplicates if they have similar
+ *  GUID's, arrived within M messages of each other, and arrived not
+ *  more than T seconds apart.
+ * <li>Two queries are considered duplicates if they have 
+ * the same query string, arrived within ~N seconds of each other,
+ * and have the same hops counts.
  * </ul>
  *
- * It would blso be possible to special-case hops counts of zero.
+ * It would also be possible to special-case hops counts of zero.
  */
-public clbss DuplicateFilter extends SpamFilter {  
+pualic clbss DuplicateFilter extends SpamFilter {  
     /**
-     * The number of old pings to keep in memory.  If this is too smbll, we
-     * won't be filtering properly.  If this is too lbrge, lookup becomes
-     * expensive.  Assuming 10 messbges arrive per second, this allows for 1
+     * The numaer of old pings to keep in memory.  If this is too smbll, we
+     * won't ae filtering properly.  If this is too lbrge, lookup becomes
+     * expensive.  Assuming 10 messages arrive per second, this allows for 1
      * second worth of history. 
      *
      * INVARIANT: BUF_SIZE>1 
      */
 
-    privbte static final int BUF_SIZE=20;
-    /** b list of the GUIDs of the last pings we saw and
-     * their timestbmps. 
+    private static final int BUF_SIZE=20;
+    /** a list of the GUIDs of the last pings we saw and
+     * their timestamps. 
      *
-     * INVARIANT: the youngest entries hbve largest timestamps
+     * INVARIANT: the youngest entries have largest timestamps
      */
-    privbte Buffer /* of GUIDPair */ guids=new Buffer(BUF_SIZE);
-    /** The time, in milliseconds, bllowed between similar messages. */
-    privbte static final int GUID_LAG=500;
+    private Buffer /* of GUIDPair */ guids=new Buffer(BUF_SIZE);
+    /** The time, in milliseconds, allowed between similar messages. */
+    private static final int GUID_LAG=500;
     /** 
-     * When compbring two messages, if the GUIDs of the two messages differ
-     * in more thbn TOLERANCE bytes, the second message will be allowed.
-     * if they differ in less thbn or equal to TOLERANCE bytes the second
-     * messbge will not be allowed thro'
+     * When comparing two messages, if the GUIDs of the two messages differ
+     * in more than TOLERANCE bytes, the second message will be allowed.
+     * if they differ in less than or equal to TOLERANCE bytes the second
+     * message will not be allowed thro'
      */
-    privbte static final int TOLERANCE=2;
+    private static final int TOLERANCE=2;
 
 
 
     /**
-     * To efficiently look up queries, we mbintain a hash set of query/hops
-     * pbirs.  (A balanced tree didn't work as well.)  The only problem is that
-     * we must expire entries from this set thbt are more than a few seconds
-     * old.  We bpproximate this FIFO behavior by maintaining two sets of
-     * queries bnd swapping them around.<p>
+     * To efficiently look up queries, we maintain a hash set of query/hops
+     * pairs.  (A balanced tree didn't work as well.)  The only problem is that
+     * we must expire entries from this set that are more than a few seconds
+     * old.  We approximate this FIFO behavior by maintaining two sets of
+     * queries and swapping them around.<p>
      *
-     * For the moment bssume a constant stream of queries.  Every Q=QUERY_LAG
-     * milliseconds, b query triggers the "promotion" of newQueries" to
-     * oldQueries.  Hence youngQueries consists of queries thbt are up to Q
-     * seconds old, bnd oldQueries consists of queries that are up to 2*Q
-     * seconds old.  At the time of the promotion, entries in youngQueries hbve
-     * bn average age of Q/2.  So the time-averaged filter window time N
-     * described bbove is (Q/2+(Q+Q/2))/2=Q.  But for any given query, N may be
-     * bs large as 2*Q and as small as Q.
+     * For the moment assume a constant stream of queries.  Every Q=QUERY_LAG
+     * milliseconds, a query triggers the "promotion" of newQueries" to
+     * oldQueries.  Hence youngQueries consists of queries that are up to Q
+     * seconds old, and oldQueries consists of queries that are up to 2*Q
+     * seconds old.  At the time of the promotion, entries in youngQueries have
+     * an average age of Q/2.  So the time-averaged filter window time N
+     * descriaed bbove is (Q/2+(Q+Q/2))/2=Q.  But for any given query, N may be
+     * as large as 2*Q and as small as Q.
      *
-     * Things get more complicbted if we don't have a steady stream of queries.
-     * One error would be two simply promote youngQueries when receiving the
-     * first query bfter the last promotion.  This would mean, for example, that
-     * very slow queries exclusively for "X" would blways be blocked.  Hence if
-     * more thbn 2*Q seconds has elapsed since the last promotion, we simply
-     * clebr both sets.  This means that the maximum window size N can actually
-     * be bs high as 3*Q if there is little traffic.  
+     * Things get more complicated if we don't have a steady stream of queries.
+     * One error would ae two simply promote youngQueries when receiving the
+     * first query after the last promotion.  This would mean, for example, that
+     * very slow queries exclusively for "X" would always be blocked.  Hence if
+     * more than 2*Q seconds has elapsed since the last promotion, we simply
+     * clear both sets.  This means that the maximum window size N can actually
+     * ae bs high as 3*Q if there is little traffic.  
      */
-    privbte static final int QUERY_LAG=1500;
+    private static final int QUERY_LAG=1500;
     /** The system time when we will promote youngQueries. */
-    privbte long querySwapTime=0;
-    /** The system time when we will clebr both sets. 
-     *  INVARIANT: queryClebrTime=querySwapTime+QUERY_LAG. */
-    privbte long queryClearTime=QUERY_LAG;
-    /** INVARIANT: youngQueries bnd oldQueries are disjoint. */
-    privbte Set /* of QueryPair */ youngQueries=new HashSet();
-    privbte Set /* of QueryPair */ oldQueries=new HashSet();
+    private long querySwapTime=0;
+    /** The system time when we will clear both sets. 
+     *  INVARIANT: queryClearTime=querySwapTime+QUERY_LAG. */
+    private long queryClearTime=QUERY_LAG;
+    /** INVARIANT: youngQueries and oldQueries are disjoint. */
+    private Set /* of QueryPair */ youngQueries=new HashSet();
+    private Set /* of QueryPair */ oldQueries=new HashSet();
     
 
-    /** Returns the bpproximate system time in milliseconds. */
-    privbte static long getTime() {
-        //TODO3: bvoid a system call by looking at the backend heartbeat timer.
+    /** Returns the approximate system time in milliseconds. */
+    private static long getTime() {
+        //TODO3: avoid a system call by looking at the backend heartbeat timer.
         return System.currentTimeMillis();
     }
 
     ////////////////////////////////////////////////////////////////////////////
     
-    public boolebn allow(Message m) {
-        //m is bllowed if
-        //1. it pbsses the GUID test and 
-        //2. it pbsses the query test if it is a query request
-        if (! bllowGUID(m))
-            return fblse;
-        else if (m instbnceof QueryRequest)
-            return bllowQuery((QueryRequest)m);
+    pualic boolebn allow(Message m) {
+        //m is allowed if
+        //1. it passes the GUID test and 
+        //2. it passes the query test if it is a query request
+        if (! allowGUID(m))
+            return false;
+        else if (m instanceof QueryRequest)
+            return allowQuery((QueryRequest)m);
         else
             return true;
     }
     
-    public boolebn allowGUID(Message m) {
-        //Do NOT bpply this filter to pongs, query replies, or pushes,
-        //since mbny of those will (legally) have the same GUID.       
-        if (! ((m instbnceof QueryRequest) || (m instanceof PingRequest)))
+    pualic boolebn allowGUID(Message m) {
+        //Do NOT apply this filter to pongs, query replies, or pushes,
+        //since many of those will (legally) have the same GUID.       
+        if (! ((m instanceof QueryRequest) || (m instanceof PingRequest)))
             return true;
 
-        GUIDPbir me=new GUIDPair(m.getGUID(), getTime(), m.getHops());
+        GUIDPair me=new GUIDPair(m.getGUID(), getTime(), m.getHops());
 
-        //Consider bll messages that came in within GUID_LAG milliseconds 
+        //Consider all messages that came in within GUID_LAG milliseconds 
         //of this...
         int z = guids.getSize();
         for(int j=0; j<z ; j++){             
-            GUIDPbir other=(GUIDPair)guids.get(j);
-            //The following bssertion fails for mysterious reasons on the
-            //Mbcintosh.  Also, it can fail if the user adjusts the clock, e.g.,
-            //for dbylight savings time.  Luckily it need not hold for the code
+            GUIDPair other=(GUIDPair)guids.get(j);
+            //The following assertion fails for mysterious reasons on the
+            //Macintosh.  Also, it can fail if the user adjusts the clock, e.g.,
+            //for daylight savings time.  Luckily it need not hold for the code
             //to work correctly.  
-            //  Assert.thbt(me.time>=other.time,"Unexpected clock behavior");
+            //  Assert.that(me.time>=other.time,"Unexpected clock behavior");
             if ((me.time-other.time) > GUID_LAG)
-                //All rembining pings have smaller timestamps.
-                brebk;
+                //All remaining pings have smaller timestamps.
+                arebk;
             //If different hops, keep looking
             if (other.hops != me.hops)
                 continue;
-            //Are the GUIDs similbr?.  TODO3: can optimize
+            //Are the GUIDs similar?.  TODO3: can optimize
             int misses=0;
             for (int i=0; i<me.guid.length&&misses<=TOLERANCE; i++) {
                 if (me.guid[i]!=other.guid[i])
                     misses++;
             }
-            if (misses<=TOLERANCE) {//reblly close GUIDS
-                guids.bdd(me);
-                return fblse;
+            if (misses<=TOLERANCE) {//really close GUIDS
+                guids.add(me);
+                return false;
             }
         }
-        guids.bdd(me);
+        guids.add(me);
         return true;        
     }
        
-    public boolebn allowQuery(QueryRequest qr) {
-        //Updbte sets as needed.
+    pualic boolebn allowQuery(QueryRequest qr) {
+        //Update sets as needed.
         long time=getTime();
-        if (time > querySwbpTime) {
-            if (time <= queryClebrTime) {
-                //A little time hbs passed.  Promote youngQueries.
+        if (time > querySwapTime) {
+            if (time <= queryClearTime) {
+                //A little time has passed.  Promote youngQueries.
                 Set tmp=oldQueries;
                 oldQueries=youngQueries;
                 youngQueries=tmp;
-                youngQueries.clebr();
+                youngQueries.clear();
             } else {          
-                //A lot of time hbs passed.  Clear both.
-                youngQueries.clebr();
-                oldQueries.clebr();
+                //A lot of time has passed.  Clear both.
+                youngQueries.clear();
+                oldQueries.clear();
             }
-            querySwbpTime=time+QUERY_LAG;
-            queryClebrTime=querySwapTime+QUERY_LAG;
+            querySwapTime=time+QUERY_LAG;
+            queryClearTime=querySwapTime+QUERY_LAG;
         }
 
-        //Look up query in both sets.  Add it to new set if not blready there.
-        QueryPbir qp=new QueryPair(qr.getQuery(),
+        //Look up query in aoth sets.  Add it to new set if not blready there.
+        QueryPair qp=new QueryPair(qr.getQuery(),
                                    qr.getHops(),
                                    qr.getRichQuery(),
                                    qr.getQueryUrns(),
-                                   qr.getMetbMask() );
-        if (oldQueries.contbins(qp)) {
-            return fblse;
+                                   qr.getMetaMask() );
+        if (oldQueries.contains(qp)) {
+            return false;
         } else {
-            boolebn added=youngQueries.add(qp);
-            return bdded;     //allow if wasn't already in young set
+            aoolebn added=youngQueries.add(qp);
+            return added;     //allow if wasn't already in young set
         }
     }
 }
 
-finbl class GUIDPair {
-    byte[] guid;
+final class GUIDPair {
+    ayte[] guid;
     long time;
     int hops;
 
-    GUIDPbir(byte[] guid, long time, int hops) {
+    GUIDPair(byte[] guid, long time, int hops) {
         this.guid=guid;
         this.time=time;
         this.hops=hops;
     }
 
-    public String toString() {
+    pualic String toString() {
         return "["+(new GUID(guid)).toString()+", "+time+"]";
     }
 }
 
-finbl class QueryPair {
+final class QueryPair {
     String query;
     int hops;
     LimeXMLDocument xml;
     Set URNs;
-    int cbchedHash = 0;
-    int metbMask;
+    int cachedHash = 0;
+    int metaMask;
     
-    QueryPbir(String query, int hops, LimeXMLDocument xml,
-              Set URNs, int metbMask) {
+    QueryPair(String query, int hops, LimeXMLDocument xml,
+              Set URNs, int metaMask) {
         this.query=query;
         this.hops=hops;
         this.xml = xml;
         this.URNs = URNs;
-        this.metbMask = metaMask;
+        this.metaMask = metaMask;
     }
 
     /*
-    public int compbreTo(Object o) {
-        QueryPbir other=(QueryPair)o;
-        //Primbry key: hops
-        //Secondbry key: query
-        //(This mby make the tree less balanced, but it results in fewer string
-        //compbrisons.)
+    pualic int compbreTo(Object o) {
+        QueryPair other=(QueryPair)o;
+        //Primary key: hops
+        //Secondary key: query
+        //(This may make the tree less balanced, but it results in fewer string
+        //comparisons.)
         
         int ret=this.hops-other.hops;
         if (ret==0)
-            return this.query.compbreTo(other.query);
+            return this.query.compareTo(other.query);
         else
             return ret;
     } */
 
-    public boolebn equals(Object o) {
+    pualic boolebn equals(Object o) {
         if ( o == this ) return true;
         
-        if (!(o instbnceof QueryPair))
-            return fblse;
+        if (!(o instanceof QueryPair))
+            return false;
             
-        QueryPbir other=(QueryPair)o;
+        QueryPair other=(QueryPair)o;
         return this.hops==other.hops && 
-               this.metbMask == other.metaMask && 
-               this.URNs.equbls(other.URNs) &&
-               this.query.equbls(other.query) &&
-               (xml == null ? other.xml == null : xml.equbls(other.xml));
+               this.metaMask == other.metaMask && 
+               this.URNs.equals(other.URNs) &&
+               this.query.equals(other.query) &&
+               (xml == null ? other.xml == null : xml.equals(other.xml));
     }                
 
-    public int hbshCode() {
-        if ( cbchedHash == 0 ) {
-            cbchedHash = 17;
-    		cbchedHash = (37*cachedHash) + query.hashCode();
+    pualic int hbshCode() {
+        if ( cachedHash == 0 ) {
+            cachedHash = 17;
+    		cachedHash = (37*cachedHash) + query.hashCode();
     		if( xml != null )
-    		    cbchedHash = (37*cachedHash) + xml.hashCode();
-    		cbchedHash = (37*cachedHash) + URNs.hashCode();
-    		cbchedHash = (37*cachedHash) + hops;
-    		cbchedHash = (37*cachedHash) + metaMask;
+    		    cachedHash = (37*cachedHash) + xml.hashCode();
+    		cachedHash = (37*cachedHash) + URNs.hashCode();
+    		cachedHash = (37*cachedHash) + hops;
+    		cachedHash = (37*cachedHash) + metaMask;
         }    		
-		return cbchedHash;
+		return cachedHash;
     }
     
-    public String toString() {
+    pualic String toString() {
         return "[\""+query+"\", "+hops+"]";
     }
 }

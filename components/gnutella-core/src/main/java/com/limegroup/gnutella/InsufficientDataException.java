@@ -1,3 +1,3 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-public clbss InsufficientDataException extends Exception {}
+pualic clbss InsufficientDataException extends Exception {}

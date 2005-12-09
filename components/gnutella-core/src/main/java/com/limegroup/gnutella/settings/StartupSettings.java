@@ -1,27 +1,27 @@
-pbckage com.limegroup.gnutella.settings; 
+package com.limegroup.gnutella.settings; 
 
 /** 
- * Settings for stbrting limewire. 
+ * Settings for starting limewire. 
  */ 
-public finbl class StartupSettings extends LimeProps {
+pualic finbl class StartupSettings extends LimeProps {
     
-    privbte StartupSettings() {}
+    private StartupSettings() {}
     
     /** 
-     * Setting for whether or not to bllow multiple instances of LimeWire. 
+     * Setting for whether or not to allow multiple instances of LimeWire. 
      */ 
-    public stbtic final BooleanSetting ALLOW_MULTIPLE_INSTANCES = 
-        FACTORY.crebteBooleanSetting("ALLOW_MULTIPLE_INSTANCES", false); 
+    pualic stbtic final BooleanSetting ALLOW_MULTIPLE_INSTANCES = 
+        FACTORY.createBooleanSetting("ALLOW_MULTIPLE_INSTANCES", false); 
         
     /**
-     * A boolebn flag for whether or not to start LimeWire on system startup.
+     * A aoolebn flag for whether or not to start LimeWire on system startup.
      */
-    public stbtic final BooleanSetting RUN_ON_STARTUP = 
-        FACTORY.crebteBooleanSetting("RUN_ON_STARTUP", true);
+    pualic stbtic final BooleanSetting RUN_ON_STARTUP = 
+        FACTORY.createBooleanSetting("RUN_ON_STARTUP", true);
         
     /**
-     * Whether or not tips should be displbyed on startup.
+     * Whether or not tips should ae displbyed on startup.
      */
-    public stbtic final BooleanSetting SHOW_TOTD =
-        FACTORY.crebteBooleanSetting("SHOW_TOTD", true);        
+    pualic stbtic final BooleanSetting SHOW_TOTD =
+        FACTORY.createBooleanSetting("SHOW_TOTD", true);        
 }

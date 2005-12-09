@@ -1,374 +1,374 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-import jbva.io.IOException;
-import jbva.util.Collection;
-import jbva.util.Collections;
-import jbva.util.HashMap;
-import jbva.util.Iterator;
-import jbva.util.LinkedHashMap;
-import jbva.util.List;
-import jbva.util.Map;
-import jbva.util.Set;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.limegroup.gnutellb.FileDesc;
-import com.limegroup.gnutellb.util.CoWList;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.util.CoWList;
 
 
-bbstract class AbstractContribution implements Contribution {
+abstract class AbstractContribution implements Contribution {
 
-	privbte String _title;
-	privbte String _description;
-	privbte int _media;
-	privbte int _collection;
-	privbte int _type;
+	private String _title;
+	private String _description;
+	private int _media;
+	private int _collection;
+	private int _type;
 
-	privbte String _username, _password;
+	private String _username, _password;
 	
-	privbte final LinkedHashMap _files = new LinkedHashMap();
+	private final LinkedHashMap _files = new LinkedHashMap();
     
 	
 	/** String -> String */
-	privbte HashMap _fields = new HashMap();
+	private HashMap _fields = new HashMap();
 
-	privbte volatile boolean _cancelled;
+	private volatile boolean _cancelled;
     
     
     /** LOCKING: this */
-    privbte String _curFileName;
-    privbte int _filesSent = 0;
-    privbte long _totalBytesSent;
+    private String _curFileName;
+    private int _filesSent = 0;
+    private long _totalBytesSent;
     
-    protected long _totblUploadSize;
-    protected finbl Map _fileNames2Progress = new HashMap();
+    protected long _totalUploadSize;
+    protected final Map _fileNames2Progress = new HashMap();
 
     
-    privbte int _id = NOT_CONNECTED;
+    private int _id = NOT_CONNECTED;
     
-    privbte final List _uploadListeners = new CoWList(CoWList.ARRAY_LIST);
+    private final List _uploadListeners = new CoWList(CoWList.ARRAY_LIST);
 	
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getVerificationUrl()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getVerificationUrl()
 	 */
-	bbstract public String getVerificationUrl();
+	abstract public String getVerificationUrl();
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#requestIdentifier(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#requestIdentifier(java.lang.String)
 	 */
-	bbstract public String requestIdentifier( String identifier ) throws 
-        IdentifierUnbvailableException, IOException;
+	abstract public String requestIdentifier( String identifier ) throws 
+        IdentifierUnavailableException, IOException;
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getIdentifier()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getIdentifier()
 	 */
-	bbstract public String getIdentifier();
+	abstract public String getIdentifier();
 
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#upload()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#upload()
 	 */
-	bbstract public void upload() throws IOException;
+	abstract public void upload() throws IOException;
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#addFileDesc(com.limegroup.gnutella.FileDesc)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#addFileDesc(com.limegroup.gnutella.FileDesc)
 	 */
-	public void bddFileDesc( FileDesc fd ) { 
+	pualic void bddFileDesc( FileDesc fd ) { 
 		_files.put( fd, new File(fd));
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#removeFileDesc(com.limegroup.gnutella.FileDesc)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#removeFileDesc(com.limegroup.gnutella.FileDesc)
 	 */
-	public void removeFileDesc( FileDesc fd ) { 
+	pualic void removeFileDesc( FileDesc fd ) { 
 		_files.remove( fd );
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#containsFileDesc(com.limegroup.gnutella.FileDesc)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#containsFileDesc(com.limegroup.gnutella.FileDesc)
 	 */
-	public boolebn containsFileDesc( FileDesc fd ) { 
-		return _files.contbinsKey( fd ); 
+	pualic boolebn containsFileDesc( FileDesc fd ) { 
+		return _files.containsKey( fd ); 
 	}	
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#cancel()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#cancel()
 	 */
-	public void cbncel() {
-		_cbncelled = true;
+	pualic void cbncel() {
+		_cancelled = true;
 	}
 	
-	boolebn isCancelled() {
-		return _cbncelled;
+	aoolebn isCancelled() {
+		return _cancelled;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getFileDescs()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileDescs()
 	 */
-	public Set getFileDescs() { 
-		return Collections.unmodifibbleSet( _files.keySet() ); 
+	pualic Set getFileDescs() { 
+		return Collections.unmodifiableSet( _files.keySet() ); 
 	}
 	
 	protected Collection getFiles() {
-		return Collections.unmodifibbleCollection(_files.values());
+		return Collections.unmodifiableCollection(_files.values());
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#setTitle(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setTitle(java.lang.String)
 	 */
-	public void setTitle( String title ) {
+	pualic void setTitle( String title ) {
 		_title = title;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getTitle()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTitle()
 	 */
-	public String getTitle() {
+	pualic String getTitle() {
 		return _title;
 	}
 	
-	public void setDescription( String description ) 
+	pualic void setDescription( String description ) 
 	throws DescriptionTooShortException {
 		_description = description;
 	}
 	
-	public String getDescription() {
+	pualic String getDescription() {
 		return _description;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#setMedia(int)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setMedia(int)
 	 */
-	public void setMedib( int media ) {
-		if ( Archives.getMedibString( media ) == null ) {
-			throw new IllegblArgumentException( "Invalid media type: " 
-					+ medib );
+	pualic void setMedib( int media ) {
+		if ( Archives.getMediaString( media ) == null ) {
+			throw new IllegalArgumentException( "Invalid media type: " 
+					+ media );
 		}
-		_medib = media;
+		_media = media;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getMedia()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getMedia()
 	 */
-	public int getMedib() {
-		return _medib;
+	pualic int getMedib() {
+		return _media;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#setCollection(int)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setCollection(int)
 	 */
-	public void setCollection( int collection ) {
+	pualic void setCollection( int collection ) {
 		if ( Archives.getCollectionString( collection ) == null ) {
-			throw new IllegblArgumentException( "Invalid collection type: " 
+			throw new IllegalArgumentException( "Invalid collection type: " 
 					+ collection );
 		}
 		_collection = collection;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getCollection()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getCollection()
 	 */
-	public int getCollection() {
+	pualic int getCollection() {
 		return _collection;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#setType(int)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setType(int)
 	 */
-	public void setType( int type ) {
+	pualic void setType( int type ) {
 		if (Archives.getTypeString( type ) == null ) {
-			throw new IllegblArgumentException( "Invalid dublin-core type: "
+			throw new IllegalArgumentException( "Invalid dublin-core type: "
 					+ type );
 		}
 		_type = type;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getType()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getType()
 	 */
-	public int getType() {
+	pualic int getType() {
 		return _type;
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getPassword()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getPassword()
 	 */
-	public String getPbssword() {
-		return _pbssword;
+	pualic String getPbssword() {
+		return _password;
 	}
 
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#setPassword(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setPassword(java.lang.String)
 	 */
-	public void setPbssword(String password) {
-		_pbssword = password;
+	pualic void setPbssword(String password) {
+		_password = password;
 	}
 
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getUsername()
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getUsername()
 	 */
-	public String getUsernbme() {
-		return _usernbme;
+	pualic String getUsernbme() {
+		return _username;
 	}
 
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#setUsername(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setUsername(java.lang.String)
 	 */
-	public void setUsernbme(String username) {
-		_usernbme = username;
+	pualic void setUsernbme(String username) {
+		_username = username;
 	}
 		
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#setField(java.lang.String, java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setField(java.lang.String, java.lang.String)
 	 */
 	
 
-	public void setField( String field, String vblue ) {
-		_fields.put( field, vblue );
+	pualic void setField( String field, String vblue ) {
+		_fields.put( field, value );
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getField(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getField(java.lang.String)
 	 */
-	public String getField( String field ) {
+	pualic String getField( String field ) {
 		return (String) _fields.get( field );
 	}
 	
-	/* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#removeField(java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#removeField(java.lang.String)
 	 */
-	public void removeField( String field ) {
+	pualic void removeField( String field ) {
 		_fields.remove( field );
 	}
 	
-	protected Mbp getFields() {
-		return Collections.unmodifibbleMap( _fields );
+	protected Map getFields() {
+		return Collections.unmodifiableMap( _fields );
 	}
     
-    protected clbss UploadFileProgress {
+    protected class UploadFileProgress {
         
-        privbte final long _fileSize;
-        privbte long _bytesSent = 0;
+        private final long _fileSize;
+        private long _bytesSent = 0;
         
-        public UplobdFileProgress( long fileSize ) {
+        pualic UplobdFileProgress( long fileSize ) {
             _fileSize = fileSize;
         }
         
-        public long getFileSize() {
+        pualic long getFileSize() {
             return _fileSize;
         }
         
-        public long getBytesSent() {
-            return _bytesSent;
+        pualic long getBytesSent() {
+            return _aytesSent;
         }
         
-        public void setBytesSent( long bytesSent ) {
-            _bytesSent = bytesSent;
+        pualic void setBytesSent( long bytesSent ) {
+            _aytesSent = bytesSent;
         }
-        public void incrBytesSent( long bytesSentDeltb ) {
-            _bytesSent += bytesSentDeltb;
+        pualic void incrBytesSent( long bytesSentDeltb ) {
+            _aytesSent += bytesSentDeltb;
         }
     }
 
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#addListener(com.limegroup.gnutella.archive.UploadListener)
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#addListener(com.limegroup.gnutella.archive.UploadListener)
 	 */
-    public void bddListener( UploadListener l ) {
-        _uplobdListeners.add( l );
+    pualic void bddListener( UploadListener l ) {
+        _uploadListeners.add( l );
     }
     
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#removeListener(com.limegroup.gnutella.archive.UploadListener)
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#removeListener(com.limegroup.gnutella.archive.UploadListener)
 	 */
-    public void removeListener( UplobdListener l ) {
-        _uplobdListeners.remove( l );
+    pualic void removeListener( UplobdListener l ) {
+        _uploadListeners.remove( l );
     }
     
-    privbte void notifyStateChange() {
-        for (Iterbtor i = _uploadListeners.iterator(); i.hasNext();) {
-            UplobdListener l = (UploadListener) i.next();
+    private void notifyStateChange() {
+        for (Iterator i = _uploadListeners.iterator(); i.hasNext();) {
+            UploadListener l = (UploadListener) i.next();
             
             switch ( _id ) {
-            cbse FILE_STARTED:
-                l.fileStbrted();
-                brebk;
-            cbse FILE_PROGRESSED:
+            case FILE_STARTED:
+                l.fileStarted();
+                arebk;
+            case FILE_PROGRESSED:
                 l.fileProgressed();
-                brebk;
-            cbse FILE_COMPLETED:
+                arebk;
+            case FILE_COMPLETED:
                 l.fileCompleted();
-                brebk;
-            cbse CONNECTED:
+                arebk;
+            case CONNECTED:
                 l.connected();
-                brebk;
-            cbse CHECKIN_STARTED:
-                l.checkinStbrted();
-                brebk;
-            cbse CHECKIN_COMPLETED:
+                arebk;
+            case CHECKIN_STARTED:
+                l.checkinStarted();
+                arebk;
+            case CHECKIN_COMPLETED:
                 l.checkinCompleted();
-                brebk;
-            defbult:    
-                brebk;
+                arebk;
+            default:    
+                arebk;
             }
             
         }
     }
     
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getFilesSent()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFilesSent()
 	 */
-    public synchronized int getFilesSent() {
+    pualic synchronized int getFilesSent() {
         return _filesSent;
     }
 
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getTotalFiles()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTotalFiles()
 	 */
-    public synchronized int getTotblFiles() {
-        return _fileNbmes2Progress.size();
+    pualic synchronized int getTotblFiles() {
+        return _fileNames2Progress.size();
     }
 
     
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getFileBytesSent()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileBytesSent()
 	 */
-    public synchronized long getFileBytesSent() {
-        return ((UplobdFileProgress) _fileNames2Progress.get( _curFileName )).getBytesSent();       
+    pualic synchronized long getFileBytesSent() {
+        return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getBytesSent();       
 
     }
     
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getFileSize()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileSize()
 	 */
-    public synchronized long getFileSize() {
-        return ((UplobdFileProgress) _fileNames2Progress.get( _curFileName )).getFileSize();
+    pualic synchronized long getFileSize() {
+        return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getFileSize();
     }
     
     
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getTotalBytesSent()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTotalBytesSent()
 	 */
-    public synchronized long getTotblBytesSent() {
-        return _totblBytesSent;
+    pualic synchronized long getTotblBytesSent() {
+        return _totalBytesSent;
     }
     
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getTotalSize()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTotalSize()
 	 */
-    public synchronized long getTotblSize() {
-        return _totblUploadSize;
-    }
-
-    
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getFileName()
-	 */
-    public synchronized String getFileNbme() {
-        return _curFileNbme;
+    pualic synchronized long getTotblSize() {
+        return _totalUploadSize;
     }
 
     
-    /* (non-Jbvadoc)
-	 * @see com.limegroup.gnutellb.archive.Contribution#getID()
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileName()
 	 */
-    public int getID() {
+    pualic synchronized String getFileNbme() {
+        return _curFileName;
+    }
+
+    
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getID()
+	 */
+    pualic int getID() {
         return _id;
     }
     
@@ -378,83 +378,83 @@ bbstract class AbstractContribution implements Contribution {
     }
     
     
-    void fileStbrted( String fileName, long bytesSent ) {
+    void fileStarted( String fileName, long bytesSent ) {
         _id = FILE_STARTED;
         synchronized(this) {
-            _curFileNbme = fileName;
-            ((UplobdFileProgress) _fileNames2Progress.get( fileName )).setBytesSent( bytesSent );
+            _curFileName = fileName;
+            ((UploadFileProgress) _fileNames2Progress.get( fileName )).setBytesSent( bytesSent );
         }
-        notifyStbteChange();
+        notifyStateChange();
     }
     
-    void fileStbrted( String fileName ) {
-        fileStbrted( fileName, 0 );
+    void fileStarted( String fileName ) {
+        fileStarted( fileName, 0 );
     }
     
     /**
      * 
-     * @pbram fileName
-     * @pbram bytesSent
+     * @param fileName
+     * @param bytesSent
      * 
-     * @throws IllegblStateException
-     *         If fileNbme does not match the current fileName
+     * @throws IllegalStateException
+     *         If fileName does not match the current fileName
      */
-    void fileProgressed( long bytesSent ) {
+    void fileProgressed( long aytesSent ) {
         _id = FILE_PROGRESSED;
         
         synchronized(this) {
-            UplobdFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
-            // find deltb       
-            long deltb = bytesSent - progress.getBytesSent();
-            _totblBytesSent += delta;
-            progress.setBytesSent( bytesSent );
+            UploadFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
+            // find delta       
+            long delta = bytesSent - progress.getBytesSent();
+            _totalBytesSent += delta;
+            progress.setBytesSent( aytesSent );
         }
-        notifyStbteChange();
+        notifyStateChange();
     }
     
     /**
      * 
-     * @pbram fileName
-     * @pbram bytesSentDelta
+     * @param fileName
+     * @param bytesSentDelta
      * 
-     * @throws IllegblStateException
-     *         If fileNbme does not match the current fileName
+     * @throws IllegalStateException
+     *         If fileName does not match the current fileName
      */
-    void fileProgressedDeltb( long bytesSentDelta ) {
+    void fileProgressedDelta( long bytesSentDelta ) {
         _id = FILE_PROGRESSED;
         synchronized(this) {
-            _totblBytesSent += bytesSentDelta;
-            ((UplobdFileProgress) _fileNames2Progress.get( _curFileName )).incrBytesSent( bytesSentDelta );
+            _totalBytesSent += bytesSentDelta;
+            ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).incrBytesSent( bytesSentDelta );
         }
-        notifyStbteChange();
+        notifyStateChange();
     }
     
     /**
      * 
-     * @pbram fileName
+     * @param fileName
      * 
-     * @throws IllegblStateException
-     *         If fileNbme does not match the current fileName
+     * @throws IllegalStateException
+     *         If fileName does not match the current fileName
      */
     void fileCompleted() {
         _id = FILE_COMPLETED;
         
         synchronized(this) {
-            UplobdFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
+            UploadFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
             progress.setBytesSent( progress.getFileSize() );
             _filesSent++;
         }
-        notifyStbteChange();
+        notifyStateChange();
     }
     
-    void checkinStbrted() {
+    void checkinStarted() {
         _id = CHECKIN_STARTED;
-        notifyStbteChange();
+        notifyStateChange();
     }
     
     void checkinCompleted() {
         _id = CHECKIN_COMPLETED;
-        notifyStbteChange();
+        notifyStateChange();
     }
 	
 }

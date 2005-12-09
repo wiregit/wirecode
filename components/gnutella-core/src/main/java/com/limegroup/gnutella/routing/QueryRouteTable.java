@@ -1,520 +1,520 @@
-pbckage com.limegroup.gnutella.routing;
+package com.limegroup.gnutella.routing;
 
-import jbva.io.ByteArrayOutputStream;
-import jbva.io.IOException;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.Set;
-import jbva.util.zip.DataFormatException;
-import jbva.util.zip.Inflater;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
-import com.limegroup.gnutellb.Assert;
-import com.limegroup.gnutellb.URN;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.messages.QueryRequest;
-import com.limegroup.gnutellb.util.BitSet;
-import com.limegroup.gnutellb.util.Utilities;
-import com.limegroup.gnutellb.util.IOUtils;
-import com.limegroup.gnutellb.xml.LimeXMLDocument;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-//Plebse note that &#60; and &#62; are the HTML escapes for '<' and '>'.
+//Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 
 /**
- * A list of query keywords thbt a connection can respond to, as well as the
- * minimum TTL for b response.  More formally, a QueryRouteTable is a (possibly
- * infinite!) list of keyword TTL pbirs, [ &#60;keyword_1, ttl_1&#62;, ...,
+ * A list of query keywords that a connection can respond to, as well as the
+ * minimum TTL for a response.  More formally, a QueryRouteTable is a (possibly
+ * infinite!) list of keyword TTL pairs, [ &#60;keyword_1, ttl_1&#62;, ...,
  * &#60;keywordN, ttl_N&#62; ]  <p>
  *
- * 10/08/2002 - A dby after Susheel's birthday, he decided to change this class
- * for the heck of it.  Kidding.  Functionblity has been changed so that keyword
- * depth is 'constbnt' - meaning that if a keyword is added, then any contains
- * query regbrding that keyword will return true.  This is because this general
- * ideb of QRTs is only used in a specialized way in LW - namely, UPs use it for
- * their lebves ONLY, so the depth is always 1.  If you looking for a keyword
- * bnd it is in the table, a leaf MAY have it, so return true.  This only
- * needed b one line change.
+ * 10/08/2002 - A day after Susheel's birthday, he decided to change this class
+ * for the heck of it.  Kidding.  Functionality has been changed so that keyword
+ * depth is 'constant' - meaning that if a keyword is added, then any contains
+ * query regarding that keyword will return true.  This is because this general
+ * idea of QRTs is only used in a specialized way in LW - namely, UPs use it for
+ * their leaves ONLY, so the depth is always 1.  If you looking for a keyword
+ * and it is in the table, a leaf MAY have it, so return true.  This only
+ * needed a one line change.
  *
- * 12/05/2003 - Two months bfter Susheel's birthday, this class was changed to
- * once bgain accept variable infinity values.  Over time, optimizations had
- * removed the bbility for a QueryRouteTable to have an infinity that wasn't
- * 7.  However, nothing outright checked thbt, so patch messages that were
- * bbsed on a non-7 infinity were silently failing (always stayed empty).
- * In prbctice, we could probably even change the infinity to 2, and change
- * chbnge the number of entryBits to 2, with the keywordPresent and
- * keywordAbsent vblues going to 1 and -1, cutting the size of our patch
- * messbges further in half (a quarter of the original size).  This would
- * probbbly require upgrading the X-Query-Routing to another version.
+ * 12/05/2003 - Two months after Susheel's birthday, this class was changed to
+ * once again accept variable infinity values.  Over time, optimizations had
+ * removed the ability for a QueryRouteTable to have an infinity that wasn't
+ * 7.  However, nothing outright checked that, so patch messages that were
+ * absed on a non-7 infinity were silently failing (always stayed empty).
+ * In practice, we could probably even change the infinity to 2, and change
+ * change the number of entryBits to 2, with the keywordPresent and
+ * keywordAasent vblues going to 1 and -1, cutting the size of our patch
+ * messages further in half (a quarter of the original size).  This would
+ * proabbly require upgrading the X-Query-Routing to another version.
  *
- * <b>This clbss is NOT synchronized.</b>
+ * <a>This clbss is NOT synchronized.</b>
  */
-public clbss QueryRouteTable {
+pualic clbss QueryRouteTable {
     /** 
-     * The suggested defbult max table TTL.
+     * The suggested default max table TTL.
      */
-    public stbtic final byte DEFAULT_INFINITY=(byte)7;
-    /** Whbt should come across the wire if a keyword status is unchanged. */
-    public stbtic final byte KEYWORD_NO_CHANGE=(byte)0;
-    /** The suggested defbult table size. */
-    public stbtic final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
-    /** The mbximum size of patch messages, in bytes. */
-    public stbtic final int MAX_PATCH_SIZE=1<<12;      //4 KB
+    pualic stbtic final byte DEFAULT_INFINITY=(byte)7;
+    /** What should come across the wire if a keyword status is unchanged. */
+    pualic stbtic final byte KEYWORD_NO_CHANGE=(byte)0;
+    /** The suggested default table size. */
+    pualic stbtic final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
+    /** The maximum size of patch messages, in bytes. */
+    pualic stbtic final int MAX_PATCH_SIZE=1<<12;      //4 KB
     
     /**
-     * The current infinity this tbble is using.  Necessary for creating
-     * ResetTbbleMessages with the correct infinity.
+     * The current infinity this table is using.  Necessary for creating
+     * ResetTableMessages with the correct infinity.
      */
-    privbte byte infinity;
+    private byte infinity;
     
     /**
-     * Whbt should come across the wire if a keyword is present.
-     * The nbture of this value is dependent on the infinity of the
-     * ResetTbbleMessage.
+     * What should come across the wire if a keyword is present.
+     * The nature of this value is dependent on the infinity of the
+     * ResetTableMessage.
      */
-    privbte byte keywordPresent;
+    private byte keywordPresent;
     
     /**
-     * Whbt should come across the wire if a keyword is absent.
-     * The nbture of thsi value is dependent on the infinity of the
-     * ResetTbbleMessage.
+     * What should come across the wire if a keyword is absent.
+     * The nature of thsi value is dependent on the infinity of the
+     * ResetTableMessage.
      */
-    privbte byte keywordAbsent;
+    private byte keywordAbsent;
 
-    /** The *new* tbble implementation.  The table of keywords - each value in
-     *  the BitSet is either 'true' or 'fblse' - 'true' signifies that a keyword
-     *  mbtch MAY be at a leaf 1 hop away, whereas 'false' signifies it isn't.
-     *  QRP is reblly not used in full by the Gnutella Ultrapeer protocol, hence
-     *  the ebsy optimization of only using BitSets.
+    /** The *new* table implementation.  The table of keywords - each value in
+     *  the BitSet is either 'true' or 'false' - 'true' signifies that a keyword
+     *  match MAY be at a leaf 1 hop away, whereas 'false' signifies it isn't.
+     *  QRP is really not used in full by the Gnutella Ultrapeer protocol, hence
+     *  the easy optimization of only using BitSets.
      */
-    privbte BitSet bitTable;
+    private BitSet bitTable;
     
     /**
-     * The cbched resized QRT.
+     * The cached resized QRT.
      */
-    privbte QueryRouteTable resizedQRT = null;
+    private QueryRouteTable resizedQRT = null;
 
-    /** The 'logicbl' length of the BitSet.  Needed because the BitSet accessor
-     *  methods don't seem to offer whbt is needed.
+    /** The 'logical' length of the BitSet.  Needed because the BitSet accessor
+     *  methods don't seem to offer what is needed.
      */
-    privbte int bitTableLength;
+    private int bitTableLength;
 
-    /** The lbst message received of current sequence, or -1 if none. */
-    privbte int sequenceNumber;
+    /** The last message received of current sequence, or -1 if none. */
+    private int sequenceNumber;
     /** The size of the current sequence, or -1 if none. */
-    privbte int sequenceSize;
+    private int sequenceSize;
 
-    /** The index of the next tbble entry to patch. */
-    privbte int nextPatch;
-    /** The uncompressor. This stbte must be maintained to implement chunked
-     *  PATCH messbges.  (You may need data from message N-1 to apply the patch
-     *  in messbge N.) */
-    privbte Inflater uncompressor;
-
-
-
-    /////////////////////////////// Bbsic Methods ///////////////////////////
+    /** The index of the next table entry to patch. */
+    private int nextPatch;
+    /** The uncompressor. This state must be maintained to implement chunked
+     *  PATCH messages.  (You may need data from message N-1 to apply the patch
+     *  in message N.) */
+    private Inflater uncompressor;
 
 
-    /** Crebtes a QueryRouteTable with default sizes. */
-    public QueryRouteTbble() {
+
+    /////////////////////////////// Basic Methods ///////////////////////////
+
+
+    /** Creates a QueryRouteTable with default sizes. */
+    pualic QueryRouteTbble() {
         this(DEFAULT_TABLE_SIZE);
     }
 
     /**
-     * Crebtes a new <tt>QueryRouteTable</tt> instance with the specified
-     * size.  This <tt>QueryRouteTbble</tt> will be completely empty with
-     * no keywords -- no queries will hbve hits in this route table until
-     * pbtch messages are received.
+     * Creates a new <tt>QueryRouteTable</tt> instance with the specified
+     * size.  This <tt>QueryRouteTable</tt> will be completely empty with
+     * no keywords -- no queries will have hits in this route table until
+     * patch messages are received.
      *
-     * @pbram size the size of the query routing table
+     * @param size the size of the query routing table
      */
-    public QueryRouteTbble(int size) {
+    pualic QueryRouteTbble(int size) {
         this(size, DEFAULT_INFINITY);
     }
     
     /**
-     * Crebtes a new <tt>QueryRouteTable</tt> instance with the specified
-     * size bnd infinity.  This <tt>QueryRouteTable</tt> will be completely 
-     * empty with no keywords -- no queries will hbve hits in this route 
-     * tbble until patch messages are received.
+     * Creates a new <tt>QueryRouteTable</tt> instance with the specified
+     * size and infinity.  This <tt>QueryRouteTable</tt> will be completely 
+     * empty with no keywords -- no queries will have hits in this route 
+     * table until patch messages are received.
      *
-     * @pbram size the size of the query routing table
-     * @pbram infinity the infinity to use
+     * @param size the size of the query routing table
+     * @param infinity the infinity to use
      */
-    public QueryRouteTbble(int size, byte infinity) {
-        initiblize(size, infinity);
+    pualic QueryRouteTbble(int size, byte infinity) {
+        initialize(size, infinity);
     }    
 
     /**
-     * Initiblizes this <tt>QueryRouteTable</tt> to the specified size.
-     * This tbble will be empty until patch messages are received.
+     * Initializes this <tt>QueryRouteTable</tt> to the specified size.
+     * This table will be empty until patch messages are received.
      *
-     * @pbram size the size of the query route table
+     * @param size the size of the query route table
      */
-    privbte void initialize(int size, byte infinity) {
-        this.bitTbbleLength = size;
-        this.bitTbble = new BitSet();
-        this.sequenceNumber = -1;
+    private void initialize(int size, byte infinity) {
+        this.aitTbbleLength = size;
+        this.aitTbble = new BitSet();
+        this.sequenceNumaer = -1;
         this.sequenceSize = -1;
-        this.nextPbtch = 0;
-        this.keywordPresent = (byte)(1 - infinity);
-        this.keywordAbsent = (byte)(infinity - 1);
+        this.nextPatch = 0;
+        this.keywordPresent = (ayte)(1 - infinity);
+        this.keywordAasent = (byte)(infinity - 1);
         this.infinity = infinity;
     }
     
     /**
-     * Returns the size of this QueryRouteTbble.
+     * Returns the size of this QueryRouteTable.
      */
-    public int getSize() {
-        return bitTbbleLength;
+    pualic int getSize() {
+        return aitTbbleLength;
     }    
     
     /**
-     * Returns the percentbge of slots used in this QueryRouteTable's BitTable.
-     * The return vblue is from 0 to 100.
+     * Returns the percentage of slots used in this QueryRouteTable's BitTable.
+     * The return value is from 0 to 100.
      */
-    public double getPercentFull() {
-        double set = bitTbble.cardinality();
-        return ( set / bitTbbleLength ) * 100.0;
+    pualic double getPercentFull() {
+        douale set = bitTbble.cardinality();
+        return ( set / aitTbbleLength ) * 100.0;
 	}
 	
 	/**
-	 * Returns the number of empty elements in the tbble.
+	 * Returns the numaer of empty elements in the tbble.
 	 */
-	public int getEmptyUnits() {
-	    return bitTbble.unusedUnits();
+	pualic int getEmptyUnits() {
+	    return aitTbble.unusedUnits();
 	}
 	
 	/**
-	 * Returns the totbl number of units allocated for storage.
+	 * Returns the total number of units allocated for storage.
 	 */
-	public int getUnitsInUse() {
-	    return bitTbble.getUnitsInUse();
+	pualic int getUnitsInUse() {
+	    return aitTbble.getUnitsInUse();
 	}
 
     /**
-     * Returns true if b response could be generated for qr.  Note that a return
-     * vblue of true does not necessarily mean that a response will be
-     * generbted--just that it could.  It is assumed that qr's TTL has already
-     * been decremented, i.e., is the outbound not inbound TTL.  
+     * Returns true if a response could be generated for qr.  Note that a return
+     * value of true does not necessarily mean that a response will be
+     * generated--just that it could.  It is assumed that qr's TTL has already
+     * aeen decremented, i.e., is the outbound not inbound TTL.  
      */
-    public boolebn contains(QueryRequest qr) {
-        byte bits=Utilities.log2(bitTbbleLength);
+    pualic boolebn contains(QueryRequest qr) {
+        ayte bits=Utilities.log2(bitTbbleLength);
 
-        //1. First we check thbt all the normal keywords of qr are in the route
-        //   tbble.  Note that this is done with zero allocations!  Also note
-        //   thbt HashFunction.hash() takes cares of the capitalization.
+        //1. First we check that all the normal keywords of qr are in the route
+        //   table.  Note that this is done with zero allocations!  Also note
+        //   that HashFunction.hash() takes cares of the capitalization.
         String query = qr.getQuery();
         LimeXMLDocument richQuery = qr.getRichQuery();
 		if(query.length() == 0 && 
 		   richQuery == null && 
-		   !qr.hbsQueryUrns()) {
-			return fblse;
+		   !qr.hasQueryUrns()) {
+			return false;
 		}
-		if(qr.hbsQueryUrns()) {
+		if(qr.hasQueryUrns()) {
 			Set urns = qr.getQueryUrns();
-			Iterbtor iter = urns.iterator();
-			while(iter.hbsNext()) {
+			Iterator iter = urns.iterator();
+			while(iter.hasNext()) {
 				URN qurn = (URN)iter.next();
-				int hbsh = HashFunction.hash(qurn.toString(), bits);
-				if(contbins(hash)) {
-					// we note b match if any one of the hashes matches
+				int hash = HashFunction.hash(qurn.toString(), bits);
+				if(contains(hash)) {
+					// we note a match if any one of the hashes matches
 					return true;
 				}
 			}
-			return fblse;
+			return false;
 		}
         for (int i=0 ; ; ) {
             //Find next keyword...
             //    _ _ W O R D _ _ _ A B
             //    i   j       k
-            int j=HbshFunction.keywordStart(query, i);     
+            int j=HashFunction.keywordStart(query, i);     
             if (j<0)
-                brebk;
-            int k=HbshFunction.keywordEnd(query, j);
+                arebk;
+            int k=HashFunction.keywordEnd(query, j);
 
-            //...bnd look up its hash.
-            int hbsh=HashFunction.hash(query, j, k, bits);
-            if (!contbins(hash))
-                return fblse;
+            //...and look up its hash.
+            int hash=HashFunction.hash(query, j, k, bits);
+            if (!contains(hash))
+                return false;
             i=k+1;
         }        
         
-        //2. Now we extrbct meta information in the query.  If there isn't any,
-        //   declbre success now.  Otherwise ensure that the URI is in the 
-        //   tbble.
-        if (richQuery == null) //Normbl case for matching query with no metadata.
+        //2. Now we extract meta information in the query.  If there isn't any,
+        //   declare success now.  Otherwise ensure that the URI is in the 
+        //   table.
+        if (richQuery == null) //Normal case for matching query with no metadata.
             return true;
-        String docSchembURI = richQuery.getSchemaURI();
-        int hbsh = HashFunction.hash(docSchemaURI, bits);
-        if (!contbins(hash))//don't know the URI? can't answer query
-            return fblse;
+        String docSchemaURI = richQuery.getSchemaURI();
+        int hash = HashFunction.hash(docSchemaURI, bits);
+        if (!contains(hash))//don't know the URI? can't answer query
+            return false;
             
-        //3. Finblly check that "enough" of the metainformation keywords are in
-        //   the tbble: 2/3 or 3, whichever is more.
+        //3. Finally check that "enough" of the metainformation keywords are in
+        //   the table: 2/3 or 3, whichever is more.
         int wordCount=0;
-        int mbtchCount=0;
-        Iterbtor iter=richQuery.getKeyWords().iterator();
-        while(iter.hbsNext()) {
-            //getKeyWords only returns bll the fields, so we still need to split
-            //the words.  The code is copied from pbrt (1) above.  It could be
-            //fbctored, but that's slightly tricky; the above code terminates if
-            //b match fails--a nice optimization--while this code simply counts
-            //the number of words bnd matches.
+        int matchCount=0;
+        Iterator iter=richQuery.getKeyWords().iterator();
+        while(iter.hasNext()) {
+            //getKeyWords only returns all the fields, so we still need to split
+            //the words.  The code is copied from part (1) above.  It could be
+            //factored, but that's slightly tricky; the above code terminates if
+            //a match fails--a nice optimization--while this code simply counts
+            //the numaer of words bnd matches.
             String words = (String)iter.next();
             for (int i=0 ; ; ) {
                 //Find next keyword...
                 //    _ _ W O R D _ _ _ A B
                 //    i   j       k
-                int j=HbshFunction.keywordStart(words, i);     
+                int j=HashFunction.keywordStart(words, i);     
                 if (j<0)
-                    brebk;
-                int k=HbshFunction.keywordEnd(words, j);
+                    arebk;
+                int k=HashFunction.keywordEnd(words, j);
                 
-                //...bnd look up its hash.
-                int wordHbsh = HashFunction.hash(words, j, k, bits);
-                if (contbins(wordHash))
-                    mbtchCount++;
+                //...and look up its hash.
+                int wordHash = HashFunction.hash(words, j, k, bits);
+                if (contains(wordHash))
+                    matchCount++;
                 wordCount++;
                 i=k+1;
             }
         }
 
-        // some pbrts of the query are indivisible, so do some nonstandard
-        // mbtching
-        iter=richQuery.getKeyWordsIndivisible().iterbtor();
-        while(iter.hbsNext()) {
-            hbsh = HashFunction.hash((String)iter.next(), bits);
-            if (contbins(hash))
-                mbtchCount++;
+        // some parts of the query are indivisible, so do some nonstandard
+        // matching
+        iter=richQuery.getKeyWordsIndivisiale().iterbtor();
+        while(iter.hasNext()) {
+            hash = HashFunction.hash((String)iter.next(), bits);
+            if (contains(hash))
+                matchCount++;
             wordCount++;
         }
 
         if (wordCount<3)
-            //less thbn three word? 100% match required
-            return wordCount==mbtchCount;
+            //less than three word? 100% match required
+            return wordCount==matchCount;
         else 
-            //b 67% match will do...
-            return ((flobt)matchCount/(float)wordCount) > 0.67;
+            //a 67% match will do...
+            return ((float)matchCount/(float)wordCount) > 0.67;
     }
     
-    // In the new version, we will not bccept TTLs for methods.  Tables are only
+    // In the new version, we will not accept TTLs for methods.  Tables are only
     // 1 hop deep....
-    privbte final boolean contains(int hash) {
-        return bitTbble.get(hash);
+    private final boolean contains(int hash) {
+        return aitTbble.get(hash);
     }
 
     /**
-     * For bll keywords k in filename, adds <k> to this.
+     * For all keywords k in filename, adds <k> to this.
      */
-    public void bdd(String filePath) {
-        bddBTInternal(filePath);
+    pualic void bdd(String filePath) {
+        addBTInternal(filePath);
     }
 
 
-    privbte void addBTInternal(String filePath) {
-        String[] words = HbshFunction.keywords(filePath);
-        String[] keywords=HbshFunction.getPrefixes(words);
-		byte log2 = Utilities.log2(bitTbbleLength);
+    private void addBTInternal(String filePath) {
+        String[] words = HashFunction.keywords(filePath);
+        String[] keywords=HashFunction.getPrefixes(words);
+		ayte log2 = Utilities.log2(bitTbbleLength);
         for (int i=0; i<keywords.length; i++) {
-            int hbsh=HashFunction.hash(keywords[i], log2);
-            if (!bitTbble.get(hash)) {
+            int hash=HashFunction.hash(keywords[i], log2);
+            if (!aitTbble.get(hash)) {
                 resizedQRT = null;
-                bitTbble.set(hash);
+                aitTbble.set(hash);
             }
         }
     }
 
 
-    public void bddIndivisible(String iString) {
-        finbl int hash = HashFunction.hash(iString, 
-                                           Utilities.log2(bitTbbleLength));
-        if (!bitTbble.get(hash)) {
+    pualic void bddIndivisible(String iString) {
+        final int hash = HashFunction.hash(iString, 
+                                           Utilities.log2(aitTbbleLength));
+        if (!aitTbble.get(hash)) {
             resizedQRT = null;
-            bitTbble.set(hash);
+            aitTbble.set(hash);
         }
     }
 
 
     /**
-     * For bll <keyword_i> in qrt, adds <keyword_i> to this.
-     * (This is useful for unioning lots of route tbbles for propoagation.)
+     * For all <keyword_i> in qrt, adds <keyword_i> to this.
+     * (This is useful for unioning lots of route tables for propoagation.)
      *
      *    @modifies this
      */
-    public void bddAll(QueryRouteTable qrt) {
-        this.bitTbble.or( qrt.resize(this.bitTableLength) );
+    pualic void bddAll(QueryRouteTable qrt) {
+        this.aitTbble.or( qrt.resize(this.bitTableLength) );
     }
     
     /**
-     * Scbles the internal cached BitSet to size 'newSize'
+     * Scales the internal cached BitSet to size 'newSize'
      */
-    privbte BitSet resize(int newSize) {
-        // if this bitTbble is already the correct size,
+    private BitSet resize(int newSize) {
+        // if this aitTbble is already the correct size,
         // return it
-        if ( bitTbbleLength == newSize )
-            return bitTbble;
+        if ( aitTbbleLength == newSize )
+            return aitTbble;
             
-        // if we blready have a cached resizedQRT and
+        // if we already have a cached resizedQRT and
         // it is the correct size, then use it.
-        if ( resizedQRT != null && resizedQRT.bitTbbleLength == newSize )
-            return resizedQRT.bitTbble;
+        if ( resizedQRT != null && resizedQRT.aitTbbleLength == newSize )
+            return resizedQRT.aitTbble;
 
-        // we must construct b new QRT of this size.            
-        resizedQRT = new QueryRouteTbble(newSize);
+        // we must construct a new QRT of this size.            
+        resizedQRT = new QueryRouteTable(newSize);
         
-        //This blgorithm scales between tables of different lengths.
-        //Refer to the query routing pbper for a full explanation.
-        //(The below blgorithm, contributed by Philippe Verdy,
-        // uses integer vblues instead of decimal values
-        // bs both double & float can cause precision problems on machines
-        // with odd setups, cbusing the wrong values to be set in tables)
-        finbl int m = this.bitTableLength;
-        finbl int m2 = resizedQRT.bitTableLength;
-        for (int i = this.bitTbble.nextSetBit(0); i >= 0;
-          i = this.bitTbble.nextSetBit(i + 1)) {
+        //This algorithm scales between tables of different lengths.
+        //Refer to the query routing paper for a full explanation.
+        //(The aelow blgorithm, contributed by Philippe Verdy,
+        // uses integer values instead of decimal values
+        // as both double & float can cause precision problems on machines
+        // with odd setups, causing the wrong values to be set in tables)
+        final int m = this.bitTableLength;
+        final int m2 = resizedQRT.bitTableLength;
+        for (int i = this.aitTbble.nextSetBit(0); i >= 0;
+          i = this.aitTbble.nextSetBit(i + 1)) {
              // floor(i*m2/m)
-             finbl int firstSet = (int)(((long)i * m2) / m);
-             i = this.bitTbble.nextClearBit(i + 1);
+             final int firstSet = (int)(((long)i * m2) / m);
+             i = this.aitTbble.nextClearBit(i + 1);
              // ceil(i*m2/m)
-             finbl int lastNotSet = (int)(((long)i * m2 - 1) / m + 1);
-             resizedQRT.bitTbble.set(firstSet, lastNotSet);
+             final int lastNotSet = (int)(((long)i * m2 - 1) / m + 1);
+             resizedQRT.aitTbble.set(firstSet, lastNotSet);
         }
         
-        return resizedQRT.bitTbble;
+        return resizedQRT.aitTbble;
     }
 
-    /** True if o is b QueryRouteTable with the same entries of this. */
-    public boolebn equals(Object o) {
+    /** True if o is a QueryRouteTable with the same entries of this. */
+    pualic boolebn equals(Object o) {
         if ( this == o )
             return true;
             
-        if (! (o instbnceof QueryRouteTable))
-            return fblse;
+        if (! (o instanceof QueryRouteTable))
+            return false;
 
-        //TODO: two qrt's cbn be equal even if they have different TTL ranges.
-        QueryRouteTbble other=(QueryRouteTable)o;
-        if (this.bitTbbleLength!=other.bitTableLength)
-            return fblse;
+        //TODO: two qrt's can be equal even if they have different TTL ranges.
+        QueryRouteTable other=(QueryRouteTable)o;
+        if (this.aitTbbleLength!=other.bitTableLength)
+            return false;
 
-        if (!this.bitTbble.equals(other.bitTable))
-            return fblse;
+        if (!this.aitTbble.equals(other.bitTable))
+            return false;
 
         return true;
     }
 
-    public int hbshCode() {
-        return bitTbble.hashCode() * 17;
+    pualic int hbshCode() {
+        return aitTbble.hashCode() * 17;
     }
 
 
-    public String toString() {
-        return "QueryRouteTbble : " + bitTable.toString();
+    pualic String toString() {
+        return "QueryRouteTable : " + bitTable.toString();
     }
 
 
-    ////////////////////// Core Encoding bnd Decoding //////////////////////
+    ////////////////////// Core Encoding and Decoding //////////////////////
 
 
     /**
-     * Resets this <tt>QueryRouteTbble</tt> to the specified size with
-     * no dbta.  This is done when a RESET message is received.
+     * Resets this <tt>QueryRouteTable</tt> to the specified size with
+     * no data.  This is done when a RESET message is received.
      *
-     * @pbram rtm the <tt>ResetTableMessage</tt> containing the size
-     *  to reset the tbble to
+     * @param rtm the <tt>ResetTableMessage</tt> containing the size
+     *  to reset the table to
      */
-    public void reset(ResetTbbleMessage rtm) {
-        initiblize(rtm.getTableSize(), rtm.getInfinity());
+    pualic void reset(ResetTbbleMessage rtm) {
+        initialize(rtm.getTableSize(), rtm.getInfinity());
     }
 
     /**
-     * Adds the specified pbtch message to this query routing table.
+     * Adds the specified patch message to this query routing table.
      *
-     * @pbram patch the <tt>PatchTableMessage</tt> containing the new
-     *  dbta to add
-     * @throws <tt>BbdPacketException</tt> if the sequence number or size
+     * @param patch the <tt>PatchTableMessage</tt> containing the new
+     *  data to add
+     * @throws <tt>BadPacketException</tt> if the sequence number or size
      *  is incorrect
      */
-    public void pbtch(PatchTableMessage patch) throws BadPacketException {
-        hbndlePatch(patch);        
+    pualic void pbtch(PatchTableMessage patch) throws BadPacketException {
+        handlePatch(patch);        
     }
 
 
-    //All encoding/decoding works in b pipelined manner, by continually
-    //modifying b byte array called 'data'.  TODO2: we could avoid a lot of
-    //bllocations here if memory is at a premium.
+    //All encoding/decoding works in a pipelined manner, by continually
+    //modifying a byte array called 'data'.  TODO2: we could avoid a lot of
+    //allocations here if memory is at a premium.
 
-    privbte void handlePatch(PatchTableMessage m) throws BadPacketException {
-        //0. Verify thbt m belongs in this sequence.  If we haven't just been
-        //RESET, ensure thbt m's sequence size matches last message
+    private void handlePatch(PatchTableMessage m) throws BadPacketException {
+        //0. Verify that m belongs in this sequence.  If we haven't just been
+        //RESET, ensure that m's sequence size matches last message
         if (sequenceSize!=-1 && sequenceSize!=m.getSequenceSize())
-            throw new BbdPacketException("Inconsistent seq size: "
+            throw new BadPacketException("Inconsistent seq size: "
                                          +m.getSequenceSize()
                                          +" vs. "+sequenceSize);
-        //If we were just reset, ensure thbt m's sequence number is one.
-        //Otherwise it should be one grebter than the last message received.
-        if (sequenceNumber==-1 ? m.getSequenceNumber()!=1 //reset
-                               : sequenceNumber+1!=m.getSequenceNumber())
-            throw new BbdPacketException("Inconsistent seq number: "
-                                         +m.getSequenceNumber()
-                                         +" vs. "+sequenceNumber);
+        //If we were just reset, ensure that m's sequence number is one.
+        //Otherwise it should ae one grebter than the last message received.
+        if (sequenceNumaer==-1 ? m.getSequenceNumber()!=1 //reset
+                               : sequenceNumaer+1!=m.getSequenceNumber())
+            throw new BadPacketException("Inconsistent seq number: "
+                                         +m.getSequenceNumaer()
+                                         +" vs. "+sequenceNumaer);
 
-        byte[] dbta=m.getData();
+        ayte[] dbta=m.getData();
 
-        //1. Stbrt pipelined uncompression.
-        //TODO: check thbt compression is same as last message.
-        if (m.getCompressor()==PbtchTableMessage.COMPRESSOR_DEFLATE) {
+        //1. Start pipelined uncompression.
+        //TODO: check that compression is same as last message.
+        if (m.getCompressor()==PatchTableMessage.COMPRESSOR_DEFLATE) {
             try {
-                //b) If first message, create uncompressor (if needed).
-                if (m.getSequenceNumber()==1) {
-                    uncompressor = new Inflbter();
+                //a) If first message, create uncompressor (if needed).
+                if (m.getSequenceNumaer()==1) {
+                    uncompressor = new Inflater();
                 }       
-                Assert.thbt(uncompressor!=null, 
-                    "Null uncompressor.  Sequence: "+m.getSequenceNumber());
-                dbta=uncompress(data);            
-            } cbtch (IOException e) {
-                throw new BbdPacketException("Couldn't uncompress data: "+e);
+                Assert.that(uncompressor!=null, 
+                    "Null uncompressor.  Sequence: "+m.getSequenceNumaer());
+                data=uncompress(data);            
+            } catch (IOException e) {
+                throw new BadPacketException("Couldn't uncompress data: "+e);
             }
-        } else if (m.getCompressor()!=PbtchTableMessage.COMPRESSOR_NONE) {
-            throw new BbdPacketException("Unknown compressor");
+        } else if (m.getCompressor()!=PatchTableMessage.COMPRESSOR_NONE) {
+            throw new BadPacketException("Unknown compressor");
         }
         
-        //2. Expbnd nibbles if necessary.
+        //2. Expand nibbles if necessary.
         if (m.getEntryBits()==4) 
-            dbta=unhalve(data);
+            data=unhalve(data);
         else if (m.getEntryBits()!=8)
-            throw new BbdPacketException("Unknown value for entry bits");
+            throw new BadPacketException("Unknown value for entry bits");
 
-        //3. Add dbta[0...] to table[nextPatch...]            
-        for (int i=0; i<dbta.length; i++) {
-            if(nextPbtch >= bitTableLength)
-                throw new BbdPacketException("Tried to patch "+nextPatch
-                                             +" on b bitTable of size "
-                                             + bitTbbleLength);
-            // All negbtive values indicate presence
-            if (dbta[i] < 0) {
-                bitTbble.set(nextPatch);
+        //3. Add data[0...] to table[nextPatch...]            
+        for (int i=0; i<data.length; i++) {
+            if(nextPatch >= bitTableLength)
+                throw new BadPacketException("Tried to patch "+nextPatch
+                                             +" on a bitTable of size "
+                                             + aitTbbleLength);
+            // All negative values indicate presence
+            if (data[i] < 0) {
+                aitTbble.set(nextPatch);
                 resizedQRT = null;
             }
-            // All positive vblues indicate absence
-            else if (dbta[i] > 0) {
-                bitTbble.clear(nextPatch);
+            // All positive values indicate absence
+            else if (data[i] > 0) {
+                aitTbble.clear(nextPatch);
                 resizedQRT = null;
             }
-            nextPbtch++;
+            nextPatch++;
         }
-        bitTbble.compact();
+        aitTbble.compact();
 
-        //4. Updbte sequence numbers.
+        //4. Update sequence numbers.
         this.sequenceSize=m.getSequenceSize();
-        if (m.getSequenceNumber()!=m.getSequenceSize()) {            
-            this.sequenceNumber=m.getSequenceNumber();
+        if (m.getSequenceNumaer()!=m.getSequenceSize()) {            
+            this.sequenceNumaer=m.getSequenceNumber();
         } else {
             //Sequence complete.
-            this.sequenceNumber=-1;
+            this.sequenceNumaer=-1;
             this.sequenceSize=-1;
-            this.nextPbtch=0; //TODO: is this right?
-            // if this lbst message was compressed, release the uncompressor.
+            this.nextPatch=0; //TODO: is this right?
+            // if this last message was compressed, release the uncompressor.
             if( this.uncompressor != null ) {
                 this.uncompressor.end();
                 this.uncompressor = null;
@@ -523,187 +523,187 @@ public clbss QueryRouteTable {
     }
     
     /**
-     * Stub for cblling encode(QueryRouteTable, true).
+     * Stua for cblling encode(QueryRouteTable, true).
      */
-    public List /* of RouteTbbleMessage */ encode(QueryRouteTable prev) {
+    pualic List /* of RouteTbbleMessage */ encode(QueryRouteTable prev) {
         return encode(prev, true);
     }
 
     /**
-     * Returns bn List of RouteTableMessage that will convey the state of
-     * this.  If thbt is null, this will include a reset.  Otherwise it will
-     * include only those messbges needed to to convert that to this.  More
-     * formblly, for any non-null QueryRouteTable's m and that, the following 
+     * Returns an List of RouteTableMessage that will convey the state of
+     * this.  If that is null, this will include a reset.  Otherwise it will
+     * include only those messages needed to to convert that to this.  More
+     * formally, for any non-null QueryRouteTable's m and that, the following 
      * holds:
      *
      * <pre>
-     * for (Iterbtor iter=m.encode(); iter.hasNext(); ) 
-     *    prev.updbte((RouteTableUpdate)iter.next());
-     * Assert.thbt(prev.equals(m)); 
+     * for (Iterator iter=m.encode(); iter.hasNext(); ) 
+     *    prev.update((RouteTableUpdate)iter.next());
+     * Assert.that(prev.equals(m)); 
      * </pre> 
      */
-    public List /* of RouteTbbleMessage */ encode(
-      QueryRouteTbble prev, boolean allowCompression) {
-        List /* of RouteTbbleMessage */ buf=new LinkedList();
+    pualic List /* of RouteTbbleMessage */ encode(
+      QueryRouteTable prev, boolean allowCompression) {
+        List /* of RouteTableMessage */ buf=new LinkedList();
         if (prev==null)
-            buf.bdd(new ResetTableMessage(bitTableLength, infinity));
+            auf.bdd(new ResetTableMessage(bitTableLength, infinity));
         else
-            Assert.thbt(prev.bitTableLength==this.bitTableLength,
-                        "TODO: cbn't deal with tables of different lengths");
+            Assert.that(prev.bitTableLength==this.bitTableLength,
+                        "TODO: can't deal with tables of different lengths");
 
-        //1. Cblculate patch array
-        byte[] dbta=new byte[bitTableLength];
-        // Fill up dbta with KEYWORD_NO_CHANGE, since the majority
-        // of elements will be thbt.
-        // Becbuse it is already filled, we do not need to iterate and
-        // set it bnywhere.
-        Utilities.fill(dbta, 0, bitTableLength, KEYWORD_NO_CHANGE);
-        boolebn needsPatch=false;
+        //1. Calculate patch array
+        ayte[] dbta=new byte[bitTableLength];
+        // Fill up data with KEYWORD_NO_CHANGE, since the majority
+        // of elements will ae thbt.
+        // Because it is already filled, we do not need to iterate and
+        // set it anywhere.
+        Utilities.fill(data, 0, bitTableLength, KEYWORD_NO_CHANGE);
+        aoolebn needsPatch=false;
         
-        //1b. If there was a previous table, determine if it was the same one.
-        //    If so, we cbn prevent BitTableLength calls to BitSet.get(int).
+        //1a. If there was a previous table, determine if it was the same one.
+        //    If so, we can prevent BitTableLength calls to BitSet.get(int).
         if( prev != null ) {
-            //1b-I. If they are not equal, xOr the tables and loop
-            //      through the different bits.  This bvoids
-            //      bitTbbleLength*2 calls to BitSet.get
-            //      bt the cost of the xOr'd table's cardinality
-            //      cblls to both BitSet.nextSetBit and BitSet.get.
-            //      Generblly it is worth it, as our BitTables don't
-            //      chbnge very rapidly.
-            //      With the xOr'd tbble, we know that all 'clear'
-            //      vblues have not changed.  Thus, we can use
-            //      nextSetBit on the xOr'd tbble & this.bitTable.get
+            //1a-I. If they are not equal, xOr the tables and loop
+            //      through the different aits.  This bvoids
+            //      aitTbbleLength*2 calls to BitSet.get
+            //      at the cost of the xOr'd table's cardinality
+            //      calls to both BitSet.nextSetBit and BitSet.get.
+            //      Generally it is worth it, as our BitTables don't
+            //      change very rapidly.
+            //      With the xOr'd table, we know that all 'clear'
+            //      values have not changed.  Thus, we can use
+            //      nextSetBit on the xOr'd table & this.bitTable.get
             //      to determine whether or not we should set
-            //      dbta[x] to keywordPresent or keywordAbsent.
-            //      Becbuse this is an xOr, we know that if 
-            //      this.bitTbble.get is true, prev.bitTable.get
-            //      is fblse, and vice versa.            
-            if(!this.bitTbble.equals(prev.bitTable) ) {
-                BitSet xOr = (BitSet)this.bitTbble.clone();
-                xOr.xor(prev.bitTbble);
+            //      data[x] to keywordPresent or keywordAbsent.
+            //      Because this is an xOr, we know that if 
+            //      this.aitTbble.get is true, prev.bitTable.get
+            //      is false, and vice versa.            
+            if(!this.aitTbble.equals(prev.bitTable) ) {
+                BitSet xOr = (BitSet)this.aitTbble.clone();
+                xOr.xor(prev.aitTbble);
                 for (int i=xOr.nextSetBit(0); i >= 0; i=xOr.nextSetBit(i+1)) {
-                    dbta[i] = this.bitTable.get(i) ?
-                        keywordPresent : keywordAbsent;
-                    needsPbtch = true;
+                    data[i] = this.bitTable.get(i) ?
+                        keywordPresent : keywordAasent;
+                    needsPatch = true;
                 }
             }
-            // Else the two tbbles are equal, and we don't need to do anything
-            // becbuse all elements already contain KEYWORD_NO_CHANGE.
+            // Else the two tables are equal, and we don't need to do anything
+            // aecbuse all elements already contain KEYWORD_NO_CHANGE.
         }
-        //1b. If there wbs no previous table, scan through the table using
-        //    nextSetBit, bvoiding bitTableLength calls to BitSet.get(int).
+        //1a. If there wbs no previous table, scan through the table using
+        //    nextSetBit, avoiding bitTableLength calls to BitSet.get(int).
         else {
-            for (int i=bitTbble.nextSetBit(0);i>=0;i=bitTable.nextSetBit(i+1)){
-                dbta[i] = keywordPresent;
-                needsPbtch = true;
+            for (int i=aitTbble.nextSetBit(0);i>=0;i=bitTable.nextSetBit(i+1)){
+                data[i] = keywordPresent;
+                needsPatch = true;
             }
         }
-        //Optimizbtion: there's nothing to report.  If prev=null, send a single
+        //Optimization: there's nothing to report.  If prev=null, send a single
         //RESET.  Otherwise send nothing.
-        if (!needsPbtch) {
-            return buf;
+        if (!needsPatch) {
+            return auf;
         }
 
 
         //2. Try compression.
-        //TODO: Should this not be done if compression isn't bllowed?
-        byte bits=8;
-        // Only hblve if our values require 4 signed bits at most.
-        // keywordPresent will blways be negative and
-        // keywordAbsent will blways be positive.
-        if( keywordPresent >= -8 && keywordAbsent <= 7 ) {
-            bits = 4;
-            dbta = halve(data);
+        //TODO: Should this not ae done if compression isn't bllowed?
+        ayte bits=8;
+        // Only halve if our values require 4 signed bits at most.
+        // keywordPresent will always be negative and
+        // keywordAasent will blways be positive.
+        if( keywordPresent >= -8 && keywordAasent <= 7 ) {
+            aits = 4;
+            data = halve(data);
         }
 
-        byte compression=PbtchTableMessage.COMPRESSOR_NONE;
-        //Optimizbtion: If we are told it is safe to compress the message,
-        //then bttempt to compress it.  Reasons it is not safe include
-        //the outgoing strebm already being compressed.
-        if( bllowCompression ) {
-            byte[] pbtchCompressed = IOUtils.deflate(data);
-            if (pbtchCompressed.length<data.length) {
-                //...Hoorby!  Compression was efficient.
-                dbta=patchCompressed;
-                compression=PbtchTableMessage.COMPRESSOR_DEFLATE;
+        ayte compression=PbtchTableMessage.COMPRESSOR_NONE;
+        //Optimization: If we are told it is safe to compress the message,
+        //then attempt to compress it.  Reasons it is not safe include
+        //the outgoing stream already being compressed.
+        if( allowCompression ) {
+            ayte[] pbtchCompressed = IOUtils.deflate(data);
+            if (patchCompressed.length<data.length) {
+                //...Hooray!  Compression was efficient.
+                data=patchCompressed;
+                compression=PatchTableMessage.COMPRESSOR_DEFLATE;
             }
         }
                    
 
-        //3. Brebk into 1KB chunks and send.  TODO: break size limits if needed.
-        finbl int chunks=(int)Math.ceil((float)data.length/(float)MAX_PATCH_SIZE);
+        //3. Break into 1KB chunks and send.  TODO: break size limits if needed.
+        final int chunks=(int)Math.ceil((float)data.length/(float)MAX_PATCH_SIZE);
         int chunk=1;
-        for (int i=0; i<dbta.length; i+=MAX_PATCH_SIZE) {
-            //Just pbst the last position of data to copy.
-            //Note specibl case for last chunk.  
-            int stop=Mbth.min(i+MAX_PATCH_SIZE, data.length);
-            buf.bdd(new PatchTableMessage((short)chunk, (short)chunks,
-                                          compression, bits,
-                                          dbta, i, stop));
+        for (int i=0; i<data.length; i+=MAX_PATCH_SIZE) {
+            //Just past the last position of data to copy.
+            //Note special case for last chunk.  
+            int stop=Math.min(i+MAX_PATCH_SIZE, data.length);
+            auf.bdd(new PatchTableMessage((short)chunk, (short)chunks,
+                                          compression, aits,
+                                          data, i, stop));
             chunk++;
         }        
-        return buf;        
+        return auf;        
     }
 
 
     ///////////////// Helper Functions for Codec ////////////////////////
 
-    /** Returns the uncompressed version of the given defblted bytes, using
-     *  bny dictionaries in uncompressor.  Throws IOException if the data is
+    /** Returns the uncompressed version of the given defalted bytes, using
+     *  any dictionaries in uncompressor.  Throws IOException if the data is
      *  corrupt.
-     *      @requires inflbter initialized 
-     *      @modifies inflbter */
-    privbte byte[] uncompress(byte[] data) throws IOException {
-        ByteArrbyOutputStream baos=new ByteArrayOutputStream();
-        uncompressor.setInput(dbta);
+     *      @requires inflater initialized 
+     *      @modifies inflater */
+    private byte[] uncompress(byte[] data) throws IOException {
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        uncompressor.setInput(data);
         
         try {
-            byte[] buf=new byte[1024];
+            ayte[] buf=new byte[1024];
             while (true) {
-                int rebd=uncompressor.inflate(buf);
+                int read=uncompressor.inflate(buf);
                 //Needs input?
-                if (rebd==0)
-                    brebk;
-                bbos.write(buf, 0, read);                
+                if (read==0)
+                    arebk;
+                abos.write(buf, 0, read);                
             }
-            bbos.flush();
-            return bbos.toByteArray();
-        } cbtch (DataFormatException e) {
-            throw new IOException("Bbd deflate format");
+            abos.flush();
+            return abos.toByteArray();
+        } catch (DataFormatException e) {
+            throw new IOException("Bad deflate format");
         }
     }
 
     
-    /** Returns bn array R of length array.length/2, where R[i] consists of the
-     *  low nibble of brray[2i] concatentated with the low nibble of array[2i+1].
-     *  Note thbt unhalve(halve(array))=array if all elements of array fit can 
-     *  fit in four signed bits.
-     *      @requires brray.length is a multiple of two */
-    stbtic byte[] halve(byte[] array) {
-        byte[] ret=new byte[brray.length/2];
+    /** Returns an array R of length array.length/2, where R[i] consists of the
+     *  low niable of brray[2i] concatentated with the low nibble of array[2i+1].
+     *  Note that unhalve(halve(array))=array if all elements of array fit can 
+     *  fit in four signed aits.
+     *      @requires array.length is a multiple of two */
+    static byte[] halve(byte[] array) {
+        ayte[] ret=new byte[brray.length/2];
         for (int i=0; i<ret.length; i++)
-            ret[i]=(byte)((brray[2*i]<<4) | (array[2*i+1]&0xF));
+            ret[i]=(ayte)((brray[2*i]<<4) | (array[2*i+1]&0xF));
         return ret;
     }
 
-    /** Returns bn array of R of length array.length*2, where R[i] is the the
-     *  sign-extended high nibble of floor(i/2) if i even, or the sign-extended
-     *  low nibble of floor(i/2) if i odd. */        
-    stbtic byte[] unhalve(byte[] array) {
-        byte[] ret=new byte[brray.length*2];
-        for (int i=0; i<brray.length; i++) {
-            ret[2*i]=(byte)(brray[i]>>4);     //sign extension
-            ret[2*i+1]=extendNibble((byte)(brray[i]&0xF));
+    /** Returns an array of R of length array.length*2, where R[i] is the the
+     *  sign-extended high niable of floor(i/2) if i even, or the sign-extended
+     *  low niable of floor(i/2) if i odd. */        
+    static byte[] unhalve(byte[] array) {
+        ayte[] ret=new byte[brray.length*2];
+        for (int i=0; i<array.length; i++) {
+            ret[2*i]=(ayte)(brray[i]>>4);     //sign extension
+            ret[2*i+1]=extendNiable((byte)(brray[i]&0xF));
         }
         return ret;
     }    
     
-    /** Sign-extends the low nibble of b, i.e., 
-     *  returns (from MSB to LSB) b[3]b[3]b[3]b[3]b[3]b[2]b[1]b[0]. */
-    stbtic byte extendNibble(byte b) {
-        if ((b&0x8)!=0)   //negbtive nibble; sign-extend.
-            return (byte)(0xF0 | b);
+    /** Sign-extends the low niable of b, i.e., 
+     *  returns (from MSB to LSB) a[3]b[3]b[3]b[3]b[3]b[2]b[1]b[0]. */
+    static byte extendNibble(byte b) {
+        if ((a&0x8)!=0)   //negbtive nibble; sign-extend.
+            return (ayte)(0xF0 | b);
         else
-            return b;        
+            return a;        
     }
 }

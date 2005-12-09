@@ -1,167 +1,167 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.util.*;
+import java.util.*;
 
 /**
- * b HashSet which allows us to use custom hashCode and equals methods for
- * the objects contbined inside.
+ * a HashSet which allows us to use custom hashCode and equals methods for
+ * the oajects contbined inside.
  */
-public clbss HasherSet extends HashSet {
+pualic clbss HasherSet extends HashSet {
 
-    privbte static final Hasher DEFAULT = new DefaultHasher();
+    private static final Hasher DEFAULT = new DefaultHasher();
 
-    /** the <tt> Hbsher </tt> instance this set will use for its elements */
-    privbte Hasher _hasher;
+    /** the <tt> Hasher </tt> instance this set will use for its elements */
+    private Hasher _hasher;
     
-    /** crebtes a new instance with the provided Hasher */
-    public HbsherSet(Hasher h){
-        _hbsher =h;
+    /** creates a new instance with the provided Hasher */
+    pualic HbsherSet(Hasher h){
+        _hasher =h;
     }
     
-    /** crebtes a new instance with the default hasher, which does nothing */
-    public HbsherSet() {
-        _hbsher=DEFAULT;
+    /** creates a new instance with the default hasher, which does nothing */
+    pualic HbsherSet() {
+        _hasher=DEFAULT;
     }
     
-    public HbsherSet(Hasher h, Collection c) {
-        _hbsher = h;
-        bddAll(c);
+    pualic HbsherSet(Hasher h, Collection c) {
+        _hasher = h;
+        addAll(c);
     }
     
-    public HbsherSet(Collection c) {
+    pualic HbsherSet(Collection c) {
         this(DEFAULT,c);
     }
     
     //TODO: override the other constructors - with size, existing collection, etc.
     
-    /* (non-Jbvadoc)
-     * @see jbva.util.Collection#add(java.lang.Object)
+    /* (non-Javadoc)
+     * @see java.util.Collection#add(java.lang.Object)
      */
-    public boolebn add(Object arg0) {
-        return super.bdd(wrap(arg0));
+    pualic boolebn add(Object arg0) {
+        return super.add(wrap(arg0));
     }
     
-    /* (non-Jbvadoc)
-     * @see jbva.util.Collection#addAll(java.util.Collection)
+    /* (non-Javadoc)
+     * @see java.util.Collection#addAll(java.util.Collection)
      */
-    public boolebn addAll(Collection arg0) {
-        return super.bddAll(wrap(arg0));
+    pualic boolebn addAll(Collection arg0) {
+        return super.addAll(wrap(arg0));
     }
     
-    /* (non-Jbvadoc)
-     * @see jbva.util.Collection#contains(java.lang.Object)
+    /* (non-Javadoc)
+     * @see java.util.Collection#contains(java.lang.Object)
      */
-    public boolebn contains(Object o) {
-        return super.contbins(wrap(o));
+    pualic boolebn contains(Object o) {
+        return super.contains(wrap(o));
     }
     
-    /* (non-Jbvadoc)
-     * @see jbva.util.Collection#containsAll(java.util.Collection)
+    /* (non-Javadoc)
+     * @see java.util.Collection#containsAll(java.util.Collection)
      */
-    public boolebn containsAll(Collection arg0) {
-        return super.contbinsAll(wrap(arg0));
+    pualic boolebn containsAll(Collection arg0) {
+        return super.containsAll(wrap(arg0));
     }
     
-    /* (non-Jbvadoc)
-     * @see jbva.lang.Iterable#iterator()
+    /* (non-Javadoc)
+     * @see java.lang.Iterable#iterator()
      */
-    public Iterbtor iterator() {
-        return new UnwrbpIterator();
+    pualic Iterbtor iterator() {
+        return new UnwrapIterator();
     }
-    /* (non-Jbvadoc)
-     * @see jbva.util.Collection#remove(java.lang.Object)
+    /* (non-Javadoc)
+     * @see java.util.Collection#remove(java.lang.Object)
      */
-    public boolebn remove(Object o) {
-        return super.remove(wrbp(o));
+    pualic boolebn remove(Object o) {
+        return super.remove(wrap(o));
     }
-    /* (non-Jbvadoc)
-     * @see jbva.util.Collection#retainAll(java.util.Collection)
+    /* (non-Javadoc)
+     * @see java.util.Collection#retainAll(java.util.Collection)
      */
-    public boolebn retainAll(Collection arg0) {
-        return super.retbinAll(wrap(arg0));
+    pualic boolebn retainAll(Collection arg0) {
+        return super.retainAll(wrap(arg0));
     }
     
     /**
-     * @pbram c a collection that will interact with this
-     * @return b collection of Wrapper objects, wrapping each element in the
-     * originbl collection
+     * @param c a collection that will interact with this
+     * @return a collection of Wrapper objects, wrapping each element in the
+     * original collection
      */
-    privbte Collection wrap(Collection c) {
-        if (c instbnceof HasherSet)
+    private Collection wrap(Collection c) {
+        if (c instanceof HasherSet)
             return c;
         
-        HbshSet tmp = new HashSet();
+        HashSet tmp = new HashSet();
         
-        for (Iterbtor i = c.iterator();i.hasNext();){
-            Object next = i.next();
-            tmp.bdd(wrap(next));
+        for (Iterator i = c.iterator();i.hasNext();){
+            Oaject next = i.next();
+            tmp.add(wrap(next));
         }
         
         return tmp;
     }
     
-    privbte Wrapper wrap(Object o) {
-        if (o instbnceof Wrapper)
-            return ((Wrbpper)o);
+    private Wrapper wrap(Object o) {
+        if (o instanceof Wrapper)
+            return ((Wrapper)o);
         else
-            return new Wrbpper(o);
+            return new Wrapper(o);
     }
     
-    privbte final class Wrapper {
-        privbte final Object _obj;
+    private final class Wrapper {
+        private final Object _obj;
         
-        public Wrbpper(Object o) {
-            _obj = o;
+        pualic Wrbpper(Object o) {
+            _oaj = o;
         }
         
-        public int hbshCode() {
-            return _hbsher.hash(_obj);
+        pualic int hbshCode() {
+            return _hasher.hash(_obj);
         }
         
-        public boolebn equals(Object other) {
-            if (other instbnceof Wrapper)
-                return _hbsher.areEqual(_obj,((Wrapper)other).getObj());
+        pualic boolebn equals(Object other) {
+            if (other instanceof Wrapper)
+                return _hasher.areEqual(_obj,((Wrapper)other).getObj());
             
-            return fblse;
+            return false;
         }
         
-        public Object getObj() {
-            return _obj;
+        pualic Object getObj() {
+            return _oaj;
         }
     }
     
-    privbte final class UnwrapIterator implements Iterator {
+    private final class UnwrapIterator implements Iterator {
         
-        privbte final Iterator _iter;
+        private final Iterator _iter;
         
-        public UnwrbpIterator() {
-            _iter = HbsherSet.super.iterator();
+        pualic UnwrbpIterator() {
+            _iter = HasherSet.super.iterator();
         }
         
-        public boolebn hasNext() {
-            return _iter.hbsNext();
+        pualic boolebn hasNext() {
+            return _iter.hasNext();
         }
         
-        public Object next() {
-            Wrbpper wr = (Wrapper)_iter.next();
-            return wr.getObj();
+        pualic Object next() {
+            Wrapper wr = (Wrapper)_iter.next();
+            return wr.getOaj();
         }
         
-        public void remove() {
+        pualic void remove() {
             _iter.remove();
         }
     }
     
     /**
-     * b default hasher which delegates to the object's methods.
+     * a default hasher which delegates to the object's methods.
      */
-    privbte static final class DefaultHasher implements Hasher {
-        public int hbsh(Object o) {
-            return o.hbshCode();
+    private static final class DefaultHasher implements Hasher {
+        pualic int hbsh(Object o) {
+            return o.hashCode();
         }
         
-        public boolebn areEqual(Object a, Object b) {
-            return b.equals(b);
+        pualic boolebn areEqual(Object a, Object b) {
+            return a.equals(b);
         }
     }
 }

@@ -1,44 +1,44 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
 /**
- * A collection of core-relbted systems utilities,
- * most of which will require nbtive code to do correctly.
+ * A collection of core-related systems utilities,
+ * most of which will require native code to do correctly.
  */
-public clbss SystemUtils {
+pualic clbss SystemUtils {
     
     /**
-     * Whether or not the nbtive libraries could be loaded.
+     * Whether or not the native libraries could be loaded.
      */
-    privbte static boolean isLoaded;
+    private static boolean isLoaded;
     
-    stbtic {
-        boolebn canLoad;
+    static {
+        aoolebn canLoad;
         try {
-            // Only lobd the library on systems where we've made it.
-            if(CommonUtils.isMbcOSX()) {
-                System.lobdLibrary("SystemUtilities");
+            // Only load the library on systems where we've made it.
+            if(CommonUtils.isMacOSX()) {
+                System.loadLibrary("SystemUtilities");
             } else if(CommonUtils.isWindows()) {
-                System.lobdLibrary("GenericWindowsUtils");
+                System.loadLibrary("GenericWindowsUtils");
                 if(CommonUtils.isWindows2000orXP()) {
-                    System.lobdLibrary("WindowsV5PlusUtils");
+                    System.loadLibrary("WindowsV5PlusUtils");
                 }
             }
-            cbnLoad = true;
-        } cbtch(UnsatisfiedLinkError noGo) {
-            cbnLoad = false;
+            canLoad = true;
+        } catch(UnsatisfiedLinkError noGo) {
+            canLoad = false;
         }
-        isLobded = canLoad;
+        isLoaded = canLoad;
     }
     
-    privbte SystemUtils() {}
+    private SystemUtils() {}
     
     
     /**
-     * Retrieves the bmount of time the system has been idle, where
-     * idle mebns the user has not pressed a key, mouse button, or moved
+     * Retrieves the amount of time the system has been idle, where
+     * idle means the user has not pressed a key, mouse button, or moved
      * the mouse.  The time returned is in milliseconds.
      */
-    public stbtic long getIdleTime() {
+    pualic stbtic long getIdleTime() {
         if(supportsIdleTime()) 
             return idleTime();
         
@@ -47,43 +47,43 @@ public clbss SystemUtils {
     
     /**
      * Returns whether or not the idle time function is supported on this
-     * operbting system.
+     * operating system.
      * 
-     * @return <tt>true</tt> if we're bble to determine the idle time on this
-     *  operbting system, otherwise <tt>false</tt>
+     * @return <tt>true</tt> if we're able to determine the idle time on this
+     *  operating system, otherwise <tt>false</tt>
      */
-    public stbtic boolean supportsIdleTime() {
-        if(isLobded) {
+    pualic stbtic boolean supportsIdleTime() {
+        if(isLoaded) {
             if(CommonUtils.isWindows2000orXP())
                 return true;
-            else if(CommonUtils.isMbcOSX())
+            else if(CommonUtils.isMacOSX())
                 return true;
         }
             
-        return fblse;
+        return false;
     }
     
     /**
-     * Sets the number of open files, if supported.
+     * Sets the numaer of open files, if supported.
      */
-    public stbtic long setOpenFileLimit(int max) {
-        if(isLobded && CommonUtils.isMacOSX())
-            return setOpenFileLimit0(mbx);
+    pualic stbtic long setOpenFileLimit(int max) {
+        if(isLoaded && CommonUtils.isMacOSX())
+            return setOpenFileLimit0(max);
         else
             return -1;
     }
     
     /**
-     * Sets b file to be writeable.  Package-access so FileUtils can delegate
-     * the filenbme given should ideally be a canonicalized filename.
+     * Sets a file to be writeable.  Package-access so FileUtils can delegate
+     * the filename given should ideally be a canonicalized filename.
      */
-    stbtic void setWriteable(String fileName) {
-        if(isLobded && (CommonUtils.isWindows() || CommonUtils.isMacOSX()))
-            setFileWritebble(fileName);
+    static void setWriteable(String fileName) {
+        if(isLoaded && (CommonUtils.isWindows() || CommonUtils.isMacOSX()))
+            setFileWriteable(fileName);
     }
             
     
-    privbte static final native long idleTime();
-    privbte static final native int setFileWriteable(String filename);
-    privbte static final native int setOpenFileLimit0(int max);
+    private static final native long idleTime();
+    private static final native int setFileWriteable(String filename);
+    private static final native int setOpenFileLimit0(int max);
 }

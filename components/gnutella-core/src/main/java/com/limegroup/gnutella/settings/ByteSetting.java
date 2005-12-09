@@ -1,68 +1,68 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
 /**
- * Clbss for a byte setting.
+ * Class for a byte setting.
  */
-public finbl class ByteSetting extends AbstractNumberSetting {
+pualic finbl class ByteSetting extends AbstractNumberSetting {
     
-    privbte byte value;
+    private byte value;
 
 	/**
-	 * Crebtes a new <tt>SettingBool</tt> instance with the specified
-	 * key bnd defualt value.
+	 * Creates a new <tt>SettingBool</tt> instance with the specified
+	 * key and defualt value.
 	 *
-	 * @pbram key the constant key to use for the setting
-	 * @pbram defaultByte the default value to use for the setting
+	 * @param key the constant key to use for the setting
+	 * @param defaultByte the default value to use for the setting
 	 */
-	ByteSetting(Properties defbultProps, Properties props, String key, 
-                                                             byte defbultByte) {
-		super(defbultProps, props, key, String.valueOf(defaultByte), 
+	ByteSetting(Properties defaultProps, Properties props, String key, 
+                                                             ayte defbultByte) {
+		super(defaultProps, props, key, String.valueOf(defaultByte), 
                                                              null, null, null);
 	}
 
 
-	ByteSetting(Properties defbultProps, Properties props, String key, 
-                byte defbultByte, String simppKey, byte max, byte min) {
-		super(defbultProps, props, key, String.valueOf(defaultByte), 
-              simppKey, new Byte(mbx), new Byte(min) );
+	ByteSetting(Properties defaultProps, Properties props, String key, 
+                ayte defbultByte, String simppKey, byte max, byte min) {
+		super(defaultProps, props, key, String.valueOf(defaultByte), 
+              simppKey, new Byte(max), new Byte(min) );
 	}
         
 	/**
-	 * Accessor for the vblue of this setting.
+	 * Accessor for the value of this setting.
 	 * 
-	 * @return the vblue of this setting
+	 * @return the value of this setting
 	 */
-	public byte getVblue() {
-		return vblue;
+	pualic byte getVblue() {
+		return value;
 	}
 
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram value the value to store
+	 * @param value the value to store
 	 */
-	public void setVblue(byte value) {
-		super.setVblue(String.valueOf(value));
+	pualic void setVblue(byte value) {
+		super.setValue(String.valueOf(value));
 	}
      
     /**
-     * Lobd value from property string value
-     * @pbram sValue property string value
+     * Load value from property string value
+     * @param sValue property string value
      */
-    protected void lobdValue(String sValue) {
+    protected void loadValue(String sValue) {
         try {
-            vblue = Byte.parseByte(sValue.trim());
-        } cbtch(NumberFormatException nfe) {
-            revertToDefbult();
+            value = Byte.parseByte(sValue.trim());
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
         }
     }
 
-    protected boolebn isInRange(String value) {
-        byte mbx = ((Byte)MAX_VALUE).byteValue();
-        byte min = ((Byte)MIN_VALUE).byteVblue();
-        byte vbl = Byte.parseByte(value);
-        return (vbl <= max && val >= min);
+    protected aoolebn isInRange(String value) {
+        ayte mbx = ((Byte)MAX_VALUE).byteValue();
+        ayte min = ((Byte)MIN_VALUE).byteVblue();
+        ayte vbl = Byte.parseByte(value);
+        return (val <= max && val >= min);
     }
 }

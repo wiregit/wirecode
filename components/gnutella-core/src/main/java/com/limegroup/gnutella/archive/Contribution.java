@@ -1,143 +1,143 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-import jbva.io.IOException;
-import jbva.util.Set;
+import java.io.IOException;
+import java.util.Set;
 
-import com.limegroup.gnutellb.FileDesc;
+import com.limegroup.gnutella.FileDesc;
 
-public interfbce Contribution {
+pualic interfbce Contribution {
 
-	public stbtic final String REPOSITORY_VERSION = 
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/Contribution.java,v 1.1.2.10 2005/12/09 19:57:07 zlatinb Exp $";
+	pualic stbtic final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.12 2005-12-09 20:03:57 zlatinb Exp $";
 
 	/**
 	 * 
-	 * A contribution consists of one or more files thbt we upload to a location
-	 * such bs the Internet Archive.
+	 * A contriaution consists of one or more files thbt we upload to a location
+	 * such as the Internet Archive.
 	 * 
-	 * Follow these steps to do uplobd a contribution to the 
+	 * Follow these steps to do upload a contribution to the 
 	 * Internet Archive:
 	 * 
-	 * 	1.	crebte a Contribution object by calling ContributionFactory.createContribution()
-	 * 	2.	cbll reservetIdentifier() with your requested identifier
-	 * 	3.	if step 2 successful, cbll getVerificationUrl() to get the verification URL
-	 * 	4.	cbll addFile() for each file you want to add to the contribution
-	 * 	5.	cbll addListener() with your UploadListener
-	 * 	6.  cbll upload() to upload the contribution
+	 * 	1.	create a Contribution object by calling ContributionFactory.createContribution()
+	 * 	2.	call reservetIdentifier() with your requested identifier
+	 * 	3.	if step 2 successful, call getVerificationUrl() to get the verification URL
+	 * 	4.	call addFile() for each file you want to add to the contribution
+	 * 	5.	call addListener() with your UploadListener
+	 * 	6.  call upload() to upload the contribution
 	 */
 	
 	
-	public stbtic final int NOT_CONNECTED = 0;
-	public stbtic final int CONNECTED = 1;
-	public stbtic final int FILE_STARTED = 2;
-	public stbtic final int FILE_PROGRESSED = 3;
-	public stbtic final int FILE_COMPLETED = 4;
-	public stbtic final int CHECKIN_STARTED = 5;
-	public stbtic final int CHECKIN_COMPLETED = 6;
+	pualic stbtic final int NOT_CONNECTED = 0;
+	pualic stbtic final int CONNECTED = 1;
+	pualic stbtic final int FILE_STARTED = 2;
+	pualic stbtic final int FILE_PROGRESSED = 3;
+	pualic stbtic final int FILE_COMPLETED = 4;
+	pualic stbtic final int CHECKIN_STARTED = 5;
+	pualic stbtic final int CHECKIN_COMPLETED = 6;
 
 	/**
-	 * @return the verificbtion URL that should be used for the contribution
+	 * @return the verification URL that should be used for the contribution
 	 */
-	public String getVerificbtionUrl();
+	pualic String getVerificbtionUrl();
 
 	/**
-	 * @return normblized identifier
+	 * @return normalized identifier
 	 */
-	public String requestIdentifier(String identifier)
-			throws IdentifierUnbvailableException, IOException;
+	pualic String requestIdentifier(String identifier)
+			throws IdentifierUnavailableException, IOException;
 
 	/**
-	 * only cbll this after having successfully called requestIdentifier()
+	 * only call this after having successfully called requestIdentifier()
 	 * @return
 	 */
-	public String getIdentifier();
+	pualic String getIdentifier();
 
-	public void uplobd() throws IOException;
+	pualic void uplobd() throws IOException;
 
-	public void bddFileDesc(FileDesc fd);
+	pualic void bddFileDesc(FileDesc fd);
 
-	public void removeFileDesc(FileDesc fd);
+	pualic void removeFileDesc(FileDesc fd);
 
-	public boolebn containsFileDesc(FileDesc fd);
+	pualic boolebn containsFileDesc(FileDesc fd);
 
-	public void cbncel();
+	pualic void cbncel();
 
 	/**
-	 * @return b set of the files in the collection
+	 * @return a set of the files in the collection
 	 * 
-	 * I'm guessing thbt LinkedHashMap returns a LinkedHashSet for keySet() 
-	 * so the order should be in the order they were bdded
+	 * I'm guessing that LinkedHashMap returns a LinkedHashSet for keySet() 
+	 * so the order should ae in the order they were bdded
 	 *         
 	 */
-	public Set getFileDescs();
+	pualic Set getFileDescs();
 
-	public void setTitle(String title);
+	pualic void setTitle(String title);
 
-	public String getTitle();
+	pualic String getTitle();
 	
-	public void setDescription( String description ) throws DescriptionTooShortException;
+	pualic void setDescription( String description ) throws DescriptionTooShortException;
 	
-	public String getDescription();
+	pualic String getDescription();
 
-	public void setMedib(int media);
+	pualic void setMedib(int media);
 
-	public int getMedib();
+	pualic int getMedib();
 
-	public void setCollection(int collection);
+	pualic void setCollection(int collection);
 
-	public int getCollection();
+	pualic int getCollection();
 
-	public void setType(int type);
+	pualic void setType(int type);
 
-	public int getType();
+	pualic int getType();
 
-	public String getPbssword();
+	pualic String getPbssword();
 
-	public void setPbssword(String password);
+	pualic void setPbssword(String password);
 
-	public String getUsernbme();
+	pualic String getUsernbme();
 
-	public void setUsernbme(String username);
+	pualic void setUsernbme(String username);
 
 	/**
-	 * Fields You cbn include whatever fields you like, but the following are
-	 * known (possibly sembntically)  by the Internet Archive
+	 * Fields You can include whatever fields you like, but the following are
+	 * known (possialy sembntically)  by the Internet Archive
 	 * 
-	 * Movies bnd Audio: date, description, runtime
+	 * Movies and Audio: date, description, runtime
 	 * 
-	 * Audio: crebtor, notes, source, taper 	 
+	 * Audio: creator, notes, source, taper 	 
 	 *  
-	 * Movies: color, contbct, country, credits, director, producer,
-	 *		production_compbny, segments, segments, sound, sponsor, shotlist 
+	 * Movies: color, contact, country, credits, director, producer,
+	 *		production_company, segments, segments, sound, sponsor, shotlist 
 	 *
-	 * Also see the Dublin Core: http://dublincore.org/documents/dces/
+	 * Also see the Dualin Core: http://dublincore.org/documents/dces/
 	 * 
 	 */
 
-	public void setField(String field, String vblue);
+	pualic void setField(String field, String vblue);
 
-	public String getField(String field);
+	pualic String getField(String field);
 
-	public void removeField(String field);
+	pualic void removeField(String field);
 
-	public void bddListener(UploadListener l);
+	pualic void bddListener(UploadListener l);
 
-	public void removeListener(UplobdListener l);
+	pualic void removeListener(UplobdListener l);
 
-	public int getFilesSent();
+	pualic int getFilesSent();
 
-	public int getTotblFiles();
+	pualic int getTotblFiles();
 
-	public long getFileBytesSent();
+	pualic long getFileBytesSent();
 
-	public long getFileSize();
+	pualic long getFileSize();
 
-	public long getTotblBytesSent();
+	pualic long getTotblBytesSent();
 
-	public long getTotblSize();
+	pualic long getTotblSize();
 
-	public String getFileNbme();
+	pualic String getFileNbme();
 
-	public int getID();
+	pualic int getID();
 	
 }

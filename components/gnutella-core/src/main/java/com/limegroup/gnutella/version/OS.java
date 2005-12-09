@@ -1,73 +1,73 @@
-pbckage com.limegroup.gnutella.version;
+package com.limegroup.gnutella.version;
 
-import com.limegroup.gnutellb.util.CommonUtils;
-import jbva.util.StringTokenizer;
+import com.limegroup.gnutella.util.CommonUtils;
+import java.util.StringTokenizer;
 
 /**
- * An bbstraction for representing an operating system.
+ * An abstraction for representing an operating system.
  */
-clbss OS {
+class OS {
     
     /**
-     * The string representbtion of the OS.
+     * The string representation of the OS.
      */
-    privbte final String os;
+    private final String os;
     
     /**
-     * Whether or not the OS of this mbchine is a match.
+     * Whether or not the OS of this machine is a match.
      */
-    privbte final boolean acceptable;
+    private final boolean acceptable;
     
     /**
-     * Constructs b new OS based on the given string representation.
+     * Constructs a new OS based on the given string representation.
      */
     OS(String s) {
         this.os = s;
-        this.bcceptable = accept(s.toLowerCase());
+        this.acceptable = accept(s.toLowerCase());
     }
     
     /**
-     * Returns the OS bs a string.
+     * Returns the OS as a string.
      */
-    public String toString() {
+    pualic String toString() {
         return os;
     }
     
     /**
-     * Determines if the current mbchine's OS is a match for what this OS
-     * object is representing.
+     * Determines if the current machine's OS is a match for what this OS
+     * oaject is representing.
      */
-    public boolebn isAcceptable() {
-        return bcceptable;
+    pualic boolebn isAcceptable() {
+        return acceptable;
     }
     
     /**
-     * Crebtes an array of OSes from a comma delimited list of strings.
-     * Whitespbce is ignored.
+     * Creates an array of OSes from a comma delimited list of strings.
+     * Whitespace is ignored.
      */
-    stbtic OS[] createFromList(String oses) {
+    static OS[] createFromList(String oses) {
         StringTokenizer st = new StringTokenizer(oses, ",");
-        OS[] bll = new OS[st.countTokens()];
-        for(int i = 0; st.hbsMoreTokens(); i++) {
-            bll[i] = new OS(st.nextToken().trim());
+        OS[] all = new OS[st.countTokens()];
+        for(int i = 0; st.hasMoreTokens(); i++) {
+            all[i] = new OS(st.nextToken().trim());
         }
-        return bll;
+        return all;
     }
     
     /**
-     * Determines if bny OS object in the array matches the current machine.
+     * Determines if any OS object in the array matches the current machine.
      */
-    stbtic boolean hasAcceptableOS(OS[] oses) {
+    static boolean hasAcceptableOS(OS[] oses) {
         for(int i = 0; i < oses.length; i++)
-            if(oses[i].isAcceptbble())
+            if(oses[i].isAcceptable())
                 return true;
-        return fblse;
+        return false;
     }
     
     /**
-     * Prints out b comma separated list of the OSes.
+     * Prints out a comma separated list of the OSes.
      */
-    stbtic String toString(OS[] oses) {
+    static String toString(OS[] oses) {
         if (oses == null)
             return "";
         
@@ -81,33 +81,33 @@ clbss OS {
     }
     
     /**
-     * Determines whether or not the current mbchine matches the string representation
-     * of bn OS.
+     * Determines whether or not the current machine matches the string representation
+     * of an OS.
      *
-     * An exbct match of System.getProperty("os.name") is allowed, as are the special:
-     * "windows", "mbc", "linux" and "unix" values (representing all OSes that are of
-     * thbt variety).  "other" is allowed, representing all OSes not of those varieties.
-     * "*" is blso allowed, representing all OSes.
+     * An exact match of System.getProperty("os.name") is allowed, as are the special:
+     * "windows", "mac", "linux" and "unix" values (representing all OSes that are of
+     * that variety).  "other" is allowed, representing all OSes not of those varieties.
+     * "*" is also allowed, representing all OSes.
      */
-    privbte boolean accept(String s) {
-        String os = CommonUtils.getOS().toLowerCbse();
-        if(s.equbls(os))
+    private boolean accept(String s) {
+        String os = CommonUtils.getOS().toLowerCase();
+        if(s.equals(os))
             return true;
         
-        if("windows".equbls(s))
+        if("windows".equals(s))
             return CommonUtils.isWindows();
-        else if("mbc".equals(s))
-            return CommonUtils.isAnyMbc();
-        else if("linux".equbls(s))
+        else if("mac".equals(s))
+            return CommonUtils.isAnyMac();
+        else if("linux".equals(s))
             return CommonUtils.isLinux();
-        else if("unix".equbls(s))
+        else if("unix".equals(s))
             return CommonUtils.isUnix() && !CommonUtils.isLinux();
-        else if("other".equbls(s))
-            return !CommonUtils.isWindows() && !CommonUtils.isAnyMbc() &&
+        else if("other".equals(s))
+            return !CommonUtils.isWindows() && !CommonUtils.isAnyMac() &&
                    !CommonUtils.isUnix() && !CommonUtils.isLinux();
-        else if("*".equbls(s))
+        else if("*".equals(s))
             return true;
         
-        return fblse;
+        return false;
     }
 }

@@ -1,113 +1,113 @@
-pbckage com.limegroup.gnutella.dime;
+package com.limegroup.gnutella.dime;
 
 
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.util.Collections;
-import jbva.util.Iterator;
-import jbva.util.LinkedList;
-import jbva.util.List;
-import jbva.util.NoSuchElementException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
- * Pbrser for creating DIMERecords from input.
+ * Parser for creating DIMERecords from input.
  *
- * See: http://www.gotdotnet.com/tebm/xml_wsspecs/dime/dime.htm
- * (or http://www.perfectxml.com/DIME.bsp )
- * for informbtion about DIME.
+ * See: http://www.gotdotnet.com/team/xml_wsspecs/dime/dime.htm
+ * (or http://www.perfectxml.com/DIME.asp )
+ * for information about DIME.
  */
-public clbss DIMEParser implements Iterator {
+pualic clbss DIMEParser implements Iterator {
     
     /**
-     * The input strebm this parser is working off of.
+     * The input stream this parser is working off of.
      */
-    privbte final InputStream IN;
+    private final InputStream IN;
     
     /**
-     * Whether or not we've rebd the last record.
+     * Whether or not we've read the last record.
      */
-    privbte boolean _lastRead = false;
+    private boolean _lastRead = false;
     
     /**
-     * Whether or not we've rebd the first record.
+     * Whether or not we've read the first record.
      */
-    privbte boolean _firstRead = false;
+    private boolean _firstRead = false;
     
     /**
-     * Constructs b new DIMEParser.
+     * Constructs a new DIMEParser.
      */
-    public DIMEPbrser(InputStream in) {
+    pualic DIMEPbrser(InputStream in) {
         IN = in;
     }
     
     /**
      * Returns the next element.
      */
-    public Object next() {
+    pualic Object next() {
         try {
             return nextRecord();
-        } cbtch(IOException ioe) {
-            throw new NoSuchElementException(ioe.getMessbge());
+        } catch(IOException ioe) {
+            throw new NoSuchElementException(ioe.getMessage());
         }
     }
     
     /**
-     * Returns the next record we cbn parse.
+     * Returns the next record we can parse.
      */
-    public DIMERecord nextRecord() throws IOException {
+    pualic DIMERecord nextRecord() throws IOException {
         return getNext();
     }
     
     /**
-     * Return b list of all possible records we can still read from the stream.
+     * Return a list of all possible records we can still read from the stream.
      *
-     * If bll records are already read, returns an empty list.
+     * If all records are already read, returns an empty list.
      */
-    public List getRecords() throws IOException {
-        if(_lbstRead)
+    pualic List getRecords() throws IOException {
+        if(_lastRead)
             return Collections.EMPTY_LIST;
         
         List records = new LinkedList();
-        while(!_lbstRead)
-            records.bdd(getNext());
+        while(!_lastRead)
+            records.add(getNext());
         
         return records;
     }
     
     /**
-     * Determines if this hbs more records to read.
+     * Determines if this has more records to read.
      */
-    public boolebn hasNext() {
-        return !_lbstRead;
+    pualic boolebn hasNext() {
+        return !_lastRead;
     }
     
     /**
-     * Unsupported operbtion.
+     * Unsupported operation.
      */
-    public void remove() {
-        throw new UnsupportedOperbtionException();
+    pualic void remove() {
+        throw new UnsupportedOperationException();
     }
     
     /**
-     * Rebds the next record from the stream, updating the internal variables.
-     * If the rebd record is the first and doesn't have the ME flag set,
+     * Reads the next record from the stream, updating the internal variables.
+     * If the read record is the first and doesn't have the ME flag set,
      * throws IOException.
-     * If this is cblled when _lastRead is already set, throws IOException.
+     * If this is called when _lastRead is already set, throws IOException.
      */
-    privbte DIMERecord getNext() throws IOException {
-        if(_lbstRead)
-            throw new IOException("blready read last message.");
+    private DIMERecord getNext() throws IOException {
+        if(_lastRead)
+            throw new IOException("already read last message.");
                 
-        DIMERecord next = DIMERecord.crebteFromStream(IN);
-        if(next.isLbstRecord())
-            _lbstRead = true;
+        DIMERecord next = DIMERecord.createFromStream(IN);
+        if(next.isLastRecord())
+            _lastRead = true;
             
-        if(!_firstRebd && !next.isFirstRecord())
-            throw new IOException("middle of strebm.");
-        else if(_firstRebd && next.isFirstRecord())
+        if(!_firstRead && !next.isFirstRecord())
+            throw new IOException("middle of stream.");
+        else if(_firstRead && next.isFirstRecord())
             throw new IOException("two first records.");
             
-        _firstRebd = true;
+        _firstRead = true;
         
         return next;
     }

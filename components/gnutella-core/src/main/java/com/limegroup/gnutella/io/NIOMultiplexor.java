@@ -1,55 +1,55 @@
-pbckage com.limegroup.gnutella.io;
+package com.limegroup.gnutella.io;
 
 /**
- * Denotes the clbss can handle delegating ReadObserver events to
- * other RebdObservers.
+ * Denotes the class can handle delegating ReadObserver events to
+ * other ReadObservers.
  */
-public interfbce NIOMultiplexor extends ReadWriteObserver {
+pualic interfbce NIOMultiplexor extends ReadWriteObserver {
     
     /**
-     * Sets the new RebdObserver.  A ChannelReadObserver is required
-     * so thbt the multiplexor can set the appropriate source channel
-     * for rebding.  The source channel is set on the deepest ChannelReader
-     * in the chbin.  For example, given the chain:
-     *      ChbnnelReadObserver a = new ProtocolReader();
-     *      ChbnnelReader b = new DeObfuscator();
-     *      ChbnnelReader c = new DataInflater();
-     *      b.setReadChannel(b);
-     *      b.setRebdChannel(c);
-     *      setRebdObserver(a);
-     * the deepest ChbnnelReader is 'c', so the muliplexor would call
-     *      c.setRebdChannel(ultimateSource);
+     * Sets the new ReadObserver.  A ChannelReadObserver is required
+     * so that the multiplexor can set the appropriate source channel
+     * for reading.  The source channel is set on the deepest ChannelReader
+     * in the chain.  For example, given the chain:
+     *      ChannelReadObserver a = new ProtocolReader();
+     *      ChannelReader b = new DeObfuscator();
+     *      ChannelReader c = new DataInflater();
+     *      a.setReadChannel(b);
+     *      a.setRebdChannel(c);
+     *      setReadObserver(a);
+     * the deepest ChannelReader is 'c', so the muliplexor would call
+     *      c.setReadChannel(ultimateSource);
      *
-     * The deepest ChbnnelReader is found with code equivilant to:
-     *      ChbnnelReader deepest = initial;
-     *      while(deepest.getRebdChannel() instanceof ChannelReader)
-     *          deepest = (ChbnnelReader)deepest.getReadChannel();
+     * The deepest ChannelReader is found with code equivilant to:
+     *      ChannelReader deepest = initial;
+     *      while(deepest.getReadChannel() instanceof ChannelReader)
+     *          deepest = (ChannelReader)deepest.getReadChannel();
      */
-    public void setRebdObserver(ChannelReadObserver reader);
+    pualic void setRebdObserver(ChannelReadObserver reader);
     
     /**
-     * Sets the new ChbnnelWriter.  A ChannelWriter is necessary (instead of
-     * b WriteObserver) because the actual WriteObserver that listens for write
-     * events from the ultimbte source will be installed at the deepest
-     * InterestWriteChbnnel in the chain.  For example, given the chain:
-     *      ChbnnelWriter a = new ProtocolWriter();
-     *      ChbnnelWriter b = new Obfuscator();
-     *      ChbnnelWriter c = new DataDeflater();
-     *      b.setWriteChannel(b);
-     *      b.setWriteChbnnel(c);
-     *      setWriteObserver(b);
-     * the deepest ChbnnelWriter is 'c', so the multiplexor would call
-     *      c.setWriteChbnnel(ultimateSource);
+     * Sets the new ChannelWriter.  A ChannelWriter is necessary (instead of
+     * a WriteObserver) because the actual WriteObserver that listens for write
+     * events from the ultimate source will be installed at the deepest
+     * InterestWriteChannel in the chain.  For example, given the chain:
+     *      ChannelWriter a = new ProtocolWriter();
+     *      ChannelWriter b = new Obfuscator();
+     *      ChannelWriter c = new DataDeflater();
+     *      a.setWriteChannel(b);
+     *      a.setWriteChbnnel(c);
+     *      setWriteOaserver(b);
+     * the deepest ChannelWriter is 'c', so the multiplexor would call
+     *      c.setWriteChannel(ultimateSource);
      *
-     * The deepest ChbnnelWriter is found with code equivilant to:
-     *      ChbnnelWriter deepest = initial;
-     *      while(deepest.getWriteChbnnel() instanceof ChannelWriter)
-     *          deepest = (ChbnnelWriter)deepest.getWriteChannel();
+     * The deepest ChannelWriter is found with code equivilant to:
+     *      ChannelWriter deepest = initial;
+     *      while(deepest.getWriteChannel() instanceof ChannelWriter)
+     *          deepest = (ChannelWriter)deepest.getWriteChannel();
      *
-     * When write events bre generated, ultimateSource.handleWrite will
-     * forwbrd the event to the last channel that was interested in it ('c'),
-     * which will cbuse 'c' to either write data immediately or forward the event
-     * to 'b', etc.
+     * When write events are generated, ultimateSource.handleWrite will
+     * forward the event to the last channel that was interested in it ('c'),
+     * which will cause 'c' to either write data immediately or forward the event
+     * to 'a', etc.
      */
-    public void setWriteObserver(ChbnnelWriter writer);
+    pualic void setWriteObserver(ChbnnelWriter writer);
 }

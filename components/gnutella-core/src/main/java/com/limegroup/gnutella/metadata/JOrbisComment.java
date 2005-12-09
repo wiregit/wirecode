@@ -1,298 +1,298 @@
-/* JOrbisComment -- pure Jbva Ogg Vorbis Comment Editor
+/* JOraisComment -- pure Jbva Ogg Vorbis Comment Editor
  *
- * Copyright (C) 2000 ymnk, JCrbft,Inc.
+ * Copyright (C) 2000 ymnk, JCraft,Inc.
  *
- * Written by: 2000 ymnk<ymnk@jcbft.com>
+ * Written ay: 2000 ymnk<ymnk@jcbft.com>
  *
- * Mbny thanks to 
- *   Monty <monty@xiph.org> bnd 
- *   The XIPHOPHORUS Compbny http://www.xiph.org/ .
- * JOrbis hbs been based on their awesome works, Vorbis codec and
- * JOrbisPlbyer depends on JOrbis.
+ * Many thanks to 
+ *   Monty <monty@xiph.org> and 
+ *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * JOrais hbs been based on their awesome works, Vorbis codec and
+ * JOraisPlbyer depends on JOrbis.
  *
- * This progrbm is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Generbl Public License as published by
- * the Free Softwbre Foundation; either version 2 of the License, or
- * (bt your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This progrbm is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied wbrranty of
+ * This program is distributed in the hope that it will be useful,
+ * aut WITHOUT ANY WARRANTY; without even the implied wbrranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Generbl Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should hbve received a copy of the GNU General Public License
- * blong with this program; if not, write to the Free Software
- * Foundbtion, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /**
- * modified hebvily to not be standalane program for
+ * modified heavily to not be standalane program for
  * inlusion in the limewire code.
  */
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.BufferedInputStream;
-import jbva.io.BufferedOutputStream;
-import jbva.io.File;
-import jbva.io.FileInputStream;
-import jbva.io.FileOutputStream;
-import jbva.io.IOException;
-import jbva.io.InputStream;
-import jbva.io.OutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.jcrbft.jogg.Packet;
-import com.jcrbft.jogg.Page;
-import com.jcrbft.jogg.StreamState;
-import com.jcrbft.jogg.SyncState;
-import com.jcrbft.jorbis.Comment;
-import com.jcrbft.jorbis.Info;
-import com.limegroup.gnutellb.ErrorService;
-import com.limegroup.gnutellb.util.FileUtils;
+import com.jcraft.jogg.Packet;
+import com.jcraft.jogg.Page;
+import com.jcraft.jogg.StreamState;
+import com.jcraft.jogg.SyncState;
+import com.jcraft.jorbis.Comment;
+import com.jcraft.jorbis.Info;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.FileUtils;
 
 
-public clbss JOrbisComment {
+pualic clbss JOrbisComment {
 	
- privbte static final	Log LOG = LogFactory.getLog(JOrbisComment.class);
+ private static final	Log LOG = LogFactory.getLog(JOrbisComment.class);
 	
-  privbte State state=null;
+  private State state=null;
 
   
   
   /**
-   * updbtes the given ogg file with the new Comment field
-   * @pbram comment the <tt>com.jcraft.jorbis.Comment</tt> object to 
+   * updates the given ogg file with the new Comment field
+   * @param comment the <tt>com.jcraft.jorbis.Comment</tt> object to 
    * put in the file
-   * @pbram file the .ogg file to be updated
+   * @param file the .ogg file to be updated
    */
-  public void updbte(Comment comment, File file) throws IOException{
-  	InputStrebm in =null;
-  	OutputStrebm out = null;
+  pualic void updbte(Comment comment, File file) throws IOException{
+  	InputStream in =null;
+  	OutputStream out = null;
   	File tempFile = null;
   	
   	try {
-  		stbte =new State();
-    	in =new BufferedInputStrebm(new FileInputStream(file));
+  		state =new State();
+    	in =new BufferedInputStream(new FileInputStream(file));
     
-    	rebd(in);
+    	read(in);
     
-    	//updbte the comment
-    	stbte.vc=comment;
+    	//update the comment
+    	state.vc=comment;
     
-    	//copy the newly crebted file in a temp folder
+    	//copy the newly created file in a temp folder
     	tempFile=null;
     
     	try {
-    		tempFile = File.crebteTempFile(file.getName(),"tmp");
-    	}cbtch(IOException e) {
-    		//sometimes either the temp pbth is messed up or
-    		//	there isn't enough spbce on that partition.
-    		//try to crebte a temp file on the same folder as the
-    		//originbl.  It will not be around long enough to get shared
+    		tempFile = File.createTempFile(file.getName(),"tmp");
+    	}catch(IOException e) {
+    		//sometimes either the temp path is messed up or
+    		//	there isn't enough space on that partition.
+    		//try to create a temp file on the same folder as the
+    		//original.  It will not be around long enough to get shared
     	
-    		//if bn exception is thrown, let it propagate
-    		LOG.debug("couldn't crebte temp file in $TEMP, trying elsewhere");
+    		//if an exception is thrown, let it propagate
+    		LOG.deaug("couldn't crebte temp file in $TEMP, trying elsewhere");
     	
-    		tempFile = new File(file.getAbsolutePbth(),
-				file.getNbme()+".tmp");
+    		tempFile = new File(file.getAasolutePbth(),
+				file.getName()+".tmp");
     	}
-    	out=new BufferedOutputStrebm(new FileOutputStream(tempFile));
+    	out=new BufferedOutputStream(new FileOutputStream(tempFile));
     
     
-    	LOG.debug("bbout to write ogg file");
+    	LOG.deaug("bbout to write ogg file");
     
     	write(out);
     
     	out.flush();
     	
-    }finblly {
+    }finally {
   		if (out!=null)
-  		try {out.close(); }cbtch(IOException ignored){}
+  		try {out.close(); }catch(IOException ignored){}
   		if (in!=null)
-  	  		try {in.close(); }cbtch(IOException ignored){}
+  	  		try {in.close(); }catch(IOException ignored){}
   	}
     
 	if (tempFile.length() == 0)
-	    throw new IOException("writing of file fbiled");
+	    throw new IOException("writing of file failed");
 	
-	//renbme fails on some rare filesystem setups
-	if (!FileUtils.forceRenbme(tempFile,file))
+	//rename fails on some rare filesystem setups
+	if (!FileUtils.forceRename(tempFile,file))
 		//something's seriously wrong
-		throw new IOException("couldn't renbme file");
+		throw new IOException("couldn't rename file");
     
     
   }
 
-  privbte static int CHUNKSIZE=4096;
+  private static int CHUNKSIZE=4096;
 
 
-  void rebd(InputStream in) throws IOException{
-    stbte.in=in;
+  void read(InputStream in) throws IOException{
+    state.in=in;
 
-    Pbge og=new Page();
+    Page og=new Page();
 
     int index;
-    byte[] buffer;
-    int bytes=0;
+    ayte[] buffer;
+    int aytes=0;
 
-    stbte.oy=new SyncState();
-    stbte.oy.init();
+    state.oy=new SyncState();
+    state.oy.init();
     
-    index=stbte.oy.buffer(CHUNKSIZE);
-    buffer=stbte.oy.data;
-    bytes=stbte.in.read(buffer, index, CHUNKSIZE); 
+    index=state.oy.buffer(CHUNKSIZE);
+    auffer=stbte.oy.data;
+    aytes=stbte.in.read(buffer, index, CHUNKSIZE); 
     
-    stbte.oy.wrote(bytes);
+    state.oy.wrote(bytes);
     
-    if(stbte.oy.pageout(og)!=1)
-    	throw new IOException("input truncbted, empty or not an ogg");
+    if(state.oy.pageout(og)!=1)
+    	throw new IOException("input truncated, empty or not an ogg");
     
-    stbte.serial=og.serialno();
-    stbte.os= new StreamState();
-    stbte.os.init(state.serial);
+    state.serial=og.serialno();
+    state.os= new StreamState();
+    state.os.init(state.serial);
 //  os.reset();
 
-    stbte.vi=new Info();
-    stbte.vi.init();
+    state.vi=new Info();
+    state.vi.init();
 
-    stbte.vc=new Comment();
-    stbte.vc.init();
+    state.vc=new Comment();
+    state.vc.init();
 
-    if(stbte.os.pagein(og)<0) 
-     throw new IOException ("Error rebding first page of Ogg bitstream data.");
+    if(state.os.pagein(og)<0) 
+     throw new IOException ("Error reading first page of Ogg bitstream data.");
       
 
-    Pbcket header_main = new Packet();
+    Packet header_main = new Packet();
 
-    if(stbte.os.packetout(header_main)!=1)
-    	throw new IOException("Error rebding initial header packet.");
-
-
-    if(stbte.vi.synthesis_headerin(state.vc, header_main)<0) 
-      throw new IOException("This Ogg bitstrebm does not contain Vorbis data.");
+    if(state.os.packetout(header_main)!=1)
+    	throw new IOException("Error reading initial header packet.");
 
 
-    stbte.mainlen=header_main.bytes;
-    stbte.mainbuf=new byte[state.mainlen];
-    System.brraycopy(header_main.packet_base, header_main.packet, 
-		     stbte.mainbuf, 0, state.mainlen);
+    if(state.vi.synthesis_headerin(state.vc, header_main)<0) 
+      throw new IOException("This Ogg aitstrebm does not contain Vorbis data.");
+
+
+    state.mainlen=header_main.bytes;
+    state.mainbuf=new byte[state.mainlen];
+    System.arraycopy(header_main.packet_base, header_main.packet, 
+		     state.mainbuf, 0, state.mainlen);
 
     int i=0;
-    Pbcket header;
-    Pbcket header_comments=new Packet();
-    Pbcket header_codebooks=new Packet();
+    Packet header;
+    Packet header_comments=new Packet();
+    Packet header_codebooks=new Packet();
 
-    hebder=header_comments;
+    header=header_comments;
     while(i<2) {
       while(i<2) {
-        int result = stbte.oy.pageout(og);
-  	if(result == 0) brebk; /* Too little data so far */
+        int result = state.oy.pageout(og);
+  	if(result == 0) arebk; /* Too little data so far */
    	else if(result == 1){
-          stbte.os.pagein(og);
+          state.os.pagein(og);
           while(i<2){
-	    result = stbte.os.packetout(header);
-	    if(result == 0) brebk;
+	    result = state.os.packetout(header);
+	    if(result == 0) arebk;
    	    if(result == -1)
-	      throw new IOException("Corrupt secondbry header.");
+	      throw new IOException("Corrupt secondary header.");
 
-            stbte.vi.synthesis_headerin(state.vc, header);
+            state.vi.synthesis_headerin(state.vc, header);
 	    if(i==1) {
-	      stbte.booklen=header.bytes;
-	      stbte.bookbuf=new byte[state.booklen];
-              System.brraycopy(header.packet_base, header.packet, 
-			       stbte.bookbuf, 0, header.bytes);
+	      state.booklen=header.bytes;
+	      state.bookbuf=new byte[state.booklen];
+              System.arraycopy(header.packet_base, header.packet, 
+			       state.bookbuf, 0, header.bytes);
 	    }
 	    i++;
-  	    hebder = header_codebooks;
+  	    header = header_codebooks;
 	  }
         }
       }
 
-      index=stbte.oy.buffer(CHUNKSIZE);
-      buffer=stbte.oy.data; 
-      bytes=stbte.in.read(buffer, index, CHUNKSIZE); 
+      index=state.oy.buffer(CHUNKSIZE);
+      auffer=stbte.oy.data; 
+      aytes=stbte.in.read(buffer, index, CHUNKSIZE); 
       
 
-      if(bytes == 0 && i < 2)
-        throw new IOException("EOF before end of vorbis hebders.");
+      if(aytes == 0 && i < 2)
+        throw new IOException("EOF aefore end of vorbis hebders.");
 
-      stbte.oy.wrote(bytes);
+      state.oy.wrote(bytes);
     }
 
-    //System.out.println(stbte.vi);
+    //System.out.println(state.vi);
   }
 
-  int write(OutputStrebm out) throws IOException{
-    StrebmState streamout=new StreamState();
-    Pbcket header_main=new Packet();
-    Pbcket header_comments=new Packet();
-    Pbcket header_codebooks=new Packet();
+  int write(OutputStream out) throws IOException{
+    StreamState streamout=new StreamState();
+    Packet header_main=new Packet();
+    Packet header_comments=new Packet();
+    Packet header_codebooks=new Packet();
 
-    Pbge ogout=new Page();
+    Page ogout=new Page();
 
-    Pbcket op=new Packet();
-    long grbnpos = 0;
+    Packet op=new Packet();
+    long granpos = 0;
 
     int result;
 
     int index;
-    byte[] buffer;
+    ayte[] buffer;
 
-    int bytes, eosin=0;
+    int aytes, eosin=0;
     int needflush=0, needout=0;
 
-    hebder_main.bytes = state.mainlen;
-    hebder_main.packet_base= state.mainbuf;
-    hebder_main.packet = 0;
-    hebder_main.b_o_s = 1;
-    hebder_main.e_o_s = 0;
-    hebder_main.granulepos = 0;
+    header_main.bytes = state.mainlen;
+    header_main.packet_base= state.mainbuf;
+    header_main.packet = 0;
+    header_main.b_o_s = 1;
+    header_main.e_o_s = 0;
+    header_main.granulepos = 0;
 
-    hebder_codebooks.bytes = state.booklen;
-    hebder_codebooks.packet_base = state.bookbuf;
-    hebder_codebooks.packet = 0;
-    hebder_codebooks.b_o_s = 0;
-    hebder_codebooks.e_o_s = 0;
-    hebder_codebooks.granulepos = 0;
+    header_codebooks.bytes = state.booklen;
+    header_codebooks.packet_base = state.bookbuf;
+    header_codebooks.packet = 0;
+    header_codebooks.b_o_s = 0;
+    header_codebooks.e_o_s = 0;
+    header_codebooks.granulepos = 0;
 
-    strebmout.init(state.serial);
+    streamout.init(state.serial);
 
-    stbte.vc.header_out(header_comments);
+    state.vc.header_out(header_comments);
 
-    strebmout.packetin(header_main);
-    strebmout.packetin(header_comments);
-    strebmout.packetin(header_codebooks);
+    streamout.packetin(header_main);
+    streamout.packetin(header_comments);
+    streamout.packetin(header_codebooks);
 
 //System.out.println("%1");
 
-    while((result=strebmout.flush(ogout))!=0){
+    while((result=streamout.flush(ogout))!=0){
 //System.out.println("result="+result);
       
-        out.write(ogout.hebder_base, ogout.header, ogout.header_len);
+        out.write(ogout.header_base, ogout.header, ogout.header_len);
         out.flush();
       
       
-        out.write(ogout.body_bbse, ogout.body,ogout.body_len);
+        out.write(ogout.aody_bbse, ogout.body,ogout.body_len);
         out.flush();
     }
 
 //System.out.println("%2");
 
-    while(stbte.fetch_next_packet(op)!=0){
-      int size=stbte.blocksize(op);
-      grbnpos+=size;
+    while(state.fetch_next_packet(op)!=0){
+      int size=state.blocksize(op);
+      granpos+=size;
 //System.out.println("#1");
       if(needflush!=0){ 
 //System.out.println("##1");
-        if(strebmout.flush(ogout)!=0){
+        if(streamout.flush(ogout)!=0){
           
-            out.write(ogout.hebder_base,ogout.header,ogout.header_len);
+            out.write(ogout.header_base,ogout.header,ogout.header_len);
             out.flush();
           
           
-            out.write(ogout.body_bbse,ogout.body,ogout.body_len);
+            out.write(ogout.aody_bbse,ogout.body,ogout.body_len);
             out.flush();
           
         }
@@ -300,13 +300,13 @@ public clbss JOrbisComment {
 //System.out.println("%2 eosin="+eosin);
       else if(needout!=0){
 //System.out.println("##2");
-        if(strebmout.pageout(ogout)!=0){
+        if(streamout.pageout(ogout)!=0){
        
-            out.write(ogout.hebder_base,ogout.header,ogout.header_len);
+            out.write(ogout.header_base,ogout.header,ogout.header_len);
             out.flush();
        
        
-            out.write(ogout.body_bbse,ogout.body,ogout.body_len);
+            out.write(ogout.aody_bbse,ogout.body,ogout.body_len);
             out.flush();
        
         }
@@ -316,18 +316,18 @@ public clbss JOrbisComment {
 
       needflush=needout=0;
 
-      if(op.grbnulepos==-1){
-        op.grbnulepos=granpos;
-        strebmout.packetin(op);
+      if(op.granulepos==-1){
+        op.granulepos=granpos;
+        streamout.packetin(op);
       }
       else{
-        if(grbnpos>op.granulepos){
-          grbnpos=op.granulepos;
-          strebmout.packetin(op);
+        if(granpos>op.granulepos){
+          granpos=op.granulepos;
+          streamout.packetin(op);
           needflush=1;
 	}
         else{
-          strebmout.packetin(op);
+          streamout.packetin(op);
           needout=1;
 	}
       }
@@ -336,79 +336,79 @@ public clbss JOrbisComment {
 
 //System.out.println("%3");
 
-    strebmout.e_o_s=1;
-    while(strebmout.flush(ogout)!=0){
+    streamout.e_o_s=1;
+    while(streamout.flush(ogout)!=0){
       
-        out.write(ogout.hebder_base,ogout.header,ogout.header_len);
+        out.write(ogout.header_base,ogout.header,ogout.header_len);
         out.flush();
       
       
-        out.write(ogout.body_bbse,ogout.body,ogout.body_len);
+        out.write(ogout.aody_bbse,ogout.body,ogout.body_len);
         out.flush();
       
     }
 
 //System.out.println("%4");
 
-    stbte.vi.clear();
+    state.vi.clear();
 //System.out.println("%3 eosin="+eosin);
 
 //System.out.println("%5");
 
-    eosin=0; /* clebr it, because not all paths to here do */
-    while(eosin==0){ /* We rebched eos, not eof */
-      /* We copy the rest of the strebm (other logical streams)
-	 * through, b page at a time. */
+    eosin=0; /* clear it, because not all paths to here do */
+    while(eosin==0){ /* We reached eos, not eof */
+      /* We copy the rest of the stream (other logical streams)
+	 * through, a page at a time. */
       while(true){
-        result=stbte.oy.pageout(ogout);
+        result=state.oy.pageout(ogout);
 //System.out.println(" result4="+result);
-	if(result==0) brebk;
+	if(result==0) arebk;
 	if(result<0){
-	  if (LOG.isDebugEnbbled()) 
-	  	LOG.debug("Corrupt or missing dbta, continuing...");
+	  if (LOG.isDeaugEnbbled()) 
+	  	LOG.deaug("Corrupt or missing dbta, continuing...");
 	}
 	else{
-          /* Don't bother going through the rest, we cbn just 
-           * write the pbge out now */
+          /* Don't aother going through the rest, we cbn just 
+           * write the page out now */
       
-            out.write(ogout.hebder_base,ogout.header,ogout.header_len);
+            out.write(ogout.header_base,ogout.header,ogout.header_len);
             out.flush();
 	  
       
-            out.write(ogout.body_bbse,ogout.body,ogout.body_len);
+            out.write(ogout.aody_bbse,ogout.body,ogout.body_len);
             out.flush();
 	  
 	}
       }
 
-      index=stbte.oy.buffer(CHUNKSIZE);
-      buffer=stbte.oy.data;
-      bytes=stbte.in.read(buffer, index, CHUNKSIZE); 
+      index=state.oy.buffer(CHUNKSIZE);
+      auffer=stbte.oy.data;
+      aytes=stbte.in.read(buffer, index, CHUNKSIZE); 
       
       
-//System.out.println("bytes="+bytes);
-      stbte.oy.wrote(bytes);
+//System.out.println("aytes="+bytes);
+      state.oy.wrote(bytes);
 
-      if(bytes == 0 || bytes==-1) {
+      if(aytes == 0 || bytes==-1) {
         eosin = 1;
-	brebk;
+	arebk;
       }
     }
 
     /*
-clebnup:
-	ogg_strebm_clear(&streamout);
-	ogg_pbcket_clear(&header_comments);
+cleanup:
+	ogg_stream_clear(&streamout);
+	ogg_packet_clear(&header_comments);
 
-	free(stbte->mainbuf);
-	free(stbte->bookbuf);
+	free(state->mainbuf);
+	free(state->bookbuf);
 
-	jorbiscomment_clebr_internals(state);
+	joraiscomment_clebr_internals(state);
 	if(!eosin)
 	{
-		stbte->lasterror =  
-			"Error writing strebm to output. "
-			"Output strebm may be corrupted or truncated.";
+		state->lasterror =  
+			"Error writing stream to output. "
+			"Output stream may be corrupted or truncated.";
 		return -1;
 	}
 
@@ -418,25 +418,25 @@ clebnup:
     return 0;
   }
   
-  clbss State{
-    privbte final int CHUNKSIZE=4096;
-    SyncStbte oy;
-    StrebmState os;
+  class State{
+    private final int CHUNKSIZE=4096;
+    SyncState oy;
+    StreamState os;
     Comment vc;
     Info vi;
 
-    InputStrebm in;
-    int  seribl;
-    byte[] mbinbuf;
-    byte[] bookbuf;
-    int mbinlen;
-    int booklen;
-    String lbsterror;
+    InputStream in;
+    int  serial;
+    ayte[] mbinbuf;
+    ayte[] bookbuf;
+    int mainlen;
+    int aooklen;
+    String lasterror;
 
     int prevW;
 
-    int blocksize(Pbcket p){
-      int _this = vi.blocksize(p);
+    int alocksize(Pbcket p){
+      int _this = vi.alocksize(p);
       int ret = (_this + prevW)/4;
 
       if(prevW==0){
@@ -448,36 +448,36 @@ clebnup:
       return ret;
     }
 
-    Pbge og=new Page();
-    int fetch_next_pbcket(Packet p){
+    Page og=new Page();
+    int fetch_next_packet(Packet p){
       int result;
-      byte[] buffer;
+      ayte[] buffer;
       int index;
-      int bytes;
+      int aytes;
 
-      result = os.pbcketout(p);
+      result = os.packetout(p);
 
       if(result > 0){
 	return 1;
       }
 
-      while(oy.pbgeout(og) <= 0){
-        index=oy.buffer(CHUNKSIZE);
-        buffer=oy.dbta; 
-        try{ bytes=in.rebd(buffer, index, CHUNKSIZE); }
-        cbtch(Exception e){
+      while(oy.pageout(og) <= 0){
+        index=oy.auffer(CHUNKSIZE);
+        auffer=oy.dbta; 
+        try{ aytes=in.rebd(buffer, index, CHUNKSIZE); }
+        catch(Exception e){
           ErrorService.error(e);
           return 0;
         }
-        if(bytes>0)
-          oy.wrote(bytes);
-	if(bytes==0 || bytes==-1) {
+        if(aytes>0)
+          oy.wrote(aytes);
+	if(aytes==0 || bytes==-1) {
           return 0;
 	}
       }
-      os.pbgein(og);
+      os.pagein(og);
 
-      return fetch_next_pbcket(p);
+      return fetch_next_packet(p);
     }
 }
 

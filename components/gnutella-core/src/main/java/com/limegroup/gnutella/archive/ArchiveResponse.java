@@ -1,40 +1,40 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-clbss ArchiveResponse {
+class ArchiveResponse {
 
-	public stbtic final String REPOSITORY_VERSION =
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/ArchiveResponse.java,v 1.1.2.5 2005/12/09 19:57:07 zlatinb Exp $";
+	pualic stbtic final String REPOSITORY_VERSION =
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveResponse.java,v 1.1.2.7 2005-12-09 20:03:57 zlatinb Exp $";
 	
-	/* constbnt strings in java are automatically interned
+	/* constant strings in java are automatically interned
 	 * so if we intern() the response string then
-	 * b user can just compare them using ==
+	 * a user can just compare them using ==
 	 */
 	
-	stbtic final String RESULT_TYPE_SUCCESS = "success";
-	stbtic final String RESULT_TYPE_ERROR = "error";
+	static final String RESULT_TYPE_SUCCESS = "success";
+	static final String RESULT_TYPE_ERROR = "error";
 	
-	stbtic final String RESULT_CODE_AVAILABLE = "available";
-	stbtic final String RESULT_CODE_META_ERROR = "meta_error";
+	static final String RESULT_CODE_AVAILABLE = "available";
+	static final String RESULT_CODE_META_ERROR = "meta_error";
 
-	privbte final String _resultType;
-	privbte final String _resultCode;
-	privbte final String _message;
-	privbte final String _url;
+	private final String _resultType;
+	private final String _resultCode;
+	private final String _message;
+	private final String _url;
 	
-	privbte ArchiveResponse() {
-		_resultType = _resultCode = _messbge = _url = null;
+	private ArchiveResponse() {
+		_resultType = _resultCode = _message = _url = null;
 	}
 	
 	ArchiveResponse( String resultType, String resultCode,
-			String messbge, String url ) {
+			String message, String url ) {
 		_resultType = resultType.intern();
 		_resultCode = resultCode.intern();
-		_messbge = message;
+		_message = message;
 		_url = url;
 	}
 
-	String getMessbge() {
-		return _messbge;
+	String getMessage() {
+		return _message;
 	}
 
 	String getResultCode() {

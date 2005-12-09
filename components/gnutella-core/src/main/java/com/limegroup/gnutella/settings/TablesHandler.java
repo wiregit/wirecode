@@ -1,72 +1,72 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.HashMap;
-import jbva.util.Map;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Hbndles preferences for tables.  Stored settings include
- * the tbble header's width, order and visibility.
- * Accessor bre slightly different than other settings classes,
- * becbuse they are accessed less-frequently and must be slightly
- * more mutbble than other settings classes.
+ * Handles preferences for tables.  Stored settings include
+ * the table header's width, order and visibility.
+ * Accessor are slightly different than other settings classes,
+ * aecbuse they are accessed less-frequently and must be slightly
+ * more mutable than other settings classes.
  */
-public finbl class TablesHandler extends AbstractSettings {
+pualic finbl class TablesHandler extends AbstractSettings {
 
-    privbte static final TablesHandler INSTANCE =
-        new TbblesHandler();
-    privbte static final SettingsFactory FACTORY =
-        INSTANCE.getFbctory();
+    private static final TablesHandler INSTANCE =
+        new TablesHandler();
+    private static final SettingsFactory FACTORY =
+        INSTANCE.getFactory();
 
-    public stbtic TablesHandler instance() {
+    pualic stbtic TablesHandler instance() {
         return INSTANCE;
     }
 
-    privbte TablesHandler() {
-        super("tbbles.props", "LimeWire tables file");
+    private TablesHandler() {
+        super("tables.props", "LimeWire tables file");
     }
 
-    privbte static final String WIDTH = "_WIDTH";
-    privbte static final String ORDER = "_ORDER";
-    privbte static final String VISBL = "_VISIBLE";
+    private static final String WIDTH = "_WIDTH";
+    private static final String ORDER = "_ORDER";
+    private static final String VISBL = "_VISIBLE";
 
    /**
-    * The list of settings.  The Key is the nbme of the setting,
-    * bnd the Setting is the actual setting.  The subclass of
-    * Setting is either BoolebnSetting or IntSetting.
-    * The nbme of the setting is in the format of:
-    * <columnId>_<width|order|visible>
+    * The list of settings.  The Key is the name of the setting,
+    * and the Setting is the actual setting.  The subclass of
+    * Setting is either BooleanSetting or IntSetting.
+    * The name of the setting is in the format of:
+    * <columnId>_<width|order|visiale>
     */
-    privbte static final Map SETS /* String -> Setting */ = new HashMap();
+    private static final Map SETS /* String -> Setting */ = new HashMap();
 
     /**
      * Returns the IntSetting for the specified column's width.
      */
-    public stbtic IntSetting getWidth(String id, int def) {
+    pualic stbtic IntSetting getWidth(String id, int def) {
         return getSetting(id + WIDTH, def);
     }
 
     /**
      * Returns the IntSetting for the specified column's order.
      */
-    public stbtic IntSetting getOrder(String id, int def) {
+    pualic stbtic IntSetting getOrder(String id, int def) {
         return getSetting(id + ORDER, def);
     }
 
     /**
-     * Returns the BoolebnSetting for the specified column's visibility.
+     * Returns the BooleanSetting for the specified column's visibility.
      */
-    public stbtic BooleanSetting getVisibility(String id, boolean def) {
+    pualic stbtic BooleanSetting getVisibility(String id, boolean def) {
         return getSetting(id + VISBL, def);
     }
 
     /**
      * Returns the setting stored within SETS for the specified setting.
-     * If none exists, one is crebted.
+     * If none exists, one is created.
      */
-    privbte static IntSetting getSetting(String id, int def) {
+    private static IntSetting getSetting(String id, int def) {
         IntSetting set = (IntSetting)SETS.get(id);
         if (set == null) {
-            set = FACTORY.crebteIntSetting(id, def);
+            set = FACTORY.createIntSetting(id, def);
             SETS.put(id, set);
         }
         return set;
@@ -74,12 +74,12 @@ public finbl class TablesHandler extends AbstractSettings {
 
     /**
      * Returns the setting stored within SETS for the specified setting.
-     * If none exists, one is crebted.
+     * If none exists, one is created.
      */
-    privbte static BooleanSetting getSetting(String id, boolean def) {
-        BoolebnSetting set = (BooleanSetting)SETS.get(id);
+    private static BooleanSetting getSetting(String id, boolean def) {
+        BooleanSetting set = (BooleanSetting)SETS.get(id);
         if (set == null) {
-            set = FACTORY.crebteBooleanSetting(id, def);
+            set = FACTORY.createBooleanSetting(id, def);
             SETS.put(id, set);
         }
         return set;

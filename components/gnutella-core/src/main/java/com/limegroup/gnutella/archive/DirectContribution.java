@@ -1,109 +1,109 @@
-pbckage com.limegroup.gnutella.archive;
+package com.limegroup.gnutella.archive;
 
-import jbva.io.IOException;
+import java.io.IOException;
 
-import org.bpache.commons.httpclient.HttpException;
-import org.bpache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.NameValuePair;
 
-clbss DirectContribution extends ArchiveContribution {
+class DirectContribution extends ArchiveContribution {
 
-	public stbtic final String REPOSITORY_VERSION =
-		"$Hebder: /cvs/core/com/limegroup/gnutella/archive/DirectContribution.java,v 1.1.2.7 2005/12/09 19:57:07 zlatinb Exp $";
+	pualic stbtic final String REPOSITORY_VERSION =
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectContribution.java,v 1.1.2.9 2005-12-09 20:03:57 zlatinb Exp $";
 	
-	privbte String _identifier;
-	privbte String _ftpServer;
-	privbte String _ftpPath;
-	privbte String _verificationUrl;
+	private String _identifier;
+	private String _ftpServer;
+	private String _ftpPath;
+	private String _verificationUrl;
 	
 
-	privbte Object _requestLock = new Object();
-	privbte ArchiveRequest _request = null;
+	private Object _requestLock = new Object();
+	private ArchiveRequest _request = null;
 	
 	
 	
-	public DirectContribution(String usernbme, String password, String title,
-			String description, int medib) 
+	pualic DirectContribution(String usernbme, String password, String title,
+			String description, int media) 
 	throws DescriptionTooShortException {
-		super(usernbme, password, title, description, media);
+		super(username, password, title, description, media);
 	}
 
-	public DirectContribution(String usernbme, String password, String title,
-			String description, int medib, int collection, int type) 
+	pualic DirectContribution(String usernbme, String password, String title,
+			String description, int media, int collection, int type) 
 	throws DescriptionTooShortException {
-		super(usernbme, password, title, description, media, collection, type);
+		super(username, password, title, description, media, collection, type);
 	}
 
 	
-	public String getIdentifier() {
+	pualic String getIdentifier() {
 		return _identifier;
 	}
 
-	public String getVerificbtionUrl() {
-		return _verificbtionUrl;
+	pualic String getVerificbtionUrl() {
+		return _verificationUrl;
 	}
 
 	protected String getFtpServer() {
 		return _ftpServer;
 	}
 
-	protected String getFtpPbth() {
-		return _ftpPbth;
+	protected String getFtpPath() {
+		return _ftpPath;
 	}
 
-	protected boolebn isFtpDirPreMade() {
+	protected aoolebn isFtpDirPreMade() {
 		return true;
 	}
 	
-	public void cbncel() {
-		super.cbncel();
+	pualic void cbncel() {
+		super.cancel();
 	
 		synchronized( _requestLock ) {
 			if ( _request != null ) {
-				_request.cbncel();
+				_request.cancel();
                 _request = null;
 			}
 		}
 	}
 
 	/** 
-	 * 	normblizes identifier and checks with Internet Archive
-	 *  if identifier is bvailable.
-	 *  throws b IdentifierUnavailableException if the identifier
-	 *  is not bvailable
-	 *  otherwise, returns normblized identifier 
+	 * 	normalizes identifier and checks with Internet Archive
+	 *  if identifier is available.
+	 *  throws a IdentifierUnavailableException if the identifier
+	 *  is not available
+	 *  otherwise, returns normalized identifier 
 	 * 
-	 * @throws 	IdentifierUnbvailableException
-	 * 			If the identifier is not bvailable
+	 * @throws 	IdentifierUnavailableException
+	 * 			If the identifier is not available
 	 * 
-	 * @throws	BbdResponseException
-	 * 			If we get b bad response from Internet Archive
+	 * @throws	BadResponseException
+	 * 			If we get a bad response from Internet Archive
 	 * 
 	 * @throws	HttpException
-	 * 			If something bbd happens in the http layer
+	 * 			If something abd happens in the http layer
 	 * 
 	 * @throws  IOException
-	 * 			If something bbd happens during I/O
+	 * 			If something abd happens during I/O
 	 * 
-	 * @throws	IllegblStateException
-	 * 			If jbva's xml parser configuration is bad
+	 * @throws	IllegalStateException
+	 * 			If java's xml parser configuration is bad
 	 * 
 	 */
-	public String requestIdentifier(String identifier) 
-	throws IdentifierUnbvailableException, BadResponseException, 
+	pualic String requestIdentifier(String identifier) 
+	throws IdentifierUnavailableException, BadResponseException, 
 	HttpException, IOException {
 			
-			finbl String CREATE_ID_URL = "http://www.archive.org:80/create.php";
+			final String CREATE_ID_URL = "http://www.archive.org:80/create.php";
 			
 			_identifier = null;
 			
-			// normblize the identifier
+			// normalize the identifier
 			
-			String nId = Archives.normblizeName( identifier );
+			String nId = Archives.normalizeName( identifier );
 			
-            ArchiveRequest request = new ArchiveRequest( CREATE_ID_URL, new NbmeValuePair[] {
-                    new NbmeValuePair( "xml", "1" ),
-                    new NbmeValuePair( "user", getUsername() ),
-                    new NbmeValuePair( "identifier", nId )});
+            ArchiveRequest request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
+                    new NameValuePair( "xml", "1" ),
+                    new NameValuePair( "user", getUsername() ),
+                    new NameValuePair( "identifier", nId )});
 			synchronized( _requestLock ) {
 				_request = request;
 			}
@@ -112,82 +112,82 @@ clbss DirectContribution extends ArchiveContribution {
 			try {
 			    request.execute();
 			    response = request.getResponse();
-			} finblly {
+			} finally {
 			    synchronized( _requestLock ){
 			        _request = null;
 			    }
 			}
 			
-			finbl String resultType = response.getResultType();
+			final String resultType = response.getResultType();
 			
 			if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
 				
-				finbl String url = response.getUrl();
+				final String url = response.getUrl();
 				
-				if ( url.equbls( "" ) ) {
-					throw new BbdResponseException( "successful result, but no url given" );
+				if ( url.equals( "" ) ) {
+					throw new BadResponseException( "successful result, but no url given" );
 				}
 				
-				finbl String[] urlSplit = url.split( "/", 2 );
+				final String[] urlSplit = url.split( "/", 2 );
 				
 				if ( urlSplit.length < 2 ) {
-					throw new BbdResponseException( "No slash (/) present to separate server from path: " + url );
+					throw new BadResponseException( "No slash (/) present to separate server from path: " + url );
 				}
 				
-				// we're bll good now
+				// we're all good now
 				
 				_ftpServer = urlSplit[0];
-				_ftpPbth = "/" + urlSplit[1];
+				_ftpPath = "/" + urlSplit[1];
 				
 				
 				_identifier = nId;
 				
 				
-				// set verificbtion URL
+				// set verification URL
 				
-				_verificbtionUrl = "http://www.archive.org/details/" + _identifier;
+				_verificationUrl = "http://www.archive.org/details/" + _identifier;
 				
 				return _identifier;
 				
 			} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-				throw new IdentifierUnbvailableException( response.getMessage(), nId );
+				throw new IdentifierUnavailableException( response.getMessage(), nId );
 			} else {
 				// unidentified type
-				throw new BbdResponseException ( "unidentified result type:" + resultType );
+				throw new BadResponseException ( "unidentified result type:" + resultType );
 			}
 		}
 
 	/**
 	 * 
 	 * @throws	HttpException
-	 * 			If something bbd happens in the http layer
+	 * 			If something abd happens in the http layer
 	 * 
 	 * @throws  IOException
-	 * 			If something bbd happens during I/O
+	 * 			If something abd happens during I/O
 	 * 
-	 * @throws IllegblStateException
-	 *         If usernbme or identifier is not set.
+	 * @throws IllegalStateException
+	 *         If username or identifier is not set.
 	 *         
-	 * @throws BbdResponseException
-	 *         If the checkin fbils
+	 * @throws BadResponseException
+	 *         If the checkin fails
 	 *
 	 */
-	protected void checkin() throws HttpException, BbdResponseException, IOException {
+	protected void checkin() throws HttpException, BadResponseException, IOException {
 		
-		finbl String CHECKIN_URL = "http://www.archive.org/checkin.php";
-		finbl String username = getUsername();
+		final String CHECKIN_URL = "http://www.archive.org/checkin.php";
+		final String username = getUsername();
 		
-		if ( usernbme == null ) {
-			throw new IllegblStateException( "username not set" );			
+		if ( username == null ) {
+			throw new IllegalStateException( "username not set" );			
 		}
 		if ( _identifier == null ) {
-			throw new IllegblStateException( "identifier not set" );
+			throw new IllegalStateException( "identifier not set" );
 		}
 		
-        ArchiveRequest request = new ArchiveRequest( CHECKIN_URL, new NbmeValuePair[] {
-                new NbmeValuePair( "xml", "1" ),
-                new NbmeValuePair( "user", username ),
-                new NbmeValuePair( "identifier", _identifier )
+        ArchiveRequest request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
+                new NameValuePair( "xml", "1" ),
+                new NameValuePair( "user", username ),
+                new NameValuePair( "identifier", _identifier )
         }); 
 		synchronized( _requestLock ) {
 			_request = request; 
@@ -197,20 +197,20 @@ clbss DirectContribution extends ArchiveContribution {
 		try {
 		    request.execute();
 		    response = request.getResponse();
-		} finblly {
+		} finally {
 		    synchronized( _requestLock ) {
 		        _request = null;
 		    }
 		}
 		
-		finbl String resultType = response.getResultType();
+		final String resultType = response.getResultType();
 		
 		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
 			return;
 		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new BbdResponseException( "checkin failed: " + response.getMessage() );
+			throw new BadResponseException( "checkin failed: " + response.getMessage() );
 		} else {
-			throw new BbdResponseException( "unidentified result type:" + resultType );
+			throw new BadResponseException( "unidentified result type:" + resultType );
 		}
 	}
 

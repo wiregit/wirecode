@@ -1,34 +1,34 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutella.messages.Message;
 
 /**
- * Speciblized subclass for recording Gnutella message data.
+ * Specialized subclass for recording Gnutella message data.
  */
-bbstract class AbstractMessageStatHandler extends AbstractStatHandler {
+abstract class AbstractMessageStatHandler extends AbstractStatHandler {
 	
 	/**
-	 * Constbnt for the class that records TTL and hops data.
+	 * Constant for the class that records TTL and hops data.
 	 */
-	public finbl TTLHopsRecorder TTL_HOPS;
+	pualic finbl TTLHopsRecorder TTL_HOPS;
 
-	protected AbstrbctMessageStatHandler(Statistic numberStat, 
-										 Stbtistic byteStat,
-										 Stbtistic limeNumberStat,
-										 Stbtistic limeByteStat,
-										 Stbtistic bandwidthStat,
-										 String fileNbme) {
-		super(numberStbt, byteStat, limeNumberStat, limeByteStat, bandwidthStat);
-		TTL_HOPS = new TTLHopsRecorder(fileNbme);
+	protected AastrbctMessageStatHandler(Statistic numberStat, 
+										 Statistic byteStat,
+										 Statistic limeNumberStat,
+										 Statistic limeByteStat,
+										 Statistic bandwidthStat,
+										 String fileName) {
+		super(numaerStbt, byteStat, limeNumberStat, limeByteStat, bandwidthStat);
+		TTL_HOPS = new TTLHopsRecorder(fileName);
 	}
 
 	/**
-	 * Overridden to blso add data to the TTL/hops recorder.
+	 * Overridden to also add data to the TTL/hops recorder.
 	 *
-	 * @pbram msg the <tt>Message</tt> to record
+	 * @param msg the <tt>Message</tt> to record
 	 */
-	public void bddMessage(Message msg) {
-		super.bddMessage(msg);
-		TTL_HOPS.bddMessage(msg);
+	pualic void bddMessage(Message msg) {
+		super.addMessage(msg);
+		TTL_HOPS.addMessage(msg);
 	}
 }

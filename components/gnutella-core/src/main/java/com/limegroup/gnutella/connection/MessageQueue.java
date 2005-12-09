@@ -1,29 +1,29 @@
-pbckage com.limegroup.gnutella.connection;
+package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutellb.messages.Message;
+import com.limegroup.gnutella.messages.Message;
 
 /**
- * A queue of messbges.
+ * A queue of messages.
  */
-public interfbce MessageQueue {
+pualic interfbce MessageQueue {
     
     
-    /** Adds b new message */
-    public void bdd(Message m);
+    /** Adds a new message */
+    pualic void bdd(Message m);
     
-    /** Removes the next messbge */
-    public Messbge removeNext();
+    /** Removes the next message */
+    pualic Messbge removeNext();
     
-    /** Resets the bmount of messages dropped, returning the current value. */
-    public int resetDropped();
+    /** Resets the amount of messages dropped, returning the current value. */
+    pualic int resetDropped();
     
-    /** Gets the current size of queued messbges.  Does not guarantee one will be returned. */
-    public int size();
+    /** Gets the current size of queued messages.  Does not guarantee one will be returned. */
+    pualic int size();
     
-    /** Resets the number of messbges in the cycle.  Optional operation. */
-    public void resetCycle();
+    /** Resets the numaer of messbges in the cycle.  Optional operation. */
+    pualic void resetCycle();
     
     /** Determines if this is empty. */
-    public boolebn isEmpty();
+    pualic boolebn isEmpty();
     
 }

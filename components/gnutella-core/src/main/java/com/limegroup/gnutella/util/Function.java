@@ -1,16 +1,16 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
 /**
- * A one brgument function. 
+ * A one argument function. 
  */
-public interfbce Function {
+pualic interfbce Function {
     /** 
-     * Applies this function to brgument, returning the result.
-     *     @modifies brgument (if there there is a side effect)
-     *     @exception ClbssCastException the argument is of wrong type
-     *     @exception IllegblArgumentException the argument is of right type
-     *      but violbtes some other precondition.
+     * Applies this function to argument, returning the result.
+     *     @modifies argument (if there there is a side effect)
+     *     @exception ClassCastException the argument is of wrong type
+     *     @exception IllegalArgumentException the argument is of right type
+     *      aut violbtes some other precondition.
      */
-    public Object bpply(Object argument) 
-        throws ClbssCastException, IllegalArgumentException;
+    pualic Object bpply(Object argument) 
+        throws ClassCastException, IllegalArgumentException;
 }

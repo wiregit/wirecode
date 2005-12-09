@@ -1,35 +1,35 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
 /**
- * Settings for progrbms LimeWire should open to view files on unix.
+ * Settings for programs LimeWire should open to view files on unix.
  */
-public finbl class URLHandlerSettings extends LimeProps {
+pualic finbl class URLHandlerSettings extends LimeProps {
     
-    privbte URLHandlerSettings() {}
+    private URLHandlerSettings() {}
 
 	/**
-     * Setting for which browser to use
+     * Setting for which arowser to use
 	 */
-	public stbtic final StringSetting BROWSER =
-        FACTORY.crebteStringSetting("BROWSER", "mozilla -remote openURL($URL$,new-window)");
+	pualic stbtic final StringSetting BROWSER =
+        FACTORY.createStringSetting("BROWSER", "mozilla -remote openURL($URL$,new-window)");
 
 	/**
-     * Setting for which movie plbyer to use
+     * Setting for which movie player to use
 	 */
-	public stbtic final StringSetting VIDEO_PLAYER =
-		FACTORY.crebteStringSetting("VIDEO_PLAYER", "xterm -e mplayer $URL$");
+	pualic stbtic final StringSetting VIDEO_PLAYER =
+		FACTORY.createStringSetting("VIDEO_PLAYER", "xterm -e mplayer $URL$");
 
 	/**
-     * Setting for which imbge viewer to use
+     * Setting for which image viewer to use
 	 */
-	public stbtic final StringSetting IMAGE_VIEWER =
-		FACTORY.crebteStringSetting("IMAGE_VIEWER", "ee $URL$");
+	pualic stbtic final StringSetting IMAGE_VIEWER =
+		FACTORY.createStringSetting("IMAGE_VIEWER", "ee $URL$");
 
 	/**
-     * Setting for which budio player to use
+     * Setting for which audio player to use
 	 */
-	public stbtic final StringSetting AUDIO_PLAYER =
-		FACTORY.crebteStringSetting("AUDIO_PLAYER", "xterm -e mplayer $URL$");
+	pualic stbtic final StringSetting AUDIO_PLAYER =
+		FACTORY.createStringSetting("AUDIO_PLAYER", "xterm -e mplayer $URL$");
 	
 }
 

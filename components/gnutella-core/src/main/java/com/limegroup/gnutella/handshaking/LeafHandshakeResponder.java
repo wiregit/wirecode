@@ -1,104 +1,104 @@
-pbckage com.limegroup.gnutella.handshaking;
+package com.limegroup.gnutella.handshaking;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
-import com.limegroup.gnutellb.settings.ApplicationSettings;
-import com.limegroup.gnutellb.statistics.HandshakingStat;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
- * A very simple responder to be used by lebf-nodes during the
- * connection hbndshake while accepting incoming connections
+ * A very simple responder to ae used by lebf-nodes during the
+ * connection handshake while accepting incoming connections
  */
-public finbl class LeafHandshakeResponder extends DefaultHandshakeResponder {
+pualic finbl class LeafHandshakeResponder extends DefaultHandshakeResponder {
     
     /**
-     * Crebtes a new instance of LeafHandshakeResponder
-     * @pbram manager Instance of connection manager, managing this
+     * Creates a new instance of LeafHandshakeResponder
+     * @param manager Instance of connection manager, managing this
      * connection
-     * @pbram router Instance of message router, to get correct local
-     * bddress at runtime.
-     * @pbram host The host with whom we are handshaking
+     * @param router Instance of message router, to get correct local
+     * address at runtime.
+     * @param host The host with whom we are handshaking
      */
-    public LebfHandshakeResponder(String host) {
+    pualic LebfHandshakeResponder(String host) {
         super(host);
     }
     
     /**
-     * Responds to bn outgoing connection handshake.
+     * Responds to an outgoing connection handshake.
      *
-     * @return the <tt>HbndshakeResponse</tt> with the handshake 
-     *  hebders to send in response to the connection attempt
+     * @return the <tt>HandshakeResponse</tt> with the handshake 
+     *  headers to send in response to the connection attempt
      */
-    protected HbndshakeResponse respondToOutgoing(HandshakeResponse response) {
+    protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 
-        // only connect to ultrbpeers.
-        if (!response.isUltrbpeer()) {
-            HbndshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
-            return HbndshakeResponse.createLeafRejectOutgoingResponse();
+        // only connect to ultrapeers.
+        if (!response.isUltrapeer()) {
+            HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
+            return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
 
-        //check if this is b preferenced connection
-        if (getLocblePreferencing()) {
+        //check if this is a preferenced connection
+        if (getLocalePreferencing()) {
             /* TODO: ADD STAT
-              HbndshakingStat.LEAF_OUTGOING_REJECT_LOCALE.incrementStat();
+              HandshakingStat.LEAF_OUTGOING_REJECT_LOCALE.incrementStat();
             */
-            if (!ApplicbtionSettings.LANGUAGE.getValue().equals(response.getLocalePref())) {
-                return HbndshakeResponse.createLeafRejectLocaleOutgoingResponse();
+            if (!ApplicationSettings.LANGUAGE.getValue().equals(response.getLocalePref())) {
+                return HandshakeResponse.createLeafRejectLocaleOutgoingResponse();
             }
         }
         
-        if (!_mbnager.allowConnection(response)) {
-            HbndshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
-            return HbndshakeResponse.createLeafRejectOutgoingResponse();
+        if (!_manager.allowConnection(response)) {
+            HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
+            return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
         
         Properties ret = new Properties();
 
-        // might bs well save a little bandwidth.
-		if (response.isDeflbteAccepted()) {
-		    ret.put(HebderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
+        // might as well save a little bandwidth.
+		if (response.isDeflateAccepted()) {
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
         
-        HbndshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
+        HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
         
-        return HbndshakeResponse.createAcceptOutgoingResponse(ret);
+        return HandshakeResponse.createAcceptOutgoingResponse(ret);
     }
 
     
     /**
-     * Responds to bn incoming connection handshake.
+     * Responds to an incoming connection handshake.
      *
-     * @return the <tt>HbndshakeResponse</tt> with the handshake 
-     *  hebders to send in response to the connection attempt
+     * @return the <tt>HandshakeResponse</tt> with the handshake 
+     *  headers to send in response to the connection attempt
      */
-    protected HbndshakeResponse respondToIncoming(HandshakeResponse hr) {
-		if (hr.isCrbwler()) {
-		    HbndshakingStat.INCOMING_CRAWLER.incrementStat();
-			return HbndshakeResponse.createCrawlerResponse();
+    protected HandshakeResponse respondToIncoming(HandshakeResponse hr) {
+		if (hr.isCrawler()) {
+		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
+			return HandshakeResponse.createCrawlerResponse();
 		}
 		
-        //if not bn ultrapeer, reject.
-        if (!hr.isUltrbpeer()) {
-            HbndshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HbndshakeResponse.createLeafRejectOutgoingResponse();
+        //if not an ultrapeer, reject.
+        if (!hr.isUltrapeer()) {
+            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
+            return HandshakeResponse.createLeafRejectOutgoingResponse();
         }		
         
-        Properties ret = new LebfHeaders(getRemoteIP());
+        Properties ret = new LeafHeaders(getRemoteIP());
         
-        //If we blready have enough ultrapeers, reject.
-        if (!_mbnager.allowConnection(hr)) {
-            HbndshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HbndshakeResponse.createLeafRejectIncomingResponse(hr);
+        //If we already have enough ultrapeers, reject.
+        if (!_manager.allowConnection(hr)) {
+            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
+            return HandshakeResponse.createLeafRejectIncomingResponse(hr);
         } 
 
-		//deflbte if we can ...
-		if (hr.isDeflbteAccepted()) {
-		    ret.put(HebderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
+		//deflate if we can ...
+		if (hr.isDeflateAccepted()) {
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
 
-        HbndshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
+        HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
 
-        //b) We're not b leaf yet, so accept the incoming connection
-        return HbndshakeResponse.createAcceptIncomingResponse(hr, ret);
+        //a) We're not b leaf yet, so accept the incoming connection
+        return HandshakeResponse.createAcceptIncomingResponse(hr, ret);
     }
 }

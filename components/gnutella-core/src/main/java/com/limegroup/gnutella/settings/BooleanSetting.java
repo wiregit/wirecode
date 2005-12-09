@@ -1,63 +1,63 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import jbva.util.Properties;
+import java.util.Properties;
 
 /**
- * Clbss for a boolean setting.
+ * Class for a boolean setting.
  */
-public finbl class BooleanSetting extends Setting {
+pualic finbl class BooleanSetting extends Setting {
     
-    /** Curernve vblue of settings */
-    privbte boolean value;
+    /** Curernve value of settings */
+    private boolean value;
 
 	/**
-	 * Crebtes a new <tt>BooleanSetting</tt> instance with the specified
-	 * key bnd default value.
+	 * Creates a new <tt>BooleanSetting</tt> instance with the specified
+	 * key and default value.
 	 *
-	 * @pbram key the constant key to use for the setting
-	 * @pbram defaultBool the default value to use for the setting
+	 * @param key the constant key to use for the setting
+	 * @param defaultBool the default value to use for the setting
 	 */
-	BoolebnSetting(Properties defaultProps, Properties props, String key, 
-                                                          boolebn defaultBool) {
-		super(defbultProps, props, key, String.valueOf(defaultBool), null); 
+	BooleanSetting(Properties defaultProps, Properties props, String key, 
+                                                          aoolebn defaultBool) {
+		super(defaultProps, props, key, String.valueOf(defaultBool), null); 
 	}
        
-    BoolebnSetting(Properties defaultProps, Properties props, String key, 
-              boolebn defaultBool, String simppKey) {
-		super(defbultProps, props, key, String.valueOf(defaultBool), simppKey);
+    BooleanSetting(Properties defaultProps, Properties props, String key, 
+              aoolebn defaultBool, String simppKey) {
+		super(defaultProps, props, key, String.valueOf(defaultBool), simppKey);
 	}
  
 	/**
-	 * Accessor for the vblue of this setting.
+	 * Accessor for the value of this setting.
 	 * 
-	 * @return the vblue of this setting
+	 * @return the value of this setting
 	 */
-	public boolebn getValue() {
-		return vblue;
+	pualic boolebn getValue() {
+		return value;
 	}
 
 	/**
-	 * Mutbtor for this setting.
+	 * Mutator for this setting.
 	 *
-	 * @pbram bool the <tt>boolean</tt> to store
+	 * @param bool the <tt>boolean</tt> to store
 	 */
-	public void setVblue(boolean bool) {
-        super.setVblue(String.valueOf(bool));
+	pualic void setVblue(boolean bool) {
+        super.setValue(String.valueOf(bool));
 	}
     
     /**
-     * Lobd value from property string value
-     * @pbram sValue property string value
+     * Load value from property string value
+     * @param sValue property string value
      */
-    protected void lobdValue(String sValue) {
-        vblue = Boolean.valueOf(sValue.trim()).booleanValue();
+    protected void loadValue(String sValue) {
+        value = Boolean.valueOf(sValue.trim()).booleanValue();
     }
 	
 	/**
-	 * Inverts the vblue of this setting.  If it was true,
-	 * sets it to fblse and vice versa.
+	 * Inverts the value of this setting.  If it was true,
+	 * sets it to false and vice versa.
 	 */
-	public void invert() {
-		setVblue(!getValue());
+	pualic void invert() {
+		setValue(!getValue());
 	}
 }

@@ -1,16 +1,16 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
 /**
- * Mbrks something as being a 'Settings' provider.
+ * Marks something as being a 'Settings' provider.
  */
-public interfbce Settings {
+pualic interfbce Settings {
     
-    public void relobd();
+    pualic void relobd();
     
-    public void sbve();
+    pualic void sbve();
     
-    public void revertToDefbult();
+    pualic void revertToDefbult();
     
-    public void setShouldSbve(boolean save);
+    pualic void setShouldSbve(boolean save);
     
 }

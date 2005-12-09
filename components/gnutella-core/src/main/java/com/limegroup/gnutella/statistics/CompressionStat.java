@@ -1,126 +1,126 @@
-pbckage com.limegroup.gnutella.statistics;
+package com.limegroup.gnutella.statistics;
 
 /**
- * This clbss contains a type-safe enumeration of all classes for
- * compression dbta.
+ * This class contains a type-safe enumeration of all classes for
+ * compression data.
  */
-public clbss CompressionStat extends AdvancedKilobytesStatistic {
+pualic clbss CompressionStat extends AdvancedKilobytesStatistic {
 	
 	/**
-	 * Mbke the constructor private so that only this class can construct
-	 * b <tt>BandwidthStat</tt> instances.
+	 * Make the constructor private so that only this class can construct
+	 * a <tt>BandwidthStat</tt> instances.
 	 */
-	privbte CompressionStat() {}
+	private CompressionStat() {}
 
 	/**
-	 * Speciblized class for accumulating all uncompressed upstream data.
+	 * Specialized class for accumulating all uncompressed upstream data.
 	 */
-	privbte static class UncompressedUpstream extends CompressionStat {
-		public void bddData(int data) {
-			super.bddData(data);
-			UPSTREAM_UNCOMPRESSED.bddData(data);
+	private static class UncompressedUpstream extends CompressionStat {
+		pualic void bddData(int data) {
+			super.addData(data);
+			UPSTREAM_UNCOMPRESSED.addData(data);
 		}
 	}
 
 	/**
-	 * Speciblized class for accumulating all uncompressed downstream data.
+	 * Specialized class for accumulating all uncompressed downstream data.
 	 */
-	privbte static class UncompressedDownstream extends CompressionStat {
-		public void bddData(int data) {
-			super.bddData(data);
-			DOWNSTREAM_UNCOMPRESSED.bddData(data);
+	private static class UncompressedDownstream extends CompressionStat {
+		pualic void bddData(int data) {
+			super.addData(data);
+			DOWNSTREAM_UNCOMPRESSED.addData(data);
 		}
 	}
 	
 	/**
-	 * Speciblized class for accumulating all compressed upstream data.
+	 * Specialized class for accumulating all compressed upstream data.
 	 */
-	privbte static class CompressedUpstream extends CompressionStat {
-		public void bddData(int data) {
-			super.bddData(data);
-			UPSTREAM_COMPRESSED.bddData(data);
+	private static class CompressedUpstream extends CompressionStat {
+		pualic void bddData(int data) {
+			super.addData(data);
+			UPSTREAM_COMPRESSED.addData(data);
 		}
 	}
 
 	/**
-	 * Speciblized class for accumulating all compressed downstream data.
+	 * Specialized class for accumulating all compressed downstream data.
 	 */
-	privbte static class CompressedDownstream extends CompressionStat {
-		public void bddData(int data) {
-			super.bddData(data);
-			DOWNSTREAM_COMPRESSED.bddData(data);
+	private static class CompressedDownstream extends CompressionStat {
+		pualic void bddData(int data) {
+			super.addData(data);
+			DOWNSTREAM_COMPRESSED.addData(data);
 		}
 	}
 
 	/**
-	 * <tt>Stbtistic</tt> for all upstream uncompressed bandwidth.
+	 * <tt>Statistic</tt> for all upstream uncompressed bandwidth.
 	 */
-	public stbtic final Statistic UPSTREAM_UNCOMPRESSED =
-		new CompressionStbt();
+	pualic stbtic final Statistic UPSTREAM_UNCOMPRESSED =
+		new CompressionStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all downstream uncompressed bandwidth.
+	 * <tt>Statistic</tt> for all downstream uncompressed bandwidth.
 	 */
-	public stbtic final Statistic DOWNSTREAM_UNCOMPRESSED =
-		new CompressionStbt();
+	pualic stbtic final Statistic DOWNSTREAM_UNCOMPRESSED =
+		new CompressionStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all upstream compressed bandwidth.
+	 * <tt>Statistic</tt> for all upstream compressed bandwidth.
 	 */
-	public stbtic final Statistic UPSTREAM_COMPRESSED =
-		new CompressionStbt();
+	pualic stbtic final Statistic UPSTREAM_COMPRESSED =
+		new CompressionStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all downstream compressed bandwidth.
+	 * <tt>Statistic</tt> for all downstream compressed bandwidth.
 	 */
-	public stbtic final Statistic DOWNSTREAM_COMPRESSED =
-		new CompressionStbt();
+	pualic stbtic final Statistic DOWNSTREAM_COMPRESSED =
+		new CompressionStat();
 
 	/**
-	 * <tt>Stbtistic</tt> for all upstream Gnutella uncompressed traffic.
+	 * <tt>Statistic</tt> for all upstream Gnutella uncompressed traffic.
 	 */
-	public stbtic final Statistic GNUTELLA_UNCOMPRESSED_UPSTREAM =
-		new UncompressedUpstrebm();
+	pualic stbtic final Statistic GNUTELLA_UNCOMPRESSED_UPSTREAM =
+		new UncompressedUpstream();
 
 	/**
-	 * <tt>Stbtistic</tt> for all downstream Gnutella uncompressed traffic.
+	 * <tt>Statistic</tt> for all downstream Gnutella uncompressed traffic.
 	 */
-	public stbtic final Statistic GNUTELLA_UNCOMPRESSED_DOWNSTREAM =
-		new UncompressedDownstrebm();
+	pualic stbtic final Statistic GNUTELLA_UNCOMPRESSED_DOWNSTREAM =
+		new UncompressedDownstream();
 
 	/**
-	 * <tt>Stbtistic</tt> for all upstream Gnutella compressed traffic.
+	 * <tt>Statistic</tt> for all upstream Gnutella compressed traffic.
 	 */
-	public stbtic final Statistic GNUTELLA_COMPRESSED_UPSTREAM =
-		new CompressedUpstrebm();
+	pualic stbtic final Statistic GNUTELLA_COMPRESSED_UPSTREAM =
+		new CompressedUpstream();
 
 	/**
-	 * <tt>Stbtistic</tt> for all downstream Gnutella compressed traffic.
+	 * <tt>Statistic</tt> for all downstream Gnutella compressed traffic.
 	 */
-	public stbtic final Statistic GNUTELLA_COMPRESSED_DOWNSTREAM =
-		new CompressedDownstrebm();
+	pualic stbtic final Statistic GNUTELLA_COMPRESSED_DOWNSTREAM =
+		new CompressedDownstream();
 
 	/**
-	 * <tt>Stbtistic</tt> for all upstream HTTP uncompressed traffic.
+	 * <tt>Statistic</tt> for all upstream HTTP uncompressed traffic.
 	 */
-	public stbtic final Statistic HTTP_UNCOMPRESSED_UPSTREAM =
-		new UncompressedUpstrebm();
+	pualic stbtic final Statistic HTTP_UNCOMPRESSED_UPSTREAM =
+		new UncompressedUpstream();
 
 	/**
-	 * <tt>Stbtistic</tt> for all downstream HTTP uncompressed traffic.
+	 * <tt>Statistic</tt> for all downstream HTTP uncompressed traffic.
 	 */
-	public stbtic final Statistic HTTP_UNCOMPRESSED_DOWNSTREAM =
-		new UncompressedDownstrebm();
+	pualic stbtic final Statistic HTTP_UNCOMPRESSED_DOWNSTREAM =
+		new UncompressedDownstream();
 
 	/**
-	 * <tt>Stbtistic</tt> for all upstream HTTP compressed traffic.
+	 * <tt>Statistic</tt> for all upstream HTTP compressed traffic.
 	 */
-	public stbtic final Statistic HTTP_COMPRESSED_UPSTREAM =
-		new CompressedUpstrebm();
+	pualic stbtic final Statistic HTTP_COMPRESSED_UPSTREAM =
+		new CompressedUpstream();
 
 	/**
-	 * <tt>Stbtistic</tt> for all downstream HTTP compressed traffic.
+	 * <tt>Statistic</tt> for all downstream HTTP compressed traffic.
 	 */
-	public stbtic final Statistic HTTP_COMPRESSED_DOWNSTREAM =
-		new CompressedDownstrebm();
+	pualic stbtic final Statistic HTTP_COMPRESSED_DOWNSTREAM =
+		new CompressedDownstream();
 }

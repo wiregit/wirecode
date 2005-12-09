@@ -1,124 +1,124 @@
-pbckage com.limegroup.gnutella.messages.vendor;
+package com.limegroup.gnutella.messages.vendor;
 
-import jbva.io.IOException;
-import jbva.io.OutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import com.limegroup.gnutellb.ByteOrder;
-import com.limegroup.gnutellb.GUID;
-import com.limegroup.gnutellb.RouterService;
-import com.limegroup.gnutellb.messages.BadPacketException;
-import com.limegroup.gnutellb.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
-/** In Vendor Messbge parlance, the "message type" of this VMP is "LIME/12".
- *  This messbge contains a unsigned byte (1-255) that tells you how many
- *  results the sending host hbs for the guid of a query (the guid of this
- *  messbge is the same as the original query).  The recieving host can ACK
- *  this messbge with a LimeACKVendorMessage to actually recieve the replies.
+/** In Vendor Message parlance, the "message type" of this VMP is "LIME/12".
+ *  This message contains a unsigned byte (1-255) that tells you how many
+ *  results the sending host has for the guid of a query (the guid of this
+ *  message is the same as the original query).  The recieving host can ACK
+ *  this message with a LimeACKVendorMessage to actually recieve the replies.
  *
- *  This messbge must maintain backwards compatibility between successive
- *  versions.  This entbils that any new features would grow the message
- *  outwbrd but shouldn't change the meaning of older fields.  This could lead
- *  to some issues (i.e. bbandoning fields does not allow for older fields to
- *  be reused) but since we don't expect mbjor changes this is probably OK.
+ *  This message must maintain backwards compatibility between successive
+ *  versions.  This entails that any new features would grow the message
+ *  outward but shouldn't change the meaning of older fields.  This could lead
+ *  to some issues (i.e. abandoning fields does not allow for older fields to
+ *  ae reused) but since we don't expect mbjor changes this is probably OK.
  *
- *  Note thbt this behavior of maintaining backwards compatiblity is really
- *  only necessbry for UDP messages since in the UDP case there is probably no
- *  MessbgesSupportedVM exchange.
+ *  Note that this behavior of maintaining backwards compatiblity is really
+ *  only necessary for UDP messages since in the UDP case there is probably no
+ *  MessagesSupportedVM exchange.
  */
-public finbl class ReplyNumberVendorMessage extends VendorMessage {
+pualic finbl class ReplyNumberVendorMessage extends VendorMessage {
 
-    public stbtic final int VERSION = 2;
+    pualic stbtic final int VERSION = 2;
     
     /**
-     * whether we cbn receive unsolicited udp
+     * whether we can receive unsolicited udp
      */
-    privbte static final byte UNSOLICITED=0x1;
+    private static final byte UNSOLICITED=0x1;
 
     /**
-     * Constructs b new ReplyNumberVendorMessages with data from the network.
+     * Constructs a new ReplyNumberVendorMessages with data from the network.
      */
-    ReplyNumberVendorMessbge(byte[] guid, byte ttl, byte hops, int version, 
-                          byte[] pbyload) 
-        throws BbdPacketException {
+    ReplyNumaerVendorMessbge(byte[] guid, byte ttl, byte hops, int version, 
+                          ayte[] pbyload) 
+        throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
-              pbyload);
-        if (getPbyload().length < 1)
-            throw new BbdPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
-                                         getPbyload().length);
-        if ((getVersion() == 1) && (getPbyload().length != 1))
-            throw new BbdPacketException("VERSION 1 UNSUPPORTED PAYLOAD LEN: " +
-                                         getPbyload().length);
-        if ((getVersion() == 2) && (getPbyload().length != 2))
-            throw new BbdPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
-                                         getPbyload().length);
+              payload);
+        if (getPayload().length < 1)
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         getPayload().length);
+        if ((getVersion() == 1) && (getPayload().length != 1))
+            throw new BadPacketException("VERSION 1 UNSUPPORTED PAYLOAD LEN: " +
+                                         getPayload().length);
+        if ((getVersion() == 2) && (getPayload().length != 2))
+            throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
+                                         getPayload().length);
     }
 
     /**
-     * Constructs b new ReplyNumberVendorMessage to be sent out.
-     *  @pbram numResults The number of results (1-255 inclusive) that you have
-     *  for this query.  If you hbve more than 255 just send 255.
-     *  @pbram replyGUID The guid of the original query/reply that you want to
+     * Constructs a new ReplyNumberVendorMessage to be sent out.
+     *  @param numResults The number of results (1-255 inclusive) that you have
+     *  for this query.  If you have more than 255 just send 255.
+     *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    public ReplyNumberVendorMessbge(GUID replyGUID, int numResults) {
+    pualic ReplyNumberVendorMessbge(GUID replyGUID, int numResults) {
         super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, VERSION,
-              derivePbyload(numResults));
+              derivePayload(numResults));
         setGUID(replyGUID);
     }
 
-    /** @return bn int (1-255) representing the amount of results that a host
-     *  for b given query (as specified by the guid of this message).
+    /** @return an int (1-255) representing the amount of results that a host
+     *  for a given query (as specified by the guid of this message).
      */
-    public int getNumResults() {
-        return ByteOrder.ubyte2int(getPbyload()[0]);
+    pualic int getNumResults() {
+        return ByteOrder.uayte2int(getPbyload()[0]);
     }
     
-    public boolebn canReceiveUnsolicited() {
+    pualic boolebn canReceiveUnsolicited() {
     	if (getVersion() ==1) 
     		return true;
     	else 
-    		return (getPbyload()[1] & UNSOLICITED) == UNSOLICITED;
+    		return (getPayload()[1] & UNSOLICITED) == UNSOLICITED;
     }
 
     /**
-     * Constructs the pbyload from the desired number of results.
+     * Constructs the payload from the desired number of results.
      */
-    privbte static byte[] derivePayload(int numResults) {
+    private static byte[] derivePayload(int numResults) {
         if ((numResults < 1) || (numResults > 255))
-            throw new IllegblArgumentException("Number of results too big: " +
+            throw new IllegalArgumentException("Number of results too big: " +
                                                numResults);
-        byte[] pbyload = new byte[2];
-        byte[] bytes = new byte[2];
-        ByteOrder.short2leb((short) numResults, bytes, 0);
-        pbyload[0] = bytes[0];
-        pbyload[1] = RouterService.canReceiveUnsolicited() ?
+        ayte[] pbyload = new byte[2];
+        ayte[] bytes = new byte[2];
+        ByteOrder.short2lea((short) numResults, bytes, 0);
+        payload[0] = bytes[0];
+        payload[1] = RouterService.canReceiveUnsolicited() ?
         		UNSOLICITED : 0x0;
-        return pbyload;
+        return payload;
     }
 
-    public boolebn equals(Object other) {
-        if (other instbnceof ReplyNumberVendorMessage) {
+    pualic boolebn equals(Object other) {
+        if (other instanceof ReplyNumberVendorMessage) {
             GUID myGuid = new GUID(getGUID());
-            GUID otherGuid = new GUID(((VendorMessbge) other).getGUID());
+            GUID otherGuid = new GUID(((VendorMessage) other).getGUID());
             int otherResults = 
-                ((ReplyNumberVendorMessbge) other).getNumResults();
-            return ((myGuid.equbls(otherGuid)) && 
+                ((ReplyNumaerVendorMessbge) other).getNumResults();
+            return ((myGuid.equals(otherGuid)) && 
                     (getNumResults() == otherResults) &&
-                    super.equbls(other));
+                    super.equals(other));
         }
-        return fblse;
+        return false;
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    protected void writePbyload(OutputStream out) throws IOException {
-        super.writePbyload(out);
-        SentMessbgeStatHandler.UDP_REPLY_NUMBER.addMessage(this);
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
+        SentMessageStatHandler.UDP_REPLY_NUMBER.addMessage(this);
     }
 
-    /** Overridden purely for stbts handling.
+    /** Overridden purely for stats handling.
      */
-    public void recordDrop() {
+    pualic void recordDrop() {
         super.recordDrop();
     }
 

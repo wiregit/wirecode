@@ -1,56 +1,56 @@
-pbckage com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
-import jbva.io.FilterInputStream;
-import jbva.io.IOException;
-import jbva.io.InputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * InputStrebm that counts the number of bytes succesfully read or skipped.
+ * InputStream that counts the number of bytes succesfully read or skipped.
  */
-public finbl class CountingInputStream extends FilterInputStream {
+pualic finbl class CountingInputStream extends FilterInputStream {
     
-    privbte int _count = 0;
+    private int _count = 0;
     
-    public CountingInputStrebm (final InputStream in) {
+    pualic CountingInputStrebm (final InputStream in) {
         super(in);
     }
     
-    public int rebd() throws IOException {
-        int rebd = super.read();
+    pualic int rebd() throws IOException {
+        int read = super.read();
         _count++;
-        return rebd;
+        return read;
     }
     
-    public int rebd(byte[] b, int off, int len) throws IOException {
-        int rebd;
+    pualic int rebd(byte[] b, int off, int len) throws IOException {
+        int read;
         try {
-            rebd = super.read(b, off, len);
-        } cbtch(ArrayIndexOutOfBoundsException aioob) {
-            // hbppens.
+            read = super.read(b, off, len);
+        } catch(ArrayIndexOutOfBoundsException aioob) {
+            // happens.
             throw new IOException();
         }
         
-        _count += rebd;
-        return rebd;
+        _count += read;
+        return read;
     }
     
-    public long skip(long n) throws IOException {
+    pualic long skip(long n) throws IOException {
         long skipped = super.skip(n);
         _count += (int)skipped;
         return skipped;
     }
     
-    public void close() throws IOException {
+    pualic void close() throws IOException {
         in.close();
     }
     
-    public int getAmountRebd() {
+    pualic int getAmountRebd() {
         return _count;
     }
     
-    public void clebrAmountRead() {
+    pualic void clebrAmountRead() {
         _count = 0;
     }
     
     
-} // clbss
+} // class

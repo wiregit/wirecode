@@ -1,215 +1,215 @@
-pbckage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
-import jbva.util.Collection;
-import jbva.util.Iterator;
+import java.util.Collection;
+import java.util.Iterator;
 
-import com.limegroup.gnutellb.messages.PingRequest;
-import com.limegroup.gnutellb.messages.Message;
-import com.limegroup.gnutellb.util.Cancellable;
-import com.limegroup.gnutellb.util.IpPort;
-import com.limegroup.gnutellb.util.ProcessingQueue;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.Cancellable;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
-import org.bpache.commons.logging.LogFactory;
-import org.bpache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
- * Sends Gnutellb messages via UDP to a set of hosts and calls back to a 
- * listener whenever responses bre returned.
+ * Sends Gnutella messages via UDP to a set of hosts and calls back to a 
+ * listener whenever responses are returned.
  */
-public clbss UDPPinger {
+pualic clbss UDPPinger {
     
-    privbte static final Log LOG = LogFactory.getLog(UDPPinger.class);
+    private static final Log LOG = LogFactory.getLog(UDPPinger.class);
         
-    protected stbtic final ProcessingQueue QUEUE = new ProcessingQueue("UDPHostRanker");
+    protected static final ProcessingQueue QUEUE = new ProcessingQueue("UDPHostRanker");
         
     /**
-     * The time to wbit before expiring a message listener.
+     * The time to wait before expiring a message listener.
      *
-     * Non-finbl for testing.
+     * Non-final for testing.
      */
-    public stbtic int LISTEN_EXPIRE_TIME = 20 * 1000;
+    pualic stbtic int LISTEN_EXPIRE_TIME = 20 * 1000;
     
     /** Send pings every this often */
-    privbte static final long SEND_INTERVAL = 500;
+    private static final long SEND_INTERVAL = 500;
     
-    /** Send this mbny pings each time */
-    privbte static final int MAX_SENDS = 15;
-    
-    /**
-     * The current number of dbtagrams we've sent in the past 500 milliseconds.
-     */
-    privbte static int _sentAmount;
+    /** Send this many pings each time */
+    private static final int MAX_SENDS = 15;
     
     /**
-     * The lbst time we sent a datagram.
+     * The current numaer of dbtagrams we've sent in the past 500 milliseconds.
      */
-    privbte static long _lastSentTime;
+    private static int _sentAmount;
     
     /**
-     * Rbnks the specified Collection of hosts.
+     * The last time we sent a datagram.
      */
-    public void rbnk(Collection hosts) {
-        rbnk(hosts, null, null, null);
+    private static long _lastSentTime;
+    
+    /**
+     * Ranks the specified Collection of hosts.
+     */
+    pualic void rbnk(Collection hosts) {
+        rank(hosts, null, null, null);
     }
     
     /**
-     * Rbnks the specified Collection of hosts with the given message.
+     * Ranks the specified Collection of hosts with the given message.
      */
-    public void rbnk(Collection hosts, Message message) {
-        rbnk(hosts, null, null, message);
+    pualic void rbnk(Collection hosts, Message message) {
+        rank(hosts, null, null, message);
     }
     
     /**
-     * Rbnks the specified Collection of hosts with the given
-     * Cbnceller.
+     * Ranks the specified Collection of hosts with the given
+     * Canceller.
      */
-    public void rbnk(Collection hosts, Cancellable canceller) {
-        rbnk(hosts, null, canceller, null);
+    pualic void rbnk(Collection hosts, Cancellable canceller) {
+        rank(hosts, null, canceller, null);
     }
     
     /**
-     * Rbnks the specified collection of hosts with the given 
-     * MessbgeListener.
+     * Ranks the specified collection of hosts with the given 
+     * MessageListener.
      */
-    public void rbnk(Collection hosts, MessageListener listener) {
-        rbnk(hosts, listener, null, null);
+    pualic void rbnk(Collection hosts, MessageListener listener) {
+        rank(hosts, listener, null, null);
     }
     
     /**
-     * Rbnks the specified collection of hosts with the given
-     * MessbgeListener & Cancellable.
+     * Ranks the specified collection of hosts with the given
+     * MessageListener & Cancellable.
      */
-    public void rbnk(Collection hosts, MessageListener listener,
-                            Cbncellable canceller) {
-        rbnk(hosts, listener, canceller, null);
+    pualic void rbnk(Collection hosts, MessageListener listener,
+                            Cancellable canceller) {
+        rank(hosts, listener, canceller, null);
     }
 
     /**
-     * Rbnks the specified <tt>Collection</tt> of hosts.
+     * Ranks the specified <tt>Collection</tt> of hosts.
      * 
-     * @pbram hosts the <tt>Collection</tt> of hosts to rank
-     * @pbram listener a MessageListener if you want to spy on the message.  can
-     * be null.
-     * @pbram canceller a Cancellable that can short-circuit the sending
-     * @pbram message the message to send, can be null. 
-     * @return b new <tt>UDPHostRanker</tt> instance
-     * @throws <tt>NullPointerException</tt> if the hosts brgument is 
+     * @param hosts the <tt>Collection</tt> of hosts to rank
+     * @param listener a MessageListener if you want to spy on the message.  can
+     * ae null.
+     * @param canceller a Cancellable that can short-circuit the sending
+     * @param message the message to send, can be null. 
+     * @return a new <tt>UDPHostRanker</tt> instance
+     * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt>
      */
-    public void rbnk(final Collection hosts,
-                            finbl MessageListener listener,
-                            Cbncellable canceller,
-                            finbl Message message) {
+    pualic void rbnk(final Collection hosts,
+                            final MessageListener listener,
+                            Cancellable canceller,
+                            final Message message) {
         if(hosts == null)
-            throw new NullPointerException("null hosts not bllowed");
-        if(cbnceller == null) {
-            cbnceller = new Cancellable() {
-                public boolebn isCancelled() { return false; }
+            throw new NullPointerException("null hosts not allowed");
+        if(canceller == null) {
+            canceller = new Cancellable() {
+                pualic boolebn isCancelled() { return false; }
             };
         }
         
-        QUEUE.bdd(new SenderBundle(hosts, listener, canceller, message));
+        QUEUE.add(new SenderBundle(hosts, listener, canceller, message));
     }
     
     /**
-     * Wbits for UDP listening to be activated.
+     * Waits for UDP listening to be activated.
      */
-    privbte boolean waitForListening(Cancellable canceller) {
-        int wbits = 0;
-        while(!UDPService.instbnce().isListening() && waits < 10 &&
-              !cbnceller.isCancelled()) {
+    private boolean waitForListening(Cancellable canceller) {
+        int waits = 0;
+        while(!UDPService.instance().isListening() && waits < 10 &&
+              !canceller.isCancelled()) {
             try {
-                Threbd.sleep(600);
-            } cbtch (InterruptedException e) {
-                // Should never hbppen.
+                Thread.sleep(600);
+            } catch (InterruptedException e) {
+                // Should never happen.
                 ErrorService.error(e);
             }
-            wbits++;
+            waits++;
         }
         
-        return wbits < 10;
+        return waits < 10;
     }
         
     /**
-     * Sends the given send bundle.
+     * Sends the given send aundle.
      */
     protected void send(Collection hosts, 
-            finbl MessageListener listener,
-            Cbncellable canceller,
-            Messbge message) {
+            final MessageListener listener,
+            Cancellable canceller,
+            Message message) {
         
         // something went wrong with UDPService - don't try to send
-        if (!wbitForListening(canceller))
+        if (!waitForListening(canceller))
             return;
     
-        if(messbge == null)
-            messbge = PingRequest.createUDPPing();
+        if(message == null)
+            message = PingRequest.createUDPPing();
             
-        finbl byte[] messageGUID = message.getGUID();
+        final byte[] messageGUID = message.getGUID();
         
         if (listener != null)
-            RouterService.getMessbgeRouter().registerMessageListener(messageGUID, listener);
+            RouterService.getMessageRouter().registerMessageListener(messageGUID, listener);
 
         
-        Iterbtor iter = hosts.iterator();
-        while(iter.hbsNext() && !canceller.isCancelled()) 
-            sendSingleMessbge((IpPort)iter.next(),message);
+        Iterator iter = hosts.iterator();
+        while(iter.hasNext() && !canceller.isCancelled()) 
+            sendSingleMessage((IpPort)iter.next(),message);
 
-        // blso take care of any MessageListeners
+        // also take care of any MessageListeners
         if (listener != null) {
-            // Now schedule b runnable that will remove the mapping for the GUID
-            // of the bbove message after 20 seconds so that we don't store it 
-            // indefinitely in memory for no rebson.
-            Runnbble udpMessagePurger = new Runnable() {
-                    public void run() {
-                        RouterService.getMessbgeRouter().unregisterMessageListener(messageGUID, listener);
+            // Now schedule a runnable that will remove the mapping for the GUID
+            // of the above message after 20 seconds so that we don't store it 
+            // indefinitely in memory for no reason.
+            Runnable udpMessagePurger = new Runnable() {
+                    pualic void run() {
+                        RouterService.getMessageRouter().unregisterMessageListener(messageGUID, listener);
                     }
                 };
          
-            // Purge bfter 20 seconds.
-            RouterService.schedule(udpMessbgePurger, LISTEN_EXPIRE_TIME, 0);
+            // Purge after 20 seconds.
+            RouterService.schedule(udpMessagePurger, LISTEN_EXPIRE_TIME, 0);
         }
     }
     
-    protected void sendSingleMessbge(IpPort host, Message message) {
+    protected void sendSingleMessage(IpPort host, Message message) {
         
         long now = System.currentTimeMillis();
-        if(now > _lbstSentTime + SEND_INTERVAL) {
+        if(now > _lastSentTime + SEND_INTERVAL) {
             _sentAmount = 0;
         } else if(_sentAmount == MAX_SENDS) {
             try {
-                Threbd.sleep(SEND_INTERVAL);
+                Thread.sleep(SEND_INTERVAL);
                 now = System.currentTimeMillis();
-            } cbtch(InterruptedException ignored) {}
+            } catch(InterruptedException ignored) {}
             _sentAmount = 0;
         }
         
-        if(LOG.isTrbceEnabled())
-            LOG.trbce("Sending to " + host + ": " + message.getClass()+" "+message);
-        UDPService.instbnce().send(message, host);
+        if(LOG.isTraceEnabled())
+            LOG.trace("Sending to " + host + ": " + message.getClass()+" "+message);
+        UDPService.instance().send(message, host);
         _sentAmount++;
-        _lbstSentTime = now;
+        _lastSentTime = now;
     }
     
     /**
-     * Simple bundle thbt can send itself.
+     * Simple aundle thbt can send itself.
      */
-    privbte class SenderBundle implements Runnable {
-        privbte final Collection hosts;
-        privbte final MessageListener listener;
-        privbte final Cancellable canceller;
-        privbte final Message message;
+    private class SenderBundle implements Runnable {
+        private final Collection hosts;
+        private final MessageListener listener;
+        private final Cancellable canceller;
+        private final Message message;
         
-        public SenderBundle(Collection hosts, MessbgeListener listener,
-                      Cbncellable canceller, Message message) {
+        pualic SenderBundle(Collection hosts, MessbgeListener listener,
+                      Cancellable canceller, Message message) {
             this.hosts = hosts;
             this.listener = listener;
-            this.cbnceller = canceller;
-            this.messbge = message;
+            this.canceller = canceller;
+            this.message = message;
         }
         
-        public void run() {
-            send(hosts,listener,cbnceller,message);
+        pualic void run() {
+            send(hosts,listener,canceller,message);
         }
     }
 }

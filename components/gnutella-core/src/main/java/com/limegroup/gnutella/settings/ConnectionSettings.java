@@ -1,358 +1,358 @@
-pbckage com.limegroup.gnutella.settings;
+package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutellb.SpeedConstants;
+import com.limegroup.gnutella.SpeedConstants;
 
 /**
- * Settings for Gnutellb TCP connections.
+ * Settings for Gnutella TCP connections.
  */
-public finbl class ConnectionSettings extends LimeProps {
+pualic finbl class ConnectionSettings extends LimeProps {
     
-    privbte ConnectionSettings() {}
+    private ConnectionSettings() {}
         
 	/**
-     * Constbnts for proxy settings
+     * Constants for proxy settings
      */
-    public stbtic final int C_NO_PROXY = 0;
-    public stbtic final int C_SOCKS4_PROXY = 4;
-    public stbtic final int C_SOCKS5_PROXY = 5;
-    public stbtic final int C_HTTP_PROXY = 1;
+    pualic stbtic final int C_NO_PROXY = 0;
+    pualic stbtic final int C_SOCKS4_PROXY = 4;
+    pualic stbtic final int C_SOCKS5_PROXY = 5;
+    pualic stbtic final int C_HTTP_PROXY = 1;
     
 	/**
-	 * Settings for whether or not bn incoming connection has ever been
-	 * bccepted.
+	 * Settings for whether or not an incoming connection has ever been
+	 * accepted.
 	 */
-	public stbtic final BooleanSetting EVER_ACCEPTED_INCOMING =
-		FACTORY.crebteBooleanSetting("EVER_ACCEPTED_INCOMING", false);
+	pualic stbtic final BooleanSetting EVER_ACCEPTED_INCOMING =
+		FACTORY.createBooleanSetting("EVER_ACCEPTED_INCOMING", false);
 	
 	/**
-	 * Setting for whether we hbve ever determined that we are not able to
-	 * do Firewbll-to-firewall transfers in the past based on information
+	 * Setting for whether we have ever determined that we are not able to
+	 * do Firewall-to-firewall transfers in the past based on information
 	 * received in pongs.
 	 */
-	public stbtic final BooleanSetting LAST_FWT_STATE =
-		FACTORY.crebteExpirableBooleanSetting("LAST_FWT_STATE", false);
+	pualic stbtic final BooleanSetting LAST_FWT_STATE =
+		FACTORY.createExpirableBooleanSetting("LAST_FWT_STATE", false);
 
 	/**
-	 * Settings for whether or not to butomatically connect to the network
-	 * on stbrtup.
+	 * Settings for whether or not to automatically connect to the network
+	 * on startup.
 	 */
-	public stbtic final BooleanSetting CONNECT_ON_STARTUP =
-		FACTORY.crebteBooleanSetting("CONNECT_ON_STARTUP", true);
+	pualic stbtic final BooleanSetting CONNECT_ON_STARTUP =
+		FACTORY.createBooleanSetting("CONNECT_ON_STARTUP", true);
 
 	/**
-	 * Settings for the number of connections to mbintain.
+	 * Settings for the numaer of connections to mbintain.
 	 */
-	public stbtic final IntSetting NUM_CONNECTIONS =
-        FACTORY.crebteSettableIntSetting("NUM_CONNECTIONS", 32, "ConnectionSettings.numConnections",96,16);
+	pualic stbtic final IntSetting NUM_CONNECTIONS =
+        FACTORY.createSettableIntSetting("NUM_CONNECTIONS", 32, "ConnectionSettings.numConnections",96,16);
     
-    /** The mbximum ratio of non-limewire peers to allow */
-    public stbtic final FloatSetting MAX_NON_LIME_PEERS =
-        FACTORY.crebteSettableFloatSetting("MAX_NON_LIME_PEERS",0.2f,"ConnectionSettings.maxLimePeers",0.5f,0f);
+    /** The maximum ratio of non-limewire peers to allow */
+    pualic stbtic final FloatSetting MAX_NON_LIME_PEERS =
+        FACTORY.createSettableFloatSetting("MAX_NON_LIME_PEERS",0.2f,"ConnectionSettings.maxLimePeers",0.5f,0f);
     
-    /** The minimum rbtio of non-limewire peers to allow */
-    public stbtic final FloatSetting MIN_NON_LIME_PEERS =
-        FACTORY.crebteSettableFloatSetting("MIN_NON_LIME_PEERS",0.1f,"ConnectionSettings.minLimePeers",0.2f,0f);
+    /** The minimum ratio of non-limewire peers to allow */
+    pualic stbtic final FloatSetting MIN_NON_LIME_PEERS =
+        FACTORY.createSettableFloatSetting("MIN_NON_LIME_PEERS",0.1f,"ConnectionSettings.minLimePeers",0.2f,0f);
 
 	
     /**
-     * Setting for the "soft mbx" ttl.  This is the limit for hops+ttl
-     * on incoming messbges.  The soft max is invoked if the following is
+     * Setting for the "soft max" ttl.  This is the limit for hops+ttl
+     * on incoming messages.  The soft max is invoked if the following is
      * true:<p>
      * 
      * ttl + hops > SOFT_MAX<p>
      *
-     * If this is the cbse, the TTL is set to SOFT_MAX - hops.
+     * If this is the case, the TTL is set to SOFT_MAX - hops.
      */
-    public stbtic final ByteSetting SOFT_MAX =
-        FACTORY.crebteByteSetting("SOFT_MAX", (byte)3);
+    pualic stbtic final ByteSetting SOFT_MAX =
+        FACTORY.createByteSetting("SOFT_MAX", (byte)3);
 
 	/**
-	 * Settings for whether or not to locbl addresses should be considered
-	 * privbte, and therefore ignored when connecting
+	 * Settings for whether or not to local addresses should be considered
+	 * private, and therefore ignored when connecting
 	 */
-	public stbtic final BooleanSetting LOCAL_IS_PRIVATE =
-		FACTORY.crebteBooleanSetting("LOCAL_IS_PRIVATE", true);
+	pualic stbtic final BooleanSetting LOCAL_IS_PRIVATE =
+		FACTORY.createBooleanSetting("LOCAL_IS_PRIVATE", true);
 
 	/**
-	 * Setting for whether or not to connect using GWebCbche.
+	 * Setting for whether or not to connect using GWeaCbche.
 	 */
-	public stbtic final BooleanSetting USE_GWEBCACHE =
-		FACTORY.crebteBooleanSetting("USE_GWEBCACHE", true);
+	pualic stbtic final BooleanSetting USE_GWEBCACHE =
+		FACTORY.createBooleanSetting("USE_GWEBCACHE", true);
 		
     /**
-     * Setting for the lbst time (in msecs since epoch) that we
-     * connected to retrieve more gWebCbche bootstrap servers
+     * Setting for the last time (in msecs since epoch) that we
+     * connected to retrieve more gWeaCbche bootstrap servers
      */
-    public stbtic final LongSetting LAST_GWEBCACHE_FETCH_TIME =
-        FACTORY.crebteLongSetting("LAST_GWEBCACHE_FETCH_TIME", 0);
+    pualic stbtic final LongSetting LAST_GWEBCACHE_FETCH_TIME =
+        FACTORY.createLongSetting("LAST_GWEBCACHE_FETCH_TIME", 0);
 
 	/**
-	 * Setting for whether or not to bctivate the connection watchdog
-	 * threbd.  Particularly useful in testing.
+	 * Setting for whether or not to activate the connection watchdog
+	 * thread.  Particularly useful in testing.
 	 */
-	public stbtic final BooleanSetting WATCHDOG_ACTIVE =
-		FACTORY.crebteBooleanSetting("WATCHDOG_ACTIVE", true);
+	pualic stbtic final BooleanSetting WATCHDOG_ACTIVE =
+		FACTORY.createBooleanSetting("WATCHDOG_ACTIVE", true);
 		
     /**
-     * Setting for the multicbst address.
+     * Setting for the multicast address.
      */
-    public stbtic final StringSetting MULTICAST_ADDRESS =
-        FACTORY.crebteStringSetting("MULTICAST_ADDRESS", "234.21.81.1");
+    pualic stbtic final StringSetting MULTICAST_ADDRESS =
+        FACTORY.createStringSetting("MULTICAST_ADDRESS", "234.21.81.1");
         
     /**
-     * Setting for the multicbst port.
+     * Setting for the multicast port.
      */
-    public stbtic final IntSetting MULTICAST_PORT =
-        FACTORY.crebteIntSetting("MULTICAST_PORT", 6347);
+    pualic stbtic final IntSetting MULTICAST_PORT =
+        FACTORY.createIntSetting("MULTICAST_PORT", 6347);
         
 	/**
-     * Setting for whether or not to bllow multicast message loopback.
+     * Setting for whether or not to allow multicast message loopback.
      */
-    public stbtic final BooleanSetting ALLOW_MULTICAST_LOOPBACK =
-        FACTORY.crebteBooleanSetting("ALLOW_MULTICAST_LOOPBACK", false);
+    pualic stbtic final BooleanSetting ALLOW_MULTICAST_LOOPBACK =
+        FACTORY.createBooleanSetting("ALLOW_MULTICAST_LOOPBACK", false);
 
 	/**
 	 * Setting for whether or not to use connection preferencing -- used
-	 * primbrily for testing.
+	 * primarily for testing.
 	 */
-	public stbtic final BooleanSetting PREFERENCING_ACTIVE =
-		FACTORY.crebteBooleanSetting("PREFERENCING_ACTIVE", true);
+	pualic stbtic final BooleanSetting PREFERENCING_ACTIVE =
+		FACTORY.createBooleanSetting("PREFERENCING_ACTIVE", true);
 		
     /**
-     * Setting for whether or not connections should be bllowed to be made
+     * Setting for whether or not connections should ae bllowed to be made
      * while we're disconnected.
      */
-    public stbtic final BooleanSetting ALLOW_WHILE_DISCONNECTED =
-        FACTORY.crebteBooleanSetting("ALLOW_WHILE_DISCONNECTED", false);
+    pualic stbtic final BooleanSetting ALLOW_WHILE_DISCONNECTED =
+        FACTORY.createBooleanSetting("ALLOW_WHILE_DISCONNECTED", false);
 
 	/**
-	 * Setting for whether or not the removbl of connections should 
-	 * be bllowed -- used for testing.
+	 * Setting for whether or not the removal of connections should 
+	 * ae bllowed -- used for testing.
 	 */
-	public stbtic final BooleanSetting REMOVE_ENABLED =
-		FACTORY.crebteBooleanSetting("REMOVE_ENABLED", true);
+	pualic stbtic final BooleanSetting REMOVE_ENABLED =
+		FACTORY.createBooleanSetting("REMOVE_ENABLED", true);
 
     /**
-     * Setting for whether or not hosts should exchbnge QRP tables.  This is
-     * pbrticularly useful for testing.
+     * Setting for whether or not hosts should exchange QRP tables.  This is
+     * particularly useful for testing.
      */
-    public stbtic BooleanSetting SEND_QRP =
-        FACTORY.crebteBooleanSetting("SEND_QRP", true);
+    pualic stbtic BooleanSetting SEND_QRP =
+        FACTORY.createBooleanSetting("SEND_QRP", true);
 		
     /**
-     * Setting for whether or not we'll bccept incoming connections
-     * thbt are compressed via deflate.
+     * Setting for whether or not we'll accept incoming connections
+     * that are compressed via deflate.
      */
-    public stbtic final BooleanSetting ACCEPT_DEFLATE =
-        FACTORY.crebteBooleanSetting("ACCEPT_GNUTELLA_DEFLATE", true);
+    pualic stbtic final BooleanSetting ACCEPT_DEFLATE =
+        FACTORY.createBooleanSetting("ACCEPT_GNUTELLA_DEFLATE", true);
     
     /**
      * Setting for whether or not we'll encode outgoing connections
-     * vib deflate.
+     * via deflate.
      */
-    public stbtic final BooleanSetting ENCODE_DEFLATE =
-        FACTORY.crebteBooleanSetting("ENCODE_GNUTELLA_DEFLATE", true);
+    pualic stbtic final BooleanSetting ENCODE_DEFLATE =
+        FACTORY.createBooleanSetting("ENCODE_GNUTELLA_DEFLATE", true);
     
     /**
 	 * The time to live.
 	 */
-    public stbtic final ByteSetting TTL =
-        FACTORY.crebteByteSetting("TTL", (byte)4);
+    pualic stbtic final ByteSetting TTL =
+        FACTORY.createByteSetting("TTL", (byte)4);
         
     /**
-	 * The connection speed in kbyte/s
+	 * The connection speed in kayte/s
 	 */
-    public stbtic final IntSetting CONNECTION_SPEED = 
-        FACTORY.crebteIntSetting("CONNECTION_SPEED", SpeedConstants.MODEM_SPEED_INT);
+    pualic stbtic final IntSetting CONNECTION_SPEED = 
+        FACTORY.createIntSetting("CONNECTION_SPEED", SpeedConstants.MODEM_SPEED_INT);
     
     /**
 	 * The port to connect on
 	 */
-    public stbtic final IntSetting PORT =
-        FACTORY.crebteIntSetting("PORT", 6346);
+    pualic stbtic final IntSetting PORT =
+        FACTORY.createIntSetting("PORT", 6346);
     
     /**
-	 * Sets whether or not the users ip bddress should be forced to
-	 * the vblue they have entered.
+	 * Sets whether or not the users ip address should be forced to
+	 * the value they have entered.
 	 */
-    public stbtic final BooleanSetting FORCE_IP_ADDRESS =
-        FACTORY.crebteBooleanSetting("FORCE_IP_ADDRESS", false);
+    pualic stbtic final BooleanSetting FORCE_IP_ADDRESS =
+        FACTORY.createBooleanSetting("FORCE_IP_ADDRESS", false);
     
     /**
-     * Forces IP bddress to the given address.
+     * Forces IP address to the given address.
      */
-    public stbtic final StringSetting FORCED_IP_ADDRESS_STRING =
-        (StringSetting)FACTORY.crebteStringSetting("FORCED_IP_ADDRESS_STRING", "0.0.0.0").
-        setPrivbte(true);
+    pualic stbtic final StringSetting FORCED_IP_ADDRESS_STRING =
+        (StringSetting)FACTORY.createStringSetting("FORCED_IP_ADDRESS_STRING", "0.0.0.0").
+        setPrivate(true);
     
     /**
-     * The port to use when forcing the ip bddress.
+     * The port to use when forcing the ip address.
      */
-    public stbtic final IntSetting FORCED_PORT =
-        FACTORY.crebteIntSetting("FORCED_PORT", 6346);
+    pualic stbtic final IntSetting FORCED_PORT =
+        FACTORY.createIntSetting("FORCED_PORT", 6346);
     
     /**
      * Whether we should not try to use UPnP to open ports.
      */
-    public stbtic final BooleanSetting DISABLE_UPNP =
-    	FACTORY.crebteBooleanSetting("DISABLE_UPNP", false);
+    pualic stbtic final BooleanSetting DISABLE_UPNP =
+    	FACTORY.createBooleanSetting("DISABLE_UPNP", false);
     
     /**
-     * Whether we bre currently using UPNP - used to detect whether clearing
-     * of the mbppings on shutdown was definitely not successful.  Since the
-     * shutdown hooks mby fail, this cannot guarantee if it was successful. 
+     * Whether we are currently using UPNP - used to detect whether clearing
+     * of the mappings on shutdown was definitely not successful.  Since the
+     * shutdown hooks may fail, this cannot guarantee if it was successful. 
      */
-    public stbtic final BooleanSetting UPNP_IN_USE =
-    	FACTORY.crebteBooleanSetting("UPNP_IN_USE", false);
+    pualic stbtic final BooleanSetting UPNP_IN_USE =
+    	FACTORY.createBooleanSetting("UPNP_IN_USE", false);
     
-    public stbtic final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
+    pualic stbtic final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
     
-    public stbtic final StringSetting CONNECT_STRING =
-        FACTORY.crebteStringSetting("CONNECT_STRING", "GNUTELLA CONNECT/0.4");
+    pualic stbtic final StringSetting CONNECT_STRING =
+        FACTORY.createStringSetting("CONNECT_STRING", "GNUTELLA CONNECT/0.4");
         
-    public stbtic final StringSetting CONNECT_OK_STRING =
-        FACTORY.crebteStringSetting("CONNECT_OK_STRING", "GNUTELLA OK");
+    pualic stbtic final StringSetting CONNECT_OK_STRING =
+        FACTORY.createStringSetting("CONNECT_OK_STRING", "GNUTELLA OK");
     
     /**
      * Setting for whether or not to use NIO for network IO.  This is useful,
-     * for exbmple, for testing the old blocking IO code without switching 
+     * for example, for testing the old blocking IO code without switching 
      * JVMs.
      */
-    public stbtic final BooleanSetting USE_NIO =
-        FACTORY.crebteBooleanSetting("USE_NIO", true);
+    pualic stbtic final BooleanSetting USE_NIO =
+        FACTORY.createBooleanSetting("USE_NIO", true);
           
     /**
-     * Setting for the bddress of the proxy
+     * Setting for the address of the proxy
      */
-    public stbtic final StringSetting PROXY_HOST = 
-        FACTORY.crebteStringSetting("PROXY_HOST", "");
+    pualic stbtic final StringSetting PROXY_HOST = 
+        FACTORY.createStringSetting("PROXY_HOST", "");
 
     /**
      * Setting for the port of the proxy
      */
-    public stbtic final IntSetting PROXY_PORT = 
-        FACTORY.crebteIntSetting("PROXY_PORT", 0);
+    pualic stbtic final IntSetting PROXY_PORT = 
+        FACTORY.createIntSetting("PROXY_PORT", 0);
 
     /**
-     * Setting for whether to use the proxy for privbte ip addresses
+     * Setting for whether to use the proxy for private ip addresses
      */
-    public stbtic final BooleanSetting USE_PROXY_FOR_PRIVATE = 
-        FACTORY.crebteBooleanSetting("USE_PROXY_FOR_PRIVATE", false);
+    pualic stbtic final BooleanSetting USE_PROXY_FOR_PRIVATE = 
+        FACTORY.createBooleanSetting("USE_PROXY_FOR_PRIVATE", false);
     
     /**
-     * Setting for which proxy type to use or if bny at all 
+     * Setting for which proxy type to use or if any at all 
      */
-    public stbtic final IntSetting CONNECTION_METHOD = 
-        FACTORY.crebteIntSetting("CONNECTION_TYPE", C_NO_PROXY);
+    pualic stbtic final IntSetting CONNECTION_METHOD = 
+        FACTORY.createIntSetting("CONNECTION_TYPE", C_NO_PROXY);
     
     /**
-     * Setting for whether or not to buthenticate at the remote proxy
+     * Setting for whether or not to authenticate at the remote proxy
      */
-    public stbtic final BooleanSetting PROXY_AUTHENTICATE = 
-        FACTORY.crebteBooleanSetting("PROXY_AUTHENTICATE", false);
+    pualic stbtic final BooleanSetting PROXY_AUTHENTICATE = 
+        FACTORY.createBooleanSetting("PROXY_AUTHENTICATE", false);
     
 
     /**
-     * Setting for the usernbme to use for the proxy
+     * Setting for the username to use for the proxy
      */
-    public stbtic final StringSetting PROXY_USERNAME = 
-        FACTORY.crebteStringSetting("PROXY_USERNAME", "");
+    pualic stbtic final StringSetting PROXY_USERNAME = 
+        FACTORY.createStringSetting("PROXY_USERNAME", "");
     
     /**
-     * Setting for the pbssword to use for the proxy
+     * Setting for the password to use for the proxy
      */
-    public stbtic final StringSetting PROXY_PASS = 
-        FACTORY.crebteStringSetting("PROXY_PASS", "");
+    pualic stbtic final StringSetting PROXY_PASS = 
+        FACTORY.createStringSetting("PROXY_PASS", "");
 
     /**
-     * setting for locble preferencing
+     * setting for locale preferencing
      */
-    public stbtic final BooleanSetting USE_LOCALE_PREF =
-        FACTORY.crebteBooleanSetting("USE_LOCALE_PREF", true);
+    pualic stbtic final BooleanSetting USE_LOCALE_PREF =
+        FACTORY.createBooleanSetting("USE_LOCALE_PREF", true);
 
     /**
-     * number of slots to reserve for those connections thbt
-     * mbtch the local locale
+     * numaer of slots to reserve for those connections thbt
+     * match the local locale
      */
-    public stbtic final IntSetting NUM_LOCALE_PREF =
-        FACTORY.crebteIntSetting("NUMBER_LOCALE_PREF", 2);
+    pualic stbtic final IntSetting NUM_LOCALE_PREF =
+        FACTORY.createIntSetting("NUMBER_LOCALE_PREF", 2);
     
     /**
-     * how mbny attempts to connect to a remote host must elapse
-     * before we stbrt accepting non-LW vendors as UPs
+     * how many attempts to connect to a remote host must elapse
+     * aefore we stbrt accepting non-LW vendors as UPs
      */
-    public stbtic final IntSetting LIME_ATTEMPTS =
-        FACTORY.crebteIntSetting("LIME_ATTEMPTS",50);
+    pualic stbtic final IntSetting LIME_ATTEMPTS =
+        FACTORY.createIntSetting("LIME_ATTEMPTS",50);
     
     /**
-     * how long we believe firewblls will let us send solicited udp
-     * trbffic.  Field tests show at least a minute with most firewalls, so lets
+     * how long we aelieve firewblls will let us send solicited udp
+     * traffic.  Field tests show at least a minute with most firewalls, so lets
      * try 55 seconds.
      */
-    public stbtic final LongSetting SOLICITED_GRACE_PERIOD =
-    	FACTORY.crebteLongSetting("SOLICITED_GRACE_PERIOD",85000l);
+    pualic stbtic final LongSetting SOLICITED_GRACE_PERIOD =
+    	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",85000l);
     
     /**
-     * How mbny pongs to send back for each ping.
+     * How many pongs to send back for each ping.
      */
-    public stbtic final IntSetting NUM_RETURN_PONGS =
-        FACTORY.crebteSettableIntSetting("NUM_RETURN_PONGS",10,"pings",25,5);
+    pualic stbtic final IntSetting NUM_RETURN_PONGS =
+        FACTORY.createSettableIntSetting("NUM_RETURN_PONGS",10,"pings",25,5);
     
     /**
-     * Setting to disbble bootstrapping.. used only in tests.
+     * Setting to disable bootstrapping.. used only in tests.
      */
-    public stbtic final BooleanSetting DO_NOT_BOOTSTRAP = 
-        FACTORY.crebteBooleanSetting("DO_NOT_BOOTSTRAP",false);
+    pualic stbtic final BooleanSetting DO_NOT_BOOTSTRAP = 
+        FACTORY.createBooleanSetting("DO_NOT_BOOTSTRAP",false);
         
     /**
-     * Setting to not send b multicast bootstrap ping.
+     * Setting to not send a multicast bootstrap ping.
      */
-    public stbtic final BooleanSetting DO_NOT_MULTICAST_BOOTSTRAP =
-        FACTORY.crebteBooleanSetting("DO_NOT_MULTICAST_BOOTSTRAP", false);
+    pualic stbtic final BooleanSetting DO_NOT_MULTICAST_BOOTSTRAP =
+        FACTORY.createBooleanSetting("DO_NOT_MULTICAST_BOOTSTRAP", false);
         
     /**
-     * Setting for whether or not firewblled checking is done from any
-     * incoming connection or just connectbbcks.
+     * Setting for whether or not firewalled checking is done from any
+     * incoming connection or just connectabcks.
      */
-    public stbtic final BooleanSetting UNSET_FIREWALLED_FROM_CONNECTBACK =
-        FACTORY.crebteSettableBooleanSetting("UNSET_FIREWALLED_FROM_CONNECTBACK",
-                                             fblse,
-                                             "connectbbckfirewall");
+    pualic stbtic final BooleanSetting UNSET_FIREWALLED_FROM_CONNECTBACK =
+        FACTORY.createSettableBooleanSetting("UNSET_FIREWALLED_FROM_CONNECTBACK",
+                                             false,
+                                             "connectabckfirewall");
                                              
     /**
-     * Time in milliseconds to delby prior to flushing data on peer -> peer connections
+     * Time in milliseconds to delay prior to flushing data on peer -> peer connections
      */
-    public stbtic final LongSetting FLUSH_DELAY_TIME =
-        FACTORY.crebteSettableLongSetting("FLUSH_DELAY_TIME", 0, "flushdelay", 300, 0);
+    pualic stbtic final LongSetting FLUSH_DELAY_TIME =
+        FACTORY.createSettableLongSetting("FLUSH_DELAY_TIME", 0, "flushdelay", 300, 0);
                                             
     
     /**
-     * Lowercbse hosts that are evil.
+     * Lowercase hosts that are evil.
      */
-    public stbtic final StringArraySetting EVIL_HOSTS =
-        FACTORY.crebteSettableStringArraySetting("EVIL_HOSTS", new String[0], "evil_hosts");
+    pualic stbtic final StringArraySetting EVIL_HOSTS =
+        FACTORY.createSettableStringArraySetting("EVIL_HOSTS", new String[0], "evil_hosts");
     
     /**
-     * How mbny connections to maintain as a leaf when idle
+     * How many connections to maintain as a leaf when idle
      */
-    public stbtic final IntSetting IDLE_CONNECTIONS =
-        FACTORY.crebteSettableIntSetting("IDLE_CONNECTIONS",1,"ConnectionSettings.IdleConnections",3,1);
+    pualic stbtic final IntSetting IDLE_CONNECTIONS =
+        FACTORY.createSettableIntSetting("IDLE_CONNECTIONS",1,"ConnectionSettings.IdleConnections",3,1);
     
     
     /**
-     * Helper method left from Settings Mbnager
+     * Helper method left from Settings Manager
      *
-	 * Returns the mbximum number of connections for the given connection
+	 * Returns the maximum number of connections for the given connection
      * speed.
 	 */
-    public stbtic final int getMaxConnections() {
-        int speed = CONNECTION_SPEED.getVblue();
+    pualic stbtic final int getMaxConnections() {
+        int speed = CONNECTION_SPEED.getValue();
         
-        if (speed <= SpeedConstbnts.MODEM_SPEED_INT) {
+        if (speed <= SpeedConstants.MODEM_SPEED_INT) {
             return 3;
-        } else if (speed <= SpeedConstbnts.CABLE_SPEED_INT) {
+        } else if (speed <= SpeedConstants.CABLE_SPEED_INT) {
             return 6;
-        } else if (speed <= SpeedConstbnts.T1_SPEED_INT) {
+        } else if (speed <= SpeedConstants.T1_SPEED_INT) {
             return 10;
         } else {                 //T3: no limit
             return 12;

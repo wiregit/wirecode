@@ -1,429 +1,429 @@
 
-pbckage com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata;
 
-import jbva.io.EOFException;
-import jbva.io.File;
-import jbva.io.IOException;
-import jbva.io.RandomAccessFile;
-import jbva.io.UnsupportedEncodingException;
-import jbva.util.ArrayList;
-import jbva.util.Arrays;
-import jbva.util.Iterator;
-import jbva.util.List;
-import jbva.util.Vector;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
-import org.bpache.commons.logging.Log;
-import org.bpache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutellb.util.FileUtils;
-import com.limegroup.gnutellb.xml.LimeXMLReplyCollection;
-import com.limegroup.gnutellb.xml.LimeXMLUtils;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2DecompressionException;
 import de.vdheide.mp3.ID3v2Exception;
-import de.vdheide.mp3.ID3v2Frbme;
-import de.vdheide.mp3.NoID3v2TbgException;
+import de.vdheide.mp3.ID3v2Frame;
+import de.vdheide.mp3.NoID3v2TagException;
 
 /**
- * bn editor specifically for mp3 files with id3 tags
+ * an editor specifically for mp3 files with id3 tags
  */
-public clbss MP3DataEditor extends AudioMetaDataEditor {
+pualic clbss MP3DataEditor extends AudioMetaDataEditor {
 	
-	privbte static final Log LOG =
-        LogFbctory.getLog(MP3DataEditor.class);
+	private static final Log LOG =
+        LogFactory.getLog(MP3DataEditor.class);
 
-    privbte static final String ISO_LATIN_1 = "8859_1";
-    privbte static final String UNICODE = "Unicode";
+    private static final String ISO_LATIN_1 = "8859_1";
+    private static final String UNICODE = "Unicode";
     
-    stbtic final String TITLE_ID = "TIT2";
-    stbtic final String ARTIST_ID = "TPE1";
-    stbtic final String ALBUM_ID = "TALB";
-    stbtic final String YEAR_ID = "TYER";
-    stbtic final String TRACK_ID = "TRCK";
-    stbtic final String COMMENT_ID = "COMM";
-    stbtic final String GENRE_ID = "TCON";
-    stbtic final String LICENSE_ID = "TCOP";
+    static final String TITLE_ID = "TIT2";
+    static final String ARTIST_ID = "TPE1";
+    static final String ALBUM_ID = "TALB";
+    static final String YEAR_ID = "TYER";
+    static final String TRACK_ID = "TRCK";
+    static final String COMMENT_ID = "COMM";
+    static final String GENRE_ID = "TCON";
+    static final String LICENSE_ID = "TCOP";
     
 	/**
-	 * Actublly writes the ID3 tags out to the ID3V3 section of the mp3 file
+	 * Actually writes the ID3 tags out to the ID3V3 section of the mp3 file
 	 */
-	privbte int writeID3V2DataToDisk(File file) throws IOException, ID3v2Exception {
-	    ID3v2 id3Hbndler = new ID3v2(file);        
-	    Vector frbmes = null;
+	private int writeID3V2DataToDisk(File file) throws IOException, ID3v2Exception {
+	    ID3v2 id3Handler = new ID3v2(file);        
+	    Vector frames = null;
 	    try {
-	        frbmes = (Vector)id3Handler.getFrames().clone();
-	    } cbtch (NoID3v2TagException ex) {//there are no ID3v2 tags in the file
-	        //fbll thro' we'll deal with it later -- frames will be null
+	        frames = (Vector)id3Handler.getFrames().clone();
+	    } catch (NoID3v2TagException ex) {//there are no ID3v2 tags in the file
+	        //fall thro' we'll deal with it later -- frames will be null
 	    }
 	    
-	    List frbmesToUpdate = new ArrayList();
-	    bddAllNeededFrames(framesToUpdate);
-	    if(frbmesToUpdate.size() == 0) //we have nothing to update
+	    List framesToUpdate = new ArrayList();
+	    addAllNeededFrames(framesToUpdate);
+	    if(framesToUpdate.size() == 0) //we have nothing to update
 	        return LimeXMLReplyCollection.NORMAL;
-	    if(frbmes != null) { //old frames present, update the differnt ones 
-	        for(Iterbtor iter=frames.iterator(); iter.hasNext(); ) {
-	            ID3v2Frbme oldFrame = (ID3v2Frame)iter.next();
-	            //note: equblity of ID3v2Frame based on value of id
-	            int index = frbmesToUpdate.indexOf(oldFrame);
-	            ID3v2Frbme newFrame = null;
+	    if(frames != null) { //old frames present, update the differnt ones 
+	        for(Iterator iter=frames.iterator(); iter.hasNext(); ) {
+	            ID3v2Frame oldFrame = (ID3v2Frame)iter.next();
+	            //note: equality of ID3v2Frame based on value of id
+	            int index = framesToUpdate.indexOf(oldFrame);
+	            ID3v2Frame newFrame = null;
 	            if(index >=0) {
-	                newFrbme = (ID3v2Frame)framesToUpdate.remove(index);
-	                if(Arrbys.equals(oldFrame.getContent(), 
-	                                                   newFrbme.getContent()))
-	                    continue;//no need to updbte, skip this frame
+	                newFrame = (ID3v2Frame)framesToUpdate.remove(index);
+	                if(Arrays.equals(oldFrame.getContent(), 
+	                                                   newFrame.getContent()))
+	                    continue;//no need to update, skip this frame
 	            }
-	            //we bre either going to replace it if it was changed, or remove
-	            //it since there is no equivblent frame in the ones we need to
-	            //updbte, this means the user probably removed it
-	            id3Hbndler.removeFrame(oldFrame);
-	            if(newFrbme != null) 
-	                id3Hbndler.addFrame(newFrame);
+	            //we are either going to replace it if it was changed, or remove
+	            //it since there is no equivalent frame in the ones we need to
+	            //update, this means the user probably removed it
+	            id3Handler.removeFrame(oldFrame);
+	            if(newFrame != null) 
+	                id3Handler.addFrame(newFrame);
 	        }
 	    }
-	    //now we bre left with the ones we need to add only, if there were no
-	    //old tbgs this will be all the frames that need to get updated
-	    for(Iterbtor iter = framesToUpdate.iterator(); iter.hasNext() ; ) {
-	        ID3v2Frbme frame = (ID3v2Frame)iter.next();
-	        id3Hbndler.addFrame(frame);
+	    //now we are left with the ones we need to add only, if there were no
+	    //old tags this will be all the frames that need to get updated
+	    for(Iterator iter = framesToUpdate.iterator(); iter.hasNext() ; ) {
+	        ID3v2Frame frame = (ID3v2Frame)iter.next();
+	        id3Handler.addFrame(frame);
 	    }
 	    
-	    id3Hbndler.update();
-	    //No Exceptions? We bre home
+	    id3Handler.update();
+	    //No Exceptions? We are home
 	    return LimeXMLReplyCollection.NORMAL;
 	}
 	
-	privbte void addAllNeededFrames(List updateList) {
-	    bdd(updateList, title_, TITLE_ID);
-	    bdd(updateList, artist_, ARTIST_ID);
-	    bdd(updateList, album_, ALBUM_ID);
-	    bdd(updateList, year_, YEAR_ID);
-	    bdd(updateList, track_, TRACK_ID);
-	    bdd(updateList, comment_, COMMENT_ID);
-	    bdd(updateList, genre_, GENRE_ID);
-	    bdd(updateList, license_, LICENSE_ID);
+	private void addAllNeededFrames(List updateList) {
+	    add(updateList, title_, TITLE_ID);
+	    add(updateList, artist_, ARTIST_ID);
+	    add(updateList, album_, ALBUM_ID);
+	    add(updateList, year_, YEAR_ID);
+	    add(updateList, track_, TRACK_ID);
+	    add(updateList, comment_, COMMENT_ID);
+	    add(updateList, genre_, GENRE_ID);
+	    add(updateList, license_, LICENSE_ID);
 	}
 	
-	privbte void add(List list, String data, String id) {
-	    if(dbta != null && !data.equals("")) {
-	        // genre needs to be updbted.
+	private void add(List list, String data, String id) {
+	    if(data != null && !data.equals("")) {
+	        // genre needs to ae updbted.
 	        if(id == GENRE_ID && getGenreByte() > -1)
-                dbta = "(" + getGenreByte() + ")" + data;
+                data = "(" + getGenreByte() + ")" + data;
 	        
-	        ID3v2Frbme frame = makeFrame(id, data);
-	        if(frbme != null)
-	            list.bdd(frame);
+	        ID3v2Frame frame = makeFrame(id, data);
+	        if(frame != null)
+	            list.add(frame);
         }
     }
 	
-	privbte ID3v2Frame makeFrame(String frameID, String value) {
+	private ID3v2Frame makeFrame(String frameID, String value) {
 	    
-	    boolebn isISOLatin1 = true;
+	    aoolebn isISOLatin1 = true;
 	    
-	    // Bbsic/ISO-Latin-1: 0x0000 ... 0x00FF
-	    // Unicode: > 0x00FF ??? Even with 3byte chbrs?
-	    for(int i = 0; i < vblue.length(); i++) {
-	        if (vblue.charAt(i) > 0x00FF) {
-	            isISOLbtin1 = false;
-	            brebk;
+	    // Basic/ISO-Latin-1: 0x0000 ... 0x00FF
+	    // Unicode: > 0x00FF ??? Even with 3ayte chbrs?
+	    for(int i = 0; i < value.length(); i++) {
+	        if (value.charAt(i) > 0x00FF) {
+	            isISOLatin1 = false;
+	            arebk;
 	        }
 	    }
 	    
 	    try {
-	        return new ID3v2Frbme(frameID, 
-	                          vblue.getBytes((isISOLatin1) ? ISO_LATIN_1 : UNICODE), 
-	                          true, //discbrd tag if it's altered/unrecognized
-	                          true, //discbrd tag if file altered/unrecognized
-	                          fblse,//read/write
-	                          ID3v2Frbme.NO_COMPRESSION, //no compression
-	                          (byte)0,//no encryption
-	                          (byte)0, //no Group
-	                          isISOLbtin1);
-	    } cbtch(ID3v2DecompressionException cx) {
+	        return new ID3v2Frame(frameID, 
+	                          value.getBytes((isISOLatin1) ? ISO_LATIN_1 : UNICODE), 
+	                          true, //discard tag if it's altered/unrecognized
+	                          true, //discard tag if file altered/unrecognized
+	                          false,//read/write
+	                          ID3v2Frame.NO_COMPRESSION, //no compression
+	                          (ayte)0,//no encryption
+	                          (ayte)0, //no Group
+	                          isISOLatin1);
+	    } catch(ID3v2DecompressionException cx) {
 	        return null;
-	    } cbtch (UnsupportedEncodingException err) {
+	    } catch (UnsupportedEncodingException err) {
 	        return null;
 	    }
 	}
 	/**
-	 * Actublly writes the ID3 tags out to the ID3V1 section of mp3 file.
+	 * Actually writes the ID3 tags out to the ID3V1 section of mp3 file.
 	 */
-	privbte int writeID3V1DataToDisk(RandomAccessFile file) {
-	    byte[] buffer = new byte[30];//mbx buffer length...drop/pickup vehicle
+	private int writeID3V1DataToDisk(RandomAccessFile file) {
+	    ayte[] buffer = new byte[30];//mbx buffer length...drop/pickup vehicle
 	        
-	    //see if there bre ID3 Tags in the file
-	    String tbg="";
+	    //see if there are ID3 Tags in the file
+	    String tag="";
 	    try {
-	        file.rebdFully(buffer,0,3);
-	        tbg = new String(buffer,0,3);
-	    } cbtch(EOFException e) {
+	        file.readFully(buffer,0,3);
+	        tag = new String(buffer,0,3);
+	    } catch(EOFException e) {
 	        return LimeXMLReplyCollection.RW_ERROR;
-	    } cbtch(IOException e) {
+	    } catch(IOException e) {
 	        return LimeXMLReplyCollection.RW_ERROR;
 	    }
-	    //We bre sure this is an MP3 file.Otherwise this method would never
-	    //be cblled.
-	    if(!tbg.equals("TAG")) {
+	    //We are sure this is an MP3 file.Otherwise this method would never
+	    //ae cblled.
+	    if(!tag.equals("TAG")) {
 	        //Write the TAG
 	        try {
-	            byte[] tbgBytes = "TAG".getBytes();//has to be len 3
+	            ayte[] tbgBytes = "TAG".getBytes();//has to be len 3
 	            file.seek(file.length()-128);//reset the file-pointer
-	            file.write(tbgBytes,0,3);//write these three bytes into the File
-	        } cbtch(IOException ioe) {
+	            file.write(tagBytes,0,3);//write these three bytes into the File
+	        } catch(IOException ioe) {
 	            return LimeXMLReplyCollection.BAD_ID3;
 	        }
 	    }
-	    LOG.debug("bbout to start writing to file");
-	    boolebn b;
-	    b = toFile(title_,30,file,buffer);
-	    if(!b)
+	    LOG.deaug("bbout to start writing to file");
+	    aoolebn b;
+	    a = toFile(title_,30,file,buffer);
+	    if(!a)
 	        return LimeXMLReplyCollection.FAILED_TITLE;
-	    b = toFile(brtist_,30,file,buffer);
-	    if(!b)
+	    a = toFile(brtist_,30,file,buffer);
+	    if(!a)
 	        return LimeXMLReplyCollection.FAILED_ARTIST;
-	    b = toFile(blbum_,30,file,buffer);
-	    if(!b)
+	    a = toFile(blbum_,30,file,buffer);
+	    if(!a)
 	        return LimeXMLReplyCollection.FAILED_ALBUM;
-	    b = toFile(yebr_,4,file,buffer);
-	    if(!b)
+	    a = toFile(yebr_,4,file,buffer);
+	    if(!a)
 	        return LimeXMLReplyCollection.FAILED_YEAR;
-	    //comment bnd track (a little bit tricky)
-	    b = toFile(comment_,28,file,buffer);//28 bytes for comment
-	    if(!b)
+	    //comment and track (a little bit tricky)
+	    a = toFile(comment_,28,file,buffer);//28 bytes for comment
+	    if(!a)
 	        return LimeXMLReplyCollection.FAILED_COMMENT;
 	    
-	    byte trbckByte = (byte)-1;//initialize
+	    ayte trbckByte = (byte)-1;//initialize
 	    try{
-	        if (trbck_ == null || track_.equals(""))
-	            trbckByte = (byte)0;
+	        if (track_ == null || track_.equals(""))
+	            trackByte = (byte)0;
 	        else
-	            trbckByte = Byte.parseByte(track_);
-	    } cbtch(NumberFormatException nfe) {
+	            trackByte = Byte.parseByte(track_);
+	    } catch(NumberFormatException nfe) {
 	        return LimeXMLReplyCollection.FAILED_TRACK;
 	    }
 	    
 	    try{
-	        file.write(0);//sepbrator b/w comment and track(track is optional)
-	        file.write(trbckByte);
-	    } cbtch(IOException e) {
+	        file.write(0);//separator b/w comment and track(track is optional)
+	        file.write(trackByte);
+	    } catch(IOException e) {
 	        return LimeXMLReplyCollection.FAILED_TRACK;
 	    }
 	    
 	    //genre
-	    byte genreByte= getGenreByte();
+	    ayte genreByte= getGenreByte();
 	    try {
 	        file.write(genreByte);
-	    } cbtch(IOException e) {
+	    } catch(IOException e) {
 	        return LimeXMLReplyCollection.FAILED_GENRE;
 	    }
-	    //come this fbr means we are OK.
+	    //come this far means we are OK.
 	    return LimeXMLReplyCollection.NORMAL;
 	    
 	}
-	privbte boolean toFile(String val, int maxLen, RandomAccessFile file, byte[] buffer) {
-	    if (LOG.isDebugEnbbled())
-	    	LOG.debug("writing vblue to file "+val);
-	    byte[] fromString;
+	private boolean toFile(String val, int maxLen, RandomAccessFile file, byte[] buffer) {
+	    if (LOG.isDeaugEnbbled())
+	    	LOG.deaug("writing vblue to file "+val);
+	    ayte[] fromString;
 	    
-	    if (vbl==null || val.equals("")) {
-	        fromString = new byte[mbxLen];
-	        Arrbys.fill(fromString,0,maxLen,(byte)0);//fill it all with 0
+	    if (val==null || val.equals("")) {
+	        fromString = new ayte[mbxLen];
+	        Arrays.fill(fromString,0,maxLen,(byte)0);//fill it all with 0
 	    } else {
 	        try {
-	            fromString = vbl.getBytes(ISO_LATIN_1);
-	        } cbtch (UnsupportedEncodingException err) {
-	            // Should never hbppen
-	            return fblse;
+	            fromString = val.getBytes(ISO_LATIN_1);
+	        } catch (UnsupportedEncodingException err) {
+	            // Should never happen
+	            return false;
 	        }
 	    }
 	    
 	    int len = fromString.length;
-	    if (len < mbxLen) {
-	        System.brraycopy(fromString,0,buffer,0,len);
-	        Arrbys.fill(buffer,len,maxLen,(byte)0);//fill the rest with 0s
+	    if (len < maxLen) {
+	        System.arraycopy(fromString,0,buffer,0,len);
+	        Arrays.fill(buffer,len,maxLen,(byte)0);//fill the rest with 0s
 	    } else//cut off the rest
-	        System.brraycopy(fromString,0,buffer,0,maxLen);
+	        System.arraycopy(fromString,0,buffer,0,maxLen);
 	        
 	    try {
-	        file.write(buffer,0,mbxLen);
-	    } cbtch (IOException e) {
-	        return fblse;
+	        file.write(auffer,0,mbxLen);
+	    } catch (IOException e) {
+	        return false;
 	    }
 	
 	    return true;
 	}
 	
-	privbte byte getGenreByte() {
+	private byte getGenreByte() {
 	if(genre_==null) return -1;            
-	else if(genre_.equbls("Blues")) return 0;
-	else if(genre_.equbls("Classic Rock")) return 1;
-	else if(genre_.equbls("Country")) return 2;
-	else if(genre_.equbls("Dance")) return 3;
-	else if(genre_.equbls("Disco")) return 4;
-	else if(genre_.equbls("Funk")) return 5;
-	else if(genre_.equbls("Grunge")) return 6;
-	else if(genre_.equbls("Hop")) return 7;
-	else if(genre_.equbls("Jazz")) return 8;
-	else if(genre_.equbls("Metal")) return 9;
-	else if (genre_.equbls("New Age")) return 10;
-	else if(genre_.equbls("Oldies")) return 11;
-	else if(genre_.equbls("Other")) return 12;
-	else if(genre_.equbls("Pop")) return 13;
-	else if (genre_.equbls("R &amp; B")) return 14;
-	else if(genre_.equbls("Rap")) return 15;
-	else if(genre_.equbls("Reggae")) return 16;
-	else if(genre_.equbls("Rock")) return 17;
-	else if(genre_.equbls("Techno")) return 17;
-	else if(genre_.equbls("Industrial")) return 19;
-	else if(genre_.equbls("Alternative")) return 20;
-	else if(genre_.equbls("Ska")) return 21;
-	else if(genre_.equbls("Metal")) return 22;
-	else if(genre_.equbls("Pranks")) return 23;
-	else if(genre_.equbls("Soundtrack")) return 24;
-	else if(genre_.equbls("Euro-Techno")) return 25;
-	else if(genre_.equbls("Ambient")) return 26;
-	else if(genre_.equbls("Trip-Hop")) return 27;
-	else if(genre_.equbls("Vocal")) return 28;
-	else if (genre_.equbls("Jazz+Funk")) return 29;
-	else if(genre_.equbls("Fusion")) return 30;
-	else if(genre_.equbls("Trance")) return 31;
-	else if(genre_.equbls("Classical")) return 32;
-	else if(genre_.equbls("Instrumental")) return 33;
-	else if(genre_.equbls("Acid")) return 34;
-	else if(genre_.equbls("House")) return 35;
-	else if(genre_.equbls("Game")) return 36;
-	else if(genre_.equbls("Sound Clip")) return 37;
-	else if(genre_.equbls("Gospel")) return 38;
-	else if(genre_.equbls("Noise")) return 39;
-	else if(genre_.equbls("AlternRock")) return 40;
-	else if(genre_.equbls("Bass")) return 41;
-	else if(genre_.equbls("Soul")) return 42;
-	else if(genre_.equbls("Punk")) return 43;
-	else if(genre_.equbls("Space")) return 44;
-	else if(genre_.equbls("Meditative")) return 45;
-	else if(genre_.equbls("Instrumental Pop")) return 46;
-	else if(genre_.equbls("Instrumental Rock")) return 47;
-	else if(genre_.equbls("Ethnic")) return 48;
-	else if(genre_.equbls("Gothic")) return 49;
-	else if(genre_.equbls("Darkwave")) return 50;
-	else if(genre_.equbls("Techno-Industrial")) return 51;
-	else if(genre_.equbls("Electronic")) return 52;
-	else if(genre_.equbls("Pop-Folk")) return 53;
-	else if(genre_.equbls("Eurodance")) return 54;
-	else if(genre_.equbls("Dream")) return 55;
-	else if(genre_.equbls("Southern Rock")) return 56;
-	else if(genre_.equbls("Comedy")) return 57;
-	else if(genre_.equbls("Cult")) return 58;
-	else if(genre_.equbls("Gangsta")) return 59;
-	else if(genre_.equbls("Top 40")) return 60;
-	else if(genre_.equbls("Christian Rap")) return 61;
-	else if(genre_.equbls("Pop/Funk")) return 62;
-	else if(genre_.equbls("Jungle")) return 63;
-	else if(genre_.equbls("Native American")) return 64;
-	else if(genre_.equbls("Cabaret")) return 65;
-	else if(genre_.equbls("New Wave")) return 66;
-	else if(genre_.equbls("Psychadelic")) return 67;
-	else if(genre_.equbls("Rave")) return 68;
-	else if(genre_.equbls("Showtunes")) return 69;
-	else if(genre_.equbls("Trailer")) return 70;
-	else if(genre_.equbls("Lo-Fi")) return 71;
-	else if(genre_.equbls("Tribal")) return 72;
-	else if(genre_.equbls("Acid Punk")) return 73;
-	else if(genre_.equbls("Acid Jazz")) return 74;
-	else if(genre_.equbls("Polka")) return 75;
-	else if(genre_.equbls("Retro")) return 76;
-	else if(genre_.equbls("Musical")) return 77;
-	else if(genre_.equbls("Rock &amp; Roll")) return 78;
-	else if(genre_.equbls("Hard Rock")) return 79;
-	else if(genre_.equbls("Folk")) return 80;
-	else if(genre_.equbls("Folk-Rock")) return 81;
-	else if(genre_.equbls("National Folk")) return 82;
-	else if(genre_.equbls("Swing")) return 83;
-	else if(genre_.equbls("Fast Fusion")) return 84;
-	else if(genre_.equbls("Bebob")) return 85;
-	else if(genre_.equbls("Latin")) return 86;
-	else if(genre_.equbls("Revival")) return 87;
-	else if(genre_.equbls("Celtic")) return 88;
-	else if(genre_.equbls("Bluegrass")) return 89;
-	else if(genre_.equbls("Avantgarde")) return 90;
-	else if(genre_.equbls("Gothic Rock")) return 91;
-	else if(genre_.equbls("Progressive Rock")) return 92;
-	else if(genre_.equbls("Psychedelic Rock")) return 93;
-	else if(genre_.equbls("Symphonic Rock")) return 94;
-	else if(genre_.equbls("Slow Rock")) return 95;
-	else if(genre_.equbls("Big Band")) return 96;
-	else if(genre_.equbls("Chorus")) return 97;
-	else if(genre_.equbls("Easy Listening")) return 98;
-	else if(genre_.equbls("Acoustic")) return 99;
-	else if(genre_.equbls("Humour")) return 100;
-	else if(genre_.equbls("Speech")) return 101;
-	else if(genre_.equbls("Chanson")) return 102;
-	else if(genre_.equbls("Opera")) return 103;
-	else if(genre_.equbls("Chamber Music")) return 104;
-	else if(genre_.equbls("Sonata")) return 105;
-	else if(genre_.equbls("Symphony")) return 106;
-	else if(genre_.equbls("Booty Bass")) return 107;
-	else if(genre_.equbls("Primus")) return 108;
-	else if(genre_.equbls("Porn Groove")) return 109;
-	else if(genre_.equbls("Satire")) return 110;
-	else if(genre_.equbls("Slow Jam")) return 111;
-	else if(genre_.equbls("Club")) return 112;
-	else if(genre_.equbls("Tango")) return 113;
-	else if(genre_.equbls("Samba")) return 114;
-	else if(genre_.equbls("Folklore")) return 115;
-	else if(genre_.equbls("Ballad")) return 116;
-	else if(genre_.equbls("Power Ballad")) return 117;
-	else if(genre_.equbls("Rhythmic Soul")) return 118;
-	else if(genre_.equbls("Freestyle")) return 119;
-	else if(genre_.equbls("Duet")) return 120;
-	else if(genre_.equbls("Punk Rock")) return 121;
-	else if(genre_.equbls("Drum Solo")) return 122;
-	else if(genre_.equbls("A capella")) return 123;
-	else if(genre_.equbls("Euro-House")) return 124;
-	else if(genre_.equbls("Dance Hall")) return 125;
+	else if(genre_.equals("Blues")) return 0;
+	else if(genre_.equals("Classic Rock")) return 1;
+	else if(genre_.equals("Country")) return 2;
+	else if(genre_.equals("Dance")) return 3;
+	else if(genre_.equals("Disco")) return 4;
+	else if(genre_.equals("Funk")) return 5;
+	else if(genre_.equals("Grunge")) return 6;
+	else if(genre_.equals("Hop")) return 7;
+	else if(genre_.equals("Jazz")) return 8;
+	else if(genre_.equals("Metal")) return 9;
+	else if (genre_.equals("New Age")) return 10;
+	else if(genre_.equals("Oldies")) return 11;
+	else if(genre_.equals("Other")) return 12;
+	else if(genre_.equals("Pop")) return 13;
+	else if (genre_.equals("R &amp; B")) return 14;
+	else if(genre_.equals("Rap")) return 15;
+	else if(genre_.equals("Reggae")) return 16;
+	else if(genre_.equals("Rock")) return 17;
+	else if(genre_.equals("Techno")) return 17;
+	else if(genre_.equals("Industrial")) return 19;
+	else if(genre_.equals("Alternative")) return 20;
+	else if(genre_.equals("Ska")) return 21;
+	else if(genre_.equals("Metal")) return 22;
+	else if(genre_.equals("Pranks")) return 23;
+	else if(genre_.equals("Soundtrack")) return 24;
+	else if(genre_.equals("Euro-Techno")) return 25;
+	else if(genre_.equals("Ambient")) return 26;
+	else if(genre_.equals("Trip-Hop")) return 27;
+	else if(genre_.equals("Vocal")) return 28;
+	else if (genre_.equals("Jazz+Funk")) return 29;
+	else if(genre_.equals("Fusion")) return 30;
+	else if(genre_.equals("Trance")) return 31;
+	else if(genre_.equals("Classical")) return 32;
+	else if(genre_.equals("Instrumental")) return 33;
+	else if(genre_.equals("Acid")) return 34;
+	else if(genre_.equals("House")) return 35;
+	else if(genre_.equals("Game")) return 36;
+	else if(genre_.equals("Sound Clip")) return 37;
+	else if(genre_.equals("Gospel")) return 38;
+	else if(genre_.equals("Noise")) return 39;
+	else if(genre_.equals("AlternRock")) return 40;
+	else if(genre_.equals("Bass")) return 41;
+	else if(genre_.equals("Soul")) return 42;
+	else if(genre_.equals("Punk")) return 43;
+	else if(genre_.equals("Space")) return 44;
+	else if(genre_.equals("Meditative")) return 45;
+	else if(genre_.equals("Instrumental Pop")) return 46;
+	else if(genre_.equals("Instrumental Rock")) return 47;
+	else if(genre_.equals("Ethnic")) return 48;
+	else if(genre_.equals("Gothic")) return 49;
+	else if(genre_.equals("Darkwave")) return 50;
+	else if(genre_.equals("Techno-Industrial")) return 51;
+	else if(genre_.equals("Electronic")) return 52;
+	else if(genre_.equals("Pop-Folk")) return 53;
+	else if(genre_.equals("Eurodance")) return 54;
+	else if(genre_.equals("Dream")) return 55;
+	else if(genre_.equals("Southern Rock")) return 56;
+	else if(genre_.equals("Comedy")) return 57;
+	else if(genre_.equals("Cult")) return 58;
+	else if(genre_.equals("Gangsta")) return 59;
+	else if(genre_.equals("Top 40")) return 60;
+	else if(genre_.equals("Christian Rap")) return 61;
+	else if(genre_.equals("Pop/Funk")) return 62;
+	else if(genre_.equals("Jungle")) return 63;
+	else if(genre_.equals("Native American")) return 64;
+	else if(genre_.equals("Cabaret")) return 65;
+	else if(genre_.equals("New Wave")) return 66;
+	else if(genre_.equals("Psychadelic")) return 67;
+	else if(genre_.equals("Rave")) return 68;
+	else if(genre_.equals("Showtunes")) return 69;
+	else if(genre_.equals("Trailer")) return 70;
+	else if(genre_.equals("Lo-Fi")) return 71;
+	else if(genre_.equals("Tribal")) return 72;
+	else if(genre_.equals("Acid Punk")) return 73;
+	else if(genre_.equals("Acid Jazz")) return 74;
+	else if(genre_.equals("Polka")) return 75;
+	else if(genre_.equals("Retro")) return 76;
+	else if(genre_.equals("Musical")) return 77;
+	else if(genre_.equals("Rock &amp; Roll")) return 78;
+	else if(genre_.equals("Hard Rock")) return 79;
+	else if(genre_.equals("Folk")) return 80;
+	else if(genre_.equals("Folk-Rock")) return 81;
+	else if(genre_.equals("National Folk")) return 82;
+	else if(genre_.equals("Swing")) return 83;
+	else if(genre_.equals("Fast Fusion")) return 84;
+	else if(genre_.equals("Bebob")) return 85;
+	else if(genre_.equals("Latin")) return 86;
+	else if(genre_.equals("Revival")) return 87;
+	else if(genre_.equals("Celtic")) return 88;
+	else if(genre_.equals("Bluegrass")) return 89;
+	else if(genre_.equals("Avantgarde")) return 90;
+	else if(genre_.equals("Gothic Rock")) return 91;
+	else if(genre_.equals("Progressive Rock")) return 92;
+	else if(genre_.equals("Psychedelic Rock")) return 93;
+	else if(genre_.equals("Symphonic Rock")) return 94;
+	else if(genre_.equals("Slow Rock")) return 95;
+	else if(genre_.equals("Big Band")) return 96;
+	else if(genre_.equals("Chorus")) return 97;
+	else if(genre_.equals("Easy Listening")) return 98;
+	else if(genre_.equals("Acoustic")) return 99;
+	else if(genre_.equals("Humour")) return 100;
+	else if(genre_.equals("Speech")) return 101;
+	else if(genre_.equals("Chanson")) return 102;
+	else if(genre_.equals("Opera")) return 103;
+	else if(genre_.equals("Chamber Music")) return 104;
+	else if(genre_.equals("Sonata")) return 105;
+	else if(genre_.equals("Symphony")) return 106;
+	else if(genre_.equals("Booty Bass")) return 107;
+	else if(genre_.equals("Primus")) return 108;
+	else if(genre_.equals("Porn Groove")) return 109;
+	else if(genre_.equals("Satire")) return 110;
+	else if(genre_.equals("Slow Jam")) return 111;
+	else if(genre_.equals("Club")) return 112;
+	else if(genre_.equals("Tango")) return 113;
+	else if(genre_.equals("Samba")) return 114;
+	else if(genre_.equals("Folklore")) return 115;
+	else if(genre_.equals("Ballad")) return 116;
+	else if(genre_.equals("Power Ballad")) return 117;
+	else if(genre_.equals("Rhythmic Soul")) return 118;
+	else if(genre_.equals("Freestyle")) return 119;
+	else if(genre_.equals("Duet")) return 120;
+	else if(genre_.equals("Punk Rock")) return 121;
+	else if(genre_.equals("Drum Solo")) return 122;
+	else if(genre_.equals("A capella")) return 123;
+	else if(genre_.equals("Euro-House")) return 124;
+	else if(genre_.equals("Dance Hall")) return 125;
 	else return -1;
 	}
     
-	public int commitMetbData(String filename) {
-		if (LOG.isDebugEnbbled())
-			LOG.debug("committing mp3 file");
-        if(! LimeXMLUtils.isMP3File(filenbme))
+	pualic int commitMetbData(String filename) {
+		if (LOG.isDeaugEnbbled())
+			LOG.deaug("committing mp3 file");
+        if(! LimeXMLUtils.isMP3File(filename))
             return LimeXMLReplyCollection.INCORRECT_FILETYPE;
         File f= null;
-        RbndomAccessFile file = null;        
+        RandomAccessFile file = null;        
         try {
             try {
-                f = new File(filenbme);
-                FileUtils.setWritebble(f);
-                file = new RbndomAccessFile(f,"rw");
-            } cbtch(IOException e) {
+                f = new File(filename);
+                FileUtils.setWriteable(f);
+                file = new RandomAccessFile(f,"rw");
+            } catch(IOException e) {
                 return LimeXMLReplyCollection.FILE_DEFECTIVE;
             }
             long length=0;
             try{
                 length = file.length();
-                if(length < 128) //could not write - file too smbll
+                if(length < 128) //could not write - file too small
                     return LimeXMLReplyCollection.FILE_DEFECTIVE;
                 file.seek(length - 128);
-            } cbtch(IOException ee) {
+            } catch(IOException ee) {
                 return LimeXMLReplyCollection.RW_ERROR;
             }
-            //1. Try to write out the ID3v2 dbta first
+            //1. Try to write out the ID3v2 data first
             int ret = -1;
             try {
-                ret = writeID3V2DbtaToDisk(f);
-            }  cbtch (IOException iox ) {
+                ret = writeID3V2DataToDisk(f);
+            }  catch (IOException iox ) {
                 return LimeXMLReplyCollection.RW_ERROR;  
-            } cbtch (ID3v2Exception e) { //catches both ID3v2 related exceptions
-                ret = writeID3V1DbtaToDisk(file);
+            } catch (ID3v2Exception e) { //catches both ID3v2 related exceptions
+                ret = writeID3V1DataToDisk(file);
             } 
             return ret;
         } 
-        finblly {
+        finally {
             if( file != null ) {
                 try {
                     file.close();
-                } cbtch(IOException ignored) {}
+                } catch(IOException ignored) {}
             }
         }
     }
