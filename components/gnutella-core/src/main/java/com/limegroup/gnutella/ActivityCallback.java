@@ -22,7 +22,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback, FileEventListener 
+public interface ActivityCallback extends DownloadCallback, FileEventListener,AddressChangeListener
 {
     
     /**

@@ -154,10 +154,15 @@ public class Acceptor implements Runnable {
            ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
             return;
         }
-
+        
+        boolean addrChanged = false;
 		synchronized(Acceptor.class) {
 		    _externalAddress = byteAddr;
+            addrChanged = true;
 		}
+        
+        if( addrChanged )
+            RouterService.addressChanged();
     }
 
 	/**

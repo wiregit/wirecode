@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.dht.LimeDHT;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -99,7 +101,7 @@ public class RouterService {
 	 */
     private static FileManager fileManager = new MetaFileManager();
 
-	/**
+    /**
 	 * Timer similar to java.util.Timer, which was not available on 1.1.8.
 	 */
     private static final SimpleTimer timer = new SimpleTimer(true);
@@ -109,6 +111,11 @@ public class RouterService {
 	 * requests, etc.
 	 */
     private static final Acceptor acceptor = new Acceptor();
+    
+    /**
+     * <tt>LimeDHT</tt> instance of the DHT.
+     */
+    private static final LimeDHT dht = new LimeDHT();
 
     /**
      * <tt>HTTPAcceptor</tt> instance for accepting magnet requests, etc.
@@ -214,7 +221,14 @@ public class RouterService {
 	 * Whether or not we are running at full power.
 	 */
 	private static boolean _fullPower = true;
-	
+    
+    /**
+     * List of event listeners for FileManagerEvents.
+     * LOCKING: listenerLock
+     */
+    private static volatile List addressChangeListeners = Collections.EMPTY_LIST;
+    private final Object listenerLock = new Object();
+    
 	private static final byte [] MYGUID;
 	static {
 	    byte [] myguid=null;
@@ -259,6 +273,8 @@ public class RouterService {
 		RouterService.callback = callback;
         fileManager.registerFileManagerEventListener(callback);
   		RouterService.router = router;
+        registerAddressChangeListener(callback);
+        registerAddressChangeListener(dht);
   	}
 
   	/**
@@ -607,6 +623,15 @@ public class RouterService {
 	public static byte [] getMyGUID() {
 	    return MYGUID;
 	}
+    
+    /** 
+     * Accessor for the <tt>LimeDHT</tt> instance.
+     *
+     * @return the <tt>LimeDHT</tt> in use
+     */
+    public static LimeDHT getLimeDHT() {
+        return dht;
+    }
 
     /**
      * Schedules the given task for repeated fixed-delay execution on this's
@@ -840,6 +865,9 @@ public class RouterService {
             _state = 3;
             
             getAcceptor().shutdown();
+            
+            //shutdown dht
+            dht.closedownInitiated();
             
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
@@ -1570,9 +1598,7 @@ public class RouterService {
      * Notifies components that this' IP address has changed.
      */
     public static boolean addressChanged() {
-        if(callback != null)
-            callback.addressStateChanged();        
-        
+        dispatchAddressStateChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1614,8 +1640,7 @@ public class RouterService {
      * Notification that we've either just set or unset acceptedIncoming.
      */
     public static boolean incomingStatusChanged() {
-        if(callback != null)
-            callback.addressStateChanged();
+        dispatchAddressStateChanged();
             
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
@@ -1720,5 +1745,39 @@ public class RouterService {
     
     public static boolean canDoFWT() {
         return UDPSERVICE.canDoFWT();
+    }
+    
+    /**
+     * registers a listener for AddressStateChanged events
+     */
+    public void registerAddressChangeListener(AddressChangeListener listener) {
+        if (addressChangeListeners.contains(listener))
+        return;    
+    synchronized(listenerLock) {
+        List copy = new ArrayList(addressChangeListeners);
+        copy.add(listener);
+        addressChangeListeners = Collections.unmodifiableList(copy);
+    }
+    }
+
+    /**
+     * unregisters a listener for AddressStateChanged events
+     */
+    public void unregisterFileManagerEventListener(AddressChangeListener listener){
+    synchronized(listenerLock) {
+        List copy = new ArrayList(addressChangeListeners);
+        copy.remove(listener);
+        addressChangeListeners = Collections.unmodifiableList(copy);
+    }
+    }
+
+    /**
+     * dispatches addressStateChanged to any registered listeners 
+     */
+    public static void dispatchAddressStateChanged() {
+        for (Iterator iter = addressChangeListeners.iterator(); iter.hasNext();) {
+            AddressChangeListener listener = (AddressChangeListener) iter.next();
+            listener.addressStateChanged();
+        }
     }
 }

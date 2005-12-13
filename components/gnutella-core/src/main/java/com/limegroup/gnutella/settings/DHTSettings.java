@@ -39,4 +39,7 @@ public class DHTSettings extends LimeProps {
     
     public static final StringSetting DHT_BIND_IP = 
         FACTORY.createStringSetting("DHT_BIND_IP","");
+    
+    public static final BooleanSetting DHT_AUTOSTART =
+        FACTORY.createSettableBooleanSetting("DHT_AUTOSTART",false,"DHTSettings.dhtAutoStart");
 }
