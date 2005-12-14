@@ -350,30 +350,28 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		return _urnType.isSHA1();
 	}
 
-	/**
-	 * Checks for URN equality.  For URNs to be equal, their URN strings must
-	 * be equal.
-	 *
-	 * @param o the object to compare against
-	 * @return <tt>true</tt> if the URNs are equal, <tt>false</tt> otherwise
-	 */
-	public boolean equals(Object o) {
-		if(o == this) return true;
-        // Since hashCode is cached, and most commonly o
-        // will be a HashCode, this speeds comparison without
-        // affecting accuracy.
+    /**
+     * Checks for URN equality.  For URNs to be equal, their URN strings must
+     * be equal.
+     *
+     * @param o the object to compare against
+     * @return <tt>true</tt> if the URNs are equal, <tt>false</tt> otherwise
+     */
+    public boolean equals(Object o) {
+        if(o == this) return true;
+        if (!(o instanceof URN)) return false;
+
+        // Since hashCode is cached, this speeds comparison 
+        // without affecting accuracy.
         if (this.hashCode() != o.hashCode()) {
             return false;
         }
-		if(!(o instanceof URN)) {
-			return false;
-		}
         
-		URN urn = (URN)o;
+        URN urn = (URN)o;
 		
-		return (_urnString.equals(urn._urnString) &&
-				_urnType.equals(urn._urnType));
-	}
+        return (_urnString.equals(urn._urnString) &&
+                    _urnType.equals(urn._urnType));
+        }
 
 	/**
 	 * Overrides the hashCode method of Object to meet the contract of 
