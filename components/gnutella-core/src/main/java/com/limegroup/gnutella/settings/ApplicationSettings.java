@@ -151,6 +151,12 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("LIBRARY_VIEW_ENABLED", true);
     
     /**
+	 * Sets whether or not Console Tab should be enabled.
+	 */    
+    public static final BooleanSetting CONSOLE_VIEW_ENABLED =
+        FACTORY.createBooleanSetting("CONSOLE_VIEW_ENABLED", false);
+    
+    /**
 	 * Sets the name of the jar file to load on startup, which is read
 	 * in from the properties file by RunLime.
 	 */

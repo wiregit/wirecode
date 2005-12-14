@@ -559,6 +559,20 @@ public final class CommonUtils {
         }
     }
 
+    /**
+     * Returns wheather or not the Log4J library is available
+     */
+    public static boolean isLog4JAvailable() {
+        try {
+            Class.forName("org.apache.log4j.LogManager");
+            return true;
+        } catch (ClassNotFoundException ignore) {
+            return false;
+        } catch (NoClassDefFoundError ignore) {
+            return false;
+        }
+    }
+    
 	/** 
 	 * Returns whether or not the OS is any Mac OS.
 	 *
