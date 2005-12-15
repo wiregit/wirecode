@@ -1,11 +1,33 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.io;
 
 /**
+ * When NIO tells you to read or write, you have objects to call to do it for you, setReadObserver(), setWriteObserver().
+ * NIO can command you to read, handleRead(), and NIO can command you to get data and write, handleWrite().
+ * 
+ * 
+ * 
+ * 
  * Denotes the class can handle delegating ReadObserver events to
  * other ReadObservers.
+ * 
+ * 
+ * Your read observer is the object that you tell to read when NIO tells you to read.
+ * 
+ * For instance, you're an NIOSocket, at the end of the read chain.
+ * NIO tells you to read.
+ * You don't read directly, instead you tell your read observer to read.
+ * Your read observer is MessageReader, the first object in the chain of readers.
+ * It reads from its source, which reads from you.
+ * 
+ * Your write observer is the object that you tell to write when NIO tells you to write.
+ * 
+ * 
  */
 public interface NIOMultiplexor extends ReadWriteObserver {
-    
+
     /**
      * Sets the new ReadObserver.  A ChannelReadObserver is required
      * so that the multiplexor can set the appropriate source channel
@@ -26,7 +48,7 @@ public interface NIOMultiplexor extends ReadWriteObserver {
      *          deepest = (ChannelReader)deepest.getReadChannel();
      */
     public void setReadObserver(ChannelReadObserver reader);
-    
+
     /**
      * Sets the new ChannelWriter.  A ChannelWriter is necessary (instead of
      * a WriteObserver) because the actual WriteObserver that listens for write

@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.connection;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,16 +16,26 @@ import com.limegroup.gnutella.io.ChannelReader;
  * 
  * Make an InflateReader and give it a source channel of compressed data.
  * Then, call read(ByteBuffer b) on it to have it read data from the channel and decompress it into the given buffer.
+ * 
+ * Extends and Implements
+ * ChannelReader:                         This object has a source channel it reads from, setReadChannel() and getReadChannel().
+ * java.nio.channels.ReadableByteChannel: Call read() to get data from this object.
  */
 public class InflaterReader implements ChannelReader, ReadableByteChannel {
 
-    /** The Java Inflater object that actually decompresses the data */
+    /** The Java Inflater object that actually decompresses the data. */
     private Inflater inflater; // A java.util.zip.Inflater is an object that can do decompression with the deflate algorithm
 
-    /** The channel we read the compressed data from */
-    private ReadableByteChannel channel; // Any object that implements ReadableByteChannel can go here
+    /**
+     * The channel we read the compressed data from.
+     * 
+     * Any object that implements ReadableByteChannel can go here.
+     * NIOSocket.setReadObserver() gives us the actual Java SocketChannel object from inside a NIOSocket object.
+     * When read() calls channel.read(data), it will actually be reading data from the Java platform, not just another LimeWire object.
+     */
+    private ReadableByteChannel channel;
 
-    /** A 512 byte buffer where compressed data from the channel waits to be decompressed */
+    /** A 512 byte buffer where compressed data from the channel waits to be decompressed. */
     private ByteBuffer data; // A java.nio.ByteBuffer is a buffer that can hold bytes
 
     /**
@@ -63,6 +74,8 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
      * You may have made a new InflateReader object without giving the constructor a channel to read from.
      * If you did, call this method to tell this InflaterReader where to get the compressed data.
      * 
+     * NIOSocket.setReadObserver() will call this, and give us the actual Java SocketChannel object from inside a NIOSocket object.
+     * 
      * @param channel An object we can call read(ByteBuffer) on to read compressed data from
      */
     public void setReadChannel(ReadableByteChannel channel) {
@@ -73,7 +86,7 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
         // Save the channel in this object
         this.channel = channel;
     }
-    
+
     /**
      * Gets the channel this object has been reading compressed data from.
      * This is an object that implements Java's ReadableByteChannel interface.
@@ -142,6 +155,13 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
                     	// Stop because the temporary buffer is out of room
                     	if (!data.hasRemaining()) break;
 
+                    	/*
+                    	 * Tour Point
+                    	 * 
+                    	 * This is where LimeWire actually reads data from the remote computer.
+                    	 * channel is a java.nio.channels.SocketChannel object.
+                    	 */
+
                     	// Move compressed data from the channel into the temporary buffer
                     	read = channel.read(data); // Sets read to the number of bytes moved
 
@@ -163,14 +183,11 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
                 }
             }
         }
-        
+
         // We decompressed all the data we could
-        if (written > 0)
-            return written; // Say how many bytes of decompressed data we wrote to the given buffer
-        else if (read == -1)
-            return -1;      // The inflater finished, needs a dictionary, or we hit the very end of the channel
-        else
-            return 0;       // The channel just doesn't have any compressed bytes for us right now
+        if      (written > 0) return written; // Say how many bytes of decompressed data we wrote to the given buffer
+        else if (read == -1)  return -1;      // The inflater finished, needs a dictionary, or we hit the very end of the channel
+        else                  return 0;       // The channel just doesn't have any compressed bytes for us right now
     }
 
     /**

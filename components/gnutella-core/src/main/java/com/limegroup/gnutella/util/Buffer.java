@@ -214,8 +214,8 @@ public class Buffer implements Cloneable {
      * this is empty.
      */
     public Object last() throws NoSuchElementException {
-        if (isEmpty())
-            throw new NoSuchElementException();
+        
+        if (isEmpty()) throw new NoSuchElementException();
         return buf[decrement(tail)];
     }    
 

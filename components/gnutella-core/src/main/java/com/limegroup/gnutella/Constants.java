@@ -1,13 +1,13 @@
-package com.limegroup.gnutella;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella;
 
 /**
 * A class to keep together the constants that may be used by multiple classes
 * @author  Anurag Singla
 */
-public final class Constants 
-{
+public final class Constants {
     
     private Constants() {}
 

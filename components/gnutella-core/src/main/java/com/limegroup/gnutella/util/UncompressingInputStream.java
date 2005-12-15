@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.util;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 /**
+ * Not used now that LimeWire has switched to NIO.
  * Make an UncompressingInputStream with a source of compressed data, then call read(b) on it to have it write decompressed data into b.
  * 
  * Pass the constructor an InputStream the new object will read compressed data from.

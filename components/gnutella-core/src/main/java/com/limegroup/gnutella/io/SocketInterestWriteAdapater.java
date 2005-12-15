@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.io;
 
 import java.nio.ByteBuffer;
@@ -9,6 +12,11 @@ import java.io.IOException;
  * calls on to NIODispatcher, as well as forwarding handleWrite
  * events to the last party that was interested.  All WritableByteChannel
  * calls are delegated to the SocketChannel.
+ * 
+ * 
+ * Extends and Implements
+ * InterestWriteChannel: The object that gives us data can tell us it has some, interest().
+ * WriteObserver:        NIO can tell this SocketInterestWriteAdapter to get data and write now, handleWrite().
  */
 class SocketInterestWriteAdapater implements InterestWriteChannel {
     
@@ -26,6 +34,14 @@ class SocketInterestWriteAdapater implements InterestWriteChannel {
     
     /** Writes the buffer to the underlying SocketChannel, returning the amount written. */
     public int write(ByteBuffer buffer) throws IOException {
+
+        /*
+         * Tour Point
+         * 
+         * This is where LimeWire actually writes data to the remote computer.
+         * channel is a java.nio.channels.SocketChannel object.
+         */
+
         return channel.write(buffer);
     }
     

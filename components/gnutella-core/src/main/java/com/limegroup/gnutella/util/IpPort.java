@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.util;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.util;
 
 import java.net.InetAddress;
 import java.util.Comparator;

@@ -1,6 +1,7 @@
-package com.limegroup.gnutella;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -114,32 +115,47 @@ public class ConnectionManager {
 
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
-    /**
-     * The number of connections leaves should maintain to Ultrapeers.
+    //done
+
+    /*
+     * Tour Point
+     * 
+     * This is the number of connections LimeWire makes.
+     * For LimeWire Pro, it's 5 instead of 3.
+     * It's not a setting, because then users could change it themselves.
+     * The build script does a find and replace to turn the 3 here into a 5.
      */
+
+    /** 3, as a leaf, we'll keep 3 connections up to ultrapeers. */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+
+    //do
 
     /**
      * How many connect back requests to send if we have a single connection
      */
     public static final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
 
-    /**
-     * The minimum amount of idle time before we switch to using 1 connection.
-     */
+    //done
+
+    /** If the user leaves the computer for a half hour, we'll drop down to just 1 ultrapeer connection instead of 3. */
     private static final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
 
+    //do
+    
     /**
      * The number of leaf connections reserved for non LimeWire clients.
      * This is done to ensure that the network is not solely LimeWire centric.
      */
     public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
 
-    /**
-     * The current number of connections we want to maintain.
-     */
-    private volatile int _preferredConnections = -1;
+    //done
 
+    /** The number of ultrapeers we should have, 32 if we're an ultrapeer or 3 if we're a leaf. */
+    private volatile int _preferredConnections = -1; // Initialize to -1 to indicate the number isn't set yet
+
+    //do
+    
     /**
      * Reference to the <tt>HostCatcher</tt> for retrieving host data as well
      * as adding host data.
@@ -209,53 +225,78 @@ public class ConnectionManager {
      *   message broadcasting, though it makes adding/removing connections
      *   much slower.
      */
-    //TODO:: why not use sets here??
-    private volatile List /* of ManagedConnection */
-        _connections = Collections.EMPTY_LIST;
-    private volatile List /* of ManagedConnection */
-        _initializedConnections = Collections.EMPTY_LIST;
-    private volatile List /* of ManagedConnection */
-        _initializedClientConnections = Collections.EMPTY_LIST;
 
+    //done
+
+    /*
+     * TODO:: why not use sets here??
+     */
+
+    /** _connections lists all the ultrapeers we're trying to connect to or are connected to. */
+    private volatile List _connections                  = Collections.EMPTY_LIST; // We'll put ManagedConnection objects in this List
+    /** _initializedConnections is a list of all the ultrapeers we have open connections to. */
+    private volatile List _initializedConnections       = Collections.EMPTY_LIST; // We'll put ManagedConnection objects in this List
+    /** _initializedClientConnections is a list of all our leaves. */
+    private volatile List _initializedClientConnections = Collections.EMPTY_LIST; // We'll put ManagedConnection objects in this List
+
+    /** How many connections up to ultapeers we have. We're a leaf. */
     private volatile int _shieldedConnections = 0;
-    private volatile int _nonLimeWireLeaves = 0;
-    private volatile int _nonLimeWirePeers = 0;
-    /** number of peers that matches the local locale pref. */
+    /** How many non-LimeWire leaves we have. We're an ultrapeer. */
+    private volatile int _nonLimeWireLeaves   = 0;
+    /** How many non-LimeWire ultrapeers we're connected to. We're an ultrapeer. */
+    private volatile int _nonLimeWirePeers    = 0;
+    /** How many ultrapeers we're connected to that match our language preference. We're an ultrapeer. */
     private volatile int _localeMatchingPeers = 0;
 
-	/**
-	 * Variable for the number of times since we attempted to force ourselves
-	 * to become an Ultrapeer that we were told to become leaves.  If this
-	 * number is too great, we give up and become a leaf.
+    /**
+     * The number of times remote computers told us they didn't need an ultrapeer after we told them we were one.
+     * 
+     * allowLeafDemotion() increments this when HandshakeResponder.respondToOutgoing() calls it.
+     * When this number grows bigger than _demotionLimit, we'll drop down to leaf mode.
 	 */
 	private volatile int _leafTries;
 
 	/**
-	 * The number of demotions to ignore before allowing ourselves to become
-	 * a leaf -- this number depends on how good this potential Ultrapeer seems
-	 * to be.
+     * The number of times we'll ignore remote computers telling us to drop down to leaf mode when we're trying to connect as an ultrapeer.
+     * 
+     * By default, this value is 0.
+     * If SupernodeAssigner.setUltrapeerCapable() finds us too good to pass up, it will set _demotionLimit to 4, 8, 12, or more.
+     * Then, allowLeafDemotion() will return false until _leafTries grows to equal this _demotionLimit.
 	 */
 	private volatile int _demotionLimit = 0;
 
     /**
-     * The current measured upstream bandwidth.
+     * The speed we're uploading Gnutella packet data, in bytes/millisecond.
+     * This is the total of the current upstream speeds from all our ManagedConnection objects.
      */
     private volatile float _measuredUpstreamBandwidth = 0.f;
 
     /**
-     * The current measured downstream bandwidth.
+     * The speed we're downloading Gnutella packet data, in bytes/millisecond.
+     * This is the total of the current downstream speeds from all our ManagedConnection objects.
      */
     private volatile float _measuredDownstreamBandwidth = 0.f;
 
     /**
-     * Constructs a ConnectionManager.  Must call initialize before using
-     * other methods of this class.
+     * Make the ConnectionManager object.
+     * Call initialize() before using any of the methods.
+     * 
+     * RouterService defines the static ConnectionManager object named manager, which calls this.
+     * Java will set all the member variables to 0.
+     * There's no code here because there's nothing else we have to do.
      */
-    public ConnectionManager() { }
+    public ConnectionManager() {}
 
+    //do
+    
     /**
      * Links the ConnectionManager up with the other back end pieces and
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
+     * 
+     * 
+     * 
+     * RouterService.start() calls this.
+     * 
      */
     public void initialize() {
         _catcher = RouterService.getHostCatcher();
@@ -263,12 +304,28 @@ public class ConnectionManager {
         // schedule the Runnable that will allow us to change
         // the number of connections we're shooting for if
         // we're idle.
-        if(SystemUtils.supportsIdleTime()) {
-            RouterService.schedule(new Runnable() {
-                public void run() {
-                    setPreferredConnections();
-                }
-            }, 1000, 1000);
+        
+        // If the operating system we're running on can tell us when the user has stepped away from the computer
+        if (SystemUtils.supportsIdleTime()) {
+
+            // Have the RouterService run some code every so often for us
+            RouterService.schedule(
+
+                // Make a new class right here that doesn't have a name, but is Runnable and has a run() method so a thread can run it
+                new Runnable() {
+
+                    // The RouterService will create a thread, and that thread will call this run() method
+                    public void run() {
+
+                        
+                        
+                        setPreferredConnections();
+                    }
+                },
+                
+                1000,
+                1000
+            );
         }
     }
 
@@ -348,67 +405,148 @@ public class ConnectionManager {
      * @param mc the <tt>ManagedConnection</tt> instance to remove
      */
     public synchronized void remove(ManagedConnection mc) {
-		// removal may be disabled for tests
-		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;
+
+        // True, let this method remove a connection
+		if (!ConnectionSettings.REMOVE_ENABLED.getValue()) return; // This would only be disabled for tests
+
         removeInternal(mc);
 
         adjustConnectionFetchers();
     }
 
+
+    //done
+
     /**
-     * True if this is currently or wants to be a supernode,
-     * otherwise false.
+     * True if we're sending "X-Ultrapeer: true" or have a fellow ultrapeer connection or a leaf.
+     * 
+     * Here's how the process of becoming an ultrapeer works:
+     * Offline and by ourselves, we determine if we have the computer, Internet connection, and online time we need to be an ultrapeer.
+     * When we decide that we do, isSupernodeCapable() is true.
+     * When this is true, we'll start greeting remote computers with "X-Ultrapeer: true".
+     * When one acceps us as their ultrapeer, and they become our leaf, then we are an ultrapeer on the network.
+     * When this happens, isActiveSupernode() is true.
+     * 
+     * @return True if we're sending handshake headers that say we're an ultrapeer, or have connections as an ultrapeer.
+     *         False if we're not saying we're an ultrapeer and we don't have any ultrapeer connections.
      */
     public boolean isSupernode() {
-        return isActiveSupernode() || isSupernodeCapable();
-    }
-    
-    /** Return true if we are not a private address, have been ultrapeer capable
-     *  in the past, and are not being shielded by anybody, AND we don't have UP
-     *  mode disabled.
-     */
-    public boolean isSupernodeCapable() {
-        return !NetworkUtils.isPrivate() &&
-               UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
-               !isShieldedLeaf() &&
-               !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
-               !isBehindProxy() &&
-               minConnectTimePassed();
-    }
-    
-    /**
-     * @return whether the minimum time since we started trying to connect has passed
-     */
-    private boolean minConnectTimePassed() {
-        return Math.max(0,(System.currentTimeMillis() - _connectTime)) / 1000 
-            >= UltrapeerSettings.MIN_CONNECT_TIME.getValue();
-    }
-    /**
-     * @return if we are currently using a http or socks4/5 proxy to connect.
-     */
-    public boolean isBehindProxy() {
-        return ConnectionSettings.CONNECTION_METHOD.getValue() != 
-            ConnectionSettings.C_NO_PROXY;
-    }
-    
-    /**
-     * Tells whether or not we're actively being a supernode to anyone.
-     */
-    public boolean isActiveSupernode() {
-        return !isShieldedLeaf() &&
-               (_initializedClientConnections.size() > 0 ||
-                _initializedConnections.size() > 0);
+
+        // Return true if we're trying to become an ultrapeer, or are one
+        return
+
+            isActiveSupernode() || // We're on the network acting as an ultrapeer right now, or
+            isSupernodeCapable();  // We have a fast enough computer and Internet connection to be one
     }
 
     /**
-     * Returns true if this is a leaf node with a connection to a ultrapeer.  It
-     * is not required that the ultrapeer support query routing, though that is
-     * generally the case.
+     * True if we have the computer, Internet connection, and upload time we need to be an ultrapeer on the Gnutella network.
+     * If this is true, we'll present ourself to remote computers as an ultrapeer, greeting them with a "X-Ultrapeer: true" header.
+     * 
+     * We can be ultrapeer-capable without having any leaves yet, it doesn't have anything to do with our connections on the network.
+     * When a remote computer accepts our ultrapeer status in the handshake and becomes our leaf, then we'll be an ultrapeer.
+     * 
+     * Recently, LimeWire developers added the minConnectTimePassed() test.
+     * minConnectTimePassed() returns false for the first 10 seconds of our attempts to connect, and true after that.
+     * So, even when we are connecting as an ultrapeer, we'll say "X-Ultrapeer: false" to computers we reach in the first 10 seconds.
+     * This is part of a strategy to have fewer ultrapeers on the Gnutella network.
+     * 
+     * @return True if we have what we need to be an ultrapeer on the Gnutella network, false if we don't.
+     */
+    public boolean isSupernodeCapable() {
+
+        // Return true if all of the following things are true
+        return
+
+            // The IP address we've been telling remote computers is a real Internet IP address
+            !NetworkUtils.isPrivate() && // Until we're externally contactable, we tell remote computers our LAN address
+
+            // At some point in the past, SupernodeAssigner.setUltrapeerCapable() found our computer and Internet connection worthy of ultrapeer status
+            UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
+
+            // We don't have any connections up to ultrapeers
+            !isShieldedLeaf() &&
+
+            // Settings allow us to be an ultrapeer
+            !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
+
+            // We don't have to connect through a proxy server
+            !isBehindProxy() &&
+
+            // We started trying to connect to Gnutella computers more than 10 seconds ago
+            minConnectTimePassed();
+    }
+
+    /**
+     * True if it's been 10 seconds since we started connecting to Gnutella computers, false if it hasn't been 10 seconds yet.
+     * 
+     * @return False for the first 10 seconds after _connectTime.
+     *         True after that.
+     */
+    private boolean minConnectTimePassed() {
+
+        // Return true if we've been trying to connect for more than 10 seconds, false if it hasn't been 10 seconds yet
+        return Math.max(0, (System.currentTimeMillis() - _connectTime)) / 1000 >= UltrapeerSettings.MIN_CONNECT_TIME.getValue();
+    }
+
+    /**
+     * True if we have to connect through a proxy server.
+     * 
+     * @return True if the user configured a proxy server for us to use, false if we can make connections directly.
+     */
+    public boolean isBehindProxy() {
+
+        // If settings have a proxy server configured, return true
+        return ConnectionSettings.CONNECTION_METHOD.getValue() != ConnectionSettings.C_NO_PROXY;
+    }
+
+    /*
+     * On the Gnutella network, we can be an ultrapeer or a leaf.
+     * isActiveSupernode() and isShieldedLeaf() determine which role we are in.
+     * They do it by looking only at the Gnutella connections to remote computers we have.
+     */
+    
+    /**
+     * True if we have no connections up to ultrapeers, and at least one to a fellow ultrapeer or one to a leaf below us.
+     * This means we're on the Gnutella network as an ultrapeer.
+     * 
+     * There are 3 kinds of connections on the Gnutella network.
+     * As a leaf, we'll have 3 connections up to ultrapeers.
+     * As an ultrapeer, we'll have 32 connections to fellow ultrapeers, and 30 connections down to leaves.
+     * 
+     * isActiveSupernode() looks at our open connections to determine which network role we are in.
+     * If we don't have any connections up to ultrapeers, and we have at least 1 fellow ultrapeer or down-to-leaf connection, we're an active supernode.
+     * Otherwise, we're not.
+     * 
+     * @return True if we don't have any connections up to ultrapeers, and we have at least 1 fellow ultrapeer or down-to-leaf connection.
+     *         False otherwise.
+     */
+    public boolean isActiveSupernode() {
+
+        // Return true if we don't have any connections up to ultrapeers, and we have some leaves, or we're connected to some ultrapeers
+        return
+
+            // We don't have any connections up to ultrapeers, and
+            !isShieldedLeaf() &&
+
+            (_initializedClientConnections.size() > 0 || // We have some leaves, or
+            _initializedConnections.size() > 0);         // We're connected to some fellow ultrapeers
+    }
+
+    /**
+     * True if we have some connections up to ultrapeers.
+     * This means we are a leaf.
+     * 
+     * @return True if we don't have any connections up to ultrapeers, false if we do
      */
     public boolean isShieldedLeaf() {
+
+        // Return true if we have some connections up to ultrapeers
         return _shieldedConnections != 0;
     }
 
+    //do
+    
     /**
      * Returns true if this is a super node with a connection to a leaf.
      */
@@ -480,38 +618,58 @@ public class ConnectionManager {
         }
         return false;
     }
+    
+    //done
 
     /**
-     * @return the number of connections, which is greater than or equal
-     *  to the number of initialized connections.
+     * The number of Gnutella computers we're connected to or at least trying to connect to.
+     * 
+     * @return The size of the _connections list
      */
     public int getNumConnections() {
+
+        // The _connections list contains all the remote computers we're trying to connect to and are connected to
         return _connections.size();
     }
 
     /**
-     * @return the number of initialized connections, which is less than or
-     *  equals to the number of connections.
+     * The number of ultrapeers we're connected to.
+     * This is the size of the _initializedConnections list.
+     * The _connections list is bigger, because it also includes ultrapeers we're trying to connect to.
+     * 
+     * @return The number of ultrapeers we have open connections to
      */
     public int getNumInitializedConnections() {
-		return _initializedConnections.size();
+
+        // _initializedConnections lists the ultrapeers we have open connections to
+		return _initializedConnections.size(); // It's size is the number of ultrapeer connections we have
     }
 
     /**
-     * @return the number of initializedclient connections, which is less than
-     * or equals to the number of connections.
+     * The number of leaves we're connected to.
+     * This is the size of the _initializedClientConnections list.
+     * 
+     * @return The number of leaves we have open connections to
      */
     public int getNumInitializedClientConnections() {
-		return _initializedClientConnections.size();
+        
+        // _initializedClientConnections lists the leaves we have open connections to
+		return _initializedClientConnections.size(); // It's size is the number of leaves we have
     }
 
     /**
-     *@return the number of initialized connections for which
-     * isClientSupernodeConnection is true.
+     * How many connections up to ultrapeers we have.
+     * We are a leaf, and these connections are shielding us from the traffic of the Gnutella network.
+     * 
+     * @return The value of _shieldedConnections
      */
     public int getNumClientSupernodeConnections() {
+
+        // Return how many connections up to ultrapeers we have
         return _shieldedConnections;
     }
+
+    //do
 
     /**
      *@return the number of ultrapeer -> ultrapeer connections.
@@ -538,28 +696,48 @@ public class ConnectionManager {
             return 0;
     }
 
+    //done
+
     /**
-     * @return the number of free leaf slots that LimeWires can connect to.
+     * Calculate how many more LimeWire leaves we want.
+     * 
+     * @return The number of free leaf slots that LimeWire leaves can connect to
      */
     public int getNumFreeLimeWireLeafSlots() {
-        return Math.max(0,
-                 getNumFreeLeafSlots() -
-                 Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES - _nonLimeWireLeaves)
-               );
+
+        /*
+         * RESERVED_NON_LIMEWIRE_LEAVES is how many non-LimeWire leaves we want
+         * _nonLimeWireLeaves           is how many non-LimeWire leaves we have
+         * getNumFreeLeafSlots()        is how many more leaves we want
+         */
+
+        // Calculate how many more LimeWire leaves we want
+        return Math.max(0, getNumFreeLeafSlots() - Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES - _nonLimeWireLeaves));
     }
 
-
     /**
-     * @return the number of free non-leaf slots.
+     * We should connect to this many more ultrapeers.
+     * This is the number of free non-leaf slots.
+     * We calculate it by taking how many ultrapeers we should have, and subtracting the number we're connected to.
+     * 
+     * @return The number of free ultrapeer slots
      */
     public int getNumFreeNonLeafSlots() {
+
+        // The number of ultrapeers we should have, minus the number we're connected to
         return _preferredConnections - getNumInitializedConnections();
     }
 
+    //do
+    
     /**
      * @return the number of free non-leaf slots that LimeWires can connect to.
      */
     public int getNumFreeLimeWireNonLeafSlots() {
+        
+        /*
+         * _nonLimeWirePeers is the number of other ultrapeers we're connected to.
+         */
         return Math.max(0,
                         getNumFreeNonLeafSlots()
                         - Math.max(0, (int)
@@ -572,10 +750,18 @@ public class ConnectionManager {
     /**
      * Returns true if we've made a locale-matching connection (or don't
      * want any at all).
+     * 
+     * Returns true if settings tell us not to worry about matching language with connections, or we have some language matching connections anyway.
+     * Returns false if settings tell us to match language with connections, and we don't have any.
      */
     public boolean isLocaleMatched() {
-        return !ConnectionSettings.USE_LOCALE_PREF.getValue() ||
-               _localeMatchingPeers != 0;
+        
+        /*
+         * _localeMatchingPeers is the number of ultrapeer connections we have to the same language as us.
+         */
+        
+        return !ConnectionSettings.USE_LOCALE_PREF.getValue() || // If the program is not trying to connect to same-language computers, or
+               _localeMatchingPeers != 0;                        // We have some connections that match our language, return true
     }
 
     /**
@@ -585,29 +771,50 @@ public class ConnectionManager {
      * have free slots that are reserved for locales
      */
     public int getNumLimeWireLocalePrefSlots() {
-        return Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
-                        - _localeMatchingPeers);
+        
+        /*
+         * _localeMatchingPeers is the number of ultrapeer connections we have to the same language as us.
+         */
+        
+        // Return the number of empty slots we've reserved for remote computers with our language preference
+        return Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue() - _localeMatchingPeers);
     }
+
+    //done
     
     /**
-     * Determines if we've reached our maximum number of preferred connections.
+     * True if we have enough connections to ultrapeers, false if we need more.
+     * 
+     * If we're a leaf, this means we have 3 connections to ultrapeers.
+     * If we're an ultrapeer, this means we have 32 connections to ultrapeers.
+     * 
+     * _initializedConnections lists the ultrapeers we're connected to.
+     * _preferredConnections is the number of ultrapers we should have.
+     * 
+     * @return True if we have enough connections to ultrapeers, false if we need more
      */
     public boolean isFullyConnected() {
+
+        // If there are more ManagedConnections in the _initializedConnections list than _preferredConnections, we have enough
         return _initializedConnections.size() >= _preferredConnections;
-    }    
+    }
 
 	/**
-	 * Returns whether or not the client has an established connection with
-	 * another Gnutella client.
-	 *
-	 * @return <tt>true</tt> if the client is currently connected to
-	 *  another Gnutella client, <tt>false</tt> otherwise
+     * True if we have at least 1 Gnutella connection to a remote computer.
+     * 
+     * @return True if we're connected to the Gnutella network
 	 */
 	public boolean isConnected() {
-		return ((_initializedClientConnections.size() > 0) ||
-				(_initializedConnections.size() > 0));
+
+        // Return true if we're connected to one ultrapeer or one leaf
+		return
+
+            ((_initializedClientConnections.size() > 0) || // We have some leaves
+			(_initializedConnections.size()        > 0));  // We're connected to some ultrapeers, either as an ultrapeer or as a leaf
 	}
-	
+
+    //do
+
 	/**
 	 * Returns whether or not we are currently attempting to connect to the
 	 * network.
@@ -623,42 +830,59 @@ public class ConnectionManager {
 	    }
 	}
 
+    //done
+
     /**
-     * Takes a snapshot of the upstream and downstream bandwidth since the last
-     * call to measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth
+     * Totals the upload and download speeds of all the remote computers we're exchanging Gnutella packet data with.
+     * SupernodeAssigner.collectBandwidthData() calls this once a second.
      */
     public void measureBandwidth() {
-        float upstream=0.f;
-        float downstream=0.f;
+
+        // Make floating point variables to total the upload and download speeds from each ManagedConnection object
+        float upstream   = 0.f;
+        float downstream = 0.f;
+
+        // Loop through the list of remote computers we have open connections to
         List connections = getInitializedConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
+        for (Iterator iter = connections.iterator(); iter.hasNext(); ) {
+            ManagedConnection mc = (ManagedConnection)iter.next(); // Point mc at each ManagedConnection object in the list
+
+            // Have this ManagedConnection object compute new speeds based on what's happened to it in the last 10 seconds
             mc.measureBandwidth();
-            upstream+=mc.getMeasuredUpstreamBandwidth();
-            downstream+=mc.getMeasuredDownstreamBandwidth();
+
+            // Add the upload and download speeds from this Gnutella connection to our totals
+            upstream   += mc.getMeasuredUpstreamBandwidth(); // Get the current speed in bytes/millisecond
+            downstream += mc.getMeasuredDownstreamBandwidth();
         }
-        _measuredUpstreamBandwidth=upstream;
-        _measuredDownstreamBandwidth=downstream;
+
+        // Save the totals in member variables
+        _measuredUpstreamBandwidth   = upstream;   // The speed we're uploading Gnutella packet data
+        _measuredDownstreamBandwidth = downstream; // The speed we're downloading Gntuella packet data
     }
 
     /**
-     * Returns the upstream bandwidth between the last two calls to
-     * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth
+     * How fast we're sending Gnutella packet data to our connections on the Gnutella network.
+     * 
+     * @return The speed we're uploading Gnutella packet data, a float in bytes/millisecond
      */
     public float getMeasuredUpstreamBandwidth() {
+
+        // Return the value that measureBandwidth() totaled
         return _measuredUpstreamBandwidth;
     }
 
     /**
-     * Returns the downstream bandwidth between the last two calls to
-     * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth
+     * How fast we're receiving Gnutella packet data from our connections on the Gnutella network.
+     * 
+     * @return The speed we're downloading Gnutella packet data, a float in bytes/millisecond
      */
     public float getMeasuredDownstreamBandwidth() {
+
+        // Return the value that measureBandwidth() totaled
         return _measuredDownstreamBandwidth;
     }
+
+    //do
 
     /**
      * Checks if the connection received can be accepted,
@@ -710,14 +934,21 @@ public class ConnectionManager {
     public boolean allowAnyConnection() {
         //Stricter than necessary.
         //See allowAnyConnection(boolean,String,String).
+        
+        // If we have some connections up to ultrapeers
         if (isShieldedLeaf())
             return false;
 
         //Do we have normal or leaf slots?
-        return getNumInitializedConnections() < _preferredConnections
-            || (isSupernode()
-				&& getNumInitializedClientConnections() <
-                UltrapeerSettings.MAX_LEAVES.getValue());
+        
+        // Return true if
+        return
+
+            // We need more ultrapeers, or
+            getNumInitializedConnections() < _preferredConnections ||
+        
+            // We're an ultrapeer
+            (isSupernode() && getNumInitializedClientConnections() < UltrapeerSettings.MAX_LEAVES.getValue());
     }
 
     /**
@@ -744,44 +975,39 @@ public class ConnectionManager {
      * @return true if a connection of the given type is allowed
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
-		// preferencing may not be active for testing purposes --
-		// just return if it's not
-		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
-		
+
+        // If we're testing the program with connection preferencing off, return true to allow everything
+		if (!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
+
 		// If it has not said whether or not it's an Ultrapeer or a Leaf
 		// (meaning it's an old-style connection), don't allow it.
 		if(!hr.isLeaf() && !hr.isUltrapeer())
 		    return false;
 
-        //Old versions of LimeWire used to prefer incoming connections over
-        //outgoing.  The rationale was that a large number of hosts were
-        //firewalled, so those who weren't had to make extra space for them.
-        //With the introduction of ultrapeers, this is not an issue; all
-        //firewalled hosts become leaf nodes.  Hence we make no distinction
-        //between incoming and outgoing.
-        //
-        //At one point we would actively kill old-fashioned unrouted connections
-        //for ultrapeers.  Later, we preferred ultrapeers to old-fashioned
-        //connections as follows: if the HostCatcher had marked ultrapeer pongs,
-        //we never allowed more than DESIRED_OLD_CONNECTIONS old
-        //connections--incoming or outgoing.
-        //
-        //Now we simply prefer connections by vendor, which has some of the same
-        //effect.  We use BearShare's clumping algorithm.  Let N be the
-        //keep-alive and K be RESERVED_GOOD_CONNECTIONS.  (In BearShare's
-        //implementation, K=1.)  Allow any connections in for the first N-K
-        //slots.  But only allow good vendors for the last K slots.  In other
-        //words, accept a connection C if there are fewer than N connections and
-        //one of the following is true: C is a good vendor or there are fewer
-        //than N-K connections.  With time, this converges on all good
-        //connections.
 
+        /*
+         * We prefer connections by vendor, using BearShare's clumping algorithm.
+         * Let N be the keep-alive and K be RESERVED_GOOD_CONNECTIONS.
+         * In BearShare's implementation, K is 1.
+         * 
+         * Allow any connections in for the first N-K slots.
+         * But only allow good vendors for the last K slots.
+         * In other words, accept a connection C if there are fewer than N connections and one of the following is true:
+         * C is a good vendor or
+         * there are fewer than N-K connections.
+         * With time, this converges on all good connections.
+         */
+
+        // The number of our connection attempts that have failed
 		int limeAttempts = ConnectionSettings.LIME_ATTEMPTS.getValue();
 		
         //Don't allow anything if disconnected.
-        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
-            _preferredConnections <=0 ) {
+        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() && // If settings tell us not to make connections when the program is disconnected, and
+            _preferredConnections <= 0) {                              // We don't want to maintain any connections right now
+            
+            // Refuse this new connection
             return false;
+
         //If a leaf (shielded or not), check rules as such.
 		} else if (isShieldedLeaf() || !isSupernode()) {
 		    // require ultrapeer.
@@ -794,7 +1020,7 @@ public class ConnectionManager {
 		      (Sockets.getAttempts() < limeAttempts && !hr.isLimeWire())) {
 		        return false;
 		    // if we have slots, allow it.
-		    } else if (_shieldedConnections < _preferredConnections) {
+		    } else if (_shieldedConnections < _preferredConnections) { // We have fewer connections up to ultrapeers than we want to have
 		        // if it matched our preference, we don't need to preference
 		        // anymore.
 		        if(checkLocale(hr.getLocalePref()))
@@ -824,7 +1050,7 @@ public class ConnectionManager {
                 return false;
 
             int leaves = getNumInitializedClientConnections();
-            int nonLimeWireLeaves = _nonLimeWireLeaves;
+            int nonLimeWireLeaves = _nonLimeWireLeaves; // How many non-LimeWire leaves we have
 
             // Reserve RESERVED_NON_LIMEWIRE_LEAVES slots
             // for non-limewire leaves to ensure that the network
@@ -854,19 +1080,20 @@ public class ConnectionManager {
             // another ultrapeer (internally or externally generated)
             
             int peers = getNumInitializedConnections();
-            int nonLimeWirePeers = _nonLimeWirePeers;
+            int nonLimeWirePeers = _nonLimeWirePeers; // The number of ultrapeers we're connected to that aren't running LimeWire
             int locale_num = 0;
             
             if(!allowUltrapeer2UltrapeerConnection(hr)) {
                 return false;
             }
             
-            if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+            // If the program is set to connect to remote computers with the same language preference as us
+            if (ConnectionSettings.USE_LOCALE_PREF.getValue()) { // True by default
+                
                 //if locale matches and we haven't satisfied the
                 //locale reservation then we force return a true
-                if(checkLocale(hr.getLocalePref()) &&
-                   _localeMatchingPeers
-                   < ConnectionSettings.NUM_LOCALE_PREF.getValue()) {
+                if (checkLocale(hr.getLocalePref()) &&
+                   _localeMatchingPeers < ConnectionSettings.NUM_LOCALE_PREF.getValue()) { // We have a slot open for a computer that matches our language
                     return true;
                 }
 
@@ -884,12 +1111,18 @@ public class ConnectionManager {
             // is well connected.
             if(!hr.isLimeWire()) {
                 double nonLimeRatio = ((double)nonLimeWirePeers) / _preferredConnections;
-                if (nonLimeRatio < ConnectionSettings.MIN_NON_LIME_PEERS.getValue())
-                    return true;
-                return (nonLimeRatio < ConnectionSettings.MAX_NON_LIME_PEERS.getValue());  
+                
+                // If nonLimeRatio is less than 10%, (do)
+                if (nonLimeRatio < ConnectionSettings.MIN_NON_LIME_PEERS.getValue()) return true;
+                
+                // If nonLimeRatio is less than 20%, accept this connection, if it's more than 20%, refuse it
+                return (nonLimeRatio < ConnectionSettings.MAX_NON_LIME_PEERS.getValue());
+                
             } else {
-                int minNonLime = (int)
-                    (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
+                
+                // Calculate the minimum number of non-LimeWire connections we want to have
+                int minNonLime = (int)(ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
+                
                 return (peers + 
                         Math.max(0,minNonLime - nonLimeWirePeers) + 
                         locale_num) < _preferredConnections;
@@ -919,7 +1152,7 @@ public class ConnectionManager {
         if(userAgent == null)
             return false;
         userAgent = userAgent.toLowerCase();
-        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
+        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue(); // Get the list of program names like "morpheus" we want to avoid
         for(int i = 0; i < bad.length; i++)
             if(userAgent.indexOf(bad[i]) != -1)
                 return false;
@@ -943,7 +1176,7 @@ public class ConnectionManager {
         if(userAgent == null)
             return false;
         userAgent = userAgent.toLowerCase();
-        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
+        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue(); // Get the list of program names like "morpheus" we want to avoid 
         for(int i = 0; i < bad.length; i++)
             if(userAgent.indexOf(bad[i]) != -1)
                 return false;
@@ -995,17 +1228,25 @@ public class ConnectionManager {
             return false;
         }
     }
+    
+    //done
 
     /**
-     * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
-     *  as an optimization.</b>  All lookup values in the returned value
-     *  are guaranteed to run in linear time.
+     * Get the list of computers we're connected to.
+     * These are ManagedConnection objects.
+     * We opened a TCP socket connection with each one, did the Gnutella handshake, and are now exchanging Gnutella packets.
+     * 
+     * Don't modify this list, just read it.
+     * 
+     * @return The _initializedConnections list
      */
     public List getInitializedConnections() {
+
+        // Return the _initializedConnections list
         return _initializedConnections;
     }
+
+    //do
 
     /**
      * return a list of initialized connection that matches the parameter
@@ -1022,17 +1263,25 @@ public class ConnectionManager {
         }
         return matches;
     }
+    
+    //done
 
     /**
-     * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
-     *  as an optimization.</b>  All lookup values in the returned value
-     *  are guaranteed to run in linear time.
+     * Get the list of all our leaves.
+     * These are the ManagedConnection objects that represent remote computers we've connected to.
+     * We did the Gnutella handshake, and are now exchanging packets with them.
+     * 
+     * Don't change this list, just read it.
+     * 
+     * @return The _initializedClientConnections list of ManagedConnection objects
      */
     public List getInitializedClientConnections() {
+
+        // Return the list
         return _initializedClientConnections;
     }
+
+    //do
 
     /**
      * return a list of initialized client connection that matches the parameter
@@ -1049,14 +1298,23 @@ public class ConnectionManager {
         }
         return matches;
     }
+    
+    //done
 
     /**
-     * @return all of this' connections.
+     * Get the list that includes all the remote computers we're trying to connect to and are connected to.
+     * This is the list of all the ManagedConnection objects.
+     * 
+     * @return The _connections list of ManagedConnection objects
      */
     public List getConnections() {
+
+        // Return the list
         return _connections;
     }
 
+    //do
+    
     /**
      * Accessor for the <tt>Set</tt> of push proxies for this node.  If
      * there are no push proxies available, or if this node is an Ultrapeer,
@@ -1068,6 +1326,8 @@ public class ConnectionManager {
      *  connections are killed and created?
      */
     public Set getPushProxies() {
+
+        // If we have some connections up to ultrapeers
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
@@ -1145,6 +1405,8 @@ public class ConnectionManager {
      * @param
      */
     public void updateQueryStatus(QueryStatusResponse stat) {
+        
+        // If we have some connections up to ultrapeers
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for query status response is a cached
@@ -1250,12 +1512,12 @@ public class ConnectionManager {
                 
                 if(c.isClientSupernodeConnection()) {
                 	killPeerConnections(); // clean up any extraneus peer conns.
-                    _shieldedConnections++;
+                    _shieldedConnections++; // Count that now we have one more connection up to an ultrapeer
                 }
                 if(!c.isLimeWire())
-                    _nonLimeWirePeers++;
+                    _nonLimeWirePeers++; // Count we're connected to one more ultrapeer that isn't running LimeWire
                 if(checkLocale(c.getLocalePref()))
-                    _localeMatchingPeers++;
+                    _localeMatchingPeers++; // Count we're connected to one more ultrapeer with the same language preference as us
             } else {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
@@ -1265,7 +1527,7 @@ public class ConnectionManager {
                 _initializedClientConnections =
                     Collections.unmodifiableList(newConnections);
                 if(!c.isLimeWire())
-                    _nonLimeWireLeaves++;
+                    _nonLimeWireLeaves++; // Count that we have another leaf that isn't running LimeWire
             }
 	        // do any post-connection initialization that may involve sending.
 	        c.postInit();
@@ -1283,6 +1545,8 @@ public class ConnectionManager {
      * @return whether the connection should be allowed 
      */
     private boolean allowInitializedConnection(Connection c) {
+        
+        // If we have some connections up to ultrapeers, or 
     	if ((isShieldedLeaf() || !isSupernode()) &&
     			!c.isClientSupernodeConnection())
     		return false;
@@ -1423,11 +1687,11 @@ public class ConnectionManager {
                     Collections.unmodifiableList(newConnections);
                 //maintain invariant
                 if(c.isClientSupernodeConnection())
-                    _shieldedConnections--;
+                    _shieldedConnections--; // Count that we now have one less connection up to an ultrapeer
                 if(!c.isLimeWire())
-                    _nonLimeWirePeers--;
+                    _nonLimeWirePeers--; // Count that we're connected to one less ultrapeer that isn't running LimeWire
                 if(checkLocale(c.getLocalePref()))
-                    _localeMatchingPeers--;
+                    _localeMatchingPeers--; // Count that we're connected to one less ultrapeer with the same language preference as us
             }
         }else{
             //check in _initializedClientConnections
@@ -1441,7 +1705,7 @@ public class ConnectionManager {
                 _initializedClientConnections =
                     Collections.unmodifiableList(newConnections);
                 if(!c.isLimeWire())
-                    _nonLimeWireLeaves--;
+                    _nonLimeWireLeaves--; // We've got one fewer leaf that isn't running LimeWire
             }
         }
 
@@ -1475,11 +1739,20 @@ public class ConnectionManager {
      *
      * This will remove the connections that we've been connected to
      * for the shortest amount of time.
+     * 
+     * setPreferredConnections() changes the value of _preferredConnections, and then calls this method.
+     * 
+     * 
      */
     private synchronized void stabilizeConnections() {
-        while(getNumInitializedConnections() > _preferredConnections) {
+        
+        // Loop while we're connected to more ultrapeers than we need to be
+        while (getNumInitializedConnections() > _preferredConnections) {
+
             ManagedConnection newest = null;
-            for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
+
+            for (Iterator i = _initializedConnections.iterator(); i.hasNext(); ) {
+
                 ManagedConnection c = (ManagedConnection)i.next();
                 
                 // first see if this is a non-limewire connection and cut it off
@@ -1517,9 +1790,15 @@ public class ConnectionManager {
      *   but numFetchers drops, so need is unchanged.
      *
      * Only call this method when the monitor is held.
+     * 
+     * 
+     * 
      */
     private void adjustConnectionFetchers() {
-        if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+
+        // True, we want to connect to remote computers with the same language preference as us
+        if (ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+
             //if it's a leaf and locale preferencing is on
             //we will create a dedicated preference fetcher
             //that tries to fetch a connection that matches the
@@ -1597,7 +1876,9 @@ public class ConnectionManager {
         // 1 times the amount of connections.
         else {
             multiple = 1;
-            neededConnections -= 5 + 
+            neededConnections -= 5 +
+            
+                // The minimum number of non-LimeWire connections we want to have
                 ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
         }
 
@@ -1746,43 +2027,75 @@ public class ConnectionManager {
             }
         }
     }
+    
+    //done
 
     /**
-     * Returns true if this can safely switch from Ultrapeer to leaf mode.
-	 * Typically this means that we are an Ultrapeer and have no leaf
-	 * connections.
-	 *
-	 * @return <tt>true</tt> if we will allow ourselves to become a leaf,
-	 *  otherwise <tt>false</tt>
+     * True if we can safely switch from ultrapeer to leaf mode.
+     * We're trying to connect as an ultrapeer, but don't have any of our own leaves yet.
+     * 
+     * In the handshake with a remote computer, we said "X-Ultrapeer: true" but the remote computer said "X-Ultrapeer-Needed: false".
+     * Now, we have to decide what to do.
+     * We could either drop down to leaf mode and connect to this computer.
+     * Or, we could stick to our plan and connect as an ultrapeer even though this computer says it doesn't want one. (ask)
+     * 
+     * If allowLeafDemotion() returns true, we'll take the remote computer's advice.
+     * We'll drop down to leaf mode and become a leaf under the remote computer.
+     * When we connect to new computers, we'll say "X-Ultrapeer: false".
+     * We'll still be ultrapeer capable, but we won't try to connect as an ultrapeer for now.
+     * 
+     * If allowLeafDemotion() returns false, we'll ignore the remote computer's advice.
+     * We'll continue with the handshake as an ultrapeer even though it told us it doesn't need any more ultrapeers.
+     * We'll greet other remote computers with "X-Ultrapeer: true" also.
+     * 
+     * @return True if we should drop down to leaf mode.
+     *         False if we should keep trying to connect as an ultrapeer.
      */
     public boolean allowLeafDemotion() {
+
+        // Count that we told another computer "X-Ultrapeer: true" and got back "X-Ultrapeer-Needed: false"
 		_leafTries++;
 
-        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
-            return false;
-        else if(SupernodeAssigner.isTooGoodToPassUp() && _leafTries < _demotionLimit)
-			return false;
-        else
-		    return true;
+        // If settings are forcing us into ultrapeer mode, no, we can't drop down to leaf mode
+        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue()) return false;
+
+        // If we have no connections up to ultrapeers, and at least one fellow ultrapeer next to us or a leaf of our own, no, we can't drop down to leaf mode
+        if (isActiveSupernode()) return false;
+
+        // If we passed every test in SupernodeAssigner.setUltrapeerCapable() and we're still ignoring demotion commands, no, we won't drop down to leaf mode
+        if (SupernodeAssigner.isTooGoodToPassUp() && // Our Internet speed and online time would make us an excellent ultrapeer, and
+            _leafTries < _demotionLimit)             // We've been told to drop down to leaf mode, but not enough times to pay attention to it yet
+            return false;                            // No, we can't drop down to leaf mode
+
+        // OK, we'll take the remote computer's advice, become a leaf, and put aside our dreams of being an ultrapeer for now
+        return true;
     }
 
-
 	/**
-	 * Notifies the connection manager that it should attempt to become an
-	 * Ultrapeer.  If we already are an Ultrapeer, this will be ignored.
-	 *
-	 * @param demotionLimit the number of attempts by other Ultrapeers to
-	 *  demote us to a leaf that we should allow before giving up in the
-	 *  attempt to become an Ultrapeer
+     * Reconnect to the Gnutella network as an ultrapeer right now.
+     * 
+     * If SupernodeAssigner.setUltrapeerCapable() finds us too good to pass up, it will make an "UltrapeerAttemptThread" thread that calls this method.
+     * Sets _demotionLimit to the given limit and _leafTries to 0.
+     * Disconnects from the network, and then connects to tell new remote computers we're an ultrapeer in the handshake.
+     * 
+     * @param demotionLimit The number of times we'll ignore remote computers telling us to become a leaf before we give up and be a leaf
 	 */
 	public void tryToBecomeAnUltrapeer(int demotionLimit) {
-		if(isSupernode()) return;
-		_demotionLimit = demotionLimit;
-		_leafTries = 0;
+
+        // If we're already an ultrapeer, there is nothing more to do
+		if (isSupernode()) return;
+
+        // Set member variables we'll use to track this attempt of ours to join the Gnutella network as an ultrapeer
+		_demotionLimit = demotionLimit; // This many other computers can tell us to become a leaf, and we'll ignore them
+		_leafTries     = 0;             // We'll count how many times that happens in _leafTries
+
+        // Close all our Gnutella connections, and then open new ones telling remote computers "X-Ultrapeer: true"
 		disconnect();
 		connect();
 	}
 
+    //do
+    
     /**
      * Adds the X-Try-Ultrapeer hosts from the connection headers to the
      * host cache.
@@ -1909,38 +2222,91 @@ public class ConnectionManager {
      * Determines if we're attempting to maintain the idle connection count.
      */
     public boolean isConnectionIdle() {
-        return
-         _preferredConnections == ConnectionSettings.IDLE_CONNECTIONS.getValue();
+
+        // Return true if _perferredConnections is only 1 right now
+        return _preferredConnections == ConnectionSettings.IDLE_CONNECTIONS.getValue();
     }
 
+    
+    
     /**
+     * Sets _preferredConnections to 32 if we're an ultrapeer, or 3 if we're a leaf.
+     * 
      * Sets the maximum number of connections we'll maintain.
-    */
+     * 
+     * 
+     * 
+     * This method is private, and called 3 places from within the ConnectionManager class:
+     * ConnectionManager.completeConnectionInitialization() calls this after we've connected a new remote computer.
+     * ConnectionManager.initialize() sets up a thread that calls this every second.
+     * ConnectionManager.connect() calls this when the program starts trying to connect to the network.
+     * 
+     * Sets the value of _preferredConnections, and then calls stabilizeConnections().
+     * 
+     * 
+     * 
+     */
     private void setPreferredConnections() {
-        // if we're disconnected, do nothing.
-        if(!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
-           _disconnectTime != 0)
-            return;
 
+        // If settings don't allow us to make connections when disconnected, and we've recorded a time when we disconnected
+        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() && _disconnectTime != 0) {
+
+            // We're disconnected, do nothing and leave now
+            return;
+        }
+
+        // Save the number of connections we've been trying to maintain up to now
         int oldPreferred = _preferredConnections;
 
-        if(isSupernode())
-            _preferredConnections = ConnectionSettings.NUM_CONNECTIONS.getValue();
-        else if(isIdle())
-            _preferredConnections = ConnectionSettings.IDLE_CONNECTIONS.getValue();
-        else
-            _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
+        /* Now, we'll decide how many connections we should maintain. */
 
-        if(oldPreferred != _preferredConnections)
-            stabilizeConnections();
+        // We're an ultrapeer
+        if (isSupernode()) {
+
+            // Set _preferredConnections to 32, as an ultrapeer, we'll try to keep this many connections to other ultrapeers
+            _preferredConnections = ConnectionSettings.NUM_CONNECTIONS.getValue();
+
+            /*
+             * Where do we configure how many leaves we should have?
+             */
+
+        // We're a leaf, and the user has been away for a half hour
+        } else if (isIdle()) {
+
+            // Set _preferredConnections to 1, we're a leaf and the user is gone, we just need a single connection up to an ultrapeer
+            _preferredConnections = ConnectionSettings.IDLE_CONNECTIONS.getValue();
+
+        // We're a leaf, and the user is at the computer
+        } else {
+
+            // Set _preferredConnections to 3, we're a leaf and the user is here, we should have 3 connections up to an ultrapeer
+            _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
+        }
+
+        // If we changed the number of connections we should have, call stabilizeConnections() to connect more or disconnect from some.
+        if (oldPreferred != _preferredConnections) stabilizeConnections();
     }
+
+
+    //done
 
     /**
-     * Determines if we're idle long enough to change the number of connections.
+     * True if the user has been away for a half hour, and we should drop down to 1 ultrapeer connection instead of 3.
+     * 
+     * @return True if the user has been away for more than a half hour, false if the user is still here
      */
     private boolean isIdle() {
+
+        /*
+         * If the operating system we're running on can't tell us how long the user has been gone, getIdleTime() returns 0.
+         * This makes it looks like the user is always at the computer.
+         */
+
+        // If the user has been away from the computer for a half hour or more, return true
         return SystemUtils.getIdleTime() >= MINIMUM_IDLE_TIME;
     }
+
+    //do
 
 
     //
@@ -2012,10 +2378,22 @@ public class ConnectionManager {
      * "interrupts itself", that is, only if it establishes a connection. If
      * the thread is interrupted externally, the interrupting thread is
      * responsible for recording the death.
+     * 
+     * 
+     * 
+     * 
+     * ConnectionFetcher extends ManagedThread, which extends Thread.
+     * So, ConnectionFetcher is a Thread.
+     * 
+     * 
+     * 
+     * 
      */
     private class ConnectionFetcher extends ManagedThread {
+        
         //set if this connectionfetcher is a preferencing fetcher
         private boolean _pref = false;
+        
         /**
          * Tries to add a connection.  Should only be called from a thread
          * that has the enclosing ConnectionManager's monitor.  This method
@@ -2023,12 +2401,15 @@ public class ConnectionManager {
          * locking requirement.
          */
         public ConnectionFetcher() {
+            
             this(false);
         }
 
         public ConnectionFetcher(boolean pref) {
+            
             setName("ConnectionFetcher");
             _pref = pref;
+            
             // Kick off the thread.
             setDaemon(true);
             start();
@@ -2036,13 +2417,17 @@ public class ConnectionManager {
 
         // Try a single connection
         public void managedRun() {
+            
             try {
+                
                 // Wait for an endpoint.
                 Endpoint endpoint = null;
+                
                 do {
+                    
                     endpoint = _catcher.getAnEndpoint();
-                } while ( !IPFilter.instance().allow(endpoint.getAddress()) ||
-                          isConnectedTo(endpoint.getAddress()) );
+                    
+                } while (!IPFilter.instance().allow(endpoint.getAddress()) || isConnectedTo(endpoint.getAddress()) );
                 Assert.that(endpoint != null);
                 _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(

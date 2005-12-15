@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.handshaking;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
 

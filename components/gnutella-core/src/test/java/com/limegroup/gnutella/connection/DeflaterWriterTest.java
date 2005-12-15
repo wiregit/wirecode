@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.connection;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella.connection;
 
 import java.io.*;
 import java.nio.ByteBuffer;

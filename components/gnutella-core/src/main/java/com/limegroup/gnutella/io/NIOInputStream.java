@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.io;
 
 import java.io.IOException;
@@ -17,10 +20,26 @@ import java.util.Stack;
  * ReadableByteChannel is implemented so that future ReadObservers can take over
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
+ * 
+ * 
+ * Extends and Implements
+ * ReadObserver:                          NIO can tell this object to read now, handleRead().
+ * java.nio.channels.ReadableByteChannel: Call read() to read data from this object.
  */
 class NIOInputStream implements ReadObserver, ReadableByteChannel {
-    
+
+    /**
+     * A stack of empty 8 KB ByteBuffer objects.
+     * When you want an 8 KB ByteBuffer, don't make one yourself.
+     * Instead, call the static method NIOInputStream.getBuffer().
+     * It will remove one from this stack, and give it to you.
+     * Keeping a stack of buffers this way is faster than allocating and garbage collecting them individually.
+     * 
+     * This stack is kept in NIOInputStream, and it's static.
+     * Both NIOInputStream and NIOOutputStream use it.
+     */
     static final Stack CACHE = new Stack();
+
     private final NIOSocket handler;
     private final SocketChannel channel;
     private BufferInputStream source;
@@ -54,13 +73,29 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
         NIODispatcher.instance().interestRead(channel, true);
     }
     
+    /**
+     * Get an 8 KB ByteBuffer you can use.
+     * 
+     * 
+     * 
+     * 
+     * 
+     * @return An empty 8 KB ByteBuffer you can use
+     */
     static ByteBuffer getBuffer() {
+
+        // Make sure only one thread can do this at a time
         synchronized(CACHE) {
+
+            // The CACHE stack object doesn't have any 8 KB ByteBuffers in it yet
             if (CACHE.isEmpty()) {
-                ByteBuffer buf = ByteBuffer.allocateDirect(8192);
-                CACHE.push(buf);
-            } 
-            
+
+                // Make a new one, and put it on the stack
+                ByteBuffer buf = ByteBuffer.allocateDirect(8192); // Use allocateDirect for a large ByteBuffer you're going to keep around for awhile
+                CACHE.push(buf); // Place the ByteBuffer on the top of the CACHE stack
+            }
+
+            // Remove an empty 8 KB ByteBuffer from the top of the CACHE stack, and return it
             return (ByteBuffer)CACHE.pop();
         }
     }
@@ -113,7 +148,14 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
     public void handleRead() throws IOException {
         synchronized(bufferLock) {
             int read = 0;
-            
+
+            /*
+             * Tour Point
+             * 
+             * This is where LimeWire actually reads data from the remote computer.
+             * channel is a java.nio.channels.SocketChannel object.
+             */
+
             // read everything we can.
             while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
             if(read == -1)
@@ -135,33 +177,48 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * The SocketChannel should be shut by NIOSocket.
      */
     public synchronized void shutdown() {
-        
-        if(shutdown)
-            return;
-         
-        if(source != null)
-            source.shutdown();
+
+        // If we've already run this method for this object, don't do it again
+        if (shutdown) return;
+
+        // If this NIOInputStream object has a BufferInputStream source, tell it to shut itself down
+        if (source != null) source.shutdown();
+
+        // Mark this object as being shut down
         shutdown = true;
-        try {close();}catch(IOException ignored) {}
+
+        try { close(); } catch (IOException ignored) {}
     }
     
     /** Unused */
     public void handleIOException(IOException iox) {
         throw new RuntimeException("unsupported operation", iox);
-    }    
-    
+    }
+
     /**
-     * Does nothing, since this is implemented for ReadableByteChannel,
-     * and that is used for reading from the temporary buffer --
-     * there is no buffer to close in this case.
+     * Marks the 8 KB ByteBuffer this object was using as clear, and puts it back onto the stack of them.
      */
     public void close() throws IOException {
+
+        /*
+         * (do)
+         * here's the comment that was here
+         * it doesn't make any sense, because this method does do something
+         * 
+         * Does nothing, since this is implemented for ReadableByteChannel,
+         * and that is used for reading from the temporary buffer --
+         * there is no buffer to close in this case.
+         */
+
+        // If we made a ByteBuffer for this NIOInputStream
         if (buffer != null) {
-            buffer.clear();
-            CACHE.push(buffer);
+
+            // Mark it as empty and put it on the top of the CACHE stack
+            buffer.clear();     // Moves position to the start and limit to the end, doesn't actually free any memory
+            CACHE.push(buffer); // Put the buffer on the top of the java.util.Stack object named CACHE
         }
     }
-    
+
     /**
      * Always returns true, since this is implemented for ReadableByteChannel,
      * and the Buffer is always available for reading.
@@ -170,6 +227,6 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
         return true;
     }
 }
-                
+
         
     

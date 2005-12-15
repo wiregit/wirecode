@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.io;
 
 import java.io.IOException;
@@ -12,6 +15,13 @@ import org.apache.commons.logging.Log;
  *
  * To work with the Throttle, this uses an attachment (which must be the same as the
  * attachment of the SelectionKey associated with the socket this is using).
+ * 
+ * 
+ * Extends and Implements
+ * ChannelWriter:        This object has a sink channel it writes to, setWriteChannel() and getWriteChannel().
+ * InterestWriteChannel: The object that gives us data can tell us it has some, interest().
+ * WriteObserver:        NIO can tell this object to get data and write now, handleWrite().
+ * ThrottleListener:     (do)
  */
 public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
     

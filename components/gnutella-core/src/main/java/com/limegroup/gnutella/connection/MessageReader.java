@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.connection;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -32,31 +33,35 @@ import com.limegroup.gnutella.io.ChannelReadObserver;
  * ChannelReader means this object has a channel it can read from.
  * You can set it and get what you set with setReadChannel and getReadChannel.
  * ReadObserver means this object can be told when it should read.
- * Code call call handleRead() on it to make it read now.
+ * Code can call handleRead() on it to make it read now.
+ * 
+ * Extends and Implements
+ * ChannelReader: This object has a source channel it reads from, setReadChannel() and getReadChannel().
+ * ReadObserver:  NIO can tell this object to read now, handleRead().
  */
 public class MessageReader implements ChannelReadObserver {
 
-    /** The maximum size of a message payload that we'll accept, 64 KB */
+    /** The maximum size of a message payload that we'll accept, 64 KB. */
     private static final long MAX_MESSAGE_SIZE = 64 * 1024; // 64 KB
-    /** A Gnutella packet header is 23 bytes */
+    /** A Gnutella packet header is 23 bytes. */
     private static final int HEADER_SIZE = 23;              // All Gnutella messages begin with a 23 byte header
-    /** Look 19 bytes into the header to read the 4 byte payload size */
+    /** Look 19 bytes into the header to read the 4 byte payload size. */
     private static final int PAYLOAD_LENGTH_OFFSET = 19;    // The payload length is a number written in 4 bytes that begin 19 bytes into the header
 
-    /** An empty buffer to use for packets that don't have payloads */
+    /** An empty buffer to use for packets that don't have payloads. */
     private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.allocate(0);
 
-    /** A 23 byte buffer we read a header into, and then look at it */
+    /** A 23 byte buffer we read a header into, and then look at it. */
     private final ByteBuffer header;
-    /** The buffer for the payload, allocated to be exactly the right size for each packet */
+    /** The buffer for the payload, allocated to be exactly the right size for each packet. */
     private ByteBuffer payload;
 
-    /** After reading a message, this object gives it to the MessageReceiver named receiver */
-    private final MessageReceiver receiver;
-    /** The source channel this MessageReader reads data from the remote computer through */
+    /** A link back to the ManagedConnection object that we'll give the sliced packets to. */
+    private final MessageReceiver receiver; // ManagedConnection implements the MessageReceiver interface
+    /** The source channel this MessageReader reads data from the remote computer through. */
     private ReadableByteChannel channel;
 
-    /** True when this reader has been shut down, makes sure it doesn't go through the shutdown process more than once */
+    /** True when this reader has been shut down, makes sure it doesn't go through the shutdown process more than once. */
     private boolean shutdown = false;
 
     /**
@@ -75,7 +80,7 @@ public class MessageReader implements ChannelReadObserver {
      * Make a new MessageReader object with the given source channel and MessageReceiver object
      * 
      * @param channel  The source channel this MessageReader object will read from
-     * @param receiver The MessageReceiver object this MessageReader will give messages it reads to
+     * @param receiver The ManagedConnection object that we'll give sliced packets to
      */
     public MessageReader(ReadableByteChannel channel, MessageReceiver receiver) {
 
@@ -84,7 +89,7 @@ public class MessageReader implements ChannelReadObserver {
 
         // Save the given channel and receiver in this object
         this.channel  = channel;
-        this.receiver = receiver;
+        this.receiver = receiver; // The ManagedConnection object we'll give sliced packets to
 
         // Make the header buffer 23 bytes in little endian order
         this.header = ByteBuffer.allocate(HEADER_SIZE);
@@ -155,7 +160,7 @@ public class MessageReader implements ChannelReadObserver {
      */
     public void handleRead() throws IOException {
 
-    	// Keep reading Gnutella packets and handing them to receiver.processReadMessage(m) until channel won't give us any more data
+    	// Keep reading Gnutella packets and handing them to ManagedConnection.processReadMessage(m) until channel won't give us any more data
         while (true) {
 
         	// Count how many bytes we read from the source channel
@@ -167,7 +172,7 @@ public class MessageReader implements ChannelReadObserver {
             	// The 23 byte header buffer is full, so it must contain a header
             	if (!header.hasRemaining()) break;
 
-            	// Get decompressed data from the remote computer
+            	// Get decompressed data from the InflaterReader object
             	read = channel.read(header); // Put it in the header buffer, return the number of bytes we got
 
             	// The source couldn't give us any more data
@@ -222,7 +227,7 @@ public class MessageReader implements ChannelReadObserver {
             	// The payload buffer is full, meaning we've read the entire payload
             	if (!payload.hasRemaining()) break;
 
-            	// Get decompressed data from the remote computer
+            	// Get decompressed data from the InflaterReader object
             	read = channel.read(payload);
 
             	// The source couldn't give us any more data
@@ -246,13 +251,13 @@ public class MessageReader implements ChannelReadObserver {
                 Message m = Message.createMessage( // This static factory method returns a new object or throws an exception
                 		header.array(),            // Give it the data of the packet header and payload we just downloaded
                 		payload.array(),
-                		receiver.getSoftMax(),     // The maximum value for hops + TTL for this message
-                		receiver.getNetwork());    // Choose which way we'll send this message, TCP or UDP
+                		receiver.getSoftMax(),     // Ask the ManagedConnection object the maximum value for hops + TTL for this remote computer
+                		receiver.getNetwork());    // Ask the ManagedConnection object whether this message came in through TCP or UDP
 
-                // Have the MessageReceiver object process the message we just read
+                // Call ManagedConnection.processReadMessage(m) to have it process the message that we just read
                 receiver.processReadMessage(m);
 
-            } catch(BadPacketException e) {}
+            } catch (BadPacketException e) {}
 
             // We read a complete packet, and then the channel said we can never read any more from it
             if (read == -1) throw new IOException("eof"); // Report EOF, end of file
@@ -277,7 +282,7 @@ public class MessageReader implements ChannelReadObserver {
             shutdown = true;      // Mark this object shut down so the next time we don't get here
         }
 
-        // Tell the MessageReceiver that we're shut down
+        // Tell the ManagedConnection object that we're shut down
         receiver.messagingClosed();
     }
 

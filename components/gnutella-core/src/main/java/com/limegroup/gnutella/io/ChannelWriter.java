@@ -1,8 +1,13 @@
-package com.limegroup.gnutella.io;
 
 // Edited for the Learning branch
 
+package com.limegroup.gnutella.io;
+
 /**
+ * You have a channel you write to, setWriteChannel() and getWriteChannel().
+ * NIO can command you to get data and write, handleWrite().
+ * 
+ * 
  * Allows arbitrary InterestWriteChannels to be set as the source writing
  * channel for this object.
  *
@@ -31,8 +36,7 @@ package com.limegroup.gnutella.io;
  * You can call setWriteChannel to give it a channel, and getWriteChannel to find what you set.
  * The channel you give it must support the InterestWriteChannel interface.
  */
-public interface ChannelWriter extends WriteObserver 
-{
+public interface ChannelWriter extends WriteObserver {
     
     /**
      * Set the new source channel.  This object should immediately

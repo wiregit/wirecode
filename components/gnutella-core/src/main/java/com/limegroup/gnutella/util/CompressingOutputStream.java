@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.util;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,6 +9,7 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 /**
+ * Not used now that LimeWire has switched to NIO.
  * Make an CompressingOutputStream with a destination for compressed data, then call write(b) on it to have it take and compress b.
  * 
  * Pass the constructor an OutputStream the new object will write compressed data to.

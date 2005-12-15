@@ -1,12 +1,12 @@
-package com.limegroup.gnutella.statistics;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella.statistics;
 
 /**
  * This class contains a type-safe enumeration of statistics for handshaking
  */
-public class HandshakingStat extends AdvancedStatistic 
-{
+public class HandshakingStat extends AdvancedStatistic {
 
 	/**
 	 * Make the constructor private so that only this class can construct

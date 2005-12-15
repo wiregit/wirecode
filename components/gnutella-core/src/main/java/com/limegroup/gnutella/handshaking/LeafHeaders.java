@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.handshaking;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.handshaking;
 
 /**
  * A new LeafHeaders object contains all the handshake headers we send as a leaf.
@@ -10,8 +11,7 @@ package com.limegroup.gnutella.handshaking;
  * When you make a new LeafHeaders object, its constructor fills in all the Gnutella headers and values that we send.
  * Use LeafHeaders when we are a leaf, because one of the headers in it is "X-Ultrapeer: false".
  */
-public class LeafHeaders extends DefaultHeaders 
-{
+public class LeafHeaders extends DefaultHeaders {
 
     /**
      * Make a new LeafHeaders object.

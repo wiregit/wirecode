@@ -1,8 +1,7 @@
-package com.limegroup.gnutella;
 
 // Commented for the Learning branch
 
-// Another small CVS test
+package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,6 +63,8 @@ public class Acceptor implements Runnable {
      * 
      * We'll tell our listening socket what port to listen on.
      * Later, we can change it to listen on a different port.
+     * 
+     * This looks like a java.net.ServerSocket object, but it's actually a LimeWire NIOServerSocket.
      * 
      * Locking:
      * Obtain _socketLock before modifying either.
@@ -601,8 +602,8 @@ public class Acceptor implements Runnable {
         ServerSocket newSocket = null;
         try {
 
-        	// Use the given port number
-        	newSocket = new com.limegroup.gnutella.io.NIOServerSocket(port); // NIO socket, will not block
+        	// Make a new NIOServerSocket and start it listening on the given port number
+        	newSocket = new com.limegroup.gnutella.io.NIOServerSocket(port);
 
         } catch (IOException e) {
 
@@ -720,7 +721,7 @@ public class Acceptor implements Runnable {
      * 
      * This line of code is key:
      * 
-     *     client = _socket.accept();
+     *   client = _socket.accept();
      * 
      * _socket is our TCP listening socket.
      * accept() is a method which blocks until a remote computer contacts us.
@@ -1044,8 +1045,8 @@ public class Acceptor implements Runnable {
                 	 * we might as well check and prevent a double check.
                 	 */
 
-                	// By default, we'll use any incoming connection to determine if we're externally contactable
-                    if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue()) {
+                    // If settings allow us to use any incoming connection to determine if we're externally contactable
+                    if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue()) { // False by default
 
                     	// A remote computer just connected to us, set _acceptedIncoming to true
                     	ac.checkFirewall(_socket); // Give the method the socket so it can make sure the computer really is remote

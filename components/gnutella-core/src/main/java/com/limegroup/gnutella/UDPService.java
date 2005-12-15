@@ -1,6 +1,7 @@
-package com.limegroup.gnutella;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -47,7 +48,11 @@ import com.limegroup.gnutella.io.NIODispatcher;
  * @see UDPReplyHandler
  * @see MessageRouter
  * @see QueryUnicaster
- *
+ * 
+ * 
+ * Extends and Implements
+ * ReadObserver:  NIO can tell this object to read now, handleRead().
+ * WriteObserver: NIO can tell this object to get data and write now, handleWrite().
  */
 public class UDPService implements ReadWriteObserver {
 

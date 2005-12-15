@@ -1,6 +1,7 @@
-package com.limegroup.gnutella;
 
-// Edited for the Learning branch
+// Commented for the Learning branch
+
+package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -129,9 +130,9 @@ public class Connection implements IpPort {
 
     /** The connection socket we talk to the remote computer through. */
     protected Socket _socket;
-    /** Stream for reading data in from the remote computer. */
+    /** Read from this BufferInputStream object to get data the remote computer sent. */
     private InputStream _in;
-    /** Stream for writing data out to the remote computer. */
+    /** Write to this ThrottledOutputStream object to send data to the remote computer */
     private OutputStream _out;
     /** True if we connected to the remote computer's IP address, false if the remote computer connected to our listening socket. */
     private final boolean OUTGOING;
@@ -362,7 +363,7 @@ public class Connection implements IpPort {
     /**
      * Make a new Connection object that we'll use to try to connect to an IP address and port number.
      * This constructor takes the IP address and port number of the remote computer.
-     * When it runs, we haven't tried connecting to the remote computer yet.
+     * It doesn't try to connect to the remote computer here, call initialize() to do that.
      * 
      * @param host            The IP address of the remote computer we're going to try to connect to, in a string like "24.183.177.68"
      * @param port            The port number of the remote computer we're going to try to connect to, like 6346
@@ -613,13 +614,27 @@ public class Connection implements IpPort {
         try {
 
         	// Get streams for reading and writing from the connection socket
-            _in  = getInputStream();
-            _out = getOutputStream();
+            _in  = getInputStream();  // Calls Connection.getOutputStream, the ManagedConnection class doesn't override this method
+            _out = getOutputStream(); // This is actually a ManagedConnection object, so this will call ManagedConnection.getOutputStream()
+            
+            /*
+             * At this point, NIOSocket has the following 4 objects:
+             * 
+             *              - NIOInputStream  - BufferInputStream
+             *   NIOSocket -
+             *              - NIOOutputStream - BufferOutputStream
+             * 
+             * getInputStream() finds the BufferInputStream behind the NIOSocket.
+             * getOutputStream() finds the BufferOutputStream, and places a new ThrottledOutputStream before it.
+             * After the two lines of code above run, _in and _out point to the following object chains:
+             * 
+             *   _in  - BufferInputStream
+             *   _out - ThrottledOutputStream - BufferOutputStream
+             */
 
-            if (_in == null)
-            	throw new IOException("null input stream");
-			else if(_out == null)
-				throw new IOException("null output stream");
+            // Make sure we were able to find the BufferInputStream and ThrottledOutputStream
+            if      (_in  == null) throw new IOException("null input stream");
+			else if (_out == null) throw new IOException("null output stream");
 
         } catch (Exception e) {
 
@@ -655,7 +670,7 @@ public class Connection implements IpPort {
         		initializeIncoming();
         	}
 
-            // headers we sent
+            // Headers we sent
             _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
 
             // Record the time we finished the handshake
@@ -679,15 +694,15 @@ public class Connection implements IpPort {
              * The call to end(), done explicitly in the close() method of this class,
              * and implicitly in the finalization of the Deflater and Inflater, releases these buffers.
              */
-            
+
             // We need to compress data before sending it to the remote computer
             if (isWriteDeflated()) { // If _headersWritten includes "Content-Encoding: deflate"
 
             	// Make a new Java Deflater, the object that will actually compress the data
                 _deflater = new Deflater();
 
-                // Make a new CompressingOutputStream object that compresses and writes to _out, and save it as _out to write to it instead
-                _out = createDeflatedOutputStream(_out);
+                // Returns the given stream unchanged now that LimeWire has switched to NIO
+                _out = createDeflatedOutputStream(_out); // Calls ManagedConnection.createDeflatedOutputStream()
             }
 
             // The remote computer is going to be sending us compressed data, we need to decompress it so we can read it
@@ -695,9 +710,9 @@ public class Connection implements IpPort {
 
             	// Make a new Java Inflater, the object that will actually decompress the data
                 _inflater = new Inflater();
-                
-                // Make a new UncompressingInputStream object that reads from _in and decompresses, and save it as _in to read from it instead
-                _in = createInflatedInputStream(_in);
+
+                // Returns the given stream unchanged now that LimeWire has switched to NIO
+                _in = createInflatedInputStream(_in); // Calls ManagedConnection.createInflatedInputStream()
             }
 
             /*
@@ -729,6 +744,7 @@ public class Connection implements IpPort {
     }
 
     /**
+     * No longer used.
      * Make a new CompressingOutputStream object that will write data to the given OutputStream object it has compressed with _deflater.
      * 
      * @param out The OutputStream the CompressingOutputStream object this method returns will write compressed data to.
@@ -740,6 +756,7 @@ public class Connection implements IpPort {
     }
 
     /**
+     * No longer used.
      * Make a new UncompressingInputStream object that will read data from the given InputStream and then decompress it with _inflater.
      * 
      * @param in The InputStream the UncompressingInputStream object this method returns will write compressed data to.
@@ -751,10 +768,20 @@ public class Connection implements IpPort {
     }
 
     /**
-     * True if the connection socket is an NIO socket that is simulating blocking for us, false if it's just a regular Java socket that always blocks.
+     * True if _socket is a NIOSocket object we can use without blocking, false if it's a regular Java socket that always blocks.
      * 
-     * @return True if _socket is a java.net.Socket that blocks when we call read or write on its streams.
-     *         False if _socket is actually a LimeWire NIOSocket that we can later tell to stop blocking.
+     * True if _socket is a LimeWire NIOSocket object.
+     * It has a Socket and SocketChannel inside.
+     * It will simulate blocking for us when we connect.
+     * For message exchange, we can use it without blocking.
+     * 
+     * False if _socket is just a regular Java socket object.
+     * It will always block.
+     * 
+     * LimeWire is now programmed to use NIOSocket objects instead of regular Java sockets.
+     * This method will always return true.
+     * 
+     * @return Always returns true
      */
     public boolean isAsynchronous() {
 
@@ -1379,10 +1406,11 @@ public class Connection implements IpPort {
     /**
      * Returns the stream you can use to send data to this remote computer.
      * 
-     * The _socket object this Connection uses to communicate with the remote computer might be one object or another.
-     * It might be a regular java.net.Socket object, which has streams that block.
-     * Or, it might be a new LimeWire NIOSocket object, which presents the same interface but uses NIO underneath.
-     * This method returns a buffered OutputStream you can write to either way.
+     * This is actually a ManagedConnection object.
+     * When initialize() calls getOutputStream(), control goes to ManagedConnection.getOutputStream() and then that calls here.
+     * 
+     * The _socket object this Connection uses to communicate with the remote computer isn't a java.net.Socket object.
+     * It's a LimeWire NIOSocket object, which presents the same interface as Socket but uses NIO underneath.
      * 
      * @return The OutputStream you can use to send data to the remote computer
      */
@@ -1400,7 +1428,7 @@ public class Connection implements IpPort {
         	// Return the object you can write to
             return _socket.getOutputStream();
 
-        // The connection socket is just a regular java.net.Socket that has streams that block
+        // Not used now that LimeWire has switched to NIO
         } else {
 
         	/*
@@ -1442,7 +1470,7 @@ public class Connection implements IpPort {
         	// Return the object you can read from
             return _socket.getInputStream();
 
-        // The connection socket is just a regular java.net.Socket that has streams that block
+        // Not used now that LimeWire has switched to NIO
         } else {
 
         	/*
@@ -1468,6 +1496,8 @@ public class Connection implements IpPort {
     }
 
     /**
+     * Not used now that LimeWire has switched to NIO.
+     * 
      * Reads one Gnutella packet from the remote computer and returns it.
      * Sets up decompression if it hasn't already been setup yet.
      * Blocks here until the remote computer sends us a packet.
@@ -1483,7 +1513,7 @@ public class Connection implements IpPort {
     protected Message receive() throws IOException, BadPacketException {
 
     	// If we need to setup decompression and haven't yet, do it now
-        if (isAsynchronous() &&                           // The connection socket here is actually an NIO socket that is simulating blocking for us, and
+        if (isAsynchronous() &&                           // The connection socket here is actually an NIOSocket object that is simulating blocking for us, and
             isReadDeflated() &&                           // The remote computer told us "Content-Encoding: deflate", it will be sending compressed data, and
             !(_in instanceof UncompressingInputStream)) { // We haven't added an UncompressingInputStream to the read chain yet
 
@@ -1511,6 +1541,8 @@ public class Connection implements IpPort {
     }
 
     /**
+     * Not used now that LimeWire has switched to NIO.
+     * 
      * Reads one Gnutella packet from the remote computer and returns it.
      * Sets up decompression if it hasn't already been setup yet.
      * Blocks here until the remote computer sends us a packet.
@@ -1552,6 +1584,9 @@ public class Connection implements IpPort {
          * TODO:kfaaborg _socket is a LimeWire NIO socket.
          * The socket it uses is the socket inside it, not the socket it is.
          * Calling getSoTimeout() and setSoTimeout() affect the socket it is, which we're not using.
+         * 
+         * To fix this, see if it's an NIOSocket, cast it as an NIOSocket, and then call setSoTimeout() on it.
+         * NIOSocket does override setSoTimeout and direct the call to the socket inside.
          */
 
         // Temporarily change the socket timeout
@@ -1579,6 +1614,8 @@ public class Connection implements IpPort {
     private final byte[] HEADER_BUF = new byte[23];
 
     /**
+     * Not used now that LimeWire has switched to NIO.
+     * 
      * Read a Gnutella packet from this remote computer and return it.
      * Also updates our statistics about how much data we've downloaded from this remote computer, before and after compression.
      * 
@@ -1665,6 +1702,9 @@ public class Connection implements IpPort {
     private final byte[] OUT_HEADER_BUF = new byte[23];
 
     /**
+     * Not used.
+     * ManagedConnection overrides this method and never calls it.
+     * 
      * Send a Gnutella packet to this remote computer.
      * This also updates statistics, just like readAndUpdateStatistics does.
      * 
@@ -1705,6 +1745,9 @@ public class Connection implements IpPort {
     }
 
     /**
+     * Not used.
+     * ManagedConnection overrides this method and never calls it.
+     * 
      * Push any data sitting in the objects of the write chain to the remote computer.
      * 
      * The OutputStream _out isn't really an OutputStream object, it's just some object that supports the OutputStream interface.
@@ -1726,7 +1769,7 @@ public class Connection implements IpPort {
 
         	// Have the object that we are writing data to send everything it has to the remote computer
             _out.flush(); // If it also calls _out.flush(), the call will propegate down the chain
-            
+
             /*
              * (ask)
              * But, what if a buffer fills up?
@@ -1993,9 +2036,13 @@ public class Connection implements IpPort {
     }
 
     /**
-     * Accessor for the soft max TTL to use for this connection.
+     * When we get a packet from this remote computer, we'll lower its TTL so its hops + TTL doesn't exceed this limit.
      * 
-     * @return the soft max TTL for this connection
+     * The MessageReceiver interface requires this method.
+     * MessageReader.handleRead() calls Connection.getSoftMax() to get the limit.
+     * It puts the limit in the Message object it's making from the data it sliced.
+     * 
+     * @return The hops + TTL limit we're enforcing on packets this remote computer sends us
      */
     public byte getSoftMax() {
 
@@ -2610,7 +2657,7 @@ public class Connection implements IpPort {
     }
 
     /**
-     * True if we are an ultrapeer and the remote computer is a shielded leaf.
+     * True if we are an ultrapeer and the remote computer is a leaf.
      * We said "X-Ultrapeer: true".
      * The remote computer said "X-Ultrapeer: false" and "X-Query-Routing: 0.1".
      * 

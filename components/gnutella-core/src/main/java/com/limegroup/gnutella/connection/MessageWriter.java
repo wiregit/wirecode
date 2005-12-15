@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.connection;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.connection;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;
@@ -29,6 +30,11 @@ import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
  * 
  * This class uses non-blocking IO.
  * All methods will return quickly.
+ * 
+ * Extends and Implements
+ * ChannelWriter: This object has a sink channel it writes to, setWriteChannel() and getWriteChannel().
+ * WriteObserver: NIO can tell this object to get data and write now, handleWrite().
+ * OutputRunner:  (do)
  */
 public class MessageWriter implements ChannelWriter, OutputRunner {
 
@@ -235,7 +241,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             // Write the message into the output buffer
             m.writeQuickly(out);
 
-            // Give the message to the SentMessageHandler, which wants to see the message we've sent
+            // Give the message to the SentMessageHandler, which will measure it for statistics
             sendHandler.processSentMessage(m);
 
             // Move data from our out buffer into the channel

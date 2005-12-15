@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
-/*
+/**
  * A "watchdog" that periodically examines connections and
  * replaces dud connections with better ones.  There are a number of
  * possible heuristics to use when examining connections.

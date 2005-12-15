@@ -1545,6 +1545,11 @@ public class QueryRequest extends Message implements Serializable{
     
     /**
      * Returns true if this is a feature query.
+     * 
+     * (ask)
+     * This means this QueryRequest packet has something to do with a new LimeWire feature.
+     * Right now, the only new LimeWire feature this refers to is the What's New feature.
+     * 
      */
     public boolean isFeatureQuery() {
         return _featureSelector > 0;

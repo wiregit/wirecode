@@ -1,10 +1,17 @@
-package com.limegroup.gnutella.io;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella.io;
 
 import java.nio.channels.WritableByteChannel;
 
 /**
+ * The object that gives you data can tell you it has some, interest().
+ * NIO can command you to get data and write, handleWrite().
+ * 
+ * 
+ * 
+ * 
  * A channel that can be written to, can receive write events of when writing
  * on this channel is capable, and can forward these events to other chained
  * WriteObservers.
@@ -13,25 +20,17 @@ import java.nio.channels.WritableByteChannel;
  * A channel that can get write events when it wants data written to it.
  * A channel that can forward these write events to other chained WriteObservers
  * 
- * (added)
+ * (do)
  * 
  * You can give data to an object that implements InterestWriteChannel, but only when it wants some.
  * First, call interest(this, true) on it. It will link back to you.
  * When it wants some data, it will call your handleWrite method.
  * In your handleWrite method, give it data by calling its write method.
  * 
- * 
- * 
- * 
  * If you want data for writing, implement the InterestWriteChannel interface.
  * An object that can give you data will call your interest method so you can link back to it.
  * When you want some data, call its handleWrite method.
  * It will call your write method to give you data.
- * 
- * 
- * 
- * 
- * 
  * 
  */
 public interface InterestWriteChannel extends WritableByteChannel, WriteObserver {
@@ -59,5 +58,4 @@ public interface InterestWriteChannel extends WritableByteChannel, WriteObserver
      * 
      */
     public void interest(WriteObserver observer, boolean status);
-
 }

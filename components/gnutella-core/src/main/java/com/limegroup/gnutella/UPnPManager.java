@@ -1,6 +1,7 @@
-package com.limegroup.gnutella;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 import java.net.Inet4Address;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
-
 
 /**
  * Manages the mapping of ports to limewire on UPnP-enabled routers.  

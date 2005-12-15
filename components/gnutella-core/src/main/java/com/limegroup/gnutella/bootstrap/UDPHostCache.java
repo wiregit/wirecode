@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.bootstrap;
 
 import com.limegroup.gnutella.Assert;
@@ -290,8 +293,10 @@ public class UDPHostCache {
      */
     private void createAndAdd(String host, int port) {
         try {
-            ExtendedEndpoint ep = 
-			  new ExtendedEndpoint(host, port).setUDPHostCache(true);
+
+            // Make a new ExtendedEndpoint object with the given IP address and port number, and mark it as holding the address of a UDP host cache
+            ExtendedEndpoint ep = new ExtendedEndpoint(host, port).setUDPHostCache(true);
+
             add(ep);
         } catch(IllegalArgumentException ignored) {}
     }

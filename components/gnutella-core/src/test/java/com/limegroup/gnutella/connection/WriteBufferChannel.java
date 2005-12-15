@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.connection;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,15 +18,9 @@ import com.limegroup.gnutella.io.WriteObserver;
  * It shows how to implement write, handleWrite, and interest.
  * 
  * When we're testing DeflaterWriter, for instance, we build a little write chain.
- * We make a DeflaterWriter, and then put it inbetween two WriteBufferChannel objects
- * 
- * 
- * 
- * 
- *
+ * We make a DeflaterWriter, and then put it inbetween two WriteBufferChannel objects.
  */
-public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel 
-{
+public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
 
 	private ByteBuffer buffer; // position and limit clip out the free space
     private boolean closed = false;

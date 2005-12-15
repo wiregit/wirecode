@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.messages;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import com.limegroup.gnutella.util.DataUtils;
  * only the TTL, hops, and priority field can be changed.
  */
 public abstract class Message implements Serializable, Comparable {
+    
     //Functional IDs defined by Gnutella protocol.
     public static final byte F_PING                  = (byte)0x0;
     public static final byte F_PING_REPLY            = (byte)0x1;
@@ -58,7 +60,6 @@ public abstract class Message implements Serializable, Comparable {
     public static byte[] makeGuid() {
         return GUID.makeGuid();
     }
-
 
     ////////////////////////// Instance Data //////////////////////
 

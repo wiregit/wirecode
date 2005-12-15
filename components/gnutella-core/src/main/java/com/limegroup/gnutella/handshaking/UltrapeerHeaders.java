@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.handshaking;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.handshaking;
 
 /**
  * A new UltrapeerHeaders object contains all the handshake headers we send as an ultrapeer.
@@ -10,9 +11,8 @@ package com.limegroup.gnutella.handshaking;
  * When you make a new UltrapeerHeaders object, its constructor fills in all the Gnutella headers and values that we send.
  * Use UltrapeerHeaders when we are an ultrapeer, because one of the headers in it is "X-Ultrapeer: true".
  */
-public class UltrapeerHeaders extends DefaultHeaders 
-{
-    
+public class UltrapeerHeaders extends DefaultHeaders {
+
     // We currently support version 0.1 of probes
 	// If probes become a part of dynamic querying, we won't need a separate header for it anymore
     public final static String PROBE_VERSION = "0.1";

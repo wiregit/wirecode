@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.util;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella.util;
 
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.io;
 
 // Edited for the Learning branch
+
+package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,6 +18,11 @@ import com.limegroup.gnutella.io.WriteObserver;
 /**
  * A Writer that stores data within a buffer and writes it out after some delay,
  * or if the buffer fills up.
+ * 
+ * 
+ * Extends and Implements
+ * ChannelWriter:        This object has a sink channel it writes to, setWriteChannel() and getWriteChannel().
+ * InterestWriteChannel: The object that gives us data can tell us it has some, interest().
  */
 public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel {
 

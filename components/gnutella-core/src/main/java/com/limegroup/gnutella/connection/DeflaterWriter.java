@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.connection;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.connection;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
@@ -28,6 +29,14 @@ import com.limegroup.gnutella.io.WriteObserver;
  * The observer is the source, it's the channel that gives us data.
  * When we want some data, we call observer.handleWrite().
  * It then calls our write method, where we copy the data from the buffer it gave us into our incoming buffer.
+ * 
+ * The object that writes to this one calls interest(this, true) to get us to link back to them.
+ * With this link established, this object can ask the source to write to us.
+ * 
+ * Extends and Implements
+ * ChannelWriter:        This object has a sink channel it writes to, setWriteChannel() and getWriteChannel().
+ * InterestWriteChannel: The object that gives us data can tell us it has some, interest().
+ * WriteObserver:        NIO can tell this object to get data and write now, handleWrite().
  */
 public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
 
@@ -93,6 +102,8 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     /**
      * You may have made a DeflaterWriter without giving the constructor a channel to write to.
      * If so, you have to call setWriteChannel on it to give it the channel later.
+     * 
+     * 
      * 
      * @param channel The channel this DeflaterWriter will send compressed data into, the sink
      */

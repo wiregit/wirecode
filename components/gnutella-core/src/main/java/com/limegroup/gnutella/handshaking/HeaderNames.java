@@ -1,6 +1,7 @@
-package com.limegroup.gnutella.handshaking;
 
 // Commented for the Learning branch
+
+package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
