@@ -19,6 +19,10 @@ public final class SearchSettings extends LimeProps {
         '{', '}',
     };
 
+    public static final int DISPLAY_JUNK_IN_PLACE = 0;
+    public static final int MOVE_JUNK_TO_BOTTOM = 1;
+    public static final int HIDE_JUNK = 2;
+    
 	/**
 	 * Setting for whether or not GUESS searching is enabled.
 	 */
@@ -83,10 +87,18 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createBooleanSetting("ENABLE_SPAM_FILTER", true);
 
     /**
-     * Whether or not spam is hidden
+     * The display mode for junk search results
      */    
-    public static final BooleanSetting HIDE_SPAM =
-        FACTORY.createBooleanSetting("HIDE_SPAM", true);
+    public static final IntSetting DISPLAY_JUNK_MODE =
+        FACTORY.createIntSetting("DISPLAY_JUNK_MODE", MOVE_JUNK_TO_BOTTOM);
+    
+    public static boolean moveJunkToBottom() {
+        return ENABLE_SPAM_FILTER.getValue() && DISPLAY_JUNK_MODE.getValue() == MOVE_JUNK_TO_BOTTOM;
+    }
+    
+    public static boolean hideJunk() {
+        return ENABLE_SPAM_FILTER.getValue() && DISPLAY_JUNK_MODE.getValue() == HIDE_JUNK;
+    }
     
     /**
 	 * Set how sensitive the spamfilter should be
