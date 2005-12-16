@@ -67,11 +67,13 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * use those anymore.
  */
 public class HostCatcher {
+
+    //done
     
-    /**
-     * Log for logging this class.
-     */
+    /** A log we can record lines of text in to see how the program acts when it's running. */
     private static final Log LOG = LogFactory.getLog(HostCatcher.class);
+
+    //do
     
     /**
      * Size of the queue for hosts returned from the GWebCaches.
@@ -81,7 +83,7 @@ public class HostCatcher {
     /**
      * The number of ultrapeer pongs to store.
      */
-    static final int GOOD_SIZE=1000;
+    static final int GOOD_SIZE = 1000;
     
     /**
      * The number of normal pongs to store.
@@ -143,12 +145,23 @@ public class HostCatcher {
      * <tt>Set</tt> of hosts advertising free leaf connection slots.
      */
     private final Set FREE_LEAF_SLOTS_SET = new HashSet();
-    
+
+    //done
+
     /**
-     * map of locale (string) to sets (of endpoints).
+     * LOCALE_SET_MAP is a data structure that organizes ExtendedEndpoint objects by their language preference.
+     * 
+     * LOCALE_SET_MAP is a HashMap.
+     * The keys will be language codes, like "en" for English.
+     * The values will be HashSet objects.
+     * 
+     * Each HashSet object will hold up to 100 ExtendedEndpoints.
+     * The ExtendedEndpoints hold address information about remote computers with that language preference.
      */
-    private final Map LOCALE_SET_MAP =  new HashMap();
-    
+    private final Map LOCALE_SET_MAP = new HashMap();
+
+    //do
+
     /**
      * number of endpoints to keep in the locale set
      */
@@ -165,12 +178,11 @@ public class HostCatcher {
      * INVARIANT: permanentHosts contains no duplicates and contains exactly
      *  the same elements and permanentHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private FixedsizePriorityQueue /* of ExtendedEndpoint */ permanentHosts=
-        new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
-                                   PERMANENT_SIZE);
-    private Set /* of ExtendedEndpoint */ permanentHostsSet=new HashSet();
 
-    
+    private FixedsizePriorityQueue /* of ExtendedEndpoint */ permanentHosts = new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(), PERMANENT_SIZE);
+
+    private Set /* of ExtendedEndpoint */ permanentHostsSet = new HashSet();
+
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache = 
         BootstrapServerManager.instance();
@@ -393,36 +405,56 @@ public class HostCatcher {
      * testability.
      *
      * @modifies this
-     * @effects read hosts from the given file.  
+     * @effects read hosts from the given file.
+     * 
+     *  
+     * @param hostFile A File object holding a path like "C:\Documents and Settings\kfaaborg\.limewire\gnutella.net"
+     * 
+     * @throws FileNotFoundException
+     * @throws IOException
      */
-    synchronized void read(File hostFile) throws FileNotFoundException, 
-												 IOException {
-        LOG.trace("entered HostCatcher.read(File)");
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new FileReader(hostFile));
-            while (true) {
-                String line=in.readLine();
-                if(LOG.isTraceEnabled())
-                    LOG.trace("read line: " + line);
+    synchronized void read(File hostFile) throws FileNotFoundException, IOException {
 
-                if (line==null)
-                    break;
-                    
-                //If endpoint a special GWebCache endpoint?  If so, add it to
-                //gWebCache but not this.
+        // Record that we're going to start reading the gnutella.net file in the debugging log
+        LOG.trace("entered HostCatcher.read(File)");
+
+        BufferedReader in = null;
+        
+        try {
+
+            // Make a new Java FileReader and BufferReader objects that will open the file at the path and read its contents
+            in = new BufferedReader(new FileReader(hostFile));
+
+            // Loop reading lines of text from the file
+            while (true) {
+
+                // Read the next line from the file
+                String line = in.readLine(); // The lines are ended with just "\n", and readLine() can deal with that
+                if (LOG.isTraceEnabled()) LOG.trace("read line: " + line); // Record it in the debugging log
+                if (line == null) break; // The last line was the last one in the file, we're done
+
                 try {
+
+                    // See if the BootstrapServerManager named gWebCache will accept this line as being about a GWebCache
                     gWebCache.addBootstrapServer(new BootstrapServer(line));
+
+                    // The gWebCache object accepted it, go to the start of the loop to read the next line
                     continue;
-                } catch (ParseException ignore) { }
-    
+
+                // The gWebCache object threw a ParseException because line isn't about a GWebCache, ignore it and keep going
+                } catch (ParseException ignore) {}
+
                 //Is it a normal endpoint?
                 try {
+
                     add(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
+
                 } catch (ParseException pe) {
+
                     continue;
                 }
             }
+
         } finally {
             gWebCache.bootstrapServersAdded();
             udpHostCache.hostCachesAdded();
@@ -450,9 +482,11 @@ public class HostCatcher {
      *  GWebCache entries are also included in this file.
      */
     synchronized void write(File hostFile) throws IOException {
+        
         repOk();
         
-        if(dirty || gWebCache.isDirty() || udpHostCache.isWriteDirty()) {
+        if (dirty || gWebCache.isDirty() || udpHostCache.isWriteDirty()) {
+            
             FileWriter out = new FileWriter(hostFile);
             
             //Write servers from GWebCache to output.
@@ -465,9 +499,11 @@ public class HostCatcher {
             //allows read() to put them into queue in the right order without any
             //difficulty.
             for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
+                
                 ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
                 e.write(out);
             }
+            
             out.close();
         }
     }
@@ -564,15 +600,24 @@ public class HostCatcher {
         } else
             return add(endpoint, NORMAL_PRIORITY);
     }
-    
+
+    //done
+
     /**
-     * Adds an endpoint to the udp host cache, returning true
-     * if it succesfully added.
+     * Gives an ExtendedEndpoint to the UDPHostCache object.
+     * Calls udpHostCache.add(host).
+     * 
+     * @param host An ExtendedEndpoint we made from a line from gnutella.net that describes the IP address and port number of a UDP host cache
+     * @return     True if it added it, false if it already had it
      */
     private boolean addUDPHostCache(ExtendedEndpoint host) {
+
+        // Have the UDPHostCache object take this one
         return udpHostCache.add(host);
     }
-    
+
+    //do
+
     /**
      * Utility method for adding the specified host to the specified 
      * <tt>Set</tt>, fixing the size of the set at the pre-defined limit for
@@ -593,25 +638,58 @@ public class HostCatcher {
         addPermanent(host);
         notify();
     }
+    
+    //done
 
     /**
-     * add the endpoint to the map which matches locales to a set of 
-     * endpoints
+     * Add the given ExtendedEndpoint to the LOCALE_SET_MAP data structure, which organizes the endpoints by their language of choice.
+     * 
+     * @param endpoint The ExtendedEndpoint to add to the LOCALE_SET_MAP data structure
      */
     private synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
+
+        // Get the remote computer's language choice, like "en" for English
         String loc = endpoint.getClientLocale();
-        if(LOCALE_SET_MAP.containsKey(loc)) { //if set exists for ths locale
-            Set s = (Set)LOCALE_SET_MAP.get(loc);
-            if(s.add(endpoint) && s.size() > LOCALE_SET_SIZE)
-                s.remove(s.iterator().next());
-        }
-        else { //otherwise create new set and add it to the map
+
+        // If the LOCALE_SET_MAP has an entry for this language
+        if (LOCALE_SET_MAP.containsKey(loc)) { //if set exists for ths locale
+
+            // Get the value stored for the language
+            Set s = (Set)LOCALE_SET_MAP.get(loc); // LOCALE_SET_MAP is a HashMap of HashSet objects, and s is the HashSet for the given language
+
+            // Add the given ExtendedEndpoint to the HashSet for computers with that language preference
+            if (s.add(endpoint) // If it was unique and added, returns true, keep going
+
+                // If we just added the 101st ExtendedEndpoint of this language
+                && s.size() > LOCALE_SET_SIZE)
+
+                    // Remove one ExtendedEndpoint from the HashSet
+                    s.remove(s.iterator().next()); // Removes the first one
+
+            /*
+             * s.add(endpoint) adds the ExtendedEndpoint.
+             * If it's the 101st, s.remove(s.iterator().next()) removes one.
+             * 
+             * remove() removes the first one, but add() doesn't add any particular location in the list.
+             * We can make the following assumptions:
+             * add() is placing new ExtendedEndpoints in seemingly random locations in the HashMap.
+             * remove() doesn't remove the one that add() just added.
+             */
+
+        // LOCALE_SET_MAP doesn't have an entry for this language yet
+        } else {
+
+            // Make a new HashSet and add the given ExtendedEndpoint to it
             Set s = new HashSet();
             s.add(endpoint);
+
+            // Store the new HashSet for that language in LOCALE_SET_MAP under the language String like "en"
             LOCALE_SET_MAP.put(loc, s);
         }
     }
     
+    //do
+
     /**
      * Adds a collection of addresses to this.
      */
@@ -633,29 +711,23 @@ public class HostCatcher {
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
-        if(!isValidHost(e))
-            return false;
-            
-        
-        if (forceHighPriority)
-            return add(e, GOOD_PRIORITY);
-        else
-            return add(e, NORMAL_PRIORITY);
-    }
 
-    
+        if (!isValidHost(e)) return false;
+
+        if (forceHighPriority) return add(e, GOOD_PRIORITY);
+        else                   return add(e, NORMAL_PRIORITY);
+    }
 
     /**
      * Adds an endpoint.  Use this method if the locale of endpoint is known
      * (used by ConnectionManager.disconnect())
      */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
-        if(!isValidHost(e))
-            return false;        
-        
+
+        if (!isValidHost(e)) return false;
+
         //need ExtendedEndpoint for the locale
-        if (forceHighPriority)
-            return add(new ExtendedEndpoint(e.getAddress(), 
+        if (forceHighPriority) return add(new ExtendedEndpoint(e.getAddress(), 
                                             e.getPort(),
                                             locale),
                        GOOD_PRIORITY);
@@ -698,35 +770,52 @@ public class HostCatcher {
      * @param uptime the host's uptime (or our best guess)
      *
      * @return true iff e was actually added 
+     * 
+     * 
+     * @param e        An ExtendedEndpoint object
+     * @param priority GOOD_PRIORITY if this is the IP address and port number of an ultrapeer, NORMAL_PRIORITY if it's a leaf
+     * 
+     * @return         True if we added it, false if we didn't because we already have it.
      */
     private boolean add(ExtendedEndpoint e, int priority) {
+
+        // Does nothing unless in testing mode
         repOk();
-        
-        if(e.isUDPHostCache())
-            return addUDPHostCache(e);
-        
+
+        // If the line from gnutella.net described a UDP host cache, have the udpHostCache take it
+        if (e.isUDPHostCache()) return addUDPHostCache(e); // The udpHostCache.add(e) returns true if it didn't have it and added it
+
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
         addPermanent(e);
 
         boolean ret = false;
-        synchronized(this) {
-            if (! (ENDPOINT_SET.contains(e))) {
-                ret=true;
+
+        synchronized (this) {
+
+            if (!(ENDPOINT_SET.contains(e))) {
+
+                ret = true;
+
                 //Add to temporary list. Adding e may eject an older point from
                 //queue, so we have to cleanup the set to maintain
                 //rep. invariant.
                 ENDPOINT_SET.add(e);
-                Object ejected=ENDPOINT_QUEUE.insert(e, priority);
-                if (ejected!=null) {
+
+                Object ejected = ENDPOINT_QUEUE.insert(e, priority);
+
+                if (ejected != null) {
+
                     ENDPOINT_SET.remove(ejected);
                 }         
-                
+
                 this.notify();
             }
         }
 
+        // Does nothing unless in testing mode
         repOk();
+
         return ret;
     }
 
@@ -736,28 +825,35 @@ public class HostCatcher {
      * its Uptime header.  If e is already in the permanent list, it is not
      * re-added, though its key may be adjusted.
      *
-     * @param e the endpoint to add
-     * @return true iff e was actually added 
+     * @param e The ExtendedEndpoint to add to what (do)
+     * @return  True if we added e, false if we didn't because why (do)
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
-        if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
-            return false;
-        if (permanentHostsSet.contains(e))
-            //TODO: we could adjust the key
-            return false;
 
-        addToLocaleMap(e); //add e to locale mapping 
-        
-        Object removed=permanentHosts.insert(e);
+        if (NetworkUtils.isPrivateAddress(e.getInetAddress())) return false;
+
+        //TODO: we could adjust the key
+        if (permanentHostsSet.contains(e)) return false;
+
+        // Add e to the HashSet in LOCALE_SET_MAP for e's language preference
+        addToLocaleMap(e);
+
+        Object removed = permanentHosts.insert(e);
+
         if (removed!=e) {
+            
             //Was actually added...
             permanentHostsSet.add(e);
-            if (removed!=null)
-                //...and something else was removed.
-                permanentHostsSet.remove(removed);
+            
+            //...and something else was removed.
+            if (removed!=null) permanentHostsSet.remove(removed);
+            
             dirty = true;
+            
             return true;
+            
         } else {
+            
             //Uptime not good enough to add.  (Note that this is 
             //really just an optimization of the above case.)
             return false;
@@ -1114,17 +1210,24 @@ public class HostCatcher {
                +", permanent:"+permanentHosts.toString()+"]";
     }
 
-    /** Enable very slow rep checking?  Package access for use by
-     *  HostCatcherTest. */
-    static boolean DEBUG=false;
+    /**
+     * False, disable very slow rep checking. (do)
+     * HostCatcherTest sets this to true for testing purposes.
+     */
+    static boolean DEBUG = false;
 
-    
-    /** Checks invariants. Very slow; method body should be enabled for testing
-     *  purposes only. */
+    /**
+     * Does nothing unless in testing mode.
+     * 
+     * Checks invariants.
+     * Very slow; method body should be enabled for testing purposes only.
+     */
     protected void repOk() {
-        if (!DEBUG)
-            return;
 
+        // Don't do this, just return now
+        if (!DEBUG) return;
+
+        // Not used unless in testing mode
         synchronized(this) {
             //Check ENDPOINT_SET == ENDPOINT_QUEUE
             outer:
@@ -1142,7 +1245,6 @@ public class HostCatcher {
                 Assert.that(e instanceof ExtendedEndpoint);
                 Assert.that(ENDPOINT_SET.contains(e));
             }
-        
             //Check permanentHosts === permanentHostsSet
             for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
                 Object o=iter.next();
@@ -1163,19 +1265,36 @@ public class HostCatcher {
      * Reads the gnutella.net file.
      */
     private void readHostsFile() {
+        
         LOG.trace("Reading Hosts File");
+        
         // Just gnutella.net
         try {
+            
             read(getHostsFile());
+            
         } catch (IOException e) {
             LOG.debug(getHostsFile(), e);
         }
     }
 
+    //done
+
+    /**
+     * The path of the gnutella.net file
+     * 
+     * @return A File object with a path like "C:\Documents and Settings\kfaaborg\.limewire\gnutella.net"
+     */
     private File getHostsFile() {
-        return new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
+
+        // Return a File object with the path to our gnutella.net file
+        return new File(                      // Make a new Java File object to hold the path to the gnutella.net file
+            CommonUtils.getUserSettingsDir(), // On Windows, returns a File object with a path like "C:\Documents and Settings\kfaaborg\.limewire"
+            "gnutella.net");                  // The file name is "gnutella.net"
     }
-    
+
+    //do
+
     /**
      * Recovers any hosts that we have put in the set of hosts "pending" 
      * removal from our hosts list.

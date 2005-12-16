@@ -103,8 +103,6 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
      * You may have made a DeflaterWriter without giving the constructor a channel to write to.
      * If so, you have to call setWriteChannel on it to give it the channel later.
      * 
-     * 
-     * 
      * @param channel The channel this DeflaterWriter will send compressed data into, the sink
      */
     public void setWriteChannel(InterestWriteChannel channel) {

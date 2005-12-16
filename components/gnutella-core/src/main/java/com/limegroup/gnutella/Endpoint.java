@@ -419,6 +419,12 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
      * Return hostname.hashCode(), the hash code of the IP address String text.
      * This is good enough, since one IP address rarely has multiple different port numbers.
      * 
+     * The HostCatcher class keeps a HashSet of ExtendedEndpoint objects.
+     * A HashSet is like a List that makes sure all its elements are unique.
+     * To determine if a new ExtendedEndpoint is already in the HashSet, the HashSet will call e.hashCode() on the new one.
+     * That call will go here.
+     * The hash code we return is an int, the result of calling hashCode() on the hostname String like "64.61.25.171".
+     * 
      * @return A hash code value for this object
      */
     public int hashCode() {
