@@ -1549,6 +1549,13 @@ public class QueryRequest extends Message implements Serializable{
     public boolean isFeatureQuery() {
         return _featureSelector > 0;
     }
+    
+    /**
+     * @return whether this is a browse host query
+     */
+    public boolean isBrowseHostQuery() {
+        return FileManager.INDEXING_QUERY.equals(getQuery());
+    }
 
     /**
      * Returns 0 if this is not a "feature" query, else it returns the selector

@@ -75,12 +75,14 @@ public final class SearchResultHandler {
     /**
      * Adds the Query to the list of queries kept track of.  You should do this
      * EVERY TIME you start a query so we can leaf guide it when possible.
+     * Also adds the query to the Spam Manager to adjust percentages.
      *
      * @param qr The query that has been started.  We really just acces the guid.
      */ 
     public void addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
-		SpamManager.instance().startedQuery(qr);
+        if (!qr.isBrowseHostQuery())
+            SpamManager.instance().startedQuery(qr);
         GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
     }
@@ -236,7 +238,7 @@ public final class SearchResultHandler {
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
 			
-			if (! SpamManager.instance().isSpam(rfd))
+			if (qr.isBrowseHostReply() || !SpamManager.instance().isSpam(rfd))
 				numGoodSentToFrontEnd++;
         } //end of response loop
 
