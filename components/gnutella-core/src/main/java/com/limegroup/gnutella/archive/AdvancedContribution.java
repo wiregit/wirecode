@@ -66,7 +66,7 @@ class AdvancedContribution extends ArchiveContribution {
 	static void checkDescription( String description ) 
 	throws DescriptionTooShortException {
 		if (!MIN_WORDS_PATTERN.matcher( description ).matches()) {
-			throw new DescriptionTooShortException( DESCRIPTION_MIN_WORDS );
+			throw new DescriptionTooShortException( description, DESCRIPTION_MIN_WORDS );
 		}
 	}
 	
