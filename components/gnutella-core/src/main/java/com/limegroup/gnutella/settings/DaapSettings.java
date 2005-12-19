@@ -85,10 +85,10 @@ public class DaapSettings extends LimeProps {
 	    FACTORY.createBooleanSetting("DAAP_REQUIRES_PASSWORD", false);
     
     /**
-     * The password in clear text. A security hazard?
+     * The DAAP password
      */
     public static PasswordSetting DAAP_PASSWORD =
-	    FACTORY.createPasswordSetting("DAAP_PASSWORD", "");
+	    FACTORY.createPasswordSettingMD5("DAAP_PASSWORD", "");
     
     /**
      * Use either BIO or NIO (default) for DAAP

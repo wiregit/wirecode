@@ -647,22 +647,13 @@ public final class SettingsFactory {
      * @param key the key for the setting
      * @param defaultValue the default value for the setting
      */
-    public synchronized PasswordSetting createPasswordSetting(
+    public synchronized PasswordSetting createPasswordSettingMD5(
             String key, String defaultValue) {
         PasswordSetting result = 
-            new PasswordSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+            new PasswordSetting(DEFAULT_PROPS, PROPS, PasswordSetting.MD5, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
-    
-    // Doesn't make sense. :)
-    /*public synchronized PasswordSetting createSettablePasswordSetting(String key,
-            String defaultValue, String simppKey) {
-        PasswordSetting result =  new PasswordSetting(
-                            DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result, simppKey);
-        return result;
-    }*/
     
     private synchronized void handleSettingInternal(Setting setting, 
                                                            String simppKey) {
