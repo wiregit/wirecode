@@ -21,18 +21,6 @@ public class SpamManager {
 	public static final float MAX_THRESHOLD = 0.995f;
 
 	/**
-	 * If the spam rating of a file is greater than this, we will remember the
-	 * rating for all Tokens associated with it
-	 */
-	public static final float SPAM_THRESHOLD = 0.7f;
-
-	/**
-	 * If a rating is smaller than this, we will remember it for all tokens
-	 * associated with it.
-	 */
-	public static final float GOOD_THRESHOLD = 0.3f;
-
-	/**
 	 * inverse rating (1 - probability) for an RFD without SHA1 urn. 
 	 */
 	private static final float NO_SHA1_URN_RATING = 0.5f;

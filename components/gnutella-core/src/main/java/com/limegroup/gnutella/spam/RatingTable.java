@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 
@@ -108,9 +109,11 @@ public class RatingTable {
 
 		rating = 1 - rating;
 
-		if (rating > SpamManager.SPAM_THRESHOLD && rating < SpamManager.MAX_THRESHOLD)
+        float bad = SearchSettings.FILTER_SPAM_RESULTS.getValue();
+        float good = bad > 0.5f ? 1f - bad : bad; 
+		if (rating > bad && rating < SpamManager.MAX_THRESHOLD)
 			markInternal(tokens, Token.RATING_SPAM);
-		else if (rating <= SpamManager.GOOD_THRESHOLD)
+		else if (rating <= good)
 			markInternal(tokens, Token.RATING_GOOD);
 
 		return rating;
