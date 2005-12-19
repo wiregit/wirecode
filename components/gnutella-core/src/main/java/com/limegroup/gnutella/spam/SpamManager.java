@@ -30,7 +30,7 @@ public class SpamManager {
 	 * If a rating is smaller than this, we will remember it for all tokens
 	 * associated with it.
 	 */
-	public static final float GOOD_THRESHOLD = 0.15f;
+	public static final float GOOD_THRESHOLD = 0.3f;
 
 	/**
 	 * inverse rating (1 - probability) for an RFD without SHA1 urn. 
