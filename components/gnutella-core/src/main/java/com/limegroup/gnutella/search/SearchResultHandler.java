@@ -62,17 +62,6 @@ public final class SearchResultHandler {
      ----------------------------------------------------*/
 
     /**
-     * Adds the query reply, immediately processing it and passing
-     * it off to the GUI.
-	 *
-	 * @param qr the <tt>QueryReply</tt> to add
-     */
-    public void handleQueryReply(QueryReply qr) {
-        handleReply(qr);
-    }
-
-
-    /**
      * Adds the Query to the list of queries kept track of.  You should do this
      * EVERY TIME you start a query so we can leaf guide it when possible.
      * Also adds the query to the Spam Manager to adjust percentages.
@@ -81,7 +70,7 @@ public final class SearchResultHandler {
      */ 
     public void addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
-        if (!qr.isBrowseHostQuery())
+        if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
             SpamManager.instance().startedQuery(qr);
         GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
@@ -172,13 +161,13 @@ public final class SearchResultHandler {
 	 * @return <tt>true</tt> if the GUI will (probably) display the results,
 	 *  otherwise <tt>false</tt> 
      */
-    private boolean handleReply(final QueryReply qr) {
+    public void handleQueryReply(final QueryReply qr) {
         HostData data;
         try {
             data = qr.getHostData();
         } catch(BadPacketException bpe) {
             LOG.debug("bad packet reading qr", bpe);
-            return false;
+            return;
         }
 
         // always handle reply to multicast queries.
@@ -188,11 +177,11 @@ public final class SearchResultHandler {
             // displayed
             if(data.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
                 LOG.debug("Ignoring because low quality");
-                return false;
+                return;
             }
             if(data.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
                 LOG.debug("Ignoring because low speed");
-                return false;
+                return;
             }
             // if the other side is firewalled AND
             // we're not on close IPs AND
@@ -206,7 +195,7 @@ public final class SearchResultHandler {
                  qr.getSupportsFWTransfer())
                )  {
                LOG.debug("Ignoring from firewall funkiness");
-               return false;
+               return;
             }
         }
 
@@ -215,9 +204,10 @@ public final class SearchResultHandler {
             results = qr.getResultsAsList();
         } catch (BadPacketException e) {
             LOG.debug("Error gettig results", e);
-            return false;
+            return;
         }
 
+        boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
         for(Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
@@ -238,15 +228,13 @@ public final class SearchResultHandler {
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
 			
-			if (qr.isBrowseHostReply() || !SpamManager.instance().isSpam(rfd))
+			if (skipSpam || !SpamManager.instance().isSpam(rfd))
 				numGoodSentToFrontEnd++;
         } //end of response loop
 
         // ok - some responses may have got through to the GUI, we should account
         // for them....
         accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd);
-
-        return numGoodSentToFrontEnd > 0;
     }
 
 
@@ -320,6 +308,11 @@ public final class SearchResultHandler {
             }
         }
         return null;
+    }
+    
+    private boolean isWhatIsNew(QueryReply reply) {
+        GuidCount gc = retrieveGuidCount(new GUID(reply.getGUID()));
+        return gc != null && gc.getQueryRequest().isWhatIsNewRequest();
     }
     
     /**
