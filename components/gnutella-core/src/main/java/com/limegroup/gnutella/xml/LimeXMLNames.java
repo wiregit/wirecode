@@ -28,6 +28,7 @@ public class LimeXMLNames {
     public static final String APPLICATION = "applications__application";
     public static final String APPLICATION_NAME = "applications__application__name__";
     public static final String APPLICATION_PUBLISHER = "applications__application__publisher__";
+    public static final String APPLICATION_PLATFORM = "applications__application__platform__";
     public static final String APPLICATION_LICENSETYPE = "applications__application__licensetype__";
     public static final String APPLICATION_LICENSE = "applications__application__license";
     
