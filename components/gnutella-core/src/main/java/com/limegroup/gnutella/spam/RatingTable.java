@@ -280,27 +280,28 @@ public class RatingTable {
 	/**
 	 * removes lowest importance elements from _tokenSet until there
      * are at most MAX_SIZE entries.
+     * 
+     * LOCKING: MUST hold monitor (synchronize) of "this" when calling 
+     * this method.
 	 */
 	private void pruneEntries() {
 
 		if (LOG.isDebugEnabled())
 			LOG.debug("pruning unimportant entries from RatingTable");
 
-        if (_tokenMap.size() <= MAX_SIZE) {
+        int tokensToRemove = _tokenMap.size() - MAX_SIZE;
+        if (tokensToRemove <= 0) {
             return;
         }
         
-        synchronized (_tokenMap) {
-            // Make a set of sorted tokens
-            TreeSet tokenSet = new TreeSet(_tokenMap.values());
-            HashMap temporaryMap = new HashMap();
-            Iterator it = tokenSet.iterator();
-            int neededTokens = MAX_SIZE;
-            while (neededTokens > 0 && it.hasNext()) {
-                Token token = (Token) it.next();
-                _tokenMap.put(token,token);
-                --neededTokens;
-            }
+        // Make a set of sorted tokens, low importance first
+        TreeSet tokenSet = new TreeSet(_tokenMap.values());
+        Iterator it = tokenSet.iterator();
+        while (tokensToRemove > 0) {
+            // If an exception is thrown here, there is a
+            // race condition
+            _tokenMap.remove(it.next());
+            --tokensToRemove;
         }
 	}
     

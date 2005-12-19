@@ -19,7 +19,10 @@ public abstract class AbstractToken implements Token {
 	 */
 	public void incrementAge() {
 		if (_age < Byte.MAX_VALUE) {
-			++_age;
+            synchronized (this) {
+			    ++_age;
+            }
+            // Mark _importance to be lazily calculated when needed
             _importance = Double.NaN;
         }
 	}
@@ -28,13 +31,16 @@ public abstract class AbstractToken implements Token {
 	 * implements interface <tt>Token</tt>
 	 */
 	public double getImportance() {
-        if (_importance == Double.NaN) {
+        // Avoid race conditions by using a local variable
+        double importance = _importance;
+        if (importance == Double.NaN) {
             // This implements -1 * Gregorio's original misnamed "age()" method.
             // Store bad ratings longer than good ratings since our filter relies
             // mostly on bad ratings.
-            _importance = (_age * -100.0 * (0.1 + Math.pow(1.0 - getRating(), 0.1)));
+            importance = (_age * -100.0 * (0.1 + Math.pow(1.0 - getRating(), 0.1)));
+            _importance = importance;
         }
-        return _importance;
+        return importance;
 	}
     
     /**
@@ -47,11 +53,11 @@ public abstract class AbstractToken implements Token {
         
         // First, sort by importance
         double importanceDelta = this.getImportance() - t.getImportance();
-        // Sort high importance first, so reverse the return value
+        // Sort low importance first
         if (importanceDelta < 0.0)
-            return 1;
-        if (importanceDelta > 0.0)
             return -1;
+        if (importanceDelta > 0.0)
+            return 1;
         
         // Then, sort by type
         int typeDelta = this.getType() - t.getType();

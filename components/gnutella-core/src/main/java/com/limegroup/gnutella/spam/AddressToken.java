@@ -96,6 +96,16 @@ public class AddressToken extends AbstractToken {
 		return ((float) _bad )/(_good + _bad + 1);
 	}
 
+    /**
+     * implements interface <tt>Token</tt>
+     */
+    public double getImportance() {
+        // Throw out AddressTokens first, since they
+        // can mostly be regenerated from the list of
+        // blocked IP addresses.
+        return Double.NEGATIVE_INFINITY;
+    }
+    
 	/**
 	 * implements interface <tt>Token</tt>
 	 */

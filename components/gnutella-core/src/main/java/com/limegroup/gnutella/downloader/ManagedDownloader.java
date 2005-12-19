@@ -2111,7 +2111,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Scans the file for corruption, returning the hash of the file on disk.
      */
-    private URN scanForCorruption() {
+    private URN scanForCorruption() throws InterruptedException {
         // if we already were told to stop, then stop.
         if (corruptState==CORRUPT_STOP_STATE)
             return null;
@@ -2124,7 +2124,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             fileHash = URN.createSHA1Urn(incompleteFile);
         }
         catch(IOException ignored) {}
-        catch(InterruptedException ignored) {}
         
         // If we have no hash, we can't check at all.
         if(downloadSHA1 == null)
