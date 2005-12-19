@@ -106,12 +106,6 @@ public final class SearchSettings extends LimeProps {
     public static final FloatSetting FILTER_SPAM_RESULTS =
         FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 0.7f);
     
-	/**
-	 * Whether or not to filter spam results
-	 */    
-    public static final BooleanSetting MARK_SPAM_RESULTS =
-        FACTORY.createBooleanSetting("MARK_SPAM_RESULTS", true);
-    
     /**
      * The minimum spam rating at which we stop counting results for 
      * dynamic querying.  Meant to prevent very strict user settings
