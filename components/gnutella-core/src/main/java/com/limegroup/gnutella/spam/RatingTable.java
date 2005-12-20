@@ -109,11 +109,10 @@ public class RatingTable {
 
 		rating = 1 - rating;
 
-        float bad = SearchSettings.FILTER_SPAM_RESULTS.getValue();
-        float good = bad > 0.5f ? 1f - bad : bad; 
-		if (rating > bad && rating < SpamManager.MAX_THRESHOLD)
+        	float bad = SearchSettings.FILTER_SPAM_RESULTS.getValue();
+		if (rating >= bad && rating <= SpamManager.MAX_THRESHOLD)
 			markInternal(tokens, Token.RATING_SPAM);
-		else if (rating <= good)
+		else if (rating <= 1f - bad)
 			markInternal(tokens, Token.RATING_GOOD);
 
 		return rating;
