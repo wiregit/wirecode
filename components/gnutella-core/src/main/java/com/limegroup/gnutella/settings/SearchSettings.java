@@ -114,6 +114,14 @@ public final class SearchSettings extends LimeProps {
     public static final FloatSetting QUERY_SPAM_CUTOFF =
         FACTORY.createSettableFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
                 "SpamManager.displayTreshold",1.0f,0.1f);
+
+    /**
+     * The percentage of normal results that spam results bring to
+     * the dynamic querying mechanism
+     */
+    public static final FloatSetting SPAM_RESULT_RATIO =
+	FACTORY.createSettableFloatSetting("SPAM_RESULT_RATIO", 0.3f,
+		"SpamManager.resultRatio",1.0f,0.2f);
     
 	/**
      * Do not issue query keys more than this often

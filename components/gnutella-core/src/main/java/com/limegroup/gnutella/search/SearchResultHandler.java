@@ -209,6 +209,7 @@ public final class SearchResultHandler {
 
         boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
+	double numBadSentToFrontEnd = 0;
         for(Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
             
@@ -230,11 +231,15 @@ public final class SearchResultHandler {
 			
 			if (skipSpam || !SpamManager.instance().isSpam(rfd))
 				numGoodSentToFrontEnd++;
+			else 
+			    numBadSentToFrontEnd++;
         } //end of response loop
-
+	numBadSentToFrontEnd = Math.ceil(numBadSentToFrontEnd * 
+	    SearchSettings.SPAM_RESULT_RATIO.getValue());
         // ok - some responses may have got through to the GUI, we should account
         // for them....
-        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd);
+        accountAndUpdateDynamicQueriers(qr, 
+	    numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
     }
 
 
