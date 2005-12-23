@@ -866,11 +866,7 @@ public class RouterService {
             
             downloader.writeSnapshot();
             
-            fileManager.stop();
-			
-            UrnCache.instance().persistCache();
-
-            CreationTimeCache.instance().persistCache();
+            fileManager.stop(); // Saves UrnCache and CreationTimeCache
 
             TigerTreeCache.instance().persistCache();
 
