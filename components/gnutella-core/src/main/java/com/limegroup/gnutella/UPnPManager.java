@@ -311,6 +311,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		// got mapped to.  Since we have to have the same port for UDP and tcp,
 		// we can't afford to change the port here.  So if mapping to this port on tcp
 		// fails, we give up and clean up the udp mapping.
+		// Note: Phillipe reported that on some routers adding an UDP mapping will also
+		// create a TCP mapping.  So we no longer delete the UDP mapping if the TCP one 
+		// fails.
 		Mapping tcp = new Mapping("",
 				port,
 				localAddress,
@@ -318,10 +321,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 				"TCP",
 				TCP_PREFIX + getGUIDSuffix());
 		if (!addMapping(tcp)) {
-			LOG.debug(" couldn't map tcp to whatever udp was mapped. cleaning up...");
-			port = 0;
+			LOG.debug(" couldn't map tcp to whatever udp was mapped. leaving udp around...");
 			tcp = null;
-			udp = null;
 		}
 		
 		// save a ref to the mappings
