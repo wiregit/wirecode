@@ -151,7 +151,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * @return whether we have created mappings this session
 	 */
 	public boolean mappingsExist() {
-	    return _tcp != null && _udp != null;
+	    return _tcp != null || _udp != null;
 	}
 	
 	/**
@@ -414,8 +414,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
                 Thread cleaner = new Thread("UPnP Cleaner") {
         			public void run() {
         				LOG.debug("start cleaning");
-        				removeMapping(tcp);
-        				removeMapping(udp);
+        				if (tcp != null) removeMapping(tcp);
+        				if (udp != null) removeMapping(udp);
         				LOG.debug("done cleaning");
         			}
         		};
@@ -602,10 +602,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 					// is it not the same as the mappings we created this session?
 					synchronized(DEVICE_LOCK) {
 						
-						if (_tcp != null && _udp != null &&
-								current._externalPort == _tcp._externalPort &&
-								current._internalAddress.equals(_tcp._internalAddress) &&
-								current._internalPort == _tcp._internalPort)
+						if (_udp != null &&
+								current._externalPort == _udp._externalPort &&
+								current._internalAddress.equals(_udp._internalAddress) &&
+								current._internalPort == _udp._internalPort)
 							continue;
 					}
 					
