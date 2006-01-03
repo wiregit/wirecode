@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +46,8 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.torrent.AzTorrentDownloader;
+import com.limegroup.gnutella.torrent.AzureusManager;
 import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.upelection.PromotionManager;
@@ -183,6 +186,11 @@ public class RouterService {
 	 */
     private static ActivityCallback callback;
 
+    /**
+	 * Variable for the <tt>AzureusManager</tt> instance.
+	 */
+    private static final AzureusManager azureusManager = new AzureusManager();
+    
 	/**
 	 * Variable for the <tt>MessageRouter</tt> that routes Gnutella
 	 * messages.
@@ -421,7 +429,12 @@ public class RouterService {
 			
 			LOG.trace("START loading spam data");
 			RatingTable.instance();
-			LOG.trace("START loading spam data");			
+			LOG.trace("START loading spam data");		
+			
+			LOG.trace("START AzureusManager");
+            callback.componentLoading("AZUREUS");
+            azureusManager.initialize();
+            LOG.trace("STOP AzureusManager");
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
@@ -1460,6 +1473,13 @@ public class RouterService {
             throws CantResumeException, SaveLocationException {
         return downloader.download(incompleteFile);
     }
+    
+    /**
+     * Starts a torrent download for the given torrent url.
+     */ 
+    public static void download(String torrentURL) throws MalformedURLException{
+    	new AzTorrentDownloader(torrentURL);
+    }
 
 	/**
 	 * Creates and returns a new chat to the given host and port.
@@ -1728,4 +1748,8 @@ public class RouterService {
     public static boolean canDoFWT() {
         return UDPSERVICE.canDoFWT();
     }
+
+	public static AzureusManager getAzureusManager() {
+		return azureusManager;
+	}
 }
