@@ -163,9 +163,8 @@ public class AzTorrentDownloader implements Downloader {
 		return Integer.MAX_VALUE; //TODO for now
 	}
 
-	public int getContentLength() {
-		//TODO temporary hack
-		return (int)(dlmanager.getSize());
+	public long getContentLength() {
+		return dlmanager.getSize();
 	}
 
 	public int getAmountRead() {

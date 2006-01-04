@@ -1100,7 +1100,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
-                                               downloadSHA1, getContentLength());
+                                               downloadSHA1, getLength());
         }
         
         LOG.warn("Incomplete File: " + incompleteFile);
@@ -1355,7 +1355,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         final long otherLength = other.getFileSize();
 
         synchronized (this) {
-            int ourLength = getContentLength();
+            int ourLength = getLength();
             
             if (ourLength != -1 && ourLength != otherLength) 
                 return false;
@@ -1413,7 +1413,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public synchronized void locationAdded(AlternateLocation loc) {
         Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
-        addDownload(loc.createRemoteFileDesc(getContentLength()),false);
+        addDownload(loc.createRemoteFileDesc(getLength()),false);
     }
     
     /** 
@@ -2761,9 +2761,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 * Return -1 if the file size is not known yet, i.e. is not stored in the
 	 * properties map under {@link #FILE_SIZE}.
 	 */
-    public synchronized int getContentLength() {
+    public synchronized int getLength() {
         Integer i = (Integer)propertiesMap.get(FILE_SIZE);
         return i != null ? i.intValue() : -1;
+    }
+    
+    /**
+     * Return -1 if the file size is not known yet, i.e. is not stored in the
+     * properties map under {@link #FILE_SIZE}.
+     */
+    public synchronized long getContentLength() {
+        return getLength();
     }
 
     /**

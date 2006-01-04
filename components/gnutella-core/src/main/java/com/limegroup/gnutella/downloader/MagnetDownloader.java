@@ -349,7 +349,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 	 * the filesize is known.
 	 */
 	protected void initializeIncompleteFile() throws IOException {
-		if (getContentLength() != -1) {
+		if (getLength() != -1) {
 			super.initializeIncompleteFile();
 		}
 	}
