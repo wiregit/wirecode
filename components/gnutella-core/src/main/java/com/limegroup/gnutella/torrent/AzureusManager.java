@@ -4,31 +4,22 @@ import java.util.List;
 
 import org.gudy.azureus2.core3.config.COConfigurationManager;
 import org.gudy.azureus2.core3.download.DownloadManager;
-import org.gudy.azureus2.core3.download.DownloadManagerState;
 import org.gudy.azureus2.core3.global.GlobalManager;
-import org.gudy.azureus2.core3.security.SESecurityManager;
+import org.gudy.azureus2.core3.global.GlobalManagerListener;
 import org.gudy.azureus2.core3.torrentdownloader.TorrentDownloaderFactory;
-import org.gudy.azureus2.ui.common.StartServer;
-import org.gudy.azureus2.ui.common.UIConst;
-import org.gudy.azureus2.ui.common.Main.StartSocket;
-import org.gudy.azureus2.ui.console.multiuser.UserManager;
 
 import com.aelitis.azureus.core.AzureusCore;
 import com.aelitis.azureus.core.AzureusCoreException;
 import com.aelitis.azureus.core.AzureusCoreFactory;
-import com.limegroup.gnutella.gui.FinalizeListener;
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.util.CommonUtils;
 
-public class AzureusManager implements FinalizeListener{
+public class AzureusManager {
 
 	private AzureusCore core;
-	
+    
 	public AzureusManager() {
 	}
 	
 	public void initialize() {
-		GUIMediator.addFinalizeListener(this);
 		try {
 			core = AzureusCoreFactory.create();
 			core.start();
@@ -52,14 +43,10 @@ public class AzureusManager implements FinalizeListener{
 		return core.getGlobalManager();
 	}
 	
-	
 	public void shutdown() {
 	    if ( core != null ){
 	        try{
-	            core.stop();
-	            core = null;
-                //TODO temporary hack
-                SESecurityManager.exitVM(1);
+                core.stop();
 	        }catch( AzureusCoreException e ){
 	            
 	            System.out.println( "Stop fails:" );
@@ -68,8 +55,4 @@ public class AzureusManager implements FinalizeListener{
 	        }
 	    }
 	}
-	
-	public void doFinalize() {
-	    shutdown();
-	}	
 }
