@@ -11,6 +11,7 @@ import org.gudy.azureus2.core3.torrentdownloader.TorrentDownloaderFactory;
 import com.aelitis.azureus.core.AzureusCore;
 import com.aelitis.azureus.core.AzureusCoreException;
 import com.aelitis.azureus.core.AzureusCoreFactory;
+import com.aelitis.azureus.core.AzureusCoreLifecycleListener;
 
 public class AzureusManager {
 
@@ -42,6 +43,10 @@ public class AzureusManager {
 	public GlobalManager getGlobalManager() {
 		return core.getGlobalManager();
 	}
+    
+    public void addLifeCycleListener(AzureusCoreLifecycleListener listener) {
+        core.addLifecycleListener(listener);
+    }
 	
 	public void shutdown() {
 	    if ( core != null ){

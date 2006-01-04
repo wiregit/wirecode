@@ -859,8 +859,6 @@ public class RouterService {
             
             getAcceptor().shutdown();
             
-            getAzureusManager().shutdown();
-            
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
             
