@@ -1477,8 +1477,15 @@ public class RouterService {
     /**
      * Starts a torrent download for the given torrent url.
      */ 
-    public static void download(String torrentURL) throws MalformedURLException{
+    public static void downloadTorrent(String torrentURL) throws MalformedURLException{
     	new AzTorrentDownloader(torrentURL);
+    }
+    
+    /**
+     * Starts a torrent download for the given torrent file.
+     */ 
+    public static void downloadTorrent(File torrentFile){
+        new AzTorrentDownloader(torrentFile);
     }
 
 	/**

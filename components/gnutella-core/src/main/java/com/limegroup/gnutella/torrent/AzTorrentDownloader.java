@@ -50,30 +50,30 @@ public class AzTorrentDownloader implements Downloader {
 	
 	public AzTorrentDownloader(String torrentURL) throws MalformedURLException{
 		new URL(torrentURL);
-		addRemoteTorrent(torrentURL);
+        TorrentDownloader downloader = TorrentDownloaderFactory.create(new TorrentDownloaderCallBackInterface() {
+            public void TorrentDownloaderEvent(int state, TorrentDownloader inf) {
+                if( state == TorrentDownloader.STATE_FINISHED )
+                {
+                    System.out.println("torrent file download complete. starting torrent");
+                    TorrentDownloaderManager.getInstance().remove(inf);
+                    downloadTorrent( inf.getFile().getAbsolutePath());
+                }
+                else
+                    TorrentDownloaderManager.getInstance().TorrentDownloaderEvent(state, inf);
+            }
+        }, torrentURL, null, null, true);
+        TorrentDownloaderManager.getInstance().add(downloader);
 	}
+    
+    public AzTorrentDownloader(File torrentFile){
+        downloadTorrent(torrentFile.getAbsolutePath());
+    }
 	
 	//TODO build abstract supertype and then implement AzRemoteTorrentDownloader, 
 	//AzExistingTorrentDownloader and AzLocalTorrentDownloader
 	public AzTorrentDownloader(DownloadManager manager) {
 		dlmanager = manager;
 		RouterService.getCallback().addDownload(this);
-	}
-	
-	private void addRemoteTorrent(String url) {
-		TorrentDownloader downloader = TorrentDownloaderFactory.create(new TorrentDownloaderCallBackInterface() {
-			public void TorrentDownloaderEvent(int state, TorrentDownloader inf) {
-				if( state == TorrentDownloader.STATE_FINISHED )
-				{
-					System.out.println("torrent file download complete. starting torrent");
-					TorrentDownloaderManager.getInstance().remove(inf);
-					downloadTorrent( inf.getFile().getAbsolutePath(), outputDir.getAbsolutePath() );
-				}
-				else
-					TorrentDownloaderManager.getInstance().TorrentDownloaderEvent(state, inf);
-			}
-		}, url, null, null, true);
-		TorrentDownloaderManager.getInstance().add(downloader);
 	}
 	
 	/**
@@ -83,9 +83,10 @@ public class AzTorrentDownloader implements Downloader {
 	 * @param filename
 	 * @param outputDir
 	 */
-	private void downloadTorrent( String filename, String outputDir )
+	private void downloadTorrent(String filename)
 	{
-		dlmanager = azManager.getGlobalManager().addDownloadManager(filename, outputDir);
+        String dir = outputDir.getAbsolutePath();
+		dlmanager = azManager.getGlobalManager().addDownloadManager(filename, dir);
 		dlmanager.getDownloadState().setAttribute(DownloadManagerState.AT_USER, CommonUtils.getUserName());
 		RouterService.getCallback().addDownload(this);
 	}
