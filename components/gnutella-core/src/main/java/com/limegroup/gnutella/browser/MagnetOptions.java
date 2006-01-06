@@ -419,42 +419,54 @@ public class MagnetOptions implements Serializable {
      * @return 
      */
     public String getFileNameForSaving() {
-    	if (extractedFileName != null) {
-    		return extractedFileName;
-    	}
-    	extractedFileName = getDisplayName();
-    	if (extractedFileName != null && extractedFileName.length() > 0) {
-    		return extractedFileName;
-    	}
-    	extractedFileName = getKeywordTopic();
-    	if (extractedFileName != null && extractedFileName.length() > 0) {
-    		return extractedFileName;
-    	}
-    	URN urn = getSHA1Urn();
-    	if (urn != null) {
-    		extractedFileName = urn.toString();
-    		return extractedFileName;
-    	}
-    	String[] urls = getDefaultURLs();
-    	if (urls.length > 0) {
-    		try {
-    			URI uri = new URI(urls[0].toCharArray());
-    			extractedFileName = extractFileName(uri);
-    			if (extractedFileName != null && extractedFileName.length() > 0) {
-    				return extractedFileName;
-    			}
-			} catch (URIException e) {
-			}
-    	}
-    	try {
-    		File file = File.createTempFile("magnet", "");
-    		file.deleteOnExit();
-    		extractedFileName = file.getName();
-    		return extractedFileName;
-    	} catch (IOException ie) {
-    	}
-    	extractedFileName = DOWNLOAD_PREFIX;
-    	return extractedFileName;
+        if (extractedFileName != null) 
+            return extractedFileName;
+        
+    	String name = getRawNameForSaving();
+        
+        // remove any leading slashes or dots
+        while(name.startsWith(".") || name.startsWith("\\") || name.startsWith("/"))
+            name = name.substring(1);
+            
+        extractedFileName = name;
+        return extractedFileName;
+    }
+    
+    private String getRawNameForSaving() {
+        
+        String tempFileName = getDisplayName();
+        if (tempFileName != null && tempFileName.length() > 0) {
+            return tempFileName;
+        }
+        tempFileName = getKeywordTopic();
+        if (tempFileName != null && tempFileName.length() > 0) {
+            return tempFileName;
+        }
+        URN urn = getSHA1Urn();
+        if (urn != null) {
+            tempFileName = urn.toString();
+            return tempFileName;
+        }
+        String[] urls = getDefaultURLs();
+        if (urls.length > 0) {
+            try {
+                URI uri = new URI(urls[0].toCharArray());
+                tempFileName = extractFileName(uri);
+                if (tempFileName != null && tempFileName.length() > 0) {
+                    return tempFileName;
+                }
+            } catch (URIException e) {
+            }
+        }
+        try {
+            File file = File.createTempFile("magnet", "");
+            file.deleteOnExit();
+            tempFileName = file.getName();
+            return tempFileName;
+        } catch (IOException ie) {
+        }
+        tempFileName = DOWNLOAD_PREFIX;
+        return tempFileName;
     }
     
     /**
