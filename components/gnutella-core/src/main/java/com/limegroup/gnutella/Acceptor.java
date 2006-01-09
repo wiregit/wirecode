@@ -1086,8 +1086,6 @@ public class Acceptor implements Runnable {
 
     /**
      * Sees if a given IP address is on our list of institutional addresses the user does not want to connect to.
-     * Returns whether <tt>ip</tt> is a banned address.
-     * 
      * 
      * @param addr The 4 bytes of an IP address
      * @return     True if this IP address is in the program's list of compuers to not talk to

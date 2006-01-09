@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.util.Collection;
@@ -17,24 +20,24 @@ import org.apache.commons.logging.Log;
  * listener whenever responses are returned.
  */
 public class UDPPinger {
-    
+
     private static final Log LOG = LogFactory.getLog(UDPPinger.class);
-        
+
     protected static final ProcessingQueue QUEUE = new ProcessingQueue("UDPHostRanker");
-        
+
     /**
      * The time to wait before expiring a message listener.
      *
      * Non-final for testing.
      */
     public static int LISTEN_EXPIRE_TIME = 20 * 1000;
-    
+
     /** Send pings every this often */
     private static final long SEND_INTERVAL = 500;
-    
+
     /** Send this many pings each time */
     private static final int MAX_SENDS = 15;
-    
+
     /**
      * The current number of datagrams we've sent in the past 500 milliseconds.
      */

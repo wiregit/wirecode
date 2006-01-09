@@ -124,43 +124,44 @@ public class HostCatcher {
      */
     public static final int NORMAL_PRIORITY = 0;
 
+    //done
 
-    /**
-     * The list of hosts to try.
-     * These are sorted by priority: ultrapeers, normal, then private addresses.
-     * Within each priority level, recent hosts are prioritized over older ones.
-     * Our representation consists of a set and a queue, both bounded in size.
-     * The set lets us quickly check if there are duplicates, while the queue provides ordering.
-     * This is a classic trade off between space and time.
-     * 
-     * 
-     * 
-     * INVARIANT: queue contains no duplicates and contains exactly the
-     *  same elements as set.
-     * LOCKING: obtain this' monitor before modifying either.  */
-
-    /**
-     * 
-     * 
-     * ENDPOINT_QUEUE is a LimeWire BucketQueue object.
-     * We make it by handing the constructor an array of 3 integers: {400, 1000, 20}
-     * 
-     */
-    private final BucketQueue ENDPOINT_QUEUE = new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, CACHE_SIZE});
-    
-    /**
-     * 
-     */
-    private final Set ENDPOINT_SET = new HashSet();
-    
     /*
+     * ENDPOINT_QUEUE and ENDPOINT_SET hold the list of IP addresses and port numbers we can try to connect to.
+     * They are the addresses of remote computers on the Internet running Gnutella software that might be online right now, ready to accept our Gnutella connection.
+     * This is our list of hosts to try.
+     * 
      * ENDPOINT_QUEUE and ENDPOINT_SET contain exactly the same elements.
      * There are no duplicate elements in the list.
+     * Both collections classes are bounded in size. (do)
+     * 
+     * The Java HashSet ENDPOINT_SET lets us quickly notice a duplicate.
+     * The LimeWire BucketQueue ENDPOINT_QUEUE keeps the same ExtendedEndpoint objects in priority sorted order.
      * 
      * We'll keep ExtendedEndpoint objects in both of these lists.
      * Lock on this HostCatcher class before modifying these lists.
      */
-    
+
+    /**
+     * A BucketQueue that sorts the ExtendedEndpoint objects by priority and then by when you added them.
+     * 
+     * ENDPOINT_QUEUE is a LimeWire BucketQueue object.
+     * We make it by handing the constructor an array of 3 integers: {400, 1000, 20}.
+     * This sets up the BucketQueue to hold ExtendedEndpoints of 3 different priority levels.
+     * The BucketQueue can hold up to 400 bad ExtendedEndpoint objects, 1000 middle ones, and 20 of the best. (do) check this order is right
+     * Within the bucket for each priority, the most recently added items are first.
+     * When you iterate through ENDPOINT_QUEUE, you'll get newest to oldest of the highest priority, then newest to oldest of the next priority, and so on.
+     * 
+     * Here, the 3 numbers represent {400 ultrapeers, 1000 normal (do), 20 private addresses (do)}.
+     * Within each priority level, recent hosts are prioritized over older ones.
+     */
+    private final BucketQueue ENDPOINT_QUEUE = new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, CACHE_SIZE});
+
+    /** The same ExtendedEndpoint objects as ENDPOINT_QUEUE in a Java HashSet. */
+    private final Set ENDPOINT_SET = new HashSet();
+
+    //do
+
     /**
      * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
      */
@@ -315,6 +316,7 @@ public class HostCatcher {
 	 * Creates a new <tt>HostCatcher</tt> instance.
 	 */
 	public HostCatcher() {
+
         pinger = new UniqueHostPinger();
         udpHostCache = new UDPHostCache(pinger);
     }
@@ -395,7 +397,9 @@ public class HostCatcher {
      * Rank the collection of hosts.
      */
     private void rank(Collection hosts) {
-        if(needsPongRanking()) {
+        
+        if (needsPongRanking()) {
+            
             pinger.rank(
                 hosts,
                 // cancel when connected -- don't send out any more pings
@@ -584,52 +588,73 @@ public class HostCatcher {
 
 
     /**
+     * 
+     * 
      * Attempts to add a pong to this, possibly ejecting other elements from the
      * cache.  This method used to be called "spy".
      *
      * @param pr the pong containing the address/port to add
      * @param receivingConnection the connection on which we received
      *  the pong.
-     * @return true iff pr was actually added 
+     * @return true iff pr was actually added
+     * 
+     * @param pr The Gnutella pong packet that contains the IP address and port number we want to add
+     * 
      */
     public boolean add(PingReply pr) {
-        //Convert to endpoint
+
+        // Make an ExtendedEndpoint from the information in the pong packet
         ExtendedEndpoint endpoint;
-        
-        if(pr.getDailyUptime() != -1) {
-            endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort(), 
-											pr.getDailyUptime());
+
+        // The pong packet contains the number of seconds the remote computer at the stated address is online during an average day
+        if (pr.getDailyUptime() != -1) {
+
+            // Make a new ExtendedEndpoint object with the IP address, port number, and average daily uptime from the pong packet
+            endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort(), pr.getDailyUptime());
+
+        // The pong packet doesn't contain the average daily uptime of the IP address and port number it's telling us
         } else {
-            endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort());
+
+            // Make a new ExtendedEndpoint object with the IP address and port number from the pong packet
+            endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort()); // endpoint.dailyUptime will remain -1 unknown
         }
-        
-        //if the PingReply had locale information then set it in the endpoint
-        if(!pr.getClientLocale().equals(""))
-            endpoint.setClientLocale(pr.getClientLocale());
-            
-        if(pr.isUDPHostCache()) {
-            endpoint.setHostname(pr.getUDPCacheAddress());            
+
+        // If the pong has language preference information, copy it into the ExtendedEndpoint object
+        if (!pr.getClientLocale().equals("")) endpoint.setClientLocale(pr.getClientLocale());
+
+        // If the information in the pong packet is about a UDP host cache
+        if (pr.isUDPHostCache()) {
+
+            // Get the IP address of the UDP host cache from the pong, and change the ExtendedEndpoint's IP address to it
+            endpoint.setHostname(pr.getUDPCacheAddress());
+
+            // Mark the ExtendedEndpoint as holding the IP address and port number of a UDP host cache
             endpoint.setUDPHostCache(true);
         }
-        
-        if(!isValidHost(endpoint))
-            return false;
-        
-        if(pr.supportsUnicast()) {
-            QueryUnicaster.instance().
-				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
+
+        // Make sure the IP address and port number look valid
+        if (!isValidHost(endpoint)) return false;
+
+        // The pong packet says the computer at the IP address and port number supports unicast GUESS-style queries (do)
+        if (pr.supportsUnicast()) {
+
+            // Add it to the QueryUnicaster (do)
+            QueryUnicaster.instance().addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
-        
+
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
         rank(pr.getPackedIPPorts());
-        for(Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
+
+        for (Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
+
             IpPort ipp = (IpPort)i.next();
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-            if(isValidHost(ep))
-                add(ep, GOOD_PRIORITY);
+
+            // If the IP address and port number look valid, add it to the permanentHosts list which gets written to the gnutella.net file
+            if (isValidHost(ep)) add(ep, GOOD_PRIORITY);
         }
-        
+
         // if the pong carried packed UDP host caches, add those as their
         // own endpoints.
         for(Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
@@ -786,6 +811,7 @@ public class HostCatcher {
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
 
+        // Make sure the IP address and port number look valid
         if (!isValidHost(e)) return false;
 
         if (forceHighPriority) return add(e, GOOD_PRIORITY);
@@ -798,6 +824,7 @@ public class HostCatcher {
      */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
 
+        // Make sure the IP address and port number look valid
         if (!isValidHost(e)) return false;
 
         //need ExtendedEndpoint for the locale
@@ -887,12 +914,15 @@ public class HostCatcher {
                 //rep. invariant.
                 ENDPOINT_SET.add(e);
 
-                Object ejected = ENDPOINT_QUEUE.insert(e, priority);
+                // Add e to the list of hosts we can try to connect to
+                Object ejected = ENDPOINT_QUEUE.insert(e, priority); // It will go into the top of the bucket for the specified priority
 
+                // The bucket for that priority was full, the oldest one at the bottom was pushed out
                 if (ejected != null) {
 
+                    // Remove it from the HashSet to keep exactly the same ExtendedEndpoint objects in both lists
                     ENDPOINT_SET.remove(ejected);
-                }         
+                }
 
                 this.notify();
             }
@@ -980,57 +1010,65 @@ public class HostCatcher {
     }
 
     /**
-     * Utility method for verifying that the given host is a valid host to add
-     * to the group of hosts to try.  This verifies that the host does not have
-     * a private address, is not banned, is not this node, is not in the
-     * expired or probated hosts set, etc.
+     * Determine if an IP address and port number looks valid.
+     * If it does, we'll add it to our list of hosts to try to connect to.
      * 
-     * @param host the host to check
-     * @return <tt>true</tt> if the host is valid and can be added, otherwise
-     *  <tt>false</tt>
+     * Verifies that we can read the IP address text as numbers.
+     * Verifies the IP address isn't in a range DHCP servers assign on a LAN.
+     * Verifies the IP address and port number isn't our own IP address and listening port number.
+     * Verifies the IP address isn't on our list of institutional addresses the user doesn't want to connect to.
+     * Verifies we haven't failed connecting to this host, and this host hasn't rejected us.
+     * 
+     * @param host An ExtendedEndpoint with the IP address and port number of a computer that may be online and accepting Gnutella connections right now
+     * @return True if the IP address and port number passes all the tests and we'll add it to our list.
+     *         False if it fails a test and we shouldn't add it.
      */
     private boolean isValidHost(Endpoint host) {
-        // caches will validate for themselves.
-        if(host.isUDPHostCache())
-            return true;
-        
+
+        // If the given ExtendedEndpoint describes a UDP host cache, return true, it will validate itself (do)
+        if (host.isUDPHostCache()) return true;
+
+        // Make sure we can read the IP address of the given ExtendedEndpoint object as an array of 4 bytes
         byte[] addr;
         try {
+
+            // Get the IP address from the given ExtendedEndpoint as an array of 4 bytes
             addr = host.getHostBytes();
-        } catch(UnknownHostException uhe) {
-            return false;
-        }
-        
-        if(NetworkUtils.isPrivateAddress(addr))
-            return false;
 
-        //We used to check that we're not connected to e, but now we do that in
-        //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
-        //deal, since the call to "set.contains(e)" below ensures no duplicates.
-        //Skip if this would connect us to our listening port.  TODO: I think
-        //this check is too strict sometimes, which makes testing difficult.
-        if (NetworkUtils.isMe(addr, host.getPort()))
-            return false;
+        // Calling InetAddress.getByName(text) with the IP address text caused an exception, report false, not a valid host
+        } catch (UnknownHostException uhe) { return false; }
 
-        //Skip if this host is banned.
-        if (RouterService.getAcceptor().isBannedIP(addr))
-            return false;  
-        
-        synchronized(this) {
-            // Don't add this host if it has previously failed.
-            if(EXPIRED_HOSTS.contains(host)) {
-                return false;
-            }
-            
-            // Don't add this host if it has previously rejected us.
-            if(PROBATION_HOSTS.contains(host)) {
-                return false;
-            }
+        // If the address is in one of the ranges that DHCP servers assign to computers on their LANs, report false, not a valid host
+        if (NetworkUtils.isPrivateAddress(addr)) return false;
+
+        /*
+         * We used to check that we're not connected to e, but now we do that in
+         * ConnectionFetcher after a call to getAnEndpoint. This is not a big
+         * deal, since the call to "set.contains(e)" below ensures no duplicates.
+         * Skip if this would connect us to our listening port. TODO: I think
+         * this check is too strict sometimes, which makes testing difficult.
+         */
+
+        // If the address and port number are our address and port number report false, connecting to this host would be connecting to ourselves
+        if (NetworkUtils.isMe(addr, host.getPort())) return false;
+
+        // Make sure the IP address isn't on a list of institutional addresses the user does not want to connect to
+        if (RouterService.getAcceptor().isBannedIP(addr)) return false;
+
+        // Only let one thread access the EXPIRED_HOSTS and PROBATION_HOSTS lists at a time
+        synchronized (this) {
+
+            // Don't add this host if it has previously failed
+            if (EXPIRED_HOSTS.contains(host)) return false;
+
+            // Don't add this host if it has previously rejected us
+            if (PROBATION_HOSTS.contains(host)) return false;
         }
-        
+
+        // Passed all the tests, report true, the host is valid and we can add it to our list
         return true;
     }
-    
+
     ///////////////////////////////////////////////////////////////////////
 
     /**
@@ -1131,20 +1169,24 @@ public class HostCatcher {
             ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
             iter.remove();
             return ee;
-        } 
-        if (! ENDPOINT_QUEUE.isEmpty()) {
-            //pop e from queue and remove from set.
-            ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
-            boolean ok=ENDPOINT_SET.remove(e);
-            
-            //check that e actually was in set.
-            Assert.that(ok, "Rep. invariant for HostCatcher broken.");
+        }
+
+        // If our list of hosts to try to connect to still has at least one ExtendedEndpoint in it
+        if (!ENDPOINT_QUEUE.isEmpty()) {
+
+            // Remove and return (do)
+            ExtendedEndpoint e = (ExtendedEndpoint)ENDPOINT_QUEUE.extractMax(); // Remove and return the oldest (do)
+            boolean ok = ENDPOINT_SET.remove(e);                                // Also remove it from the HashSet so it still has exactly the same contents
+            Assert.that(ok, "Rep. invariant for HostCatcher broken.");          // Make sure that e was actually in the HashSet
+
             return e;
-        } else
+
+        } else {
+
             throw new NoSuchElementException();
+        }
     }
 
-    
     /**
      * tries to return an endpoint that matches the locale of this client
      * from the passed in set.
