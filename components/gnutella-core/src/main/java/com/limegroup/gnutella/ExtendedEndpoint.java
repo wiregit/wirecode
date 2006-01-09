@@ -17,7 +17,7 @@ import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * An ExtendedEndpoint holds information about a remote computer on the Internet running Gnutella software.
+ * An ExtendedEndpoint holds information about a remote computer on the Internet running Gnutella software, like its IP address, port number, and how much it's online.
  * We can try to connect to this computer to connect to the Gnutella network.
  * The HostCatcher class keeps a list of ExtendedEndpoint objects, and picks the best looking ones to try to connect to next.
  * 

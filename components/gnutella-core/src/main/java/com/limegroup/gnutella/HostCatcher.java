@@ -84,28 +84,31 @@ public class HostCatcher {
      * The number of ultrapeer pongs to store.
      */
     static final int GOOD_SIZE = 1000;
-    
-    /**
-     * The number of normal pongs to store.
-     * This must be large enough to store all permanent addresses, 
-     * as permanent addresses when read from disk are stored as
-     * normal priority.
-     */    
-    static final int NORMAL_SIZE=400;
 
-    /**
-     * The number of permanent locations to store in gnutella.net 
-     * This MUST NOT BE GREATER THAN NORMAL_SIZE.  This is because when we read
-     * in endpoints, we add them as NORMAL_PRIORITY.  If we have written
-     * out more than NORMAL_SIZE hosts, then we guarantee that endpoints
-     * will be ejected from the ENDPOINT_QUEUE upon startup.
-     * Because we write out best first (and worst last), and thus read in
-     * best first (and worst last) this means that we will be ejecting
-     * our best endpoints and using our worst ones when starting.
+    //done
+
+    /*
+     * NORMAL_SIZE
+     * The number of normal pongs to store.
+     * This must be large enough to store all permanent addresses, as permanent addresses when read from disk are stored as normal priority.
      * 
+     * PERMANENT_SIZE
+     * The number of permanent locations to store in gnutella.net.
+     * This must not be greater than NORMAL_SIZE.
+     * This is because when we read in endpoints, we add them as NORMAL_PRIORITY.
+     * If we have written out more than NORMAL_SIZE hosts, then we guarantee that endpoints will be ejected from the ENDPOINT_QUEUE upon startup.
+     * Because we write out best first (and worst last), and thus read in best first (and worst last)
+     * this means that we will be ejecting our best endpoints and using our worst ones when starting.
      */
+
+    /** 400, there are up to 400 IP addresses and port numbers in the permanentHosts list and gnutella.net file. */
+    static final int NORMAL_SIZE = 400;
+
+    /** 400, there are up to 400 IP addresses and port numbers in the permanentHosts list and gnutella.net file. */
     static final int PERMANENT_SIZE = NORMAL_SIZE;
-    
+
+    //do
+
     /**
      * Constant for the priority of hosts retrieved from GWebCaches.
      */
@@ -122,19 +125,41 @@ public class HostCatcher {
     public static final int NORMAL_PRIORITY = 0;
 
 
-    /** The list of hosts to try.  These are sorted by priority: ultrapeers,
-     * normal, then private addresses.  Within each priority level, recent hosts
-     * are prioritized over older ones.  Our representation consists of a set
-     * and a queue, both bounded in size.  The set lets us quickly check if
-     * there are duplicates, while the queue provides ordering--a classic
-     * space/time tradeoff.
-     *
+    /**
+     * The list of hosts to try.
+     * These are sorted by priority: ultrapeers, normal, then private addresses.
+     * Within each priority level, recent hosts are prioritized over older ones.
+     * Our representation consists of a set and a queue, both bounded in size.
+     * The set lets us quickly check if there are duplicates, while the queue provides ordering.
+     * This is a classic trade off between space and time.
+     * 
+     * 
+     * 
      * INVARIANT: queue contains no duplicates and contains exactly the
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
-    private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = 
-        new BucketQueue(new int[] {NORMAL_SIZE,GOOD_SIZE, CACHE_SIZE});
-    private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
+
+    /**
+     * 
+     * 
+     * ENDPOINT_QUEUE is a LimeWire BucketQueue object.
+     * We make it by handing the constructor an array of 3 integers: {400, 1000, 20}
+     * 
+     */
+    private final BucketQueue ENDPOINT_QUEUE = new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, CACHE_SIZE});
+    
+    /**
+     * 
+     */
+    private final Set ENDPOINT_SET = new HashSet();
+    
+    /*
+     * ENDPOINT_QUEUE and ENDPOINT_SET contain exactly the same elements.
+     * There are no duplicate elements in the list.
+     * 
+     * We'll keep ExtendedEndpoint objects in both of these lists.
+     * Lock on this HostCatcher class before modifying these lists.
+     */
     
     /**
      * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
@@ -160,28 +185,39 @@ public class HostCatcher {
      */
     private final Map LOCALE_SET_MAP = new HashMap();
 
-    //do
+    /** 100, we'll keep up to 100 ExtendedEndpoint objects for each language in LOCALE_SET_MAP. */
+    private static final int LOCALE_SET_SIZE = 100;
 
     /**
-     * number of endpoints to keep in the locale set
+     * A list of 400 IP addresses and port numbers we'll try to connect to.
+     * This is the list we keep in the gnutella.net file.
+     * 
+     * This list holds the computers with the highest average daily uptime.
+     * We have the best change of contacting them in the future.
+     * They don't necessarily have open slots now.
+     * They act more like bootstrap hosts than normal pongs.
+     * 
+     * This list contains no duplicates.
+     * We use the HashSet named permanentHostsSet to prevent duplicates.
+     * 
+     * Lock on this HostCatcher class before modifying this list.
      */
-    private static final int LOCALE_SET_SIZE = 100;
-    
-    /** The list of pongs with the highest average daily uptimes.  Each host's
-     * weight is set to the uptime.  These are most likely to be reachable
-     * during the next session, though not necessarily likely to have slots
-     * available now.  In this way, they act more like bootstrap hosts than
-     * normal pongs.  This list is written to gnutella.net and used to
-     * initialize queue on startup.  To prevent duplicates, we also maintain a
-     * set of all addresses, like with queue/set.
-     *
-     * INVARIANT: permanentHosts contains no duplicates and contains exactly
-     *  the same elements and permanentHostsSet
-     * LOCKING: obtain this' monitor before modifying either */
+    private FixedsizePriorityQueue permanentHosts = // We'll keep ExtendedEndpoint objects in this FixedsizePriorityQueue
+        new FixedsizePriorityQueue(                 // Make a new FixedsizePriorityQueue
+            ExtendedEndpoint.priorityComparator(),  // Have it call ExtendedEndpoint.PriorityComparator.compare(a, b)
+            PERMANENT_SIZE);                        // When it has 400 ExtendedEndpoints, it will throw out the worst one to add a new one
 
-    private FixedsizePriorityQueue /* of ExtendedEndpoint */ permanentHosts = new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(), PERMANENT_SIZE);
+    /**
+     * A copy of the list of 400 IP addresses from gnutella.net that we'll try to connect to.
+     * 
+     * permanentHosts and permanentHostsSet contain exactly the same elements.
+     * We use this HashSet to prevent duplicates in the lists.
+     * 
+     * Lock on the HostCatcher class before modifying this list.
+     */
+    private Set permanentHostsSet = new HashSet(); // We'll put ExtendedEndpoint objects in this HashSet
 
-    private Set /* of ExtendedEndpoint */ permanentHostsSet = new HashSet();
+    //do
 
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache = 
@@ -418,8 +454,9 @@ public class HostCatcher {
         // Record that we're going to start reading the gnutella.net file in the debugging log
         LOG.trace("entered HostCatcher.read(File)");
 
+        // We'll use a Java BufferedReader to read lines from the file
         BufferedReader in = null;
-        
+
         try {
 
             // Make a new Java FileReader and BufferReader objects that will open the file at the path and read its contents
@@ -466,47 +503,82 @@ public class HostCatcher {
         LOG.trace("left HostCatcher.read(File)");
     }
 
+    //done
+
 	/**
-	 * Writes the host file to the default location.
-	 *
-	 * @throws <tt>IOException</tt> if the file cannot be written
+     * Writes the gnutella.net file, turning each ExtendedEndpoint in the permanentHosts list into a line of text there.
 	 */
 	synchronized void write() throws IOException {
+
+        // Get the path to the gnutella.net file, and write the permanentHosts to it
 		write(getHostsFile());
 	}
 
     /**
-     * @modifies the file named filename
-     * @effects writes this to the given file.  The file
-     *  is prioritized by rough probability of being good.
-     *  GWebCache entries are also included in this file.
+     * Write the gnutella.net file turning each ExtendedEndpoint in the permanentHosts list into a line of text there.
+     * A gnutella.net file looks like this:
+     * 
+     * http://gwcrab.sarcastro.com:8001/
+     * http://pokerface.bishopston.net:3558/
+     * uhc2.limewire.com:20181,,1131588496406,,,en,0
+     * uhc3.limewire.com:51180,,1131588496406,,,en,0
+     * 24.47.251.37:32851,51154,1134687004484,,,en,
+     * 69.92.140.161:15562,86400,1133997176312,,,en,
+     * 69.205.59.212:6346,86276,1134322024359,1134686990578;1134322028968,,en,
+     * 67.9.175.234:6346,86400,1132897988921,1134686989046;1134345039890;1133994459812,,en,
+     * 
+     * In this example, the first 2 lines are written by the GWebCache object.
+     * They are the addresses of GWebCache scrips on the Web.
+     * The second 2 lines above are UDP host caches.
+     * They are written by the udpHostCache object.
+     * After that come the ExtendedEndpoints from permanentHosts.
+     * They are ordered worst to best.
+     * The second to last one above has 3 times that we were able to contact it.
+     * It's the best one we've got.
+     * 
+     * The permanentHosts list is ordered by priority, worst to best.
+     * The Iterator we get to loop down it proceedes through it in this order.
+     * So, the lines of text in the gnutella.net file are ordered with the computers we'll be most likely to contact last.
+     * 
+     * @param hostFile A File object with the path to the gnutella.net file
      */
     synchronized void write(File hostFile) throws IOException {
-        
+
+        // If in test mode, make sure the lists are OK
         repOk();
-        
-        if (dirty || gWebCache.isDirty() || udpHostCache.isWriteDirty()) {
-            
+
+        // If we added some hosts since we last wrote gnutella.net
+        if (dirty ||                       // If we added some hosts since we last wrote gnutella.net, or
+            gWebCache.isDirty() ||         // The GWebCache object has changed data for gnutella.net, or
+            udpHostCache.isWriteDirty()) { // The UDPHostCache object has changed data for gnutella.net
+
+            // Open the gnutella.net file for writing
             FileWriter out = new FileWriter(hostFile);
-            
-            //Write servers from GWebCache to output.
+
+            // Have the GWebCache and UDP host cache objects write their information first
             gWebCache.write(out);
-    
-            //Write udp hostcache endpoints.
             udpHostCache.write(out);
-    
-            //Write elements of permanent from worst to best.  Order matters, as it
-            //allows read() to put them into queue in the right order without any
-            //difficulty.
-            for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
-                
-                ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
+
+            /*
+             * Write elements of permanent from worst to best.  Order matters, as it
+             * allows read() to put them into queue in the right order without any
+             * difficulty.
+             */
+
+            // Loop through all the ExtendedEndpoints in the permanentHosts list
+            for (Iterator iter = permanentHosts.iterator(); iter.hasNext(); ) {
+
+                // Get one and write it into a line of text in the gnutella.net file
+                ExtendedEndpoint e = (ExtendedEndpoint)iter.next();
                 e.write(out);
             }
-            
+
+            // Close the gnutella.net file
             out.close();
         }
     }
+    
+    //do
 
     ///////////////////////////// Add Methods ////////////////////////////
 
@@ -635,6 +707,8 @@ public class HostCatcher {
         }
         
         // Also add it to the list of permanent hosts stored on disk.
+        
+        // Add host to the permanentHosts list which gets written to the gnutella.net file
         addPermanent(host);
         notify();
     }
@@ -758,6 +832,14 @@ public class HostCatcher {
     }
 
     /**
+     * 
+     * 
+     * 
+     * Adds e to the permanentHosts list which gets written to the gnutella.net file.
+     * Adds e to the ENDPOINT_SET HashSet
+     * 
+     * 
+     * 
      * Adds the passed endpoint to the set of hosts maintained, temporary and
      * permanent. The endpoint may not get added due to various reasons
      * (including it might be our address itself, we might be connected to it
@@ -779,7 +861,7 @@ public class HostCatcher {
      */
     private boolean add(ExtendedEndpoint e, int priority) {
 
-        // Does nothing unless in testing mode
+        // If in test mode, make sure the lists are OK
         repOk();
 
         // If the line from gnutella.net described a UDP host cache, have the udpHostCache take it
@@ -787,12 +869,15 @@ public class HostCatcher {
 
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
+
+        // Add host to the permanentHosts list which gets written to the gnutella.net file
         addPermanent(e);
 
         boolean ret = false;
 
         synchronized (this) {
 
+            
             if (!(ENDPOINT_SET.contains(e))) {
 
                 ret = true;
@@ -813,53 +898,75 @@ public class HostCatcher {
             }
         }
 
-        // Does nothing unless in testing mode
+        // If in test mode, make sure the lists are OK
         repOk();
 
         return ret;
     }
 
     /**
+     * Add an ExtendedEndpoint to permanentHosts and permanentHostsSet, which hold the list that gets written to the gnutella.net file.
+     * 
      * Adds an address to the permanent list of this without marking it for
      * immediate fetching.  This method is when connecting to a host and reading
      * its Uptime header.  If e is already in the permanent list, it is not
      * re-added, though its key may be adjusted.
-     *
-     * @param e The ExtendedEndpoint to add to what (do)
-     * @return  True if we added e, false if we didn't because why (do)
+     * 
+     * @param e The ExtendedEndpoint to add
+     * @return  True if we added e, false if we didn't because it's worse than all 400 already in the list
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
 
+        // If this IP address is just a LAN address, don't add it
         if (NetworkUtils.isPrivateAddress(e.getInetAddress())) return false;
 
-        //TODO: we could adjust the key
-        if (permanentHostsSet.contains(e)) return false;
+        /*
+         * TODO: we could adjust the key
+         */
+
+        // If we already have this ExtendedEndpoint in permanentHosts and permanentHostsSet, we don't need to add it, leave now
+        if (permanentHostsSet.contains(e)) return false; // Didn't add it
+
+        /*
+         * We don't have it yet, and will add it.
+         */
 
         // Add e to the HashSet in LOCALE_SET_MAP for e's language preference
         addToLocaleMap(e);
 
-        Object removed = permanentHosts.insert(e);
+        // Insert e into the permanentHosts FixedsizePriorityQueue, which will put it in sorted order based on how good a host it is
+        Object removed = permanentHosts.insert(e); // If we've already got 400, adding this one will remove the lowest priority one of all 401 of them
 
-        if (removed!=e) {
-            
-            //Was actually added...
-            permanentHostsSet.add(e);
-            
-            //...and something else was removed.
-            if (removed!=null) permanentHostsSet.remove(removed);
-            
-            dirty = true;
-            
+        /*
+         * One of 3 things could have happened:
+         * permanentHosts wasn't full, it inserted e and returned null.
+         * permanentHosts was full, it inserted e into priority order, and returned the worst one it removed from the list.
+         * permanentHosts was full, and e was worse than all 400 in there, insert(e) left the list unchanged and returned e.
+         */
+
+        // We added e to the list
+        if (removed != e) {
+
+            // Update permanentHostsSet to keep its contents the same as permanentHosts
+            permanentHostsSet.add(e);                               // Add it to the HashSet that we use to notice duplicates
+            if (removed != null) permanentHostsSet.remove(removed); // Remove the one that got knocked out from the HashSet
+
+            // The permanentHosts list no longer matches the data saved in gnutella.net
+            dirty = true; // Set dirty to true so we'll write the file to disk again
+
+            // We added e
             return true;
-            
+
+        // We tried to insert e, but it got spit right back out, it's actually worse than all 400 in there
         } else {
-            
-            //Uptime not good enough to add.  (Note that this is 
-            //really just an optimization of the above case.)
+
+            // Didn't add e
             return false;
         }
     }
-    
+
+    //do
+
     /** Removes e from permanentHostsSet and permanentHosts. 
      *  @return true iff this was modified */
     private synchronized boolean removePermanent(ExtendedEndpoint e) {
@@ -984,6 +1091,8 @@ public class HostCatcher {
             _failures++;
             ee.recordConnectionFailure();
         }
+
+        // Add host to the permanentHosts list which gets written to the gnutella.net file
         addPermanent(ee);
     }
 
@@ -1217,7 +1326,7 @@ public class HostCatcher {
     static boolean DEBUG = false;
 
     /**
-     * Does nothing unless in testing mode.
+     * If in test mode, makes sure the lists are OK.
      * 
      * Checks invariants.
      * Very slow; method body should be enabled for testing purposes only.

@@ -69,11 +69,11 @@ public class Buffer implements Cloneable {
                             other.buf.length);
         }
     }
-    
+
     /** Initializes the internal buf if necessary. */
     private void initialize() {
-        if(buf == null)
-            buf = new Object[size+1];
+
+        if (buf == null) buf = new Object[size + 1];
     }
 
     /** Returns true iff this is empty. */

@@ -1,9 +1,16 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** 
+/**
+ * BinaryHeap doesn't appear to be in use.
+ * FixedsizePriorityQueue and BucketQueue may have replaced it. (do)
+ * 
+ * 
  * A class for maintaining the objects in a binary heap form, i.e., a classic
  * fixed-size priority queue.  Its a MAX heap, i.e., the root of the heap is the
  * element with max value.  The objects to be inserted into the heap must
