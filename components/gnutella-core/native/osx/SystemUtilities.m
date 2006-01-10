@@ -13,7 +13,7 @@
 
 // compile with:
 // cc -c -dynamiclib -o libSystemUtilities.o -I/System/Library/Frameworks/JavaVM.framework/Headers  SystemUtilities.m 
-// cc -dynamiclib -o libSystemUtilities.jnilib libSystemUtilities.o -framework JavaVM -framework Carbon 
+// cc -dynamiclib -o libSystemUtilities.jnilib libSystemUtilities.o -framework JavaVM -framework Carbon -arch ppc -arch i386
 
 extern double CGSSecondsSinceLastInputEvent(unsigned long envType);
 
