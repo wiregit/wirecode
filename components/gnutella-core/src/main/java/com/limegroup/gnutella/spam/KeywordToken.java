@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.spam;
 
+import java.util.Arrays;
+
 /**
  * A token holding a simple keyword
  */
@@ -56,7 +58,11 @@ public class KeywordToken extends AbstractToken {
         if (! (o instanceof KeywordToken))
             return false;
         
-        return _hashCode == o.hashCode();
+        if (_hashCode != o.hashCode()) {
+            return false;
+        }
+        
+        return Arrays.equals(_keyword, ((KeywordToken)o)._keyword);
     }
     
 	/**
