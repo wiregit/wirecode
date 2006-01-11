@@ -37,7 +37,6 @@ import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 
-
 /**
  * The host catcher.  This peeks at pong messages coming on the
  * network and snatches IP addresses of other Gnutella peers.  IP
