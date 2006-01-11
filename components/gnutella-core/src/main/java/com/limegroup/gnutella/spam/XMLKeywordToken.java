@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.spam;
 
+import java.util.Arrays;
+
 /**
  * Like a KeywordToken but also holds part of the meta-data name which this
  * token belongs to, so the filter can specifically rate for example videos with
@@ -107,7 +109,12 @@ public class XMLKeywordToken extends AbstractToken {
         if (!(o instanceof XMLKeywordToken))
             return false;
         
-        return _hashCode == o.hashCode();
+        if (_hashCode != o.hashCode()) {
+            return false;
+        }
+        
+        return Arrays.equals(_xmlField, ((XMLKeywordToken)o)._xmlField) 
+                && Arrays.equals(_keyword, ((XMLKeywordToken)o)._keyword);
     }
     
 	/**

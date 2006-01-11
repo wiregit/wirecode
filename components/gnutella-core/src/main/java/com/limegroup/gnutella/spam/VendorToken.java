@@ -60,7 +60,12 @@ public class VendorToken extends AbstractToken {
     public final boolean equals(Object o) {
         if (! (o instanceof VendorToken))
             return false;
-        return hashCode == o.hashCode();
+        
+        if (hashCode != o.hashCode()) {
+            return false;
+        }
+        
+        return vendor.equals(((VendorToken)o).vendor);
     }
     
     public int getType() {

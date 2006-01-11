@@ -75,9 +75,12 @@ public class UrnToken extends AbstractToken {
             return false;
         if (!(o instanceof UrnToken))
             return false;
-        UrnToken ut = (UrnToken) o;
         
-        return _urn.equals(ut._urn);
+        if (hashCode() != o.hashCode()) {
+            return false;
+        }
+        
+        return _urn.equals(((UrnToken)o)._urn);
     }
 
 	/**

@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.spam;
 
-import com.limegroup.gnutella.Assert;
+import java.util.Arrays;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.filters.IPFilter;
 
@@ -158,7 +159,12 @@ public class AddressToken extends AbstractToken {
         if ( ! (o instanceof AddressToken))
             return false;
         
-        return _hashCode == o.hashCode();
+        if (_hashCode != o.hashCode()) {
+            return false;
+        }
+        
+        return _port == ((AddressToken)o)._port 
+                && Arrays.equals(_address, ((AddressToken)o)._address);
     }
 
 	/**
