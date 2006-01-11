@@ -29,6 +29,8 @@ public class UDPPinger {
      * A ProcessingQueue object runs code for us in a separate thread.
      * We make one named QUEUE, and then call QUEUE.add(r), where r is an object that has a run() method.
      * The ProcessingQueue starts a separate thread named "UDPHostRanker" which calls the object's run() method.
+     * 
+     * This member is protected because UniqueHostPinger, which extends UDPPinger, also uses it.
      */
     protected static final ProcessingQueue QUEUE = new ProcessingQueue("UDPHostRanker");
 

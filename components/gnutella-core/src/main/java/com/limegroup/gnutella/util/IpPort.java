@@ -39,7 +39,8 @@ public interface IpPort {
     String getAddress();
 
     /**
-     * A Comparator is a method which can take two objects of the same type, and determine which should come first or if they are equal.
+     * A Comparator is an object that has a compare(a, b) method.
+     * It takes two objects of the same type, and determines which should come first or if they are equal.
      * Comparators are used to see if two objects are the same, and to sort lists of objects into order.
      * A class which implements this interface must provide a comparator.
      */
