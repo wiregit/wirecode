@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
  * 
  * When you iterate through a BucketQueue, you get the highest priority most recently added item first.
  * Then, you get the rest of the items with that priority, from newest to oldest.
- * After taht, the iterator will provide the most recently added item with the second highest priority.
+ * After that, the iterator will provide the most recently added item with the second highest priority.
  * This continues until the last item, which is the oldest with the lowest priority.
  * 
  * A discrete-case priority queue.

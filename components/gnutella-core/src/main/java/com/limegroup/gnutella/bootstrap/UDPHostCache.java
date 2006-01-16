@@ -54,6 +54,10 @@ import org.apache.commons.logging.Log;
  * 
  * To send a ping packet over UDP to the next best 5 UDP host caches, call the fetchHosts() method.
  * HostCatcher.Bootstrapper.udpHostCacheFetch() does this.
+ * 
+ * There is only one UDPHostCache object as the program runs.
+ * 
+ * 
  */
 public class UDPHostCache {
 
@@ -236,6 +240,9 @@ public class UDPHostCache {
      * Keeps track of which UDP host caches we've contacted so we don't keep bothering the same ones.
      * 
      * HostCatcher.Bootstrapper.udpHostCacheFetch() calls this to actually talk to the UDP host caches.
+     * 
+     * @return True if we sent a ping to some UDP host caches.
+     *         False if the list of UDP host caches was empty so we didn't do anything.
      */
     public synchronized boolean fetchHosts() {
 
@@ -247,7 +254,7 @@ public class UDPHostCache {
              * hosts in order of failure, but within each of those buckets
              * the order will be random.
              */
-            
+
             // Shuffle and sort so within each group that has the same number of failures, the order will be different than it was before
             Collections.shuffle(udpHosts);                  // Shuffle the ExtendedEndpoint objects in udpHosts into a random order
             Collections.sort(udpHosts, FAILURE_COMPARATOR); // Sort the ExtendedEndpoint objects by how many times we've sent a ping and got no response

@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella;
 
@@ -38,53 +38,86 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * The host catcher.  This peeks at pong messages coming on the
- * network and snatches IP addresses of other Gnutella peers.  IP
- * addresses may also be added to it from a file (usually
- * "gnutella.net").  The servent may then connect to these addresses
- * as necessary to maintain full connectivity.<p>
- *
- * The HostCatcher currently prioritizes pongs as follows.  Note that Ultrapeers
- * with a private address is still highest priority; hopefully this may allow
- * you to find local Ultrapeers.
- * <ol>
- * <li> Ultrapeers.  Ultrapeers are identified because the number of files they
- *      are sharing is an exact power of two--a dirty but effective hack.
- * <li> Normal pongs.
- * <li> Private addresses.  This means that the host catcher will still 
- *      work on private networks, although we will normally ignore private
- *      addresses.        
- * </ol> 
- *
- * HostCatcher also manages the list of GWebCache servers.  YOU MUST CALL
- * EXPIRE() TO START THE GBWEBCACHE BOOTSTRAPING PROCESS.  This should be done
- * when calling RouterService.connect().<p>
- *
- * Finally, HostCatcher maintains a list of "permanent" locations, based on
- * average daily uptime.  These are stored in the gnutella.net file.  They
- * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
- * use those anymore.
+ * The HostCatcher object keeps a list of IP addresses and port numbers of remote computers we can try to connect to.
+ * 
+ * When you run LimeWire, the program needs to connect to other computers on the Internet running Gnutella software.
+ * The HostCatcher object keeps a list of IP addresses and port numbers it can try.
+ * We've gotten these addresses from a variety of sources.
+ * They are the addresses of computers like us that are likely to be online accepting new Gnutella connections right now.
+ * 
+ * To save the list between times you run LimeWire, the program writes the data to disk in a file named gnutella.net.
+ * 
+ * We get these addresses from several sources.
+ * The "X-Try" and "X-Try-Ultrapeers" headers in the Gnutella handshake contain some.
+ * Pong packets contain a handful of addresses, and information about the sender.
+ * GWebCaches are PHP scripts on the Web we can tell our address, and get more.
+ * UDP host caches are high-performance successors to GWebCache scripts.
+ * We can send UDP Gnutella ping packets to them, and they will reply with pongs with host addresses inside.
+ * We can also send UDP Gnutella ping packets to regular computers running recent Gnutella software, and they will respond in the same way.
+ * 
+ * RouterService.catcher creates a new HostCatcher() object, and then RouterService.start() calls catcher.initialize().
+ * This schedules code for the RouterService to run on different intervals.
+ * Every 2 minutes, the RouterService will call Bootstrapper.run().
+ * Bootstrapper.run() contacts external services to get more hosts.
+ * It uses a multicast packet, UDP host caches, and then GWebCache scripts.
+ * 
+ * If you've received a pong packet that has some IP addresses in it, call add(PingReply).
+ * When you get IP addresses in the "X-Try" or "X-Try-Ultrapeers" headers, call add(Collection).
+ * 
+ * ConnectionManager.ConnectionFetcher.managedRun() calls getAnEndpoint() to get an IP address to try.
+ * It later calls doneWithConnect(e, success) to tell us if it worked or not.
+ * 
+ * The HostCatcher object uses a LimeWire BucketQueue named ENDPOINT_QUEUE to keep the list of IP addresses.
+ * It mirrors the same contents in a HashSet called ENDPOINT_SET, and uses it to detect duplicates quickly.
+ * A third collections object, LOCALE_SET_MAP, organizes all the hosts by their language preference.
+ * 
+ * The add() methods put hosts advertising free ultrapeer connection slots in FREE_ULTRAPEER_SLOTS_SET instead of these lists.
+ * Likewise, hosts that want more leaves are diverted to FREE_LEAF_SLOTS_SET.
+ * 
+ * In these lists, each host is represented by an ExtendedEndpoint object.
+ * The ExtendedEndpoint holds the IP address, port number, and statistics about uptime and availability.
+ * 
+ * HostCatcher makes several important objects to help it communicate with bootstrapping services.
+ * BootstrapServerManager gWebCache communicates with GWebCache scripts for us.
+ * UniqueHostPinger pinger can send a Gnutella ping packet to a list of UDP host caches.
+ * UDPHostCache udpHostCache keeps the list of UDP host caches.
+ * 
+ * In many of the names here, the word rank appears.
+ * Ranking is the process of deciding which remote Gnutella PCs to contact first.
+ * To rank, we'll contact UDP host caches and have them tell us the IP addresses of other Gnutella PCs to contact.
+ * 
+ * The host catcher.
+ * This peeks at pong messages coming on the network and snatches IP addresses of other Gnutella peers.
+ * IP addresses may also be added to it from a file (usually "gnutella.net").
+ * The servent may then connect to these addresses as necessary to maintain full connectivity.
+ * 
+ * The HostCatcher currently prioritizes pongs as follows.
+ * Note that Ultrapeers with a private address is still highest priority;
+ * hopefully this may allow you to find local Ultrapeers.
+ * 
+ * (1) Ultrapeers. Ultrapeers are identified because the number of files they are sharing is an exact power of two - a dirty but effective hack.
+ * (2) Normal pongs.
+ * (3) Private addresses. This means that the host catcher will still work on private networks, although we will normally ignore private addresses.
+ * 
+ * HostCatcher also manages the list of GWebCache servers.
+ * You must call expire() to start the GWebCache bootstrapping process.
+ * You should do this when calling RouterService.connect().
+ * 
+ * HostCatcher maintains a list of permanent locations, based on average daily uptime.
+ * These are stored in the gnutella.net file.
+ * They are NOT bootstrap servers like router.limewire.com.
+ * LimeWire doesn't use those anymore.
  */
 public class HostCatcher {
 
-    //done
-    
     /** A log we can record lines of text in to see how the program acts when it's running. */
     private static final Log LOG = LogFactory.getLog(HostCatcher.class);
 
-    //do
-    
-    /**
-     * Size of the queue for hosts returned from the GWebCaches.
-     */
+    /** 20, the BucketQueue ENDPOINT_QUEUE will hold up to 20 hosts returned from GWebCaches. */
     static final int CACHE_SIZE = 20;
     
-    /**
-     * The number of ultrapeer pongs to store.
-     */
+    /** 1000, the BucketQueue ENDPOINT_QUEUE will hold the IP addresses and port numbers of up to 1000 ultrapeers. */
     static final int GOOD_SIZE = 1000;
-
-    //done
 
     /*
      * NORMAL_SIZE
@@ -106,24 +139,19 @@ public class HostCatcher {
     /** 400, there are up to 400 IP addresses and port numbers in the permanentHosts list and gnutella.net file. */
     static final int PERMANENT_SIZE = NORMAL_SIZE;
 
-    //do
-
-    /**
-     * Constant for the priority of hosts retrieved from GWebCaches.
+    /*
+     * The BucketQueue ENDPOINT_QUEUE has 3 buckets, with priorities 0, 1, and 2.
+     * This class defines NORMAL_PRIORITY 0, GOOD_PRIORITY 1, and CACHE_PRIORITY 2 as names for these buckets.
      */
+
+    /** 2, we put the hosts we get from GWebCaches in the bucket with priority number 2. */
     public static final int CACHE_PRIORITY = 2;
 
-    /**
-     * Constant for the index of good priority hosts (Ultrapeers)
-     */
+    /** 1, we put ultrapeers in the bucket with priority number 1. */
     public static final int GOOD_PRIORITY = 1;
 
-    /**
-     * Constant for the index of non-Ultrapeer hosts.
-     */
+    /** 0, we put leaves in the bucket with priority number 0. */
     public static final int NORMAL_PRIORITY = 0;
-
-    //done
 
     /*
      * ENDPOINT_QUEUE and ENDPOINT_SET hold the list of IP addresses and port numbers we can try to connect to.
@@ -151,7 +179,7 @@ public class HostCatcher {
      * Within the bucket for each priority, the most recently added items are first.
      * When you iterate through ENDPOINT_QUEUE, you'll get newest to oldest of the highest priority, then newest to oldest of the next priority, and so on.
      * 
-     * Here, the 3 numbers represent {400 ultrapeers, 1000 normal (do), 20 private addresses (do)}.
+     * Here, the 3 numbers represent {400 leaves, 1000 ultrapeers, 20 addresses returned from GWebCaches}.
      * Within each priority level, recent hosts are prioritized over older ones.
      */
     private final BucketQueue ENDPOINT_QUEUE = new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, CACHE_SIZE});
@@ -159,19 +187,11 @@ public class HostCatcher {
     /** The same ExtendedEndpoint objects as ENDPOINT_QUEUE in a Java HashSet. */
     private final Set ENDPOINT_SET = new HashSet();
 
-    //do
-
-    /**
-     * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
-     */
+    /** Set of hosts advertising free ultrapeer connection slots. */
     private final Set FREE_ULTRAPEER_SLOTS_SET = new HashSet();
-    
-    /**
-     * <tt>Set</tt> of hosts advertising free leaf connection slots.
-     */
-    private final Set FREE_LEAF_SLOTS_SET = new HashSet();
 
-    //done
+    /** Set of hosts advertising free leaf connection slots. */
+    private final Set FREE_LEAF_SLOTS_SET = new HashSet();
 
     /**
      * LOCALE_SET_MAP is a data structure that organizes ExtendedEndpoint objects by their language preference.
@@ -202,10 +222,9 @@ public class HostCatcher {
      * 
      * Lock on this HostCatcher class before modifying this list.
      */
-    private FixedsizePriorityQueue permanentHosts = // We'll keep ExtendedEndpoint objects in this FixedsizePriorityQueue
-        new FixedsizePriorityQueue(                 // Make a new FixedsizePriorityQueue
-            ExtendedEndpoint.priorityComparator(),  // Have it call ExtendedEndpoint.PriorityComparator.compare(a, b)
-            PERMANENT_SIZE);                        // When it has 400 ExtendedEndpoints, it will throw out the worst one to add a new one
+    private FixedsizePriorityQueue permanentHosts = new FixedsizePriorityQueue( // Make a new FixedsizePriorityQueue, we'll keep ExtendedEndpoint objects in it
+        ExtendedEndpoint.priorityComparator(), // Have it call ExtendedEndpoint.PriorityComparator.compare(a, b)
+        PERMANENT_SIZE);                       // When it has 400 ExtendedEndpoints, it will throw out the worst one to add a new one
 
     /**
      * A copy of the list of 400 IP addresses from gnutella.net that we'll try to connect to.
@@ -217,244 +236,325 @@ public class HostCatcher {
      */
     private Set permanentHostsSet = new HashSet(); // We'll put ExtendedEndpoint objects in this HashSet
 
-    //do
+    /** A reference to the BootstrapServerManager, the object that helps us communicate with GWebCache scripts. */
+    private BootstrapServerManager gWebCache = BootstrapServerManager.instance();
 
-    /** The GWebCache bootstrap system. */
-    private BootstrapServerManager gWebCache = 
-        BootstrapServerManager.instance();
-    
-    /**
-     * The pinger that will send the messages
-     */
+    /** The UniqueHostPinger object we'll use to send a UDP Gnutella ping packet to a list of UDP host caches or PCs running Gnutella software. */
     private UniqueHostPinger pinger;
-        
-    /** The UDPHostCache bootstrap system. */
+
+    /** The UDPHostCache object that keeps our list of UDP host caches. */
     private UDPHostCache udpHostCache;
-    
+
     /**
-     * Count for the number of hosts that we have not been able to connect to.
-     * This is used for degenerate cases where we ultimately have to hit the 
-     * GWebCaches.
+     * The number of hosts we were unable to connect a TCP socket to.
+     * If we have a lot of failures, we'll resort to using the GWebCaches.
      */
     private int _failures;
-    
-    /**
-     * <tt>Set</tt> of hosts we were unable to create TCP connections with
-     * and should therefore not be tried again.  Fixed size.
-     * 
-     * LOCKING: obtain this' monitor before modifying/iterating
-     */
-    private final Set EXPIRED_HOSTS = new HashSet();
-    
-    /**
-     * <tt>Set</tt> of hosts we were able to create TCP connections with but 
-     * did not accept our Gnutella connection, and are therefore put on 
-     * "probation".  Fixed size.
-     * 
-     * LOCKING: obtain this' monitor before modifying/iterating
-     */    
-    private final Set PROBATION_HOSTS = new HashSet();
-    
-    /**
-     * Constant for the number of milliseconds to wait before periodically
-     * recovering hosts on probation.  Non-final for testing.
-     */
-    private static long PROBATION_RECOVERY_WAIT_TIME = 60*1000;
 
     /**
-     * Constant for the number of milliseconds to wait between calls to 
-     * recover hosts that have been placed on probation.  
-     * Non-final for testing.
+     * Set of hosts we were unable to create TCP connections with, and we therefore shouldn't try again.
+     * Locking: Synchronize on this HostCatcher object before modifying or iterating.
      */
-    private static long PROBATION_RECOVERY_TIME = 60*1000;
-    
+    private final Set EXPIRED_HOSTS = new HashSet();
+
     /**
-     * Constant for the size of the set of hosts put on probation.  Public for
-     * testing.
+     * We were able to create TCP connections with these hosts, but then they didn't accept our Gnutella connection.
+     * Locking: Synchronize on this HostCatcher object before modifying or iterating.
+     */
+    private final Set PROBATION_HOSTS = new HashSet();
+
+    /**
+     * 1 minute.
+     * After 1 minute, we'll restore hosts that we connected to, but that refused us in the Gnutella handshake.
+     * Not final for testing.
+     */
+    private static long PROBATION_RECOVERY_WAIT_TIME = 60 * 1000;
+
+    /**
+     * 1 minute.
+     * Every minute, we'll restore hosts that we connected to, but that refused us in the Gnutella handshake.
+     * Not final for testing.
+     */
+    private static long PROBATION_RECOVERY_TIME = 60 * 1000;
+
+    /**
+     * 500, we'll keep the PROBATION_HOSTS set to this capacity.
+     * Public for testing.
      */
     public static final int PROBATION_HOSTS_SIZE = 500;
 
     /**
-     * Constant for the size of the set of expired hosts.  Public for
-     * testing.  
+     * 500, we'll keep the EXPIRED_HOSTS set to this capacity.
+     * Public for testing.
      */
     public static final int EXPIRED_HOSTS_SIZE = 500;
-    
-    /**
-     * The scheduled runnable that fetches GWebCache entries if we need them.
-     */
+
+    /** FETCHER is a Bootstrapper object that we schedule to communicate with GWebCache scripts. */
     public final Bootstrapper FETCHER = new Bootstrapper();
-    
+
     /**
-     * The number of threads waiting to get an endpoint.
+     * The number of threads waiting to get an IP address and port number from our list, which is empty.
+     * 
+     * If a thread calls getAnEndpoint() and the list is empty, it will sleep there until another thread adds one to our list.
+     * _catchersWaiting is the count of how many threads are stuck in getAnEndpoint().
      */
     private volatile int _catchersWaiting = 0;
-    
+
     /**
-     * The last allowed time that we can continue ranking pongs.
+     * The time when we're no longer allowed to contact UDP host caches.
+     * 
+     * We'll only let ourselves contact UDP host caches for the first 20 seconds we're trying to connect.
+     * lastAllowedPongRankTime is the time 20 seconds from now, after which we're not allowed to contact UDP host caches.
      */
     private long lastAllowedPongRankTime = 0;
-    
-    /**
-     * The amount of time we're allowed to do pong ranking after
-     * we click connect.
-     */
+
+    /** 20 seconds, the amount of time we're allowed to contact UDP host caches after we click connect. */
     private final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
-    
-    /**
-     * Stop ranking if we have this many connections.
-     */
+
+    /** 5, if we already have 5 connections, we shouldn't bother UDP host caches anymore. */
     private static final int MAX_CONNECTIONS = 5;
-    
-    /**
-     * Whether or not hosts have been added since we wrote to disk.
-     */
+
+    /** True if we've changed the list and need to save the new data to the gnutella.net file. */
     private boolean dirty = false;
-    
+
 	/**
-	 * Creates a new <tt>HostCatcher</tt> instance.
+     * Make the HostCatcher object for the program.
+     * The RouterService makes one HostCatcher for the program.
+     * It saves it as RouterService.catcher.
+     * 
+     * Makes the UniqueHostPinger and UDPHostCache objects.
 	 */
 	public HostCatcher() {
 
+        // Make the UniqueHostPinger object we'll use to send a Gnutella ping packet to a list of IP addresses using UDP
         pinger = new UniqueHostPinger();
+
+        // Make the UDPHostCache object which will keep our list of UDP host caches and let us contact a small group at a time
         udpHostCache = new UDPHostCache(pinger);
     }
 
     /**
-     * Initializes any components required for HostCatcher.
-     * Currently, this schedules occasional services.
+     * Schedules code for the RouterService to run on different intervals.
+     * Every hour, if we're an externally contactable ultrapeer, we'll tell the GWebCache servers our IP address.
+     * Every minute, we'll move the hosts that refused us in the handshake back onto the main list where we can try them again.
+     * Every 2 minutes, the RouterService will call Bootstrapper.run(), which uses the GWebCaches.
+     * 
+     * RouterService.start() calls this when the program runs.
      */
     public void initialize() {
+
+        // Setup the run() methods the RouterService will call
         LOG.trace("START scheduling");
-        
         scheduleServices();
     }
-    
+
+    /**
+     * Schedules code for the RouterService to run on different intervals.
+     * Every hour, if we're an externally contactable ultrapeer, we'll tell the GWebCache servers our IP address.
+     * Every minute, we'll move the hosts that refused us in the handshake back onto the main list where we can try them again.
+     * Every 2 minutes, the RouterService will call Bootstrapper.run(), which uses the GWebCaches.
+     * 
+     * Only initialize() above calls this.
+     */
     protected void scheduleServices() {
-        //Register to send updates every hour (starting in one hour) if we're a
-        //supernode and have accepted incoming connections.  I think we should
-        //only do this if we also have incoming slots, but John Marshall from
-        //Gnucleus says otherwise.
-        Runnable updater=new Runnable() {
+
+        /*
+         * Register to send updates every hour (starting in one hour) if we're a
+         * supernode and have accepted incoming connections.  I think we should
+         * only do this if we also have incoming slots, but John Marshall from
+         * Gnucleus says otherwise.
+         */
+
+        // Define a new Runnable class named updater right here
+        Runnable updater = new Runnable() {
+
+            /**
+             * If we're an externally contactable ultrapeer, tell the GWebCaches our IP address and port number.
+             * The RouterService will have a thread call this run() method every hour.
+             */
             public void run() {
-                if (RouterService.acceptedIncomingConnection() && 
-                    RouterService.isSupernode()) {
-                        byte[] addr = RouterService.getAddress();
-                        int port = RouterService.getPort();
-                        if(NetworkUtils.isValidAddress(addr) &&
-                           NetworkUtils.isValidPort(port) &&
-                           !NetworkUtils.isPrivateAddress(addr)) {
-                            Endpoint e=new Endpoint(addr, port);
-							// This spawns another thread, so blocking is  
-                            // not an issue.
-							gWebCache.sendUpdatesAsync(e);
-						}
+
+                // Only do something if we're an externally contactable ultrapeer
+                if (RouterService.acceptedIncomingConnection() && RouterService.isSupernode()) {
+
+                    // Get our IP address and port number
+                    byte[] addr = RouterService.getAddress();
+                    int port = RouterService.getPort();
+
+                    // If our IP address and port number look valid
+                    if (NetworkUtils.isValidAddress(addr) && NetworkUtils.isValidPort(port) && !NetworkUtils.isPrivateAddress(addr)) {
+
+                        // Wrap them in a new Endpoint object
+                        Endpoint e = new Endpoint(addr, port);
+
+                        /*
+                         * This spawns another thread, so blocking is not an issue.
+                         */
+
+                        // Tell the GWebCache servers our IP address
+                        gWebCache.sendUpdatesAsync(e);
                     }
+                }
             }
         };
-        
-        RouterService.schedule(updater, 
-							   BootstrapServerManager.UPDATE_DELAY_MSEC, 
-							   BootstrapServerManager.UPDATE_DELAY_MSEC);
-        
+
+        // Have the RouterService execute the run() method above 1 hour from now, and every hour after that
+        RouterService.schedule(updater, BootstrapServerManager.UPDATE_DELAY_MSEC, BootstrapServerManager.UPDATE_DELAY_MSEC);
+
+        // Define a new Runnable class named probationRestorer right here
         Runnable probationRestorer = new Runnable() {
+
+            /**
+             * Restore all the hosts we put on probation.
+             * 
+             * If we connected to a remote computer, but then it refused us in the Gnutella handshake, we added it to the PROBATION_HOSTS list.
+             * The RouterService will call this run() method every minute.
+             * It moves all the hosts on the PROBATION_HOSTS list back onto the main list.
+             */
             public void run() {
+
+                // Make a note in the debugging log
                 LOG.trace("restoring hosts on probation");
-                synchronized(HostCatcher.this) {
+
+                // Synchronize on the HostCatcher object before accessing the PROBATION_HOSTS list
+                synchronized (HostCatcher.this) {
+
+                    // Loop through each host in the probation hosts list
                     Iterator iter = PROBATION_HOSTS.iterator();
-                    while(iter.hasNext()) {
+                    while (iter.hasNext()) {
+
+                        // Move it back onto the main list
                         Endpoint host = (Endpoint)iter.next();
                         add(host, false);
                     }
-                    
+
+                    // Now that we've copied all the hosts back on the main list, clear the probation list
                     PROBATION_HOSTS.clear();
                 }
-            } 
+            }
         };
-        // Recover hosts on probation every minute.
-        RouterService.schedule(probationRestorer, 
-            PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
-            
-        // Try to fetch GWebCache's whenever we need them.
-        // Start it immediately, so that if we have no hosts
-        // (because of a fresh installation) we will connect.
-        RouterService.schedule(FETCHER, 0, 2*1000);
+
+        // Have the router service move the hosts on the probation list back to the main list every minute
+        RouterService.schedule(probationRestorer, PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
+
+        /*
+         * Try to fetch GWebCache's whenever we need them.
+         * Start it immediately, so that if we have no hosts
+         * (because of a fresh installation) we will connect.
+         */
+
+        // Have the router service call Bootstrapper.run() every 2 minutes
+        RouterService.schedule(FETCHER, 0, 2 * 1000);
+
+        // We're done setting up the methods that tell GWebCaches our IP address and restore the hosts we put on probation
         LOG.trace("STOP scheduling");
     }
 
     /**
-     * Sends UDP pings to hosts read from disk.
+     * Send a UDP Gnutella ping packet to all the PCs from the gnutella.net file, using them as though they were UDP host caches.
      */
     public void sendUDPPings() {
-        // We need the lock on this so that we can copy the set of endpoints.
-        synchronized(this) {
-            rank(new HashSet(ENDPOINT_SET));
+
+        // We need the lock on this object so that we can copy ENDPOINT_SET
+        synchronized (this) {
+
+            // Send a UDP Gnutella ping packet to all the remote computers in our list (do) does this really try to contact all of them?
+            rank(new HashSet(ENDPOINT_SET)); // This uses these Gnutella PCs as though they were UDP host caches
         }
     }
-    
+
     /**
-     * Rank the collection of hosts.
+     * Send a UDP Gnutella ping packet to the IP addresses of some remote computers running Gnutella software.
+     * These remote computers aren't UDP host caches, but if they're running modern Gnutella software like LimeWire, we can talk to them as though they were.
+     * We don't have TCP socket connections to these remote computers and aren't connecting to them here, we're just using them as UDP host caches.
+     * 
+     * Pong ranking is the process of deciding which remote Gnutella computers to try to connect to.
+     * To get the IP addresses of some highly-ranked ones, we'll talk to some remote Gnutella computers as though they are UDP host caches.
+     * 
+     * @param hosts A list of ExtendedEndpoint objects that have the IP addresses of remote computers on the Internet running Gnutella software
      */
     private void rank(Collection hosts) {
-        
+
+        // If we're not connected to the Gnutella network yet, we can justify bothering remote computers for more IP addresses to try
         if (needsPongRanking()) {
-            
+
+            /*
+             * pinger.rank() sends a UDP Gnutella ping packet to all the IP addreses in the list.
+             * The list can be of UDP host caches, or just regular Gnutella PCs.
+             * LimeWire supports UDP Gnutella ping and pong packets, and will respond just like a UDP host cache.
+             * 
+             * In this method, the hosts list is always a list of regular Gnutella PCs, not UDP host caches.
+             */
+
+            // Send a Gnutella ping packet to the group of computers over UDP
             pinger.rank(
+
+                // The IP addresses of the PCs to contact
                 hosts,
-                // cancel when connected -- don't send out any more pings
+
+                // The pinger will wait a little while, then call this isCancelled() method to see if we actually want to do this
                 new Cancellable() {
+
+                    /**
+                     * Tell the pinger if it should contact the PCs or not.
+                     * It calls this method after waiting for enough time to expire to not contact computers too quickly, but before it contacts this batch.
+                     * 
+                     * @return True if we're fully connected to the Gnutella network, it would be bad to bother more computers, and the pinger should not do this.
+                     *         False if we're still not connected to the Gnutella network, and the pinger should go ahead with the plan.
+                     */
                     public boolean isCancelled() {
+
+                        // If we connected to the Gnutella network while the pinger was waiting, cancel the request
                         return !needsPongRanking();
                     }
                 }
             );
         }
     }
-    
+
     /**
-     * Determines if UDP Pongs need to be sent out.
+     * Determine if we are allowed to contact UDP host caches right now.
+     * 
+     * Pong ranking is the process of deciding which remote Gnutella computers to try to connect to.
+     * To get the IP addresses of some highly-ranked ones, we'll talk to UDP host caches.
+     * 
+     * @return True if we don't have many Gnutella connections yet and talking to some UDP host caches still makes sense
+     *         False if we're fully connected to the Gnutella network, so it would be bad for us to bother UDP host caches now
      */
     private boolean needsPongRanking() {
-        if(RouterService.isFullyConnected())
-            return false;
-        int have = RouterService.getConnectionManager().
-            getInitializedConnections().size();
-        if(have >= MAX_CONNECTIONS)
-            return false;
-            
+
+        // If we have all the Gnutella connections we need, we wouldn't benefit from contacting more UDP host caches, and shouldn't bother them
+        if (RouterService.isFullyConnected()) return false;
+
+        // If we have more than 5 Gnutella connections, we wouldn't benefit from contacting more UDP host caches, and shouldn't bother them
+        int have = RouterService.getConnectionManager().getInitializedConnections().size();
+        if (have >= MAX_CONNECTIONS) return false;
+
+        // There's only a 20 second interval at the start during which we're allowed to contact UDP host caches
         long now = System.currentTimeMillis();
-        if(now > lastAllowedPongRankTime)
-            return false;
+        if (now > lastAllowedPongRankTime) return false; // It's over, we can't bother them
 
+        // Find out how many hosts in our list want to connect to a computer that's in the same network role as us
         int size;
-        if(RouterService.isSupernode())
-            size = FREE_ULTRAPEER_SLOTS_SET.size();
-        else
-            size = FREE_LEAF_SLOTS_SET.size();
+        if (RouterService.isSupernode()) size = FREE_ULTRAPEER_SLOTS_SET.size(); // We're an ultrapeer, set size to the number that want ultrapeer connections
+        else size = FREE_LEAF_SLOTS_SET.size();                                  // We're a leaf, set size to the number that want leaf connections
 
-        int preferred = RouterService.getConnectionManager().
-            getPreferredConnectionCount();
-        
-        return size < preferred - have;
+        // Find out how many ultrapeers we're trying to be connected to
+        int preferred = RouterService.getConnectionManager().getPreferredConnectionCount();
+
+        // Return true if we need more additional connections than we have hosts in the list
+        return size < preferred - have; // The number (preferred - have) is how many additional ultrapeer connections we need
     }
-    
+
     /**
-     * Reads in endpoints from the given file.  This is called by initialize, so
-     * you don't need to call it manually.  It is package access for
-     * testability.
-     *
-     * @modifies this
-     * @effects read hosts from the given file.
+     * Read the gnutella.net file, turning lines of text with IP addresses and port numbers into ExtendedEndpoint objects in the list the HostCatcher keeps.
+     * Package access for testing.
      * 
-     *  
      * @param hostFile A File object holding a path like "C:\Documents and Settings\kfaaborg\.limewire\gnutella.net"
-     * 
-     * @throws FileNotFoundException
-     * @throws IOException
      */
     synchronized void read(File hostFile) throws FileNotFoundException, IOException {
 
-        // Record that we're going to start reading the gnutella.net file in the debugging log
+        // Record in the debugging log that we're going to start reading the gnutella.net file
         LOG.trace("entered HostCatcher.read(File)");
 
         // We'll use a Java BufferedReader to read lines from the file
@@ -475,38 +575,43 @@ public class HostCatcher {
 
                 try {
 
-                    // See if the BootstrapServerManager named gWebCache will accept this line as being about a GWebCache
+                    // See if the gWebCache manager will accept this line as being about a GWebCache
                     gWebCache.addBootstrapServer(new BootstrapServer(line));
 
                     // The gWebCache object accepted it, go to the start of the loop to read the next line
                     continue;
 
-                // The gWebCache object threw a ParseException because line isn't about a GWebCache, ignore it and keep going
+                // The gWebCache object threw a ParseException because line isn't about a GWebCache, keep going
                 } catch (ParseException ignore) {}
 
-                //Is it a normal endpoint?
                 try {
 
+                    // The line is about a UDP host cache or a PC running Gnutella software, add it to the list
                     add(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
 
-                } catch (ParseException pe) {
-
-                    continue;
-                }
+                // If reading that line threw an exception, go to the top of the loop to try the next line
+                } catch (ParseException pe) { continue; }
             }
 
         } finally {
+
+            // Tell the object that manages GWebCache servers for us that we're done telling it about all of those we know about
             gWebCache.bootstrapServersAdded();
+
+            // If the UDPHostCache object's list is empty, add some hard-coded IP addresses
             udpHostCache.hostCachesAdded();
+
             try {
-                if( in != null )
-                    in.close();
-            } catch(IOException e) {}
+
+                // Close the gnutella.net file
+                if (in != null) in.close();
+
+            } catch (IOException e) {}
         }
+
+        // We're done reading the gnutella.net file
         LOG.trace("left HostCatcher.read(File)");
     }
-
-    //done
 
 	/**
      * Writes the gnutella.net file, turning each ExtendedEndpoint in the permanentHosts list into a line of text there.
@@ -580,25 +685,16 @@ public class HostCatcher {
             out.close();
         }
     }
-    
-    //do
 
-    ///////////////////////////// Add Methods ////////////////////////////
-
+    /*
+     * ///////////////////////////// Add Methods ////////////////////////////
+     */
 
     /**
-     * 
-     * 
-     * Attempts to add a pong to this, possibly ejecting other elements from the
-     * cache.  This method used to be called "spy".
-     *
-     * @param pr the pong containing the address/port to add
-     * @param receivingConnection the connection on which we received
-     *  the pong.
-     * @return true iff pr was actually added
+     * Adds all the IP addresses and port numbers in a Gnutella pong packet we've received.
      * 
      * @param pr The Gnutella pong packet that contains the IP address and port number we want to add
-     * 
+     * @return   True if we got some IP addresses and port numbers for our list, false if we didn't add any
      */
     public boolean add(PingReply pr) {
 
@@ -641,69 +737,95 @@ public class HostCatcher {
             QueryUnicaster.instance().addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
 
-        // if the pong carried packed IP/Ports, add those as their own
-        // endpoints.
+        /*
+         * if the pong carried packed IP/Ports, add those as their own
+         * endpoints.
+         */
+
+        // Send a UDP Gnutella ping packet to all the IP addresses in the pong, using those Gnutella PCs as though they were UDP host caches
         rank(pr.getPackedIPPorts());
 
+        // Loop through the IP addresses and port numbers in the pong packet
         for (Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
-
             IpPort ipp = (IpPort)i.next();
+
+            // Make an ExtendedEndpoint out of it
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
 
             // If the IP address and port number look valid, add it to the permanentHosts list which gets written to the gnutella.net file
             if (isValidHost(ep)) add(ep, GOOD_PRIORITY);
         }
 
-        // if the pong carried packed UDP host caches, add those as their
-        // own endpoints.
-        for(Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
+        // If the pong has information about UDP host caches, add them too
+        for (Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
             IpPort ipp = (IpPort)i.next();
+
+            // Make an ExtendedEndpoint out of it
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-            ep.setUDPHostCache(true);
+            ep.setUDPHostCache(true); // Mark it as holding the IP address and port number of a UDP host cache
+
+            // Add it to the list of UDP host caches that the UDPHostCache object keeps
             addUDPHostCache(ep);
         }
-        
-        // if it was a UDPHostCache pong, just add it as that.
-        if(endpoint.isUDPHostCache())
-            return addUDPHostCache(endpoint);
 
-        //Add the endpoint, forcing it to be high priority if marked pong from 
-        //an ultrapeer.
-            
+        // If the pong packet is from a UDPHostCache, add it to our list of UDP host caches
+        if (endpoint.isUDPHostCache()) return addUDPHostCache(endpoint);
+
+        /*
+         * This pong packet is from a Gnutella PC, not a UDP host cache.
+         * Add it to our list, marking it as high priority if it's from an ultrapeer.
+         */
+
+        // An ultrapeer sent us this pong packet
         if (pr.isUltrapeer()) {
-            // Add it to our free leaf slots list if it has free leaf slots and
-            // is an Ultrapeer.
-            if(pr.hasFreeLeafSlots()) {
+
+            // The ultrapeer that sent us this pong packet has free slots for leaves
+            if (pr.hasFreeLeafSlots()) {
+
+                // Add its IP address and port number to our list of remote Gnutella comptuers with free leaf slots
                 addToFixedSizeSet(endpoint, FREE_LEAF_SLOTS_SET);
-                // Return now if the pong is not also advertising free 
-                // ultrapeer slots.
-                if(!pr.hasFreeUltrapeerSlots()) {
+
+                // If the ultrapeer that sent us this pong packet doesn't have free slots for ultrapeers, leave now
+                if (!pr.hasFreeUltrapeerSlots()) {
+
+                    // We added some IP addresses and port numbers to our list
                     return true;
                 }
-            } 
-            
+            }
+
+            /*
+             * An ultrapeer sent us this pong packet.
+             * It doesn't have free slots for leaves.
+             * Or, it does, and also has free slots for ultrapeers.
+             */
+
             // Add it to our free leaf slots list if it has free leaf slots and
             // is an Ultrapeer.
-            if(pr.hasFreeUltrapeerSlots() 
-               || //or if the locales match and it has free locale pref. slots
-               (ApplicationSettings.LANGUAGE.getValue()
-                .equals(pr.getClientLocale()) && pr.getNumFreeLocaleSlots() > 0)) {
+            
+            // If the ultrapeer that sent us this packet has free ultrapeer slots, or if our language preferences match and it has free locale preferenced slots
+            if (pr.hasFreeUltrapeerSlots() || (ApplicationSettings.LANGUAGE.getValue().equals(pr.getClientLocale()) && pr.getNumFreeLocaleSlots() > 0)) {
+
+                // Add its IP address and port number to our list of remote Gnutella computers with free ultrapeer slots
                 addToFixedSizeSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
                 return true;
-            } 
-            
-            return add(endpoint, GOOD_PRIORITY); 
-        } else
-            return add(endpoint, NORMAL_PRIORITY);
-    }
+            }
 
-    //done
+            // Add the IP address of the ultrapeer that sent us this pong packet to our list, marking it as good priority
+            return add(endpoint, GOOD_PRIORITY);
+
+        // The pong packet is from a leaf
+        } else {
+
+            // Add the IP address of the leaf that sent us this pong packet to our list, marking it as normal priority
+            return add(endpoint, NORMAL_PRIORITY);
+        }
+    }
 
     /**
      * Gives an ExtendedEndpoint to the UDPHostCache object.
      * Calls udpHostCache.add(host).
      * 
-     * @param host An ExtendedEndpoint we made from a line from gnutella.net that describes the IP address and port number of a UDP host cache
+     * @param host An ExtendedEndpoint we got from the gnutella.net file or a pong packet that describes the IP address and port number of a UDP host cache
      * @return     True if it added it, false if it already had it
      */
     private boolean addUDPHostCache(ExtendedEndpoint host) {
@@ -712,32 +834,32 @@ public class HostCatcher {
         return udpHostCache.add(host);
     }
 
-    //do
-
     /**
-     * Utility method for adding the specified host to the specified 
-     * <tt>Set</tt>, fixing the size of the set at the pre-defined limit for
-     * the number of hosts with free slots to store.
+     * Add an ExtendedEndpoint to a list of them like FREE_LEAF_SLOTS_SET or FREE_ULTRAPEER_SLOTS_SET.
+     * Only the add() method above uses this method.
      * 
-     * @param host the host to add
-     * @param hosts the <tt>Set</tt> to add it to
+     * @param host  The ExtendedEndpoint to add
+     * @param hosts The Set to add it to
      */
-    private synchronized void addToFixedSizeSet(ExtendedEndpoint host, 
-        Set hosts) {
-        
+    private synchronized void addToFixedSizeSet(ExtendedEndpoint host, Set hosts) {
+
         // Don't allow the free slots host to expand infinitely.
-        if(hosts.add(host) && hosts.size() > 200) {
+        
+        // Add host to the Set, if it took it, and now holds more than 200 objects
+        if (hosts.add(host) && hosts.size() > 200) {
+
+            // Remove one to bring the total back down to 200
             hosts.remove(hosts.iterator().next());
         }
-        
+
         // Also add it to the list of permanent hosts stored on disk.
-        
-        // Add host to the permanentHosts list which gets written to the gnutella.net file
+
+        // Also add host to the permanentHosts list which gets written to the gnutella.net file
         addPermanent(host);
+
+        // Wake up the the thread sleeping in getAnEndpoint(), there will be one for it to get now
         notify();
     }
-    
-    //done
 
     /**
      * Add the given ExtendedEndpoint to the LOCALE_SET_MAP data structure, which organizes the endpoints by their language of choice.
@@ -785,105 +907,91 @@ public class HostCatcher {
             LOCALE_SET_MAP.put(loc, s);
         }
     }
-    
-    //do
 
     /**
-     * Adds a collection of addresses to this.
+     * Add a list of IP addresses and port numbers of remote computers running Gnutella software to the list of them we keep and write to the gnutella.net file.
+     * If the list is full, adding these may eject some.
+     * 
+     * This method is used to bring in the IP addresses and port numbers a remote computer told us during the Gnutella handshake.
+     * ConnectionManager.updateHostCache(HandshakeResponse) calls this.
+     * 
+     * @param endpoints A list of ExtendedEndpoint objects made from the IP addresses and port numbers in a remote computer's handshake headers
      */
     public void add(Collection endpoints) {
+
+        // Send a UDP Gnutella ping packet to these remote computers, using them as though they are UDP host caches
         rank(endpoints);
-        for(Iterator i = endpoints.iterator(); i.hasNext(); )
-            add((Endpoint)i.next(), true);
-            
+
+        // Add all the given ExtendedEndpoint objects to the list with GOOD_PRIORITY
+        for (Iterator i = endpoints.iterator(); i.hasNext(); ) add((Endpoint)i.next(), true); // True to list these has having better than normal priority
     }
 
-
     /**
-     * Adds an address to this, possibly ejecting other elements from the cache.
-     * This method is used when getting an address from headers instead of the
-     * normal ping reply.
-     *
-     * @param pr the pong containing the address/port to add.
-     * @param forceHighPriority true if this should always be of high priority
-     * @return true iff e was actually added
+     * Add an IP address and port number of a remote computer running Gnutella software to the list of them we keep and write to the gnutella.net file.
+     * If the list is full, adding this one will eject one.
+     * 
+     * This method is used to bring in the IP addresses and port numbers a remote computer told us during the Gnutella handshake.
+     * 
+     * @param e                 An ExtendedEndpoint with the IP address and port number to add
+     * @param forceHighPriority True to mark the information as good priority in the list, false to just mark it normal priority
+     * @return                  True if we added e, false if we didn't
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
 
         // Make sure the IP address and port number look valid
         if (!isValidHost(e)) return false;
 
+        // Add the ExtendedEndpoint with good or normal priority, depending on what the caller wants
         if (forceHighPriority) return add(e, GOOD_PRIORITY);
         else                   return add(e, NORMAL_PRIORITY);
     }
 
     /**
-     * Adds an endpoint.  Use this method if the locale of endpoint is known
-     * (used by ConnectionManager.disconnect())
+     * Add the IP address and port number of a remote computer running Gnutella software to the list of them the HostCatcher object keeps.
+     * Use this method if you know the language preference of the remote computer.
+     * ConnectionManager.disconnect() and ConnectionManager.ConnectionFetcher.managedRun() use this method.
+     * 
+     * @param e                 The ExtendedEndpoint to add
+     * @param forceHighPriority True to list with GOOD_PRIORITY, false to use NORMAL_PRIORITY
+     * @param locale            The computer's language preference, like "en" for English
+     * @return                  True if we added e, false if we didn't
      */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
 
         // Make sure the IP address and port number look valid
         if (!isValidHost(e)) return false;
 
-        //need ExtendedEndpoint for the locale
-        if (forceHighPriority) return add(new ExtendedEndpoint(e.getAddress(), 
-                                            e.getPort(),
-                                            locale),
-                       GOOD_PRIORITY);
-        else
-            return add(new ExtendedEndpoint(e.getAddress(),
-                                            e.getPort(),
-                                            locale), 
-                       NORMAL_PRIORITY);
+        // Add the IP address and port number along with the given language preference and priority level
+        if (forceHighPriority) return add(new ExtendedEndpoint(e.getAddress(), e.getPort(), locale), GOOD_PRIORITY);
+        else                   return add(new ExtendedEndpoint(e.getAddress(), e.getPort(), locale), NORMAL_PRIORITY);
     }
 
     /**
-     * Adds the specified host to the host catcher with the specified priority.
+     * Add the IP address and port number of a remote computer running Gnutella software to the list of them the HostCatcher object keeps.
      * 
-     * @param host the endpoint to add
-     * @param priority the priority of the endpoint
-     * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
+     * @param host     The IP address and port number in an Endpoint or ExtendedEndpoint object
+     * @param priority The priority level, like NORMAL_PRIORITY or GOOD_PRIORITY
+     * @return         True if we added e, false if we didn't
      */
     public boolean add(Endpoint host, int priority) {
-        if (LOG.isTraceEnabled())
-            LOG.trace("adding host "+host);
-        if(host instanceof ExtendedEndpoint)
-            return add((ExtendedEndpoint)host, priority);
-        
-        //need ExtendedEndpoint for the locale
-        return add(new ExtendedEndpoint(host.getAddress(), 
-                                        host.getPort()), 
-                   priority);
+
+        // Make a note in the debugging log
+        if (LOG.isTraceEnabled()) LOG.trace("adding host " + host);
+
+        // If the given object is an ExtendedEndpoint, add it
+        if (host instanceof ExtendedEndpoint) return add((ExtendedEndpoint)host, priority);
+
+        // It's just an Endpoint, not an ExtendedEndpoint, make an ExtendedEndpoint from it and add that
+        return add(new ExtendedEndpoint(host.getAddress(), host.getPort()), priority);
     }
 
     /**
-     * 
-     * 
-     * 
-     * Adds e to the permanentHosts list which gets written to the gnutella.net file.
-     * Adds e to the ENDPOINT_SET HashSet
-     * 
-     * 
-     * 
-     * Adds the passed endpoint to the set of hosts maintained, temporary and
-     * permanent. The endpoint may not get added due to various reasons
-     * (including it might be our address itself, we might be connected to it
-     * etc.). Also adding this endpoint may lead to the removal of some other
-     * endpoint from the cache.
-     *
-     * @param e Endpoint to be added
-     * @param priority the priority to use for e, one of GOOD_PRIORITY 
-     *  (ultrapeer) or NORMAL_PRIORITY
-     * @param uptime the host's uptime (or our best guess)
-     *
-     * @return true iff e was actually added 
-     * 
+     * Add e to the permanentHosts list which gets written to the gnutella.net file.
+     * Adds it to the HashSet ENDPOINT_SET and BucketQueue ENDPOINT_QUEUE lists the program keeps in memory.
      * 
      * @param e        An ExtendedEndpoint object
      * @param priority GOOD_PRIORITY if this is the IP address and port number of an ultrapeer, NORMAL_PRIORITY if it's a leaf
-     * 
-     * @return         True if we added it, false if we didn't because we already have it.
+     * @return         True if we added it, false if we didn't because we already have it
      */
     private boolean add(ExtendedEndpoint e, int priority) {
 
@@ -893,27 +1001,34 @@ public class HostCatcher {
         // If the line from gnutella.net described a UDP host cache, have the udpHostCache take it
         if (e.isUDPHostCache()) return addUDPHostCache(e); // The udpHostCache.add(e) returns true if it didn't have it and added it
 
-        //Add to permanent list, regardless of whether it's actually in queue.
-        //Note that this modifies e.
+        /*
+         * Add to permanent list, regardless of whether it's actually in queue.
+         * Note that this modifies e.
+         */
 
         // Add host to the permanentHosts list which gets written to the gnutella.net file
         addPermanent(e);
 
-        boolean ret = false;
+        // Make a boolean for the value we'll return
+        boolean ret = false; // No, we haven't added it yet
 
+        // Make sure only one thread can access the ENDPOINT_QUEUE and ENDPOINT_SET lists at a time
         synchronized (this) {
 
-            
+            // If we don't have this IP address and port number in our list yet
             if (!(ENDPOINT_SET.contains(e))) {
 
+                // We're going to add it, and will return true
                 ret = true;
 
-                //Add to temporary list. Adding e may eject an older point from
-                //queue, so we have to cleanup the set to maintain
-                //rep. invariant.
-                ENDPOINT_SET.add(e);
+                /*
+                 * Add to temporary list. Adding e may eject an older point from
+                 * queue, so we have to cleanup the set to maintain
+                 * rep. invariant.
+                 */
 
                 // Add e to the list of hosts we can try to connect to
+                ENDPOINT_SET.add(e); // Add it to the HashSet we used to detect new duplicates
                 Object ejected = ENDPOINT_QUEUE.insert(e, priority); // It will go into the top of the bucket for the specified priority
 
                 // The bucket for that priority was full, the oldest one at the bottom was pushed out
@@ -923,6 +1038,7 @@ public class HostCatcher {
                     ENDPOINT_SET.remove(ejected);
                 }
 
+                // Wake up the thread waiting in getAnEndpoint(), the list has one for it now
                 this.notify();
             }
         }
@@ -930,6 +1046,7 @@ public class HostCatcher {
         // If in test mode, make sure the lists are OK
         repOk();
 
+        // Return true if we added e, false if we didn't because we already had it
         return ret;
     }
 
@@ -994,17 +1111,25 @@ public class HostCatcher {
         }
     }
 
-    //do
-
-    /** Removes e from permanentHostsSet and permanentHosts. 
-     *  @return true iff this was modified */
+    /**
+     * Remove an IP address and port number from the list of them the HostCatcher object keeps.
+     * 
+     * @param e An ExtendedEndpoint to remove from the list
+     * @return  True if we found e and removed it, false if not found
+     */
     private synchronized boolean removePermanent(ExtendedEndpoint e) {
-        boolean removed1=permanentHosts.remove(e);
-        boolean removed2=permanentHostsSet.remove(e);
-        Assert.that(removed1==removed2,
-                    "Queue "+removed1+" but set "+removed2);
-        if(removed1)
-            dirty = true;
+
+        // Remove e from both the FixedsizePriorityQueue and the HashSet
+        boolean removed1 = permanentHosts.remove(e);
+        boolean removed2 = permanentHostsSet.remove(e);
+
+        // Make sure it was found in both or not found in both
+        Assert.that(removed1 == removed2, "Queue " + removed1 + " but set " + removed2);
+
+        // If we found and removed e, the list has changed and we need to save it to the gnutella.net file
+        if (removed1) dirty = true;
+
+        // Return true if we found and removed e, false if not found
         return removed1;
     }
 
@@ -1019,8 +1144,8 @@ public class HostCatcher {
      * Verifies we haven't failed connecting to this host, and this host hasn't rejected us.
      * 
      * @param host An ExtendedEndpoint with the IP address and port number of a computer that may be online and accepting Gnutella connections right now
-     * @return True if the IP address and port number passes all the tests and we'll add it to our list.
-     *         False if it fails a test and we shouldn't add it.
+     * @return     True if the IP address and port number passes all the tests and we'll add it to our list.
+     *             False if it fails a test and we shouldn't add it.
      */
     private boolean isValidHost(Endpoint host) {
 
@@ -1068,139 +1193,216 @@ public class HostCatcher {
         return true;
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    /*
+     * ///////////////////////////////////////////////////////////////////////
+     */
 
     /**
-     * @modifies this
-     * @effects atomically removes and returns the highest priority host in
-     *  this.  If no host is available, blocks until one is.  If the calling
-     *  thread is interrupted during this process, throws InterruptedException.
-     *  The caller should call doneWithConnect and doneWithMessageLoop when done
-     *  with the returned value.
+     * Picks a host from the list the HostCatcher keeps of IP addreses and port numbers of remote computers running Gnutella software on the internet.
+     * Removes it from the list and returns it.
+     * 
+     * Picks the highest priority host we have.
+     * Takes ultrapeer and leaf mode into account, and also language preferencing.
+     * 
+     * The caller should call doneWithConnect() and doneWithMessageLoop() when done with the returned value. (do)
+     * 
+     * @return An ExtendedEndpoint from our list that you can try to connect to
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
-        while (true)  {
-            try { 
-                // note : if this succeeds with an endpoint, it
-                // will return it.  otherwise, it will throw
-                // the exception, causing us to fall down to the wait.
-                // the wait will be notified to stop when something
-                // is added to the queue
-                //  (presumably from fetchEndpointsAsync working)               
-                
-                return getAnEndpointInternal();
-            } catch (NoSuchElementException e) { }
-            
-            //No luck?  Wait and try again.
+
+        // Loop until we get an ExtendedEndpoint from the list, waiting until another thread adds one if necessary
+        while (true) {
+
             try {
+
+                /*
+                 * note : if this succeeds with an endpoint, it
+                 * will return it.  otherwise, it will throw
+                 * the exception, causing us to fall down to the wait.
+                 * the wait will be notified to stop when something
+                 * is added to the queue
+                 * (presumably from fetchEndpointsAsync working)               
+                 */
+
+                // Pick an ExtendedEndpoint from our list, taking ultrapeer mode and language preferencing into account
+                return getAnEndpointInternal();
+
+            // The list is empty, ignore the exception and keep going
+            } catch (NoSuchElementException e) {}
+
+            // Have this thread wait here and try again when the list isn't empty anymore
+            try {
+
+                // Record that we're one more catcher waiting here in getAnEndpoint() for the program to add one to the list
                 _catchersWaiting++;
-                wait();  //throws InterruptedException
+
+                // Have this thread wait here until add() or addToFixedSizeSet() adds an ExtendedEndpoint for us to grab
+                wait(); // This is the method that can throw InterruptedException
+
+            // Another thread added an ExtendedEndpoint to the list and called notify()
             } finally {
+
+                // Record that we're not waiting here anymore
                 _catchersWaiting--;
+                
+                /*
+                 * Loop back up to the top to try again.
+                 */
             }
         } 
     }
-  
+
     /**
-     * Notifies this that the fetcher has finished attempting a connection to
-     * the given host.  This exists primarily to update the permanent host list
-     * with connection history.
-     *
-     * @param e the address/port, which should have been returned by 
-     *  getAnEndpoint
-     * @param success true if we successfully established a messaging connection 
-     *  to e, at least temporarily; false otherwise 
+     * Call this when you've finished trying to connect to a given host.
+     * Makes a note that we had another success or failure with this host.
+     * That information will get saved into the gnutella.net file.
+     * 
+     * ConnectionManager.ConnectionFetcher.managedRun() calls this.
+     * 
+     * @param e       The IP address and port number you tried to connect to.
+     *                The getAndEndpoint() method gave you this information.
+     * @param success True if you connected, false if you were unable to connect.
      */
     public synchronized void doneWithConnect(Endpoint e, boolean success) {
-        //Normal host: update key.  TODO3: adjustKey() operation may be more
-        //efficient.
-        if (! (e instanceof ExtendedEndpoint))
-            //Should never happen, but I don't want to update public
-            //interface of this to operate on ExtendedEndpoint.
-            return;
-        
-        ExtendedEndpoint ee=(ExtendedEndpoint)e;
 
+        /*
+         * Normal host: update key.  TODO3: adjustKey() operation may be more
+         * efficient.
+         * 
+         * Should never happen, but I don't want to update public
+         * interface of this to operate on ExtendedEndpoint.
+         */
+
+        // Make sure e is an ExtendedEndpoint, not just an Endpoint, and cast it up to one
+        if (!(e instanceof ExtendedEndpoint)) return;
+        ExtendedEndpoint ee = (ExtendedEndpoint)e;
+
+        // Remove it from the list to edit it
         removePermanent(ee);
+
+        // We connected to this computer
         if (success) {
+
+            // Increment the ExtendedEndpoint object's count of successes
             ee.recordConnectionSuccess();
+
+        // We tried to connect to this computer, but our attempt timed out
         } else {
+
+            // Increment our total count of failures
             _failures++;
+
+            // Increment the ExtendedEndpoint object's count of failures
             ee.recordConnectionFailure();
         }
 
-        // Add host to the permanentHosts list which gets written to the gnutella.net file
+        // Add it back to the list
         addPermanent(ee);
     }
 
     /**
-     * @requires this' monitor held
-     * @modifies this
-     * @effects returns the highest priority endpoint in queue, regardless
-     *  of quick-connect settings, etc.  Throws NoSuchElementException if
-     *  this is empty.
+     * Have this HostCatcher pick a host from its list that you can try to connect to.
+     * Removes the ExtendedEndpoint from the list and returns it.
+     * 
+     * Returns the best host we have information about.
+     * Takes our role as an ultrapeer or a leaf into account, as well as matching language preference.
+     * 
+     * Synchronize on this object before calling this method.
+     * Only getAnEndpoint() calls this method.
+     * 
+     * @return An ExtendedEndpoint from our list that you can try connecting to
+     * @throws NoSuchElementException if we don't have an ExtendedEndpoint to return
      */
-    private ExtendedEndpoint getAnEndpointInternal()
-            throws NoSuchElementException {
-        //LOG.trace("entered getAnEndpointInternal");
-        // If we're already an ultrapeer and we know about hosts with free
-        // ultrapeer slots, try them.
-        if(RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+    private ExtendedEndpoint getAnEndpointInternal() throws NoSuchElementException {
+
+        // If we're already an ultrapeer and we know about hosts with free ultrapeer slots, try them
+        if (RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+
+            // From the list of hosts advertising free ultrapeer slots, choose one that matches our language preference
             return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
-                                    
-        } 
-        // Otherwise, if we're already a leaf and we know about ultrapeers with
-        // free leaf slots, try those.
-        else if(RouterService.isShieldedLeaf() && 
-                !FREE_LEAF_SLOTS_SET.isEmpty()) {
+
+        // If we're already a leaf and we know about ultrapeers with free leaf slots, try one of those
+        } else if (RouterService.isShieldedLeaf() && !FREE_LEAF_SLOTS_SET.isEmpty()) {
+
+            // From the list of hosts advertising free leaf slots, choose one that matches our language preference
             return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
-        } 
-        // Otherwise, assume we'll be a leaf and we're trying to connect, since
-        // this is more common than wanting to become an ultrapeer and because
-        // we want to fill any remaining leaf slots if we can.
-        else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+
+        // If we know about remote computers that want more ultrapeer connections
+        } else if (!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+
+            /*
+             * Otherwise, assume we'll be a leaf and we're trying to connect, since
+             * this is more common than wanting to become an ultrapeer and because
+             * we want to fill any remaining leaf slots if we can.
+             */
+
+            // From the list of hosts advertising free ultrapeer slots, choose one that matches our language preference
             return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
-        } 
-        // Otherwise, might as well use the leaf slots hosts up as well
-        // since we added them to the size and they can give us other info
-        else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
-            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
-            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
-            iter.remove();
-            return ee;
+
+        // If we know about remote computers that want more leaf connections
+        } else if (!FREE_LEAF_SLOTS_SET.isEmpty()) {
+
+            /*
+             * Otherwise, might as well use the leaf slots hosts up as well
+             * since we added them to the size and they can give us other info
+             */
+
+            // Pick a host that wants another leaf
+            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();      // Get an iterator on the list of hosts with free leaf slots
+            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next(); // Pick the first one
+            iter.remove();                                       // Remove it from the FREE_LEAF_SLOTS_SET list
+            return ee;                                           // Return it
         }
 
         // If our list of hosts to try to connect to still has at least one ExtendedEndpoint in it
         if (!ENDPOINT_QUEUE.isEmpty()) {
 
-            // Remove and return (do)
-            ExtendedEndpoint e = (ExtendedEndpoint)ENDPOINT_QUEUE.extractMax(); // Remove and return the oldest (do)
+            // Remove and return the lowest priority element that we added most recently
+            ExtendedEndpoint e = (ExtendedEndpoint)ENDPOINT_QUEUE.extractMax(); // Remove and return the lowest priority element that we added most recently
             boolean ok = ENDPOINT_SET.remove(e);                                // Also remove it from the HashSet so it still has exactly the same contents
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");          // Make sure that e was actually in the HashSet
+            return e;                                                           // Return it
 
-            return e;
-
+        // Our list of hosts to try to connect to is empty
         } else {
 
+            // We don't have an ExtendedEndpoint to return, throw an exception instead
             throw new NoSuchElementException();
         }
     }
 
     /**
-     * tries to return an endpoint that matches the locale of this client
-     * from the passed in set.
+     * Picks an ExtendedEndpoint from the list for us to try to connect to.
+     * Chooses one from the set you pass it.
+     * Tries to pick one that matches our language preference.
+     * 
+     * @param base A selection of the ExtendedEndpoints in the list for us to choose from
+     * @return     An ExtendedEndpoint from the list that we can try connecting to
      */
     private ExtendedEndpoint preferenceWithLocale(Set base) {
 
+        // Get our language preference, like "en" for English
         String loc = ApplicationSettings.LANGUAGE.getValue();
 
-        // preference a locale host if we haven't matched any locales yet
-        if(!RouterService.getConnectionManager().isLocaleMatched()) {
-            if(LOCALE_SET_MAP.containsKey(loc)) {
-                Set locales = (Set)LOCALE_SET_MAP.get(loc);
-                for(Iterator i = base.iterator(); i.hasNext(); ) {
-                    Object next = i.next();
-                    if(locales.contains(next)) {
+        /*
+         * Preference a locale host if we haven't matched any locales yet
+         */
+
+        // If we don't have any connections that match our language preference yet
+        if (!RouterService.getConnectionManager().isLocaleMatched()) {
+
+            // If we have an ExtendedEndpoint in our list that matches our language preference
+            if (LOCALE_SET_MAP.containsKey(loc)) {
+
+                // Loop through the ExtendedEndpoint objects in that part of the list
+                Set locales = (Set)LOCALE_SET_MAP.get(loc);         // Point locales at the set of ExtendedEndpoint objects that match our language preference
+                for (Iterator i = base.iterator(); i.hasNext(); ) { // Loop through the ExtendedEndpoint objects in the given list
+                    Object next = i.next();                         // Get the next object in the given list
+
+                    // We found an ExtendedEndpoint object that's both in the given base list, and in the matching language preference list
+                    if (locales.contains(next)) {
+
+                        // Remove it from the given list and the language preference list, and return it
                         i.remove();
                         locales.remove(next);
                         return (ExtendedEndpoint)next;
@@ -1208,160 +1410,273 @@ public class HostCatcher {
                 }
             }
         }
-        
-        Iterator iter = base.iterator();
-        ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
-        iter.remove();
-        return ee;
+
+        /*
+         * We do have some connections that match our language preference, or we don't and,
+         * we couldn't find one from base that did.
+         */
+
+        // Just pick one from the given base list
+        Iterator iter = base.iterator();                     // Get an iterator to move through the base list
+        ExtendedEndpoint ee = (ExtendedEndpoint)iter.next(); // Get the first ExtendedEndpoint from that list
+        iter.remove();                                       // Remove it from the list
+        return ee;                                           // Return it
     }
 
     /**
-     * Accessor for the total number of hosts stored, including Ultrapeers and
-     * leaves.
+     * The number of hosts in our list.
+     * This includes ultrapeers and leaves.
+     * It's a total of the ExtendedEndpoint objects in our main list, and those in our free leaf and free ultrapeer slots lists.
      * 
-     * @return the total number of hosts stored 
+     * @return The total number of computers we have in our list
      */
     public synchronized int getNumHosts() {
-        return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
-            FREE_ULTRAPEER_SLOTS_SET.size();
+
+        // The total number of hosts in our list is the total size of the main list and the free leaf and ultrapeer slots lists
+        return
+            ENDPOINT_QUEUE.size() +          // The number of hosts in the main list, and
+            FREE_LEAF_SLOTS_SET.size() +     // The number of ultrapeers that tell us they want more leaves, and
+            FREE_ULTRAPEER_SLOTS_SET.size(); // The number of ultrapeers that tell us they want more ultrapeers
     }
 
     /**
-     * Returns the number of marked ultrapeer hosts.
+     * The number of ultrapeers in our list.
+     * 
+     * @return The number of computers we have in our list that we know are running in ultrapeer mode
      */
     public synchronized int getNumUltrapeerHosts() {
-        return ENDPOINT_QUEUE.size(GOOD_PRIORITY)+FREE_LEAF_SLOTS_SET.size()+
-            FREE_ULTRAPEER_SLOTS_SET.size();
+
+        // Total up the number of ultrapeers that we have the IP addresses and port numbers of
+        return
+            ENDPOINT_QUEUE.size(GOOD_PRIORITY) + // The number of ultrapeers in the main list, and
+            FREE_LEAF_SLOTS_SET.size() +         // The number of ultrapeers that tell us they want more leaves, and
+            FREE_ULTRAPEER_SLOTS_SET.size();     // The number of ultrapeers that tell us they want more ultrapeers
     }
 
     /**
-     * Returns an iterator of this' "permanent" hosts, from worst to best.
-     * This method exists primarily for testing.  THIS MUST NOT BE MODIFIED
-     * WHILE ITERATOR IS IN USE.
+     * Get an iterator you can use to move down the permanent hosts list.
+     * This is the list we write to the gnutella.net file.
+     * The hosts will be in priority order, from worst to best.
+     * 
+     * This method exists for testing.
+     * Do not modify the list while you are using the iterator.
+     * 
+     * @return An Iterator on the permanentHosts list
      */
     Iterator getPermanentHosts() {
+
+        // Let the caller move down the permanentHosts list for testing purposes
         return permanentHosts.iterator();
     }
 
-    
     /**
-     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
-     * advertised free Ultrapeer slots.  The returned <tt>Collection</tt> is a 
-     * new <tt>Collection</tt> and can therefore be modified in any way.
+     * Make a list of hosts to try that have free ultrapeer slots, choosing ones that match our language preference first.
      * 
-     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
-     *  have advertised they have free ultrapeer slots
+     * @param num How many hosts we want in the list
+     * @return    A new Collection of ExtendedEndpoint objects from the list
      */
     public synchronized Collection getUltrapeersWithFreeUltrapeerSlots(int num) {
-        return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
-                                        ApplicationSettings.LANGUAGE.getValue(),num);
-    }
 
-    public synchronized Collection 
-        getUltrapeersWithFreeUltrapeerSlots(String locale,int num) {
-        return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
-                                        locale,num);
+        // Choose only hosts that want more ultrapeer connections, and pick those that match our language preference first
+        return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET, ApplicationSettings.LANGUAGE.getValue(), num);
     }
-    
 
     /**
-     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
-     * advertised free leaf slots.  The returned <tt>Collection</tt> is a 
-     * new <tt>Collection</tt> and can therefore be modified in any way.
+     * Make a list of hosts to try that have free ultrapeer slots, choosing ones that match the given language preference first.
      * 
-     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
-     *  have advertised they have free leaf slots
+     * @param locale The language preference we want, like "en" for English
+     * @param num    How many hosts we want in the list
+     * @return       A new Collection of ExtendedEndpoint objects from the list
+     */
+    public synchronized Collection getUltrapeersWithFreeUltrapeerSlots(String locale, int num) {
+
+        // Choose only hosts that want more ultrapeer connections, and pick those that match the given language preference first
+        return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET, locale, num);
+    }
+
+    /**
+     * Make a list of hosts to try that have free leaf slots, choosing ones that match our language preference first.
+     * 
+     * @param num How many hosts we want in the list
+     * @return    A new Collection of ExtendedEndpoint objects from the list
      */
     public synchronized Collection getUltrapeersWithFreeLeafSlots(int num) {
-        return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
-                                        ApplicationSettings.LANGUAGE.getValue(),num);
-    }
-    
-    public synchronized Collection
-        getUltrapeersWithFreeLeafSlots(String locale,int num) {
-        return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
-                                        locale,num);
+
+        // Choose only hosts that want more leaf connections, and pick those that match our language preference first
+        return getPreferencedCollection(FREE_LEAF_SLOTS_SET, ApplicationSettings.LANGUAGE.getValue(), num);
     }
 
     /**
-     * preference the set so we try to return those endpoints that match
-     * passed in locale "loc"
+     * Make a list of hosts to try that have free leaf slots, choosing ones that match the given language preference first.
+     * 
+     * @param locale The language preference we want, like "en" for English
+     * @param num    How many hosts we want in the list
+     * @return       A new Collection of ExtendedEndpoint objects from the list
+     */
+    public synchronized Collection getUltrapeersWithFreeLeafSlots(String locale, int num) {
+
+        // Choose only hosts that want more leaf connections, and pick those that match the given language preference first
+        return getPreferencedCollection(FREE_LEAF_SLOTS_SET, locale, num);
+    }
+
+    /**
+     * Prepare a collection of hosts for us to try, choosing from among a given base list and trying to match our language preference.
+     * 
+     * @param base A list of ExtendedEndpoint objects to choose from
+     * @param loc  Our language preference, like "en" for English
+     * @param num  The number of ExtendedEndpoint objects we want in the returned list
+     * @return     A new Collection of ExtendedEndpoint objects chosen from base, most of which match our language preference
      */
     private Collection getPreferencedCollection(Set base, String loc, int num) {
-        if(loc == null || loc.equals(""))
-            loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
+        // If the caller didn't give us a language preference, use our own, like "en" for English
+        if (loc == null || loc.equals("")) loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
+
+        // Make a new empty HashSet called hosts that can hold up to num ExtendedEndpoint objects
         Set hosts = new HashSet(num);
         Iterator i;
 
+        // Point locales at the Set of hosts in our list that have that language preference
         Set locales = (Set)LOCALE_SET_MAP.get(loc);
-        if(locales != null) {
-            for(i = locales.iterator(); i.hasNext() && hosts.size() < num; ) {
+
+        // If we have some hosts with our language preference
+        if (locales != null) {
+
+            // Loop through them, stopping when we run out or hosts grows to hold num
+            for (i = locales.iterator(); i.hasNext() && hosts.size() < num; ) {
                 Object next = i.next();
-                if(base.contains(next))
-                    hosts.add(next);
+
+                // If this host is in the given base list, add it to the hosts list we're putting together
+                if (base.contains(next)) hosts.add(next);
             }
         }
-        
-        for(i = base.iterator(); i.hasNext() && hosts.size() < num;) {
+
+        // Copy ExtendedEndpoint objects from base to hosts to fill up the remaining space
+        for (i = base.iterator(); i.hasNext() && hosts.size() < num;) {
+
             hosts.add(i.next());
         }
-        
+
+        // Return the list we put together
         return hosts;
     }
 
-
     /**
-     * Notifies this that connect() has been called.  This may decide to give
-     * out bootstrap pongs if necessary.
+     * Reads in the gnutella.net file.
+     * 
+     * If it's been more than a week since we've contacted the GWebCache servers, contacts them.
+     * Reads everything from the gnutella.net file.
+     * Starts the 20 second period during which we're allowed to contact UDP host caches, and schedules a call to pinger.resetData() for the end of that period.
+     * 
+     * ConnectionManger.connect() calls this.
+     * 
+     * Notifies this that connect() has been called.
+     * This may decide to give out bootstrap pongs if necessary.
      */
     public synchronized void expire() {
-        //Fetch more GWebCache urls once per session.
-        //(Well, once per connect really--good enough.)
+
+        /*
+         * Fetch more GWebCache urls once per session.
+         * (Well, once per connect really--good enough.)
+         */
+
+        // Get the time now, and the time when we last bothered the GWebCaches
         long now = System.currentTimeMillis();
-        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
-        if( fetched + DataUtils.ONE_WEEK <= now ) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Fetching more bootstrap servers. " +
-                          "Last fetch time: " + fetched);
+        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue(); // Stored in settings so we have data from the previous times the program has run
+
+        // If it's been a week since we bothered the GWebCaches
+        if (fetched + DataUtils.ONE_WEEK <= now ) {
+
+            // Contact the GWebCaches to get more hosts for us to try
+            if (LOG.isDebugEnabled()) LOG.debug("Fetching more bootstrap servers. " + "Last fetch time: " + fetched);
             gWebCache.fetchBootstrapServersAsync();
         }
+
+        // Clear our records of what's happened with the host list, and read it from the gnutella.net file again
         recoverHosts();
+
+        // For the next 20 seconds, we're allowed to contact UDP host caches
         lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
-        
-        // schedule new runnable to clear the set of endpoints that
-        // were pinged while trying to connect
+
+        /*
+         * schedule new runnable to clear the set of endpoints that
+         * were pinged while trying to connect
+         */
+
+        // Have the router service run this code once, 20 seconds from now
         RouterService.schedule(
-                new Runnable() {
-                    public void run() {
-                        pinger.resetData();
-                    }
-                },
-                PONG_RANKING_EXPIRE_TIME,0);
+
+            // Define a new unnamed class that implements the Runnable interface right here
+            new Runnable() {
+
+                /**
+                 * Clear our record of the IP addresses of UDP host caches that we sent UDP Gnutella ping packets to.
+                 * The router service will run this code one time, 20 seconds from now.
+                 */
+                public void run() {
+
+                    // Clear our record of the IP addresses of UDP host caches that we sent UDP Gnutella ping packets to
+                    pinger.resetData();
+                }
+            },
+
+            // Run this once 20 seconds from now
+            PONG_RANKING_EXPIRE_TIME,
+
+            // Don't run it after that
+            0
+        );
     }
 
     /**
-     * @modifies this
-     * @effects removes all entries from this
+     * Clear the list of hosts the HostCatcher keeps.
+     * 
+     * A host is our record of an IP address and port number of a remote computer that may be online running Gnutella software right now.
+     * We keep this information in an ExtendedEndpoint object, and then keep the ExtendedEndpoint objects in lists.
+     * The main lists are ENDPOINT_QUEUE and ENDPOINT_SET.
+     * Some of the hosts in those lists are also listed in FREE_LEAF_SLOTS_SET and FREE_ULTRAPEER_SLOTS_SET.
+     * This method clears all of them.
      */
     public synchronized void clear() {
+
+        // Clear our lists of the computers we know want more leaf and ultrapeer connections
         FREE_LEAF_SLOTS_SET.clear();
         FREE_ULTRAPEER_SLOTS_SET.clear();
-        ENDPOINT_QUEUE.clear();
-        ENDPOINT_SET.clear();
+
+        // Clear our list of hosts itself
+        ENDPOINT_QUEUE.clear(); // The main list of hosts
+        ENDPOINT_SET.clear();   // The same hosts in a HashSet to detect duplicates easily
+        
+        /*
+         * Doesn't delete permanentHosts or permanentHostsSet
+         */
     }
-    
+
+    /**
+     * Get the UniqueHostPinger object the HostCatcher uses to send a UDP Gnutella ping packet to a list of IP addresses and port numbers.
+     * 
+     * @return A reference to the HostCatcher's UniqueHostPinger object
+     */
     public UDPPinger getPinger() {
+
+        // Return a reference to the object we made in the constructor
         return pinger;
     }
 
+    /**
+     * Express the hosts in the list as text.
+     * Lists the hosts in ENDPOINT_QUEUE and permanentHosts.
+     * 
+     * @return Text like (do)
+     */
     public String toString() {
-        return "[volatile:"+ENDPOINT_QUEUE.toString()
-               +", permanent:"+permanentHosts.toString()+"]";
+
+        // Compose text from the ENDPOINT_QUEUE and permanentHosts lists
+        return "[volatile:" + ENDPOINT_QUEUE.toString() + ", permanent:" + permanentHosts.toString() + "]";
     }
 
     /**
-     * False, disable very slow rep checking. (do)
+     * False, don't take the time to check the lists are not corrupted.
      * HostCatcherTest sets this to true for testing purposes.
      */
     static boolean DEBUG = false;
@@ -1370,7 +1685,8 @@ public class HostCatcher {
      * If in test mode, makes sure the lists are OK.
      * 
      * Checks invariants.
-     * Very slow; method body should be enabled for testing purposes only.
+     * Very slow.
+     * The method body should be enabled for testing purposes only.
      */
     protected void repOk() {
 
@@ -1410,25 +1726,23 @@ public class HostCatcher {
             }
         }
     }
-    
+
     /**
      * Reads the gnutella.net file.
+     * Only recoverHosts() below calls this.
      */
     private void readHostsFile() {
-        
-        LOG.trace("Reading Hosts File");
-        
-        // Just gnutella.net
-        try {
-            
-            read(getHostsFile());
-            
-        } catch (IOException e) {
-            LOG.debug(getHostsFile(), e);
-        }
-    }
 
-    //done
+        // Make a note in the log
+        LOG.trace("Reading Hosts File");
+
+        try {
+
+            // Read the gnutella.net file and build the list of hosts this object keeps
+            read(getHostsFile());
+
+        } catch (IOException e) { LOG.debug(getHostsFile(), e); }
+    }
 
     /**
      * The path of the gnutella.net file
@@ -1443,229 +1757,326 @@ public class HostCatcher {
             "gnutella.net");                  // The file name is "gnutella.net"
     }
 
-    //do
-
     /**
-     * Recovers any hosts that we have put in the set of hosts "pending" 
-     * removal from our hosts list.
+     * Clear our records of what's happened with the host list, and read it from the gnutella.net file again.
+     * 
+     * Recovers any hosts that we have put in the set of hosts pending removal from our hosts list.
      */
     public synchronized void recoverHosts() {
+
+        // Make a note in the log
         LOG.debug("recovering hosts file");
-        
-        PROBATION_HOSTS.clear();
-        EXPIRED_HOSTS.clear();
+
+        // Clear our records of which hosts in the list we had trouble connecting to
+        PROBATION_HOSTS.clear(); // Hosts we connected a TCP socket to, but that refused us in the handshake
+        EXPIRED_HOSTS.clear();   // Hosts we couldn't connect a TCP socket to
+
+        // Reset our count of the number of hosts we tried to connect to, but were unable to
         _failures = 0;
+
+        // Reset the system within this HostCatcher that talks to GWebCache servers
         FETCHER.resetFetchTime();
         gWebCache.resetData();
+
+        // Set UDP host caches that have failed 6 times back to 5, and move them back into the main list
         udpHostCache.resetData();
-        
+
+        // Clear our record of IP addresses we sent pings to
         pinger.resetData();
-        
-        // Read the hosts file again.  This will also notify any waiting 
-        // connection fetchers from previous connection attempts.
+
+        /*
+         * Read the hosts file again.  This will also notify any waiting 
+         * connection fetchers from previous connection attempts.
+         */
+
+        // Read the IP addresses and port numbers from the gnutella.net file into the lists this object keeps again
         readHostsFile();
     }
 
     /**
-     * Adds the specified host to the group of hosts currently on "probation."
-     * These are hosts that are on the network but that have rejected a 
-     * connection attempt.  They will periodically be re-activated as needed.
+     * Add the given host to our group of hosts on probation.
+     * These are hosts that we created a TCP connection with, but then rejected us in the Gnutella handshake.
+     * We may use them if we need more hosts.
      * 
-     * @param host the <tt>Endpoint</tt> to put on probation
+     * @param host The ExtendedEndpoint in the list that we connected to and got rejected by
      */
     public synchronized void putHostOnProbation(Endpoint host) {
+
+        // Add the given host to the list
         PROBATION_HOSTS.add(host);
-        if(PROBATION_HOSTS.size() > PROBATION_HOSTS_SIZE) {
+
+        // If we put the 501st host on probation
+        if (PROBATION_HOSTS.size() > PROBATION_HOSTS_SIZE) {
+
+            // Remove one to bring the list back down to 500
             PROBATION_HOSTS.remove(PROBATION_HOSTS.iterator().next());
         }
     }
-    
+
     /**
-     * Adds the specified host to the group of expired hosts.  These are hosts
-     * that we have been unable to create a TCP connection to, let alone a 
-     * Gnutella connection.
+     * Add the given host to our group of expired hosts.
+     * These are hosts that we have been unable to create a TCP connection to.
      * 
-     * @param host the <tt>Endpoint</tt> to expire
+     * @param host The ExtendedEndpoint in the list with the IP address and port number we couldn't connect to
      */
     public synchronized void expireHost(Endpoint host) {
+
+        // Add the given host to the list
         EXPIRED_HOSTS.add(host);
-        if(EXPIRED_HOSTS.size() > EXPIRED_HOSTS_SIZE) {
+
+        // If we just expired the 501st host
+        if (EXPIRED_HOSTS.size() > EXPIRED_HOSTS_SIZE) {
+
+            // Remove one to bring the list back down to 500
             EXPIRED_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
         }
     }
-    
+
     /**
-     * Runnable that looks for GWebCache, UDPHostCache or multicast hosts.
-     * This tries, in order:
-     * 1) Multicasting a ping.
-     * 2) Sending UDP pings to UDPHostCaches.
-     * 3) Connecting via TCP to GWebCaches.
+     * Every 2 minutes, gets more hosts if necessary from external services like UDP host caches and GWebCaches.
+     * 
+     * This nested class named Bootstrapper implements the Runnable interface.
+     * This means it has a run() method.
+     * The RouterService calls run() every 2 minutes.
+     * 
+     * The run() method determines if we need more hosts, and if we've waited long enough since bothering external bootstrapping services.
+     * If so, it gets hosts 3 different ways:
+     * Send a multicast ping packet.
+     * Send a UDP Gnutella ping packet to UDP host caches.
+     * Connect a TCP socket to GWebCache scripts on the Web.
      */
     private class Bootstrapper implements Runnable {
-        
+
         /**
          * The next allowed multicast time.
          */
         private long nextAllowedMulticastTime = 0;
-        
+
         /**
          * The next time we're allowed to fetch via GWebCache.
          * Incremented after each succesful fetch.
          */
         private long nextAllowedFetchTime = 0;
-        
+
         /**
-        /**
-         * The delay to wait before the next time we contact a GWebCache.
-         * Upped after each attempt at fetching.
+         * 20 seconds, then 1 minute 40 seconds, then 8 minutes 20 seconds, and so on.
+         * The time we have to wait before bothering a GWebCache script again.
+         * Each time this expires, we'll make it 5 times longer.
          */
         private int delay = 20 * 1000;
-        
-        /**
-         * How long we must wait after contacting UDP before we can contact
-         * GWebCaches.
-         */
+
+        /** 30 seconds, after we contact UDP host caches, we'll wait 30 seconds before we start contacting GWebCaches. */
         private static final int POST_UDP_DELAY = 30 * 1000;
-        
-        /**
-         * How long we must wait after each multicast ping before
-         * we attempt a newer multicast ping.
-         */
+
+        /** 1 minute, we'll wait a minute between sending multicast pings. */
         private static final int POST_MULTICAST_DELAY = 60 * 1000;
 
         /**
-         * Determines whether or not it is time to get more hosts,
-         * and if we need them, gets them.
+         * Contacts external bootstrapping services to get more hosts for our list.
+         * The RouterService will call this run() method every 2 minutes.
+         * 
+         * Determines if we need more hosts.
+         * Determines if we've waited long enough to give ourselves permission to contact an external bootstrapping service.
+         * If so, calls getHosts(), which tries multicast, UDP host caches, and then GWebCache scripts to get more hosts.
          */
         public synchronized void run() {
-            if (ConnectionSettings.DO_NOT_BOOTSTRAP.getValue())
-                return;
 
-            // If no one's waiting for an endpoint, don't get any.
-            if(_catchersWaiting == 0)
-                return;
-            
-            long now = System.currentTimeMillis();
-            
-            if(udpHostCache.getSize() == 0 &&
-               now < nextAllowedFetchTime &&
-               now < nextAllowedMulticastTime)
-                return;
-                
-            //if we don't need hosts, exit.
-            if(!needsHosts(now))
-                return;
-                
+            // If connection settings prevent us from using GWebCache scripts, do nothing and leave now
+            if (ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) return;
+
+            // If there aren't any threads sleeping in getAnEndpoint(), we don't need to bother a GWebCache for some
+            if (_catchersWaiting == 0) return;
+
+            // Only continue here if we've waited long enough
+            long now = System.currentTimeMillis(); // Get the time right now
+            if (udpHostCache.getSize() == 0 &&     // Our list of UDP host caches is empty, and
+                now < nextAllowedFetchTime &&      // We haven't waited long enough to be able to contact a GWebCache, and
+                now < nextAllowedMulticastTime)    // We haven't waited long enough yet to get hosts through multicast (do)
+                return;                            // Try again later
+
+            // Only continue if our list of hosts is empty
+            if (!needsHosts(now)) return;
+
+            // Get more hosts, asking by multicast, then bothering UDP host caches, and then trying GWebCaches
             getHosts(now);
         }
-        
+
         /**
-         * Resets the nextAllowedFetchTime, so that after we regain a
-         * connection to the internet, we can fetch from gWebCaches
-         * if needed.
+         * Grant permisson to contact GWebCache scripts without waiting.
+         * 
+         * Resets nextAllowedFetchTime.
+         * Do this after we regain our Internet connection.
+         * That way, we'll be able to fetch from GWebCache scripts if we need to.
          */
         void resetFetchTime() {
+
+            // Setting nextAllowedFetchTime to 0 will let us do it the next time we try to
             nextAllowedFetchTime = 0;
         }
-        
+
         /**
          * Determines whether or not we need more hosts.
+         * If our host list is empty, we need more, returns true.
+         * 
+         * @param now The time right now
+         * @return    True if we need more hosts, false if we don't
          */
         private synchronized boolean needsHosts(long now) {
-            synchronized(HostCatcher.this) {
-                return getNumHosts() == 0 ||
-                    (!RouterService.isConnected() && _failures > 100);
+
+            // Synchronize on the HostCatcher object
+            synchronized (HostCatcher.this) {
+
+                // Return true if our list of hosts is empty and we need more
+                return
+                    getNumHosts() == 0 ||                              // If our list is empty, or
+                    (!RouterService.isConnected() && _failures > 100); // We're still not connected, and we've been unable to make more than 100 connections
             }
         }
-        
+
         /**
          * Fetches more hosts, updating the next allowed time to fetch.
+         * 
+         * @param now The time now
          */
         synchronized void getHosts(long now) {
-            // alway try multicast first.
-            if(multicastFetch(now))
-                return;
-                
-            // then try udp host caches.
-            if(udpHostCacheFetch(now))
-                return;
-                
-            // then try gwebcaches
-            if(gwebCacheFetch(now))
-                return;
-                
-            // :-(
+
+            // Always try multicast first
+            if (multicastFetch(now)) return; // multicastFetch() returns true if we sent out a multicast ping, leave now
+
+            // If we were unable to try that way, contact UDP host caches
+            if (udpHostCacheFetch(now)) return; // udpHostCacheFetch() returns true if it contacted some UDP host caches, leave now
+
+            // If we don't know any UDP host caches to contact, bother the GWebCache scripts
+            if (gwebCacheFetch(now)) return;
+
+            /*
+             * Nothing worked.
+             * :-(
+             */
         }
-        
+
         /**
-         * Attempts to fetch via multicast, returning true
-         * if it was able to.
+         * Makes a multicast ping packet, and has the multicast service send it.
+         * 
+         * @return True if we sent out a ping over multicast, false if we didn't.
          */
         private boolean multicastFetch(long now) {
-            if(nextAllowedMulticastTime < now && 
-               !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
+
+            // If we've waited long enough to try multicast again, and connection settings allow it
+            if (nextAllowedMulticastTime < now && !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
+
+                // Make a multicast ping packet, and have the multicast service send it
                 LOG.trace("Fetching via multicast");
                 PingRequest pr = PingRequest.createMulticastPing();
                 MulticastService.instance().send(pr);
+
+                // Prevent us from doing this again until more than a minute from now
                 nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
+                
+                // Report that we did it
                 return true;
             }
+
+            // No, we haven't waited long enough, or settings forbid trying
             return false;
         }
-        
+
         /**
-         * Attempts to fetch via udp host caches, returning true
-         * if it was able to.
+         * Contact the best 5 UDP host caches in our list.
+         * Make a Gnutella ping packet in a UDP packet, and send it to them.
+         * 
+         * @param now The time now
+         * @return    True if we sent a ping to some UDP host caches.
+         *            False if the list of UDP host caches was empty so we didn't do anything.
          */
         private boolean udpHostCacheFetch(long now) {
-            // if we had udp host caches to fetch from, use them.
-            if(udpHostCache.fetchHosts()) {
+
+            // Contact the best 5 UDP host caches in our list
+            if (udpHostCache.fetchHosts()) {
+
+                // Returns true if we've got some in our list, and sent a Gnutella ping message to them
                 LOG.trace("Fetching via UDP");
+
+                // Record the time 30 seconds from now, when we'll let ourselves start contacting GWebCaches if we're still not connected
                 nextAllowedFetchTime = now + POST_UDP_DELAY;
+
+                // Report true, we contacted some UDP host caches
                 return true;
             }
+
+            // Report false, we didn't have any UDP host caches to contact
             return false;
         }
-        
+
         /**
-         * Attempts to fetch via gwebcaches, returning true
-         * if it was able to.
+         * Contact GWebCache scripts to get some IP addresses and port numbers of computers to try to connect to.
+         * 
+         * @param now The time now
+         * @return    True if we contacted some GWebCache scripts, false if we didn't
          */
         private boolean gwebCacheFetch(long now) {
-            // if we aren't allowed to contact gwebcache's yet, exit.
-            if(now < nextAllowedFetchTime)
-                return false;
-            
+
+            // If we haven't waited long enough before bothring the GWebCache scripts again, do nothing and leave now
+            if (now < nextAllowedFetchTime) return false;
+
+            // Tell the GWebCache object to contact the scripts, and find out what state of that process it's in
             int ret = gWebCache.fetchEndpointsAsync();
-            switch(ret) {
+
+            // Do something different depending on the state it reported
+            switch (ret) {
+
+            // It's scheduled an operation to contact the GWebCache scripts
             case BootstrapServerManager.FETCH_SCHEDULED:
+
+                // Make the time we'll have to wait before trying this again 5 times longer than we just waited
                 delay *= 5;
                 nextAllowedFetchTime = now + delay;
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Fetching hosts.  Next allowed time: " +
-                              nextAllowedFetchTime);
+
+                // Return true, the GWebCache object will contact a script to get more hosts
+                if (LOG.isDebugEnabled()) LOG.debug("Fetching hosts.  Next allowed time: " + nextAllowedFetchTime);
                 return true;
+
+            // It didn't schedule a new fetch because it's doing one right now
             case BootstrapServerManager.FETCH_IN_PROGRESS:
+
+                // Return true, the GWebCache object will contact a script to get more hosts
                 LOG.debug("Tried to fetch, but was already fetching.");
                 return true;
+
+            // It can't contact any GWebCaches because we've disabled it
             case BootstrapServerManager.CACHE_OFF:
+
+                // Return false, the GWebCache feature is turned off
                 LOG.debug("Didn't fetch, gWebCache's turned off.");
                 return false;
+
+            // It didn't do anything because it already has gotten too many hosts back from GWebCaches
             case BootstrapServerManager.FETCHED_TOO_MANY:
+
+                // Return false, we've already gotten too many hosts from GWebCache scripts
                 LOG.debug("We've received a bunch of endpoints already, didn't fetch.");
                 MessageService.showError("GWEBCACHE_FETCHED_TOO_MANY");
                 return false;
+
+            // It didn't do anything because we've already contacted each GWebCache we know about at least once
             case BootstrapServerManager.NO_CACHES_LEFT:
+
+                // Return false, we've already bothered all the GWebCache scripts that we know
                 LOG.debug("Already contacted each gWebCache, didn't fetch.");
                 MessageService.showError("GWEBCACHE_NO_CACHES_LEFT");
                 return false;
+
+            // The GWebCache object can only return one of the states listed above
             default:
+
+                // Somehow, it returned something else, throw an exception
                 throw new IllegalArgumentException("invalid value: " + ret);
             }
         }
     }
 
-    //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
-    //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
-    //           
+    /*
+     * Unit test: tests/com/.../gnutella/HostCatcherTest.java
+     *            tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
+     */
 }

@@ -100,7 +100,8 @@ public class BootstrapServerManager {
     /** The maximum number of hosts to try per request.  Prevents us from
      *  consuming all hosts if disconnected.  Non-final for testing. */
     public static int MAX_HOSTS_PER_REQUEST=20;
-    /** The amount of time in milliseconds between update requests. 
+    /** 1 hour.
+     *  The amount of time in milliseconds between update requests. 
      *  Public and non-final for testing purposes. */
     public static int UPDATE_DELAY_MSEC=60*60*1000;
 

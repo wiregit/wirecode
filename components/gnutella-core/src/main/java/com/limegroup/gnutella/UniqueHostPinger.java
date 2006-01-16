@@ -12,6 +12,9 @@ import com.limegroup.gnutella.util.IpPortSet;
 /**
  * Send a Gnutella ping packet to a list of IP addresses using UDP.
  * Makes sure we don't bother the same computer twice.
+ * 
+ * There is only one HostCatcher object, and it only makes one UniqueHostPinger.
+ * So, there is only one of these as the program runs.
  */
 public class UniqueHostPinger extends UDPPinger {
 
@@ -27,6 +30,7 @@ public class UniqueHostPinger extends UDPPinger {
 
     /**
      * Make a new UniqueHostPinger object.
+     * It will let us send a Gnutella ping packet to a list of IP addresses using UDP.
      */
     public UniqueHostPinger() {
 
