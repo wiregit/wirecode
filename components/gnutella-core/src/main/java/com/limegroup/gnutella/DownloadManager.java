@@ -427,10 +427,13 @@ public class DownloadManager implements BandwidthTracker {
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
      *  at any time for checkpointing purposes.  Returns true iff the file was
      *  successfully written. */
-    synchronized boolean writeSnapshot() {
-        List buf=new ArrayList(active.size() + waiting.size());
-        buf.addAll(active);
-        buf.addAll(waiting);
+    boolean writeSnapshot() {
+        List buf;
+        synchronized(this) {
+            buf = new ArrayList(active.size() + waiting.size());
+            buf.addAll(active);
+            buf.addAll(waiting);
+        }
         
         File outFile = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
         //must delete in order for renameTo to work.
