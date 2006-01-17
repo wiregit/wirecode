@@ -491,13 +491,6 @@ public class DownloadManager implements BandwidthTracker {
             return false;
         }
         
-        //Remove entries that are too old or no longer existent.  This is done
-        //before starting downloads in the rare case that a downloader uses one
-        //of these incomplete files.  Then commit changes to disk.  (This last
-        //step isn't really needed.)
-        if (incompleteFileManager.purge(true))
-            writeSnapshot();
-
         // Pump the downloaders through a set, to remove duplicate values.
         // This is necessary in case LimeWire got into a state where a
         // downloader was written to disk twice.
@@ -526,9 +519,27 @@ public class DownloadManager implements BandwidthTracker {
             return true;
         } catch (ClassCastException e) {
             return false;
+        } finally {
+            // Remove entries that are too old or no longer existent and not actively 
+            // downloaded.  
+            if (incompleteFileManager.initialPurge(getActiveDownloadFiles(buf)))
+                writeSnapshot();
         }
     }
      
+    private static Collection getActiveDownloadFiles(List downloaders) {
+        List ret = new ArrayList(downloaders.size());
+        for (Iterator iter = downloaders.iterator(); iter.hasNext();) {
+            Downloader d = (Downloader) iter.next();
+            try {
+                ret.add(FileUtils.getCanonicalFile(d.getFile()));
+            } catch (IOException iox) { 
+                ret.add(d.getFile().getAbsoluteFile());
+            }
+        }
+        
+        return ret;
+    }
     ////////////////////////// Main Public Interface ///////////////////////
            
     /** 
@@ -578,7 +589,7 @@ public class DownloadManager implements BandwidthTracker {
         //prompt or the library.  Note that you could optimize this by just
         //purging files corresponding to the current download, but it's not
         //worth it.
-        incompleteFileManager.purge(false);
+        incompleteFileManager.purge();
 
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
@@ -624,7 +635,7 @@ public class DownloadManager implements BandwidthTracker {
             throw new IllegalArgumentException("magnet not downloadable");
         
         //remove entry from IFM if the incomplete file was deleted.
-        incompleteFileManager.purge(false);
+        incompleteFileManager.purge();
         
         if (fileName == null) {
         	fileName = magnet.getFileNameForSaving();
@@ -684,7 +695,7 @@ public class DownloadManager implements BandwidthTracker {
         //prompt or the library.  Note that you could optimize this by just
         //purging files corresponding to the current download, but it's not
         //worth it.
-        incompleteFileManager.purge(false);
+        incompleteFileManager.purge();
 
         //Instantiate downloader, validating incompleteFile first.
         ResumeDownloader downloader=null;
@@ -718,7 +729,7 @@ public class DownloadManager implements BandwidthTracker {
         if(conflicts(info.getUpdateURN(), info.getUpdateFileName(), (int)info.getSize()))
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
-        incompleteFileManager.purge(false);
+        incompleteFileManager.purge();
         ManagedDownloader d = 
             new InNetworkDownloader(incompleteFileManager, info, dir, now);
         initializeDownload(d);

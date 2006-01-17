@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -299,7 +300,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         }
 
         //After purging, only hashes associated with files that exists remain.
-        ifm.purge(true);
+        ifm.initialPurge(Collections.EMPTY_LIST);
         File file1c=ifm.getFile(rfd1b);
         assertNotEquals(file1b, file1c);
         File file2c=ifm.getFile(rfd2b);
@@ -316,7 +317,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         File file1=ifm.getFile(rfd1);
         File file2=ifm.getFile(rfd2);
         assertEquals(file1, file2);
-        ifm.purge(false);             //Does nothing
+        ifm.purge();             //Does nothing
         File file2b=ifm.getFile(rfd2);
         assertEquals(file2, file2b);
     }

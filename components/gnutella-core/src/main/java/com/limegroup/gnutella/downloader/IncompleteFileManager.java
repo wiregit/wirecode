@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -104,40 +105,58 @@ public class IncompleteFileManager implements Serializable {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    /** 
-     * Deletes incomplete files more than INCOMPLETE_PURGE_TIME days old from
-     * disk.  Then removes entries in this for which there is no file on disk.
+    /**
+     * Removes entries in this for which there is no file on disk.
      * 
-     * @param initialPurge true iff this was just read from disk, i.e., if this
-     *  is being called from readSnapshot() instead of getFiles().  Hashes will
-     *  only be purged if initialPurge==true.
      * @return true iff any entries were purged 
      */
-    public synchronized boolean purge(boolean initialPurge) {
+    public synchronized boolean purge() {
         boolean ret=false;
-        //Remove any files that are old.  
         //Remove any blocks for which the file doesn't exist.
         for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
             File file=(File)iter.next();
-            if (!file.exists() || (isOld(file) && initialPurge) ) {
+            if (!file.exists() ) {
                 ret=true;
                 RouterService.getFileManager().removeFileIfShared(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }
         }
-
-        //Remove any hashes for which the file doesn't exist.  Only do this once
-        //per session--that's critical to resume-by-hash.
-        if (initialPurge) {
-            for (Iterator iter=hashes.values().iterator(); iter.hasNext(); ) {
-                File file=(File)iter.next();
-                if (!file.exists()) {
-                    iter.remove();
-                    ret=true;
-                }
+        return ret;
+    }
+    
+     /** 
+      * Deletes incomplete files more than INCOMPLETE_PURGE_TIME days old from disk
+      * Then removes entries in this for which there is no file on disk.
+      * 
+      * @param activeFiles which files are currently being downloaded.
+      * @return true iff any entries were purged
+      */
+    public synchronized boolean initialPurge(Collection activeFiles) {
+        //Remove any files that are old.
+        boolean ret = false;
+        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+            File file=(File)iter.next();
+            try {
+                file = FileUtils.getCanonicalFile(file);
+            } catch (IOException iox) {
+                file = file.getAbsoluteFile();
+            }
+            if (!file.exists() || (isOld(file) && !activeFiles.contains(file))) {
+                ret=true;
+                RouterService.getFileManager().removeFileIfShared(file);
+                file.delete();
+                iter.remove();
             }
         }
+        for (Iterator iter=hashes.values().iterator(); iter.hasNext(); ) {
+            File file=(File)iter.next();
+            if (!file.exists()) {
+                iter.remove();
+                ret=true;
+            }
+        }
+        
         return ret;
     }
 
