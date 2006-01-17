@@ -2,6 +2,8 @@ package com.limegroup.gnutella.spam;
 
 public class VendorToken extends AbstractToken {
     
+    private static final long serialVersionUID = -3593261726550970847L;
+    
     private static final byte INITAL_GOOD = 20;
     private static final int MAX = 100;
     
@@ -109,6 +111,8 @@ public class VendorToken extends AbstractToken {
      * Alternate locations should not be marked as spam
      */
     private static class ALTVendor extends VendorToken {
+
+        private static final long serialVersionUID = 703031386150175127L;
 
         ALTVendor() {
             super("ALT");
