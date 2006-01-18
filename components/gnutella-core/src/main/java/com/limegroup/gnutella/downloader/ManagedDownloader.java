@@ -687,24 +687,29 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (downloadSHA1 == null)
         	downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
         
-        for(Iterator iter = cachedRFDs.iterator();
-        iter.hasNext() && downloadSHA1 == null;) {
-        	RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-        	downloadSHA1 = rfd.getSHA1Urn();
-        	RouterService.getAltlocManager().addListener(downloadSHA1,this);
+        synchronized(this) {
+            for(Iterator iter = cachedRFDs.iterator();
+            iter.hasNext() && downloadSHA1 == null;) {
+                RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
+                downloadSHA1 = rfd.getSHA1Urn();
+            }
         }
         
-		if (downloadSHA1 != null)
+		if (downloadSHA1 != null) {
+		    RouterService.getAltlocManager().addListener(downloadSHA1,this);
 			propertiesMap.put(SHA1_URN,downloadSHA1);
+        }
 		
 		// make sure all rfds have the same sha1
         verifyAllFiles();
 		
-        validAlts = new HashSet();
-        // stores up to 1000 locations for up to an hour each
-        invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
-        // stores up to 10 locations for up to 10 minutes
-        recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
+        synchronized(altLock) {
+            validAlts = new HashSet();
+            // stores up to 1000 locations for up to an hour each
+            invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
+            // stores up to 10 locations for up to 10 minutes
+            recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
+        }
         synchronized (this) {
             if(shouldInitAltLocs(deserializedFromDisk)) {
                 initializeAlternateLocations();
@@ -731,7 +736,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * the invariants of the current ManagedDownloader, so we must
      * remove the extraneous RFDs.
      */
-    private void verifyAllFiles() {
+    private synchronized void verifyAllFiles() {
         if(downloadSHA1 == null)
             return ;
         
@@ -827,8 +832,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 recentInvalidAlts.clear();
                 invalidAlts.clear();
                 validAlts.clear();
-                if (complete)
+            }
+            if (complete) {
+                synchronized(this) {
                     cachedRFDs.clear(); // the call right before this serializes. 
+                }
             }
         }
         
@@ -2543,8 +2551,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 * Returns the number of alternate locations that this download is using.
 	 */
 	public int getNumberOfAlternateLocations() {
-	    if ( validAlts == null ) return 0;
-        synchronized(altLock) {
+	    synchronized(altLock) {
+	        if ( validAlts == null ) return 0;
             return validAlts.size();
         }
     }
@@ -2554,8 +2562,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * using.
      */
     public int getNumberOfInvalidAlternateLocations() {
-        if ( invalidAlts == null ) return 0;
         synchronized(altLock) {
+            if ( invalidAlts == null ) return 0;
             return invalidAlts.size();
         }
     }
