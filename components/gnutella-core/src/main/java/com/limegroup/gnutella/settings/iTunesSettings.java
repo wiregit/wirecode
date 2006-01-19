@@ -9,12 +9,18 @@ public class iTunesSettings extends LimeProps {
     private iTunesSettings() {}
     
     /**
-     * whether or not player should be enabled.
+     * Whether or not player should be enabled.
      */
     public static BooleanSetting ITUNES_SUPPORT_ENABLED =
         FACTORY.createBooleanSetting("ITUNES_SUPPORT_ENABLED", true);
 
-      
+    
+    /**
+     * The name of the Playlist where songs shall be imported
+     */
+    public static StringSetting ITUNES_PLAYLIST = 
+        FACTORY.createStringSetting("ITUNES_PLAYLIST", "LimeWire");
+    
     /**
      * Supported file types
      */
