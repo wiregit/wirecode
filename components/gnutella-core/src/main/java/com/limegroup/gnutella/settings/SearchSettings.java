@@ -228,54 +228,6 @@ public final class SearchSettings extends LimeProps {
         '\uFF5C', // FULLWIDTH VERTICAL LINE
     };
 
-    /*public static void main(String[] args) throws Exception {
-        Map map = new LinkedHashMap();
-
-        String pathToNorm = "<path>/lib/i18nData/data/NormalizationTest-3.2.0.txt";
-        BufferedReader in = new BufferedReader(new FileReader(pathToNorm));
-        String line = null;
-        while((line = in.readLine()) != null) {
-            if (line.startsWith("#")) {
-                continue;
-            }
-
-            for(int i = 0; i < BAD_CHARS.length; i++) {
-                if (BAD_CHARS[i] >= 0xFF) {
-                    break;
-                }
-
-                String hex = "00" + Integer.toHexString((int)BAD_CHARS[i]).toUpperCase(Locale.US);
-                if (line.indexOf(hex) >= 0) {
-                    Character key = new Character(BAD_CHARS[i]);
-                    List list = (List)map.get(key);
-                    if (list == null) {
-                        list = new ArrayList();
-                        map.put(key, list);
-                    }
-
-                    String theChar = "'\\u" + line.substring(0, 4) + "'";
-                    String theComment = line.substring(line.lastIndexOf(')')+1);
-                    list.add(theChar + ", //" + theComment);
-                }
-            }
-        }
-        in.close();
-
-        StringBuffer buffer = new StringBuffer();
-        Iterator it = map.keySet().iterator();
-        while(it.hasNext()) {
-            Character ch = (Character)it.next();
-            List lines = (List)map.get(ch);
-
-            buffer.append("// Characters that turn into '" + ch + "'\n");
-            for(int i = 0; i < lines.size(); i++) {
-                buffer.append(lines.get(i)).append("\n");
-            }
-            buffer.append("\n");
-        }
-        System.out.println(buffer);
-    }*/
-
     public static final int DISPLAY_JUNK_IN_PLACE = 0;
     public static final int MOVE_JUNK_TO_BOTTOM = 1;
     public static final int HIDE_JUNK = 2;
