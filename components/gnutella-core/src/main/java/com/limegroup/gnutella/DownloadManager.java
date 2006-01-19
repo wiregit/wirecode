@@ -531,11 +531,14 @@ public class DownloadManager implements BandwidthTracker {
         List ret = new ArrayList(downloaders.size());
         for (Iterator iter = downloaders.iterator(); iter.hasNext();) {
             Downloader d = (Downloader) iter.next();
-            try {
-                ret.add(FileUtils.getCanonicalFile(d.getFile()));
-            } catch (IOException iox) { 
-                ret.add(d.getFile().getAbsoluteFile());
-            }
+	    File f = d.getFile();
+	    if (f != null) {
+                try {
+                    ret.add(FileUtils.getCanonicalFile(f));
+                } catch (IOException iox) { 
+                    ret.add(f.getAbsoluteFile());
+                }
+	    }
         }
         
         return ret;
