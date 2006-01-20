@@ -451,7 +451,7 @@ public class Connection implements IpPort {
 
     /**
      * Send the remote computer messages about the vendor-specific messages we understand.
-     * ConnectionManager.connectionInitialized() calls this after we've connected to the remote computer for a little while.
+     * ConnectionManager.connectionInitialized() calls this after we've connected to the remote computer and finished the Gnutella handshake.
      */
     protected void postInit() {
 

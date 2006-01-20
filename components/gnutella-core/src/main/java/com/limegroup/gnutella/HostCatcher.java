@@ -1200,6 +1200,7 @@ public class HostCatcher {
     /**
      * Picks a host from the list the HostCatcher keeps of IP addreses and port numbers of remote computers running Gnutella software on the internet.
      * Removes it from the list and returns it.
+     * If the list is empty, blocks here until another thread adds an IP address and port number for us to take. 
      * 
      * Picks the highest priority host we have.
      * Takes ultrapeer and leaf mode into account, and also language preferencing.
@@ -1258,10 +1259,12 @@ public class HostCatcher {
      * That information will get saved into the gnutella.net file.
      * 
      * ConnectionManager.ConnectionFetcher.managedRun() calls this.
+     * If the remote computer refuses us in the Gnutella handshake, managedRun() still calls doneWithConnect(e, true).
+     * It passes true because we established a TCP socket connection.
      * 
      * @param e       The IP address and port number you tried to connect to.
      *                The getAndEndpoint() method gave you this information.
-     * @param success True if you connected, false if you were unable to connect.
+     * @param success True if you established an outgoing TCP socket connection, false if you were unable to connect.
      */
     public synchronized void doneWithConnect(Endpoint e, boolean success) {
 

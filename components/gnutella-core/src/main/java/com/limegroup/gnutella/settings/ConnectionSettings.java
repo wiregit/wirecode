@@ -72,9 +72,9 @@ public final class ConnectionSettings extends LimeProps {
      * This means we'd like between 80% and 90% of our connections to be running LimeWire.
      */
 
-    /** 0.2, the maximum ratio of non-LimeWire peers to allow. */
+	/** 0.2, we want less than 20% of our ultrapeers to be running something other than LimeWire. */
     public static final FloatSetting MAX_NON_LIME_PEERS = FACTORY.createSettableFloatSetting("MAX_NON_LIME_PEERS", 0.2f, "ConnectionSettings.maxLimePeers", 0.5f, 0f);
-    /** 0.1, the minimum ratio of non-LimeWire peers to allow. */
+    /** 0.1, we want more than 10% of our ultrapeers to be running something other than LimeWire. */
     public static final FloatSetting MIN_NON_LIME_PEERS = FACTORY.createSettableFloatSetting("MIN_NON_LIME_PEERS", 0.1f, "ConnectionSettings.minLimePeers", 0.2f, 0f);
 
     /**

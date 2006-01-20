@@ -2007,7 +2007,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
 	}
 
     /**
-     * Configure the HandshakeResponder to refuse or not refuse foreigh language computers.
+     * Configure the HandshakeResponder to refuse or not refuse foreign language computers.
      * ConnectionFetcher.managedRun() calls this and always passes it false.
      * 
      * @param b False to not have the HandshakeResponder refuse foreign language remote computers

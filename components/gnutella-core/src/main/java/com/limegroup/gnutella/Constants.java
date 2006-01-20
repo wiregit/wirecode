@@ -8,9 +8,10 @@ package com.limegroup.gnutella;
 * @author  Anurag Singla
 */
 public final class Constants {
-    
+
     private Constants() {}
 
+    /** "," a comma in a string, used as a separator in text. */
     public static final String ENTRY_SEPARATOR = ",";
     
     /**

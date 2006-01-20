@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella;
 
@@ -39,6 +39,8 @@ import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.SystemUtils;
 
 /**
+ * ConnectionManager holds the list of remote computers running Gnutella software that we're connected to.
+ * 
  * The list of all ManagedConnection's.  Provides a factory method for creating
  * user-requested outgoing connections, accepts incoming connections, and
  * fetches "automatic" outgoing connections as needed.  Creates threads for
@@ -47,27 +49,27 @@ import com.limegroup.gnutella.util.SystemUtils;
  * Because this is the only list of all connections, it plays an important role
  * in message broadcasting.  For this reason, the code is highly tuned to avoid
  * locking in the getInitializedConnections() methods.  Adding and removing
- * connections is a slower operation.<p>
+ * connections is a slower operation.
  *
- * LimeWire follows the following connection strategy:<br>
+ * LimeWire follows the following connection strategy:
  * As a leaf, LimeWire will ONLY connect to 'good' Ultrapeers.  The definition
  * of good is constantly changing.  For a current view of 'good', review
  * HandshakeResponse.isGoodUltrapeer().  LimeWire leaves will NOT deny
  * a connection to an ultrapeer even if they've reached their maximum
  * desired number of connections (currently 4).  This means that if 5
  * connections resolve simultaneously, the leaf will remain connected to all 5.
- * <br>
+ * 
  * As an Ultrapeer, LimeWire will seek outgoing connections for 5 less than
- * the number of it's desired peer slots.  This is done so that newcomers
+ * the number of its desired peer slots.  This is done so that newcomers
  * on the network have a better chance of finding an ultrapeer with a slot
  * open.  LimeWire ultrapeers will allow ANY other ultrapeer to connect to it,
  * and to ensure that the network does not become too LimeWire-centric, it
  * reserves 3 slots for non-LimeWire peers.  LimeWire ultrapeers will allow
  * ANY leaf to connect, so long as there are atleast 15 slots open.  Beyond
  * that number, LimeWire will only allow 'good' leaves.  To see what consitutes
- * a good leave, view HandshakeResponse.isGoodLeaf().  To ensure that the
+ * a good leaf, view HandshakeResponse.isGoodLeaf().  To ensure that the
  * network does not remain too LimeWire-centric, it reserves 3 slots for
- * non-LimeWire leaves.<p>
+ * non-LimeWire leaves.
  *
  * ConnectionManager has methods to get up and downstream bandwidth, but it
  * doesn't quite fit the BandwidthTracker interface.
@@ -75,47 +77,56 @@ import com.limegroup.gnutella.util.SystemUtils;
 public class ConnectionManager {
 
     /**
-     * Timestamp for the last time the user selected to disconnect.
+     * The time when the user disconnected the program from the Gnutella network.
+     * 
+     * Initialized to -1.
+     * connect() sets to 0.
+     * disconnect() sets to now.
      */
     private volatile long _disconnectTime = -1;
-    
+
     /**
-     * Timestamp for the last time we started trying to connect
+     * The time when the program started trying to connect to the Gnutella network.
+     * 
+     * Initialized to Long.MAX_VALUE.
+     * connect() sets _connectTime to now.
+     * disconnect() sets _connectTime to Long.MAX_VALUE.
      */
     private volatile long _connectTime = Long.MAX_VALUE;
 
     /**
-     * Timestamp for the time we began automatically connecting.  We stop
-     * trying to automatically connect if the user has disconnected since that
-     * time.
+     * The time when we realized we had lost our Internet connection, and started trying to connect every 2 minutes.
+     * 
+     * Initialized to 0.
+     * noInternetConnection() sets to now.
      */
     private volatile long _automaticConnectTime = 0;
 
     /**
-     * Flag for whether or not the auto-connection process is in effect.
+     * True if we've lost our Internet connection, and are trying to connect every 2 minutes.
+     * 
+     * Initialized to false.
+     * noInternetConnection() sets to true.
      */
     private volatile boolean _automaticallyConnecting;
 
     /**
-     * Timestamp of our last successful connection.
+     * The time when we last successfully opened a TCP socket to a remote computer.
+     * ConnectionFetcher.managedRun() calls this after initializeFetchedConnection() has the ManagedConnection object connect.
      */
     private volatile long _lastSuccessfulConnect = 0;
 
     /**
-     * Timestamp of the last time we checked to verify that the user has a live
-     * Internet connection.
+     * The time when we started checking to see if we have a live Internet connection.
+     * ConnectionFetcher.managedRun() calls this when it realizes we've had a lot of trouble connecting, and starts the ConnectionChecker.
      */
     private volatile long _lastConnectionCheck = 0;
 
-
-    /**
-     * Counter for the number of connection attempts we've made.
-     */
+    /** Counter for the number of connection attempts we've made. */
     private volatile static int _connectionAttempts;
 
+    /** A log that we can write lines of text into as the code here runs. */
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
-
-    //done
 
     /*
      * Tour Point
@@ -129,70 +140,63 @@ public class ConnectionManager {
     /** 3, as a leaf, we'll keep 3 connections up to ultrapeers. */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
 
-    //do
-
-    /**
-     * How many connect back requests to send if we have a single connection
-     */
+    /** 3, if we only have 1 ultrapeer that understands the TCP connect back vendor message, we'll send it 3 of them. */
     public static final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
-
-    //done
 
     /** If the user leaves the computer for a half hour, we'll drop down to just 1 ultrapeer connection instead of 3. */
     private static final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
 
-    //do
-    
     /**
-     * The number of leaf connections reserved for non LimeWire clients.
-     * This is done to ensure that the network is not solely LimeWire centric.
+     * 2, as an ultrapeer, we'll try to get 2 leaves that aren't running LimeWire.
+     * We want some diversity amongst our leaves.
+     * If all our leaves were LimeWire, the Gnutella network could become LimeWire-centric.
      */
     public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
-
-    //done
 
     /** The number of ultrapeers we should have, 32 if we're an ultrapeer or 3 if we're a leaf. */
     private volatile int _preferredConnections = -1; // Initialize to -1 to indicate the number isn't set yet
 
-    //do
-    
     /**
-     * Reference to the <tt>HostCatcher</tt> for retrieving host data as well
-     * as adding host data.
+     * The HostCatcher object that keeps the list of IP addresses of remote computers like us running Gnutella software.
+     * We'll give it the IP addresses we encounter, and ask it for some to try to connect to.
      */
     private HostCatcher _catcher;
 
-    /** Threads trying to maintain the NUM_CONNECTIONS.
-     *  LOCKING: obtain this. */
-    private final List /* of ConnectionFetcher */ _fetchers =
-        new ArrayList();
-    /** Connections that have been fetched but not initialized.  I don't
-     *  know the relation between _initializingFetchedConnections and
-     *  _connections (see below).  LOCKING: obtain this. */
-    private final List /* of ManagedConnection */ _initializingFetchedConnections =
-        new ArrayList();
+    /**
+     * A list of the ConnectionFetcher threads we have running right now.
+     * Each one is trying to connect to a single remote Gnutella computer.
+     * 
+     * Synchronize on this ConnectionManager object before using this list.
+     */
+    private final List _fetchers = new ArrayList(); // We'll put ConnectionFetcher threads in this ArrayList
 
     /**
-     * dedicated ConnectionFetcher used by leafs to fetch a
-     * locale matching connection
-     * NOTE: currently this is only used by leafs which will try
-     * to connect to one connection which matches the locale of the
-     * client.
+     * A list of ManagedConnection objects that we have ConnectionFetcher threads trying to open.
+     * We haven't done the Gnutella handshake with these remote computers yet.
+     * 
+     * Synchronize on this ConnectionManager object before using this list.
+     */
+    private final List _initializingFetchedConnections = new ArrayList(); // We'll put ManagedConnection objects in this ArrayList
+
+    /**
+     * A ConnectionFetcher thread that will refuse foreign language remote computers in the Gnutella handshake.
+     * We'll use _dedicatedPrefFetcher when we're a leaf and need an ultrapeer that matches our language.
      */
     private ConnectionFetcher _dedicatedPrefFetcher;
 
-    /**
-     * boolean to check if a locale matching connection is needed.
-     */
+    /** True until we have a connection to a remote computer with the same language preference as us. */
     private volatile boolean _needPref = true;
-    
+
     /**
-     * boolean of whether or not the interruption of the prefFetcher thread
-     * has been scheduled.
+     * True when the RouterService has some code scheduled to kill the language preferenced ConnectionFetcher 15 seconds from now.
+     * 
+     * adjustConnectionFetchers() may find that we're a leaf with at least one connection up to an ultrapeer, but none that speak our language yet.
+     * If it does, it will make a special ConnectionFetcher thread that will refuse foreign language computers in the Gnutella handshake.
+     * It will also schedule some code with the RouterService that will kill the thread 15 seconds later.
      */
     private boolean _needPrefInterrupterScheduled = false;
 
-    /**
+    /*
      * List of all connections.  The core data structures are lists, which allow
      * fast iteration for message broadcast purposes.  Actually we keep a couple
      * of lists: the list of all initialized and uninitialized connections
@@ -226,15 +230,13 @@ public class ConnectionManager {
      *   much slower.
      */
 
-    //done
-
     /*
      * TODO:: why not use sets here??
      */
 
     /** _connections lists all the ultrapeers we're trying to connect to or are connected to. */
     private volatile List _connections                  = Collections.EMPTY_LIST; // We'll put ManagedConnection objects in this List
-    /** _initializedConnections is a list of all the ultrapeers we have open connections to. */
+    /** _initializedConnections is a list of all the ultrapeers we've finished the Gnutella handshake with. */
     private volatile List _initializedConnections       = Collections.EMPTY_LIST; // We'll put ManagedConnection objects in this List
     /** _initializedClientConnections is a list of all our leaves. */
     private volatile List _initializedClientConnections = Collections.EMPTY_LIST; // We'll put ManagedConnection objects in this List
@@ -287,24 +289,26 @@ public class ConnectionManager {
      */
     public ConnectionManager() {}
 
-    //do
-    
     /**
-     * Links the ConnectionManager up with the other back end pieces and
-     * launches the ConnectionWatchdog and the initial ConnectionFetchers.
+     * Schedule a method that will keep _preferredConnections, the number of ultrapeer connections we'll try to get, up to date.
      * 
-     * 
+     * Has the RouterService call setPreferredConnections() every second.
+     * This method will set _preferredConnections, the number of ultrapeer connections we will try to get.
+     * The value is 32 if we're an ultrapeer, 3 if we're a leaf, or 1 if we're a leaf and the user has been gone for a half hour.
      * 
      * RouterService.start() calls this.
-     * 
      */
     public void initialize() {
+
+        // Get and save a reference to the HostCatcher the RouterService made when the program started
         _catcher = RouterService.getHostCatcher();
 
-        // schedule the Runnable that will allow us to change
-        // the number of connections we're shooting for if
-        // we're idle.
-        
+        /*
+         * schedule the Runnable that will allow us to change
+         * the number of connections we're shooting for if
+         * we're idle.
+         */
+
         // If the operating system we're running on can tell us when the user has stepped away from the computer
         if (SystemUtils.supportsIdleTime()) {
 
@@ -317,108 +321,156 @@ public class ConnectionManager {
                     // The RouterService will create a thread, and that thread will call this run() method
                     public void run() {
 
-                        
-                        
+                        // Set _preferredConnections to 32 if we're an ultrapeer, or 3 if we're a leaf, or 1 if we're a leaf and the user has been gone for a half hour
                         setPreferredConnections();
                     }
                 },
-                
+
+                // The RouterService will do this one second from now
                 1000,
+
+                // After that, it will do it every second
                 1000
             );
         }
     }
 
-
     /**
-     * Create a new connection, blocking until it's initialized, but launching
-     * a new thread to do the message loop.
+     * Connect to an IP address, do the Gnutella handshake, get ready to exchange Gnutella packets, and return a new ManagedConnection object.
+     * 
+     * This blocks while we're waiting to make the TCP socket connection, and while we're doing the Gnutella handshake.
+     * Then, it starts a new thread named "OutgoingConnector" to call startConnection(), which sets up the chain of readers.
+     * 
+     * Only RouterService.connectToHostBlocking(hostname, portnum) calls this.
+     * 
+     * @param hostname The IP address of a remote computer on the Internet that may be running Gnutella software right now, like "67.163.131.22"
+     * @param portnum  The port number we can contact the remote computer on
+     * @return         A new ManagedConnection object that represents the newly connected remote computer
      */
-    public ManagedConnection createConnectionBlocking(String hostname,
-        int portnum)
-		throws IOException {
-        ManagedConnection c =
-			new ManagedConnection(hostname, portnum);
+    public ManagedConnection createConnectionBlocking(String hostname, int portnum) throws IOException {
 
-        // Initialize synchronously
-        initializeExternallyGeneratedConnection(c);
-        // Kick off a thread for the message loop.
-        Thread conn =
-            new ManagedThread(new OutgoingConnector(c, false), "OutgoingConnector");
-        conn.setDaemon(true);
-        conn.start();
+        // Make a new ManagedConnection object from the given IP address and port number
+        ManagedConnection c = new ManagedConnection(hostname, portnum);
+
+        // Connect to the IP address, do the Gnutella handshake, setup compression, and send the remote computer a ping packet
+        initializeExternallyGeneratedConnection(c); // Does this synchronously, execution blocks here while we're waiting to connect
+
+        // Start a new thread called "OutgoingConnector" that will build the chain of readers
+        Thread conn = new ManagedThread(new OutgoingConnector(c, false), "OutgoingConnector"); // False, we've already called initializeExternallyGeneratedConnection(c)
+        conn.setDaemon(true); // Let the program exit if this thread is still running
+        conn.start(); // Have the thread run OutgoingConnector.run(), which calls startConnection()
+
+        // Return the ManagedConnection object that's connected and ready to send and receive Gnutella packets
         return c;
     }
 
     /**
-     * Create a new connection, allowing it to initialize and loop for messages
-     * on a new thread.
+     * Connect to an IP address, do the Gnutella handshake, and get ready to exchange Gnutella packets.
+     * 
+     * This doesn't block.
+     * It makes a thread called "OutgoingConnectionThread" which connects to the new computer.
+     * 
+     * Only RouterService.connectToHostAsynchronously(hostname, portnum) calls this.
+     * 
+     * @param hostname The IP address of a remote computer on the Internet that may be running Gnutella software right now, like "67.163.131.22"
+     * @param portnum  The port number we can contact the remote computer on
      */
-    public void createConnectionAsynchronously(
-            String hostname, int portnum) {
+    public void createConnectionAsynchronously(String hostname, int portnum) {
 
-		Runnable outgoingRunner =
-			new OutgoingConnector(new ManagedConnection(hostname, portnum),
-								  true);
-        // Initialize and loop for messages on another thread.
+        // Make a new ManagedConnection object with the given IP address and port number, and put it in a new OutgoingConnector object
+		Runnable outgoingRunner = new OutgoingConnector(new ManagedConnection(hostname, portnum), true); // True, have the thread do the connecting instead of us
 
-		Thread outgoingConnectionRunner =
-			new ManagedThread(outgoingRunner, "OutgoingConnectionThread");
-		outgoingConnectionRunner.setDaemon(true);
-		outgoingConnectionRunner.start();
+        /*
+         * Initialize and loop for messages on another thread.
+         */
+
+        // Start a new thread called "OutgoingConnectionThread" that will connect a socket, do the Gnutella handshake, and make the chain of readers
+		Thread outgoingConnectionRunner = new ManagedThread(outgoingRunner, "OutgoingConnectionThread");
+		outgoingConnectionRunner.setDaemon(true); // Let the program exit if this thread is still running
+		outgoingConnectionRunner.start(); // Have the thread run OutgoingConnector.run()
     }
 
-
     /**
+     * Make a ManagedConnection object, add it to our list, do the Gnutella handshake, and get ready to exchange Gnutella packets.
+     * 
+     * Acceptor.ConnectionDispatchRunner.run() calls this.
+     * A remote computer connected to our listening socket, and said "GNUTELLA" first.
+     * The Acceptor calls this acceptConnection(socket) method, giving it the new connection socket.
+     * This method makes a ManagedConnection object, adds it to our list, does the Gnutella handshake, and makes the chain of readers.
+     * 
      * Create an incoming connection.  This method starts the message loop,
      * so it will block for a long time.  Make sure the thread that calls
      * this method is suitable doing a connection message loop.
      * If there are already too many connections in the manager, this method
      * will launch a RejectConnection to send pongs for other hosts.
+     * 
+     * @param socket A LimeWire NIOSocket object that contains the connection socket Java gave us when the remote computer connected to our listening socket
      */
-     void acceptConnection(Socket socket) {
-         //1. Initialize connection.  It's always safe to recommend new headers.
-         Thread.currentThread().setName("IncomingConnectionThread");
-         ManagedConnection connection = new ManagedConnection(socket);
-         try {
-             initializeExternallyGeneratedConnection(connection);
-         } catch (IOException e) {
-			 connection.close();
-             return;
-         }
+    void acceptConnection(Socket socket) {
 
-         try {
-			 startConnection(connection);
-         } catch(IOException e) {
-             // we could not start the connection for some reason --
-             // this can easily happen, for example, if the connection
-             // just drops
-         }
-     }
+        /*
+         * 1. Initialize connection. It's always safe to recommend new headers.
+         */
 
+        // Rename this thread "IncommingConnectionThread"
+        Thread.currentThread().setName("IncomingConnectionThread");
+
+        // Make a new ManagedConnection object from the given connection socket
+        ManagedConnection connection = new ManagedConnection(socket); // Marks the new ManagedConnection as incoming
+
+        try {
+
+            // Do the Gnutella handshake, setup compression, and send the remote computer a ping packet
+            initializeExternallyGeneratedConnection(connection); // Won't connect because this ManagedConnection is incoming
+
+        // The remote computer refused us in the Gnutella handshake
+        } catch (IOException e) {
+
+            // Close the socket connection to this remote computer, and leave
+            connection.close();
+            return;
+        }
+
+        try {
+
+            // Rename this thread "MessageLoopingThread" and make the chain of readers
+            startConnection(connection);
+        
+        // We lost the socket connection
+        } catch (IOException e) {
+
+            /*
+             * we could not start the connection for some reason --
+             * this can easily happen, for example, if the connection
+             * just drops
+             */
+        }
+    }
 
     /**
-     * Removes the specified connection from currently active connections, also
-     * removing this connection from routing tables and modifying active
-     * connection fetchers accordingly.
-     *
-     * @param mc the <tt>ManagedConnection</tt> instance to remove
+     * Close the connection and remove it from our lists.
+     * 
+     * Removes the given connection from our currently active connections.
+     * Removes the connection from routing tables.
+     * If we need another connection, starts a new ConnectionFetcher thread.
+     * 
+     * @param mc The ManagedConnection to close and remove
      */
     public synchronized void remove(ManagedConnection mc) {
-
-        // True, let this method remove a connection
-		if (!ConnectionSettings.REMOVE_ENABLED.getValue()) return; // This would only be disabled for tests
-
+        
+        // Make sure settings allow us to remove a connection, REMOVE_ENABLED is only false for testing
+        if (!ConnectionSettings.REMOVE_ENABLED.getValue()) return;
+        
+        // Close the connection and remove it from our lists
         removeInternal(mc);
-
+        
+        // If we need another connection, start a thread that will get one
         adjustConnectionFetchers();
     }
 
-
-    //done
-
     /**
      * True if we're sending "X-Ultrapeer: true" or have a fellow ultrapeer connection or a leaf.
+     * Returns true if isActiveSupernode() or isSupernodeCapable() is true.
      * 
      * Here's how the process of becoming an ultrapeer works:
      * Offline and by ourselves, we determine if we have the computer, Internet connection, and online time we need to be an ultrapeer.
@@ -431,14 +483,14 @@ public class ConnectionManager {
      *         False if we're not saying we're an ultrapeer and we don't have any ultrapeer connections.
      */
     public boolean isSupernode() {
-
+        
         // Return true if we're trying to become an ultrapeer, or are one
         return
-
-            isActiveSupernode() || // We're on the network acting as an ultrapeer right now, or
-            isSupernodeCapable();  // We have a fast enough computer and Internet connection to be one
+        
+        isActiveSupernode() || // We're on the network acting as an ultrapeer right now, or
+        isSupernodeCapable();  // We have a fast enough computer and Internet connection to be one
     }
-
+    
     /**
      * True if we have the computer, Internet connection, and upload time we need to be an ultrapeer on the Gnutella network.
      * If this is true, we'll present ourself to remote computers as an ultrapeer, greeting them with a "X-Ultrapeer: true" header.
@@ -454,27 +506,27 @@ public class ConnectionManager {
      * @return True if we have what we need to be an ultrapeer on the Gnutella network, false if we don't.
      */
     public boolean isSupernodeCapable() {
-
+        
         // Return true if all of the following things are true
         return
-
-            // The IP address we've been telling remote computers is a real Internet IP address
-            !NetworkUtils.isPrivate() && // Until we're externally contactable, we tell remote computers our LAN address
-
-            // At some point in the past, SupernodeAssigner.setUltrapeerCapable() found our computer and Internet connection worthy of ultrapeer status
-            UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
-
-            // We don't have any connections up to ultrapeers
-            !isShieldedLeaf() &&
-
-            // Settings allow us to be an ultrapeer
-            !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
-
-            // We don't have to connect through a proxy server
-            !isBehindProxy() &&
-
-            // We started trying to connect to Gnutella computers more than 10 seconds ago
-            minConnectTimePassed();
+        
+        // The IP address we've been telling remote computers is a real Internet IP address
+        !NetworkUtils.isPrivate() && // Until we're externally contactable, we tell remote computers our LAN address
+        
+        // At some point in the past, SupernodeAssigner.setUltrapeerCapable() found our computer and Internet connection worthy of ultrapeer status
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
+        
+        // We don't have any connections up to ultrapeers
+        !isShieldedLeaf() &&
+        
+        // Settings allow us to be an ultrapeer
+        !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
+        
+        // We don't have to connect through a proxy server
+        !isBehindProxy() &&
+        
+        // We started trying to connect to Gnutella computers more than 10 seconds ago
+        minConnectTimePassed();
     }
 
     /**
@@ -545,81 +597,102 @@ public class ConnectionManager {
         return _shieldedConnections != 0;
     }
 
-    //do
-    
     /**
-     * Returns true if this is a super node with a connection to a leaf.
+     * True if we're an ultrapeer with a connection down to a leaf.
+     * 
+     * @return True if we have at least 1 leaf, false if we don't have any leaves
      */
     public boolean hasSupernodeClientConnection() {
+
+        // If we're connected to at least 1 leaf, return true
         return getNumInitializedClientConnections() > 0;
     }
 
     /**
+     * Find out if we have free ultrapeer or leaf slots.
+     * If we're a leaf, returns false.
+     * 
      * Returns whether or not this node has any available connection
      * slots.  This is only relevant for Ultrapeers -- leaves will
      * always return <tt>false</tt> to this call since they do not
      * accept any incoming connections, at least for now.
-     *
-     * @return <tt>true</tt> if this node is an Ultrapeer with free
-     *  leaf or Ultrapeer connections slots, otherwise <tt>false</tt>
+     * 
+     * @return True if we have open ultrapeer or leaf slots.
+     *         False if we have all the ultrapeers and leaves we need.
+     *         False if we're a leaf.
      */
     public boolean hasFreeSlots() {
-        return isSupernode() &&
-            (hasFreeUltrapeerSlots() || hasFreeLeafSlots());
+
+        // Return true if we're an ultrapeer with a slot for an ultrapeer or a leaf still open
+        return
+            isSupernode() && // If we're greeting new computers with "X-Ultrapeer: true" or have a connection as an ultrapeer, and
+            (hasFreeUltrapeerSlots() || hasFreeLeafSlots()); // We have room for more ultrapeer or leaf connections, return true
     }
 
     /**
-     * Utility method for determing whether or not we have any available
-     * Ultrapeer connection slots.  If this node is a leaf, it will
-     * always return <tt>false</tt>.
-     *
-     * @return <tt>true</tt> if there are available Ultrapeer connection
-     *  slots, otherwise <tt>false</tt>
+     * Find out if we have free ultrapeer slots, and are trying to connect to more ultrapeers.
+     * If we're a leaf, returns false.
+     * 
+     * @return True if we have open ultrapeer slots.
+     *         False if we have all the ultrapeers we need.
+     *         False if we're a leaf.
      */
     private boolean hasFreeUltrapeerSlots() {
+
+        // If we're trying to connect to some more ultrapeers, return true
         return getNumFreeNonLeafSlots() > 0;
     }
 
     /**
-     * Utility method for determing whether or not we have any available
-     * leaf connection slots.  If this node is a leaf, it will
-     * always return <tt>false</tt>.
-     *
-     * @return <tt>true</tt> if there are available leaf connection
-     *  slots, otherwise <tt>false</tt>
+     * Find out if we have free leaf slots, and are hoping more leaves connect to us.
+     * If we're a leaf, returns false.
+     * 
+     * @return True if we have open leaf slots.
+     *         False if we have all the leaves we need.
+     *         False if we're a leaf.
      */
     private boolean hasFreeLeafSlots() {
+
+        // If we'll accept connections from some more leaves, return true
         return getNumFreeLeafSlots() > 0;
     }
 
     /**
+     * Find out if we're connecting or connected to a remote computer at a given IP address.
+     * 
      * Returns whether this (probably) has a connection to the given host.  This
      * method is currently implemented by iterating through all connections and
      * comparing addresses but not ports.  (Incoming connections use ephemeral
      * ports.)  As a result, this test may conservatively return true even if
-     * this is not connected to <tt>host</tt>.  Likewise, it may it mistakenly
-     * return false if <tt>host</tt> is a multihomed system.  In the future,
+     * this is not connected to host.  Likewise, it may it mistakenly
+     * return false if host is a multihomed system.  In the future,
      * additional connection headers may make the test more precise.
-     *
-     * @return true if this is probably connected to <tt>host</tt>
+     * 
+     * @param hostName An IP address, like "12.152.83.138"
+     * @return         True if we're trying to connect to or are connected to that remote computer, false if we're not
      */
     boolean isConnectedTo(String hostName) {
-        //A clone of the list of all connections, both initialized and
-        //uninitialized, leaves and unrouted.  If Java could be prevented from
-        //making certain code transformations, it would be safe to replace the
-        //call to "getConnections()" with "_connections", thus avoiding a clone.
-        //(Remember that _connections is never mutated.)
-        List connections=getConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
+
+        /*
+         * A clone of the list of all connections, both initialized and
+         * uninitialized, leaves and unrouted.  If Java could be prevented from
+         * making certain code transformations, it would be safe to replace the
+         * call to "getConnections()" with "_connections", thus avoiding a clone.
+         * (Remember that _connections is never mutated.)
+         */
+
+        // Loop through our list of all the remote computers we're trying to connect to and are connected to
+        List connections = getConnections();
+        for (Iterator iter = connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc = (ManagedConnection)iter.next();
 
-            if (mc.getAddress().equals(hostName))
-                return true;
+            // If this ManagedConnection has the given address, we've found it, report true
+            if (mc.getAddress().equals(hostName)) return true;
         }
+
+        // Not found
         return false;
     }
-    
-    //done
 
     /**
      * The number of Gnutella computers we're connected to or at least trying to connect to.
@@ -669,34 +742,62 @@ public class ConnectionManager {
         return _shieldedConnections;
     }
 
-    //do
-
     /**
-     *@return the number of ultrapeer -> ultrapeer connections.
+     * The number of Gnutella connections we have to fellow ultrapeers.
+     * If we're an ultrapeer, this is the number of connections we have to fellow ultrapeers. (do)
+     * If we're a leaf, this is 0. (do)
+     * 
+     * Loops through _initializedConnections, counting c.isSupernodeSupernodeConnection().
+     * Both we and the remote computer said "X-Ultrapeer: true" in the Gnutella handshake.
+     * 
+     * @return The number of ultrapeer to ultrapeer connections
      */
     public synchronized int getNumUltrapeerConnections() {
+
+        // Loop through _initializedConnections, counting c.isSupernodeSupernodeConnection()
         return ultrapeerToUltrapeerConnections();
     }
 
     /**
-     *@return the number of old unrouted connections.
+     * The number of Gnutella connections we have to ultrapeers.
+     * If we're an ultrapeer, this is the number of connections we have to fellow ultrapeers. (do)
+     * If we're a leaf, this is the number of connections we have up to ultrapeers. (do)
+     * 
+     * Loops through _initializedConnections, counting c.isSupernodeConnection().
+     * These are the remote computers that told us "X-Ultrapeer: true" in the Gnutella handshake.
+     * 
+     * @return The number of ultrapeer to ultrapeer, or leaf to ultrapeer connections
      */
     public synchronized int getNumOldConnections() {
+
+        // Loop through _initializedConnections, counting c.isSupernodeConnection()
         return oldConnections();
     }
 
     /**
-     * @return the number of free leaf slots.
+     * How may free leaf slots we have.
+     * We hope this many more leaves will connect to us.
+     * As an ultrapper, we'd like to have 30 leaves.
+     * Returns 30 minus the number of leaves we have.
+     * If we're a leaf, returns 0.
+     * 
+     * @return The number of additional leaves that can connect to us
      */
     public int getNumFreeLeafSlots() {
-        if (isSupernode())
-			return UltrapeerSettings.MAX_LEAVES.getValue() -
-				getNumInitializedClientConnections();
-        else
-            return 0;
-    }
 
-    //done
+        // We're greeting new computers with "X-Ultrapeer: true" or have a connection as an ultrapeer
+        if (isSupernode()) {
+
+            // Return the number of additional leaves we hope will connect to us
+			return UltrapeerSettings.MAX_LEAVES.getValue() - getNumInitializedClientConnections(); // The number of leaves we want, 30, minus the number of leaves we have
+
+        // We're a leaf
+        } else {
+
+            // We don't want any leaves to connect to us
+            return 0;
+        }
+    }
 
     /**
      * Calculate how many more LimeWire leaves we want.
@@ -728,60 +829,72 @@ public class ConnectionManager {
         return _preferredConnections - getNumInitializedConnections();
     }
 
-    //do
-    
     /**
-     * @return the number of free non-leaf slots that LimeWires can connect to.
+     * How many more LimeWire ultrapeers we need.
+     * 
+     * @return The number of free ultrapeer slots that LimeWires can connect to
      */
     public int getNumFreeLimeWireNonLeafSlots() {
-        
+
         /*
-         * _nonLimeWirePeers is the number of other ultrapeers we're connected to.
+         * // Find out how many non-LimeWire ultrapeers we should have, like 0.1 * 32 = 3
+         * int nonLimeUltrapeerNeed = (int)(ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
+         * 
+         * // Subtract the number of non-LimeWire ultrapeers we already have to get the number of additional non-LimeWire ultrapeers we need
+         * int nonLimeUltrapeerSlots = nonLimeUltrapeerNeed - _nonLimeWirePeers;
+         * 
+         * // nonLimeUltrapeerSlotsOutsideLanguage is the number of additional non-LimeWire ultrapeers we need, not counting those we need that share our language
+         * int nonLimeUltrapeerSlotsOutsideLanguage = nonLimeUltrapeerSlots - getNumLimeWireLocalePrefSlots();
+         * nonLimeUltrapeerSlotsOutsideLanguage = Math.max(0, nonLimeUltrapeerSlotsOutsideLanguage); // Make sure it's positive
+         * 
+         * // Starting with the number of ultrapeer slots, subtract the number of additional non-LimeWire ultrapeers we need, not counting those that share our language
+         * int limeUltrapeerSlots = getNumFreeNonLeafSlots() - nonLimeUltrapeerSlotsOutsideLanguage;
+         * limeUltrapeerSlots = Math.max(0, limeUltrapeerSlots); // Make sure it's positive
+         * 
+         * // This is how many more LimeWire ultrapeers we need
+         * return limeUltrapeerSlots;
          */
-        return Math.max(0,
-                        getNumFreeNonLeafSlots()
-                        - Math.max(0, (int)
-                                (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections) 
-                                - _nonLimeWirePeers)
-                        - getNumLimeWireLocalePrefSlots()
-                        );
+
+        // Calculate how many more LimeWire ultrapeers we need
+        return
+            Math.max(0, getNumFreeNonLeafSlots() -
+            Math.max(0, (int)(ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections) - _nonLimeWirePeers) - getNumLimeWireLocalePrefSlots());
     }
-    
+
     /**
-     * Returns true if we've made a locale-matching connection (or don't
-     * want any at all).
-     * 
+     * True if we've made a language-matching connection, or never needed one.
      * Returns true if settings tell us not to worry about matching language with connections, or we have some language matching connections anyway.
      * Returns false if settings tell us to match language with connections, and we don't have any.
+     * 
+     * @return True if we're connected to at least 1 ultrapeer that has the same language preference as us
      */
     public boolean isLocaleMatched() {
-        
+
         /*
          * _localeMatchingPeers is the number of ultrapeer connections we have to the same language as us.
          */
-        
+
+        // Return true if we're connected to at least 1 ultrapeer that has the same language preference as us
         return !ConnectionSettings.USE_LOCALE_PREF.getValue() || // If the program is not trying to connect to same-language computers, or
                _localeMatchingPeers != 0;                        // We have some connections that match our language, return true
     }
 
     /**
-     * @return the number of locale reserved slots to be filled
-     *
-     * An ultrapeer may not have Free LimeWire Non Leaf Slots but may still
-     * have free slots that are reserved for locales
+     * How many more ultrapeers we want that share our language preference.
+     * As an ultrapeer, we might have no ultrapeer slots, but still have a slot reserved for a remote computer that matches our language preference.
+     * 
+     * @return The number of empty ultrapeer slots we've reserved for remote computers with our language preference
      */
     public int getNumLimeWireLocalePrefSlots() {
-        
+
         /*
          * _localeMatchingPeers is the number of ultrapeer connections we have to the same language as us.
          */
-        
+
         // Return the number of empty slots we've reserved for remote computers with our language preference
         return Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue() - _localeMatchingPeers);
     }
 
-    //done
-    
     /**
      * True if we have enough connections to ultrapeers, false if we need more.
      * 
@@ -813,24 +926,44 @@ public class ConnectionManager {
 			(_initializedConnections.size()        > 0));  // We're connected to some ultrapeers, either as an ultrapeer or as a leaf
 	}
 
-    //do
-
 	/**
-	 * Returns whether or not we are currently attempting to connect to the
-	 * network.
+     * Returns whether or not we are trying to connect to the Gnutella network right now.
+     * 
+     * If we haven't started trying to connect yet, returns false.
+     * If the user has disconnected the program from the network, returns false.
+     * If we have a Gnutella connection, returns false.
+     * If we have ConnectionFetcher threads or the connections they've opened, return true.
+     * 
+     * Parts of the GUI call down to this method to show the program's connecting status to the user.
+     * 
+     * @return True if we're trying to connect to the Gnutella network right now, false if we're not
 	 */
 	public boolean isConnecting() {
-	    if(_disconnectTime != 0)
-	        return false;
-	    if(isConnected())
-	        return false;
-	    synchronized(this) {
-	        return _fetchers.size() != 0 ||
-	               _initializingFetchedConnections.size() != 0;
+
+        /*
+         * If connect() hasn't run yet, _disconnectTime will be -1.
+         * If disconnect() ran, _disconnectTime will be a large number.
+         * If either of these things are true, return false, we're not trying to connect right now.
+         */
+
+        // connect() hasn't run yet, or disconnect() has, return false, we're not trying to connect right now
+	    if (_disconnectTime != 0) return false;
+
+        // We have at least one open connection that we've done the Gnutella handshake through, return false
+	    if (isConnected()) return false;
+
+	    synchronized (this) {
+
+            // If we have ConnectionFetcher threads or the connections they've opened, return true
+	        return
+
+                // We've got ConnectionFetcher threads trying to open TCP socket connections, or
+                _fetchers.size() != 0 ||
+
+                // We've got connections opened by ConnectionFetcher threads that we haven't done the Gnutella handshake through yet
+	            _initializingFetchedConnections.size() != 0;
 	    }
 	}
-
-    //done
 
     /**
      * Totals the upload and download speeds of all the remote computers we're exchanging Gnutella packet data with.
@@ -882,108 +1015,104 @@ public class ConnectionManager {
         return _measuredDownstreamBandwidth;
     }
 
-    //do
-
     /**
-     * Checks if the connection received can be accepted,
-     * based upon the type of connection (e.g. client, ultrapeer,
-     * temporary etc).
-     * @param c The connection we received, for which to
-     * test if we have incoming slot.
-     * @return true, if we have incoming slot for the connection received,
-     * false otherwise
+     * Look at a remote ultrapeer's handshake headers and how many connections we already have to decide if we want to keep this connection, or refuse and disconnect.
+     * Does not include the possiblity of the remote ultrapeer becoming a leaf.
+     * 
+     * Only initializeExternallyGeneratedConnection(c) calls this.
+     * 
+     * @param c The ManagedConnection object that represents the remote computer, and contains the handshake headers the remote computer sent us
+     * @return  True to keep this connection, false to disconnect
      */
     private boolean allowConnection(ManagedConnection c) {
 
     	// TODO:kfaaborg receivedHeaders always returns true
-        if(!c.receivedHeaders()) return false;
-		return allowConnection(c.headers(), false);
+        if (!c.receivedHeaders()) return false;
+
+        // Call allowConnection(), telling it the remote ultrapeer can't become a leaf
+		return allowConnection(c.headers(), false); // Pass false, the remote computer is an ultrapeer
     }
 
     /**
-     * Determines if we have room to accept a new connection
-     * Includes the possiblity of telling the remote ultrapeer to become a leaf
+     * Look at a remote ultrapeer's handshake headers and how many connections we already have to decide if we want to keep this connection, or refuse and disconnect.
+     * Includes the possiblity of telling the remote ultrapeer to become a leaf.
+     * 
+     * Only UltrapeerHandshakeResponder.reject(hr) calls this.
      * 
      * @param hr The headers from the remote computer
-     * @return   true if we have an incoming slot for this, false if we don't
+     * @return   True to keep this connection, false to disconnect
      */
     public boolean allowConnectionAsLeaf(HandshakeResponse hr) {
-    	
-    	// Call allow connection telling it the remote computer is a leaf
-		return allowConnection(hr, true);
+
+    	// Call allowConnection(), telling it the remote computer is a leaf
+		return allowConnection(hr, true); // Pass true, the remote computer is a leaf
     }
 
     /**
-     * Determines if we have room to accept a new connection
+     * Look at a remote computer's handshake headers and how many connections we already have to decide if we want to keep this connection, or refuse and disconnect.
      * 
      * @param hr The headers from the remote computer
-     * @return   true if we have an incoming slot for this, false if we don't
+     * @return   True to keep this connection, false to disconnect
      */
-     public boolean allowConnection(HandshakeResponse hr) {
-    	 
-    	 // Call allowConnection telling it if the remote computer is a leaf or ultrapeer
-         return allowConnection(hr, !hr.isUltrapeer());
-     }
+    public boolean allowConnection(HandshakeResponse hr) {
 
+    	// Call allowConnection(), telling it the remote computer's current ultrapeer or leaf status
+        return allowConnection(hr, !hr.isUltrapeer()); // Pass true if the remote computer is a leaf, or false if it's an ultrapeer
+    }
 
     /**
-     * Checks if there is any available slot of any kind.
-     * @return true, if we have incoming slot of some kind,
-     * false otherwise
+     * Checks if we have an available slot of any kind.
+     * If we're a leaf on the network, we don't, leaves don't accept connections at all.
+     * If we're an ultrapeer and we don't have our 30 leaves yet, returns true.
+     * 
+     * @return True if we still have an open slot, false if they are all full or we're not accepting incoming connections
      */
     public boolean allowAnyConnection() {
-        //Stricter than necessary.
-        //See allowAnyConnection(boolean,String,String).
-        
-        // If we have some connections up to ultrapeers
-        if (isShieldedLeaf())
-            return false;
 
-        //Do we have normal or leaf slots?
-        
-        // Return true if
+        // If we have some connections up to ultrapeers, no, we don't have any slots
+        if (isShieldedLeaf()) return false;
+
+        // Return true if we need more ultrapeers, or we're an ultrapeer and we don't have our 30 leaves yet
         return
 
             // We need more ultrapeers, or
             getNumInitializedConnections() < _preferredConnections ||
-        
-            // We're an ultrapeer
+
+            // We're an ultrapeer, and we don't have our 30 leaves yet
             (isSupernode() && getNumInitializedClientConnections() < UltrapeerSettings.MAX_LEAVES.getValue());
     }
 
     /**
-     * Returns true if this has slots for an incoming connection, <b>without
-     * accounting for this' ultrapeer capabilities</b>.  More specifically:
-     * <ul>
-     * <li>if ultrapeerHeader==null, returns true if this has space for an
-     *  unrouted old-style connection.
-     * <li>if ultrapeerHeader.equals("true"), returns true if this has slots
-     *  for a leaf connection.
-     * <li>if ultrapeerHeader.equals("false"), returns true if this has slots
-     *  for an ultrapeer connection.
-     * </ul>
-     *
-     * <tt>useragentHeader</tt> is used to prefer LimeWire and certain trusted
-     * vendors.  <tt>outgoing</tt> is currently unused, but may be used to
-     * prefer incoming or outgoing connections in the forward.
-     *
-     * @param outgoing true if this is an outgoing connection; true if incoming
-     * @param ultrapeerHeader the value of the X-Ultrapeer header, or null
-     *  if it was not written
-     * @param useragentHeader the value of the User-Agent header, or null if
-     *  it was not written
-     * @return true if a connection of the given type is allowed
+     * Look at a remote computer's handshake headers and how many connections we already have to decide if we want to keep this connection, or refuse and disconnect.
+     * 
+     * At this stage of the process, the following things have happened.
+     * We've connected to a remote computer, or the remote computer has connected to us.
+     * We've completed the Gnutella handshake, or several stages of it are done.
+     * Now, this method will help us decide if we want to keep this connection, or refuse and disconnect.
+     * 
+     * Splits the situation into 3 possiblities:
+     * We're a leaf, and the remote computer is an ultrapeer.
+     * We're an ultrapeer, and the remote computer is a leaf.
+     * We're both ultrapeers.
+     * 
+     * Considers the following things about the remote computer.
+     * If the remote computer is running LimeWire.
+     * If the remote computer's language preference matches our own.
+     * 
+     * Looks at how many slots we have, how many connections we have, and how many slots are open.
+     * Decides to keep the connection, or disconnect.
+     * 
+     * @param hr   All the headers the remote computer told us during the Gnutella handshake, stored in a HandshakeResponse hash table of strings
+     * @param leaf True if the remote computer is a leaf, or we should think of it as though it were one
+     * @return     True to keep this connection, false to disconnect it
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
 
         // If we're testing the program with connection preferencing off, return true to allow everything
 		if (!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
 
-		// If it has not said whether or not it's an Ultrapeer or a Leaf
-		// (meaning it's an old-style connection), don't allow it.
-		if(!hr.isLeaf() && !hr.isUltrapeer())
-		    return false;
-
+        // If the remote computer never told us "X-Ultrapeer: true" or "X-Ultrapeer: false", it's a very old Gnutella program, refuse it
+		if (!hr.isLeaf() && !hr.isUltrapeer()) return false;
 
         /*
          * We prefer connections by vendor, using BearShare's clumping algorithm.
@@ -998,241 +1127,377 @@ public class ConnectionManager {
          * With time, this converges on all good connections.
          */
 
-        // The number of our connection attempts that have failed
+        // 50, if 50 of our connection attempts fail, we'll start accepting non-LimeWire remote computers as ultrapeers
 		int limeAttempts = ConnectionSettings.LIME_ATTEMPTS.getValue();
-		
-        //Don't allow anything if disconnected.
+
+        // If the program is disconnected from the Gnutella network, refuse all connections
         if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() && // If settings tell us not to make connections when the program is disconnected, and
             _preferredConnections <= 0) {                              // We don't want to maintain any connections right now
-            
+
             // Refuse this new connection
             return false;
 
-        //If a leaf (shielded or not), check rules as such.
-		} else if (isShieldedLeaf() || !isSupernode()) {
-		    // require ultrapeer.
-		    if(!hr.isUltrapeer())
-		        return false;
+        // We're a leaf
+		} else if (isShieldedLeaf() || !isSupernode()) { // We either have some connections up to ultrapeers, or we aren't and can't be an ultrapeer
+
+            // If the new remote computer is also a leaf, refuse it
+		    if (!hr.isUltrapeer()) return false; // Two leaves can't connect on the Gnutella network
 		    
-		    // If it's not good, or it's the first few attempts & not a LimeWire, 
-		    // never allow it.
-		    if(!hr.isGoodUltrapeer() || 
-		      (Sockets.getAttempts() < limeAttempts && !hr.isLimeWire())) {
+		    /*
+             * (1) We're a leaf, and the remote computer is an ultrapeer.
+             */
+
+            // If the remote ultrapeer doesn't support advanced features, or we're just starting to connect and the remote ultrapeer isn't running LimeWire, refuse it
+		    if (!hr.isGoodUltrapeer() || // The remote ultrapeer doesn't support advanced features, or
+		        (Sockets.getAttempts() < limeAttempts && !hr.isLimeWire())) { // We've connected less than 50 sockets and the remote ultrapeer isn't limewire
+
+                // Refuse the connection, we want to connect to LimeWire at the start
 		        return false;
-		    // if we have slots, allow it.
-		    } else if (_shieldedConnections < _preferredConnections) { // We have fewer connections up to ultrapeers than we want to have
-		        // if it matched our preference, we don't need to preference
-		        // anymore.
-		        if(checkLocale(hr.getLocalePref()))
-		            _needPref = false;
 
-                // while idle, only allow LimeWire connections.
-                if (isIdle()) 
-                    return hr.isLimeWire();
+		    // We have fewer connections up to ultrapeers than we want to have
+		    } else if (_shieldedConnections < _preferredConnections) {
 
+                // If this ultrapeer has the same language preference as us, turn _needPref off, we don't need to look for a language match anymore
+		        if (checkLocale(hr.getLocalePref())) _needPref = false;
+
+                // If the user has been gone for a half hour, we'll only have 1 connection up to an ultrapeer, we need it to be another LimeWire
+                if (isIdle()) return hr.isLimeWire(); // If this ultrapeer is LimeWire, keep it, otherwise don't
+
+                // We need another ultrapeer, keep this connection
                 return true;
-            } else {
-                // if we were still trying to get a locale connection
-                // and this one matches, allow it, 'cause no one else matches.
-                // (we would have turned _needPref off if someone matched.)
-                if(_needPref && checkLocale(hr.getLocalePref()))
-                    return true;
 
-                // don't allow it.
+            // We have enough connections up to ultrapeers
+            } else {
+
+                /*
+                 * if we were still trying to get a locale connection
+                 * and this one matches, allow it, 'cause no one else matches.
+                 * (we would have turned _needPref off if someone matched.)
+                 */
+
+                // We have enough ultrapeers already, but we need one that matches our language and this one does, keep it
+                if (_needPref && checkLocale(hr.getLocalePref())) return true;
+
+                // We have enough ultrapeers already, disconnect from this new one
                 return false;
             }
-		} else if (hr.isLeaf() || leaf) {
-		    // no leaf connections if we're a leaf.
-		    if(isShieldedLeaf() || !isSupernode())
-		        return false;
 
-            if(!allowUltrapeer2LeafConnection(hr))
-                return false;
+        // The remote computer is a leaf
+		} else if (hr.isLeaf() || leaf) { // The remote computer said "X-Ultrapeer: false", or we are thinking of it as a leaf because it could become one
 
+		    // If we're a leaf too, refuse the remote computer
+		    if (isShieldedLeaf() || !isSupernode()) return false; // Two leaves can't connect on the Gnutella network
+
+            /*
+             * (2) We're an ultrapeer, and the remote computer is a leaf.
+             */
+
+            // If the remote computer didn't send an "User-Agent" header or said it's running a Gnutella program we're avoiding, disconnect
+            if (!allowUltrapeer2LeafConnection(hr)) return false;
+
+            // Find out how many leaves we have, and how many aren't running LimeWire
             int leaves = getNumInitializedClientConnections();
             int nonLimeWireLeaves = _nonLimeWireLeaves; // How many non-LimeWire leaves we have
 
-            // Reserve RESERVED_NON_LIMEWIRE_LEAVES slots
-            // for non-limewire leaves to ensure that the network
-            // is well connected.
-            if(!hr.isLimeWire()) {
-                if( leaves < UltrapeerSettings.MAX_LEAVES.getValue() &&
-                    nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES ) {
+            /*
+             * Reserve RESERVED_NON_LIMEWIRE_LEAVES slots
+             * for non-limewire leaves to ensure that the network
+             * is well connected.
+             */
+
+            // The remote leaf isn't running LimeWire
+            if (!hr.isLimeWire()) {
+
+                // If we have less than 30 leaves and fewer than 2 non-LimeWire leaves
+                if (leaves < UltrapeerSettings.MAX_LEAVES.getValue() && nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES) {
+
+                    // Accept this non-LimeWire leaf, we need at least 2 of them
                     return true;
                 }
             }
-            
-            // Only allow good guys.
-            if(!hr.isGoodLeaf())
-                return false;
 
-            // if it's good, allow it.
-            if(hr.isGoodLeaf())
-                return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES -
-                        nonLimeWireLeaves)) <
-                          UltrapeerSettings.MAX_LEAVES.getValue();
+            /*
+             * At this point, either:
+             * This is a LimeWire leaf, or
+             * This is a non-LimeWire leaf, but we've already got our required 2 of those.
+             */
 
-        } else if (hr.isGoodUltrapeer()) {
-            // Note that this code is NEVER CALLED when we are a leaf.
-            // As a leaf, we will allow however many ultrapeers we happen
-            // to connect to.
-            // Thus, we only worry about the case we're connecting to
-            // another ultrapeer (internally or externally generated)
-            
-            int peers = getNumInitializedConnections();
-            int nonLimeWirePeers = _nonLimeWirePeers; // The number of ultrapeers we're connected to that aren't running LimeWire
-            int locale_num = 0;
-            
-            if(!allowUltrapeer2UltrapeerConnection(hr)) {
-                return false;
+            // If the remote leaf doesn't support advanced Gnutella features, disconnect from it
+            if (!hr.isGoodLeaf()) return false;
+
+            // The remote leaf does support advanced Gnutella features
+            if (hr.isGoodLeaf()) {
+
+                // If we need another LimeWire leaf, return true, if we don't, return false
+                return
+
+                    // The number of leaves we have, plus the number of non-LimeWire leaves we're looking for
+                    (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES - nonLimeWireLeaves))
+
+                    // If that's less than 30, return true, otherwise return false
+                    < UltrapeerSettings.MAX_LEAVES.getValue();
             }
-            
+
+        // The remote computer is an ultrapeer that supports advanced Gnutella features
+        } else if (hr.isGoodUltrapeer()) {
+
+            /*
+             * Note that this code is NEVER CALLED when we are a leaf.
+             * As a leaf, we will allow however many ultrapeers we happen
+             * to connect to.
+             * Thus, we only worry about the case we're connecting to
+             * another ultrapeer (internally or externally generated)
+             */
+
+            /*
+             * (3) We're both ultrapeers.
+             */
+
+            // Find out how many ultrapeers we're already connected to
+            int peers = getNumInitializedConnections(); // The number of ultrapeers we're connected to
+            int nonLimeWirePeers = _nonLimeWirePeers;   // The number of ultrapeers we're connected to that aren't running LimeWire
+            int locale_num = 0;                         // The number of additional ultrapeers we want that share our language preference
+
+            // If the remote computer didn't send an "User-Agent" header or said it's running a Gnutella program we're avoiding, disconnect
+            if (!allowUltrapeer2UltrapeerConnection(hr)) return false;
+
             // If the program is set to connect to remote computers with the same language preference as us
             if (ConnectionSettings.USE_LOCALE_PREF.getValue()) { // True by default
-                
-                //if locale matches and we haven't satisfied the
-                //locale reservation then we force return a true
-                if (checkLocale(hr.getLocalePref()) &&
-                   _localeMatchingPeers < ConnectionSettings.NUM_LOCALE_PREF.getValue()) { // We have a slot open for a computer that matches our language
+
+                // If the remote ultrapeer has our language preference and we have a slot for an ultrapeer that has our language preference, keep this connection
+                if (checkLocale(hr.getLocalePref()) &&                                      // The remote ultrapeer has our language preference, and
+                    _localeMatchingPeers < ConnectionSettings.NUM_LOCALE_PREF.getValue()) { // We have a slot open for a computer that matches our language
+
+                    // Keep this connection
                     return true;
                 }
 
-                //this number will be used at the end to figure out
-                //if the connection should be allowed
-                //(the reserved slots is to make sure we have at least
-                // NUM_LOCALE_PREF locale connections but we could have more so
-                // we get the max)
-                locale_num =
-                    getNumLimeWireLocalePrefSlots();
+                /*
+                 * this number will be used at the end to figure out
+                 * if the connection should be allowed
+                 * (the reserved slots is to make sure we have at least
+                 * NUM_LOCALE_PREF locale connections but we could have more so
+                 * we get the max)
+                 */
+
+                // Set locale_num to the number of additional ultrapeers we want that share our language preference
+                locale_num = getNumLimeWireLocalePrefSlots();
             }
 
-            // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
-            // for non-limewire peers to ensure that the network
-            // is well connected.
-            if(!hr.isLimeWire()) {
+            /*
+             * Reserve RESERVED_NON_LIMEWIRE_PEERS slots
+             * for non-limewire peers to ensure that the network
+             * is well connected.
+             */
+
+            // The remote ultrapeer isn't LimeWire
+            if (!hr.isLimeWire()) {
+
+                // Calculate what ratio of our ultrapeers aren't running LimeWire
                 double nonLimeRatio = ((double)nonLimeWirePeers) / _preferredConnections;
-                
-                // If nonLimeRatio is less than 10%, (do)
+
+                /*
+                 * We'd like between 80% and 90% of our ultrapeers to be running LimeWire.
+                 * We trust LimeWire, so we want most of our ultrapeers to be running it.
+                 * However, we don't want to only be connected to other LimeWire computers, because the network gains resiliance through software diversity.
+                 */
+
+                // If our non-LimeWire ratio is below 10%, yes, we need this non-LimeWire ultrapeer
                 if (nonLimeRatio < ConnectionSettings.MIN_NON_LIME_PEERS.getValue()) return true;
-                
-                // If nonLimeRatio is less than 20%, accept this connection, if it's more than 20%, refuse it
+
+                /*
+                 * If our non-LimeWire ratio is below 20%, keep this non-LimeWire ultrapeer.
+                 * If our non-LimeWire ratio is above 20%, disconnect from this non-LimeWire ultrapeer.
+                 */
+
+                // If our non-LimeWire ratio is below 20%, keep this non-LimeWire ultrapeer, if it's above 20%, disconnect from this non-LimeWire ultrapeer
                 return (nonLimeRatio < ConnectionSettings.MAX_NON_LIME_PEERS.getValue());
-                
+
+                // TODO:kfaaborg Here, only MAX_NON_LIME_PEERS changes anything.
+
+            // This is a remote LimeWire ultrapeer we've finished the Gnutella handshake with
             } else {
-                
-                // Calculate the minimum number of non-LimeWire connections we want to have
+
+                // We want to have at least 3 non-LimeWire ultrapeers, which is 10% of 32
                 int minNonLime = (int)(ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
-                
-                return (peers + 
-                        Math.max(0,minNonLime - nonLimeWirePeers) + 
-                        locale_num) < _preferredConnections;
+
+                /*
+                 * // Calculate how many more non-LimeWire ultrapeers we need
+                 * int nonLimeUltrapeerNeed = minNonLime - nonLimeWirePeers; // 3 minus the number of non-LimeWire ultrapeers we have
+                 * nonLimeUltrapeerNeed = Math.max(0, nonLimeUltrapeerNeed); // Make sure it's positive
+                 * 
+                 * // To that, add the number of ultrapeers we have, and the number we need that share our language preference
+                 * // This is the number of other ultrapeers we're going to have, when we get everything we want
+                 * int futureUltrapeers = peers + nonLimeUltrapeerNeed + locale_num;
+                 * 
+                 * // When we have all those special connections, if we still won't have enough, keep this one
+                 * if (futureUltrapeers < _preferredConnections) return true;
+                 * else return false; // When we have all those special connections, we'll have reached our maximum, disconnect from this LimeWire ultrapeer
+                 */
+
+                // If we won't have room for this LimeWire ultrapeer when we have all the special connections we need, disconnect from it
+                return (peers + Math.max(0, minNonLime - nonLimeWirePeers) + locale_num) < _preferredConnections;
             }
         }
+
+        // Somehow, some other combination happened, disconnect from this remote computer
 		return false;
     }
 
     /**
-     * Utility method for determining whether or not the connection should be
-     * allowed as an Ultrapeer<->Ultrapeer connection.  We may not allow the
-     * connection for a variety of reasons, including lack of support for
-     * specific features that are vital for good performance, or clients of
-     * specific vendors that are leechers or have serious bugs that make them
-     * detrimental to the network.
-     *
-     * @param hr the <tt>HandshakeResponse</tt> instance containing the
-     *  connections headers of the remote host
-     * @return <tt>true</tt> if the connection should be allowed, otherwise
-     *  <tt>false</tt>
+     * Looks at the remote computer's "User-Agent" header to see if we should disconnect.
+     * Only allowConnection() above calls this method.
+     * 
+     * @param hr All the headers the remote computer told us during the Gnutella handshake, stored in a HandshakeResponse hash table of strings
+     * @return   True to keep this connection, false to disconnect it
      */
     private static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
-        if(hr.isLimeWire())
-            return true;
-        
+
+        // TODO:kfaaborg The allowUltrapeer2UltrapeerConnection() and allowUltrapeer2LeafConnection() methods are exactly the same.
+
+        // If the remote computer is running LimeWire, keep our connection to it
+        if (hr.isLimeWire()) return true;
+
+        // Find the name of the Gnutella program the remote computer is running, the value of the "User-Agent" header it sent us
         String userAgent = hr.getUserAgent();
-        if(userAgent == null)
-            return false;
-        userAgent = userAgent.toLowerCase();
-        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue(); // Get the list of program names like "morpheus" we want to avoid
-        for(int i = 0; i < bad.length; i++)
-            if(userAgent.indexOf(bad[i]) != -1)
-                return false;
+        if (userAgent == null) return false; // If the remote computer didn't tell us what program it's running, disconnect
+
+        // If the remote computer is running a program we want to avoid, disconnect
+        userAgent = userAgent.toLowerCase(); // Make the string lowercase so we can match it with our list of bad programs
+        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue(); // Get the list of program names like "morpheus" we want to avoid, and loop through them
+        for (int i = 0; i < bad.length; i++) {
+
+            // If the "User-Agent" value contains the name of a bad client, refuse it
+            if (userAgent.indexOf(bad[i]) != -1) return false;
+        }
+
+        // The "User-Agent" text looks OK, stay connected
         return true;
     }
 
     /**
-     * Utility method for determining whether or not the connection should be
-     * allowed as a leaf when we're an Ultrapeer.
-     *
-     * @param hr the <tt>HandshakeResponse</tt> containing their connection
-     *  headers
-     * @return <tt>true</tt> if the connection should be allowed, otherwise
-     *  <tt>false</tt>
+     * Looks at the remote computer's "User-Agent" header to see if we should disconnect.
+     * Only allowConnection() above calls this method.
+     * 
+     * @param hr All the headers the remote computer told us during the Gnutella handshake, stored in a HandshakeResponse hash table of strings
+     * @return   True to keep this connection, false to disconnect it
      */
     private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
-        if(hr.isLimeWire())
-            return true;
-        
+
+        // TODO:kfaaborg The allowUltrapeer2UltrapeerConnection() and allowUltrapeer2LeafConnection() methods are exactly the same.
+
+        // If the remote computer is running LimeWire, keep our connection to it
+        if (hr.isLimeWire()) return true;
+
+        // Find the name of the Gnutella program the remote computer is running, the value of the "User-Agent" header it sent us
         String userAgent = hr.getUserAgent();
-        if(userAgent == null)
-            return false;
-        userAgent = userAgent.toLowerCase();
-        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue(); // Get the list of program names like "morpheus" we want to avoid 
-        for(int i = 0; i < bad.length; i++)
-            if(userAgent.indexOf(bad[i]) != -1)
-                return false;
+        if (userAgent == null) return false; // If the remote computer didn't tell us what program it's running, disconnect
+
+        // If the remote computer is running a program we want to avoid, disconnect
+        userAgent = userAgent.toLowerCase(); // Make the string lowercase so we can match it with our list of bad programs
+        String[] bad = ConnectionSettings.EVIL_HOSTS.getValue(); // Get the list of program names like "morpheus" we want to avoid, and loop through them
+        for (int i = 0; i < bad.length; i++) {
+
+            // If the "User-Agent" value contains the name of a bad client, refuse it
+            if (userAgent.indexOf(bad[i]) != -1) return false;
+        }
+
+        // The "User-Agent" text looks OK, stay connected
         return true;
     }
 
     /**
-     * Returns the number of connections that are ultrapeer -> ultrapeer.
-     * Caller MUST hold this' monitor.
+     * The number of Gnutella connections we have to fellow ultrapeers.
+     * If we're an ultrapeer, this is the number of connections we have to fellow ultrapeers. (do)
+     * If we're a leaf, this is 0. (do)
+     * 
+     * Loops through _initializedConnections, counting c.isSupernodeSupernodeConnection().
+     * Both we and the remote computer said "X-Ultrapeer: true" in the Gnutella handshake.
+     * 
+     * Synchronize on the ConnectionManager object before calling this method.
+     * 
+     * @return The number of ultrapeer to ultrapeer connections
      */
     private int ultrapeerToUltrapeerConnections() {
-        //TODO3: augment state of this if needed to avoid loop
-        int ret=0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.isSupernodeSupernodeConnection())
-                ret++;
-        }
-        return ret;
-    }
 
-    /** Returns the number of old-fashioned unrouted connections.  Caller MUST
-     *  hold this' monitor. */
-    private int oldConnections() {
-		// technically, we can allow old connections.
-		int ret = 0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (!mc.isSupernodeConnection())
-                ret++;
+        /*
+         * TODO3: augment state of this if needed to avoid loop
+         */
+
+        // Loop through all the ultrapeers we have Gnutella connections to
+        int ret = 0; // Start the count at 0
+        for (Iterator iter = _initializedConnections.iterator(); iter.hasNext(); ) {
+            ManagedConnection mc = (ManagedConnection)iter.next();
+
+            // If both we and this remote computer are ultrapeers, increment our count
+            if (mc.isSupernodeSupernodeConnection()) ret++;
         }
+
+        // Return the total count
         return ret;
     }
 
     /**
-     * Tells if this node thinks that more ultrapeers are needed on the
-     * network. This method should be invoked on a ultrapeer only, as
-     * only ultrapeer may have required information to make informed
-     * decision.
-     * @return true, if more ultrapeers needed, false otherwise
+     * The number of Gnutella connections we have to ultrapeers.
+     * If we're an ultrapeer, this is the number of connections we have to fellow ultrapeers. (do)
+     * If we're a leaf, this is the number of connections we have up to ultrapeers. (do)
+     * 
+     * Loops through _initializedConnections, counting c.isSupernodeConnection().
+     * These are the remote computers that told us "X-Ultrapeer: true" in the Gnutella handshake.
+     * 
+     * Synchronize on the ConnectionManager object before calling this method.
+     * 
+     * @return The number of ultrapeer to ultrapeer, or leaf to ultrapeer connections
+     */
+    private int oldConnections() {
+
+        /*
+         * technically, we can allow old connections.
+         */
+
+        // Loop through all the ultrapeers we have Gnutella connections to
+		int ret = 0; // Start the count at 0
+        for (Iterator iter = _initializedConnections.iterator(); iter.hasNext(); ) {
+            ManagedConnection mc = (ManagedConnection)iter.next();
+
+            // If both we and this remote computer are ultrapeers, increment our count
+            if (!mc.isSupernodeConnection()) ret++;
+        }
+
+        // Return the total count
+        return ret;
+    }
+
+    /**
+     * Determines if we think there should be more ultrapeers on the Gnutella network from our view of it.
+     * Only use this method if we're an ultrapeer, as only then will we have the information we need to make an informed decision.
+     * 
+     * As an ultrapeer, we have 30 leaf slots.
+     * If those slots are 90% full, we'll have 27 leaves.
+     * If those slots are that full or more, supernodeNeeded() returns true.
+     * From our perspective, it looks like there are too many leaves on the network and not enough ultrapeers to serve them.
+     * 
+     * @return True if the network looks like it needs more ultrapeers, false if it looks balanced correctly
      */
     public boolean supernodeNeeded() {
-        //if more than 90% slots are full, return true
-		if(getNumInitializedClientConnections() >=
-           (UltrapeerSettings.MAX_LEAVES.getValue() * 0.9)){
+
+        // If more than 90% of our leaf slots are full, return true, the network needs more ultrapeers
+		if (getNumInitializedClientConnections() >=            // If we have more leaves than
+            (UltrapeerSettings.MAX_LEAVES.getValue() * 0.9)) { // 90% of our 30 leaf capacity
+
+            // Yes, from here, it looks like the Gnutella network needs more ultrapeers
             return true;
+
+        // We have fewer than 27 leaves filling our 30 leaf slots
         } else {
-            //else return false
+
+            // No, from here, it looks like the number of ultrapeers on the Gnutella network is balanced correctly
             return false;
         }
     }
-    
-    //done
 
     /**
-     * Get the list of computers we're connected to.
+     * Get the list of the ultrapeers we're connected to.
      * These are ManagedConnection objects.
      * We opened a TCP socket connection with each one, did the Gnutella handshake, and are now exchanging Gnutella packets.
      * 
@@ -1246,25 +1511,26 @@ public class ConnectionManager {
         return _initializedConnections;
     }
 
-    //do
-
     /**
-     * return a list of initialized connection that matches the parameter
-     * String loc.
-     * create a new linkedlist to return.
+     * Get a list of the ultrapeers we're connected to that have a given language preference.
+     * 
+     * @param loc A language preference, like "en" for English
+     * @return    A LinkedList of connected ultrapeers that have that language preference
      */
     public List getInitializedConnectionsMatchLocale(String loc) {
-        List matches = new LinkedList();
-        for(Iterator itr= _initializedConnections.iterator();
-            itr.hasNext();) {
+
+        // Loop through the ultrapeers we've finished the Gnutella handshake with
+        List matches = new LinkedList(); // Make a new empty list named matches
+        for (Iterator itr = _initializedConnections.iterator(); itr.hasNext(); ) {
             Connection conn = (Connection)itr.next();
-            if(loc.equals(conn.getLocalePref()))
-                matches.add(conn);
+
+            // If this ultrapeer's language preference matches the given one, add it to the list
+            if (loc.equals(conn.getLocalePref())) matches.add(conn);
         }
+
+        // Return the list we made of connected ultrapeers with the given language preference
         return matches;
     }
-    
-    //done
 
     /**
      * Get the list of all our leaves.
@@ -1281,25 +1547,26 @@ public class ConnectionManager {
         return _initializedClientConnections;
     }
 
-    //do
-
     /**
-     * return a list of initialized client connection that matches the parameter
-     * String loc.
-     * create a new linkedlist to return.
+     * Get a list of our leaves that have a given language preference.
+     * 
+     * @param loc A language preference, like "en" for English
+     * @return    A LinkedList of connected leaves that have that language preference
      */
     public List getInitializedClientConnectionsMatchLocale(String loc) {
-    	List matches = new LinkedList();
-        for(Iterator itr= _initializedClientConnections.iterator();
-            itr.hasNext();) {
+
+        // Loop through the leaves we've finished the Gnutella handshake with
+    	List matches = new LinkedList(); // Make a new empty list named matches
+        for (Iterator itr = _initializedClientConnections.iterator(); itr.hasNext(); ) {
             Connection conn = (Connection)itr.next();
-            if(loc.equals(conn.getLocalePref()))
-                matches.add(conn);
+
+            // If this leaf's language preference matches the given one, add it to the list
+            if (loc.equals(conn.getLocalePref())) matches.add(conn);
         }
+
+        // Return the list we made of connected leaves with the given language preference
         return matches;
     }
-    
-    //done
 
     /**
      * Get the list that includes all the remote computers we're trying to connect to and are connected to.
@@ -1313,722 +1580,1060 @@ public class ConnectionManager {
         return _connections;
     }
 
-    //do
-    
     /**
-     * Accessor for the <tt>Set</tt> of push proxies for this node.  If
+     * Get a list of up to 4 of our push proxies, ultrapeers we're connected up to that sent us a PushProxyAcknowledgement vendor message.
+     * 
+     * Accessor for the Set of push proxies for this node.  If
      * there are no push proxies available, or if this node is an Ultrapeer,
-     * this will return an empty <tt>Set</tt>.
-     *
-     * @return a <tt>Set</tt> of push proxies with a maximum size of 4
-     *
-     *  TODO: should the set of pushproxy UPs be cached and updated as
-     *  connections are killed and created?
+     * this will return an empty Set.
+     * 
+     * TODO: should the set of pushproxy UPs be cached and updated as
+     * connections are killed and created?
+     * 
+     * @return A Set of up to 4 ultrapeers we're connected up to that are push proxies
      */
     public Set getPushProxies() {
 
-        // If we have some connections up to ultrapeers
-        if (isShieldedLeaf()) {
-            // this should be fast since leaves don't maintain a lot of
-            // connections and the test for proxy support is cached boolean
-            // value
+        // If we're a leaf
+        if (isShieldedLeaf()) { // If we have some connections up to ultrapeers
+
+            /*
+             * this should be fast since leaves don't maintain a lot of
+             * connections and the test for proxy support is cached boolean
+             * value
+             */
+
+            // Loop through the ultrapeers we're connected up to
             Iterator ultrapeers = getInitializedConnections().iterator();
-            Set proxies = new IpPortSet();
+            Set proxies = new IpPortSet(); // Make a new IpPortSet list that will keep objects that implement the IpPort interface in sorted order with no duplicates
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
                 ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
-                if (currMC.isPushProxy())
-                    proxies.add(currMC);
+
+                // If this ultrapeer sent a PushProxyAcknowledgement vendor message that makes us a push proxy for somebody (do), add it to our list
+                if (currMC.isPushProxy()) proxies.add(currMC);
             }
+
+            // Return the list
             return proxies;
         }
 
+        // We're not connected to the Gnutella network as a leaf, return a reference to an empty list
         return Collections.EMPTY_SET;
     }
 
     /**
-     * Sends a TCPConnectBack request to (up to) 2 connected Ultrapeers.
-     * @returns false if no requests were sent, otherwise true.
+     * Send a TCP connect back request to up to 4 of the ultrapeers we're connected to.
+     * 
+     * @return True if we sent a TCP connect back message to at least 1 ultrapeer, false if we didn't send anything to anyone
      */
     public boolean sendTCPConnectBackRequests() {
+
+        // Count how many TCP connect back requests we send
         int sent = 0;
-        
+
+        // Make a copy of the list of ultrapeers we're connected to, shuffle it into random order, and loop through it
         List peers = new ArrayList(getInitializedConnections());
         Collections.shuffle(peers);
-        for (Iterator iter = peers.iterator(); iter.hasNext();) {
+        for (Iterator iter = peers.iterator(); iter.hasNext(); ) {
             ManagedConnection currMC = (ManagedConnection) iter.next();
-            if (currMC.remoteHostSupportsTCPRedirect() < 0)
-                iter.remove();
+
+            // If this ultrapeer doesn't support the TCP connect back redirect vendor message, remove it from the list
+            if (currMC.remoteHostSupportsTCPRedirect() < 0) iter.remove();
         }
-        
+
+        // We only found one ultrapeer that supports the TCP connect back message
         if (peers.size() == 1) {
-            ManagedConnection myConn = (ManagedConnection) peers.get(0);
+
+            // Get it
+            ManagedConnection myConn = (ManagedConnection)peers.get(0); // It's at index 0, the start of the list
+
+            // Loop 3 times
             for (int i = 0; i < CONNECT_BACK_REDUNDANT_REQUESTS; i++) {
+
+                // Make a new TCP connect back message with the port number the ultrapeer can reach us at, and send it
                 Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
                 myConn.send(cb);
-                sent++;
+                sent++; // Count one more sent
             }
+
+        // The list is empty, or contains 2 or more ultrapeers
         } else {
+
+            // Make a new TCP connect back message with the port number the ultrapeer can reach us at
             final Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
-            for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
+
+            // Loop through the first 4 ultrapeers we found that can understand this message
+            for (Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
                 ManagedConnection currMC = (ManagedConnection)i.next();
+
+                // Send the ultrapeer the TCP connect back message
                 currMC.send(cb);
-                sent++;
+                sent++; // Count one more sent
             }
         }
+
+        // Return true if we sent the TCP connect back message to at least 1 ultrapeer
         return (sent > 0);
     }
 
     /**
-     * Sends a UDPConnectBack request to (up to) 4 (and at least 2)
-     * connected Ultrapeers.
-     * @returns false if no requests were sent, otherwise true.
+     * Send a UDP connect back request to up to 4 of the ultrapeers we're connected to.
+     * 
+     * @return True if we sent a UDP connect back message to at least 1 ultrapeer, false if we didn't send anything to anyone
      */
     public boolean sendUDPConnectBackRequests(GUID cbGuid) {
-        int sent =  0;
-        final Message cb =
-            new UDPConnectBackVendorMessage(RouterService.getPort(), cbGuid);
+
+        // Count how many UDP connect back requests we send
+        int sent = 0;
+
+        // Make a UDP Gnutella connect back vendor message with our external listening port number and the given GUID
+        final Message cb = new UDPConnectBackVendorMessage(RouterService.getPort(), cbGuid);
+
+        // Make a copy of the list of ultrapeers we're connected to, shuffle it into random order, and loop through it
         List peers = new ArrayList(getInitializedConnections());
         Collections.shuffle(peers);
-        for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
+        for (Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) { // Stop after sending the message to 4 ultrapeers
             ManagedConnection currMC = (ManagedConnection)i.next();
+
+            // If this ultrapeer supports the UDP connect back redirect vendor message
             if (currMC.remoteHostSupportsUDPConnectBack() >= 0) {
+
+                // Send it the UDP connect back message
                 currMC.send(cb);
-                sent++;
+                sent++; // Count one more sent
             }
         }
+
+        // Return true if we sent the UDP connect back message to at least 1 ultrapeer
         return (sent > 0);
     }
 
     /**
-     * Sends a QueryStatusResponse message to as many Ultrapeers as possible.
-     *
-     * @param
+     * Send a given QueryStatusResponse packet to all the ultrapeers we're connected up to that support the leaf guidance vendor message.
+     * Only does something if we're a leaf with connections up to ultrapeers.
+     * Only sends the QueryStatusResponse packet to the ultrapeers that support the leaf guidance vendor message.
+     * 
+     * @param stat A QueryStatusResponse packet
      */
     public void updateQueryStatus(QueryStatusResponse stat) {
-        
-        // If we have some connections up to ultrapeers
-        if (isShieldedLeaf()) {
-            // this should be fast since leaves don't maintain a lot of
-            // connections and the test for query status response is a cached
-            // value
+
+        // Only do something if we're a leaf
+        if (isShieldedLeaf()) { // We have some connections up to ultrapeers
+
+            /*
+             * this should be fast since leaves don't maintain a lot of
+             * connections and the test for query status response is a cached
+             * value
+             */
+
+            // Loop for each ultrapeer we're connected up to
             Iterator ultrapeers = getInitializedConnections().iterator();
             while (ultrapeers.hasNext()) {
                 ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
-                if (currMC.remoteHostSupportsLeafGuidance() >= 0)
-                    currMC.send(stat);
+
+                // If this remote computer supports the leaf guidance vendor message, send it the given QueryStatusResponse packet
+                if (currMC.remoteHostSupportsLeafGuidance() >= 0) currMC.send(stat);
             }
         }
     }
 
-	/**
-	 * Returns the <tt>Endpoint</tt> for an Ultrapeer connected via TCP,
-	 * if available.
-	 *
-	 * @return the <tt>Endpoint</tt> for an Ultrapeer connected via TCP if
-	 *  there is one, otherwise returns <tt>null</tt>
-	 */
-	public Endpoint getConnectedGUESSUltrapeer() {
-		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
-			if(connection.isSupernodeConnection() &&
-			   connection.isGUESSUltrapeer()) {
-				return new Endpoint(connection.getInetAddress().getAddress(),
-									connection.getPort());
-			}
-		}
-		return null;
-	}
-
-
-    /** Returns a <tt>List<tt> of Ultrapeers connected via TCP that are GUESS
-     *  enabled.
-     *
-     * @return A non-null List of GUESS enabled, TCP connected Ultrapeers.  The
-     * are represented as ManagedConnections.
-     */
-	public List getConnectedGUESSUltrapeers() {
-        List retList = new ArrayList();
-		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
-			if(connection.isSupernodeConnection() &&
-               connection.isGUESSUltrapeer())
-				retList.add(connection);
-		}
-		return retList;
-	}
-
-
     /**
-     * Adds an initializing connection.
-     * Should only be called from a thread that has this' monitor.
-     * This is called from initializeExternallyGeneratedConnection
-     * and initializeFetchedConnection, both times from within a
-     * synchronized(this) block.
+     * Get the IP address and port number of an ultrapeer we're connected to that supports GUESS.
+     * We have a TCP socket connection to this remote computer.
+     * 
+     * @return The IP address and port number in a new Endpoint object.
+     *         null if we aren't connected to any GUESS ultrapeers.
      */
-    private void connectionInitializing(Connection c) {
-        //REPLACE _connections with the list _connections+[c]
-        List newConnections=new ArrayList(_connections);
-        newConnections.add(c);
-        _connections = Collections.unmodifiableList(newConnections);
+    public Endpoint getConnectedGUESSUltrapeer() {
+
+        // Loop through the ultrapeers we're connected to
+        for (Iterator iter = _initializedConnections.iterator(); iter.hasNext(); ) {
+            ManagedConnection connection = (ManagedConnection)iter.next();
+
+            // The remote computer said "X-Ultrapeer: true" and "X-GUESS: 0.1" or higher
+            if (connection.isSupernodeConnection() && connection.isGUESSUltrapeer()) {
+
+                // Return this remote computer's IP address and port number in a new Endpoint object
+                return new Endpoint(connection.getInetAddress().getAddress(), connection.getPort());
+            }
+        }
+
+        // We're not connected to any ultrapeers that support GUESS
+        return null;
     }
 
     /**
-     * Adds an incoming connection to the list of connections. Note that
-     * the incoming connection has already been initialized before
-     * this method is invoked.
-     * Should only be called from a thread that has this' monitor.
-     * This is called from initializeExternallyGeneratedConnection, for
-     * incoming connections
+     * Get a list of the ultrapeers we're connected to that support GUESS.
+     * We have TCP socket connections to these remote computers.
+     * 
+     * @return A List of ManagedConnection objects that are GUESS ultrapeers.
+     *         If we're not connected to any, returns an empty List, not null.
+     */
+    public List getConnectedGUESSUltrapeers() {
+
+        // Loop through the ultrapeers we're connected to
+        List retList = new ArrayList(); // We'll return this list
+        for (Iterator iter = _initializedConnections.iterator(); iter.hasNext(); ) {
+            ManagedConnection connection = (ManagedConnection)iter.next();
+
+            // The remote computer said "X-Ultrapeer: true" and "X-GUESS: 0.1" or higher
+            if (connection.isSupernodeConnection() && connection.isGUESSUltrapeer()) {
+
+                // Add this GUESS ultrapeer to our list
+                retList.add(connection);
+            }
+        }
+
+        // Return the list we made of all the GUESS ultrapeers we're connected to
+        return retList;
+    }
+
+    /**
+     * Add c to the _connections list.
+     * c is a ManagedConnection object you just made from an IP address and port number.
+     * After calling connectionInitializing, you'll have it try to open a TCP socket connection to the remote computer.
+     * 
+     * The _connections list is just for ultrapeers.
+     * c must be an ultrapeer, not a leaf.
+     * 
+     * This method isn't synchronized, call it when you are already inside a synchronized block.
+     * 
+     * @param c A ManagedConnection object to add to the _connections list
+     */
+    private void connectionInitializing(Connection c) {
+
+        // Add c to the _connections list
+        List newConnections = new ArrayList(_connections);           // Copy the list
+        newConnections.add(c);                                       // Add c to the copy
+        _connections = Collections.unmodifiableList(newConnections); // Replace the list with the new copy
+    }
+
+    /**
+     * Add c to the _connections list.
+     * c is a ManagedConnection object for an incoming connection.
+     * It's initialized, and the socket inside it is already connected.
+     * 
+     * The _connections list is just for ultrapeers.
+     * c must be an ultrapeer, not a leaf.
+     * 
+     * This method isn't synchronized, call it when you are already inside a synchronized block.
+     * 
+     * @param c A ManagedConnection object to add to the _connections list
      */
     private void connectionInitializingIncoming(ManagedConnection c) {
+
+        // Add c to the _connections list
         connectionInitializing(c);
     }
 
     /**
-     * Marks a connection fully initialized, but only if that connection wasn't
-     * removed from the list of open connections during its initialization.
-     * Should only be called from a thread that has this' monitor.
+     * Add a newly connected computer to _initializedConnections or _initializedClientConnections, and send it a ping packet.
+     * 
+     * Makes sure we have a slot for this kind of remote computer.
+     * Adds the ManagedConnection object to _initializedConnections if it's an ultrapeer or _initializedClientConnections if it's a leaf.
+     * Sends the remote computer vendor specific packets and a ping.
+     * 
+     * Only ConnectionManager.completeConnectionInitialization() calls this.
+     * Call from a thread that is synchronized on this ConnectionManager object.
+     * 
+     * @param c The ManagedConnection object that represents a remote computer we've finished the Gnutella handshake with
+     * @return  True if we decided to keep it and sent it a ping packet, false if we chose to disconnect
      */
     private boolean connectionInitialized(ManagedConnection c) {
-        if(_connections.contains(c)) {
-            // Double-check that we haven't improperly allowed
-            // this connection.  It is possible that, because of race-conditions,
-            // we may have allowed both a 'Peer' and an 'Ultrapeer', or an 'Ultrapeer'
-            // and a leaf.  That'd 'cause undefined results if we allowed it.
-            if(!allowInitializedConnection(c)) {
+
+        // Only do something if the given ManagedConnection is already in the _connections list
+        if (_connections.contains(c)) {
+
+            /*
+             * Double-check that we haven't improperly allowed
+             * this connection.  It is possible that, because of race-conditions,
+             * we may have allowed both a 'Peer' and an 'Ultrapeer', or an 'Ultrapeer'
+             * and a leaf.  That'd 'cause undefined results if we allowed it.
+             */
+
+            // If we don't have a slot for this kind of remote computer
+            if (!allowInitializedConnection(c)) {
+
+                // Close the connection and remove it from our lists
                 removeInternal(c);
                 return false;
             }
-            
 
-            //update the appropriate list of connections
-            if(!c.isSupernodeClientConnection()){
-                //REPLACE _initializedConnections with the list
-                //_initializedConnections+[c]
-                List newConnections=new ArrayList(_initializedConnections);
+            /*
+             * Update the appropriate list of connections
+             */
+
+            // We're a leaf and the remote computer is an ultrapeer, or we're both ultrapeers
+            if (!c.isSupernodeClientConnection()) {
+
+                // Add c to _initializedConnections, our list of all the ultrapeers we've finished the Gnutella handshake with
+                List newConnections = new ArrayList(_initializedConnections);
                 newConnections.add(c);
-                _initializedConnections =
-                    Collections.unmodifiableList(newConnections);
-                
-                if(c.isClientSupernodeConnection()) {
-                	killPeerConnections(); // clean up any extraneus peer conns.
-                    _shieldedConnections++; // Count that now we have one more connection up to an ultrapeer
+                _initializedConnections = Collections.unmodifiableList(newConnections);
+
+                // The remote computer is an ultrapeer and we are just a leaf
+                if (c.isClientSupernodeConnection()) {
+
+                    // Disconnect from any ultrapeers that we connected to as a fellow ultrapeer
+                	killPeerConnections(); // Without doing this, we'd be a leaf to some computers and an ultrapeer to others, which is not allowed
+
+                	// Count that now we have one more connection up to an ultrapeer as a leaf
+                    _shieldedConnections++;
                 }
-                if(!c.isLimeWire())
-                    _nonLimeWirePeers++; // Count we're connected to one more ultrapeer that isn't running LimeWire
-                if(checkLocale(c.getLocalePref()))
-                    _localeMatchingPeers++; // Count we're connected to one more ultrapeer with the same language preference as us
+
+                // Add to our counts
+                if (!c.isLimeWire()) _nonLimeWirePeers++; // Count we're connected to one more ultrapeer that isn't running LimeWire
+                if (checkLocale(c.getLocalePref())) _localeMatchingPeers++; // Count we're connected to one more ultrapeer with the same language preference as us
+
+            // We're an ultrapeer and the remote computer is a leaf
             } else {
-                //REPLACE _initializedClientConnections with the list
-                //_initializedClientConnections+[c]
-                List newConnections
-                    =new ArrayList(_initializedClientConnections);
+
+                // Add c to _initializedClientConnections, the list of our leaves we've finished the Gnutella handshake with
+                List newConnections = new ArrayList(_initializedClientConnections);
                 newConnections.add(c);
-                _initializedClientConnections =
-                    Collections.unmodifiableList(newConnections);
-                if(!c.isLimeWire())
-                    _nonLimeWireLeaves++; // Count that we have another leaf that isn't running LimeWire
+                _initializedClientConnections = Collections.unmodifiableList(newConnections);
+
+                // Add to our counts
+                if (!c.isLimeWire()) _nonLimeWireLeaves++; // Count that we have another leaf that isn't running LimeWire
             }
-	        // do any post-connection initialization that may involve sending.
+
+            // Send the remote computer vendor-specific messages that list which other vendor-specifc messages we understand
 	        c.postInit();
-	        // sending the ping request.
+
+	        // Send the remote computer a Gnutella ping packet
     		sendInitialPingRequest(c);
+            
+            // We kept the remote computer and sent it some packets
             return true;
         }
-        return false;
 
+        // The given connection isn't in the _connections list
+        return false;
     }
 
     /**
-     * like allowConnection, except more strict - if this is a leaf,
-     * only allow connections whom we have told we're leafs.
-     * @return whether the connection should be allowed 
+     * Look at a remote computer's handshake headers and how many connections we already have to decide if we want to keep this connection, or refuse and disconnect.
+     * 
+     * Calls allowConnection() to look at the headers and slots and choose keep or disconnect.
+     * Before that, adds an additional check.
+     * If we're a leaf but we didn't tell the remote computer that, disconnect.
+     * 
+     * @param c A ManagedConnection we've finished the Gnutella handshake with
+     * @return  True to keep this connection, false to disconnect
      */
     private boolean allowInitializedConnection(Connection c) {
-        
-        // If we have some connections up to ultrapeers, or 
-    	if ((isShieldedLeaf() || !isSupernode()) &&
-    			!c.isClientSupernodeConnection())
+
+        // If we're a leaf but we didn't tell the remote computer that, disconnect
+    	if (
+
+            // We have some connections up to ultrapeers, or we're not an ultrapeer nor are we trying to become one
+            (isShieldedLeaf() || !isSupernode()) &&
+
+            // And, the remote computer is an ultrapeer and we're just a leaf
+    		!c.isClientSupernodeConnection())
+
+            // No, disconnect from this remote computer
     		return false;
-    	
+
+        // Look at the remote computer's handshake headers and consider how many slots we have open to decide if we want to disconnect
     	return allowConnection(c.headers());
     }
-    
+
     /**
-     * removes any supernode->supernode connections
+     * Remove any ultrapeer-to-ultrapeer connections that we may have right now.
+     * Disconnect from the ultrapeers we've connected to as a fellow ultrapeer ourselves.
+     * 
+     * Only connectionInitialized() calls this.
+     * The remote computer is an ultrapeer, and we are just a leaf.
+     * As a leaf, it's important that we don't have any ultrapeer-to-ultrapeer connections.
+     * If we had any, we'd be an ultrapeer to some computers and a leaf to others.
+     * This is not allowed on the Gnutella network.
      */
     private void killPeerConnections() {
+
+        // Loop through _initializedConnections, our list of all the ultrapeers we've finished the Gnutella handshake with
     	List conns = _initializedConnections;
     	for (Iterator iter = conns.iterator(); iter.hasNext();) {
 			ManagedConnection con = (ManagedConnection) iter.next();
-			if (con.isSupernodeSupernodeConnection()) 
-				removeInternal(con);
+
+            // If we connected to this ultrapeer as an ultrapeer
+			if (con.isSupernodeSupernodeConnection()) {
+
+			    // Close the connection and remove it from our lists
+			    removeInternal(con);
+            }
 		}
-    }
-    
-    /**
-     * Iterates over all the connections and sends the updated CapabilitiesVM
-     * down every one of them.
-     */
-    public void sendUpdatedCapabilities() {        
-        for(Iterator iter = getInitializedConnections().iterator(); iter.hasNext(); ) {
-            Connection c = (Connection)iter.next();
-            c.sendUpdatedCapabilities();
-        }
-        for(Iterator iter = getInitializedClientConnections().iterator(); iter.hasNext(); ) {
-            Connection c = (Connection)iter.next();
-            c.sendUpdatedCapabilities();
-        }        
     }
 
     /**
-     * Disconnects from the network.  Closes all connections and sets
-     * the number of connections to zero.
+     * Sends our current CapabiltiesVM vendor message to all the Gnutella computers we're connected to.
+     * Loops through or list of connected ultrapeers, and then our list of leaves.
+     * Use after updating our CapabilitiesVM message.
+     */
+    public void sendUpdatedCapabilities() {
+
+        // Loop for each ultrapeer we're connected to
+        for (Iterator iter = getInitializedConnections().iterator(); iter.hasNext(); ) {
+            Connection c = (Connection)iter.next();
+
+            // Send the ultrapeer our current CapabilitiesVM vendor message
+            c.sendUpdatedCapabilities();
+        }
+
+        // Loop for each of our leaves
+        for (Iterator iter = getInitializedClientConnections().iterator(); iter.hasNext(); ) {
+            Connection c = (Connection)iter.next();
+
+            // Send the leaf our current CapabilitiesVM vendor message
+            c.sendUpdatedCapabilities();
+        }
+    }
+
+    /**
+     * Disconnect the program from the Gnutella network.
+     * Closes all connections in the _connections list and sets the number of connections we want to 0.
      */
     public synchronized void disconnect() {
+
+        // Record the time now that we're disconnecting
         _disconnectTime = System.currentTimeMillis();
-        _connectTime = Long.MAX_VALUE;
+        _connectTime = Long.MAX_VALUE; // Clear the time we tried to connect
+
+        // With _preferredConnections set to 0, adjustConnectionFetchers() will stop all the ConnectionFetcher threads and close the sockets they've opened
         _preferredConnections = 0;
-        adjustConnectionFetchers(); // kill them all
-        //2. Remove all connections.
-        for (Iterator iter=getConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        adjustConnectionFetchers(); // Closes the connections we've opened but haven't done the Gnutella handshake through yet
+
+        // Loop for each ultrapeer connection in the _connections list
+        for (Iterator iter = getConnections().iterator(); iter.hasNext(); ) {
+            ManagedConnection c = (ManagedConnection)iter.next();
+
+            // Close the connection and remove it from our lists
             remove(c);
-            //add the endpoint to hostcatcher
+
+            // If this computer was an ultrapeer we were connected to
             if (c.isSupernodeConnection()) {
-                //add to catcher with the locale info.
-                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                                          c.getPort()), true, c.getLocalePref());
+
+                // Give its IP address to the HostCatcher
+                _catcher.add(
+                    new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()), // Make a new Endpoint from the IP address and port number
+                    true,                                                           // List with GOOD_PRIORITY because this is an ultrapeer
+                    c.getLocalePref());                                             // Include the remote computer's language preference in the listing
             }
         }
-        
+
+        // Have the Sockets class reset its count of connection attempts back to 0
         Sockets.clearAttempts();
     }
 
     /**
-     * Connects to the network.  Ensures the number of messaging connections
-     * is non-zero and recontacts the pong server as needed.
+     * Connect the program to the Gnutella network.
+     * 
+     * Sets _preferredConnections, the number of ultrapers we'll try to get.
+     * Has the HostCatcher start sending UDP Gnutella ping packets to the IP addresses of PCs in its list.
      */
     public synchronized void connect() {
 
-        // Reset the disconnect time to be a long time ago.
+        // Clear the time we disconnected, and set the time we connected to now
         _disconnectTime = 0;
         _connectTime = System.currentTimeMillis();
 
-        // Ignore this call if we're already connected
-        // or not initialized yet.
-        if(isConnected() || _catcher == null) {
-            return;
-        }
-        
-        _connectionAttempts = 0;
-        _lastConnectionCheck = 0;
+        // If we already have a Gnutella connection or the HostCatcher hasn't been setup yet, leave now
+        if (isConnected() || _catcher == null) return;
+
+        // Start counts at 0
+        _connectionAttempts    = 0; // Italic in Eclipse because it is static
+        _lastConnectionCheck   = 0;
         _lastSuccessfulConnect = 0;
 
-
-        // Notify HostCatcher that we've connected.
+        // Have the HostCatcher read in the gnutella.net file
         _catcher.expire();
-        
+
         // Set the number of connections we want to maintain
         setPreferredConnections();
-        
-        // tell the catcher to start pinging people.
+
+        // Have the HostCatcher start sending UDP Gnutella ping packets to the IP addresses of PCs in its list
         _catcher.sendUDPPings();
     }
 
     /**
-     * Sends the initial ping request to a newly initialized connection.  The
-     * ttl of the PingRequest will be 1 if we don't need any connections.
-     * Otherwise, the ttl = max ttl.
+     * Send the newly connected computer a Gnutella ping packet.
+     * 
+     * If we don't need any more connections, we'll send the ping with a TTL of 1.
+     * If we do need more connections, we'll set the TTL to 4.
+     * 
+     * Only connectionInitialize() calls this.
+     * 
+     * @param connection The ManagedConnection object for a remote computer we've just finished the Gnutella handshake with
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
-        if(connection.supportsPongCaching()) return;
 
-        //We need to compare how many connections we have to the keep alive to
-        //determine whether to send a broadcast ping or a handshake ping,
-        //initially.  However, in this case, we can't check the number of
-        //connection fetchers currently operating, as that would always then
-        //send a handshake ping, since we're always adjusting the connection
-        //fetchers to have the difference between keep alive and num of
-        //connections.
+        // If the remote computer said "Pong-Caching: 0.1" or later, leave now (do) why?
+        if (connection.supportsPongCaching()) return;
+
+        /*
+         * We need to compare how many connections we have to the keep alive to
+         * determine whether to send a broadcast ping or a handshake ping,
+         * initially.  However, in this case, we can't check the number of
+         * connection fetchers currently operating, as that would always then
+         * send a handshake ping, since we're always adjusting the connection
+         * fetchers to have the difference between keep alive and num of
+         * connections.
+         */
+
+        // We have all the ultrapeer connections we need
         PingRequest pr;
-        if (getNumInitializedConnections() >= _preferredConnections)
-            pr = new PingRequest((byte)1);
-        else
-            pr = new PingRequest((byte)4);
+        if (getNumInitializedConnections() >= _preferredConnections) {
 
+            // Prepare a ping packet with a TTL of 1
+            pr = new PingRequest((byte)1); // Handshake ping
+
+        // We are still looking for more ultrapeers to connect to
+        } else {
+
+            // Prepare a ping packet with a TTL of 4
+            pr = new PingRequest((byte)4); // Broadcast ping, it will travel further so we'll find out about more ultrapeers to connect to
+        }
+
+        // Send this remote computer the PingRequest packet
         connection.send(pr);
-        //Ensure that the initial ping request is written in a timely fashion.
-        try {
-            connection.flush();
-        } catch (IOException e) { /* close it later */ }
+        try { connection.flush(); } catch (IOException e) {} // Actually send it out now
     }
 
     /**
-     * An unsynchronized version of remove, meant to be used when the monitor
-     * is already held.  This version does not kick off ConnectionFetchers;
-     * only the externally exposed version of remove does that.
+     * Close a ManagedConnection object and remove it from the lists the ConnectionManager keeps.
+     * 
+     * Removes c from _initializedConnections if it's an ultrapeer, or _initializedClientConnections if it's a leaf.
+     * Removes c from _connections.
+     * Closes the TCP socket connection that c holds.
+     * Removes c from the MessageRouter, the listener, and the unicaster.
+     * 
+     * This remove method isn't synchronized, use it when you're already in a synchronized block.
+     * This remove method doesn't kick off connection fetchers, only the public version of remove does that.
+     * 
+     * @param c The ManagedConnection object to remove
      */
     private void removeInternal(ManagedConnection c) {
-        // 1a) Remove from the initialized connections list and clean up the
-        // stuff associated with initialized connections.  For efficiency
-        // reasons, this must be done before (2) so packets are not forwarded
-        // to dead connections (which results in lots of thrown exceptions).
-        if(!c.isSupernodeClientConnection()){
-            int i=_initializedConnections.indexOf(c);
+
+        /*
+         * 1a) Remove from the initialized connections list and clean up the
+         * stuff associated with initialized connections.  For efficiency
+         * reasons, this must be done before (2) so packets are not forwarded
+         * to dead connections (which results in lots of thrown exceptions).
+         */
+
+        // If we're both ultrapeers, or we're a leaf and c is an ultrapeer
+        if (!c.isSupernodeClientConnection()) {
+
+            // We can find c in _initializedConnections, the list of all the ultrapeers we're connected to
+            int i = _initializedConnections.indexOf(c);
             if (i != -1) {
-                //REPLACE _initializedConnections with the list
-                //_initializedConnections-[c]
-                List newConnections=new ArrayList();
-                newConnections.addAll(_initializedConnections);
-                newConnections.remove(c);
-                _initializedConnections =
-                    Collections.unmodifiableList(newConnections);
-                //maintain invariant
-                if(c.isClientSupernodeConnection())
-                    _shieldedConnections--; // Count that we now have one less connection up to an ultrapeer
-                if(!c.isLimeWire())
-                    _nonLimeWirePeers--; // Count that we're connected to one less ultrapeer that isn't running LimeWire
-                if(checkLocale(c.getLocalePref()))
-                    _localeMatchingPeers--; // Count that we're connected to one less ultrapeer with the same language preference as us
+
+                // Remove c from the _initializedConnections list
+                List newConnections = new ArrayList();                                  // Make a new, empty ArrayList called newConnections
+                newConnections.addAll(_initializedConnections);                         // Copy all the references from _initializedConnections into it
+                newConnections.remove(c);                                               // Remove the given ManagedConnection reference from it
+                _initializedConnections = Collections.unmodifiableList(newConnections); // Replace _initializedConnections with an unmodifiable view of the new list
+
+                // Subtract 1 from the counts that c was a part of
+                if (c.isClientSupernodeConnection()) _shieldedConnections--; // Count that we now have one less connection up to an ultrapeer
+                if (!c.isLimeWire())                 _nonLimeWirePeers--;    // Count that we're connected to one less ultrapeer that isn't running LimeWire
+                if (checkLocale(c.getLocalePref()))  _localeMatchingPeers--; // Count that we're connected to one less ultrapeer with the same language preference as us
             }
-        }else{
-            //check in _initializedClientConnections
-            int i=_initializedClientConnections.indexOf(c);
+
+        // We're an ultrapeer, and c is a leaf
+        } else {
+
+            // We can find c in _initializedClientConnections, the list of all the leaves we're connected to
+            int i = _initializedClientConnections.indexOf(c);
             if (i != -1) {
-                //REPLACE _initializedClientConnections with the list
-                //_initializedClientConnections-[c]
-                List newConnections=new ArrayList();
-                newConnections.addAll(_initializedClientConnections);
-                newConnections.remove(c);
-                _initializedClientConnections =
-                    Collections.unmodifiableList(newConnections);
-                if(!c.isLimeWire())
-                    _nonLimeWireLeaves--; // We've got one fewer leaf that isn't running LimeWire
+
+                // Remove c from the _initializedClientConnections list
+                List newConnections=new ArrayList();                                          // Make a new, empty ArrayList called newConnections
+                newConnections.addAll(_initializedClientConnections);                         // Copy all the references from _initializedClientConnections into it
+                newConnections.remove(c);                                                     // Remove the given ManagedConnection reference from it
+                _initializedClientConnections = Collections.unmodifiableList(newConnections); // Replace the old list with an unmodifiable view of the new one
+
+                // Subtract 1 from the counts that c was a part of
+                if (!c.isLimeWire()) _nonLimeWireLeaves--; // We've got one fewer leaf that isn't running LimeWire
             }
         }
 
-        // 1b) Remove from the all connections list and clean up the
-        // stuff associated all connections
-        int i=_connections.indexOf(c);
+        /*
+         * 1b) Remove from the all connections list and clean up the
+         * stuff associated all connections
+         */
+
+        // Remove c from _connections, the list of all the ultrapeers we're trying to connect to or are connected to
+        int i = _connections.indexOf(c);
         if (i != -1) {
-            //REPLACE _connections with the list _connections-[c]
-            List newConnections=new ArrayList(_connections);
-            newConnections.remove(c);
-            _connections = Collections.unmodifiableList(newConnections);
+
+            // Replace the _connections list with one just like it, but without c
+            List newConnections = new ArrayList(_connections);           // Copy the references from the _connections list into a new ArrayList called newConnections
+            newConnections.remove(c);                                    // Remove c from the new list
+            _connections = Collections.unmodifiableList(newConnections); // Replace _connections with an unmodifiable view of the new list
         }
 
-        // 2) Ensure that the connection is closed.  This must be done before
-        // step (3) to ensure that dead connections are not added to the route
-        // table, resulting in dangling references.
+        /*
+         * 2) Ensure that the connection is closed.  This must be done before
+         * step (3) to ensure that dead connections are not added to the route
+         * table, resulting in dangling references.
+         */
+
+        // Close our TCP socket connection to this remote computer
         c.close();
 
-        // 3) Clean up route tables.
+        /*
+         * 3) Clean up route tables.
+         */
+
+        // Have the MessageRouter stop sending Gnutella packets to c
         RouterService.getMessageRouter().removeConnection(c);
 
-        // 4) Notify the listener
+        /*
+         * 4) Notify the listener.
+         */
+
+        // (do)
         RouterService.getCallback().connectionClosed(c);
 
-        // 5) Clean up Unicaster
+        /*
+         * 5) Clean up Unicaster.
+         */
+
+        // (do)
         QueryUnicaster.instance().purgeQuery(c);
     }
-    
+
     /**
-     * Stabilizes connections by removing extraneous ones.
-     *
-     * This will remove the connections that we've been connected to
-     * for the shortest amount of time.
+     * If we have more connections than we need, stabilizeConnections() removes extra ones.
+     * 
+     * Disconnects from ultrapeers in the _initializedConnections list until we have just _preferredConnections number of them.
+     * First, disconnects from any ultrapeers not running LimeWire.
+     * If we still have too many, disconnects from the ultrapeers we connected to most recently.
      * 
      * setPreferredConnections() changes the value of _preferredConnections, and then calls this method.
-     * 
-     * 
      */
     private synchronized void stabilizeConnections() {
         
         // Loop while we're connected to more ultrapeers than we need to be
         while (getNumInitializedConnections() > _preferredConnections) {
 
+            // We'll point newest at the connection in 
+            
             ManagedConnection newest = null;
 
+            // Loop through each ManagedConnection in the _initializedConnections list of ultrapeers we've finished the Gnutella handshake with
             for (Iterator i = _initializedConnections.iterator(); i.hasNext(); ) {
-
                 ManagedConnection c = (ManagedConnection)i.next();
-                
-                // first see if this is a non-limewire connection and cut it off
-                // unless it is our only connection left
-                
+
+                /*
+                 * first see if this is a non-limewire connection and cut it off
+                 * unless it is our only connection left
+                 */
+
+                // This remote computer is running something other than LimeWire
                 if (!c.isLimeWire()) {
+
+                    // Pick it and leave the for loop
                     newest = c;
                     break;
                 }
-                
-                if(newest == null || 
-                   c.getConnectionTime() > newest.getConnectionTime())
-                    newest = c;
+
+                /*
+                 * The ManagedConnection c is running LimeWire.
+                 */
+
+                // If we don't have a winner yet, or c has a more recent connection time than our current winner, pick c as newest
+                if (newest == null || c.getConnectionTime() > newest.getConnectionTime()) newest = c;
             }
-            if(newest != null)
-                remove(newest);
+
+            // If we found a non-LimeWire or most recently added ultrapeer, close the connection and remove it from our lists
+            if (newest != null) remove(newest);
         }
+
+        // If we need another connection, start a thread that will get one
         adjustConnectionFetchers();
-    }    
+    }
 
     /**
-     * Starts or stops connection fetchers to maintain the invariant
-     * that numConnections + numFetchers >= _preferredConnections
-     *
-     * _preferredConnections - numConnections - numFetchers is called the need.
-     * This method is called whenever the need changes:
-     *   1. setPreferredConnections() -- _preferredConnections changes
-     *   2. remove(Connection) -- numConnections drops.
-     *   3. initializeExternallyGeneratedConnection() --
-     *        numConnections rises.
-     *   4. initialization error in initializeFetchedConnection() --
-     *        numConnections drops when removeInternal is called.
-     *   Note that adjustConnectionFetchers is not called when a connection is
-     *   successfully fetched from the host catcher.  numConnections rises,
-     *   but numFetchers drops, so need is unchanged.
-     *
-     * Only call this method when the monitor is held.
+     * Starts or stops connection fetchers so there is one for each additional connection we need.
      * 
+     * This maintains the following equation which should always be true as the program runs:
+     * number of connections + number of connection fetchers >= _preferredConnections
      * 
+     * _preferredConnections - number of connections - number of connection fetchers is called the need.
+     * Call this method whenever the need changes.
      * 
+     * The following things can happen that make the need change.
+     * 
+     * (1) setPreferredConnections() changes the _preferredConnections value
+     * (2) remove(c) makes the number of connections drop
+     * (3) initializeExternallyGeneratedConnection() makes the number of connections rise
+     * (4) There's an initialization error in initializeFetchedConnection(), and the number of connections drops when removeInternal() runs
+     * 
+     * This method isn't called when a connection is fetched successfully from the host catcher.
+     * The number of connections rises, but the number of connection fetchers drops, so the need number doesn't change.
+     * 
+     * The _dedicatedPrefFetcher is a ConnectionFetcher thread that will find us an ultrapeer that matches our language preference.
+     * If we're a leaf that has a connection up to an ultrapeer, but none that speak our language yet, we start _dedicatedPrefFetcher.
+     * It's created with ConnectionFetcher(true), which causes the HandshakeResponder to refuse foreign language computers.
+     * 
+     * Code here figures out how many more connections we need.
+     * Each ConnectionFetcher thread will try to open one new connection.
+     * If we need more connections, the method makes more ConnectionFetcher threads.
+     * 
+     * If we have too many connections, the method stops ConnectionFetcher threads.
+     * If we still have too many connections, the method closes TCP sockets the ConnectionFetcher threads have opened.
+     * These are connections we've opened, but we haven't done the Gnutella handshake through them yet.
+     * 
+     * This method isn't synchronized, only call it within a synchronized block.
      */
     private void adjustConnectionFetchers() {
 
         // True, we want to connect to remote computers with the same language preference as us
         if (ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+            
+            /*
+             * if it's a leaf and locale preferencing is on
+             * we will create a dedicated preference fetcher
+             * that tries to fetch a connection that matches the
+             * clients locale
+             */
+            
+            // If we're a leaf with at least one connection up to an ultrapeer, but none that speak our language yet
+            if (RouterService.isShieldedLeaf() && // We're a leaf with at least one connection up to an ultrapeer, and
+                _needPref &&                      // We're still looking for a connection that matches our language preference, and
+                !_needPrefInterrupterScheduled && // The program doesn't have a preference fetcher interrupter scheduled yet, and
+                _dedicatedPrefFetcher == null) {  // The fetcher dedicated to helping us as a leaf find an ultrapeer that matches our language isn't set up yet
 
-            //if it's a leaf and locale preferencing is on
-            //we will create a dedicated preference fetcher
-            //that tries to fetch a connection that matches the
-            //clients locale
-            if(RouterService.isShieldedLeaf()
-               && _needPref
-               && !_needPrefInterrupterScheduled
-               && _dedicatedPrefFetcher == null) {
-                _dedicatedPrefFetcher = new ConnectionFetcher(true);
+                // Make the one dedicated language preference ConnectionFetcher
+                _dedicatedPrefFetcher = new ConnectionFetcher(true); // True to have it refuse foreign language computers in the Gnutella handshake
+
+                // Define a new object named interrupted that implements the Runnable interface right here
                 Runnable interrupted = new Runnable() {
-                        public void run() {
-                            synchronized(ConnectionManager.this) {
-                                // always finish once this runs.
-                                _needPref = false;
 
-                                if (_dedicatedPrefFetcher == null)
-                                    return;
-                                _dedicatedPrefFetcher.interrupt();
-                                _dedicatedPrefFetcher = null;
-                            }
+                    // Stop the dedicated preference fetcher in 15 seconds
+                    public void run() {
+
+                        synchronized (ConnectionManager.this) {
+
+                            // Record that we no longer need a connection that matches our language preference
+                            _needPref = false;
+
+                            // If the dedicated preference fetcher isn't running, we're done
+                            if (_dedicatedPrefFetcher == null) return;
+
+                            // The dedicated preference fetcher is running, stop it
+                            _dedicatedPrefFetcher.interrupt(); // Have it throw an exception
+                            _dedicatedPrefFetcher = null;      // Remove our reference to it
                         }
-                    };
+                    }
+                };
+
+                // Record that now we do have the code scheduled to stop the fetcher
                 _needPrefInterrupterScheduled = true;
-                // shut off this guy if he didn't have any luck
+
+                // Have the RouterService call the run() method above one time, 15 seconds from now
                 RouterService.schedule(interrupted, 15 * 1000, 0);
             }
         }
-        int goodConnections = getNumInitializedConnections();
-        int neededConnections = _preferredConnections - goodConnections;
-        //Now how many fetchers do we need?  To increase parallelism, we
-        //allocate 3 fetchers per connection, but no more than 10 fetchers.
-        //(Too much parallelism increases chance of simultaneous connects,
-        //resulting in too many connections.)  Note that we assume that all
-        //connections being fetched right now will become ultrapeers.
+
+        // Find out how many ultrapeers we're connected to, and how many more we need
+        int goodConnections = getNumInitializedConnections();            // The number of ultrapeers we're connected to
+        int neededConnections = _preferredConnections - goodConnections; // The number of additional ultrapeer connections we need
+
+        /*
+         * Now how many fetchers do we need?  To increase parallelism, we
+         * allocate 3 fetchers per connection, but no more than 10 fetchers.
+         * (Too much parallelism increases chance of simultaneous connects,
+         * resulting in too many connections.)  Note that we assume that all
+         * connections being fetched right now will become ultrapeers.
+         * 
+         * The end result of the following logic, assuming _preferredConnections is 32 for Ultrapeers, is:
+         * When we have 22 active peer connections,             we fetch (27 - current) * 1 connections.
+         * All other times, for Ultrapeers,                we will fetch (32 - current) * 3, up to a maximum of 20.
+         * For leaves, assuming they maintin 4 Ultrapeers, we will fetch ( 4 - current) * 2 connections.
+         */
+
+        // We're firewalled and don't have any ultrapeer-to-ultrapeer connections
         int multiple;
+        if (!RouterService.acceptedIncomingConnection() && !isActiveSupernode()) {
 
-        // The end result of the following logic, assuming _preferredConnections
-        // is 32 for Ultrapeers, is:
-        // When we have 22 active peer connections, we fetch
-        // (27-current)*1 connections.
-        // All other times, for Ultrapeers, we will fetch
-        // (32-current)*3, up to a maximum of 20.
-        // For leaves, assuming they maintin 4 Ultrapeers,
-        // we will fetch (4-current)*2 connections.
+            /*
+             * If we have not accepted incoming, fetch 3 times as many connections as we need.
+             * We must also check if we're actively being a Ultrapeer because
+             * it's possible we may have turned off acceptedIncoming while
+             * being an Ultrapeer.
+             */
 
-        // If we have not accepted incoming, fetch 3 times
-        // as many connections as we need.
-        // We must also check if we're actively being a Ultrapeer because
-        // it's possible we may have turned off acceptedIncoming while
-        // being an Ultrapeer.
-        if( !RouterService.acceptedIncomingConnection() && !isActiveSupernode() ) {
+            // Fetch 3 times as many connections as we need
             multiple = 3;
-        }
-        // Otherwise, if we're not ultrapeer capable,
-        // or have not become an Ultrapeer to anyone,
-        // also fetch 3 times as many connections as we need.
-        // It is critical that active ultrapeers do not use a multiple of 3
-        // without reducing neededConnections, otherwise LimeWire would
-        // continue connecting and rejecting connections forever.
-        else if( !isSupernode() || getNumUltrapeerConnections() == 0 ) {
-            multiple = 3;
-        }
-        // Otherwise (we are actively Ultrapeering to someone)
-        // If we needed more than connections, still fetch
-        // 2 times as many connections as we need.
-        // It is critical that 10 is greater than RESERVED_NON_LIMEWIRE_PEERS,
-        // else LimeWire would try connecting and rejecting connections forever.
-        else if( neededConnections > 10 ) {
-            multiple = 2;
-        }
-        // Otherwise, if we need less than 10 connections (and we're an Ultrapeer), 
-        // decrement the amount of connections we need by 5,
-        // leaving 5 slots open for newcomers to use,
-        // and decrease the rate at which we fetch to
-        // 1 times the amount of connections.
-        else {
-            multiple = 1;
-            neededConnections -= 5 +
+
+        // We're not an ultrapeer or can't become one, or we have no ultrapeer-to-ultrapeer connections
+        } else if (!isSupernode() || getNumUltrapeerConnections() == 0) {
             
-                // The minimum number of non-LimeWire connections we want to have
-                ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
+            /*
+             * Otherwise, if we're not ultrapeer capable,
+             * or have not become an Ultrapeer to anyone,
+             * also fetch 3 times as many connections as we need.
+             * It is critical that active ultrapeers do not use a multiple of 3
+             * without reducing neededConnections, otherwise LimeWire would
+             * continue connecting and rejecting connections forever.
+             */
+
+            // Fetch 3 times as many connections as we need
+            multiple = 3;
+
+        // We are an ultrapeer, and we need more than 10 connections
+        } else if (neededConnections > 10) {
+
+            /*
+             * Otherwise (we are actively Ultrapeering to someone)
+             * If we needed more than connections, still fetch
+             * 2 times as many connections as we need.
+             * It is critical that 10 is greater than RESERVED_NON_LIMEWIRE_PEERS,
+             * else LimeWire would try connecting and rejecting connections forever.
+             */
+
+            // Fetch twice as many connections as we need
+            multiple = 2;
+
+        // We're an ultrapeer and we need less than 10 connections
+        } else {
+
+            /*
+             * Otherwise, if we need less than 10 connections (and we're an Ultrapeer), 
+             * decrement the amount of connections we need by 5,
+             * leaving 5 slots open for newcomers to use,
+             * and decrease the rate at which we fetch to
+             * 1 times the amount of connections.
+             */
+
+            // Fetch just as many connections as we need
+            multiple = 1;
+
+            // Lower the number of connections we're seeking by 5 and the minimum number of non-LimeWire connections we want to have
+            neededConnections -= 5 + ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
         }
 
-        int need = Math.min(10, multiple*neededConnections)
-                 - _fetchers.size()
-                 - _initializingFetchedConnections.size();
+        // Calculate how many connection fetchers we need, the need number can be negative
+        int need = Math.min(10, multiple * neededConnections) - _fetchers.size() - _initializingFetchedConnections.size();
 
-        // do not open more sockets than we can
+        // Stay under the Windows XP Service Pack 2 limit for half-open TCP socket connections
         need = Math.min(need, Sockets.getNumAllowedSockets());
-        
-        // Start connection fetchers as necessary
-        while(need > 0) {
-            // This kicks off the thread for the fetcher
+
+        // If need is positive, make that many more connection fetchers
+        while (need > 0) {
+
+            // Make a new ConnectionFetcher object, which starts the thread, and add it to the _fetchers list
             _fetchers.add(new ConnectionFetcher());
             need--;
         }
 
-        // Stop ConnectionFetchers as necessary, but it's possible there
-        // aren't enough fetchers to stop.  In this case, close some of the
-        // connections started by ConnectionFetchers.
-        int lastFetcherIndex = _fetchers.size();
-        while((need < 0) && (lastFetcherIndex > 0)) {
-            ConnectionFetcher fetcher = (ConnectionFetcher)
-                _fetchers.remove(--lastFetcherIndex);
+        /*
+         * Stop ConnectionFetchers as necessary, but it's possible there
+         * aren't enough fetchers to stop.  In this case, close some of the
+         * connections started by ConnectionFetchers.
+         */
+
+        // Find out how many ConnectionFetcher threads we have running right now
+        int lastFetcherIndex = _fetchers.size(); // We'll subtract 1 before using the size as an index
+
+        // If need is negative, stop that many connection fetchers
+        while ((need < 0) && (lastFetcherIndex > 0)) {
+
+            /*
+             * ConnectionFetcher extends Thread, so a ConnectionFetcher object is a Thread.
+             * Call fetcher.interrupt() to stop the thread.
+             * If the thread is blocking on a call to wait(), it will throw an InterruptedException.
+             * If it's just running code, it's status will change so now calling thread.isInterrupted() will return true.
+             * initializeFetchedConnection() checks for this.
+             */
+
+            // Remove a ConnectionFetcher object from _fetchers, and stop the thread
+            ConnectionFetcher fetcher = (ConnectionFetcher)_fetchers.remove(--lastFetcherIndex); // Subtract before resolving
             fetcher.interrupt();
             need++;
         }
-        int lastInitializingConnectionIndex =
-            _initializingFetchedConnections.size();
-        while((need < 0) && (lastInitializingConnectionIndex > 0)) {
-            ManagedConnection connection = (ManagedConnection)
-                _initializingFetchedConnections.remove(
-                    --lastInitializingConnectionIndex);
+
+        // Find out how many connections our ConnectionFetcher threads have opened
+        int lastInitializingConnectionIndex = _initializingFetchedConnections.size(); // These are open TCP sockets that we haven't done the Gnutella handshake through yet
+
+        // If need is still negative, close connections
+        while ((need < 0) && (lastInitializingConnectionIndex > 0)) {
+
+            // Get a connection a ConnectionFetcher thread opened but that we haven't done the Gnutella handshake through yet
+            ManagedConnection connection = (ManagedConnection)_initializingFetchedConnections.remove(--lastInitializingConnectionIndex);
+            
+            // Close the connection and remove it from our lists
             removeInternal(connection);
             need++;
         }
     }
 
     /**
-     * Initializes an outgoing connection created by a ConnectionFetcher
-     * Throws any of the exceptions listed in Connection.initialize on
-     * failure; no cleanup is necessary in this case.
-     *
-     * @exception IOException we were unable to establish a TCP connection
-     *  to the host
-     * @exception NoGnutellaOkException we were able to establish a
-     *  messaging connection but were rejected
-     * @exception BadHandshakeException some other problem establishing
-     *  the connection, e.g., the server responded with HTTP, closed the
-     *  the connection during handshaking, etc.
-     * @see com.limegroup.gnutella.Connection#initialize(int)
+     * Connect to the remote computer, do the Gnutella handshake, and add it to the right list.
+     * 
+     * Only ConnectionFetcher.managedRun() calls this.
+     * When it does, we're at the following stage of the process of getting a new Gnutella connection.
+     * We've gotten an IP address from the HostCatcher.
+     * We've made a ManagedConnection object with it.
+     * That's it, now this method will take things from there.
+     * 
+     * Adds the ManagedConnection object to the _initializingFetchedConnections and _connections lists.
+     * Removes the ConnectionFetcher thread from the _fetchers list.
+     * Calls mc.initialize() to connect to the remote computer, do the Gnutella handshake, and setup compression on the connection.
+     * Looks at the headers from the remote computer to save its listening port and grab IP addresses for the HostCatcher.
+     * Adds mc to the right list and sends it a ping packet.
+     * 
+     * @param mc      A new ManagedConnection object we just made from an IP address from the HostCatcher
+     * @param fetcher The ConnectionFetcher thread that is in charge of opening this connection
+     * 
+     * @exception IOException           We couldn't connect a TCP socket to the remote computer
+     * @exception NoGnutellaOkException The remote computer rejected us in the Gnutella handshake
+     * @exception BadHandshakeException The remote computer responded with HTTP, closed the connection during the handshake, or something else
      */
-    private void initializeFetchedConnection(ManagedConnection mc,
-                                             ConnectionFetcher fetcher)
-            throws NoGnutellaOkException, BadHandshakeException, IOException {
-        synchronized(this) {
-            if(fetcher.isInterrupted()) {
-                // Externally generated interrupt.
-                // The interrupting thread has recorded the
-                // death of the fetcher, so throw IOException.
-                // (This prevents fetcher from continuing!)
+    private void initializeFetchedConnection(ManagedConnection mc, ConnectionFetcher fetcher) throws NoGnutellaOkException, BadHandshakeException, IOException {
+
+        synchronized (this) {
+
+            // If another thread called interrupt() on the ConnectionFetcher thread
+            if (fetcher.isInterrupted()) {
+
+                /*
+                 * Externally generated interrupt.
+                 * The interrupting thread has recorded the
+                 * death of the fetcher, so throw IOException.
+                 * (This prevents fetcher from continuing!)
+                 */
+
+                // Throw an exception to prevent the ConnectionFetcher from continuing
                 throw new IOException("connection fetcher");
             }
 
+            // Add the ManagedConnection object to our list of connections that have ConnectionFetcher threads connecting them
             _initializingFetchedConnections.add(mc);
-            if(fetcher == _dedicatedPrefFetcher)
-                _dedicatedPrefFetcher = null;
-            else
-                _fetchers.remove(fetcher);
+
+            /*
+             * Remove references to the ConnectionFetcher from the ConnectionManager object.
+             */
+
+            // If this is the ConnectionFetcher dedicated to finding us as a leaf at least one ultrapeer that matches our language preference
+            if (fetcher == _dedicatedPrefFetcher) _dedicatedPrefFetcher = null; // It is, remove our reference to it
+            else                                  _fetchers.remove(fetcher);    // It's not, remove it from our list of ConnectionFetcher threads
+
+            // Add the ManagedConnection object to the _connections list
             connectionInitializing(mc);
-            // No need to adjust connection fetchers here.  We haven't changed
-            // the need for connections; we've just replaced a ConnectionFetcher
-            // with a Connection.
+
+            /*
+             * No need to adjust connection fetchers here.  We haven't changed
+             * the need for connections; we've just replaced a ConnectionFetcher
+             * with a Connection.
+             */
         }
+
+        // Tell the GUI that we're connecting to the remote computer
         RouterService.getCallback().connectionInitializing(mc);
 
         try {
+
+            // Connect to the remote computer, do the Gnutella handshake, and setup compression on the connection
             mc.initialize();
-        } catch(IOException e) {
-            synchronized(ConnectionManager.this) {
+
+        // We were unable to open a TCP socket connection to that IP address and port number
+        } catch (IOException e) {
+
+            synchronized (ConnectionManager.this) {
+
+                // Remove mc from our list of connections that have ConnectionFetcher threads connecting them
                 _initializingFetchedConnections.remove(mc);
+
+                // Close the connection and remove it from our lists
                 removeInternal(mc);
-                // We've removed a connection, so the need for connections went
-                // up.  We may need to launch a fetcher.
+
+                /*
+                 * We've removed a connection, so the need for connections went
+                 * up.  We may need to launch a fetcher.
+                 */
+
+                // If we need another connection, start a thread that will try to get one
                 adjustConnectionFetchers();
             }
+
+            // Throw the exception so the next part of the program will have to catch it
             throw e;
-        }
-        finally {
-            //if the connection received headers, process the headers to
-            //take steps based on the headers
+
+        // Even if there's an exception, we still want to get the IP addresses from the headers
+        } finally {
+
+            // Look at the headers the remote computer sent us to save its listening port and grab IP addresses for the HostCatcher
             processConnectionHeaders(mc);
         }
 
-        completeConnectionInitialization(mc, true);
+        // Add mc to the right list and send it a ping packet
+        completeConnectionInitialization(mc, true); // A ConnectionFetcher thread got us this connection, remove it from the _initializingFetchedConnections list
     }
 
     /**
-     * Processes the headers received during connection handshake and updates
-     * itself with any useful information contained in those headers.
-     * Also may change its state based upon the headers.
-     * @param headers The headers to be processed
-     * @param connection The connection on which we received the headers
+     * Look at the headers the remote computer sent us to save its listening port and grab IP addresses for the HostCatcher
+     * 
+     * Reads "X-Try-Ultrapeers", giving the IP addresses and port numbers to the HostCatcher.
+     * If the remote computer connected to us, reads it's listening port number from its "Listen-IP" header.
+     * We save that port number in the ManagedConnection object, overwriting our record of the epehmeral port the remote computer connected to us from.
+     * 
+     * @param connection The ManagedConnection object for a remote computer with which we just finished the Gnutella handshake
      */
     private void processConnectionHeaders(Connection connection) {
 
     	// TODO:kfaaborg receivedHeaders always returns true
-        if(!connection.receivedHeaders()) {
-            return;
-        }
+        if (!connection.receivedHeaders()) return;
 
-        //get the connection headers
-        Properties headers = connection.headers().props();
-        //return if no headers to process
-        if(headers == null) return;
-        //update the addresses in the host cache (in case we received some
-        //in the headers)
+        // Get all the Gnutella handshake headers the remote computer sent us in a Java Properties hash table of strings
+        Properties headers = connection.headers().props(); // Returns a HandshakeResponse object, which extends Properties
+        if (headers == null) return;
+
+        // Read the "X-Try-Ultrapeers" header the remote computer sent us, and give the IP addresses and port numbers to the HostCatcher
         updateHostCache(connection.headers());
 
-        //get remote address.  If the more modern "Listen-IP" header is
-        //not included, try the old-fashioned "X-My-Address".
-        String remoteAddress
-            = headers.getProperty(HeaderNames.LISTEN_IP);
-        if (remoteAddress==null)
-            remoteAddress
-                = headers.getProperty(HeaderNames.X_MY_ADDRESS);
+        // Get the remote computer's IP address, the value of the "Listen-IP" or older "X-My-Address" header
+        String remoteAddress = headers.getProperty(HeaderNames.LISTEN_IP);
+        if (remoteAddress == null) remoteAddress = headers.getProperty(HeaderNames.X_MY_ADDRESS);
 
-        //set the remote port if not outgoing connection (as for the outgoing
-        //connection, we already know the port at which remote host listens)
-        if((remoteAddress != null) && (!connection.isOutgoing())) {
+        /*
+         * set the remote port if not outgoing connection (as for the outgoing
+         * connection, we already know the port at which remote host listens)
+         */
+
+        // If the remote computer said "Listen-IP" and it connected to us
+        if ((remoteAddress != null) && (!connection.isOutgoing())) {
+
+            // Get the index of the port number just beyond the colon in text like "12.152.83.138:6346"
             int colonIndex = remoteAddress.indexOf(':');
-            if(colonIndex == -1) return;
+            if (colonIndex == -1) return;
             colonIndex++;
-            if(colonIndex > remoteAddress.length()) return;
+            if (colonIndex > remoteAddress.length()) return;
+
             try {
-                int port =
-                    Integer.parseInt(
-                        remoteAddress.substring(colonIndex).trim());
-                if(NetworkUtils.isValidPort(port)) {
-                	// for incoming connections, set the port based on what it's
-                	// connection headers say the listening port is
+
+                // Read the text beyond the colon as a number, the port number
+                int port = Integer.parseInt(remoteAddress.substring(colonIndex).trim());
+
+                // It's 1 through 65535
+                if (NetworkUtils.isValidPort(port)) {
+
+                    /*
+                     * for incoming connections, set the port based on what it's
+                     * connection headers say the listening port is
+                     */
+
+                    // Save the remote computer's listening port, overwriting the separate ephemeral port it connected to us from
                     connection.setListeningPort(port);
                 }
-            } catch(NumberFormatException e){
-                // should nothappen though if the other client is well-coded
-            }
+
+            // The remote computer sent us text we couldn't parse, ignore it
+            } catch (NumberFormatException e) {}
         }
     }
-    
-    //done
 
     /**
      * True if we can safely switch from ultrapeer to leaf mode.
@@ -2094,132 +2699,204 @@ public class ConnectionManager {
 		connect();
 	}
 
-    //do
-    
     /**
-     * Adds the X-Try-Ultrapeer hosts from the connection headers to the
-     * host cache.
-     *
-     * @param headers the connection headers received
+     * Read the "X-Try-Ultrapeers" header a remote computer sent us, giving the IP addresses and port numbers to the HostCatcher.
+     * 
+     * @param headers A HandshakeResponse object that holds all the Gnutella handshake headers the remote computer sent us
      */
     private void updateHostCache(HandshakeResponse headers) {
 
-        if(!headers.hasXTryUltrapeers()) return;
+        // Get the value of the "X-Try-Ultrapeers" header the remote computer sent us
+        if (!headers.hasXTryUltrapeers()) return;           // Make sure the remote computer sent us an "X-Try-Ultrapeers" header
+        String hostAddresses = headers.getXTryUltrapeers(); // Get the value, which is text like "12.152.83.138:6346,63.252.232.216:6346,69.178.195.177:6346"
 
-        //get the ultrapeers, and add those to the host cache
-        String hostAddresses = headers.getXTryUltrapeers();
+        // Split the text around commas to get individual parts like "12.152.83.138:6346" and "63.252.232.216:6346", and loop for each one
+        StringTokenizer st = new StringTokenizer(hostAddresses, Constants.ENTRY_SEPARATOR); // A StringTokenizer to hold each part of text
+        List hosts = new ArrayList(st.countTokens()); // An ArrayList to hold the Endpoint objects we turn each part of text into
+        while (st.hasMoreTokens()) {
 
-        //tokenize to retrieve individual addresses
-        StringTokenizer st = new StringTokenizer(hostAddresses,
-            Constants.ENTRY_SEPARATOR);
-
-        List hosts = new ArrayList(st.countTokens());
-        while(st.hasMoreTokens()){
+            // Remove any spaces from before or after this IP address and port number text
             String address = st.nextToken().trim();
+
             try {
+
+                // Make a new Endpoint to hold the IP address and port number
                 Endpoint e = new Endpoint(address);
                 hosts.add(e);
-            } catch(IllegalArgumentException iae){
-                continue;
-            }
+
+            // If reading that text as numbers didn't work, just loop to try the next one
+            } catch (IllegalArgumentException iae) { continue; }
         }
-        _catcher.add(hosts);        
+
+        // Have the HostCatcher add all those IP addresses to the list it keeps
+        _catcher.add(hosts); // hosts is an ArrayList with Endpoint objects in it
     }
 
-
-
     /**
-     * Initializes an outgoing connection created by createConnection or any
-     * incomingConnection.  If this is an incoming connection and there are no
-     * slots available, rejects it and throws IOException.
-     *
-     * @throws IOException on failure.  No cleanup is necessary if this happens.
+     * Connects to the remote computer, do the Gnutella handshake, setup compression, and send the remote computer a ping packet.
+     * 
+     * Makes sure we have a slot for this kind of computer.
+     * Updates the GUI to show we're connected.
+     * 
+     * If the new connection is outgoing, we made c from an IP address and port number and haven't connected yet.
+     * If the new connection is incoming, we made c from a socket that's connected.
+     * 
+     * @param c A new ManagedConnection object
      */
-    private void initializeExternallyGeneratedConnection(ManagedConnection c)
-		throws IOException {
-        //For outgoing connections add it to the GUI and the fetcher lists now.
-        //For incoming, we'll do this below after checking incoming connection
-        //slots.  This keeps reject connections from appearing in the GUI, as
-        //well as improving performance slightly.
+    private void initializeExternallyGeneratedConnection(ManagedConnection c) throws IOException {
+
+        /*
+         * For outgoing connections add it to the GUI and the fetcher lists now.
+         * For incoming, we'll do this below after checking incoming connection
+         * slots.  This keeps reject connections from appearing in the GUI, as
+         * well as improving performance slightly.
+         */
+
+        // We just made the given ManagedConnection object from an IP address and port number
         if (c.isOutgoing()) {
-            synchronized(this) {
+
+            synchronized (this) {
+
+                // Add c to the _connections list
                 connectionInitializing(c);
-                // We've added a connection, so the need for connections went
-                // down.
+
+                /*
+                 * We've added a connection, so our need for connections went down.
+                 */
+
+                // If we have too many ConnectionFetcher threads trying to connect to remote computers, cancel one
                 adjustConnectionFetchers();
             }
+
+            // Have the GUI show this outgoing connection is initializing
             RouterService.getCallback().connectionInitializing(c);
         }
 
         try {
+
+            // Connect to the remote computer, do the Gnutella handshake, and setup compression on the connection
             c.initialize();
 
-        } catch(IOException e) {
+        // There was a problem connecting to the computer
+        } catch (IOException e) {
+
+            // Close the connection and remove it from our lists, and throw the exception upwards
             remove(c);
             throw e;
-        }
-        finally {
-            //if the connection received headers, process the headers to
-            //take steps based on the headers
+
+        // Run this code if there was no exception or before leaving if there was one 
+        } finally {
+
+            // Look at the headers the remote computer sent us to save its listening port and grab IP addresses for the HostCatcher
             processConnectionHeaders(c);
         }
 
-        //If there's not space for the connection, destroy it.
-        //It really should have been destroyed earlier, but this is just in case.
+        /*
+         * If there's not space for the connection, destroy it.
+         * It really should have been destroyed earlier, but this is just in case.
+         */
+
+        // If the remote computer connected to us, and we don't have a slot for this type of remote computer
         if (!c.isOutgoing() && !allowConnection(c)) {
-            //No need to remove, since it hasn't been added to any lists.
+
+            /*
+             * No need to remove, since it hasn't been added to any lists.
+             */
+
+            // Throw an exception because we don't have a free slot for this
             throw new IOException("No space for connection");
         }
 
-        //For incoming connections, add it to the GUI.  For outgoing connections
-        //this was done at the top of the method.  See note there.
-        if (! c.isOutgoing()) {
-            synchronized(this) {
+        /*
+         * For incoming connections, add it to the GUI.  For outgoing connections
+         * this was done at the top of the method.  See note there.
+         */
+
+        // If the remote computer connected to us
+        if (!c.isOutgoing()) {
+
+            synchronized (this) {
+
+                // Add c to the _connections list
                 connectionInitializingIncoming(c);
-                // We've added a connection, so the need for connections went
-                // down.
+
+                /*
+                 * We've added a connection, so our need for connections has gone down.
+                 */
+
+                // If we have too many ConnectionFetcher threads trying to connect to remote computers, cancel one
                 adjustConnectionFetchers();
             }
+
+            // Have the GUI show this outgoing connection is initializing
             RouterService.getCallback().connectionInitializing(c);
         }
 
-        completeConnectionInitialization(c, false);
+        // Add c to the right list and send it a ping packet
+        completeConnectionInitialization(c, false); // False, the remote computer connected to us
     }
 
     /**
-     * Performs the steps necessary to complete connection initialization.
-     *
-     * @param mc the <tt>ManagedConnection</tt> to finish initializing
-     * @param fetched Specifies whether or not this connection is was fetched
-     *  by a connection fetcher.  If so, this removes that connection from
-     *  the list of fetched connections being initialized, keeping the
-     *  connection fetcher data in sync
+     * Adds a given ManagedConnection to the right list and sends it a ping packet.
+     * 
+     * If a ConnectionFetcher got us this connection, removes it from the _initializingFetchedConnections list.
+     * 
+     * Calls connectionInitialized(mc), which:
+     * Makes sure we have a slot for mc and disconnects if we don't.
+     * adds mc to _initializedConnections or _initializedClientConnections.
+     * Sends it a ping packet.
+     * 
+     * Tells the GUI to show this connection as initialized.
+     * If we have too many ultrapeer connections, disconnects from some of them.
+     * 
+     * @param mc      A ManagedConnection we've finished the Gnutella handshake with.
+     * @param fetched True if one of our ConnectionFetcher threads connected to this remote computer.
+     *                False if the remote computer connected to us.
      */
-    private void completeConnectionInitialization(ManagedConnection mc,
-                                                  boolean fetched) {
-        synchronized(this) {
-            if(fetched) {
-                _initializingFetchedConnections.remove(mc);
-            }
-            // If the connection was killed while initializing, we shouldn't
-            // announce its initialization
-            boolean connectionOpen = connectionInitialized(mc);
-            if(connectionOpen) {
+    private void completeConnectionInitialization(ManagedConnection mc, boolean fetched) {
+
+        synchronized (this) {
+
+            // If a ConnectionFetcher thread got us this connection, remove it from the list
+            if (fetched) _initializingFetchedConnections.remove(mc);
+
+            /*
+             * If the connection was killed while initializing, we shouldn't announce its initialization.
+             */
+
+            // Add mc to _initializedConnections or _initializedClientConnections and send it a ping packet
+            boolean connectionOpen = connectionInitialized(mc); // Returns false if mc wasn't in _connections or we don't have a slot for it
+
+            // connectionInitialized(mc) didn't disconnect us from mc
+            if (connectionOpen) {
+
+                // Have the GUI show the connection as initialized
                 RouterService.getCallback().connectionInitialized(mc);
+
+                // Set _preferredConnections to 32 if we're an ultrapeer, or 3 if we're a leaf, and disconnect from extra ultrapeers
                 setPreferredConnections();
             }
         }
     }
 
     /**
-     * Gets the number of preferred connections to maintain.
+     * The number of ultrapeers we should have, 32 if we're an ultrapeer or 3 if we're a leaf.
+     * If we have fewer connections than this number, we have threads to get more.
+     * If we have more connections than this number, we're disconnecting from some to take the number down.
+     * 
+     * @return The value of _preferredConnections
      */
     public int getPreferredConnectionCount() {
+
+        // Return the value of _preferredConnections
         return _preferredConnections;
     }
 
     /**
      * Determines if we're attempting to maintain the idle connection count.
+     * When the user leaves the computer for a half hour, we as a leaf will drop down from 3 ultrapeer connections to just 1.
+     * 
+     * @return True if _preferredConnections is only 1 right now
      */
     public boolean isConnectionIdle() {
 
@@ -2227,24 +2904,14 @@ public class ConnectionManager {
         return _preferredConnections == ConnectionSettings.IDLE_CONNECTIONS.getValue();
     }
 
-    
-    
     /**
+     * Sets the number of ultrapeer connections we'll maintain, and disconnect from some if we have too many.
      * Sets _preferredConnections to 32 if we're an ultrapeer, or 3 if we're a leaf.
-     * 
-     * Sets the maximum number of connections we'll maintain.
-     * 
-     * 
      * 
      * This method is private, and called 3 places from within the ConnectionManager class:
      * ConnectionManager.completeConnectionInitialization() calls this after we've connected a new remote computer.
      * ConnectionManager.initialize() sets up a thread that calls this every second.
      * ConnectionManager.connect() calls this when the program starts trying to connect to the network.
-     * 
-     * Sets the value of _preferredConnections, and then calls stabilizeConnections().
-     * 
-     * 
-     * 
      */
     private void setPreferredConnections() {
 
@@ -2283,12 +2950,9 @@ public class ConnectionManager {
             _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
         }
 
-        // If we changed the number of connections we should have, call stabilizeConnections() to connect more or disconnect from some.
+        // If we changed the number of connections we should have, call stabilizeConnections() to disconnect from some
         if (oldPreferred != _preferredConnections) stabilizeConnections();
     }
-
-
-    //done
 
     /**
      * True if the user has been away for a half hour, and we should drop down to 1 ultrapeer connection instead of 3.
@@ -2306,272 +2970,419 @@ public class ConnectionManager {
         return SystemUtils.getIdleTime() >= MINIMUM_IDLE_TIME;
     }
 
-    //do
-
-
-    //
-    // End connection list management functions
-    //
-
-
-    //
-    // Begin connection launching thread inner classes
-    //
+    /*
+     * End connection list management functions.
+     * Begin connection launching thread inner classes.
+     */
 
     /**
-     * This thread does the initialization and the message loop for
-     * ManagedConnections created through createConnectionAsynchronously and
-     * createConnectionBlocking
+     * Have a thread run a OutgoingConnector object to connect a ManagedConnection object, and get it ready for Gnutella packet exchange.
+     * 
+     * createConnectionBlocking() and createConnectionAsynchronously() make new OutgoingConnector objects with this constructor.
+     * createConnectionBlcoking() passes false, it has already connected the ManagedConnection object.
+     * createConnectionAsynchronously() passes true, we'll have to connect the ManagedConnection object.
      */
     private class OutgoingConnector implements Runnable {
+
+        /** The ManagedConnection object we'll connect and setup for reading. */
         private final ManagedConnection _connection;
+
+        /** True if we need to connect _connection, false if it's already connected and we just need to make the chain of readers. */
         private final boolean _doInitialization;
 
         /**
-		 * Creates a new <tt>OutgoingConnector</tt> instance that will
-		 * attempt to create a connection to the specified host.
-		 *
-		 * @param connection the host to connect to
+         * Make a new OutgoingConnector object that will connect a given ManagedConnection object and set it up for reading.
+         * 
+         * createConnectionBlocking() and createConnectionAsynchronously() make new OutgoingConnector objects with this constructor.
+         * createConnectionBlcoking() passes false, it has already connected the ManagedConnection object.
+         * createConnectionAsynchronously() passes true, we'll have to connect the ManagedConnection object.
+		 * 
+		 * @param connection The ManagedConnection object
+         * @param initialize True if this OutgoingConnector will have to connect the ManagedConnection before setting up the chain of readers
          */
-        public OutgoingConnector(ManagedConnection connection,
-								 boolean initialize) {
+        public OutgoingConnector(ManagedConnection connection, boolean initialize) {
+
+            // Save the given values
             _connection = connection;
             _doInitialization = initialize;
         }
 
+        /**
+         * Connects to the remote computer, does the Gnutella handshake, and makes the chain of readers.
+         * 
+         * When we give a thread an OutgoingConnector object, it calls this run() method.
+         */
         public void run() {
+
             try {
-				if(_doInitialization) {
-					initializeExternallyGeneratedConnection(_connection);
-				}
+
+                // If createConnectionAsynchronously() made this OutgoingConnector, connect to the remote computer
+				if (_doInitialization) initializeExternallyGeneratedConnection(_connection);
+
+                // Rename this thread "MessageLoopingThread" and make the chain of readers
 				startConnection(_connection);
-            } catch(IOException ignored) {}
+
+            } catch (IOException ignored) {}
         }
     }
 
 	/**
-	 * Runs standard calls that should be made whenever a connection is fully
-	 * established and should wait for messages.
-	 *
-	 * @param conn the <tt>ManagedConnection</tt> instance to start
-	 * @throws <tt>IOException</tt> if there is an excpetion while looping
-	 *  for messages
+     * Renames this thread "MessageLoopingThread" and makes the chain of readers.
+	 * 
+	 * @param c A ManagedConnection that we've connected, done the handshake, and added to our lists
+     * 
+	 * @throws IOException If our connection to the remote computer drops
 	 */
-	private void startConnection(ManagedConnection conn) throws IOException {
+	private void startConnection(ManagedConnection c) throws IOException {
+
+        // Change the name of this thread to "MessageLoopingThread"
 	    Thread.currentThread().setName("MessageLoopingThread");
-		if(conn.isGUESSUltrapeer()) {
-			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-				conn.getPort());
+
+        // The remote computer supports GUESS, the way of giving rare searches longer TTLs
+		if (c.isGUESSUltrapeer()) {
+
+            // Give its IP address and port number to the QueryUnicaster (do)
+			QueryUnicaster.instance().addUnicastEndpoint(c.getInetAddress(), c.getPort());
 		}
 
-		// this can throw IOException
-		conn.loopForMessages();
+        // Make the chain of objects the program will use to read data from the remote computer
+		c.loopForMessages(); // Throws IOException if our connection to the remote computer drops
 	}
 
     /**
+     * To find and connect to a new Gnutella computer, make a ConnectionFetcher thread.
+     * It will get an IP address from the HostCatcher, connect to it, do the Gnutella handshake, and get ready to exchange Gnutella packets.
+     * 
+     * The managedRun() method performs these steps:
+     * Gets an IP address and port number from the HostCatcher.
+     * Makes a new ManagedConnection object from it called connection.
+     * Has initializeFetchedConnection() connect, do the Gnutella handshake, and setup compression.
+     * Catches IOException if we couldn't connect.
+     * Catches NoGnutellaOkException if we connected, but then the remote computer refused us in the Gnutella handshake.
+     * Renames this thread from "ConnectionFetcher" to "MessageLoopingThread".
+     * Makes the chain of readers that will get the data the remote computer sends, decompress it, and slice it into Gnutella packets.
+     * 
+     * ConnectionFetcher extends ManagedThread, which extends Thread.
+     * So, ConnectionFetcher is a Thread.
+     * 
      * Asynchronously fetches a connection from hostcatcher, then does
      * then initialization and message loop.
-     *
+     * 
      * The ConnectionFetcher is responsible for recording its instantiation
      * by adding itself to the fetchers list.  It is responsible  for recording
      * its death by removing itself from the fetchers list only if it
      * "interrupts itself", that is, only if it establishes a connection. If
      * the thread is interrupted externally, the interrupting thread is
      * responsible for recording the death.
-     * 
-     * 
-     * 
-     * 
-     * ConnectionFetcher extends ManagedThread, which extends Thread.
-     * So, ConnectionFetcher is a Thread.
-     * 
-     * 
-     * 
-     * 
      */
     private class ConnectionFetcher extends ManagedThread {
-        
-        //set if this connectionfetcher is a preferencing fetcher
+
+        /** False by default, true to have the HandshakeResponder refuse a foreign language computer in the Gnutella handshake. */
         private boolean _pref = false;
-        
+
         /**
-         * Tries to add a connection.  Should only be called from a thread
-         * that has the enclosing ConnectionManager's monitor.  This method
-         * is only called from adjustConnectionFetcher's, which has the same
-         * locking requirement.
+         * Make a ConnectionFetcher thread.
+         * It will get an IP address from the HostCatcher, make a ManagedConnection object for it, and open a TCP socket connection to it.
+         * 
+         * The adjustConnectionFetchers() method makes a new ConnectionFetcher thread and keeps it in the _fetchers list.
+         * 
+         * Only call this from a thread that is synchronized on the ConnectionManager.
+         * This constructor is only called from adjustConnectionFetchers(), which has the same locking requirement.
          */
         public ConnectionFetcher() {
-            
-            this(false);
+
+            // Call the next constructor
+            this(false); // False to not refuse a foreign language computer in the Gnutella handshake
         }
 
+        /**
+         * Make a ConnectionFetcher thread.
+         * It will get an IP address from the HostCatcher, make a ManagedConnection object for it, and open a TCP socket connection to it.
+         * 
+         * The adjustConnectionFetchers() method makes a new ConnectionFetcher thread and keeps it in the _fetchers list.
+         * 
+         * Only call this from a thread that is synchronized on the ConnectionManager.
+         * This constructor is only called from adjustConnectionFetchers(), which has the same locking requirement.
+         * 
+         * @param pref True to have this ConnectionFetcher thread refuse a foreign language computer in the Gnutella handshake
+         */
         public ConnectionFetcher(boolean pref) {
-            
+
+            // Name this thread "ConnectionFetcher"
             setName("ConnectionFetcher");
+
+            // Save the language preferencing option
             _pref = pref;
-            
-            // Kick off the thread.
-            setDaemon(true);
-            start();
+
+            // Have the thread call the managedRun() method below
+            setDaemon(true); // Let Java close the program even if this thread is still running
+            start();         // Have Java begin the thread by calling ManagedThread.run(), which calls managedRun() below
         }
 
-        // Try a single connection
+        /**
+         * Find and connect to a new computer on the Internet running Gnutella software, and get ready to exchange Gnutella packets.
+         * 
+         * Gets an IP address and port number from the HostCatcher.
+         * Makes a new ManagedConnection object from it called connection.
+         * Has initializeFetchedConnection() connect, do the Gnutella handshake, and setup compression.
+         * Catches IOException if we couldn't connect.
+         * Catches NoGnutellaOkException if we connected, but then the remote computer refused us in the Gnutella handshake.
+         * Renames this thread from "ConnectionFetcher" to "MessageLoopingThread".
+         * Makes the chain of readers that will get the data the remote computer sends, decompress it, and slice it into Gnutella packets.
+         * 
+         * When adjustConnectionFetchers() makes a new ConnectionFetcher thread, the constructor above calls start().
+         * This calls ManagedThread.run(), which calls this method, managedRun().
+         */
         public void managedRun() {
-            
+
             try {
-                
-                // Wait for an endpoint.
+
+                // Loop, waiting for the HostCatcher to give us an IP address to try, and making sure we get a good one
                 Endpoint endpoint = null;
-                
                 do {
-                    
+
+                    // Get an IP address and port number we can try connecting to from the HostCatcher object
                     endpoint = _catcher.getAnEndpoint();
-                    
-                } while (!IPFilter.instance().allow(endpoint.getAddress()) || isConnectedTo(endpoint.getAddress()) );
+
+                } while (
+
+                    // If the IP address the HostCatcher gave us isn't on our block list and we're not already connected to it, leave the loop
+                    !IPFilter.instance().allow(endpoint.getAddress()) || // That address is on our list of institutional addresses to avoid, or
+                    isConnectedTo(endpoint.getAddress())                 // We're already connected to that address, loop again to get another one
+                );
+
+                // Make sure we got one
                 Assert.that(endpoint != null);
+
+                // Record this as another attempt to connect to a remote computer
                 _connectionAttempts++;
-                ManagedConnection connection = new ManagedConnection(
-                    endpoint.getAddress(), endpoint.getPort());
-                //set preferencing
+
+                // Make a new ManagedConnection object from the IP address and port number the HostCatcher gave us
+                ManagedConnection connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort());
+
+                // If _pref is true, configure the HandshakeResponder to refuse foreign language computers
                 connection.setLocalePreferencing(_pref);
 
-                // If we've been trying to connect for awhile, check to make
-                // sure the user's internet connection is live.  We only do
-                // this if we're not already connected, have not made any
-                // successful connections recently, and have not checked the
-                // user's connection in the last little while or have very
-                // few hosts left to try.
+                /*
+                 * If we've been trying to connect for a while, check to make
+                 * sure the user's internet connection is live.  We only do
+                 * this if we're not already connected, have not made any
+                 * successful connections recently, and have not checked the
+                 * user's connection in the last little while or have very
+                 * few hosts left to try.
+                 */
+
+                // If we've been having a lot of trouble connecting, start the ConnectionChecker
                 long curTime = System.currentTimeMillis();
-                if(!isConnected() &&
-                   _connectionAttempts > 40 &&
-                   ((curTime-_lastSuccessfulConnect)>4000) &&
-                   ((curTime-_lastConnectionCheck)>60*60*1000)) {
+                if (!isConnected() &&                                      // If we don't have any Gnutella connections, and
+                    _connectionAttempts > 40 &&                            // We've tried to connect to more than 40 remote computers, and
+                    ((curTime - _lastSuccessfulConnect) > 4000) &&         // Our last successful TCP connection happened more than 4 seconds ago, and
+                    ((curTime - _lastConnectionCheck) > 60 * 60 * 1000)) { // We last checked our Internet connection more than an hour ago
+
+                    // Reset our count of connection attempts back down to 0
                     _connectionAttempts = 0;
+
+                    // Start a thread that will try popular Web sites to see if our Internet connection is dead
                     _lastConnectionCheck = curTime;
                     LOG.debug("checking for live connection");
                     ConnectionChecker.checkForLiveConnection();
                 }
 
-                //Try to connect, recording success or failure so HostCatcher
-                //can update connection history.  Note that we declare
-                //success if we were able to establish the TCP connection
-                //but couldn't handshake (NoGnutellaOkException).
+                /*
+                 * Try to connect, recording success or failure so HostCatcher
+                 * can update connection history.  Note that we declare
+                 * success if we were able to establish the TCP connection
+                 * but couldn't handshake (NoGnutellaOkException).
+                 */
+
                 try {
-                    initializeFetchedConnection(connection, this);
-                    _lastSuccessfulConnect = System.currentTimeMillis();
-                    _catcher.doneWithConnect(endpoint, true);
-                    if(_pref) // if pref connection succeeded
-                        _needPref = false;
+
+                    // Connect to the remote computer, do the Gnutella handshake, and add it to the right list 
+                    initializeFetchedConnection(connection, this); // Give it a reference to this ConnectionFetcher thread
+
+                    // That worked without an exception, so we're connected and done with the Gnutella handshake now
+                    _lastSuccessfulConnect = System.currentTimeMillis(); // Record we successfully initiated a TCP connection now
+                    _catcher.doneWithConnect(endpoint, true);            // Have the host catcher record another success with this listing
+
+                    // If we were refusing foreign language computers, this one must have matched, record that we don't have to do that anymore
+                    if (_pref) _needPref = false;
+
+                // The remote computer responded with something other than "GNUTELLA/0.6 200 OK"
                 } catch (NoGnutellaOkException e) {
+
+                    // Record we successfully initiated a TCP connection now
                     _lastSuccessfulConnect = System.currentTimeMillis();
-                    if(e.getCode() == HandshakeResponse.LOCALE_NO_MATCH) {
-                        //if it failed because of a locale matching issue
-                        //readd to hostcatcher??
-                        _catcher.add(endpoint, true,
-                                     connection.getLocalePref());
+
+                    // The remote computer said 577, it refused us because we don't have the same language preference as it does
+                    if (e.getCode() == HandshakeResponse.LOCALE_NO_MATCH) {
+                        
+                        /*
+                         * if it failed because of a locale matching issue
+                         * readd to hostcatcher??
+                         */
+
+                        // Add it to the HostCatcher now that we know its language preference
+                        _catcher.add(endpoint, true, connection.getLocalePref());
+
+                    // The remote computer refused us in the Gnutella handshake for some other reason
+                    } else {
+
+                        // Have the HostCatcher record that we were able to establish a TCP connection, but then the computer refused us in the Gnutella handshake
+                        _catcher.doneWithConnect(endpoint, true); // True, we established the TCP connection
+                        _catcher.putHostOnProbation(endpoint);    // List the computer with others that are online, but not accepting Gnutella connections right now
                     }
-                    else {
-                        _catcher.doneWithConnect(endpoint, true);
-                        _catcher.putHostOnProbation(endpoint);
-                    }
+
+                    // NoGnutellaOkException extends IOException, so the catch block in this method one level up for IOException will catch it
                     throw e;
+
+                // We couldn't connect a TCP socket to the remote computer
                 } catch (IOException e) {
-                    _catcher.doneWithConnect(endpoint, false);
-                    _catcher.expireHost(endpoint);
+
+                    // Have the HostCatcher record that we weren't able to establish a TCP connection
+                    _catcher.doneWithConnect(endpoint, false); // False, we weren't able to establish the TCP connection
+                    _catcher.expireHost(endpoint);             // List the computer with others that we weren't able to connect to
+
+                    // Throw the IOException to the catch block one level up
                     throw e;
                 }
 
+                // Rename the thread from "ConnectionFetcher" to "MessageLoopingThread", and make the chain of readers
 				startConnection(connection);
-            } catch(IOException e) {
+
+            // Connecting to the remote computer caused a NoGnutellaOkException or an IOException
+            } catch (IOException e) {
+
+                // Just keep going
+
+            // Another thread called interrupt() on this ConnectionFetcher thread to stop it from trying to connect to a remote computer
             } catch (InterruptedException e) {
-                // Externally generated interrupt.
-                // The interrupting thread has recorded the
-                // death of the fetcher, so just return.
+
+                /*
+                 * Externally generated interrupt.
+                 * The interrupting thread has recorded the
+                 * death of the fetcher, so just return.
+                 */
+
+                // Return, which will exit from this thread's run() method and end the thread
                 return;
-            } catch(Throwable e) {
-                //Internal error!
+
+            // Some other exception happened
+            } catch (Throwable e) {
+
+                // Give it to the ErrorService
                 ErrorService.error(e);
             }
         }
 
+        /**
+         * Express this ConnectionFetcher thread as a String.
+         * 
+         * @return The text "ConnectionFetcher"
+         */
         public String toString() {
+
+            // Just return the word "ConnectionFetcher"
             return "ConnectionFetcher";
         }
 	}
 
     /**
-     * This method notifies the connection manager that the user does not have
-     * a live connection to the Internet to the best of our determination.
-     * In this case, we notify the user with a message and maintain any
-     * Gnutella hosts we have already tried instead of discarding them.
+     * Disconnects from the Gnutella network, and has some code run every 2 minutes to try to connect.
+     * 
+     * ConnectionChecker.run() calls this when it looks like we have no Internet connection.
+     * Tells the user they have no Internet connection, and the program will keep looking for one.
+     * Disconnects the program from the Gnutella network, closing all connections and setting the number we want to 0.
+     * Has the RouterService call some code here every 2 minutes that tries to connect.
      */
     public void noInternetConnection() {
 
-        if(_automaticallyConnecting) {
-            // We've already notified the user about their connection and we're
-            // alread retrying automatically, so just return.
-            return;
-        }
+        // If we've already told the user about their connection and started the thread that tries later, don't do it again
+        if (_automaticallyConnecting) return;
 
-        
-        // Notify the user that they have no internet connection and that
-        // we will automatically retry
-        MessageService.showError("NO_INTERNET_RETRYING",
-                QuestionsHandler.NO_INTERNET_RETRYING);
-        
-        // Kill all of the ConnectionFetchers.
-        disconnect();
-        
-        // Try to reconnect in 10 seconds, and then every minute after
-        // that.
-        RouterService.schedule(new Runnable() {
-            public void run() {
-                // If the last time the user disconnected is more recent
-                // than when we started automatically connecting, just
-                // return without trying to connect.  Note that the
-                // disconnect time is reset if the user selects to connect.
-                if(_automaticConnectTime < _disconnectTime) {
-                    return;
+        // Tell the user that they have no Internet connection, and the program will keep looking for one
+        MessageService.showError("NO_INTERNET_RETRYING", QuestionsHandler.NO_INTERNET_RETRYING);
+
+        // Disconnect the program from the Gnutella network, closing all connections and setting the number we want to 0
+        disconnect(); // Kills all the ConnectionFetcher threads that we have running
+
+        // Try to reconnect in 10 seconds, and every 2 minutes after that
+        RouterService.schedule(     // Have the RouterService run some code here later
+            new Runnable() {        // Define a new class right here that implements the Runnable interface
+                public void run() { // This is the run() method that the RouterService will have a thread call later
+
+                    /*
+                     * If the last time the user disconnected is more recent
+                     * than when we started automatically connecting, just
+                     * return without trying to connect.  Note that the
+                     * disconnect time is reset if the user selects to connect.
+                     */
+
+                    // If the user has disconnected since we started trying to automatically reconnect, don't try to connect
+                    if (_automaticConnectTime < _disconnectTime) return;
+
+                    // If we don't have any Gnutella connections
+                    if (!RouterService.isConnected()) {
+
+                        /*
+                         * Try to re-connect.  Note this call resets the time
+                         * for our last check for a live connection, so we may
+                         * hit web servers again to check for a live connection.
+                         */
+
+                        // Set _preferredConnections to 32 or 3, and have the HostCatcher send UDP Gnutella ping packets
+                        connect();
+                    }
                 }
-                
-                if(!RouterService.isConnected()) {
-                    // Try to re-connect.  Note this call resets the time
-                    // for our last check for a live connection, so we may
-                    // hit web servers again to check for a live connection.
-                    connect();
-                }
-            }
-        }, 10*1000, 2*60*1000);
+            },
+
+            // Run this 10 seconds from now
+            10 * 1000,
+
+            // And every 2 minutes after that
+            2 * 60 * 1000
+        );
+
+        // Record that we started trying to automatically connect right now
         _automaticConnectTime = System.currentTimeMillis();
         _automaticallyConnecting = true;
-        
 
+        // If the HostCatcher has less than 100 IP addresses in its list, clear the list and read in the gnutella.net file again
         recoverHosts();
     }
 
     /**
-     * Utility method that tells the host catcher to recover hosts from disk
-     * if it doesn't have enough hosts.
+     * If the HostCatcher has less than 100 IP addresses in its list, clear the list and read in the gnutella.net file again.
      */
     private void recoverHosts() {
-        // Notify the HostCatcher that it should keep any hosts it has already
-        // used instead of discarding them.
-        // The HostCatcher can be null in testing.
-        if(_catcher != null && _catcher.getNumHosts() < 100) {
+
+        /*
+         * Notify the HostCatcher that it should keep any hosts it has already
+         * used instead of discarding them.
+         * The HostCatcher can be null in testing.
+         */
+
+        // If the HostCatcher has less than 100 IP adresses in its list
+        if (_catcher != null && _catcher.getNumHosts() < 100) {
+
+            // Clear the list and read in the gnutella.net file again
             _catcher.recoverHosts();
         }
     }
 
     /**
-     * Utility method to see if the passed in locale matches
-     * that of the local client. As of now, we assume that
-     * those clients not advertising locale as english locale
+     * True if the given language preference matches our language preference.
+     * 
+     * @param loc A remote computer's language preference, like "en" for English, or null if it didn't send a "X-Locale-Pref" header.
+     * @return    True if it matches our language preference.
+     *            False if it doesn't match.
+     *            True if it didn't say.
      */
     private boolean checkLocale(String loc) {
-        if(loc == null)
-            loc = /** assume english if locale is not given... */
-                ApplicationSettings.DEFAULT_LOCALE.getValue();
+
+        // If the remote computer didn't tell us its language preference with a header like "X-Locale-Pref: en", imagine it did and said our language preference
+        if (loc == null) loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
+
+        // Return true if the remote computer said or language preference or didn't say, false if it's
         return ApplicationSettings.LANGUAGE.getValue().equals(loc);
     }
-
 }

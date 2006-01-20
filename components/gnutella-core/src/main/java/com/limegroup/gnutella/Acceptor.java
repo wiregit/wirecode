@@ -902,12 +902,16 @@ public class Acceptor implements Runnable {
          */
         public void run() {
 
-        	// Get access to the managers for connections, uploads, and downloads, and the acceptor
-        	// When the program started, it made exactly one of each of these objects
-			ConnectionManager cm = RouterService.getConnectionManager();
+            /*
+             * Get access to the managers for connections, uploads, and downloads, and the acceptor
+             * When the program started, it made exactly one of each of these objects
+             */
+
+            // Get references to related objects
+			ConnectionManager cm = RouterService.getConnectionManager(); // The ConnectionManger keeps a list of our Gnutella connections
 			UploadManager     um = RouterService.getUploadManager();
 			DownloadManager   dm = RouterService.getDownloadManager();
-			Acceptor          ac = RouterService.getAcceptor();
+			Acceptor          ac = RouterService.getAcceptor();          // The Acceptor holds the listening socket that remote computers connect to
 
 			try {
 

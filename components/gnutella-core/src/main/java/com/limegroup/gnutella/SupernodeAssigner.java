@@ -30,7 +30,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * Here's what we look for:
  * An upload speed of 10 KB/s or more or a download speed of 20 KB/s or more.
  * The user did not indicate we're on a modem in settings.
- * An average upload time of more than an hour, or a current upload time of more than 2 hours.
+ * An average online time of more than an hour, or a current time online of more than 2 hours.
  * Remote computers can connect to us on TCP and UDP.
  * We're not running on Windows 95, 98, Me, or NT 4.0.
  * 

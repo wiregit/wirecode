@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 
 /**
  * A UDPHostCache object keeps a list of UDP host caches, and has a method to contact them to find IP addresses of Gnutella computers to connect to.
+ * There is only one UDPHostCache object as the program runs.
  * 
  * A UDP host cache is a remote computer on the Internet running UDP host cache software.
  * UDP host caches are usually on Web servers that have fast Internet connections, total uptime, and externally reachable IP addresses that don't change.
@@ -54,10 +55,6 @@ import org.apache.commons.logging.Log;
  * 
  * To send a ping packet over UDP to the next best 5 UDP host caches, call the fetchHosts() method.
  * HostCatcher.Bootstrapper.udpHostCacheFetch() does this.
- * 
- * There is only one UDPHostCache object as the program runs.
- * 
- * 
  */
 public class UDPHostCache {
 
