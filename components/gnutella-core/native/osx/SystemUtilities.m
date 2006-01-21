@@ -12,8 +12,11 @@
 
 
 // compile with:
-// cc -c -dynamiclib -o libSystemUtilities.o -I/System/Library/Frameworks/JavaVM.framework/Headers  SystemUtilities.m 
-// cc -dynamiclib -o libSystemUtilities.jnilib libSystemUtilities.o -framework JavaVM -framework Carbon -arch ppc -arch i386
+// cc -c -dynamiclib -o libSystemUtilities.ppc -I/System/Library/Frameworks/JavaVM.framework/Headers SystemUtilities.m -arch ppc
+// cc -c -dynamiclib -o libSystemUtilities.i386 -I/System/Library/Frameworks/JavaVM.framework/Headers SystemUtilities.m -arch i386
+// cc -dynamiclib -o libSystemUtilities.jnilib libSystemUtilities.ppc libSystemUtilities.i386 -framework JavaVM -framework Carbon -arch ppc -arch i386
+
+// or build two thin JNI libraries and merge them with lipo to an Universal Binary
 
 extern double CGSSecondsSinceLastInputEvent(unsigned long envType);
 
