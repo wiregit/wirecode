@@ -3382,7 +3382,7 @@ public class ConnectionManager {
         // If the remote computer didn't tell us its language preference with a header like "X-Locale-Pref: en", imagine it did and said our language preference
         if (loc == null) loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
-        // Return true if the remote computer said or language preference or didn't say, false if it's
+        // Return true if the remote computer said or language preference or didn't say, false if it doesn't match
         return ApplicationSettings.LANGUAGE.getValue().equals(loc);
     }
 }

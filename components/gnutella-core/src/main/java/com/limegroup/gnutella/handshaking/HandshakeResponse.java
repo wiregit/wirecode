@@ -388,20 +388,20 @@ public final class HandshakeResponse {
     }
 	
     /**
-     * Put the given headers under "200 OK", add "X-Try", and return them wrapped in a HandshakeResponse object.
+     * Put the given headers under "200 OK", add "X-Try-Ultrapeers", and return them wrapped in a HandshakeResponse object.
      * 
      * We are a leaf or an ultrapeer.
      * A remote computer connected to us and sent stage 1 headers.
      * The respondToIncoming method composed the stage 2 headers of our response.
-     * Now, this method just adds the "X-Try" header, puts "200 OK" at the top, and returns it as a new HandshakeResponse object.
+     * Now, this method just adds the "X-Try-Ultrapeers" header, puts "200 OK" at the top, and returns it as a new HandshakeResponse object.
      * 
      * @param response The stage 1 headers the remote computer sent us when it connected to us
      * @param headers  The stage 2 headers we've composed for our response
-     * @return         A new HandshakeResponse object with "200 OK" and "X-Try" added to the given headers
+     * @return         A new HandshakeResponse object with "200 OK" and "X-Try-Ultrapeers" added to the given headers
      */
     static HandshakeResponse createAcceptIncomingResponse(HandshakeResponse response, Properties headers) {
 
-    	// Put the given headers under "200 OK", add "X-Try", and return the group of headers in a new HandshakeResponse
+    	// Put the given headers under "200 OK", add "X-Try-Ultrapeers", and return the group of headers in a new HandshakeResponse
     	return new HandshakeResponse(addXTryHeader(response, headers));
     }
 
@@ -635,7 +635,7 @@ public final class HandshakeResponse {
         		hr.getLocalePref(), // The preferred language of the remote user, like "en" for English
         		10);                // We want information about up to 10 ultrapeers
 
-        // Add or overwrite the header "X-Try-Ultrapeers" with text from createEndpointString
+        // Add or overwrite the header "X-Try-Ultrapeers" with text from createEndpointString()
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         
         // Return the headers with the newly added or changed value for "X-Try-Ultrapeers"

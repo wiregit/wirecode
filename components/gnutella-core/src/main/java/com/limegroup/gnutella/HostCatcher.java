@@ -48,7 +48,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * To save the list between times you run LimeWire, the program writes the data to disk in a file named gnutella.net.
  * 
  * We get these addresses from several sources.
- * The "X-Try" and "X-Try-Ultrapeers" headers in the Gnutella handshake contain some.
+ * The "X-Try-Ultrapeers" header in the Gnutella handshake contain some.
  * Pong packets contain a handful of addresses, and information about the sender.
  * GWebCaches are PHP scripts on the Web we can tell our address, and get more.
  * UDP host caches are high-performance successors to GWebCache scripts.
@@ -62,7 +62,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * It uses a multicast packet, UDP host caches, and then GWebCache scripts.
  * 
  * If you've received a pong packet that has some IP addresses in it, call add(PingReply).
- * When you get IP addresses in the "X-Try" or "X-Try-Ultrapeers" headers, call add(Collection).
+ * When you get IP addresses in the "X-Try-Ultrapeers" header, call add(Collection).
  * 
  * ConnectionManager.ConnectionFetcher.managedRun() calls getAnEndpoint() to get an IP address to try.
  * It later calls doneWithConnect(e, success) to tell us if it worked or not.
