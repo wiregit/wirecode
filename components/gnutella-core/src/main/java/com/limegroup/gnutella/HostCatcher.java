@@ -48,7 +48,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * To save the list between times you run LimeWire, the program writes the data to disk in a file named gnutella.net.
  * 
  * We get these addresses from several sources.
- * The "X-Try-Ultrapeers" header in the Gnutella handshake contain some.
+ * The "X-Try-Ultrapeers" header in the Gnutella handshake contains some.
  * Pong packets contain a handful of addresses, and information about the sender.
  * GWebCaches are PHP scripts on the Web we can tell our address, and get more.
  * UDP host caches are high-performance successors to GWebCache scripts.
