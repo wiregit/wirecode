@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
@@ -19,61 +22,106 @@ import com.limegroup.gnutella.util.NameValue;
 
 /**
  * A Gnutella ping message.
+ * 
  */
-
 public class PingRequest extends Message {
 
-    /**
-     * various flags related to the SCP ggep field
+    /*
+     * various flags related to the SCP ggep field.
      */
-    public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
-    public static final byte SCP_LEAF = 0x0;
-    public static final byte SCP_ULTRAPEER = 0x1;
-   
 
     /**
-     * With the Big Ping and Big Pong extensions pings may have a payload
+     * 
+     */
+    public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
+
+    /**
+     * 
+     */
+    public static final byte SCP_LEAF = 0x0;
+
+    /**
+     * 
+     */
+    public static final byte SCP_ULTRAPEER = 0x1;
+
+    /**
+     * The payload of this ping if it is a big ping.
+     * 
+     * Gnutella ping packets are just a header.
+     * The payload length in the header is set to 0, and there is no payload.
+     * But, newer extensions define big pings and big pongs.
+     * These ping and pong packets do have a payload.
+     * If this PingRequest object describes a big ping, it will have a payload.
      */
     private byte[] payload = null;
-    
+
     /**
      * The GGEP blocks carried in this ping - parsed when necessary
+     * 
+     * 
      */
     private GGEP _ggep;
-    
-    /////////////////Constructors for incoming messages/////////////////
+
+    /*
+     * /////////////////Constructors for incoming messages/////////////////
+     */
+
     /**
-     * Creates a normal ping from data read on the network
+     * Make a new PingRequest object to represent the Gnutella ping packet we just received.
+     * Use this constructor when reading packets from the network.
+     * 
+     * @param guid The GUID that uniquely identifies this ping packet
+     * @param ttl  The message TTL, the number of times it will travel across the Internet
+     * @param hops The number of times this Gnutella message has traveled across the Internet
      */
     public PingRequest(byte[] guid, byte ttl, byte hops) {
+
+        // Call the Message constructor, adding the 0x00 ping byte and a payload length of 0 to the information we were given
         super(guid, Message.F_PING, ttl, hops, 0);
     }
 
     /**
-     * Creates an incoming group ping. Used only by boot-strap server
+     * Not used.
+     * 
+     * Creates an incoming group ping. Used only by boot-strap server.
      */
     protected PingRequest(byte[] guid, byte ttl, byte hops, byte length) {
         super(guid, Message.F_PING, ttl, hops, length);
     }
 
     /**
-     * Creates a big ping request from data read from the network
+     * Make a new PingRequest object to represent the Gnutella ping packet we just received that has a payload.
+     * Message.createMessage() calls this when it gets a ping that has a payload.
      * 
-     * @param payload the headers etc. which the big pings contain.
+     * @param guid    The GUID that uniquely identifies this ping packet
+     * @param ttl     The message TTL, the number of times it will travel across the Internet
+     * @param hops    The number of times this Gnutella message has traveled across the Internet
+     * @param payload A byte array that contains the data of the payload
+     * @param length  The payload length, the number of bytes in the message beyond the Gnutella message header
      */
     public PingRequest(byte[] guid, byte ttl, byte hops, byte[] payload) {
-        super(guid, Message.F_PING, ttl, hops, payload.length);
+
+        // Call the Message constructor, adding the 0x00 ping byte to the information we were given
+        super(guid, Message.F_PING, ttl, hops, payload.length); // Get the length from the given byte array
+
+        // Save the given payload in this new PingRequest object
         this.payload = payload;
     }
 
-    //////////////////////Constructors for outgoing Pings/////////////
+    /*
+     * ////////////////////// Constructors for outgoing Pings /////////////
+     */
+
     /**
      * Creates a normal ping with a new GUID
      *
      * @param ttl the ttl of the new Ping
      */
     public PingRequest(byte ttl) {
+        
         super((byte)0x0, ttl, (byte)0);
+        
         addBasicGGEPs();
     }
     
