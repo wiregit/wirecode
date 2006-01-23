@@ -19,12 +19,21 @@ public class DaapSettings extends LimeProps {
 	
     
     /**
-     * The file types supported by DAAP.
+     * The audio file types supported by DAAP.
      */
-    public static StringArraySetting DAAP_SUPPORTED_FILE_TYPES = 
-        FACTORY.createStringArraySetting("DAAP_SUPPORTED_FILE_TYPES", 
+    public static StringArraySetting DAAP_SUPPORTED_AUDIO_FILE_TYPES = 
+        FACTORY.createStringArraySetting("DAAP_SUPPORTED_AUDIO_FILE_TYPES", 
             new String[]{".mp3", ".m4a", ".wav", ".aif", ".aiff", ".m1a"});
-            
+     
+    /**
+     * The video file types supported by DAAP. Note: MPEG-2 does not
+     * work (requires commercial codec)! AVI isn't in the list as QT 
+     * doesn't support most of the codecs... 
+     */
+    public static StringArraySetting DAAP_SUPPORTED_VIDEO_FILE_TYPES = 
+        FACTORY.createStringArraySetting("DAAP_SUPPORTED_VIDEO_FILE_TYPES", 
+            new String[]{".mov", ".mp4", ".mpg", ".mpeg"});
+    
     /**
      * The name of the Library.
      */
