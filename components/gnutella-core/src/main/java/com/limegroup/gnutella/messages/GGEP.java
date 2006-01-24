@@ -1,4 +1,8 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages;
+
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,59 +29,58 @@ import com.limegroup.gnutella.util.IOUtils;
  */
 public class GGEP {
 
-    /** The extension header (key) for Browse Host. */
+    /** "BH" The extension header (key) for Browse Host. */
     public static final String GGEP_HEADER_BROWSE_HOST = "BH";
-    /** The extension header (key) for average daily uptime. */
+    /** "DU" The extension header (key) for average daily uptime. */
     public static final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
-    /** The extension header (key) for unicast protocol support. */
+    /** "GUE" The extension header (key) for unicast protocol support. */
     public static final String GGEP_HEADER_UNICAST_SUPPORT = "GUE";
-    /** The extension header (key) for vendor info. */
+    /** "VC" The extension header (key) for vendor info. */
     public static final String GGEP_HEADER_VENDOR_INFO = "VC";
-    /** The extension header (key) for Ultrapeer support. */
+    /** "UP" The extension header (key) for Ultrapeer support. */
     public static final String GGEP_HEADER_UP_SUPPORT = "UP";
-    /** The extension header (key) for QueryKey support. */
+    /** "QK" The extension header (key) for QueryKey support. */
     public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
-    /** The extension header (key) for QueryKey support. */
+    /** "MCAST" The extension header (key) for QueryKey support. */
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
-    /** The extension header (key) for PushProxy support. */
+    /** "PUSH" The extension header (key) for PushProxy support. */
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
-    /** The extension header (key) for AlternateLocation support */
+    /** "ALT" The extension header (key) for AlternateLocation support */
     public static final String GGEP_HEADER_ALTS = "ALT";
-    /** The extention header (key) for IpPort request */
-    public static final String GGEP_HEADER_IPPORT="IP";
-    /** The extension header (key) for UDP HostCache pongs. */
+    /** "IP" The extention header (key) for IpPort request */
+    public static final String GGEP_HEADER_IPPORT = "IP";
+    /** "UDPHC" The extension header (key) for UDP HostCache pongs. */
     public static final String GGEP_HEADER_UDP_HOST_CACHE = "UDPHC";
-    /** The extension header (key) for indicating support for packed ip/ports & udp host caches. */
+    /** "SCP" The extension header (key) for indicating support for packed ip/ports & udp host caches. */
     public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
-    /** The extension header (key) for packed IP/Ports */
-    public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
-    /** The extension header (key) for packed UDP Host Caches */
-    public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
-    
+    /** "IPP" The extension header (key) for packed IP/Ports */
+    public static final String GGEP_HEADER_PACKED_IPPORTS = "IPP";
+    /** "PHC" The extension header (key) for packed UDP Host Caches */
+    public static final String GGEP_HEADER_PACKED_HOSTCACHES = "PHC";
+
     /**
-     * The extension header (key) for a feature query.
+     * "WH" The extension header (key) for a feature query.
      * This is 'WH' for legacy reasons, because 'What is New' was the first.
      */
     public static final String GGEP_HEADER_FEATURE_QUERY = "WH";
-    /** The extension header disabling OOB proxying. */
+    /** "NP" The extension header disabling OOB proxying. */
     public static final String GGEP_HEADER_NO_PROXY = "NP";
-    /** The extension header (key) for MetaType query support */
+    /** "M" The extension header (key) for MetaType query support */
     public static final String GGEP_HEADER_META = "M";
-    /** The extension header (key) for client locale */
+    /** "LOC" The extension header (key) for client locale */
     public static final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
-    /** The extension header (key) for creation time */
+    /** "CT" The extension header (key) for creation time */
     public static final String GGEP_HEADER_CREATE_TIME = "CT";
-    /** The extension header (key) for Firewalled Transfer support in Hits. */
+    /** "FW" The extension header (key) for Firewalled Transfer support in Hits. */
     public static final String GGEP_HEADER_FW_TRANS = "FW";
 
-    /** The maximum size of a extension header (key). */
+    /** 15, The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
-    /** The maximum size of a extension data (value). */
+    /** 262143, the maximum size of a extension data (value). */
     public static final int MAX_VALUE_SIZE_IN_BYTES = 262143;
 
-    /** The GGEP prefix.  A GGEP block will start with this byte value.
-     */
+    /** 0xC3, the GGEP prefix.  A GGEP block will start with this byte value. */
     public static final byte GGEP_PREFIX_MAGIC_NUMBER = (byte) 0xC3;
 
     /** 
@@ -92,7 +95,7 @@ public class GGEP {
      * False iff this should COBS encode values to prevent null bytes.
      * Default is false, to be conservative.
      */
-    public boolean notNeedCOBS=false;
+    public boolean notNeedCOBS = false;
 
 	/**
 	 * Cached hash code value to avoid calculating the hash code from the
@@ -666,8 +669,3 @@ public class GGEP {
 	    }
 	}
 }
-
-
-
-
-

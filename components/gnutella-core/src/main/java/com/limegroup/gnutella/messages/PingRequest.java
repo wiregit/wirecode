@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella.messages;
 
@@ -23,26 +23,34 @@ import com.limegroup.gnutella.util.NameValue;
 /**
  * A Gnutella ping message.
  * 
+ * Traditionally, ping packets don't have payloads, and consist only of a 23-byte Gnutella packet header.
+ * LimeWire uses pings that have payloads, however.
+ * These are called big pings.
+ * 
+ * The payload is a GGEP block.
+ * In LimeWire, a GGEP block is represented by a GGEP object.
+ * Here, it's the _ggep member.
+ * The serialized data of the GGEP block is the byte array member named payload.
+ * 
+ * We can send pings in a TCP socket connection, or in UDP packets.
+ * UDP pings can be intended for remote PCs like us, UDP host caches, or the multicast network.
+ * 
+ * A special kind of ping packet is a solicited ping attempt.
+ * It's labeled "SCP" in the GGEP block.
  */
 public class PingRequest extends Message {
 
     /*
-     * various flags related to the SCP ggep field.
+     * Various flags related to the "SCP" GGEP field.
      */
 
-    /**
-     * 
-     */
+    /** 0x01, related to the "SCP" GGEP field. (do) */
     public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
 
-    /**
-     * 
-     */
+    /** 0x00, related to the "SCP" GGEP field. (do) */
     public static final byte SCP_LEAF = 0x0;
 
-    /**
-     * 
-     */
+    /** 0x01, related to the "SCP" GGEP field. (do) */
     public static final byte SCP_ULTRAPEER = 0x1;
 
     /**
@@ -57,9 +65,9 @@ public class PingRequest extends Message {
     private byte[] payload = null;
 
     /**
-     * The GGEP blocks carried in this ping - parsed when necessary
-     * 
-     * 
+     * The GGEP block this ping carries.
+     * If this is a big ping, it's payload will be a GGEP block.
+     * Code in this class parses and edits the GGEP block, and serializes its data when we send the packet.
      */
     private GGEP _ggep;
 
@@ -114,267 +122,481 @@ public class PingRequest extends Message {
      */
 
     /**
-     * Creates a normal ping with a new GUID
-     *
-     * @param ttl the ttl of the new Ping
+     * Make a new Gnutella ping packet for us to send with a new unique GUID.
+     * It comes with a GGEP block with the key "LOC" and a value like "en", indicating our language preference.
+     * 
+     * @param ttl The TTL for the packet, the number of times it should hop across the Internet before dying
      */
     public PingRequest(byte ttl) {
-        
-        super((byte)0x0, ttl, (byte)0);
-        
+
+        // Call the Message constructor to set values in the packet header
+        super(
+            (byte)0x0, // 0x00 identifies this as a ping packet
+            ttl,       // The number of times this packet will travel across the Internet
+            (byte)0);  // Payload length 0, no payload yet
+
+        // Add a GGEP block with the key "LOC" and value like "en", indicating our language preference
         addBasicGGEPs();
     }
-    
+
     /**
-     * Creates a normal ping with a specified GUID
-     *
-     * @param ttl the ttl of the new Ping
+     * Make a new Gnutella ping packet for us to send with the specified GUID.
+     * It comes with a GGEP block with the key "LOC" and a value like "en", indicating our language preference.
+     * 
+     * @param guid The GUID for this new packet
+     * @param ttl  The TTL for the packet, the number of times it should hop across the Internet before dying
      */
-    public PingRequest(byte [] guid,byte ttl) {
-        super(guid,(byte)0x0, ttl, (byte)0,0);
+    public PingRequest(byte[] guid, byte ttl) {
+
+        // Call the Message constructor to set values in the packet header
+        super(
+            guid,      // GUID, use the given GUID
+            (byte)0x0, // Function byte, 0x00 identifies this as a ping packet
+            ttl,       // TTL, use the given number of times this packet can travel across the Internet
+            (byte)0,   // Hops, 0 because this packet hasn't traveled across the Internet yet
+            0);        // Length, 0 because we haven't added a payload yet
+
+        // Add a GGEP block with the key "LOC" and value like "en", indicating our language preference
         addBasicGGEPs();
     }
-    
+
     /**
-     * Creates a ping with the specified GUID, ttl, and GGEP fields.
+     * Make a new Gnutella ping packet for us to send with the given GUID, TTL, and GGEP fields.
+     * 
+     * @param guid  The GUID for this new packet
+     * @param ttl   The TTL for this packet, the number of times it should hop across the Internet before dying
+     * @param ggeps A List of NameValue objects with GGEP tags and values to add
      */
-    private PingRequest(byte[] guid, byte ttl, List /* of NameValue */ ggeps) {
-        super(guid, (byte)0x0, ttl, (byte)0, 0);
+    private PingRequest(byte[] guid, byte ttl, List ggeps) {
+
+        // Call the Message constructor to set values in the packet header
+        super(
+            guid,      // GUID, use the given GUID
+            (byte)0x0, // Function byte, 0x00 identifies this as a ping packet
+            ttl,       // TTL, use the given number of times this packet can travel across the Internet
+            (byte)0,   // Hops, 0 because this packet hasn't traveled across the Internet yet
+            0);        // Length, 0 because we haven't added a payload yet
+
+        // Add the given GGEP block
         addGGEPs(ggeps);
     }
 
     /**
-     * Creates a Query Key ping.
+     * Make a new QueryKey ping for us to send.
+     * It will have hops 0, TTL 1, and a GGEP block with the key "QT" with no value.
+     * 
+     * @return A new PingRequest object
      */
     public static PingRequest createQueryKeyRequest() {
+
+        // Make a new LinkedList of NameValue objects with just one, the key "QK" and no value
         List l = new LinkedList();
         l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
-        return new PingRequest(GUID.makeGuid(), (byte)1, l);
+
+        // Make and return a new PingRequest object
+        return new PingRequest(
+            GUID.makeGuid(), // Make a new unique GUID for the packet
+            (byte)1,         // Set a TTL of 1
+            l);              // Add the GGEP block with the "QT" key and no value
     }
-    
+
     /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to UDP hosts.
+     * Make a TTL 1 ping we'll send to remote computers over UDP.
+     * 
+     * If we're externally contactable, it will have a new unique GUID.
+     * If we're behind a NAT, it will have the GUID we chose for "SCP" solicited ping attempts.
+     * It will have the GGEP field "SCP" with a value of 0x01 if we're an ultrapeer, and 0x00 if we're a leaf.
+     * 
+     * @return A new PingRequest object
      */
     public static PingRequest createUDPPing() {
+
+        // Make a new ping packet with a TTL of 1 and either a random GUID or our special "SCP" GUID
         List l = new LinkedList();
-        return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
+        return new PingRequest(
+            populateUDPGGEPList(l).bytes(), // Choose a GUID and GGEP fields for the new UDP ping packet
+            (byte)1,                        // TTL of 1
+            l);                             // The GGEP tags that populateUDPGGEPList(l) set
     }
-    
+
     /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to UHCs.
-     */    
+     * Make a TTL 1 ping we'll send to UDP host caches.
+     * 
+     * If we're externally contactable, it will have a new unique GUID.
+     * If we're behind a NAT, it will have the GUID we chose for "SCP" solicited ping attempts.
+     * It will have the GGEP field "SCP" with a value of 0x01 if we're an ultrapeer, and 0x00 if we're a leaf.
+     * It will have the GGEP field "UDPHC" with no value, indicating this ping is for a UDP host cache.
+     * 
+     * @return A new PingRequest object
+     */
     public static PingRequest createUHCPing() {
+
+        // Choose a GUID and GGEP fields for the new UDP ping packet
         List ggeps = new LinkedList();
         GUID guid = populateUDPGGEPList(ggeps);
+
+        // Add the key "UDPHC" with no value, indicating this ping is for a UDP host cache
         ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
-        return new PingRequest(guid.bytes(),(byte)1,ggeps);
+
+        // Make a new ping packet with a TTL of 1 and either a random GUID or our special "SCP" GUID
+        return new PingRequest(
+            guid.bytes(), // Use the random or special "SCP" GUID
+            (byte)1,      // TTL of 1
+            ggeps);       // The GGEP tags that populateUDPGGEPList(l) set, and the "UDPHC" one
     }
-    
+
     /**
-     * @param l list to put the standard extentions we add to UDP pings
-     * @return the guid to use for the ping
+     * Choose a GUID and GGEP fields for a new UDP ping packet we'll send.
+     * 
+     * If we're externally contactable, makes a new unique GUID.
+     * If we're behind a NAT device, adds "IP" to the GGEP block and uses the GUID we chose for solicited ping attempts.
+     * Adds the GGEP field "SCP" with a value of 0x01 if we're an ultrapeer, or 0x00 if we're a leaf.
+     * 
+     * @param l A List this method adds NameValue objects to for the fields like "IP" and "SCP"
+     * @return  The GUID the new ping should have
      */
     private static GUID populateUDPGGEPList(List l) {
+
+        // Remote computers can contact us on our TCP listening socket
         GUID guid;
-        if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
+        if (ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
+
+            // Make a new unique GUID for the ping packet we're making
             guid = new GUID();
+
+        // We may be behind a NAT device
         } else {
-            l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
+
+            // Prepare the key "IP" with no value to the list we'll add to the ping's GGEP block
+            l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT)); // This identifies it as a request for IP address and port number information
+
+            // Ask the UDPService for the GUID we've been using for our solicited ping attempts
             guid = UDPService.instance().getSolicitedGUID();
         }
+
+        // Add the GGEP field "SCP" with a value of 0x01 if we're an ultrapeer, or 0x00 if we're a leaf
         byte[] data = new byte[1];
-        if(RouterService.isSupernode())
-            data[0] = SCP_ULTRAPEER;
-        else
-            data[0] = SCP_LEAF;
+        if (RouterService.isSupernode()) data[0] = SCP_ULTRAPEER;
+        else                             data[0] = SCP_LEAF;
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
-        
+
+        // Return the GUID we chose for this new ping packet
         return guid;
     }
-    
+
     /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to the multicast network.
+     * Make a TTL 1 ping we'll send to the multicast network over UDP. (do)
+     * 
+     * It will have a new unique GUID.
+     * It will have the GGEP field "SCP" with a value of 0x01 if we're an ultrapeer, or 0x00 if we're a leaf.
+     * 
+     * @return A new PingRequest object
      */
     public static PingRequest createMulticastPing() {
+
+        // Make a new unique GUID for this ping
         GUID guid = new GUID();
+
+        // Add the GGEP field "SCP" with a value of 0x01 if we're an ultrapeer, or 0x00 if we're a leaf
         byte[] data = new byte[1];
-        if(RouterService.isSupernode())
-            data[0] = 0x1;
-        else
-            data[0] = 0x0;
+        if (RouterService.isSupernode()) data[0] = 0x1;
+        else                             data[0] = 0x0;
         List l = new LinkedList();
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
-        return new PingRequest(guid.bytes(), (byte)1, l);
-    }    
-            
 
-    /////////////////////////////methods///////////////////////////
+        // Make a new ping packet with a TTL of 1
+        return new PingRequest(
+            guid.bytes(), // Use the new random GUID we made
+            (byte)1,      // TTL of 1
+            l);           // The GGEP "SCP" tag with the value 0x01 ultrapeer or 0x00 leaf
+    }
 
+    /*
+     * ///////////////////////////// methods ///////////////////////////
+     */
+
+    /**
+     * Write this ping's GGEP block to the given OutputStream.
+     * 
+     * @param out The OutputStream we can call write(b) on to send data to the remote computer
+     */
     protected void writePayload(OutputStream out) throws IOException {
-        if(payload != null) {
-            out.write(payload);
-        }
-        // the ping is still written even if there's no payload
+
+        // If this ping packet has a GGEP block payload, write it out
+        if (payload != null) out.write(payload);
+
+        // Give this message to the SentMessageHandler as a ping we sent over TCP
         SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-        //Do nothing...there is no payload!
     }
 
+    /**
+     * Make a copy of this PingRequest, but without the GGEP block payload.
+     * If this ping doesn't have a payload, returns a reference to this same object.
+     * 
+     * @return A new PingRequest with no GGEP block, or a reference to this same one
+     */
     public Message stripExtendedPayload() {
-        if (payload==null)
+
+        // This ping packet has no GGEP block payload
+        if (payload == null) {
+
+            // Return a reference to this object
             return this;
-        else
-            return new PingRequest(this.getGUID(), 
-                                   this.getTTL(), 
-                                   this.getHops());
+
+        // This ping packet has a GGEP block payload
+        } else {
+
+            // Make a new PingRequest with this one's GUID, TTL, an hops count, but no GGEP block
+            return new PingRequest(this.getGUID(), this.getTTL(), this.getHops());
+        }
     }
 
-	// inherit doc comment
+    /**
+     * Record that we're dropping this ping packet.
+     */
 	public void recordDrop() {
+
+        // Give the whole packet to the DroppedSentMessageStatHandler for TCP ping requests
 		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
 	}
 
+    /**
+     * Express this ping packet as text.
+     * Composes text like "PingRequest({guid=00FF00FF00FF00FF00FF00FF00FF00FF, ttl=1, hops=1, priority=1})".
+     * 
+     * This isn't the same thing as turning it into bytes to send to a computer.
+     * 
+     * @return A String with the ping's GUID, TTL, hops count, and priority
+     */
     public String toString() {
-        return "PingRequest("+super.toString()+")";
+
+        // Compose text like "PingRequest({guid=00FF00FF00FF00FF00FF00FF00FF00FF, ttl=1, hops=1, priority=1})"
+        return "PingRequest(" + super.toString() + ")";
     }
 
     /**
-     * Accessor for whether or not this ping meets the criteria for being a
-     * "heartbeat" ping, namely having ttl=0 and hops=1.
+     * Determine if this ping is a heartbeat ping.
+     * Heartbeat pings have hops 1 and TTL 0.
      * 
-     * @return <tt>true</tt> if this ping apears to be a "heartbeat" ping,
-     *  otherwise <tt>false</tt>
+     * @return True if this ping has hops 1 and TTL 0
      */
     public boolean isHeartbeat() {
+
+        // Return true if this ping has a hops count of 1, and a TTL of 0
         return (getHops() == 1 && getTTL() == 0);
     }
-    
+
     /**
-     * Marks this ping request as requesting a pong carrying
-     * an ip:port info.
+     * Adds the key "IP" with no value to this ping's GGEP block.
+     * This makes this ping request a pong with IP address and port number information.
      */
     public void addIPRequest() {
+
+        // Add the key "IP" and no value to this ping packet's GGEP block
         List l = new LinkedList();
         l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
         addGGEPs(l);
     }
 
     /**
-     * Adds all basic GGEP information to the outgoing ping.
-     * Currently adds a Locale field.
+     * Adds the key "LOC" with a value like "en" to this ping's GGEP block.
      */
     private void addBasicGGEPs() {
+
+        // Add the key "LOC" and a value like "en" for English to this ping packet's GGEP block
         List l = new LinkedList();
-        l.add(new NameValue(GGEP.GGEP_HEADER_CLIENT_LOCALE, 
-                            ApplicationSettings.LANGUAGE.getValue()));
+        l.add(new NameValue(GGEP.GGEP_HEADER_CLIENT_LOCALE, ApplicationSettings.LANGUAGE.getValue()));
         addGGEPs(l);
     }
-    
-    /**
-     * Adds the specified GGEPs.
-     */
-     private void addGGEPs(List /* of NameValue */ ggeps) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            if (_ggep == null)
-                _ggep = new GGEP(true);
 
-            _ggep.putAll(ggeps);
-            _ggep.write(baos);
-            baos.write(0);            
-            payload = baos.toByteArray();
-            updateLength(payload.length);
-        } catch(IOException e) {
-            ErrorService.error(e);
-        }
+    /**
+     * Add a given list of name and value text to this packet's GGEP block and payload.
+     * 
+     * @param ggeps A LinkedList of NameValue objects, each of which has a key and value
+     */
+    private void addGGEPs(List ggeps) {
+
+        // Make a new ByteArrayOutputStream we'll use to compose the payload
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try {
+
+            // Format the name value pairs in the given list into a GGEP block, and save it as the payload of this ping
+            if (_ggep == null) _ggep = new GGEP(true); // If this PingRequest doesn't have a GGEP block, make it a new empty one
+            _ggep.putAll(ggeps);                       // Add all the NameValue objects in the given LinkedList into the GGEP object
+            _ggep.write(baos);                         // Have the GGEP object write all its data into the ByteArrayOutputStream
+            baos.write(0);                             // Write a 0 byte that terminates the GGEP block
+            payload = baos.toByteArray();              // Have the ByteArrayOutputStream release everything we wrote as a byte array, and point payload at it
+            updateLength(payload.length);              // Set the paylaod length in the Gnutella packet header to the length of the GGEP block
+
+        // Pass an exception to the ErrorService
+        } catch (IOException e) { ErrorService.error(e); }
     }
 
     /**
-     * get locale of this PingRequest 
+     * Get the language preference stored under "LOC" in this big ping's GGEP block.
+     * If this isn't a big ping, returns our default language preference.
+     * 
+     * @return A language preference, like "en" for English
      */
     public String getLocale() {
-        if(payload != null) {
+
+        // If this is a big ping with a payload, we can look in the GGEP block for the language preference
+        if (payload != null) {
+
             try {
+
+                // If this ping doesn't have a GGEP object, make it a new blank one
                 parseGGEP();
-                if(_ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
-                	return _ggep.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-            } catch(BadGGEPBlockException ignored) {
-            } catch(BadGGEPPropertyException ignoredToo) {}
+
+                // If our GGEP block contains the key "LOC", parse and return the value, like "en" for English
+                if (_ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) return _ggep.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+
+            // Catch and ignore exceptions
+            } catch (BadGGEPBlockException ignored) {
+            } catch (BadGGEPPropertyException ignoredToo) {}
         }
-        
-        return ApplicationSettings.DEFAULT_LOCALE.getValue();
+
+        // This ping doesn't have a GGEP block, or a "LOC" key, or there was an error reading it
+        return ApplicationSettings.DEFAULT_LOCALE.getValue(); // Return our language preference, like "en" for English
     }
-    
+
     /**
-     * Determines if this PingRequest has the 'supports cached pongs'
-     * marking.
+     * Determine if this ping has the "supports cached pongs" marking.
+     * This is the key "SCP" in the GGEP block.
+     * 
+     * @return True if this ping has a GGEP block with the key "SCP", false if it doesn't
      */
     public boolean supportsCachedPongs() {
-        if(payload != null) {
+
+        // If this is a big ping with a payload, we can look in the GGEP block for the supports cached pongs marking
+        if (payload != null) {
+            
             try {
+                
+                // If this ping doesn't have a GGEP object, make it a new blank one
                 parseGGEP();
+                
+                // If our GGEP block has the key "SCP", return true
                 return _ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
-            } catch(BadGGEPBlockException ignored) {}
-        }
-        return false;
-    }
-    
-    /**
-     * Gets the data value for the SCP field, if one exists.
-     * If none exist, null is returned.  Else, a byte[] of some
-     * size is returned.
-    */
-    public byte[] getSupportsCachedPongData() {
-        byte[] ret = null;
-
-        if(payload != null) {
-            try {
-                parseGGEP();
-                if(_ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
-                    ret = DataUtils.EMPTY_BYTE_ARRAY;
-                    // this may throw, which is why we first set it to an empty value.
-                    return _ggep.getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
-                }
-            } catch(BadGGEPBlockException ignored) {
-            } catch(BadGGEPPropertyException ignored) {
-            }
-        }
-
-        return ret;
-    }
-
-    public boolean isQueryKeyRequest() {
-        if (!(getTTL() == 0) || !(getHops() == 1))
-            return false;
-
-        if(payload != null) {
-            try {
-                parseGGEP();
-                return _ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                
+            // There was an error reading the GGEP block, return false below
             } catch (BadGGEPBlockException ignored) {}
         }
 
+        // This ping doesn't have a GGEP block, or there was an error reading it, return false
         return false;
     }
-    
+
     /**
-     * @return whether this ping wants a reply carrying IP:Port info.
+     * Get the value of the "supports cached pongs" marking in this big ping's GGEP block.
+     * This is the value stored under the "SCP" key.
+     * 
+     * @return A byte array with the value of the "SCP" key.
+     *         If we don't have a GGEP block or a "SCP" key, returns an empty byte array or null. (do)
      */
-    public boolean requestsIP() {
-       if(payload != null) {
-           try {
-               parseGGEP();
-               return _ggep.hasKey(GGEP.GGEP_HEADER_IPPORT);
-           } catch(BadGGEPBlockException ignored) {}
+    public byte[] getSupportsCachedPongData() {
+
+        // The byte array that we'll return
+        byte[] ret = null;
+
+        // If this is a big ping with a payload, we can look in the GGEP block for the supports cached pongs marking
+        if (payload != null) {
+
+            try {
+
+                // If this ping doesn't have a GGEP object, make it a new blank one
+                parseGGEP();
+
+                // Our GGEP block has the key "SCP", indicating it supports cached pongs
+                if (_ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
+
+                    // Point ret at an empty byte array
+                    ret = DataUtils.EMPTY_BYTE_ARRAY;
+
+                    /*
+                     * The next line may throw an exception.
+                     * This is why we first set ret to an empty value.
+                     */
+
+                    // Get the value of the "SCP" key as a byte array, and return it
+                    return _ggep.getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
+                }
+
+            // There was an error reading the GGEP block, return ret pointed to the empty byte array below
+            } catch(BadGGEPBlockException ignored) {
+            } catch(BadGGEPPropertyException ignored) {}
         }
 
-       return false;
+        // The ping doesn't have a GGEP block, or there was an error reading it, return an empty byte array
+        return ret;
     }
-    
+
+    /**
+     * Determine if this big ping has "QK" in its GGEP block, indicating QueryKey support.
+     * Before we even look in the GGEP block, this ping must have hops 1 and TTL 0.
+     * 
+     * @return True if this ping has hops 1, TTL 0, and a GGEP block with the key "QK"
+     */
+    public boolean isQueryKeyRequest() {
+
+        // Make sure this ping has TTL 0 and hops 1
+        if (!(getTTL() == 0) || !(getHops() == 1)) return false; // It doesn't, return false
+
+        // If this is a big ping with a payload, we can look in the GGEP block for the supports cached pongs marking
+        if (payload != null) {
+
+            try {
+
+                // If this ping doesn't have a GGEP object, make it a new blank one
+                parseGGEP();
+
+                // Our GGEP block has the key "QK", indicating it supports QueryKey
+                return _ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+
+            // There was an error reading the GGEP block, return false below
+            } catch (BadGGEPBlockException ignored) {}
+        }
+
+        // The ping doesn't have a GGEP block, or there was an error reading it, return false
+        return false;
+    }
+
+    /**
+     * Determine if this is a big ping with "IP" in its GGEP block, indicating it wants IP address and port number information.
+     * 
+     * @return True if this ping has a GGEP block with the key "IP"
+     */
+    public boolean requestsIP() {
+
+        // If this is a big ping with a payload, we can look in the GGEP block for the supports cached pongs marking
+        if (payload != null) {
+
+            try {
+
+                // If this ping doesn't have a GGEP object, make it a new blank one
+                parseGGEP();
+
+                // Our GGEP block has the key "IP", indicating it wants IP address and port number information
+                return _ggep.hasKey(GGEP.GGEP_HEADER_IPPORT);
+
+            // There was an error reding the GGEP block, return false below
+            } catch (BadGGEPBlockException ignored) {}
+        }
+
+        // This ping doesn't have a GGEP block, or there was an error reading it, return false
+        return false;
+    }
+
+    /**
+     * If this ping doesn't have a GGEP object, make it a new blank one.
+     * The GGEP object is named _ggep.
+     * 
+     * @throws BadGGEPBlockException
+     */
     private void parseGGEP() throws BadGGEPBlockException {
-        if(_ggep == null)
-            _ggep = new GGEP(payload, 0, null);
+
+        // If this ping doesn't have a GGEP object, make it a new blank one
+        if(_ggep == null) _ggep = new GGEP(payload, 0, null);
     }
 }

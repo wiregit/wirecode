@@ -484,17 +484,12 @@ public class ConnectionManager {
      */
     public boolean isSupernode() {
 
-        //zootella, changed this
-        
         // Return true if we're trying to become an ultrapeer, or are one
-        return true;
-        
-        /*
-        isActiveSupernode() || // We're on the network acting as an ultrapeer right now, or
-        isSupernodeCapable();  // We have a fast enough computer and Internet connection to be one
-        */
+        return
+            isActiveSupernode() || // We're on the network acting as an ultrapeer right now, or
+            isSupernodeCapable();  // We have a fast enough computer and Internet connection to be one
     }
-    
+
     /**
      * True if we have the computer, Internet connection, and upload time we need to be an ultrapeer on the Gnutella network.
      * If this is true, we'll present ourself to remote computers as an ultrapeer, greeting them with a "X-Ultrapeer: true" header.
