@@ -1864,7 +1864,7 @@ public abstract class MessageRouter {
         RouteTable.ReplyRoutePair rrp =
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength(),
-											 queryReply.getResultCount());
+											 queryReply.getUniqueResultCount());
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());

@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -140,6 +141,9 @@ public class QueryReply extends Message implements Serializable{
     /** Our static and final instance of the GGEPUtil helper class.
      */
     private static final GGEPUtil _ggepUtil = new GGEPUtil();
+    
+    /** The number of unique results (by SHA1) this message carries */
+    private transient short _uniqueResultURNs;
 
     /** Creates a new query reply.  The number of responses is responses.length
      *  The Browse Host GGEP extension is ON by default.  
@@ -552,6 +556,14 @@ public class QueryReply extends Message implements Serializable{
         //The result of ubyte2int always fits in a short, so downcast is ok.
         return (short)ByteOrder.ubyte2int(_payload[0]);
     }
+    
+    /** 
+     * @return the number of unique results (per SHA1) carried in this message
+     */
+    public short getUniqueResultCount() {
+        parseResults();
+        return _uniqueResultURNs;
+    }
 
     public int getPort() {
         return ByteOrder.ushort2int(ByteOrder.leb2short(_payload,1));
@@ -804,12 +816,14 @@ public class QueryReply extends Message implements Serializable{
         //silently caught.
         int left=getResultCount();          //number of records left to get
         Response[] responses=new Response[left];
+        Set urns = new HashSet(); // set for the urns carried in this reply
         try {
             InputStream bais = 
                 new ByteArrayInputStream(_payload,i,_payload.length-i);
             //For each record...
             for ( ; left > 0; left--) {
                 Response r = Response.createFromStream(bais);
+                urns.addAll(r.getUrns());
                 responses[responses.length-left] = r;
                 i+=r.getLength();
             }
@@ -820,6 +834,9 @@ public class QueryReply extends Message implements Serializable{
         } catch (IOException e) {
             return;
         }
+        
+        // remember how many unique urns this reply carries
+        _uniqueResultURNs = (short) urns.size();
         
         //2. Extract BearShare-style metainformation, if any.  Any exceptions
         //are silently caught.  The definitive reference for this format is at
