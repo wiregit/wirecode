@@ -823,9 +823,13 @@ public class QueryReply extends Message implements Serializable{
             //For each record...
             for ( ; left > 0; left--) {
                 Response r = Response.createFromStream(bais);
-                urns.addAll(r.getUrns());
                 responses[responses.length-left] = r;
                 i+=r.getLength();
+                
+                if (r.getUrns().isEmpty())
+                    _uniqueResultURNs++;
+                else
+                    urns.addAll(r.getUrns());
             }
             //All set.  Accept parsed results.
             this._responses=responses;
@@ -836,7 +840,7 @@ public class QueryReply extends Message implements Serializable{
         }
         
         // remember how many unique urns this reply carries
-        _uniqueResultURNs = (short) urns.size();
+        _uniqueResultURNs += (short) urns.size();
         
         //2. Extract BearShare-style metainformation, if any.  Any exceptions
         //are silently caught.  The definitive reference for this format is at
