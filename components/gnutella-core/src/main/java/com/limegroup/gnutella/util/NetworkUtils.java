@@ -3,13 +3,17 @@ package com.limegroup.gnutella.util;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -393,6 +397,41 @@ public final class NetworkUtils {
         return isValidAddress(b) &&
         	!isPrivateAddress(b) &&
         	isValidPort(addr.getPort());
+    }
+    
+    /**
+     * @return A non-loopback IPv4 address of a network interface on the local
+     *         host.
+     * @throws UnknownHostException
+     */
+    public static InetAddress getLocalAddress() throws UnknownHostException {
+        InetAddress addr = InetAddress.getLocalHost();
+        
+        if (addr instanceof Inet4Address 
+                && !addr.isLoopbackAddress()) {
+            return addr;
+        }
+        
+        try {
+            Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+
+            if (interfaces != null) {
+                while (interfaces.hasMoreElements()) {
+                    Enumeration addresses = ((NetworkInterface)interfaces.nextElement()).getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        addr = (InetAddress)addresses.nextElement();
+                        if (addr instanceof Inet4Address
+                                && !addr.isLoopbackAddress()) {
+                            return addr;
+                        }
+                    }
+                }
+            }
+        } catch (SocketException se) {
+        }
+
+        throw new UnknownHostException(
+                "localhost has no interface with a non-loopback IPv4 address");
     }
 }
 

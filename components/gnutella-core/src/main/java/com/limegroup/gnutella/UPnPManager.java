@@ -2,13 +2,9 @@ package com.limegroup.gnutella;
 
 
 import java.net.InetAddress;
-import java.net.Inet4Address;
 import java.net.UnknownHostException;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Enumeration;
 import java.util.Random;
 import java.util.Set;
 
@@ -450,39 +446,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 */
 	public void deviceRemoved(Device dev) {}
 	
-	/**
-	 *  @return A non-loopback IPv4 address of a network interface on the
-         * local host.
-         * @throws UnknownHostException
-         */
-   	public static InetAddress getLocalAddress()
-     	  throws UnknownHostException {
-            InetAddress addr = InetAddress.getLocalHost();
-            if (addr instanceof Inet4Address && !addr.isLoopbackAddress())
-                return addr;
-
-            try {
-               Enumeration interfaces =
-                   NetworkInterface.getNetworkInterfaces();
-
-               if (interfaces != null) {
-                   while (interfaces.hasMoreElements()) {
-                       Enumeration addresses =
-                            ((NetworkInterface)interfaces.nextElement()).getInetAddresses();
-                       while (addresses.hasMoreElements()) {
-			   addr = (InetAddress) addresses.nextElement();
-                           if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
-                               return addr;
-                           }
-                       }
-		   }
-	       }
-            } catch (SocketException se) {}
-
-       	    throw new UnknownHostException(
-               "localhost has no interface with a non-loopback IPv4 address");
-   	} 
-
 	private final class Mapping {
 		public final String _externalAddress;
 		public final int _externalPort;

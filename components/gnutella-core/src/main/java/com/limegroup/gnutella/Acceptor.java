@@ -21,7 +21,6 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -185,7 +184,7 @@ public class Acceptor implements Runnable {
         //   See the notes for _address.
         try {
             setAddress(UPNP_MANAGER != null ? 
-                    UPnPManager.getLocalAddress() : 
+                    NetworkUtils.getLocalAddress() : 
                         InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
@@ -613,8 +612,7 @@ public class Acceptor implements Runnable {
         // short-circuit for tests.
         if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
-    
-        byte[] bytes = addr.getAddress();
+        
         return !RouterService.isConnectedTo(addr) &&
                !NetworkUtils.isLocalAddress(addr);
 	}
