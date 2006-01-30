@@ -168,6 +168,12 @@ public class VerifyingFile {
     private IOException storedException;
     
     /**
+     * The size of the file on disk if we're going to scan for completed
+     * blocks.  Otherwise -1.
+     */
+    private long existingFileSize;
+    
+    /**
      * Constructs a new VerifyingFile, without a given completion size.
      *
      * Useful for tests.
@@ -267,19 +273,49 @@ public class VerifyingFile {
                         " that wasn't leased.\n"+dumpState());
             }
     		
-    		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
-                savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
+    		if (partialBlocks.contains(intvl) || savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
                 Assert.that(false,"trying to write an interval "+intvl+
                         " that was already written"+dumpState());
     		}
                 
             leasedBlocks.delete(intvl);
-            pendingBlocks.add(intvl);
+            
+            // add only the ranges that aren't already verified into pending.
+            // this is necessary because full-scanning may have added unforeseen
+            // blocks into verified.
+            
+            // technically the code in the if block would work for all cases,
+            // but it's kind of inefficient to do lots of work all the time,
+            // when the if is only necessary after a full-scan.
+            if(verifiedBlocks.containsAny(intvl)) {
+                IntervalSet remaining = new IntervalSet();
+                remaining.add(intvl);
+                remaining.delete(verifiedBlocks);
+                pendingBlocks.add(remaining);
+            } else {
+                pendingBlocks.add(intvl);
+            }
         }
         
         System.arraycopy(buf,0,temp,0,length);
         QUEUE.add(new ChunkHandler(temp,intvl));
         
+    }
+    
+    /**
+     * Set whether or not we're going to do a one-time full scan
+     * on this file for verified blocks once we find a
+     * hash tree.
+     * 
+     * @param scan
+     * @param length
+     */
+    public void setScanForExistingBlocks(boolean scan, long length) {
+        if(scan && length != 0) {
+            existingFileSize = length;
+        } else {
+            existingFileSize = -1;
+        }
     }
     
     private static byte [] getBuffer() throws InterruptedException {
@@ -504,10 +540,6 @@ public class VerifyingFile {
      * Closes the file output stream.
      */
     public void close() {
-        // This does not clear the ManagedDownloader because
-        // it could still be in a waiting state, and we need
-        // it to allow IncompleteFileDescs to funnel alt-locs
-        // as sources to the downloader.
         isOpen = false;
         if(fos==null)
             return;
@@ -596,15 +628,18 @@ public class VerifyingFile {
         if (tree != null && tree.getFileSize() != completedSize)
             return;
         
-        // if we did not have a tree previously and there are no pending blocks,
-        // trigger verification
-        HashTree previoius = hashTree;
+        // if we did not have a tree previously
+        // and we do have a hash tree now
+        // and either we want to scan the whole file once
+        // or we don't have pending blocks but do have partial blocks,
+        // trigger verification.
+        HashTree previous = hashTree;
         hashTree = tree;
-        if (previoius == null && 
-            tree != null &&
-            pendingBlocks.getSize() == 0 && 
-            partialBlocks.getSize() > 0) 
-            QUEUE.add(new EmptyVerifier());
+        if (previous == null && tree != null &&
+            (existingFileSize != -1 || (pendingBlocks.getSize() == 0 &&	partialBlocks.getSize() > 0))
+           )
+            QUEUE.add(new EmptyVerifier(existingFileSize));
+        	existingFileSize = -1;
     }
     
     /**
@@ -627,27 +662,36 @@ public class VerifyingFile {
     }
     
 
+    /**
+     * Stub for calling verifyChunks(-1).
+     */
+    private void verifyChunks() {
+        verifyChunks(-1);
+    }
     
 	/**
 	 * Schedules those chunks that can be verified against the hash tree
 	 * for verification.
 	 */
-	private void verifyChunks() {
+	private void verifyChunks(long existingFileSize) {
+        boolean fullScan = existingFileSize != -1;
 	    HashTree tree = getHashTree(); // capture the tree.
 	    if(tree != null) {
             // if we have a tree, see if there is a completed chunk in the partial list
-            for (Iterator iter = findVerifyableBlocks().iterator(); iter.hasNext();)  {
+            for (Iterator iter = findVerifyableBlocks(existingFileSize).iterator(); iter.hasNext();)  {
                 Interval i = (Interval)iter.next();
                 boolean good = verifyChunk(i, tree);
                 
-                synchronized(this) {
+                synchronized (this) {
                     partialBlocks.delete(i);
-                    if(good)
+                    if (good)
                         verifiedBlocks.add(i);
                     else {
-                        if(!discardBad)
-                            savedCorruptBlocks.add(i);
-                        lostSize += (i.high - i.low + 1);
+                        if (!fullScan) {
+                            if (!discardBad)
+                                savedCorruptBlocks.add(i);
+                            lostSize += (i.high - i.low + 1);
+                        }
                     }
                 }
             }
@@ -688,7 +732,6 @@ public class VerifyingFile {
      * if possible.
      */
 	private static byte [] getChunkBuf(int size) {
-
 		// cache only chunks size powers of two
 		// others are very unlikely to be reused
 		int exp;
@@ -710,13 +753,22 @@ public class VerifyingFile {
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
      * per method call unless the downloader is being deserialized from disk
      */
-    private synchronized List findVerifyableBlocks() {
+    private synchronized List findVerifyableBlocks(long existingFileSize) {
         if (LOG.isTraceEnabled())
             LOG.trace("trying to find verifyable blocks out of "+partialBlocks);
         
+        boolean fullScan = existingFileSize != -1;
         List verifyable = new ArrayList(2);
-        List partial = partialBlocks.getAllIntervalsAsList();
+        List partial;
         int chunkSize = getChunkSize();
+        
+        if(fullScan) {
+            IntervalSet temp = (IntervalSet)partialBlocks.clone();
+            temp.add(new Interval(0, existingFileSize));
+            partial = temp.getAllIntervalsAsList();
+        } else {
+            partial = partialBlocks.getAllIntervalsAsList();
+        }
         
         for (int i = 0; i < partial.size() ; i++) {
             Interval current = (Interval)partial.get(i);
@@ -804,8 +856,14 @@ public class VerifyingFile {
 	}
     
     private class EmptyVerifier implements Runnable {
+    	private long existingFileSize;
+    	
+    	EmptyVerifier(long existingFileSize) {
+    	    this.existingFileSize = existingFileSize;
+    	}
+        
         public void run() {
-            verifyChunks();
+            verifyChunks(existingFileSize);
             synchronized(VerifyingFile.this) {
                 VerifyingFile.this.notify();
             }

@@ -95,6 +95,15 @@ public class IntervalSet {
     }
     
     /**
+     * Adds a whole IntervalSet into this IntervalSet.
+     * @param set
+     */
+    public void add(IntervalSet set) {
+        for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
+            add((Interval)iter.next());
+    }
+    
+    /**
      * Deletes any overlap of existing intervals with the Interval to delete.
      * @param deleteMe the Interval that should be deleted.
      */
@@ -182,14 +191,37 @@ public class IntervalSet {
 	 * @return whether this interval set contains fully the given interval
 	 */
 	public boolean contains(Interval i) {
-		for (Iterator iter = getAllIntervals();iter.hasNext();) {
-			Interval ours = (Interval)iter.next();
-			if (ours.low <= i.low && ours.high >= i.high)
-				return true;
-		}
-		
-		return false;
-	}
+        for (Iterator iter = getAllIntervals(); iter.hasNext();) {
+            Interval ours = (Interval)iter.next();
+            if (ours.low <= i.low && ours.high >= i.high)
+                return true;
+        }
+        return false;        
+    }
+    
+    /**
+     * @return whether this interval set contains any part of the given interval
+     */
+    public boolean containsAny(Interval i) {
+        int low = i.low;
+        int high = i.high;
+        for (Iterator iter = getAllIntervals(); iter.hasNext(); ) {
+            Interval interval = (Interval)iter.next();
+            if (low<=interval.low && interval.high<=high)  //  <low-------high>
+                return true;                               //      interval
+
+            if (low >= interval.low && interval.high >= high) //   <low, high>
+                return true;                                  // ....interval....
+            
+            if (low<=interval.high + 1 && interval.low < low)    //     <low, high>
+                return true;                                     //  interval........
+
+            if (interval.low - 1 <=high && interval.high > high)  //     <low, high>
+                return true;                                     //  .........interval
+        }
+        
+        return false;
+    }
 	
     /**
      *@return a List of intervals that overlap checkInterval. For example

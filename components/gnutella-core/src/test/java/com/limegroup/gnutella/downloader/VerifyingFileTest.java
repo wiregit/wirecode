@@ -424,6 +424,7 @@ public class VerifyingFileTest extends BaseTestCase {
         assertEquals(0,exact.length() % exactTree.getNodeSize());
         raf = new RandomAccessFile(exact,"r");
         
+        vf.close();
         vf = new VerifyingFile((int)exact.length());
         vf.open(new File("outfile"));
         vf.setHashTree(exactTree);
@@ -473,5 +474,41 @@ public class VerifyingFileTest extends BaseTestCase {
         // but things should be pending verification
         vf.waitForPendingIfNeeded();
         assertTrue(vf.isComplete());
+    }
+    
+    /**
+     * Tests that if the incomplete file had some data in it,
+     * and we told the VF to use that data, it'll auto-verify
+     * once it gets a hash tree.
+     * @throws Exception
+     */
+    public void testExistingBlocksVerify() throws Exception {
+        vf.setHashTree(null);
+        vf.close();
+        
+        File outfile = new File("outfile");
+        
+        long wrote = 0;
+        RandomAccessFile out = new RandomAccessFile(outfile, "rw");
+        byte[] data = new byte[hashTree.getNodeSize()];
+        for(; wrote < completeFile.length() / 2; ) {
+            raf.read(data);
+            out.write(data);
+            wrote += hashTree.getNodeSize();
+        }
+        
+        // null the rest of the file.
+        for(long i = wrote; i < completeFile.length(); i++) {
+            out.write(0);
+        }
+        
+        out.close();
+        vf.open(outfile);
+        assertEquals(0, vf.getVerifiedBlockSize());
+        vf.setScanForExistingBlocks(true, outfile.length());
+        assertEquals(0, vf.getVerifiedBlockSize());
+        vf.setHashTree(hashTree);
+        Thread.sleep(1000);
+        assertEquals(wrote, vf.getVerifiedBlockSize());
     }
 }

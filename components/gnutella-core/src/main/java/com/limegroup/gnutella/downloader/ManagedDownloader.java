@@ -1074,32 +1074,28 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * initializes the verifying file if the incompleteFile is initialized.
      */
-    protected void initializeVerifyingFile() throws IOException {
+	protected void initializeVerifyingFile() throws IOException {
 
-        if (incompleteFile == null)
-            return;
-        
-        //get VerifyingFile
-        commonOutFile= incompleteFileManager.getEntry(incompleteFile);
+		if (incompleteFile == null)
+			return;
 
-        if(commonOutFile==null) {//no entry in incompleteFM
-            
-            int completedSize = 
-                (int)IncompleteFileManager.getCompletedSize(incompleteFile);
-            
-            commonOutFile = new VerifyingFile(completedSize);
-            try {
-                //we must add an entry in IncompleteFileManager
-                incompleteFileManager.
-                           addEntry(incompleteFile,commonOutFile);
-            } catch(IOException ioe) {
-                ErrorService.error(ioe, "file: " + incompleteFile);
-                throw ioe;
-            }
-        }        
-    }
-    
-    protected void initializeIncompleteFile() throws IOException {
+		// get VerifyingFile
+		commonOutFile = incompleteFileManager.getEntry(incompleteFile);
+		if (commonOutFile == null) {// no entry in incompleteFM
+			int completedSize = (int) IncompleteFileManager.getCompletedSize(incompleteFile);
+			commonOutFile = new VerifyingFile(completedSize);
+			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
+			try {
+				// we must add an entry in IncompleteFileManager
+				incompleteFileManager.addEntry(incompleteFile, commonOutFile);
+			} catch (IOException ioe) {
+				ErrorService.error(ioe, "file: " + incompleteFile);
+				throw ioe;
+			}
+		}
+	}
+
+	protected void initializeIncompleteFile() throws IOException {
         if (incompleteFile != null)
             return;
         

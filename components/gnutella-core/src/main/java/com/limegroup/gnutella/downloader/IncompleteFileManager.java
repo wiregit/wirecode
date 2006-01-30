@@ -453,14 +453,14 @@ public class IncompleteFileManager implements Serializable {
                     // ignore entry
                     continue;
                 }
-                Iterator iter = ((List)o).iterator();
                 VerifyingFile vf;
                 try {
                     vf = new VerifyingFile((int) getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
                     vf = new VerifyingFile();
                 }
-                while (iter.hasNext()) {
+                List list = (List)o;
+                for(Iterator iter = list.iterator(); iter.hasNext(); ) {
                     Interval interval = (Interval) iter.next();
                     // older intervals excuded the high'th byte, so we decrease
                     // the value of interval.high. An effect of this is that
@@ -469,6 +469,8 @@ public class IncompleteFileManager implements Serializable {
                     interval = new Interval(interval.low, interval.high - 1);
                     vf.addInterval(interval);
                 }
+                if(list.isEmpty())
+                	vf.setScanForExistingBlocks(true, f.length());
                 retMap.put(f, vf);
             }
         }//end of for

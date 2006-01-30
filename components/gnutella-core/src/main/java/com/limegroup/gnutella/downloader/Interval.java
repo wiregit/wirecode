@@ -16,8 +16,6 @@ public class Interval implements Serializable{
 
     /** @requires low<=high
      *  @requires low and high can be represented as ints
-     * 
-     * Stub for making code 64-bit clean.
      */
     public Interval(long low, long high) {
         if(high < low)
@@ -38,8 +36,6 @@ public class Interval implements Serializable{
     
     /**
     *  @requires singleton can be represented as an int
-    * 
-    * Stub for making code 64-bit clean.
     */
     public Interval(long singleton) {
         if(singleton < Integer.MIN_VALUE)
