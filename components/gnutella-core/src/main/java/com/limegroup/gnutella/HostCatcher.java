@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -235,9 +237,9 @@ public class HostCatcher {
     public final Bootstrapper FETCHER = new Bootstrapper();
     
     /**
-     * The number of threads waiting to get an endpoint.
+     * All EndpointObservers waiting on getting an Endpoint.
      */
-    private volatile int _catchersWaiting = 0;
+    private List _catchersWaiting = new LinkedList();
     
     /**
      * The last allowed time that we can continue ranking pongs.
@@ -589,7 +591,7 @@ public class HostCatcher {
         
         // Also add it to the list of permanent hosts stored on disk.
         addPermanent(host);
-        notify();
+        endpointAdded();
     }
 
     /**
@@ -720,6 +722,7 @@ public class HostCatcher {
                     ENDPOINT_SET.remove(ejected);
                 }         
                 
+                endpointAdded();
                 this.notify();
             }
         }
@@ -824,47 +827,78 @@ public class HostCatcher {
     }
     
     ///////////////////////////////////////////////////////////////////////
+    
+    /**
+     * Notification that endpoints now exist.
+     * If something was waiting on getting endpoints, this will
+     * 
+     */
+    private synchronized void endpointAdded() {
+        while (!_catchersWaiting.isEmpty()) {
+            LOG.debug("Got an endpoint & had catchers waiting...");
+            Endpoint p = getAnEndpointInternal();
+            if (p == null) {
+                break; // no more endpoints.
+            }
+            EndpointObserver observer = (EndpointObserver)_catchersWaiting.remove(0);
+            observer.handleEndpoint(p);
+        }
+    }
+
+    /**
+     * Passes the next available endpoint to the EndpointObserver.
+     */
+    public synchronized void getAnEndpoint(EndpointObserver observer) {
+        Endpoint p = getAnEndpointInternal();
+        if (p != null) {
+            observer.handleEndpoint(p);
+        } else {
+            LOG.debug("Adding an EndpointObserver");
+            _catchersWaiting.add(observer);
+        }
+    }
 
     /**
      * @modifies this
      * @effects atomically removes and returns the highest priority host in
-     *  this.  If no host is available, blocks until one is.  If the calling
-     *  thread is interrupted during this process, throws InterruptedException.
-     *  The caller should call doneWithConnect and doneWithMessageLoop when done
-     *  with the returned value.
+     *          this. If no host is available, blocks until one is. If the
+     *          calling thread is interrupted during this process, throws
+     *          InterruptedException. The caller should call doneWithConnect and
+     *          doneWithMessageLoop when done with the returned value.
      */
-    public synchronized Endpoint getAnEndpoint() throws InterruptedException {
-        while (true)  {
-            try { 
-                // note : if this succeeds with an endpoint, it
-                // will return it.  otherwise, it will throw
-                // the exception, causing us to fall down to the wait.
-                // the wait will be notified to stop when something
-                // is added to the queue
-                //  (presumably from fetchEndpointsAsync working)               
-                
-                return getAnEndpointInternal();
-            } catch (NoSuchElementException e) { }
-            
-            //No luck?  Wait and try again.
-            try {
-                _catchersWaiting++;
-                wait();  //throws InterruptedException
-            } finally {
-                _catchersWaiting--;
+    public Endpoint getAnEndpoint() throws InterruptedException {
+        BlockingObserver observer = new BlockingObserver();
+
+        getAnEndpoint(observer);
+        try {
+            synchronized (observer) {
+                if (observer.getEndpoint() == null) {
+                    LOG.debug("Waiting on getting an endpoint");
+                    observer.wait(); // only stops waiting when
+                    // handleEndpoint is called.
+                }
+                return observer.getEndpoint();
             }
-        } 
+        } catch (InterruptedException ie) {
+            // If we got interrupted, we must remove the waiting observer.
+            synchronized (this) {
+                _catchersWaiting.remove(observer);
+                throw ie;
+            }
+        }
     }
   
     /**
      * Notifies this that the fetcher has finished attempting a connection to
-     * the given host.  This exists primarily to update the permanent host list
+     * the given host. This exists primarily to update the permanent host list
      * with connection history.
-     *
-     * @param e the address/port, which should have been returned by 
-     *  getAnEndpoint
-     * @param success true if we successfully established a messaging connection 
-     *  to e, at least temporarily; false otherwise 
+     * 
+     * @param e
+     *            the address/port, which should have been returned by
+     *            getAnEndpoint
+     * @param success
+     *            true if we successfully established a messaging connection to
+     *            e, at least temporarily; false otherwise
      */
     public synchronized void doneWithConnect(Endpoint e, boolean success) {
         //Normal host: update key.  TODO3: adjustKey() operation may be more
@@ -890,11 +924,9 @@ public class HostCatcher {
      * @requires this' monitor held
      * @modifies this
      * @effects returns the highest priority endpoint in queue, regardless
-     *  of quick-connect settings, etc.  Throws NoSuchElementException if
-     *  this is empty.
+     *  of quick-connect settings, etc.  Returns null if this is empty.
      */
-    private ExtendedEndpoint getAnEndpointInternal()
-            throws NoSuchElementException {
+    private ExtendedEndpoint getAnEndpointInternal() {
         //LOG.trace("entered getAnEndpointInternal");
         // If we're already an ultrapeer and we know about hosts with free
         // ultrapeer slots, try them.
@@ -930,8 +962,9 @@ public class HostCatcher {
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
-        } else
-            throw new NoSuchElementException();
+        } else {
+            return null;
+        }
     }
 
     
@@ -1263,13 +1296,14 @@ public class HostCatcher {
          * Determines whether or not it is time to get more hosts,
          * and if we need them, gets them.
          */
-        public synchronized void run() {
+        public synchronized void run() {            
             if (ConnectionSettings.DO_NOT_BOOTSTRAP.getValue())
                 return;
 
             // If no one's waiting for an endpoint, don't get any.
-            if(_catchersWaiting == 0)
+            if(_catchersWaiting.isEmpty()) {
                 return;
+            }
             
             long now = System.currentTimeMillis();
             
@@ -1281,7 +1315,7 @@ public class HostCatcher {
             //if we don't need hosts, exit.
             if(!needsHosts(now))
                 return;
-                
+            
             getHosts(now);
         }
         
@@ -1298,7 +1332,7 @@ public class HostCatcher {
          * Determines whether or not we need more hosts.
          */
         private synchronized boolean needsHosts(long now) {
-            synchronized(HostCatcher.this) {
+            synchronized(HostCatcher.this) { 
                 return getNumHosts() == 0 ||
                     (!RouterService.isConnected() && _failures > 100);
             }
@@ -1388,6 +1422,25 @@ public class HostCatcher {
             default:
                 throw new IllegalArgumentException("invalid value: " + ret);
             }
+        }
+    }
+    
+    /** Simple callback for having an endpoint added. */
+    public static interface EndpointObserver {
+        public void handleEndpoint(Endpoint p);
+    }
+    
+    /** A blocking implementation of EndpointObserver. */
+    public static class BlockingObserver implements EndpointObserver {
+        private Endpoint endpoint;
+        
+        public synchronized void handleEndpoint(Endpoint p) {
+            endpoint = p;
+            notify();
+        }
+        
+        public Endpoint getEndpoint() {
+            return endpoint;
         }
     }
 
