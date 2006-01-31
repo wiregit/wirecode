@@ -190,6 +190,13 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createStringSetting("DEFAULT_LOCALE", "en");
         
 
+    /**
+     * Enable the MagnetClipboardListener on non Windows and Mac OS
+     * systems
+     */
+    public static final BooleanSetting MAGNET_CLIPBOARD_LISTENER
+        = FACTORY.createBooleanSetting("MAGNET_CLIPBOARD_LISTENER", 
+                !CommonUtils.isWindows() && !CommonUtils.isAnyMac());
     
     /**
      * Gets the current language setting.
