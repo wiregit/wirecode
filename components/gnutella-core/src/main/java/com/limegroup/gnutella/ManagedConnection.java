@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.Throttle;
@@ -80,6 +83,8 @@ import com.limegroup.gnutella.version.UpdateHandler;
  */
 public class ManagedConnection extends Connection 
 	implements ReplyHandler, MessageReceiver, SentMessageHandler {
+    
+    private static final Log LOG = LogFactory.getLog(ManagedConnection.class);
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -305,10 +310,20 @@ public class ManagedConnection extends Connection
      * @throws NoGnutellaOkException
      * @throws BadHandshakeException
      */
-    public void initialize(ConnectionObserver observer)
-            throws IOException, NoGnutellaOkException, BadHandshakeException {
-        //Establish the socket (if needed), handshake.
-		super.initialize(CONNECT_TIMEOUT, observer);
+    public void initialize(ConnectionObserver observer) throws IOException, NoGnutellaOkException, BadHandshakeException {
+        // Establish the socket (if needed), handshake.
+        super.initialize(CONNECT_TIMEOUT, observer);
+        
+        // Nothing else should be done here.  All post-init-sequences
+        // should be triggered from finishInitialize, which will be called
+        // when the socket is connected (if it connects).
+    }
+
+    /**
+     * Completes the initialization process.
+     */
+    protected void finishInitialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
+        super.finishInitialize();
 
         // Start our OutputRunner.
         startOutput();
@@ -318,12 +333,10 @@ public class ManagedConnection extends Connection
     }
 
     /**
-     * Resets the query route table for this connection.  The new table
-     * will be of the size specified in <tt>rtm</tt> and will contain
-     * no data.  If there is no <tt>QueryRouteTable</tt> yet created for
-     * this connection, this method will create one.
-     *
-     * @param rtm the <tt>ResetTableMessage</tt> 
+     * Resets the query route table for this connection. The new table will be of the size specified in <tt>rtm</tt> and will contain no data. If there is no <tt>QueryRouteTable</tt> yet created
+     * for this connection, this method will create one.
+     * 
+     * @param rtm the <tt>ResetTableMessage</tt>
      */
     public void resetQueryRouteTable(ResetTableMessage rtm) {
         if(_lastQRPTableReceived == null) {

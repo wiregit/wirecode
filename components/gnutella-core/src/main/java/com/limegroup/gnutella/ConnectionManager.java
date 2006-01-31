@@ -330,7 +330,7 @@ public class ConnectionManager {
      */
      void acceptConnection(Socket socket) {
          //1. Initialize connection.  It's always safe to recommend new headers.
-         Thread.currentThread().setName("IncommingConnectionThread");
+         Thread.currentThread().setName("IncomingConnectionThread");
          ManagedConnection connection = new ManagedConnection(socket);
          try {
              initializeExternallyGeneratedConnection(connection);
@@ -771,49 +771,54 @@ public class ConnectionManager {
 
 		int limeAttempts = ConnectionSettings.LIME_ATTEMPTS.getValue();
 		
-        //Don't allow anything if disconnected.
-        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
-            _preferredConnections <=0 ) {
+        // Don't allow anything if disconnected.
+        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() && _preferredConnections <= 0) {
             return false;
-        //If a leaf (shielded or not), check rules as such.
-		} else if (isShieldedLeaf() || !isSupernode()) {
-		    // require ultrapeer.
-		    if(!hr.isUltrapeer())
-		        return false;
+            // If a leaf (shielded or not), check rules as such.
+        } else if (isShieldedLeaf() || !isSupernode()) {
+            
+            // require ultrapeer.
+		    if(!hr.isUltrapeer()) {
+                return false;
+            }
 		    
 		    // If it's not good, or it's the first few attempts & not a LimeWire, 
 		    // never allow it.
 		    if(!hr.isGoodUltrapeer() || (_connectionAttempts < limeAttempts && !hr.isLimeWire())) {
 		        return false;
 		    // if we have slots, allow it.
-		    } else if (_shieldedConnections < _preferredConnections) {
+		    } else if (_shieldedConnections < _preferredConnections) {                
 		        // if it matched our preference, we don't need to preference
 		        // anymore.
 		        if(checkLocale(hr.getLocalePref()))
 		            _needPref = false;
 
                 // while idle, only allow LimeWire connections.
-                if (isIdle()) 
+                if (isIdle()) {
                     return hr.isLimeWire();
+                }
 
                 return true;
             } else {
                 // if we were still trying to get a locale connection
                 // and this one matches, allow it, 'cause no one else matches.
                 // (we would have turned _needPref off if someone matched.)
-                if(_needPref && checkLocale(hr.getLocalePref()))
+                if(_needPref && checkLocale(hr.getLocalePref())) {
                     return true;
-
+                }
+                
                 // don't allow it.
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
 		    // no leaf connections if we're a leaf.
-		    if(isShieldedLeaf() || !isSupernode())
-		        return false;
-
-            if(!allowUltrapeer2LeafConnection(hr))
+		    if(isShieldedLeaf() || !isSupernode()) {
                 return false;
+            }
+
+            if(!allowUltrapeer2LeafConnection(hr)) {
+                return false;
+            }
 
             int leaves = getNumInitializedClientConnections();
             int nonLimeWireLeaves = _nonLimeWireLeaves;
@@ -829,16 +834,19 @@ public class ConnectionManager {
             }
             
             // Only allow good guys.
-            if(!hr.isGoodLeaf())
+            if(!hr.isGoodLeaf()) {
                 return false;
-
+            }
+                
             // if it's good, allow it.
-            if(hr.isGoodLeaf())
+            if(hr.isGoodLeaf()) {
                 return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES -
                         nonLimeWireLeaves)) <
                           UltrapeerSettings.MAX_LEAVES.getValue();
+            }
 
         } else if (hr.isUltrapeer()) {
+            
             // Note that this code is NEVER CALLED when we are a leaf.
             // As a leaf, we will allow however many ultrapeers we happen
             // to connect to.
@@ -943,20 +951,7 @@ public class ConnectionManager {
         return true;
     }
 
-	/** Returns the number of connections to other ultrapeers.  Caller MUST hold
-     *  this' monitor. */
-    private int ultrapeerConnections() {
-        //TODO3: augment state of this if needed to avoid loop
-        int ret=0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.isSupernodeConnection())
-                ret++;
-        }
-        return ret;
-    }
-
-    /**
+	/**
      * Returns the number of connections that are ultrapeer -> ultrapeer.
      * Caller MUST hold this' monitor.
      */
@@ -1882,15 +1877,6 @@ public class ConnectionManager {
     }
 
 
-    //
-    // End connection list management functions
-    //
-
-
-    //
-    // Begin connection launching thread inner classes
-    //
-
     /**
      * This thread does the initialization and the message loop for
      * ManagedConnections created through createConnectionAsynchronously and
@@ -2000,12 +1986,11 @@ public class ConnectionManager {
                 _catcher.getAnEndpoint(this);
             }
 
-            _connectionAttempts++;
             this.endpoint = endpoint;
             connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort());
             connection.setLocalePreferencing(_pref);
-
             doConnectionCheck();
+            _connectionAttempts++;
             initializeFetchedConnection(connection, this);
         }
         
@@ -2022,7 +2007,7 @@ public class ConnectionManager {
         
         /** Callback that a connect failed. */
         public void shutdown() {
-            cleanupBrokenFetchedConnection(connection);
+            cleanupBrokenFetchedConnection(connection);            
             _catcher.doneWithConnect(endpoint, false);
             _catcher.expireHost(endpoint);
         }
@@ -2034,6 +2019,7 @@ public class ConnectionManager {
         
         /** Callback that connecting worked, but we got something other than a Gnutella OK */
         public void handleNoGnutellaOk(int code, String msg) {
+            cleanupBrokenFetchedConnection(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
             if (code == HandshakeResponse.LOCALE_NO_MATCH) {
                 // Failures because of locale aren't really a failure.
@@ -2061,10 +2047,6 @@ public class ConnectionManager {
                 LOG.debug("checking for live connection");
                 ConnectionChecker.checkForLiveConnection();
             }
-        }
-
-        public String toString() {
-            return "ConnectionFetcher";
         }
         
         // unused.

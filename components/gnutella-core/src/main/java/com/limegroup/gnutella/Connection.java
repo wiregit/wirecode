@@ -34,9 +34,11 @@ import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 import com.limegroup.gnutella.util.CompressingOutputStream;
+import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.gnutella.util.UncompressingInputStream;
 
 /**
@@ -434,6 +436,8 @@ public class Connection implements IpPort {
                 _socket=Sockets.connect(_host, _port, timeout);
                 finishInitialize();
             }
+        } else {
+            finishInitialize();
         }
     }
     
@@ -485,10 +489,11 @@ public class Connection implements IpPort {
         try {
             //In all the line reading code below, we are somewhat lax in
             //distinguishing between '\r' and '\n'.  Who cares?
-            if(isOutgoing())
+            if(isOutgoing()) {
                 initializeOutgoing();
-            else
+            } else {
                 initializeIncoming();
+            }
 
             _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
 
@@ -1918,13 +1923,18 @@ public class Connection implements IpPort {
         public void handleNoGnutellaOk(int code, String msg);
         public void handleBadHandshake();
     }
+    
+    /** Pool of threads that will do the moving & handshaking. */
+    private static final ThreadPool SHAKERS = new DefaultThreadPool("Handshaking");    
  
     /**
      * A ConnectObserver to finish the initialization process prior
      * to handing the connection to the underlying ConnectObserver.
      */
-    private class Connector implements ConnectObserver {
+    private class Connector implements ConnectObserver, Runnable {
+        
         private final ConnectionObserver observer;
+        private Socket socket;
         
         Connector(ConnectionObserver observer) {
             this.observer = observer;
@@ -1941,7 +1951,13 @@ public class Connection implements IpPort {
         }
 
         /** We got a connection. */
-        public void handleConnect(Socket socket) throws IOException {
+        public void handleConnect(Socket socket) {
+            this.socket = socket;
+            SHAKERS.invokeLater(this); // handshake in a different thread.
+        }
+        
+        /** Does the handshaking & completes the connection process. */
+        public void run() {
             try {
                 finishInitialize();
                 observer.handleConnect(socket);

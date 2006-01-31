@@ -431,11 +431,13 @@ public class NIODispatcher implements Runnable {
             }
             
             Collection keys = selector.selectedKeys();
-            if(keys.size() == 0)
+            if(keys.size() == 0) {
+                processTimeouts();
                 continue;
+            }
             
-           // if(LOG.isDebugEnabled())
-           //     LOG.debug("Selected (" + keys.size() + ") keys.");
+            if(LOG.isDebugEnabled())
+                LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
             
             readyThrottles(keys);
             

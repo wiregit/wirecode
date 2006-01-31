@@ -853,7 +853,6 @@ public class HostCatcher {
         if (p != null) {
             observer.handleEndpoint(p);
         } else {
-            LOG.debug("Adding an EndpointObserver");
             _catchersWaiting.add(observer);
         }
     }
@@ -878,7 +877,6 @@ public class HostCatcher {
         try {
             synchronized (observer) {
                 if (observer.getEndpoint() == null) {
-                    LOG.debug("Waiting on getting an endpoint");
                     observer.wait(); // only stops waiting when
                     // handleEndpoint is called.
                 }
@@ -1140,11 +1138,6 @@ public class HostCatcher {
     
     public UDPPinger getPinger() {
         return pinger;
-    }
-
-    public String toString() {
-        return "[volatile:"+ENDPOINT_QUEUE.toString()
-               +", permanent:"+permanentHosts.toString()+"]";
     }
 
     /** Enable very slow rep checking?  Package access for use by
