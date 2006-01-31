@@ -14,12 +14,14 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.HostCatcher.EndpointObserver;
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
@@ -775,50 +777,54 @@ public class ConnectionManager {
 
 		int limeAttempts = ConnectionSettings.LIME_ATTEMPTS.getValue();
 		
-        //Don't allow anything if disconnected.
-        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
-            _preferredConnections <=0 ) {
+        // Don't allow anything if disconnected.
+        if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() && _preferredConnections <= 0) {
             return false;
-        //If a leaf (shielded or not), check rules as such.
-		} else if (isShieldedLeaf() || !isSupernode()) {
-		    // require ultrapeer.
-		    if(!hr.isUltrapeer())
-		        return false;
+            // If a leaf (shielded or not), check rules as such.
+        } else if (isShieldedLeaf() || !isSupernode()) {
+            
+            // require ultrapeer.
+		    if(!hr.isUltrapeer()) {
+                return false;
+            }
 		    
 		    // If it's not good, or it's the first few attempts & not a LimeWire, 
 		    // never allow it.
-		    if(!hr.isGoodUltrapeer() || 
-		      (Sockets.getAttempts() < limeAttempts && !hr.isLimeWire())) {
+		    if(!hr.isGoodUltrapeer() || (_connectionAttempts < limeAttempts && !hr.isLimeWire())) {
 		        return false;
 		    // if we have slots, allow it.
-		    } else if (_shieldedConnections < _preferredConnections) {
+		    } else if (_shieldedConnections < _preferredConnections) {                
 		        // if it matched our preference, we don't need to preference
 		        // anymore.
 		        if(checkLocale(hr.getLocalePref()))
 		            _needPref = false;
 
                 // while idle, only allow LimeWire connections.
-                if (isIdle()) 
+                if (isIdle()) {
                     return hr.isLimeWire();
+                }
 
                 return true;
             } else {
                 // if we were still trying to get a locale connection
                 // and this one matches, allow it, 'cause no one else matches.
                 // (we would have turned _needPref off if someone matched.)
-                if(_needPref && checkLocale(hr.getLocalePref()))
+                if(_needPref && checkLocale(hr.getLocalePref())) {
                     return true;
-
+                }
+                
                 // don't allow it.
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
 		    // no leaf connections if we're a leaf.
-		    if(isShieldedLeaf() || !isSupernode())
-		        return false;
-
-            if(!allowUltrapeer2LeafConnection(hr))
+		    if(isShieldedLeaf() || !isSupernode()) {
                 return false;
+            }
+
+            if(!allowUltrapeer2LeafConnection(hr)) {
+                return false;
+            }
 
             int leaves = getNumInitializedClientConnections();
             int nonLimeWireLeaves = _nonLimeWireLeaves;
@@ -834,14 +840,16 @@ public class ConnectionManager {
             }
             
             // Only allow good guys.
-            if(!hr.isGoodLeaf())
+            if(!hr.isGoodLeaf()) {
                 return false;
-
+            }
+                
             // if it's good, allow it.
-            if(hr.isGoodLeaf())
+            if(hr.isGoodLeaf()) {
                 return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES -
                         nonLimeWireLeaves)) <
                           UltrapeerSettings.MAX_LEAVES.getValue();
+            }
 
         } else if (hr.isGoodUltrapeer()) {
             // Note that this code is NEVER CALLED when we are a leaf.
@@ -946,7 +954,7 @@ public class ConnectionManager {
                 return false;
         return true;
     }
-
+    
     /**
      * Returns the number of connections that are ultrapeer -> ultrapeer.
      * Caller MUST hold this' monitor.
@@ -1335,8 +1343,6 @@ public class ConnectionManager {
                                           c.getPort()), true, c.getLocalePref());
             }
         }
-        
-        Sockets.clearAttempts();
     }
 
     /**
@@ -1526,6 +1532,7 @@ public class ConnectionManager {
                && !_needPrefInterrupterScheduled
                && _dedicatedPrefFetcher == null) {
                 _dedicatedPrefFetcher = new ConnectionFetcher(true);
+                _dedicatedPrefFetcher.connect();
                 Runnable interrupted = new Runnable() {
                         public void run() {
                             synchronized(ConnectionManager.this) {
@@ -1534,7 +1541,7 @@ public class ConnectionManager {
 
                                 if (_dedicatedPrefFetcher == null)
                                     return;
-                                _dedicatedPrefFetcher.interrupt();
+                                _dedicatedPrefFetcher.stopConnecting();
                                 _dedicatedPrefFetcher = null;
                             }
                         }
@@ -1608,8 +1615,10 @@ public class ConnectionManager {
         // Start connection fetchers as necessary
         while(need > 0) {
             // This kicks off the thread for the fetcher
-            _fetchers.add(new ConnectionFetcher());
+            ConnectionFetcher fetcher = new ConnectionFetcher();
+            _fetchers.add(fetcher);
             need--;
+            fetcher.connect();
         }
 
         // Stop ConnectionFetchers as necessary, but it's possible there
@@ -1617,9 +1626,8 @@ public class ConnectionManager {
         // connections started by ConnectionFetchers.
         int lastFetcherIndex = _fetchers.size();
         while((need < 0) && (lastFetcherIndex > 0)) {
-            ConnectionFetcher fetcher = (ConnectionFetcher)
-                _fetchers.remove(--lastFetcherIndex);
-            fetcher.interrupt();
+            ConnectionFetcher fetcher = (ConnectionFetcher)_fetchers.remove(--lastFetcherIndex);
+            fetcher.stopConnecting();
             need++;
         }
         int lastInitializingConnectionIndex =
@@ -1634,29 +1642,17 @@ public class ConnectionManager {
     }
 
     /**
-     * Initializes an outgoing connection created by a ConnectionFetcher
-     * Throws any of the exceptions listed in Connection.initialize on
-     * failure; no cleanup is necessary in this case.
-     *
-     * @exception IOException we were unable to establish a TCP connection
-     *  to the host
-     * @exception NoGnutellaOkException we were able to establish a
-     *  messaging connection but were rejected
-     * @exception BadHandshakeException some other problem establishing
-     *  the connection, e.g., the server responded with HTTP, closed the
-     *  the connection during handshaking, etc.
-     * @see com.limegroup.gnutella.Connection#initialize(int)
+     * Begins initializing fetched connections.
+     * This will maintain all class invariants and then wait to hear
+     * back from the ConnectionFetcher after connecting succeeds or fails.
      */
     private void initializeFetchedConnection(ManagedConnection mc,
-                                             ConnectionFetcher fetcher)
-            throws NoGnutellaOkException, BadHandshakeException, IOException {
+                                             ConnectionFetcher fetcher) {
+        
         synchronized(this) {
-            if(fetcher.isInterrupted()) {
-                // Externally generated interrupt.
-                // The interrupting thread has recorded the
-                // death of the fetcher, so throw IOException.
-                // (This prevents fetcher from continuing!)
-                throw new IOException("connection fetcher");
+            if(fetcher.isPrematurelyStopped()) {
+                fetcher.finish();
+                return;
             }
 
             _initializingFetchedConnections.add(mc);
@@ -1670,26 +1666,23 @@ public class ConnectionManager {
             // with a Connection.
         }
         RouterService.getCallback().connectionInitializing(mc);
-
+     
         try {
-            mc.initialize();
+            mc.initialize(fetcher);
         } catch(IOException e) {
             synchronized(ConnectionManager.this) {
-                _initializingFetchedConnections.remove(mc);
-                removeInternal(mc);
-                // We've removed a connection, so the need for connections went
-                // up.  We may need to launch a fetcher.
-                adjustConnectionFetchers();
+                cleanupBrokenFetchedConnection(mc);
             }
-            throw e;
         }
-        finally {
-            //if the connection received headers, process the headers to
-            //take steps based on the headers
-            processConnectionHeaders(mc);
-        }
-
-        completeConnectionInitialization(mc, true);
+    }
+    
+    private void cleanupBrokenFetchedConnection(ManagedConnection mc) {
+        _initializingFetchedConnections.remove(mc);
+        removeInternal(mc);
+        // We've removed a connection, so the need for connections went
+        // up.  We may need to launch a fetcher.
+        adjustConnectionFetchers();
+        processConnectionHeaders(mc);
     }
 
     /**
@@ -1938,15 +1931,6 @@ public class ConnectionManager {
     }
 
 
-    //
-    // End connection list management functions
-    //
-
-
-    //
-    // Begin connection launching thread inner classes
-    //
-
     /**
      * This thread does the initialization and the message loop for
      * ManagedConnections created through createConnectionAsynchronously and
@@ -2008,106 +1992,120 @@ public class ConnectionManager {
      * the thread is interrupted externally, the interrupting thread is
      * responsible for recording the death.
      */
-    private class ConnectionFetcher extends ManagedThread {
-        //set if this connectionfetcher is a preferencing fetcher
+    private class ConnectionFetcher implements Connection.ConnectionObserver, HostCatcher.EndpointObserver {
+        // set if this connectionfetcher is a preferencing fetcher
         private boolean _pref = false;
-        /**
-         * Tries to add a connection.  Should only be called from a thread
-         * that has the enclosing ConnectionManager's monitor.  This method
-         * is only called from adjustConnectionFetcher's, which has the same
-         * locking requirement.
-         */
+        private ManagedConnection connection;
+        private Endpoint endpoint;
+        private volatile boolean stoppedEarly = false;
+
         public ConnectionFetcher() {
             this(false);
         }
 
         public ConnectionFetcher(boolean pref) {
-            setName("ConnectionFetcher");
             _pref = pref;
-            // Kick off the thread.
-            setDaemon(true);
-            start();
         }
 
-        // Try a single connection
-        public void managedRun() {
-            try {
-                // Wait for an endpoint.
-                Endpoint endpoint = null;
-                do {
-                    endpoint = _catcher.getAnEndpoint();
-                } while ( !IPFilter.instance().allow(endpoint.getAddress()) ||
-                          isConnectedTo(endpoint.getAddress()) );
-                Assert.that(endpoint != null);
-                _connectionAttempts++;
-                ManagedConnection connection = new ManagedConnection(
-                    endpoint.getAddress(), endpoint.getPort());
-                //set preferencing
-                connection.setLocalePreferencing(_pref);
+        /** Starts the process of connecting to an arbitary endpoint. */
+        public void connect() {
+            _catcher.getAnEndpoint(this);
+        }
+        
+        /** 
+         * Marks this fetcher as not wanting to connect.
+         * It is entirely possible that this fetcher has proceeded to connect
+         * already.  If that's the case, this call essentially does nothing.
+         */
+        public void stopConnecting() {
+            stoppedEarly = true;
+            _catcher.removeEndpointObserver(this);
+        }
+        
+        /** Returns whether or not we were told to stop early. */
+        public boolean isPrematurelyStopped() {
+            return stoppedEarly;
+        }
+        
+        /** Does nothing right now. */
+        public void finish() {
+        }
 
-                // If we've been trying to connect for awhile, check to make
-                // sure the user's internet connection is live.  We only do
-                // this if we're not already connected, have not made any
-                // successful connections recently, and have not checked the
-                // user's connection in the last little while or have very
-                // few hosts left to try.
-                long curTime = System.currentTimeMillis();
-                if(!isConnected() &&
-                   _connectionAttempts > 40 &&
-                   ((curTime-_lastSuccessfulConnect)>4000) &&
-                   ((curTime-_lastConnectionCheck)>60*60*1000)) {
-                    _connectionAttempts = 0;
-                    _lastConnectionCheck = curTime;
-                    LOG.debug("checking for live connection");
-                    ConnectionChecker.checkForLiveConnection();
-                }
+        /** Callback that an endpoint is available for connecting. */
+        public void handleEndpoint(Endpoint endpoint) {
+            assert endpoint != null;
 
-                //Try to connect, recording success or failure so HostCatcher
-                //can update connection history.  Note that we declare
-                //success if we were able to establish the TCP connection
-                //but couldn't handshake (NoGnutellaOkException).
-                try {
-                    initializeFetchedConnection(connection, this);
-                    _lastSuccessfulConnect = System.currentTimeMillis();
-                    _catcher.doneWithConnect(endpoint, true);
-                    if(_pref) // if pref connection succeeded
-                        _needPref = false;
-                } catch (NoGnutellaOkException e) {
-                    _lastSuccessfulConnect = System.currentTimeMillis();
-                    if(e.getCode() == HandshakeResponse.LOCALE_NO_MATCH) {
-                        //if it failed because of a locale matching issue
-                        //readd to hostcatcher??
-                        _catcher.add(endpoint, true,
-                                     connection.getLocalePref());
-                    }
-                    else {
-                        _catcher.doneWithConnect(endpoint, true);
-                        _catcher.putHostOnProbation(endpoint);
-                    }
-                    throw e;
-                } catch (IOException e) {
-                    _catcher.doneWithConnect(endpoint, false);
-                    _catcher.expireHost(endpoint);
-                    throw e;
-                }
+            // If this was an invalid endpoint, try again.
+            if (!IPFilter.instance().allow(endpoint.getAddress()) || isConnectedTo(endpoint.getAddress())) {
+                _catcher.getAnEndpoint(this);
+            }
 
-				startConnection(connection);
-            } catch(IOException e) {
-            } catch (InterruptedException e) {
-                // Externally generated interrupt.
-                // The interrupting thread has recorded the
-                // death of the fetcher, so just return.
-                return;
-            } catch(Throwable e) {
-                //Internal error!
-                ErrorService.error(e);
+            this.endpoint = endpoint;
+            connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort());
+            connection.setLocalePreferencing(_pref);
+            doConnectionCheck();
+            _connectionAttempts++;
+            initializeFetchedConnection(connection, this);
+        }
+        
+        /** Callback that Sockets.connect worked. */
+        public void handleConnect(Socket s) throws IOException {
+            completeConnectionInitialization(connection, true);
+            _lastSuccessfulConnect = System.currentTimeMillis();
+            _catcher.doneWithConnect(endpoint, true);
+            if(_pref)
+                _needPref = false;
+            
+            startConnection(connection);
+        }
+        
+        /** Callback that a connect failed. */
+        public void shutdown() {
+            cleanupBrokenFetchedConnection(connection);            
+            _catcher.doneWithConnect(endpoint, false);
+            _catcher.expireHost(endpoint);
+        }
+        
+        /** Callback that handshaking failed. */
+        public void handleBadHandshake() {
+            shutdown();
+        }
+        
+        /** Callback that connecting worked, but we got something other than a Gnutella OK */
+        public void handleNoGnutellaOk(int code, String msg) {
+            cleanupBrokenFetchedConnection(connection);
+            _lastSuccessfulConnect = System.currentTimeMillis();
+            if (code == HandshakeResponse.LOCALE_NO_MATCH) {
+                // Failures because of locale aren't really a failure.
+                _catcher.add(endpoint, true, connection.getLocalePref());
+            } else {
+                _catcher.doneWithConnect(endpoint, true);
+                _catcher.putHostOnProbation(endpoint);
             }
         }
 
-        public String toString() {
-            return "ConnectionFetcher";
+        /** Checks to see if we need to check for a live connection. */
+        private void doConnectionCheck() {
+            // If we've been trying to connect for awhile, check to make
+            // sure the user's internet connection is live. We only do
+            // this if we're not already connected, have not made any
+            // successful connections recently, and have not checked the
+            // user's connection in the last little while or have very
+            // few hosts left to try.
+            long curTime = System.currentTimeMillis();
+            if (!isConnected() && _connectionAttempts > 40
+                    && ((curTime - _lastSuccessfulConnect) > 4000)
+                    && ((curTime - _lastConnectionCheck) > 60 * 60 * 1000)) {
+                _connectionAttempts = 0;
+                _lastConnectionCheck = curTime;
+                LOG.debug("checking for live connection");
+                ConnectionChecker.checkForLiveConnection();
+            }
         }
-	}
+        
+        // unused.
+        public void handleIOException(IOException iox) {}
+    }
 
     /**
      * This method notifies the connection manager that the user does not have

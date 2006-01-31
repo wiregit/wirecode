@@ -8,8 +8,10 @@ import java.util.LinkedList;
  *
  * The queue processes the items in a seperate thread, allowing
  * the thread to be released when all items are processed.
+ *
+ * Runnables are processed sequentially, one after the other.  
  */
-public class ProcessingQueue {
+public class ProcessingQueue implements ThreadPool {
     
     /**
      * The list of items to be processed.
@@ -84,6 +86,13 @@ public class ProcessingQueue {
     
     public synchronized int size() {
         return QUEUE.size();
+    }
+    
+    /**
+     * Adds the specified runnable to be processed.
+     */
+    public synchronized void invokeLater(Runnable r) {
+        add(r);
     }
     
     /**

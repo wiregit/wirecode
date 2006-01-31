@@ -40,7 +40,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
     /**
      * Creates the pipes, buffer, and registers channels for interest.
      */
-    synchronized void init() throws IOException {
+    synchronized NIOInputStream init() throws IOException {
         if(buffer != null)
             throw new IllegalStateException("already init'd!");
             
@@ -52,6 +52,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
         bufferLock = source.getBufferLock();
         
         NIODispatcher.instance().interestRead(channel, true);
+        return this;
     }
     
     static ByteBuffer getBuffer() {
