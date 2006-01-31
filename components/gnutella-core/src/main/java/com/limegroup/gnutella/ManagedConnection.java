@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.io.NBThrottle;
@@ -286,13 +287,28 @@ public class ManagedConnection extends Connection
 				  socket.getInetAddress().getHostAddress())));
         _manager = RouterService.getConnectionManager();
     }
+    
+    /**
+     * Stub for calling initialize(null);
+     */
+    public void initialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
+        initialize(null);
+    }
 
-
-
-    public void initialize()
+    /**
+     * Attempts to initialize the connection.  If observer is non-null and this wasn't
+     * created with a pre-existing Socket this will return immediately.  Otherwise,
+     * this will block while connecting or initializing the handshake.
+     * return immediately, 
+     * @param observer
+     * @throws IOException
+     * @throws NoGnutellaOkException
+     * @throws BadHandshakeException
+     */
+    public void initialize(ConnectionObserver observer)
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
-		super.initialize(CONNECT_TIMEOUT);
+		super.initialize(CONNECT_TIMEOUT, observer);
 
         // Start our OutputRunner.
         startOutput();

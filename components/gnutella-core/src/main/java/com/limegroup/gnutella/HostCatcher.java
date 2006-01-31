@@ -857,6 +857,11 @@ public class HostCatcher {
             _catchersWaiting.add(observer);
         }
     }
+    
+    /** Removes an oberserver from wanting to get an endpoint. */
+    public synchronized void removeEndpointObserver(EndpointObserver observer) {
+        _catchersWaiting.remove(observer);
+    }
 
     /**
      * @modifies this
@@ -926,7 +931,7 @@ public class HostCatcher {
      * @effects returns the highest priority endpoint in queue, regardless
      *  of quick-connect settings, etc.  Returns null if this is empty.
      */
-    private ExtendedEndpoint getAnEndpointInternal() {
+    protected ExtendedEndpoint getAnEndpointInternal() {
         //LOG.trace("entered getAnEndpointInternal");
         // If we're already an ultrapeer and we know about hosts with free
         // ultrapeer slots, try them.
@@ -1431,7 +1436,7 @@ public class HostCatcher {
     }
     
     /** A blocking implementation of EndpointObserver. */
-    public static class BlockingObserver implements EndpointObserver {
+    private static class BlockingObserver implements EndpointObserver {
         private Endpoint endpoint;
         
         public synchronized void handleEndpoint(Endpoint p) {

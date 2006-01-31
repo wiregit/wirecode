@@ -392,7 +392,7 @@ public class ConnectionManagerTest extends BaseTestCase {
      * unreachable host.
      */
     public void testUnreachableHost() {
-        CATCHER.endpoint = new Endpoint("1.2.3.4", 5000);
+        CATCHER.endpoint = new ExtendedEndpoint("1.2.3.4", 5000);
         RouterService.connect();
         sleep(15000);
         assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
@@ -404,7 +404,7 @@ public class ConnectionManagerTest extends BaseTestCase {
      * the wrong protocol.
      */
     public void testWrongProtocolHost() {
-        CATCHER.endpoint = new Endpoint("www.yahoo.com", 80);
+        CATCHER.endpoint = new ExtendedEndpoint("www.yahoo.com", 80);
         RouterService.connect();
         sleep();
         assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
@@ -416,7 +416,7 @@ public class ConnectionManagerTest extends BaseTestCase {
      * Test to make sure that a good host is successfully connected to.
      */
     public void testGoodHost() {
-        CATCHER.endpoint = new Endpoint("localhost", Backend.BACKEND_PORT);
+        CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         
         RouterService.connect();
         sleep();
@@ -432,7 +432,7 @@ public class ConnectionManagerTest extends BaseTestCase {
      */
     public void testRejectHost() {
         CATCHER.endpoint = 
-            new Endpoint("localhost", Backend.REJECT_PORT);
+            new ExtendedEndpoint("localhost", Backend.REJECT_PORT);
         RouterService.connect();
         sleep();
         assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
@@ -474,7 +474,7 @@ public class ConnectionManagerTest extends BaseTestCase {
      * to.
      */
     private static class TestHostCatcher extends HostCatcher {
-        private volatile Endpoint endpoint;
+        private volatile ExtendedEndpoint endpoint;
         private volatile int connectSuccess=0;
         private volatile int connectFailures=0;
         
@@ -482,12 +482,12 @@ public class ConnectionManagerTest extends BaseTestCase {
             super();
         }
         
-        public synchronized Endpoint getAnEndpoint() throws InterruptedException {
-            if (endpoint==null)
-                throw new InterruptedException("no endpoint");
+        protected ExtendedEndpoint getAnEndpointInternal() {
+            if(endpoint == null)
+                return null;
             else {
-                Endpoint ret=endpoint;
-                endpoint=null;
+                ExtendedEndpoint ret = endpoint;
+                endpoint = null;
                 return ret;
             }
         }

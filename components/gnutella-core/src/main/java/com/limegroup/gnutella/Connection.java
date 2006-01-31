@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -402,7 +403,7 @@ public class Connection implements IpPort {
      */
     public void initialize() 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
-        initialize(0);
+        initialize(0, null);
     }
 
     /**
@@ -422,12 +423,29 @@ public class Connection implements IpPort {
      *  the connection, e.g., the server responded with HTTP, closed the
      *  the connection during handshaking, etc.
      */
-    public void initialize(int timeout) 
+    protected void initialize(int timeout, ConnectionObserver observer) 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
 
-        if(isOutgoing())
-            _socket=Sockets.connect(_host, _port, timeout);
-
+        if(isOutgoing()) {
+            if(observer != null) {
+                ConnectObserver wrapper = new Connector(observer);
+                _socket = Sockets.connect(_host, _port, timeout, wrapper);
+            } else {
+                _socket=Sockets.connect(_host, _port, timeout);
+                finishInitialize();
+            }
+        }
+    }
+    
+    /**
+     * Finishes the initialization process.  This blocks during handshaking.
+     * 
+     * @throws IOException
+     * @throws NoGnutellaOkException
+     * @throws BadHandshakeException
+     */
+    protected void finishInitialize() throws IOException,
+            NoGnutellaOkException, BadHandshakeException {
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
@@ -1891,6 +1909,51 @@ public class Connection implements IpPort {
     public String getLocalePref() {
         return _headers.getLocalePref();
     }
+    
+    /**
+     * A specialized ConnectObserver, with more callbacks for dealing
+     * with events specific to Gnutella connections.
+     */
+    public static interface ConnectionObserver extends ConnectObserver {
+        public void handleNoGnutellaOk(int code, String msg);
+        public void handleBadHandshake();
+    }
+ 
+    /**
+     * A ConnectObserver to finish the initialization process prior
+     * to handing the connection to the underlying ConnectObserver.
+     */
+    private class Connector implements ConnectObserver {
+        private final ConnectionObserver observer;
+        
+        Connector(ConnectionObserver observer) {
+            this.observer = observer;
+        }
+        
+        // unused.
+        public void handleIOException(IOException iox) {}
+
+        /**
+         * The connection couldn't be created.
+         */
+        public void shutdown() {
+            observer.shutdown();
+        }
+
+        /** We got a connection. */
+        public void handleConnect(Socket socket) throws IOException {
+            try {
+                finishInitialize();
+                observer.handleConnect(socket);
+            } catch(NoGnutellaOkException ex) {
+                observer.handleNoGnutellaOk(ex.getCode(), ex.getMessage());
+            } catch(BadHandshakeException ex) {
+                observer.handleBadHandshake();
+            } catch(IOException iox) {
+                observer.shutdown();
+            }
+        }
+    }
 
     // Technically, a Connection object can be equal in various ways...
     // Connections can be said to be equal if the pipe the information is
@@ -1917,144 +1980,4 @@ public class Connection implements IpPort {
 //	public int hashCode() {
 //      return super.hashCode();
 //	}
-    
-    
-    /////////////////////////// Unit Tests  ///////////////////////////////////
-    
-//      /** Unit test */
-//      public static void main(String args[]) {
-//          Assert.that(! notLessThan06("CONNECT"));
-//          Assert.that(! notLessThan06("CONNECT/0.4"));
-//          Assert.that(! notLessThan06("CONNECT/0.599"));
-//          Assert.that(! notLessThan06("CONNECT/XP"));
-//          Assert.that(notLessThan06("CONNECT/0.6"));
-//          Assert.that(notLessThan06("CONNECT/0.7"));
-//          Assert.that(notLessThan06("GNUTELLA CONNECT/1.0"));
-
-//          final Properties props=new Properties();
-//          props.setProperty("Query-Routing", "0.3");        
-//          HandshakeResponder standardResponder=new HandshakeResponder() {
-//              public HandshakeResponse respond(HandshakeResponse response,
-//                                               boolean outgoing) {
-//                  return new HandshakeResponse(props);
-//              }
-//          };        
-//          HandshakeResponder secretResponder=new HandshakeResponder() {
-//              public HandshakeResponse respond(HandshakeResponse response,
-//                                               boolean outgoing) {
-//                  Properties props2=new Properties();
-//                  props2.setProperty("Secret", "abcdefg");
-//                  return new HandshakeResponse(props2);
-//              }
-//          };
-//          ConnectionPair p=null;
-
-//          //1. 0.4 => 0.4
-//          p=connect(null, null, null);
-//          Assert.that(p!=null);
-//          Assert.that(p.in.getProperty("Query-Routing")==null);
-//          Assert.that(p.out.getProperty("Query-Routing")==null);
-//          disconnect(p);
-
-//          //2. 0.6 => 0.6
-//          p=connect(standardResponder, props, secretResponder);
-//          Assert.that(p!=null);
-//          Assert.that(p.in.getProperty("Query-Routing").equals("0.3"));
-//          Assert.that(p.out.getProperty("Query-Routing").equals("0.3"));
-//          Assert.that(p.out.getProperty("Secret")==null);
-//          Assert.that(p.in.getProperty("Secret").equals("abcdefg"));
-//          disconnect(p);
-
-//          //3. 0.4 => 0.6 (Incoming doesn't send properties)
-//          p=connect(standardResponder, null, null);
-//          Assert.that(p!=null);
-//          Assert.that(p.in.getProperty("Query-Routing")==null);
-//          Assert.that(p.out.getProperty("Query-Routing")==null);
-//          disconnect(p);
-
-//          //4. 0.6 => 0.4 (If the receiving connection were Gnutella 0.4, this
-//          //wouldn't work.  But the new guy will automatically upgrade to 0.6.)
-//          p=connect(null, props, standardResponder);
-//          Assert.that(p!=null);
-//          //Assert.that(p.in.getProperty("Query-Routing")==null);
-//          Assert.that(p.out.getProperty("Query-Routing")==null);
-//          disconnect(p);
-
-//          //5.
-//          System.out.println("-Testing IOException reading from closed socket");
-//          p=connect(null, null, null);
-//          Assert.that(p!=null);
-//          p.in.close();
-//          try {
-//              p.out.receive();
-//              Assert.that(false);
-//          } catch (BadPacketException failed) {
-//              Assert.that(false);
-//          } catch (IOException pass) {
-//          }
-
-//          //6.
-//          System.out.println("-Testing IOException writing to closed socket");
-//          p=connect(null, null, null);
-//          Assert.that(p!=null);
-//          p.in.close();
-//          try { Thread.sleep(2000); } catch (InterruptedException e) { }
-//          try {
-//              //You'd think that only one write is needed to get IOException.
-//              //That doesn't seem to be the case, and I'm not 100% sure why.  It
-//              //has something to do with TCP half-close state.  Anyway, this
-//              //slightly weaker test is good enough.
-//              p.out.send(new QueryRequest((byte)3, 0, "las"));
-//              p.out.flush();
-//              p.out.send(new QueryRequest((byte)3, 0, "las"));
-//              p.out.flush();
-//              Assert.that(false);
-//          } catch (IOException pass) {
-//          }
-
-//          //7.
-//          System.out.println("-Testing connect with timeout");
-//          Connection c=new Connection("this-host-does-not-exist.limewire.com", 6346);
-//          int TIMEOUT=1000;
-//          long start=System.currentTimeMillis();
-//          try {
-//              c.initialize(TIMEOUT);
-//              Assert.that(false);
-//          } catch (IOException e) {
-//              //Check that exception happened quickly.  Note fudge factor below.
-//              long elapsed=System.currentTimeMillis()-start;  
-//              Assert.that(elapsed<(3*TIMEOUT)/2, "Took too long to connect: "+elapsed);
-//          }
-//      }   
-
-//      private static class ConnectionPair {
-//          Connection in;
-//          Connection out;
-//      }
-
-//      private static ConnectionPair connect(HandshakeResponder inProperties,
-//                                            Properties outRequestHeaders,
-//                                            HandshakeResponder outProperties2) {
-//          ConnectionPair ret=new ConnectionPair();
-//          com.limegroup.gnutella.tests.MiniAcceptor acceptor=
-//              new com.limegroup.gnutella.tests.MiniAcceptor(inProperties);
-//          try {
-//              ret.out=new Connection("localhost", 6346,
-//                                     outRequestHeaders, outProperties2,
-//                                     true);
-//              ret.out.initialize();
-//          } catch (IOException e) { }
-//          ret.in=acceptor.accept();
-//          if (ret.in==null || ret.out==null)
-//              return null;
-//          else
-//              return ret;
-//      }
-
-//      private static void disconnect(ConnectionPair cp) {
-//          if (cp.in!=null)
-//              cp.in.close();
-//          if (cp.out!=null)
-//              cp.out.close();
-//      }    
 }
