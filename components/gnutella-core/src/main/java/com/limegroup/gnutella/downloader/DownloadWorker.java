@@ -1325,8 +1325,14 @@ public class DownloadWorker {
         return workerName + " -> "+_rfd;  
     }
     
-    private void startRunner(Runnable impl) {
-        Runnable runner = new DownloadRunner(impl);
+    /**
+     * Starts a new thread that will perform the download, running the given Runnable
+     * prior to downloading.  Typically the Runnable should be for connecting, but may
+     * be null if the connection already exists.
+     * @param connector
+     */
+    private void startRunner(Runnable connector) {
+        Runnable runner = new DownloadRunner(connector);
         _myThread = new ManagedThread(runner);
         _myThread.setDaemon(true);
         _myThread.setName(workerName);
@@ -1348,14 +1354,10 @@ public class DownloadWorker {
             this.connector = connector;
         }
         
-        /**
-         * Constructs a runner that performs no connection attempts
-         * prior to starting the download process.
+        /** 
+         * Runs the connector, initializes alternate locations, and does the download.
+         * This will always call _manager.workerFinished after completing.
          */
-        DownloadRunner() {
-            this.connector = null;
-        }
-        
         public void run() {
             try {
                 if(connector != null)

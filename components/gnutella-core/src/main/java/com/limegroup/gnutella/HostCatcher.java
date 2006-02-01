@@ -837,7 +837,6 @@ public class HostCatcher {
      */
     private synchronized void endpointAdded() {
         while (!_catchersWaiting.isEmpty()) {
-            LOG.debug("Got an endpoint & had catchers waiting...");
             Endpoint p = getAnEndpointInternal();
             if (p == null) {
                 break; // no more endpoints.
@@ -880,7 +879,7 @@ public class HostCatcher {
             synchronized (observer) {
                 if (observer.getEndpoint() == null) {
                     observer.wait(); // only stops waiting when
-                    // handleEndpoint is called.
+                                     // handleEndpoint is called.
                 }
                 return observer.getEndpoint();
             }

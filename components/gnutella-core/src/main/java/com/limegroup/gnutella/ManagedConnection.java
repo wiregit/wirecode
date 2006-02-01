@@ -331,13 +331,15 @@ public class ManagedConnection extends Connection
     }
 
     /**
-     * Resets the query route table for this connection. The new table will be of the size specified in <tt>rtm</tt> and will contain no data. If there is no <tt>QueryRouteTable</tt> yet created
-     * for this connection, this method will create one.
+     * Resets the query route table for this connection. The new table will be of the size specified in <tt>rtm</tt>
+     * and will contain no data. If there is no <tt>QueryRouteTable</tt> yet created for this connection, this method
+     * will create one.
      * 
-     * @param rtm the <tt>ResetTableMessage</tt>
+     * @param rtm
+     *            the <tt>ResetTableMessage</tt>
      */
     public void resetQueryRouteTable(ResetTableMessage rtm) {
-        if(_lastQRPTableReceived == null) {
+        if (_lastQRPTableReceived == null) {
             _lastQRPTableReceived =
                 new QueryRouteTable(rtm.getTableSize(), rtm.getInfinity());
         } else {

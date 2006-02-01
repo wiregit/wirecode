@@ -170,7 +170,13 @@ public class Sockets {
 		    return connectPlain(proxyAddr, timeout, new ProxyUtils.ProxyConnector(type, observer, addr, timeout));
 		} else {
 		    Socket proxySocket = connectPlain(proxyAddr, timeout, null);
-		    return ProxyUtils.establishProxy(type, proxySocket, addr, timeout);
+            try {
+                return ProxyUtils.establishProxy(type, proxySocket, addr, timeout);
+            } catch(IOException iox) {
+                // Ensure the proxySocket is closed.  Not all proxies cleanup correctly.
+                try { proxySocket.close(); } catch(IOException ignored) {}
+                throw iox;
+            }
 		}
     }
     

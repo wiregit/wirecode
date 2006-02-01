@@ -1503,11 +1503,13 @@ public class ConnectionManager {
      * Starts or stops connection fetchers to maintain the invariant that numConnections + numFetchers >=
      * _preferredConnections
      * 
-     * _preferredConnections - numConnections - numFetchers is called the need. This method is called whenever the need
-     * changes: 1. setPreferredConnections() -- _preferredConnections changes 2. remove(Connection) -- numConnections
-     * drops. 3. initializeExternallyGeneratedConnection() -- numConnections rises. 4. initialization error in
-     * initializeFetchedConnection() -- numConnections drops when removeInternal is called. Note that
-     * adjustConnectionFetchers is not called when a connection is successfully fetched from the host catcher.
+     * _preferredConnections - numConnections - numFetchers is called the need.
+     * This method is called whenever the need changes:
+     *  1. setPreferredConnections() -- _preferredConnections changes
+     *  2. remove(Connection) -- numConnections drops.
+     *  3. initializeExternallyGeneratedConnection() -- numConnections rises.
+     *  4. initialization error in initializeFetchedConnection() -- numConnections drops when removeInternal is called.
+     * Note that adjustConnectionFetchers is not called when a connection is successfully fetched from the host catcher.
      * numConnections rises, but numFetchers drops, so need is unchanged.
      * 
      * Only call this method when the monitor is held.
@@ -1690,6 +1692,16 @@ public class ConnectionManager {
         }
     }
     
+    /**
+     * Cleans up references to the given connection.
+     * 
+     * This removes the now-dead connection from the list of initializing fetched
+     * connections, ensures that the connection is closed and nothing can
+     * be routed to it, adjusts connection fetchers so as to spark a new fetcher
+     * if needed, and processes the headers of the connection for addition to the local
+     * hostcache.
+     * @param mc
+     */
     private void cleanupBrokenFetchedConnection(ManagedConnection mc) {
         synchronized (this) {
             _initializingFetchedConnections.remove(mc);
@@ -2002,10 +2014,9 @@ public class ConnectionManager {
      *
      * The ConnectionFetcher is responsible for recording its instantiation
      * by adding itself to the fetchers list.  It is responsible  for recording
-     * its death by removing itself from the fetchers list only if it
-     * "interrupts itself", that is, only if it establishes a connection. If
-     * the thread is interrupted externally, the interrupting thread is
-     * responsible for recording the death.
+     * its death by removing itself from the fetchers list only if fetching proceeded
+     * beyond the 'connect' stage.  That is, if a connect attempt is performed and failed
+     * for any reason, this must clean itself up.
      */
     private class ConnectionFetcher implements Connection.ConnectionObserver, HostCatcher.EndpointObserver {
         // set if this connectionfetcher is a preferencing fetcher
@@ -2033,8 +2044,6 @@ public class ConnectionManager {
          * already.  If that's the case, this call essentially does nothing.
          */
         public void stopConnecting() {
-            LOG.debug("Stopping early with endpoint: " + endpoint);
-            
             stoppedEarly = true;
             _catcher.removeEndpointObserver(this);
         }
@@ -2050,9 +2059,6 @@ public class ConnectionManager {
 
         /** Callback that an endpoint is available for connecting. */
         public void handleEndpoint(Endpoint endpoint) {
-            LOG.debug("(" + this + ") Got an endpoint: " + endpoint);
-            //Thread.dumpStack();
-            
             assert endpoint != null;
 
             // If this was an invalid endpoint, try again.
@@ -2071,8 +2077,6 @@ public class ConnectionManager {
         
         /** Callback that Sockets.connect worked. */
         public void handleConnect(Socket s) throws IOException {
-            LOG.debug("Connecting with endpoint: " + endpoint);
-            
             completeConnectionInitialization(connection, true);
             processConnectionHeaders(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
@@ -2084,8 +2088,6 @@ public class ConnectionManager {
         
         /** Callback that a connect failed. */
         public void shutdown() {
-            LOG.debug("Shutting down endpoint: " + endpoint);
-            
             cleanupBrokenFetchedConnection(connection);            
             _catcher.doneWithConnect(endpoint, false);
             _catcher.expireHost(endpoint);
@@ -2098,8 +2100,6 @@ public class ConnectionManager {
         
         /** Callback that connecting worked, but we got something other than a Gnutella OK */
         public void handleNoGnutellaOk(int code, String msg) {
-            LOG.debug("No GOK with endpoint: " + endpoint);
-            
             cleanupBrokenFetchedConnection(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
             if (code == HandshakeResponse.LOCALE_NO_MATCH) {

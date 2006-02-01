@@ -1961,14 +1961,12 @@ public class Connection implements IpPort {
         /** We got a connection. */
         public void handleConnect(Socket socket) {
             this.socket = socket;
-            LOG.debug("Socket connected (" + this + ")");
             SHAKERS.invokeLater(this); // handshake in a different thread.
         }
         
         /** Does the handshaking & completes the connection process. */
         public void run() {
             try {
-                LOG.debug("Handshaking... (" + this + ")");
                 finishInitialize();
                 observer.handleConnect(socket);
             } catch(NoGnutellaOkException ex) {

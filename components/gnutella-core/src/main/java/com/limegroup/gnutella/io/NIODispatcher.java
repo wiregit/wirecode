@@ -335,8 +335,8 @@ public class NIODispatcher implements Runnable {
      * deadlock.
      */
     private void addPendingItems() {
-        long now = System.currentTimeMillis();
         synchronized(Q_LOCK) {
+            long now = System.currentTimeMillis();
             for(int i = 0; i < THROTTLE.size(); i++)
                 ((NBThrottle)THROTTLE.get(i)).tick(now);
 
@@ -380,10 +380,8 @@ public class NIODispatcher implements Runnable {
      * is beyond the timeout time, cancels the item & generates a handleIOException
      * on the item.
      */
-    static int COUNT = 0;
     private void processTimeouts() {
         if(!TIMEOUTS.isEmpty()) {
-            if(COUNT++ % 50 == 0) LOG.debug("Processing timeouts, size: " + TIMEOUTS.size());
             long now = System.currentTimeMillis();
             for(int i = TIMEOUTS.size() - 1; i >= 0; i--) {
                 Timeout next = (Timeout)TIMEOUTS.get(i);
@@ -394,7 +392,6 @@ public class NIODispatcher implements Runnable {
                     next.handler.handleIOException(new SocketTimeoutException("no connection in: " + next.timeout));
                     TIMEOUTS.remove(i);
                 } else {
-                    if(COUNT % 50 == 0)      LOG.debug("No timeout, first: " + next.dead + ", now: " + now);
                     break; // TIMEOUTS is sorted.
                 }
             }
@@ -410,18 +407,15 @@ public class NIODispatcher implements Runnable {
         if(TIMEOUTS.isEmpty()) {
             // Common case.
             TIMEOUTS.add(t);
-            LOG.debug("Adding (" + handler + ", " + timeout + ") in empty TIMEOUTS.");
         } else if(then >= ((Timeout)TIMEOUTS.get(TIMEOUTS.size() - 1)).dead) {
             // Another common case.
             TIMEOUTS.add(t);
-            LOG.debug("Adding (" + handler + ", " + timeout + ") at end of TIMEOUTS.");
         } else {
             // Quick lookup.
             int insertion = Collections.binarySearch(TIMEOUTS, t);
             if(insertion < 0)
                 insertion = (insertion + 1) * -1;
             TIMEOUTS.add(insertion, t);
-            LOG.debug("Adding (" + handler + ", " + timeout + ") in TIMEOUTS at position (" + insertion + ")");
         }
     }
     
@@ -498,7 +492,7 @@ public class NIODispatcher implements Runnable {
             Collection keys = selector.selectedKeys();
             if(keys.size() == 0) {
                 if(startSelect == -1) {
-                   // LOG.warn("No keys selected, starting spin check.");
+                    LOG.warn("No keys selected, starting spin check.");
                     checkTime = true;
                 } else if(startSelect + 30 >= System.currentTimeMillis()) {
                     if(LOG.isWarnEnabled())
@@ -524,8 +518,8 @@ public class NIODispatcher implements Runnable {
                 }
             }
             
-           // if(LOG.isDebugEnabled())
-           //     LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
+            if(LOG.isDebugEnabled())
+                LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
             
             readyThrottles(keys);
             
