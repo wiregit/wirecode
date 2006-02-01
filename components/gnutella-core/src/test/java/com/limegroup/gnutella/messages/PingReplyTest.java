@@ -5,13 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Random;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.zip.GZIPOutputStream;
 
 import junit.framework.Test;
 
@@ -20,10 +19,9 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     
@@ -67,8 +65,8 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // Switch ConnectionManager to report different values for free leaf
         // and ultrapeer slots.
-        PrivilegedAccessor.setValue(RouterService.class, "manager",
-            new TestConnectionManager(7,10));
+        ConnectionManager manager = new TestConnectionManager(7, 10);
+        PrivilegedAccessor.setValue(RouterService.class, "manager", manager);
         
         pr = PingReply.create(guid, (byte)3, 6346, ip, 
             (long)10, (long)10, true, 100, true);    
@@ -79,17 +77,14 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         assertTrue("slots unexpectedly full", pr.hasFreeUltrapeerSlots());
         
-        int nonLimeSlots = (int)
-        (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * ConnectionSettings.NUM_CONNECTIONS.getValue());
         // Should now have leaf slots
         assertEquals("unexpected number leaf slots", 
-                     10 - nonLimeSlots, 
-                     pr.getNumLeafSlots());
+                    manager.getNumFreeLimeWireLeafSlots(), 
+                    pr.getNumLeafSlots());
         
         assertEquals("unexpected number ultrapeer slots", 
-            7 - nonLimeSlots -
-            ConnectionSettings.NUM_LOCALE_PREF.getValue(), 
-            pr.getNumUltrapeerSlots());
+                    manager.getNumFreeLimeWireNonLeafSlots(), 
+                    pr.getNumUltrapeerSlots());
     }
    
     
