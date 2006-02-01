@@ -260,10 +260,21 @@ class ProxyUtils {
                 public void run() {
                     try {
                         establishProxy(proxyType, s, addr, timeout);
-                        delegate.handleConnect(s);
                     } catch(IOException iox) {
                         LOG.warn("Error establishing proxy connection", iox);
                         IOUtils.close(s);
+                        shutdown(); // couldn't establish, so let delegate know.
+                        return;
+                    }
+                    
+                    try {
+                        delegate.handleConnect(s);
+                    } catch(IOException iox) {
+                        LOG.warn("Delegate IOX", iox);
+                        IOUtils.close(s);
+                        // do not call shutdown, because then the delegate
+                        // would get both handleConnect & shutdown, which
+                        // is confusing.
                     }
                 }
             });
