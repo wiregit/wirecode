@@ -3,13 +3,14 @@ package com.limegroup.gnutella.licenses;
 import java.io.StringReader;
 
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.HTMLEditorKit.Parser;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-
 import org.cyberneko.relaxng.parsers.SAXParser;
 import org.xml.sax.InputSource;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 
 public class PublishedCCLicenseTest extends BaseTestCase {
     
@@ -50,15 +51,11 @@ public class PublishedCCLicenseTest extends BaseTestCase {
 
 		// first extract the RDF out of the html comment
 
-		ParserGetter kit = new ParserGetter();
-		HTMLEditorKit.Parser htmlParser = kit.getParser();
-
-		HTMLEditorKit.ParserCallback callback = new CommentExtractor();
-
 		StringReader reader = new StringReader(rdfEmbeddedComment);
 		
-		htmlParser.parse(reader, callback, true);
-
+        HTMLEditorKit.ParserCallback callback = new CommentExtractor();
+        getHTMLEditorKitParser().parse(reader, callback, true);
+        
 		synchronized (rdfLock) {
 			// wait for parser to finish
 			while ( rdf == null ) {
@@ -89,20 +86,20 @@ public class PublishedCCLicenseTest extends BaseTestCase {
 
 	}
     
-    
-    private class ParserGetter extends HTMLEditorKit {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -4065408030391493623L;
-
-		// purely to make this method public
-		public HTMLEditorKit.Parser getParser() {
-			return super.getParser();
-		}
-
-	}
+    /** 
+     * Returns the HTML parser as used by HTMLEditorKit. We could use
+     * HTMLEditorKit to get an instance of it but HTMLEditorKit instantiates
+     * some java.awt.Cursor objects internally that causes some problems 
+     * on OSX even in java.awt.headless mode!
+     */
+    private static Parser getHTMLEditorKitParser() {
+        try {
+            Class c = Class.forName("javax.swing.text.html.parser.ParserDelegator");
+            return (Parser) c.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     private class CommentExtractor extends HTMLEditorKit.ParserCallback {
 		public void handleComment(char[] data, int pos) {
