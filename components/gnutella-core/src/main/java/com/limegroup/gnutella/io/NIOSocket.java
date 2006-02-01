@@ -1,20 +1,19 @@
 package com.limegroup.gnutella.io;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStream;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.ReadableByteChannel;
+import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
+import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SocketChannel;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * A Socket that does all of its connecting/reading/writing using NIO.
@@ -52,9 +51,6 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
      * (Necessary because Sockets retrieved from channels null out the host when disconnected)
      */
     private InetAddress connectedTo;
-    
-    /** Whether the socket has started shutting down */
-    private boolean shuttingDown;
     
     /** Lock used to signal/wait for shutting down */
     private final Object LOCK = new Object();
@@ -236,18 +232,14 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
      */
     public void shutdown() {
         synchronized(LOCK) {
-            if (shuttingDown)
+            if(shutdown)
                 return;
-            shuttingDown = true;
+            shutdown = true;
         }
         
         if(LOG.isDebugEnabled())
             LOG.debug("Shutting down socket & streams for: " + this);
-
-        if(shutdown)
-            return;
-        shutdown = true;
-        
+ 
         try {
             shutdownInput();
         } catch(IOException ignored) {}
@@ -322,7 +314,7 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
         if (iaddr.isUnresolved())
             throw new IOException("unresolved: "+addr);
 
-        connectedTo = ((InetSocketAddress)addr).getAddress();
+        connectedTo = iaddr.getAddress();
         this.connecter = observer;
         
         try {

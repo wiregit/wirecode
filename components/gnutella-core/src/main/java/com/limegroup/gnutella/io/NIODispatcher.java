@@ -380,8 +380,10 @@ public class NIODispatcher implements Runnable {
      * is beyond the timeout time, cancels the item & generates a handleIOException
      * on the item.
      */
+    static int COUNT = 0;
     private void processTimeouts() {
         if(!TIMEOUTS.isEmpty()) {
+            if(COUNT++ % 50 == 0) LOG.debug("Processing timeouts, size: " + TIMEOUTS.size());
             long now = System.currentTimeMillis();
             for(int i = TIMEOUTS.size() - 1; i >= 0; i--) {
                 Timeout next = (Timeout)TIMEOUTS.get(i);
@@ -392,6 +394,7 @@ public class NIODispatcher implements Runnable {
                     next.handler.handleIOException(new SocketTimeoutException("no connection in: " + next.timeout));
                     TIMEOUTS.remove(i);
                 } else {
+                    if(COUNT % 50 == 0)      LOG.debug("No timeout, first: " + next.dead + ", now: " + now);
                     break; // TIMEOUTS is sorted.
                 }
             }
@@ -407,15 +410,18 @@ public class NIODispatcher implements Runnable {
         if(TIMEOUTS.isEmpty()) {
             // Common case.
             TIMEOUTS.add(t);
+            LOG.debug("Adding (" + handler + ", " + timeout + ") in empty TIMEOUTS.");
         } else if(then >= ((Timeout)TIMEOUTS.get(TIMEOUTS.size() - 1)).dead) {
             // Another common case.
             TIMEOUTS.add(t);
+            LOG.debug("Adding (" + handler + ", " + timeout + ") at end of TIMEOUTS.");
         } else {
             // Quick lookup.
             int insertion = Collections.binarySearch(TIMEOUTS, t);
             if(insertion < 0)
                 insertion = (insertion + 1) * -1;
             TIMEOUTS.add(insertion, t);
+            LOG.debug("Adding (" + handler + ", " + timeout + ") in TIMEOUTS at position (" + insertion + ")");
         }
     }
     
@@ -426,7 +432,21 @@ public class NIODispatcher implements Runnable {
         for(int i = TIMEOUTS.size() - 1; i >= 0; i--) {
             Timeout next = (Timeout)TIMEOUTS.get(i);
             if(next.key == key && next.handler == handler) {
+                LOG.debug("Removing timeout: " + handler);
                 TIMEOUTS.remove(i);
+                break;
+            }
+        }
+    }
+    
+    /**
+     * Changes the key in a Timeout item.
+     */
+    private void changeNotify(IOErrorObserver handler, SelectionKey newKey) {
+        for(int i = 0; i < TIMEOUTS.size(); i++) {
+            Timeout next = (Timeout)TIMEOUTS.get(i);
+            if(next.handler == handler) {
+                next.key = newKey;
                 break;
             }
         }
@@ -478,7 +498,7 @@ public class NIODispatcher implements Runnable {
             Collection keys = selector.selectedKeys();
             if(keys.size() == 0) {
                 if(startSelect == -1) {
-                    LOG.warn("No keys selected, starting spin check.");
+                   // LOG.warn("No keys selected, starting spin check.");
                     checkTime = true;
                 } else if(startSelect + 30 >= System.currentTimeMillis()) {
                     if(LOG.isWarnEnabled())
@@ -504,8 +524,8 @@ public class NIODispatcher implements Runnable {
                 }
             }
             
-            if(LOG.isDebugEnabled())
-                LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
+           // if(LOG.isDebugEnabled())
+           //     LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
             
             readyThrottles(keys);
             
@@ -602,7 +622,8 @@ public class NIODispatcher implements Runnable {
                 Object attachment = key.attachment();
                 int ops = key.interestOps();
                 try {
-                    channel.register(selector, ops, attachment);
+                    SelectionKey newKey = channel.register(selector, ops, attachment);
+                    changeNotify((IOErrorObserver)attachment, newKey);
                 } catch(IOException iox) {
                     ((Attachment)attachment).attachment.handleIOException(iox);
                 }
@@ -683,7 +704,7 @@ public class NIODispatcher implements Runnable {
     
     /** Encapsulates an IOErrorObserver on a timing-out operation. */
     private static class Timeout implements Comparable {
-        private final SelectionKey key;
+        private SelectionKey key;
         private final IOErrorObserver handler;
         private final int timeout;
         private final long dead;

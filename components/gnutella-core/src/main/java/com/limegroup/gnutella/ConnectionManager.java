@@ -14,14 +14,10 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.HostCatcher.EndpointObserver;
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
-import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
@@ -1501,56 +1497,26 @@ public class ConnectionManager {
                 remove(newest);
         }
         adjustConnectionFetchers();
-    }    
+    }
 
     /**
-     * Starts or stops connection fetchers to maintain the invariant
-     * that numConnections + numFetchers >= _preferredConnections
-     *
-     * _preferredConnections - numConnections - numFetchers is called the need.
-     * This method is called whenever the need changes:
-     *   1. setPreferredConnections() -- _preferredConnections changes
-     *   2. remove(Connection) -- numConnections drops.
-     *   3. initializeExternallyGeneratedConnection() --
-     *        numConnections rises.
-     *   4. initialization error in initializeFetchedConnection() --
-     *        numConnections drops when removeInternal is called.
-     *   Note that adjustConnectionFetchers is not called when a connection is
-     *   successfully fetched from the host catcher.  numConnections rises,
-     *   but numFetchers drops, so need is unchanged.
-     *
+     * Starts or stops connection fetchers to maintain the invariant that numConnections + numFetchers >=
+     * _preferredConnections
+     * 
+     * _preferredConnections - numConnections - numFetchers is called the need. This method is called whenever the need
+     * changes: 1. setPreferredConnections() -- _preferredConnections changes 2. remove(Connection) -- numConnections
+     * drops. 3. initializeExternallyGeneratedConnection() -- numConnections rises. 4. initialization error in
+     * initializeFetchedConnection() -- numConnections drops when removeInternal is called. Note that
+     * adjustConnectionFetchers is not called when a connection is successfully fetched from the host catcher.
+     * numConnections rises, but numFetchers drops, so need is unchanged.
+     * 
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
         if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
-            //if it's a leaf and locale preferencing is on
-            //we will create a dedicated preference fetcher
-            //that tries to fetch a connection that matches the
-            //clients locale
-            if(RouterService.isShieldedLeaf()
-               && _needPref
-               && !_needPrefInterrupterScheduled
-               && _dedicatedPrefFetcher == null) {
-                _dedicatedPrefFetcher = new ConnectionFetcher(true);
-                _dedicatedPrefFetcher.connect();
-                Runnable interrupted = new Runnable() {
-                        public void run() {
-                            synchronized(ConnectionManager.this) {
-                                // always finish once this runs.
-                                _needPref = false;
-
-                                if (_dedicatedPrefFetcher == null)
-                                    return;
-                                _dedicatedPrefFetcher.stopConnecting();
-                                _dedicatedPrefFetcher = null;
-                            }
-                        }
-                    };
-                _needPrefInterrupterScheduled = true;
-                // shut off this guy if he didn't have any luck
-                RouterService.schedule(interrupted, 15 * 1000, 0);
-            }
+            startDedicatedLocaleFetcher();
         }
+        
         int goodConnections = getNumInitializedConnections();
         int neededConnections = _preferredConnections - goodConnections;
         //Now how many fetchers do we need?  To increase parallelism, we
@@ -1612,34 +1578,84 @@ public class ConnectionManager {
         // do not open more sockets than we can
         need = Math.min(need, Sockets.getNumAllowedSockets());
         
+        // Build up lists of what we need to connect to & remove from connecting.
+        
         // Start connection fetchers as necessary
-        while(need > 0) {
-            // This kicks off the thread for the fetcher
-            ConnectionFetcher fetcher = new ConnectionFetcher();
-            _fetchers.add(fetcher);
-            need--;
-            fetcher.connect();
+        List fetchers = Collections.EMPTY_LIST;
+        if (need > 0) {
+            fetchers = new ArrayList(need);
+            while (need > 0) {
+                // This kicks off the thread for the fetcher
+                ConnectionFetcher fetcher = new ConnectionFetcher();
+                fetchers.add(fetcher);
+                need--;
+            }
+            _fetchers.addAll(fetchers);
         }
 
         // Stop ConnectionFetchers as necessary, but it's possible there
         // aren't enough fetchers to stop.  In this case, close some of the
         // connections started by ConnectionFetchers.
         int lastFetcherIndex = _fetchers.size();
+        List extras = new ArrayList();
         while((need < 0) && (lastFetcherIndex > 0)) {
             ConnectionFetcher fetcher = (ConnectionFetcher)_fetchers.remove(--lastFetcherIndex);
-            fetcher.stopConnecting();
             need++;
+            extras.add(fetcher);
         }
-        int lastInitializingConnectionIndex =
-            _initializingFetchedConnections.size();
+        int lastInitializingConnectionIndex = _initializingFetchedConnections.size();
         while((need < 0) && (lastInitializingConnectionIndex > 0)) {
-            ManagedConnection connection = (ManagedConnection)
-                _initializingFetchedConnections.remove(
-                    --lastInitializingConnectionIndex);
-            removeInternal(connection);
+            ManagedConnection connection = 
+                (ManagedConnection)_initializingFetchedConnections.remove(--lastInitializingConnectionIndex);
             need++;
+            extras.add(connection);
+        }
+        
+        // Now connect'm.
+        for(int i = fetchers.size() - 1; i >= 0; i--) {
+            ConnectionFetcher fetcher = (ConnectionFetcher)fetchers.remove(i);
+            fetcher.connect();
+        }
+        
+        // And delete extras.
+        for(int i = extras.size() - 1; i >= 0; i--) {
+            Object next = extras.remove(i);
+            if(next instanceof ConnectionFetcher) {
+               ((ConnectionFetcher)next).stopConnecting(); 
+            } else {
+                removeInternal((ManagedConnection)next);
+            }
         }
     }
+    
+    /** Starts the dedicated locale ConnectionFetcher, if necessary */
+    private void startDedicatedLocaleFetcher() {
+        // if it's a leaf and locale preferencing is on
+        // we will create a dedicated preference fetcher
+        // that tries to fetch a connection that matches the
+        // clients locale
+        if (RouterService.isShieldedLeaf() && _needPref && !_needPrefInterrupterScheduled
+                && _dedicatedPrefFetcher == null) {
+            _dedicatedPrefFetcher = new ConnectionFetcher(true);
+            _dedicatedPrefFetcher.connect();
+            Runnable interrupted = new Runnable() {
+                public void run() {
+                    synchronized (ConnectionManager.this) {
+                        // always finish once this runs.
+                        _needPref = false;
+
+                        if (_dedicatedPrefFetcher == null)
+                            return;
+                        _dedicatedPrefFetcher.stopConnecting();
+                        _dedicatedPrefFetcher = null;
+                    }
+                }
+            };
+            _needPrefInterrupterScheduled = true;
+            // shut off this guy if he didn't have any luck
+            RouterService.schedule(interrupted, 15 * 1000, 0);
+        }
+    }    
 
     /**
      * Begins initializing fetched connections.
@@ -1670,18 +1686,18 @@ public class ConnectionManager {
         try {
             mc.initialize(fetcher);
         } catch(IOException e) {
-            synchronized(ConnectionManager.this) {
-                cleanupBrokenFetchedConnection(mc);
-            }
+            cleanupBrokenFetchedConnection(mc);
         }
     }
     
     private void cleanupBrokenFetchedConnection(ManagedConnection mc) {
-        _initializingFetchedConnections.remove(mc);
-        removeInternal(mc);
-        // We've removed a connection, so the need for connections went
-        // up.  We may need to launch a fetcher.
-        adjustConnectionFetchers();
+        synchronized (this) {
+            _initializingFetchedConnections.remove(mc);
+            removeInternal(mc);
+            // We've removed a connection, so the need for connections went
+            // up. We may need to launch a fetcher.
+            adjustConnectionFetchers();
+        }
         processConnectionHeaders(mc);
     }
 
@@ -1700,30 +1716,29 @@ public class ConnectionManager {
         //get the connection headers
         Properties headers = connection.headers().props();
         //return if no headers to process
-        if(headers == null) return;
+        if(headers == null)
+            return;
         //update the addresses in the host cache (in case we received some
         //in the headers)
         updateHostCache(connection.headers());
 
         //get remote address.  If the more modern "Listen-IP" header is
         //not included, try the old-fashioned "X-My-Address".
-        String remoteAddress
-            = headers.getProperty(HeaderNames.LISTEN_IP);
+        String remoteAddress = headers.getProperty(HeaderNames.LISTEN_IP);
         if (remoteAddress==null)
-            remoteAddress
-                = headers.getProperty(HeaderNames.X_MY_ADDRESS);
+            remoteAddress = headers.getProperty(HeaderNames.X_MY_ADDRESS);
 
         //set the remote port if not outgoing connection (as for the outgoing
         //connection, we already know the port at which remote host listens)
         if((remoteAddress != null) && (!connection.isOutgoing())) {
             int colonIndex = remoteAddress.indexOf(':');
-            if(colonIndex == -1) return;
+            if(colonIndex == -1) 
+                return;
             colonIndex++;
-            if(colonIndex > remoteAddress.length()) return;
+            if(colonIndex > remoteAddress.length())
+                return;
             try {
-                int port =
-                    Integer.parseInt(
-                        remoteAddress.substring(colonIndex).trim());
+                int port = Integer.parseInt(remoteAddress.substring(colonIndex).trim());
                 if(NetworkUtils.isValidPort(port)) {
                 	// for incoming connections, set the port based on what it's
                 	// connection headers say the listening port is
@@ -2018,6 +2033,8 @@ public class ConnectionManager {
          * already.  If that's the case, this call essentially does nothing.
          */
         public void stopConnecting() {
+            LOG.debug("Stopping early with endpoint: " + endpoint);
+            
             stoppedEarly = true;
             _catcher.removeEndpointObserver(this);
         }
@@ -2033,11 +2050,15 @@ public class ConnectionManager {
 
         /** Callback that an endpoint is available for connecting. */
         public void handleEndpoint(Endpoint endpoint) {
+            LOG.debug("(" + this + ") Got an endpoint: " + endpoint);
+            //Thread.dumpStack();
+            
             assert endpoint != null;
 
             // If this was an invalid endpoint, try again.
             if (!IPFilter.instance().allow(endpoint.getAddress()) || isConnectedTo(endpoint.getAddress())) {
                 _catcher.getAnEndpoint(this);
+                return;
             }
 
             this.endpoint = endpoint;
@@ -2050,17 +2071,21 @@ public class ConnectionManager {
         
         /** Callback that Sockets.connect worked. */
         public void handleConnect(Socket s) throws IOException {
+            LOG.debug("Connecting with endpoint: " + endpoint);
+            
             completeConnectionInitialization(connection, true);
+            processConnectionHeaders(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
             _catcher.doneWithConnect(endpoint, true);
             if(_pref)
                 _needPref = false;
-            
             startConnection(connection);
         }
         
         /** Callback that a connect failed. */
         public void shutdown() {
+            LOG.debug("Shutting down endpoint: " + endpoint);
+            
             cleanupBrokenFetchedConnection(connection);            
             _catcher.doneWithConnect(endpoint, false);
             _catcher.expireHost(endpoint);
@@ -2073,6 +2098,8 @@ public class ConnectionManager {
         
         /** Callback that connecting worked, but we got something other than a Gnutella OK */
         public void handleNoGnutellaOk(int code, String msg) {
+            LOG.debug("No GOK with endpoint: " + endpoint);
+            
             cleanupBrokenFetchedConnection(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
             if (code == HandshakeResponse.LOCALE_NO_MATCH) {
