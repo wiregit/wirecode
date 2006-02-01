@@ -2,7 +2,7 @@ package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 
-class StubReadWriteObserver implements ReadWriteObserver {
+class StubReadWriteObserver implements IOErrorObserver, ReadWriteObserver {
     
     private int amtToUse = Integer.MAX_VALUE;
     private Throttle throttle;

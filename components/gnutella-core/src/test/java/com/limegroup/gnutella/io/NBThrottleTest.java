@@ -1,15 +1,14 @@
 package com.limegroup.gnutella.io;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.io.NIODispatcher.Attachment;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests that Throttle does its thing.
@@ -258,7 +257,7 @@ public final class NBThrottleTest extends BaseTestCase {
 	private static class Data {
         private StubReadWriteObserver ATTACHMENT = new StubReadWriteObserver();
         private StubThrottleListener STUB = new StubThrottleListener(ATTACHMENT);
-        private FakeSelectionKey KEY = new FakeSelectionKey(ATTACHMENT);
+        private FakeSelectionKey KEY = new FakeSelectionKey(new Attachment(ATTACHMENT));
         Data(Throttle throttle) {
             ATTACHMENT.setThrottle(throttle);
         }

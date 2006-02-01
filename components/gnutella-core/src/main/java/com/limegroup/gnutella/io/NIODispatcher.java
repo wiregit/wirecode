@@ -590,7 +590,7 @@ public class NIODispatcher implements Runnable {
     }
     
     /** Encapsulates an attachment. */
-    private static class Attachment {
+    static class Attachment {
         private final IOErrorObserver attachment;
         private long lastMod;
         private long hits;
