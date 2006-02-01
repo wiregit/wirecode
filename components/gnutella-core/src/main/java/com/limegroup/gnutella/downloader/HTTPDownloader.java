@@ -123,7 +123,6 @@ public class HTTPDownloader implements BandwidthTracker {
         new BandwidthThrottle(Float.MAX_VALUE, false);
 
     private RemoteFileDesc _rfd;
-    private boolean _isPush;
 	private long _index;
 	private String _filename; 
 	private byte[] _guid;
@@ -288,7 +287,6 @@ public class HTTPDownloader implements BandwidthTracker {
 	public HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
         //Dirty secret: this is implemented with the push constructor!
         this(null, rfd, incompleteFile, inNetwork);
-        _isPush=false;
 	}	
 
 	/**
@@ -308,7 +306,6 @@ public class HTTPDownloader implements BandwidthTracker {
         if(rfd == null) {
             throw new NullPointerException("null rfd");
         }
-        _isPush=true;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -419,33 +416,26 @@ public class HTTPDownloader implements BandwidthTracker {
      * <p>
      * @param timeout the timeout to use for connecting, in milliseconds,
      *  or zero if no timeout
-     * @exception CantConnectException could not establish a TCP connection
+     * @exception IOException could not establish a TCP connection
      */
 	public void connectTCP(int timeout) throws IOException {
-        //Connect, if not already done.  Ignore 
-        //The try-catch below is a work-around for JDK bug 4091706.
-        try {            
-            if (_socket==null) {
-                long curTime = System.currentTimeMillis();
-                _socket = Sockets.connect(_host, _port, timeout);
-                NumericalDownloadStat.TCP_CONNECT_TIME.
-                    addData((int)(System.currentTimeMillis() -  curTime));
-                
-            }
-            _socket.setKeepAlive(true);
-            _input = new NPECatchingInputStream(new BufferedInputStream(_socket.getInputStream()));
-            _output = new BufferedOutputStream(_socket.getOutputStream());
-            
-        } catch (IOException e) {
-            throw new CantConnectException();
+        if (_socket == null) {
+            long curTime = System.currentTimeMillis();
+            _socket = Sockets.connect(_host, _port, timeout);
+            NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - curTime));
         }
-        //Note : once we have established the TCP connection with the host we
-        //want to download from we set the soTimeout. Its reset in doDownload
-        //Note2 : this may throw an IOException.  
+        
+        _socket.setKeepAlive(true);
+        _input = new NPECatchingInputStream(new BufferedInputStream(_socket.getInputStream()));
+        _output = new BufferedOutputStream(_socket.getOutputStream());
+
+        // Note : once we have established the TCP connection with the host we
+        // want to download from we set the soTimeout. Its reset in doDownload
+        // Note2 : this may throw an IOException.
         _socket.setSoTimeout(Constants.TIMEOUT);
         _byteReader = new ByteReader(_input);
     }
-    
+
     /**
      * Same as connectHTTP(start, stop, supportQueueing, -1)
      */
@@ -1770,11 +1760,6 @@ public class HTTPDownloader implements BandwidthTracker {
      * Returns the RemoteFileDesc passed to this' constructor.
      */
     public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
-    
-    /**
-     * Returns true iff this is a push download.
-     */
-    public boolean isPush() {return _isPush;}
     
     /**
      *  returns true if we have think that the server 

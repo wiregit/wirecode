@@ -2285,16 +2285,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private void startWorker(final RemoteFileDesc rfd) {
         DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile,stealLock);
-        Thread connectCreator = new ManagedThread(worker);
-        
-        connectCreator.setName("DownloadWorker");
-        
         synchronized(this) {
             _workers.add(worker);
             currentRFDs.add(rfd);
-        }
-
-        connectCreator.start();
+        }        
+        worker.start();
     }        
     
     /**
