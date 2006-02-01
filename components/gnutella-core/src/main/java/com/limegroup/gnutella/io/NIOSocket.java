@@ -197,8 +197,13 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
      * connecter for the duration of the connection.
      */
     public void handleConnect(Socket s) throws IOException {
-        connecter.handleConnect(this);
+        // Clear out connector prior to calling handleConnect.
+        // This is so that if handleConnect throws an IOX, the
+        // observer won't be confused by having both handleConnect &
+        // shutdown called.  It'll be one or the other.
+        ConnectObserver observer = connecter;
         connecter = null;
+        observer.handleConnect(this);
     }
     
     /**

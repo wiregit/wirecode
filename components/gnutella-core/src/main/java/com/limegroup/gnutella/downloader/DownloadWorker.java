@@ -1380,11 +1380,17 @@ public class DownloadWorker {
          * Upon succesful connect, create the HTTPDownloader with the right socket, and proceed to continue
          * downloading.
          */
-        public void handleConnect(Socket socket) throws IOException {
+        public void handleConnect(Socket socket) {
             NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - createTime));
             DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
-            _downloader = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
-            _downloader.connectTCP(0); // already connected, timeout doesn't matter.
+            HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
+            try {
+                dl.connectTCP(0); // already connected, timeout doesn't matter.
+            } catch(IOException iox) {
+                shutdown(); // if it immediately IOX's, try a push instead.
+                return;
+            }
+            _downloader = dl;
             finishConnect();
             startRunner(null);
         }
