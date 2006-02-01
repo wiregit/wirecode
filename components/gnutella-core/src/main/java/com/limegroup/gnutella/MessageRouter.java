@@ -1286,8 +1286,6 @@ public abstract class MessageRouter {
                     }
                 } catch (IOException ignored) {
                     LOG.warn("IOX during connectback", ignored);
-                } catch (Throwable t) {
-                    ErrorService.error(t);
                 } finally {
                     IOUtils.close(sock);
                 }

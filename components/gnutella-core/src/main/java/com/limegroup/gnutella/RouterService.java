@@ -1485,13 +1485,9 @@ public class RouterService {
 	  final Set proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
-        Thread asynch = new ManagedThread( new Runnable() {
+        Thread asynch = new ManagedThread(new Runnable() {
             public void run() {
-                try {
-                    handler.browseHost(host, port, proxies, canDoFWTransfer);
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+                handler.browseHost(host, port, proxies, canDoFWTransfer);
             }
         }, "BrowseHoster" );
         asynch.setDaemon(true);
