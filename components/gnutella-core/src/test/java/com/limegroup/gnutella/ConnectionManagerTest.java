@@ -90,10 +90,10 @@ public class ConnectionManagerTest extends BaseTestCase {
      * 
      * @throws Exception if an error occurs
      */
-    public void testAllowConnection() throws Exception {
+ //   public void testAllowConnection() throws Exception {
         // NOTA BENE: you may have to turn on ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
     	// which is deactivated in this.setSettings()
-    }
+ //   }
     
     /**
      * Tests the method for allowing ultrapeer 2 ultrapeer connections.
@@ -195,8 +195,12 @@ public class ConnectionManagerTest extends BaseTestCase {
         ConnectionManager mgr = RouterService.getConnectionManager();
         
         // test preconditions
+        assertTrue("should not start as supernode", !mgr.isSupernode());
+        assertTrue("should not be a shielded leaf", !mgr.isShieldedLeaf());
+        UltrapeerSettings.MIN_CONNECT_TIME.setValue(0);
+        setConnectTime();
         assertTrue("should start as supernode", mgr.isSupernode());
-        assertTrue("should not be leaf", !mgr.isShieldedLeaf());
+        assertTrue("should not be leaf", !mgr.isShieldedLeaf());        
         
         // construct peers
         // u ==> i should be ultrapeer
@@ -268,6 +272,7 @@ public class ConnectionManagerTest extends BaseTestCase {
             
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         ConnectionManager mgr = RouterService.getConnectionManager();
+        setConnectTime();
         // test preconditions
         assertTrue("should start as supernode", mgr.isSupernode());
         assertTrue("should not be leaf", !mgr.isShieldedLeaf());
@@ -454,6 +459,10 @@ public class ConnectionManagerTest extends BaseTestCase {
         }
     }
     
+    private void setConnectTime() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+                "_connectTime", new Integer(0));
+    }
     
     private void initializeStart(ManagedConnection c) throws Exception {
         //  Need to setup the _outputRunner member of c as well...
