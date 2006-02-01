@@ -275,5 +275,9 @@ class ProxyUtils {
         
         // Ignored.
         public void handleIOException(IOException iox) {}
+        
+        public ConnectObserver getDelegateObserver() {
+            return delegate;
+        }
     }
 }

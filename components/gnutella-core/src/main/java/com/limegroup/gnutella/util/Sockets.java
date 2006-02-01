@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,25 +59,7 @@ public class Sockets {
 	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public static Socket connect(String host, int port, int timeout) throws IOException {
-        return connect(host, port, timeout, null, false);
-    }
-    
-    /**
-     * Connects and returns a socket to the given host, with a timeout.
-     * Any time spent waiting for available socket is counted towards the timeout.
-     *
-     * @param host the address of the host to connect to
-     * @param port the port to connect to
-     * @param timeout the desired timeout for connecting, in milliseconds,
-     *  or 0 for no timeout. In case of a proxy connection, this timeout
-     *  might be exceeded
-     * @return the connected Socket
-     * @throws IOException the connections couldn't be made in the 
-     *  requested time
-     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
-     */
-    public static Socket connectHardTimeout(String host, int port, int timeout)  throws IOException {
-      return connect(host, port, timeout, null, true);
+        return connect(host, port, timeout, null);
     }
     
     /**
@@ -103,18 +87,7 @@ public class Sockets {
      * @throws IOException see above
 	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public static Socket connect(String host, int port, int timeout, ConnectObserver observer) throws IOException {
-        return connect(host, port, timeout, observer, false);
-    }
-    
-    /**
-     * Same as above, except with an extra parameter for 'hard' timeouts.
-     * A 'hard' timeout cannot be used if observer is non-null.
-     * If a hard timeout can be used and hard is true, this will only block for a total time of 'timeout'.
-     * Otherwise, the 'timeout' only applies to the network value -- more time may be spent waiting internally
-     * until a slot for connecting is available.
-     */
-    private static Socket connect(String host, int port, int timeout, ConnectObserver observer, boolean hard) throws IOException {        
+    public static Socket connect(String host, int port, int timeout, ConnectObserver observer) throws IOException {  
         if(!NetworkUtils.isValidPort(port))  
             throw new IllegalArgumentException("port out of range: "+port);  
   
@@ -123,10 +96,36 @@ public class Sockets {
         int proxyType = ProxyUtils.getProxyType(address);  
                        
         if (proxyType != ConnectionSettings.C_NO_PROXY)  
-            return connectProxy(proxyType, addr, timeout, observer, hard);  
+            return connectProxy(proxyType, addr, timeout, observer);  
         else
-            return connectPlain(addr, timeout, observer, hard);  
+            return connectPlain(addr, timeout, observer);  
 	}
+    
+    /**
+     * Removes the given ConnectObserver from wanting to make a request.
+     * This returns true if it was able to remove the observer because the request had
+     * not been processed yet.
+     * Otherwise it returns false, and the ConnectObserver should expect some sort of callback
+     * indicating whether or not the connect succeeded.
+     */
+    public static boolean removeConnectObserver(ConnectObserver observer) {
+        synchronized(Sockets.class) {
+            for(Iterator i = WAITING_REQUESTS.iterator(); i.hasNext(); ) {
+                Requestor next = (Requestor)i.next();
+                if(next.observer == observer) {
+                    i.remove();
+                    return true;
+                // must handle proxy'd kinds also.
+                } else if(next.observer instanceof ProxyUtils.ProxyConnector) {
+                    if(((ProxyUtils.ProxyConnector)next.observer).getDelegateObserver() == observer) {
+                        i.remove();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     /** 
      * Establishes a connection to the given host.
@@ -134,7 +133,7 @@ public class Sockets {
      * If observer is null, this will block until a connection is established or an IOException is thrown.
      * Otherwise, this will return immediately and the Observer will be notified of success or failure.
      */
-    private static Socket connectPlain(InetSocketAddress addr, int timeout, ConnectObserver observer, boolean hard)
+    private static Socket connectPlain(InetSocketAddress addr, int timeout, ConnectObserver observer)
         throws IOException {
         
         // needs to be declared as an NIOSocket for the non-blocking connect.
@@ -142,19 +141,7 @@ public class Sockets {
         
         if(observer == null) {
             // BLOCKING.
-            
-            if(hard) {
-                long waitTime = System.currentTimeMillis();
-                boolean waited = waitForSocketHard(timeout, waitTime);
-                if (waited) {
-                    waitTime = System.currentTimeMillis() - waitTime;
-                    timeout -= waitTime;
-                    if (timeout <= 0)
-                        throw new IOException("timed out");
-                }
-            } else {
-                waitForSocket();
-            }
+            waitForSocket();
             try {
                 socket.connect(addr, timeout);
             } finally {
@@ -173,16 +160,16 @@ public class Sockets {
     /**
      * Connects to a host using a proxy.
      */
-    private static Socket connectProxy(int type, InetSocketAddress addr, int timeout, ConnectObserver observer, boolean hard)
+    private static Socket connectProxy(int type, InetSocketAddress addr, int timeout, ConnectObserver observer)
       throws IOException {
 		String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
 		int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
 		InetSocketAddress proxyAddr = new InetSocketAddress(proxyHost, proxyPort);
 		
 		if(observer != null) {
-		    return connectPlain(proxyAddr, timeout, new ProxyUtils.ProxyConnector(type, observer, addr, timeout), false);
+		    return connectPlain(proxyAddr, timeout, new ProxyUtils.ProxyConnector(type, observer, addr, timeout));
 		} else {
-		    Socket proxySocket = connectPlain(proxyAddr, timeout, null, hard);
+		    Socket proxySocket = connectPlain(proxyAddr, timeout, null);
 		    return ProxyUtils.establishProxy(type, proxySocket, addr, timeout);
 		}
     }
@@ -191,9 +178,18 @@ public class Sockets {
      * Runs through any waiting Requestors and initiates a connection to them.
      */
     private static void runWaitingRequests() {
-        while(_socketsConnecting < MAX_CONNECTING_SOCKETS && !WAITING_REQUESTS.isEmpty()) {
-            Requestor next = (Requestor)WAITING_REQUESTS.remove(0);
-            _socketsConnecting++;        
+        // We must connect outside of the lock, so as not to expose being locked to external
+        // entities.
+        List toBeProcessed = new ArrayList(Math.min(WAITING_REQUESTS.size(), Math.max(0, MAX_CONNECTING_SOCKETS - _socketsConnecting)));
+        synchronized(Sockets.class) {
+            while(_socketsConnecting < MAX_CONNECTING_SOCKETS && !WAITING_REQUESTS.isEmpty()) {
+                toBeProcessed.add(WAITING_REQUESTS.remove(0));
+                _socketsConnecting++;
+            }
+        }
+        
+        for(int i = 0; i < toBeProcessed.size(); i++) {
+            Requestor next = (Requestor)toBeProcessed.get(i);
             try {
                 next.socket.connect(next.addr, next.timeout, new DelegateConnector(next.observer));
             } catch(IOException iox) {
@@ -222,37 +218,6 @@ public class Sockets {
 	        }
 	    }
 	}
-    
-    /**
-     * Waits until we're allowed to do an active outgoing socket
-     * connection with a timeout
-     * @return true if we had to wait before we could get a connection
-     */
-    private static boolean waitForSocketHard(int timeout, long now) throws IOException {
-        if(!CommonUtils.isWindowsXP())
-            return false;
-        
-        long timeoutTime = now + timeout;
-        boolean ret = false;
-        synchronized(Sockets.class) {
-            while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
-                
-                if (timeout <= 0)
-                    throw new IOException("timed out :(");
-                
-                try {
-                    ret = true;
-                    Sockets.class.wait(timeout);
-                    timeout = (int)(timeoutTime - System.currentTimeMillis());
-                } catch(InterruptedException ignored) {
-                    throw new IOException(ignored.getMessage());
-                }
-            }
-            _socketsConnecting++;           
-        }
-        
-        return ret;
-    }
 	
 	/**
 	 * Waits until we're allowed to do an active outgoing socket
@@ -282,11 +247,18 @@ public class Sockets {
 	private static void releaseSocket() {
 	    if(!CommonUtils.isWindowsXP())
 	        return;
-	        
+	    
+        // Release this slot.
 	    synchronized(Sockets.class) {
 	        _socketsConnecting--;
+        }
+        
+        // See if any non-blocking requests are queued.
+        runWaitingRequests();
+        
+        // If there's room, notify blocking requests.
+        synchronized(Sockets.class) {
 	        if(_socketsConnecting < MAX_CONNECTING_SOCKETS) {
-	            runWaitingRequests();
 	            Sockets.class.notifyAll();
             }
 	    }

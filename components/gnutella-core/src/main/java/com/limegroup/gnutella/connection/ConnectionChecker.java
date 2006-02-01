@@ -18,6 +18,7 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
@@ -65,57 +66,57 @@ public final class ConnectionChecker implements Runnable {
      * in minimal traffic to these sites.  NON-FINAL FOR TESTING.
      */
     private static String[] STANDARD_HOSTS = {
-        "http://www.wanadoo.fr",
-        "http://www.tiscali.com",
-        "http://www.ntt.com",
-        "http://www.tonline.com",
-        "http://www.download.com",
-        "http://www.ibm.com",
-        "http://www.sun.com",
-        "http://www.apple.com",
-        "http://www.ebay.com",
-        "http://www.sun.com",
-        "http://www.monster.com",
-        "http://www.uunet.com",
-        "http://www.real.com",
-        "http://www.microsoft.com",
-        "http://www.sco.com",
-        "http://www.google.com",
-        "http://www.cnn.com",
-        "http://www.amazon.com",
-        "http://www.espn.com", 
-        "http://www.yahoo.com",
-        "http://www.oracle.com",
-        "http://www.dell.com",
-        "http://www.ge.com",
-        "http://www.sprint.com",
-        "http://www.att.com",
-        "http://www.mci.com",
-        "http://www.cisco.com",
-        "http://www.intel.com",
-        "http://www.motorola.com",
-        "http://www.hp.com",
-        "http://www.gateway.com",
-        "http://www.sony.com",
-        "http://www.ford.com",
-        "http://www.gm.com",
-        "http://www.aol.com",
-        "http://www.verizon.com",
-        "http://www.passport.com",
-        "http://www.go.com",
-        "http://www.overture.com",
-        "http://www.earthlink.net",
-        "http://www.bellsouth.net",
-        "http://www.excite.com",
-        "http://www.paypal.com",
-        "http://www.altavista.com",
-        "http://www.weather.com",
-        "http://www.mapquest.com",
-        "http://www.geocities.com",
-        "http://www.juno.com",
-        "http://www.msnbc.com",
-        "http://www.lycos.com",
-        "http://www.comcast.com",
+        "www.wanadoo.fr",
+        "www.tiscali.com",
+        "www.ntt.com",
+        "www.tonline.com",
+        "www.download.com",
+        "www.ibm.com",
+        "www.sun.com",
+        "www.apple.com",
+        "www.ebay.com",
+        "www.sun.com",
+        "www.monster.com",
+        "www.uunet.com",
+        "www.real.com",
+        "www.microsoft.com",
+        "www.sco.com",
+        "www.google.com",
+        "www.cnn.com",
+        "www.amazon.com",
+        "www.espn.com", 
+        "www.yahoo.com",
+        "www.oracle.com",
+        "www.dell.com",
+        "www.ge.com",
+        "www.sprint.com",
+        "www.att.com",
+        "www.mci.com",
+        "www.cisco.com",
+        "www.intel.com",
+        "www.motorola.com",
+        "www.hp.com",
+        "www.gateway.com",
+        "www.sony.com",
+        "www.ford.com",
+        "www.gm.com",
+        "www.aol.com",
+        "www.verizon.com",
+        "www.passport.com",
+        "www.go.com",
+        "www.overture.com",
+        "www.earthlink.net",
+        "www.bellsouth.net",
+        "www.excite.com",
+        "www.paypal.com",
+        "www.altavista.com",
+        "www.weather.com",
+        "www.mapquest.com",
+        "www.geocities.com",
+        "www.juno.com",
+        "www.msnbc.com",
+        "www.lycos.com",
+        "www.comcast.com",
     };
     
     /**
@@ -125,6 +126,7 @@ public final class ConnectionChecker implements Runnable {
     private ConnectionChecker() {}
 
     private static ConnectionChecker current;
+    
     /**
      * Creates a new <tt>ConnectionChecker</tt> instance that checks for a live
      * internet connection.  If the checker determines that there is no active 
@@ -137,15 +139,23 @@ public final class ConnectionChecker implements Runnable {
         LOG.trace("checking for live connection");
 
         ConnectionChecker checker;
+        boolean startThread = false;
         synchronized(ConnectionChecker.class) {
-            if (current == null)
+            if (current == null) {
+                startThread = true;
                 current = new ConnectionChecker();
+            }
             checker = current;
         }
         
-        Thread connectionThread = new ManagedThread(checker, "check for live connection");
-        connectionThread.setDaemon(true);
-        connectionThread.start();
+        // Only create a new thread if one isn't alive.
+        if(startThread) {
+            LOG.debug("Starting a new connection-checker thread");
+            Thread connectionThread = new ManagedThread(checker, "check for live connection");
+            connectionThread.setDaemon(true);
+            connectionThread.start();
+        }
+        
         return checker;
     }
 
@@ -161,18 +171,20 @@ public final class ConnectionChecker implements Runnable {
             
             Iterator iter = hostList.iterator();
             while(iter.hasNext()) {
-                String curHost = (String)iter.next();        
+                String curHost = (String)iter.next();
                 connectToHost(curHost);
                 
                 // Break out of the loop if we've already discovered that we're 
                 // connected -- we only need to successfully connect to one host
                 // to know for sure that we're up.
                 if(_connected) {
+                    LOG.debug("Connection exists.");
+                    
                     // if we did disconnect as an attempt to work around SP2, connect now.
-                    if (_triedSP2Workaround && 
-                            !RouterService.isConnected() && 
-                            !RouterService.isConnecting())
+                    if (_triedSP2Workaround && !RouterService.isConnected() && !RouterService.isConnecting()) {
+                        LOG.debug("Reconnecting RouterService");
                         RouterService.connect();
+                    }
                     return;
                 }
                 
@@ -181,8 +193,8 @@ public final class ConnectionChecker implements Runnable {
                 // sure the user's connection is down.  If it is down, trying
                 // multiple times adds no load to the test servers.
                 if(_unsuccessfulAttempts > 2) {
-                    
-                    if (_triedSP2Workaround || !CommonUtils.isWindowsXP()) { 
+                    LOG.debug("Failed connection check more than twice.");
+                    if (_triedSP2Workaround || !CommonUtils.isWindowsXP()) {
                         RouterService.getConnectionManager().noInternetConnection();
                         return;
                     } else {
@@ -192,9 +204,6 @@ public final class ConnectionChecker implements Runnable {
                 }
             }
             
-        } catch(Throwable t) {
-            // Report any unhandled errors.
-            ErrorService.error(t);
         } finally {
             synchronized(ConnectionChecker.class) {
                 current = null;
@@ -282,20 +291,68 @@ public final class ConnectionChecker implements Runnable {
      * @param host the host to connect to
      */
     private void connectToHost(String host) {
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("connecting to: "+host);
-        }
+        if(LOG.isDebugEnabled())
+            LOG.debug("Checking for connection with host: " + host);
         
-        Socket s = null;
         try  {
         	InetAddress.getByName(host); // die fast if unresolvable
-        	s = Sockets.connectHardTimeout(host, 80, 20000);
-        	_connected = true;
+            Observer observer = new Observer();
+            synchronized(observer) {
+                Socket s = Sockets.connect(host, 80, 20000, observer);
+                LOG.debug("Waiting for callback...");
+                try {
+                    observer.wait(40000);
+                } catch(InterruptedException e) {}
+                if(!observer.hasResponse()) {
+                    LOG.debug("No response!");
+                    // only consider unsuccesful if we were able to remove it
+                    // 'cause if it couldn't be removed, a response is still pending...
+                    if(Sockets.removeConnectObserver(observer)) {
+                        LOG.debug("Removed observer");
+                        _unsuccessfulAttempts++;
+                        IOUtils.close(s);
+                    }
+                }
+            }
         } catch (IOException bad) {
+            LOG.debug("failed to resolve name", bad);
         	_unsuccessfulAttempts++;
-        } finally {
-        	IOUtils.close(s);
         }
+    }
+    
+    private class Observer implements ConnectObserver {
+        boolean response = false;
+        
+        // unused.
+        public void handleIOException(IOException iox) {}
+
+        // Yay, we're connected.    
+        public synchronized void handleConnect(Socket socket) throws IOException {
+            if(!response) {
+                LOG.debug("Socket connected OK");
+                
+                response = true;
+                _connected = true;
+                notify();
+                
+                IOUtils.close(socket);
+            }
+        }
+
+        public synchronized void shutdown() {
+            if(!response) {
+                LOG.debug("Socket failed to connect");
+                
+                response = true;
+                _unsuccessfulAttempts++;
+                notify();
+            }
+        }
+        
+        public boolean hasResponse() {
+            return response;
+        }
+        
     }
     
     private class UDPChecker implements MessageListener, Cancellable {
