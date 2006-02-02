@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.File;
-import java.io.IOException;
 
 import junit.framework.Test;
 
@@ -57,7 +56,9 @@ public class SimppManagerTest extends BaseTestCase {
     private static File _simppFile;
 
     private static int _simppMessageNumber = -1;
-
+    
+    private static RouterService routerService;
+    
     public SimppManagerTest(String name) {
         super(name);
     }
@@ -71,11 +72,23 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        setSettings();
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        rs.start();
+        if (routerService == null) {
+            setSettings();
+            routerService = new RouterService(new ActivityCallbackStub());
+            routerService.start();
+            Thread.sleep(10000);
+            setSettings();
+        }
     }
 
+    private void shutdown() throws Exception {
+        if (routerService != null) {
+            RouterService.shutdown();
+            routerService = null;
+            Thread.sleep(5000);
+        }
+    }
+    
     private static void setSettings() throws Exception {
         String simppDir = "com/limegroup/gnutella/simpp/";
 
@@ -115,24 +128,39 @@ public class SimppManagerTest extends BaseTestCase {
                                                    new String[] {"*.*.*.*"} );
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                                                    new String[] {"127.*.*.*"});
-		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+        
+        ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.PORT.setValue(PORT);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.MAX_LEAVES.setValue(5);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(5);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        ConnectionSettings.NUM_CONNECTIONS.setValue(5);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        
+        ConnectionSettings.DISABLE_UPNP.setValue(true);
+        ConnectionSettings.PORT.setValue(PORT);
+        
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+        ConnectionSettings.FORCED_PORT.setValue(PORT);
+        
+        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
     }
     
     public void setUp() throws Exception {
-        Thread.sleep(4000);
+    }
+    
+    
+    ////////////////////////////////tests/////////////////////////////////////
+
+    public void preSetUp() throws Exception {
+        // TODO Auto-generated method stub
+        super.preSetUp();
         setSettings();
     }
-
-    ////////////////////////////////tests/////////////////////////////////////
 
     public void testOldVersion() throws Exception{
         //Note: we have already set the version to be old in setSettings
@@ -186,6 +214,8 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
     public void testOlderSimppNotRequested() throws Exception {
+        globalSetUp();
+        
         //1. Set up LimeWire
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -194,6 +224,7 @@ public class SimppManagerTest extends BaseTestCase {
         //not receive a simpprequest
         TestConnection conn = new TestConnection(OLD, false, false);//!expect, !respond
         conn.start();
+        
         //6s = 2s * 3 (timeout in TestConnection == 2s)
         Thread.sleep(6000);//let messages be exchanged, 
         
@@ -204,9 +235,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("SimppManager should not have updated", MIDDLE, 
                                                               man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
     
     public void testOlderSimppNotRequestedUnsolicitedAccepted() throws Exception {
+        globalSetUp();
+        
         //1. Set up LimeWire 
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -223,9 +257,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("SimppManager should not have updated", NEW, 
                                                               man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
 
     public void testSameSimppNotRequested() throws Exception {
+        globalSetUp();
+        
         //1. Set up LimeWire 
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -242,9 +279,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("SimppManager should not have updated", MIDDLE, 
                                                               man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
     
     public void testNewSimppAdvOldActualRejected() throws Exception {
+        globalSetUp();
+        
         //1. Set up LimeWire 
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -262,10 +302,13 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("SimppManager should not have updated", MIDDLE, 
                                                               man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
 
 
     public void testNewerSimppRequested() throws Exception {
+        globalSetUp();
+        
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -282,9 +325,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("Simpp manager did not update simpp version", 
                                                          NEW, man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
 
     public void testTamperedSimppSigRejected() throws Exception {
+        globalSetUp();
+        
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -302,9 +348,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
 
     public void testTamperedSimppDataRejected() throws Exception  {
+        globalSetUp();
+        
        //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -321,9 +370,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
 
     public void testBadSimppXMLRejected() throws Exception  {
+        globalSetUp();
+        
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -339,9 +391,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
 
     public void testGargabeDataRejected() throws Exception {
+        globalSetUp();
+        
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -357,9 +412,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         conn.killConnection();
+        //shutdown();
     }
 
-    public void testSimppTakesEffect() throws Exception {        
+    public void testSimppTakesEffect() throws Exception {
+        globalSetUp();
+        
         assertEquals("base case did not revert to defaults",4, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         //1. Test that Simpp files read off disk take effect. 
@@ -379,9 +437,13 @@ public class SimppManagerTest extends BaseTestCase {
 
         assertEquals("test_upload setting not changed to simpp value", 15,
                                  UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        
+        //shutdown();
     }
 
     public void testSimppSettingStaysBelowMax() throws Exception {
+        globalSetUp();
+        
         assertEquals("base case did not revert to defaults", 4, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         _simppMessageNumber = OLD;
@@ -400,9 +462,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("test_upload setting not changed to simpp value", 12,
                                 UploadSettings.TEST_UPLOAD_SETTING.getValue());
         
+        //shutdown();
     }
 
     public void testSimppSettingStaysAboveMin() throws Exception {
+        globalSetUp();
+        
         assertEquals("base case did not revert to defaults", 4, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         _simppMessageNumber = OLD;
@@ -421,27 +486,35 @@ public class SimppManagerTest extends BaseTestCase {
         
         assertEquals("test_upload setting not changed to simpp value", 12,
                                 UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        
+        //shutdown();
     }
 
     public void testIOXLeavesSimppUnchanged() throws Exception {
-       //1. Set up limewire correctly
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
-
-        //2. Set up the test connection, to have the new version, and to expect
-        //a simpp request from limewire, but then close the connection while
-        //uploading the simpp message
-        TestConnection conn = new TestConnection(NEW, true, true);
-        conn.setCauseError(true);
-        conn.start();
-
-        Thread.sleep(6000);//let the message exchange take place
-
-        //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = SimppManager.instance();
-        assertEquals("Simpp manager did not update simpp version", 
-                                                     MIDDLE, man.getVersion());
-        conn.killConnection();
+        try {
+            globalSetUp();
+        
+            //1. Set up limewire correctly
+            _simppMessageNumber = MIDDLE;
+            changeSimppFile();
+    
+            //2. Set up the test connection, to have the new version, and to expect
+            //a simpp request from limewire, but then close the connection while
+            //uploading the simpp message
+            TestConnection conn = new TestConnection(NEW, true, true);
+            conn.setCauseError(true);
+            conn.start();
+    
+            Thread.sleep(6000);//let the message exchange take place
+    
+            //3. OK. LimeWire should have upgraded now. 
+            SimppManager man = SimppManager.instance();
+            assertEquals("Simpp manager did not update simpp version", 
+                                                         MIDDLE, man.getVersion());
+            conn.killConnection();
+        } finally {
+            shutdown(); // Last test shuts down the RouterService
+        }
     }
 
     ////////////////////////////////private methods///////////////////////////
