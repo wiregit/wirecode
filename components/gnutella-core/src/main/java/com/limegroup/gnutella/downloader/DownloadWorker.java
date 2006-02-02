@@ -159,11 +159,6 @@ public class DownloadWorker {
     private final Object _stealLock;
     
     /**
-     * Socket to use when doing a push download.
-     */
-    private Socket _pushSocket;
-    
-    /**
      * The downloader that will do the actual downloading
      * TODO: un-volatilize after fixing the assertion failures
      */
@@ -519,9 +514,8 @@ public class DownloadWorker {
                 }
         }
 
-        if(LOG.isDebugEnabled())
-            LOG.debug("WORKER: attempting connect to "
-              + _rfd.getHost() + ":" + _rfd.getPort());        
+        if (LOG.isDebugEnabled())
+            LOG.debug("WORKER: attempting connect to " + _rfd.getHost() + ":" + _rfd.getPort());        
         
         DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
 
@@ -530,184 +524,72 @@ public class DownloadWorker {
         // this is because newer clients work better with pushes,
         // but older ones didn't understand them
         if (_rfd.isReplyToMulticast()) {
-            connectMulticast();
-            return;
+            connectWithPush(new PushConnector(false, true));
         } else {
             // otherwise, we're not multicast.
             // if we need a push, go directly to a push.
             // if we don't, try direct and if that fails try a push.
             if (!needsPush) {
-                try {
-                    connectDirectlyAsync();
+                if(connectDirectly(new DirectConnector(true))) {
                     return;
-                } catch (IOException e) {
-                    // IOX will happen if Sockets.connect failed immediately,
-                    // without even scheduling any callbacks.
-                    // In that case, fall through to the push ...
                 }
             }
-            
-            startRunner(new Runnable() {
-                public void run() {
-                    doPushConnect(needsPush);
-                    finishConnect();
-                }
-            });
-        }
-    }
-    
-    /**
-     * Attempts to connect via a push. If pushOnly is true and the connect fails, we tell the manager to forget about
-     * this RFD.
-     * 
-     * @param pushOnly
-     */
-    private void doPushConnect(boolean pushOnly) {
-        if (_downloader == null) {
-            try {
-                _downloader = connectWithPush();
-            } catch (IOException e) {
-                // even the push failed :(
-                if (pushOnly)
-                    _manager.forgetRFD(_rfd);
-            }
+            connectWithPush(new PushConnector(needsPush, false));
         }
     }
 
     /**
-     * Performs actions necessary after the connection process is finished.
-     * This will tell the manager this is a bad RFD if no downloader could
-     * be created, and stop the downloader if we were interrupted.
+     * Performs actions necessary after the connection process is finished. This will tell the manager this is a bad RFD
+     * if no downloader could be created, and stop the downloader if we were interrupted.
+     * Returns true if the download should proceed, false otherwise.
      */
-    private void finishConnect() {
+    private boolean finishConnect() {
         // if we didn't connect at all, tell the rest about this rfd
-        if (_downloader == null)
+        if (_downloader == null) {
             _manager.informMesh(_rfd, false);
-        else if (_interrupted) {
+            return false;
+        } else if (_interrupted) {
             // if the worker got killed, make sure the downloader is stopped.
             _downloader.stop();
             _downloader = null;
+            return false;
         }
-    }
-    
-    /**
-     * Attempts to connect to the RFD in the "multicast way". This first connects with a push, and then if that fails,
-     * connects directly.
-     */
-    private void connectMulticast() {
-        startRunner(new Runnable() {
-            public void run() {
-                try {
-                    _downloader = connectWithPush();
-                } catch (IOException e) {
-                    try {
-                        _downloader = connectDirectly();
-                    } catch (IOException e2) {
-                        return; // impossible to connect.
-                    }
-                }
-            }
-        });
+        return true;
     }
     
     /**
      * Attempts to asynchronously connect through TCP to the remote end.
+     * Returns true if the attempt to schedule a connect was succesful,
+     * false if it couldn't be scheduled.
      */
-    private void connectDirectlyAsync() throws IOException {
+    private boolean connectDirectly(ConnectObserver observer) {
         LOG.trace("WORKER: attempt asynchronous direct connection");
-        _connectObserver = new AsyncConnector();        
-        Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, _connectObserver);
-    }
-    
-    /**
-     * Attempts to directly connect through TCP to the remote end.
-     */
-    private HTTPDownloader connectDirectly() throws IOException {
-        LOG.trace("WORKER: attempt direct connection");
-        HTTPDownloader ret;
-        //Establish normal downloader.              
-        ret = new HTTPDownloader(_rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
-        // Note that connectTCP can throw IOException
-        // (and the subclassed CantConnectException)
+        _connectObserver = observer;
         try {
-            ret.connectTCP(NORMAL_CONNECT_TIME);
-            DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
+            Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, _connectObserver);
         } catch(IOException iox) {
-            DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
-            throw iox;
+            return false;
         }
-        return ret;
+        return true;
     }
     
     /**
      * Attempts to connect by using a push to the remote end.
      * BLOCKING.
      */
-    private HTTPDownloader connectWithPush() throws IOException {
+    private void connectWithPush(ConnectObserver observer) {
         LOG.trace("WORKER: attempt push connection");
-        HTTPDownloader ret;
         
         //When the push is complete and we have a socket ready to use
         //the acceptor thread is going to notify us using this object
-        MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(
-                     _rfd.getFileName(),_rfd.getIndex(),_rfd.getClientGUID());
-       
-        _manager.registerPushWaiter(this,mrfd);
-        
-        Socket pushSocket = null;
-        try {
-            synchronized(this) {
-                // only wait if we actually were able to send the push
-                RouterService.getDownloadManager().sendPush(_rfd, this);
-                
-                //No loop is actually needed here, assuming spurious
-                //notify()'s don't occur.  (They are not allowed by the Java
-                //Language Specifications.)  Look at acceptDownload for
-                //details.
-                try {
-                    wait(_rfd.isFromAlternateLocation()? 
-                            UDP_PUSH_CONNECT_TIME: 
-                                PUSH_CONNECT_TIME);
-                    pushSocket = _pushSocket;
-                    _pushSocket = null;
-                } catch(InterruptedException e) {
-                    DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
-                    throw new IOException("push interupted.");
-                }
-                
+        final MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(_rfd.getFileName(), _rfd.getIndex(),_rfd.getClientGUID());       
+        _manager.registerPushObserver(observer, mrfd);
+        RouterService.getDownloadManager().sendPush(_rfd, observer);
+        RouterService.schedule(new Runnable() {
+            public void run() {
+                _manager.unregisterPushObserver(mrfd, true);
             }
-            
-            //Done waiting or were notified.
-            if (pushSocket==null) {
-                DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
-                
-                throw new IOException("push socket is null");
-            }
-        } finally {
-            _manager.unregisterPushWaiter(mrfd); //we are not going to use it after this
-        }
-        
-        ret = new HTTPDownloader(pushSocket, _rfd, _commonOutFile, 
-                _manager instanceof InNetworkDownloader);
-        
-        //Socket.getInputStream() throws IOX if the connection is closed.
-        //So this connectTCP *CAN* throw IOX.
-        try {
-            ret.connectTCP(0);//just initializes the byteReader in this case
-            DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
-        } catch(IOException iox) {
-            DownloadStat.PUSH_FAILURE_LOST.incrementStat();
-            throw iox;
-        }
-        return ret;
-    }
-    
-    /**
-     * callback to notify that a push request was received
-     */
-    synchronized void setPushSocket(Socket s) {
-        _pushSocket = s;
-        notify();
+        }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME : PUSH_CONNECT_TIME, 0);
     }
 
     /**
@@ -730,6 +612,7 @@ public class DownloadWorker {
     private boolean doDownload(boolean http11) {
         if(LOG.isTraceEnabled())
             LOG.trace("WORKER: about to start downloading "+_downloader);
+        
         boolean problem = false;
         try {
             _downloader.doDownload();
@@ -1326,46 +1209,36 @@ public class DownloadWorker {
     }
     
     /**
-     * Starts a new thread that will perform the download, running the given Runnable
-     * prior to downloading.  Typically the Runnable should be for connecting, but may
-     * be null if the connection already exists.
-     * @param connector
+     * Starts a new thread that will perform the download.
+     * @param dl
      */
-    private void startRunner(Runnable connector) {
-        Runnable runner = new DownloadRunner(connector);
-        _myThread = new ManagedThread(runner);
-        _myThread.setDaemon(true);
-        _myThread.setName(workerName);
-        _myThread.start();
+    private void startDownload(HTTPDownloader dl) {
+        _downloader = dl;
+        
+        // If we should continue, then start the download.
+        if(finishConnect()) {
+            Runnable runner = new DownloadRunner();
+            _myThread = new ManagedThread(runner);
+            _myThread.setDaemon(true);
+            _myThread.setName(workerName);
+            _myThread.start();
+        } else {
+            _manager.workerFinished(this);
+        }
     }
     
     /**
-     * A Runnable that allows arbitrary methods of connecting to be performed
-     * prior to continuing the correct download process.
+     * A Runnable that processes the download.
      */
     private class DownloadRunner implements Runnable {
-        private final Runnable connector;
-        
-        /**
-         * Constructs a runner that runs the specified connector first.
-         * @param connector
-         */
-        DownloadRunner(Runnable connector) {
-            this.connector = connector;
-        }
-        
         /** 
          * Runs the connector, initializes alternate locations, and does the download.
          * This will always call _manager.workerFinished after completing.
          */
         public void run() {
             try {
-                if(connector != null)
-                    connector.run();
-                if(_downloader != null) {
-                    initializeAlternateLocations();
-                    httpLoop();
-                }
+                initializeAlternateLocations();
+                httpLoop();
             } finally {
                 _manager.workerFinished(DownloadWorker.this);
             }
@@ -1373,16 +1246,84 @@ public class DownloadWorker {
     }
     
     /**
-     * A ConnectObserver for starting the download.
+     * A ConnectObserver for starting the download via a push connect.
      */
-    private class AsyncConnector implements ConnectObserver {
+    private class PushConnector implements ConnectObserver {
+        private boolean forgetOnFailure;
+        private boolean directConnectOnFailure;
+        
+        PushConnector(boolean forgetOnFailure, boolean directConnectOnFailure) {
+            this.forgetOnFailure = forgetOnFailure;
+            this.directConnectOnFailure = directConnectOnFailure;
+        }
+
+        /**
+         * Notification that the push succeeded.  Starts the download if the connection still exists.
+         */
+        public void handleConnect(Socket socket) {
+           // LOG.debug(_rfd + " -- Handling connect from PushConnector");
+            HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
+            try {
+               dl.connectTCP(0);
+               DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
+            } catch(IOException iox) {
+               // LOG.debug(_rfd + " -- IOX after starting connected from PushConnector.");
+                DownloadStat.PUSH_FAILURE_LOST.incrementStat();
+                failed();
+                return;
+            }
+            
+            startDownload(dl);
+        }
+
+        /** Notification that the push failed. */
+        public void shutdown() {
+           // LOG.debug(_rfd + " -- Handling shutdown from PushConnector");            
+            DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
+            failed();
+        }
+        
+        /**
+         * Possibly tells the manager to forget this RFD, cleans up various things,
+         * and tells the manager to forget this worker.
+         */
+        private void failed() {
+            if(!directConnectOnFailure) {
+                if(forgetOnFailure) {
+                    _manager.forgetRFD(_rfd);
+                }
+                finishConnect();
+                _manager.workerFinished(DownloadWorker.this);
+            } else {
+                if(!connectDirectly(new DirectConnector(false))) {
+                    _manager.workerFinished(DownloadWorker.this);
+                }
+            }
+            
+            _manager.unregisterPushObserver(new MiniRemoteFileDesc(_rfd), false);
+        }
+
+        // unused
+        public void handleIOException(IOException iox) {}
+    }
+    
+    /**
+     * A ConnectObserver for starting the download via a direct connect.
+     */
+    private class DirectConnector implements ConnectObserver {
         private long createTime = System.currentTimeMillis();
+        private boolean pushConnectOnFailure;
+        
+        DirectConnector(boolean pushConnectOnFailure) {
+            this.pushConnectOnFailure = pushConnectOnFailure;
+        }
         
         /**
          * Upon succesful connect, create the HTTPDownloader with the right socket, and proceed to continue
          * downloading.
          */
         public void handleConnect(Socket socket) {
+           // LOG.debug(_rfd + " -- Handling connect from DirectConnector");
             NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - createTime));
             DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
             HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
@@ -1392,26 +1333,25 @@ public class DownloadWorker {
                 shutdown(); // if it immediately IOX's, try a push instead.
                 return;
             }
-            _downloader = dl;
-            finishConnect();
-            startRunner(null);
+            
+            startDownload(dl);
         }
 
         /**
          * Upon unsuccesful connect, try using a push.
          */
         public void shutdown() {
+           // LOG.debug(_rfd + " -- Handling shutdown from DirectConnnector");
             DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
-            startRunner(new Runnable() {
-                public void run() {
-                    doPushConnect(false);
-                    finishConnect();
-                }
-            });
+            if(pushConnectOnFailure) {
+                connectWithPush(new PushConnector(false, false));
+            } else {
+                finishConnect();
+                _manager.workerFinished(DownloadWorker.this);
+            }
         }
 
         // unused.
-        public void handleIOException(IOException iox) {
-        }
+        public void handleIOException(IOException iox) {}
     }
 }

@@ -430,12 +430,11 @@ public class BrowseHostHandler {
     /** @return true if the Push was handled by me.
      */
     public static boolean handlePush(int index, GUID serventID, 
-                                     final Socket socket) 
-        throws IOException {
+                                     final Socket socket) {
         boolean retVal = false;
         LOG.trace("BHH.handlePush(): entered.");
-        if (index == SPECIAL_INDEX)
-            ; // you'd hope, but not necessary...
+       // if (index == SPECIAL_INDEX)
+       //     ; // you'd hope, but not necessary...
 
         PushRequestDetails prd = null;
         synchronized (_pushedHosts) {

@@ -51,6 +51,7 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -1549,32 +1550,43 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * (with given index and clientGUID) from socket, returns true.  In this
      * case, the caller may not make any modifications to the socket.  If this
      * rejects the given file, returns false without modifying this or socket.
-     * If this could has problems with the socket, throws IOException.  In this
-     * case the caller should close the socket.  Non-blocking.
+     * Non-blocking.
      *     @modifies this, socket
      *     @requires GIV string (and nothing else) has been read from socket
      */
-    public boolean acceptDownload(
-            String file, Socket socket, int index, byte[] clientGUID)
-            throws IOException {
-        
+    public boolean acceptDownload(String file, Socket socket, int index, byte[] clientGUID) {
         MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
-        DownloadWorker worker =  (DownloadWorker) miniRFDToLock.get(mrfd);
+        ConnectObserver observer =  (ConnectObserver) miniRFDToLock.remove(mrfd);
         
-        if(worker == null) //not in map. Not intended for me
+        if(observer == null) //not in map. Not intended for me
             return false;
         
-        worker.setPushSocket(socket);
+        try {
+            observer.handleConnect(socket);
+        } catch(IOException impossible) {}
         
         return true;
     }
     
-    void registerPushWaiter(DownloadWorker worker, MiniRemoteFileDesc mrfd) {
-        miniRFDToLock.put(mrfd,worker);
+    /**
+     * Registers a new ConnectObserver that is waiting for a socket from the given MRFD.
+     * @param observer
+     * @param mrfd
+     */
+    void registerPushObserver(ConnectObserver observer, MiniRemoteFileDesc mrfd) {
+        miniRFDToLock.put(mrfd, observer);
     }
     
-    void unregisterPushWaiter(MiniRemoteFileDesc mrfd) {
-        miniRFDToLock.remove(mrfd);
+    /**
+     * Unregisters a ConnectObserver that was waiting for the given MRFD.  If shutdown
+     * is true and the observer was still registered, calls shutdown on that observer.
+     * @param mrfd
+     * @param shutdown
+     */
+    void unregisterPushObserver(MiniRemoteFileDesc mrfd, boolean shutdown) {
+        ConnectObserver observer = (ConnectObserver)miniRFDToLock.remove(mrfd);
+        if(observer != null && shutdown)
+            observer.shutdown();
     }
     
     /**
@@ -1649,8 +1661,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Kills all workers.
      */    
-    private synchronized void killAllWorkers() {
-        for (Iterator iter = _workers.iterator(); iter.hasNext();) {
+    private void killAllWorkers() {
+        List workers;
+        
+        synchronized (this) {
+            workers = new ArrayList(_workers);
+            _workers.clear();
+        }
+        
+        // cannot interrupt while iterating through the main list, because that
+        // could cause ConcurrentMods.
+        for (Iterator iter = workers.iterator(); iter.hasNext();) {
             DownloadWorker doomed = (DownloadWorker) iter.next();
             doomed.interrupt();
         }
