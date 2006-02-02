@@ -8,7 +8,6 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -110,7 +109,7 @@ public class TestConnection {
         //Phase 2 of handshake -- read
         String line = null;
         while((line = reader.readLine()) != null && !line.equals("")) {
-            System.out.println(line);
+            //System.out.println(line);
         }
 
         //Phase 3 of handshake -- write 200 OK

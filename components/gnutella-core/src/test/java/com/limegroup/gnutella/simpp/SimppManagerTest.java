@@ -77,7 +77,6 @@ public class SimppManagerTest extends BaseTestCase {
             routerService = new RouterService(new ActivityCallbackStub());
             routerService.start();
             Thread.sleep(10000);
-            setSettings();
         }
     }
 
