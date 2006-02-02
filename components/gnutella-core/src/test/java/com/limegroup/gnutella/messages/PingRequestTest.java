@@ -237,6 +237,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         PingRequest pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         
+        UltrapeerSettings.MIN_CONNECT_TIME.setValue(0);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
