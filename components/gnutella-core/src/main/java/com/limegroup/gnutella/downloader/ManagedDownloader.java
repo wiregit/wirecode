@@ -66,6 +66,7 @@ import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -753,7 +754,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public synchronized void startDownload() {
         Assert.that(dloaderManagerThread == null, "already started" );
-        dloaderManagerThread = new ManagedThread(new Runnable() {
+        ThreadFactory.startThread(new Runnable() {
             public void run() {
                 try {
                     receivedNewSources = false;
@@ -772,8 +773,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 }
             }
         }, "ManagedDownload");
-        dloaderManagerThread.setDaemon(true);
-        dloaderManagerThread.start(); 
     }
     
     /**

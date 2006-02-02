@@ -14,6 +14,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -189,7 +190,7 @@ public class HTTPAcceptor implements Runnable {
                 }
 
                 //Dispatch asynchronously.
-                new ConnectionDispatchRunner(client);
+                ThreadFactory.startThread(new ConnectionDispatchRunner(client), "ConnectionDispatchRunner");
 
             } catch (SecurityException e) {
 				ErrorService.error(e);
@@ -201,7 +202,7 @@ public class HTTPAcceptor implements Runnable {
         }
     }
 
-    private class ConnectionDispatchRunner extends ManagedThread {
+    private class ConnectionDispatchRunner implements Runnable {
         private Socket _socket;
 
         /**
@@ -213,13 +214,10 @@ public class HTTPAcceptor implements Runnable {
          *  returns.
          */
         public ConnectionDispatchRunner(Socket socket) {
-            super("ConnectionDispatchRunner");
             _socket=socket;
-            setDaemon(true);
-            this.start();
         }
 
-        public void managedRun() {
+        public void run() {
             try {
                 InputStream in = _socket.getInputStream(); 
                 _socket.setSoTimeout(Constants.TIMEOUT);
@@ -238,11 +236,8 @@ public class HTTPAcceptor implements Runnable {
                     }	
                 }
             } catch (IOException e) {
-            } catch(Throwable e) {
-				ErrorService.error(e);
-			} finally {
-			    // handshake failed: try to close connection.
-                try { _socket.close(); } catch (IOException e2) { }
+            } finally {
+                IOUtils.close(_socket);
             }
         }
     }

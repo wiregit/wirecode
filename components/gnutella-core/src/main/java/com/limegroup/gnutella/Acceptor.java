@@ -24,6 +24,7 @@ import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 
 /**
@@ -587,12 +588,8 @@ public class Acceptor implements Runnable {
                 setAddress( localAddress );                
 
                 //Dispatch asynchronously.
-                ConnectionDispatchRunner dispatcher =
-					new ConnectionDispatchRunner(client);
-				Thread dispatchThread = 
-                    new ManagedThread(dispatcher, "ConnectionDispatchRunner");
-				dispatchThread.setDaemon(true);
-				dispatchThread.start();
+                ConnectionDispatchRunner dispatcher = new ConnectionDispatchRunner(client);
+                ThreadFactory.startThread(dispatcher, "ConnectionDispatchRunner");
 
             } catch (Throwable e) {
                 ErrorService.error(e);

@@ -24,8 +24,6 @@ class ProxyUtils {
     
     private static final Log LOG = LogFactory.getLog(ProxyUtils.class);
     
-    private static final ThreadPool POOL = new DefaultThreadPool("ProxyConnector");
-    
     private ProxyUtils() {}
     
     /**
@@ -256,7 +254,7 @@ class ProxyUtils {
         }
         
         public void handleConnect(final Socket s) throws IOException {
-            POOL.invokeLater(new Runnable() {
+            ThreadFactory.startThread(new Runnable() {
                 public void run() {
                     try {
                         establishProxy(proxyType, s, addr, timeout);
@@ -277,7 +275,7 @@ class ProxyUtils {
                         // is confusing.
                     }
                 }
-            });
+            }, "ProxyConnector");
         }
        
         public void shutdown() {

@@ -24,6 +24,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 
@@ -442,19 +443,15 @@ public class BrowseHostHandler {
         }
         if (prd != null) {
             final PushRequestDetails finalPRD = prd;
-            Thread runLater = new ManagedThread() {
-                    public void managedRun() {
-                        try {
-                            finalPRD.bhh.browseExchange(socket);
-                        }
-                        catch (IOException ohWell) {
-                            finalPRD.bhh.failed();
-                        }
+            ThreadFactory.startThread(new Runnable() {
+                public void run() {
+                    try {
+                        finalPRD.bhh.browseExchange(socket);
+                    } catch (IOException ohWell) {
+                        finalPRD.bhh.failed();
                     }
-                };
-            runLater.setName("BrowseHost");
-            runLater.setDaemon(true);
-            runLater.start();
+                }
+            }, "BrowseHost");
             retVal = true;
         }
         else

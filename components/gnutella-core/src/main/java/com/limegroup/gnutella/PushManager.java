@@ -15,6 +15,7 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * Manages state for push upload requests.
@@ -102,9 +103,7 @@ public final class PushManager {
      * @param socket The possibly null socket.
      */
     private static void startPushRunner(PushData data, Socket socket) {
-        Thread thread = new ManagedThread(new Pusher(data, socket), "PushUploadThread");
-        thread.setDaemon(true);
-        thread.start();
+        ThreadFactory.startThread(new Pusher(data, socket), "PushUploadThread");
     }
     
     /** A simple collection of Push information */

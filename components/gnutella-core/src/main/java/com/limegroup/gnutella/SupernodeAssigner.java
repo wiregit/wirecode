@@ -9,6 +9,7 @@ import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * This class determines whether or not this node has all of the necessary
@@ -197,10 +198,7 @@ public final class SupernodeAssigner {
 						RouterService.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
 					}
 				};
-			Thread ultrapeerThread = 
-				new ManagedThread(ultrapeerRunner, "UltrapeerAttemptThread");
-			ultrapeerThread.setDaemon(true);
-			ultrapeerThread.start();
+            ThreadFactory.startThread(ultrapeerRunner, "UltrapeerAttemptThread");
 		}
 	}
 	

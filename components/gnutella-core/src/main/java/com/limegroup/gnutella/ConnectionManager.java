@@ -32,6 +32,7 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.SystemUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -282,10 +283,7 @@ public class ConnectionManager {
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
-        Thread conn =
-            new ManagedThread(new OutgoingConnector(c, false), "OutgoingConnector");
-        conn.setDaemon(true);
-        conn.start();
+        ThreadFactory.startThread(new OutgoingConnector(c, false), "OutgoingConnector");
         return c;
     }
 
@@ -301,10 +299,7 @@ public class ConnectionManager {
 								  true);
         // Initialize and loop for messages on another thread.
 
-		Thread outgoingConnectionRunner =
-			new ManagedThread(outgoingRunner, "OutgoingConnectionThread");
-		outgoingConnectionRunner.setDaemon(true);
-		outgoingConnectionRunner.start();
+		ThreadFactory.startThread(outgoingRunner, "OutgoingConnectionThread");
     }
 
 

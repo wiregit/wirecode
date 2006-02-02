@@ -62,6 +62,7 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.ThreadPool;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -137,11 +138,6 @@ public class DownloadManager implements BandwidthTracker {
      * TCP pushes a short bit of time after the UDP push is sent.
      */
     private final ProcessingQueue FAILOVERS = new ProcessingQueue("udp failovers");
-    
-    /**
-     * A pool of threads to process FWT push requests.
-     */
-    private final ThreadPool FWT_CONNECTORS = new DefaultThreadPool("FWT PushRequestors");
     
     /**
      * how long we think should take a host that receives an udp push
@@ -1317,8 +1313,8 @@ public class DownloadManager implements BandwidthTracker {
         // we need to open up our NAT for incoming UDP, so
         // start the UDPConnection.  The other side should
         // do it soon too so hopefully we can communicate.
-        Thread startPushThread = new ManagedThread("FWIncoming") {
-            public void managedRun() {
+        ThreadFactory.startThread(new Runnable() {
+            public void run() {
                 Socket fwTrans = null;
                 try {
                     fwTrans = new UDPConnection(file.getHost(), file.getPort());
@@ -1336,9 +1332,7 @@ public class DownloadManager implements BandwidthTracker {
                     DownloadStat.FW_FW_FAILURE.incrementStat();
                 }
             }
-        };
-        startPushThread.setDaemon(true);
-        startPushThread.start();
+        }, "FWIncoming");
     }
     
     /**
@@ -1380,7 +1374,7 @@ public class DownloadManager implements BandwidthTracker {
             // if we can do FWT, offload a TCP pusher.
             if(UDPService.instance().canDoFWT()) {
                 addUDPFailover(file);
-                FWT_CONNECTORS.invokeLater(new PushFailoverRequestor(file, guid, observer));
+                ThreadFactory.startThread(new PushFailoverRequestor(file, guid, observer), "FWT PushRequestor");
             } else if(observer != null) {
                     observer.shutdown();
             }

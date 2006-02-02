@@ -38,6 +38,7 @@ import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.gnutella.util.UncompressingInputStream;
 
@@ -1930,10 +1931,7 @@ public class Connection implements IpPort {
     public static interface ConnectionObserver extends ConnectObserver {
         public void handleNoGnutellaOk(int code, String msg);
         public void handleBadHandshake();
-    }
-    
-    /** Pool of threads that will do the moving & handshaking. */
-    private static final ThreadPool SHAKERS = new DefaultThreadPool("Handshaking");    
+    }    
  
     /**
      * A ConnectObserver to finish the initialization process prior
@@ -1961,7 +1959,7 @@ public class Connection implements IpPort {
         /** We got a connection. */
         public void handleConnect(Socket socket) {
             this.socket = socket;
-            SHAKERS.invokeLater(this); // handshake in a different thread.
+            ThreadFactory.startThread(this, "Handshaking");
         }
         
         /** Does the handshaking & completes the connection process. */

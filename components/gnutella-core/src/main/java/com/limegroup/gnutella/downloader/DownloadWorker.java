@@ -28,6 +28,7 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.ThreadPool;
 
 /**
@@ -103,8 +104,6 @@ public class DownloadWorker {
        is called and no thread is ever created.
     */
     private static final Log LOG = LogFactory.getLog(DownloadWorker.class);
-    
-    private static ThreadPool WORKER_POOL = new DefaultThreadPool("DownloadWorker");
     
     ///////////////////////// Policy Controls ///////////////////////////
     /** The smallest interval that can be split for parallel download */
@@ -564,7 +563,7 @@ public class DownloadWorker {
             
             //When the push is complete and we have a socket ready to use
             //the acceptor thread is going to notify us using this object
-            final MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(_rfd.getFileName(), _rfd.getIndex(),_rfd.getClientGUID());       
+            final MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(_rfd.getFileName(), _rfd.getIndex(), _rfd.getClientGUID());       
             _manager.registerPushObserver(observer, mrfd);
             RouterService.getDownloadManager().sendPush(_rfd, observer);
             RouterService.schedule(new Runnable() {
@@ -931,8 +930,7 @@ public class DownloadWorker {
         synchronized(slowest.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
             if (!slowest.getDownloader().isActive()) {
-                if (LOG.isDebugEnabled())
-                    LOG.debug("victim is no longer active");
+                LOG.debug("victim is no longer active");
                 throw new NoSuchElementException();
             }
             
@@ -1221,7 +1219,7 @@ public class DownloadWorker {
         
         // If we should continue, then start the download.
         if(finishConnect()) {
-            WORKER_POOL.invokeLater(new DownloadRunner());
+            ThreadFactory.startThread(new DownloadRunner(), workerName);
         } else {
             _manager.workerFinished(this);
         }
@@ -1237,12 +1235,10 @@ public class DownloadWorker {
          */
         public void run() {
             try {
-                Thread.currentThread().setName(workerName);
                 initializeAlternateLocations();
                 httpLoop();
             } finally {
                 _manager.workerFinished(DownloadWorker.this);
-                Thread.currentThread().setName("DownloadWorker-idle");
             }
         }
     }

@@ -188,11 +188,7 @@ public final class QueryUnicaster {
         // start service...
         _querier = new ManagedThread() {
 			public void managedRun() {
-                try {
-                    queryLoop();
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+			    queryLoop();
 			}
 		};
 
