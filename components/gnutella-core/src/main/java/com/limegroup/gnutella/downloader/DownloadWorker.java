@@ -693,8 +693,9 @@ public class DownloadWorker {
                 synchronized(_stealLock) {
                     assignGrey();
                 }
-            } else
+            } else {
                 assignWhite(interval);
+            }
             
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
@@ -911,8 +912,7 @@ public class DownloadWorker {
         DownloadWorker slowest = findSlowestDownloader();
                         
         if (slowest==null) {//Not using this downloader...but RFD maybe useful
-            if (LOG.isDebugEnabled())
-                LOG.debug("didn't find anybody to steal from");
+            LOG.debug("didn't find anybody to steal from");
             throw new NoSuchElementException();
         }
 		
@@ -1009,8 +1009,10 @@ public class DownloadWorker {
         float slowestSpeed = ourSpeed;
         
         // are we too slow to steal?
-        if (ourSpeed == -1) 
-            return null;
+//        if (ourSpeed == -1) {
+//            LOG.debug("Can't steal 'cause our speed is -1");
+//            return null;
+//        }
         
         Set queuedWorkers = _manager.getQueuedWorkers().keySet();
         for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
@@ -1024,20 +1026,29 @@ public class DownloadWorker {
             if (h == null || h == _downloader)
                 continue;
             
-            // see if he is the slowest one
-            float hisSpeed = 0;
-            try {
-                h.getMeasuredBandwidth();
-                hisSpeed = h.getAverageBandwidth();
-            } catch (InsufficientDataException ide) {
-                // we assume these guys would go almost as fast as we do, so we do not steal
-                // from them unless they are the last ones remaining
-                hisSpeed = Math.max(0f,ourSpeed - 0.1f);
-            }
-            
-            if (hisSpeed < slowestSpeed) {
-                slowestSpeed = hisSpeed;
-                slowest = worker;
+            // if we have no speed, only steal from slow guys.
+            if (ourSpeed == -1) {
+                if (worker.isSlow() && slowest == null) {
+                    slowest = worker;
+                    break;
+                }
+            } else {
+                // otherwise, if we do have a speed, steal from the guys that are slower
+                // than us.
+                float hisSpeed = 0;
+                try {
+                    h.getMeasuredBandwidth();
+                    hisSpeed = h.getAverageBandwidth();
+                } catch (InsufficientDataException ide) {
+                    // we assume these guys would go almost as fast as we do, so we do not steal
+                    // from them unless they are the last ones remaining
+                    hisSpeed = Math.max(0f, ourSpeed - 0.1f);
+                }
+                
+                if (hisSpeed < slowestSpeed) {
+                    slowestSpeed = hisSpeed;
+                    slowest = worker;
+                }
             }
             
         }
@@ -1056,8 +1067,14 @@ public class DownloadWorker {
     }
     
     boolean isSlow() {
-        float ourSpeed = getOurSpeed();
-        return ourSpeed < MIN_ACCEPTABLE_SPEED;
+        if (_downloader == null) // give it a chance to connect.
+            return false;
+        try {
+            _downloader.getMeasuredBandwidth();
+            return _downloader.getAverageBandwidth() < MIN_ACCEPTABLE_SPEED;
+        } catch (InsufficientDataException bad) {
+            return false; // give it a chance.
+        }
     }
     
     ////// various handlers for failure states of the assign process /////

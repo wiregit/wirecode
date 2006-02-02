@@ -371,12 +371,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     protected VerifyingFile commonOutFile;
     
     ////////////////datastructures used only for pushes//////////////
-    /** MiniRemoteFileDesc -> Object. 
-        In the case of push downloads, connecting threads write the values into
-        this map. The acceptor threads consumes these values and notifies the
-        connecting threads when it is done.        
-    */
-    private Map miniRFDToLock;
+    /**
+     * Push downloads insert their PushObserver into this map so that when
+     * this downloader is notified of a push, it can send the event to the
+     * observer.        
+     */
+    private Map /* MiniRemoteFileDesc -> ConnectObserver */ pushObservers;
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
@@ -672,7 +672,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         stopped=false;
         paused = false;
         setState(QUEUED);
-        miniRFDToLock = Collections.synchronizedMap(new HashMap());
+        pushObservers = Collections.synchronizedMap(new HashMap());
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();
@@ -1556,7 +1556,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public boolean acceptDownload(String file, Socket socket, int index, byte[] clientGUID) {
         MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
-        ConnectObserver observer =  (ConnectObserver) miniRFDToLock.remove(mrfd);
+        ConnectObserver observer =  (ConnectObserver) pushObservers.remove(mrfd);
         
         if(observer == null) //not in map. Not intended for me
             return false;
@@ -1574,7 +1574,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @param mrfd
      */
     void registerPushObserver(ConnectObserver observer, MiniRemoteFileDesc mrfd) {
-        miniRFDToLock.put(mrfd, observer);
+        pushObservers.put(mrfd, observer);
     }
     
     /**
@@ -1584,7 +1584,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @param shutdown
      */
     void unregisterPushObserver(MiniRemoteFileDesc mrfd, boolean shutdown) {
-        ConnectObserver observer = (ConnectObserver)miniRFDToLock.remove(mrfd);
+        ConnectObserver observer = (ConnectObserver)pushObservers.remove(mrfd);
         if(observer != null && shutdown)
             observer.shutdown();
     }
@@ -1659,21 +1659,33 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
     /**
-     * Kills all workers.
+     * Kills all workers & shuts down all push waiters.
      */    
     private void killAllWorkers() {
-        List workers;
-        
-        synchronized (this) {
-            workers = new ArrayList(_workers);
-            _workers.clear();
-        }
+        List workers = getAllWorkers();
         
         // cannot interrupt while iterating through the main list, because that
         // could cause ConcurrentMods.
         for (Iterator iter = workers.iterator(); iter.hasNext();) {
             DownloadWorker doomed = (DownloadWorker) iter.next();
             doomed.interrupt();
+        }
+        
+        Map pushers;
+        synchronized(pushObservers) {
+            pushers = new HashMap(pushObservers);
+        }
+        
+        // cannot iterate over pushObservers because shutdown may attempt
+        // to remove from it.
+        // synchronize on this so that something else cannot come in with
+        // acceptDownload(..) triggering a handleConnect(..) while we're shutting
+        // down the pushers.
+        synchronized(this) {
+            for(Iterator i = pushers.values().iterator(); i.hasNext(); ) {
+                ConnectObserver next = (ConnectObserver)i.next();
+                next.shutdown();
+            }
         }
     }
     
@@ -2533,17 +2545,19 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * @return true if we have more than one worker or the last one is slow
+     * @return true if one of the workers is going below MIN_ACCEPTABLE_SPEED
      */
     private boolean stealingCanHappen() {
-        if (_workers.size() < 1)
+        if (_workers.isEmpty()) {
             return false;
-        else if (_workers.size() > 1)
-            return true;
-            
-        DownloadWorker lastOne = (DownloadWorker)_workers.get(0);
-        // with larger chunk sizes we may end up with slower last downloader
-        return lastOne.isSlow(); 
+        } else {
+            for(Iterator i = _workers.iterator(); i.hasNext(); ) {
+                DownloadWorker next = (DownloadWorker)i.next();
+                if(next.isSlow())
+                    return true;
+            }
+        }
+        return false; 
     }
 	
 	synchronized void addRFD(RemoteFileDesc rfd) {
@@ -2849,16 +2863,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return queuePosition;
     }
     
+    /** Returns the number of active + queued workers. */
     public int getNumDownloaders() {
         return getActiveWorkers().size() + getQueuedWorkers().size();
     }
     
+    /** Returns the list of all active workers. */
     List getActiveWorkers() {
         return _activeWorkers;
     }
     
+    /** Returns a copy of the list of all workers. */
     synchronized List getAllWorkers() {
-        //CoR because it will be used only while stealing
         return new ArrayList(_workers);
     }
     
