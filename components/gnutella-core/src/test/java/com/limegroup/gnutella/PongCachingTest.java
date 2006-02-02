@@ -18,7 +18,6 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -152,12 +151,15 @@ public final class PongCachingTest extends BaseTestCase {
 
 		ROUTER_SERVICE.start();
 		RouterService.clearHostCatcher();
-		RouterService.connect();	
+		RouterService.connect();
+        
+        Thread.sleep(10000); // give the RouterService a bit time to settle down
+        
 		connect();
         assertEquals("unexpected port", SERVER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 	}
-
+	
 	public void tearDown() throws Exception {
         drainAll();
 		sleep();
