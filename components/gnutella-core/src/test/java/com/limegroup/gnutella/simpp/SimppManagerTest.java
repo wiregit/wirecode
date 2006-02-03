@@ -73,7 +73,6 @@ public class SimppManagerTest extends BaseTestCase {
         setSettings();
         RouterService rs = new RouterService(new ActivityCallbackStub());
         rs.start();
-        Thread.sleep(10000);
     }
 
     public static void globalShutdown() throws Exception {
@@ -83,7 +82,6 @@ public class SimppManagerTest extends BaseTestCase {
     
     public void setUp() throws Exception {
         setSettings();
-        /*Thread.sleep(1000);*/
     }
     
     private static void setSettings() throws Exception {
@@ -144,7 +142,7 @@ public class SimppManagerTest extends BaseTestCase {
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
-        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
     }
     
     ////////////////////////////////tests/////////////////////////////////////

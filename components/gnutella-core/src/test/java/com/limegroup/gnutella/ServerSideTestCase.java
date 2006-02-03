@@ -110,6 +110,8 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+        
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
     }
 
 	public static void globalSetUp(Class callingClass) throws Exception {
@@ -128,8 +130,6 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 		ROUTER_SERVICE.start();
 		ROUTER_SERVICE.clearHostCatcher();
 		ROUTER_SERVICE.connect();
-        
-        Thread.sleep(10000); // Give RouterService a bit time to settle down
         
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());

@@ -378,8 +378,12 @@ public class ConnectionManager {
      * @return whether the minimum time since we started trying to connect has passed
      */
     private boolean minConnectTimePassed() {
+        if (!UltrapeerSettings.NEED_MIN_CONNECT_TIME.getValue()) {
+            return true;
+        }
+        
         return Math.max(0,(System.currentTimeMillis() - _connectTime)) / 1000 
-            >= UltrapeerSettings.MIN_CONNECT_TIME.getValue();
+                >= UltrapeerSettings.MIN_CONNECT_TIME.getValue();
     }
     /**
      * @return if we are currently using a http or socks4/5 proxy to connect.

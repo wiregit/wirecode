@@ -145,7 +145,9 @@ public final class PongCachingTest extends BaseTestCase {
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 		ConnectionSettings.SEND_QRP.setValue(false);
-
+		
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
+        
         assertEquals("unexpected port", SERVER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 
@@ -153,10 +155,8 @@ public final class PongCachingTest extends BaseTestCase {
 		RouterService.clearHostCatcher();
 		RouterService.connect();
         
-        Thread.sleep(10000); // give the RouterService a bit time to settle down
-        
 		connect();
-        assertEquals("unexpected port", SERVER_PORT, 
+		assertEquals("unexpected port", SERVER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 	}
 	
