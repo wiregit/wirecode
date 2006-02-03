@@ -9,8 +9,10 @@ import junit.framework.Test;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
 
@@ -65,6 +67,8 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.PORT.setValue(6332);
+        
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
     }
     
     public static void globalSetUp() throws Exception {
@@ -126,7 +130,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
         assertTrue("should be connected", RouterService.isConnected());
                 
         QueryRequest qr = QueryRequest.createQuery(
-            "FileManager.class." + Backend.SHARED_EXTENSION, (byte)1);
+            "FileManagerTest.class." + Backend.SHARED_EXTENSION, (byte)1);
         sendQuery(qr);
         Thread.sleep(4000);
         assertTrue("should have sent query", !SENT.isEmpty());
@@ -148,7 +152,10 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
      * The actual QueryRequest sent will not be the same (==) as this,
      * because QueryHandler creates new queries with appropriate TTLs.
      */
-    private static void sendQuery(QueryRequest qr) {
+    private static void sendQuery(QueryRequest qr) throws Exception {
+        ResponseVerifier VERIFIER = (ResponseVerifier)PrivilegedAccessor.getValue(ROUTER_SERVICE, "VERIFIER");
+        VERIFIER.record(qr);
+        
         MessageRouter mr = RouterService.getMessageRouter();
         mr.sendDynamicQuery(qr);
         //mr.broadcastQueryRequest(qr);
