@@ -150,7 +150,7 @@ public class NIODispatcher implements Runnable {
     }
 	    
     /** Register interest in accepting */
-    public void registerAccept(SelectableChannel channel, AcceptObserver attachment) {
+    public void registerAccept(SelectableChannel channel, AcceptChannelObserver attachment) {
         register(channel, attachment, SelectionKey.OP_ACCEPT, 0);
     }
     
@@ -267,7 +267,7 @@ public class NIODispatcher implements Runnable {
      * 
      * @throws IOException
      */
-    private void processAccept(SelectionKey sk, AcceptObserver handler) throws IOException {
+    private void processAccept(SelectionKey sk, AcceptChannelObserver handler) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling accept: " + handler);
         
@@ -279,7 +279,7 @@ public class NIODispatcher implements Runnable {
         
         if (channel.isOpen()) {
             channel.configureBlocking(false);
-            handler.handleAccept(channel);
+            handler.handleAcceptChannel(channel);
         } else {
             try {
                 channel.close();
@@ -555,7 +555,7 @@ public class NIODispatcher implements Runnable {
             try {
                 try {
                     if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                        processAccept(sk, (AcceptObserver)attachment);
+                        processAccept(sk, (AcceptChannelObserver)attachment);
                     else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
                         processConnect(sk, (ConnectObserver)attachment);
                     else {

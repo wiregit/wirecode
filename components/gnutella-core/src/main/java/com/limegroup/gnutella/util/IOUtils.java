@@ -9,6 +9,7 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 import com.limegroup.gnutella.MessageService;
@@ -206,6 +207,14 @@ public class IOUtils {
                 close(s.getOutputStream());
             } catch(IOException ignored) {}
 
+            try {
+                s.close();
+            } catch(IOException ignored) {}
+        }
+    }
+    
+    public static void close(ServerSocket s) {
+        if(s != null) {
             try {
                 s.close();
             } catch(IOException ignored) {}
