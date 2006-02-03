@@ -10,12 +10,12 @@ import java.util.Properties;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -63,6 +63,8 @@ public final class HandshakingTest extends BaseTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 		//ConnectionSettings.REMOVE_ENABLED.setValue(false);
 		ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
+
 		//ConnectionSettings.NUM_CONNECTIONS.setValue(1);
 		//RouterService rs = new RouterService(new ActivityCallbackStub());
 		//rs.start();		

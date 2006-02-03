@@ -6,16 +6,16 @@ import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -35,14 +35,12 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
@@ -376,6 +374,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         SettingsHandler.revertToDefault();
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
