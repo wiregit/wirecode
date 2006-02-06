@@ -43,8 +43,11 @@ public class LimeXMLSchemaRepositoryTest extends BaseTestCase {
         String[] availableSchemas 
             = LimeXMLSchemaRepository.instance().getAvailableSchemaURIs();
             
-        check( availableSchemas[0], "audio");
-        check( availableSchemas[1], "video");
+        check( availableSchemas[0], "application");
+        check( availableSchemas[1], "audio");
+        check( availableSchemas[2], "document");
+        check( availableSchemas[3], "image");
+        check( availableSchemas[4], "video");
     }
     
     private static void check(String actual, String name) {
