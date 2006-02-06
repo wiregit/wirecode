@@ -199,6 +199,9 @@ public class DownloadWorker {
     /** The observer used for direct connection establishment. */
     private DirectConnector _connectObserver;
     
+    /** Lock waited on while queued. */
+    private final Object Q_LOCK = new Object();
+    
     DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf, Object lock) {
         _manager = manager;
         _rfd = rfd;
@@ -429,34 +432,45 @@ public class DownloadWorker {
     
     /**
      * Handles a queued downloader with the given ConnectionStatus.
-     * BLOCKING (while sleeping).
+     * BLOCKING (while waiting).
      *
      * @return true if we need to tell the manager to churn another
      *         connection and let this one die, false if we are
      *         going to try this connection again.
      */
     private boolean handleQueued(ConnectionStatus status) {
-        try {
-            // make sure that we're not in _downloaders if we're
-            // sleeping/queued.  this would ONLY be possible
-            // if some uploader was misbehaved and queued
-            // us after we succesfully managed to download some
-            // information.  despite the rarity of the situation,
-            // we should be prepared.
-            _manager.removeActiveWorker(this);
+        // make sure that we're not in _downloaders if we're
+        // sleeping/queued. this would ONLY be possible
+        // if some uploader was misbehaved and queued
+        // us after we succesfully managed to download some
+        // information. despite the rarity of the situation,
+        // we should be prepared.
+        _manager.removeActiveWorker(this);
+        boolean remQ = false;
+        
+        synchronized(Q_LOCK) {
+            if(_interrupted)
+                return true;
             
-            Thread.sleep(status.getQueuePollTime());//value from QueuedException
-            return false;
-        } catch (InterruptedException ix) {
-            if(LOG.isWarnEnabled())
-                LOG.warn("worker: interrupted while asleep in "+
-                  "queue" + _downloader);
-            _manager.removeQueuedWorker(this);
-            _downloader.stop(); //close connection
-            // notifying will make no diff, coz the next 
-            //iteration will throw interrupted exception.
-            return true;
+            // We look at _interrupted instead of InterruptedException
+            // because the only method of interrupted we're interested in
+            // is from the interrupt() method being called on this worker,
+            // which would set the _interrupted flag.
+            try {
+                Q_LOCK.wait(status.getQueuePollTime());
+            } catch(InterruptedException ie) {}
+            
+            if(_interrupted) {
+                LOG.warn("WORKER: interrupted while waiting in queue " + _downloader);
+                remQ = true;
+            }
         }
+        
+        // downloader.stop() will already be called if it was interrupted.
+        if(remQ)
+            _manager.removeQueuedWorker(this);
+        
+        return remQ;
     }
     
     /** 
@@ -1194,6 +1208,11 @@ public class DownloadWorker {
             // Make sure it immediately stops trying to connect.
             else if(observer.getSocket() != null)
                 IOUtils.close(observer.getSocket());
+        }
+        
+        // make sure that queued downloaders are stopped.
+        synchronized(Q_LOCK) {
+            Q_LOCK.notify();
         }
     }
 
