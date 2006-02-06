@@ -40,6 +40,8 @@ public abstract class VendorMessage extends Message {
     protected static final int F_HEADER_UPDATE = 25;
     protected static final int F_UPDATE_REQ = 26;
     protected static final int F_UPDATE_RESP = 27;
+    protected static final int F_CONTENT_REQ = 28;
+    protected static final int F_CONTENT_RESP = 29;
 
 
     

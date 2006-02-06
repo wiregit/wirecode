@@ -7,6 +7,7 @@ package com.limegroup.gnutella.messages;
 public class BadPacketException extends Exception {
     public BadPacketException() { }
     public BadPacketException(String msg) { super(msg); }
+    public BadPacketException(Exception cause) { super(cause); }
 
     /** 
      * Reusable exception for efficiency that can be statically

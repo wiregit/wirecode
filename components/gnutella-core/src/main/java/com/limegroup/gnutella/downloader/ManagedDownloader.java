@@ -3072,8 +3072,3 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return attributes.remove( key );
     }    
 }
-
-interface MeshHandler {
-    void informMesh(RemoteFileDesc rfd, boolean good);
-    void addPossibleSources(Collection hosts);
-}

@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -172,6 +173,11 @@ public class RouterService {
      * The manager of altlocs
      */
     private static AltLocManager altManager = AltLocManager.instance();
+    
+    /**
+     * The content manager
+     */
+    private static ContentManager contentManager = new ContentManager();
     
     /**
      * isShuttingDown flag
@@ -331,6 +337,10 @@ public class RouterService {
             LOG.trace("START SimppSettingsManager.instance");
             SimppSettingsManager.instance();
             LOG.trace("STOP SimppSettingsManager.instance");
+            
+            LOG.trace("START ContentManager");
+            contentManager.initialize();
+            LOG.trace("STOP ContentManager");
 
             LOG.trace("START MessageRouter");
             callback.componentLoading("MESSAGE_ROUTER");
