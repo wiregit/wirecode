@@ -1,14 +1,18 @@
 package com.limegroup.gnutella.handshaking;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
 /**
@@ -20,7 +24,6 @@ import com.limegroup.gnutella.util.BaseTestCase;
  * http://groups.yahoo.com/group/the_gdf/files/Proposals/Ultrapeer/Ultrapeers_1.0_clean.html
  */
 public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
-
 
 	public UltrapeerHandshakeResponderTest(String name) {
 		super(name);
@@ -43,7 +46,38 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
     }    
+    
+    /**
+     * Free all slots
+     */
+    protected void tearDown() throws Exception {
+        freeSlots();
+    }
 
+    /**
+     * Fills all available slots of ConnectionManager so that
+     * checks for x < UltrapeerSettings.MAX_LEAVES will always 
+     * fail
+     */
+    private void fillSlots() throws Exception {
+        int maxLeaves = UltrapeerSettings.MAX_LEAVES.getValue();
+        ManagedConnection[] mc = new ManagedConnection[maxLeaves];
+        for(int i = 0; i < mc.length; i++) {
+            mc[i] = new ManagedConnectionStub();
+        }
+        
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+                "_initializedClientConnections", Arrays.asList(mc));
+    }
+    
+    /**
+     * Restores the ConnectionManager._initializedClientConnections List
+     */
+    private void freeSlots() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+                "_initializedClientConnections", Collections.EMPTY_LIST);
+    }
+    
     /**
      * Tests the method for responding to outgoing connection attempts.
      * The response we send is the final response of the handshake --
@@ -130,7 +164,8 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
                     hr.isDeflateEnabled());
 
         
-        UltrapeerSettings.MAX_LEAVES.setValue(0);
+        fillSlots();
+        
         hr = responder.respond(headers, true);
         assertTrue("should not have accepted the connection", 
                    !hr.isAccepted());
@@ -169,7 +204,8 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //     Ultrapeer connections when we have enough leaves -- create this
         //     artifially by setting the MAX_LEAVES to zero
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
-        UltrapeerSettings.MAX_LEAVES.setValue(0);        
+        fillSlots();
+        
         hr = responder.respond(up, false);        
         assertTrue("should tell the Ultrapeer to stay an Ultrapeer", 
                    !hr.hasLeafGuidance());
@@ -214,7 +250,8 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //  2) check to make sure that leaves are rejected with X-Try-Ultrapeer
         //     headers when we alread have enough leaves -- create this 
         //     situation artificially by setting the MAX_LEAVES to zero
-        UltrapeerSettings.MAX_LEAVES.setValue(0);        
+        fillSlots();
+        
         hr = responder.respond(leaf, false);        
         assertTrue("should have rejected the leaf: status code was: "+
                    hr.getStatusLine(), 
@@ -224,5 +261,4 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         UltrapeerSettings.MAX_LEAVES.revertToDefault();        
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
     }
-
 }
