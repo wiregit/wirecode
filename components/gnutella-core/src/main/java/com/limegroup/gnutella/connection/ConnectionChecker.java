@@ -65,57 +65,57 @@ public final class ConnectionChecker implements Runnable {
      * in minimal traffic to these sites.  NON-FINAL FOR TESTING.
      */
     private static String[] STANDARD_HOSTS = {
-        "http://www.wanadoo.fr",
-        "http://www.tiscali.com",
-        "http://www.ntt.com",
-        "http://www.tonline.com",
-        "http://www.download.com",
-        "http://www.ibm.com",
-        "http://www.sun.com",
-        "http://www.apple.com",
-        "http://www.ebay.com",
-        "http://www.sun.com",
-        "http://www.monster.com",
-        "http://www.uunet.com",
-        "http://www.real.com",
-        "http://www.microsoft.com",
-        "http://www.sco.com",
-        "http://www.google.com",
-        "http://www.cnn.com",
-        "http://www.amazon.com",
-        "http://www.espn.com", 
-        "http://www.yahoo.com",
-        "http://www.oracle.com",
-        "http://www.dell.com",
-        "http://www.ge.com",
-        "http://www.sprint.com",
-        "http://www.att.com",
-        "http://www.mci.com",
-        "http://www.cisco.com",
-        "http://www.intel.com",
-        "http://www.motorola.com",
-        "http://www.hp.com",
-        "http://www.gateway.com",
-        "http://www.sony.com",
-        "http://www.ford.com",
-        "http://www.gm.com",
-        "http://www.aol.com",
-        "http://www.verizon.com",
-        "http://www.passport.com",
-        "http://www.go.com",
-        "http://www.overture.com",
-        "http://www.earthlink.net",
-        "http://www.bellsouth.net",
-        "http://www.excite.com",
-        "http://www.paypal.com",
-        "http://www.altavista.com",
-        "http://www.weather.com",
-        "http://www.mapquest.com",
-        "http://www.geocities.com",
-        "http://www.juno.com",
-        "http://www.msnbc.com",
-        "http://www.lycos.com",
-        "http://www.comcast.com",
+        "www.wanadoo.fr",
+        "www.tiscali.com",
+        "www.ntt.com",
+        "www.tonline.com",
+        "www.download.com",
+        "www.ibm.com",
+        "www.sun.com",
+        "www.apple.com",
+        "www.ebay.com",
+        "www.sun.com",
+        "www.monster.com",
+        "www.uunet.com",
+        "www.real.com",
+        "www.microsoft.com",
+        "www.sco.com",
+        "www.google.com",
+        "www.cnn.com",
+        "www.amazon.com",
+        "www.espn.com", 
+        "www.yahoo.com",
+        "www.oracle.com",
+        "www.dell.com",
+        "www.ge.com",
+        "www.sprint.com",
+        "www.att.com",
+        "www.mci.com",
+        "www.cisco.com",
+        "www.intel.com",
+        "www.motorola.com",
+        "www.hp.com",
+        "www.gateway.com",
+        "www.sony.com",
+        "www.ford.com",
+        "www.gm.com",
+        "www.aol.com",
+        "www.verizon.com",
+        "www.passport.com",
+        "www.go.com",
+        "www.overture.com",
+        "www.earthlink.net",
+        "www.bellsouth.net",
+        "www.excite.com",
+        "www.paypal.com",
+        "www.altavista.com",
+        "www.weather.com",
+        "www.mapquest.com",
+        "www.geocities.com",
+        "www.juno.com",
+        "www.msnbc.com",
+        "www.lycos.com",
+        "www.comcast.com",
     };
     
     /**
@@ -137,16 +137,21 @@ public final class ConnectionChecker implements Runnable {
         LOG.trace("checking for live connection");
 
         ConnectionChecker checker;
+        boolean startThread = false;
         synchronized(ConnectionChecker.class) {
-            if (current == null)
+            if (current == null) {
                 current = new ConnectionChecker();
+                startThread = true;
+            }
             checker = current;
         }
         
-        Thread connectionThread = 
-        new ManagedThread(checker, "check for live connection");
-        connectionThread.setDaemon(true);
-        connectionThread.start();
+        if (startThread) {
+            Thread connectionThread = 
+                new ManagedThread(checker, "check for live connection");
+            connectionThread.setDaemon(true);
+            connectionThread.start();
+        }
         return checker;
     }
 
