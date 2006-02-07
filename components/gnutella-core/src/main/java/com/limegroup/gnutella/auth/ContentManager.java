@@ -38,9 +38,6 @@ public class ContentManager {
     /** Map of SHA1 to Observers listening for responses to the SHA1. */
     private final Map /* URN -> List (of Responder) */ OBSERVERS = Collections.synchronizedMap(new HashMap());
     
-    /** Map of SHA1 to Responses we already know about for this file. */
-    private final Map /* Urn -> Response */ RESPONSES = Collections.synchronizedMap(new HashMap());
-    
     /** List of Responder's that are currently waiting, in order of timeout. */
     private final List RESPONDERS = new ArrayList();
     
@@ -50,6 +47,9 @@ public class ContentManager {
     /** Set of URNs that have failed requesting. */
     private final Set TIMEOUTS = Collections.synchronizedSet(new HashSet());
     
+    /** The ContentCache. */
+    private final ContentCache CACHE = new ContentCache();
+    
     /** Wehther or not we're shutting down. */
     private volatile boolean shutdown = false;
     
@@ -57,7 +57,7 @@ public class ContentManager {
      * Initializes this content manager.
      */
     public void initialize() {
-        buildResponses(RESPONSES);
+        CACHE.initialize();
         startTimeoutThread();
     }
     
@@ -66,7 +66,7 @@ public class ContentManager {
      */
     public void shutdown() {
         shutdown = true;
-        writeResponses(RESPONSES);
+        CACHE.writeToDisk();
     }
     
     /**
@@ -74,7 +74,7 @@ public class ContentManager {
      *  for a response for the given URN.
      */
     public boolean isVerified(URN urn) {
-        return !ACTIVE || RESPONSES.containsKey(urn) || TIMEOUTS.contains(urn);
+        return !ACTIVE || CACHE.hasResponseFor(urn) || TIMEOUTS.contains(urn);
     }
     
     /**
@@ -85,7 +85,7 @@ public class ContentManager {
      * @param timeout
      */
     public void request(URN urn, ResponseObserver observer, long timeout) {
-        Response response = (Response)RESPONSES.get(urn);
+        Response response = (Response)CACHE.getResponse(urn);
         if(response != null || !ACTIVE) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Immediate response for URN: " + urn);
@@ -112,16 +112,16 @@ public class ContentManager {
                 } catch(InterruptedException ix) {
                     LOG.warn("Interrupted while waiting for response", ix);
                 }
+                return validator.getResponse();
             }
         }
-        return validator.getResponse();
     }
     
     /**
      * Gets a response if one exists.
      */
     public Response getResponse(URN urn) {
-        return (Response)RESPONSES.get(urn);
+        return (Response)CACHE.getResponse(urn);
     }
     
     /**
@@ -151,7 +151,7 @@ public class ContentManager {
         if(urn != null) {
             REQUESTED.remove(urn);
             Response response = new Response(responseMsg);
-            RESPONSES.put(urn, response);
+            CACHE.addResponse(urn, response);
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding response (" + response + ") for URN: " + urn);
     
@@ -293,24 +293,6 @@ public class ContentManager {
      */
     private IpPort getContentAuthority() {
         return null; // INSERT CONTENT AUTHORITY HERE
-    }
-    
-    /**
-     * Builds a map of responses from data cached on disk. 
-     * 
-     * @return
-     */
-    private void buildResponses(Map responses) {
-        // TODO: read data from disk.
-    }
-    
-    /**
-     * Writes the given map out to disk.
-     * 
-     * @param responses
-     */
-    private void writeResponses(Map responses) {
-        // TODO: write responses to disk.
     }
     
     /**
