@@ -29,6 +29,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnCallback;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -376,6 +377,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
+        PrivilegedAccessor.setValue(ContentManager.class, "ACTIVE", Boolean.FALSE);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
     }

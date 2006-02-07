@@ -31,6 +31,9 @@ public class ContentManager {
     
     private static final Log LOG = LogFactory.getLog(ContentManager.class);
     
+    /** Flag for whether or not the Manager is active.  Necessary for tests. */
+    private static boolean ACTIVE = true;
+    
     
     /** Map of SHA1 to Observers listening for responses to the SHA1. */
     private final Map /* URN -> List (of Responder) */ OBSERVERS = Collections.synchronizedMap(new HashMap());
@@ -40,6 +43,12 @@ public class ContentManager {
     
     /** List of Responder's that are currently waiting, in order of timeout. */
     private final List RESPONDERS = new ArrayList();
+    
+    /** Set or URNs that we've already requested. */
+    private final Set REQUESTED = Collections.synchronizedSet(new HashSet());
+    
+    /** Set of URNs that have failed requesting. */
+    private final Set TIMEOUTS = Collections.synchronizedSet(new HashSet());
     
     /** Wehther or not we're shutting down. */
     private volatile boolean shutdown = false;
@@ -61,6 +70,14 @@ public class ContentManager {
     }
     
     /**
+     *  Determines if we've already tried sending a request & waited the time
+     *  for a response for the given URN.
+     */
+    public boolean isVerified(URN urn) {
+        return !ACTIVE || RESPONSES.containsKey(urn) || TIMEOUTS.contains(urn);
+    }
+    
+    /**
      * Determines if the given URN is valid.
      * 
      * @param urn
@@ -69,7 +86,7 @@ public class ContentManager {
      */
     public void request(URN urn, ResponseObserver observer, long timeout) {
         Response response = (Response)RESPONSES.get(urn);
-        if(response != null) {
+        if(response != null || !ACTIVE) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Immediate response for URN: " + urn);
             observer.handleResponse(urn, response);
@@ -119,7 +136,10 @@ public class ContentManager {
         long now = System.currentTimeMillis();
         addResponder(new Responder(now, timeout, observer, urn));
         if (authority != null ) {
-            UDPService.instance().send(new ContentRequest(urn), authority);
+            // only send if we haven't already requested.
+            if(REQUESTED.add(urn)) {
+                UDPService.instance().send(new ContentRequest(urn), authority);
+            }
         }
     }
     
@@ -129,6 +149,7 @@ public class ContentManager {
     public void handleContentResponse(ContentResponse responseMsg) {
         URN urn = responseMsg.getURN();
         if(urn != null) {
+            REQUESTED.remove(urn);
             Response response = new Response(responseMsg);
             RESPONSES.put(urn, response);
             if(LOG.isDebugEnabled())
@@ -216,6 +237,8 @@ public class ContentManager {
             for(int i = RESPONDERS.size() - 1; i >= 0; i--) {
                 next = (Responder)RESPONDERS.get(i);
                 if(next.dead <= now) {
+                    REQUESTED.remove(next.urn);
+                    TIMEOUTS.add(next.urn);
                     if(responders == null)
                         responders = new ArrayList(2);
                     responders.add(next);

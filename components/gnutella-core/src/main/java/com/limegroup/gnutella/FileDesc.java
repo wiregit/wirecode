@@ -375,23 +375,6 @@ public class FileDesc implements FileDetails {
     public InputStream createInputStream() throws FileNotFoundException {
 		return new BufferedInputStream(new FileInputStream(FILE));
     }
-    
-    /**
-     * Utility method for toString that converts the specified
-     * <tt>Iterator</tt>'s items to a string.
-     *
-     * @param i the <tt>Iterator</tt> to convert
-     * @return the contents of the set as a comma-delimited string
-     */
-    private String listInformation(Iterator i) {
-        StringBuffer stuff = new StringBuffer();
-        for(; i.hasNext(); ) {
-            stuff.append(i.next().toString());
-            if( i.hasNext() )
-                stuff.append(", ");
-        }
-        return stuff.toString();
-    }
 
 	// overrides Object.toString to provide a more useful description
 	public String toString() {
@@ -420,6 +403,13 @@ public class FileDesc implements FileDetails {
 	public boolean isFirewalled() {
 		return !RouterService.acceptedIncomingConnection();
 	}
+    
+    /**
+     * Determines if this FileDesc has been validated.
+     */
+    public boolean isVerified() {
+        return RouterService.getContentManager().isVerified(SHA1_URN);
+    }
 }
 
 
