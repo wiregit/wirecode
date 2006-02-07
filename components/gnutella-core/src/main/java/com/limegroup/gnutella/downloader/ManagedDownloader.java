@@ -2511,23 +2511,26 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * or we have some rfds to re-try
      */
     private boolean shouldStartWorker() {
-        return (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen() ) &&
+        return (commonOutFile.hasFreeBlocksToAssign() > 0 || victimsExist() ) &&
              ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
              ranker.hasMore();
     }
     
     /**
-     * @return true if we have more than one worker or the last one is slow
+     * @return true if a new worker should be started that would steal.
      */
-    private boolean stealingCanHappen() {
-        if (_workers.size() < 1)
+    private boolean victimsExist() {
+        if (_workers.isEmpty())
             return false;
-        else if (_workers.size() > 1)
-            return true;
             
-        DownloadWorker lastOne = (DownloadWorker)_workers.get(0);
-        // with larger chunk sizes we may end up with slower last downloader
-        return lastOne.isSlow(); 
+        // there needs to be at least one slow worker.
+        for (Iterator iter = _workers.iterator(); iter.hasNext();) {
+            DownloadWorker victim = (DownloadWorker) iter.next();
+            if (victim.isSlow())
+                return true;
+        }
+        
+        return false;
     }
 	
 	synchronized void addRFD(RemoteFileDesc rfd) {

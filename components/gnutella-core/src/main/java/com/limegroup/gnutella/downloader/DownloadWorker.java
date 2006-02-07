@@ -90,6 +90,13 @@ public class DownloadWorker implements Runnable {
 		DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue() < 8 ? 
 		0.1f:
 		0.5f;
+    
+    /** 
+     * The speed of download workers that haven't been started yet or do not 
+     * have enough measurements
+     */
+    private static final int UNKNOWN_SPEED = -1;
+    
     /** The time to wait trying to establish each normal connection, in
      *  milliseconds.*/
     private static final int NORMAL_CONNECT_TIME=10000; //10 seconds
@@ -1112,10 +1119,6 @@ public class DownloadWorker implements Runnable {
         final float ourSpeed = getOurSpeed();
         float slowestSpeed = ourSpeed;
         
-        // are we too slow to steal?
-        if (ourSpeed == -1) 
-            return null;
-        
         Set queuedWorkers = _manager.getQueuedWorkers().keySet();
         for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
             
@@ -1128,20 +1131,27 @@ public class DownloadWorker implements Runnable {
             if (h == null || h == _downloader)
                 continue;
             
-            // see if he is the slowest one
-            float hisSpeed = 0;
-            try {
-                h.getMeasuredBandwidth();
-                hisSpeed = h.getAverageBandwidth();
-            } catch (InsufficientDataException ide) {
-                // we assume these guys would go almost as fast as we do, so we do not steal
-                // from them unless they are the last ones remaining
-                hisSpeed = Math.max(0f,ourSpeed - 0.1f);
+            // if we don't have speed yet, steal from the first slow guy
+            if (ourSpeed == UNKNOWN_SPEED) {
+                if (worker.isSlow()) 
+                    return worker;
             }
-            
-            if (hisSpeed < slowestSpeed) {
-                slowestSpeed = hisSpeed;
-                slowest = worker;
+            else {
+                // see if he is the slowest one
+                float hisSpeed = 0;
+                try {
+                    h.getMeasuredBandwidth();
+                    hisSpeed = h.getAverageBandwidth();
+                } catch (InsufficientDataException ide) {
+                    // we assume these guys would go almost as fast as we do, so we do not steal
+                    // from them unless they are the last ones remaining
+                    hisSpeed = Math.max(0f,ourSpeed - 0.1f);
+                }
+                
+                if (hisSpeed < slowestSpeed) {
+                    slowestSpeed = hisSpeed;
+                    slowest = worker;
+                }
             }
             
         }
@@ -1150,18 +1160,18 @@ public class DownloadWorker implements Runnable {
     
     private float getOurSpeed() {
         if (_downloader == null)
-            return -1;
+            return UNKNOWN_SPEED;
         try {
             _downloader.getMeasuredBandwidth();
             return _downloader.getAverageBandwidth();
         } catch (InsufficientDataException bad) {
-            return -1;
+            return UNKNOWN_SPEED;
         }
     }
     
     boolean isSlow() {
         float ourSpeed = getOurSpeed();
-        return ourSpeed < MIN_ACCEPTABLE_SPEED;
+        return ourSpeed < MIN_ACCEPTABLE_SPEED && ourSpeed != UNKNOWN_SPEED;
     }
     
     ////// various handlers for failure states of the assign process /////
