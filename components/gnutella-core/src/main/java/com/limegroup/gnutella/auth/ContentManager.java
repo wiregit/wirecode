@@ -70,8 +70,12 @@ public class ContentManager {
     public void request(URN urn, ResponseObserver observer, long timeout) {
         Response response = (Response)RESPONSES.get(urn);
         if(response != null) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Immediate response for URN: " + urn);
             observer.handleResponse(urn, response);
         } else {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Scheduling request for URN: " + urn);
             scheduleRequest(urn, observer, timeout);
         }
     }
@@ -104,17 +108,22 @@ public class ContentManager {
      */
     public void handleContentResponse(ContentResponse responseMsg) {
         URN urn = responseMsg.getURN();
-        Response response = new Response(responseMsg);
-        RESPONSES.put(urn, response);
-
-        Collection responders = (Collection)OBSERVERS.remove(urn);
-        if(responders != null) {
-            removeResponders(responders);
-            for(Iterator i = responders.iterator(); i.hasNext(); ) {
-                Responder next = (Responder)i.next();
-                next.observer.handleResponse(next.urn, response);
+        if(urn != null) {
+            Response response = new Response(responseMsg);
+            RESPONSES.put(urn, response);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Adding response (" + response + ") for URN: " + urn);
+    
+            Collection responders = (Collection)OBSERVERS.remove(urn);
+            if(responders != null) {
+                removeResponders(responders);
+                for(Iterator i = responders.iterator(); i.hasNext(); ) {
+                    Responder next = (Responder)i.next();
+                    next.observer.handleResponse(next.urn, response);
+                }
             }
-        }
+        } else if(LOG.isWarnEnabled())
+            LOG.warn("No URN in response: " + responseMsg);
     }
     
     /**
@@ -186,6 +195,8 @@ public class ContentManager {
             for(int i = RESPONDERS.size() - 1; i >= 0; i--) {
                 next = (Responder)RESPONDERS.get(i);
                 if(next.dead <= now) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Timing out responder: " + next + " for URN: " + next.urn);
                     try {
                         next.observer.handleResponse(next.urn, null);
                     } catch(Throwable t) {

@@ -62,7 +62,7 @@ public class ContentResponse extends VendorMessage {
         
         GGEP ggep =  new GGEP(true);
         // TODO use bytes instead of String, or pack into GUID.
-        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.httpStringValue());
+        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());
         ggep.put(GGEP.GGEP_HEADER_SHA1_VALID, okay ? 1 : 0);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -78,7 +78,7 @@ public class ContentResponse extends VendorMessage {
      */
     public URN getURN() {
         try {
-            return URN.createSHA1Urn(("urn:sha1" + ggep.getString(GGEP.GGEP_HEADER_SHA1)));
+            return URN.createSHA1UrnFromBytes(ggep.getBytes(GGEP.GGEP_HEADER_SHA1));
         } catch(IOException iox) {
             return null;
         } catch(BadGGEPPropertyException bgpe) {

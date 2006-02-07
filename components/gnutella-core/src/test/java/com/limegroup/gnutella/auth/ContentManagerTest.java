@@ -107,6 +107,7 @@ public class ContentManagerTest extends BaseTestCase {
     
     /** Makes sure that stuff times out. */
     public void testTimeout() throws Exception {
+        mgr.initialize(); // must start timeout thread.
         mgr.request(URN_1, one, 1);
         mgr.request(URN_2, two, 1);
         

@@ -232,6 +232,17 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		}	   
 		return createSHA1Urn(urnString);
 	}
+    
+    /**
+     * Creates a SHA1 URN from a byte[].
+     */
+    public static URN createSHA1UrnFromBytes(byte[] bytes) throws IOException {
+        if(bytes == null || bytes.length != 20)
+            throw new IOException("invalid bytes!");
+        
+        String hash = Base32.encode(bytes);
+        return createSHA1UrnFromString("urn:sha1:" + hash);
+    }
 
 	/**
 	 * Convenience method that runs a standard validation check on the URN
@@ -313,6 +324,18 @@ public final class URN implements HTTPHeaderValue, Serializable {
                                   hash.toUpperCase(Locale.US);
 		this._urnType = urnType;
 	}
+    
+    /**
+     * Returns the bytes of this URN.
+     * 
+     * TODO: If the URN wasn't stored in Base32, this will be wrong.
+     *       We deal only with SHA1 right now, which will be Base32.
+     */
+    public byte[] getBytes() {
+        int lastColon = _urnString.lastIndexOf(":");
+        String hash = _urnString.substring(lastColon+1);
+        return Base32.decode(hash);        
+    }
 
 	/**
 	 * Returns the <tt>UrnType</tt> instance for this <tt>URN</tt>.
