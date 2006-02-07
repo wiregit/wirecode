@@ -842,10 +842,9 @@ public class ConnectionManager {
                 return false;
 
             // if it's good, allow it.
-            if(hr.isGoodLeaf())
-                return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES -
-                        nonLimeWireLeaves)) <
-                          UltrapeerSettings.MAX_LEAVES.getValue();
+            return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES -
+                    nonLimeWireLeaves)) <
+                      UltrapeerSettings.MAX_LEAVES.getValue();
 
         } else if (hr.isGoodUltrapeer()) {
             // Note that this code is NEVER CALLED when we are a leaf.
