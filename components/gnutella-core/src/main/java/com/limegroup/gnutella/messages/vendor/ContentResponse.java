@@ -45,6 +45,12 @@ public class ContentResponse extends VendorMessage {
      */
     public ContentResponse(URN sha1, boolean okay) {
         super(F_LIME_VENDOR_ID, F_CONTENT_RESP, VERSION, derivePayload(sha1, okay));
+        
+        try {
+            this.ggep = new GGEP(getPayload(), 0);
+        } catch(BadGGEPBlockException bgbe) {
+            ErrorService.error(bgbe);
+        }        
     }
 
     /**

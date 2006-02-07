@@ -49,25 +49,7 @@ public class ContentManager {
      */
     public void initialize() {
         buildResponses(RESPONSES);
-        Thread timeouter = new ManagedThread(new Runnable() {
-            public void run() {
-                while(true) {
-                    if(shutdown)
-                        return;
-                    try {
-                        try {
-                            Thread.sleep(2000);
-                        } catch(InterruptedException ix) {}
-                        if(!shutdown)
-                            timeout(System.currentTimeMillis());
-                    } catch(Throwable t) {
-                        ErrorService.error(t);
-                    }
-                }
-            }
-        }, "ContentTimeout");
-        timeouter.setDaemon(true);
-        timeouter.start();
+        startTimeoutThread();
     }
     
     /**
@@ -108,7 +90,7 @@ public class ContentManager {
      * @param observer
      * @param timeout
      */
-    private void scheduleRequest(URN urn, ResponseObserver observer, long timeout) {
+    protected void scheduleRequest(URN urn, ResponseObserver observer, long timeout) {
         IpPort authority = getContentAuthority();
         long now = System.currentTimeMillis();
         addResponder(new Responder(now, timeout, observer, urn));
@@ -122,8 +104,10 @@ public class ContentManager {
      */
     public void handleContentResponse(ContentResponse responseMsg) {
         URN urn = responseMsg.getURN();
-        Collection responders = (Collection)OBSERVERS.remove(urn);
         Response response = new Response(responseMsg);
+        RESPONSES.put(urn, response);
+
+        Collection responders = (Collection)OBSERVERS.remove(urn);
         if(responders != null) {
             removeResponders(responders);
             for(Iterator i = responders.iterator(); i.hasNext(); ) {
@@ -136,7 +120,7 @@ public class ContentManager {
     /**
      * Removes all responders from RESPONDERS.
      */
-    private void removeResponders(Collection responders) {
+    protected void removeResponders(Collection responders) {
         int size = responders.size();
         int removed = 0;
         synchronized(RESPONDERS) {
@@ -163,7 +147,7 @@ public class ContentManager {
      * 
      * @param responder
      */
-    private void addResponder(Responder responder) {
+    protected void addResponder(Responder responder) {
         synchronized(OBSERVERS) {
             Set observers = (Set)OBSERVERS.get(responder.urn);
             if(observers == null)
@@ -177,7 +161,7 @@ public class ContentManager {
     }
     
     /** Adds a responder into the correct place in the sorted Responders list. */
-    private void addForTimeout(Responder responder) {
+    protected void addForTimeout(Responder responder) {
         synchronized (RESPONDERS) {
             if (RESPONDERS.isEmpty()) {
                 RESPONDERS.add(responder);
@@ -196,7 +180,7 @@ public class ContentManager {
     }
     
     /** Times out old responders. */
-    private void timeout(long now) {
+    protected void timeout(long now) {
         synchronized(RESPONDERS) {
             Responder next = null;
             for(int i = RESPONDERS.size() - 1; i >= 0; i--) {
@@ -215,6 +199,29 @@ public class ContentManager {
             }
         }
     }
+    
+    /** Starst the thread that does the timeout stuff. */
+    protected void startTimeoutThread() {
+        Thread timeouter = new ManagedThread(new Runnable() {
+            public void run() {
+                while(true) {
+                    if(shutdown)
+                        return;
+                    try {
+                        try {
+                            Thread.sleep(2000);
+                        } catch(InterruptedException ix) {}
+                        if(!shutdown)
+                            timeout(System.currentTimeMillis());
+                    } catch(Throwable t) {
+                        ErrorService.error(t);
+                    }
+                }
+            }
+        }, "ContentTimeout");
+        timeouter.setDaemon(true);
+        timeouter.start();
+    }    
     
     /**
      * Gets the content authority.
