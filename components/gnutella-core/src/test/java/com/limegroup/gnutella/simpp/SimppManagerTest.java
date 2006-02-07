@@ -143,7 +143,6 @@ public class SimppManagerTest extends BaseTestCase {
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
-        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
     }
     
     ////////////////////////////////tests/////////////////////////////////////

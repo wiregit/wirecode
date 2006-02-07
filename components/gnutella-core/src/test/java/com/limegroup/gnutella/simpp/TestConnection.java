@@ -105,6 +105,8 @@ public class TestConnection {
         os.write("X-Dynamic-Querying: 0.1\r\n".getBytes());
         os.write(("X-Version: @version@\r\n").getBytes());
         os.write("X-Ultrapeer: False\r\n".getBytes());
+        os.write("X-Degree: 15\r\n".getBytes());
+        os.write("X-Ultrapeer-Query-Routing: 0.1\r\n".getBytes());
         os.write("\r\n".getBytes());
         //Phase 2 of handshake -- read
         String line = null;

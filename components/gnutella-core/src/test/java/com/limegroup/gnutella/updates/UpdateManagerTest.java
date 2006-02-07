@@ -132,6 +132,8 @@ public class UpdateManagerTest extends BaseTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
+        
         //Set the version to a lower version
         PrivilegedAccessor.setValue(CommonUtils.class, "testVersion", "3.2.2");
     }
