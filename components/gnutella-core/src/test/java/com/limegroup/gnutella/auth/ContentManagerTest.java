@@ -5,14 +5,17 @@ import junit.framework.Test;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.ManagedThread;
  
 public class ContentManagerTest extends BaseTestCase {
     
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     private static final String S_URN_2 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB";
+    private static final String S_URN_3 = "urn:sha1:PABCDEFGAPOJTS5FJUPAKOZWUGZQYPFB";
     
     private static URN URN_1;
     private static URN URN_2;
+    private static URN URN_3;
     
     private ContentManager mgr;
     private ContentResponse crOne;
@@ -32,6 +35,7 @@ public class ContentManagerTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
        URN_1 = URN.createSHA1Urn(S_URN_1);
        URN_2 = URN.createSHA1Urn(S_URN_2);
+       URN_3 = URN.createSHA1Urn(S_URN_3);
     }
     
     public void setUp() throws Exception {
@@ -42,6 +46,7 @@ public class ContentManagerTest extends BaseTestCase {
         two = new Observer();
         assertNull(mgr.getResponse(URN_1));
         assertNull(mgr.getResponse(URN_2));        
+        assertNull(mgr.getResponse(URN_3));
         assertNull(one.urn);
         assertNull(two.urn);
         assertNull(one.response);
@@ -117,6 +122,47 @@ public class ContentManagerTest extends BaseTestCase {
         assertNull(one.response);
         assertEquals(URN_2, two.urn);
         assertNull(two.response);       
+    }
+    
+    /** Checks blocking requests. */
+    public void testBlockingRequest() throws Exception {
+        mgr.initialize();
+        
+        Thread responder = new ManagedThread() {
+            public void managedRun() {
+                ContentManagerTest.sleep(1000);
+                mgr.handleContentResponse(crOne);
+                ContentManagerTest.sleep(1000);
+                mgr.handleContentResponse(crTwo);
+            }
+        };
+        responder.setDaemon(true);
+        responder.start();
+        
+        long now = System.currentTimeMillis();
+        Response rOne =  mgr.request(URN_1, 3000);
+        assertNotNull(rOne);
+        assertTrue(rOne.isOK());
+        assertGreaterThan(600, System.currentTimeMillis() - now);
+        
+        now = System.currentTimeMillis();
+        Response rTwo = mgr.request(URN_2, 3000);
+        assertNotNull(rTwo);
+        assertFalse(rTwo.isOK());
+        assertGreaterThan(600, System.currentTimeMillis() - now);
+        
+        now = System.currentTimeMillis();
+        Response rThree = mgr.request(URN_3, 1000);
+        assertNull(rThree);
+        assertGreaterThan(900, System.currentTimeMillis() - now);
+    }
+    
+    private static void sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch(InterruptedException ix) {
+            throw new RuntimeException(ix);
+        }
     }
     
     private static class Observer implements ResponseObserver {

@@ -532,6 +532,10 @@ public class RouterService {
         return altManager;
     }
     
+    public static ContentManager getContentManager() {
+        return contentManager;
+    }
+    
 	/**
 	 * Accessor for the <tt>UDPService</tt> instance.
 	 *

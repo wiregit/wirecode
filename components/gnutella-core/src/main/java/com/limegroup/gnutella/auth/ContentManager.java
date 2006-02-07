@@ -81,6 +81,26 @@ public class ContentManager {
     }
     
     /**
+     * Does a request, blocking until a response is given or the request times out.
+     */
+    public Response request(URN urn, long timeout) {
+        Validator validator = new Validator();
+        synchronized(validator) {
+            request(urn, validator, timeout);
+            if (validator.hasResponse()) {
+                return validator.getResponse();
+            } else {
+                try {
+                    validator.wait(); // notified when response comes in.
+                } catch(InterruptedException ix) {
+                    LOG.warn("Interrupted while waiting for response", ix);
+                }
+            }
+        }
+        return validator.getResponse();
+    }
+    
+    /**
      * Gets a response if one exists.
      */
     public Response getResponse(URN urn) {
@@ -190,22 +210,33 @@ public class ContentManager {
     
     /** Times out old responders. */
     protected void timeout(long now) {
+        List responders = null;
         synchronized(RESPONDERS) {
             Responder next = null;
             for(int i = RESPONDERS.size() - 1; i >= 0; i--) {
                 next = (Responder)RESPONDERS.get(i);
                 if(next.dead <= now) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Timing out responder: " + next + " for URN: " + next.urn);
-                    try {
-                        next.observer.handleResponse(next.urn, null);
-                    } catch(Throwable t) {
-                        ErrorService.error(t, "Content Response Error");
-                    }
+                    if(responders == null)
+                        responders = new ArrayList(2);
+                    responders.add(next);
                     RESPONDERS.remove(i);
                     next = null;
                 } else {
                     break;
+                }
+            }
+        }
+        
+        // Now call outside of lock.
+        if (responders != null) {
+            for (int i = 0; i < responders.size(); i++) {
+                Responder next = (Responder) responders.get(i);
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Timing out responder: " + next + " for URN: " + next.urn);
+                try {
+                    next.observer.handleResponse(next.urn, null);
+                } catch (Throwable t) {
+                    ErrorService.error(t, "Content Response Error");
                 }
             }
         }
@@ -279,6 +310,28 @@ public class ContentManager {
         public int compareTo(Object a) {
             Responder o = (Responder)a;
             return dead > o.dead ? 1 : dead < o.dead ? -1 : 0;
+        }
+    }    
+    
+    /** A blocking ResponseObserver. */
+    private static class Validator implements ResponseObserver {
+        private boolean gotResponse = false;
+        private Response response = null;
+        
+        public void handleResponse(URN urn, Response response) {
+            synchronized(this) {
+                gotResponse = true;
+                this.response = response;
+                notify();
+            }
+        }
+        
+        public boolean hasResponse() {
+            return gotResponse;
+        }
+        
+        public Response getResponse() {
+            return response;
         }
     }
     

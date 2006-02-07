@@ -48,6 +48,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.auth.ResponseObserver;
+import com.limegroup.gnutella.auth.Response;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -138,6 +140,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
       
       All downloads start QUEUED.
       From there, it will stay queued until a slot is available.
+      
+      Once a slot is available, the download will go to VALIDATING.
+      If validation fails, the download will end with INVALID.
+      Otherwise, it will continue onward...
       
       If atleast one host is available to download from, then the
       first state is always CONNECTING.
@@ -755,8 +761,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         dloaderManagerThread = new ManagedThread(new Runnable() {
             public void run() {
                 try {
-                    receivedNewSources = false;
-                    int status = performDownload();
+                    int status = validateDownload();
+                    if(status == VALIDATED) {
+                        receivedNewSources = false;
+                        status = performDownload();
+                    }
                     completeDownload(status);
                 } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
@@ -796,6 +805,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             case COMPLETE:
             case DISK_PROBLEM:
             case CORRUPT_FILE:
+            case INVALID:
                 clearingNeeded = true;
                 setState(status);
                 break;
@@ -1007,6 +1017,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         case ABORTED:
         case DISK_PROBLEM:
         case CORRUPT_FILE:
+        case INVALID:
             return true;
         }
         return false;
@@ -1022,6 +1033,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         case CONNECTING:
         case DOWNLOADING:
         case REMOTE_QUEUED:
+        case VALIDATING:
+        case VALIDATED:
             return true;
         default:
             return false;
@@ -1039,6 +1052,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         case HASHING:
         case SAVING:
         case IDENTIFY_CORRUPTION:
+        case VALIDATING:
+        case VALIDATED:
             return true;
         }
         return false;
@@ -1075,7 +1090,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * initializes the verifying file if the incompleteFile is initialized.
      */
 	protected void initializeVerifyingFile() throws IOException {
-
 		if (incompleteFile == null)
 			return;
 
@@ -2082,7 +2096,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @throws InterruptedException if we get interrupted while waiting for user
      * response.
      */
-    private int verifyAndSave() throws InterruptedException{
+    private int verifyAndSave() throws InterruptedException {
         
         // Find out the hash of the file and verify that its the same
         // as our hash.
@@ -2095,6 +2109,23 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         // Save the file to disk.
         return saveFile(fileHash);
+    }
+    
+    /**
+     * Validates the current download.
+     */
+    protected int validateDownload() {
+        setState(VALIDATING);
+        if(downloadSHA1 != null) {
+            Response response = RouterService.getContentManager().request(downloadSHA1, 5000);
+            if(response == null || response.isOK()) {
+                return VALIDATED;
+            } else {
+                return INVALID;
+            }
+        } else {
+            return VALIDATED;
+        }
     }
     
     /**
@@ -3070,5 +3101,5 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public Object removeAttribute( String key ) {
         return attributes.remove( key );
-    }    
+    }
 }
