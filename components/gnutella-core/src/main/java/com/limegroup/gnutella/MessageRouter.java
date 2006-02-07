@@ -586,6 +586,9 @@ public abstract class MessageRouter {
         else if(msg instanceof UpdateRequest) {
             handleUpdateRequest((UpdateRequest)msg, handler);
         }
+        else if(msg instanceof ContentResponse) {
+            handleContentResponse((ContentResponse)msg, handler);
+        }
         notifyMessageListener(msg, handler);
     }
     
@@ -2042,6 +2045,10 @@ public abstract class MessageRouter {
         }
     }
     
+    /** Handles a ContentResponse msg -- passing it to the ContentManager. */
+    private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
+        RouterService.getContentManager().handleContentResponse(msg);
+    }
 
     /**
      * Passes the request onto the update manager.

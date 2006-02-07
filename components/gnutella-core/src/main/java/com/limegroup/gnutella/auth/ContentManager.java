@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.limegroup.gnutella.auth;
 
 import java.util.ArrayList;
@@ -85,7 +82,7 @@ public class ContentManager {
      * @param timeout
      */
     public void request(URN urn, ResponseObserver observer, long timeout) {
-        Response response = (Response)CACHE.getResponse(urn);
+        Response response = CACHE.getResponse(urn);
         if(response != null || !ACTIVE) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Immediate response for URN: " + urn);
@@ -121,7 +118,7 @@ public class ContentManager {
      * Gets a response if one exists.
      */
     public Response getResponse(URN urn) {
-        return (Response)CACHE.getResponse(urn);
+        return CACHE.getResponse(urn);
     }
     
     /**
