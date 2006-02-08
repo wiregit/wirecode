@@ -23,6 +23,7 @@ public class ContentManagerTest extends BaseTestCase {
     private ContentResponse crTwo;
     private Observer one;
     private Observer two;
+    private Observer three;
     
     
     public ContentManagerTest(String name) {
@@ -46,6 +47,7 @@ public class ContentManagerTest extends BaseTestCase {
         crTwo = new ContentResponse(URN_2, false);
         one = new Observer();
         two = new Observer();
+        three = new Observer();
         assertNull(mgr.getResponse(URN_1));
         assertNull(mgr.getResponse(URN_2));        
         assertNull(mgr.getResponse(URN_3));
@@ -191,6 +193,32 @@ public class ContentManagerTest extends BaseTestCase {
         Response rThree = mgr.request(URN_3, 1000);
         assertNull(rThree);
         assertGreaterThan(900, System.currentTimeMillis() - now);
+    }
+    
+    public void testVaryingTimeouts() throws Exception {
+        mgr.initialize();
+        mgr.request(URN_1, one, 6000);
+        mgr.request(URN_2, two, 2000);
+        mgr.request(URN_3, three, 10000);
+        
+        assertNull(one.urn);
+        assertNull(two.urn);
+        assertNull(three.urn);
+        
+        Thread.sleep(4000);
+        assertEquals(URN_2, two.urn);
+        assertNull(two.response);
+        assertNull(one.urn);
+        assertNull(three.urn);
+        
+        Thread.sleep(4000);
+        assertEquals(URN_1, one.urn);
+        assertNull(one.response);
+        assertNull(three.urn);
+        
+        Thread.sleep(4000);
+        assertEquals(URN_3, three.urn);
+        assertNull(three.response);
     }
     
     private static void sleep(int milliseconds) {

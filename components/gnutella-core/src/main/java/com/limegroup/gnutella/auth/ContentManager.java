@@ -227,16 +227,14 @@ public class ContentManager {
         synchronized (RESPONDERS) {
             if (RESPONDERS.isEmpty()) {
                 RESPONDERS.add(responder);
+            } else if (responder.dead <= ((Responder) RESPONDERS.get(RESPONDERS.size() - 1)).dead) {
+                RESPONDERS.add(responder);
             } else {
-                if (responder.dead >= ((Responder)RESPONDERS.get(RESPONDERS.size() - 1)).dead) {
-                    RESPONDERS.add(responder);
-                } else {
-                    // Quick lookup.
-                    int insertion = Collections.binarySearch(RESPONDERS, responder);
-                    if (insertion < 0)
-                        insertion = (insertion + 1) * -1;
-                    RESPONDERS.add(insertion, responder);
-                }
+                // Quick lookup.
+                int insertion = Collections.binarySearch(RESPONDERS, responder);
+                if (insertion < 0)
+                    insertion = (insertion + 1) * -1;
+                RESPONDERS.add(insertion, responder);
             }
         }
     }
@@ -361,7 +359,7 @@ public class ContentManager {
 
         public int compareTo(Object a) {
             Responder o = (Responder)a;
-            return dead > o.dead ? 1 : dead < o.dead ? -1 : 0;
+            return dead < o.dead ? 1 : dead > o.dead ? -1 : 0;
         }
     }    
     
