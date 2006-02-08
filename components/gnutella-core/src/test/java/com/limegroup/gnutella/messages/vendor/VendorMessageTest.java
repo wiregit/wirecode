@@ -135,7 +135,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         vm = new QueryStatusRequest(new GUID(GUID.makeGuid()));
         testRead(vm);
 
-        // Query Status ContentResponseData
+        // Query Status Response
         // -----------------------------
         // test network constructor....
         vm = new QueryStatusResponse(GUID.makeGuid(), (byte) 1, 

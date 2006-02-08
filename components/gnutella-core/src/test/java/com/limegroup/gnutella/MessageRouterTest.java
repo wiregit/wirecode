@@ -122,7 +122,7 @@ public final class MessageRouterTest extends BaseTestCase {
     
     /**
      * Tests the method for creating <tt>QueryReply</tt> instances from
-     * <tt>ContentResponseData</tt> arrays.
+     * <tt>Response</tt> arrays.
      */
     public void testResponsesToQueryReplies() throws Exception {
         ConnectionSettings.LAST_FWT_STATE.setValue(true); 

@@ -85,7 +85,7 @@ public class MetaFileManager extends FileManager {
      * XML docs is that presumably the query will be a 'rich' query,
      * and we want to include only the schema that was in the query.
      * 
-     * @param response the <tt>ContentResponseData</tt> instance that XML should be 
+     * @param response the <tt>Response</tt> instance that XML should be 
      *  added to 
      * @param fd the <tt>FileDesc</tt> that provides access to the 
      *   <tt>LimeXMLDocuments</tt> to add to the response
@@ -331,7 +331,7 @@ public class MetaFileManager extends FileManager {
             
         // It is important to use a HashSet here so that duplicate
         // responses are not sent.
-        // Unfortunately, it is still possible that one ContentResponseData
+        // Unfortunately, it is still possible that one Response
         // did not have metadata but the other did, causing two
         // responses for the same file.
             

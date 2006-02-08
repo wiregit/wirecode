@@ -107,7 +107,7 @@ public class HTTPHeaderName {
         new HTTPHeaderName("Content-Encoding");
 
 	/**
-	 * ContentResponseData header for specifying the server name and version.
+	 * Response header for specifying the server name and version.
 	 */
 	public static final HTTPHeaderName SERVER =
 		new HTTPHeaderName("Server");

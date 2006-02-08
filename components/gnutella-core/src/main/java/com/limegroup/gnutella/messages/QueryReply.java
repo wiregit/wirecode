@@ -589,7 +589,7 @@ public class QueryReply extends Message implements Serializable{
     }
     
     /**
-     * Returns the ContentResponseData[].  Throws BadPacketException if this
+     * Returns the Response[].  Throws BadPacketException if this
      * data couldn't be extracted.
      */
     public Response[] getResultsArray() throws BadPacketException {
@@ -600,7 +600,7 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** Returns an iterator that will yield the results, each as an
-     *  instance of the ContentResponseData class.  Throws BadPacketException if
+     *  instance of the Response class.  Throws BadPacketException if
      *  this data couldn't be extracted.  */
     public Iterator getResults() throws BadPacketException {
         parseResults();
@@ -612,7 +612,7 @@ public class QueryReply extends Message implements Serializable{
 
 
     /** Returns a List that will yield the results, each as an
-     *  instance of the ContentResponseData class.  Throws BadPacketException if
+     *  instance of the Response class.  Throws BadPacketException if
      *  this data couldn't be extracted.  */
     public List getResultsAsList() throws BadPacketException {
         parseResults();

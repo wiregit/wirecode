@@ -1171,7 +1171,7 @@ public class RouterService {
      *
      * @param guid the value returned by query(..).  MUST be 16 bytes long.
      * @param resp a response delivered by ActivityCallback.handleQueryReply
-     * @see ResponseVerifier#matchesType(byte[], ContentResponseData) 
+     * @see ResponseVerifier#matchesType(byte[], Response) 
      */
     public static boolean matchesType(byte[] guid, Response response) {
         return VERIFIER.matchesType(guid, response);
@@ -1189,7 +1189,7 @@ public class RouterService {
      *
      * @param guid the value returned by query(..).  MUST be 16 byts long.
      * @param resp a response delivered by ActivityCallback.handleQueryReply
-     * @see ResponseVerifier#isMandragoreWorm(byte[], ContentResponseData) 
+     * @see ResponseVerifier#isMandragoreWorm(byte[], Response) 
      */
     public static boolean isMandragoreWorm(byte[] guid, Response response) {
         return VERIFIER.isMandragoreWorm(guid, response);

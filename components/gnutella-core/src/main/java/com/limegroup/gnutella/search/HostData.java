@@ -11,7 +11,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 /**
  * This class contains data about a host that has returned a query hit,
  * as opposed to the data about the file itself, which is contained in
- * <tt>ContentResponseData</tt>.
+ * <tt>Response</tt>.
  */
 public final class HostData {
 

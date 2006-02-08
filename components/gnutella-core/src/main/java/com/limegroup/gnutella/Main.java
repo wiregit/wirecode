@@ -127,7 +127,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 // 			System.out.println("Query reply from "+qr.getIP()+":"+qr.getPort()+":");
 // 			try {
 // 				for (Iterator iter=qr.getResults(); iter.hasNext(); )
-// 					System.out.println("   "+((ContentResponseData)iter.next()).getName());
+// 					System.out.println("   "+((Response)iter.next()).getName());
 // 			} catch (BadPacketException e) { }
 // 		}
 //     }

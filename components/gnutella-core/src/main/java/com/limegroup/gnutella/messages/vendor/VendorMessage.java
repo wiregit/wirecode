@@ -315,7 +315,7 @@ public abstract class VendorMessage extends Message {
             return new QueryStatusRequest(guid, ttl, hops, version, restOf);
         if ((selector == F_REPLY_NUMBER) && 
             (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
-            // Query Status ContentResponseData
+            // Query Status Response
             return new QueryStatusResponse(guid, ttl, hops, version, restOf);
         if ((selector == F_TCP_CONNECT_BACK) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))

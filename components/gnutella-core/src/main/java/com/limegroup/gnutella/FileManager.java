@@ -1885,7 +1885,7 @@ public abstract class FileManager {
     ////////////////////////////////// Queries ///////////////////////////////
 
     /**
-     * Constant for an empty <tt>ContentResponseData</tt> array to return when there are
+     * Constant for an empty <tt>Response</tt> array to return when there are
      * no matches.
      */
     private static final Response[] EMPTY_RESPONSES = new Response[0];
