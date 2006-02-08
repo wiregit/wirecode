@@ -31,7 +31,6 @@ public class ContentManager {
     /** Flag for whether or not the Manager is active.  Necessary for tests. */
     private static boolean ACTIVE = true;
     
-    
     /** Map of SHA1 to Observers listening for responses to the SHA1. */
     private final Map /* URN -> List (of Responder) */ OBSERVERS = Collections.synchronizedMap(new HashMap());
     
@@ -132,11 +131,9 @@ public class ContentManager {
         IpPort authority = getContentAuthority();
         long now = System.currentTimeMillis();
         addResponder(new Responder(now, timeout, observer, urn));
-        if (authority != null ) {
-            // only send if we haven't already requested.
-            if(REQUESTED.add(urn)) {
-                UDPService.instance().send(new ContentRequest(urn), authority);
-            }
+        // only send if we haven't already requested.
+        if (REQUESTED.add(urn) && authority != null) {
+            UDPService.instance().send(new ContentRequest(urn), authority);
         }
     }
     
@@ -145,8 +142,9 @@ public class ContentManager {
      */
     public void handleContentResponse(ContentResponse responseMsg) {
         URN urn = responseMsg.getURN();
-        if(urn != null) {
-            REQUESTED.remove(urn);
+        // Only process if we requested this msg.
+        // (Don't allow arbitrary responses to be processed)
+        if(urn != null && REQUESTED.remove(urn)) {
             Response response = new Response(responseMsg);
             CACHE.addResponse(urn, response);
             if(LOG.isDebugEnabled())
@@ -161,7 +159,7 @@ public class ContentManager {
                 }
             }
         } else if(LOG.isWarnEnabled())
-            LOG.warn("No URN in response: " + responseMsg);
+            LOG.warn("No URN in response (or didn't request it) :" + responseMsg);
     }
     
     /**
@@ -271,7 +269,7 @@ public class ContentManager {
                         return;
                     try {
                         try {
-                            Thread.sleep(2000);
+                            Thread.sleep(1000);
                         } catch(InterruptedException ix) {}
                         if(!shutdown)
                             timeout(System.currentTimeMillis());

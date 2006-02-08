@@ -357,6 +357,12 @@ public abstract class VendorMessage extends Message {
         if((selector == F_UPDATE_RESP) && 
            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             return new UpdateResponse(guid, ttl, hops, version, restOf);
+        if((selector == F_CONTENT_REQ) &&
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new ContentRequest(guid, ttl, hops, version, restOf);
+        if((selector == F_CONTENT_RESP) &&
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new ContentResponse(guid, ttl, hops, version, restOf);
         
         ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
         throw UNRECOGNIZED_EXCEPTION;
