@@ -511,11 +511,9 @@ public abstract class MessageRouter {
         // Increment hops and decrement TTL.
         msg.hop();
 
+        // note: validity of addr/port are checked when message is constructed
 		InetAddress address = addr.getAddress();
 		int port = addr.getPort();
-		// Verify that the address and port are valid.
-		// If they are not, we cannot send any replies to them.
-		if(!RouterService.isIpPortValid()) return;
 
 		// Send UDPConnection messages on to the connection multiplexor
 		// for routing to the appropriate connection processor

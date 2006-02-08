@@ -59,6 +59,7 @@ class ContentCache {
     
     /** Initializes this cache. */
     synchronized void initialize() {
+        dirty = false;        
         deserialize();
     }
     
@@ -89,11 +90,13 @@ class ContentCache {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Invalid k[" + key + "], v[" + value + "]");
                         i.remove();
+                        dirty = true;
                     }
                     if(((Response)value).getCreationTime() < cutoff) {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Removing old response [" + value + "]");
                         i.remove();
+                        dirty = true;
                     }
                 }
             } else {
@@ -102,6 +105,7 @@ class ContentCache {
             
             responses = map;
         } catch(Throwable t) {
+            dirty = true;
             LOG.error("Can't read responses", t);
         } finally {
             IOUtils.close(ois);

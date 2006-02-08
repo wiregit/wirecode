@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 public class IpPortImpl implements IpPort {
@@ -8,6 +9,11 @@ public class IpPortImpl implements IpPort {
     private final InetAddress addr;
     private final String addrString;
     private final int port;
+    
+    /** Constructs a new IpPort based on the given SocketAddress. */
+    public IpPortImpl(InetSocketAddress addr) {
+        this(addr.getAddress(), addr.getHostName(), addr.getPort());
+    }
     
     /**
      * Constructs a new IpPort using the given addr, host & port.

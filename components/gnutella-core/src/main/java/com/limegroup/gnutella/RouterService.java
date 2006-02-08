@@ -886,6 +886,8 @@ public class RouterService {
 
             LicenseFactory.persistCache();
             
+            contentManager.shutdown();
+            
             runShutdownItems();
             
             _state = 4;

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.auth;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,6 +47,9 @@ public class ContentManager {
     /** The ContentCache. */
     private final ContentCache CACHE = new ContentCache();
     
+    /** The IpPort to use as the content authority. */
+    private volatile IpPort authority = null;
+    
     /** Wehther or not we're shutting down. */
     private volatile boolean shutdown = false;
     
@@ -54,7 +58,7 @@ public class ContentManager {
      */
     public void initialize() {
         CACHE.initialize();
-        startTimeoutThread();
+        startProcessingThread();
     }
     
     /**
@@ -64,6 +68,11 @@ public class ContentManager {
         shutdown = true;
         CACHE.writeToDisk();
     }
+    
+    /** Sets the content authority. */
+    void setContentAuthority(IpPort authority) {
+        this.authority = authority;
+    }    
     
     /**
      *  Determines if we've already tried sending a request & waited the time
@@ -128,13 +137,16 @@ public class ContentManager {
      * @param timeout
      */
     protected void scheduleRequest(URN urn, ResponseObserver observer, long timeout) {
-        IpPort authority = getContentAuthority();
         long now = System.currentTimeMillis();
         addResponder(new Responder(now, timeout, observer, urn));
+
         // only send if we haven't already requested.
         if (REQUESTED.add(urn) && authority != null) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Sending request for URN: " + urn + " to authority: " + authority);
             UDPService.instance().send(new ContentRequest(urn), authority);
-        }
+        } else if(LOG.isDebugEnabled())
+            LOG.debug("Not sending request.  No authority or already requested.");
     }
     
     /**
@@ -158,8 +170,13 @@ public class ContentManager {
                     next.observer.handleResponse(next.urn, response);
                 }
             }
-        } else if(LOG.isWarnEnabled())
-            LOG.warn("No URN in response (or didn't request it) :" + responseMsg);
+        } else if(LOG.isWarnEnabled()) {
+            if(urn == null) {
+                LOG.debug("No URN in response: " + responseMsg);
+            } else {
+                LOG.debug("Didn't request URN: " + urn + ", msg: " + responseMsg);
+            }
+        }
     }
     
     /**
@@ -260,10 +277,18 @@ public class ContentManager {
         }
     }
     
-    /** Starst the thread that does the timeout stuff. */
-    protected void startTimeoutThread() {
+    /**
+     * Starts the thread that does the timeout stuff & sets the content authority.
+     * The content authority is attempted to be set here instead of outside this
+     * thread because looking up the DNS name can block.
+     */
+    protected void startProcessingThread() {
         Thread timeouter = new ManagedThread(new Runnable() {
             public void run() {
+                // if no existing authority, try and make one.
+                if(authority == null)
+                    setDefaultContentAuthority();
+                
                 while(true) {
                     if(shutdown)
                         return;
@@ -278,22 +303,49 @@ public class ContentManager {
                     }
                 }
             }
-        }, "ContentTimeout");
+        }, "ContentProcessor");
         timeouter.setDaemon(true);
         timeouter.start();
     }    
     
     /**
-     * Gets the content authority.
+     * Gets the default content authority.
      */
-    private IpPort getContentAuthority() {
-        return null; // INSERT CONTENT AUTHORITY HERE
+    protected IpPort getDefaultContentAuthority() throws UnknownHostException {
+        return null; // INSERT DEFAULT CONTENT AUTHORITY HERE.
+    }
+    
+    /** Sets the content authority with the default & process all pre-requested items. */
+    private void setDefaultContentAuthority() {
+        IpPort auth = null;
+        try {
+            auth = getDefaultContentAuthority();
+        } catch (UnknownHostException uhe) {}
+        
+        // if we have an authority to set, grab all pre-requested items,
+        // set the authority (so newly requested ones will immediately send to it),
+        // and then send off those requested.
+        // note that the timeouts on processing older requests will be lagging slightly.
+        if (auth != null) {
+            Set alreadyReq = new HashSet();
+            synchronized(REQUESTED) {
+                alreadyReq.addAll(REQUESTED);
+                setContentAuthority(auth);
+            }
+            
+            for(Iterator i = alreadyReq.iterator(); i.hasNext(); ) {
+                URN urn = (URN)i.next();
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
+                UDPService.instance().send(new ContentRequest(urn), auth);
+            }
+        }
     }
     
     /**
      * A simple struct to allow ResponseObservers to be timed out.
      */
-    private static class Responder {
+    private static class Responder implements Comparable {
         private final long dead;
         private final ResponseObserver observer;
         private final URN urn;
