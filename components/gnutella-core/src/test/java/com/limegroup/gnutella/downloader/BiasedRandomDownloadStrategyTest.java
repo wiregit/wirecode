@@ -346,19 +346,25 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         } catch (IllegalArgumentException e) {
             // Wohoo!  Exception thrown... test passed... do nothing
         }
-
-        // createSingletonSet might throw its own IllegalArgumentException
-        // so create it outside of the try-catch
-        IntervalSet badNeededBytes = IntervalSet.createSingletonSet(-5,10);
-        // Try telling the strategy that we need some bytes
-        // before the beginning of the file
+        
+        IntervalSet badNeededBytes = null;
+        
         try {
-            strategy.pickAssignment(availableBytes, badNeededBytes, blockSize);
-            fail("Failed to complain about negative Intervals in neededBytes");
+            // createSingletonSet might throw its own IllegalArgumentException
+            // so create it outside of the try-catch
+            badNeededBytes = IntervalSet.createSingletonSet(-5,10);
+            // Try telling the strategy that we need some bytes
+            // before the beginning of the file
+            try {
+                strategy.pickAssignment(availableBytes, badNeededBytes, blockSize);
+                fail("Failed to complain about negative Intervals in neededBytes");
+            } catch (IllegalArgumentException e) {
+                // Wohoo!  Exception thrown... test passed... do nothing
+            }
         } catch (IllegalArgumentException e) {
             // Wohoo!  Exception thrown... test passed... do nothing
         }
-
+        
         badNeededBytes = IntervalSet.createSingletonSet(fileSize,fileSize);
         // Try telling the strategy that we need a byte after the end
         // of the file
