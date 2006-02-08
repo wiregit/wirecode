@@ -1,30 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-import java.util.Random;
-import java.util.NoSuchElementException;
-
 public class RandomDownloadStrategyTest extends BaseTestCase {
 
-    /** Smallest number that can be subtracted from 1.0f 
-     * and get something different from 1.0f.  Note that
-     * this differs slightly from the standard IEE 754
-     * definition of EPSILON by using subtraction instead
-     * of addition.
-     */
-    private static float EPSILON;
-    static {
-        float epsilon = 1.0f;
-        while((1.0f-epsilon)!=1.0f) {
-            EPSILON = epsilon;
-            epsilon /= 2.0f;
-        }
-    }
-    
     public RandomDownloadStrategyTest(String s) {
         super(s);
     }
@@ -166,18 +150,24 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
             // Wohoo!  Exception thrown... test passed... do nothing
         }
 
-        // createSingletonSet might throw its own IllegalArgumentException
-        // so create it outside of the try-catch
-        IntervalSet badNeededBytes = IntervalSet.createSingletonSet(-5,10);
-        // Try telling the strategy that we need some bytes
-        // before the beginning of the file
+        IntervalSet badNeededBytes = null;
+        
         try {
-            strategy.pickAssignment(availableBytes, badNeededBytes, blockSize);
-            fail("Failed to complain about negative Intervals in neededBytes");
+            // createSingletonSet might throw its own IllegalArgumentException
+            // so create it outside of the try-catch
+            badNeededBytes = IntervalSet.createSingletonSet(-5,10);
+            // Try telling the strategy that we need some bytes
+            // before the beginning of the file
+            try {
+                strategy.pickAssignment(availableBytes, badNeededBytes, blockSize);
+                fail("Failed to complain about negative Intervals in neededBytes");
+            } catch (IllegalArgumentException e) {
+                // Wohoo!  Exception thrown... test passed... do nothing
+            }
         } catch (IllegalArgumentException e) {
             // Wohoo!  Exception thrown... test passed... do nothing
         }
-
+        
         badNeededBytes = IntervalSet.createSingletonSet(fileSize,fileSize);
         // Try telling the strategy that we need a byte after the end
         // of the file
