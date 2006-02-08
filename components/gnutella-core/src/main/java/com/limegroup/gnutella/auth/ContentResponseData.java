@@ -5,19 +5,19 @@ import java.io.Serializable;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 
 /** A response for content. */
-public class Response implements Serializable {
+public class ContentResponseData implements Serializable {
     private static final long serialVersionUID = -2625113217839178878L;
     
     private long created;
     private boolean ok;
     
-    /** Constructs a new Response with data from the given ContentResponse */
-    public Response(ContentResponse msg) {
+    /** Constructs a new ContentResponseData with data from the given ContentResponse */
+    public ContentResponseData(ContentResponse msg) {
         this(System.currentTimeMillis(), msg.getOK());
     }
     
     /** Hook for tests to create Responses at different times. */
-    private Response(long now, boolean ok) {
+    private ContentResponseData(long now, boolean ok) {
         this.created = now;
         this.ok = ok;
     }
@@ -27,7 +27,7 @@ public class Response implements Serializable {
         return ok;
     }
     
-    /** Returns the time this Response was created. */
+    /** Returns the time this ContentResponseData was created. */
     public long getCreationTime() {
         return created;
     }

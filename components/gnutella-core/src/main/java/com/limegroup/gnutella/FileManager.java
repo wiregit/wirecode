@@ -19,7 +19,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.auth.ResponseObserver;
+import com.limegroup.gnutella.auth.ContentResponseData;
+import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -1078,7 +1079,6 @@ public abstract class FileManager {
                     // the file is still shareable.
                     if(!urns.isEmpty() && isFileShareable(file)) {
                         fd = addFile(file, urns);
-                        _needRebuild = true;
                     }
                 }
                     
@@ -1128,8 +1128,7 @@ public abstract class FileManager {
 
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
-        com.limegroup.gnutella.auth.Response r = 
-            RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
+        ContentResponseData r = RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
             return null;
@@ -1411,8 +1410,8 @@ public abstract class FileManager {
     public void validate(final FileDesc fd) {
         ContentManager cm = RouterService.getContentManager();
         if(_requestingValidation.add(fd.getSHA1Urn())) {
-            cm.request(fd.getSHA1Urn(), new ResponseObserver() {
-               public void handleResponse(URN urn, com.limegroup.gnutella.auth.Response r) {
+            cm.request(fd.getSHA1Urn(), new ContentResponseObserver() {
+               public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
                    if(r != null && !r.isOK())
                        removeFileIfShared(fd.getFile());
@@ -1886,7 +1885,7 @@ public abstract class FileManager {
     ////////////////////////////////// Queries ///////////////////////////////
 
     /**
-     * Constant for an empty <tt>Response</tt> array to return when there are
+     * Constant for an empty <tt>ContentResponseData</tt> array to return when there are
      * no matches.
      */
     private static final Response[] EMPTY_RESPONSES = new Response[0];

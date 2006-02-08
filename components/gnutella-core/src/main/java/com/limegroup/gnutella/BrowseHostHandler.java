@@ -277,7 +277,7 @@ public class BrowseHostHandler {
         if ((code < 200) || (code >= 300))
             throw new IOException();
         if(LOG.isDebugEnabled())
-            LOG.debug("BHH.browseExchange(): HTTP Response is " + code);
+            LOG.debug("BHH.browseExchange(): HTTP ContentResponseData is " + code);
 
         // now confirm the content-type, the encoding, etc...
         boolean readingHTTP = true;

@@ -2274,13 +2274,13 @@ public class DownloadTest extends BaseTestCase {
         //Add normal dummy result
         ActivityCallback callback=router.getCallback();        
         byte[] localhost={(byte)127, (byte)0, (byte)0, (byte)1};
-        Response[] responses=new Response[1];
-        responses[0]=new Response(0l, file.length(), file.getName());
+        ContentResponseData[] responses=new ContentResponseData[1];
+        responses[0]=new ContentResponseData(0l, file.length(), file.getName());
         QueryReply qr=new QueryReply(guid, (byte)5, PORT_1,
                                      localhost, Integer.MAX_VALUE,
                                      responses, new byte[16]);
-        responses=new Response[1];
-        responses[0]=new Response(0l, file.length(), file.getName());
+        responses=new ContentResponseData[1];
+        responses[0]=new ContentResponseData(0l, file.length(), file.getName());
         qr=new QueryReply(guid, (byte)5, PORT_2,
                           localhost, Integer.MAX_VALUE,
                           responses, new byte[16]);

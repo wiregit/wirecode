@@ -48,8 +48,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.auth.ResponseObserver;
-import com.limegroup.gnutella.auth.Response;
+import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -2114,18 +2114,27 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Validates the current download.
      */
-    protected int validateDownload() {
-        setState(VALIDATING);
-        if(downloadSHA1 != null) {
-            Response response = RouterService.getContentManager().request(downloadSHA1, 5000);
-            if(response == null || response.isOK()) {
-                return VALIDATED;
+    private int validateDownload() {
+        if(shouldValidate(deserializedFromDisk)) {
+            setState(VALIDATING);
+            if(downloadSHA1 != null) {
+                ContentResponseData response = RouterService.getContentManager().request(downloadSHA1, 5000);
+                if(response == null || response.isOK()) {
+                    return VALIDATED;
+                } else {
+                    return INVALID;
+                }
             } else {
-                return INVALID;
+                return VALIDATED;
             }
         } else {
             return VALIDATED;
         }
+    }
+    
+    /** Determines if validation should occur for this download. */
+    protected boolean shouldValidate(boolean deserialized) {
+        return !deserialized;
     }
     
     /**

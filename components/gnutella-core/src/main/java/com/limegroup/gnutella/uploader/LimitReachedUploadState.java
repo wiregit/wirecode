@@ -53,6 +53,9 @@ public class LimitReachedUploadState extends UploadState {
     
     /** Error msg to use when validating. */
     private static final byte[] VALIDATING_MSG = "Validating file.  One moment please.".getBytes();
+    
+    /** True if this is a LimitReached state because we're validating the file */
+    private final boolean validating;
 
 	/**
 	 * Creates a new <tt>LimitReachedUploadState</tt> with the specified
@@ -61,7 +64,12 @@ public class LimitReachedUploadState extends UploadState {
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
 	public LimitReachedUploadState(HTTPUploader uploader) {
+        this(uploader, false);
+    }
+    
+    public LimitReachedUploadState(HTTPUploader uploader, boolean validating) {
 		super(uploader);
+        this.validating = validating;
 
 		LOG.debug("creating limit reached state");
 	}
@@ -81,7 +89,7 @@ public class LimitReachedUploadState extends UploadState {
         
 		if(FILE_DESC != null) {
 			URN sha1 = FILE_DESC.getSHA1Urn();
-            if(!FILE_DESC.isVerified()) {
+            if(validating) {
                 errorMsg = VALIDATING_MSG;
                 HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER, RETRY_AFTER_VALIDATING, ostream);
             } else if(sha1 != null) {

@@ -398,7 +398,7 @@ public class MediaType implements Serializable {
             _filters.add(filter);
         }
 
-        /** @return true if the Response falls within one of the MediaTypes
+        /** @return true if the ContentResponseData falls within one of the MediaTypes
          *  this aggregates.
          */
         public boolean allow(final String fName) {

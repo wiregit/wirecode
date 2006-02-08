@@ -16,7 +16,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 /**
- * This class tests the Response class.
+ * This class tests the ContentResponseData class.
  */
 public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase {
 
@@ -41,7 +41,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 
 	/**
 	 * Modified version of the unit test that was formerly embedded in
-	 * the Response class.
+	 * the ContentResponseData class.
 	 */
 	public void testLegacyResponseUnitTest() throws Exception {
         Response r = new Response(3,4096,"A.mp3");
@@ -49,13 +49,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         assertNull(r.getDocument());
 
         //
-        //Response r2 = new Response("",999,4,"blah.txt");
+        //ContentResponseData r2 = new ContentResponseData("",999,4,"blah.txt");
 		//assertEquals("bad meta", null, r2.getMetaBytes());
 		//assertEquals("Meta size not right", 0, r2.getMetaBytesSize());
         //Assert.that(r2.getMetaBytes()==null,"bad meta");
         //Assert.that(r2.getMetaBytesSize() == 0,"Meta size not right");
         //String md = "Hello";
-        //Response r3 = new Response(md,999,4,"king.txt");
+        //ContentResponseData r3 = new ContentResponseData(md,999,4,"king.txt");
 		//assertEquals("bad meta", null, r3.getMetaBytes());
 		//assertEquals("Meta size not right", 0, r3.getMetaBytesSize());
         //Assert.that(r3.getMetaBytes()==null,"bad meta");
@@ -65,7 +65,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         String[] meta = {"a kbps 44.1 kHz b","akbps 44.1 kHz b", 
                                              "b akbps 44.1kHz" };
         for(int i=0;i<meta.length;i++){
-            Response r4 = new Response(meta[i],999+i,4,"abc.txt");
+            ContentResponseData r4 = new ContentResponseData(meta[i],999+i,4,"abc.txt");
             LimeXMLDocument d=null;
             String xml = r4.getMetadata();
             try{

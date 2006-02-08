@@ -141,11 +141,11 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     }
     
     
-    private static class Observer implements ResponseObserver {
+    private static class Observer implements ContentResponseObserver {
         private URN urn;
-        private Response response;
+        private ContentResponseData response;
         
-        public void handleResponse(URN urn, Response response) {
+        public void handleResponse(URN urn, ContentResponseData response) {
             this.urn = urn;
             this.response = response;
         }

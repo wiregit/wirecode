@@ -36,7 +36,7 @@ class ContentCache {
         new File(CommonUtils.getUserSettingsDir(), "responses.cache");
     
     /** Map of SHA1 to Responses. */
-    private Map /* URN -> Response */ responses = new HashMap();    
+    private Map /* URN -> ContentResponseData */ responses = new HashMap();    
     
     /** Whether or not data is dirty since the last time we wrote to disk. */
     private boolean dirty = false;
@@ -47,14 +47,14 @@ class ContentCache {
     }
     
     /** Adds the given response for the given URN. */
-    synchronized void addResponse(URN urn, Response response) {
+    synchronized void addResponse(URN urn, ContentResponseData response) {
         responses.put(urn, response);
         dirty = true;
     }
     
     /** Gets the response for the given URN. */
-    synchronized Response getResponse(URN urn) {
-        return (Response)responses.get(urn);
+    synchronized ContentResponseData getResponse(URN urn) {
+        return (ContentResponseData)responses.get(urn);
     }
     
     /** Initializes this cache. */
@@ -86,13 +86,13 @@ class ContentCache {
                     Map.Entry next = (Map.Entry)i.next();
                     Object key = next.getKey();
                     Object value = next.getValue();
-                    if( !(key instanceof URN) || !(value instanceof Response) ) {
+                    if( !(key instanceof URN) || !(value instanceof ContentResponseData) ) {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Invalid k[" + key + "], v[" + value + "]");
                         i.remove();
                         dirty = true;
                     }
-                    if(((Response)value).getCreationTime() < cutoff) {
+                    if(((ContentResponseData)value).getCreationTime() < cutoff) {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Removing old response [" + value + "]");
                         i.remove();

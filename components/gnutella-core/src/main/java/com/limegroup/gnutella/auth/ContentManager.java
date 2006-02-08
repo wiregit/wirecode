@@ -44,6 +44,25 @@ public class ContentManager {
     /** Set of URNs that have failed requesting. */
     private final Set TIMEOUTS = Collections.synchronizedSet(new HashSet());
     
+    /* 
+     * LOCKING OF THE ABOVE:
+     * 
+     * OBSERVERS may NOT be locked if RESPONDERS, TIMEOUTS or REQUESTED is locked.
+     * RESPONDERS may NOT be locked if TIMEOUTS or REQUESTED is locked.
+     * TIMEOUTS may be locked at any time.
+     * REQUESTED may be locked at any time.
+     * 
+     * In other words, locking order goes:
+     *  synchronized(OBSERVERS) {
+     *      ...
+     *      synchronized(RESPONDERS) {
+     *          ...
+     *          synchronized(TIMEOUTS) { ... }
+     *          synchronized(REQUESTED) { ... }
+     *      }
+     *  }
+     */
+    
     /** The ContentCache. */
     private final ContentCache CACHE = new ContentCache();
     
@@ -89,8 +108,8 @@ public class ContentManager {
      * @param observer
      * @param timeout
      */
-    public void request(URN urn, ResponseObserver observer, long timeout) {
-        Response response = CACHE.getResponse(urn);
+    public void request(URN urn, ContentResponseObserver observer, long timeout) {
+        ContentResponseData response = CACHE.getResponse(urn);
         if(response != null || !ACTIVE) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Immediate response for URN: " + urn);
@@ -105,7 +124,7 @@ public class ContentManager {
     /**
      * Does a request, blocking until a response is given or the request times out.
      */
-    public Response request(URN urn, long timeout) {
+    public ContentResponseData request(URN urn, long timeout) {
         Validator validator = new Validator();
         synchronized(validator) {
             request(urn, validator, timeout);
@@ -125,7 +144,7 @@ public class ContentManager {
     /**
      * Gets a response if one exists.
      */
-    public Response getResponse(URN urn) {
+    public ContentResponseData getResponse(URN urn) {
         return CACHE.getResponse(urn);
     }
     
@@ -136,7 +155,7 @@ public class ContentManager {
      * @param observer
      * @param timeout
      */
-    protected void scheduleRequest(URN urn, ResponseObserver observer, long timeout) {
+    protected void scheduleRequest(URN urn, ContentResponseObserver observer, long timeout) {
         long now = System.currentTimeMillis();
         addResponder(new Responder(now, timeout, observer, urn));
 
@@ -157,7 +176,7 @@ public class ContentManager {
         // Only process if we requested this msg.
         // (Don't allow arbitrary responses to be processed)
         if(urn != null && REQUESTED.remove(urn)) {
-            Response response = new Response(responseMsg);
+            ContentResponseData response = new ContentResponseData(responseMsg);
             CACHE.addResponse(urn, response);
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding response (" + response + ") for URN: " + urn);
@@ -269,7 +288,7 @@ public class ContentManager {
                 try {
                     next.observer.handleResponse(next.urn, null);
                 } catch (Throwable t) {
-                    ErrorService.error(t, "Content Response Error");
+                    ErrorService.error(t, "Content ContentResponseData Error");
                 }
             }
         }
@@ -345,10 +364,10 @@ public class ContentManager {
      */
     private static class Responder implements Comparable {
         private final long dead;
-        private final ResponseObserver observer;
+        private final ContentResponseObserver observer;
         private final URN urn;
         
-        Responder(long now, long timeout, ResponseObserver observer, URN urn) {
+        Responder(long now, long timeout, ContentResponseObserver observer, URN urn) {
             if(timeout != 0)
                 this.dead = now + timeout;
             else
@@ -363,12 +382,12 @@ public class ContentManager {
         }
     }    
     
-    /** A blocking ResponseObserver. */
-    private static class Validator implements ResponseObserver {
+    /** A blocking ContentResponseObserver. */
+    private static class Validator implements ContentResponseObserver {
         private boolean gotResponse = false;
-        private Response response = null;
+        private ContentResponseData response = null;
         
-        public void handleResponse(URN urn, Response response) {
+        public void handleResponse(URN urn, ContentResponseData response) {
             synchronized(this) {
                 gotResponse = true;
                 this.response = response;
@@ -380,7 +399,7 @@ public class ContentManager {
             return gotResponse;
         }
         
-        public Response getResponse() {
+        public ContentResponseData getResponse() {
             return response;
         }
     }

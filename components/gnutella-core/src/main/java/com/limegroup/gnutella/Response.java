@@ -38,7 +38,7 @@ import org.apache.commons.logging.Log;
  * have been a better name.)  Besides basic file information, responses can
  * include metadata.
  *
- * Response was originally intended to be immutable, but it currently includes
+ * ContentResponseData was originally intended to be immutable, but it currently includes
  * mutator methods for metadata; these will be removed in the future.  
  */
 public class Response {
@@ -75,21 +75,21 @@ public class Response {
     private LimeXMLDocument document;
 
     /** 
-	 * The <tt>Set</tt> of <tt>URN</tt> instances for this <tt>Response</tt>,
+	 * The <tt>Set</tt> of <tt>URN</tt> instances for this <tt>ContentResponseData</tt>,
 	 * as specified in HUGE v0.94.  This is guaranteed to be non-null, 
 	 * although it is often empty.
      */
     private final Set urns;
 
 	/**
-	 * The bytes between the nulls for the <tt>Response</tt>, as specified
+	 * The bytes between the nulls for the <tt>ContentResponseData</tt>, as specified
 	 * in HUGE v0.94.  This is guaranteed to be non-null, although it can be
 	 * an empty array.
 	 */
     private final byte[] extBytes;
     
     /**
-     * The cached RemoteFileDesc created from this Response.
+     * The cached RemoteFileDesc created from this ContentResponseData.
      */
     private volatile RemoteFileDesc cachedRFD;
     
@@ -129,11 +129,11 @@ public class Response {
     }
 
 	/**
-	 * Constructs a new <tt>Response</tt> instance from the data in the
+	 * Constructs a new <tt>ContentResponseData</tt> instance from the data in the
 	 * specified <tt>FileDesc</tt>.  
 	 *
 	 * @param fd the <tt>FileDesc</tt> containing the data to construct 
-	 *  this <tt>Response</tt> -- must not be <tt>null</tt>
+	 *  this <tt>ContentResponseData</tt> -- must not be <tt>null</tt>
 	 */
 	public Response(FileDesc fd) {
 		this(fd.getIndex(), fd.getFileSize(), fd.getFileName(), 
@@ -490,10 +490,10 @@ public class Response {
    
 
 	/**
-	 * Returns the index for the file stored in this <tt>Response</tt>
+	 * Returns the index for the file stored in this <tt>ContentResponseData</tt>
 	 * instance.
 	 *
-	 * @return the index for the file stored in this <tt>Response</tt>
+	 * @return the index for the file stored in this <tt>ContentResponseData</tt>
 	 * instance
 	 */
     public long getIndex() {
@@ -501,10 +501,10 @@ public class Response {
     }
 
 	/**
-	 * Returns the size of the file for this <tt>Response</tt> instance
+	 * Returns the size of the file for this <tt>ContentResponseData</tt> instance
 	 * (in bytes).
 	 *
-	 * @return the size of the file for this <tt>Response</tt> instance
+	 * @return the size of the file for this <tt>ContentResponseData</tt> instance
 	 * (in bytes)
 	 */
     public long getSize() {
@@ -530,10 +530,10 @@ public class Response {
 
 	/**
 	 * Returns an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
-	 * this <tt>Response</tt>.
+	 * this <tt>ContentResponseData</tt>.
 	 *
 	 * @return an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
-	 * this <tt>Response</tt>, guaranteed to be non-null, although the
+	 * this <tt>ContentResponseData</tt>, guaranteed to be non-null, although the
 	 * set could be empty
 	 */
     public Set getUrns() {
@@ -542,10 +542,10 @@ public class Response {
     
     /**
      * Returns an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>.
+     * contain the same file described in this <tt>ContentResponseData</tt>.
      *
      * @return an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>,
+     * contain the same file described in this <tt>ContentResponseData</tt>,
      * guaranteed to be non-null, although the set could be empty
      */
     public Set getLocations() {
@@ -564,7 +564,7 @@ public class Response {
     }
     
     /**
-     * Returns this Response as a RemoteFileDesc.
+     * Returns this ContentResponseData as a RemoteFileDesc.
      */
     public RemoteFileDesc toRemoteFileDesc(HostData data){
         if(cachedRFD != null &&

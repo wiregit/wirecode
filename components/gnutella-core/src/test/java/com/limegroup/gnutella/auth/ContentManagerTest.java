@@ -72,7 +72,7 @@ public class ContentManagerTest extends BaseTestCase {
         assertNotNull(mgr.getResponse(URN_1));
         assertNull(mgr.getResponse(URN_2));
 
-        Response res = mgr.getResponse(URN_1);
+        ContentResponseData res = mgr.getResponse(URN_1);
         assertTrue(res.isOK());
 
         mgr.request(URN_2, two, 0);
@@ -178,19 +178,19 @@ public class ContentManagerTest extends BaseTestCase {
         responder.start();
         
         long now = System.currentTimeMillis();
-        Response rOne =  mgr.request(URN_1, 3000);
+        ContentResponseData rOne =  mgr.request(URN_1, 3000);
         assertNotNull(rOne);
         assertTrue(rOne.isOK());
         assertGreaterThan(600, System.currentTimeMillis() - now);
         
         now = System.currentTimeMillis();
-        Response rTwo = mgr.request(URN_2, 3000);
+        ContentResponseData rTwo = mgr.request(URN_2, 3000);
         assertNotNull(rTwo);
         assertFalse(rTwo.isOK());
         assertGreaterThan(600, System.currentTimeMillis() - now);
         
         now = System.currentTimeMillis();
-        Response rThree = mgr.request(URN_3, 1000);
+        ContentResponseData rThree = mgr.request(URN_3, 1000);
         assertNull(rThree);
         assertGreaterThan(900, System.currentTimeMillis() - now);
     }
@@ -229,11 +229,11 @@ public class ContentManagerTest extends BaseTestCase {
         }
     }
     
-    private static class Observer implements ResponseObserver {
+    private static class Observer implements ContentResponseObserver {
         private URN urn;
-        private Response response;
+        private ContentResponseData response;
         
-        public void handleResponse(URN urn, Response response) {
+        public void handleResponse(URN urn, ContentResponseData response) {
             this.urn = urn;
             this.response = response;
         }

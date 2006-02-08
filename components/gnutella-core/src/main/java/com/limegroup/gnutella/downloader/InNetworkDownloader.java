@@ -91,8 +91,8 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         super.startDownload();
     }
     
-    protected int validateDownload() {
-        return VALIDATED;
+    protected boolean shouldValidate(boolean deserialized) {
+        return false;
     }
     
     /**
