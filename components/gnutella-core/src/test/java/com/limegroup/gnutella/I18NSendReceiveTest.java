@@ -84,9 +84,13 @@ public class I18NSendReceiveTest
 
     private static void setUpFiles() throws Exception {
         
+        File dir = new File("com/limegroup/gnutella/");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        
         for(int i = 0; i < FILES.length; i++) {
-            File f = 
-                new File("com/limegroup/gnutella/" + FILES[i]);
+            File f = new File(dir, FILES[i]);
             if(!f.exists()) {
                 f.createNewFile();
                 //make sure its not 0kb
