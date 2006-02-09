@@ -80,6 +80,8 @@ public class HttpClientManagerTest extends BaseTestCase {
         s9.shutdown();
         s10.shutdown();
         s11.shutdown();
+        
+        Thread.sleep(100);
     }
     
     public void testExecuteMethodRedirecting() throws Exception {
