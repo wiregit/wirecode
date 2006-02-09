@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.util.ByteArrayCache;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.ProcessingQueue;
@@ -70,18 +71,13 @@ public class VerifyingFile {
      */
     /* package */ static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
-    /** a bunch of cached byte[]s for partial chunks */
-    private static final Stack CACHE = new Stack();
-    static {
-        CACHE.ensureCapacity(MAX_CACHED_BUFFERS);
-        RouterService.schedule(new CacheCleaner(),10 * 60 * 1000, 10 * 60 * 1000);
-    }
-    
     /** 
-     * how many buffers were created
-     * LOCKING: hold CACHE 
+     * A cache for byte[]s.
      */
-    private static int numCreated;
+    private static final ByteArrayCache CACHE = new ByteArrayCache(512, HTTPDownloader.BUF_LENGTH);
+    static {
+        RouterService.schedule(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000);
+    }
     
     /** a bunch of cached byte[]s for verifyable chunks */
     private static final Map CHUNK_CACHE = new HashMap(20);
@@ -263,7 +259,7 @@ public class VerifyingFile {
 		Interval intvl = new Interval(currPos,currPos+length-1);
 		
         
-        byte [] temp = getBuffer();
+        byte [] temp = CACHE.get();
         Assert.that(temp.length >= length);
         
         synchronized(this) {
@@ -315,22 +311,6 @@ public class VerifyingFile {
             existingFileSize = length;
         } else {
             existingFileSize = -1;
-        }
-    }
-    
-    private static byte [] getBuffer() throws InterruptedException {
-        byte [] temp = null;
-        synchronized(CACHE) {
-            while (true) {
-                if (!CACHE.isEmpty())
-                    return (byte []) CACHE.pop();
-                else if (numCreated < MAX_CACHED_BUFFERS) {
-                    temp = new byte[HTTPDownloader.BUF_LENGTH];
-                    numCreated++;
-                    return temp;
-                } else 
-                    CACHE.wait();   
-            }
         }
     }
 
@@ -841,10 +821,7 @@ public class VerifyingFile {
                 }
             } finally {
                 // return the buffer to the cache
-                synchronized(CACHE) {
-                    CACHE.push(buf);
-                    CACHE.notifyAll();
-                }
+                CACHE.release(buf);
                 
                 synchronized(VerifyingFile.this) {
                     if (!freedPending)
@@ -873,12 +850,7 @@ public class VerifyingFile {
     private static class CacheCleaner implements Runnable {
         public void run() {
             LOG.info("clearing cache");
-            synchronized(CACHE) {
-                int size = CACHE.size();
-                CACHE.clear();
-                numCreated -= size;
-                CACHE.notifyAll();
-            }
+            CACHE.clear();
             QUEUE.add(new ChunkCacheCleaner());
         }
     }
