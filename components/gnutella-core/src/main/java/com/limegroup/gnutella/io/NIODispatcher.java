@@ -3,25 +3,23 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedSelectorException;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-
+import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.LinkedList;
-import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Dispatcher for NIO.
@@ -78,7 +76,7 @@ public class NIODispatcher implements Runnable {
      * Maximum number of times an attachment can be hit in a row without considering
      * it suspect & closing it.
      */
-    private static final long MAXIMUM_ATTACHMENT_HITS = 10000;
+    private static final long MAXIMUM_ATTACHMENT_HITS = 1000000;
     
     /**
      * Maximum number of times Selector can return quickly without having anything
@@ -109,6 +107,9 @@ public class NIODispatcher implements Runnable {
     
     /** The throttle queue. */
     private volatile List /* of NBThrottle */ THROTTLE = new ArrayList();
+    
+    /** Whether or not we told the selector to wakeup immediately. */
+    private volatile boolean wokeup = false;
     
     /**
      * Temporary list used where REGISTER & LATER are combined, so that
@@ -174,6 +175,7 @@ public class NIODispatcher implements Runnable {
 	        synchronized(Q_LOCK) {
 				REGISTER.add(new RegisterOp(channel, handler, op));
 			}
+            wakeup();
         }
     }
     
@@ -215,6 +217,11 @@ public class NIODispatcher implements Runnable {
     				else
     					sk.interestOps(sk.interestOps() & ~op);
                 }
+                
+                // if we want to see if something is happening,
+                // wakeup immediately so we can process again.
+                if(on)
+                    wakeup();
 			}
         } catch(CancelledKeyException ignored) {
             // Because closing can happen in any thread, the key may be cancelled
@@ -236,6 +243,7 @@ public class NIODispatcher implements Runnable {
             synchronized(Q_LOCK) {
                 LATER.add(runner);
             }
+            wakeup();
         }
     }
     
@@ -310,6 +318,12 @@ public class NIODispatcher implements Runnable {
         }
     }
     
+    /** Wakes up the selector. */
+    private void wakeup() {
+        wokeup = true;
+        selector.wakeup();
+    }
+    
     /**
      * Adds any pending actions.
      *
@@ -372,6 +386,7 @@ public class NIODispatcher implements Runnable {
         long startSelect = -1;
         int zeroes = 0;
         int ignores = 0;
+      //  boolean waswoke = false;
         
         while(true) {
             // This sleep is technically not necessary, however occasionally selector
@@ -381,13 +396,14 @@ public class NIODispatcher implements Runnable {
             // selection can handle more things in one round.
             // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
             // that cause this.
-            if (!checkTime || !CommonUtils.isWindows()) {
-                try {
-                    Thread.sleep(50);
-                } catch(InterruptedException ix) {
-                    LOG.warn("Selector interrupted", ix);
-                }
-            }
+//            if (!waswoke && (!checkTime || !CommonUtils.isWindows())) {
+//                try {
+//                    Thread.sleep(50);
+//                } catch(InterruptedException ix) {
+//                    LOG.warn("Selector interrupted", ix);
+//                }
+//            }
+//            waswoke = false;
             
             addPendingItems();
 
@@ -396,7 +412,7 @@ public class NIODispatcher implements Runnable {
                     startSelect = System.currentTimeMillis();
                     
                 // see register(...) for why this has a timeout
-                selector.select(100);
+                selector.select();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
@@ -412,7 +428,7 @@ public class NIODispatcher implements Runnable {
                 if(startSelect == -1) {
                     LOG.warn("No keys selected, starting spin check.");
                     checkTime = true;
-                } else if(startSelect + 30 >= System.currentTimeMillis()) {
+                } else if(!wokeup && startSelect + 30 >= System.currentTimeMillis()) {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Spinning detected, current spins: " + zeroes);
                     if(zeroes++ > SPIN_AMOUNT)
@@ -448,6 +464,8 @@ public class NIODispatcher implements Runnable {
             
             keys.clear();
             iteration++;
+           // waswoke = wokeup;
+            wokeup = false;
         }
     }
     

@@ -1568,7 +1568,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	public void doDownload() 
         throws DiskException, IOException {
-        
+       
         _socket.setSoTimeout(1*60*1000);//downloading, can stall upto 1 mins
         
         long currPos = _initialReadingPoint;
@@ -1599,7 +1599,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 BandwidthThrottle throttle = _socket instanceof UDPConnection ?
                     UDP_THROTTLE : THROTTLE;
                 int toRead = throttle.request(Math.min(BUF_LENGTH, left));
-                c = _byteReader.read(buf, 0, toRead);
+                c = _input.read(buf, 0, toRead);
                 if (c == -1) 
                     break;
                 
@@ -1609,7 +1609,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
 
 				synchronized(this) {
-				    if (_isActive) {
+                    if (_isActive) {
                         
                         // skip until we reach the initial writing point
                         int skipped = 0;
@@ -1628,22 +1628,13 @@ public class HTTPDownloader implements BandwidthTracker {
                             continue;
                         }
                         
-                        // if are past our initial writing point, but we had to skip some bytes 
-                        // or were told to stop sooner, trim the buffer
-                        if (skipped > 0 || _amountRead+c >= _amountToRead) {
-                            c = Math.min(c,_amountToRead - _amountRead);
-                            if (LOG.isDebugEnabled())
-                                LOG.debug("trimming buffer by "+
-                                        skipped +" to "+c+" bytes");
-                            
-                            byte [] temp = new byte[c];
-                            System.arraycopy(buf,skipped,temp,0,c);
-                            System.arraycopy(temp,0,buf,0,temp.length);
-                        } 
+                        // this works because amountRead has not yet been updated with
+                        // the amount we just read.  it'll be updated after we write.
+                        c = Math.min(c, _amountToRead - _amountRead);
                         
                         // write to disk
                         try {
-                            _incompleteFile.writeBlock(currPos,c,buf);
+                            _incompleteFile.writeBlock(currPos, skipped, c, buf);
                         } catch (InterruptedException killed) {
                             _isActive = false;
                             break;

@@ -231,28 +231,34 @@ public class VerifyingFile {
      * @throws InterruptedException if the downloader gets killed during the process
      */
     public void writeBlock(long pos,byte[] data) throws InterruptedException {
-        writeBlock(pos,data.length,data);
+        writeBlock(pos, 0, data.length, data);
     }
     
     /**
      * Writes bytes to the underlying file.
      * @throws InterruptedException if the downloader gets killed during the process
+     * @param currPos the position in the file to write to
+     * @param start the start position in the buffer to read from
+     * @param length the length of data in the buffer to use
+     * @param buf the buffer of data
      */
-    public void writeBlock(long currPos, int length, byte[] buf) 
-    throws InterruptedException {
-        
+    public void writeBlock(long currPos, int start, int length, byte[] buf) 
+      throws InterruptedException {
+
+        int bufLength = length - start;
         if (LOG.isTraceEnabled())
-            LOG.trace(" trying to write block at offset "+currPos+" with size "+length);
+            LOG.trace("trying to write block at offset " + currPos + " with size " + bufLength);
         
-        if(buf.length==0) //nothing to write? return
+        if(bufLength == 0) //nothing to write? return
             return;
+        
         if(fos == null)
             throw new IllegalStateException("no fos!");
         
         if (!isOpen())
             return;
 		
-		Interval intvl = new Interval(currPos,currPos+length-1);        
+		Interval intvl = new Interval(currPos, currPos + bufLength - 1);        
         synchronized(this) {
     		/// some stuff to help debugging ///
     		if (!leasedBlocks.contains(intvl)) {
@@ -285,8 +291,8 @@ public class VerifyingFile {
         }
         
         byte[] temp = CACHE.get();
-        Assert.that(temp.length >= length);
-        System.arraycopy(buf, 0, temp, 0, length);
+        Assert.that(temp.length >= bufLength);
+        System.arraycopy(buf, start, temp, 0, length);
         QUEUE.add(new ChunkHandler(temp, intvl));
 
     }
