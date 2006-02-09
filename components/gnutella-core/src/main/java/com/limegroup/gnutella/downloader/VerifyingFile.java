@@ -252,12 +252,7 @@ public class VerifyingFile {
         if (!isOpen())
             return;
 		
-		Interval intvl = new Interval(currPos,currPos+length-1);
-		
-        
-        byte [] temp = CACHE.get();
-        Assert.that(temp.length >= length);
-        
+		Interval intvl = new Interval(currPos,currPos+length-1);        
         synchronized(this) {
     		/// some stuff to help debugging ///
     		if (!leasedBlocks.contains(intvl)) {
@@ -289,9 +284,11 @@ public class VerifyingFile {
             }
         }
         
-        System.arraycopy(buf,0,temp,0,length);
-        QUEUE.add(new ChunkHandler(temp,intvl));
-        
+        byte[] temp = CACHE.get();
+        Assert.that(temp.length >= length);
+        System.arraycopy(buf, 0, temp, 0, length);
+        QUEUE.add(new ChunkHandler(temp, intvl));
+
     }
     
     /**
@@ -808,6 +805,7 @@ public class VerifyingFile {
         }
 	}
     
+    /**  A simple Runnable that schedules a verification of the file. */
     private class EmptyVerifier implements Runnable {
     	private long existingFileSize;
     	
@@ -823,6 +821,10 @@ public class VerifyingFile {
         }
     }
     
+    /**
+     * A Runnable that clears the cache used for storing byte[]s used for
+     * writing data read from network to disk, and schedules a ChunkCacheCleaner.
+     */
     private static class CacheCleaner implements Runnable {
         public void run() {
             LOG.info("clearing cache");
@@ -831,6 +833,7 @@ public class VerifyingFile {
         }
     }
     
+    /** A Runnable that clears the cache storing byte[]s used for verifying. */
     private static class ChunkCacheCleaner implements Runnable {
     	public void run() {
     		CHUNK_CACHE.clear();
