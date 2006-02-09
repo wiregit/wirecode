@@ -20,6 +20,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.ByteArrayCache;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.PowerOf2ByteArrayCache;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 
@@ -54,11 +55,6 @@ public class VerifyingFile {
             Thread.NORM_PRIORITY+1); // a little higher priority than normal
     
     /**
-     * Do not queue up more than this many chunks otherwise the queue grows unbounded
-     */
-    private static final int MAX_CACHED_BUFFERS = 512; // = half meg
-    
-    /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
      */
     static final float MAX_CORRUPTION = 0.9f;
@@ -69,7 +65,7 @@ public class VerifyingFile {
      *  downloads that will be required after we learn the chunk size from the TigerTree,
      *  since the chunk size will always be a power of two.
      */
-    /* package */ static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
+    static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
     /** 
      * A cache for byte[]s.
@@ -80,7 +76,7 @@ public class VerifyingFile {
     }
     
     /** a bunch of cached byte[]s for verifyable chunks */
-    private static final Map CHUNK_CACHE = new HashMap(20);
+    private static final PowerOf2ByteArrayCache CHUNK_CACHE = new PowerOf2ByteArrayCache();
     
     /**
      * The file we're writing to / reading from.
@@ -600,14 +596,13 @@ public class VerifyingFile {
      */
     public synchronized void setHashTree(HashTree tree) {
         // doesn't match our expected tree, bail.
-        if(expectedHashRoot != null && tree != null &&
-                !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
+        if (expectedHashRoot != null && tree != null && !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
             return;
-        
+
         // if the tree is of incorrect size, ignore it
         if (tree != null && tree.getFileSize() != completedSize)
             return;
-        
+
         // if we did not have a tree previously
         // and we do have a hash tree now
         // and either we want to scan the whole file once
@@ -615,11 +610,12 @@ public class VerifyingFile {
         // trigger verification.
         HashTree previous = hashTree;
         hashTree = tree;
-        if (previous == null && tree != null &&
-            (existingFileSize != -1 || (pendingBlocks.getSize() == 0 &&	partialBlocks.getSize() > 0))
-           )
+        if (previous == null && tree != null && (existingFileSize != -1 ||
+                (pendingBlocks.getSize() == 0 && partialBlocks.getSize() > 0))
+           ) {
             QUEUE.add(new EmptyVerifier(existingFileSize));
-        	existingFileSize = -1;
+            existingFileSize = -1;
+        }
     }
     
     /**
@@ -686,12 +682,13 @@ public class VerifyingFile {
             LOG.debug("verifying interval "+i);
         
         
-        byte []b = getChunkBuf(i.high - i.low+1);
+        int length = i.high - i.low + 1;
+        byte[] b = CHUNK_CACHE.get(length);
         // read the interval from the file
         try {
 			synchronized(fos) {
 				fos.seek(i.low);
-				fos.readFully(b);
+				fos.readFully(b, 0, length);
 			}
         } catch (IOException bad) {
             // we failed reading back from the file - assume block is corrupt
@@ -699,34 +696,13 @@ public class VerifyingFile {
             return false;
         }
         
-        boolean corrupt = tree.isCorrupt(i,b);
+        boolean corrupt = tree.isCorrupt(i, b, length);
         
         if (LOG.isDebugEnabled() && corrupt)
             LOG.debug("block corrupt!");
         
         return !corrupt;
     }
-    
-    /**
-     * @return a byte array of the specified size, using cached one
-     * if possible.
-     */
-	private static byte [] getChunkBuf(int size) {
-		// cache only chunks size powers of two
-		// others are very unlikely to be reused
-		int exp;
-		for (exp = 1 ; exp < size ; exp*=2);
-		if (exp > size) 
-			return new byte[size];
-		
-		Integer i = new Integer(size);
-		byte [] ret = (byte []) CHUNK_CACHE.get(i);
-		if (ret == null) {
-			ret = new byte[size];
-			CHUNK_CACHE.put(i,ret);
-		} 
-		return ret;
-	}
 	
     /**
      * iterates through the pending blocks and checks if the recent write has created

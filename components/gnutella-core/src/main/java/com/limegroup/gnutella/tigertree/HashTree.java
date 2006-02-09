@@ -218,6 +218,13 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Checks whether the specific area of the file matches the hash tree. 
      */
     public boolean isCorrupt(Interval in, byte [] data) {
+        return isCorrupt(in, data, data.length);
+    }
+ 
+    /**
+     * Checks whether the specific area of the file matches the hash tree.
+     */
+    public boolean isCorrupt(Interval in, byte[] data, int length) {
         Assert.that(in.high <= FILE_SIZE);
         
         // if the interval is not a fixed chunk, we cannot verify it.
@@ -226,7 +233,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
                 in.high - in.low +1 <= _nodeSize &&
                 (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
             TigerTree digest = new TigerTree();
-            digest.update(data);
+            digest.update(data, 0, length);
             byte [] hash = digest.digest();
             byte [] treeHash = (byte [])NODES.get(in.low / _nodeSize);
             boolean ok = Arrays.equals(treeHash, hash);

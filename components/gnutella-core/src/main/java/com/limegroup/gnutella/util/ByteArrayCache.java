@@ -27,10 +27,12 @@ public class ByteArrayCache {
     /** The length of buffers to create. */
     private int _length;
 
+    /** Constructs a new ByteArraCache using the default size of 512 & length of 1024 */
     public ByteArrayCache() {
         this(DEFAULT_SIZE, DEFAULT_LENGTH);
     }
     
+    /** Constructs a new ByteArrayCache using the given maxSize & length. */
     public ByteArrayCache(int maxSize, int length) {
         _maxSize = maxSize;
         _length = length;
