@@ -1568,7 +1568,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public void doDownload() 
         throws DiskException, IOException {
        
-        _socket.setSoTimeout(1*60*1000);//downloading, can stall upto 1 mins
+        _socket.setSoTimeout(60 * 1000); // downloading, can stall upto 1 minute
         
         long currPos = _initialReadingPoint;
         try {
@@ -1620,7 +1620,6 @@ public class HTTPDownloader implements BandwidthTracker {
                         // maintain data for next read.
                         _amountRead += c;
                         currPos += c;
-                       
                         
                         if(skipped >= c) {       
                             if(LOG.isDebugEnabled())
@@ -1637,7 +1636,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 try {
                     _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buf);
                 } catch (InterruptedException killed) {
-                    _isActive = false;
+                    synchronized(this) {
+                        _isActive = false;
+                    }
                     break;
                 }
             }  // end of while loop
