@@ -134,6 +134,10 @@ public class DownloadTest extends BaseTestCase {
     // default to waiting for 2 defaults.
     private final static long DOWNLOAD_WAIT_TIME = 1000 * 60 * 4;	
     
+    private static boolean saveAltLocs = false;
+    private static Set validAlts = null;
+    private static Set invalidAlts = null;
+    
     public static void globalSetUp() throws Exception {
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
@@ -247,6 +251,10 @@ public class DownloadTest extends BaseTestCase {
         FileDesc []shared = RouterService.getFileManager().getAllSharedFileDescriptors();
         for (int i = 0; i < shared.length; i++) 
             RouterService.getFileManager().removeFileIfShared(shared[i].getFile());
+        
+        saveAltLocs = false;
+        validAlts = null;
+        invalidAlts = null;
     }
     
     private static void deleteAllFiles() {
@@ -1456,7 +1464,8 @@ public class DownloadTest extends BaseTestCase {
         ualt.add(al3);
 
         uploader1.setGoodAlternateLocations(ualt);
-
+        
+        saveAltLocs = true;
         tGeneric(rfds);
 
         //Now let's check that the uploaders got the correct AltLocs.
@@ -1472,6 +1481,17 @@ public class DownloadTest extends BaseTestCase {
         alts = uploader3.incomingGoodAltLocs;
         assertTrue(alts.contains(al1));
         assertFalse(alts.contains(al2));
+        
+        // Test Downloader has correct alts: the downloader should have 
+        // 2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted
+        assertTrue(validAlts.contains(al1)); 
+        assertTrue(validAlts.contains(al3)); 
+        Iterator iter = validAlts.iterator(); 
+        while(iter.hasNext()) { 
+            AlternateLocation loc = (AlternateLocation)iter.next(); 
+            if(loc.equals(al2)) 
+                assertTrue("failed loc not demoted",loc.isDemoted()); 
+        }
         
         // ManagedDownloader clears validAlts and invalidAlts after completion
         assertEquals(Downloader.COMPLETE, DOWNLOADER.getState());
@@ -1497,11 +1517,18 @@ public class DownloadTest extends BaseTestCase {
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
         uploader1.setGoodAlternateLocations(ualt);
 
+        saveAltLocs = true;
         tGeneric(rfds);
         
         //Check to check the alternate locations
         List alt1 = uploader1.incomingGoodAltLocs;
         assertEquals("uploader got bad alt locs",0,alt1.size());
+        
+        AlternateLocation agood = AlternateLocation.create(rfd1);
+        assertTrue(validAlts.contains(agood)); 
+        assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0])); 
+        assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1])); 
+        assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
         
         // ManagedDownloader clears validAlts and invalidAlts after completion
         assertEquals(Downloader.COMPLETE, DOWNLOADER.getState());
@@ -2511,6 +2538,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     private static final class MyCallback extends ActivityCallbackStub {
+        
         public void addDownload(Downloader d) {
             DOWNLOADER = (ManagedDownloader)d;
         }
@@ -2518,6 +2546,18 @@ public class DownloadTest extends BaseTestCase {
             synchronized(COMPLETE_LOCK) {
                 REMOVED = true;
                 COMPLETE_LOCK.notify();
+            }
+            
+            if (saveAltLocs) {
+                try {
+                    validAlts = new HashSet();
+                    validAlts.addAll((Set)PrivilegedAccessor.getValue(d, "validAlts"));
+                    
+                    invalidAlts = new HashSet();
+                    invalidAlts.addAll((Set)PrivilegedAccessor.getValue(d, "invalidAlts"));
+                } catch (Exception err) {
+                    throw new RuntimeException(err);
+                }
             }
         }
     }
