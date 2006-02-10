@@ -953,18 +953,20 @@ public class DownloadTest extends BaseTestCase {
                 "will eventually finish");
         final int RATE = 100;
         uploader1.setCorruption(true);
-        uploader1.setCorruptBoundary(50);
+        uploader1.setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         uploader1.setRate(RATE);
+        
+        uploader2.setCorruption(true);
+        uploader2.setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
         uploader2.setRate(RATE);
-
+        
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         
-        
         Downloader download=
-            RouterService.download(new RemoteFileDesc[]{rfd1}, Collections.EMPTY_LIST, null, false);
+            RouterService.download(new RemoteFileDesc[]{rfd1, rfd2}, Collections.EMPTY_LIST, null, false);
         waitForComplete(false);
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -976,7 +978,8 @@ public class DownloadTest extends BaseTestCase {
         // tried once or twice.
         assertLessThanOrEquals(2, uploader2.getConnections());
         
-        assertGreaterThanOrEquals(TestFile.length(),uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
+        assertGreaterThanOrEquals(TestFile.length(), 
+                uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
     }
     
     public void testDiscardCorrupt() throws Exception {
@@ -987,13 +990,15 @@ public class DownloadTest extends BaseTestCase {
         callback.delCorrupt = true;
         callback.corruptChecked = false;
         uploader1.setCorruption(true);
-        uploader1.setCorruptBoundary(50);
-        uploader1.stopAfter(256*1024);
+        uploader1.setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         uploader1.setRate(RATE);
-        uploader2.setRate(RATE/10);
-
+        
+        uploader2.setCorruption(true);
+        uploader2.setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
+        uploader2.setRate(RATE);
+        
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         
@@ -1007,10 +1012,8 @@ public class DownloadTest extends BaseTestCase {
         // tried once or twice.
         assertLessThanOrEquals(2, uploader2.getConnections());
         
-        assertLessThan("u1: " + uploader1.getAmountUploaded()+
-                "u2: " + uploader2.getAmountUploaded(),
-                TestFile.length(),uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
-
+        assertGreaterThanOrEquals(TestFile.length(), 
+                uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
     }
     
     
@@ -1456,7 +1459,6 @@ public class DownloadTest extends BaseTestCase {
 
         tGeneric(rfds);
 
-
         //Now let's check that the uploaders got the correct AltLocs.
         //Uploader 1: Must have al3. 
         //Uploader 1 got correct Alts?
@@ -1471,17 +1473,10 @@ public class DownloadTest extends BaseTestCase {
         assertTrue(alts.contains(al1));
         assertFalse(alts.contains(al2));
         
-        //Test Downloader has correct alts: the downloader should have
-        //2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted 
-        Set coll = (Set) PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
-        assertTrue(coll.contains(al1));
-        assertTrue(coll.contains(al3));
-        Iterator iter = coll.iterator();
-        while(iter.hasNext()) {
-            AlternateLocation loc = (AlternateLocation)iter.next();
-            if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.isDemoted());
-        }
+        // ManagedDownloader clears validAlts and invalidAlts after completion
+        assertEquals(Downloader.COMPLETE, DOWNLOADER.getState());
+        assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "validAlts")).isEmpty());
+        assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "invalidAlts")).isEmpty());
     }    
 
     public void testWeirdAlternateLocations() throws Exception {  
@@ -1506,15 +1501,12 @@ public class DownloadTest extends BaseTestCase {
         
         //Check to check the alternate locations
         List alt1 = uploader1.incomingGoodAltLocs;
-
-        AlternateLocation agood = AlternateLocation.create(rfd1);
-
         assertEquals("uploader got bad alt locs",0,alt1.size());
-        Set coll = (Set) PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
-        assertTrue(coll.contains(agood));
-        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]));
-        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]));
-        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
+        
+        // ManagedDownloader clears validAlts and invalidAlts after completion
+        assertEquals(Downloader.COMPLETE, DOWNLOADER.getState());
+        assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "validAlts")).isEmpty());
+        assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "invalidAlts")).isEmpty());
     }
 
     public void testAddSelfToMeshWithTree() throws Exception {
@@ -1723,7 +1715,6 @@ public class DownloadTest extends BaseTestCase {
         final int RATE=200;
         //second half of file + 1/8 of the file
         final int STOP_AFTER = TestFile.length()/10;
-        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
@@ -1755,9 +1746,9 @@ public class DownloadTest extends BaseTestCase {
         tResume(incFile);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        int u3 = uploader3.fullRequestsUploaded();
+        int u1 = uploader1.getAmountUploaded();
+        int u2 = uploader2.getAmountUploaded();
+        int u3 = uploader3.getAmountUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tu3: "+u3+"\n");

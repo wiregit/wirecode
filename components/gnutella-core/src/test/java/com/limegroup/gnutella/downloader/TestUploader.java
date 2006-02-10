@@ -71,7 +71,7 @@ public class TestUploader extends AssertComparisons {
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
     /** the boundary between stop/start to send corrupt bytes */
-    private int corruptBoundary;
+    private float corruptPercentage;
 
 	private AlternateLocationCollection storedGoodLocs,storedBadLocs;
 	public List incomingGoodAltLocs, incomingBadAltLocs;
@@ -296,7 +296,7 @@ public class TestUploader extends AssertComparisons {
         rate = 10000;
         stopped = false;
         sendCorrupt = false;
-        corruptBoundary = 0;
+        corruptPercentage = 0;
         busy = false;
         retryAfter = -1;
         timesBusy = Integer.MAX_VALUE;
@@ -388,10 +388,10 @@ public class TestUploader extends AssertComparisons {
     }
     
     /**
-     * Sets the boundary around stop/start to send corrupted bytes.
+     * Sets the corrupt percentage of the corrupted bytes.
      */
-    public void setCorruptBoundary(int num) {
-        this.corruptBoundary = num;
+    public void setCorruptPercentage(float num) {
+        this.corruptPercentage = num;
     }
 
     /** 
@@ -604,7 +604,8 @@ public class TestUploader extends AssertComparisons {
         boolean thexReq = false;
         
         while (true) {
-            String line=input.readLine();LOG.debug("read "+line);
+            String line=input.readLine();
+            //LOG.debug("read "+line);
             if (firstLine) {
                 if(line != null && !line.equals("")) {
                     requestsReceived++;
@@ -851,7 +852,10 @@ public class TestUploader extends AssertComparisons {
             out.close();
             return;
         }
-
+        
+        int length = stop-start;
+        int okLength = length - (int)(length * corruptPercentage);
+        
         amountThisRequest = 0;
         boolean sentCorrupt = false;
         for (int i=start; i<stop; ) {
@@ -869,9 +873,8 @@ public class TestUploader extends AssertComparisons {
                 }
             }
             throttle.request(1);
-            if(sendCorrupt &&
-               i-start >= corruptBoundary &&
-               stop-i >= corruptBoundary) {
+            if(sendCorrupt 
+                    && (i-start) >= okLength) {
                 sentCorrupt = true;
                 out.write(TestFile.getByte(i)+(byte)1);
             }
@@ -882,6 +885,7 @@ public class TestUploader extends AssertComparisons {
             i++;
             
         }
+        
         if (sentCorrupt)
             LOG.debug("corrupt data sent");
         out.flush();
