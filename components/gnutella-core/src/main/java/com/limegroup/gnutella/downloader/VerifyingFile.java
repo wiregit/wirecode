@@ -230,7 +230,7 @@ public class VerifyingFile {
      * Writes bytes to the underlying file.
      * @throws InterruptedException if the downloader gets killed during the process
      */
-    public void writeBlock(long pos,byte[] data) throws InterruptedException {
+    public void writeBlock(long pos, byte[] data) throws InterruptedException {
         writeBlock(pos, 0, data.length, data);
     }
     
@@ -245,7 +245,7 @@ public class VerifyingFile {
     public void writeBlock(long currPos, int start, int length, byte[] buf) 
       throws InterruptedException {
 
-        int bufLength = length - start;
+        long bufLength = length - start;
         if (LOG.isTraceEnabled())
             LOG.trace("trying to write block at offset " + currPos + " with size " + bufLength);
         

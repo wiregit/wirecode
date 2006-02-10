@@ -1608,48 +1608,39 @@ public class HTTPDownloader implements BandwidthTracker {
                 else
                     BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
 
+                long filePosition;
+                int dataLength;
+                int dataStart;
 				synchronized(this) {
                     if (_isActive) {
+                        int skipped = (int)(_initialWritingPoint - currPos);
+                        // setup data for writing.
+                        dataLength = c - skipped;
+                        dataStart = skipped;
+                        filePosition = currPos + skipped;                        
+                        // maintain data for next read.
+                        _amountRead += c;
+                        currPos += c;
                         
-                        // skip until we reach the initial writing point
-                        int skipped = 0;
-                        while (_initialWritingPoint > currPos && c > 0) {
-                            skipped++;
-                            currPos++;
-                            c--;
-                            _amountRead++;
-                        }
-                        
-                        // if we're still not there, continue
-                        if (_initialWritingPoint > currPos || c == 0) {
-                            if (LOG.isDebugEnabled())
-                                LOG.debug("skipped "+skipped+" bytes");
-                            
+                        if(skipped >= c) {       
+                            if(LOG.isDebugEnabled())
+                                LOG.debug("skipped full read of: " + skipped + " bytes");
                             continue;
-                        }
-                        
-                        // this works because amountRead has not yet been updated with
-                        // the amount we just read.  it'll be updated after we write.
-                        c = Math.min(c, _amountToRead - _amountRead);
-                        
-                        // write to disk
-                        try {
-                            _incompleteFile.writeBlock(currPos, skipped, c, buf);
-                        } catch (InterruptedException killed) {
-                            _isActive = false;
-                            break;
-                        }
-				        
-                        _amountRead+=c;
-				        currPos += c;//update the currPos for next iteration
-				        
-				    }
+                        }                 
+                    }
 				    else {
 				        if (LOG.isDebugEnabled())
 				            LOG.debug("WORKER:"+this+" stopping at "+(_initialReadingPoint+_amountRead));
 				        break;
 				    }
-				} 
+				}                
+                // write to disk outside of lock.
+                try {
+                    _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buf);
+                } catch (InterruptedException killed) {
+                    _isActive = false;
+                    break;
+                }
             }  // end of while loop
 
             synchronized(this) {
