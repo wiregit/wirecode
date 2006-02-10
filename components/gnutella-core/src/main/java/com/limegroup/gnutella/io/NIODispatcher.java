@@ -73,12 +73,6 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Maximum number of times an attachment can be hit in a row without considering
-     * it suspect & closing it.
-     */
-    private static final long MAXIMUM_ATTACHMENT_HITS = 1000000;
-    
-    /**
      * Maximum number of times Selector can return quickly without having anything
      * selected.
      */
@@ -92,9 +86,6 @@ public class NIODispatcher implements Runnable {
     
     /** The selector this uses. */
     private Selector selector = null;
-    
-    /** The current iteration of selection. */
-    private long iteration = 0;
 	
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
@@ -320,8 +311,13 @@ public class NIODispatcher implements Runnable {
     
     /** Wakes up the selector. */
     private void wakeup() {
-        wokeup = true;
-        selector.wakeup();
+        // there's no need to wakeup if we're on the dispatch thread,
+        // since it's impossible to be blocked in a select call if this is
+        // happening.
+        if(Thread.currentThread() != dispatchThread) {
+            wokeup = true;
+            selector.wakeup();
+        }
     }
     
     /**
@@ -386,32 +382,14 @@ public class NIODispatcher implements Runnable {
         long startSelect = -1;
         int zeroes = 0;
         int ignores = 0;
-      //  boolean waswoke = false;
         
-        while(true) {
-            // This sleep is technically not necessary, however occasionally selector
-            // begins to wakeup with nothing selected.  This happens very frequently on Linux,
-            // and sometimes on Windows (bugs, etc..).  The sleep prevents busy-looping.
-            // It also allows pending registrations & network events to queue up so that
-            // selection can handle more things in one round.
-            // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
-            // that cause this.
-//            if (!waswoke && (!checkTime || !CommonUtils.isWindows())) {
-//                try {
-//                    Thread.sleep(50);
-//                } catch(InterruptedException ix) {
-//                    LOG.warn("Selector interrupted", ix);
-//                }
-//            }
-//            waswoke = false;
-            
+        while(true) {            
             addPendingItems();
 
             try {
                 if(checkTime)
                     startSelect = System.currentTimeMillis();
-                    
-                // see register(...) for why this has a timeout
+                
                 selector.select();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
@@ -463,8 +441,6 @@ public class NIODispatcher implements Runnable {
             }
             
             keys.clear();
-            iteration++;
-           // waswoke = wokeup;
             wokeup = false;
         }
     }
@@ -474,44 +450,29 @@ public class NIODispatcher implements Runnable {
      * ops that are in allowedOps.
      */
     void process(SelectionKey sk, Object proxyAttachment, int allowedOps) {
-        Attachment proxy = (Attachment)proxyAttachment;
+        Attachment proxy = (Attachment) proxyAttachment;
         IOErrorObserver attachment = proxy.attachment;
-        
-        if(proxy.lastMod == iteration) {
-            proxy.hits++;
-        // do not count ones that we've already processed (such as throttled items)
-        } else if(proxy.lastMod < iteration)
-            proxy.hits = 0;
-            
-        proxy.lastMod = iteration + 1;
-            
-        if(proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
+
+        try {
             try {
-                try {
-                    if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                        processAccept(sk, (AcceptObserver)attachment);
-                    else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
-                        processConnect(sk, (ConnectObserver)attachment);
-                    else {
-                        if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
-                            ((ReadObserver)attachment).handleRead();
-                        if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
-                            ((WriteObserver)attachment).handleWrite();
-                    }
-                } catch (CancelledKeyException err) {
-                    LOG.warn("Ignoring cancelled key", err);
-                } catch(IOException iox) {
-                    LOG.warn("IOX processing", iox);
-                    attachment.handleIOException(iox);
+                if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                    processAccept(sk, (AcceptObserver) attachment);
+                else if ((allowedOps & SelectionKey.OP_CONNECT) != 0 && sk.isConnectable())
+                    processConnect(sk, (ConnectObserver) attachment);
+                else {
+                    if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
+                        ((ReadObserver) attachment).handleRead();
+                    if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
+                        ((WriteObserver) attachment).handleWrite();
                 }
-            } catch(Throwable t) {
-                ErrorService.error(t, "Unhandled exception while dispatching");
-                safeCancel(sk, attachment);
+            } catch (CancelledKeyException err) {
+                LOG.warn("Ignoring cancelled key", err);
+            } catch (IOException iox) {
+                LOG.warn("IOX processing", iox);
+                attachment.handleIOException(iox);
             }
-        } else {
-            if(LOG.isErrorEnabled())
-                LOG.error("Too many hits in a row for: " + attachment);
-            // we've had too many hits in a row.  kill this attachment.
+        } catch (Throwable t) {
+            ErrorService.error(t, "Unhandled exception while dispatching");
             safeCancel(sk, attachment);
         }
     }
@@ -607,21 +568,24 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Encapsulates an attachment. */
+    /**
+     * Encapsulates an attachment.
+     * Extra information about the attachment can be stored here.  
+     */
     static class Attachment {
         private final IOErrorObserver attachment;
-        private long lastMod;
-        private long hits;
         
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
         }
     }
 
+    /** Exception to be thrown when the Selector is spinning. */
     private static class SpinningException extends Exception {
         public SpinningException() { super(); }
     }
     
+    /** Exception to be thrown when there's an error with selecting. */
     private static class ProcessingException extends Exception {
         public ProcessingException() { super(); }
         public ProcessingException(Throwable t) { super(t); }

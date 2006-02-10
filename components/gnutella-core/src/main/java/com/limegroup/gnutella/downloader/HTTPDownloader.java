@@ -320,7 +320,6 @@ public class HTTPDownloader implements BandwidthTracker {
 		_host = rfd.getHost();
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
-        URN urn = rfd.getSHA1Urn();
         _locationsReceived = new HashSet();
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
@@ -1613,22 +1612,23 @@ public class HTTPDownloader implements BandwidthTracker {
                 int dataStart;
 				synchronized(this) {
                     if (_isActive) {
-                        int skipped = (int)(_initialWritingPoint - currPos);
+                        int skipped = Math.max(0, (int)(_initialWritingPoint - currPos));
                         // setup data for writing.
                         dataLength = c - skipped;
                         dataStart = skipped;
-                        filePosition = currPos + skipped;                        
+                        filePosition = currPos + skipped;
+                        LOG.debug("read: " + c + ", writingPoint: " + _initialWritingPoint + ", skipped: " + skipped + ", dataLength: " + dataLength + ", dataStart: " + skipped + ", filePosition: " + filePosition + ", currentPosition: " + currPos + ", amountRead: " + _amountRead);
                         // maintain data for next read.
                         _amountRead += c;
                         currPos += c;
+                       
                         
                         if(skipped >= c) {       
                             if(LOG.isDebugEnabled())
                                 LOG.debug("skipped full read of: " + skipped + " bytes");
                             continue;
                         }                 
-                    }
-				    else {
+                    } else {
 				        if (LOG.isDebugEnabled())
 				            LOG.debug("WORKER:"+this+" stopping at "+(_initialReadingPoint+_amountRead));
 				        break;

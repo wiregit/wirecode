@@ -245,11 +245,10 @@ public class VerifyingFile {
     public void writeBlock(long currPos, int start, int length, byte[] buf) 
       throws InterruptedException {
 
-        long bufLength = length - start;
         if (LOG.isTraceEnabled())
-            LOG.trace("trying to write block at offset " + currPos + " with size " + bufLength);
+            LOG.trace("trying to write block at offset " + currPos + " with size " + length);
         
-        if(bufLength == 0) //nothing to write? return
+        if(length == 0) //nothing to write? return
             return;
         
         if(fos == null)
@@ -258,7 +257,7 @@ public class VerifyingFile {
         if (!isOpen())
             return;
 		
-		Interval intvl = new Interval(currPos, currPos + bufLength - 1);        
+		Interval intvl = new Interval(currPos, currPos + length - 1);        
         synchronized(this) {
     		/// some stuff to help debugging ///
     		if (!leasedBlocks.contains(intvl)) {
@@ -291,7 +290,7 @@ public class VerifyingFile {
         }
         
         byte[] temp = CACHE.get();
-        Assert.that(temp.length >= bufLength);
+        Assert.that(temp.length >= length);
         System.arraycopy(buf, start, temp, 0, length);
         QUEUE.add(new ChunkHandler(temp, intvl));
 
