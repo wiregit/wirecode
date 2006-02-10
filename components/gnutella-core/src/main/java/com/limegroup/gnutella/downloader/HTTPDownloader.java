@@ -1617,7 +1617,6 @@ public class HTTPDownloader implements BandwidthTracker {
                         dataLength = c - skipped;
                         dataStart = skipped;
                         filePosition = currPos + skipped;
-                        LOG.debug("read: " + c + ", writingPoint: " + _initialWritingPoint + ", skipped: " + skipped + ", dataLength: " + dataLength + ", dataStart: " + skipped + ", filePosition: " + filePosition + ", currentPosition: " + currPos + ", amountRead: " + _amountRead);
                         // maintain data for next read.
                         _amountRead += c;
                         currPos += c;
