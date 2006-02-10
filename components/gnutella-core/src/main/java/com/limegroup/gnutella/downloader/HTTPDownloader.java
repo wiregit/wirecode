@@ -1573,7 +1573,7 @@ public class HTTPDownloader implements BandwidthTracker {
         long currPos = _initialReadingPoint;
         try {
             
-            int c = -1;
+            int read = -1;
             byte[] buf = new byte[BUF_LENGTH];
             
             while (true) {
@@ -1598,14 +1598,14 @@ public class HTTPDownloader implements BandwidthTracker {
                 BandwidthThrottle throttle = _socket instanceof UDPConnection ?
                     UDP_THROTTLE : THROTTLE;
                 int toRead = throttle.request(Math.min(BUF_LENGTH, left));
-                c = _input.read(buf, 0, toRead);
-                if (c == -1) 
+                read = _input.read(buf, 0, toRead);
+                if (read == -1) 
                     break;
                 
                 if (_inNetwork)
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(c);
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(read);
                 else
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(read);
 
                 long filePosition;
                 int dataLength;
@@ -1613,15 +1613,24 @@ public class HTTPDownloader implements BandwidthTracker {
 				synchronized(this) {
                     if (_isActive) {
                         int skipped = Math.max(0, (int)(_initialWritingPoint - currPos));
+                        
+                        // see if we were stolen from while reading
+                        read = Math.min(read, _amountToRead - _amountRead);
+                        if (read <=0 ) {
+                            // if were told to not read anything more, finish
+                            _isActive = false;
+                            break;
+                        }
+                        
                         // setup data for writing.
-                        dataLength = c - skipped;
+                        dataLength = read - skipped;
                         dataStart = skipped;
                         filePosition = currPos + skipped;
                         // maintain data for next read.
-                        _amountRead += c;
-                        currPos += c;
+                        _amountRead += read;
+                        currPos += read;
                         
-                        if(skipped >= c) {       
+                        if(skipped >= read) {       
                             if(LOG.isDebugEnabled())
                                 LOG.debug("skipped full read of: " + skipped + " bytes");
                             continue;
