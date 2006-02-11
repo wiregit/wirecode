@@ -182,15 +182,18 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("AUTOMATIC_MANUAL_GC", CommonUtils.isMacOSX());
 
     /**
+     * "en" English, the default locale to assume a remote computer has when it doesn't say.
+     * 
+     * If a remote computer doesn't tell us it's language preference, we'll assume it's English.
+     * This DEFAULT_LOCALE setting isn't the same as our language preference.
+     * If a LimeWire program in France is configured for French, this DEFAULT_LOCALE setting will still be "en" English.
+     * 
      * the default locale to use if not specified
      * used to set the locale for connections which don't have X_LOCALE_PREF
      * header or pings and pongs that don't advertise locale preferences.
      */
-    public static final StringSetting DEFAULT_LOCALE = 
-        FACTORY.createStringSetting("DEFAULT_LOCALE", "en");
-        
+    public static final StringSetting DEFAULT_LOCALE = FACTORY.createStringSetting("DEFAULT_LOCALE", "en");
 
-    
     /**
      * Gets the current language setting.
      */

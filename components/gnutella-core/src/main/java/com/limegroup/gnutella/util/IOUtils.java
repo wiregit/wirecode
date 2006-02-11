@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.util;
 
 import java.io.EOFException;
@@ -182,15 +185,31 @@ public class IOUtils {
             } catch(IOException ignored) {}
         }
     }
-    
+
+    /**
+     * Close the given OutputStream object safely.
+     * 
+     * Calls out.close().
+     * If out is null, doesn't do anything.
+     * Catches and suppresses an IOException.
+     * 
+     * @param out An OutputStream object we can call close() on
+     */
     public static void close(OutputStream out) {
-        if(out != null) {
+
+        // If out is null, don't do anything
+        if (out != null) {
+
             try {
+
+                // Close the given OutputStream
                 out.close();
-            } catch(IOException ignored) {}
+
+            // If that caused an exception, catch it and suppress it
+            } catch (IOException ignored) {}
         }
     }
-    
+
     public static void close(RandomAccessFile raf) {
         if(raf != null) {
             try {
@@ -214,47 +233,115 @@ public class IOUtils {
             } catch(IOException ignored) {}
         }
     }
-    
+
     /**
-     * Deflates (compresses) the data.
+     * Compresses data.
+     * Uses deflate compression.
+     * 
+     * @param data A byte array of data
+     * @return     A byte array with the data, compressed
      */
     public static byte[] deflate(byte[] data) {
-        OutputStream dos = null;
+
+        // We'll point out at a DeflaterOutputStream that writes to a ByteArrayOutputStream
+        OutputStream out = null;
+
         try {
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            dos = new DeflaterOutputStream(baos);
-            dos.write(data, 0, data.length);
-            dos.close();                      //flushes bytes
-            return baos.toByteArray();
-        } catch(IOException impossible) {
+
+            // A Java ByteArrayOutputStream grows to hold the data we write to it
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+
+            // Wrap a Java DeflaterOutputStream around b, and point out at it
+            out = new DeflaterOutputStream(b);
+
+            /*
+             * When we write to out, the DeflaterOutputStream will compress the bytes and the ByteArrayOutputStream will hold them.
+             */
+
+            // Write the given byte array into the DeflaterOutputStream
+            out.write(data, 0, data.length);
+
+            // Close the DeflaterOutputStream, causing it to actually compress everything and write it to the ByteArrayOutputStream
+            out.close(); // Flushes bytes
+
+            // Get the byte array inside the ByteArrayOutputStream where it has been keeping its data, and return it
+            return b.toByteArray();
+
+        // An IOException shouldn't happen
+        } catch (IOException impossible) {
+
+            // Have the ErrorService log it and return null instead of a byte array of compressed data
             ErrorService.error(impossible);
             return null;
+
+        // Run the code here if there was an exception or not
         } finally {
-            IOUtils.close(dos);
+
+            // Call out.close() to put away the DeflaterOutputStream
+            IOUtils.close(out); // Checks that out isn't null first and suppresses an IOException
         }
     }
-    
+
     /**
-     * Inflates (uncompresses) the data.
+     * Decompresses data.
+     * Uses deflate compression.
+     * 
+     * @param data A byte array of compressed data
+     * @return     A byte array of that data, decompressed
      */
     public static byte[] inflate(byte[] data) throws IOException {
+
+        // We'll point in at a InflaterInputStream that reads from a ByteArrayInputStream that has the give data
         InputStream in = null;
+
         try {
+
+            /*
+             * A Java ByteArrayInputStream lets us read from its data, and keeps track of which part to read next.
+             * A Java InflaterInputStream decompresses the data we read from it.
+             * A Java ByteArrayOutputStream grows to hold the data we write to it.
+             * 
+             * new ByteArrayInputStream(data) makes a new ByteArrayInputStream with the data byte array inside it.
+             * We can call read() on it, and it will give us the data and keep track of which byte to give us next.
+             * The InflaterInputStream will do this, decompressing the data it reads.
+             */
+
+            // Wrap the given data in a ByteArrayInputStream that a InflaterInputStream can call read() on to get the given data
             in = new InflaterInputStream(new ByteArrayInputStream(data));
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            // Make a ByteArrayOutputStream to hold the uncompressed data
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+
+            // Make a temporary buffer that holds 64 bytes
             byte[] buf = new byte[64];
-            while(true) {
-                int read = in.read(buf, 0, buf.length);
-                if(read == -1)
-                    break;
-                out.write(buf, 0, read);
+
+            // Loop, reading data from the InflaterInputStream to the temporary buffer, and then moving it to the ByteArrayOutputStream
+            while (true) {
+
+                // Read 64 bytes of uncompressed data from the InflaterInputStream, which will get compressed data from the ByteArrayInputStream
+                int read = in.read(buf, 0, buf.length); // Returns the number of bytes the InflaterInputStream put in buf
+
+                // The InflaterInputStream returned -1, indicating there is no more data
+                if (read == -1) break; // Leave the loop
+
+                // Move the uncompressed data from our temporary buffer into the ByteArrayOutputStream
+                b.write(buf, 0, read);
             }
-            return out.toByteArray();
-        } catch(OutOfMemoryError oome) {
+
+            // Get the byte array inside the ByteArrayOutputStream where it keeps the data we've written to it, and return it
+            return b.toByteArray();
+
+        // Java ran out of memory
+        } catch (OutOfMemoryError oome) {
+
+            // Throw an IOException instead, taking the message from the OutOfMemoryError
             throw new IOException(oome.getMessage());
+
+        // Run the code here if there was an exception or not
         } finally {
+
+            // Call in.close() to put away the InflaterInputStream
             IOUtils.close(in);
         }
-    }    
-
+    }
 }

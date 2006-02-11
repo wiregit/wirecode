@@ -52,6 +52,5 @@ public final class UltrapeerSettings extends LimeProps {
         FACTORY.createSettableIntSetting("MIN_INITIAL_UPTIME", 120 * 60, "UltrapeerSettings.MinInitialUptime", 48 * 3600, 120 * 60);
 
     /** 10800000 milliseconds, we'll wait 3 hours before we try to become an ultrapeer again. */
-    public static final IntSetting UP_RETRY_TIME =
-        FACTORY.createSettableIntSetting("UP_RETRY_TIME", 180 * 60 * 1000, "UltrapeerSettings.UpRetryTime", 24 * 3600 * 1000, 180 * 60 * 1000);
+    public static final IntSetting UP_RETRY_TIME = FACTORY.createSettableIntSetting("UP_RETRY_TIME", 180 * 60 * 1000, "UltrapeerSettings.UpRetryTime", 24 * 3600 * 1000, 180 * 60 * 1000);
 }

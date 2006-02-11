@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.guess;
 
 import java.io.IOException;
@@ -11,14 +14,16 @@ import org.logi.crypto.keys.DESKey;
 import com.limegroup.gnutella.ByteOrder;
 
 /**
+ * QueryKey is part of GUESS, which LimeWire doesn't use anymore.
+ * 
  * Abstraction for a Query Key as detailed in the GUESS protocol spec.
  * Provides:
  * - encapsulation of (all, LW and non-LW) Query Keys
  * - generation of Query Keys (hence, it contains the LimeWire QK Algorithm)
- *
+ * 
  * A Query Key is a credential necessary to perform a GUESS Query.  A Query Key
  * instance is immutable.
- *
+ * 
  * If you want to change the underlying generation algorithm, you need to change
  * getQueryKey(ip, port, ....) and the two Secret inner classes (SecretKey and
  * SecretPad).
