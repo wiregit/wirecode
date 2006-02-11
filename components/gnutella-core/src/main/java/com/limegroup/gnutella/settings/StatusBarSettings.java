@@ -20,6 +20,12 @@ public class StatusBarSettings extends LimeProps {
         FACTORY.createBooleanSetting("SHARED_FILES_DISPLAY_ENABLED", true);
 
     /**
+     * Whether or not language status should be displayed.
+     */
+    public static BooleanSetting LANGUAGE_DISPLAY_ENABLED =
+    	FACTORY.createBooleanSetting("LANGUAGE_DISPLAY_ENABLED", true);
+    
+    /**
      * Whether or not firewall status should be displayed.
      */
     public static BooleanSetting FIREWALL_DISPLAY_ENABLED =
