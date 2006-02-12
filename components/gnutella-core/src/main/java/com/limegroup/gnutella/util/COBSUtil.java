@@ -16,6 +16,25 @@ import com.limegroup.gnutella.ByteOrder;
  * COBS stands for Consistant Overhead Byte Stuffing.
  * It adds no more than one byte of overhead for every 254 bytes of data.
  * http://www.acm.org/sigcomm/sigcomm97/papers/p062.pdf
+ * 
+ * COBS encoding takes a group of bytes that doesn't contain any 0s, and writes the length followed by the data.
+ * {'h' 'e' 'l' 'l' 'o'} becomes {6 'h' 'e' 'l' 'l' 'o'}
+ * The COBS encoded data on the right contains a single block that starts with its length, 6.
+ * {'a' 'a'} becomes {2 'a' 'a'}
+ * The only special length byte is 0xff.
+ * It describes a block 255 bytes long, after which there isn't a 0.
+ * 
+ * We choose groups separated by 0s.
+ * {'a' 'a' 0 'a' 'a'} becomes {3 'a' 'a' 3 'a' 'a'}
+ * 
+ * If there are multiple 0s between groups, an extra 0 can be represented by {1}, a block with length 1 and no data
+ * {'a' 'a' 0 0 'a' 'a'} becomes {3 'a' 'a' 1 3 'a' 'a'}
+ * 
+ * 0s on the ends become {1} blocks like this.
+ * {0 'a'} becomes {1 2 'a'}
+ * {'a' 0} becomes {2 'a' 1}
+ * {0} becomes {1 1}
+ * {0 0} becomes {1 1 1}
  */
 public class COBSUtil {
 
@@ -23,23 +42,6 @@ public class COBSUtil {
      * Encode a byte array with COBS.
      * The array might contain bytes that are 0s, which are not allowed.
      * This will hide them.
-     * 
-     * COBS encoding takes a group of bytes that doesn't contain any 0s, and writes the length followed by the data.
-     * {'h' 'e' 'l' 'l' 'o'} becomes {6 'h' 'e' 'l' 'l' 'o'}
-     * The COBS encoded data on the right contains a single block that starts with its length, 6.
-     * {'a' 'a'} becomes {2 'a' 'a'}
-     * 
-     * We choose groups separated by 0s.
-     * {'a' 'a' 0 'a' 'a'} becomes {3 'a' 'a' 3 'a' 'a'}
-     * 
-     * If there are multiple 0s between groups, an extra 0 can be represented by {1}, a block with length 1 and no data
-     * {'a' 'a' 0 0 'a' 'a'} becomes {3 'a' 'a' 1 3 'a' 'a'}
-     * 
-     * 0s on the ends become {1} blocks like this.
-     * {0 'a'} becomes {1 2 'a'}
-     * {'a' 0} becomes {2 'a' 1}
-     * {0} becomes {1 1}
-     * {0 0} becomes {1 1 1}
      * 
      * @param src A byte array of data with 0s to COBS encode
      * @return    The COBS encoded data with all the 0s hidden
@@ -132,23 +134,6 @@ public class COBSUtil {
      * Remove the COBS encoding from a byte array.
      * The array was COBS encoding to hide bytes that are 0s.
      * This will restore them.
-     * 
-     * COBS encoded data consists of blocks that look like this:
-     * 
-     * 0x01
-     * 0x02 'h'
-     * 0x03 'h' 'e'
-     * 0x06 'h' 'e' 'l' 'l' 'o'
-     * 
-     * The first byte tells the size of the whole block.
-     * The 3 block above would decode into this:
-     * 
-     * 0h0he0hello
-     * 
-     * We put 0s between the blocks, but not at the end.
-     * The empty block at the start became a 0.
-     * The only special length byte is 0xff.
-     * It describes a block 255 bytes long, after which there isn't a 0.
      * 
      * @param src A byte array of COBS encoded data with all the 0 bytes hidden
      * @return    The data with the COBS encoding removed and the 0s restored

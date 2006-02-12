@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella.messages;
 
@@ -19,20 +19,43 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.IOUtils;
 
-/** 
- * A mutable GGEP extension block.  A GGEP block can be thought of as a
- * collection of key/value pairs.  A key (extension header) cannot be greater
- * than 15 bytes.  The value (extension data) can be 0 to 2^24-1 bytes.  Values
- * can be formatted as a number, boolean, or generic blob of binary data.  If
- * necessary (e.g., for query replies), GGEP will COBS-encode values to remove
- * null bytes.  The order of the extensions is immaterial.  Extensions supported
- * by LimeWire have keys specified in this class (prefixed by GGEP_HEADER...)
+/**
+ * A GGEP object represents a GGEP block in a Gnutella packet.
+ * Make a new empty GGEP object and fill it with extensions to send a packet.
+ * Or, use this class to parse data from a packet we've received into a new GGEP object.
+ * You can change the names and values of this GGEP block once you've made it.
  * 
+ * GGEP stands for the Gnutella Generic Extension Protocol.
+ * It allows Gnutella programs to store additional information in Gnutella packets.
+ * http://www.the-gdf.org/wiki/index.php?title=GGEP
  * 
+ * A GGEP block looks like this:
  * 
+ * 0xC3
+ * #NAMEA#value
+ * #NAMEB##valuevaluevalue
+ * #NAMEC#
+ * #NAMED###valuevaluevaluevaluevalue
  * 
+ * All GGEP blocks start with the byte 0xC3.
+ * After that are a number of GGEP extensions.
+ * The order of the extensions doesn't matter.
+ * Each extension has a header followed by a value.
+ * A header looks like this:
  * 
+ * #NAMED###
  * 
+ * The first byte contains flags and the length of the header name.
+ * Next is the header name, like "VC".
+ * After that, 1, 2, or 3 bytes tell the length of this extension header's value.
+ * A bit in the flag byte marks the last extension in the block.
+ * 
+ * A GGEP extension header name can't be more than 15 characters, and a value can't be 256 KB or more.
+ * GGEP values can be deflate compressed and COBS encoded.
+ * COBS encoding hides 0s in arbitrary data so it can be put somewhere where 0s aren't allowed.
+ * 
+ * The extensions that LimeWire uses have names in this class like GGEP_HEADER_BROWSE_HOST and GGEP_HEADER_DAILY_AVERAGE_UPTIME.
+ * http://www.the-gdf.org/wiki/index.php?title=Known_GGEP_Extension_Blocks
  */
 public class GGEP {
 
@@ -201,10 +224,19 @@ public class GGEP {
      */
     public static final String GGEP_HEADER_FW_TRANS = "FW";
 
-    /** 15, A key name like "VC" can't be more than 15 bytes. */
+    /**
+     * 15, A key name like "VC" can't be more than 15 bytes.
+     * 4 bits in the GGEP header express its length.
+     * 2 ^ 4 - 1 = 15.
+     */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
-    /** 262143, A value can't be more than 262143 bytes long, which is 256 KB - 1 byte. */
+    /**
+     * 262143, A value can't be more than 262143 bytes long.
+     * In a GGEP header, 18 bits in 3 bytes express its length.
+     * 2 ^ 18 - 1 = 262143.
+     * A 256 KB value is too long.
+     */
     public static final int MAX_VALUE_SIZE_IN_BYTES = 262143;
 
     /** 0xC3. A GGEP block starts with a 0xC3 byte. */
@@ -237,8 +269,6 @@ public class GGEP {
      * //////////////////// Encoding/Decoding (Map <==> byte[]) ///////////////////
      */
 
-    //done
-
     /**
      * Make a new empty GGEP block.
      * To make a GGEP block for a packet we're going to send, use this constructor, and then add the keys and values.
@@ -263,39 +293,50 @@ public class GGEP {
         this(false);
     }
 
-    
-    
     /**
-     * Constructs a new GGEP message with the given bytes & offset.
+     * Parse the data of a GGEP block into a new GGEP object.
+     * If you're not sure if there is one GGEP block, use the read() method. (do)
      * 
-     * @param data
-     * @param offset
+     * @param  data                  The data of a Gnutella packet that contains a GGEP block
+     * @param  offset                The index where the GGEP block starts with its 0xC3 byte
+     * @throws BadGGEPBlockException The block isn't formed correctly for parsing
      */
     public GGEP(byte[] data, int offset) throws BadGGEPBlockException {
-        
-        
-        this(data, offset, null);
+
+        // Call the next constructor
+        this(data, offset, null); // We don't need to know how big the GGEP block is
     }
 
-    /** Constructs a GGEP instance based on the GGEP block beginning at
-     *  messageBytes[beginOffset].  If you are unsure of whether or not there is
-     *  one GGEP Block, use the read method.
-     *  @param messageBytes The bytes of the message.
-     *  @param beginOffset  The begin index of the GGEP prefix.
-     *  @param endOffset If you want to get the offset where the GGEP block
-     *  ends (more precisely, one above the ending index), then send me a
-     *  int[1].  I'll put the endOffset in endOffset[0].  If you don't care, 
-     *  null will do....
-     *  @exception BadGGEPBlockException Thrown if the block could not be parsed
-     *  correctly.
+    /**
+     * Parse the data of a GGEP block into a new GGEP object.
+     * If you're not sure if there is one GGEP block, use the read() method. (do)
      * 
-     * 
-     * @param messageBytes
-     * @param beginOffset
-     * @param endOffset
-     * 
+     * @param  messageBytes          The data of a Gnutella packet that contains a GGEP block
+     * @param  beginOffset           The index where the GGEP block starts with its 0xC3 byte
+     * @param  endOffset             This constructor will write the index beyond the GGEP block in endOffset[0], pass null to not do this
+     * @throws BadGGEPBlockException The block isn't formed correctly for parsing
      */
     public GGEP(byte[] messageBytes, final int beginOffset, int[] endOffset) throws BadGGEPBlockException {
+
+        /*
+         * A GGEP block looks like this:
+         * 
+         * 0xC3
+         * #VC###value
+         * #IPP###valuevaluevalue
+         * #PHC###valuevaluevalue
+         * 
+         * It starts with the 0xC3 byte.
+         * After that are any number of GGEP extensions.
+         * Each extension has a header followed by a value.
+         * A header looks like this:
+         * 
+         * #VC###
+         * 
+         * The first byte contains flags and the length of the header name.
+         * Next is the header name, like "VC".
+         * After that, 1, 2, or 3 bytes tell the length of this extension header's value.
+         */
 
         // Make sure the given byte array is at least 4 bytes
         if (messageBytes.length < 4) throw new BadGGEPBlockException();
@@ -303,116 +344,113 @@ public class GGEP {
         // All GGEP blocks begin with the byte 0xC3
         if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER) throw new BadGGEPBlockException();
 
+        // When we find the header marked as the last one, we'll set onLastExtension to true
         boolean onLastExtension = false;
-        
+
         // Start the index in the GGEP block just beyond the 0xC3 byte
         int currIndex = beginOffset + 1;
 
+        // Loop until we've read the last extension in the block
         while (!onLastExtension) {
 
-            // process extension header flags
-            // bit order is interpreted as 76543210
-            try {
+            // In the header's first byte, the 4th bit must be a 0
+            try { sanityCheck(messageBytes[currIndex]); } catch (ArrayIndexOutOfBoundsException malformedInput) { throw new BadGGEPBlockException(); }
 
-                sanityCheck(messageBytes[currIndex]);
-
-            } catch (ArrayIndexOutOfBoundsException malformedInput) {
-
-                throw new BadGGEPBlockException();
-            }
-
+            // If the 8th bit in the header's first byte is 1, this is the last extension in this GGEP block
             onLastExtension = isLastExtension(messageBytes[currIndex]);
+
+            // Look at the 7th and 6th bits to see if the value of this extension is COBS encoded and compressed
             boolean encoded = isEncoded(messageBytes[currIndex]);
             boolean compressed = isCompressed(messageBytes[currIndex]);
+
+            // Read the length of the header, like 3 for "SCP" from the first byte
             int headerLen = deriveHeaderLength(messageBytes[currIndex]);
 
-            // get the extension header
-            currIndex++;
+            // Read the extension header, like "SCP"
+            currIndex++; // Move past the flags byte, from "#VC###" to "VC###", the header name
             String extensionHeader = null;
             try {
 
+                // From the messageBytes byte array, at currIndex, clip out the ASCII characters to get the header name like "VC"
                 extensionHeader = new String(messageBytes, currIndex, headerLen);
 
-            } catch (StringIndexOutOfBoundsException inputIsMalformed) {
+            // We couldn't read that far
+            } catch (StringIndexOutOfBoundsException inputIsMalformed) { throw new BadGGEPBlockException(); }
 
-                throw new BadGGEPBlockException();
-            }
+            // Find out how long this extension's value is
+            currIndex += headerLen; // Move past the header name, from "VC###" to "###", the length bytes
 
-            // get the data length
-            currIndex += headerLen;
-            int[] toIncrement = new int[1];
+            // Read the length from the next 1, 2, or 3 bytes
+            int[] toIncrement = new int[1]; // deriveDataLength will tell us how many bytes it used by setting the value of toIncrement[0]
             final int dataLength = deriveDataLength(messageBytes, currIndex, toIncrement);
+            byte[] extensionData = null;    // A byte array for the value we'll read next
+            currIndex += toIncrement[0];    // Move past the length bytes, beyond "###", to the start of the value
 
-            byte[] extensionData = null;
-
-            currIndex += toIncrement[0];
-
+            // This extension has a value for us to read
             if (dataLength > 0) {
 
-                // ok, data is present, get it....
-
+                // Make a new byte array of the required length
                 byte[] data = new byte[dataLength];
-
                 try {
 
+                    // Copy in the data
                     System.arraycopy(messageBytes, currIndex, data, 0, dataLength);
 
-                } catch (ArrayIndexOutOfBoundsException malformedInput) {
+                } catch (ArrayIndexOutOfBoundsException malformedInput) { throw new BadGGEPBlockException(); }
 
-                    throw new BadGGEPBlockException();
-                }
-
+                // The header indicated that this data is COBS encoded
                 if (encoded) {
 
                     try {
 
+                        // Decode it
                         data = COBSUtil.cobsDecode(data);
 
-                    } catch (IOException badCobsEncoding) {
-
-                        throw new BadGGEPBlockException("Bad COBS Encoding");
-                    }
+                    } catch (IOException badCobsEncoding) { throw new BadGGEPBlockException("Bad COBS Encoding"); }
                 }
 
+                // The header indicated that this data is deflate compressed
                 if (compressed) {
 
                     try {
 
+                        // Decompress it
                         data = IOUtils.inflate(data);
 
-                    } catch(IOException badData) {
-
-                        throw new BadGGEPBlockException("Bad compressed data");
-                    }
+                    } catch (IOException badData) { throw new BadGGEPBlockException("Bad compressed data"); }
                 }
 
+                // Save the data, and move past it
                 extensionData = data;
-
-                currIndex += dataLength;
+                currIndex += dataLength; // Move from the start of this extension's data to the start of the next extension header
             }
 
-            // ok, everything checks out, just slap it in the hashmapper...
-            if (compressed) _props.put(extensionHeader, new NeedsCompression(extensionData));
+            // Add the extension name and value we just read to this GGEP object's _props TreeMap list of them
+            if (compressed) _props.put(extensionHeader, new NeedsCompression(extensionData)); // If we decompressed the data, wrap it in a NeedsCompression object to note that
             else            _props.put(extensionHeader, extensionData);
         }
 
-        if ((endOffset != null) && (endOffset.length > 0)) endOffset[0] = currIndex;
+        // If the caller wants to know where the GGEP block ends, write it in endOffset[0]
+        if ((endOffset != null) && (endOffset.length > 0)) endOffset[0] = currIndex; // The index in messageBytes after the last extension's value
     }
 
-    
-    
     /**
-     * Merges the other's GGEP with this' GGEP.
+     * Copy all the extensions from a given GGEP object into this one.
+     * If this one already has a value for an extension, it will get overwritten.
+     * 
+     * @param other The GGEP object to grab all the extensions from
      */
     public void merge(GGEP other) {
+
+        // Merge in the elements of the _props TreeMap
         _props.putAll(other._props);
-    }   
+    }
 
     /**
      * In the header's first byte, the 4th bit must be a 0.
      * 
      * @param  headerFlags           The header's first byte
-     * @throws BadGGEPBlockException The 4th bit in the header's first byte is a 1.
+     * @throws BadGGEPBlockException The 4th bit in the header's first byte is a 1
      */
     private void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
 
@@ -551,6 +589,8 @@ public class GGEP {
 
     /**
      * Write out this GGEP block as data we can send in a Gnutella packet.
+     * Loops through all the headers in _props.
+     * For each one, writes the name like "#SCP###" and value data.
      * 
      * @param out The OutputStream object we can call out.write(data) on to send the data
      */
@@ -569,11 +609,12 @@ public class GGEP {
             // Loop for each header
             Iterator headers = getHeaders().iterator();
             while (headers.hasNext()) {
-                
+
                 // Get the name and value of this header
                 String currHeader = (String)headers.next();
                 byte[] currData = get(currHeader); // If the value is a NeedsCompression object, gets the byte array inside it
 
+                // Variable for the length of this header's data value
                 int dataLen = 0;
 
                 // Determine if we need to COBS encode and compress this header's value
@@ -593,14 +634,26 @@ public class GGEP {
                         if (currData.length > MAX_VALUE_SIZE_IN_BYTES) throw new IllegalArgumentException("value for [" + currHeader + "] too large after compression");
                     }
 
-                    // 
+                    /*
+                     * TODO:kfaaborg currData changed when we compressed it, it might have gained a 0 byte
+                     */
+
+                    // COBS encode the compressed data so it doesn't contain any 0 bytes
                     if (shouldEncode) currData = COBSUtil.cobsEncode(currData);
-                    dataLen = currData.length;
+                    dataLen = currData.length; // Get the compressed length
                 }
 
-                writeHeader(currHeader, dataLen, !headers.hasNext(), out, shouldEncode, shouldCompress);
+                // Write the data of the header, like "#SCP###"
+                writeHeader(
+                    currHeader,         // The header name, like "SCP"
+                    dataLen,            // The length of the value that will come after this header
+                    !headers.hasNext(), // True if this is the last header in the GGEP block
+                    out,                // The object we can call out.write(b) on to write data
+                    shouldEncode,       // True if the value will be COBS encoded
+                    shouldCompress);    // True if the value will be deflate compressed
 
-                if (dataLen > 0) out.write(currData);
+                // If this header has data, write it
+                if (dataLen > 0) out.write(currData); // The length dataLen was written in the header above
             }
         }
     }
@@ -635,239 +688,323 @@ public class GGEP {
         return (_props.get(header) instanceof NeedsCompression);
     }
 
-    private void writeHeader(String header, final int dataLen, 
-                             boolean isLast, OutputStream out, 
-                             boolean isEncoded, boolean isCompressed) 
-        throws IOException {
+    /**
+     * Write the data of a GGEP extension header, like "SCP".
+     * dataLen is the length of the value after this header.
+     * This method just writes the header, not the header's value.
+     * 
+     * A GGEP header looks like this:
+     * 
+     * #SCP###
+     * 
+     * The text in the middle is the name of the tag, like "VC" or "SCP".
+     * It's ASCII text that isn't null terminated.
+     * 
+     * The first byte contains flags and the length of the tag name.
+     * The first 3 bits are 1 to mark this as the last tag in the GGEP block, 1 to indicate the value after is COBS encoded, and 1 to indicate it's compressed.
+     * The 5 bits after that have the length of the tag nam, like 3 for "SCP".
+     * 
+     * After the tag name, there are 1, 2, or 3 bytes that hold the length of the value for this tag.
+     * Each length byte starts with 2 flag bits, and then has 6 to hold the length.
+     * The length looks like this:
+     * 
+     * 10------ 10------ 01------
+     * 
+     * The bits that hold the length are shown as hyphens.
+     * The first bit tells if there is another after it.
+     * The first two bytes above start with 1s, and the last one starts with a 0.
+     * writeHeader() sets the second bit in the last byte. (do)
+     * 
+     * @param header       The header name, like "VC"
+     * @param dataLen      The length of this header's value
+     * @param isLast       True if this is the last header in the GGEP block, false if there is another one after it
+     * @param out          The OutputStream we'll call out.write(b) on to write the serialized data
+     * @param isEncoded    True if the data in the value will be COBS encoded
+     * @param isCompressed True if the data in the value will be deflate compressed
+     */
+    private void writeHeader(String header, final int dataLen, boolean isLast, OutputStream out, boolean isEncoded, boolean isCompressed) throws IOException {
 
-        // 1. WRITE THE HEADER FLAGS
-        // in the future, when we actually encode and compress, this code should
-        // still work.  well, the code that deals with the header flags, that
-        // is, you'll still need to encode/compress
+        /*
+         * 1. WRITE THE HEADER FLAGS
+         * in the future, when we actually encode and compress, this code should
+         * still work.  well, the code that deals with the header flags, that
+         * is, you'll still need to encode/compress
+         */
+
+        // Not used
         boolean shouldCompress = false;
 
+        // Prepare and write the flags byte
         int flags = 0x00;
-        if (isLast)
-            flags |= 0x80;
-        if (isEncoded)
-            flags |= 0x40;
-        if (isCompressed)
-            flags |= 0x20;
-        flags |= header.getBytes().length;
+        if (isLast)       flags |= 0x80;   // Set the bit 1000 0000 to mark this as the last header in the GGEP block
+        if (isEncoded)    flags |= 0x40;   // Set the bit 0100 0000 if the value of this header will be COBS encoded
+        if (isCompressed) flags |= 0x20;   // Set the bit 0010 0000 if the value of this header will be compressed
+        flags |= header.getBytes().length; // Put the length of the header text in the low 4 bits we didn't touch above
         out.write(flags);
 
-        // 2. WRITE THE HEADER
-        out.write(header.getBytes());
+        // Write the text of the header
+        out.write(header.getBytes()); // If String header is "SCP", writes those characters as 3 ASCII bytes without a null terminator
 
-        // 3. WRITE THE DATA LEN
-        // possibly 3 bytes
+        /*
+         * Write the length of the value, which will take 1, 2, or 3 bytes.
+         * The caller gave us the length in a 4 byte int named dataLen.
+         * The code below uses the & operator to pull out 6 bit long sections.
+         * Here are the masks:
+         * 
+         * 0x0003f000 00 03 f0 00 00000000 00000011 11110000 00000000 shift to the right 12
+         * 0x00000fc0 00 00 0f c0 00000000 00000000 00001111 11000000 shift to the right 6
+         * 0x0000003f 00 00 00 3f 00000000 00000000 00000000 00111111 no shifting necessary
+         */
+
+        // We'll keep the value of the byte we're going to write in the int toWrite
         int toWrite;
+
+        // Clip out the 6 highest bits of the given length
         int begin = dataLen & 0x3F000;
-        if (begin != 0) {
-            begin = begin >> 12; // relevant bytes at the bottom now...
-            toWrite = 0x80 | begin;
-            out.write(toWrite);
+        if (begin != 0) { // The length is big enough to have some 1s in those bits
+
+            // Write the first length byte like 1011 1111
+            begin = begin >> 12;    // Shift them to the right 12 bits to move them all the way down to 0011 1111
+            toWrite = 0x80 | begin; // Add the bit at the start like 1011 1111 to indicate there's another length byte after this
+            out.write(toWrite);     // Write the first length byte
         }
+
+        // Clip out the next 6 highest bits from the given length
         int middle = dataLen & 0xFC0;
-        if (middle != 0) {
-            middle = middle >> 6; // relevant bytes at the bottom now...
-            toWrite = 0x80 | middle;
-            out.write(toWrite);
+        if (middle != 0) { // The length is big enough to have some 1s here
+
+            // TODO:kfaaborg What if the number is big enough for begin to be nonzero, but just happens to have all 0s in middle?
+
+            // Write the second length byte like 1011 1111
+            middle = middle >> 6;    // Shift them to the right 6 bits to move them all the way down to 0011 1111
+            toWrite = 0x80 | middle; // Add the bit at the start like 1011 1111 to indicate there's another length byte after this
+            out.write(toWrite);      // Write the first length byte
         }
-        int end = dataLen & 0x3F; // shut off everything except last 6 bits...
-        toWrite = 0x40 | end;
-        out.write(toWrite);
+
+        // Clip out the lowest 6 bits from the given length
+        int end = dataLen & 0x3F; // Clip out the lowest 6 bits from the given length, like 0011 1111
+        toWrite = 0x40 | end;     // Make the bit right before that 1, like 0111 1111, leaving the first bit 0 (do)
+        out.write(toWrite);       // Write the last or only length byte
     }
 
-    ////////////////////////// Key/Value Mutators and Accessors ////////////////
-    
-    /**
-     * Adds all the specified key/value pairs.
-     * TODO: Allow a value to be compressed.
+    /*
+     * ////////////////////////// Key/Value Mutators and Accessors ////////////////
      */
-    public void putAll(List /* of NameValue */ fields) throws IllegalArgumentException {
-        for(Iterator i = fields.iterator(); i.hasNext(); ) {
+
+    /**
+     * Add a list of GGEP extension headers and their values.
+     * 
+     * @param fields A List of NameValue objects with names like "SCP" and values that are byte arrays, strings, or numbers
+     */
+    public void putAll(List fields) throws IllegalArgumentException {
+
+        /*
+         * TODO: Allow a value to be compressed.
+         */
+
+        // Loop for each NameValue object in the given list
+        for (Iterator i = fields.iterator(); i.hasNext(); ) {
             NameValue next = (NameValue)i.next();
+
+            // Get the key like "VC" and value, which can be one of a number of different types of objects
             String key = next.getName();
             Object value = next.getValue();
-            if(value == null)
-                put(key);
-            else if(value instanceof byte[])
-                put(key, (byte[])value);
-            else if(value instanceof String)
-                put(key, (String)value);
-            else if(value instanceof Integer)
-                put(key, ((Integer)value).intValue());
-            else if(value instanceof Long)
-                put(key, ((Long)value).longValue());
-            else
-                throw new IllegalArgumentException("Unknown value: " + value);
+
+            // Call the right put() method for the kind of object value is
+            if      (value == null)            put(key);                              // No value, just add the header
+            else if (value instanceof byte[])  put(key, (byte[])value);               // Add the header with the given byte array value
+            else if (value instanceof String)  put(key, (String)value);               // Add the header with the given String value
+            else if (value instanceof Integer) put(key, ((Integer)value).intValue()); // Add the header with the given int value
+            else if (value instanceof Long)    put(key, ((Long)value).longValue());   // Add the header with the given long value
+            else throw new IllegalArgumentException("Unknown value: " + value);       // No other kinds of objects are allowed
         }
     }
-    
+
     /**
-     * Adds a key with data that should be compressed.
+     * Add a header name with a data value that needs to be compressed in the GGEP block.
+     * 
+     * @param key   A GGEP header name like "VC"
+     * @param value A byte array with the data that we should compress in the GGEP block
      */
     public void putCompressed(String key, byte[] value) throws IllegalArgumentException {
+
+        // Make sure the header name isn't blank
         validateKey(key);
-        //validateValue(value); // done when writing.  TODO: do here?
+
+        /*
+         * validateValue(value); // done when writing. TODO: do here?
+         */
+
+        // Wrap the byte array value in a NeedsCompression object, and put the key and it in the _props list
         _props.put(key, new NeedsCompression(value));
     }
 
-    /** 
-     * Adds a key with raw byte value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, and if you
-     *  didn't allow nulls at construction but has nulls
+    /**
+     * Add a GGEP header name that has some data as its value.
+     * 
+     * @param key   A GGEP header name, like "VC"
+     * @param value A byte array with the data value
      */
     public void put(String key, byte[] value) throws IllegalArgumentException {
+
+        // Make sure the header name isn't blank and the value isn't too long, and add them to the _props list
         validateKey(key);
         validateValue(value);
         _props.put(key, value);
     }
 
-
-    /** 
-     * Adds a key with string value, using the default character encoding.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, if you
-     *  didn't allow nulls at construction but has nulls
+    /**
+     * Add a GGEP header name that has a text value.
+     * 
+     * @param key   A GGEP header name, like "VC"
+     * @param value A String value for that header
      */
     public void put(String key, String value) throws IllegalArgumentException {
-        put(key, value==null ? null : value.getBytes());
+
+        // Add the header name and value to the _props list
+        put(key, value == null ? null : value.getBytes()); // Pass null or the ASCII bytes of the String
     }
 
-    /** 
-     * Adds a key with integer value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data, which should be an unsigned integer
-     * @exception IllegalArgumentException key is of an illegal length; or value
-     *  is negative; or value contains a null bytes, null bytes are disallowed,
-     *  and COBS encoding is not supported 
+    /**
+     * Add a GGEP header name with a number value.
+     * Expresses the number in the fewest bytes necessary in little endian order.
+     * 
+     * @param key   A GGEP header name, like "VC"
+     * @param value The number value
      */
     public void put(String key, int value) throws IllegalArgumentException {
 
-        if (value < 0)  //TODO: ?
-            throw new IllegalArgumentException("Negative value");
-        put(key, ByteOrder.int2minLeb(value));
+        // Negative values aren't allowed
+        if (value < 0) throw new IllegalArgumentException("Negative value");
+
+        // Add the header name and value data to the _props list
+        put(key, ByteOrder.int2minLeb(value)); // Turn the number into a byte array of the necessary length
     }
 
-    /** 
-     * Adds a key with long value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @param value the GGEP extension data, which should be an unsigned long
-     * @exception IllegalArgumentException key is of an illegal length; or value
-     *  is negative; or value contains a null bytes, null bytes are disallowed,
-     *  and COBS encoding is not supported 
+    /**
+     * Add a GGEP header name with a number value.
+     * Expresses the number in the fewest bytes necessary in little endian order.
+     * 
+     * @param key   A GGEP header name, like "VC"
+     * @param value The number value
      */
     public void put(String key, long value) throws IllegalArgumentException {
-        if (value<0)  //TODO: ?
-            throw new IllegalArgumentException("Negative value");
-        put(key, ByteOrder.long2minLeb(value));
+
+        // Negative values aren't allowed
+        if (value < 0) throw new IllegalArgumentException("Negative value");
+
+        // Add the header name and value data to the _props list
+        put(key, ByteOrder.long2minLeb(value)); // Turn the number into a byte array of the necessary length
     }
 
-    /** 
-     * Adds a key without any value.
-     * @param key the name of the GGEP extension, whose length should be between
-     *  1 and 15, inclusive
-     * @exception IllegalArgumentException key is of an illegal length.
+    /**
+     * Add a GGEP header name that doesn't have a value.
+     * 
+     * @param key A GGEP header name, like "VC"
      */
     public void put(String key) throws IllegalArgumentException {
+
+        // Add the header name, passing null instead of a byte array
         put(key, (byte[])null);
     }
 
     /**
-     * Returns the value for a key, as raw bytes.
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.  Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Get a GGEP header's data value.
+     * 
+     * @param  key                      A GGEP header name, like "VC"
+     * @return                          The header's value in a byte array
+     * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public byte[] getBytes(String key) throws BadGGEPPropertyException {
+
+        // Look up the byte array value of the given key in the _props TreeMap, and return it
         byte[] ret = get(key);
-        if (ret == null)
-            throw new BadGGEPPropertyException();
+        if (ret == null) throw new BadGGEPPropertyException(); // Not found
         return ret;
     }
 
     /**
-     * Returns the value for a key, as a string.
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.   Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Get a GGEP header's text value.
+     * 
+     * @param  key                      A GGEP header name, like "VC"
+     * @return                          The header's value in a String
+     * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public String getString(String key) throws BadGGEPPropertyException {
+
+        // Get the byte array value, and turn it into a String
         return new String(getBytes(key));
     }
 
     /**
-     * Returns the value for a key, as an integer
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.   Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Get a GGEP header's int value.
+     * 
+     * @param  key                      A GGEP header name, like "VC"
+     * @return                          The header's value in an int
+     * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public int getInt(String key) throws BadGGEPPropertyException {
-        byte[] bytes=getBytes(key);
-        if (bytes.length<1)
-            throw new BadGGEPPropertyException("No bytes");
-        if (bytes.length>4)
-            throw new BadGGEPPropertyException("Integer too big");
+
+        // Get the value of the given key name as a byte array
+        byte[] bytes = getBytes(key);
+
+        // Make sure it exists and isn't too big for an int
+        if (bytes.length < 1) throw new BadGGEPPropertyException("No bytes");
+        if (bytes.length > 4) throw new BadGGEPPropertyException("Integer too big");
+
+        // Convert it into an int, and return it
         return ByteOrder.leb2int(bytes, 0, bytes.length);
     }
-    
+
     /**
-     * Returns the value for a key as a long.
-     * @param key the name of the GGEP extension
-     * @return the GGEP extension data associated with the key
-     * @exception BadGGEPPropertyException extension not found, was corrupt,
-     *  or has no associated data.   Note that BadGGEPPropertyException is
-     *  is always thrown for extensions with no data; use hasKey instead.
+     * Get a GGEP header's long number value.
+     * 
+     * @param  key                      A GGEP header name, like "VC"
+     * @return                          The header's value in a long
+     * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public long getLong(String key) throws BadGGEPPropertyException {
-        byte[] bytes=getBytes(key);
-        if (bytes.length<1)
-            throw new BadGGEPPropertyException("No bytes");
-        if (bytes.length>8)
-            throw new BadGGEPPropertyException("Integer too big");
+
+        // Get the value of the given key name as a byte array
+        byte[] bytes = getBytes(key);
+
+        // Make sure it exists and isn't too big for a long
+        if (bytes.length < 1) throw new BadGGEPPropertyException("No bytes");
+        if (bytes.length > 8) throw new BadGGEPPropertyException("Integer too big");
+
+        // Convert it to a long, and return it
         return ByteOrder.leb2long(bytes, 0, bytes.length);
     }
 
     /**
-     * Returns whether this has the given key.
-     * @param key the name of the GGEP extension
-     * @return true if this has a key
+     * Determine if this GGEP block has a given key.
+     * 
+     * @param key A GGEP header name, like "VC"
+     * @return    True if this GGEP block has it, false if not found
      */
     public boolean hasKey(String key) {
+
+        // Look for it in our _props TreeMap
         return _props.containsKey(key);
     }
 
-    /** 
-     * Returns the set of keys.
-     * @return a set of all the GGEP extension header name in this, each
-     *  as a String.
+    /**
+     * Get a list of the header names this GGEP block has.
+     * 
+     * @return A Set of this GGEP block's header names, like "VC", "SCP", the set has String objects in it
      */
     public Set getHeaders() {
-        return _props.keySet();
+
+        // Return a list of all the GGEP headers, like "VC", "SCP", that this GGEP block has
+        return _props.keySet(); // Returns a Set of all the keys in the _props TreeMap
     }
 
     /**
-     * Gets the byte[] data from props.
+     * Get the data of a given GGEP header.
+     * Looks in the _props TreeMap of GGEP headers and values.
      * 
      * @param key The name of a GGEP header, like "VC"
-     * @return    The byte array with that header's value data
+     * @return    The header's value data in a byte array
      */
     public byte[] get(String key) {
 
@@ -888,20 +1025,41 @@ public class GGEP {
         }
     }
 
+    /**
+     * Make sure a GGEP header key name like "SCP" isn't null, blank, longer than 15 bytes, or contains a 0 byte.
+     * 
+     * @param  key                      A String like "SCP", a GGEP header name
+     * @throws IllegalArgumentException The name is null, blank, longer than 15 characters, or contains a 0 byte
+     */
     private void validateKey(String key) throws IllegalArgumentException {
-        byte[] bytes=key.getBytes();
-        if ((key == null)
-                || key.equals("")
-                || (bytes.length > MAX_KEY_SIZE_IN_BYTES)
-                || containsNull(bytes))
+
+        // Look at the String like "SCP" as a byte array of 3 ASCII characters
+        byte[] bytes = key.getBytes();
+
+        // Make sure the header name is valid for GGEP storage
+        if
+            ((key == null)                            // Make sure we were passed a String a not a null reference
+            || key.equals("")                         // Make sure the String isn't blank
+            || (bytes.length > MAX_KEY_SIZE_IN_BYTES) // Make sure the byte array isn't longer than 15 bytes
+            || containsNull(bytes))                   // Make sure the byte array doesn't contain a 0 byte
+
+            // If any of those checks failed, throw an exception
             throw new IllegalArgumentException();
     }
 
+    /**
+     * Make sure a GGEP header value isn't 256 KB or longer.
+     * 
+     * @param  value                    A byte array that contains the data of a GGEP header value
+     * @throws IllegalArgumentException The given reference is null, or the byte array is 256 KB or longer
+     */
     private void validateValue(byte[] value) throws IllegalArgumentException {
-        if (value==null)
-            return;
-        if (value.length>MAX_VALUE_SIZE_IN_BYTES)
-            throw new IllegalArgumentException();
+
+        // If there is no data for this extension header, leave without throwing an exception
+        if (value == null) return;
+
+        // Make sure the value isn't 256 KB or longer
+        if (value.length > MAX_VALUE_SIZE_IN_BYTES) throw new IllegalArgumentException();
     }
 
     /**
@@ -935,51 +1093,87 @@ public class GGEP {
      * //////////////////////////////// Miscellany ///////////////////////////////
      */
 
-    /** @return True if the two Maps that represent header/data pairs are
-     *  equivalent.
+    /**
+     * Determine if another GGEP object has the same keys and values as this one.
+     * 
+     * @param o Another object
+     * @return  True if o is a GGEP object with exactly the same keys and values as we have
      */
     public boolean equals(Object o) {
-		if(o == this) return true;
-        if (! (o instanceof GGEP))
-            return false; 
-        //This is O(n lg n) time with n keys.  It would be great if we could
-        //just check that the trees are isomorphic.  I don't think this code is
-        //really used anywhere, however.
+
+        // If the caller gave us a reference to ourselves, yes, that's the same
+		if (o == this) return true;
+
+        // If o isn't even a GGEP object, no, different
+        if (!(o instanceof GGEP)) return false;
+
+        /*
+         * This is O(n lg n) time with n keys.  It would be great if we could
+         * just check that the trees are isomorphic.  I don't think this code is
+         * really used anywhere, however.
+         */
+
+        // Use the subset() method twice to make sure that all the keys in both are in the other, and all the values match
         return this.subset((GGEP)o) && ((GGEP)o).subset(this);
     }
-    
-    /** Returns true if this is a subset of other, e.g., all of this' keys 
-     *  can be found in OTHER with the same value. */
+
+    /**
+     * Determine if all the information in this GGEP block appears in another one.
+     * Returns true if all of this GGEP block's keys can be found in other with the same values.
+     * 
+     * @param other Another GGEP block which may have all we do and more.
+     * @return      True if the give GGEP block has all of our keys, and with all the same values.
+     *              False if we have a key the given GGEP block is missing, or our values for a key aren't the same.
+     */
     private boolean subset(GGEP other) {
-        for (Iterator iter=this._props.keySet().iterator(); iter.hasNext(); ) {
-            String key=(String)iter.next();
-            byte[] v1= this.get(key);
-            byte[] v2= other.get(key);
-            //Remember that v1 and v2 can be null.
-            if ((v1==null) != (v2==null))
-                return false;
-            if (v1!=null && !Arrays.equals(v1, v2))
-                return false;
+
+        // Loop through the keys in this GGEP block
+        for (Iterator iter = this._props.keySet().iterator(); iter.hasNext(); ) {
+            String key = (String)iter.next();
+
+            // Get the key's value
+            byte[] v1 = this.get(key);
+
+            // Look for the key and value in the other GGEP block
+            byte[] v2 = other.get(key);
+
+            // If the other GGEP block doesn't have this key, we're not a subset of it
+            if ((v1 == null) != (v2 == null)) return false;
+
+            // If the other GGEP block has a different value than we do for this key, we're not a subset of it
+            if (v1 != null && !Arrays.equals(v1, v2)) return false;
         }
+
+        // The given GGEP block has all of our keys, and with all the same values
         return true;
     }
-                
-	// overrides Object.hashCode to be consistent with equals
+
+    /**
+     * The hash code of this GGEP object.
+     * Overrides Object.hashCode to be consistent with equals().
+     * 
+     * @return An int that identifies the data in this object
+     */
 	public int hashCode() {
-		if(hashCode == 0) {
+
+        // If we haven't computed and saved our hashCode yet
+		if (hashCode == 0) {
+
+            // Take the hash code of the TreeMap of GGEP header names and values, and multiply that by 37
 			hashCode = 37 * _props.hashCode();
 		}
+
+        // Return the hash code we computed now, or earlier
 		return hashCode;
 	}
 
 	/**
      * NeedsCompression is a class that has one member variable, a byte array.
-     * The GGEP class keeps value that need compression in NeedsCompression objects.
+     * The GGEP class keeps values that need compression in NeedsCompression objects.
      * Values that don't need compression are just byte arrays.
      * 
-     * 
-	 * Marker class that wraps a byte[] value, if that value
-	 * is going to require compression upon write.
+     * This class can't actually compress anything.
+     * It just keeps data that needs to be compressed.
 	 */
 	private static class NeedsCompression {
 
