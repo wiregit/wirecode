@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.VersionUtils;
 
 /**
  * Dispatcher for NIO.
@@ -71,6 +72,13 @@ public class NIODispatcher implements Runnable {
             dispatchThread = null;
         }
     }
+    
+    /**
+     *  Whether or not we can wakeup the selector.
+     *  See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4850373 for why
+     *  we couldn't.  (It's broken below 1.4.2_05)
+     */
+    private static final boolean WAKEUP = VersionUtils.isJavaAbove("1.4.2_04");
     
     /**
      * Maximum number of times Selector can return quickly without having anything
@@ -314,7 +322,7 @@ public class NIODispatcher implements Runnable {
         // there's no need to wakeup if we're on the dispatch thread,
         // since it's impossible to be blocked in a select call if this is
         // happening.
-        if(Thread.currentThread() != dispatchThread) {
+        if(WAKEUP && Thread.currentThread() != dispatchThread) {
             wokeup = true;
             selector.wakeup();
         }
@@ -370,8 +378,8 @@ public class NIODispatcher implements Runnable {
      */
     private void readyThrottles(Collection keys) {
         List throttle = THROTTLE;
-            for(int i = 0; i < throttle.size(); i++)
-                ((NBThrottle)throttle.get(i)).selectableKeys(keys);
+        for (int i = 0; i < throttle.size(); i++)
+            ((NBThrottle) throttle.get(i)).selectableKeys(keys);
     }
     
     /**
@@ -390,7 +398,7 @@ public class NIODispatcher implements Runnable {
                 if(checkTime)
                     startSelect = System.currentTimeMillis();
                 
-                selector.select();
+                selector.select(100);
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
