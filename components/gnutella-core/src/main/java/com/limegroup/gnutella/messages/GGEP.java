@@ -381,13 +381,13 @@ public class GGEP {
         // possibly 3 bytes
         int toWrite;
         int begin = dataLen & 0x3F000;
-        if (begin != 0) {
+        if (dataLen > 0x00000fff) {
             begin = begin >> 12; // relevant bytes at the bottom now...
             toWrite = 0x80 | begin;
             out.write(toWrite);
         }
         int middle = dataLen & 0xFC0;
-        if (middle != 0) {
+        if (dataLen > 0x0000003f) {
             middle = middle >> 6; // relevant bytes at the bottom now...
             toWrite = 0x80 | middle;
             out.write(toWrite);

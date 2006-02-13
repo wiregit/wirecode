@@ -729,9 +729,25 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         catch (BadGGEPBlockException hopefullySo) {
         }
 
-
     }
 
+    public void testMissingMiddleValueSize() throws Exception {
+    	
+    	int length = 0x0003f03f;    // in the size 258111, the 6 bytes in the middle are missing 00000000 00000011 11110000 00111111
+    	GGEP ggep = new GGEP(true); // don't do COBS encoding
+    	byte[] value = new byte[length];
+    	ggep.put("TEST", value);
+    	
+    	// serialize it to data
+    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+    	ggep.write(out);
+    	byte[] serialized = out.toByteArray();
+    	
+    	// turn that back into a new GGEP block and make sure it's the same
+    	GGEP ggep2 = new GGEP(serialized, 0);
+    	byte[] value2 = ggep2.getBytes("TEST");
+    	assertEquals(value.length, value2.length);
+    }
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
