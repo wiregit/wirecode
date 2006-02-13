@@ -1221,6 +1221,12 @@ public final class CommonUtils {
                 }
                 buffer.append("\n");
             }
+            
+            // Remove the last '\n'
+            if (buffer.length() > 0) {
+                buffer.setLength(buffer.length()-1);
+            }
+            
             return buffer.toString();
         } catch (Exception err) {
             StringWriter sw = new StringWriter();
