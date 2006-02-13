@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.UnsupportedAddressTypeException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -399,6 +400,9 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
             } catch(UnknownHostException uhe) {
                 return null;
             }
+        } catch(UnsupportedAddressTypeException uate) {
+            SocketAddress localAddr = socket.getLocalSocketAddress();
+            throw new RuntimeException("wrong address type: " + ( localAddr == null ? null : localAddr.getClass()), uate);
         }
     }
     
