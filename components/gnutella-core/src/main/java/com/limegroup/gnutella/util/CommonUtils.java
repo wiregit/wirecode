@@ -8,10 +8,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 /**
  * This class handles common utility functions that many classes
@@ -1180,6 +1187,50 @@ public final class CommonUtils {
 	    time.append(Integer.toString(seconds));
 	    return time.toString();
 	}
+    
+    /**
+     * Returns the stack traces of all current Threads or an empty
+     * String if LimeWire is running on Java 1.4 or if an error
+     * occured.
+     */
+    public static String getAllStackTraces() {
+        if (!CommonUtils.isJava15OrLater()) {
+            return "";
+        }
+        
+        try {
+            Method m = Thread.class.getDeclaredMethod("getAllStackTraces", new Class[0]);
+            Map map = (Map)m.invoke(null, new Object[0]);
+            Map sorted = new TreeMap(new Comparator() {
+                public int compare(Object a, Object b) {
+                    return ((Thread)a).getName().compareTo(((Thread)b).getName());
+                }
+            });
+            sorted.putAll(map);
+            
+            StringBuffer buffer = new StringBuffer();
+            Iterator it = sorted.entrySet().iterator();
+            while(it.hasNext()) {
+                Map.Entry entry = (Map.Entry)it.next();
+                Thread key = (Thread)entry.getKey();
+                StackTraceElement[] value = (StackTraceElement[])entry.getValue();
+                
+                buffer.append(key.getName()).append("\n");
+                for(int i = 0; i < value.length; i++) {
+                    buffer.append("    ").append(value[i]).append("\n");
+                }
+                buffer.append("\n");
+            }
+            return buffer.toString();
+        } catch (Exception err) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            pw.println("An error occured during getting the StackTraces of all active Threads");
+            err.printStackTrace(pw);
+            pw.flush();
+            return sw.toString();
+        }
+    }
     
     /*
     public static void main(String args[]) {
