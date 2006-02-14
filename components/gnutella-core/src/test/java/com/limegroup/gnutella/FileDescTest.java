@@ -2,8 +2,11 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -14,7 +17,9 @@ import com.limegroup.gnutella.util.CommonUtils;
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
 public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase {
-
+    
+    private static final long MAX_FILE_SIZE = 3L * 1024L * 1024;
+    
 	private final String[] uncontainedURNStrings = {
 		"urn:sha1:CLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"urn:sha1:XLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
@@ -55,9 +60,9 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	}
 
 	/**
-	 * Tests the FileDesc construcotor.
+	 * Tests the FileDesc construcotor for invalid arguments
 	 */
-	public void testConstructor() throws Exception {
+	public void testInvalidConstructorArguments() throws Exception {
         File file = CommonUtils.getResourceFile("build.xml");
         Set urns = calculateAndCacheURN(file);
         
@@ -81,4 +86,32 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
             fail("no sha1 urn should not be permitted for FileDesc constructor");
         } catch(IllegalArgumentException ignored) {}
 	}
+    
+    /**
+     * Tests the FileDesc construcotor for valid arguments
+     */
+    public void testValidConstructorArguments() throws Exception {
+        File current = CommonUtils.getCurrentDirectory();
+        File parDir = current.getParentFile(); 
+        File[] allFiles = parDir.listFiles(); 
+        List fileList = new ArrayList(); 
+        for(int i=0; i<allFiles.length; i++) { 
+            if(allFiles[i].isFile()
+                    && allFiles[i].length() < MAX_FILE_SIZE) { 
+                fileList.add(allFiles[i]); 
+            } 
+        }
+        
+        boolean oneTest = false;
+        Iterator it = fileList.iterator();
+        for(int i = 0; it.hasNext(); i++) {
+            File file = (File)it.next();
+            Set urns = calculateAndCacheURN(file); 
+            new FileDesc(file, urns, i);
+            oneTest = true;
+        }
+        
+        // Make sure we've run at least one check!
+        assertTrue(oneTest);
+    }
 }
