@@ -10,6 +10,12 @@ import java.util.Comparator;
  * LimeWire has several classes that hold an IP address and port number among their other information.
  * This interface was created to provide a uniform way for these classes to express their IP and port.
  * If you have a class that holds an IP and port, implement this class so that the IP and port are reachable in a uniform way.
+ * 
+ * Some of the important classes in LimeWire that implement IpPort are:
+ * Connection and ManagedConnection - The object that represents a remote computer running Gnutella software that we're connected to.
+ * Endpoint and ExtendedEndpoint - A listing in the gnutella.net file of an IP address to try to connect to.
+ * QueryReply.IPPortCombo - An IP address and port number with checking specific to QueryReply packets.
+ * IpPortImpl - An IP address and port number without additional features.
  */
 public interface IpPort {
 

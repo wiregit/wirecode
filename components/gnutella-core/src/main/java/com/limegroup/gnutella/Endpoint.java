@@ -35,7 +35,10 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
     /** Total size in KB of all the files the computer is sharing, -1 if unknown. */
     private long kbytes = -1; // Initialize to -1, unknown
 
-    /* so subclasses can serialize. */
+    /**
+     * Make a new Endpoint object.
+     * Marked protected so subclasses can serialize Endpoint objects.
+     */
     protected Endpoint() {}
 
     /**

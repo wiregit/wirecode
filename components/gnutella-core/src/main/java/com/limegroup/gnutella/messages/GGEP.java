@@ -232,10 +232,9 @@ public class GGEP {
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
     /**
-     * 262143, A value can't be more than 262143 bytes long.
+     * 262143, A value can't be 256 KB or larger.
      * In a GGEP header, 18 bits in 3 bytes express its length.
      * 2 ^ 18 - 1 = 262143.
-     * A 256 KB value is too long.
      */
     public static final int MAX_VALUE_SIZE_IN_BYTES = 262143;
 
@@ -635,7 +634,9 @@ public class GGEP {
                     }
 
                     /*
-                     * TODO:kfaaborg currData changed when we compressed it, it might have gained a 0 byte
+                     * TODO:kfaaborg currData changed when we compressed it, it might have gained a 0 byte.
+                     * We compress and then we COBS encode.
+                     * The bug is, we look for 0s before we compress.
                      */
 
                     // COBS encode the compressed data so it doesn't contain any 0 bytes

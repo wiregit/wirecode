@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella.messages;
 
@@ -33,27 +33,21 @@ import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * A ping reply message, aka, "pong".  This implementation provides a way
- * to "mark" pongs as being from supernodes.
+ * A PingReply object represents a Gnutella pong packet.
  * 
- * 
- * 
- * 
- * 
+ * A pong is the response to a ping.
+ * A pong has information about a computer on the Internet running Gnutella software.
+ * Each pong has information about one computer, but the GGEP "IPP" extension has more IP addresses to try.
+ * Most pongs are about PCs like us, but a pong with the GGEP "UDPHC" extension is about a UDP host cache.
+ * In the start of Gnutella, a computer would only send you a pong about itself.
+ * Now, computers send groups of pongs about computers they have information about.
  * 
  * A pong has 3 parts:
  * The 23 byte Gnutella header.
  * A 14 byte payload.
  * A GGEP block.
- * 
- * 
- * 
- * 
- * 
  */
 public class PingReply extends Message implements Serializable, IpPort {
-
-    //done
 
     /**
      * The IP addresses and port numbers in the pong packet of computers running Gnutella software.
@@ -64,7 +58,7 @@ public class PingReply extends Message implements Serializable, IpPort {
 
     /**
      * The IP addresses and port numbers in the pong packet of UDP host caches.
-     * Read from the "PHC" GGEP header
+     * Read from the "PHC" GGEP header.
      * This is a LinkedList of IpPortImpl objects.
      */
     private final List PACKED_UDP_HOST_CACHES;
@@ -88,41 +82,53 @@ public class PingReply extends Message implements Serializable, IpPort {
      */
     public static final int STANDARD_PAYLOAD_SIZE = 14;
 
-    //do
-
-    /** All the data.  We extract the port, ip address, number of files,
-     *  and number of kilobytes lazily. */
+    /**
+     * The data of the standard pong payload and the GGEP block.
+     * This is what comes right after the Gnutella message header.
+     * 
+     * The standard pong payload is 14 bytes:
+     * At  0, size 2 is the computer's port number.
+     * At  2, size 4 is the computer's IP address.
+     * At  6, size 4 is the number of files the computer is sharing.
+     * At 10, size 4 is the total size in KB of shared data.
+     */
     private final byte[] PAYLOAD;
 
-    /** The IP string as extracted from payload[2..5].  Cached to avoid
-     *  allocations.  LOCKING: obtain this' monitor. */
+    /**
+     * The IP address the computer this pong is about is externally contactable at, read from the standard pong payload.
+     * 
+     * LOCKING: obtain this' monitor. (do)
+     */
     private final InetAddress IP;
 
-    /**
-     * Constant for the port number of this pong.
-     */
+    /** The port number the computer this pong is about is listening on, read from the start of the standard pong payload. */
     private final int PORT;
 
-    /** The IP address this pong says it's externally contactable at, read from the "IP" GGEP header. */
+    /**
+     * The IP address the computer this pong is about is externally contactable at, read from the "IP" GGEP header.
+     * The "IP" extension is used specifically when one computer pings another to see what its IP address looks like from the outside.
+     */
     private final InetAddress MY_IP;
 
-    /** The port number this pong says it's externally contactable at, read from the "IP" GGEP header. */
+    /**
+     * The port number the computer this pong is about is externally contactable at, read from the "IP" GGEP header.
+     * The "IP" extension is used specifically when one computer pings another to see what its IP address looks like from the outside.
+     */
     private final int MY_PORT;
 
-    /**
-     * Constant for the number of shared files reported in the pong.
-     */
+    /** The number of files the computer this pong is about is sharing, read from the standard pong payload. */
     private final long FILES;
 
-    /**
-     * Constant for the number of shared kilobytes reported in the pong.
-     */
+    /** The KBs of files the computer this pong is about is sharing, read from the standard pong payload. */
     private final long KILOBYTES;
 
     /** The number of seconds the pong says it's online on an average day, read from the "DU" GGEP header. */
     private final int DAILY_UPTIME;
 
-    /** True if the pong says it supports UDP, indicated by the presence of the "GUE" GGEP header. */
+    /**
+     * True if the pong says it supports UDP, indicated by the presence of the "GUE" GGEP header.
+     * Support for UDP makes GUESS possible, a kind of searching that LimeWire no longer uses.
+     */
     private final boolean SUPPORTS_UNICAST;
 
     /** The pong's vendor code like "LIME", read from the "VC" GGEP header. */
@@ -134,13 +140,14 @@ public class PingReply extends Message implements Serializable, IpPort {
     /** The pong's minor version number, like 9 if the version is 4.9, read from the "VC" GGEP header. */
     private final int VENDOR_MINOR_VERSION;
 
-    /** The QueryKey object (do), read from the "QK" GGEP header. */
+    /**
+     * QueryKey is a part of GUESS, which LimeWire no longer uses.
+     * The QueryKey object, read from the "QK" GGEP header.
+     */
     private final QueryKey QUERY_KEY;
 
     /** True if this pong has a GGEP block, and we've parsed it. */
     private final boolean HAS_GGEP_EXTENSION;
-
-    //done
 
     /**
      * An array of 5 bytes like "LIME#" where # is the version number, like 4.9, with the 4 in the high half and the 9 in the low half.
@@ -175,334 +182,440 @@ public class PingReply extends Message implements Serializable, IpPort {
     private int FREE_LOCALE_SLOTS;
 
     /**
-     * Make a new pong packet about us with the given GUID and TTL.
+     * Make a new PingReply object that represents a Gnutella pong packet filled with information about us.
      * 
-     * 
-     * 
-     * @param guid The GUID that will uniquely mark this new pong packet
-     * @param ttl  The number of hops across the Internet that this pong packet will be able to travel
+     * @param guid  The GUID for this new packet
+     * @param ttl   The TTL for the packet
+     * @return      A new PingReply objet that represents a pong packet filled with information about us
      */
     public static PingReply create(byte[] guid, byte ttl) {
 
+        // Call the next create() method, passing an empty list instead of a list of IpPort objects for the GGEP "IPP" header
         return create(guid, ttl, Collections.EMPTY_LIST);
     }
 
     /**
-     * Creates a new <tt>PingReply</tt> for this host with the specified
-     * GUID, TTL & packed hosts.
+     * Make a new PingReply object that represents a Gnutella pong packet filled with information about us.
+     * 
+     * @param guid  The GUID for this new packet
+     * @param ttl   The TTL for the packet
+     * @param hosts A list of IpPort objects to put under "IPP" in this new packet's GGEP block
+     * @return      A new PingReply objet that represents a pong packet filled with information about us
      */
     public static PingReply create(byte[] guid, byte ttl, Collection hosts) {
+
+        // Make a new PingReply packet that represents a pong packet with information about us
         return create(
-            guid,
-            ttl,
-            RouterService.getPort(),
-            RouterService.getAddress(),
-            (long)RouterService.getNumSharedFiles(),
-            (long)RouterService.getSharedFileSize()/1024,
-            RouterService.isSupernode(),
-            Statistics.instance().calculateDailyUptime(),
-            UDPService.instance().isGUESSCapable(),
-            ApplicationSettings.LANGUAGE.getValue().equals("") ?
-                ApplicationSettings.DEFAULT_LOCALE.getValue() :
-                ApplicationSettings.LANGUAGE.getValue(),
-            RouterService.getConnectionManager()
-                .getNumLimeWireLocalePrefSlots(),
+
+            // Information we'll put in the Gnutella packet header
+            guid,                       // The GUID that marks this packet unique
+            ttl,                        // The number of times this packet can travel from ultrapeer to ultrapeer
+            RouterService.getPort(),    // The port number we're listening on
+            RouterService.getAddress(), // Our external Internet IP address
+
+            // Information we'll put in the pong payload
+            (long)RouterService.getNumSharedFiles(),        // The number of files we're sharing
+            (long)RouterService.getSharedFileSize() / 1024, // The total size of all the files we're sharing, in KB
+
+            // Information we'll put in the GGEP block
+            RouterService.isSupernode(),                  // Adds "UP" with information about how many slots we have, and shifts the shared file size to a power of 2
+            Statistics.instance().calculateDailyUptime(), // Adds "DU" with the number of seconds we're online on an average day
+            UDPService.instance().isGUESSCapable(),       // If we're externally contactable for UDP, adds "GUE" with 0.1 as the value
+
+            // Add "LOC" with our language preference, and the number of slots we have for that language preference
+            ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE.getValue() : ApplicationSettings.LANGUAGE.getValue(),
+            RouterService.getConnectionManager().getNumLimeWireLocalePrefSlots(),
+
+            // Add "IPP" with each IpPort object in this list turned into 6 bytes in the value
             hosts);
     }
- 
-     /**
-     * Creates a new PingReply for this host with the specified
-     * GUID, TTL & return address.
-     */   
+
+    /**
+     * Make a new PingReply object that represents a Gnutella pong packet filled with information about us.
+     * 
+     * @param guid The GUID for this new packet
+     * @param ttl  The TTL for the packet
+     * @param addr Our IP address for the "IP" GGEP header
+     * @return     A new PingReply objet that represents a pong packet filled with information about us
+     */
     public static PingReply create(byte[] guid, byte ttl, IpPort addr) {
+
+        // Call the next create() method, passing an empty list to not have an "IPP" GGEP extension
         return create(guid, ttl, addr, Collections.EMPTY_LIST);
     }
-    
-    
+
     /**
-     * Creates a new PingReply for this host with the specified
-     * GUID, TTL, return address & packed hosts.
+     * Make a new PingReply object that represents a Gnutella pong packet filled with information about us.
+     * 
+     * @param guid       The GUID for this new packet
+     * @param ttl        The TTL for the packet
+     * @param returnAddr Our IP address for the "IP" GGEP header
+     * @param hosts      Other computer's IP addresses for the "IPP" GGEP header, a list of IpPort objects
+     * @return           A new PingReply objet that represents a pong packet filled with information about us
      */
     public static PingReply create(byte[] guid, byte ttl, IpPort returnAddr, Collection hosts) {
 
-        /*
-         * Make the GGEP block for our pong packet with information about us.
-         */
-
-        // Make the GGEP block for our pong packet with information about us
-        // Make the GGEP block for our pong packet with information about us
-        
-        // Adds the DU, GUE, UP, and VC tags
+        // Make the GGEP block for this pong packet with DU, GUE, UP, and VC tags
         GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(), RouterService.isSupernode(), UDPService.instance().isGUESSCapable());
 
         // Get our language preference, like "en" for English, and add the LOC tag
         String locale = ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE.getValue() : ApplicationSettings.LANGUAGE.getValue();
         addLocale(ggep, locale, RouterService.getConnectionManager().getNumLimeWireLocalePrefSlots());
 
-        addAddress(ggep, returnAddr);
-        addPackedHosts(ggep, hosts);
+        // Add IP addresses to the GGEP block
+        addAddress(ggep, returnAddr); // Add the "IP" header with our IP address
+        addPackedHosts(ggep, hosts);  // Add the "IPP" header  with the given list of other IP addresses
 
+        // Make a new PingReply object
+        return create(
+
+            // Information for the Gnutella packet header
+            guid, // The GUID that marks this packet unique
+            ttl,  // The number of times the packet can travel between ultrapeers
+
+            // Information for the pong payload
+            RouterService.getPort(), // The IP address and port number other computers on the Internet can contact us at
+            RouterService.getAddress(),
+            (long)RouterService.getNumSharedFiles(), // The number of files we're sharing, and their total size in KBs
+            (long)RouterService.getSharedFileSize() / 1024,
+            RouterService.isSupernode(), // If we're an ultrapeer, adjust our shared file size to the nearest power of 2
+
+            // The GGEP block
+            ggep);
+    }
+
+    /**
+     * QueryKey is a part of GUESS, which LimeWire no longer uses.
+     * MessageRouter.sendQueryKeyPong calls this.
+     * 
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID, ttl, and query key.
+     * 
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param key the <tt>QueryKey</tt> for this reply
+     */
+    public static PingReply createQueryKeyReply(byte[] guid, byte ttl, QueryKey key) {
         return create(
             guid,
             ttl,
             RouterService.getPort(),
             RouterService.getAddress(),
-            (long)RouterService.getNumSharedFiles(),
-            (long)RouterService.getSharedFileSize() / 1024,
+            RouterService.getNumSharedFiles(),
+            RouterService.getSharedFileSize() / 1024,
             RouterService.isSupernode(),
-            ggep);
+            qkGGEP(key));
     }
 
     /**
+     * QueryKey is a part of GUESS, which LimeWire no longer uses.
+     * Only test code calls this.
+     * 
      * Creates a new <tt>PingReply</tt> for this host with the specified
      * GUID, ttl, and query key.
-     *
+     * 
      * @param guid the Globally Unique Identifier (GUID) for this message
      * @param ttl the time to live for this message
      * @param key the <tt>QueryKey</tt> for this reply
-     */                                   
-    public static PingReply createQueryKeyReply(byte[] guid, byte ttl, 
-                                                QueryKey key) {
-        return create(guid, ttl, 
-                      RouterService.getPort(),
-                      RouterService.getAddress(),
-                      RouterService.getNumSharedFiles(),
-                      RouterService.getSharedFileSize()/1024,
-                      RouterService.isSupernode(),
-                      qkGGEP(key));
-    }
-
-    /**
-     * Creates a new <tt>PingReply</tt> for this host with the specified
-     * GUID, ttl, and query key.
-     *
-     * @param guid the Globally Unique Identifier (GUID) for this message
-     * @param ttl the time to live for this message
-     * @param key the <tt>QueryKey</tt> for this reply
-     */                                   
-    public static PingReply createQueryKeyReply(byte[] guid, byte ttl, 
-                                                int port, byte[] ip,
-                                                long sharedFiles, 
-                                                long sharedSize,
-                                                boolean ultrapeer,
-                                                QueryKey key) {
-        return create(guid, ttl, 
-                      port,
-                      ip,
-                      sharedFiles,
-                      sharedSize,
-                      ultrapeer,
-                      qkGGEP(key));
-    }
-
-    /**
-     * Creates a new <tt>PingReply</tt> for an external node -- the data
-     * in the reply will not contain data for this node.  In particular,
-     * the data fields are set to zero because we do not know these
-     * statistics for the other node.
-     *
-     * @param guid the Globally Unique Identifier (GUID) for this message
-     * @param ttl the time to live for this message
-     * @param port the port the remote host is listening on
-     * @param address the address of the node
      */
-    public static PingReply 
-        create(byte[] guid, byte ttl, int port, byte[] address) {
-        return create(guid, ttl, port, address, 0, 0, false, -1, false); 
+    public static PingReply createQueryKeyReply(byte[] guid, byte ttl, int port, byte[] ip, long sharedFiles, long sharedSize, boolean ultrapeer, QueryKey key) {
+        return create(
+            guid,
+            ttl,
+            port,
+            ip,
+            sharedFiles,
+            sharedSize,
+            ultrapeer,
+            qkGGEP(key));
     }
 
     /**
-     * Creates a new <tt>PingReply</tt> for an external node -- the data
-     * in the reply will not contain data for this node.  In particular,
-     * the data fields are set to zero because we do not know these
-     * statistics for the other node.
-     *
-     * @param guid the Globally Unique Identifier (GUID) for this message
-     * @param ttl the time to live for this message
-     * @param port the port the remote host is listening on
-     * @param address the address of the node
-     * @param ultrapeer whether or not we should mark this node as
-     *  being an Ultrapeer
+     * Make a new PingReply object that represents a pong packet with information about a remote computer.
+     * It won't have any information about us.
+     * We don't know how many files the computer is sharing, so the shared number and size will be 0.
+     * 
+     * @param guid    The packet GUID for its header
+     * @param ttl     The packet TTL for its header
+     * @param port    The port number the computer is listening on
+     * @param address The IP address of the computer
+     * @return        A new PingReply object that represents a Gnutella pong packet with that information
      */
-    public static PingReply 
-        createExternal(byte[] guid, byte ttl, int port, byte[] address,
-                       boolean ultrapeer) {
-        return create(guid, ttl, port, address, 0, 0, ultrapeer, -1, false); 
+    public static PingReply create(byte[] guid, byte ttl, int port, byte[] address) {
+
+        // Make a new PingReply object
+        return create(
+
+            // Include the given information
+            guid, ttl, port, address,
+
+            // Pass default values and omit additional GGEP tags
+            0,      // We're not sharing any files
+            0,      // Their total size in KB is 0
+            false,  // Don't add the "UP" tag
+            -1,     // Don't add the "DU" tag
+            false); // Don't the "GUE" tag
     }
 
     /**
-     * Creates a new <tt>PingReply</tt> for an external node -- the data
-     * in the reply will not contain data for this node.  In particular,
-     * the data fields are set to zero because we do not know these
-     * statistics for the other node.  This is primarily used for testing.
-     *
-     * @param guid the Globally Unique Identifier (GUID) for this message
-     * @param ttl the time to live for this message
-     * @param port the port the remote host is listening on
-     * @param address the address of the node
-     * @param ultrapeer whether or not we should mark this node as
-     *  being an Ultrapeer
+     * Make a new PingReply object that represents a pong packet with information about a remote computer.
+     * It won't have any information about us.
+     * We don't know how many files the computer is sharing, so the shared number and size will be 0.
+     * 
+     * @param guid      The packet GUID for its header
+     * @param ttl       The packet TTL for its header
+     * @param port      The port number the computer is listening on
+     * @param address   The IP address of the computer
+     * @param ultrapeer True if the computer is an ultrapeer, the GGEP block will get the "UP" extension
+     * @return          A new PingReply object that represents a Gnutella pong packet with that information
      */
-    public static PingReply 
-        createExternal(byte[] guid, byte ttl, int port, byte[] address,
-                       int uptime,
-                       boolean ultrapeer) {
-        return create(guid, ttl, port, address, 0, 0, ultrapeer, uptime, false); 
+    public static PingReply createExternal(byte[] guid, byte ttl, int port, byte[] address, boolean ultrapeer) {
+
+        /*
+         * TODO:kfaaborg There is a way that some information about us can sneak into the pong this method makes.
+         * If ultrpeer is true, create() below will call newGGEP() with isUltrapeer true.
+         * It calls addUltrapeerExtension(), which calls RouterService.getNumFreeLimeWireLeafSlots().
+         * The pong's GGEP will have the "UP" extension, and its value will have our number of free slots.
+         * The program uses createExternal() to make a pong packet about a remote computer.
+         * It should not contain any information about us.
+         */
+
+        // Make a new PingReply object
+        return create(
+            guid,      // Include the given information
+            ttl,
+            port,
+            address,
+            0,         // Don't number any shared files or any KB of shared data
+            0,
+            ultrapeer, // If true, include the "UP" GGEP extension
+            -1,        // Don't add the "DU" daily uptime extension
+            false);    // Don't add the "GUE" tag
     }
 
     /**
-     * Creates a new <tt>PingReply</tt> instance for a GUESS node.  This
-     * method should only be called if the caller is sure that the given
-     * node is, in fact, a GUESS-capable node.  This method is only used
-     * to create pongs for nodes other than ourselves.  
-     *
-     * @param guid the Globally Unique Identifier (GUID) for this message
-     * @param ttl the time to live for this message
-     * @param ep the <tt>Endpoint</tt> instance containing data about 
-     *  the remote host
-     */       
-    public static PingReply 
-        createGUESSReply(byte[] guid, byte ttl, Endpoint ep) 
-        throws UnknownHostException {
-        return create(guid, ttl,
-                      ep.getPort(),
-                      ep.getHostBytes(),
-                      0, 0, true, -1, true);        
-    }
-
-    /**
-     * Creates a new <tt>PingReply</tt> instance for a GUESS node.  This
-     * method should only be called if the caller is sure that the given
-     * node is, in fact, a GUESS-capable node.  This method is only used
-     * to create pongs for nodes other than ourselves.  Given that this
-     * reply is for a remote node, we do not know the data for number of
-     * shared files, etc, and so leave it blank.
-     *
-     * @param guid the Globally Unique Identifier (GUID) for this message
-     * @param ttl the time to live for this message
-     * @param port the port the remote host is listening on
-     * @param address the address of the node
+     * Make a new PingReply object that represents a pong packet with information about a remote computer.
+     * It won't have any information about us.
+     * We don't know how many files the computer is sharing, so the shared number and size will be 0.
+     * Primarily used for testing.
+     * 
+     * @param guid      The packet GUID for its header
+     * @param ttl       The packet TTL for its header
+     * @param port      The port number the computer is listening on
+     * @param address   The IP address of the computer
+     * @param uptime    Add "DU" with this number of seconds as the value, or -1 if we don't know and shouldn't say
+     * @param ultrapeer Add "UP" with information about how many slots we have TODO:kfaaborg information about us is slipping in
+     * @return          A new PingReply object that represents a Gnutella pong packet with that information
      */
-    public static PingReply 
-        createGUESSReply(byte[] guid, byte ttl, int port, byte[] address) {
-        return create(guid, ttl, port, address, 0, 0, true, -1, true); 
+    public static PingReply createExternal(byte[] guid, byte ttl, int port, byte[] address, int uptime, boolean ultrapeer) {
+
+        // Make a new PingReply object
+        return create(
+            guid,      // Include the given information
+            ttl,
+            port,
+            address,
+            0,         // Don't number any shared files or any KB of shared data
+            0,
+            ultrapeer, // If true, include the "UP" GGEP extension
+            uptime,    // If not -1, include the "DU" GGEP extension with the daily uptime seconds as its value
+            false);    // Don't add the "GUE" tag
     }
 
     /**
-     * Creates a new pong with the specified data -- used primarily for
-     * testing!
-     *
-     * @param guid the sixteen byte message GUID
-     * @param ttl the message TTL to use
-     * @param port my listening port.  MUST fit in two signed bytes,
-     *  i.e., 0 < port < 2^16.
-     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  format e.g. {18, 239, 0, 144}.
-     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @param kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * Make a new PingReply object that represents a pong packet about a computer that is a GUESS-capable ultrapeer.
+     * This method is only used to create pongs for computers other than ourselves.
+     * Adds the "UP" and "GUE" extensions to the GGEP block.
+     * Leaves the number of shared files and their size in KB 0.
+     * 
+     * @param guid    The packet GUID for its header
+     * @param ttl     The packet TTL for its header
+     * @param ep      The computer's IP address and port number
+     * @return        A new PingReply object that represents a Gnutella pong packet with the given information
      */
-    public static PingReply 
-        create(byte[] guid, byte ttl,
-               int port, byte[] ip, long files, long kbytes) {
-        return create(guid, ttl, port, ip, files, kbytes, 
-                      false, -1, false); 
+    public static PingReply createGUESSReply(byte[] guid, byte ttl, Endpoint ep) throws UnknownHostException {
+
+        /*
+         * TODO:kfaaborg The Javadoc says the program uses this method to make a pong about a computer that is not us.
+         * But, passing true, -1, true, leads to information about us getting into the GGEP block.
+         */
+
+        // Make and return a new PingReply object
+        return create(
+            guid,              // Include the given information
+            ttl,
+            ep.getPort(),
+            ep.getHostBytes(),
+            0,                 // No shared files or KBs
+            0,
+            true,              // Add "UP" ultrapeer
+            -1,                // Omit "DU"
+            true);             // Add "GUE" guess
     }
 
+    /**
+     * Make a new PingReply object that represents a pong packet about a computer that is a GUESS-capable ultrapeer.
+     * This method is only used to create pongs for computers other than ourselves.
+     * Adds the "UP" and "GUE" extensions to the GGEP block.
+     * Leaves the number of shared files and their size in KB 0.
+     * 
+     * @param guid    The packet GUID for its header
+     * @param ttl     The packet TTL for its header
+     * @param port    The computer's port number
+     * @param address The computer's IP address
+     * @return        A new PingReply object that represents a Gnutella pong packet with the given information
+     */
+    public static PingReply createGUESSReply(byte[] guid, byte ttl, int port, byte[] address) {
+
+        /*
+         * TODO:kfaaborg The Javadoc says the program uses this method to make a pong about a computer that is not us.
+         * But, passing true, -1, true, leads to information about us getting into the GGEP block.
+         */
+
+        // Make and return a new PingReply object
+        return create(
+            guid,    // Include the given information
+            ttl,
+            port,
+            address,
+            0,       // No shared files or KBs
+            0,
+            true,    // Add "UP" ultrapeer
+            -1,      // Omit "DU"
+            true);   // Add "GUE" guess
+    }
 
     /**
-     * Creates a new ping from scratch with ultrapeer and daily uptime extension
-     * data.
-     *
-     * @param guid the sixteen byte message GUID
-     * @param ttl the message TTL to use
-     * @param port my listening port.  MUST fit in two signed bytes,
-     *  i.e., 0 < port < 2^16.
-     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  format e.g. {18, 239, 0, 144}.
-     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @param kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
-     * @param isUltrapeer true if this should be a marked ultrapeer pong,
-     *  which sets kbytes to the nearest power of 2 not less than 8.
-     * @param dailyUptime my average daily uptime, in seconds, e.g., 
-     *  3600 for one hour per day.  Negative values mean "don't know".
-     *  GGEP extension blocks are allocated if dailyUptime is non-negative.  
+     * Make a new PingReply object that represents a pong packet with information about us.
+     * Places the given information about us in the pong header, payload, and GGEP block.
+     * Calls methods within the program to get additional information specific to us.
+     * Used for testing.
+     * 
+     * @param guid   The packet GUID for its header
+     * @param ttl    The packet TTL for its header
+     * @param port   Our port number for the packet header
+     * @param ip     Our IP address for the packet header
+     * @param files  The number of files we're sharing for the pong payload
+     * @param kbytes The total size in KB of all the files we're sharing for the pong payload
+     * @return       A new PingReply object that represents a Gnutella pong packet with all that information about us
+     */
+    public static PingReply create(byte[] guid, byte ttl, int port, byte[] ip, long files, long kbytes) {
+
+        // Make and return a new PingReply object
+        return create(
+            guid,   // Include the given information
+            ttl,
+            port,
+            ip,
+            files,
+            kbytes,
+            false,  // Don't add "UP"
+            -1,     // Don't add "DU"
+            false); // Don't add "GUE"
+    }
+
+    /**
+     * Make a new PingReply object that represents a pong packet with information about us.
+     * Places the given information about us in the pong header, payload, and GGEP block.
+     * Calls methods within the program to get additional information specific to us.
+     * 
+     * @param guid           The packet GUID for its header
+     * @param ttl            The packet TTL for its header
+     * @param port           Our port number for the packet header
+     * @param ip             Our IP address for the packet header
+     * @param files          The number of files we're sharing for the pong payload
+     * @param kbytes         The total size in KB of all the files we're sharing for the pong payload
+     * @param isUltrapeer    Adds "UP" with information about how many slots we have as the value in the GGEP block, and move kbytes to a power of 2
+     * @param dailyUptime    Adds "DU" with this number of seconds as the value, or -1 if we don't know and shouldn't say
+     * @param isGuessCapable If true and we're an ultrapeer, adds "GUE" with 0.1 as the value
+     * @return               A new PingReply object that represents a Gnutella pong packet with all that information about us
      */
     public static PingReply create(byte[] guid, byte ttl, int port, byte[] ip, long files, long kbytes, boolean isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
 
-        return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-            newGGEP(dailyUptime, isUltrapeer, isGUESSCapable)); // Make the GGEP block for our pong packet with information about us
+        // Make a new GGEP block with DU, GUE, UP, and VC, and put that and the rest of the information about us in a new PingReply object
+        return create(guid, ttl, port, ip, files, kbytes, isUltrapeer, newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
 
     /**
-     * Creates a new PingReply with the specified data.
+     * Make a new PingReply object that represents a pong packet with information about us.
+     * Places the given information about us in the pong header, payload, and GGEP block.
+     * This constructor calls methods within the program to get additional information about us.
+     * 
+     * @param guid           The packet GUID for its header
+     * @param ttl            The packet TTL for its header
+     * @param port           Our port number for the packet header
+     * @param ip             Our IP address for the packet header
+     * @param files          The number of files we're sharing for the pong payload
+     * @param kbytes         The total size in KB of all the files we're sharing for the pong payload
+     * @param isUltrapeer    Adds "UP" with information about how many slots we have as the value in the GGEP block, and move kbytes to a power of 2
+     * @param dailyUptime    Adds "DU" with this number of seconds as the value, or -1 if we don't know and shouldn't say
+     * @param isGuessCapable If true and we're an ultrapeer, adds "GUE" with 0.1 as the value
+     * @param locale         Our language preference, stored in "LOC"
+     * @param slots          The number of slots we have for our locale, stored in "LOC"
+     * @return               A new PingReply object that represents a Gnutella pong packet with all that information about us
      */
     public static PingReply create(byte[] guid, byte ttl, int port, byte[] ip, long files, long kbytes, boolean isUltrapeer, int dailyUptime, boolean isGuessCapable, String locale, int slots) {
 
+        // Have the create() method make the new PingReply object, passing an empty list so the GGEP block won't have an "IPP" extension
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer, dailyUptime, isGuessCapable, locale, slots, Collections.EMPTY_LIST);
     }
-    
+
     /**
-     * creates a new PingReply with the specified locale
-     *
-     * @param guid the sixteen byte message GUID
-     * @param ttl the message TTL to use
-     * @param port my listening port.  MUST fit in two signed bytes,
-     *  i.e., 0 < port < 2^16.
-     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  format e.g. {18, 239, 0, 144}.
-     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @param kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
-     * @param isUltrapeer true if this should be a marked ultrapeer pong,
-     *  which sets kbytes to the nearest power of 2 not less than 8.
-     * @param dailyUptime my average daily uptime, in seconds, e.g., 
-     *  3600 for one hour per day.  Negative values mean "don't know".
-     *  GGEP extension blocks are allocated if dailyUptime is non-negative.  
-     * @param isGuessCapable guess capable
-     * @param locale the locale 
-     * @param slots the number of locale preferencing slots available
-     * @param hosts the hosts to pack into this PingReply
+     * Make a new PingReply object that represents a pong packet with information about us.
+     * Places the given information about us in the pong header, payload, and GGEP block.
+     * create() calls methods within the program to get additional information about us.
+     * 
+     * @param guid           The packet GUID for its header
+     * @param ttl            The packet TTL for its header
+     * @param port           Our port number for the packet header
+     * @param ip             Our IP address for the packet header
+     * @param files          The number of files we're sharing for the pong payload
+     * @param kbytes         The total size in KB of all the files we're sharing for the pong payload
+     * @param isUltrapeer    Adds "UP" with information about how many slots we have as the value in the GGEP block, and move kbytes to a power of 2
+     * @param dailyUptime    Adds "DU" with this number of seconds as the value, or -1 if we don't know and shouldn't say
+     * @param isGuessCapable If true and we're an ultrapeer, adds "GUE" with 0.1 as the value
+     * @param locale         Our language preference, stored in "LOC"
+     * @param slots          The number of slots we have for our locale, stored in "LOC"
+     * @param hosts          A list of IpPort objects to turn into 6 bytes each and store in "IPP"
+     * @return               A new PingReply object that represents a Gnutella pong packet with all that information about us
      */
     public static PingReply create(byte[] guid, byte ttl, int port, byte[] ip, long files, long kbytes, boolean isUltrapeer, int dailyUptime, boolean isGuessCapable, String locale, int slots, Collection hosts) {
 
         // Make the GGEP block for our pong packet with information about us
-        GGEP ggep = newGGEP(dailyUptime, isUltrapeer, isGuessCapable);
+        GGEP ggep = newGGEP(dailyUptime, isUltrapeer, isGuessCapable); // Make a new GGEP block with "DU", "GUE", "UP", and "VC", our vendor code
+        addLocale(ggep, locale, slots);                                // Add "LOC"
+        addPackedHosts(ggep, hosts);                                   // Add "IPP" with the IP addresses and port numbers placed together in the value
 
-        addLocale(ggep, locale, slots); // Add the "LOC" tag
-        addPackedHosts(ggep, hosts);
+        // Make and return a pong packet with that GGEP block, putting the rest of the information in the packet header and pong payload
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer, ggep);
     }
 
     /**
-     * Returns a new <tt>PingReply</tt> instance with all the same data
-     * as <tt>this</tt>, but with the specified GUID.
-     *
-     * @param guid the guid to use for the new <tt>PingReply</tt>
-     * @return a new <tt>PingReply</tt> instance with the specified GUID
-     *  and all of the data from this <tt>PingReply</tt>
-     * @throws IllegalArgumentException if the guid is not 16 bytes or the input
-     * (this') format is bad
+     * Make a new PingReply object with all the same data as this one, but with the specified GUID.
+     * 
+     * @param guid The GUID to use in the new pong
+     * @return     A new PingReply that's a copy of this one, but with the given GUID
      */
     public PingReply mutateGUID(byte[] guid) {
-        if (guid.length != 16)
-            throw new IllegalArgumentException("bad guid size: " + guid.length);
 
-        // i can't just call a new constructor, i have to recreate stuff
+        // Make sure the GUID is exactly 16 bytes long
+        if (guid.length != 16) throw new IllegalArgumentException("bad guid size: " + guid.length);
+
+        /*
+         * i can't just call a new constructor, i have to recreate stuff
+         */
+
         try {
-            return createFromNetwork(guid, getTTL(), getHops(), PAYLOAD); 
-        }
-        catch (BadPacketException ioe) {
-            throw new IllegalArgumentException("Input pong was bad!");
-        }
 
+            // Make and return a new PingReply object
+            return createFromNetwork(
+                guid,      // The given GUID
+                getTTL(),  // The TTL and hops count of this pong
+                getHops(),
+                PAYLOAD);  // The standard pong payload and the GGEP block
+
+        } catch (BadPacketException ioe) { throw new IllegalArgumentException("Input pong was bad!"); }
     }
-
-    //done
 
     /**
      * Make PingReply object that represents a pong packet with information about a computer online running Gnutella software.
@@ -544,10 +657,10 @@ public class PingReply extends Message implements Serializable, IpPort {
         // Write the payload into a new byte array named payload
         byte[] payload = new byte[length];            // Make a new byte array for the serialized payload
         ByteOrder.short2leb((short)port, payload, 0); // Start the payload with the 2 byte port number, least significant byte first
-        payload[2]=ipBytes[0];                        // Next, write the IP address in big endian order
-        payload[3]=ipBytes[1];
-        payload[4]=ipBytes[2];
-        payload[5]=ipBytes[3];
+        payload[2] = ipBytes[0];                      // Next, write the IP address in big endian order
+        payload[3] = ipBytes[1];
+        payload[4] = ipBytes[2];
+        payload[5] = ipBytes[3];
         ByteOrder.int2leb((int)files, payload, 6);    // 6 bytes into the payload buffer, write the 4 bytes of the files int in little endian order
 
         // If we're making this pong to describe an ultrapeer, adjust the number of shared KBs to the nearest power of 2
@@ -758,7 +871,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         int         vendorMinor        = -1;
         int         freeLeafSlots      = -1;
         int         freeUltrapeerSlots = -1;
-        QueryKey    key                = null;
+        QueryKey    key                = null; // QueryKey is a part of GUESS, which LimeWire no longer uses
         String      locale             = ApplicationSettings.DEFAULT_LOCALE.getValue(); // If the pong doesn't specify a language preference, use "en" for English
         int         slots              = -1;
         InetAddress myIP               = null;
@@ -804,7 +917,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 } catch (BadGGEPPropertyException e) {}
             }
 
-            // "QK" QueryKey
+            // "QK" QueryKey is a part of GUESS, which LimeWire no longer uses
             if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
 
                 try {
@@ -932,6 +1045,10 @@ public class PingReply extends Message implements Serializable, IpPort {
             }
         }
 
+        /*
+         * The "IP" extension is used specifically when one computer pings another to see what its IP address looks like from the outside.
+         */
+
         // From the "IP" key, the IP address and port number the pong says it's computer is externally contactable at
         MY_IP   = myIP;   // The first 4 bytes of the "IP" value
         MY_PORT = myPort; // The 2 bytes after that
@@ -951,7 +1068,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         VENDOR_MINOR_VERSION = vendorMinor; // The minor version number, like 9, from the low half of the byte
 
         // From the "QK" query key tag, the QueryKey object we made from the 4-16 byte value
-        QUERY_KEY = key;
+        QUERY_KEY = key; // QueryKey is a part of GUESS, which LimeWire no longer uses
 
         // From the "UP" ultrapeer tag, the number of free slots the ultrapeer computer has for leaves and other ultrapeers
         FREE_LEAF_SLOTS      = freeLeafSlots;
@@ -989,7 +1106,7 @@ public class PingReply extends Message implements Serializable, IpPort {
     private static GGEP newGGEP(int dailyUptime, boolean isUltrapeer, boolean isGUESSCapable) {
 
         // Make a new empty GGEP object that we'll add our GGEP tags to
-        GGEP ggep = new GGEP(true); // True, let tags have null values
+        GGEP ggep = new GGEP(true); // True, don't COBS encode values to eliminate 0 bytes
 
         // Add the daily uptime GGEP tag "DU" with the daily uptime number as its value
         if (dailyUptime >= 0) ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
@@ -1018,31 +1135,26 @@ public class PingReply extends Message implements Serializable, IpPort {
         return ggep;
     }
 
-    //do
-
-    /** Returns the GGEP payload bytes to encode the given QueryKey */
+    /**
+     * QueryKey is a part of GUESS, which LimeWire no longer uses.
+     * 
+     * Returns the GGEP payload bytes to encode the given QueryKey.
+     */
     private static GGEP qkGGEP(QueryKey queryKey) {
-
         try {
-
             GGEP ggep = new GGEP(true);
-
             // get qk bytes....
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             queryKey.write(baos);
             // populate GGEP....
             ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, baos.toByteArray());
-
             return ggep;
-            
         } catch (IOException e) {
             //See above.
             Assert.that(false, "Couldn't encode QueryKey" + queryKey);
             return null;
         }
     }
-
-    //done
 
     /**
      * Adds the tag "LOC" with a value like "en#" to our GGEP block.
@@ -1067,31 +1179,51 @@ public class PingReply extends Message implements Serializable, IpPort {
         return ggep;
     }
 
-    //do
-
     /**
-     * Adds the address GGEP.
+     * Add the "IP" header to the given GGEP block, with the given IP address and port number as its 6-byte value.
+     * The "IP" extension is used specifically when one computer pings another to see what its IP address looks like from the outside.
+     * 
+     * @param ggep    The GGEP block to add the "IP" header to
+     * @param address An object that supports the IpPort interface that we can get the IP address and port number from
+     * @return        The same GGEP object
      */
     private static GGEP addAddress(GGEP ggep, IpPort address) {
+
+        // Turn the given IpPort address into 6 bytes, with the IP address in the first 4 and the port number in the last 2
         byte[] payload = new byte[6];
         System.arraycopy(address.getInetAddress().getAddress(), 0, payload, 0, 4);
         ByteOrder.short2leb((short)address.getPort(), payload, 4);
-        ggep.put(GGEP.GGEP_HEADER_IPPORT,payload);
-        return ggep;
-    }
-    
-    /**
-     * Adds the packed hosts into this GGEP.
-     */
-    private static GGEP addPackedHosts(GGEP ggep, Collection hosts) {
-        if(hosts == null || hosts.isEmpty())
-            return ggep;
-            
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(hosts));
+
+        // Put the address under "IP" in the GGEP block
+        ggep.put(GGEP.GGEP_HEADER_IPPORT, payload);
+
+        // Return the reference to the GGEP block we were given, and that we edited
         return ggep;
     }
 
-    //done
+    /**
+     * Add the "IPP" extension to a GGEP block with a list of IP addresses and port numbers as its value.
+     * 
+     * Serializes the IpPort objects into a byte array.
+     * Each IpPort object becomes 6 bytes.
+     * The first 4 are the IP address, and the last 2 are the port number.
+     * This is the value of the "IPP" header.
+     * 
+     * @param ggep  A GGEP object to edit
+     * @param hosts A list of IpPort objects
+     * @return      The same GGEP object
+     */
+    private static GGEP addPackedHosts(GGEP ggep, Collection hosts) {
+
+        // If the caller didn't give us any IP addresses and port numbers, return the GGEP object unchanged
+        if (hosts == null || hosts.isEmpty()) return ggep;
+
+        // Turn the list of IpPort objects into a byte array, and store it as the value of "IPP" in the GGEP block
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(hosts));
+
+        // Return the GGEP block we were given and that we edited
+        return ggep;
+    }
 
     /**
      * Add our ultrapeer GGEP extension to the given GGEP block.
@@ -1140,172 +1272,220 @@ public class PingReply extends Message implements Serializable, IpPort {
         return (byte)retInt;
     }
 
-    //do
-
     /**
-     * Returns whether or not this pong is reporting any free slots on the 
-     * remote host, either leaf or ultrapeer.
+     * Determine if the ultrapeer this pong is about needs more leaves or ultrapeers.
+     * Looks at the number of free leaf and ultrapeer slots in the "UP" GGEP header.
      * 
-     * @return <tt>true</tt> if the remote host has any free leaf or ultrapeer
-     *  slots, otherwise <tt>false</tt>
+     * @return True if the "UP" GGEP header has a positive number of free leaf or ultrapeer slots
      */
     public boolean hasFreeSlots() {
-        return hasFreeLeafSlots() || hasFreeUltrapeerSlots();    
+
+        // If the "UP" GGEP header listed a positive number of free leaf or ultrapeer slots, return true
+        return hasFreeLeafSlots() || hasFreeUltrapeerSlots();
     }
-    
+
     /**
-     * Returns whether or not this pong is reporting free leaf slots on the 
-     * remote host.
+     * Determine if the ultrapeer this pong is about needs more leaves.
+     * Looks at the number of free leaf slots in the "UP" GGEP header.
      * 
-     * @return <tt>true</tt> if the remote host has any free leaf slots, 
-     *  otherwise <tt>false</tt>
+     * @return True if the "UP" GGEP header has a positive number of free leaf slots
      */
     public boolean hasFreeLeafSlots() {
+
+        // If the "UP" GGEP header listed a positive number of free leaf slots, return true
         return FREE_LEAF_SLOTS > 0;
     }
 
     /**
-     * Returns whether or not this pong is reporting free ultrapeer slots on  
-     * the remote host.
+     * Determine if the ultrapeer this pong is about needs more ultrapeers.
+     * Looks at the number of free ultrapeer slots in the "UP" GGEP header.
      * 
-     * @return <tt>true</tt> if the remote host has any free ultrapeer slots, 
-     *  otherwise <tt>false</tt>
+     * @return True if the "UP" GGEP header has a positive number of free ultrapeer slots
      */
     public boolean hasFreeUltrapeerSlots() {
+
+        // If the "UP" GGEP header listed a positive number of free ultrapeer slots, return true
         return FREE_ULTRAPEER_SLOTS > 0;
     }
-    
+
     /**
-     * Accessor for the number of free leaf slots reported by the remote host.
-     * This will return -1 if the remote host did not include the necessary 
-     * GGEP block reporting slots.
+     * The number of additional leaf connections the ultrapeer this pong is about needs.
      * 
-     * @return the number of free leaf slots, or -1 if the remote host did not
-     *  include this information
+     * @return The number we parsed from the "UP" GGEP header.
+     *         -1 if the GGEP block doesn't have "UP".
      */
     public int getNumLeafSlots() {
+
+        // Return the number we parsed from the GGEP "UP" header
         return FREE_LEAF_SLOTS;
     }
 
     /**
-     * Accessor for the number of free ultrapeer slots reported by the remote 
-     * host.  This will return -1 if the remote host did not include the  
-     * necessary GGEP block reporting slots.
+     * The number of additional ultrapeer connections the ultrapeer this pong is about needs.
      * 
-     * @return the number of free ultrapeer slots, or -1 if the remote host did 
-     *  not include this information
-     */    
+     * @return The number we parsed from the "UP" GGEP header.
+     *         -1 if the GGEP block doesn't have "UP.
+     */
     public int getNumUltrapeerSlots() {
+
+        // Return the number we parsed from the GGEP "UP" header
         return FREE_ULTRAPEER_SLOTS;
     }
 
+    /**
+     * Write the pong payload, including the GGEP block
+     * This is the part after the Gnutella message header.
+     * The standard pong payload is 14 bytes, and contains the computer's IP address and how many files it's sharing.
+     * The GGEP block contains additional information.
+     * 
+     * @param out The OutputStream object we'll call out.write(PAYLOAD) on.
+     */
     protected void writePayload(OutputStream out) throws IOException {
+
+        // Write the bytes of the pong payload and GGEP block
         out.write(PAYLOAD);
+
+        // Give this entire pong to the SentMessageStatHandler, calling this method means we're sending this packet
 		SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
     }
 
     /**
-     * Accessor for the port reported in this pong.
-     *
+     * The port number that the computer this pong has information about is listening on.
+     * The port number is the first 2 bytes of the standard pong payload.
+     * 
      * @return the port number reported in the pong
      */
     public int getPort() {
+
+        // Return the port number the PingReply constructor parsed
         return PORT;
     }
 
     /**
-     * Returns the ip field in standard dotted decimal format, e.g.,
-     * "127.0.0.1".  The most significant byte is written first.
+     * The IP address of the computer that this pong has information about.
+     * This IP address is in the standard pong payload.
+     * It's 4 bytes long, 2 bytes into the payload.
+     * We parsed it, and turned it into a String.
+     * 
+     * @return The pong's IP address, like "71.113.91.191"
      */
-    public String getAddress() { 
+    public String getAddress() {
+
+        // Return the IP address the PingReply constructor received
         return IP.getHostAddress();
     }
 
     /**
-     * Returns the ip address bytes (MSB first)
+     * The IP address of the computer that this pong has information about.
+     * This IP address is in the standard pong payload.
+     * It's 4 bytes long, 2 bytes into the payload.
+     * This method returns a byte array of its 4 bytes.
+     * The most significant byte is first, just as the data is written in the pong.
+     * 
+     * @return A byte array of 4 bytes with the IP address in the pong payload
      */
     public byte[] getIPBytes() {
-        byte[] ip=new byte[4];
-        ip[0]=PAYLOAD[2];
-        ip[1]=PAYLOAD[3];
-        ip[2]=PAYLOAD[4];
-        ip[3]=PAYLOAD[5];
-        
-        return ip;
+
+        // Copy the 4 bytes of the IP address from the pong payload to a new byte array, and return it
+        byte[] ip = new byte[4]; // Make a byte array that can hold 4 bytes
+        ip[0] = PAYLOAD[2];      // Copy the 4 bytes starting from 2 bytes into the pong payload
+        ip[1] = PAYLOAD[3];
+        ip[2] = PAYLOAD[4];
+        ip[3] = PAYLOAD[5];
+        return ip;               // Return the byte array we made and filled
     }
-    
+
     /**
-     * Accessor for the number of files shared, as reported in the
-     * pong.
-     *
-     * @return the number of files reported shared
+     * The number of files the computer this pong is about is sharing.
+     * This information is an int 6 bytes into the standard pong payload.
+     * 
+     * @return The number of files this pong reports the computer is sharing
      */
     public long getFiles() {
+
+        // Return the number the PingReply constructor parsed
         return FILES;
     }
 
     /**
-     * Accessor for the number of kilobytes shared, as reported in the
-     * pong.
-     *
-     * @return the number of kilobytes reported shared
+     * The total size in KB of all the files the computer this pong is about is sharing.
+     * This information is an int 10 bytes into the standard pong payload.
+     * 
+     * @return The size in KB of the files this pong reports the computer is sharing
      */
     public long getKbytes() {
+
+        // Return the number the PingReply constructor parsed
         return KILOBYTES;
     }
 
-    /** Returns the average daily uptime in seconds from the GGEP payload.
-     *  If the pong did not report a daily uptime, returns -1.
-     *
-     * @return the daily uptime reported in the pong, or -1 if the uptime
-     *  was not present or could not be read
+    /**
+     * The number of seconds the computer this pong is about is online in an average day.
+     * This is the value of the "DU" GGEP header.
+     * 
+     * @return The number of seconds online in an average day.
+     *         -1 If the pong doesn't have the "DU" extension.
      */
     public int getDailyUptime() {
+
+        // Return the number the PingReply constructor parsed
         return DAILY_UPTIME;
     }
 
-
-    /** Returns whether or not this host support unicast, GUESS-style
-     *  queries.
-     *
-     * @return <tt>true</tt> if this host does support GUESS-style queries,
-     *  otherwise <tt>false</tt>
+    /**
+     * True if the computer this pong is about supports UDP.
+     * This is indicated by the presence of the "GUE" GGEP header.
+     * This means the pong supports GUESS-style queries.
+     * LimeWire doesn't use GUESS at all anymore.
+     * 
+     * @return True if the computer can receive UDP packets
      */
     public boolean supportsUnicast() {
+
+        // Return the value the PingReply constructor parsed
         return SUPPORTS_UNICAST;
     }
 
-
-    /** Returns the 4-character vendor string associated with this Pong.
-     *
-     * @return the 4-character vendor code reported in the pong, or the
-     *  empty string if no vendor code was successfully read
+    /**
+     * The Gnutella software the computer this pong is about is running, like "LIME" or "BEAR".
+     * This is the start of the value of the "VC" GGEP header.
+     * 
+     * @return The software vendor code, or blank if the pong doesn't have the "VC" extension
      */
     public String getVendor() {
+
+        // Return the text the PingReply constructor parsed
         return VENDOR;
     }
 
-
-    /** Returns the major version number of the vendor returning this pong.
+    /**
+     * The major version number of the software the computer this pong is about is running, like 4 if the version number is 4.9.
+     * Read from the value of the "VC" GGEP header.
      * 
-     * @return the major version number of the vendor returning this pong,
-     *  or -1 if the version could not be read
+     * @return The major version number, or -1 if the pong's GGEP block doesn't have the "VC" extension
      */
     public int getVendorMajorVersion() {
+
+        // Return the number the PingReply constructor parsed
         return VENDOR_MAJOR_VERSION;
     }
 
-    /** Returns the minor version number of the vendor returning this pong.
+    /**
+     * The minor version number of the software the computer this pong is about is running, like 9 if the version number is 4.9.
+     * Read from the value of the "VC" GGEP header.
      * 
-     * @return the minor version number of the vendor returning this pong,
-     *  or -1 if the version could not be read
+     * @return The minor version number, or -1 if the pong's GGEP block doesn't have the "VC" extension
      */
     public int getVendorMinorVersion() {
+
+        // Return the number the PingReply constructor parsed
         return VENDOR_MINOR_VERSION;
     }
 
-
-    /** Returns the QueryKey (if any) associated with this pong.  May be null!
+    /**
+     * QueryKey is a part of GUESS, which LimeWire no longer uses.
+     * 
+     * Returns the QueryKey (if any) associated with this pong.  May be null!
      *
      * @return the <tt>QueryKey</tt> for this pong, or <tt>null</tt> if no
      *  key was specified
@@ -1313,33 +1493,48 @@ public class PingReply extends Message implements Serializable, IpPort {
     public QueryKey getQueryKey() {
         return QUERY_KEY;
     }
-    
+
     /**
-     * Gets the list of packed IP/Ports.
+     * Get the IP addresses and port numbers this pong lists that are of remote PCs running Gnutella software like us.
+     * 
+     * Reads the "IPP" GGEP extension.
+     * These are the IP addresses and port numbers of remote PCs running Gnutella software like us.
+     * We can treat these IPs as we would those in the "X-Try-Ultrapeers" header.
+     * 
+     * @return From the "IPP" packed IP addresses and port numbers, a List of IpPortCombo objects
      */
-    public List /* of IpPort */ getPackedIPPorts() {
+    public List getPackedIPPorts() {
+
+        // Return the List of IpPortCombo objects we parsed from the GGEP "IPP" extension
         return PACKED_IP_PORTS;
     }
-    
+
     /**
-     * Gets a list of packed IP/Ports of UDP Host Caches.
+     * Get the IP addresses and port numbers this pong lists that are of UDP host caches.
+     * 
+     * Reads the "PHC" GGEP extension.
+     * These are the IP addresses and port numbers of UDP host caches.
+     * 
+     * @return From the "PHC" packed host caches, a List of IpPortCombo objects
      */
-    public List /* of IpPort */ getPackedUDPHostCaches() {
+    public List getPackedUDPHostCaches() {
+
+        // Return the list of IpPortCombo objects we parsed from the GGEP "PHC" extension
         return PACKED_UDP_HOST_CACHES;
     }
 
     /**
-     * Returns whether or not this pong has a GGEP extension.
-     *
-     * @return <tt>true</tt> if the pong has a GGEP extension, otherwise
-     *  <tt>false</tt>
+     * Determine if this pong packet has a GGEP block.
+     * Returns true if the parseGGEP() method found data beyond the standard pong payload, and the GGEP constructor turned it into a GGEP block.
+     * 
+     * @return True if this pong has a GGEP block, false if it's just the Gnutella header and standard pong payload
      */
     public boolean hasGGEPExtension() {
+
+        // The PingReply constructor set this to true if we have one
         return HAS_GGEP_EXTENSION;
     }
 
-    //done
-    
     /**
      * Take a pong payload and parse it into a GGEP object.
      * 
@@ -1371,88 +1566,176 @@ public class PingReply extends Message implements Serializable, IpPort {
         } catch (BadGGEPBlockException e) { return null; }
     }
 
-    //do
-    
-    
-    // inherit doc comment from message superclass
-    public Message stripExtendedPayload() {
-        //TODO: if this is too slow, we can alias parts of this, as as the
-        //payload.  In fact we could even return a subclass of PingReply that
-        //simply delegates to this.
-        byte[] newPayload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.arraycopy(PAYLOAD, 0,
-                         newPayload, 0,
-                         STANDARD_PAYLOAD_SIZE);
-
-        return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                             newPayload, null, IP);
-    }
-    
     /**
-     * Unzips data about UDP host caches & returns a list of'm.
+     * Make a copy of this PingReply object without a GGEP block.
+     * Makes a new PingReply object with the same information in the Gnutella message header and standard pong payload.
+     * Doesn't copy over the GGEP block.
+     * 
+     * The PingReply class extends Message, which lists stripExtendedPayload() as an abstract method we can implement.
+     * 
+     * @return A new PingReply object that's the same as this one but with no GGEP block
+     */
+    public Message stripExtendedPayload() {
+
+        /*
+         * TODO: if this is too slow, we can alias parts of this, as as the
+         * payload.  In fact we could even return a subclass of PingReply that
+         * simply delegates to this.
+         */
+
+        // Make a new byte array to hold the 14 byte standard pong payload
+        byte[] newPayload = new byte[STANDARD_PAYLOAD_SIZE];
+
+        // Copy the first 14 bytes of PAYLOAD to get the standard pong payload and leave the GGEP block behind
+        System.arraycopy(PAYLOAD, 0, newPayload, 0, STANDARD_PAYLOAD_SIZE);
+
+        // Make a new PingReply object
+        return new PingReply(
+            this.getGUID(), // Same information for the Gnutella message header
+            this.getTTL(),
+            this.getHops(),
+            newPayload,     // The standard pong payload without a GGEP block
+            null,           // No GGEP block
+            IP);            // The IP address of the computer this pong is about
+    }
+
+    /**
+     * Parses the text of a GGEP "PHC" packed UDP host caches extension value, and returns a List of IpPortImpl objects with the IP addresses and port numbers.
+     * 
+     * Takes the text value of the GGEP extension "PHC", packed UDP host caches.
+     * http://www.the-gdf.org/wiki/index.php?title=UHC
+     * This is text like this:
+     * 
+     * 27.174.162.220:6346&key=value&key2=value2\n
+     * 24.3.65.216:2244&key=value&key2=value2\n
+     * 69.181.203.230:6346&key=value&key2=value2\n
+     * 
+     * @param allCaches The text value of the GGEP extension "PHC" packed UDP host caches extension
+     * @return          A list of IpPortImpl objects with the IP addresses and port numbers parsed from the text
      */
     private List listCaches(String allCaches) {
+
+        // Each time we turn a line of text into an IpPortImpl object, we'll add it to this list
         List theCaches = new LinkedList();
+
+        // Break the "PHC" text around "\n", and loop for line
         StringTokenizer st = new StringTokenizer(allCaches, "\n");
-        while(st.hasMoreTokens()) {
+        while (st.hasMoreTokens()) {
+
+            // Get this line of text like "host.example.com:port&key=value&key2=value2"
             String next = st.nextToken();
-            // look for possible features and ignore'm
+
+            // We just want the address and port number, clip out everything before the first "&"
             int i = next.indexOf("&");
-            // basically ignore.
-            if(i != -1)
-                next = next.substring(0, i);
+            if (i != -1) next = next.substring(0, i);
+
+            // Find the colon that separates the address and port number
             i = next.indexOf(":");
+
+            // If we can't read the port, use the default Gnutella port of 6346
             int port = 6346;
-            if(i == 0 || i == next.length()) {
+
+            // The text starts with a colon or it's beyond the end (do)
+            if (i == 0 || i == next.length()) {
+
+                // Start the loop again with the next line
                 continue;
-            } else if(i != -1) {
+
+            // Colon found
+            } else if (i != -1) {
+
                 try {
-                    port = Integer.valueOf(next.substring(i+1)).intValue();
-                } catch(NumberFormatException invalid) {
-                    continue;
-                }
+
+                    // Look beyond the colon, and read the port number
+                    port = Integer.valueOf(next.substring(i + 1)).intValue();
+
+                // If there was an error reading the port number, go to the start of the loop and try the next line
+                } catch (NumberFormatException invalid) { continue; }
+
+            // Colon not found, the text is just an address
             } else {
-                i = next.length(); // setup for i-1 below.
+
+                // Move i to the end so next.substring(0, i) will work below
+                i = next.length();
             }
-            if(!NetworkUtils.isValidPort(port))
-                continue;
+
+            /*
+             * At this point, if the colon was found, i points to it.
+             * If there isn't a colon, i points beyond the end of the String.
+             */
+
+            // If the port number we read is 0 or too big to fit in 2 bytes, go to the start of the loop and try the next line
+            if (!NetworkUtils.isValidPort(port)) continue;
+
+            // Clip out the address before the colon
             String host = next.substring(0, i);
+
             try {
+
+                // Make a new IpPortImpl from the address and port number, and add it to the theCaches list
                 theCaches.add(new IpPortImpl(host, port));
-            } catch(UnknownHostException invalid) {
-                continue;
-            }
+
+                /*
+                 * TODO:kfaaborg What happens when host is text like "www.site.com" and not an IP address in text like "1.2.3.4"
+                 */
+
+            // The IpPortImpl tried to turn the host text into a Java InetAddress object, and couldn't
+            } catch (UnknownHostException invalid) { continue; }
         }
+
+        // Return the list of IpPortImpl objects
         return Collections.unmodifiableList(theCaches);
     }
 
+    /*
+     * ////////////////////////// Pong Marking //////////////////////////
+     */
 
-    ////////////////////////// Pong Marking //////////////////////////
-
-    /** 
-     * Returns true if this message is "marked", i.e., likely from an
-     * Ultrapeer. 
-     *
-     * @return <tt>true</tt> if this pong is marked as an Ultrapeer pong,
-     *  otherwise <tt>false</tt>
+    /**
+     * See if the shared size number is specially formatted to indicate the computer this pong is about is an ultrapeer.
+     * 
+     * A pong contains information about a computer running Gnutella software.
+     * It needs to tell if the computer is an ultrapeer or a leaf.
+     * The ultrapeer system was developed after the pong payload was designed, so there's no room in the pong payload for this information.
+     * So, Gnutella programs hide it in a clever way.
+     * The standard pong payload includes the size of shared data in KB.
+     * If the computer is an ultrapeer, this size will be a power of 2 that is 8 or bigger.
+     * 
+     * @return True if this pong is marked as an ultrapeer pong, false if it's not
      */
     public boolean isUltrapeer() {
-        //Returns true if kb is a power of two greater than or equal to eight.
+
+        // Get the shared data size int from 10 bytes into the standard pong payload
         long kb = getKbytes();
-        if (kb < 8)
-            return false;
+
+        // If the number is less than 8, this pong does not have the ultrapeer marking
+        if (kb < 8) return false;
+
+        // Return true if the number is a power of 2
         return isPowerOf2(ByteOrder.long2int(kb));
     }
 
-    public static boolean isPowerOf2(int x) {  //package access for testability
-        if (x<=0)
-            return false;
-        else
-            return (x&(x - 1)) == 0;
+    /**
+     * Determine if x is a power of 2.
+     * This method has package access for testing.
+     * 
+     * @param x A number
+     * @return  True if x is a power of 2, false if it's not
+     */
+    public static boolean isPowerOf2(int x) {
+
+        // Look at the bits to determine if the number is a power of 2
+        if (x <= 0) return false;              // Negative and 0 are not
+        else        return (x & (x - 1)) == 0; // 4 is 100 and 3 is 011, 100 & 011 is 000
     }
 
-	// inherit doc comment
+    /**
+     * Record in the program statistics that we're not going to forward this pong packet.
+     * Adds this PingReply object to the TCP_PING_REPLIES DroppedSentMessageStatHandler.
+     */
 	public void recordDrop() {
+
+        // Give this PingReply object to the DroppedSentMessageStatHandler for TCP pongs
 		DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
 	}
 
@@ -1515,59 +1798,108 @@ public class PingReply extends Message implements Serializable, IpPort {
         else                    return 1073741824; // 1 << 30
     }
 
-    // overrides Object.toString
+    /**
+     * Express this PingReply object as text.
+     * This method overrides Object.toString().
+     * 
+     * @return A String with information from this PingReply object
+     */
     public String toString() {
-        return "PingReply("+getAddress()+":"+getPort()+
-            ", free ultrapeers slots: "+hasFreeUltrapeerSlots()+
-            ", free leaf slots: "+hasFreeLeafSlots()+
-            ", vendor: "+VENDOR+" "+VENDOR_MAJOR_VERSION+"."+
-                VENDOR_MINOR_VERSION+
-            ", "+super.toString()+
-            ", locale : " + CLIENT_LOCALE + ")";
+
+        // Compose and return the text
+        return
+            "PingReply(" + getAddress() + ":" + getPort() +
+            ", free ultrapeers slots: " + hasFreeUltrapeerSlots() +
+            ", free leaf slots: " + hasFreeLeafSlots() +
+            ", vendor: " + VENDOR + " " + VENDOR_MAJOR_VERSION + "." + VENDOR_MINOR_VERSION +
+            ", " + super.toString() +
+            ", locale: " + CLIENT_LOCALE + ")";
     }
 
     /**
-     * Implements <tt>IpPort</tt> interface.  Returns the <tt>InetAddress</tt>
-     * for this host.
+     * Get the IP address of the computer this pong has information about, read from the standard pong payload.
+     * The IpPort interface requires this method.
      * 
-     * @return the <tt>InetAddress</tt> for this host
-     */ 
+     * @return The IP address as a Java InetAddress object
+     */
     public InetAddress getInetAddress() {
+
+        // Return the object we made from the address we read from the standard pong payload
         return IP;
     }
 
+    /**
+     * Get the IP address of the computer this pong is about, read from the "IP" GGEP extension.
+     * The "IP" extension is used specifically when one computer pings another to see what its IP address looks like from the outside.
+     * 
+     * @return The IP address as a Java InetAddress object
+     */
     public InetAddress getMyInetAddress() {
+
+        // Return the object we made from the address we parsed from the "IP" GGEP header
         return MY_IP;
     }
-    
+
+    /**
+     * Get the port number of the computer this pong is about, read from the "IP" GGEP extension.
+     * The "IP" extension is used specifically when one computer pings another to see what its IP address looks like from the outside.
+     * 
+     * @return The port number
+     */
     public int getMyPort() {
+
+        // Return the number we read from the "IP" GGEP header
         return MY_PORT;
     }
-    
+
     /**
-     * access the client_locale
+     * Get the language preference of the computer this pong has information about.
+     * This is part of the value of the "LOC" GGEP header.
+     * 
+     * @return A String like "en" for English
      */
     public String getClientLocale() {
+
+        // Return the pong's language preference, like "en", which we parsed from the "LOC" GGEP extension
         return CLIENT_LOCALE;
     }
 
+    /**
+     * Get the number of additional connections the computer this pong is about wants that share its language preference.
+     * 
+     * @return The number of free locale preferenced slots
+     */
     public int getNumFreeLocaleSlots() {
+
+        // Return the pong's free slots for computers that match its language preference, which we parsed from the "LOC" GGEP extension
         return FREE_LOCALE_SLOTS;
     }
-    
+
     /**
-     * Accessor for host cacheness.
+     * Determine if this pong is about a UDP host cache.
+     * If the GGEP block has the "UDPHC" extension, it is.
+     * 
+     * @return True if this pong has information about a UDP host cache
      */
     public boolean isUDPHostCache() {
+
+        // If the GGEP block has "UDPHC", we parsed its String value, return true
         return UDP_CACHE_ADDRESS != null;
     }
-    
+
     /**
-     * Gets the UDP host cache address.
+     * The address of the UDP host cache this pong packet is about.
+     * This is the value of the GGEP "UDPHC" extension.
+     * 
+     * @return The String value of the "UDPHC" extension
      */
     public String getUDPCacheAddress() {
+
+        // Return the String value we parsed from the "UDPHC" extension
         return UDP_CACHE_ADDRESS;
     }
 
-    //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
+    /*
+     * Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
+     */
 }

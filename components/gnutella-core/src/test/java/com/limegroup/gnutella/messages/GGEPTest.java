@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.List;
@@ -728,10 +729,30 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         catch (BadGGEPBlockException hopefullySo) {
         }
-
-
     }
 
+    public void testMissingMiddleValueSize() throws Exception {
+
+        // Make a GGEP block with an extension named "TEST" that has a value 258111 bytes long
+        int length = 0x0003f03f;    // In the size 258111, the 6 bytes in the middle are missing 00000000 00000011 11110000 00111111
+        GGEP ggep = new GGEP(true); // Don't do COBS encoding
+        byte[] value = new byte[length];
+        ggep.put("TEST", value);
+
+        // Serialize it to data
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ggep.write(out);
+        byte[] serialized = out.toByteArray();
+
+        // Turn that back into a new GGEP block
+        GGEP ggep2 = new GGEP(serialized, 0);
+
+        // Read the value of the "TEST" extension
+        byte[] value2 = ggep2.getBytes("TEST");
+
+        // Make sure we didn't loose any data
+        assertEquals(value.length, value2.length);
+    }
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
