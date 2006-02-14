@@ -18,11 +18,13 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * Handles incoming search results from the network.  This class parses the 
@@ -207,39 +209,51 @@ public final class SearchResultHandler {
             return;
         }
 
+        // throw away results that aren't secure.
+        int secureStatus = qr.getSecureStatus();
+        if(secureStatus == SecureMessage.FAILED)
+            return;
+        
         boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
-	double numBadSentToFrontEnd = 0;
-        for(Iterator iter = results.iterator(); iter.hasNext();) {
-            Response response = (Response)iter.next();
+        double numBadSentToFrontEnd = 0;
+        
             
-            if (!qr.isBrowseHostReply()) {
-            	if (!RouterService.matchesType(data.getMessageGUID(), response))
-            		continue;
-            	
-            	if (!RouterService.matchesQuery(data.getMessageGUID(),response)) 
-            		continue;
-            }
-            
-        	//Throw away results from Mandragore Worm
-        	if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
-        		continue;
+        for (Iterator iter = results.iterator(); iter.hasNext();) {
+            Response response = (Response) iter.next();
 
+            if (!qr.isBrowseHostReply()) {
+                if (!RouterService.matchesType(data.getMessageGUID(), response))
+                    continue;
+
+                if (!RouterService.matchesQuery(data.getMessageGUID(), response))
+                    continue;
+            }
+
+            // Throw away results from Mandragore Worm
+            if (RouterService.isMandragoreWorm(data.getMessageGUID(), response))
+                continue;
+            
+            // If there was an action, only allow it if it's a secure message.
+            LimeXMLDocument doc = response.getDocument();
+            if(doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE)
+                continue;
+            
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
+            rfd.setSecureStatus(secureStatus);
             Set alts = response.getLocations();
-			RouterService.getCallback().handleQueryResult(rfd, data, alts);
-			
-			if (skipSpam || !SpamManager.instance().isSpam(rfd))
-				numGoodSentToFrontEnd++;
-			else 
-			    numBadSentToFrontEnd++;
-        } //end of response loop
-	numBadSentToFrontEnd = Math.ceil(numBadSentToFrontEnd * 
-	    SearchSettings.SPAM_RESULT_RATIO.getValue());
+            RouterService.getCallback().handleQueryResult(rfd, data, alts);
+
+            if (skipSpam || !SpamManager.instance().isSpam(rfd))
+                numGoodSentToFrontEnd++;
+            else
+                numBadSentToFrontEnd++;
+        }
+
+        numBadSentToFrontEnd = Math.ceil(numBadSentToFrontEnd * SearchSettings.SPAM_RESULT_RATIO.getValue());
         // ok - some responses may have got through to the GUI, we should account
         // for them....
-        accountAndUpdateDynamicQueriers(qr, 
-	    numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
+        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd + (int) numBadSentToFrontEnd);
     }
 
 

@@ -7,12 +7,6 @@ import java.io.FileFilter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -735,7 +729,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // trying to input
         try {
             IpPort proxy = 
-                new QueryReply.IPPortCombo("0.0.0.0", 6346);
+                new IPPortCombo("0.0.0.0", 6346);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -755,7 +749,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // trying to input is the only case
         try {
             IpPort proxy = 
-                new QueryReply.IPPortCombo("0.0.0.0", 634600);
+                new IPPortCombo("0.0.0.0", 634600);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 

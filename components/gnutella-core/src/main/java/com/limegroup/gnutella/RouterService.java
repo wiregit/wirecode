@@ -31,6 +31,7 @@ import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.SecureMessageVerifier;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -172,6 +173,9 @@ public class RouterService {
      * The manager of altlocs
      */
     private static AltLocManager altManager = AltLocManager.instance();
+    
+    /** Variable for the <tt>SecureMessageVerifier</tt> that verifies secure messages. */
+    private static SecureMessageVerifier secureMessageVerifier = new SecureMessageVerifier();    
     
     /**
      * isShuttingDown flag
@@ -608,6 +612,11 @@ public class RouterService {
 	public static PromotionManager getPromotionManager() {
 		return promotionManager;
 	}
+    
+    /** Gets the SecureMessageVerifier. */
+    public static SecureMessageVerifier getSecureMessageVerifier() {
+        return secureMessageVerifier;
+    }
 	
 	public static byte [] getMyGUID() {
 	    return MYGUID;

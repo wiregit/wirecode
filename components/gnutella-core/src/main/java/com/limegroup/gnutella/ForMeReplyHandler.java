@@ -16,6 +16,8 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.SecureMessage;
+import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -33,7 +35,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This is the class that goes in the route table when a request is
  * sent whose reply is for me.
  */
-public final class ForMeReplyHandler implements ReplyHandler {
+public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
     
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
     
@@ -117,15 +119,28 @@ public final class ForMeReplyHandler implements ReplyHandler {
         // responses invalid?  exit.
         if(!validResponses)
             return;
+        
+        if(reply.hasSecureData()) {
+            RouterService.getSecureMessageVerifier().verify(reply, this);
+        } else {
+            routeQueryReplyInternal(reply);
+        }
+    }
+    
+    /** Notification that a message is secure.  Currently only possible for a QueryReply. */
+    public void handleSecureMessage(SecureMessage sm, boolean passed) {
+        if (passed)
+            routeQueryReplyInternal((QueryReply) sm);
+    }
+    
+    /** Passes the QueryReply off to where it should go. */
+    private void routeQueryReplyInternal(QueryReply reply) {
+        SearchResultHandler resultHandler = RouterService.getSearchResultHandler();
+        resultHandler.handleQueryReply(reply);
 
-		SearchResultHandler resultHandler = 
-			RouterService.getSearchResultHandler();
-		resultHandler.handleQueryReply(reply);
-		
-
-		DownloadManager dm = RouterService.getDownloadManager();
-		dm.handleQueryReply(reply);
-	}
+        DownloadManager dm = RouterService.getDownloadManager();
+        dm.handleQueryReply(reply);
+    }
 	
 	/**
 	 * Adds XML to the responses in a QueryReply.

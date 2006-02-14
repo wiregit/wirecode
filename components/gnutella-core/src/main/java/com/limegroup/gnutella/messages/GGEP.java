@@ -69,6 +69,10 @@ public class GGEP {
     public static final String GGEP_HEADER_CREATE_TIME = "CT";
     /** The extension header (key) for Firewalled Transfer support in Hits. */
     public static final String GGEP_HEADER_FW_TRANS = "FW";
+    /** The extension header (key) indicating the GGEP block is the 'secure' block. */
+    public static final String GGEP_HEADER_SECURE_BLOCK = "SB";
+    /** The extension header (key) indiciating the value has a signature in it. */
+    public static final String GGEP_HEADER_SIGNATURE = "SIG";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
@@ -129,9 +133,9 @@ public class GGEP {
         this(data, offset, null);
     }
 
-    /** Constructs a GGEP instance based on the GGEP block beginning at
-     *  messageBytes[beginOffset].  If you are unsure of whether or not there is
-     *  one GGEP Block, use the read method.
+    /**
+     *  Constructs a GGEP instance based on the GGEP block beginning at
+     *  messageBytes[beginOffset].
      *  @param messageBytes The bytes of the message.
      *  @param beginOffset  The begin index of the GGEP prefix.
      *  @param endOffset If you want to get the offset where the GGEP block

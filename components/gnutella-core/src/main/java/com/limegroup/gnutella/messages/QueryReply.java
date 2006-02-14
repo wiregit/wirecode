@@ -9,6 +9,8 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,7 +51,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * This class also encapsulates xml metadata.  See the description of the QHD 
  * below for more details.
  */
-public class QueryReply extends Message implements Serializable{
+public class QueryReply extends Message implements SecureMessage {
     //Rep rationale: because most queries aren't directed to us (we'll just
     //forward them) we extract the responses lazily as needed.
     //When they are extracted, however, it makes sense to store the parsed
@@ -113,6 +115,9 @@ public class QueryReply extends Message implements Serializable{
     /** The mask for extracting the chat flag from the QHD private area. */
     private static final byte CHAT_MASK=(byte)0x01;
     
+    /** The data with info about the secure result. */
+    private SecureGGEPData _secureGGEP;
+    
     /** The xml chunk that contains metadata about xml responses*/
     private byte[] _xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;
 
@@ -136,6 +141,9 @@ public class QueryReply extends Message implements Serializable{
      * Only set if this QueryReply is parsed.
      */
     private HostData _hostData;
+    
+    /** Whether or not this message has been verified as secure. */
+    private int _secureStatus = SecureMessage.INSECURE;
     
 
     /** Our static and final instance of the GGEPUtil helper class.
@@ -475,6 +483,8 @@ public class QueryReply extends Message implements Serializable{
                                                        _proxies);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
+                writeSecureGGEP(baos, xmlBytes);
+                
                 //g) actual xml.
                 baos.write(xmlBytes, 0, xmlBytes.length);
                 
@@ -494,6 +504,12 @@ public class QueryReply extends Message implements Serializable{
         }
 
 		setAddress();
+    }
+    
+    /** Writes the 'secureGGEP' GGEP. */
+    protected void writeSecureGGEP(ByteArrayOutputStream out, byte[] xml) {
+        // writes the secure ggep portion.
+        // don't forget to secure the null after the XML also.
     }
 
 	/**
@@ -720,6 +736,34 @@ public class QueryReply extends Message implements Serializable{
             return false;
         }
     }
+    
+    /** Returns the bytes of the signature from the secure GGEP block. */
+    public byte[] getSecureSignature() {
+        try {
+            return _secureGGEP.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
+        } catch(BadGGEPPropertyException bgpe) {
+            return null;
+        }
+    }
+
+    /** Passes in the appropriate bytes of the payload to the signature. */
+    public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
+        signature.update(_payload, 0, _secureGGEP.getStartIndex());
+        int end = _secureGGEP.getEndIndex() + 1;
+        int length = _payload.length - 16 - end;
+        signature.update(_payload, _secureGGEP.getEndIndex(), length);
+    }
+
+
+    /** Determines if the message was verified. */
+    public synchronized int getSecureStatus() {
+        return _secureStatus;
+    }
+
+    /** Sets whether or not the message is verified. */
+    public synchronized void setSecureStatus(int secureStatus) {
+        this._secureStatus = secureStatus;
+    }    
 
     /** 
      * Returns true iff the client supports chat.
@@ -783,7 +827,16 @@ public class QueryReply extends Message implements Serializable{
             throw new BadPacketException();
         return _hostData;
     }
-
+    
+    /**
+     * Determines if this result has secure data.
+     * This does NOT determine if the result has been verified
+     * as secure.
+     */
+    public boolean hasSecureData() {
+        parseResults();
+        return _secureGGEP != null;
+    }
     
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
@@ -887,7 +940,7 @@ public class QueryReply extends Message implements Serializable{
          * Byte 7-8 : Size of XML + 1 (for a null), you need to count backward
          * from the client GUID.
          * Byte 9   : private vendor flag
-         * Byte 10-X: GGEP area
+         * Byte 10-X: GGEP area (may contain multiple GGEP blocks)
          * Byte X-beginning of xml : (new) private area
          * Byte (payload.length - 16 - xmlSize (above)) - 
                 (payload.length - 16 - 1) : XML!!
@@ -943,27 +996,24 @@ public class QueryReply extends Message implements Serializable{
                     uploadedFlagT = (flags&UPLOADED_MASK)!=0 ? TRUE : FALSE;
                 if ((control & SPEED_MASK)!=0)
                     measuredSpeedFlagT = (flags&SPEED_MASK)!=0 ? TRUE : FALSE;
-                if ((control & GGEP_MASK)!=0 && (flags & GGEP_MASK)!=0) {
-                    // GGEP processing
-                    // iterate past flags...
-                    int magicIndex = i + 2;
-                    for (; 
-                         (_payload[magicIndex]!=GGEP.GGEP_PREFIX_MAGIC_NUMBER) &&
-                         (magicIndex < _payload.length);
-                         magicIndex++)
-                        ; // get the beginning of the GGEP stuff...
-                    try {
-                        // if there are GGEPs, see if Browse Host supported...
-                        GGEP ggep = new GGEP(_payload, magicIndex, null);
-                        supportsBrowseHostT = ggep.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST);
-                        if(ggep.hasKey(GGEP.GGEP_HEADER_FW_TRANS)) {
-                            _fwTransferVersion = ggep.getBytes(GGEP.GGEP_HEADER_FW_TRANS)[0];
-                            _supportsFWTransfer = _fwTransferVersion > 0;
+                if ((control & GGEP_MASK) != 0 && (flags & GGEP_MASK) != 0) {
+                    GGEPParser parser = GGEPParser.scanForGGEPs(_payload, i + 2);
+                    GGEP ggep = parser.getNormalGGEP();
+                    if (ggep != null) {
+                        try {
+                            supportsBrowseHostT = ggep.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST);
+                            if (ggep.hasKey(GGEP.GGEP_HEADER_FW_TRANS)) {
+                                _fwTransferVersion = ggep.getBytes(GGEP.GGEP_HEADER_FW_TRANS)[0];
+                                _supportsFWTransfer = _fwTransferVersion > 0;
+                            }
+                            replyToMulticastT = ggep.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                            proxies = _ggepUtil.getPushProxies(ggep);
+                        } catch (BadGGEPPropertyException bgpe) {
                         }
-                        replyToMulticastT = ggep.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-                        proxies = _ggepUtil.getPushProxies(ggep);
-                    } catch (BadGGEPBlockException ignored) {
-                    } catch (BadGGEPPropertyException bgpe) {
+                    }
+                    // store the data about the secure result, if it's there.
+                    if(parser.getSecureGGEP() != null) {
+                        _secureGGEP = new SecureGGEPData(parser);
                     }
                 }
                 i+=2; // increment used bytes appropriately...
@@ -1020,13 +1070,10 @@ public class QueryReply extends Message implements Serializable{
                 this._proxies = proxies;
             }
             this._hostData = new HostData(this);
-            debug("QR.parseResults2(): returning w/o exception.");
 
         } catch (BadPacketException e) {
-            debug("QR.parseResults2(): bpe = " + e);
             return;
         } catch (IndexOutOfBoundsException e) {
-            debug("QR.parseResults2(): index exception = " + e);
             return;
         } 
     }
@@ -1160,16 +1207,6 @@ public class QueryReply extends Message implements Serializable{
 	public void recordDrop() {
 		DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
 	}
-
-    public final static boolean debugOn = false;
-    public static void debug(String out) {
-        if (debugOn) 
-            System.out.println(out);
-    }
-    public static void debug(Exception e) {
-        if (debugOn) 
-            e.printStackTrace();
-    }
 
     /** Handles all our GGEP stuff.  Caches potential GGEP blocks for efficiency.
      */
@@ -1325,7 +1362,7 @@ public class QueryReply extends Message implements Serializable{
                             try {
                                 if(proxies == null)
                                     proxies = new IpPortSet();
-                                proxies.add(new IPPortCombo(combo));
+                                proxies.add(IPPortCombo.getCombo(combo));
                             } catch (BadPacketException malformedPair) {}
                         }                        
                     }
@@ -1338,110 +1375,4 @@ public class QueryReply extends Message implements Serializable{
                 return proxies;
         }
     }
-
-    /** Another utility class the encapsulates some complexity.
-     *  Keep in mind that I very well could have used Endpoint here, but I
-     *  decided against it mainly so I could do validity checking.
-     *  This may be a bad decision.  I'm sure someone will let me know during
-     *  code review.
-     */
-    public static class IPPortCombo implements IpPort {
-        private int _port;
-        private InetAddress _addr;
-        
-        public static final String DELIM = ":";
-
-        /**
-         * Used for reading data from the network.  Throws BadPacketException
-         * if the data is invalid.
-         * @param fromNetwork 6 bytes - first 4 are IP, next 2 are port
-         */
-        public static IPPortCombo getCombo(byte[] fromNetwork)
-          throws BadPacketException {
-            return new IPPortCombo(fromNetwork);
-        }
-        
-        /**
-         * Constructor used for data read from the network.
-         * Throws BadPacketException on errors.
-         */
-        private IPPortCombo(byte[] networkData) throws BadPacketException {
-            if (networkData.length != 6)
-                throw new BadPacketException("Weird Input");
-
-            String host = NetworkUtils.ip2string(networkData, 0);
-            int port = ByteOrder.ushort2int(ByteOrder.leb2short(networkData, 4));
-            if (!NetworkUtils.isValidPort(port))
-                throw new BadPacketException("Bad Port: " + port);
-            _port = port;
-            try {
-                _addr = InetAddress.getByName(host);
-            } catch(UnknownHostException uhe) {
-                throw new BadPacketException("bad host.");
-            }
-            if (!NetworkUtils.isValidAddress(_addr))
-                throw new BadPacketException("invalid addr: " + _addr);
-        }
-
-        /**
-         * Constructor used for local data.
-         * Throws IllegalArgumentException on errors.
-         */
-        public IPPortCombo(String hostAddress, int port) 
-            throws UnknownHostException, IllegalArgumentException  {
-            if (!NetworkUtils.isValidPort(port))
-                throw new IllegalArgumentException("Bad Port: " + port);
-            _port = port;
-            _addr = InetAddress.getByName(hostAddress);
-            if (!NetworkUtils.isValidAddress(_addr))
-                throw new IllegalArgumentException("invalid addr: " + _addr);
-        }
-
-        // Implements IpPort interface
-        public int getPort() {
-            return _port;
-        }
-        
-        // Implements IpPort interface
-        public InetAddress getInetAddress() {
-            return _addr;
-        }
-
-        // Implements IpPort interface
-        public String getAddress() {
-            return _addr.getHostAddress();
-        }
-
-        /** @return the ip and port encoded in 6 bytes (4 ip, 2 port).
-         *  //TODO if IPv6 kicks in, this may fail, don't worry so much now.
-         */
-        public byte[] toBytes() {
-            byte[] retVal = new byte[6];
-            
-            for (int i=0; i < 4; i++)
-                retVal[i] = _addr.getAddress()[i];
-
-            ByteOrder.short2leb((short)_port, retVal, 4);
-
-            return retVal;
-        }
-
-        public boolean equals(Object other) {
-            if (other instanceof IPPortCombo) {
-                IPPortCombo combo = (IPPortCombo) other;
-                return _addr.equals(combo._addr) && (_port == combo._port);
-            }
-            return false;
-        }
-
-        // overridden to fulfill contract with equals for hash-based
-        // collections
-        public int hashCode() {
-            return _addr.hashCode() * _port;
-        }
-        
-        public String toString() {
-            return getAddress() + ":" + getPort();
-        }
-    }
-} //end QueryReply
+}
