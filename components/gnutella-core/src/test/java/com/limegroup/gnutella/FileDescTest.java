@@ -1,10 +1,8 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -20,21 +18,6 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
     
     private static final long MAX_FILE_SIZE = 3L * 1024L * 1024;
     
-	private final String[] uncontainedURNStrings = {
-		"urn:sha1:CLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:XLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"Urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"uRn:sHa1:FLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:DLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:Sha1:SLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"UrN:sha1:ALSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sHa1:QLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:WLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:ELSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB"
-	};
-
-	private Set _uncontainedUrnSet;
-
 	public FileDescTest(String name) {
 		super(name);
 	}
@@ -45,18 +28,6 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
-	}
-
-	protected void setUp() throws Exception {		
-		_uncontainedUrnSet = new HashSet();
-		for(int i=0; i<10; i++) {
-			try {
-				_uncontainedUrnSet.add(URN.createSHA1Urn(uncontainedURNStrings[i]));
-			} catch(IOException e) {
-				assertTrue("unexpected exception "+e+"\r\n"+
-						   uncontainedURNStrings[i], false);
-			}
-		}
 	}
 
 	/**
@@ -102,16 +73,14 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
             } 
         }
         
-        boolean oneTest = false;
+        // Make sure we're running at least one check!
+        assertFalse(fileList.isEmpty());
+        
         Iterator it = fileList.iterator();
         for(int i = 0; it.hasNext(); i++) {
             File file = (File)it.next();
             Set urns = calculateAndCacheURN(file); 
             new FileDesc(file, urns, i);
-            oneTest = true;
         }
-        
-        // Make sure we've run at least one check!
-        assertTrue(oneTest);
     }
 }
