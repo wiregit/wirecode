@@ -4,6 +4,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -41,7 +42,7 @@ public class ContentManagerTest extends BaseTestCase {
     }
     
     public void setUp() throws Exception {
-        PrivilegedAccessor.setValue(ContentManager.class, "ACTIVE", Boolean.TRUE);
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         mgr = new ContentManager();
         crOne = new ContentResponse(URN_1, true);
         crTwo = new ContentResponse(URN_2, false);

@@ -31,9 +31,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int IDENTIFY_CORRUPTION     = 16;
     public static final int RECOVERY_FAILED         = 17;
     public static final int PAUSED                  = 18;
-    public static final int VALIDATING              = 19;
-    public static final int VALIDATED               = 20;
-    public static final int INVALID                 = 21;
+    public static final int INVALID                 = 19;
 
     
     /**

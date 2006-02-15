@@ -29,7 +29,6 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnCallback;
-import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -38,6 +37,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
@@ -377,7 +377,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
-        PrivilegedAccessor.setValue(ContentManager.class, "ACTIVE", Boolean.FALSE);
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
     }

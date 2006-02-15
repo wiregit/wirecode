@@ -46,9 +46,11 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -396,7 +398,7 @@ public class DownloadTest extends BaseTestCase {
         TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
         Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
         
-        waitForComplete(false);
+        waitForComplete();
         assertEquals(6,uploader1.getRequestsReceived());
         if (isComplete())
             LOG.debug("pass"+"\n");
@@ -649,7 +651,7 @@ public class DownloadTest extends BaseTestCase {
         download=RouterService.download(new RemoteFileDesc[] {rfd1}, false, null);
         ((ManagedDownloader)download).addDownload(rfd2,true);
 
-        waitForComplete(false);
+        waitForComplete();
         if (isComplete())
             LOG.debug("pass"+"\n");
         else
@@ -688,7 +690,7 @@ public class DownloadTest extends BaseTestCase {
         
         downloader.addDownload(rfd2,false);
 
-        waitForComplete(false);
+        waitForComplete();
 
         //Make sure there weren't too many overlapping regions.
         int u1 = uploader1.fullRequestsUploaded();
@@ -722,7 +724,7 @@ public class DownloadTest extends BaseTestCase {
         
         downloader.addDownload(rfd2,false);
 
-        waitForComplete(false);
+        waitForComplete();
 
          
         // the stalled uploader should not have uploaded anything
@@ -777,7 +779,7 @@ public class DownloadTest extends BaseTestCase {
         // at this point we should stall since we'll never get our 50 bytes
         md.addDownloadForced(rfd5,false);
         
-        waitForComplete(false);
+        waitForComplete();
         assertGreaterThanOrEquals(50,uploader5.fullRequestsUploaded());
         assertGreaterThanOrEquals(100000-50,uploader1.fullRequestsUploaded());
     }
@@ -800,7 +802,7 @@ public class DownloadTest extends BaseTestCase {
         // the first downloader should have failed after downloading a complete chunk
         
         assertLessThan(100001,uploader1.fullRequestsUploaded());
-        waitForComplete(false);
+        waitForComplete();
         
     }
     
@@ -823,7 +825,7 @@ public class DownloadTest extends BaseTestCase {
         // the first downloader should have failed without downloading a complete chunk
         
         assertEquals(0,uploader1.fullRequestsUploaded());
-        waitForComplete(false);
+        waitForComplete();
     }
     
     public void testUploaderHighLowerRange() throws Exception {
@@ -842,7 +844,7 @@ public class DownloadTest extends BaseTestCase {
         // at this point we should stall since we'll never get our 10 bytes
         md.addDownloadForced(rfd5,false);
         
-        waitForComplete(false);
+        waitForComplete();
         assertGreaterThanOrEquals(50,uploader5.fullRequestsUploaded());
         assertGreaterThanOrEquals(100000-50,uploader1.fullRequestsUploaded());
     }
@@ -965,7 +967,7 @@ public class DownloadTest extends BaseTestCase {
         
         Downloader download=
             RouterService.download(new RemoteFileDesc[]{rfd1}, Collections.EMPTY_LIST, null, false);
-        waitForComplete(false);
+        waitForComplete();
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
         assertNull(tree);
@@ -1277,7 +1279,7 @@ public class DownloadTest extends BaseTestCase {
         Thread.sleep(1000);
         download.addDownload(later,false);
 
-        waitForComplete(false);
+        waitForComplete();
         
 
         assertGreaterThan("u1 did no work",100000,uploader1.getAmountUploaded());
@@ -1350,7 +1352,7 @@ public class DownloadTest extends BaseTestCase {
             (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(2000);
         download.addDownload(openRFD,false);
-        waitForComplete(false);
+        waitForComplete();
         
         List alc = uploader1.incomingGoodAltLocs;
         assertEquals(1,alc.size());
@@ -1813,7 +1815,7 @@ public class DownloadTest extends BaseTestCase {
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
         download.addDownload(rfd2,true);
         
-        waitForComplete(false);
+        waitForComplete();
         int u1 = uploader1.getAmountUploaded();
         int u2 = uploader2.getAmountUploaded();
         
@@ -1951,7 +1953,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not replaced ",0, queued);
 
-        waitForComplete(false);
+        waitForComplete();
         if(isComplete())
             LOG.debug("pass \n");
         else
@@ -2014,7 +2016,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not replaced ",0, queued);
 
-        waitForComplete(false);
+        waitForComplete();
         if(isComplete())
             LOG.debug("pass \n");
         else
@@ -2101,7 +2103,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("uploader 4 not queued ",1,queued);
         assertEquals("incorrect queue pos ",1,qPos);        
 
-        waitForComplete(false);
+        waitForComplete();
         if(isComplete())
             LOG.debug("pass \n");
         else
@@ -2169,13 +2171,27 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("queued uploader not dropped",1,queued);
         assertEquals("wrong uploader removed",1,qPos);
 
-        waitForComplete(false);
+        waitForComplete();
         if(isComplete())
             LOG.debug("pass \n");
         else
             fail("FAILED: complete corrupt");
 
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
+    }
+    
+    /** Tests what happens if the content authority says no. */
+    public void testContentInvalid() throws Exception {
+        LOG.info("-Testing partial downloads...");
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        uploader1.setRate(50);
+        
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
+        RouterService.download(rfds,false,null);
+        Thread.sleep(1000);
+        RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
+        waitForInvalid();       
     }
     
     /**
@@ -2237,7 +2253,7 @@ public class DownloadTest extends BaseTestCase {
        download.addDownload(noFile,false);
        
        LOG.debug("waiting for download to complete");
-       waitForComplete(false);
+       waitForComplete();
        
        // the first downloader should have received an NAlt
        assertTrue(uploader1.incomingBadAltLocs.contains(toBeDemoted));
@@ -2321,7 +2337,7 @@ public class DownloadTest extends BaseTestCase {
                 ((ManagedDownloader)download).addDownload(later[i], true);
         }
 
-        waitForComplete(false);
+        waitForComplete();
         if (isComplete())
             LOG.debug("pass"+"\n");
         else
@@ -2355,7 +2371,7 @@ public class DownloadTest extends BaseTestCase {
                 ((ManagedDownloader)download).addDownload(later[i], true);
         }
 
-        waitForComplete(true);
+        waitForCorrupt();
         if (isComplete())
             fail("should be corrupt");
         else
@@ -2377,7 +2393,7 @@ public class DownloadTest extends BaseTestCase {
         
         download = RouterService.download(incFile);
         
-        waitForComplete(false);
+        waitForComplete();
         if (isComplete())
             LOG.debug("pass"+"\n");
         else
@@ -2480,7 +2496,27 @@ public class DownloadTest extends BaseTestCase {
         return true;
     }
     
-    private static void waitForComplete(boolean isCorrupt) {
+    private static final int CORRUPT = 1;
+    private static final int COMPLETE = 2;
+    private static final int INVALID = 3;
+    
+    private static void waitForComplete(boolean corrupt) {
+        waitForCompleteImpl(corrupt? CORRUPT : COMPLETE);
+    }
+    
+    private static void waitForCorrupt() {
+        waitForCompleteImpl(CORRUPT);       
+    }
+    
+    private static void waitForInvalid() {
+        waitForCompleteImpl(INVALID);
+    }
+    
+    private static void waitForComplete() {
+        waitForCompleteImpl(COMPLETE);
+    }
+    
+    private static void waitForCompleteImpl(int state) {
         synchronized(COMPLETE_LOCK) {
             try {
                 REMOVED = false;
@@ -2499,10 +2535,14 @@ public class DownloadTest extends BaseTestCase {
                  DOWNLOADER.getState());
         }
         
-        if ( isCorrupt )
+        if ( state == CORRUPT )
             assertEquals("unexpected state", Downloader.CORRUPT_FILE, DOWNLOADER.getState());
-        else
+        else if(state == INVALID)
+            assertEquals("unexpected state", Downloader.INVALID, DOWNLOADER.getState());
+        else if(state == COMPLETE)
             assertEquals("unexpected state", Downloader.COMPLETE, DOWNLOADER.getState());
+        else
+            fail("bad expectation: " + state);
     }        
     
     private static void waitForBusy(Downloader downloader) {

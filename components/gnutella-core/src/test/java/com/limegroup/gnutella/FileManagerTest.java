@@ -14,12 +14,15 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.StubContentAuthority;
+import com.limegroup.gnutella.auth.StubContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -109,9 +112,11 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         URN u2 = getURN(f2);
         URN u3 = getURN(f3);
         
-        PrivilegedAccessor.setValue(ContentManager.class, "ACTIVE", Boolean.TRUE);
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentManager cm = RouterService.getContentManager();
         cm.initialize();
+        // request the urn so we can use the response.
+        cm.request(u1, new StubContentResponseObserver(), 1000);
         cm.handleContentResponse(new ContentResponse(u1, false));
         
         waitForLoad();

@@ -55,9 +55,6 @@
 	<delete>
 		<fileset dir="${basedir}/com" includes="**/*.class"/>
 	</delete>
-	<delete>
-		<fileset dir="${basedir}/de" includes="**/*.class"/>
-	</delete>
 </target>
 
 <!-- Creates a jar file from core code -->

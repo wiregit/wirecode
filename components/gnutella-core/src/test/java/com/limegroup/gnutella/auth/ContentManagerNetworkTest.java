@@ -16,6 +16,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
@@ -54,7 +55,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     }
     
     public void setUp() throws Exception {
-        PrivilegedAccessor.setValue(ContentManager.class, "ACTIVE", Boolean.TRUE);
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         mgr = new ContentManager();
         crOne = new ContentResponse(URN_1, true);
         one = new Observer();
@@ -73,7 +74,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
         
-        mgr.setContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort()));
+        mgr.setContentAuthority(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort())));
         mgr.request(URN_1, one, 2000);
         
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
@@ -99,11 +100,12 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         final DatagramSocket socket = new DatagramSocket(addr);
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
+        final IpPort authority = new IpPortImpl("127.0.0.1", socket.getLocalPort());
         
         mgr.shutdown();
         mgr = new ContentManager() {
-            protected IpPort getDefaultContentAuthority() throws UnknownHostException {
-                return new IpPortImpl("127.0.0.1", socket.getLocalPort());
+            protected ContentAuthority getDefaultContentAuthority() {
+                return new IpPortContentAuthority(authority);
             }
         };
         mgr.request(URN_1, one, 2000);

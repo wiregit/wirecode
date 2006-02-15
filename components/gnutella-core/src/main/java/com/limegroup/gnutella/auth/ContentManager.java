@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.auth;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,11 +14,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
-import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /**
@@ -28,9 +26,6 @@ import com.limegroup.gnutella.util.ManagedThread;
 public class ContentManager {
     
     private static final Log LOG = LogFactory.getLog(ContentManager.class);
-    
-    /** Flag for whether or not the Manager is active.  Necessary for tests. */
-    private static boolean ACTIVE = true;
     
     /** Map of SHA1 to Observers listening for responses to the SHA1. */
     private final Map /* URN -> List (of Responder) */ OBSERVERS = Collections.synchronizedMap(new HashMap());
@@ -66,8 +61,8 @@ public class ContentManager {
     /** The ContentCache. */
     private final ContentCache CACHE = new ContentCache();
     
-    /** The IpPort to use as the content authority. */
-    private volatile IpPort authority = null;
+    /** The content authority. */
+    private volatile ContentAuthority authority = null;
     
     /** Wehther or not we're shutting down. */
     private volatile boolean shutdown = false;
@@ -89,7 +84,7 @@ public class ContentManager {
     }
     
     /** Sets the content authority. */
-    void setContentAuthority(IpPort authority) {
+    public void setContentAuthority(ContentAuthority authority) {
         this.authority = authority;
     }    
     
@@ -98,7 +93,8 @@ public class ContentManager {
      *  for a response for the given URN.
      */
     public boolean isVerified(URN urn) {
-        return !ACTIVE || CACHE.hasResponseFor(urn) || TIMEOUTS.contains(urn);
+        return !ContentSettings.CONTENT_MANAGEMENT_ACTIVE.getValue() ||
+               CACHE.hasResponseFor(urn) || TIMEOUTS.contains(urn);
     }
     
     /**
@@ -110,7 +106,7 @@ public class ContentManager {
      */
     public void request(URN urn, ContentResponseObserver observer, long timeout) {
         ContentResponseData response = CACHE.getResponse(urn);
-        if(response != null || !ACTIVE) {
+        if(response != null || !ContentSettings.CONTENT_MANAGEMENT_ACTIVE.getValue()) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Immediate response for URN: " + urn);
             observer.handleResponse(urn, response);
@@ -163,7 +159,7 @@ public class ContentManager {
         if (REQUESTED.add(urn) && authority != null) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Sending request for URN: " + urn + " to authority: " + authority);
-            UDPService.instance().send(new ContentRequest(urn), authority);
+            authority.send(new ContentRequest(urn));
         } else if(LOG.isDebugEnabled())
             LOG.debug("Not sending request.  No authority or already requested.");
     }
@@ -328,33 +324,31 @@ public class ContentManager {
     /**
      * Gets the default content authority.
      */
-    protected IpPort getDefaultContentAuthority() throws UnknownHostException {
-        return null; // INSERT DEFAULT CONTENT AUTHORITY HERE.
+    protected ContentAuthority getDefaultContentAuthority() {
+        return new SettingsBasedContentAuthority();
     }
     
     /** Sets the content authority with the default & process all pre-requested items. */
     private void setDefaultContentAuthority() {
-        IpPort auth = null;
-        try {
-            auth = getDefaultContentAuthority();
-        } catch (UnknownHostException uhe) {}
-        
-        // if we have an authority to set, grab all pre-requested items,
-        // set the authority (so newly requested ones will immediately send to it),
-        // and then send off those requested.
-        // note that the timeouts on processing older requests will be lagging slightly.
-        if (auth != null) {
-            Set alreadyReq = new HashSet();
-            synchronized(REQUESTED) {
-                alreadyReq.addAll(REQUESTED);
-                setContentAuthority(auth);
-            }
-            
-            for(Iterator i = alreadyReq.iterator(); i.hasNext(); ) {
-                URN urn = (URN)i.next();
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
-                UDPService.instance().send(new ContentRequest(urn), auth);
+        ContentAuthority auth = getDefaultContentAuthority();
+        if(auth.initialize()) {
+            // if we have an authority to set, grab all pre-requested items,
+            // set the authority (so newly requested ones will immediately send to it),
+            // and then send off those requested.
+            // note that the timeouts on processing older requests will be lagging slightly.
+            if (auth != null) {
+                Set alreadyReq = new HashSet();
+                synchronized(REQUESTED) {
+                    alreadyReq.addAll(REQUESTED);
+                    setContentAuthority(auth);
+                }
+                
+                for(Iterator i = alreadyReq.iterator(); i.hasNext(); ) {
+                    URN urn = (URN)i.next();
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
+                    auth.send(new ContentRequest(urn));
+                }
             }
         }
     }

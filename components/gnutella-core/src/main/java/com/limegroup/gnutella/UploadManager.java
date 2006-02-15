@@ -104,7 +104,7 @@ public class UploadManager implements BandwidthTracker {
     private final int QUEUED = 1;
     private final int ACCEPTED = 2;
     private final int BANNED = 3;
-    private final int NOT_VALIDATED = 4;
+    //private final int NOT_VALIDATED = 4;
     /** The min and max allowed times (in milliseconds) between requests by
      *  queued hosts. */
     public static final int MIN_POLL_TIME = 45000; //45 sec
@@ -715,9 +715,6 @@ public class UploadManager implements BandwidthTracker {
         
         // Act upon the queued state.
         switch(queued) {
-            case NOT_VALIDATED:
-                uploader.setState(Uploader.NOT_VALIDATED);
-                break;
             case REJECTED:
                 uploader.setState(Uploader.LIMIT_REACHED);
                 break;
@@ -941,10 +938,8 @@ public class UploadManager implements BandwidthTracker {
         }
         
         FileDesc fd = uploader.getFileDesc();
-        if(!fd.isVerified()) {
+        if(!fd.isVerified()) // spawn a validation
             RouterService.getFileManager().validate(fd);
-            return NOT_VALIDATED; // wait till we verify.
-        }
 
         URN sha1 = fd.getSHA1Urn();
         boolean isGreedy = rqc.isGreedy(sha1);

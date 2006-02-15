@@ -9,6 +9,8 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 
@@ -44,8 +46,7 @@ public class ContentRequest extends VendorMessage {
             throw new NullPointerException("null sha1");
         
         GGEP ggep =  new GGEP(true);
-        // TODO use bytes instead of String, or pack into GUID.
-        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.httpStringValue());        
+        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());        
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             ggep.write(out);
@@ -53,5 +54,18 @@ public class ContentRequest extends VendorMessage {
             ErrorService.error(iox); // impossible.
         }
         return out.toByteArray();
+    }
+    
+    /** Gets the URN -- this will inefficiently parse the GGEP each time it's called. */
+    public URN getURN() {
+        try {
+            GGEP ggep = new GGEP(getPayload(), 0);
+            return URN.createSHA1UrnFromBytes(ggep.getBytes(GGEP.GGEP_HEADER_SHA1));
+        } catch (BadGGEPBlockException e) {
+        } catch (BadGGEPPropertyException e) {
+        } catch(IOException iox) {
+        }
+        
+        return null;
     }
 }

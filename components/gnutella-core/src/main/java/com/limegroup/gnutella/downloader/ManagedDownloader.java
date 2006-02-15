@@ -49,6 +49,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentResponseData;
+import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -140,10 +141,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
       All downloads start QUEUED.
       From there, it will stay queued until a slot is available.
       
-      Once a slot is available, the download will go to VALIDATING.
-      If validation fails, the download will end with INVALID.
-      Otherwise, it will continue onward...
-      
       If atleast one host is available to download from, then the
       first state is always CONNECTING.
           After connecting, a downloader can become:
@@ -172,14 +169,15 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
       state to QUEUED and wait for DownloadManager to activate it.
       
       The download can finish in one of the following states:
-          h) COMPLETE (download completed just fine)
-          i) ABORTED  (user pressed stopped at some point)
-          j) DISK_PROBLEM (limewire couldn't manipulate the file)
-          k) CORRUPT_FILE (the file was corrupt)
+          - COMPLETE (download completed just fine)
+          - ABORTED  (user pressed stopped at some point)
+          - DISK_PROBLEM (limewire couldn't manipulate the file)
+          - CORRUPT_FILE (the file was corrupt)
+          - INVALID (content authority didn't allow the transfer)
 
      There are a few intermediary states:
-          l) HASHING
-          m) SAVING
+          - HASHING
+          - SAVING
      HASHING & SAVING are seen by the GUI, and are used just prior to COMPLETE,
      to let the user know what is currently happening in the closing states of
      the download.  RECOVERY_FAILED is used as an indicator that we no longer want
@@ -313,6 +311,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private volatile boolean stopped;
     /** True iff this has been paused.  */
     private volatile boolean paused;
+    /** True if this has been invalidated. */
+    private volatile boolean invalidated;
 
     
     /** 
@@ -760,11 +760,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         dloaderManagerThread = new ManagedThread(new Runnable() {
             public void run() {
                 try {
-                    int status = validateDownload();
-                    if(status == VALIDATED) {
-                        receivedNewSources = false;
-                        status = performDownload();
-                    }
+                    validateDownload();
+                    receivedNewSources = false;
+                    int status = performDownload();
                     completeDownload(status);
                 } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
@@ -804,18 +802,21 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             case COMPLETE:
             case DISK_PROBLEM:
             case CORRUPT_FILE:
-            case INVALID:
                 clearingNeeded = true;
                 setState(status);
                 break;
 			case BUSY:
             case GAVE_UP:
-                if(stopped)
+                if(invalidated) {
+                    clearingNeeded = true;
+                    setState(INVALID);
+                } else if(stopped) {
                     setState(ABORTED);
-                else if(paused)
+                } else if(paused) {
                     setState(PAUSED);
-                else
-                    setState(status);
+                } else {
+                    setState(status); // BUSY or GAVE_UP
+                }
                 break;
             default:
                 Assert.that(false, "Bad status from tad2: "+status);
@@ -1032,8 +1033,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         case CONNECTING:
         case DOWNLOADING:
         case REMOTE_QUEUED:
-        case VALIDATING:
-        case VALIDATED:
             return true;
         default:
             return false;
@@ -1051,8 +1050,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         case HASHING:
         case SAVING:
         case IDENTIFY_CORRUPTION:
-        case VALIDATING:
-        case VALIDATED:
             return true;
         }
         return false;
@@ -2113,21 +2110,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Validates the current download.
      */
-    private int validateDownload() {
+    private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
-            setState(VALIDATING);
             if(downloadSHA1 != null) {
-                ContentResponseData response = RouterService.getContentManager().request(downloadSHA1, 5000);
-                if(response == null || response.isOK()) {
-                    return VALIDATED;
-                } else {
-                    return INVALID;
-                }
-            } else {
-                return VALIDATED;
+                RouterService.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
+                    public void handleResponse(URN urn, ContentResponseData response) {
+                        if(response != null && !response.isOK()) {
+                            invalidated = true;
+                            stop();
+                        }
+                    }
+                }, 5000);           
             }
-        } else {
-            return VALIDATED;
         }
     }
     
