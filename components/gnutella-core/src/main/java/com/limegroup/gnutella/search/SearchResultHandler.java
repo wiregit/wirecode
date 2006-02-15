@@ -206,45 +206,46 @@ public final class SearchResultHandler {
             LOG.debug("Error gettig results", e);
             return;
         }
-
+        
         boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
         double numBadSentToFrontEnd = 0;
         for(Iterator iter = results.iterator(); iter.hasNext();) {
-        	   Response response = (Response)iter.next();
-        	
-        	   if (!qr.isBrowseHostReply()) {
-        		   if (!RouterService.matchesType(data.getMessageGUID(), response))
-        			   continue;
-        		
-        		   if (!RouterService.matchesQuery(data.getMessageGUID(),response)) 
-        			   continue;
-        	   }
-        	
-        	   //Throw away results from Mandragore Worm
-        	   if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
-        		   continue;
-        	
-        	   RemoteFileDesc rfd = response.toRemoteFileDesc(data);
-        	   if (FilterSettings.FILTER_ACTION_RESPONSES.getValue() && 
-        			rfd.getXMLDocument().getAction().length() > 0)
-        		   continue;
-        	
-           Set alts = response.getLocations();
-           RouterService.getCallback().handleQueryResult(rfd, data, alts);
-        	
-        	  if (skipSpam || !SpamManager.instance().isSpam(rfd))
-        		   numGoodSentToFrontEnd++;
-        	  else 
-        		   numBadSentToFrontEnd++;
+            Response response = (Response)iter.next();
+            
+            if (!qr.isBrowseHostReply()) {
+                if (!RouterService.matchesType(data.getMessageGUID(), response))
+                    continue;
+                
+                if (!RouterService.matchesQuery(data.getMessageGUID(),response)) 
+                    continue;
+            }
+            
+            //Throw away results from Mandragore Worm
+            if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
+                continue;
+            
+            RemoteFileDesc rfd = response.toRemoteFileDesc(data);
+            if (FilterSettings.FILTER_ACTION_RESPONSES.getValue() && 
+                    rfd.getXMLDocument() != null &&
+                    rfd.getXMLDocument().getAction().length() > 0)
+                continue;
+            
+            Set alts = response.getLocations();
+            RouterService.getCallback().handleQueryResult(rfd, data, alts);
+            
+            if (skipSpam || !SpamManager.instance().isSpam(rfd))
+                numGoodSentToFrontEnd++;
+            else 
+                numBadSentToFrontEnd++;
         } //end of response loop
         
         numBadSentToFrontEnd = Math.ceil(numBadSentToFrontEnd * 
-        		SearchSettings.SPAM_RESULT_RATIO.getValue());
+                SearchSettings.SPAM_RESULT_RATIO.getValue());
         // ok - some responses may have got through to the GUI, we should account
         // for them....
         accountAndUpdateDynamicQueriers(qr, 
-        		numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
+                numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
     }
 
 
