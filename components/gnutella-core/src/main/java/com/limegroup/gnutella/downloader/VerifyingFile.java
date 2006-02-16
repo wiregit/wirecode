@@ -163,7 +163,7 @@ public class VerifyingFile {
      * The size of the file on disk if we're going to scan for completed
      * blocks.  Otherwise -1.
      */
-    private long existingFileSize;
+    private long existingFileSize = -1;
     
     /**
      * Constructs a new VerifyingFile, without a given completion size.
@@ -812,7 +812,7 @@ public class VerifyingFile {
     
     /**  A simple Runnable that schedules a verification of the file. */
     private class EmptyVerifier implements Runnable {
-    	private long existingFileSize;
+    	private final long existingFileSize;
     	
     	EmptyVerifier(long existingFileSize) {
     	    this.existingFileSize = existingFileSize;
