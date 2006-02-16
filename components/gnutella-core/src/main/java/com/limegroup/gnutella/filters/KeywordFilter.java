@@ -89,6 +89,7 @@ public class KeywordFilter extends SpamFilter {
      */
     public void disallowWMVASF() {
     	disallow(".asf");
+	disallow(".asx");
     	disallow(".wmv");
     }
 
