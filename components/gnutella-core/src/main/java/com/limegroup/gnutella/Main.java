@@ -277,4 +277,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 	}
 
 	public void acceptedIncomingChanged(boolean status) { }
+
+    public void disconnected() {}
+    
 }

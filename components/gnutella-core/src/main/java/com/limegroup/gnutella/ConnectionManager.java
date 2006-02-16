@@ -2120,18 +2120,17 @@ public class ConnectionManager {
      */
     public void noInternetConnection() {
 
+        
+        // Notify the user that they have no internet connection and that
+        // we will automatically retry
+        RouterService.getCallback().disconnected();
+
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're
             // alread retrying automatically, so just return.
             return;
         }
 
-        
-        // Notify the user that they have no internet connection and that
-        // we will automatically retry
-        MessageService.showError("NO_INTERNET_RETRYING",
-                QuestionsHandler.NO_INTERNET_RETRYING);
-        
         // Kill all of the ConnectionFetchers.
         disconnect();
         
