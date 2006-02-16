@@ -3,24 +3,25 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedSelectorException;
+import java.nio.channels.SocketChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.LinkedList;
+import java.util.ArrayList;
 
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.VersionUtils;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * Dispatcher for NIO.
@@ -74,11 +75,10 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     *  Whether or not we can wakeup the selector.
-     *  See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4850373 for why
-     *  we couldn't.  (It's broken below 1.4.2_05)
+     * Maximum number of times an attachment can be hit in a row without considering
+     * it suspect & closing it.
      */
-    private static final boolean WAKEUP = VersionUtils.isJavaAbove("1.4.2_04");
+    private static final long MAXIMUM_ATTACHMENT_HITS = 10000;
     
     /**
      * Maximum number of times Selector can return quickly without having anything
@@ -94,6 +94,9 @@ public class NIODispatcher implements Runnable {
     
     /** The selector this uses. */
     private Selector selector = null;
+    
+    /** The current iteration of selection. */
+    private long iteration = 0;
 	
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
@@ -106,9 +109,6 @@ public class NIODispatcher implements Runnable {
     
     /** The throttle queue. */
     private volatile List /* of NBThrottle */ THROTTLE = new ArrayList();
-    
-    /** Whether or not we told the selector to wakeup immediately. */
-    private volatile boolean wokeup = false;
     
     /**
      * Temporary list used where REGISTER & LATER are combined, so that
@@ -174,7 +174,6 @@ public class NIODispatcher implements Runnable {
 	        synchronized(Q_LOCK) {
 				REGISTER.add(new RegisterOp(channel, handler, op));
 			}
-            wakeup();
         }
     }
     
@@ -216,11 +215,6 @@ public class NIODispatcher implements Runnable {
     				else
     					sk.interestOps(sk.interestOps() & ~op);
                 }
-                
-                // if we want to see if something is happening,
-                // wakeup immediately so we can process again.
-                if(on)
-                    wakeup();
 			}
         } catch(CancelledKeyException ignored) {
             // Because closing can happen in any thread, the key may be cancelled
@@ -242,7 +236,6 @@ public class NIODispatcher implements Runnable {
             synchronized(Q_LOCK) {
                 LATER.add(runner);
             }
-            wakeup();
         }
     }
     
@@ -317,17 +310,6 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Wakes up the selector. */
-    private void wakeup() {
-        // there's no need to wakeup if we're on the dispatch thread,
-        // since it's impossible to be blocked in a select call if this is
-        // happening.
-        if(WAKEUP && Thread.currentThread() != dispatchThread) {
-            wokeup = true;
-            selector.wakeup();
-        }
-    }
-    
     /**
      * Adds any pending actions.
      *
@@ -378,8 +360,8 @@ public class NIODispatcher implements Runnable {
      */
     private void readyThrottles(Collection keys) {
         List throttle = THROTTLE;
-        for (int i = 0; i < throttle.size(); i++)
-            ((NBThrottle) throttle.get(i)).selectableKeys(keys);
+            for(int i = 0; i < throttle.size(); i++)
+                ((NBThrottle)throttle.get(i)).selectableKeys(keys);
     }
     
     /**
@@ -391,13 +373,29 @@ public class NIODispatcher implements Runnable {
         int zeroes = 0;
         int ignores = 0;
         
-        while(true) {            
+        while(true) {
+            // This sleep is technically not necessary, however occasionally selector
+            // begins to wakeup with nothing selected.  This happens very frequently on Linux,
+            // and sometimes on Windows (bugs, etc..).  The sleep prevents busy-looping.
+            // It also allows pending registrations & network events to queue up so that
+            // selection can handle more things in one round.
+            // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
+            // that cause this.
+            if (!checkTime || !CommonUtils.isWindows()) {
+                try {
+                    Thread.sleep(50);
+                } catch(InterruptedException ix) {
+                    LOG.warn("Selector interrupted", ix);
+                }
+            }
+            
             addPendingItems();
 
             try {
                 if(checkTime)
                     startSelect = System.currentTimeMillis();
-                
+                    
+                // see register(...) for why this has a timeout
                 selector.select(100);
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
@@ -414,7 +412,7 @@ public class NIODispatcher implements Runnable {
                 if(startSelect == -1) {
                     LOG.warn("No keys selected, starting spin check.");
                     checkTime = true;
-                } else if(!wokeup && startSelect + 30 >= System.currentTimeMillis()) {
+                } else if(startSelect + 30 >= System.currentTimeMillis()) {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Spinning detected, current spins: " + zeroes);
                     if(zeroes++ > SPIN_AMOUNT)
@@ -449,7 +447,7 @@ public class NIODispatcher implements Runnable {
             }
             
             keys.clear();
-            wokeup = false;
+            iteration++;
         }
     }
     
@@ -458,29 +456,44 @@ public class NIODispatcher implements Runnable {
      * ops that are in allowedOps.
      */
     void process(SelectionKey sk, Object proxyAttachment, int allowedOps) {
-        Attachment proxy = (Attachment) proxyAttachment;
+        Attachment proxy = (Attachment)proxyAttachment;
         IOErrorObserver attachment = proxy.attachment;
-
-        try {
+        
+        if(proxy.lastMod == iteration) {
+            proxy.hits++;
+        // do not count ones that we've already processed (such as throttled items)
+        } else if(proxy.lastMod < iteration)
+            proxy.hits = 0;
+            
+        proxy.lastMod = iteration + 1;
+            
+        if(proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
             try {
-                if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                    processAccept(sk, (AcceptObserver) attachment);
-                else if ((allowedOps & SelectionKey.OP_CONNECT) != 0 && sk.isConnectable())
-                    processConnect(sk, (ConnectObserver) attachment);
-                else {
-                    if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
-                        ((ReadObserver) attachment).handleRead();
-                    if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
-                        ((WriteObserver) attachment).handleWrite();
+                try {
+                    if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                        processAccept(sk, (AcceptObserver)attachment);
+                    else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
+                        processConnect(sk, (ConnectObserver)attachment);
+                    else {
+                        if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
+                            ((ReadObserver)attachment).handleRead();
+                        if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
+                            ((WriteObserver)attachment).handleWrite();
+                    }
+                } catch (CancelledKeyException err) {
+                    LOG.warn("Ignoring cancelled key", err);
+                } catch(IOException iox) {
+                    LOG.warn("IOX processing", iox);
+                    attachment.handleIOException(iox);
                 }
-            } catch (CancelledKeyException err) {
-                LOG.warn("Ignoring cancelled key", err);
-            } catch (IOException iox) {
-                LOG.warn("IOX processing", iox);
-                attachment.handleIOException(iox);
+            } catch(Throwable t) {
+                ErrorService.error(t, "Unhandled exception while dispatching");
+                safeCancel(sk, attachment);
             }
-        } catch (Throwable t) {
-            ErrorService.error(t, "Unhandled exception while dispatching");
+        } else {
+            if(LOG.isErrorEnabled())
+                LOG.error("Too many hits in a row for: " + attachment);
+            // we've had too many hits in a row.  kill this attachment.
             safeCancel(sk, attachment);
         }
     }
@@ -576,24 +589,21 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /**
-     * Encapsulates an attachment.
-     * Extra information about the attachment can be stored here.  
-     */
-    static class Attachment {
+    /** Encapsulates an attachment. */
+    private static class Attachment {
         private final IOErrorObserver attachment;
+        private long lastMod;
+        private long hits;
         
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
         }
     }
 
-    /** Exception to be thrown when the Selector is spinning. */
     private static class SpinningException extends Exception {
         public SpinningException() { super(); }
     }
     
-    /** Exception to be thrown when there's an error with selecting. */
     private static class ProcessingException extends Exception {
         public ProcessingException() { super(); }
         public ProcessingException(Throwable t) { super(t); }
