@@ -465,11 +465,13 @@ public class VerifyingFileTest extends BaseTestCase {
         Thread.sleep(500);
         assertTrue(vf.isComplete());
         
-        // give it a hashTree
-        vf.setHashTree(defaultHashTree);
-        
-        // now, it shouldn't be complete
-        assertFalse(vf.isComplete());
+        synchronized(vf) {
+            // give it a hashTree
+            vf.setHashTree(defaultHashTree);
+            
+            // now, it shouldn't be complete
+            assertFalse(vf.isComplete());
+        }
         
         // but things should be pending verification
         vf.waitForPendingIfNeeded();
