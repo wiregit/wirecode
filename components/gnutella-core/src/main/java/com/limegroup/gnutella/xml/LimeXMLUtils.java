@@ -418,8 +418,8 @@ public class LimeXMLUtils {
             return false;
     }
     
-    public static boolean isFilePublishable(File file) {
-    	 return isMP3File(file.getName()) || isOGGFile(file.getName());
+    public static boolean isFilePublishable(String file) {
+    	 return isMP3File(file) || isOGGFile(file);
     }
     
     /**
