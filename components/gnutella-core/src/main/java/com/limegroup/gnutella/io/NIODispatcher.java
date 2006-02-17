@@ -590,7 +590,8 @@ public class NIODispatcher implements Runnable {
     }
     
     /** Encapsulates an attachment. */
-    private static class Attachment {
+    // Make it accessible for NBThrottleTest
+    static class Attachment {
         private final IOErrorObserver attachment;
         private long lastMod;
         private long hits;
