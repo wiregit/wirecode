@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import com.limegroup.gnutella.util.Data;
+import com.limegroup.gnutella.util.IOUtils;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -24,10 +25,7 @@ public final class StaticMessages {
         } catch(Throwable t) {
             LOG.error("Unable to read serialized data", t);
         } finally {
-            try {
-                if(in!=null)
-                    in.close();
-            } catch(IOException iox) {}
+            IOUtils.close(in);
         }
     }
 }

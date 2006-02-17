@@ -749,9 +749,9 @@ public class QueryReply extends Message implements SecureMessage {
     /** Passes in the appropriate bytes of the payload to the signature. */
     public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
         signature.update(_payload, 0, _secureGGEP.getStartIndex());
-        int end = _secureGGEP.getEndIndex() + 1;
+        int end = _secureGGEP.getEndIndex();
         int length = _payload.length - 16 - end;
-        signature.update(_payload, _secureGGEP.getEndIndex(), length);
+        signature.update(_payload, end, length);
     }
 
 

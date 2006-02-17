@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.messages;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Allows multiple GGEP blocks to be parsed, storing
  * the 'secure GGEP' block separately.  Can store
@@ -7,6 +10,8 @@ package com.limegroup.gnutella.messages;
  * so that the rest of the data can be properly verified.
  */
 public class GGEPParser {
+    
+    private static final Log LOG = LogFactory.getLog(GGEPParser.class);
     
     private final GGEP normal;
     private final GGEP secure;
@@ -28,6 +33,7 @@ public class GGEPParser {
      * Scans through the data, starting at idx, looking for the first
      * spot that has GGEP_PREFIX_MAGIC_NUMBER, and parses GGEP blocks
      * from there.
+     * Once a secure block is found, no other GGEPs are parsed.
      */
     public static GGEPParser scanForGGEPs(byte[] data, int idx) {
         // Find the beginning of the GGEP block.
@@ -36,8 +42,10 @@ public class GGEPParser {
              data[idx] != GGEP.GGEP_PREFIX_MAGIC_NUMBER;
              idx++);
         
-        if(idx >= data.length)
+        if(idx >= data.length) {
+            LOG.debug("No GGEP in data");
             return new GGEPParser(); // nothing to parse.
+        }
             
         int[] storage = new int[1];
         GGEP normal = null;
@@ -47,6 +55,11 @@ public class GGEPParser {
             
         try {
             while(secure == null && idx < data.length) {
+                // optimization: don't bother constructing (and throwing exception)
+                //               if it clearly isn't a GGEP block.
+                if(data[idx] != GGEP.GGEP_PREFIX_MAGIC_NUMBER)
+                    break;
+                
                 GGEP ggep = new GGEP(data, idx, storage);
                 if(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_BLOCK)) {
                     secure = ggep;
@@ -58,11 +71,12 @@ public class GGEPParser {
                         normal = ggep;
                     else
                         normal.merge(ggep);
-                    idx = storage[0] + 1;
+                    idx = storage[0];
                     storage[0] = -1;
                 }
             }
         } catch (BadGGEPBlockException ignored) {
+            LOG.debug("Unable to create ggep", ignored);
         }
         
         return new GGEPParser(normal, secure, secureStart, secureEnd);

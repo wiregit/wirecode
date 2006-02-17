@@ -41,12 +41,14 @@ public class SecureMessageVerifier {
     private void verifyMessage(SecureMessage message, SecureMessageCallback callback) {
         if(pubKey == null) {
             LOG.warn("Cannot verify message without a public key.");
+            callback.handleSecureMessage(message, false);
             return;
         }
         
         byte[] signature = message.getSecureSignature();
         if(signature == null) {
             LOG.warn("Cannot verify message without a signature.");
+            callback.handleSecureMessage(message, false);
             return;
         }
         
@@ -56,6 +58,7 @@ public class SecureMessageVerifier {
             message.updateSignatureWithSecuredBytes(verifier);
             if(verifier.verify(signature)) {
                 message.setSecureStatus(SecureMessage.SECURE);
+                callback.handleSecureMessage(message, true);
                 return;
             }
             
@@ -69,7 +72,9 @@ public class SecureMessageVerifier {
         } catch (ClassCastException ccx) {
             LOG.error("bad cast", ccx);
         }
+        
         message.setSecureStatus(SecureMessage.FAILED);
+        callback.handleSecureMessage(message, false);
     }
     
     private class Verifier implements Runnable {
