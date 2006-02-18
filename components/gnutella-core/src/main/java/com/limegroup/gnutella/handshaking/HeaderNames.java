@@ -62,7 +62,7 @@ public final class HeaderNames {
     public static final String X_QUERY_ROUTING = "X-Query-Routing";
     /** "Pong-Caching" header name, indicates support for pong caching, the method of limiting pongs on the network */
     public static final String X_PONG_CACHING = "Pong-Caching";
-    /** "GGEP" header name, indicates support for GGEP extension blocks in packets, usually big pongs */
+    /** "GGEP" header name, indicates support for GGEP extension blocks in Gnutella packets, like pongs */
     public static final String GGEP = "GGEP";
     /** "X-Guess" header name, shows the GUESS version */
     public static final String X_GUESS = "X-Guess";

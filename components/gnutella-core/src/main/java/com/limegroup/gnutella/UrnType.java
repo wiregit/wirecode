@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.IOException;
@@ -183,16 +186,14 @@ public class UrnType implements Serializable {
 	 *  string, or <tt>null</tt> if the type is not supported
 	 */
 	public static UrnType createUrnType(String type) {
+        
+        // lowerCaseType is like "urn:sha1:"
 		String lowerCaseType = type.toLowerCase().trim();
-		if(lowerCaseType.equals(SHA1.toString())) { 
-			return SHA1;
-		} else if(lowerCaseType.equals(ANY_TYPE.toString())) {
-			return ANY_TYPE;
-		} else if(lowerCaseType.equals(BITPRINT.toString())) {
-		    return BITPRINT;
-        } else {
-			return null;
-		}
+
+		if      (lowerCaseType.equals(SHA1.toString()))     return SHA1;     // "urn:sha1:"
+		else if (lowerCaseType.equals(ANY_TYPE.toString())) return ANY_TYPE; // "urn:"
+		else if (lowerCaseType.equals(BITPRINT.toString())) return BITPRINT; // "urn:bitprint:"
+        else                                                return null;
 	}
 
 	/**

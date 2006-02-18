@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.IOException;
@@ -20,15 +23,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+// LimeWire doesn't use GUESS anymore
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
+
+// Standard Gnutella packets and LimeWire-specific vendor messages
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
+
+// Import classes related to QRT, the hash mask of what a computer is sharing
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
+
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.ResultCounter;
@@ -58,7 +67,6 @@ import com.limegroup.gnutella.version.UpdateHandler;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-
 /**
  * One of the three classes that make up the core of the backend.  This
  * class' job is to direct the routing of messages and to count those message
@@ -85,7 +93,6 @@ public abstract class MessageRouter {
      * responses.
      */
     protected byte[] _clientGUID;
-
 
 	/**
 	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 

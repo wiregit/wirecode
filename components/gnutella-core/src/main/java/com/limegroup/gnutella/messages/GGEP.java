@@ -37,20 +37,41 @@ import com.limegroup.gnutella.util.IOUtils;
  * #NAMEC#
  * #NAMED###valuevaluevaluevaluevalue
  * 
- * All GGEP blocks start with the byte 0xC3.
+ * A GGEP block starts with the prefix byte, 0xC3.
+ * This helps us identify them.
+ * 
  * After that are a number of GGEP extensions.
  * The order of the extensions doesn't matter.
+ * 
  * Each extension has a header followed by a value.
  * A header looks like this:
  * 
- * #NAMED###
+ * #NAME###
  * 
  * The first byte contains flags and the length of the header name.
- * Next is the header name, like "VC".
+ * Next is the header name, like "NAME".
  * After that, 1, 2, or 3 bytes tell the length of this extension header's value.
- * A bit in the flag byte marks the last extension in the block.
  * 
- * A GGEP extension header name can't be more than 15 characters, and a value can't be 256 KB or more.
+ * The flags byte looks like this:
+ * 
+ * lcd0----
+ * 
+ * l is set to 1 on the last extension on the block.
+ * c is set to 1 if the value is COBS encoded to hide 0 bytes.
+ * d is set to 1 if the value is deflate compressed.
+ * The 0 after that isn't in use yet.
+ * The 4 bits ---- hold the length of the name, like 4 for "NAME".
+ * 
+ * After "NAME" are the length bytes, which look like this:
+ * 
+ * 10------ 10------ 01------
+ * 
+ * The last or only byte starts 01, and the one or two bytes before it start 10.
+ * We only really need one bit for this, but this way, we can be sure no byte is ever 0.
+ * The bits of the length number are written where the hyphens appear.
+ * They are big endian and slid to the right.
+ * 
+ * A GGEP extension header name can't be 16 characters or more, and a value can't be 256 KB or more.
  * GGEP values can be deflate compressed and COBS encoded.
  * COBS encoding hides 0s in arbitrary data so it can be put somewhere where 0s aren't allowed.
  * 
@@ -548,8 +569,13 @@ public class GGEP {
     /**
      * Read the length of a GGEP value from 1, 2, or 3 bytes.
      * 
-     * @param increment a int array of size >0.  i'll put the number of bytes
-     * devoted to data storage in increment[0].
+     * A GGEP length looks like this:
+     * 
+     * 10------ 10------ 01------
+     * 
+     * The bits of the number are ordered big endian, and placed in the area marked by hyphens.
+     * The last or only byte starts 01, and the bytes before that start 10.
+     * We really only need one bit to mark the last one, GGEP uses 10 and 01 to make sure no byte can ever be 0, which would have special meaning in the packet.
      * 
      * @param buff        The data of the GGEP block
      * @param beginOffset The index where the 1, 2, or 3 bytes with the length are located
@@ -713,8 +739,7 @@ public class GGEP {
      * 
      * The bits that hold the length are shown as hyphens.
      * The first bit tells if there is another after it.
-     * The first two bytes above start with 1s, and the last one starts with a 0.
-     * writeHeader() sets the second bit in the last byte. (do)
+     * The second bit is just a reverse of the first, to make sure no byte can ever be 0.
      * 
      * @param header       The header name, like "VC"
      * @param dataLen      The length of this header's value
@@ -734,6 +759,19 @@ public class GGEP {
 
         // Not used
         boolean shouldCompress = false;
+
+        /*
+         * The flags byte looks like this:
+         * 
+         * 1110 0000
+         * lcd0 leng
+         * 
+         * The first bit indicates the last extension in the GGEP block.
+         * The second bit indicates the value of this extension is COBS encoded.
+         * The third bit indicates the value of this extension is deflate compressed.
+         * The fourth bit is not used, we leave it 0.
+         * The remaining 4 bits are the length of the extension name, like 3 for "SCP".
+         */
 
         // Prepare and write the flags byte
         int flags = 0x00;
@@ -784,7 +822,7 @@ public class GGEP {
 
         // Clip out the lowest 6 bits from the given length
         int end = dataLen & 0x3F; // Clip out the lowest 6 bits from the given length, like 0011 1111
-        toWrite = 0x40 | end;     // Make the bit right before that 1, like 0111 1111, leaving the first bit 0 (do)
+        toWrite = 0x40 | end;     // Make the bit right before that 1, like 0111 1111, leaving the first bit 0, to mark the last byte "01"
         out.write(toWrite);       // Write the last or only length byte
     }
 

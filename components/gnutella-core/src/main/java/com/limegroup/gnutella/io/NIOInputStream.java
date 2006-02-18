@@ -21,7 +21,6 @@ import java.util.Stack;
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  * 
- * 
  * Extends and Implements
  * ReadObserver:                          NIO can tell this object to read now, handleRead().
  * java.nio.channels.ReadableByteChannel: Call read() to read data from this object.
@@ -72,15 +71,12 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
         
         NIODispatcher.instance().interestRead(channel, true);
     }
-    
+
     /**
      * Get an 8 KB ByteBuffer you can use.
+     * BufferInputStream and BufferOutputStream objects get their buffer objects from this method.
      * 
-     * 
-     * 
-     * 
-     * 
-     * @return An empty 8 KB ByteBuffer you can use
+     * @return An empty 8 KB ByteBuffer from our cache of them
      */
     static ByteBuffer getBuffer() {
 
@@ -99,7 +95,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
             return (ByteBuffer)CACHE.pop();
         }
     }
-    
+
     /**
      * Reads from this' channel (which is the temporary ByteBuffer,
      * not the SocketChannel) into the given buffer.

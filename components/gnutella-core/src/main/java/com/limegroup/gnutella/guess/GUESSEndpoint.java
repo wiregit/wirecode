@@ -1,8 +1,13 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.guess;
 
 import java.net.InetAddress;
 
 /**
+ * GUESSEndpoint is part of GUESS, which LimeWire doesn't use anymore.
+ * 
  * Simple host/port pair for endpoints used in GUESS.  The use of the
  * <tt>InetAddress</tt> class allows easy migration to IPv6.
  */

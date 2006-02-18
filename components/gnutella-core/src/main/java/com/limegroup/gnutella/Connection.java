@@ -737,7 +737,7 @@ public class Connection implements IpPort {
         // There was some other error communicating with the remote computer
         } catch (IOException e) {
 
-        	// Close our connection socket with this remote computer, and throw a BandHandshakeException instead of the IOException we just caught
+        	// Close our connection socket with this remote computer, and throw a BadHandshakeException instead of the IOException we just caught
             close();
             throw new BadHandshakeException(e);
         }
@@ -867,8 +867,7 @@ public class Connection implements IpPort {
 			String connectLine = readLine();                      // Blocks until we've downloaded a whole line
 			Assert.that(connectLine != null, "null connectLine"); // Make sure we didn't hit the end of the socket's input stream
 
-			// The remote computer's stage 2 headers don't start with "GNUTELLA/0.6"
-			// It must be running something else, like eDonkey or BitTorrent
+			// The remote computer's stage 2 headers don't start with "GNUTELLA/0.6", it must be running something else, like eDonkey or BitTorrent
 			if (!connectLine.startsWith(GNUTELLA_06)) {
 
 				// Record the error and leave now

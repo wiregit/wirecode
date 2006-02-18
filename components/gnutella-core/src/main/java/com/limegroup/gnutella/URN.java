@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.File;
@@ -632,30 +635,40 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *         <tt>false</tt> otherwise
 	 */
 	private static boolean isValidUrn(final String urnString) {
+
+        // Find the first colon in the text like "urn:sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ"
 		int colon1Index = urnString.indexOf(":");
-		if(colon1Index == -1 || colon1Index+1 > urnString.length()) {
-			return false;
-		}
 
-		int urnIndex1 = colon1Index-3;
-		int urnIndex2 = colon1Index+1;
+        // If there isn't a colon or it's on the end, invalid
+		if (colon1Index == -1 || colon1Index + 1 > urnString.length()) return false;
 
-		if((urnIndex1 < 0) || (urnIndex2 < 0)) {
-			return false;
-		}
+        /*
+         * urnString is text like "urn:sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ".
+         * colon1Index points to   -->
+         * Point urnIndex1 to     >
+         * Point urnIndex2 to      --->
+         * Point colon2Index to    ------->
+         */
 
-		// get the last colon -- this should separate the <NID>
-		// from the <NIS>
-		int colon2Index = urnString.indexOf(":", colon1Index+1);
-		
-		if(colon2Index == -1 || colon2Index+1 > urnString.length())
-		    return false;
-		
-		String urnType = urnString.substring(0, colon2Index+1);
-		if(!UrnType.isSupportedUrnType(urnType) ||
-		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
-			return false;
-		}
+        // Point urnIndex1 to "urn:" and urnIndex2 beyond the colon
+		int urnIndex1 = colon1Index - 3;
+		int urnIndex2 = colon1Index + 1;
+		if ((urnIndex1 < 0) || (urnIndex2 < 0)) return false; // Make sure this didn't move either before the start
+
+        /*
+         * get the last colon -- this should separate the <NID>
+         * from the <NIS>
+         */
+
+        // Clip out the starting text like "urn:sha1:"
+		int colon2Index = urnString.indexOf(":", colon1Index + 1);                   // Find the colon after the first colon
+		if (colon2Index == -1 || colon2Index + 1 > urnString.length()) return false; // Not found or at the end, invalid
+		String urnType = urnString.substring(0, colon2Index + 1);                    // urnType is like "urn:sha1:"
+
+        // Make sure urnType is "urn:sha1:", "urn:", or "urn:bitprint:", and the text after that is 32 or 72 characters long
+		if (!UrnType.isSupportedUrnType(urnType) || !isValidNamespaceSpecificString(urnString.substring(colon2Index + 1))) return false; // It's not
+
+        // Passed all the tests
 		return true;
 	}
 

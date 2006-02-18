@@ -372,6 +372,7 @@ public class QueryReply extends Message implements Serializable{
              boolean supportsChat, boolean supportsBH,
              boolean isMulticastReply, boolean supportsFWTransfer, 
              Set proxies) {
+        
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -435,13 +436,13 @@ public class QueryReply extends Message implements Serializable{
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
                 boolean hasProxies = (_proxies != null) && (_proxies.size() > 0);
-                byte flags=
+                byte flags =
                     (byte)((needsPush && !isMulticastReply ? PUSH_MASK : 0) 
                            | BUSY_MASK 
                            | UPLOADED_MASK 
                            | SPEED_MASK
                            | GGEP_MASK);
-                byte controls=
+                byte controls =
                     (byte)(PUSH_MASK
                            | (isBusy && !isMulticastReply ? BUSY_MASK : 0) 
                            | (finishedUpload ? UPLOADED_MASK : 0)

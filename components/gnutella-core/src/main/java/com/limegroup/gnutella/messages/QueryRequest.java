@@ -1288,17 +1288,43 @@ public class QueryRequest extends Message implements Serializable{
 		Set tempRequestedUrnTypes = null;
         QueryKey tempQueryKey = null;
         try {
+
+            // Wrap the entire payload into a ByteArrayInputStream that we can call read() on to get the data a piece at a time
             ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
-			short sp = ByteOrder.leb2short(bais);
-			tempMinSpeed = ByteOrder.ushort2int(sp);
-            tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8");
-            // handle extensions, which include rich query and URN stuff
-            byte[] extsBytes = super.readNullTerminatedBytes(bais);
+
+            /*
+             * A query payload looks like this:
+             * 
+             * S
+             * search text\0
+             * extension[0x1C]extesion[0x1C]extension\0
+             * 
+             * S is the speed byte.
+             * The search text is null terminated.
+             * The extensions are separated by 0x1C bytes, don't contain null bytes, and are terminated by one.
+             */
+
+            // Read the first byte, the minimum speed
+			short sp = ByteOrder.leb2short(bais);    // Read 1 byte, and return it in a short
+			tempMinSpeed = ByteOrder.ushort2int(sp); // Turn that into an int
+
+            // Read the search text after that
+            tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8"); // Read the text and the 0 from bais, and turn the returned bytes into a String
+
+            /*
+             * handle extensions, which include rich query and URN stuff
+             */
+
+            // Read the extensions, which can't contain a 0 byte and are terminated by one, and turn them into a HUGEExtension object
+            byte[] extsBytes = super.readNullTerminatedBytes(bais); // Read the bytes and the 0 from bais, but return just the bytes up to the 0
             HUGEExtension huge = new HUGEExtension(extsBytes);
+
             GGEP ggep = huge.getGGEP();
 
-            if(ggep != null) {
+            if (ggep != null) {
+
                 try {
+
                     if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                         byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
                         tempQueryKey = QueryKey.getQueryKey(qkBytes, false);

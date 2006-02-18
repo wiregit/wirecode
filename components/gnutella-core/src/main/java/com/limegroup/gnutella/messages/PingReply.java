@@ -46,6 +46,12 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * The 23 byte Gnutella header.
  * A 14 byte payload.
  * A GGEP block.
+ * 
+ * The 14 byte pong payload looks like this:
+ * At  0, length 2, the port number
+ * At  2, length 4, the IP address
+ * At  6, length 4, the number of files the computer is sharing
+ * At 10, length 4, the total size in KB of the shared files
  */
 public class PingReply extends Message implements Serializable, IpPort {
 

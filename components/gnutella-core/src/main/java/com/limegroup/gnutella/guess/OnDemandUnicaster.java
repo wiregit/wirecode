@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.guess;
 
 import java.net.InetAddress;
@@ -13,7 +16,10 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 
-/** Utility class for sending GUESS queries.
+/**
+ * OnDemandUnicaster is part of GUESS, which LimeWire doesn't use anymore.
+ * 
+ * Utility class for sending GUESS queries.
  */
 public class OnDemandUnicaster {
 
