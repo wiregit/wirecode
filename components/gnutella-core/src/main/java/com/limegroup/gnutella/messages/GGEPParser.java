@@ -13,21 +13,10 @@ public class GGEPParser {
     
     private static final Log LOG = LogFactory.getLog(GGEPParser.class);
     
-    private final GGEP normal;
-    private final GGEP secure;
-    private final int secureStart;
-    private final int secureEnd;
-    
-    private GGEPParser() {
-        this(null, null, -1, -1);
-    }
-    
-    private GGEPParser(GGEP normal, GGEP secure, int start, int end) {
-        this.normal = normal;
-        this.secure = secure;
-        this.secureStart = start;
-        this.secureEnd = end;
-    }
+    private GGEP normal = null;
+    private GGEP secure  = null;
+    private int secureStart = -1;
+    private int secureEnd = -1;
     
     /**
      * Scans through the data, starting at idx, looking for the first
@@ -35,7 +24,7 @@ public class GGEPParser {
      * from there.
      * Once a secure block is found, no other GGEPs are parsed.
      */
-    public static GGEPParser scanForGGEPs(byte[] data, int idx) {
+    public void scanForGGEPs(byte[] data, int idx) {
         // Find the beginning of the GGEP block.
         for (; 
              idx < data.length &&
@@ -44,7 +33,7 @@ public class GGEPParser {
         
         if(idx >= data.length) {
             LOG.debug("No GGEP in data");
-            return new GGEPParser(); // nothing to parse.
+            return; // nothing to parse.
         }
             
         int[] storage = new int[1];
@@ -79,7 +68,10 @@ public class GGEPParser {
             LOG.debug("Unable to create ggep", ignored);
         }
         
-        return new GGEPParser(normal, secure, secureStart, secureEnd);
+        this.normal = normal;
+        this.secure = secure;
+        this.secureStart = secureStart;
+        this.secureEnd = secureEnd;
     }
     
     

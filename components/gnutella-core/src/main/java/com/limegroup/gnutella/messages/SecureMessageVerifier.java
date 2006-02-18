@@ -24,23 +24,32 @@ public class SecureMessageVerifier {
     /** The public key. */
     private PublicKey pubKey;
     
-    
+    /** Queues this SecureMessage for verification.  The callback will be notified of success or failure. */
     public void verify(SecureMessage sm, SecureMessageCallback smc) {
         QUEUE.add(new Verifier(sm, smc));
     }
     
+    /** Initializes the public key if one isn't set. */
     private void initializePublicKey() {
         if(pubKey == null)
-            pubKey = SignatureVerifier.readKey(getKeyFile(), "DSA");
+            pubKey = createPublicKey();
     }
     
-    private File getKeyFile() {
+    /** Creates the public key. */
+    protected PublicKey createPublicKey() {
+        return SignatureVerifier.readKey(getKeyFile(), "DSA");
+    }
+    
+    /** Gets the file holding the key. */
+    protected File getKeyFile() {
         return new File(CommonUtils.getUserSettingsDir(), "secureMessage.key");
     }
     
+    /** Does the verification. */
     private void verifyMessage(SecureMessage message, SecureMessageCallback callback) {
         if(pubKey == null) {
             LOG.warn("Cannot verify message without a public key.");
+            message.setSecureStatus(SecureMessage.INSECURE);
             callback.handleSecureMessage(message, false);
             return;
         }
@@ -48,12 +57,13 @@ public class SecureMessageVerifier {
         byte[] signature = message.getSecureSignature();
         if(signature == null) {
             LOG.warn("Cannot verify message without a signature.");
+            message.setSecureStatus(SecureMessage.INSECURE);
             callback.handleSecureMessage(message, false);
             return;
         }
         
         try {
-            Signature verifier = Signature.getInstance("DSAwithSHA1");
+            Signature verifier = Signature.getInstance("SHA1withDSA");
             verifier.initVerify(pubKey);
             message.updateSignatureWithSecuredBytes(verifier);
             if(verifier.verify(signature)) {
@@ -61,7 +71,6 @@ public class SecureMessageVerifier {
                 callback.handleSecureMessage(message, true);
                 return;
             }
-            
             // fallthrough on not secure & failures to set failed.
         } catch (NoSuchAlgorithmException nsax) {
             LOG.error("No alg.", nsax);
@@ -77,6 +86,7 @@ public class SecureMessageVerifier {
         callback.handleSecureMessage(message, false);
     }
     
+    /** Simple runnable to insert into the ProcessingQueue. */
     private class Verifier implements Runnable {
         private final SecureMessage message;
         private final SecureMessageCallback callback;

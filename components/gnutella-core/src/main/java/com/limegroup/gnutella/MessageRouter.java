@@ -2390,17 +2390,19 @@ public abstract class MessageRouter {
     }
 
     private void updateMessage(QueryRequest request, ReplyHandler handler) {
-        if(! (handler instanceof Connection) )
+        if (!(handler instanceof Connection))
             return;
-        Connection c  = (Connection) handler;
-        if(request.getHops()==1 && c.isOldLimeWire()) {
-            if(StaticMessages.updateReply ==null) 
-                return;
-            QueryReply qr
-                 = new QueryReply(request.getGUID(),StaticMessages.updateReply);
-            try {
-                sendQueryReply(qr);
-            } catch (IOException ignored) {}
+        
+        Connection c = (Connection) handler;
+        QueryReply update = StaticMessages.getUpdateReply();
+        if (request.getHops() == 1 && c.isOldLimeWire()) {
+            if (update != null) {
+                QueryReply qr = new QueryReply(request.getGUID(), update);
+                try {
+                    sendQueryReply(qr);
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 

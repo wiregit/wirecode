@@ -397,19 +397,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     }
     
     /**
-     * Get tests directory from a marker resource file.
-     */
-    public static File getTestDirectory() throws Exception {
-        File f =
-            CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
-        f = f.getCanonicalFile(); // make it a full (not relative) path
-        
-                 //gnutella       // limegroup    // com         // tests
-        f = f.getParentFile().getParentFile().getParentFile().getParentFile();
-        return new File(f, "testData");
-    }   
-    
-    /**
      * Sets this test up to have unique directories.
      */
     public static void setupUniqueDirectories() throws Exception {
@@ -436,11 +423,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                                     "SETTINGS_DIRECTORY",
                                     _settingsDir);
 
-        // Get a marker file.
-        File f = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
-        f = f.getCanonicalFile();
-                 //gnutella       // limegroup    // com         // tests       // .
-        f = f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+        File f = getRootDir();
 
         // Expand the xml.war file.
         File xmlWar = new File(f, "gui/xml.war");
@@ -454,7 +437,29 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         Expand.expandFile(updateVer, _settingsDir);
 
         _baseDir.deleteOnExit();
-        
+    }
+    
+    /**
+     * Get tests directory from a marker resource file.
+     */
+    public static File getTestDirectory() throws Exception {
+        return new File(getRootDir(), "testData");
+    }   
+    
+    public static File getGUIDir() throws Exception {
+        return new File(getRootDir(), "gui");
+    }
+    
+    public static File getCoreDir() throws Exception {
+        return new File(getRootDir(), "core");        
+    }
+    
+    public static File getRootDir() throws Exception {
+        // Get a marker file.
+        File f = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
+        f = f.getCanonicalFile();
+                 //gnutella       // limegroup    // com         // tests       // .
+        return f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();        
     }
     
     /**

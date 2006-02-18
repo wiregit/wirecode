@@ -32,6 +32,7 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
+import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -425,7 +426,11 @@ public class RouterService {
 			
 			LOG.trace("START loading spam data");
 			RatingTable.instance();
-			LOG.trace("START loading spam data");			
+			LOG.trace("START loading spam data");
+            
+            LOG.trace("START loading StaticMessages");
+            StaticMessages.initialize();
+            LOG.trace("END loading StaticMessages");
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
