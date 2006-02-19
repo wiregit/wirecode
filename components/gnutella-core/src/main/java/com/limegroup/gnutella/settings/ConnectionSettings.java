@@ -340,6 +340,13 @@ public final class ConnectionSettings extends LimeProps {
     
     
     /**
+     * The size of our Querry Routing Tables, in kilobytes. 
+     */
+    public static final PowerOfTwoSetting QRT_SIZE_IN_KILOBYTES =
+        FACTORY.createSettablePowerOfTwoSetting("QRT_SIZE_IN_KILOBYTES", 64,
+                "ConnectionSettings.QRTSizeInKilobytes", 256, 64);
+    
+    /**
      * Helper method left from Settings Manager
      *
 	 * Returns the maximum number of connections for the given connection

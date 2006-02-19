@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for a long setting.
  */
-public final class LongSetting extends AbstractNumberSetting {
+public class LongSetting extends AbstractNumberSetting {
     
     private long value;
 

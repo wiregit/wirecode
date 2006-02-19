@@ -392,6 +392,23 @@ public final class SettingsFactory {
     }
 
     /**
+     * Creates a new <tt>PowerOfTwoSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting, which must be a
+     *            power of two.
+     */
+    public synchronized PowerOfTwoSetting createSettablePowerOfTwoSetting(String key,
+            long defaultValue, String simppKey, long max, long min) {
+        PowerOfTwoSetting result = 
+            new PowerOfTwoSetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
+                                                 simppKey, max, min);
+        handleSettingInternal(result, simppKey);
+        return result;
+    }
+    
+    /**
      * Creates a new <tt>FileSetting</tt> instance with the specified
      * key and default value.
      *
