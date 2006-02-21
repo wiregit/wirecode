@@ -6,6 +6,14 @@ import java.io.File;
 import java.io.FileFilter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.SignatureSpi;
 import java.util.*;
 
 import junit.framework.Test;
@@ -1010,45 +1018,155 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         } catch(BadPacketException e) {
         }
     }
+    
+    public void testSecureReplyNoSignature() throws Exception {
+        int indexes[] = new int[2];
+        ByteArrayOutputStream payload = new ByteArrayOutputStream();
+        
+        GGEP ggep = new GGEP(false);
+        ggep.put("SB");
+        QueryReply reply = newSecureQueryReply(ggep, indexes, payload);
+        assertTrue(reply.hasSecureData());
+        assertNull(reply.getSecureSignature());
+        runSignatureTest(reply, indexes, payload.toByteArray());
+    }
+    
+    public void testSecureReplyWithSignature() throws Exception {
+        int indexes[] = new int[2];
+        ByteArrayOutputStream payload = new ByteArrayOutputStream();
+        
+        GGEP ggep = new GGEP(false);
+        ggep.put("SB");
+        byte[] sig = new byte[100];
+        new Random().nextBytes(sig);
+        ggep.put("SIG", sig);
+        QueryReply reply = newSecureQueryReply(ggep, indexes, payload);
+        assertTrue(reply.hasSecureData());
+        assertEquals(sig, reply.getSecureSignature());
+        runSignatureTest(reply, indexes, payload.toByteArray());
+    }
+    
+    public void testNoSecureReply() throws Exception {
+        int indexes[] = new int[2];
+        ByteArrayOutputStream payload = new ByteArrayOutputStream();
+        
+        GGEP ggep = new GGEP(false);
+        ggep.put("SC");
+        byte[] sig = new byte[100];
+        new Random().nextBytes(sig);
+        ggep.put("SIG", sig);        
+        QueryReply reply = newSecureQueryReply(ggep, indexes, payload);
+        assertFalse(reply.hasSecureData());
+        assertNull(reply.getSecureSignature());
+        Provider provider = new TestProvider();
+        Signature signature = Signature.getInstance("FakeSignature", provider);
+        signature.initSign(null);
+        reply.updateSignatureWithSecuredBytes(signature);
+        assertEquals(-1, FakeSignatureSpi.off1);
+        assertEquals(-1, FakeSignatureSpi.off2);
+        assertEquals(-1, FakeSignatureSpi.len1);
+        assertEquals(-1, FakeSignatureSpi.len2);
+        assertNull(FakeSignatureSpi.update1);
+        assertNull(FakeSignatureSpi.update2);       
+    }
+    
+    public void testSecureStatus() throws Exception {
+        int indexes[] = new int[2];
+        ByteArrayOutputStream payload = new ByteArrayOutputStream();        
+        GGEP ggep = new GGEP(false);
+        QueryReply reply = newSecureQueryReply(ggep, indexes, payload);
+        assertEquals(SecureMessage.INSECURE, reply.getSecureStatus());
+        reply.setSecureStatus(SecureMessage.FAILED);
+        assertEquals(SecureMessage.FAILED, reply.getSecureStatus());
+        reply.setSecureStatus(SecureMessage.SECURE);
+        assertEquals(SecureMessage.SECURE, reply.getSecureStatus());
+    }
+    
+    private void runSignatureTest(QueryReply reply, int[] indexes, byte[] payload) throws Exception {
+        Provider provider = new TestProvider();
+        Signature sig = Signature.getInstance("FakeSignature", provider);
+        sig.initSign(null);
+        reply.updateSignatureWithSecuredBytes(sig);
+        assertNotEquals(-1, FakeSignatureSpi.off1);
+        assertNotEquals(-1, FakeSignatureSpi.off2);
+        assertNotEquals(-1, FakeSignatureSpi.len1);
+        assertNotEquals(-1, FakeSignatureSpi.len2);
+        assertNotNull(FakeSignatureSpi.update1);
+        assertNotNull(FakeSignatureSpi.update2);
+        
+        assertEquals(0, FakeSignatureSpi.off1);
+        assertEquals(indexes[0], FakeSignatureSpi.len1);
+        for(int i = 0; i < indexes[0]; i++)
+            assertEquals("bad match at offset: " + i, payload[i], FakeSignatureSpi.update1[i]);
+        
+        assertEquals(indexes[1], FakeSignatureSpi.off2);
+        int len2 = payload.length - 16 - indexes[1];
+        assertEquals(len2, FakeSignatureSpi.len2);
+        for(int i = indexes[1]; i < len2 + indexes[1]; i++)
+            assertEquals("bad match at offset: " + i, payload[i], FakeSignatureSpi.update2[i]);
+    }
+    
+    private QueryReply newSecureQueryReply(GGEP secureGGEP, int[] indexes, ByteArrayOutputStream payload) throws Exception {
+        indexes[0] = -1;
+        indexes[1] = -1;
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(1); // # of results
+        ByteOrder.short2leb((short)6346, out); // port
+        out.write(IP); // ip
+        ByteOrder.int2leb(1, out);
+        Response r = new Response(0, 1, "test");
+        r.writeToStream(out);
+        out.write(new byte[] { 'L', 'I', 'M', 'E' });
+        out.write(4); // common payload length
+        out.write(0x3C); // flags (control no push) 
+        out.write(0x21); // control (yes ggep, flag busy)
+        ByteOrder.short2leb((short)1, out); // xml size
+        out.write(0); // no chat
+        
+        GGEP ggep = new GGEP(false);
+        ggep.put("test", "data");
+        ggep.write(out); // normal ggep block.
+        
+        indexes[0] = out.size();
+        secureGGEP.write(out);
+        indexes[1] = out.size();
+        
+        out.write(0); // null after XML
+        out.write(new byte[16]); // clientGUID
+        
+        // copy the payload.
+        payload.reset();
+        out.writeTo(payload);
+        
+        return new QueryReply(new byte[16], (byte)1, (byte)1, out.toByteArray());
+    }
 
     private void addFilesToLibrary() throws Exception {
-	String dirString = "com/limegroup/gnutella";
-	File testDir = CommonUtils.getResourceFile(dirString);
-	testDir = testDir.getCanonicalFile();
-	assertTrue("could not find the gnutella directory",
-		   testDir.isDirectory());
-	
-        File[] testFiles = testDir.listFiles(new FileFilter() { 
-		public boolean accept(File file) {
-		    // use files with a $ because they'll generally
-		    // trigger a single-response return, which is
-		    // easier to check
-		    return FileManager.isFilePhysicallyShareable(file) 
-			&& file.getName().indexOf("$")!=-1;
-		}
-	    });
-        
-	assertNotNull("no files to test against", testFiles);
-	assertNotEquals("no files to test against", 0, testFiles.length);
-	
-	for (int i = 0; i < testFiles.length; i++) {
-	    File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
-	    assertTrue("unable to get file", CommonUtils.copy( testFiles[i], shared));
-	}
-	
-        waitForLoad();
+        String dirString = "com/limegroup/gnutella";
+        File testDir = CommonUtils.getResourceFile(dirString);
+        testDir = testDir.getCanonicalFile();
+        assertTrue("could not find the gnutella directory", testDir.isDirectory());
 
-// 	if (testFiles.length != fman.getNumFiles()) {
-// 	    for (int i = 0; i < testFiles.length; i++) {
-// 		File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
-// 		 if (fman.getFileDescForFile(shared) == null) {
-// 		     System.out.println("File not shared " + shared);
-// 		 }
-// 	    }
-// 	}
-	
-	 assertEquals("unexpected number of shared files",
-		      testFiles.length, fman.getNumFiles() );
+        File[] testFiles = testDir.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                // use files with a $ because they'll generally
+                // trigger a single-response return, which is
+                // easier to check
+                return FileManager.isFilePhysicallyShareable(file) && file.getName().indexOf("$") != -1;
+            }
+        });
+
+        assertNotNull("no files to test against", testFiles);
+        assertNotEquals("no files to test against", 0, testFiles.length);
+
+        for (int i = 0; i < testFiles.length; i++) {
+            File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
+            assertTrue("unable to get file", CommonUtils.copy(testFiles[i], shared));
+        }
+
+        waitForLoad();
+        assertEquals("unexpected number of shared files", testFiles.length, fman.getNumFiles());
     }
     
     private void addAlternateLocationsToFiles() throws Exception {
@@ -1088,6 +1206,73 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                 //good.
             }
         }
-    }   
+    }
+    
+    
+    /*
+     * All the below crap is because we can't subclass Signature and instead need to provide an SPI.
+     */
+    
+    /** Provider that references the fake SPI */
+    private static final class TestProvider extends Provider {
+        TestProvider() {
+            super("LIME", 1.0, "LIME test provider");
+            put("Signature.FakeSignature", FakeSignatureSpi.class.getName());
+        }
+    }
+    
+    /** SPI that stores things statically because there's no other reference to it anywhere. */
+    public static class FakeSignatureSpi extends SignatureSpi {
+        private static byte[] update1;
+        private static int off1;
+        private static int len1;
+        
+        private static byte[] update2;
+        private static int off2;
+        private static int len2;
+        
+        protected Object engineGetParameter(String arg0) throws InvalidParameterException {
+            return null;
+        }
 
+        protected void engineInitSign(PrivateKey arg0) throws InvalidKeyException {
+            update1 = null;
+            off1 = -1;
+            len1 = -1;
+            update2 = null;
+            off2 = -1;
+            len2 = -1;
+        }
+
+        protected void engineInitVerify(PublicKey arg0) throws InvalidKeyException {
+        }
+
+        protected void engineSetParameter(String arg0, Object arg1) throws InvalidParameterException {
+        }
+
+        protected byte[] engineSign() throws SignatureException {
+            return null;
+        }
+
+        protected void engineUpdate(byte arg0) throws SignatureException {
+        }
+
+        protected void engineUpdate(byte[] data, int off, int len) throws SignatureException {
+            if(update1 == null) {
+                update1 = data;
+                off1 = off;
+                len1 = len;
+            } else if(update2 == null) {
+                update2 = data;
+                off2 = off;
+                len2 = len;
+            } else {
+                fail("updating signature more than twice!");
+            }
+        }
+
+        protected boolean engineVerify(byte[] arg0) throws SignatureException {
+            return false;
+        }
+    }
 }

@@ -739,19 +739,29 @@ public class QueryReply extends Message implements SecureMessage {
     
     /** Returns the bytes of the signature from the secure GGEP block. */
     public byte[] getSecureSignature() {
-        try {
-            return _secureGGEP.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
-        } catch(BadGGEPPropertyException bgpe) {
+        parseResults();
+        
+        if(_secureGGEP != null) {
+            try {
+                return _secureGGEP.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
+            } catch(BadGGEPPropertyException bgpe) {
+                return null;
+            }
+        } else {
             return null;
         }
     }
 
     /** Passes in the appropriate bytes of the payload to the signature. */
     public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
-        signature.update(_payload, 0, _secureGGEP.getStartIndex());
-        int end = _secureGGEP.getEndIndex();
-        int length = _payload.length - 16 - end;
-        signature.update(_payload, end, length);
+        parseResults();
+        
+        if(_secureGGEP != null) {
+            signature.update(_payload, 0, _secureGGEP.getStartIndex());
+            int end = _secureGGEP.getEndIndex();
+            int length = _payload.length - 16 - end;
+            signature.update(_payload, end, length);
+        }
     }
 
 
