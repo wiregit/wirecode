@@ -150,7 +150,7 @@ public class RouterService {
     private static PromotionManager promotionManager = new PromotionManager();
 
 	
-    private static final ResponseVerifier VERIFIER = new ResponseVerifier();
+    private static ResponseVerifier VERIFIER = new ResponseVerifier();
 
 	/**
 	 * <tt>Statistics</tt> class for managing statistics.

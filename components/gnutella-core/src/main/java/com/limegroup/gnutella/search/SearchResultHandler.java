@@ -20,7 +20,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -211,8 +210,9 @@ public final class SearchResultHandler {
 
         // throw away results that aren't secure.
         int secureStatus = qr.getSecureStatus();
-        if(secureStatus == SecureMessage.FAILED)
+        if(secureStatus == SecureMessage.FAILED) {
             return;
+        }
         
         boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
@@ -223,21 +223,25 @@ public final class SearchResultHandler {
             Response response = (Response) iter.next();
 
             if (!qr.isBrowseHostReply()) {
-                if (!RouterService.matchesType(data.getMessageGUID(), response))
+                if (!RouterService.matchesType(data.getMessageGUID(), response)) {
                     continue;
+                }
 
-                if (!RouterService.matchesQuery(data.getMessageGUID(), response))
+                if (!RouterService.matchesQuery(data.getMessageGUID(), response)) {
                     continue;
+                }
             }
 
             // Throw away results from Mandragore Worm
-            if (RouterService.isMandragoreWorm(data.getMessageGUID(), response))
+            if (RouterService.isMandragoreWorm(data.getMessageGUID(), response)) {
                 continue;
+            }
             
             // If there was an action, only allow it if it's a secure message.
             LimeXMLDocument doc = response.getDocument();
-            if(doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE)
+            if(doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
                 continue;
+            }
             
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             rfd.setSecureStatus(secureStatus);
