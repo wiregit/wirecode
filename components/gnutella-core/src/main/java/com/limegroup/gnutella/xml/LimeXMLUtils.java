@@ -59,8 +59,6 @@ public class LimeXMLUtils {
     private static final int GZIP = 1;
     private static final int ZLIB = 2;
 
-    public  static final String AUDIO_BITRATE_ATTR = "audios__audio__bitrate__";
-
     /**
      * Returns an instance of InputSource after reading the file, and trimming
      * the extraneous white spaces.
@@ -232,7 +230,7 @@ public class LimeXMLUtils {
                     double qVD  = (new Double(queryValue)).doubleValue();
                     if (rDVD == qVD) {
                         matchCount++;
-                        if (currFieldName.equals(AUDIO_BITRATE_ATTR))
+                        if (currFieldName.equals(LimeXMLNames.AUDIO_BITRATE))
                             matchedBitrate = true;
                     }
                     continue;
@@ -363,36 +361,68 @@ public class LimeXMLUtils {
         return in.endsWith(".asf") || in.endsWith(".wm");
     }
     
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Audio file (for example ID3 tags).
+     */
     public static boolean isSupportedAudioFormat(File file) {
         return isSupportedAudioFormat(file.getName());
     }
-
+    
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Audio file (for example ID3 tags).
+     */
     public static boolean isSupportedAudioFormat(String file) {
-    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
+        return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
     }
     
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Video file.
+     */
     public static boolean isSupportedVideoFormat(File file) {
-    	return isSupportedVideoFormat(file.getName());
+        return isSupportedVideoFormat(file.getName());
     }
     
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Video file.
+     */
     public static boolean isSupportedVideoFormat(String file) {
-    	return isRIFFFile(file) || isOGMFile(file) || isWMVFile(file);
+        return isRIFFFile(file) || isOGMFile(file) || isWMVFile(file);
     }
     
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Audio/Video file.
+     */
     public static boolean isSupportedMultipleFormat(File file) {
         return isSupportedMultipleFormat(file.getName());
     }
     
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Audio/Video file.
+     */
     public static boolean isSupportedMultipleFormat(String file) {
         return isASFFile(file);
     }
     
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Audio, Video, whatsoever file.
+     */
     public static boolean isSupportedFormat(File file) {
-    	return isSupportedFormat(file.getName());
+        return isSupportedFormat(file.getName());
     }
     
+    /** 
+     * Returns true if LimeWire might be able to read the Meta Data of 
+     * this Audio, Video, whatsoever file.
+     */
     public static boolean isSupportedFormat(String file) {
-    	return isSupportedAudioFormat(file) || isSupportedVideoFormat(file) || isSupportedMultipleFormat(file);
+        return isSupportedAudioFormat(file) || isSupportedVideoFormat(file) || isSupportedMultipleFormat(file);
     }
     
     /**
