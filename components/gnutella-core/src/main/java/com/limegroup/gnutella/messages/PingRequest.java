@@ -184,6 +184,7 @@ public class PingRequest extends Message {
     /**
      * Make a new QueryKey ping for us to send.
      * It will have hops 0, TTL 1, and a GGEP block with the key "QT" with no value.
+     * QueryKey is a part of GUESS, which LimeWire no longer uses.
      * 
      * @return A new PingRequest object
      */
@@ -535,6 +536,7 @@ public class PingRequest extends Message {
     /**
      * Determine if this big ping has "QK" in its GGEP block, indicating QueryKey support.
      * Before we even look in the GGEP block, this ping must have hops 1 and TTL 0.
+     * QueryKey is a part of GUESS, which LimeWire no longer uses.
      * 
      * @return True if this ping has hops 1, TTL 0, and a GGEP block with the key "QK"
      */

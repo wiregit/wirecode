@@ -1,84 +1,74 @@
-package com.limegroup.gnutella.settings;
 
+// Commented for the Learning branch
+
+package com.limegroup.gnutella.settings;
 
 /**
  * Settings for searches.
+ * 
+ * The LimeWire GUI uses these settings to check user input and choose which search results to display.
+ * In the LimeWire core, QueryRequest uses these settings to validate the parts of an incoming query packet.
+ * Many of these settings deal with QueryKey and GUESS, which LimeWire no longer uses.
  */
 public final class SearchSettings extends LimeProps {
-    
-    private SearchSettings() {}
-    
+
     /**
-     * Constant for the characters that are banned from search
-     * strings.
+     * Don't let anyone make a SearchSettings object.
+     * Just use the static members here instead.
+     */
+    private SearchSettings() {}
+
+    /**
+     * The characters that are not allowed in search text, like _ # ! |.
+     * Four of the banned characters, '\t', '\n', '\r', '\f', won't appear first or last because they get trimmed.
+     * 
+     * Used only by the ILLEGAL_CHARS setting below.
      */
     private static final char[] BAD_CHARS = {
-        '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', 
-        ':', ';', '/', '\\', '[', ']', 
-        '\t', '\n', '\r', '\f', // these cannot be last or first 'cause they're trimmed
-        '{', '}',
+
+        // Define the char elements of this char array
+        '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', ':', ';', '/', '\\', '[', ']', '\t', '\n', '\r', '\f', '{', '}',
     };
 
-	/**
-	 * Setting for whether or not GUESS searching is enabled.
-	 */
-	public static final BooleanSetting GUESS_ENABLED =
-		FACTORY.createBooleanSetting("GUESS_ENABLED", true);
+	/** LimeWire doesn't use GUESS searching any longer. */
+	public static final BooleanSetting GUESS_ENABLED = FACTORY.createBooleanSetting("GUESS_ENABLED", true);
 
-
-	/**
-	 * Setting for whether or not OOB searching is enabled.
-	 */
-	public static final BooleanSetting OOB_ENABLED =
-		FACTORY.createBooleanSetting("OOB_ENABLED", true);
-
+	/** This is a part of GUESS, which LimeWire doesn't use any longer. (do) */
+	public static final BooleanSetting OOB_ENABLED = FACTORY.createBooleanSetting("OOB_ENABLED", true);
 
     /**
+     * Not used.
      * The TTL for probe queries.
      */
-    public static final ByteSetting PROBE_TTL =
-        FACTORY.createByteSetting("PROBE_TTL", (byte)2);
+    public static final ByteSetting PROBE_TTL = FACTORY.createByteSetting("PROBE_TTL", (byte)2);
 
     /**
-     * Setting for the characters that are not allowed in search strings
+     * The characters that are not allowed in seach text.
+     * _ # ! | ? < > ^ ( ) : ; / \ [ ] \t \n \r \f { }
+     * 
+     * LimeWire's user interface blocks the user from entering these characters in the Search box.
+     * The QueryRequest constructor drops packets that come in with these characters in their search text.
      */
-    public static final CharArraySetting ILLEGAL_CHARS =
-        FACTORY.createCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
+    public static final CharArraySetting ILLEGAL_CHARS = FACTORY.createCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
+
+    /** 30 characters, the maximum number to allow in search text. */
+    public static final IntSetting MAX_QUERY_LENGTH = FACTORY.createIntSetting("MAX_QUERY_LENGTH", 30);
+
+    /** 500 characters, the maximum number to allow in an XML query. */
+    public static final IntSetting MAX_XML_QUERY_LENGTH = FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 500);
+
+    /** 0, a search result will have to have this many stars to show up in the list. */
+    public static final IntSetting MINIMUM_SEARCH_QUALITY = FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY", 0);
+
+    /** 0, a search result has to have this speed to show up in the list. */
+    public static final IntSetting MINIMUM_SEARCH_SPEED = FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED", 0);
+
+    /** 5, don't let the user run more than 5 searches at once. */
+    public static final IntSetting PARALLEL_SEARCH = FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
 
     /**
-     * Setting for the maximum number of bytes to allow in queries.
+     * QueryKey is a part of GUESS, and no longer used.
+     * Do not issue query keys more than this often.
      */
-    public static final IntSetting MAX_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_QUERY_LENGTH", 30);
-
-    /**
-     * Setting for the maximum number of bytes to allow in XML queries.
-     */
-    public static final IntSetting MAX_XML_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 500);
-    
-    /**
-	 * The minimum quality (number of stars) for search results to
-	 * display.
-	 */
-    public static final IntSetting MINIMUM_SEARCH_QUALITY =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY", 0);
-    
-    /**
-	 * The minimum speed for search results to display.
-	 */
-    public static final IntSetting MINIMUM_SEARCH_SPEED =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED", 0);
-    
-    /**
-	 * The maximum number of simultaneous searches to allow.
-	 */    
-    public static final IntSetting PARALLEL_SEARCH =
-        FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
-    
-    /**
-     * Do not issue query keys more than this often
-     */
-    public static final IntSetting QUERY_KEY_DELAY = 
-        FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,"MessageRouter.QueryKeyDelay",10000,10);
+    public static final IntSetting QUERY_KEY_DELAY = FACTORY.createSettableIntSetting("QUERY_KEY_DELAY", 500, "MessageRouter.QueryKeyDelay", 10000, 10);
 }

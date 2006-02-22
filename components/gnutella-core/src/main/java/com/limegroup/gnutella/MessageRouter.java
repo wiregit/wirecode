@@ -878,6 +878,8 @@ public abstract class MessageRouter {
     
 
     /**
+     * QueryKey is a part of GUESS, and no longer used.
+     * 
      * Generates a QueryKey for the source (described by addr) and sends the
      * QueryKey to it via a QueryKey pong....
      */

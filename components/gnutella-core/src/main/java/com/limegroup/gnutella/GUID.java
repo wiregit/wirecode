@@ -318,6 +318,7 @@ public class GUID implements Comparable {
 
     /**
      * Read the first 4 bytes in this GUID as an IP address, and return it as a String like "1.2.3.4".
+     * Query packets put the IP address and port number computers should send UDP out of band replies to in the GUID.
      * 
      * @return The first 4 bytes as IP address text like "1.2.3.4"
      */
@@ -329,6 +330,7 @@ public class GUID implements Comparable {
 
     /**
      * Determine if this GUID starts with a given IP address.
+     * Query packets put the IP address and port number computers should send UDP out of band replies to in the GUID.
      * 
      * @param bytes An IP address in a 4-byte array
      * @return      True if the GUID starts with the IP address, false if a byte doesn't match
@@ -341,6 +343,7 @@ public class GUID implements Comparable {
 
     /**
      * Reads the 2 bytes starting at 13 in this GUID as a port number.
+     * Query packets put the IP address and port number computers should send UDP out of band replies to in the GUID.
      * 
      * @return The port number written in the GUID
      */

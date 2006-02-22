@@ -45,7 +45,7 @@ public abstract class FileManager {
 	
     private static final Log LOG = LogFactory.getLog(FileManager.class);
 
-    /** The string used by Clip2 reflectors to index hosts. */
+    /** "    " A String of 4 spaces, the string used by Clip2 reflectors to index hosts. */
     public static final String INDEXING_QUERY = "    ";
     
     /** The string used by LimeWire to browse hosts. */

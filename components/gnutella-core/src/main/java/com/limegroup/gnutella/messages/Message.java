@@ -91,7 +91,7 @@ public abstract class Message implements Serializable, Comparable {
     public static final int N_TCP = 1;
     /** 2, UDP. */
     public static final int N_UDP = 2;
-    /** 3, multicast. (do) */
+    /** 3, Multicast UDP on the LAN. (do) */
     public static final int N_MULTICAST = 3;
 
     /**
@@ -1032,6 +1032,7 @@ public abstract class Message implements Serializable, Comparable {
 
     /**
      * The GUID of this Gnutella packet that marks it as unique.
+     * This GUID may contain the IP address to send out of band replies to.
      * 
      * @return A 16-byte array with the message GUID
      */

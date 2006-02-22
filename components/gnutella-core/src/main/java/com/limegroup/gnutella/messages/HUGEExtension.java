@@ -67,13 +67,13 @@ public class HUGEExtension {
 
     /**
      * A list of HUGE URN Strings, like "urn:sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ".
-     * This Set has URN objects in it, not strings.
+     * This HashSet has URN objects in it, not strings.
      */
     private Set _urns = null; // Of URN objects
 
     /**
      * A list of HUGE URN types, like "urn:sha1:", "urn:", or "urn:bitprint:".
-     * This Set has UrnType objects in it, not strings.
+     * This HashSet has UrnType objects in it, not strings.
      */
     private Set _urnTypes = null; // Of UrnType objects
 
@@ -103,12 +103,12 @@ public class HUGEExtension {
      * The HUGE URN extensions, like "urn:sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ", that we found in this HUGE extended area.
      * This is how a query hit sends the SHA1 hash of a file.
      * 
-     * @return A Set of String objects with the URNs.
+     * @return A HashSet of URN objects with the URNs.
      *         If this HUGE extended area doesn't have any URNs, returns an empty list instead of null.
      */
     public Set getURNS() {
 
-        // Return the Set of String objects, or an empty one if we didn't find any URNs in this extended area.
+        // Return the Set of URN objects, or an empty one if we didn't find any URNs in this extended area.
         if (_urns == null) return Collections.EMPTY_SET;
         else               return _urns;
     }

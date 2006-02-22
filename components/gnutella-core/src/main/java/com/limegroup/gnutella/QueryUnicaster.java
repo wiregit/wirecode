@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.net.InetAddress;
@@ -28,7 +31,9 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-/** 
+/**
+ * This is a part of GUESS, which LimeWire no longer uses. (do)
+ * 
  * This class runs a single thread which sends unicast UDP queries to a master
  * list of unicast-enabled hosts every n milliseconds.  It interacts with
  * HostCatcher to find unicast-enabled hosts.  It also allows for stopping of
