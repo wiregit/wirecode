@@ -375,6 +375,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
+        SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );

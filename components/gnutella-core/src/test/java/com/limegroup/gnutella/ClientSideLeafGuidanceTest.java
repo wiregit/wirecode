@@ -101,14 +101,6 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
-
-            // The respones are too spammy! One option would be either 
-            // to disable the Filter which is probably not a good test
-            // or figure out some keywords that ain't spam (haha) ;-). 
-            // It's however easier to train the Filter a bit so that 
-            // they'll pass the isSpam() check in SearchResultHandler!
-            markAsNotSpam((QueryReply)m);
-            
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -161,14 +153,6 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
-
-            // The respones are too spammy! One option would be either 
-            // to disable the Filter which is probably not a good test
-            // or figure out some keywords that ain't spam (haha) ;-). 
-            // It's however easier to train the Filter a bit so that 
-            // they'll pass the isSpam() check in SearchResultHandler!
-            markAsNotSpam((QueryReply)m);
-            
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -237,14 +221,6 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
                            true, false, false, null);
-        
-        // The respones are too spammy! One option would be either 
-        // to disable the Filter which is probably not a good test
-        // or figure out some keywords that ain't spam (haha) ;-). 
-        // It's however easier to train the Filter a bit so that 
-        // they'll pass the isSpam() check in SearchResultHandler!
-        markAsNotSpam((QueryReply)m);
-        
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -329,6 +305,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
      * in leaf guidance
      */
     public void testSpamFiltering() throws Exception {
+        SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         SearchSettings.FILTER_SPAM_RESULTS.setValue(0.4f);
         
         myCallback.responses.clear();

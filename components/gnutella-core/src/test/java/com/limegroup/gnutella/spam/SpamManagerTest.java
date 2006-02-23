@@ -71,6 +71,7 @@ public class SpamManagerTest extends BaseTestCase {
     }
     
     public void setUp() {
+        SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         SearchSettings.FILTER_SPAM_RESULTS.revertToDefault();
         manager.clearFilterData();
     }

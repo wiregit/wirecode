@@ -69,9 +69,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // now move them to the share dir
         CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
-        
-        // Turn the spam filter OFF for this test case
-        SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
     }   
     
     ///////////////////////// Actual Tests ////////////////////////////

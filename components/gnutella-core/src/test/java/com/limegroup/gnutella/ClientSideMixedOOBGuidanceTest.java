@@ -157,7 +157,6 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
-            markAsNotSpam((QueryReply)m);
             testUP[i].send(m);
             testUP[i].flush();
         }
