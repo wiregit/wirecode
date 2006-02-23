@@ -222,7 +222,7 @@ public final class SearchResultHandler {
         for (Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response) iter.next();
 
-            if (!qr.isBrowseHostReply()) {
+            if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
                 if (!RouterService.matchesType(data.getMessageGUID(), response)) {
                     continue;
                 }

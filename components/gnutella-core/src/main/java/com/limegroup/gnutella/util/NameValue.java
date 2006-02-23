@@ -13,7 +13,7 @@ import java.util.Map;
  * be any object. 
  * @author  asingla
  */
-public final class NameValue implements Map.Entry {
+public class NameValue implements Map.Entry {
 
     private final String _name;
     private Object _value;
@@ -51,5 +51,31 @@ public final class NameValue implements Map.Entry {
         
     public String toString() {
         return "name = " + _name + " value = " + _value;
-    }    
+    }
+    
+    public static class ComparableByName extends NameValue implements Comparable {
+        public ComparableByName(String name) {
+            super(name);
+        }
+        
+        public ComparableByName(String name, Object value) {
+            super(name, value);
+        }
+        
+        public int compareTo(Object other) {
+            ComparableByName b = (ComparableByName)other;            
+            if(other == null)
+                return 1;
+            String nameB = b.getName();
+            String name = getName();
+            if(name == null && nameB == null)
+                return 0;
+            else if(name == null)
+                return -1;
+            else if(nameB == null)
+                return 1;
+            else
+                return name.compareTo(nameB);
+        }
+    }
 }
