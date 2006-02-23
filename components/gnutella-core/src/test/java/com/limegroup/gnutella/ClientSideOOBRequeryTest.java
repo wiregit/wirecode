@@ -3,14 +3,11 @@ package com.limegroup.gnutella;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -29,14 +26,13 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -72,7 +68,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
-	ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
+        ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
+        
+        // Turn the spam filter OFF for this test case
+        SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
     }   
     
     ///////////////////////// Actual Tests ////////////////////////////
@@ -525,7 +524,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
+                res[j] = new Response(10+j+i, 10+j+i, "metadata "+ j + i);
             m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
                                myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,

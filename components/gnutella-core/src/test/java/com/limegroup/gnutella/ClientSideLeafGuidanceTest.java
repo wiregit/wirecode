@@ -384,12 +384,16 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         int numBadSentToFrontEnd = (int)Math.ceil(res.length * SearchSettings.SPAM_RESULT_RATIO.getValue());
         int numToReport = numGoodSentToFrontEnd + numBadSentToFrontEnd;
         
+        // Make sure the spam ratio is not 1 as we'd no longer 
+        // be able to distinguish between spam and not spam!
+        assertNotEquals(SearchSettings.SPAM_RESULT_RATIO.getValue(), 1.0f);
+        
         assertGreaterThan(REPORT_INTERVAL, numToReport);
         
         QueryStatusResponse qsr 
             = (QueryStatusResponse)getFirstInstanceOfMessageType(testUP[0], QueryStatusResponse.class, TIMEOUT);
         
-        assertEquals(qsr.getNumResults(), numToReport/4);
+        assertEquals(numToReport/4, qsr.getNumResults());
     }
     
     /**
