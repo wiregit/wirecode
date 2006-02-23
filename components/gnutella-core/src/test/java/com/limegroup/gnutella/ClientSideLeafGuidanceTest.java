@@ -55,24 +55,6 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
     static MyActivityCallback myCallback = new MyActivityCallback();
     
-    private void handleUserMarkedGood(QueryReply qr) throws Exception {
-        SpamManager.instance().clearFilterData(); // Start from scratch
-        
-        Response[] resp = qr.getResultsArray();
-        RemoteFileDesc rfds[] = new RemoteFileDesc[resp.length];
-        for(int i = 0; i < resp.length; i++) {
-            rfds[i] = resp[i].toRemoteFileDesc(qr.getHostData());
-            //assertTrue(SpamManager.instance().isSpam(rfds[i]));
-        }
-        
-        SpamManager.instance().handleUserMarkedGood(rfds);
-        
-        // Make sure they're not spam
-        for(int i = 0; i < rfds.length; i++) {
-            assertFalse(SpamManager.instance().isSpam(rfds[i]));
-        }
-    }
-    
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
@@ -125,7 +107,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             // or figure out some keywords that ain't spam (haha) ;-). 
             // It's however easier to train the Filter a bit so that 
             // they'll pass the isSpam() check in SearchResultHandler!
-            handleUserMarkedGood((QueryReply)m);
+            markAsNotSpam((QueryReply)m);
             
             testUP[i].send(m);
             testUP[i].flush();
@@ -185,7 +167,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             // or figure out some keywords that ain't spam (haha) ;-). 
             // It's however easier to train the Filter a bit so that 
             // they'll pass the isSpam() check in SearchResultHandler!
-            handleUserMarkedGood((QueryReply)m);
+            markAsNotSpam((QueryReply)m);
             
             testUP[i].send(m);
             testUP[i].flush();
@@ -261,7 +243,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // or figure out some keywords that ain't spam (haha) ;-). 
         // It's however easier to train the Filter a bit so that 
         // they'll pass the isSpam() check in SearchResultHandler!
-        handleUserMarkedGood((QueryReply)m);
+        markAsNotSpam((QueryReply)m);
         
         testUP[0].send(m);
         testUP[0].flush();

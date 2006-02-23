@@ -1,9 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -15,13 +12,10 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -144,18 +138,26 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         // ensure that we'll get a QueryStatusResponse from the Responses
         // we're sending.
         for (int i = 0; i < testUP.length; i++) {
-            Response[] res = new Response[7];
-            res[0] = new Response(10, 10, "susheel"+i);
-            res[1] = new Response(10, 10, "susheel smells good"+i);
-            res[2] = new Response(10, 10, "anita is sweet"+i);
-            res[3] = new Response(10, 10, "anita is prety"+i);
-            res[4] = new Response(10, 10, "susheel smells bad" + i);
-            res[5] = new Response(10, 10, "renu is sweet " + i);
-            res[6] = new Response(10, 10, "prety is spelled pretty " + i);
+            Response[] res = new Response[] {
+                // Only the 'susheel' Responses will pass the 
+                // ResponseVerifier.matchesQuery() check and 
+                // the others wont
+                new Response(10, 10, "susheel"+i),
+                new Response(10, 10, "susheel smells good"+i),
+                new Response(10, 10, "anita is sweet"+i),
+                new Response(10, 10, "anita is prety"+i),
+                new Response(10, 10, "susheel smells bad" + i),
+                new Response(10, 10, "renu is sweet " + i),
+                new Response(10, 10, "prety is spelled pretty " + i),
+                new Response(10, 10, "go susheel go" + i),
+                new Response(10, 10, "susheel runs fast" + i),
+                new Response(10, 10, "susheel jumps high" + i),
+                new Response(10, 10, "sleepy susheel" + i),
+            };
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
-
+            markAsNotSpam((QueryReply)m);
             testUP[i].send(m);
             testUP[i].flush();
         }

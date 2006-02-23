@@ -18,11 +18,13 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -245,7 +247,26 @@ public abstract class ClientSideTestCase
             Thread.sleep(2000);
         } catch (InterruptedException e) { }
     }
-
+    
+    /** Marks the Responses of QueryReply as NOT spam */
+    protected void markAsNotSpam(QueryReply qr) throws Exception {
+        SpamManager.instance().clearFilterData(); // Start from scratch
+        
+        Response[] resp = qr.getResultsArray();
+        RemoteFileDesc rfds[] = new RemoteFileDesc[resp.length];
+        for(int i = 0; i < resp.length; i++) {
+            rfds[i] = resp[i].toRemoteFileDesc(qr.getHostData());
+            //assertTrue(SpamManager.instance().isSpam(rfds[i]));
+        }
+        
+        SpamManager.instance().handleUserMarkedGood(rfds);
+        
+        // Make sure they're not spam
+        for(int i = 0; i < rfds.length; i++) {
+            assertFalse(SpamManager.instance().isSpam(rfds[i]));
+        }
+    }
+    
     protected static boolean DEBUG = false;
     protected static void debug(String message) {
         if(DEBUG) 
