@@ -20,7 +20,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -29,6 +28,7 @@ import com.limegroup.gnutella.util.ManagedThread;
  */
 public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
+    
     private final int REPORT_INTERVAL = SearchResultHandler.REPORT_INTERVAL;
     private final int MAX_RESULTS = SearchResultHandler.MAX_RESULTS;
 
@@ -55,11 +55,29 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
     static MyActivityCallback myCallback = new MyActivityCallback();
     
+    private void handleUserMarkedGood(QueryReply qr) throws Exception {
+        SpamManager.instance().clearFilterData(); // Start from scratch
+        
+        Response[] resp = qr.getResultsArray();
+        RemoteFileDesc rfds[] = new RemoteFileDesc[resp.length];
+        for(int i = 0; i < resp.length; i++) {
+            rfds[i] = resp[i].toRemoteFileDesc(qr.getHostData());
+            //assertTrue(SpamManager.instance().isSpam(rfds[i]));
+        }
+        
+        SpamManager.instance().handleUserMarkedGood(rfds);
+        
+        // Make sure they're not spam
+        for(int i = 0; i < rfds.length; i++) {
+            assertFalse(SpamManager.instance().isSpam(rfds[i]));
+        }
+    }
+    
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
     public void testBasicGuidance() throws Exception {
-        
+
         for (int i = 0; i < testUP.length; i++)
             // send a MessagesSupportedMessage
             testUP[i].send(MessagesSupportedVendorMessage.instance());
@@ -82,18 +100,33 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // we're sending.
         assertGreaterThan(REPORT_INTERVAL, 6*testUP.length);
         for (int i = 0; i < testUP.length; i++) {
-            Response[] res = new Response[7];
-            res[0] = new Response(10, 10, "susheel"+i);
-            res[1] = new Response(10, 10, "susheel smells good"+i);
-            res[2] = new Response(10, 10, "anita is sweet"+i);
-            res[3] = new Response(10, 10, "anita is prety"+i);
-            res[4] = new Response(10, 10, "susheel smells bad" + i);
-            res[5] = new Response(10, 10, "renu is sweet " + i);
-            res[6] = new Response(10, 10, "prety is spelled pretty " + i);
+            Response[] res = new Response[] {
+                // Only the 'susheel' Responses will pass the 
+                // ResponseVerifier.matchesQuery() check and 
+                // the others wont
+                new Response(10, 10, "susheel"+i),
+                new Response(10, 10, "susheel smells good"+i),
+                new Response(10, 10, "anita is sweet"+i),
+                new Response(10, 10, "anita is prety"+i),
+                new Response(10, 10, "susheel smells bad" + i),
+                new Response(10, 10, "renu is sweet " + i),
+                new Response(10, 10, "prety is spelled pretty " + i),
+                new Response(10, 10, "go susheel go" + i),
+                new Response(10, 10, "susheel runs fast" + i),
+                new Response(10, 10, "susheel jumps high" + i),
+                new Response(10, 10, "sleepy susheel" + i),
+            };
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
 
+            // The respones are too spammy! One option would be either 
+            // to disable the Filter which is probably not a good test
+            // or figure out some keywords that ain't spam (haha) ;-). 
+            // It's however easier to train the Filter a bit so that 
+            // they'll pass the isSpam() check in SearchResultHandler!
+            handleUserMarkedGood((QueryReply)m);
+            
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -147,6 +180,13 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
 
+            // The respones are too spammy! One option would be either 
+            // to disable the Filter which is probably not a good test
+            // or figure out some keywords that ain't spam (haha) ;-). 
+            // It's however easier to train the Filter a bit so that 
+            // they'll pass the isSpam() check in SearchResultHandler!
+            handleUserMarkedGood((QueryReply)m);
+            
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -215,6 +255,13 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
                            true, false, false, null);
+        
+        // The respones are too spammy! One option would be either 
+        // to disable the Filter which is probably not a good test
+        // or figure out some keywords that ain't spam (haha) ;-). 
+        // It's however easier to train the Filter a bit so that 
+        // they'll pass the isSpam() check in SearchResultHandler!
+        handleUserMarkedGood((QueryReply)m);
         
         testUP[0].send(m);
         testUP[0].flush();
