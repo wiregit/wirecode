@@ -236,7 +236,7 @@ public class GGEP {
     /**
      * "CT" Creation Time.
      * The time when the file this query hit packet describes was made.
-     * The value is 1 to 7 bytes that contain the number of milliseconds since January 1970.
+     * The value is 1 to 7 bytes that contain the number of seconds since January 1970, not milliseconds. (do)
      */
     public static final String GGEP_HEADER_CREATE_TIME = "CT";
 
