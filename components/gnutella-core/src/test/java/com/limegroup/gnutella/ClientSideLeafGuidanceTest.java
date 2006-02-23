@@ -395,8 +395,19 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // the gui should be informed about the results 
         assertEquals(REPORT_INTERVAL * 4, myCallback.responses.size());
         
-        // but the ultrapeers should not be told about them cause they were all spam.
-        drainQSRespones();
+        // We should get a QueryStatusResponse from the UP even if all
+        // Responses are spam. See SearchResultHandler.handleQueryReply(QueryReply)
+        // for more info!
+        int numGoodSentToFrontEnd = 0;
+        int numBadSentToFrontEnd = (int)Math.ceil(res.length * SearchSettings.SPAM_RESULT_RATIO.getValue());
+        int numToReport = numGoodSentToFrontEnd + numBadSentToFrontEnd;
+        
+        assertGreaterThan(REPORT_INTERVAL, numToReport);
+        
+        QueryStatusResponse qsr 
+            = (QueryStatusResponse)getFirstInstanceOfMessageType(testUP[0], QueryStatusResponse.class, TIMEOUT);
+        
+        assertEquals(qsr.getNumResults(), numToReport/4);
     }
     
     /**
