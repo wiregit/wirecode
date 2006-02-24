@@ -3,11 +3,13 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
@@ -61,9 +63,9 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     NIOSocket(Socket s) throws IOException {
         channel = s.getChannel();
         socket = s;
-        writer = new NIOOutputStream(this, channel).init();
-        reader = new NIOInputStream(this, channel).init();
-        NIODispatcher.instance().registerReadWrite(channel, this);
+        writer = new NIOOutputStream(this, channel);
+        reader = new NIOInputStream(this, channel);
+        NIODispatcher.instance().register(channel, this);
         connectedTo = s.getInetAddress();
     }
     
@@ -288,6 +290,7 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
         BlockingConnecter connecter = new BlockingConnecter();
         synchronized(connecter) {
             if(!connect(addr, timeout, connecter)) {
+                long then = System.currentTimeMillis();
                 try {
                     connecter.wait();
                 } catch(InterruptedException ie) {
@@ -297,7 +300,11 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
                 
                 if(!isConnected()) {
                     shutdown();
-                    throw new IOException("Unable to connect!");
+                    long now = System.currentTimeMillis();
+                    if(timeout != 0 && now - then >= timeout)
+                        throw new SocketTimeoutException("operation timed out (" + timeout + ")");
+                    else
+                        throw new ConnectException("Unable to connect!");
                 }
             }
         }

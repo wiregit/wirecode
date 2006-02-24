@@ -99,6 +99,72 @@ public final class NIOSocketTest extends BaseTestCase {
         assertSame(chain1, entry.getReadChannel());
     }
     
+    public void testBlockingConnect() throws Exception {
+        NIOSocket socket = new NIOSocket();
+        socket.connect(new InetSocketAddress("www.google.com", 80));
+        assertTrue(socket.isConnected());
+        socket.close();
+        Thread.sleep(500);
+        assertFalse(socket.isConnected());
+    }
+    
+    public void testBlockingConnectFailing() throws Exception {
+        NIOSocket socket = new NIOSocket();
+        try {
+            socket.connect(new InetSocketAddress("www.google.com", 9999));
+            fail("shouldn't have connected");
+        } catch(ConnectException iox) {
+            assertFalse(socket.isConnected());
+        }
+    }
+    
+    public void testBlockingConnectTimesOut() throws Exception {
+        NIOSocket socket = new NIOSocket();
+        try {
+            socket.connect(new InetSocketAddress("www.google.com", 9999), 1000);
+            fail("shouldn't have connected");
+        } catch(SocketTimeoutException iox) {
+            assertEquals("operation timed out (1000)", iox.getMessage());
+        }
+    }
+    
+    public void testNonBlockingConnect() throws Exception {
+        NIOSocket socket = new NIOSocket();
+        StubConnectObserver observer = new StubConnectObserver(); 
+        socket.connect(new InetSocketAddress("www.google.com", 80), 5000, observer);
+        observer.waitForResponse(5500);
+        assertTrue(socket.isConnected());
+        assertSame(socket, observer.getSocket());
+        assertFalse(observer.isShutdown());
+        assertNull(observer.getIoException());
+        socket.close();
+        Thread.sleep(500);
+        assertFalse(observer.isShutdown()); // doesn't get both connect & shutdown
+        assertFalse(socket.isConnected());
+    }
+    
+    public void testNonBlockingConnectFailing() throws Exception {
+        NIOSocket socket = new NIOSocket();
+        StubConnectObserver observer = new StubConnectObserver(); 
+        socket.connect(new InetSocketAddress("www.google.com", 9999), 60000, observer);
+        observer.waitForResponse(30000);
+        assertTrue(observer.isShutdown());
+        assertNull(observer.getSocket());
+        assertNull(observer.getIoException()); // NIOSocket swallows the IOX.
+        assertFalse(socket.isConnected());
+    }
+    
+    public void testNonBlockingConnectTimesOut() throws Exception {
+        NIOSocket socket = new NIOSocket();
+        StubConnectObserver observer = new StubConnectObserver();
+        socket.connect(new InetSocketAddress("www.google.com", 9999), 1000, observer);
+        observer.waitForResponse(1500);
+        assertTrue(observer.isShutdown());
+        assertNull(observer.getSocket());
+        assertNull(observer.getIoException()); // NIOSocket swallows the IOX.
+        assertFalse(socket.isConnected());
+    }
+    
     private static class Listener {
         
         private ServerSocket server;
