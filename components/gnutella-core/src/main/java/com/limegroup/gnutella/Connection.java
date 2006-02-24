@@ -408,6 +408,14 @@ public class Connection implements IpPort {
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
         initialize(0, null);
     }
+    
+    /**
+     * Initializes this without a timeout, using the given ConnectObserver.
+     */
+    public void initialize(ConnectionObserver observer) 
+     throws IOException, NoGnutellaOkException, BadHandshakeException {
+        initialize(0, observer);
+    }
 
     /**
      * Initialize the connection by doing the handshake.  Throws IOException
