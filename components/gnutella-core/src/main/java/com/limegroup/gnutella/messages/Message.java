@@ -85,7 +85,7 @@ public abstract class Message implements Serializable, Comparable {
      * We can communicate on the Internet with TCP connections, UDP packets, or multicast on the LAN. (do)
      */
 
-    /** -1, network unknown, we don't know if it's TCP, UDP, or multicast. */
+    /** -1, network unknown, we don't know if it's TCP, UDP, or multicast UDP on the LAN. */
     public static final int N_UNKNOWN = -1;
     /** 1, TCP. */
     public static final int N_TCP = 1;

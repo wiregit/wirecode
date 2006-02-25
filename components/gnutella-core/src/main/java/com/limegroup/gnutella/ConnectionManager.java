@@ -484,10 +484,15 @@ public class ConnectionManager {
      */
     public boolean isSupernode() {
 
+        //zootella
+        return true;
+        
+        /*
         // Return true if we're trying to become an ultrapeer, or are one
         return
             isActiveSupernode() || // We're on the network acting as an ultrapeer right now, or
             isSupernodeCapable();  // We have a fast enough computer and Internet connection to be one
+            */
     }
 
     /**

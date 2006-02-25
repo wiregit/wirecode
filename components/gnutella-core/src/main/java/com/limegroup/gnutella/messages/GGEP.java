@@ -139,14 +139,26 @@ public class GGEP {
     public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
 
     /**
-     * "MCAST" Multicast.
-     * Present when this pong is responding directly to a multicast query. (do)
+     * "MCAST" Multicast Response.
+     * Marks a query hit that's responding directly to a multicast query.
      */
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
 
     /**
      * "PUSH" Push proxies.
-     * A list of the computer's push proxies. (do)
+     * The addresses of the computer's push proxies.
+     * The value is an array of 6 byte chunks, IP addresses followed by port numbers.
+     * 
+     * Used in the GGEP block of a query hit packet.
+     * This is the packet itself, not the individual file results, which each can have their own GGEP blocks.
+     * 
+     * If the sharing computer isn't externally contactable, we can send a push message to one of its push proxies.
+     * The push proxy will relay the message to the computer, which will push open a connection to us.
+     * The connection with be a TCP socket connection that starts with the HTTP GIV header, and gives us the file we want.
+     * 
+     * A computer only lists push proxies if its firewalled for incoming TCP.
+     * This makes it a leaf, and its push proxies are just its ultrapeers.
+     * Ultrapeers have to be externally contactable for TCP.
      */
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
 
@@ -241,7 +253,10 @@ public class GGEP {
     public static final String GGEP_HEADER_CREATE_TIME = "CT";
 
     /**
-     * "FW" Firewalled transfer support in query hits. (do)
+     * "FW" Firewall-to-firewall file transfer support.
+     * This extension appears in a query hit packet.
+     * It indicates the computer sharing these files can deliver them with a firewall-to-firewall transfer.
+     * The value is 1 byte with the version number, currently 1.
      */
     public static final String GGEP_HEADER_FW_TRANS = "FW";
 
