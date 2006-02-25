@@ -27,8 +27,8 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         peer=new ManagedConnectionCountQRT();
         leaf=new ManagedConnectionCountQRT();
         
-        peer.setPeerConnection(true);
-        leaf.setPeerConnection(false);
+        peer.setLeafConnection(false);
+        leaf.setLeafConnection(true);
         
         cm.addStubOvrConnection(peer);
         cm.addStubOvrConnection(leaf);
@@ -75,19 +75,19 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     public void testNonBusyLastHop() throws Exception {
         //  No busy leaves
         forwardQueryRouteTablesCaller();
-        assertTrue( 1==getTotalNumberOfLeavesQRTsIncluded() );
+        assertEquals( 1, getTotalNumberOfLeavesQRTsIncluded() );
         cm.clearConnectionQRTStatus();
         waitForSeconds();
         
         //  Still no busy leaves
         forwardQueryRouteTablesCaller();
-        assertTrue( 1==getTotalNumberOfLeavesQRTsIncluded() );
+        assertEquals( 1, getTotalNumberOfLeavesQRTsIncluded() );
     }
     
     public void testBusyLastHop() throws Exception {
         //  No busy leaves
         forwardQueryRouteTablesCaller();
-        assertTrue( 1==getTotalNumberOfLeavesQRTsIncluded() );
+        assertEquals( 1, getTotalNumberOfLeavesQRTsIncluded() );
         cm.clearConnectionQRTStatus();
         
         leaf.setBusyEnoughToTriggerQRTRemoval(true);
@@ -95,7 +95,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         
         //  A busy leaf should have been noticed
         forwardQueryRouteTablesCaller();
-        assertTrue( 0==getTotalNumberOfLeavesQRTsIncluded() );
+        assertEquals( 0, getTotalNumberOfLeavesQRTsIncluded() );
     }
     
     public void forwardQueryRouteTablesCaller() throws Exception {
@@ -201,7 +201,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             }
         }
         
-        private boolean _isPeer=false;
+        private boolean isLeaf = false;
         
         public long getNextQRPForwardTime() {
             return 0l;
@@ -211,19 +211,27 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         }
 
         public boolean isUltrapeerQueryRoutingConnection() {
-            return _isPeer;
+            return !isLeaf;
         }
         
+        /** 
+         * If I'm not a leaf then I'm an Ultrapeer! See also 
+         * isClientSupernodeConnection()
+         */
         public boolean isSupernodeClientConnection() {
-            return !_isPeer;
+            return isLeaf;
         }
         
+        /** 
+         * If I'm not a leaf then I'm an Ultrapeer! See also 
+         * isSupernodeClientConnection()
+         */
         public boolean isClientSupernodeConnection() {
-            return _isPeer;
+            return isLeaf;
         }
         
         public boolean isQueryRoutingEnabled() {
-            return _isPeer;
+            return !isLeaf;
         }
         
         public void send(Message m) {}
@@ -234,8 +242,8 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             setBusy(busy);
          }
         
-        public void setPeerConnection( boolean peer ){
-            _isPeer = peer;
+        public void setLeafConnection( boolean isLeaf ){
+            this.isLeaf = isLeaf;
         }
 
         public boolean _qrtIncluded=false;

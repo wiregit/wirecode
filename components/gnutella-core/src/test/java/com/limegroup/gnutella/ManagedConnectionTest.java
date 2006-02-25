@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -10,18 +9,13 @@ import junit.framework.Test;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
 
 
 /**
@@ -65,6 +59,14 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         Thread.sleep(6000);
         assertTrue("connection should be considered stable", conn.isStable());
         conn.close();
+        
+        // Keep in mind that Connection is a loopback
+        // connection! That means Acceptor creates a
+        // second ManagedConnection instance for the
+        // incoming connection. Give that instance a
+        // bit time to die or the next test will fail
+        // frequently.
+        Thread.sleep(500);
     }
     
     public void testConnectionStatsRecorded() throws Exception {
