@@ -14,7 +14,8 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.ErrorService;
 
-public class FakeProxyServer {
+// extends AssertCmparisons just to get useful methods.
+public class FakeProxyServer extends AssertComparisons {
 
     /**
      * The server which we tell limewire is the proxy
@@ -42,6 +43,7 @@ public class FakeProxyServer {
     
 
     public FakeProxyServer(int proxyPort, int destinationPort) {
+        super("fake");
         _proxyOn = false;
         _proxyVersion = ProxyTest.NONE;
         _authentication = false;
@@ -81,8 +83,7 @@ public class FakeProxyServer {
                 Socket incomingProxy = null;
                 incomingProxy = _proxyServer.accept();
                 if(!_proxyOn)
-                    Assert.that(false,
-                      "LimeWire connected to proxy server instead of directly");
+                    fail("LimeWire connected to proxy server instead of directly");
                 InputStream is = incomingProxy.getInputStream();
                 OutputStream os = incomingProxy.getOutputStream();
                 if(_proxyVersion == ProxyTest.SOCKS4)
@@ -92,8 +93,8 @@ public class FakeProxyServer {
                 else if(_proxyVersion == ProxyTest.HTTP)
                     checkHTTP(is, os);
                 else
-                    Assert.that(_isHTTPRequest, 
-                         "test not set up correctly, incorrect proxy version");
+                   assertTrue("test not set up correctly, incorrect proxy version",
+                           _isHTTPRequest);
                 int a = 0;
                 if(_isHTTPRequest) {
                     consumeHttpHeaders(is);
@@ -118,23 +119,23 @@ public class FakeProxyServer {
     private void checkSOCKS4(InputStream is, OutputStream os) 
                                                        throws IOException {
         byte currByte = (byte)is.read();
-        Assert.that((byte)4==currByte, "Wrong version sent by LW to proxy");
-        Assert.that((byte)is.read()==(byte)1, "connect command not sent");
+        assertEquals("Wrong version sent by LW to proxy", 4, currByte);
+        assertEquals( "connect command not sent", 1, is.read());
         //TODO: make sure port is correct
         is.read();
         is.read();
         //check IP
-        Assert.that((byte)is.read()==(byte)127,"0th byte of ip wrong");
-        Assert.that((byte)is.read()==(byte)0,"1st byte of ip wrong");
-        Assert.that((byte)is.read()==(byte)0,"2nd byte of ip wrong");
-        Assert.that((byte)is.read()==(byte)1,"3rd byte of ip wrong");
+        assertEquals("0th byte of ip wrong", 127, is.read());
+        assertEquals("1st byte of ip wrong", 0, is.read());
+        assertEquals("2nd byte of ip wrong", 0, is.read());
+        assertEquals("3rd byte of ip wrong", 1, is.read());
 
         if(_authentication) {
             byte[] u = new byte[USER.length()];
             is.read(u);
-            Assert.that(USER.equals(new String(u)),"LW sent wrong user");
+            assertEquals("LW sent wrong user", USER, new String(u));
         }
-        Assert.that((byte)is.read()==(byte)0,"LW did not send terminating 0");
+        assertEquals("LW did not send terminating 0", 0, is.read());
         os.write((byte)4);//send version
 
         if(_makeError)
@@ -150,17 +151,17 @@ public class FakeProxyServer {
     private void checkSOCKS5(InputStream is, OutputStream os) 
                                                            throws IOException {
         byte currByte = (byte)is.read();
-        Assert.that((byte)5==currByte,"Wrong version sent by LW to proxy");
+        assertEquals("Wrong version sent by LW to proxy", 5, currByte);
         currByte = (byte)is.read();
         if(_authentication)
-            Assert.that(currByte == (byte)2, "should support 2 auth methods");
+            assertEquals("should support 2 auth methods", 2, currByte);
         else
-            Assert.that(currByte == (byte)1, "should support 1 auth method");
+            assertEquals("should support 1 auth method", 1, currByte);
         currByte = (byte)is.read();
-        Assert.that(currByte == (byte)0, "we always support no auth");
+        assertEquals("we always support no auth", 0, currByte);
         if(_authentication) {
             currByte = (byte)is.read();
-            Assert.that(currByte == (byte)2, "should support user/passwd");
+            assertEquals("should support user/passwd", 2, currByte);
         }
         
         os.write((byte)5);//confirm that we are supporting version 5
@@ -169,27 +170,27 @@ public class FakeProxyServer {
         else
             os.write((byte)0);
         if(_authentication) {//do all the checking
-            Assert.that((byte)is.read() == (byte)1,"wrong auth version");
-            Assert.that((byte)is.read() == USER.length(), "wrong user len");
+            assertEquals("wrong auth version", 1, is.read());
+            assertEquals("wrong user len", USER.length(), is.read());
             byte[] u = new byte[USER.length()];
             is.read(u);
-            Assert.that(USER.equals(new String(u)), "Wrong user sent");
-            Assert.that((byte)is.read() == PASS.length(), "wrong pass len");
+            assertEquals("Wrong user sent", USER, new String(u));
+            assertEquals("wrong pass len", PASS.length(), is.read());
             byte[] p = new byte[PASS.length()];
             is.read(p);
-            Assert.that(PASS.equals(new String(p)), "Wrong pass sent");
+            assertEquals("Wrong pass sent", PASS, new String(p));
             os.write((byte)1);//send version
             os.write((byte)0); //send success.
         }
-        Assert.that((byte)is.read() == (byte)5, "no version sent at end");
-        Assert.that((byte)is.read() == (byte)1, "no connect command sent");
-        Assert.that((byte)is.read() == (byte)0, "no reserved byte sent");
-        Assert.that((byte)is.read() == (byte)1, "IPv4 marker not sent");
+        assertEquals("no version sent at end", 5, is.read());
+        assertEquals("no connect command sent", 1, is.read()); 
+        assertEquals("no reserved byte sent", 0, is.read());
+        assertEquals("IPv4 marker not sent", 1, is.read()); 
 
-        Assert.that((byte)is.read() == (byte)127, "wrong 0th ip byte");
-        Assert.that((byte)is.read() == (byte)0, "wrong 1st ip byte");
-        Assert.that((byte)is.read() == (byte)0, "wrong 2nd ip byte");
-        Assert.that((byte)is.read() == (byte)1, "wrong 3rd ip byte");
+        assertEquals("wrong 0th ip byte", 127, is.read());
+        assertEquals("wrong 1st ip byte", 0, is.read());
+        assertEquals("wrong 2nd ip byte", 0, is.read());
+        assertEquals("wrong 3rd ip byte", 1, is.read());
         //TODO2: check if port bytes are correct
         is.read();
         is.read();
@@ -211,13 +212,10 @@ public class FakeProxyServer {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         String line = reader.readLine();
         StringTokenizer tok = new StringTokenizer(line, " :");
-        Assert.that(tok.nextToken().equals("CONNECT"),
-                                                  "connect string not sent");
-        Assert.that(tok.nextToken().equals("localhost"), "LW sent wrong host");
-        Assert.that(tok.nextToken().equals(""+ProxyTest.DEST_PORT),
-                                                     "LW sent wrong port");
-        Assert.that(tok.nextToken().equals("HTTP/1.0"), 
-                                                 "LW didn't send http string");
+        assertEquals("connect string not sent", "CONNECT", tok.nextToken());
+        assertEquals("LW sent wrong host", "127.0.0.1", tok.nextToken());
+        assertEquals("LW sent wrong port", "" + ProxyTest.DEST_PORT, tok.nextToken());
+        assertEquals("LW didn't send http string", "HTTP/1.0", tok.nextToken());
         if(_makeError)
             os.write("503 Busy\r\n\r\n".getBytes());
         else
@@ -231,8 +229,7 @@ public class FakeProxyServer {
                 Socket incomingDest = null;
                 incomingDest = _destinationServer.accept();
                 if(_proxyOn)
-                    Assert.that(false, 
-                           "Limewire connected to desination instead of proxy");
+                    fail("Limewire connected to desination instead of proxy");
                 if(_isHTTPRequest) {
                     writeHTTPBack(incomingDest.getOutputStream());
                     try {
