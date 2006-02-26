@@ -9,7 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.NBSocket;
+import com.limegroup.gnutella.io.SocketFactory;
 
 class LimitedSocketController extends SimpleSocketController {
 
@@ -48,8 +49,7 @@ class LimitedSocketController extends SimpleSocketController {
      * Otherwise, observer will be notified of success or failure.
      */
     protected Socket connectPlain(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
-        // needs to be declared as an NIOSocket for the non-blocking connect.
-        NIOSocket socket = new NIOSocket();
+        NBSocket socket = SocketFactory.newSocket();
         
         if(observer == null) {
             // BLOCKING.
@@ -126,7 +126,7 @@ class LimitedSocketController extends SimpleSocketController {
      * Determines if the given requestor can immediately connect.
      * If not, adds it to a pool of future connection-wanters.
      */
-    private synchronized boolean addWaitingSocket(NIOSocket socket, 
+    private synchronized boolean addWaitingSocket(NBSocket socket, 
             InetSocketAddress addr, int timeout, ConnectObserver observer) {
         if (_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
             WAITING_REQUESTS.add(new Requestor(socket, addr, timeout, observer));
@@ -198,9 +198,9 @@ class LimitedSocketController extends SimpleSocketController {
     private static class Requestor {
         private final InetSocketAddress addr;
         private final int timeout;
-        private final NIOSocket socket;
+        private final NBSocket socket;
         private final ConnectObserver observer;
-        Requestor(NIOSocket socket, InetSocketAddress addr, int timeout, ConnectObserver observer) {
+        Requestor(NBSocket socket, InetSocketAddress addr, int timeout, ConnectObserver observer) {
             this.socket = socket;
             this.addr = addr;
             this.timeout = timeout;

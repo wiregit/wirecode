@@ -20,6 +20,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.NIOServerSocket;
+import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -422,7 +423,7 @@ public class Acceptor {
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
-                newSocket = new NIOServerSocket(port, new SocketListener());
+                newSocket = SocketFactory.newServerSocket(port, new SocketListener());
             } catch (IOException e) {
                 LOG.warn("can't create ServerSocket", e);
                 udpServiceSocket.close();

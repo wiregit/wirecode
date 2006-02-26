@@ -5,7 +5,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.NBSocket;
+import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 class SimpleSocketController implements SocketController {
@@ -44,8 +45,7 @@ class SimpleSocketController implements SocketController {
     protected Socket connectPlain(InetSocketAddress addr, int timeout, ConnectObserver observer)
         throws IOException {
         
-        // needs to be declared as an NIOSocket for the non-blocking connect.
-        NIOSocket socket = new NIOSocket();
+        NBSocket socket = SocketFactory.newSocket();
         
         if(observer == null)
             socket.connect(addr, timeout); // blocking
