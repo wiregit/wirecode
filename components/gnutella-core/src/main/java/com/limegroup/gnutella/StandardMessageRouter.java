@@ -36,74 +36,97 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This class is the message routing implementation for TCP messages.
  */
 public class StandardMessageRouter extends MessageRouter {
+
     /**
+     * 
+     * 
      * Responds to a Gnutella ping with cached pongs.  This does special 
      * handling for both "heartbeat" pings that were sent to ensure that
      * the connection is still live as well as for pings from a crawler.
      *
      * @param ping the <tt>PingRequest</tt> to respond to
      * @param handler the <tt>ReplyHandler</tt> to send any pongs to
+     * 
+     * 
      */
-    protected void respondToPingRequest(PingRequest ping,
-                                        ReplyHandler handler) {
-        //If this wasn't a handshake or crawler ping, check if we can accept
-        //incoming connection for old-style unrouted connections, ultrapeers, or
-        //leaves.  TODO: does this mean leaves always respond to pings?
+    protected void respondToPingRequest(PingRequest ping, ReplyHandler handler) {
+
+        /*
+         * If this wasn't a handshake or crawler ping, check if we can accept
+         * incoming connection for old-style unrouted connections, ultrapeers, or
+         * leaves.  TODO: does this mean leaves always respond to pings?
+         */
+
         int hops = (int)ping.getHops();
         int ttl = (int)ping.getTTL();
-        if (   (hops+ttl > 2) 
-            && !_manager.allowAnyConnection())
-            return;
-            
+        
+        if ((hops+ttl > 2) && !_manager.allowAnyConnection()) return;
+
         // Only send pongs for ourself if we have a valid address & port.
-        if(NetworkUtils.isValidAddress(RouterService.getAddress()) &&
-           NetworkUtils.isValidPort(RouterService.getPort())) {    
-            //SPECIAL CASE: for crawler ping
-            // TODO:: this means that we can never send TTL=2 pings without
-            // them being interpreted as from the crawler!!
-            if(hops ==1 && ttl==1) {
+        if (NetworkUtils.isValidAddress(RouterService.getAddress()) && NetworkUtils.isValidPort(RouterService.getPort())) {
+            
+            /*
+             * SPECIAL CASE: for crawler ping
+             * TODO:: this means that we can never send TTL=2 pings without
+             * them being interpreted as from the crawler!!
+             */
+
+            if (hops == 1 && ttl == 1) {
+
                 handleCrawlerPing(ping, handler);
                 return;
-                //Note that the while handling crawler ping, we dont send our
-                //own pong, as that is unnecessary, since crawler already has
-                //our address.
+
+                /*
+                 * Note that the while handling crawler ping, we dont send our
+                 * own pong, as that is unnecessary, since crawler already has
+                 * our address.
+                 */
             }
-    
+
             // handle heartbeat pings specially -- bypass pong caching code
-            if(ping.isHeartbeat()) {
-                sendPingReply(PingReply.create(ping.getGUID(), (byte)1), 
+            if (ping.isHeartbeat()) {
+
+                sendPingReply(
+                    PingReply.create(ping.getGUID(), (byte)1),
                     handler);
+
                 return;
             }
     
             //send its own ping in all the cases
-            int newTTL = hops+1;
-            if ( (hops+ttl) <=2)
-                newTTL = 1;        
-    
-            // send our own pong if we have free slots or if our average
-            // daily uptime is more than 1/2 hour
-            if(RouterService.getConnectionManager().hasFreeSlots()  ||
-               Statistics.instance().calculateDailyUptime() > 60*30) {
-                PingReply pr = 
-                    PingReply.create(ping.getGUID(), (byte)newTTL);
-                
+            int newTTL = hops + 1;
+
+            if ((hops + ttl) <= 2) newTTL = 1;
+
+            /*
+             * send our own pong if we have free slots or if our average
+             * daily uptime is more than 1/2 hour
+             */
+
+            if (RouterService.getConnectionManager().hasFreeSlots() || Statistics.instance().calculateDailyUptime() > 60 * 30) {
+
+                PingReply pr = PingReply.create(ping.getGUID(), (byte)newTTL);
                 sendPingReply(pr, handler);
             }
         }
-        
+
         List pongs = PongCacher.instance().getBestPongs(ping.getLocale());
         Iterator iter = pongs.iterator();
         byte[] guid = ping.getGUID();
         InetAddress pingerIP = handler.getInetAddress();
-        while(iter.hasNext()) {
+
+        while (iter.hasNext()) {
+
             PingReply pr = (PingReply)iter.next();
-            if(pr.getInetAddress().equals(pingerIP))
-                continue;
+            if (pr.getInetAddress().equals(pingerIP)) continue;
             sendPingReply(pr.mutateGUID(guid), handler);
         }
     }
 
+    
+    
+    
+    
 	/**
 	 * Responds to a ping request received over a UDP port.  This is
 	 * handled differently from all other ping requests.  Instead of

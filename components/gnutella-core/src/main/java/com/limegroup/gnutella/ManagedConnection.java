@@ -1401,7 +1401,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
                 else if (m instanceof QueryStatusResponse) m = morphToStopQuery((QueryStatusResponse)m);
             }
 
-            // Get the instance of the program's one MessageDispatcher object, and give it this message
+            // Have the "MessageDispatch" thread call MessageRouter.handleMessage(m, this)
             MessageDispatcher.instance().dispatchTCP(m, this); // We got it over TCP, and it's from this ManagedConnection object
         }
     }

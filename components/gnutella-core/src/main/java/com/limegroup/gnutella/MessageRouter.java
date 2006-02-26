@@ -388,107 +388,138 @@ public abstract class MessageRouter {
     }
 
 	/**
+     * 
+     * 
      * The handler for all message types.  Processes a message based on the 
      * message type.
 	 *
 	 * @param m the <tt>Message</tt> instance to route appropriately
 	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
-	 *  the message was received
+	 * the message was received
+     * 
+     * @param msg
+     * 
      */
-    public void handleMessage(Message msg, 
-                              ManagedConnection receivingConnection) {
+    public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+
         // Increment hops and decrease TTL.
         msg.hop();
-	   
-        if(msg instanceof PingRequest) {
+
+        if (msg instanceof PingRequest) {
+
             ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
-            handlePingRequestPossibleDuplicate((PingRequest)msg, 
-											   receivingConnection);
+            handlePingRequestPossibleDuplicate((PingRequest)msg, receivingConnection);
+
 		} else if (msg instanceof PingReply) {
+
 			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, receivingConnection);
-		} else if (msg instanceof QueryRequest) {
+
+        } else if (msg instanceof QueryRequest) {
+
 			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
-            handleQueryRequestPossibleDuplicate(
-                (QueryRequest)msg, receivingConnection);
+            handleQueryRequestPossibleDuplicate((QueryRequest)msg, receivingConnection);
+
 		} else if (msg instanceof QueryReply) {
+
 			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
-            // if someone sent a TCP QueryReply with the MCAST header,
-            // that's bad, so ignore it.
+
+            /*
+             * if someone sent a TCP QueryReply with the MCAST header,
+             * that's bad, so ignore it.
+             */
+
             QueryReply qmsg = (QueryReply)msg;
-            handleQueryReply(qmsg, receivingConnection);            
+            handleQueryReply(qmsg, receivingConnection); 
+
 		} else if (msg instanceof PushRequest) {
+
 			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
+
 		} else if (msg instanceof ResetTableMessage) {
+
 			ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handleResetTableMessage((ResetTableMessage)msg,
-                                    receivingConnection);
+            handleResetTableMessage((ResetTableMessage)msg, receivingConnection);
+
 		} else if (msg instanceof PatchTableMessage) {
+
 			ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handlePatchTableMessage((PatchTableMessage)msg,
-                                    receivingConnection);            
-        }
-        else if (msg instanceof TCPConnectBackVendorMessage) {
+            handlePatchTableMessage((PatchTableMessage)msg, receivingConnection);
+
+        } else if (msg instanceof TCPConnectBackVendorMessage) {
+
             ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
-            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
-                                        receivingConnection);
-        }
-        else if (msg instanceof UDPConnectBackVendorMessage) {
+            handleTCPConnectBackRequest((TCPConnectBackVendorMessage)msg, receivingConnection);
+
+        } else if (msg instanceof UDPConnectBackVendorMessage) {
+
 			ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
-            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
-                                        receivingConnection);
-        }
-        else if (msg instanceof TCPConnectBackRedirect) {
-            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
-                                         receivingConnection);
-        }
-        else if (msg instanceof UDPConnectBackRedirect) {
-            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
-                                         receivingConnection);
-        }
-        else if (msg instanceof PushProxyRequest) {
-            handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
-        }
-        else if (msg instanceof QueryStatusResponse) {
-            handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
-        }
-        else if (msg instanceof GiveStatsVendorMessage) {
+            handleUDPConnectBackRequest((UDPConnectBackVendorMessage)msg, receivingConnection);
+
+        } else if (msg instanceof TCPConnectBackRedirect) {
+
+            handleTCPConnectBackRedirect((TCPConnectBackRedirect)msg, receivingConnection);
+
+        } else if (msg instanceof UDPConnectBackRedirect) {
+
+            handleUDPConnectBackRedirect((UDPConnectBackRedirect)msg, receivingConnection);
+
+        } else if (msg instanceof PushProxyRequest) {
+
+            handlePushProxyRequest((PushProxyRequest)msg, receivingConnection);
+
+        } else if (msg instanceof QueryStatusResponse) {
+
+            handleQueryStatus((QueryStatusResponse)msg, receivingConnection);
+
+        } else if (msg instanceof GiveStatsVendorMessage) {
+
             //TODO: add the statistics recording code
             handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
-        }
-        else if(msg instanceof StatisticVendorMessage) {
+
+        } else if(msg instanceof StatisticVendorMessage) {
+
             //TODO: add the statistics recording code
-            handleStatisticsMessage(
-                            (StatisticVendorMessage)msg, receivingConnection);
-        }
-        else if (msg instanceof HeadPing) {
+            handleStatisticsMessage((StatisticVendorMessage)msg, receivingConnection);
+
+        } else if (msg instanceof HeadPing) {
+
         	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, receivingConnection);
-        }
-        else if(msg instanceof SimppRequestVM) {
+
+        } else if(msg instanceof SimppRequestVM) {
+
             handleSimppRequest((SimppRequestVM)msg, receivingConnection);
-        }
-        else if(msg instanceof SimppVM) {
+
+        } else if(msg instanceof SimppVM) {
+
             handleSimppVM((SimppVM)msg);
-        } 
-        else if(msg instanceof UpdateRequest) {
+
+        } else if(msg instanceof UpdateRequest) {
+
             handleUpdateRequest((UpdateRequest)msg, receivingConnection);
-        }
-        else if(msg instanceof UpdateResponse) {
+
+        } else if(msg instanceof UpdateResponse) {
+
             handleUpdateResponse((UpdateResponse)msg, receivingConnection);
-        }
-        else if (msg instanceof HeadPong) {  
-            handleHeadPong((HeadPong)msg, receivingConnection); 
-        } 
-        else if (msg instanceof VendorMessage) {
+
+        } else if (msg instanceof HeadPong) {
+
+            handleHeadPong((HeadPong)msg, receivingConnection);
+
+        } else if (msg instanceof VendorMessage) {
+
             receivingConnection.handleVendorMessage((VendorMessage)msg);
         }
-        
-        //This may trigger propogation of query route tables.  We do this AFTER
-        //any handshake pings.  Otherwise we'll think all clients are old
-        //clients.
-		//forwardQueryRouteTables();
+
+        /*
+         * This may trigger propogation of query route tables.  We do this AFTER
+         * any handshake pings.  Otherwise we'll think all clients are old
+         * clients.
+         * forwardQueryRouteTables();
+         */
+
         notifyMessageListener(msg, receivingConnection);
     }
 

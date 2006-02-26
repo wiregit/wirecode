@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
@@ -211,6 +214,8 @@ public final class MulticastService implements Runnable {
                     Message message = Message.read(in, Message.N_MULTICAST, HEADER_BUF);
                     if(message == null)
                         continue;
+
+                    // Have the "MessageDispatch" thread call MessageRouter.handleMulticastMessage(m, (InetSocketAddress)datagram.getSocketAddress())
                     MessageDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
                 }
                 catch (IOException e) {

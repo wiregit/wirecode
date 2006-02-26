@@ -1178,7 +1178,7 @@ public abstract class Message implements Serializable, Comparable {
      * 
      * Increments hops.
      * If ttl is positive, returns its current value and then decrements it.
-     * If ttl is 0, returns 0.
+     * If ttl is 0, returns 0 without changing it.
      * 
      * @return The TTL before this function decrements it
      */

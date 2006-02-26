@@ -335,6 +335,8 @@ public class UDPService implements ReadWriteObserver {
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
         updateState(message, addr);
+
+        // Have the "MessageDispatch" thread call MessageRouter.handleUDPMessage(message, addr)
         MessageDispatcher.instance().dispatchUDP(message, addr);
     }
 	
