@@ -12,10 +12,15 @@ import junit.framework.Test;
 
 public class LimitedSocketControllerTest extends BaseTestCase {
     
+    private static final int TIMEOUT = 30000;
+    
     private int BAD_PORT = 9998;
     private InetSocketAddress BAD_ADDR = new InetSocketAddress("127.0.0.1", BAD_PORT);
     private int LISTEN_PORT = 9999;
-    private InetSocketAddress LISTEN_ADDR = new InetSocketAddress("127.0.0.1", 9999);
+    private InetSocketAddress LISTEN_ADDR = new InetSocketAddress("127.0.0.1", LISTEN_PORT);
+    private int BAD_GOOGLE_PORT = 6666;
+    private InetSocketAddress BAD_GOOGLE_ADDR = new InetSocketAddress("www.google.com", BAD_GOOGLE_PORT);
+    
     private ServerSocket LISTEN_SOCKET;
     private LimitedSocketController CONTROLLER;
     
@@ -64,8 +69,8 @@ public class LimitedSocketControllerTest extends BaseTestCase {
     public void testWaitsForTurn() throws Exception {
         StubConnectObserver o1 = new StubConnectObserver();
         StubConnectObserver o2 = new StubConnectObserver();
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o1);
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o2);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o1);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
         // the above two will stall for awhile while trying to connect...
         long then = System.currentTimeMillis();
         connect(false, true);
@@ -76,8 +81,8 @@ public class LimitedSocketControllerTest extends BaseTestCase {
     public void testWaitsForTurnNB() throws Exception {
         StubConnectObserver o1 = new StubConnectObserver();
         StubConnectObserver o2 = new StubConnectObserver();
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o1);
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o2);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o1);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
         // the above two will stall for awhile while trying to connect...
         long then = System.currentTimeMillis();
         connect(true, true);
@@ -92,8 +97,8 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         
         StubConnectObserver o2 = new StubConnectObserver();
         StubConnectObserver o3 = new StubConnectObserver();
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o2);
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o3);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o3);
 
         StubConnectObserver o4 = new StubConnectObserver();
         CONTROLLER.connect(LISTEN_ADDR, 0, o4);
@@ -116,8 +121,8 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         
         StubConnectObserver o2 = new StubConnectObserver();
         StubConnectObserver o3 = new StubConnectObserver();
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o2);
-        CONTROLLER.connect(new InetSocketAddress("www.google.com", 9999), 0, o3);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o3);
 
         StubConnectObserver o4 = new StubConnectObserver();
         CONTROLLER.connect(LISTEN_ADDR, 0, o4);
