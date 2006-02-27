@@ -10,6 +10,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
@@ -19,6 +20,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -87,33 +89,33 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static CountingConnection LEAF_1;
+    private static QueryCountingConnection LEAF_1;
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static CountingConnection LEAF_2;
+    private static QueryCountingConnection LEAF_2;
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static CountingConnection LEAF_3;
+    private static QueryCountingConnection LEAF_3;
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static CountingConnection LEAF_4;
+    private static QueryCountingConnection LEAF_4;
 
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static CountingConnection TCP_TEST_LEAF;
+    private static QueryCountingConnection TCP_TEST_LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private static CountingConnection ULTRAPEER_1;
+    private static QueryCountingConnection ULTRAPEER_1;
 
     /**
      * Ultrapeer 1 UDP connection.
@@ -123,7 +125,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     /**
 	 * Second Ultrapeer ConnectionStub
      */
-    private static CountingConnection ULTRAPEER_2;
+    private static QueryCountingConnection ULTRAPEER_2;
 
     private static InetAddress _udpAddress;
 
@@ -182,34 +184,34 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 	
 	private static void buildConnections() throws Exception {
 	    LEAF_1 =
-			new CountingConnection("localhost", PORT, 
+			new QueryCountingConnection("localhost", PORT, 
                             new LeafHeaders("localhost"),new EmptyResponder());
 
 	    LEAF_2 =
-			new CountingConnection("localhost", PORT, 
+			new QueryCountingConnection("localhost", PORT, 
                             new LeafHeaders("localhost"), new EmptyResponder());
 
 	    LEAF_3 =
-			new CountingConnection("localhost", PORT, 
+			new QueryCountingConnection("localhost", PORT, 
                            new LeafHeaders("localhost"), new EmptyResponder());
 
 	    LEAF_4 =
-			new CountingConnection("localhost", PORT, 
+			new QueryCountingConnection("localhost", PORT, 
                            new LeafHeaders("localhost"), new EmptyResponder());
 
 	    TCP_TEST_LEAF =
-			new CountingConnection("localhost", PORT, 
+			new QueryCountingConnection("localhost", PORT, 
                            new LeafHeaders("localhost"), new EmptyResponder());
         
         ULTRAPEER_1 = 
-			new CountingConnection("localhost", PORT,
+			new QueryCountingConnection("localhost", PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder() );
-
+        
         UDP_ACCESS = new DatagramSocket();
 
         ULTRAPEER_2 = 
-			new CountingConnection("localhost", PORT,
+			new QueryCountingConnection("localhost", PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder() );
     }
@@ -598,7 +600,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
                                                 ULTRAPEER_2,query3.getClass());
         //assertNull("UP1 got query3 ", qUP1);
         //assertNull("UP2 got query3 ", qUP2);
-                                                 
+        
         assertEquals("Query3 should hav reached UP1", GUID3, 
                                                     new GUID(qUP1.getGUID()));
         assertEquals("Query3 should hav reached UP2", GUID3, 
@@ -648,12 +650,29 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         readAllFully();
 
         //Leaf 1 final score incoming queries = 2, query replies = 2
+        assertEquals(2, LEAF_1.incomingQueries);
+        assertEquals(2, LEAF_1.queryReplies);
+        
         //Leaf 2 final score incoming queries = 2, query replies = 1
+        assertEquals(2, LEAF_2.incomingQueries);
+        assertEquals(1, LEAF_2.queryReplies);
+        
         //LEAF_3 final score incoming queries = 1 query replies = 1
+        assertEquals(1, LEAF_3.incomingQueries);
+        assertEquals(1, LEAF_3.queryReplies);
+        
         //LEAF_4 final score incoming queries = 0 query replies = 0
-        //UP1 final score incoming queries = 2 query replies = 1        
-        //UP2 final score incoming queries = 2 query replies = 0
-
+        assertEquals(0, LEAF_4.incomingQueries);
+        assertEquals(0, LEAF_4.queryReplies);
+        
+        //UP1 final score incoming queries = 3 query replies = 1
+        assertEquals(3, ULTRAPEER_1.incomingQueries);
+        assertEquals(1, ULTRAPEER_1.queryReplies);
+        
+        //UP2 final score incoming queries = 3 query replies = 0
+        assertEquals(3, ULTRAPEER_2.incomingQueries);
+        assertEquals(0, ULTRAPEER_2.queryReplies);
+        
         //OK. Now we can send the Give Stats Message to the central UP, and see
         //what the response is
     }
@@ -983,8 +1002,9 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         //System.out.println("****Sumeet***:"+token);
 
         val = Integer.parseInt(token.trim());
-
+        
         assertEquals("UP2 received mismatch", ULTRAPEER_2.incomingCount, val);
+        
         token = tok.nextToken(); //UP1 received -- should be 14
         assertEquals("UP2 dropped mismatch",0,Integer.parseInt(token.trim()));
 
@@ -1029,4 +1049,38 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 
     }
     
+    private static class QueryCountingConnection extends CountingConnection {
+
+        public int incomingQueries = 0;
+        public int queryReplies = 0;
+        
+        public QueryCountingConnection(String host, int port, Properties reqHeaders, 
+                HandshakeResponder handshakeResp) {
+            super(host, port, reqHeaders, handshakeResp);
+        }
+
+        public Message receive() throws IOException, BadPacketException {
+            Message m = super.receive();
+            if (countEnabled && m instanceof QueryRequest) {
+                incomingQueries++;
+            }
+            return m;
+        }
+
+        public Message receive(int timeout) throws IOException, BadPacketException {
+            Message m = super.receive(timeout);
+            if (countEnabled && m instanceof QueryRequest) {
+                incomingQueries++;
+            }
+            return m;
+        }
+
+        
+        public void send(Message m) throws IOException {
+            if (countEnabled && m instanceof QueryReply) {
+                queryReplies++;
+            }
+            super.send(m);
+        }
+    }
 }
