@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella;
 
@@ -20,61 +20,61 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * This class is an implementation of <tt>ReplyHandler</tt> that is
- * specialized for handling UDP messages.
+ * A UDPReplyHandler object represents a remote computer on the Internet running Gnutella software that we can send UDP packets to.
+ * We'll wrap each Gnutella message in a UDP packet, and send it directly there.
+ * When you make a UDPReplyHandler object, the constructor takes a the IP address and port number of the remote computer.
+ * Call a method like handlePingReply(pong), and the method will send the remote computer the given pong packet.
+ * 
+ * This class implements the ReplyHandler interface.
+ * Another important class that implements ReplyHandler is ManagedConnection.
+ * A ManagedConnection object represents a remote computer on the Internet we can send packets to through our TCP socket Gnutella connection with it.
+ * A UDPReplyHandler object represents a remote computer on the Internet we can send UDP packets to.
+ * 
+ * ManagedConnection and UDPReplyHandler implement the ReplyHandler interface so they can be placed in a RouteTable.
  */
 public final class UDPReplyHandler implements ReplyHandler {
 
-	/**
-	 * Constant for the <tt>InetAddress</tt> of the host to reply to.
-	 */
+	/** The IP address of the remote computer this UDPReplyHandler will send packets to. */
 	private final InetAddress IP;
 
-	/**
-	 * Constant for the port of the host to reply to.
-	 */
+	/** The port number of the remote computer this UDPReplyHandler will send packets to. */
 	private final int PORT;
 
-	/**
-	 * Constant for the <tt>UDPService</tt>.
-	 */
+	/** A reference to the program's single UDPService object, which we'll use to send UDP packets. */
 	private static final UDPService UDP_SERVICE = UDPService.instance();
-    
-    /**
-     * Used to filter messages that are considered spam.
-     * With the introduction of OOB replies, it is important
-     * to check UDP replies for spam too.
-     *
-     * Uses one static instance instead of creating a new
-     * filter for every single UDP message.
-     */
-    private static volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
-	
+
+    /** All UDPReplyHandler objects use this one static personal SpamFilter to check packets before sending them. */
+    private static volatile SpamFilter _personalFilter = SpamFilter.newPersonalFilter();
+
 	/**
-	 * Constructor that sets the ip and port to reply to.
-	 *
-	 * @param ip the <tt>InetAddress</tt> to reply to
-	 * @param port the port to reply to
+     * Make a new UDPReplyHandler object that can wrap Gnutella packets into UDP packets and send them to an IP address and port number.
+     * 
+     * @param ip   The IP address to send packets to
+     * @param port The port number to send packets to
 	 */
 	public UDPReplyHandler(InetAddress ip, int port) {
-	    if(!NetworkUtils.isValidPort(port))
-	        throw new IllegalArgumentException("invalid port: " + port);
-	    if(!NetworkUtils.isValidAddress(ip))
-	        throw new IllegalArgumentException("invalid ip: " + ip);
-	       
+
+        // Make sure the port isn't 0 and the IP address doesn't start 0 or 255
+	    if (!NetworkUtils.isValidPort(port))  throw new IllegalArgumentException("invalid port: " + port);
+	    if (!NetworkUtils.isValidAddress(ip)) throw new IllegalArgumentException("invalid ip: "   + ip);
+
+        // Save the address information in this new object
 		IP   = ip;
 		PORT = port;
 	}
-    
+
     /**
-     * Sets the new personal spam filter to be used for all UDPReplyHandlers.
+     * Set the personal SpamFilter that all UDPReplyHandler objects use to check packets before sending them.
+     * _personalFilter is static, so every UDPReplyHandler object is using the same SpamFilter.
+     * RouterService.adjustSpamFilters() calls this when the program's spam filters have changed. 
+     * 
+     * @param filter The new SpamFilter to use
      */
     public static void setPersonalFilter(SpamFilter filter) {
+
+        // Save the given SpamFilter in the static member
         _personalFilter = filter;
     }
-
-    //done
 
 	/**
      * Send the given pong in a UDP packet to this remote computer.
@@ -128,6 +128,9 @@ public final class UDPReplyHandler implements ReplyHandler {
     /**
      * Determine if the given Gnutella packet passes through our personal SpamFilter, letting us show its information to the user.
      * The ReplyHandler interface requires this method.
+     * 
+     * _personalFilter is static, so every UDPReplyHandler uses the same one.
+     * Having the method here makes it look like it does checks specific to this remote computer, but it doesn't.
      * 
      * @param m A gnutella packet we've received
      * @return  True to hide it from the user, false if it's fine
@@ -318,22 +321,28 @@ public final class UDPReplyHandler implements ReplyHandler {
      */
     public void handleSimppVM(SimppVM simppVM) {}
 
-    //do
-    
-    // inherit doc comment
+    /**
+     * Get the IP address this UDPReplyHandler sends packets to.
+     * 
+     * @return The IP address as a Java InetAddress object
+     */
     public InetAddress getInetAddress() {
+
+        // Return the IP address the constructor saved
         return IP;
     }
-    
+
     /**
-     * Retrieves the host address.
+     * Get the IP address this UDPReplyHandler sends packets to.
+     * 
+     * @return The IP address as a String like "1.2.3.4"
      */
     public String getAddress() {
+
+        // Express the IP address as text and return it
         return IP.getHostAddress();
     }
 
-    //done
-    
     /**
      * Determine if our connection with this computer is stable.
      * Returns false because UDP doesn't make any guarantee the computer will still be there.
@@ -364,27 +373,33 @@ public final class UDPReplyHandler implements ReplyHandler {
         return ApplicationSettings.DEFAULT_LOCALE.getValue();
     }
 
-    //do
-    
 	/**
-	 * Overrides toString to print out more detailed information about
-	 * this <tt>UDPReplyHandler</tt>
+     * Express this UDPReplyHandler object as 3 lines of text with the IP address and port number it sends packets to.
+     * Composes a String like:
+     * 
+     * UDPReplyHandler:
+     * 220.237.253.112
+     * 6346
+     * 
+     * @return A String
 	 */
 	public String toString() {
-		return ("UDPReplyHandler:\r\n"+
-				IP.toString()+"\r\n"+
-				PORT+"\r\n");
+
+        // Compose 3 lines of text with the IP address and port number
+		return ("UDPReplyHandler:\r\n" + IP.toString() + "\r\n" + PORT + "\r\n");
 	}
-	
+
 	/**
-	 * sends the response through udp back to the requesting party
+     * Send the given UDPCrawlerPong packet to this remote computer.
+     * 
+     * @param m The UDPCrawlerPong to send
 	 */
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
+
+        // Have the UDPService object send the Gnutella message in a UDP packet to the IP address and port number of this UDPReplyHandler
 		UDPService.instance().send(m, IP, PORT);
 	}
 
-    //done
-    
     /**
      * Send the given Gnutella packet to this remote computer by UDP.
      * The ReplyHandler interface requires this method.
@@ -397,14 +412,17 @@ public final class UDPReplyHandler implements ReplyHandler {
 		UDPService.instance().send(m, IP, PORT);
 	}
 
-    //do
-    
+    /**
+     * Get the port number this UDPReplyHandler sends packets to.
+     * 
+     * @return The port number
+     */
 	public int getPort() {
+
+        // Return the port number the constructor saved
 		return PORT;
 	}
 
-    //done
-    
     /**
      * Get the remote computer's Gnutella client ID GUID.
      * Returns 0s because we don't know what it is.
