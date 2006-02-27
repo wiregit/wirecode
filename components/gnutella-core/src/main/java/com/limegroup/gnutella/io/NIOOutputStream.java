@@ -25,7 +25,7 @@ class NIOOutputStream implements WriteObserver {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOOutputStream(NIOSocket handler, SocketChannel channel) throws IOException {
+    NIOOutputStream(NIOSocket handler, SocketChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }

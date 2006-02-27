@@ -32,7 +32,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOInputStream(NIOSocket handler, SocketChannel channel) throws IOException {
+    NIOInputStream(NIOSocket handler, SocketChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }

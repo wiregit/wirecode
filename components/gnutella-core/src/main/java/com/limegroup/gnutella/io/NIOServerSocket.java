@@ -133,15 +133,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
      * Notification that a socket has been accepted.
      */
     public void handleAcceptChannel(SocketChannel channel) throws IOException {
-        Socket socket;
-        try {
-            socket = new NIOSocket(channel.socket());
-        } catch(IOException iox) {
-            channel.close();
-            throw iox;
-        }
-        
-        observer.handleAccept(socket);
+        observer.handleAccept(new NIOSocket(channel.socket()));
     }
     
     /**

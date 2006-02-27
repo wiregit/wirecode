@@ -60,7 +60,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
      * Constructs an NIOSocket using a pre-existing Socket.
      * To be used by NIOServerSocket while accepting incoming connections.
      */
-    NIOSocket(Socket s) throws IOException {
+    NIOSocket(Socket s) {
         channel = s.getChannel();
         socket = s;
         writer = new NIOOutputStream(this, channel);

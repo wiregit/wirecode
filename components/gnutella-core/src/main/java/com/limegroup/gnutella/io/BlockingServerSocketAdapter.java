@@ -164,10 +164,6 @@ public class BlockingServerSocketAdapter extends ServerSocket {
         return delegate.isClosed();
     }
 
-    public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
-        delegate.setPerformancePreferences(connectionTime, latency, bandwidth);
-    }
-
     public void setReceiveBufferSize(int size) throws SocketException {
         delegate.setReceiveBufferSize(size);
     }
