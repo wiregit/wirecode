@@ -1485,6 +1485,7 @@ public class Connection implements IpPort {
 
     /**
      * True if we started with the remote computer's IP address, false if it connected to our listening socket.
+     * The ReplyHandler interface requires this method.
      * 
      * @return True if we initiated the connection to the remote computer, false if it connected to us
      */
@@ -2051,6 +2052,7 @@ public class Connection implements IpPort {
 
     /**
      * True if we've been exchanging Gnutella packets with this remote computer for at least 5 seconds.
+     * The ReplyHandler interface requires this method.
      * 
      * @return True if it's been more than 5 seconds since we finished the handshake with this remote computer
      */
@@ -2211,9 +2213,12 @@ public class Connection implements IpPort {
     }
 
     /**
+     * Determine if we can still send a packet with this connection.
      * True until code calls the close() method on this Connection object.
+     * The ReplyHandler interface requires this method.
      * 
-     * @return True if this Connection object is being closed
+     * @return True if we can still send a packet through this connection.
+     *         False if the connection is being closed.
      */
     public boolean isOpen() {
 
@@ -2331,6 +2336,7 @@ public class Connection implements IpPort {
     /**
      * The remote computer supports the advanced features we're looking for ultrapeers to have.
      * This doesn't mean the remote computer is an ultrapeer.
+     * The ReplyHandler interface requires this method.
      * 
      * @return True if the remote computer supports advanced Gnutella features that would make it a good ultrapeer
      */
@@ -2343,6 +2349,7 @@ public class Connection implements IpPort {
     /**
      * The remote computer supports the advanced features we're looking for leaves to have.
      * This doesn't mean the remote computer is a leaf.
+     * The ReplyHandler interface requires this method.
      * 
      * @return True if the remote computer supports advanced Gnutella features that would make it a good leaf
      */
@@ -2354,6 +2361,7 @@ public class Connection implements IpPort {
 
     /**
      * True if the remote computer supports pong caching.
+     * The ReplyHandler interface requires this method.
      * 
      * @return True if the remote computer told us "Pong-Caching: 0.1" or higher in the handshake
      */
@@ -2368,6 +2376,7 @@ public class Connection implements IpPort {
      * Limits the number of pings we'll relay for this computer to one every 2.5 seconds.
      * If this remote computer sent us a ping recently, allowNewPings will return false.
      * This stops a remote computer from pinging the network to death through us.
+     * The ReplyHandler interface requires this method.
      * 
      * First returns true 5 seconds into a new connection, and only once every 2.5 seconds after that.
      * 
@@ -2463,6 +2472,7 @@ public class Connection implements IpPort {
 	/**
 	 * True if the remote computer said "X-Degree: 15" or higher, meaning that it, as an ultrapeer, will keep that many connections to other ultrapeers.
 	 * The Gnutella network will be more efficient if ultrapeers have more connections and packets travel fewer hops.
+     * The ReplyHandler interface requires this method.
 	 * 
 	 * @return True if the remote computer said "X-Degree: 15" or higher
 	 */
@@ -2476,6 +2486,7 @@ public class Connection implements IpPort {
 	 * True if the remote computer said "X-Ultrapeer-Query-Routing: 0.1", meaning it can exchange query routing tables with other ultrapeers.
 	 * This means it can exchange QRP tables not just with leaves, but with ultrapeers too.
 	 * Then, it doesn't have to send a query to a connected ultrapeer if it knows it won't have it.
+     * The ReplyHandler interface requires this method.
 	 *  
 	 * @return True if the remote computer said "X-Ultrapeer-Query-Routing: 0.1" or higher
 	 */
@@ -2547,8 +2558,9 @@ public class Connection implements IpPort {
 	}
 
     /**
+     * Determine if the remote computer is a leaf.
      * True if the remote computer said "X-Ultrapeer: false", meaning it's a leaf.
-     * This doesn't necessarily mean it's a leaf running in shielded leaf mode, though. (do) what is shielded leaf mode
+     * The ReplyHandler interface requires this method.
      * 
      * @return True if the remote computer is a leaf
      */
@@ -2659,13 +2671,9 @@ public class Connection implements IpPort {
      * True if we are an ultrapeer and the remote computer is a leaf.
      * We said "X-Ultrapeer: true".
      * The remote computer said "X-Ultrapeer: false" and "X-Query-Routing: 0.1".
+     * The ReplyHandler interface requires this method.
      * 
-     * (do)
-     * I know we support QRP, but why don't we have to check that we told the remote computer that?
-     * What's the difference between a shielded leaf and a regular leaf?
-     * If this method is about shielded leaves, do we need another one for regular leaves?
-     * 
-     * @return True if we are an ultrapeer shielding this remote leaf
+     * @return True if we are an ultrapeer and the remote computer is a leaf
      */
     public boolean isSupernodeClientConnection() {
 
@@ -2681,12 +2689,6 @@ public class Connection implements IpPort {
 
         			// The remote compuer said "X-Query-Routing: 0.1", it can send us a hash map of all the files it is sharing
         			if (isQueryRoutingEnabled()) {
-
-        				/*
-        				 * This means it can send us a hash map of all the files it's sharing.
-        				 * We can use this hash map to know that a search wouldn't get a hit from this leaf, and not send it.
-        				 * This is what it means to have a shielded leaf node (do)
-        				 */
 
         				// We're an ultrapeer, and the remote computer is a leaf that can do QRP
         				return true;
@@ -2713,6 +2715,7 @@ public class Connection implements IpPort {
 
     /**
      * Send a statistic vendor message to this remote computer.
+     * The ReplyHandler interface requires this method.
      * (do) what is a StatisticVendorMessage
      * 
      * @param The StatisticVendorMessage Gnutella packet to send
@@ -2762,6 +2765,7 @@ public class Connection implements IpPort {
     /**
      * The remote computer's language of choice, like "en" for English.
      * This is the value of a header like "X-Locale-Pref: en" the remote computer sent us.
+     * The ReplyHandler interface requires this method.
      * 
      * The remote computer probably didn't specify a language preference.
      * In that case, this is our own language preference, taken from settings.

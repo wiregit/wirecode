@@ -199,6 +199,8 @@ public class SharingSettings extends LimeProps {
         FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
                                             
     /**
+     * 100, don't disconnect from computers that connect to us and are sharing nothing.
+     * 
      * Sets the probability (expressed as a percentage) that an incoming
      * freeloader will be accepted.   For example, if allowed==50, an incoming
      * connection has a 50-50 chance being accepted.  If allowed==100, all
@@ -208,7 +210,7 @@ public class SharingSettings extends LimeProps {
         FACTORY.createIntSetting("FREELOADER_ALLOWED", 100);
     
     /**
-     * Minimum the number of files a host must share to not be considered
+     * 1, Minimum the number of files a host must share to not be considered
      * a freeloader.  For example, if files==0, no host is considered a
      * freeloader.
      */

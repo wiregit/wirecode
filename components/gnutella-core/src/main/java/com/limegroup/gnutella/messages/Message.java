@@ -695,18 +695,18 @@ public abstract class Message implements Serializable, Comparable {
         // Ping
         case F_PING:
 
-            // This ping message has a payload, which is unusual
+            // This ping message has a payload
             if (length > 0) {
 
                 /*
                  * Big ping
                  */
 
-                // Make a new PingRequest object to represent this Gnutella message
+                // Make a new PingRequest object to represent this ping
                 return new PingRequest(guid, ttl, hops, payload); // Include the payload
             }
 
-            // This is a normal ping with no payload, make a new PingRequest object to represent it
+            // Make a new PingRequest object to represent this ping
             return new PingRequest(guid, ttl, hops);
 
         // Pong

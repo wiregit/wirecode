@@ -1519,6 +1519,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     /**
      * Have the ConnectionStats object count another message we received from this remote computer, and then dropped.
      * MessageRouter calls this when it drops a message.
+     * The ReplyHandler interface requires this method.
      * 
      * A callback for the ConnectionManager to inform this connection that a message was dropped.
      * This happens when a reply received from this connection has no routing path.
@@ -1530,22 +1531,15 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
-     * MessageHandler objects call this to pass a Gnutella packet through the personal SpamFilter.
-     * MessageRouter and ForMeReplyHandler call this.
+     * Determine if the given Gnutella packet passes through our personal SpamFilter, letting us show its information to the user.
+     * The ReplyHandler interface requires this method.
      * 
-     * A callback for Message Handler implementations to check to see if a
-     * message is considered to be undesirable by the message's receiving
-     * connection.
-     * 
-     * Messages ignored for this reason are not considered to be dropped, so
-     * no statistics are incremented here.
-     * 
-     * @param m A gnutella packet (do) that we got from where and is going where?
-     * @return  True if the packet is spam, false if it's OK
+     * @param m A gnutella packet we've received
+     * @return  True to hide it from the user, false if it's fine
      */
     public boolean isPersonalSpam(Message m) {
 
-        // See if the Gnutella packet passes through the SpamFilter for messages to show the user
+        // See if the Gnutella packet passes through our SpamFilter for messages to show the user
         return !_personalFilter.allow(m);
     }
 
@@ -1578,59 +1572,65 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
-     * Sends the given PingReply packet to this remote computer.
+     * Send the given pong to this remote computer.
      * 
-     * (do)
-     * This method is called when a reply is received for a PingRequest
-     * originating on this Connection.  So, just send it back.
-     * If modifying this method, note that receivingConnection may
-     * by null.
+     * Previously, this remote computer gave us a ping, which we broadcasted forward.
+     * Now, we're getting pongs in response to that ping.
+     * This method sends the pongs back to the computer that wanted them.
      * 
-     * MessageRouter.sendPingReply() and MessageRouter.handlePingReply() call this.
+     * The ReplyHandler interface requires this method.
      * 
-     * @param pingReply           A PingReply packet this remote computer sent us
-     * @param receivingConnection May be null, and not used (do)
+     * @param pingReply           A pong addressed to this remote computer
+     * @param receivingConnection Not used, may be null
      */
     public void handlePingReply(PingReply pingReply, ReplyHandler receivingConnection) {
 
         // Send the given packet to this remote computer
         send(pingReply);
     }
-
+    
     /**
+     * Send the given query hit to this remote computer.
+     * 
+     * Previously, this remote computer gave us a query, which we broadcasted forward.
+     * Now, we're getting query hits in response to that query.
+     * This method sends them back to the computer that wanted them.
+     * 
+     * The ReplyHandler interface requires this method.
+     * 
      * Used for UDP query hits. (do)
      * 
-     * This method is called when a reply is received for a QueryRequest
-     * originating on this Connection.  So, send it back.
-     * If modifying this method, note that receivingConnection may
-     * by null.
+     * @param queryReply          A query hit packet addressed to this remote computer
+     * @param receivingConnection Not used, may be null
      */
     public void handleQueryReply(QueryReply queryReply, ReplyHandler receivingConnection) {
-        
+
+        // (do)
+        /*
+         * If we are proxying for a query, map back the guid of the reply
+         */
         if (_guidMap != null) {
-        // ---------------------
-        // If we are proxying for a query, map back the guid of the reply
-        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()),
-                                                  TIMED_GUID_LIFETIME);
-        GUID origGUID = (GUID) _guidMap.get(tGuid);
-        if (origGUID != null) { 
-            byte prevHops = queryReply.getHops();
-            queryReply = new QueryReply(origGUID.bytes(), queryReply);
-            queryReply.setTTL((byte)2); // we ttl 1 more than necessary
-            queryReply.setHops(prevHops);
+            GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()), TIMED_GUID_LIFETIME);
+            GUID origGUID = (GUID) _guidMap.get(tGuid);
+            if (origGUID != null) {
+                byte prevHops = queryReply.getHops();
+                queryReply = new QueryReply(origGUID.bytes(), queryReply);
+                queryReply.setTTL((byte)2); // we ttl 1 more than necessary
+                queryReply.setHops(prevHops);
+            }
         }
-        // ---------------------
-        }
-        
+
+        // Send the given packet to this remote computer
         send(queryReply);
     }
 
     /**
      * The remote computer's Client ID, the GUID that identifies it on the Gnutella network.
-     * The handleMessageInternal() method reads it from a QueryReply packet the remote computer generated.
+     * The handleMessageInternal() method reads it from the end of a QueryReply packet the remote computer generated and sent to us.
+     * The ReplyHandler interface requires this method.
      * 
      * @return The remote computer's client ID GUID on the Gnutella network.
-     *         If the remote computer hasn't sent us a QueryReply packet yet, this returns a byte array of 16 zeroes.
+     *         If the remote computer hasn't sent us one of its own QueryReply packets yet, returns a byte array of 16 0s.
      */
     public byte[] getClientGUID() {
 
@@ -1639,17 +1639,21 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
-     * Used for QueryReply and PushRequest. (do)
+     * Send the given push packet to this remote computer.
      * 
-     * This method is called when a PushRequest is received for a QueryReply
-     * originating on this Connection.  So, just send it back.
-     * If modifying this method, note that receivingConnection may
-     * by null.
+     * The message routing system got a push packet with a GUID that addresses it to this remote computer.
+     * This method sends it there.
+     * 
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param pushRequest         A push packet addressed to this remote computer
+     * @param receivingConnection Not used, may be null
      */
-    public void handlePushRequest(PushRequest pushRequest,
-                                  ReplyHandler receivingConnection) {
+    public void handlePushRequest(PushRequest pushRequest, ReplyHandler receivingConnection) {
+
+        // Send the given packet to this remote computer
         send(pushRequest);
-    }   
+    }
 
     /**
      * Used for vendor messages. (do)
@@ -1761,6 +1765,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
 
     /**
      * The number of Gnutella packets this remote computer has sent us.
+     * The ReplyHandler interface requires this method.
      * 
      * @return The value from ConnectionStats.getReceived()
      */
@@ -1932,19 +1937,23 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
 	}
 
     /**
-     * The ConnectionWatchdog's DudChecker calls this, and it always returns true.
-     * This means yes, you are allowed to kill this connection.
+     * Determine if you are allowed to close this connection.
+     * Returns true, you are.
      * 
-     * Returns true if this should not be policed by the ConnectionWatchdog,
-     * e.g., because this is a connection to a Clip2 reflector. Default value:
-     * true.
+     * The ConnectionWatchdog's DudChecker calls isKillable().
+     * The ReplyHandler interface requires this method.
      * 
-     * TODO:kfaaborg Clip2 reflectors are completely extinct, and this always returns true.
-     *               Also, doesn't false mean this connection shouldn't be policed by the ConnectionWatchdog?
-     * 
-     * @return Always returns true
+     * @return true
      */
 	public boolean isKillable() {
+
+        /*
+         * Returns true if this should not be policed by the ConnectionWatchdog,
+         * e.g., because this is a connection to a Clip2 reflector. Default value:
+         * true.
+         * 
+         * TODO:kfaaborg Clip2 reflectors are completely extinct, and this always returns true.
+         */
 
         // Always returns true
 		return _isKillable;
@@ -2019,7 +2028,9 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
-     * Call this method to send this remote computer a Gnutella packet, it's the same as calling send(m).
+     * Call this method to send this remote computer a Gnutella packet.
+     * This is the same as calling send(m).
+     * The ReplyHandler interface requires this method.
      * 
      * @param m The Gnutella packet to send this remote computer
      */

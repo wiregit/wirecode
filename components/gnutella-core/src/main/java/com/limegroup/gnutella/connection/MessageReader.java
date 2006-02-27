@@ -249,10 +249,10 @@ public class MessageReader implements ChannelReadObserver {
 
             	// Turn the data of the packet into a new Message object named m
                 Message m = Message.createMessage( // This static factory method returns a new object or throws an exception
-                		header.array(),            // Give it the data of the packet header and payload we just downloaded
-                		payload.array(),
-                		receiver.getSoftMax(),     // Ask the ManagedConnection object the maximum value for hops + TTL for this remote computer
-                		receiver.getNetwork());    // Ask the ManagedConnection object whether this message came in through TCP or UDP
+                    header.array(),                // Give it the data of the packet header and payload we just downloaded
+                	payload.array(),
+                	receiver.getSoftMax(),         // Ask the ManagedConnection object the maximum value for hops + TTL for this remote computer
+                	receiver.getNetwork());        // Ask the ManagedConnection object whether this message came in through TCP or UDP
 
                 // Call ManagedConnection.processReadMessage(m) to have it process the message that we just read
                 receiver.processReadMessage(m);

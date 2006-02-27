@@ -405,35 +405,44 @@ public abstract class MessageRouter {
         // Increment hops and decrease TTL.
         msg.hop();
 
+        // Ping
         if (msg instanceof PingRequest) {
 
+            // Update statistics and hand off the message
             ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, receivingConnection);
 
+        // Pong
 		} else if (msg instanceof PingReply) {
 
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, receivingConnection);
 
+        // Query
         } else if (msg instanceof QueryRequest) {
 
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate((QueryRequest)msg, receivingConnection);
 
+        // Query hit
 		} else if (msg instanceof QueryReply) {
+		    
+		    /*
+		     * if someone sent a TCP QueryReply with the MCAST header,
+		     * that's bad, so ignore it.
+		     */
 
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
-
-            /*
-             * if someone sent a TCP QueryReply with the MCAST header,
-             * that's bad, so ignore it.
-             */
-
             QueryReply qmsg = (QueryReply)msg;
             handleQueryReply(qmsg, receivingConnection); 
 
+        // Push
 		} else if (msg instanceof PushRequest) {
 
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
 

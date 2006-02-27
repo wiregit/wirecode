@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.IOException;
@@ -17,7 +20,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
- * This class is an implementation of <tt>ReplyHandler</tt> that is 
+ * This class is an implementation of <tt>ReplyHandler</tt> that is
  * specialized for handling UDP messages.
  */
 public final class UDPReplyHandler implements ReplyHandler {
@@ -71,179 +74,252 @@ public final class UDPReplyHandler implements ReplyHandler {
         _personalFilter = filter;
     }
 
-	
+    //done
+
 	/**
-	 * Sends the <tt>PingReply</tt> via a UDP datagram to the IP and port
-	 * for this handler.<p>
-	 *
-	 * Implements <tt>ReplyHandler</tt>.
-	 *
-	 * @param hit the <tt>PingReply</tt> to send
-	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+     * Send the given pong in a UDP packet to this remote computer.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param pong    The Gnutella pong packet to send
+     * @param handler Not used
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
+
+        // Have the UDPService wrap the pong in a UDP packet and send it to the IP address and port number of this UDPReplyHandler
         UDP_SERVICE.send(pong, IP, PORT);
 		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
 	/**
-	 * Sends the <tt>QueryReply</tt> via a UDP datagram to the IP and port
-	 * for this handler.<p>
-	 *
-	 * Implements <tt>ReplyHandler</tt>.
-	 *
-	 * @param hit the <tt>QueryReply</tt> to send
-	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+     * Send the given query hit in a UDP packet to this remote computer.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param pong    The Gnutella query hit packet to send
+     * @param handler Not used
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
+
+        // Have the UDPService wrap the query hit in a UDP packet and send it to the IP address and port number of this UDPReplyHandler
         UDP_SERVICE.send(hit, IP, PORT);
 		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
 	/**
-	 * Sends the <tt>QueryRequest</tt> via a UDP datagram to the IP and port
-	 * for this handler.<p>
-	 *
-	 * Implements <tt>ReplyHandler</tt>.
-	 *
-	 * @param request the <tt>QueryRequest</tt> to send
-	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
+     * Send the given push request in a UDP packet to this remote computer.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param request The Gnutella push request packet to send
+     * @param handler Not used
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
+
+        // Have the UDPService wrap the push in a UDP packet and send it to the IP address and port number of this UDPReplyHandler
         UDP_SERVICE.send(request, IP, PORT);
 		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
+    /**
+     * Does nothing.
+     * Would count that we dropped this message.
+     * The ReplyHandler interface requires this method.
+     */
 	public void countDroppedMessage() {}
 
+    /**
+     * Determine if the given Gnutella packet passes through our personal SpamFilter, letting us show its information to the user.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param m A gnutella packet we've received
+     * @return  True to hide it from the user, false if it's fine
+     */
 	public boolean isPersonalSpam(Message m) {
+
+        // See if the Gnutella packet passes through our SpamFilter for messages to show the user
         return !_personalFilter.allow(m);
 	}
 
+    /**
+     * Determine if we can still send a packet with this connection.
+     * Returns true, because with UDP, there is no connection that can be lost or closed.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return true
+     */
 	public boolean isOpen() {
+
+        // Yes, we can always send a UDP packet
 		return true;
 	}
 
+    /**
+     * The number of Gnutella packets this remote computer has sent us.
+     * Returns 0 because with UDP, we don't keep count.
+     * The ReplyHandler interface requires this method.
+     * 
+     * return 0
+     */
 	public int getNumMessagesReceived() {
-		return 0;
+
+        // Return 0 because we don't know
+        return 0;
 	}
 
+    /**
+     * Determine if this is an outgoing connection we initiated.
+     * Returns false, as UDP doesn't have connections.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
+     */
 	public boolean isOutgoing() {
-		return false;
+
+        // This is not an outgoing connection we initiated
+        return false;
 	}
 
-	// inherit doc comment
-	public boolean isKillable() {
-		return false;
-	}
+    /**
+     * Determine if you are allowed to close this connection.
+     * Returns false, there is no connection with UDP.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
+     */
+    public boolean isKillable() {
+
+        // There is no connection to close
+        return false;
+    }
 
 	/**
-	 * Implements <tt>ReplyHandler</tt>.  This always returns <tt>false</tt>
-	 * for UDP reply handlers, as leaves are always connected via TCP.
-	 *
-	 * @return <tt>false</tt>, as all leaves are connected via TCP, so
-	 *  directly connected leaves will not have <tt>UDPReplyHandler</tt>s
+     * Determine if we are an ultrapeer and this remote computer is a leaf.
+     * Returns false, because leaves and ultrapeers only with TCP socket Gnutella connections, not UDP.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
 	 */
 	public boolean isSupernodeClientConnection() {
+
+        // Only TCP socket connections can set up this relationship
 		return false;
 	}
 
 	/**
-	 * Implements <tt>ReplyHandler</tt> interface.  Always returns 
-	 * <tt>false</tt> because leaves are connected via TCP, not UDP.
-	 *
-	 * @return <tt>false</tt>, since leaves never maintain their connections
-	 *  via UDP, only TCP
+     * Determine if our connection to this remote computer is down to a leaf.
+     * Returns false because leaf connections only exist on TCP.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
 	 */
 	public boolean isLeafConnection() {
-		return false;
-	}
 
-	/**
-	 * Returns whether or not this connection is a high-degree connection,
-	 * meaning that it maintains a high number of intra-Ultrapeer connections.
-	 * In the case of UDP reply handlers, this always returns <tt>false<tt>.
-	 *
-	 * @return <tt>false</tt> because, by definition, a UDP 'connection' is not
-	 *  a connection at all
-	 */
-	public boolean isHighDegreeConnection() {
-		return false;
+        // The leaf role only happens on TCP connections, not UDP packets we're sending a remote computer
+        return false;
 	}
 
     /**
-     * Returns <tt>false</tt> since UDP reply handlers are not TCP 
-     * connections in the first place.
-     *
-     * @return <tt>false</tt>, since UDP handlers are not connections in
-     *  the first place, and therefore cannot use Ultrapeer query routing
+     * Determine if this is a high degree connection, meaning it's an ultrapeer with 15 or more ultrapeer connections.
+     * True when the remote compueter says "X-Degree: 15" or higher.
+     * Returns false because this only makes sense for TCP Gnutella connections to remote computers.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
+     */
+    public boolean isHighDegreeConnection() {
+
+        // This is just for TCP Gnutella connections
+        return false;
+    }
+
+    /**
+     * Determine if this is a connection to an ultrapeer that can exchange query routing tables with other ultrapeers.
+     * True when the remote computer says "X-Ultrapeer-Query-Routing: 0.1".
+     * Returns false because this only makes sense for TCP Gnutella connections to remote computers.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
      */
     public boolean isUltrapeerQueryRoutingConnection() {
+
+        // This is just for TCP Gnutella connections
         return false;
     }
 
-
     /**
-     * Returns <tt>false</tt>, as this node is not  a "connection"
-     * in the first place, and so could never have sent the requisite
-     * headers.
-     *
-     * @return <tt>false</tt>, as this node is not a real connection
+     * Determine if this is a connection to a computer that supports the advanced Gnutella features good ultrapeers need.
+     * Returns false because this only makes sense for TCP Gnutella connections to remote computers.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
      */
     public boolean isGoodUltrapeer() {
+
+        // This only applies to Gnutella connections on TCP
         return false;
     }
 
     /**
-     * Returns <tt>false</tt>, as this node is not  a "connection"
-     * in the first place, and so could never have sent the requisite
-     * headers.
-     *
-     * @return <tt>false</tt>, as this node is not a real connection
+     * Determine if this is a connection to a computer that supports the advanced Gnutella features good leaves need.
+     * Returns false because this only makes sense for TCP Gnutella connections to remote computers.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
      */
     public boolean isGoodLeaf() {
+
+        // This only applies to Gnutella connections on TCP
         return false;
     }
 
     /**
-     * Returns <tt>false</tt>, since we don't know whether a host 
-     * communicating via UDP supports pong caching or not.
-     *
-     * @return <tt>false</tt> since we don't know if this node supports
-     *  pong caching or not
+     * Determine if this connection is to a computer that supports pong caching.
+     * Returns false because we never did the Gnutella handshake with this remote computer, so we don't know.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
      */
     public boolean supportsPongCaching() {
+
+        // We don't know because there is no Gnutella handshake with UDP
         return false;
     }
 
     /**
-     * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
-     * Since this ping is over UDP, we'll always allow it.
-     *
-     * @return <tt>true</tt> since this ping is received over UDP
+     * Determine if we'll let this remote computer ping us right now.
+     * Returns true, not placing the restriction on UDP pings that we place on pings we get through TCP Gnutella connections.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return true
      */
     public boolean allowNewPings() {
+
+        // Always allow UDP pings
         return true;
     }
 
     /**
-     * sends a Vendor Message to the host/port in this reply handler by UDP
-     * datagram.
+     * Send the given StatisticVendorMessage to this remote computer.
+     * Uses the IP address and port number saved in this UDPReplyHandler object.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param m The StatisticVendorMessage to send to this remote computer
      */
     public void handleStatisticVM(StatisticVendorMessage m) throws IOException {
+
+        // Get the UDPService object, and have it send the StatisticVendorMessage in a UDP packet to this UDPReplyHandler's IP address and port number
         UDPService.instance().send(m, IP, PORT);
     }
-    
+
     /**
-     * As of now there is no need to send SimppMessages via UDP, 
-     */ 
-    public void handleSimppVM(SimppVM simppVM) {
-        //This should never happen. But if it does, ignore it and move on
-        return;
-    }
+     * Does nothing.
+     * SIMPP vendor messages are only sent through TCP Gnutella connections, not UDP.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param simppVM The SIMPP vendor message the program asked us to send to this remote computer by UDP
+     */
+    public void handleSimppVM(SimppVM simppVM) {}
+
+    //do
     
-
-
     // inherit doc comment
     public InetAddress getInetAddress() {
         return IP;
@@ -256,24 +332,40 @@ public final class UDPReplyHandler implements ReplyHandler {
         return IP.getHostAddress();
     }
 
+    //done
+    
     /**
-     * Returns <tt>false</tt> to indicate that <tt>UDPReplyHandler</tt>s 
-     * should never be considered stable, due to data loss over UDP and lack
-     * of knowledge as to whether the host is still alive.
-     *
-     * @return <tt>false</tt> since UDP handler are never stable
+     * Determine if our connection with this computer is stable.
+     * Returns false because UDP doesn't make any guarantee the computer will still be there.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return false
      */
     public boolean isStable() {
+
+        // Report not stable
         return false;
     }
 
     /**
-     * implementation of interface. this is not used.
+     * Get the language preference of this packet handling computer.
+     * This is information we get in the Gnutella handshake, so for UDP, we don't know.
+     * Always returns "en" for English, because most computers on the Gnutella network have that default.
+     * The ReplyHandler interface requires this method.
+     * 
+     * This method is implemented to meet the requirements of the ReplyHandler interface.
+     * It is not used.
+     * 
+     * @return "en"
      */
     public String getLocalePref() {
+
+        // Get the default locale for the entire Gnutella network, "en" for English
         return ApplicationSettings.DEFAULT_LOCALE.getValue();
     }
 
+    //do
+    
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>
@@ -290,16 +382,39 @@ public final class UDPReplyHandler implements ReplyHandler {
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
 		UDPService.instance().send(m, IP, PORT);
 	}
-	
+
+    //done
+    
+    /**
+     * Send the given Gnutella packet to this remote computer by UDP.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @param m The Gnutella packet to send
+     */
 	public void reply(Message m) {
-		UDPService.instance().send(m, IP,PORT);
+
+        // Have the UDPService object send the Gnutella message in a UDP packet to the IP address and port number of this UDPReplyHandler
+		UDPService.instance().send(m, IP, PORT);
 	}
-	
+
+    //do
+    
 	public int getPort() {
 		return PORT;
 	}
-	
+
+    //done
+    
+    /**
+     * Get the remote computer's Gnutella client ID GUID.
+     * Returns 0s because we don't know what it is.
+     * The ReplyHandler interface requires this method.
+     * 
+     * @return A 16 byte array filled with 0s, because we don't know
+     */
 	public byte[] getClientGUID() {
+
+        // Return a 16 byte array filled with 0s
 	    return DataUtils.EMPTY_GUID;
 	}
 }
