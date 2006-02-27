@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -106,9 +107,6 @@ public class NIODispatcher implements Runnable {
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
     
-    /** Register queue. */
-    private final Collection /* of RegisterOp */ REGISTER = new LinkedList();
-	
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
     
@@ -182,10 +180,10 @@ public class NIODispatcher implements Runnable {
     /** Register interest */
     private void register(SelectableChannel channel, IOErrorObserver handler, int op, int timeout) {
 		if(Thread.currentThread() == dispatchThread) {
-		    registerImpl(selector, channel, op, handler, timeout, System.currentTimeMillis());
+		    registerImpl(selector, channel, op, handler, timeout);
 		} else {
 	        synchronized(Q_LOCK) {
-				REGISTER.add(new RegisterOp(channel, handler, op, timeout));
+				LATER.add(new RegisterOp(channel, handler, op, timeout));
 			}
         }
     }
@@ -315,13 +313,13 @@ public class NIODispatcher implements Runnable {
      * Does a real registration.
      */
     private void registerImpl(Selector selector, SelectableChannel channel, int op,
-                              IOErrorObserver attachment, int timeout, long now) {
+                              IOErrorObserver attachment, int timeout) {
         try {
             Attachment guard = new Attachment(attachment);
             SelectionKey key = channel.register(selector, op, guard);
             guard.setKey(key);
             if(timeout != 0) 
-                guard.addTimeout(now, timeout);
+                guard.addTimeout(System.currentTimeMillis(), timeout);
         } catch(IOException iox) {
             attachment.handleIOException(iox);
         }
@@ -340,30 +338,22 @@ public class NIODispatcher implements Runnable {
      * actions are all within this package, so we can guarantee that it doesn't
      * deadlock.
      */
-    private void addPendingItems() {
+    private void runPendingTasks() {
         long now;
         synchronized(Q_LOCK) {
             now = System.currentTimeMillis();
             for(int i = 0; i < THROTTLE.size(); i++)
                 ((NBThrottle)THROTTLE.get(i)).tick(now);
 
-            UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
-            UNLOCKED.addAll(REGISTER);
             UNLOCKED.addAll(LATER);
-            REGISTER.clear();
             LATER.clear();
         }
         
         if(!UNLOCKED.isEmpty()) {
             for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
-                Object item = i.next();
+                Runnable item = (Runnable) i.next();
                 try {
-                    if(item instanceof RegisterOp) {
-                        RegisterOp next = (RegisterOp)item;
-                        registerImpl(selector, next.channel, next.op, next.handler, next.timeout, now);
-                    } else if(item instanceof Runnable) {
-                        ((Runnable)item).run();
-                    } 
+                    item.run();
                 } catch(Throwable t) {
                     LOG.error(t);
                     ErrorService.error(t);
@@ -407,7 +397,7 @@ public class NIODispatcher implements Runnable {
                 }
             }
             
-            addPendingItems();
+            runPendingTasks();
 
             try {
                 if(checkTime)
@@ -637,7 +627,7 @@ public class NIODispatcher implements Runnable {
     }    
     
     /** Encapsulates a register op. */
-    private static class RegisterOp {
+    private class RegisterOp implements Runnable {
         private final SelectableChannel channel;
         private final IOErrorObserver handler;
         private final int op;
@@ -648,6 +638,10 @@ public class NIODispatcher implements Runnable {
             this.handler = handler;
             this.op = op;
             this.timeout = timeout;
+        }
+        
+        public void run() {
+            registerImpl(selector, channel, op, handler, timeout);
         }
     }
 
