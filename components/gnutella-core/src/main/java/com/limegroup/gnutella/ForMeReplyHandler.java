@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella;
 
@@ -33,48 +33,87 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- * This is the class that goes in the route table when a request is
- * sent whose reply is for me.
+ * LimeWire puts the ForMeReplyHandler object in a RouteTable to get the pong and query hit packets that are responses to our pings and queries.
+ * ForMeReplyHandler implements the ReplyHandler interface, just like ManagedConnection and UDPReplyHandler.
+ * 
+ * There is only one ForMeReplyHandler object as LimeWire runs.
+ * The program saves it as MessageRouter.FOR_ME_REPLY_HANDLER, and uses it in the MessageRouter class.
  */
 public final class ForMeReplyHandler implements ReplyHandler {
-    
+
+    /** Make a debugging log we can write lines of text to as the program runs. */
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
-    
+
     /**
-     * Keeps track of what hosts have sent us PushRequests lately.
+     * Counts how many times push packets have asked us to push open new connections to different IP addresses.
+     * This lets handlePushRequest() notice if we get more than 5 requests to push open a connection to a single IP address in the same 30 second period.
+     * 
+     * PUSH_REQUESTS is a Map of String to IntWrapper objects.
+     * Its String values are IP addresses, like "1.2.3.4".
+     * Its LimeWire IntWrapper objects hold the number of times we've been asked to push open a connection to that IP address.
+     * 
+     * PUSH_REQUESTS is a FixedsizeForgetfulHashMap that holds up to 200 pairings.
+     * When it overflows, it throws out the object that was added first.
+     * 
+     * The RouterService runs code in the constructor every 30 seconds that clears this list completely.
      */
-    private final Map /* String -> IntWrapper */ PUSH_REQUESTS = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+    private final Map PUSH_REQUESTS = Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
 
-    private final Map /* GUID -> GUID */ GUID_REQUESTS = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+    /**
+     * Keeps track of which push packets we've already pushed connections open for.
+     * This lets handlePushRequest() notice if the same push packet comes in a second time.
+     * 
+     * GUID_REQUESTS is a Map of GUID to GUID objects.
+     * handlePushRequest() uses it to make sure we don't push for the same packet twice.
+     * Each push packet has a message GUID that marks the Gnutella packet unique.
+     * handlePushRequest() adds the GUID as the key and value.
+     * The put(guid, guid) method returns an object already stored under that GUID key.
+     * If it gets an object and not null, we know we've seen this packet before.
+     * 
+     * GUID_REQUESTS is a FixedsizeForgetfulHashMap that holds up to 200 pairings.
+     * When it overflows, it throws out the object that was added first.
+     * This Map isn't cleared on any timed schedule, it just grows to hold 200 GUIDs, and then starts to overflow.
+     */
+    private final Map GUID_REQUESTS = Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+
+	/** Make the program's one ForMeReplyHandler object. */
+	private static final ReplyHandler INSTANCE = new ForMeReplyHandler();
 
 	/**
-	 * Instance following singleton.
-	 */
-	private static final ReplyHandler INSTANCE =
-		new ForMeReplyHandler();
-
-	/**
-	 * Singleton accessor.
-	 *
-	 * @return the <tt>ReplyHandler</tt> instance for this node
+     * Get a reference to the program's single ForMeReplyHandler object.
+     * MessageRouter.FOR_ME_REPLY_HANDLER uses this method to reference the program's ForMeReplyHandler object.
+	 * 
+	 * @return A reference to the program's single ForMeReplyHandler object
 	 */
 	public static ReplyHandler instance() {
+
+        // Return the object we made and saved
 		return INSTANCE;
 	}
-	   
+
 	/**
-	 * Private constructor to ensure that only this class can construct
-	 * itself.
+     * Make the ForMeReplyHandler to represent us in a RouteTable.
+     * The constructor is marked private to make sure external code can't make a second ForMeReplyHandler.
+     * It contains code that will get the RouterService to clear the PUSH_REQUESTS list every 30 seconds.
 	 */
 	private ForMeReplyHandler() {
-	    //Clear push requests every 30 seconds.
-	    RouterService.schedule(new Runnable() {
+
+	    // Define a new class right here that doesn't have a name but implements Java's Runnable interface, requiring it to have a run() method
+	    RouterService.schedule(new Runnable() { // Schedule the RouterService to call the run() method every 30 seconds
+
+            // The RouterService will have a thread call this run() method every 30 seconds
 	        public void run() {
+
+                // Clear our record of the IP addresses we've been told to push open file delivering connections to
 	            PUSH_REQUESTS.clear();
 	        }
-	    }, 30 * 1000, 30 * 1000);
+	    },
+
+        // Call this 30 seconds from now
+        30 * 1000,
+
+        // And every 30 seconds after that
+        30 * 1000);
     }
 
     /**
@@ -169,72 +208,120 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	}
 
 	/**
-	 * Adds XML to the responses in a QueryReply.
+     * Match each part of the XML in the given query hit packet with the correct file information block in it.
+     * Extracts the XML, decompresses it, parses it, splits it, and inserts the parts by calling response.setDocument().
+     * handleQueryReply() above calls this.
+     * 
+     * @param qr A query hit packet we've received
+     * @return   true if it worked, false if there was an error
 	 */
     private boolean addXMLToResponses(QueryReply qr) {
-        // get xml collection string, then get dis-aggregated docs, then 
-        // in loop
-        // you can match up metadata to responses
+
+        /*
+         * get xml collection string, then get dis-aggregated docs, then
+         * in loop
+         * you can match up metadata to responses
+         */
+
+        // Make a string for the XML we'll decompress from the given query hit packet
         String xmlCollectionString = "";
+
         try {
+
+            // Get the bytes of the compressed XML from the end of the query hit packet
             LOG.trace("Trying to do uncompress XML.....");
             byte[] xmlCompressed = qr.getXMLBytes();
             if (xmlCompressed.length > 1) {
+
+                // Decompess it into a String
                 byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
-                xmlCollectionString = new String(xmlUncompressed,"UTF-8");
+                xmlCollectionString = new String(xmlUncompressed, "UTF-8"); // UTF-8 is ASCII
             }
-        }
-        catch (UnsupportedEncodingException use) {
-            //b/c this should never happen, we will show and error
-            //if it ever does for some reason.
-            //we won't throw a BadPacketException here but we will show it.
-            //the uee will effect the xml part of the reply but we could
-            //still show the reply so there shouldn't be any ill effect if
-            //xmlCollectionString is ""
+
+        // Java didn't like the "UTF-8" ASCII encoding
+        } catch (UnsupportedEncodingException use) {
+
+            /*
+             * b/c this should never happen, we will show and error
+             * if it ever does for some reason.
+             * we won't throw a BadPacketException here but we will show it.
+             * the uee will effect the xml part of the reply but we could
+             * still show the reply so there shouldn't be any ill effect if
+             * xmlCollectionString is ""
+             */
+
+            // Log the error, and keep on going
             ErrorService.error(use);
-        }
-        catch (IOException ignored) {}
-        
-        // valid response, no XML in EQHD.
-        if(xmlCollectionString == null || xmlCollectionString.equals(""))
-            return true;
-        
-        Response[] responses;
-        int responsesLength;
+
+        // Ignore the exception and keep on going
+        } catch (IOException ignored) {}
+
+        // If there's no XML in this query hit, leave now
+        if (xmlCollectionString == null || xmlCollectionString.equals("")) return true;
+
+        // Get the Response objects the QueryReply parsed file information blocks into
+        Response[] responses; // An array of Response objects that represent the file information blocks in the query hit packet
+        int responsesLength;  // The length of the array and the number of shared files the packet has information about
+
         try {
+
+            // Get the array of Response objects from the query hit packet, and save the number of Response objects in it
             responses = qr.getResultsArray();
             responsesLength = responses.length;
-        } catch(BadPacketException bpe) {
+
+        // The QueryReply class wasn't able to parse the packet for file information blocks
+        } catch (BadPacketException bpe) {
+
+            // Nothing more to do with XML, leave
             LOG.trace("Unable to get responses", bpe);
             return false;
         }
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("xmlCollectionString = " + xmlCollectionString);
 
-        List allDocsArray = 
-            LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
-                                               responsesLength);
-        
-        for(int i = 0; i < responsesLength; i++) {
+        // Save the XML into the debugging log
+        if (LOG.isDebugEnabled()) LOG.debug("xmlCollectionString = " + xmlCollectionString);
+
+        // Parse the XML into a List of LimeXMLDocument objects, with one object for each file information block
+        List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, responsesLength);
+
+        /*
+         * A QueryHit packet has file information blocks, and then a big string of XML at the end.
+         * The QueryReply class parsed each file information block into a Response object.
+         * Here, responses[] has responsesLength number of Response objects.
+         * The LimeXMLDocumentHelper split the XML into separate LimeXMLDocument objects.
+         * Here, allDocsArray has allDocsArray.size() number of LimeXMLDocument objects.
+         * 
+         * For each Response, loop through all the LimeXMLDocument objects.
+         * Stop when we find a match.
+         * Call response.setDocument(LimeXMLDocument) to load the matching schema in the Response object.
+         */
+
+        // Loop through the Response objects in the responses array
+        for (int i = 0; i < responsesLength; i++) {
             Response response = responses[i];
+
+            // Make an array that can hold LimeXMLDocument objects
             LimeXMLDocument[] metaDocs;
-            for(int schema = 0; schema < allDocsArray.size(); schema++) {
+
+            // Loop through the LimeXMLDocument objects for each schema
+            for (int schema = 0; schema < allDocsArray.size(); schema++) {
                 metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
-                // If there are no documents in this schema, try another.
-                if(metaDocs == null)
-                    continue;
-                // If this schema had a document for this response, use it.
-                if(metaDocs[i] != null) {
+
+                // If there are no documents in this schema, try another
+                if (metaDocs == null) continue;
+
+                // If this schema had a document for this response, use it
+                if (metaDocs[i] != null) {
+
+                    // Save the found schema in the Response object
                     response.setDocument(metaDocs[i]);
-                    break; // we only need one, so break out.
+                    break; // Each Response only needs one schema, so move to the next Response object
                 }
             }
         }
+
+        // We made it
         return true;
     }
-
-    //done
 
     /**
      * Checks the push packet, and calls PushManager.acceptPushUpload() to have us push open the connection.
@@ -259,14 +346,18 @@ public final class ForMeReplyHandler implements ReplyHandler {
         String h = NetworkUtils.ip2string(ip);
 
         // Make sure we haven't done this push already
-        GUID guid = new GUID(pushRequest.getGUID());
-        if (GUID_REQUESTS.put(guid, guid) != null) return;
+        GUID guid = new GUID(pushRequest.getGUID()); // Get the message GUID of the push packet that marks it unique, not the client ID GUID the push is addressed to
+        if (GUID_REQUESTS.put(guid, guid) != null) { // put() adds the GUID to the list, and returns the same GUID if it was already there
+
+            // The GUID was already in our list, we've already pushed for this packet before
+            return; // Leave without doing it again
+        }
 
         /*
          * make sure the guy isn't hammering us
          */
 
-        // This is the first time we've been asked to push open a connection to this IP address
+        // This is the first time we've been asked to push open a connection to this IP address in this 30 second period
         IntWrapper i = (IntWrapper)PUSH_REQUESTS.get(h); // Look up the IP address in the PUSH_REQUESTS list
         if (i == null) {
 
@@ -274,13 +365,13 @@ public final class ForMeReplyHandler implements ReplyHandler {
             i = new IntWrapper(1);
             PUSH_REQUESTS.put(h, i);
 
-        // We've been asked to push open a connection to this IP address before
+        // We've been asked to push open a connection to this IP address in this 30 second period before
         } else {
 
             // Increment the number stored in the list
             i.addInt(1);
 
-            // If we've pushed open 5 connections to this IP address already, leave without pushing open a 6th
+            // If we've pushed open 5 connections to this IP address in this 30 second period already, leave without pushing open a 6th
             if (i.getInt() > UploadSettings.MAX_PUSHES_PER_HOST.getValue()) return;
         }
 
@@ -353,8 +444,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
         return false;
 	}
 
-    //done
-
     /**
      * Always returns false to let us show the given message to the user.
      * isPersonalSpam() is supposed to determine if the given Gnutella packet passes through our personal SpamFilter, letting us show its information to the user.
@@ -369,14 +458,19 @@ public final class ForMeReplyHandler implements ReplyHandler {
         return false;
 	}
 
-    //do
-
+    /**
+     * Not used.
+     * Does nothing.
+     * 
+     * @param A PingReply object we could record in statistics
+     */
 	public void updateHorizonStats(PingReply pingReply) {
-        // TODO:: we should probably actually update the stats with this pong
+
+        /*
+         * TODO:: we should probably actually update the stats with this pong
+         */
     }
 
-    //done
-    
     /**
      * Determine if this is an outgoing connection we initiated.
      * Returns false, as a ForMeReplyHandler object represents ourselves.
@@ -500,29 +594,58 @@ public final class ForMeReplyHandler implements ReplyHandler {
         return true;
     }
 
-    //do
-    
-    // inherit doc comment
+    /**
+     * Get our Internet IP address.
+     * Calling getInetAddress() on a ReplyHandler object will usually tell you the IP address of the remote computer the ReplyHandler sends packets to.
+     * The ForMeReplyHandler represents us, so getInetAddress() returns our IP address.
+     * 
+     * @return Our IP address as a Java InetAddress object
+     */
     public InetAddress getInetAddress() {
+
         try {
-            return InetAddress.
-                getByName(NetworkUtils.ip2string(RouterService.getAddress()));
-        } catch(UnknownHostException e) {
-            // may want to do something else here if we ever use this!
+
+            // Ask the RouterService what our IP address is, convert it into a String, convert that into a InetAddress object, and return it
+            return InetAddress.getByName(NetworkUtils.ip2string(RouterService.getAddress()));
+
+        // Converting it into a InetAddress object didn't work
+        } catch (UnknownHostException e) {
+
+            /*
+             * may want to do something else here if we ever use this!
+             */
+
+            // Return null instead of a InetAddress object
             return null;
         }
     }
-    
+
+    /**
+     * Get our port number.
+     * Calling getPort() on a ReplyHandler object will usually tell you the port number of the remote computer the ReplyHandler sends packets to.
+     * The ForMeReplyHandler represents us, so getPort() returns our port.
+     * 
+     * @return Our port number
+     */
     public int getPort() {
+
+        // Ask the RouterService for our port number, and return it
         return RouterService.getPort();
     }
-    
+
+    /**
+     * Get our Internet IP address.
+     * Calling getInetAddress() on a ReplyHandler object will usually tell you the IP address of the remote computer the ReplyHandler sends packets to.
+     * The ForMeReplyHandler represents us, so getInetAddress() returns our IP address.
+     * 
+     * @return Our IP address as a String like "216.27.158.74"
+     */
     public String getAddress() {
+
+        // Ask the RouterService for our IP address, convert it into a String, and return it
         return NetworkUtils.ip2string(RouterService.getAddress());
     }
 
-    //done
-    
     /**
      * Log an error because we were asked to send a packet to ourselves
      * The ReplyHandler interface requires this method.

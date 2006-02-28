@@ -572,8 +572,9 @@ public abstract class MessageRouter {
 			return;
 		}
 
+        // Make a new UDPReplyHandler that will wrap Gnutella packets into UDP packets and send them to the given IP address and port number
 		ReplyHandler handler = new UDPReplyHandler(address, port);
-		
+
         if (msg instanceof QueryRequest) {
             //TODO: compare QueryKey with old generation params.  if it matches
             //send a new one generated with current params 
@@ -668,9 +669,10 @@ public abstract class MessageRouter {
         if (NetworkUtils.isLocalAddress(address) &&
           !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue())
             return;
-		
+
+        // Make a new UDPReplyHandler that will wrap Gnutella packets into UDP packets and send them to the given IP address and port number
 		ReplyHandler handler = new UDPReplyHandler(address, port);
-		
+
         if (msg instanceof QueryRequest) {
             if(!handleUDPQueryRequestPossibleDuplicate(
               (QueryRequest)msg, handler) ) {

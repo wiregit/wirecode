@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.xml;
 
 import java.io.IOException;
@@ -13,7 +16,6 @@ import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Response;
-
 
 public final class LimeXMLDocumentHelper{
 
@@ -32,6 +34,8 @@ public final class LimeXMLDocumentHelper{
     /**
      * TO be used when a Query Reply comes with a chunk of meta-data
      * we want to get LimeXMLDocuments out of it
+     * 
+     * @return A List of LimeXMLDocument objects
      */
     public static List getDocuments(String aggregatedXML, int totalResponseCount) {
         if(aggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)
