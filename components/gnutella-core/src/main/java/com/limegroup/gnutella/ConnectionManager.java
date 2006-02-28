@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.connection.ConnectionChecker;
+import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -28,7 +29,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.QuestionsHandler;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.SystemUtils;
@@ -2013,7 +2013,7 @@ public class ConnectionManager {
      * beyond the 'connect' stage.  That is, if a connect attempt is performed and failed
      * for any reason, this must clean itself up.
      */
-    private class ConnectionFetcher implements Connection.ConnectionObserver, HostCatcher.EndpointObserver {
+    private class ConnectionFetcher implements GnetConnectObserver, HostCatcher.EndpointObserver {
         // set if this connectionfetcher is a preferencing fetcher
         private boolean _pref = false;
         private ManagedConnection connection;
@@ -2071,14 +2071,17 @@ public class ConnectionManager {
         }
         
         /** Callback that Sockets.connect worked. */
-        public void handleConnect(Socket s) throws IOException {
+        public void handleConnect() {
             completeConnectionInitialization(connection, true);
             processConnectionHeaders(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
             _catcher.doneWithConnect(endpoint, true);
             if(_pref)
                 _needPref = false;
-            startConnection(connection);
+            
+            try {
+                startConnection(connection);
+            } catch(IOException ignored) {}
         }
         
         /** Callback that a connect failed. */
@@ -2124,9 +2127,6 @@ public class ConnectionManager {
                 ConnectionChecker.checkForLiveConnection();
             }
         }
-        
-        // unused.
-        public void handleIOException(IOException iox) {}
     }
 
     /**

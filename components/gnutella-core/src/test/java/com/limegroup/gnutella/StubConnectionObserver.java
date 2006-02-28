@@ -3,17 +3,15 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.net.Socket;
 
-import com.limegroup.gnutella.Connection.ConnectionObserver;
+import com.limegroup.gnutella.connection.GnetConnectObserver;
 
-public class StubConnectionObserver implements ConnectionObserver {
+
+public class StubConnectionObserver implements GnetConnectObserver {
     private boolean noGOK;
     private int code;
     private String msg;
     private boolean badHandshake;
     private boolean connect;
-    private Socket socket;
-    private boolean iox;
-    private IOException ioexception;
     private boolean shutdown;
     
     public synchronized void handleNoGnutellaOk(int code, String msg) {
@@ -28,15 +26,8 @@ public class StubConnectionObserver implements ConnectionObserver {
         notify();
     }
 
-    public synchronized void handleConnect(Socket socket) throws IOException {
+    public synchronized void handleConnect() {
         this.connect = true;
-        this.socket = socket;
-        notify();
-    }
-
-    public synchronized void handleIOException(IOException iox) {
-        this.iox = true;
-        this.ioexception = iox;
         notify();
     }
 
@@ -61,14 +52,6 @@ public class StubConnectionObserver implements ConnectionObserver {
         return connect;
     }
 
-    public IOException getIoexception() {
-        return ioexception;
-    }
-
-    public boolean isIox() {
-        return iox;
-    }
-
     public String getMsg() {
         return msg;
     }
@@ -79,10 +62,6 @@ public class StubConnectionObserver implements ConnectionObserver {
 
     public boolean isShutdown() {
         return shutdown;
-    }
-
-    public Socket getSocket() {
-        return socket;
     }
 
 }

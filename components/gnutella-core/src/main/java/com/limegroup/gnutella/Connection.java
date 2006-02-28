@@ -17,7 +17,12 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -34,12 +39,10 @@ import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 import com.limegroup.gnutella.util.CompressingOutputStream;
-import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
-import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.gnutella.util.UncompressingInputStream;
 
 /**
@@ -412,7 +415,7 @@ public class Connection implements IpPort {
     /**
      * Initializes this without a timeout, using the given ConnectObserver.
      */
-    public void initialize(ConnectionObserver observer) 
+    public void initialize(GnetConnectObserver observer) 
      throws IOException, NoGnutellaOkException, BadHandshakeException {
         initialize(0, observer);
     }
@@ -434,7 +437,7 @@ public class Connection implements IpPort {
      *  the connection, e.g., the server responded with HTTP, closed the
      *  the connection during handshaking, etc.
      */
-    protected void initialize(int timeout, ConnectionObserver observer) 
+    protected void initialize(int timeout, GnetConnectObserver observer) 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
 
         if(isOutgoing()) {
@@ -1933,24 +1936,14 @@ public class Connection implements IpPort {
     }
     
     /**
-     * A specialized ConnectObserver, with more callbacks for dealing
-     * with events specific to Gnutella connections.
-     */
-    public static interface ConnectionObserver extends ConnectObserver {
-        public void handleNoGnutellaOk(int code, String msg);
-        public void handleBadHandshake();
-    }    
- 
-    /**
      * A ConnectObserver to finish the initialization process prior
      * to handing the connection to the underlying ConnectObserver.
      */
     private class Connector implements ConnectObserver, Runnable {
         
-        private final ConnectionObserver observer;
-        private Socket socket;
+        private final GnetConnectObserver observer;
         
-        Connector(ConnectionObserver observer) {
+        Connector(GnetConnectObserver observer) {
             this.observer = observer;
         }
         
@@ -1966,7 +1959,6 @@ public class Connection implements IpPort {
 
         /** We got a connection. */
         public void handleConnect(Socket socket) {
-            this.socket = socket;
             ThreadFactory.startThread(this, "Handshaking");
         }
         
@@ -1974,7 +1966,7 @@ public class Connection implements IpPort {
         public void run() {
             try {
                 finishInitialize();
-                observer.handleConnect(socket);
+                observer.handleConnect();
             } catch(NoGnutellaOkException ex) {
                 observer.handleNoGnutellaOk(ex.getCode(), ex.getMessage());
             } catch(BadHandshakeException ex) {

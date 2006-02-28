@@ -60,7 +60,6 @@ public class ConnectionTest extends BaseTestCase {
         c.initialize(observer);
         observer.waitForResponse(3000);
         assertTrue(observer.isShutdown());
-        assertFalse(observer.isIox());
         assertFalse(observer.isBadHandshake());
         assertFalse(observer.isConnect());
         assertFalse(observer.isNoGOK());
@@ -77,7 +76,6 @@ public class ConnectionTest extends BaseTestCase {
         c.initialize(observer);
         observer.waitForResponse(3000);
         assertFalse(observer.isShutdown());
-        assertFalse(observer.isIox());
         assertFalse(observer.isBadHandshake());
         assertTrue(observer.isConnect());
         assertFalse(observer.isNoGOK());
@@ -90,7 +88,6 @@ public class ConnectionTest extends BaseTestCase {
         c.initialize(observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());
-        assertFalse(observer.isIox());
         assertFalse(observer.isBadHandshake());
         assertFalse(observer.isConnect());
         assertTrue(observer.isNoGOK());
@@ -104,7 +101,6 @@ public class ConnectionTest extends BaseTestCase {
         c.initialize(observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());
-        assertFalse(observer.isIox());
         assertTrue(observer.isBadHandshake());
         assertFalse(observer.isConnect());
         assertFalse(observer.isNoGOK());

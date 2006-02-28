@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.DeflaterWriter;
+import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.InflaterReader;
 import com.limegroup.gnutella.connection.MessageQueue;
 import com.limegroup.gnutella.connection.MessageReader;
@@ -337,7 +338,7 @@ public class ManagedConnection extends Connection
      * @throws NoGnutellaOkException
      * @throws BadHandshakeException
      */
-    public void initialize(ConnectionObserver observer) throws IOException, NoGnutellaOkException, BadHandshakeException {
+    public void initialize(GnetConnectObserver observer) throws IOException, NoGnutellaOkException, BadHandshakeException {
         // Establish the socket (if needed), handshake.
         super.initialize(CONNECT_TIMEOUT, observer);
         

@@ -832,30 +832,47 @@ public class HostCatcher {
     
     /**
      * Notification that endpoints now exist.
-     * If something was waiting on getting endpoints, this will
-     * 
+     * If something was waiting on getting endpoints, this will notify them
+     * about the new endpoint.
      */
-    private synchronized void endpointAdded() {
-        while (!_catchersWaiting.isEmpty()) {
-            Endpoint p = getAnEndpointInternal();
-            if (p == null) {
-                break; // no more endpoints.
-            }
-            EndpointObserver observer = (EndpointObserver)_catchersWaiting.remove(0);
-            observer.handleEndpoint(p);
+    private void endpointAdded() {
+        // No loop is actually necessary here because this method is called
+        // each time an endpoint is added.  Each new endpoint will trigger its
+        // own check.
+        Endpoint p;
+        EndpointObserver observer;
+        synchronized (this) {
+            if(_catchersWaiting.isEmpty())
+                return; // no one waiting.
+            
+            p = getAnEndpointInternal();
+            if (p == null)
+                return; // no more endpoints to give.
+            
+            observer = (EndpointObserver) _catchersWaiting.remove(0);
         }
+        
+        // It is important that this is outside the lock.  Otherwise HostCatcher's lock
+        // is exposed to the outside world.
+        observer.handleEndpoint(p);
     }
 
     /**
      * Passes the next available endpoint to the EndpointObserver.
      */
-    public synchronized void getAnEndpoint(EndpointObserver observer) {
-        Endpoint p = getAnEndpointInternal();
-        if (p != null) {
-            observer.handleEndpoint(p);
-        } else {
-            _catchersWaiting.add(observer);
+    public void getAnEndpoint(EndpointObserver observer) {
+        Endpoint p;
+        
+        // We can only lock around endpoint retrieval & _catchersWaiting,
+        // we don't want to expose our lock to the observer.
+        synchronized(this) {
+            p = getAnEndpointInternal();
+            if(p == null)
+                _catchersWaiting.add(observer);    
         }
+        
+        if(p != null)
+            observer.handleEndpoint(p);
     }
     
     /** Removes an oberserver from wanting to get an endpoint. */
