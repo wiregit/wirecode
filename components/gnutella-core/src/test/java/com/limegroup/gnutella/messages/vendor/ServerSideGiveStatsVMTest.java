@@ -9,7 +9,9 @@ import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -214,6 +216,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 			new QueryCountingConnection("localhost", PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder() );
+        
+        ULTRAPEER_2.log = new ArrayList();
     }
 
     public static void setSettings() {
@@ -287,42 +291,42 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     private static void readAllFully() throws IOException, BadPacketException {
        while(true) {
             try {
-                LEAF_1.receive(300);
+                LEAF_1.receive(600);
             } catch (InterruptedIOException e) {
                 break;
             }
         }
         while(true) {
             try {
-                LEAF_2.receive(300);
+                LEAF_2.receive(600);
             } catch (InterruptedIOException e) {
                 break;
             }
         }
         while(true) {
             try {
-                LEAF_3.receive(300);
+                LEAF_3.receive(600);
             } catch (InterruptedIOException e) {
                 break;
             }
         }
         while(true) {
             try {
-                LEAF_4.receive(300);
+                LEAF_4.receive(600);
             } catch (InterruptedIOException e) {
                 break;
             }
         }
         while(true) {
             try {
-                ULTRAPEER_1.receive(300);
+                ULTRAPEER_1.receive(600);
             } catch (InterruptedIOException e) {
                 break;
             }
         }
         while(true) {
             try {
-                ULTRAPEER_2.receive(300);
+                ULTRAPEER_2.receive(600);
             } catch (InterruptedIOException e) {
                 break;
             }
@@ -678,6 +682,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     }
      
     public void testTCPGiveStatsVM() throws Exception {        
+        System.out.println("testTCPGiveStatsVM: " + System.currentTimeMillis());
         
         //Gnutella incoming by TCP
         GiveStatsVendorMessage statsVM = new GiveStatsVendorMessage(
@@ -1050,7 +1055,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     }
     
     private static class QueryCountingConnection extends CountingConnection {
-
+        
+        public List log = null;
         public int incomingQueries = 0;
         public int queryReplies = 0;
         
@@ -1064,6 +1070,10 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
             if (countEnabled && m instanceof QueryRequest) {
                 incomingQueries++;
             }
+            
+            if (log != null) {
+                log.add(m.toString() + " " + System.currentTimeMillis());
+            }
             return m;
         }
 
@@ -1071,6 +1081,10 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
             Message m = super.receive(timeout);
             if (countEnabled && m instanceof QueryRequest) {
                 incomingQueries++;
+            }
+            
+            if (log != null) {
+                log.add(m.toString() + " " + System.currentTimeMillis());
             }
             return m;
         }
