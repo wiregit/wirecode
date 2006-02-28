@@ -42,7 +42,7 @@ public class BlockingSocketAdapter extends NBSocket {
      * The observer will be notified of the changes.
      */
     public boolean connect(final SocketAddress addr, final int timeout, 
-                           final ConnectObserver observer) throws IOException {
+                           final ConnectObserver observer) {
         ThreadFactory.startThread(new Runnable() {
             public void run() {
                 try {

@@ -258,7 +258,7 @@ public final class NBThrottleTest extends BaseTestCase {
 	private static class Data {
         private StubReadWriteObserver ATTACHMENT = new StubReadWriteObserver();
         private StubThrottleListener STUB = new StubThrottleListener(ATTACHMENT);
-        private FakeSelectionKey KEY = new FakeSelectionKey(ATTACHMENT);
+        private FakeSelectionKey KEY = new FakeSelectionKey(NIODispatcher.instance().new Attachment(ATTACHMENT));
         Data(Throttle throttle) {
             ATTACHMENT.setThrottle(throttle);
         }

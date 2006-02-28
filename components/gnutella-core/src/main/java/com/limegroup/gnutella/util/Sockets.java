@@ -14,8 +14,8 @@ public class Sockets {
     
     private final static SocketController CONTROLLER =
         CommonUtils.isWindowsXP() ?
-                (SocketController)new LimitedSocketController(4) :
-                (SocketController)new SimpleSocketController();
+                new LimitedSocketController(4) :
+                new SimpleSocketController();
         
 	/**
 	 * Ensure this cannot be constructed.

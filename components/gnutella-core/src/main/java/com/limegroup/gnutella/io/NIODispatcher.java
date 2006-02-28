@@ -594,7 +594,7 @@ public class NIODispatcher implements Runnable {
      * Contains methods for timing out an attachment,
      * keeping track of the number of successive hits, etc...
      */
-    private class Attachment implements Timeoutable {        
+    class Attachment implements Timeoutable {        
         private final IOErrorObserver attachment;
         private long lastMod;
         private long hits;

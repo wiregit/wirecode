@@ -113,12 +113,7 @@ class LimitedSocketController extends SimpleSocketController {
         
         for(int i = 0; i < toBeProcessed.size(); i++) {
             Requestor next = (Requestor)toBeProcessed.get(i);
-            try {
-                next.socket.connect(next.addr, next.timeout, new DelegateConnector(next.observer));
-            } catch(IOException iox) {
-                _socketsConnecting--;
-                next.observer.shutdown();
-            }
+            next.socket.connect(next.addr, next.timeout, new DelegateConnector(next.observer));
         }
     }
     

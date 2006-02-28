@@ -43,7 +43,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
     private ReadObserver reader;
     
     /** The ConnectObserver this delegates to about connect events */
-    private ConnectObserver connecter;
+    private volatile ConnectObserver connecter;
     
     /** If this Socket has already been shutdown. */
     private boolean shutdown = false;
@@ -260,6 +260,14 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         if(connecter != null)
             connecter.shutdown();
         
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                reader = new NoOpReader();
+                writer = new NoOpWriter();
+                connecter = null;
+            }
+        });
+        
         try {
             socket.close();
         } catch(IOException ignored) {
@@ -318,18 +326,17 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
      *
      * Returns true if this was able to connect immediately.  The observer is still
      * notified about the success even it it was immediate.
-     * 
-     * @throws IOException if the address cannot be resolved.
-     */
-    public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
-        InetSocketAddress iaddr = (InetSocketAddress)addr;
-        if (iaddr.isUnresolved())
-            throw new IOException("unresolved: "+addr);
 
+     */
+    public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
         connectedTo = iaddr.getAddress();
         this.connecter = observer;
         
         try {
+            if (iaddr.isUnresolved())
+                throw new IOException("unresolved: " + addr);
+            
             if(channel.connect(addr)) {
                 observer.handleConnect(this);
                 return true;

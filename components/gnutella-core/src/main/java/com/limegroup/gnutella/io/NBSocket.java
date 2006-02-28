@@ -23,10 +23,8 @@ public abstract class NBSocket extends Socket {
      * receive the connection events.
      * 
      * This method always returns immediately.
-     * 
-     * @throws IOException if the address cannot be resolved.
      */
-    public abstract boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) throws IOException;
+    public abstract boolean connect(SocketAddress addr, int timeout, ConnectObserver observer);
     
     // a bunch of Constructors.
     
