@@ -92,7 +92,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         assertNotNull( mCapvm );
         assertNotNull( mVendS );
         //  See above
-//        assertTrue( mqePingR!=null );
+        // assertNotNull( mqePingR );
         
         assertEquals( "Leaf messages queue not empty" + _queue, 0, _queue.size() );
     }
@@ -106,11 +106,9 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     
     private void parseWaitingMessages( Connection con ) throws Exception {
         try {
-            Message m=con.receive( 100 );
-            
-            while( m!=null ) {
+            Message m = null;
+            while((m = con.receive( 300 )) !=null ) {
                 _queue.add( m );
-                m=con.receive(100);
             }
         } catch (InterruptedIOException ie) {
         }
