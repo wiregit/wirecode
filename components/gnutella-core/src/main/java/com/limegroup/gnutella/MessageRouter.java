@@ -1286,8 +1286,6 @@ public abstract class MessageRouter {
                     }
                 } catch (IOException ignored) {
                     LOG.warn("IOX during connectback", ignored);
-                } catch (Throwable t) {
-                    ErrorService.error(t);
                 } finally {
                     IOUtils.close(sock);
                 }
@@ -1975,29 +1973,29 @@ public abstract class MessageRouter {
 
     private void handleStatisticsMessage(final StatisticVendorMessage svm, 
                                          final ReplyHandler handler) {
-        if(StatisticsSettings.RECORD_VM_STATS.getValue()) {
-            Thread statHandler = new ManagedThread("Stat writer ") {
-                public void managedRun() {
-                    RandomAccessFile file = null;
-                    try {
-                        file = new RandomAccessFile("stats_log.log", "rw");
-                        file.seek(file.length());//go to the end.
-                        file.writeBytes(svm.getReportedStats()+"\n");
-                    } catch (IOException iox) {
-                        ErrorService.error(iox);
-                    } finally {
-                        if(file != null) {
-                            try {
-                                file.close();
-                            } catch (IOException iox) {
-                                ErrorService.error(iox);
-                            }
-                        }
-                    }
-                }
-            };
-            statHandler.start();
-        }
+//        if(StatisticsSettings.RECORD_VM_STATS.getValue()) {
+//            Thread statHandler = new ManagedThread("Stat writer ") {
+//                public void managedRun() {
+//                    RandomAccessFile file = null;
+//                    try {
+//                        file = new RandomAccessFile("stats_log.log", "rw");
+//                        file.seek(file.length());//go to the end.
+//                        file.writeBytes(svm.getReportedStats()+"\n");
+//                    } catch (IOException iox) {
+//                        ErrorService.error(iox);
+//                    } finally {
+//                        if(file != null) {
+//                            try {
+//                                file.close();
+//                            } catch (IOException iox) {
+//                                ErrorService.error(iox);
+//                            }
+//                        }
+//                    }
+//                }
+//            };
+//            statHandler.start();
+//        }
     }
 
     /**

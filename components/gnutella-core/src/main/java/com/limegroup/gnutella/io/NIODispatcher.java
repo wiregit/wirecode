@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.io;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SocketChannel;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -29,7 +31,11 @@ import org.apache.commons.logging.Log;
  * To register interest initially in either reading, writing, accepting, or connecting,
  * use registerRead, registerWrite, registerReadWrite, registerAccept, or registerConnect.
  *
- * When handling events, interest is done different ways.  A channel registered for accepting
+ * A channel registering for a connect can specify a timeout.  If the timeout is greater than
+ * 0 and a connect event hasn't happened in that length of time, the channel will be cancelled 
+ * and handleIOException will be called on the Observer. 
+ *
+ * When handling events, future interest is done different ways.  A channel registered for accepting
  * will remain registered for accepting until that channel is closed.  There is no way to 
  * turn off interest in accepting.  A channel registered for connecting will turn off all
  * interest (for any operation) once the connect event has been handled.  Channels registered
@@ -101,14 +107,14 @@ public class NIODispatcher implements Runnable {
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
     
-    /** Register queue. */
-    private final Collection /* of RegisterOp */ REGISTER = new LinkedList();
-	
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
     
     /** The throttle queue. */
     private volatile List /* of NBThrottle */ THROTTLE = new ArrayList();
+    
+    /** The timeout manager. */
+    private final TimeoutController TIMEOUTER = new TimeoutController();
     
     /**
      * Temporary list used where REGISTER & LATER are combined, so that
@@ -140,39 +146,44 @@ public class NIODispatcher implements Runnable {
             THROTTLE = throttle;
         }
     }
+    
+    /** Registers a channel for nothing. */
+    public void register(SelectableChannel channel, IOErrorObserver attachment) {
+        register(channel, attachment, 0, 0);
+    }
 	    
     /** Register interest in accepting */
-    public void registerAccept(SelectableChannel channel, AcceptObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_ACCEPT);
+    public void registerAccept(SelectableChannel channel, AcceptChannelObserver attachment) {
+        register(channel, attachment, SelectionKey.OP_ACCEPT, 0);
     }
     
     /** Register interest in connecting */
-    public void registerConnect(SelectableChannel channel, ConnectObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_CONNECT);
+    public void registerConnect(SelectableChannel channel, ConnectObserver attachment, int timeout) {
+        register(channel, attachment, SelectionKey.OP_CONNECT, timeout);
     }
     
     /** Register interest in reading */
     public void registerRead(SelectableChannel channel, ReadObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_READ);
+        register(channel, attachment, SelectionKey.OP_READ, 0);
     }
     
     /** Register interest in writing */
     public void registerWrite(SelectableChannel channel, WriteObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_WRITE);
+        register(channel, attachment, SelectionKey.OP_WRITE, 0);
     }
     
     /** Register interest in both reading & writing */
     public void registerReadWrite(SelectableChannel channel, ReadWriteObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE, 0);
     }
     
     /** Register interest */
-    private void register(SelectableChannel channel, IOErrorObserver handler, int op) {
+    private void register(SelectableChannel channel, IOErrorObserver handler, int op, int timeout) {
 		if(Thread.currentThread() == dispatchThread) {
-		    registerImpl(selector, channel, op, handler);
+		    registerImpl(selector, channel, op, handler, timeout);
 		} else {
 	        synchronized(Q_LOCK) {
-				REGISTER.add(new RegisterOp(channel, handler, op));
+				LATER.add(new RegisterOp(channel, handler, op, timeout));
 			}
         }
     }
@@ -259,7 +270,7 @@ public class NIODispatcher implements Runnable {
      * 
      * @throws IOException
      */
-    private void processAccept(SelectionKey sk, AcceptObserver handler) throws IOException {
+    private void processAccept(SelectionKey sk, AcceptChannelObserver handler) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling accept: " + handler);
         
@@ -271,7 +282,7 @@ public class NIODispatcher implements Runnable {
         
         if (channel.isOpen()) {
             channel.configureBlocking(false);
-            handler.handleAccept(channel);
+            handler.handleAcceptChannel(channel);
         } else {
             try {
                 channel.close();
@@ -286,14 +297,13 @@ public class NIODispatcher implements Runnable {
      */
     private void processConnect(SelectionKey sk, ConnectObserver handler) throws IOException {
         if(LOG.isDebugEnabled())
-            LOG.debug("Handling connect: " + handler);        
-            
+            LOG.debug("Handling connect: " + handler);
         SocketChannel channel = (SocketChannel)sk.channel();
         
         boolean finished = channel.finishConnect();
         if(finished) {
             sk.interestOps(0); // interested in nothing just yet.
-            handler.handleConnect();
+            handler.handleConnect(channel.socket());
         } else {
             cancel(sk, handler);
         }
@@ -302,9 +312,14 @@ public class NIODispatcher implements Runnable {
     /**
      * Does a real registration.
      */
-    private void registerImpl(Selector selector, SelectableChannel channel, int op, IOErrorObserver attachment) {
+    private void registerImpl(Selector selector, SelectableChannel channel, int op,
+                              IOErrorObserver attachment, int timeout) {
         try {
-            channel.register(selector, op, new Attachment(attachment));
+            Attachment guard = new Attachment(attachment);
+            SelectionKey key = channel.register(selector, op, guard);
+            guard.setKey(key);
+            if(timeout != 0) 
+                guard.addTimeout(System.currentTimeMillis(), timeout);
         } catch(IOException iox) {
             attachment.handleIOException(iox);
         }
@@ -323,29 +338,22 @@ public class NIODispatcher implements Runnable {
      * actions are all within this package, so we can guarantee that it doesn't
      * deadlock.
      */
-    private void addPendingItems() {
+    private void runPendingTasks() {
+        long now;
         synchronized(Q_LOCK) {
-            long now = System.currentTimeMillis();
+            now = System.currentTimeMillis();
             for(int i = 0; i < THROTTLE.size(); i++)
                 ((NBThrottle)THROTTLE.get(i)).tick(now);
 
-            UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
-            UNLOCKED.addAll(REGISTER);
             UNLOCKED.addAll(LATER);
-            REGISTER.clear();
             LATER.clear();
         }
         
         if(!UNLOCKED.isEmpty()) {
             for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
-                Object item = i.next();
+                Runnable item = (Runnable) i.next();
                 try {
-                    if(item instanceof RegisterOp) {
-                        RegisterOp next = (RegisterOp)item;
-                        registerImpl(selector, next.channel, next.op, next.handler);
-                    } else if(item instanceof Runnable) {
-                        ((Runnable)item).run();
-                    } 
+                    item.run();
                 } catch(Throwable t) {
                     LOG.error(t);
                     ErrorService.error(t);
@@ -389,7 +397,7 @@ public class NIODispatcher implements Runnable {
                 }
             }
             
-            addPendingItems();
+            runPendingTasks();
 
             try {
                 if(checkTime)
@@ -409,10 +417,11 @@ public class NIODispatcher implements Runnable {
             
             Collection keys = selector.selectedKeys();
             if(keys.size() == 0) {
+                long now = System.currentTimeMillis();
                 if(startSelect == -1) {
                     LOG.warn("No keys selected, starting spin check.");
                     checkTime = true;
-                } else if(startSelect + 30 >= System.currentTimeMillis()) {
+                } else if(startSelect + 30 >= now) {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Spinning detected, current spins: " + zeroes);
                     if(zeroes++ > SPIN_AMOUNT)
@@ -423,7 +432,8 @@ public class NIODispatcher implements Runnable {
                     zeroes = 0;
                     ignores = 0;
                 }
-                continue;
+                TIMEOUTER.processTimeouts(now);
+                continue;                
             } else if (checkTime) {             
                 // skip up to certain number of good selects if we suspect the selector is broken
                 ignores++;
@@ -436,7 +446,7 @@ public class NIODispatcher implements Runnable {
             }
             
             if(LOG.isDebugEnabled())
-                LOG.debug("Selected (" + keys.size() + ") keys.");
+                LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
             
             readyThrottles(keys);
             
@@ -447,7 +457,8 @@ public class NIODispatcher implements Runnable {
             }
             
             keys.clear();
-            iteration++;
+            iteration++;            
+            TIMEOUTER.processTimeouts(System.currentTimeMillis());
         }
     }
     
@@ -457,6 +468,7 @@ public class NIODispatcher implements Runnable {
      */
     void process(SelectionKey sk, Object proxyAttachment, int allowedOps) {
         Attachment proxy = (Attachment)proxyAttachment;
+        proxy.clearTimeout();
         IOErrorObserver attachment = proxy.attachment;
         
         if(proxy.lastMod == iteration) {
@@ -471,7 +483,7 @@ public class NIODispatcher implements Runnable {
             try {
                 try {
                     if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                        processAccept(sk, (AcceptObserver)attachment);
+                        processAccept(sk, (AcceptChannelObserver)attachment);
                     else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
                         processConnect(sk, (ConnectObserver)attachment);
                     else {
@@ -529,12 +541,13 @@ public class NIODispatcher implements Runnable {
             try {
                 SelectionKey key = (SelectionKey)i.next();
                 SelectableChannel channel = key.channel();
-                Object attachment = key.attachment();
+                Attachment attachment = (Attachment)key.attachment();
                 int ops = key.interestOps();
                 try {
-                    channel.register(selector, ops, attachment);
+                    SelectionKey newKey = channel.register(selector, ops, attachment);
+                    attachment.setKey(newKey);
                 } catch(IOException iox) {
-                    ((Attachment)attachment).attachment.handleIOException(iox);
+                    attachment.attachment.handleIOException(iox);
                 }
             } catch(CancelledKeyException ignored) {
                 LOG.warn("key cancelled while swapping", ignored);
@@ -576,28 +589,59 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Encapsulates a register op. */
-    private static class RegisterOp {
-        private final SelectableChannel channel;
-        private final IOErrorObserver handler;
-        private final int op;
-    
-        RegisterOp(SelectableChannel channel, IOErrorObserver handler, int op) {
-            this.channel = channel;
-            this.handler = handler;
-            this.op = op;
-        }
-    }
-    
-    /** Encapsulates an attachment. */
-    // Make it accessible for NBThrottleTest
-    static class Attachment {
+    /**
+     * Encapsulates an attachment.
+     * Contains methods for timing out an attachment,
+     * keeping track of the number of successive hits, etc...
+     */
+    class Attachment implements Timeoutable {        
         private final IOErrorObserver attachment;
         private long lastMod;
         private long hits;
+        private boolean timeoutActive;
+        private SelectionKey key;
         
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
+        }
+        
+        void clearTimeout() {
+            timeoutActive = false;
+        }
+
+        void addTimeout(long now, long timeoutLength) {
+            timeoutActive = true;
+            TIMEOUTER.addTimeout(this, now, timeoutLength);
+        }
+        
+        public void notifyTimeout(long now, long expireTime, long timeoutLength) {
+            if(timeoutActive) {
+                cancel(key, attachment);
+                attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeoutLength + ")"));
+            }
+        }
+        
+        public void setKey(SelectionKey key) {
+            this.key = key;
+        }
+    }    
+    
+    /** Encapsulates a register op. */
+    private class RegisterOp implements Runnable {
+        private final SelectableChannel channel;
+        private final IOErrorObserver handler;
+        private final int op;
+        private final int timeout;
+    
+        RegisterOp(SelectableChannel channel, IOErrorObserver handler, int op, int timeout) {
+            this.channel = channel;
+            this.handler = handler;
+            this.op = op;
+            this.timeout = timeout;
+        }
+        
+        public void run() {
+            registerImpl(selector, channel, op, handler, timeout);
         }
     }
 
@@ -609,6 +653,5 @@ public class NIODispatcher implements Runnable {
         public ProcessingException() { super(); }
         public ProcessingException(Throwable t) { super(t); }
     }
-    
 }
 

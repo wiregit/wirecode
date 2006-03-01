@@ -12,19 +12,19 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known
@@ -125,6 +125,7 @@ public final class ConnectionChecker implements Runnable {
     private ConnectionChecker() {}
 
     private static ConnectionChecker current;
+    
     /**
      * Creates a new <tt>ConnectionChecker</tt> instance that checks for a live
      * internet connection.  If the checker determines that there is no active 
@@ -140,18 +141,18 @@ public final class ConnectionChecker implements Runnable {
         boolean startThread = false;
         synchronized(ConnectionChecker.class) {
             if (current == null) {
-                current = new ConnectionChecker();
                 startThread = true;
+                current = new ConnectionChecker();
             }
             checker = current;
         }
         
-        if (startThread) {
-            Thread connectionThread = 
-                new ManagedThread(checker, "check for live connection");
-            connectionThread.setDaemon(true);
-            connectionThread.start();
+        // Only create a new thread if one isn't alive.
+        if(startThread) {
+            LOG.debug("Starting a new connection-checker thread");
+            ThreadFactory.startThread(checker, "check for live connection");
         }
+        
         return checker;
     }
 
@@ -167,18 +168,20 @@ public final class ConnectionChecker implements Runnable {
             
             Iterator iter = hostList.iterator();
             while(iter.hasNext()) {
-                String curHost = (String)iter.next();        
+                String curHost = (String)iter.next();
                 connectToHost(curHost);
                 
                 // Break out of the loop if we've already discovered that we're 
                 // connected -- we only need to successfully connect to one host
                 // to know for sure that we're up.
                 if(_connected) {
+                    LOG.debug("Connection exists.");
+                    
                     // if we did disconnect as an attempt to work around SP2, connect now.
-                    if (_triedSP2Workaround && 
-                            !RouterService.isConnected() && 
-                            !RouterService.isConnecting())
+                    if (_triedSP2Workaround && !RouterService.isConnected() && !RouterService.isConnecting()) {
+                        LOG.debug("Reconnecting RouterService");
                         RouterService.connect();
+                    }
                     return;
                 }
                 
@@ -187,8 +190,8 @@ public final class ConnectionChecker implements Runnable {
                 // sure the user's connection is down.  If it is down, trying
                 // multiple times adds no load to the test servers.
                 if(_unsuccessfulAttempts > 2) {
-                    
-                    if (_triedSP2Workaround || !CommonUtils.isWindowsXP()) { 
+                    LOG.debug("Failed connection check more than twice.");
+                    if (_triedSP2Workaround || !CommonUtils.isWindowsXP()) {
                         RouterService.getConnectionManager().noInternetConnection();
                         return;
                     } else {
@@ -198,9 +201,6 @@ public final class ConnectionChecker implements Runnable {
                 }
             }
             
-        } catch(Throwable t) {
-            // Report any unhandled errors.
-            ErrorService.error(t);
         } finally {
             synchronized(ConnectionChecker.class) {
                 current = null;
@@ -288,20 +288,68 @@ public final class ConnectionChecker implements Runnable {
      * @param host the host to connect to
      */
     private void connectToHost(String host) {
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("connecting to: "+host);
-        }
+        if(LOG.isDebugEnabled())
+            LOG.debug("Checking for connection with host: " + host);
         
-        Socket s = null;
         try  {
         	InetAddress.getByName(host); // die fast if unresolvable
-        	s = Sockets.connectHardTimeout(host, 80, 20000);
-        	_connected = true;
+            Observer observer = new Observer();
+            synchronized(observer) {
+                Socket s = Sockets.connect(host, 80, 20000, observer);
+                LOG.debug("Waiting for callback...");
+                try {
+                    observer.wait(40000);
+                } catch(InterruptedException e) {}
+                if(!observer.hasResponse()) {
+                    LOG.debug("No response!");
+                    // only consider unsuccesful if we were able to remove it
+                    // 'cause if it couldn't be removed, a response is still pending...
+                    if(Sockets.removeConnectObserver(observer)) {
+                        LOG.debug("Removed observer");
+                        _unsuccessfulAttempts++;
+                        IOUtils.close(s);
+                    }
+                }
+            }
         } catch (IOException bad) {
+            LOG.debug("failed to resolve name", bad);
         	_unsuccessfulAttempts++;
-        } finally {
-        	IOUtils.close(s);
         }
+    }
+    
+    private class Observer implements ConnectObserver {
+        boolean response = false;
+        
+        // unused.
+        public void handleIOException(IOException iox) {}
+
+        // Yay, we're connected.    
+        public synchronized void handleConnect(Socket socket) throws IOException {
+            if(!response) {
+                LOG.debug("Socket connected OK");
+                
+                response = true;
+                _connected = true;
+                notify();
+                
+                IOUtils.close(socket);
+            }
+        }
+
+        public synchronized void shutdown() {
+            if(!response) {
+                LOG.debug("Socket failed to connect");
+                
+                response = true;
+                _unsuccessfulAttempts++;
+                notify();
+            }
+        }
+        
+        public boolean hasResponse() {
+            return response;
+        }
+        
     }
     
     private class UDPChecker implements MessageListener, Cancellable {

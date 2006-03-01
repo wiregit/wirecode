@@ -1,9 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
-import java.io.InputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -13,17 +13,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.connection.CompositeQueue;
+import com.limegroup.gnutella.connection.ConnectionStats;
+import com.limegroup.gnutella.connection.DeflaterWriter;
+import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.connection.InflaterReader;
+import com.limegroup.gnutella.connection.MessageQueue;
+import com.limegroup.gnutella.connection.MessageReader;
+import com.limegroup.gnutella.connection.MessageReceiver;
+import com.limegroup.gnutella.connection.MessageWriter;
+import com.limegroup.gnutella.connection.OutputRunner;
+import com.limegroup.gnutella.connection.SentMessageHandler;
+import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.LeafHandshakeResponder;
+import com.limegroup.gnutella.handshaking.LeafHeaders;
+import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.io.ChannelWriter;
+import com.limegroup.gnutella.io.DelayedBufferWriter;
+import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.Throttle;
-import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.ThrottleWriter;
-import com.limegroup.gnutella.io.DelayedBufferWriter;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.connection.*;
-import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
+import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
+import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
+import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UpdateRequest;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
@@ -33,9 +67,9 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.updates.UpdateManager;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -77,6 +111,8 @@ import com.limegroup.gnutella.version.UpdateHandler;
  */
 public class ManagedConnection extends Connection 
 	implements ReplyHandler, MessageReceiver, SentMessageHandler {
+    
+    private static final Log LOG = LogFactory.getLog(ManagedConnection.class);
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -284,13 +320,38 @@ public class ManagedConnection extends Connection
 				  socket.getInetAddress().getHostAddress())));
         _manager = RouterService.getConnectionManager();
     }
+    
+    /**
+     * Stub for calling initialize(null);
+     */
+    public void initialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
+        initialize(null);
+    }
 
+    /**
+     * Attempts to initialize the connection.  If observer is non-null and this wasn't
+     * created with a pre-existing Socket this will return immediately.  Otherwise,
+     * this will block while connecting or initializing the handshake.
+     * return immediately, 
+     * @param observer
+     * @throws IOException
+     * @throws NoGnutellaOkException
+     * @throws BadHandshakeException
+     */
+    public void initialize(GnetConnectObserver observer) throws IOException, NoGnutellaOkException, BadHandshakeException {
+        // Establish the socket (if needed), handshake.
+        super.initialize(CONNECT_TIMEOUT, observer);
+        
+        // Nothing else should be done here.  All post-init-sequences
+        // should be triggered from finishInitialize, which will be called
+        // when the socket is connected (if it connects).
+    }
 
-
-    public void initialize()
-            throws IOException, NoGnutellaOkException, BadHandshakeException {
-        //Establish the socket (if needed), handshake.
-		super.initialize(CONNECT_TIMEOUT);
+    /**
+     * Completes the initialization process.
+     */
+    protected void finishInitialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
+        super.finishInitialize();
 
         // Start our OutputRunner.
         startOutput();
@@ -300,15 +361,15 @@ public class ManagedConnection extends Connection
     }
 
     /**
-     * Resets the query route table for this connection.  The new table
-     * will be of the size specified in <tt>rtm</tt> and will contain
-     * no data.  If there is no <tt>QueryRouteTable</tt> yet created for
-     * this connection, this method will create one.
-     *
-     * @param rtm the <tt>ResetTableMessage</tt> 
+     * Resets the query route table for this connection. The new table will be of the size specified in <tt>rtm</tt>
+     * and will contain no data. If there is no <tt>QueryRouteTable</tt> yet created for this connection, this method
+     * will create one.
+     * 
+     * @param rtm
+     *            the <tt>ResetTableMessage</tt>
      */
     public void resetQueryRouteTable(ResetTableMessage rtm) {
-        if(_lastQRPTableReceived == null) {
+        if (_lastQRPTableReceived == null) {
             _lastQRPTableReceived =
                 new QueryRouteTable(rtm.getTableSize(), rtm.getInfinity());
         } else {
@@ -1201,9 +1262,7 @@ public class ManagedConnection extends Connection
         
         public BlockingRunner(MessageQueue queue) {
             this.queue = queue;
-            Thread output = new ManagedThread(this, "OutputRunner");
-            output.setDaemon(true);
-            output.start();
+            ThreadFactory.startThread(this, "OutputRunner");
         }
 
         public void send(Message m) {

@@ -53,6 +53,7 @@ import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -274,10 +275,7 @@ public class RouterService {
   				_state = 1;
   		}
   		
-  	    Thread t = new ManagedThread(new Initializer());
-  	    t.setName("async gui initializer");
-  	    t.setDaemon(true);
-  	    t.start();
+        ThreadFactory.startThread(new Initializer(), "async gui initializer");
   	}
   	
   	/**
@@ -1485,17 +1483,11 @@ public class RouterService {
 	  final Set proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
-        Thread asynch = new ManagedThread( new Runnable() {
+        ThreadFactory.startThread(new Runnable() {
             public void run() {
-                try {
-                    handler.browseHost(host, port, proxies, canDoFWTransfer);
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+                handler.browseHost(host, port, proxies, canDoFWTransfer);
             }
         }, "BrowseHoster" );
-        asynch.setDaemon(true);
-        asynch.start();
         
         return handler;
 	}

@@ -24,6 +24,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 
@@ -430,12 +431,11 @@ public class BrowseHostHandler {
     /** @return true if the Push was handled by me.
      */
     public static boolean handlePush(int index, GUID serventID, 
-                                     final Socket socket) 
-        throws IOException {
+                                     final Socket socket) {
         boolean retVal = false;
         LOG.trace("BHH.handlePush(): entered.");
-        if (index == SPECIAL_INDEX)
-            ; // you'd hope, but not necessary...
+       // if (index == SPECIAL_INDEX)
+       //     ; // you'd hope, but not necessary...
 
         PushRequestDetails prd = null;
         synchronized (_pushedHosts) {
@@ -443,19 +443,15 @@ public class BrowseHostHandler {
         }
         if (prd != null) {
             final PushRequestDetails finalPRD = prd;
-            Thread runLater = new ManagedThread() {
-                    public void managedRun() {
-                        try {
-                            finalPRD.bhh.browseExchange(socket);
-                        }
-                        catch (IOException ohWell) {
-                            finalPRD.bhh.failed();
-                        }
+            ThreadFactory.startThread(new Runnable() {
+                public void run() {
+                    try {
+                        finalPRD.bhh.browseExchange(socket);
+                    } catch (IOException ohWell) {
+                        finalPRD.bhh.failed();
                     }
-                };
-            runLater.setName("BrowseHost");
-            runLater.setDaemon(true);
-            runLater.start();
+                }
+            }, "BrowseHost");
             retVal = true;
         }
         else

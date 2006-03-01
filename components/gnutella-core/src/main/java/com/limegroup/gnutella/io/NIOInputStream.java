@@ -32,7 +32,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOInputStream(NIOSocket handler, SocketChannel channel) throws IOException {
+    NIOInputStream(NIOSocket handler, SocketChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }
@@ -40,7 +40,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
     /**
      * Creates the pipes, buffer, and registers channels for interest.
      */
-    synchronized void init() throws IOException {
+    synchronized NIOInputStream init() throws IOException {
         if(buffer != null)
             throw new IllegalStateException("already init'd!");
             
@@ -52,6 +52,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
         bufferLock = source.getBufferLock();
         
         NIODispatcher.instance().interestRead(channel, true);
+        return this;
     }
     
     static ByteBuffer getBuffer() {

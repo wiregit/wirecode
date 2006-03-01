@@ -51,6 +51,7 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -65,6 +66,7 @@ import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -370,12 +372,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     protected VerifyingFile commonOutFile;
     
     ////////////////datastructures used only for pushes//////////////
-    /** MiniRemoteFileDesc -> Object. 
-        In the case of push downloads, connecting threads write the values into
-        this map. The acceptor threads consumes these values and notifies the
-        connecting threads when it is done.        
-    */
-    private Map miniRFDToLock;
+    /**
+     * Push downloads insert their PushObserver into this map so that when
+     * this downloader is notified of a push, it can send the event to the
+     * observer.        
+     */
+    private Map /* MiniRemoteFileDesc -> ConnectObserver */ pushObservers;
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
@@ -671,7 +673,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         stopped=false;
         paused = false;
         setState(QUEUED);
-        miniRFDToLock = Collections.synchronizedMap(new HashMap());
+        pushObservers = Collections.synchronizedMap(new HashMap());
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();
@@ -752,7 +754,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public synchronized void startDownload() {
         Assert.that(dloaderManagerThread == null, "already started" );
-        dloaderManagerThread = new ManagedThread(new Runnable() {
+        ThreadFactory.startThread(new Runnable() {
             public void run() {
                 try {
                     receivedNewSources = false;
@@ -771,8 +773,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 }
             }
         }, "ManagedDownload");
-        dloaderManagerThread.setDaemon(true);
-        dloaderManagerThread.start(); 
     }
     
     /**
@@ -1549,32 +1549,43 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * (with given index and clientGUID) from socket, returns true.  In this
      * case, the caller may not make any modifications to the socket.  If this
      * rejects the given file, returns false without modifying this or socket.
-     * If this could has problems with the socket, throws IOException.  In this
-     * case the caller should close the socket.  Non-blocking.
+     * Non-blocking.
      *     @modifies this, socket
      *     @requires GIV string (and nothing else) has been read from socket
      */
-    public boolean acceptDownload(
-            String file, Socket socket, int index, byte[] clientGUID)
-            throws IOException {
-        
+    public boolean acceptDownload(String file, Socket socket, int index, byte[] clientGUID) {
         MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
-        DownloadWorker worker =  (DownloadWorker) miniRFDToLock.get(mrfd);
+        ConnectObserver observer =  (ConnectObserver) pushObservers.remove(mrfd);
         
-        if(worker == null) //not in map. Not intended for me
+        if(observer == null) //not in map. Not intended for me
             return false;
         
-        worker.setPushSocket(socket);
+        try {
+            observer.handleConnect(socket);
+        } catch(IOException impossible) {}
         
         return true;
     }
     
-    void registerPushWaiter(DownloadWorker worker, MiniRemoteFileDesc mrfd) {
-        miniRFDToLock.put(mrfd,worker);
+    /**
+     * Registers a new ConnectObserver that is waiting for a socket from the given MRFD.
+     * @param observer
+     * @param mrfd
+     */
+    void registerPushObserver(ConnectObserver observer, MiniRemoteFileDesc mrfd) {
+        pushObservers.put(mrfd, observer);
     }
     
-    void unregisterPushWaiter(MiniRemoteFileDesc mrfd) {
-        miniRFDToLock.remove(mrfd);
+    /**
+     * Unregisters a ConnectObserver that was waiting for the given MRFD.  If shutdown
+     * is true and the observer was still registered, calls shutdown on that observer.
+     * @param mrfd
+     * @param shutdown
+     */
+    void unregisterPushObserver(MiniRemoteFileDesc mrfd, boolean shutdown) {
+        ConnectObserver observer = (ConnectObserver)pushObservers.remove(mrfd);
+        if(observer != null && shutdown)
+            observer.shutdown();
     }
     
     /**
@@ -1647,12 +1658,33 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
     /**
-     * Kills all workers.
+     * Kills all workers & shuts down all push waiters.
      */    
-    private synchronized void killAllWorkers() {
-        for (Iterator iter = _workers.iterator(); iter.hasNext();) {
+    private void killAllWorkers() {
+        List workers = getAllWorkers();
+        
+        // cannot interrupt while iterating through the main list, because that
+        // could cause ConcurrentMods.
+        for (Iterator iter = workers.iterator(); iter.hasNext();) {
             DownloadWorker doomed = (DownloadWorker) iter.next();
             doomed.interrupt();
+        }
+        
+        Map pushers;
+        synchronized(pushObservers) {
+            pushers = new HashMap(pushObservers);
+        }
+        
+        // cannot iterate over pushObservers because shutdown may attempt
+        // to remove from it.
+        // synchronize on this so that something else cannot come in with
+        // acceptDownload(..) triggering a handleConnect(..) while we're shutting
+        // down the pushers.
+        synchronized(this) {
+            for(Iterator i = pushers.values().iterator(); i.hasNext(); ) {
+                ConnectObserver next = (ConnectObserver)i.next();
+                next.shutdown();
+            }
         }
     }
     
@@ -2285,16 +2317,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private void startWorker(final RemoteFileDesc rfd) {
         DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile,stealLock);
-        Thread connectCreator = new ManagedThread(worker);
-        
-        connectCreator.setName("DownloadWorker");
-        
         synchronized(this) {
             _workers.add(worker);
             currentRFDs.add(rfd);
-        }
-
-        connectCreator.start();
+        }        
+        worker.start();
     }        
     
     /**
@@ -2517,6 +2544,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
+     * Returns true if a new worker should be started because an existing
+     * one is going below MIN_ACCEPTABLE_SPEED.
+     * 
      * @return true if a new worker should be started that would steal.
      */
     private boolean victimsExist() {
@@ -2836,16 +2866,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return queuePosition;
     }
     
+    /** Returns the number of active + queued workers. */
     public int getNumDownloaders() {
         return getActiveWorkers().size() + getQueuedWorkers().size();
     }
     
+    /** Returns the list of all active workers. */
     List getActiveWorkers() {
         return _activeWorkers;
     }
     
+    /** Returns a copy of the list of all workers. */
     synchronized List getAllWorkers() {
-        //CoR because it will be used only while stealing
         return new ArrayList(_workers);
     }
     

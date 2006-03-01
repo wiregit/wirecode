@@ -35,46 +35,25 @@ public class HostCatcherTest extends BaseTestCase {
         return buildTestSuite(HostCatcherTest.class);
     }
 
-    /** Returns a new HostCatcher connected to stubs.  YOU MAY WANT TO CALL
-     *  EXPIRE to force bootstrap pongs. */
-    public void setUp() {
 
-        //explicitly allow all ips to test.
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
+    }
+    
+    /**
+     * Returns a new HostCatcher connected to stubs. YOU MAY WANT TO CALL EXPIRE to force bootstrap pongs.
+     */
+    public void setUp() {
+        // explicitly allow all ips to test.
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] { "*.*" });
-        
-        HostCatcher.DEBUG=true;
-		new RouterService(new ActivityCallbackStub());
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*" });
+
+        HostCatcher.DEBUG = true;
+        new RouterService(new ActivityCallbackStub());
 
         hc = new HostCatcher();
-
-        //move gnutella.dot before we initialize
-        //test it specifically in other places.
-        File gdotnet = new File(CommonUtils.getUserSettingsDir(), 
-                                "gnutella.net");
-        if ( gdotnet.exists() ) {
-            File tmpFile = new File("gdotnet.tmp");
-            tmpFile.delete();
-            gdotnet.renameTo( tmpFile );
-        }
-        
-        
-		hc.initialize();		
+        hc.initialize();		
     }
-
-	public void tearDown() {
-	    
-	    // put the gnutella.dot file back.
-	    File gtmp = new File( "gdotnet.tmp" );
-	    if( gtmp.exists() ) {
-            File gdotnet = new File(CommonUtils.getUserSettingsDir(), 
-                                    "gnutella.net");
-            gdotnet.delete();
-            gtmp.renameTo( gdotnet );
-	    }
-	    
-	}
 
     /**
      * Test the method for putting hosts on probation.
@@ -664,29 +643,47 @@ public class HostCatcherTest extends BaseTestCase {
         hc.add(pr);
         assertEquals(1, hc.getNumHosts());
         assertEquals(4, uhc.getSize());
-    }                        
-        
-        
-    private final byte[] zip(List l) throws Exception {
-        StringBuffer sb = new StringBuffer();
-        for(Iterator i = l.iterator(); i.hasNext(); ) {
-            sb.append(i.next().toString());
-            if(i.hasNext())
-                sb.append("\n");
-        }
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        GZIPOutputStream gz = new GZIPOutputStream(bo);
-        gz.write(sb.toString().getBytes("UTF-8"));
-        gz.flush();
-        gz.close();
-        return bo.toByteArray();
-    }
-        
-
-    public static void main(String argv[]) {
-        junit.textui.TestRunner.run(suite());
     }
     
+    public void testAsyncEndpointObserver() throws Exception {
+        StubEndpointObserver observer = new StubEndpointObserver();
+        assertEquals(0, hc.getNumHosts());
+        assertNull(observer.getEndpoint());
+        hc.getAnEndpoint(observer);
+        assertNull(observer.getEndpoint());
+        Endpoint p = new Endpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        assertEquals(p, observer.getEndpoint());
+    }
+    
+    public void testMultipleAsyncEndpointObservers() throws Exception {
+        StubEndpointObserver o1 = new StubEndpointObserver();
+        StubEndpointObserver o2 = new StubEndpointObserver();
+        
+        assertEquals(0, hc.getNumHosts());
+        hc.getAnEndpoint(o1);
+        hc.getAnEndpoint(o2);
+        assertNull(o1.getEndpoint());
+        assertNull(o2.getEndpoint());
+        Endpoint p1 = new Endpoint("231.123.254.1", 1);
+        Endpoint p2 = new Endpoint("231.123.254.1", 2);
+        hc.add(p1, true);
+        hc.add(p2, true);
+        assertEquals(p1, o1.getEndpoint());
+        assertEquals(p2, o2.getEndpoint());
+    }
+    
+    public void testAsyncEndpointObserverEndpointAlreadyAdded() throws Exception {
+        StubEndpointObserver observer = new StubEndpointObserver();
+        assertEquals(0, hc.getNumHosts());
+        assertNull(observer.getEndpoint());
+        Endpoint p = new Endpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        hc.getAnEndpoint(observer);
+        assertEquals(p, observer.getEndpoint());       
+    }
+        
+   
     private static class StubGWebBootstrapper extends BootstrapServerManager {
         private boolean fetched = false;
         private String host = "123.234.132.143";

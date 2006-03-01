@@ -6,7 +6,6 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.io.NIODispatcher.Attachment;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -257,7 +256,7 @@ public final class NBThrottleTest extends BaseTestCase {
 	private static class Data {
         private StubReadWriteObserver ATTACHMENT = new StubReadWriteObserver();
         private StubThrottleListener STUB = new StubThrottleListener(ATTACHMENT);
-        private FakeSelectionKey KEY = new FakeSelectionKey(new Attachment(ATTACHMENT));
+        private FakeSelectionKey KEY = new FakeSelectionKey(NIODispatcher.instance().new Attachment(ATTACHMENT));
         Data(Throttle throttle) {
             ATTACHMENT.setThrottle(throttle);
         }

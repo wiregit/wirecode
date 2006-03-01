@@ -38,6 +38,7 @@ import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -52,6 +53,7 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
@@ -59,6 +61,8 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ThreadPool;
+import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -129,8 +133,11 @@ public class DownloadManager implements BandwidthTracker {
     private final Map /* of byte [] guids -> Set of Strings*/ 
         UDP_FAILOVER = new TreeMap(new GUID.GUIDByteComparator());
     
-    private final ProcessingQueue FAILOVERS 
-        = new ProcessingQueue("udp failovers");
+    /**
+     * A sequentially processed list of PushFailoverRequestors, used to process
+     * TCP pushes a short bit of time after the UDP push is sent.
+     */
+    private final ProcessingQueue FAILOVERS = new ProcessingQueue("udp failovers");
     
     /**
      * how long we think should take a host that receives an udp push
@@ -926,54 +933,49 @@ public class DownloadManager implements BandwidthTracker {
      *     @requires "GIV " was just read from s
      */
     public void acceptDownload(Socket socket) {
-        Thread.currentThread().setName("PushDownloadThread");
-        try {
-            //1. Read GIV line BEFORE acquiring lock, since this may block.
-            GIVLine line=parseGIV(socket);
-            String file=line.file;
-            int index=line.index;
-            byte[] clientGUID=line.clientGUID;
-            
-            synchronized(UDP_FAILOVER) {
-                // if the push was sent through udp, make sure we cancel
-                // the failover push.
-                byte [] key = clientGUID;
-                Set files = (Set)UDP_FAILOVER.get(key);
-            
-                if (files!=null) {
-                    files.remove(file);
-                    if (files.isEmpty())
-                        UDP_FAILOVER.remove(key);
-                }
-            }
+        String file = null;
+        int index = 0;
+        byte[] clientGUID = null;
 
-            //2. Attempt to give to an existing downloader.
-            synchronized (this) {
-                if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), 
-                                                 socket))
-                    return;
-                for (Iterator iter=active.iterator(); iter.hasNext();) {
-                    ManagedDownloader md=(ManagedDownloader)iter.next();
-                    if (md.acceptDownload(file, socket, index, clientGUID))
-                        return;
-                }
-                for (Iterator iter=waiting.iterator(); iter.hasNext();) {
-                    ManagedDownloader md=(ManagedDownloader)iter.next();
-                    if (md.acceptDownload(file, socket, index, clientGUID))
-                        return;
-                }
-            }
+        try {
+            // 1. Read GIV line BEFORE acquiring lock, since this may block.
+            GIVLine line = parseGIV(socket);
+            file = line.file;
+            index = line.index;
+            clientGUID = line.clientGUID;
         } catch (IOException e) {
-        }            
+            IOUtils.close(socket);
+            return;
+        }
+        
+        // if the push was sent through udp, make sure we cancel the failover push.
+        cancelUDPFailover(clientGUID, file);
+        
+        // 2. Attempt to give to an existing downloader.
+        synchronized (this) {
+            if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))
+                return;
+            
+            for (Iterator iter = active.iterator(); iter.hasNext();) {
+                ManagedDownloader md = (ManagedDownloader) iter.next();
+                if (md.acceptDownload(file, socket, index, clientGUID))
+                    return;
+            }
+            for (Iterator iter = waiting.iterator(); iter.hasNext();) {
+                ManagedDownloader md = (ManagedDownloader) iter.next();
+                if (md.acceptDownload(file, socket, index, clientGUID))
+                    return;
+            }
+        }
+        
+        // Will only get here if no matching push existed.
 
-        //3. We never requested the file or already got it.  Kill it.
-        try {
-            socket.close();
-        } catch (IOException e) { }
+        // 3. We never requested the file or already got it. Kill it.
+        IOUtils.close(socket);
     }
 
 
-    ////////////// Callback Methods for ManagedDownloaders ///////////////////
+    // //////////// Callback Methods for ManagedDownloaders ///////////////////
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
@@ -1311,12 +1313,11 @@ public class DownloadManager implements BandwidthTracker {
         // we need to open up our NAT for incoming UDP, so
         // start the UDPConnection.  The other side should
         // do it soon too so hopefully we can communicate.
-        Thread startPushThread = new ManagedThread("FWIncoming") {
-            public void managedRun() {
-                Socket fwTrans=null;
+        ThreadFactory.startThread(new Runnable() {
+            public void run() {
+                Socket fwTrans = null;
                 try {
-                    fwTrans = 
-                        new UDPConnection(file.getHost(), file.getPort());
+                    fwTrans = new UDPConnection(file.getHost(), file.getPort());
                     DownloadStat.FW_FW_SUCCESS.incrementStat();
                     // TODO: put this out to Acceptor in // the future
                     InputStream is = fwTrans.getInputStream();
@@ -1327,14 +1328,11 @@ public class DownloadManager implements BandwidthTracker {
                         fwTrans.close();
                 } catch (IOException crap) {
                     LOG.debug("failed to establish UDP connection",crap);
-                    if (fwTrans!=null)
-                        try {fwTrans.close();}catch(IOException ignored){}
+                    IOUtils.close(fwTrans);
                     DownloadStat.FW_FW_FAILURE.incrementStat();
                 }
             }
-        };
-        startPushThread.setDaemon(true);
-        startPushThread.start();
+        }, "FWIncoming");
     }
     
     /**
@@ -1349,17 +1347,18 @@ public class DownloadManager implements BandwidthTracker {
      *
      * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
      *  hit, containing data about the host we're pushing to
-     * @param the object to notify if a failover TCP push fails
+     * @param observer The ConnectObserver to notify of success or failure
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public void sendPush(final RemoteFileDesc file, final Object toNotify) {
+    public void sendPush(final RemoteFileDesc file, final ConnectObserver observer) {
         //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = RouterService.getAddress();
         int port = RouterService.getPort();
         if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
-            notify(toNotify);
+            if(observer != null)
+                observer.shutdown();
             return;
         }
         
@@ -1372,10 +1371,13 @@ public class DownloadManager implements BandwidthTracker {
         // if we can't accept incoming connections, we can only try
         // using the TCP push proxy, which will do fw-fw transfers.
         if(!RouterService.acceptedIncomingConnection()) {
-            // if we can't do FWT, or we can and the TCP push failed,
-            // then notify immediately.
-            if(!UDPService.instance().canDoFWT() || !sendPushTCP(file, guid))
-                notify(toNotify);
+            // if we can do FWT, offload a TCP pusher.
+            if(UDPService.instance().canDoFWT()) {
+                addUDPFailover(file);
+                ThreadFactory.startThread(new PushFailoverRequestor(file, guid, observer), "FWT PushRequestor");
+            } else if(observer != null) {
+                    observer.shutdown();
+            }
             return;
         }
         
@@ -1383,14 +1385,7 @@ public class DownloadManager implements BandwidthTracker {
         // for the specific file.
         // do not send tcp pushes to results from alternate locations.
         if (!file.isFromAlternateLocation()) {
-            synchronized(UDP_FAILOVER) {
-                byte[] key = file.getClientGUID();
-                Set files = (Set)UDP_FAILOVER.get(key);
-                if (files==null)
-                    files = new HashSet();
-                files.add(file.getFileName());
-                UDP_FAILOVER.put(key,files);
-            }
+            addUDPFailover(file);
             
             // schedule the failover tcp pusher, which will run
             // if we don't get a response from the UDP push
@@ -1400,16 +1395,50 @@ public class DownloadManager implements BandwidthTracker {
                     // Add it to a ProcessingQueue, so the TCP connection 
                     // doesn't bog down RouterService's scheduler
                     // The FailoverRequestor will thus run in another thread.
-                    FAILOVERS.add(new PushFailoverRequestor(file, guid, toNotify));
+                    FAILOVERS.add(new PushFailoverRequestor(file, guid, observer));
                 }
             }, UDP_PUSH_FAILTIME, 0);
         }
 
         sendPushUDP(file,guid);
     }
+    
+    /**
+     * Adds the necessary data into UDP_FAILOVER so that a PushFailoverRequestor
+     * knows if it should send a request.
+     * @param file
+     */
+    private void addUDPFailover(RemoteFileDesc file) {
+        synchronized(UDP_FAILOVER) {
+            byte[] key = file.getClientGUID();
+            Set files = (Set)UDP_FAILOVER.get(key);
+            if (files==null)
+                files = new HashSet();
+            files.add(file.getFileName());
+            UDP_FAILOVER.put(key,files);
+        }
+    }
+    
+    /**
+     * Removes data from UDP_FAILOVER, indicating a push has used it.
+     * 
+     * @param guid
+     * @param file
+     */
+    private void cancelUDPFailover(byte[] clientGUID, String file) {
+        synchronized (UDP_FAILOVER) {
+            byte[] key = clientGUID;
+            Set files = (Set) UDP_FAILOVER.get(key);
+            if (files != null) {
+                files.remove(file);
+                if (files.isEmpty())
+                    UDP_FAILOVER.remove(key);
+            }
+        }
+    }
 
 
-    /////////////////// Internal Method to Parse GIV String ///////////////////
+    // ///////////////// Internal Method to Parse GIV String ///////////////////
 
     private static final class GIVLine {
         final String file;
@@ -1535,17 +1564,6 @@ public class DownloadManager implements BandwidthTracker {
     public synchronized float getAverageBandwidth() {
         return averageBandwidth;
     }
-    
-    /**
-     * Notifies the given object, if it isn't null.
-     */
-    private void notify(Object o) {
-        if(o == null)
-            return;
-        synchronized(o) {
-            o.notify();
-        }
-    }
 	
 	private String getFileName(RemoteFileDesc[] rfds, String fileName) {
 		for (int i = 0; i < rfds.length && fileName == null; i++) {
@@ -1561,14 +1579,14 @@ public class DownloadManager implements BandwidthTracker {
         
         final RemoteFileDesc _file;
         final byte [] _guid;
-        final Object _toNotify;
+        final ConnectObserver _observer;
         
         public PushFailoverRequestor(RemoteFileDesc file,
                                      byte[] guid,
-                                     Object toNotify) {
+                                     ConnectObserver observer) {
             _file = file;
             _guid = guid;
-            _toNotify = toNotify;
+            _observer = observer;
         }
         
         public void run() {
@@ -1587,9 +1605,12 @@ public class DownloadManager implements BandwidthTracker {
                 }
             }
             
-            if (proceed) 
-                if(!sendPushTCP(_file,_guid))
-                    DownloadManager.this.notify(_toNotify);
+            if (proceed) {
+                if (!sendPushTCP(_file, _guid)) {
+                    if(_observer != null)
+                        _observer.shutdown();
+                }
+            }
         }
     }
 

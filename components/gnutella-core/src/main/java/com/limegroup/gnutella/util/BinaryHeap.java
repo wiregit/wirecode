@@ -258,7 +258,9 @@ public class BinaryHeap
         //save it, swap first and last element, decrease the size of heap by one
         //and heapify it from the root
         Comparable max = array[1];
-        array[1] = array[currentSize--];
+        array[1] = array[currentSize];
+        array[currentSize] = null; // allow GC to clean the object later on.
+        currentSize--;
         heapify(1);
 
         //return the max element

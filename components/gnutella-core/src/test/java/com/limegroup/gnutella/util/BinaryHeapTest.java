@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import junit.framework.Test;
@@ -9,6 +11,8 @@ import junit.framework.Test;
  * Unit tests for BinaryHeap
  */
 public class BinaryHeapTest extends BaseTestCase {
+    
+    private List FINALIZED = new ArrayList();
             
 	public BinaryHeapTest(String name) {
 		super(name);
@@ -136,9 +140,35 @@ public class BinaryHeapTest extends BaseTestCase {
         assertEquals(8, q.capacity());
     }
     
+    public void testErasesReferences() throws Exception {
+        BinaryHeap heap = new BinaryHeap(50);
+        heap.insert(new Finalizable(1));
+        heap.extractMax();
+        System.gc();
+        Thread.sleep(2000);
+        assertEquals(1, FINALIZED.size());
+        assertEquals(new Integer(1), FINALIZED.get(0));
+    }
+    
     private static Comparable[] getArray(BinaryHeap q) throws Exception {
         return (Comparable[])PrivilegedAccessor.getValue(
             q, "array");
+    }
+    
+    private class Finalizable implements Comparable {
+        private int id;
+        Finalizable(int id) {
+            this.id = id;
+        }
+        
+        public int compareTo(Object other) {
+            return new Integer(id).compareTo(new Integer(((Finalizable)other).id));
+        }
+
+        protected void finalize() throws Throwable {
+            super.finalize();
+            FINALIZED.add(new Integer(id));
+        }
     }
 
     //For testing with Java 1.1.8

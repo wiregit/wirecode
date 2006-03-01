@@ -25,7 +25,7 @@ class NIOOutputStream implements WriteObserver {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOOutputStream(NIOSocket handler, SocketChannel channel) throws IOException {
+    NIOOutputStream(NIOSocket handler, SocketChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }
@@ -33,7 +33,7 @@ class NIOOutputStream implements WriteObserver {
     /**
      * Creates the pipes, buffer & registers channels for interest.
      */
-    synchronized void init() throws IOException {
+    synchronized NIOOutputStream init() throws IOException {
         if(buffer != null)
             throw new IllegalStateException("already init'd!");
             
@@ -43,6 +43,7 @@ class NIOOutputStream implements WriteObserver {
         this.buffer = NIOInputStream.getBuffer();
         sink = new BufferOutputStream(buffer, handler, channel);
         bufferLock = sink.getBufferLock();
+        return this;
     }
     
     /**

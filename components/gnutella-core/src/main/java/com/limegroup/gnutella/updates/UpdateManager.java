@@ -19,6 +19,7 @@ import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * Used for parsing the signed_update_file.xml and updating any values locally.
@@ -118,8 +119,8 @@ public class UpdateManager {
             return;//so this should never happen
         final Connection c = connection;
         final String myversion = myVersion;
-        Thread checker = new ManagedThread("UpdateFileRequestor") {
-            public void managedRun() {
+        ThreadFactory.startThread(new Runnable() {
+            public void run() {
                 LOG.trace("Getting update file");
                 final String UPDATE = "/update.xml";
                 //if we get host or port incorrectly, we will not be able to 
@@ -184,9 +185,7 @@ public class UpdateManager {
                         get.releaseConnection();
                 }
             }//end of run
-        };
-        checker.setDaemon(true);
-        checker.start();      
+        }, "UpdateFileRequestor");
     }
 
     /**

@@ -34,6 +34,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 
 /**
@@ -501,21 +502,15 @@ public class BootstrapServerManager {
 			throw new NullPointerException("asynchronous request to null cache");
 		}
 		
-        Thread runner=new ManagedThread() {
-            public void managedRun() {
+        ThreadFactory.startThread(new Runnable() {
+            public void run() {
                 try {
                     requestBlocking(request);
-                } catch (Throwable e) {
-                    //Internal error!  Display to GUI for debugging.
-                    ErrorService.error(e);
                 } finally {
                     request.done();
                 }
             }
-        };
-        runner.setName(threadName);
-        runner.setDaemon(true);
-        runner.start();
+        }, threadName);
     }
 
     private void requestBlocking(GWebCacheRequest request) {        

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.util.Arrays;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
 
 /**
  * keeps file, clientGUID, and index of the file we are getting.
@@ -18,6 +19,10 @@ public class MiniRemoteFileDesc {
         this.file = f;
         this.index = i;
         this.clientGUID = g;
+    }
+    
+    MiniRemoteFileDesc(RemoteFileDesc rfd) {
+        this(rfd.getFileName(), rfd.getIndex(), rfd.getClientGUID());
     }
     
     //accessors

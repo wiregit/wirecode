@@ -14,6 +14,7 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * this class is a subclass of Chat, also implementing
@@ -102,9 +103,7 @@ public class InstantMessenger implements Chatter {
 	/** starts the chatting */
 	public void start() {
 		MessageReader messageReader = new MessageReader(this);
-        Thread upThread = new ManagedThread(messageReader, "MessageReader");
-		upThread.setDaemon(true);
-		upThread.start();
+        ThreadFactory.startThread(messageReader, "MessageReader");
 
 	}
 

@@ -18,12 +18,16 @@ import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.io.AcceptObserver;
+import com.limegroup.gnutella.io.NIOServerSocket;
+import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 
 /**
@@ -34,7 +38,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
-public class Acceptor implements Runnable {
+public class Acceptor {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
 
@@ -60,12 +64,7 @@ public class Acceptor implements Runnable {
      * The port of the server socket.
      */
     private volatile int _port = 6346;
-
-    /**
-     * The object to lock on while setting the listening socket
-     */
-    private final Object SOCKET_LOCK = new Object();
-
+    
     /**
      * The real address of this host--assuming there's only one--used for pongs
      * and query replies.  This value is ignored if FORCE_IP_ADDRESS is
@@ -287,10 +286,6 @@ public class Acceptor implements Runnable {
 	public void start() {
 	    MulticastService.instance().start();
 	    UDPService.instance().start();
-	    
-		Thread at = new ManagedThread(this, "Acceptor");
-		at.setDaemon(true);
-		at.start();
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES,
                                TIME_BETWEEN_VALIDATES);
 	}
@@ -376,17 +371,9 @@ public class Acceptor implements Runnable {
         //will not have changed before we grab the lock.
         else if (port==0) {
             LOG.trace("shutting off service.");
-            //Close old socket (if non-null)
-            if (_socket!=null) {
-                try {
-                    _socket.close();
-                } catch (IOException e) { }
-            }
-            synchronized (SOCKET_LOCK) {
-                _socket=null;
-                _port=0;
-                SOCKET_LOCK.notify();
-            }
+            IOUtils.close(_socket);            
+            _socket=null;
+            _port=0;
 
             //Shut off UDPService also!
             UDPService.instance().setListeningSocket(null);
@@ -436,7 +423,7 @@ public class Acceptor implements Runnable {
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
-                newSocket=new com.limegroup.gnutella.io.NIOServerSocket(port);
+                newSocket = SocketFactory.newServerSocket(port, new SocketListener());
             } catch (IOException e) {
                 LOG.warn("can't create ServerSocket", e);
                 udpServiceSocket.close();
@@ -446,18 +433,12 @@ public class Acceptor implements Runnable {
                 udpServiceSocket.close();
                 throw new IOException("could not create a listening socket");
             }
-            //b) Close old socket (if non-null)
-            if (_socket!=null) {
-                try {
-                    _socket.close();
-                } catch (IOException e) { }
-            }
-            //c) Replace with new sock.  Notify the accept thread.
-            synchronized (SOCKET_LOCK) {
-                _socket=newSocket;
-                _port=port;
-                SOCKET_LOCK.notify();
-            }
+            //b) Close old socket
+            IOUtils.close(_socket);
+            
+            //c) Replace with new sock.
+            _socket=newSocket;
+            _port=port;
 
             LOG.trace("Acceptor ready..");
 
@@ -465,10 +446,8 @@ public class Acceptor implements Runnable {
             UDPService.instance().setListeningSocket(udpServiceSocket);
             // Commit the MulticastService's new socket
             // if we were able to get it
-            if ( mcastServiceSocket != null ) {
-                MulticastService.instance().setListeningSocket(
-                    mcastServiceSocket
-                );
+            if (mcastServiceSocket != null) {
+                MulticastService.instance().setListeningSocket(mcastServiceSocket);
             }
 
             if(LOG.isDebugEnabled())
@@ -517,85 +496,48 @@ public class Acceptor implements Runnable {
     }
 
 
-    /** @modifies this, network, SettingsManager
-     *  @effects accepts new incoming connections on a designated port
-     *   and services incoming requests.  If the port was changed
-     *   in order to accept incoming connections, SettingsManager is
-     *   changed accordingly.
+    /**
+     * Listens for new incoming sockets & starts a thread to
+     * process them if necessary.
      */
-    public void run() {
-		
+	private class SocketListener implements AcceptObserver {
         
-        while (true) {
-            try {
-                //Accept an incoming connection, make it into a
-                //Connection object, handshake, and give it a thread
-                //to service it.  If not bound to a port, wait until
-                //we are.  If the port is changed while we are
-                //waiting, IOException will be thrown, forcing us to
-                //release the lock.
-                Socket client=null;
-                synchronized (SOCKET_LOCK) {
-                    if (_socket!=null) {
-                        try {
-                            client=_socket.accept();
-                        } catch (IOException e) {
-                            LOG.warn("IOX while accepting", e);
-                            continue;
-                        }
-                    } else {
-                        // When the socket lock is notified, the socket will
-                        // be available.  So, just wait for that to happen and
-                        // go around the loop again.
-                        try {
-                            SOCKET_LOCK.wait();
-                        } catch (InterruptedException e) {
-                        }
-                        continue;
-                    }
-                }
-
-                // If the client was closed before we were able to get the address,
-                // then getInetAddress will return null.
-				InetAddress address = client.getInetAddress();
-				if(address == null) {
-				    LOG.warn("connection closed while accepting");
-				    try {
-				        client.close();
-				    } catch(IOException ignored) {}
-				    continue;
-				}
-				    
-                //Check if IP address of the incoming socket is in _badHosts
-                if (isBannedIP(address.getAddress())) {
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("Ignoring banned host: " + address);
-                    HTTPStat.BANNED_REQUESTS.incrementStat();
-                    try {
-                        client.close();
-                    } catch(IOException ignored) {}
-                    continue;
-                }
+        public void handleIOException(IOException iox) {
+            LOG.warn("IOX while accepting", iox);
+        }
+        
+        public void shutdown() {
+            LOG.debug("shutdown one SocketListener");
+        }
+        
+        public void handleAccept(Socket client) {
+            // If the client was closed before we were able to get the address,
+            // then getInetAddress will return null.
+            InetAddress address = client.getInetAddress();
+            if (address == null) {
+                IOUtils.close(client);
+                LOG.warn("connection closed while accepting");
+            } else if(isBannedIP(address.getAddress())) {
+                if (LOG.isWarnEnabled())
+                    LOG.warn("Ignoring banned host: " + address);
+                HTTPStat.BANNED_REQUESTS.incrementStat();
+                IOUtils.close(client);
+            } else {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Dispatching new client connecton: " + address);
                 
-                // if we want to unset firewalled from any connection, 
+                // if we want to unset firewalled from any connection,
                 // do it here.
-                if(!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+                if (!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
                     checkFirewall(client);
-				
+
                 // Set our IP address of the local address of this socket.
                 InetAddress localAddress = client.getLocalAddress();
-                setAddress( localAddress );                
-
-                //Dispatch asynchronously.
-                ConnectionDispatchRunner dispatcher =
-					new ConnectionDispatchRunner(client);
-				Thread dispatchThread = 
-                    new ManagedThread(dispatcher, "ConnectionDispatchRunner");
-				dispatchThread.setDaemon(true);
-				dispatchThread.start();
-
-            } catch (Throwable e) {
-                ErrorService.error(e);
+                setAddress(localAddress);
+    
+                // Dispatch asynchronously.
+                ConnectionDispatchRunner dispatcher = new ConnectionDispatchRunner(client);
+                ThreadFactory.startThread(dispatcher, "ConnectionDispatchRunner");
             }
         }
     }
@@ -741,9 +683,7 @@ public class Acceptor implements Runnable {
             } catch (IOException e) {
                 LOG.warn("IOX while dispatching", e);
                 IOUtils.close(_socket);
-            } catch(Throwable e) {
-				ErrorService.error(e);
-			}
+            }
         }
     }
 

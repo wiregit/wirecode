@@ -22,6 +22,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 
 /**
@@ -328,11 +329,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		}
 		
 		// we're good - start a thread to clean up any potentially stale mappings
-		Thread staleCleaner = new ManagedThread(new StaleCleaner());
-		staleCleaner.setDaemon(true);
-		staleCleaner.setName("Stale Mapping Cleaner");
-		staleCleaner.start();
-		
+        ThreadFactory.startThread(new StaleCleaner(), "Stale Mapping Cleaner");
 		return port;
 	}
 	
