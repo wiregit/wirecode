@@ -689,7 +689,7 @@ public class UploadManager implements BandwidthTracker {
      *    If it is determined that the uploader is accepted, the uploader
      *    is added to the _activeUploadList.
      */
-    protected int processNewRequest(HTTPUploader uploader, 
+    private int processNewRequest(HTTPUploader uploader, 
                                   Socket socket,
                                   boolean forceAllow) throws IOException {
         if(LOG.isTraceEnabled())
@@ -726,11 +726,7 @@ public class UploadManager implements BandwidthTracker {
                 break;
             case ACCEPTED:
                 assertAsConnecting( uploader.getState() );
-                synchronized (this) {
-                    if (uploader.isForcedShare())
-                        _forcedUploads++;
-                    _activeUploadList.add(uploader);
-                }
+                addAcceptedUploader(uploader);
                 break;
             case BYPASS_QUEUE:
                 // ignore.
@@ -740,8 +736,17 @@ public class UploadManager implements BandwidthTracker {
         }
         
         return queued;
-        }
-
+    }
+    
+    /**
+     * Adds an accepted HTTPUploader to the internal list of active downloads.
+     */
+    protected synchronized void addAcceptedUploader(HTTPUploader uploader) {
+        if (uploader.isForcedShare())
+            _forcedUploads++;
+        _activeUploadList.add(uploader);
+    }
+    
     /**
      * Adds this upload to the GUI and increments the attempted uploads.
      * Does nothing if 'shouldShowInGUI' is false.

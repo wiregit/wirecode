@@ -220,10 +220,10 @@ public class UploadTest extends BaseTestCase {
         upMan = RouterService.getUploadManager();
         
         // Make sure our customized UploadManager is set in
-        // RouterService and clear it's activeConnections
+        // RouterService and clear its activeUploads
         // cache. See TestUploadManager for more Info!
         assertTrue(upMan == UPLOAD_MANAGER);
-        UPLOAD_MANAGER.clearConnections();
+        UPLOAD_MANAGER.clearUploads();
         
         FileManager fm = RouterService.getFileManager();
         File incFile = new File(_incompleteDir, incName);
@@ -579,7 +579,7 @@ public class UploadTest extends BaseTestCase {
 		            HTTPUploader u;
 		            synchronized(umanager){
                         // See TestUploadManager for more info!
-		                l = UPLOAD_MANAGER.activeConnections;
+		                l = UPLOAD_MANAGER.activeUploads;
 		                assertEquals(1,l.size());
 		                u = (HTTPUploader)l.get(0);
 		            }
@@ -630,7 +630,7 @@ public class UploadTest extends BaseTestCase {
 	                HTTPUploader u;
 	                synchronized(umanager){
                         // See TestUploadManager for more info!
-                        l = UPLOAD_MANAGER.activeConnections;
+                        l = UPLOAD_MANAGER.activeUploads;
                         assertEquals(1,l.size());
 	                    u = (HTTPUploader)l.get(0);
 	                }
@@ -680,7 +680,7 @@ public class UploadTest extends BaseTestCase {
                     HTTPUploader u;
                     synchronized(umanager) {
                         // See TestUploadManager for more info!
-                        l = UPLOAD_MANAGER.activeConnections;
+                        l = UPLOAD_MANAGER.activeUploads;
                         assertEquals(1,l.size());
                         u = (HTTPUploader)l.get(0);
                     }
@@ -2654,24 +2654,22 @@ public class UploadTest extends BaseTestCase {
      * testFALTNotRequested(), testFALTWhenRequested() and testFWALTWhenRequested()
      * fail if the server processes the entire request before we start reading
      * from the InputStreams. That means: our HTTPUploader is added to UploadManagers 
-     * private _activeConnections List, the request is processed and the HTTPUploader is
+     * private _activeUploadsList, the request is processed and the HTTPUploader is
      * removed from the List. We start reading from the InputStream and the assertions
      * in the mentioned tests fail because our HTTPUploader is no longer in that
      * List. So, we have to cache the HTTPUploader somehow what this extension does.
      */
     private static class TestUploadManager extends UploadManager {
 
-        private List activeConnections = new ArrayList();
+        private List activeUploads = new ArrayList();
         
-        protected int processNewRequest(HTTPUploader uploader, Socket socket, boolean forceAllow) 
-                throws IOException {
-            
-            activeConnections.add(uploader);
-            return super.processNewRequest(uploader, socket, forceAllow);
+        protected synchronized void addAcceptedUploader(HTTPUploader uploader) {
+            activeUploads.add(uploader);
+            super.addAcceptedUploader(uploader);
         }
         
-        public void clearConnections() {
-            activeConnections.clear();
+        public void clearUploads() {
+            activeUploads.clear();
         }
     }
 }
