@@ -115,28 +115,26 @@ public abstract class MessageRouter {
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
-    private RouteTable _pingRouteTable = 
-        new RouteTable(2*60, MAX_ROUTE_TABLE_SIZE);
+    private RouteTable _pingRouteTable = new RouteTable(2 * 60, MAX_ROUTE_TABLE_SIZE); // 2 minutes
+
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
      * typically around 13000 entries, but never more than 100,000 entries.
      */
-    private RouteTable _queryRouteTable = 
-        new RouteTable(5*60, MAX_ROUTE_TABLE_SIZE);
+    private RouteTable _queryRouteTable = new RouteTable(5 * 60, MAX_ROUTE_TABLE_SIZE); // 5 minutes
+
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
      * minutes, typically around 3500 entries, but never more than 100,000
      * entries.  
      */
-    private RouteTable _pushRouteTable = 
-        new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
-    
+    private RouteTable _pushRouteTable = new RouteTable(7 * 60, MAX_ROUTE_TABLE_SIZE); // 7 minutes
+
     /**
      * Maps HeadPong guids to the originating pingers.  Short-lived since
      * we expect replies from our leaves quickly.
      */
-    private RouteTable _headPongRouteTable = 
-    	new RouteTable(10, MAX_ROUTE_TABLE_SIZE);
+    private RouteTable _headPongRouteTable = new RouteTable(10, MAX_ROUTE_TABLE_SIZE); // 10 seconds
 
     /** How long to buffer up out-of-band replies.
      */
