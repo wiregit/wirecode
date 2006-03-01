@@ -1,13 +1,18 @@
 package com.limegroup.gnutella;
 
+import java.io.InterruptedIOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
 import junit.framework.Test;
 
-import java.io.InterruptedIOException;
-import java.util.*;
-
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.routing.PatchTableMessage;
+import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -61,12 +66,12 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         //  UP may support PONG CACHING so we don't send it an initial ping.
         Message mPingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
         
-        assertTrue( mCapVM!=null );
-        assertTrue( mVendS!=null );
-        assertTrue( mReset!=null );
-        assertTrue( mPatch!=null );
+        assertNotNull( mCapVM );
+        assertNotNull( mVendS );
+        assertNotNull( mReset );
+        assertNotNull( mPatch );
         //  see above
-//        assertTrue( mPingR!=null );
+        // assertNotNull( mPingR );
         
         assertEquals( "Peer messages queue not empty" + _queue, 0, _queue.size() );
     }
@@ -84,8 +89,8 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         //  Leaf may support PONG CACHING so we don't send it an initial ping.
         Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
         
-        assertTrue( mCapvm!=null );
-        assertTrue( mVendS!=null );
+        assertNotNull( mCapvm );
+        assertNotNull( mVendS );
         //  See above
 //        assertTrue( mqePingR!=null );
         
