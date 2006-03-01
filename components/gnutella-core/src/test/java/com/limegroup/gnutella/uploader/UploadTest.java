@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -43,6 +44,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnectionStub;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
@@ -58,6 +60,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -77,8 +80,10 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -544,34 +549,6 @@ public class UploadTest extends BaseTestCase {
 		assertEquals(1,pushFwt.supportsFWTVersion());
 		assertEquals(3,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));        
         
-        Thread pollThread = new Thread(new Runnable() {
-            public void run() {
-                while(true) {
-                    try {
-                        List l = null;
-                        HTTPUploader u = null;
-                        UploadManager umanager = RouterService.getUploadManager();
-                        synchronized(umanager) {
-                            l = (List)PrivilegedAccessor.getValue(umanager,"_activeUploadList");
-                        }
-                        
-                        if (!l.isEmpty()) {
-                            assertEquals(1,l.size());
-                            u = (HTTPUploader)l.get(0);
-                            
-                            assertFalse(u.wantsFAlts());
-                            assertEquals(0,u.wantsFWTAlts());
-                            
-                            break;
-                        }
-                    } catch (Exception e) {
-                        fail(e);
-                    }
-                }
-            }
-        });
-        pollThread.start();
-        
         boolean passed = download(fileName, 
                                   "X-Alt:",
                                   "abcdefghijklmnopqrstuvwxyz",
@@ -581,14 +558,20 @@ public class UploadTest extends BaseTestCase {
                         fail("had line: " + line);
                     else if(!line.startsWith("HTTP")) // check only the first time.
                         return;
+                    UploadManager umanager = RouterService.getUploadManager();
+		            List l;
+		            HTTPUploader u;
+		            synchronized(umanager){
+		                l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		                assertEquals(1,l.size());
+		                u = (HTTPUploader)l.get(0);
+		            }
+		            assertFalse(u.wantsFAlts());
+		            assertEquals(0,u.wantsFWTAlts());
                 }
             }
         );
-        
-        pollThread.join(60L * 1000L);
-        assertFalse(pollThread.isAlive());
         assertTrue(passed);
-        
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
     }
     
@@ -617,43 +600,28 @@ public class UploadTest extends BaseTestCase {
 		assertEquals(1,pushFwt.supportsFWTVersion());
 		assertEquals(3,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));                
         
-        Thread pollThread = new Thread(new Runnable() {
-            public void run() {
-                while(true) {
-                    try {
-                        List l = null;
-                        HTTPUploader u = null;
-                        UploadManager umanager = RouterService.getUploadManager();
-                        synchronized(umanager) {
-                            l = (List)PrivilegedAccessor.getValue(umanager,"_activeUploadList");
-                        }
-                        
-                        if (!l.isEmpty()) {
-                            assertEquals(1,l.size());
-                            u = (HTTPUploader)l.get(0);
-                            
-                            assertTrue(u.wantsFAlts());
-                            assertEquals(0,u.wantsFWTAlts());
-                            
-                            break;
-                        }
-                    } catch (Exception e) {
-                        fail(e);
-                    }
+        boolean passed = download(fileName,
+                                  FALTFeatures,
+                                  "abcdefghijklmnopqrstuvwxyz",
+                                  "X-FAlt: " + push.httpStringValue() + ", " + pushFwt.httpStringValue(),
+            new Applyable() {
+                public void apply(String line) throws Exception {
+                    if(!line.startsWith("HTTP")) // check only the first time
+                        return;
+	                UploadManager umanager = RouterService.getUploadManager();
+	                List l;
+	                HTTPUploader u;
+	                synchronized(umanager){
+	                    l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+	                    assertEquals(1,l.size());
+	                    u = (HTTPUploader)l.get(0);
+	                }
+		            assertTrue(u.wantsFAlts());
+ 		            assertEquals(0,u.wantsFWTAlts());        
                 }
             }
-        });
-        pollThread.start();
-        
-        boolean passed = download(fileName,
-              FALTFeatures,
-              "abcdefghijklmnopqrstuvwxyz",
-              "X-FAlt: " + push.httpStringValue() + ", " + pushFwt.httpStringValue(), null);
-       
-       pollThread.join(60L * 1000L);
-       assertFalse(pollThread.isAlive());
+       );
        assertTrue(passed);
-       
        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
     }
     
@@ -681,43 +649,28 @@ public class UploadTest extends BaseTestCase {
 		assertEquals(1,pushFwt.supportsFWTVersion());
 		assertEquals(3,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));             
         
-        Thread pollThread = new Thread(new Runnable() {
-            public void run() {
-                while(true) {
-                    try {
-                        List l = null;
-                        HTTPUploader u = null;
-                        UploadManager umanager = RouterService.getUploadManager();
-                        synchronized(umanager) {
-                            l = (List)PrivilegedAccessor.getValue(umanager,"_activeUploadList");
-                        }
-                        
-                        if (!l.isEmpty()) {
-                            assertEquals(1,l.size());
-                            u = (HTTPUploader)l.get(0);
-                            
-                            assertTrue(u.wantsFAlts());
-                            assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.wantsFWTAlts());
-                            
-                            break;
-                        }
-                    } catch (Exception e) {
-                        fail(e);
-                    }
-                }
-            }
-        });
-        pollThread.start();
-        
         boolean passed = download(fileName,
                                   FWALTFeatures,
                                   "abcdefghijklmnopqrstuvwxyz",
-                                  "X-FAlt: " + pushFwt.httpStringValue(), null);
-       
-       pollThread.join(60L * 1000L);
-       assertFalse(pollThread.isAlive());
+                                  "X-FAlt: " + pushFwt.httpStringValue(),
+            new Applyable() {
+                public void apply(String line) throws Exception {
+                    if(!line.startsWith("HTTP")) // check only the first time.
+                        return;
+                    UploadManager umanager = RouterService.getUploadManager();
+                    List l;
+                    HTTPUploader u;
+                    synchronized(umanager) {
+                        l= (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+                        assertEquals(1,l.size());
+                        u = (HTTPUploader)l.get(0);
+                    }
+                    assertTrue(u.wantsFAlts());
+                    assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.wantsFWTAlts());
+                }
+            }
+       );
        assertTrue(passed);
-       
        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
     }
     
