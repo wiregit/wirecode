@@ -72,15 +72,24 @@ import org.apache.commons.logging.Log;
  * class' job is to direct the routing of messages and to count those message
  * as they pass through.  To do so, it aggregates a ConnectionManager that
  * maintains a list of connections.
+ * 
+ * 
  */
 public abstract class MessageRouter {
-    
+
+    //done
+
+    /** A debugging log we can write lines of text to as the program runs. */
     private static final Log LOG = LogFactory.getLog(MessageRouter.class);
-	
+
     /**
-     * Handle to the <tt>ConnectionManager</tt> to access our TCP connections.
+     * Access the ConnectionManager object that keeps the list of our Gnutella connections.
+     * These are TCP socket Gnutella connections that began with the Gnutella handshake.
+     * Each connection is represented by a ManagedConnection object.
      */
     protected static ConnectionManager _manager;
+
+    //do
 
     /**
      * Constant for the number of old connections to use when forwarding
@@ -88,11 +97,17 @@ public abstract class MessageRouter {
      */
     private static final int OLD_CONNECTIONS_TO_USE = 15;
 
+    //done
+
     /**
-     * The GUID we attach to QueryReplies to allow PushRequests in
-     * responses.
+     * Our client ID GUID that uniquely identifies us on the Gnutella network.
+     * We chose it when LimeWire first ran, and keep it in ApplicationSettings.CLIENT_ID, which is the CLIENT_ID line in limewire.props.
+     * 
+     * We'll include our client ID GUID at the end of the query hit packets we send so downloaders can get a push request to us.
      */
     protected byte[] _clientGUID;
+
+    //do
 
 	/**
 	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
@@ -281,18 +296,29 @@ public abstract class MessageRouter {
      * The time we last received a request for a query key.
      */
     private long _lastQueryKeyTime;
-    
+
+    //done
+
     /**
-     * Creates a MessageRouter.  Must call initialize before using.
+     * Make the MessageRouter part of the program's single StandardMessageRouter object.
+     * Call initialize() before using it.
+     * 
+     * This constructor gets called when the RouterService(ActivityCallback) constructor makes the program's StandardMessageRouter object.
+     * Saves our client ID GUID in _clientGUID.
      */
     protected MessageRouter() {
-        _clientGUID=RouterService.getMyGUID();
+
+        // Get our client ID GUID that will uniquely identify us on the Gnutella network
+        _clientGUID = RouterService.getMyGUID(); // LimeWire chose our client ID GUID when it first ran, and keeps it in the limewire.props file
     }
+
+    //do
 
     /**
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize() {
+        
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
@@ -987,10 +1013,8 @@ public abstract class MessageRouter {
      * @param locallyEvaluate false if you don't want to send the query to
      * leaves and yourself, true otherwise....
      */
-    protected void handleQueryRequest(QueryRequest request,
-									  ReplyHandler handler, 
-									  ResultCounter counter,
-                                      boolean locallyEvaluate) {
+    protected void handleQueryRequest(QueryRequest request, ReplyHandler handler, ResultCounter counter, boolean locallyEvaluate) {
+        
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -1030,7 +1054,10 @@ public abstract class MessageRouter {
             locallyEvaluate = false;
             
             // do respond with files that we may have, though
-            respondToQueryRequest(request, _clientGUID, handler);
+            respondToQueryRequest( // Calls StandardMessageRouter.respondToQueryRequest()
+                request,
+                _clientGUID, // Not used, our client ID GUID that uniquely identifies us on the Gnutella network
+                handler);
             
             multicastQueryRequest(request);
             
@@ -1045,12 +1072,17 @@ public abstract class MessageRouter {
                                                                       counter), 
 								 handler);
 			}
-		} else if(request.getTTL() > 0 && RouterService.isSupernode()) {
+
+        } else if(request.getTTL() > 0 && RouterService.isSupernode()) {
+            
             // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
-            if(handler.isGoodUltrapeer()) {
+            
+            if (handler.isGoodUltrapeer()) {
+                
                 // send it to everyone
                 forwardQueryToUltrapeers(request, handler);
+                
             } else {
                 // otherwise, only send it to some connections
                 forwardLimitedQueryToUltrapeers(request, handler);
@@ -1058,19 +1090,22 @@ public abstract class MessageRouter {
 		}
 			
         if (locallyEvaluate) {
+            
             // always forward any queries to leaves -- this only does
             // anything when this node's an Ultrapeer
             forwardQueryRequestToLeaves(request, handler);
             
             // if (I'm firewalled AND the source is firewalled) AND 
             // NOT(he can do a FW transfer and so can i) then don't reply...
-            if ((request.isFirewalledSource() &&
-                 !RouterService.acceptedIncomingConnection()) &&
-                !(request.canDoFirewalledTransfer() &&
-                  UDPService.instance().canDoFWT())
-                )
+
+            if ((request.isFirewalledSource() && !RouterService.acceptedIncomingConnection()) &&
+                !(request.canDoFirewalledTransfer() && UDPService.instance().canDoFWT()))
                 return;
-            respondToQueryRequest(request, _clientGUID, handler);
+
+            respondToQueryRequest( // Calls StandardMessageRouter.respondToQueryRequest()
+                request,
+                _clientGUID, // Not used, our client ID GUID that uniquely identifies us on the Gnutella network
+                handler);
         }
     }
 
@@ -1826,16 +1861,19 @@ public abstract class MessageRouter {
 													InetSocketAddress addr,
                                                     ReplyHandler handler);
 
-
     /**
      * Respond to the query request.  Implementations typically will either
      * do nothing (if they don't think a response is appropriate) or call
      * sendQueryReply(QueryReply).
      * This method is called from the default handleQueryRequest.
+     * 
+     * Implemented by StandardMessageRouter.respondToQueryRequest().
+     * 
+     * @param queryRequest
+     * @param clientGUID   Not used, our client ID GUID that uniquely identifies us on the Gnutella network
+     * @param handler
      */
-    protected abstract boolean respondToQueryRequest(QueryRequest queryRequest,
-                                                     byte[] clientGUID,
-                                                     ReplyHandler handler);
+    protected abstract boolean respondToQueryRequest(QueryRequest queryRequest, byte[] clientGUID, ReplyHandler handler);
 
     /**
      * The default handler for PingRequests received in
@@ -2127,21 +2165,52 @@ public abstract class MessageRouter {
             handler.countDroppedMessage();
         }
     }
-    
+
+    //done
+
     /**
-     * Returns the appropriate handler from the _pushRouteTable.
-     * This enforces that requests for my clientGUID will return
-     * FOR_ME_REPLY_HANDLER, even if it's not in the table.
+     * Look up the client ID GUID a push packet is addressed to in our push route table, and return the connected computer that it's for.
+     * 
+     * Takes the client ID that a push packet is addressed to.
+     * Looks up the given client ID GUID in the _pushRouteTable, which has client ID GUIDs instead of message GUIDs like the other route tables.
+     * If we're connected to a remote computer with the given client ID, returns the ReplyHandler object that represents it.
+     * If the push packet is addressed to our client ID GUID, returns the ForMeReplyHandler object, which will have us take it and do the push.
+     * This method does this even if the ForMeReplyHandler object isn't in the table.
+     * 
+     * (do)
+     * This will get a push request to the computer we're connected to which needs to do the push
+     * but, what routes the push on the hops before this final one
+     * what trail does it follow back
+     * 
+     * @param guid The client ID GUID that a push request packet is addressed to
+     * @return     The ReplyHandler object that represents the remote computer we've been exchanging packets with that has that client ID GUID
      */
     protected ReplyHandler getPushHandler(byte[] guid) {
-        ReplyHandler replyHandler = _pushRouteTable.getReplyHandler(guid);
-        if(replyHandler != null)
-            return replyHandler;
-        else if(Arrays.equals(_clientGUID, guid))
+
+        // Look up the GUID in our RouteTable for push packets
+        ReplyHandler replyHandler = _pushRouteTable.getReplyHandler(guid); // The push route table uses client ID GUIDs, while the others use message GUIDs
+
+        // We found our connection to the remote computer that has a client ID that matches the one in the push packet
+        if (replyHandler != null) {
+
+            // Return it
+            return replyHandler; // A ManagedConnection or UDPReplyHandler object that represents a remote computer and can send the push packet to it
+
+        // Not found, but the push packet is addressed to our client ID
+        } else if (Arrays.equals(_clientGUID, guid)) {
+
+            // Return the ForMeReplyHandler to have us process the packet and do the push
             return FOR_ME_REPLY_HANDLER;
-        else
+
+        // No connection found, and not for us
+        } else {
+
+            // Return null, we can't route this packet
             return null;
+        }
     }
+
+    //do
 
     /**
      * Uses the ping route table to send a PingReply to the appropriate
@@ -2258,13 +2327,18 @@ public abstract class MessageRouter {
      * generating query replies.
      * @param REPLY_LIMIT the maximum number of responses to have in each reply.
      * @return Iterator (on QueryReply) over the Query Replies
+     * 
+     * 
+     * @param responses
+     * @param queryRequest
+     * @param REPLY_LIMIT  like 10
+     * @return             An Iterator you can move through 
      */
-    private Iterator responsesToQueryReplies(Response[] responses,
-                                             QueryRequest queryRequest,
-                                             final int REPLY_LIMIT) {
+    private Iterator responsesToQueryReplies(Response[] responses, QueryRequest queryRequest, final int REPLY_LIMIT) {
+
         //List to store Query Replies
-        List /*<QueryReply>*/ queryReplies = new LinkedList();
-        
+        List queryReplies = new LinkedList(); // List of QueryReply objects
+
         // get the appropriate queryReply information
         byte[] guid = queryRequest.getGUID();
         byte ttl = (byte)(queryRequest.getHops() + 1);
@@ -2273,10 +2347,11 @@ public abstract class MessageRouter {
 
         //Return measured speed if possible, or user's speed otherwise.
         long speed = um.measuredUploadSpeed();
-        boolean measuredSpeed=true;
-        if (speed==-1) {
-            speed=ConnectionSettings.CONNECTION_SPEED.getValue();
-            measuredSpeed=false;
+        boolean measuredSpeed = true;
+        if (speed == -1) {
+            
+            speed = ConnectionSettings.CONNECTION_SPEED.getValue();
+            measuredSpeed = false;
         }
 
         int numResponses = responses.length;
@@ -2286,51 +2361,67 @@ public abstract class MessageRouter {
 
         // limit the responses if we're not delivering this 
         // out-of-band and we have a lot of responses
-        if(REPLY_LIMIT > 1 && 
-           numHops > 2 && 
-           numResponses > HIGH_HOPS_RESPONSE_LIMIT) {
-            int j = 
-                (int)(Math.random() * numResponses) % 
-                (numResponses - HIGH_HOPS_RESPONSE_LIMIT);
+        if (REPLY_LIMIT > 1 && 
+            numHops > 2 && 
+            numResponses > HIGH_HOPS_RESPONSE_LIMIT) {
 
-            Response[] newResponses = 
-                new Response[HIGH_HOPS_RESPONSE_LIMIT];
-            for(int i=0; i<10; i++, j++) {
+            int j = (int)(Math.random() * numResponses) % (numResponses - HIGH_HOPS_RESPONSE_LIMIT);
+
+            Response[] newResponses = new Response[HIGH_HOPS_RESPONSE_LIMIT];
+            
+            for (int i = 0; i < 10; i++, j++) {
+                
                 newResponses[i] = responses[j];
             }
+
             responses = newResponses;
             numResponses = responses.length;
         }
+        
         while (numResponses > 0) {
+            
             int arraySize;
-            // if there are more than 255 responses,
-            // create an array of 255 to send in the queryReply
-            // otherwise, create an array of whatever size is left.
+            
+            /*
+             * if there are more than 255 responses,
+             * create an array of 255 to send in the queryReply
+             * otherwise, create an array of whatever size is left.
+             */
+
             if (numResponses < REPLY_LIMIT) {
                 // break;
                 arraySize = numResponses;
-            }
-            else
+            } else {
+                
                 arraySize = REPLY_LIMIT;
+            }
 
             Response[] res;
-            // a special case.  in the common case where there
-            // are less than 256 responses being sent, there
-            // is no need to copy one array into another.
-            if ( (index == 0) && (arraySize < REPLY_LIMIT) ) {
+            
+            /*
+             * a special case.  in the common case where there
+             * are less than 256 responses being sent, there
+             * is no need to copy one array into another.
+             */
+
+            if ((index == 0) && (arraySize < REPLY_LIMIT) ) {
+                
                 res = responses;
-            }
-            else {
+                
+            } else {
+                
                 res = new Response[arraySize];
+                
                 // copy the reponses into bite-size chunks
-                for(int i =0; i < arraySize; i++) {
+                for (int i =0; i < arraySize; i++) {
+                    
                     res[i] = responses[index];
                     index++;
                 }
             }
 
             // decrement the number of responses we have left
-            numResponses-= arraySize;
+            numResponses -= arraySize;
 
 			// see if there are any open slots
 			boolean busy = !um.isServiceable();
@@ -2338,8 +2429,7 @@ public abstract class MessageRouter {
 			
             // We only want to return a "reply to multicast query" QueryReply
             // if the request travelled a single hop.
-			boolean mcast = queryRequest.isMulticast() && 
-                (queryRequest.getTTL() + queryRequest.getHops()) == 1;
+			boolean mcast = queryRequest.isMulticast() && (queryRequest.getTTL() + queryRequest.getHops()) == 1;
 			
             // We should mark our hits if the remote end can do a firewalled
             // transfer AND so can we AND we don't accept tcp incoming AND our
@@ -2349,20 +2439,34 @@ public abstract class MessageRouter {
                 UDPService.instance().canDoFWT() &&
                 !RouterService.acceptedIncomingConnection();
             
-			if ( mcast ) {
+			if (mcast) {
+                
                 ttl = 1; // not strictly necessary, but nice.
             }
-            
-            List replies =
-                createQueryReply(guid, ttl, speed, res, 
-                                 _clientGUID, busy, uploaded, 
-                                 measuredSpeed, mcast,
-                                 fwTransfer);
+
+            /*
+             * Include _clientGUID, our client ID GUID, in the QueryReply messages we create.
+             * (do) where in the message will it go
+             * If we're firewalled, this will let downloaders get a push request back to us.
+             * When we get it, we'll push open a connection to them to deliver the file they want.
+             */
+
+            List replies = createQueryReply( // Calls StandardMessageRouter.createQueryReply(), which returns an ArrayList of QueryReply objects
+                guid,
+                ttl,
+                speed,
+                res,
+                _clientGUID, // Write our client ID GUID into the last 16 bytes of the query hit packet so downloaders can get a push request to us
+                busy,
+                uploaded,
+                measuredSpeed,
+                mcast,
+                fwTransfer);
 
             //add to the list
             queryReplies.addAll(replies);
 
-        }//end of while
+        }
         
         return queryReplies.iterator();
     }
@@ -2370,17 +2474,10 @@ public abstract class MessageRouter {
     /**
      * Abstract method for creating query hits.  Subclasses must specify
      * how this list is created.
-     *
+     * 
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
-    protected abstract List createQueryReply(byte[] guid, byte ttl,
-                                            long speed, 
-                                             Response[] res, byte[] clientGUID, 
-                                             boolean busy, 
-                                             boolean uploaded, 
-                                             boolean measuredSpeed, 
-                                             boolean isFromMcast,
-                                             boolean shouldMarkForFWTransfer);
+    protected abstract List createQueryReply(byte[] guid, byte ttl, long speed, Response[] res, byte[] clientGUID, boolean busy, boolean uploaded, boolean measuredSpeed, boolean isFromMcast, boolean shouldMarkForFWTransfer);
 
     /**
      * Handles a message to reset the query route table for the given

@@ -1,17 +1,26 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.settings;
+
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Settings for LimeWire application
  */
 public class ApplicationSettings extends LimeProps {
+
     private ApplicationSettings() {}
-    
+
+    //done
+
     /**
-     * The Client ID number
+     * The client ID GUID that uniquely identifies us on the Gnutella network.
+     * When LimeWire runs for the first time on a new computer, it makes a new GUID and sets it here.
      */
-    public static final StringSetting CLIENT_ID = 
-        FACTORY.createStringSetting("CLIENT_ID", "");
+    public static final StringSetting CLIENT_ID = FACTORY.createStringSetting("CLIENT_ID", "");
+
+    //do
 
     /**
      * The average time this user leaves the application running.

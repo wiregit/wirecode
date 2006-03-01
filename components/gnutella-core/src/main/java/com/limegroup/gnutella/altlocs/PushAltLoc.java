@@ -1,4 +1,6 @@
 
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
@@ -20,7 +22,6 @@ import com.limegroup.gnutella.http.HTTPConstants;
  */
 public class PushAltLoc extends AlternateLocation {
 
-	
 	/**
 	 * the host we would send push to.  Null if not firewalled.
 	 */
@@ -83,12 +84,21 @@ public class PushAltLoc extends AlternateLocation {
         ret._count = this._count;
         return ret;
     }
-	
+
+    /**
+     * Determine if this PushAltLoc is us.
+     * Matches it's client ID GUID to our own.
+     * 
+     * @return True if this PushAltLoc is us.
+     *         False if it is a remote computer.
+     */
 	public boolean isMe() {
-	    return Arrays.equals(_pushAddress.getClientGUID(),
-	            RouterService.getMyGUID());
+
+	    return Arrays.equals(
+             _pushAddress.getClientGUID(), // _pushAddress is a PushEndpoint that represents a firewalled computer, get its client ID GUID
+             RouterService.getMyGUID());   // Compare that with our client ID GUID, and return true if they're the same
 	}
-	
+
 	/**
 	 * Updates the proxies in this PushEndpoint.  If this method is
 	 * called, the PE of this PushLoc will always point to the current

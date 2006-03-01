@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.net.InetAddress;
@@ -9,13 +12,14 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
+
 /**
  * A push endpoint for myself.  This differs from the standard
  * push endpoints because it always returns the current connections
  * as the set of push proxies.
  */
 public class PushEndpointForSelf extends PushEndpoint {
-    
+
     private static PushEndpointForSelf _instance;
     
     /**
@@ -24,11 +28,12 @@ public class PushEndpointForSelf extends PushEndpoint {
      * do not initialize that.
      */
     private PushEndpointForSelf() {
-        super(RouterService.getMyGUID(),
-                Collections.EMPTY_SET,
-                0,
-                UDPConnection.VERSION);
-    
+
+        super(
+            RouterService.getMyGUID(), // Our client ID GUID that identifies us on the Gnutella network
+            Collections.EMPTY_SET,
+            0,
+            UDPConnection.VERSION);
     }
     
     public static PushEndpointForSelf instance() {

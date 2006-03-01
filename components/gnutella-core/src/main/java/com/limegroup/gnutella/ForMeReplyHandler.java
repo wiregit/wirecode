@@ -708,12 +708,14 @@ public final class ForMeReplyHandler implements ReplyHandler {
     /**
      * Get our Gnutella client ID GUID.
      * The ReplyHandler interface requires this method.
+     * Call getClientGUID() on a ReplyHandler to find the client ID GUID of the remote computer the ReplyHandler represents.
+     * This ForMeReplyHandler represents us, so getClientGUID() returns our client ID GUID from settings.
      * 
      * @return A 16 byte array with our Gnutella client ID GUID
      */
     public byte[] getClientGUID() {
 
-        // Get our GUID
+        // Return our client ID GUID that uniquely identifies us on the Gnutella network
         return RouterService.getMyGUID();
     }
 }

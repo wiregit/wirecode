@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.IOException;
@@ -491,15 +494,18 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     public boolean isPartialSource() {
         return (_availableRanges != null);
     }
-    
+
     /**
      * @return whether this rfd points to myself.
      */
     public boolean isMe() {
-        return needsPush() ? 
-                Arrays.equals(_clientGUID,RouterService.getMyGUID()) :
-                    NetworkUtils.isMe(getHost(),getPort());
+
+        return
+            needsPush() ?
+            Arrays.equals(_clientGUID, RouterService.getMyGUID()) : // Return true if this RemoteFileDesc object has our client ID GUID
+            NetworkUtils.isMe(getHost(),getPort());
     }
+
     /**
      * Accessor for the available ranges.
      */

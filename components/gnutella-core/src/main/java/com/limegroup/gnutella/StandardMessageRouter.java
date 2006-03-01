@@ -214,56 +214,60 @@ public class StandardMessageRouter extends MessageRouter {
         //pongs for the neighbors will be sent by neighbors themselves
         //as ping will be broadcasted to them (since TTL=2)        
     }
-    
-    protected boolean respondToQueryRequest(QueryRequest queryRequest,
-                                            byte[] clientGUID,
-                                            ReplyHandler handler) {
-        //Only respond if we understand the actual feature, if it had a feature.
-        if(!FeatureSearchData.supportsFeature(queryRequest.getFeatureSelector()))
-            return false;
 
-        if (queryRequest.isWhatIsNewRequest())
-            ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();
-                                                
-        // Only send results if we're not busy.  Note that this ignores
-        // queue slots -- we're considered busy if all of our "normal"
-        // slots are full.  This allows some spillover into our queue that
-        // is necessary because we're always returning more total hits than
-        // we have slots available.
-        if(!RouterService.getUploadManager().isServiceable() )  {
-            return false;
-        }
-                                                
-                                                
-        // Ensure that we have a valid IP & Port before we send the response.
-        // Otherwise the QueryReply will fail on creation.
-        if( !NetworkUtils.isValidPort(RouterService.getPort()) ||
+    /**
+     * 
+     * @param queryRequest
+     * @param clientGUID   Not used, our client ID GUID that uniquely identifies us on the Gnutella network
+     * @param handler
+     */
+    protected boolean respondToQueryRequest(QueryRequest queryRequest, byte[] clientGUID, ReplyHandler handler) {
+
+        //Only respond if we understand the actual feature, if it had a feature.
+        if (!FeatureSearchData.supportsFeature(queryRequest.getFeatureSelector())) return false;
+
+        if (queryRequest.isWhatIsNewRequest()) ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();
+
+        /*
+         * Only send results if we're not busy.  Note that this ignores
+         * queue slots -- we're considered busy if all of our "normal"
+         * slots are full.  This allows some spillover into our queue that
+         * is necessary because we're always returning more total hits than
+         * we have slots available.
+         */
+
+        if (!RouterService.getUploadManager().isServiceable()) return false;
+
+        /*
+         * Ensure that we have a valid IP & Port before we send the response.
+         * Otherwise the QueryReply will fail on creation.
+         */
+
+        if (!NetworkUtils.isValidPort(RouterService.getPort()) ||
             !NetworkUtils.isValidAddress(RouterService.getAddress()))
             return false;
-                                                     
+
         // Run the local query
-        Response[] responses = 
-            RouterService.getFileManager().query(queryRequest);
-        
-        if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
-            if( responses != null && responses.length > 0 )
+        Response[] responses = RouterService.getFileManager().query(queryRequest);
+
+        if (RouterService.isShieldedLeaf() && queryRequest.isTCP()) {
+
+            if (responses != null && responses.length > 0)
                 RoutedQueryStat.LEAF_HIT.incrementStat();
             else
                 RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
         }
 
         return sendResponses(responses, queryRequest, handler);
-        
     }
 
     //This method needs to be public because the Peer-Server code uses it.
-    public boolean sendResponses(Response[] responses, QueryRequest query,
-                                 ReplyHandler handler) {
+    public boolean sendResponses(Response[] responses, QueryRequest query, ReplyHandler handler) {
+
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
-        if ( (responses == null) || ((responses.length < 1)) )
-            return false;
+        if ((responses == null) || ((responses.length < 1))) return false;
 
         
         // Here we can do a couple of things - if the query wants
@@ -341,15 +345,23 @@ public class StandardMessageRouter extends MessageRouter {
      * compressed XML data, if requested.
      *
      * @return a new <tt>List</tt> of <tt>QueryReply</tt> instances
+     * 
+     * 
+     * 
+     * @param guid
+     * @param ttl
+     * @param speed
+     * @param res
+     * @param clientGUID Our client ID GUID, not used, we just use _clientGUID instead
+     * @param busy
+     * @param uploaded
+     * @param measuredSpeed
+     * @param isFromMcast
+     * @param isFWTransfer
+     * @return
      */
-    protected List createQueryReply(byte[] guid, byte ttl,
-                                    long speed, Response[] res,
-                                    byte[] clientGUID, 
-                                    boolean busy, boolean uploaded, 
-                                    boolean measuredSpeed, 
-                                    boolean isFromMcast,
-                                    boolean isFWTransfer) {
-        
+    protected List createQueryReply(byte[] guid, byte ttl, long speed, Response[] res, byte[] clientGUID, boolean busy, boolean uploaded, boolean measuredSpeed, boolean isFromMcast, boolean isFWTransfer) {
+
         List queryReplies = new ArrayList();
         QueryReply queryReply = null;
 
@@ -454,14 +466,24 @@ public class StandardMessageRouter extends MessageRouter {
                         xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
                     
                     // create the new queryReply
-                    queryReply = new QueryReply(guid, ttl, port, ip, speed, 
-                                                currResps, _clientGUID, 
-                                                xmlCompressed, notIncoming, 
-                                                busy, uploaded, 
-                                                measuredSpeed, 
-                                                ChatSettings.CHAT_ENABLED.getValue(),
-                                                isFromMcast, isFWTransfer,
-                                                proxies);
+                    queryReply = new QueryReply(
+                        guid,
+                        ttl,
+                        port,
+                        ip,
+                        speed,
+                        currResps,
+                        _clientGUID, // Write our client ID GUID into the last 16 bytes of the query hit packet to let downloaders get push requests to us 
+                        xmlCompressed,
+                        notIncoming,
+                        busy,
+                        uploaded,
+                        measuredSpeed,
+                        ChatSettings.CHAT_ENABLED.getValue(),
+                        isFromMcast,
+                        isFWTransfer,
+                        proxies);
+
                     queryReplies.add(queryReply);
                 }
             }
@@ -477,13 +499,24 @@ public class StandardMessageRouter extends MessageRouter {
                 xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
             
             // create the new queryReply
-            queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
-                                        _clientGUID, xmlCompressed,
-                                        notIncoming, busy, uploaded, 
-                                        measuredSpeed, 
-                                        ChatSettings.CHAT_ENABLED.getValue(),
-                                        isFromMcast, isFWTransfer,
-                                        proxies);
+            queryReply = new QueryReply(
+                guid,
+                ttl,
+                port,
+                ip,
+                speed,
+                res,
+                _clientGUID, // Write our client ID GUID into the last 16 bytes of the query hit packet to let downloaders get push requests to us
+                xmlCompressed,
+                notIncoming,
+                busy,
+                uploaded,
+                measuredSpeed,
+                ChatSettings.CHAT_ENABLED.getValue(),
+                isFromMcast,
+                isFWTransfer,
+                proxies);
+
             queryReplies.add(queryReply);
         }
 

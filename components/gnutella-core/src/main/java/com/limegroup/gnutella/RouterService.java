@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.File;
@@ -54,7 +57,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
-
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -214,18 +216,54 @@ public class RouterService {
 	 * Whether or not we are running at full power.
 	 */
 	private static boolean _fullPower = true;
+
+    //done
+
+	/**
+	 * Our client ID GUID that uniquely identifies us on the Gnutella network.
+     * We'll put this GUID into the end of query hit packets so a downloader can address a push packet back to us.
+	 * LimeWire chose its client ID GUID the first time it ran on this computer, and has kept it in settings ever since.
+	 * 
+	 * In the file limewire.props, the client ID GUID is saved in a line of text like this:
+	 * 
+	 * CLIENT_ID=219A7298C72905B60534EDA54AD3D500
+	 * 
+	 * The 16 bytes of GUID data are expressed as 32 characters of base 16 text.
+	 * This is ApplicationSettings.CLIENT_ID, which has a factory default of blank.
+	 * When LimeWire runs, Java executes the code in the static block below.
+	 * It reads the setting from limewire.props to set the byte array MYGUID.
+	 * 
+	 * The first time it runs, the line of text won't be there.
+	 * When this happens, it creates our client ID GUID, and saves it in settings.
+	 * 
+	 * To get our client ID GUID, call RouterService.getMyGUID().
+	 */
+	private static final byte[] MYGUID;
 	
-	private static final byte [] MYGUID;
+	// Java will run the code in this static block when it loads the RouterService class
 	static {
-	    byte [] myguid=null;
+	    
+	    // Make a byte array to point at the 16 bytes of our client ID GUID
+	    byte[] myguid = null;
+	    
 	    try {
+	        
+	        // Read the CLIENT_ID String from ApplicationSettings, and read the base 16 text as data
 	        myguid = GUID.fromHexString(ApplicationSettings.CLIENT_ID.getValue());
-	    }catch(IllegalArgumentException iae) {
-	        myguid = GUID.makeGuid();
-	        ApplicationSettings.CLIENT_ID.setValue((new GUID(myguid)).toHexString());
+	        
+	    // GUID.fromHexString threw an exception because CLIENT_ID is blank
+	    } catch (IllegalArgumentException iae) {
+	        
+	        // Make a new LimeWire GUID, and save it in ApplicationSettings as the CLIENT_ID String
+	        myguid = GUID.makeGuid(); // Also point myguid to it
+	        ApplicationSettings.CLIENT_ID.setValue((new GUID(myguid)).toHexString()); // Convert it to base 16 text and write it 
 	    }
-	    MYGUID=myguid;
+	    
+	    // Save the GUID we read or created and saved in MYGUID
+	    MYGUID = myguid;
 	}
+
+    //do
 
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
@@ -235,7 +273,10 @@ public class RouterService {
 	 *  making callbacks
 	 */
   	public RouterService(ActivityCallback callback) {
-        this(callback, new StandardMessageRouter());
+
+        this(
+            callback,
+            new StandardMessageRouter()); // Make the program's single StandardMessageRouter object, calling the MessageRouter constructor
     }
 
     /**
@@ -603,10 +644,26 @@ public class RouterService {
 	public static PromotionManager getPromotionManager() {
 		return promotionManager;
 	}
-	
-	public static byte [] getMyGUID() {
+
+    //done
+
+    /**
+     * Our client ID GUID that uniquely identifies us on the Gnutella network.
+     * We'll put this GUID into the end of query hit packets so a downloader can address a push packet back to us.
+     * LimeWire chose its client ID GUID the first time it ran on this computer, and has kept it in settings ever since.
+     * The GUID is the StringSetting ApplicationSettings.CLIENT_ID.
+     * In the limewire.props file, it looks like this:
+     * CLIENT_ID=219A7298C72905B60534EDA54AD3D500
+     * 
+     * @return Our client ID GUID that uniquely identifies us on the Gnutella network.
+     */
+	public static byte[] getMyGUID() {
+
+        // Return the GUID we made when LimeWire first ran on this computer that uniquely identifies us on the Gnutella network
 	    return MYGUID;
 	}
+
+    //do
 
     /**
      * Schedules the given task for repeated fixed-delay execution on this's
