@@ -117,11 +117,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
 
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        try {
-            LEAF[0].receive(TIMEOUT);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
+        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        assertNull("Did not expected a QueryRequest", reqRecvd);
 
         reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
@@ -175,11 +172,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
 
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        try {
-            LEAF[0].receive(TIMEOUT);
-            fail("expected InterruptedIOException");
-        }
-        catch (InterruptedIOException expected) {}
+        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        assertNull("Did not expected a QueryRequest", reqRecvd);
 
         reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
@@ -214,10 +208,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         // should NOT be forwarded to leaf again....
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        try {
-            reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
-        }
-        catch (InterruptedIOException expected) {}
+        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        assertNull("Did not expected a QueryRequest", reqRecvd);
 
         // should NOT be forwarded to other Ultrapeer....
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
@@ -271,11 +263,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         // should NOT be forwarded to leaf again....
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        try {
-            reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
-            fail("expected InterruptedIOException");
-        }
-        catch (InterruptedIOException expected) {}
+        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        assertNull("Did not expected a QueryRequest", reqRecvd);
 
         // should NOT be forwarded to other Ultrapeer....
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
@@ -313,16 +302,10 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
             // should be counted as a duplicate and not forwarded anywhere...
             // leaves don't get any unexpected messages, no use using
             // noUnenexpectedMessages
-            try {
-                LEAF[0].receive(TIMEOUT);
-                fail("expected InterruptedIOException");
-            }
-            catch (InterruptedIOException expected) {}
+            reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+            assertNull("Did not expected a QueryRequest", reqRecvd);
 
             assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
         }
     }
-
-    
-
 }
