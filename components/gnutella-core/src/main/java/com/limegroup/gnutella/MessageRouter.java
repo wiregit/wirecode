@@ -115,41 +115,72 @@ public abstract class MessageRouter {
 	 */
     private final ReplyHandler FOR_ME_REPLY_HANDLER = 
 		ForMeReplyHandler.instance();
-		
+
+    //done
+
     /**
-     * The maximum size for <tt>RouteTable</tt>s.
+     * 50000, a map in a RouteTable can hold 50 thousand GUIDs.
+     * 
+     * A RouteTable object has 2 maps, the new map and the old map.
+     * Each map remembers 50 thousand GUIDs, so the RouteTable holds a total of 100 thousand.
+     * 
+     * A RouteTable map shouldn't ever hit this maximum.
+     * It shifts the GUIDs from the new map to the old map and then throws them away on a timed interval.
+     * The timed shifting will keep the contents low, not this high maximum.
      */
-    private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
+    private int MAX_ROUTE_TABLE_SIZE = 50000;
+
+    //do
 
     /**
      * The maximum number of bypassed results to remember per query.
      */
     private final int MAX_BYPASSED_RESULTS = 150;
 
-    /**
-     * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
-     * typically around 2500 entries, but never more than 100,000 entries.
-     */
-    private RouteTable _pingRouteTable = new RouteTable(2 * 60, MAX_ROUTE_TABLE_SIZE); // 2 minutes
+    //done
 
     /**
-     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
-     * typically around 13000 entries, but never more than 100,000 entries.
+     * A RouteTable that maps ping messge GUIDs to the connection that sent the ping, and will want pongs with the same GUID.
+     * 
+     * When a ReplyHandler like a ManagedConnection sends us a ping, we'll add it under the ping's message GUID in _pingRouteTable.
+     * Later, we may get a pong with the same message GUID.
+     * We'll look up the GUID in this RouteTable and know which ReplyHandler to send it back to.
+     * 
+     * Every 2 minutes, the ping route table will discard the old map and shift the new map contents there, holding a GUID for between 2 and 4 minutes.
+     * Each map can hold 50 thousand GUID mappings for a total maximum of 100 thousand.
      */
-    private RouteTable _queryRouteTable = new RouteTable(5 * 60, MAX_ROUTE_TABLE_SIZE); // 5 minutes
+    private RouteTable _pingRouteTable = new RouteTable(2 * 60, MAX_ROUTE_TABLE_SIZE); // 2 minutes, 50 thousand entries
 
     /**
-     * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
-     * minutes, typically around 3500 entries, but never more than 100,000
-     * entries.  
+     * A RouteTable that maps query message GUIDs to the connection that sent the query, and will want query hits with the same GUID.
+     * 
+     * When a ReplyHandler like a ManagedConnection sends us a query, we'll add it under the query's message GUID in _queryRouteTable.
+     * Later, we may get a query hit with the same message GUID.
+     * We'll look up the GUID in this RouteTable and know which ReplyHandler to send it back to.
+     * 
+     * Every 5 minutes, the ping route table will discard the old map and shift the new map contents there, holding a GUID for between 5 and 10 minutes.
+     * Each map can hold 50 thousand GUID mappings for a total maximum of 100 thousand.
      */
-    private RouteTable _pushRouteTable = new RouteTable(7 * 60, MAX_ROUTE_TABLE_SIZE); // 7 minutes
+    private RouteTable _queryRouteTable = new RouteTable(5 * 60, MAX_ROUTE_TABLE_SIZE); // 5 minutes, 50 thousand entries
+
+    //do
+
+    /**
+     * Maps QueryReply client GUIDs to PushRequestHandlers.
+     * 
+     * Every 7 minutes, the ping route table will discard the old map and shift the new map contents there, holding a GUID for between 7 and 14 minutes
+     * Each map can hold 50 thousand GUID mappings for a total maximum of 100 thousand.
+     */
+    private RouteTable _pushRouteTable = new RouteTable(7 * 60, MAX_ROUTE_TABLE_SIZE); // 7 minutes, 50 thousand entries
 
     /**
      * Maps HeadPong guids to the originating pingers.  Short-lived since
      * we expect replies from our leaves quickly.
+     * 
+     * Every 10 seconds, the ping route table will discard the old map and shift the new map contents there, holding a GUID for between 10 and 20 seconds
+     * Each map can hold 50 thousand GUID mappings for a total maximum of 100 thousand.
      */
-    private RouteTable _headPongRouteTable = new RouteTable(10, MAX_ROUTE_TABLE_SIZE); // 10 seconds
+    private RouteTable _headPongRouteTable = new RouteTable(10, MAX_ROUTE_TABLE_SIZE); // 10 seconds, 50 thousand entries
 
     /** How long to buffer up out-of-band replies.
      */
@@ -210,16 +241,22 @@ public abstract class MessageRouter {
      */
     private static final ProcessingQueue TCP_CONNECT_BACKER =
         new ProcessingQueue("TCPConnectBack");
-    
+
+    //done
+
     /**
+     * Not used.
+     * 
+     * TODO:kfaaborg This is not used.
+     * 
      * keeps track of which hosts have sent us head pongs.  We may choose
      * to use these messages for udp tunnel keep-alive, so we don't want to
      * set the minimum interval too high.  Right now it is half of what we
      * believe to be the solicited grace period.
      */
-    private static final Set _udpHeadRequests =
-    	Collections.synchronizedSet(new FixedSizeExpiringSet(200,
-    			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2));
+    private static final Set _udpHeadRequests = Collections.synchronizedSet(new FixedSizeExpiringSet(200, ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue() / 2));
+
+    //do
 
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -386,30 +423,44 @@ public abstract class MessageRouter {
         }
         return clone;
     }
-    
+
+    //done
+
+    /** Not used. */
     public String getPingRouteTableDump() {
         return _pingRouteTable.toString();
     }
 
+    /** Not used. */
     public String getQueryRouteTableDump() {
         return _queryRouteTable.toString();
     }
 
+    /** Not used. */
     public String getPushRouteTableDump() {
         return _pushRouteTable.toString();
     }
 
     /**
-     * A callback for ConnectionManager to clear a <tt>ReplyHandler</tt> from
-     * the routing tables when the connection is closed.
+     * Remove the given ManagedConnection from all the packet routing tables.
+     * With it gone, we won't notice when we get a pong or query hit with the same GUID as a ping or query it sent us.
+     * ConnectionManager.removeInternal(c) calls this, giving us a ManagedConnection it's closed.
+     * 
+     * @param rh A ManagedConnection object that we just closed
      */
     public void removeConnection(ReplyHandler rh) {
+
+        // Also remove it from the DYNAMIC_QUERIER QueryDispatcher (do)
         DYNAMIC_QUERIER.removeReplyHandler(rh);
+
+        // Remove it from all 4 of our routing tables.
         _pingRouteTable.removeReplyHandler(rh);
         _queryRouteTable.removeReplyHandler(rh);
         _pushRouteTable.removeReplyHandler(rh);
         _headPongRouteTable.removeReplyHandler(rh);
     }
+
+    //do
 
 	/**
      * 
@@ -780,28 +831,43 @@ public abstract class MessageRouter {
 
 
 
-	
+
     /**
      * The handler for PingRequests received in
      * ManagedConnection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handlePingRequest.
+     * 
+     * 
+     * handleMessage(Message, ManagedConnection) calls this.
+     * 
+     * @param request
+     * @param handler
      */
-    final void handlePingRequestPossibleDuplicate(
-        PingRequest request, ReplyHandler handler) {
-		if(_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null)
-            handlePingRequest(request, handler);
+    final void handlePingRequestPossibleDuplicate(PingRequest request, ReplyHandler handler) {
+
+		if (_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null) handlePingRequest(request, handler);
     }
 
     /**
      * The handler for PingRequests received in
      * ManagedConnection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handlePingRequest.
+     * 
+     * handleUDPMessage(Message, InetSocketAddress) and handleMulticastMessage(Message, InetSocketAddress) call this.
+     * 
+     * @param request
+     * @param handler
+     * @param addr
      */
-    final void handleUDPPingRequestPossibleDuplicate(													 
-        PingRequest request, ReplyHandler handler, InetSocketAddress  addr) {
-		if(_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null)
-            handleUDPPingRequest(request, handler, addr);
+    final void handleUDPPingRequestPossibleDuplicate(PingRequest request, ReplyHandler handler, InetSocketAddress  addr) {
+
+		if (_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null) handleUDPPingRequest(request, handler, addr);
     }
+
+
+
+
+
 
     /**
      * The handler for QueryRequests received in

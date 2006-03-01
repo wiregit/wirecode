@@ -216,10 +216,23 @@ public class GGEP {
     public static final String GGEP_HEADER_PACKED_HOSTCACHES = "PHC";
 
     /**
-     * "WH" What is new feature query.
-     * The value is 1 byte that contains the number 1. (do)
+     * "WH" feature query, including feature number 1 What's New search.
+     * The value is 1 byte that contains the number 1.
+     * 
      * LimeWire puts WH in the GGEP block of a query packet.
      * The remote comptuer that gets the query should reply with information about the 3 files it started sharing most recently.
+     * 
+     * This GGEP extension is named "WH", but a better name would be "FQ" Feature Query.
+     * The value lists the number of advanced Gnutella features the computer supports.
+     * Right now, there is only one advanced feature: What's New search.
+     * What's New search is feature number 1.
+     * 
+     * In the future, a Gnutella program might send "WH" with a value of 3.
+     * This would mean the program supports 3 advanced features:
+     * Feature number 1: What's New search.
+     * Feature number 2: Some other advanced feature.
+     * Feature number 3: Another not yet imagined feature.
+     * This design doesn't allow a Gnutella program to support features 2 and 3 without supporting feature 1.
      */
     public static final String GGEP_HEADER_FEATURE_QUERY = "WH";
 

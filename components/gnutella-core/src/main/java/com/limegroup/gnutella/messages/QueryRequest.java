@@ -1223,7 +1223,7 @@ public class QueryRequest extends Message implements Serializable {
             throw new IllegalArgumentException("illegal chars: " + query);
         }
 
-        // Save the given feature selector byte, it will be the value of the "WH" What's New GGEP extension
+        // Save the given feature selector byte, it will be the value of the "WH" feature query GGEP extension
         if (featureSelector < 0) throw new IllegalArgumentException("Bad feature = " + featureSelector); // The bits should all be in the lowest byte
         _featureSelector = featureSelector;
 
@@ -1491,7 +1491,7 @@ public class QueryRequest extends Message implements Serializable {
                         tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
                     }
 
-                    // The query's GGEP block has the "WH" What's New extension, get its number value
+                    // The query's GGEP block has the "WH" feature query extension, get its number value
                     if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY)) _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
 
                     // If the query's GGEP block has the "NP" No Proxy extension, set _doNotProxy to true
