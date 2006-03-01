@@ -22,7 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,7 +44,6 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnectionStub;
-import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
@@ -60,7 +59,6 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -80,10 +78,8 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -124,8 +120,9 @@ public class UploadTest extends BaseTestCase {
 	private static String FALTFeatures, FWALTFeatures;    
 
     private static RouterService ROUTER_SERVICE;
-        
-        
+    
+    private static TestUploadManager UPLOAD_MANAGER;
+    
     private static final Object loaded = new Object();
 
 	/**
@@ -164,8 +161,20 @@ public class UploadTest extends BaseTestCase {
 
     public static void globalSetUp() {
         vf = new VerifyingFile(252450);
+        
         ROUTER_SERVICE = new RouterService(new FManCallback());
+        UPLOAD_MANAGER = new TestUploadManager();
+        
+        // Overwrite the original UploadManager with 
+        // our custom TestUploadManager. See latter
+        // for more Info!
+        try {
+            PrivilegedAccessor.setValue(ROUTER_SERVICE, "uploadManager", UPLOAD_MANAGER);
+        } catch (Exception e) {
+            fail(e);
+        }
     }
+    
 	protected void setUp() throws Exception {
 	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -209,6 +218,12 @@ public class UploadTest extends BaseTestCase {
                      PORT, ConnectionSettings.PORT.getValue());
                      
         upMan = RouterService.getUploadManager();
+        
+        // Make sure our customized UploadManager is set in
+        // RouterService and clear it's activeConnections
+        // cache. See TestUploadManager for more Info!
+        assertTrue(upMan == UPLOAD_MANAGER);
+        UPLOAD_MANAGER.clearConnections();
         
         FileManager fm = RouterService.getFileManager();
         File incFile = new File(_incompleteDir, incName);
@@ -558,11 +573,13 @@ public class UploadTest extends BaseTestCase {
                         fail("had line: " + line);
                     else if(!line.startsWith("HTTP")) // check only the first time.
                         return;
+                    
                     UploadManager umanager = RouterService.getUploadManager();
 		            List l;
 		            HTTPUploader u;
 		            synchronized(umanager){
-		                l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+                        // See TestUploadManager for more info!
+		                l = UPLOAD_MANAGER.activeConnections;
 		                assertEquals(1,l.size());
 		                u = (HTTPUploader)l.get(0);
 		            }
@@ -612,8 +629,9 @@ public class UploadTest extends BaseTestCase {
 	                List l;
 	                HTTPUploader u;
 	                synchronized(umanager){
-	                    l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
-	                    assertEquals(1,l.size());
+                        // See TestUploadManager for more info!
+                        l = UPLOAD_MANAGER.activeConnections;
+                        assertEquals(1,l.size());
 	                    u = (HTTPUploader)l.get(0);
 	                }
 		            assertTrue(u.wantsFAlts());
@@ -661,7 +679,8 @@ public class UploadTest extends BaseTestCase {
                     List l;
                     HTTPUploader u;
                     synchronized(umanager) {
-                        l= (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+                        // See TestUploadManager for more info!
+                        l = UPLOAD_MANAGER.activeConnections;
                         assertEquals(1,l.size());
                         u = (HTTPUploader)l.get(0);
                     }
@@ -2141,6 +2160,8 @@ public class UploadTest extends BaseTestCase {
         if (requiredHeader != null) {
 			assertTrue("Didn't find header: " + requiredHeader, foundHeader);
 		}
+        
+        //System.out.println("Download returns: " + System.currentTimeMillis());
 		return length;
     }
     
@@ -2627,5 +2648,30 @@ public class UploadTest extends BaseTestCase {
    
     public static String readLine(InputStream in) throws IOException {
         return new ByteReader(in).readLine();
-    }    
+    }
+    
+    /**
+     * testFALTNotRequested(), testFALTWhenRequested() and testFWALTWhenRequested()
+     * fail if the server processes the entire request before we start reading
+     * from the InputStreams. That means: our HTTPUploader is added to UploadManagers 
+     * private _activeConnections List, the request is processed and the HTTPUploader is
+     * removed from the List. We start reading from the InputStream and the assertions
+     * in the mentioned tests fail because our HTTPUploader is no longer in that
+     * List. So, we have to cache the HTTPUploader somehow what this extension does.
+     */
+    private static class TestUploadManager extends UploadManager {
+
+        private List activeConnections = new ArrayList();
+        
+        protected int processNewRequest(HTTPUploader uploader, Socket socket, boolean forceAllow) 
+                throws IOException {
+            
+            activeConnections.add(uploader);
+            return super.processNewRequest(uploader, socket, forceAllow);
+        }
+        
+        public void clearConnections() {
+            activeConnections.clear();
+        }
+    }
 }

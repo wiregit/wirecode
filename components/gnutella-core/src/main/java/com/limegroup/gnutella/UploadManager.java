@@ -689,7 +689,7 @@ public class UploadManager implements BandwidthTracker {
      *    If it is determined that the uploader is accepted, the uploader
      *    is added to the _activeUploadList.
      */
-    private int processNewRequest(HTTPUploader uploader, 
+    protected int processNewRequest(HTTPUploader uploader, 
                                   Socket socket,
                                   boolean forceAllow) throws IOException {
         if(LOG.isTraceEnabled())
