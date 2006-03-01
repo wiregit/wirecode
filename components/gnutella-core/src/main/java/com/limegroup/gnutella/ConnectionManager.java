@@ -2184,7 +2184,7 @@ public class ConnectionManager {
      * Utility method that tells the host catcher to recover hosts from disk
      * if it doesn't have enough hosts.
      */
-    private void recoverHosts() {
+    private synchronized void recoverHosts() {
         // Notify the HostCatcher that it should keep any hosts it has already
         // used instead of discarding them.
         // The HostCatcher can be null in testing.

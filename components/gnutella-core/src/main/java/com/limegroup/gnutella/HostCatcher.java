@@ -394,7 +394,7 @@ public class HostCatcher {
      * @modifies this
      * @effects read hosts from the given file.  
      */
-    synchronized void read(File hostFile) throws FileNotFoundException, 
+    void read(File hostFile) throws FileNotFoundException, 
 												 IOException {
         LOG.trace("entered HostCatcher.read(File)");
         BufferedReader in = null;
@@ -580,16 +580,18 @@ public class HostCatcher {
      * @param host the host to add
      * @param hosts the <tt>Set</tt> to add it to
      */
-    private synchronized void addToFixedSizeSet(ExtendedEndpoint host, 
-        Set hosts) {
+    private void addToFixedSizeSet(ExtendedEndpoint host, Set hosts) {
         
-        // Don't allow the free slots host to expand infinitely.
-        if(hosts.add(host) && hosts.size() > 200) {
-            hosts.remove(hosts.iterator().next());
+        synchronized(this) {
+            // Don't allow the free slots host to expand infinitely.
+            if(hosts.add(host) && hosts.size() > 200) {
+                hosts.remove(hosts.iterator().next());
+            }
+            
+            // Also add it to the list of permanent hosts stored on disk.
+            addPermanent(host);
         }
         
-        // Also add it to the list of permanent hosts stored on disk.
-        addPermanent(host);
         endpointAdded();
     }
 
@@ -704,12 +706,12 @@ public class HostCatcher {
         if(e.isUDPHostCache())
             return addUDPHostCache(e);
         
-        //Add to permanent list, regardless of whether it's actually in queue.
-        //Note that this modifies e.
-        addPermanent(e);
-
         boolean ret = false;
         synchronized(this) {
+            //Add to permanent list, regardless of whether it's actually in queue.
+            //Note that this modifies e.
+            addPermanent(e);
+            
             if (! (ENDPOINT_SET.contains(e))) {
                 ret=true;
                 //Add to temporary list. Adding e may eject an older point from
@@ -721,10 +723,10 @@ public class HostCatcher {
                     ENDPOINT_SET.remove(ejected);
                 }         
                 
-                endpointAdded();
-                this.notify();
             }
         }
+        
+        endpointAdded();        
 
         repOk();
         return ret;
@@ -1118,19 +1120,23 @@ public class HostCatcher {
      * Notifies this that connect() has been called.  This may decide to give
      * out bootstrap pongs if necessary.
      */
-    public synchronized void expire() {
-        //Fetch more GWebCache urls once per session.
-        //(Well, once per connect really--good enough.)
-        long now = System.currentTimeMillis();
-        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
-        if( fetched + DataUtils.ONE_WEEK <= now ) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Fetching more bootstrap servers. " +
-                          "Last fetch time: " + fetched);
-            gWebCache.fetchBootstrapServersAsync();
+    public void expire() {
+
+        synchronized (this) {
+            // Fetch more GWebCache urls once per session.
+            // (Well, once per connect really--good enough.)
+            long now = System.currentTimeMillis();
+            long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
+            if (fetched + DataUtils.ONE_WEEK <= now) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Fetching more bootstrap servers. " + "Last fetch time: " + fetched);
+                gWebCache.fetchBootstrapServersAsync();
+            }
+
+            lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
         }
+        
         recoverHosts();
-        lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
         
         // schedule new runnable to clear the set of endpoints that
         // were pinged while trying to connect
@@ -1224,17 +1230,19 @@ public class HostCatcher {
      * Recovers any hosts that we have put in the set of hosts "pending" 
      * removal from our hosts list.
      */
-    public synchronized void recoverHosts() {
+    public void recoverHosts() {
         LOG.debug("recovering hosts file");
         
-        PROBATION_HOSTS.clear();
-        EXPIRED_HOSTS.clear();
-        _failures = 0;
-        FETCHER.resetFetchTime();
-        gWebCache.resetData();
-        udpHostCache.resetData();
-        
-        pinger.resetData();
+        synchronized(this) {
+            PROBATION_HOSTS.clear();
+            EXPIRED_HOSTS.clear();
+            _failures = 0;
+            FETCHER.resetFetchTime();
+            gWebCache.resetData();
+            udpHostCache.resetData();
+            
+            pinger.resetData();
+        }
         
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.
