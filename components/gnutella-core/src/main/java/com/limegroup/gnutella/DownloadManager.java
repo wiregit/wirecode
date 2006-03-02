@@ -39,6 +39,7 @@ import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.io.ConnectObserver;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -1351,7 +1352,7 @@ public class DownloadManager implements BandwidthTracker {
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public void sendPush(final RemoteFileDesc file, final ConnectObserver observer) {
+    public void sendPush(final RemoteFileDesc file, final Shutdownable observer) {
         //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = RouterService.getAddress();
@@ -1578,11 +1579,11 @@ public class DownloadManager implements BandwidthTracker {
         
         final RemoteFileDesc _file;
         final byte [] _guid;
-        final ConnectObserver _observer;
+        final Shutdownable _observer;
         
         public PushRequestor(RemoteFileDesc file,
                                      byte[] guid,
-                                     ConnectObserver observer) {
+                                     Shutdownable observer) {
             _file = file;
             _guid = guid;
             _observer = observer;
@@ -1606,7 +1607,7 @@ public class DownloadManager implements BandwidthTracker {
        
        public PushFailoverRequestor(RemoteFileDesc file,
                byte[] guid,
-               ConnectObserver observer) {
+               Shutdownable observer) {
            super(file, guid, observer);
        }
        

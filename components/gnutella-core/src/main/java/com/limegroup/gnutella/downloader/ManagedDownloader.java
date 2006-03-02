@@ -1554,6 +1554,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      *     @requires GIV string (and nothing else) has been read from socket
      */
     public boolean acceptDownload(String file, Socket socket, int index, byte[] clientGUID) {
+        if (stopped)
+            return false;
+        
         MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
         HTTPConnectObserver observer =  
             (HTTPConnectObserver) pushObservers.remove(mrfd);
@@ -1643,10 +1646,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
         stopped=true;
+        killAllWorkers();
         
         synchronized(this) {
-            killAllWorkers();
-            
             // must capture in local variable so the value doesn't become null
             // between if & contents of if.
             Thread dlMan = dloaderManagerThread;
@@ -1673,18 +1675,14 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         Map pushers;
         synchronized(pushObservers) {
             pushers = new HashMap(pushObservers);
+            pushObservers.clear();
         }
         
         // cannot iterate over pushObservers because shutdown may attempt
         // to remove from it.
-        // synchronize on this so that something else cannot come in with
-        // acceptDownload(..) triggering a handleConnect(..) while we're shutting
-        // down the pushers.
-        synchronized(this) {
-            for(Iterator i = pushers.values().iterator(); i.hasNext(); ) {
-                ConnectObserver next = (ConnectObserver)i.next();
-                next.shutdown();
-            }
+        for(Iterator i = pushers.values().iterator(); i.hasNext(); ) {
+            HTTPConnectObserver next = (HTTPConnectObserver)i.next();
+            next.shutdown();
         }
     }
     
