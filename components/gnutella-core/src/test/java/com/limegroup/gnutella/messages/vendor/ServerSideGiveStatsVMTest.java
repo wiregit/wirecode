@@ -183,37 +183,14 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 	}
 	
 	private static void buildConnections() throws Exception {
-	    LEAF_1 =
-			new QueryCountingConnection("localhost", PORT, 
-                            new LeafHeaders("localhost"),new EmptyResponder());
-
-	    LEAF_2 =
-			new QueryCountingConnection("localhost", PORT, 
-                            new LeafHeaders("localhost"), new EmptyResponder());
-
-	    LEAF_3 =
-			new QueryCountingConnection("localhost", PORT, 
-                           new LeafHeaders("localhost"), new EmptyResponder());
-
-	    LEAF_4 =
-			new QueryCountingConnection("localhost", PORT, 
-                           new LeafHeaders("localhost"), new EmptyResponder());
-
-	    TCP_TEST_LEAF =
-			new QueryCountingConnection("localhost", PORT, 
-                           new LeafHeaders("localhost"), new EmptyResponder());
-        
-        ULTRAPEER_1 = 
-			new QueryCountingConnection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder() );
-        
+	    LEAF_1 = new QueryCountingConnection("localhost", PORT);
+	    LEAF_2 = new QueryCountingConnection("localhost", PORT);
+	    LEAF_3 = new QueryCountingConnection("localhost", PORT);
+	    LEAF_4 = new QueryCountingConnection("localhost", PORT);
+	    TCP_TEST_LEAF = new QueryCountingConnection("localhost", PORT);
+        ULTRAPEER_1 = new QueryCountingConnection("localhost", PORT);
+        ULTRAPEER_2 = new QueryCountingConnection("localhost", PORT);
         UDP_ACCESS = new DatagramSocket();
-
-        ULTRAPEER_2 = 
-			new QueryCountingConnection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder() );
     }
 
     public static void setSettings() {
@@ -372,17 +349,16 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
-
+        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
+        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         
         //3. routed leaf, with route table for "test"
-        LEAF_1.initialize();
-        LEAF_2.initialize();
-        LEAF_3.initialize();
-        LEAF_4.initialize();
-        TCP_TEST_LEAF.initialize();
+        LEAF_1.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF_2.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF_3.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF_4.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        TCP_TEST_LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder());
                 
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("ashish");
@@ -1054,9 +1030,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         public int incomingQueries = 0;
         public int queryReplies = 0;
         
-        public QueryCountingConnection(String host, int port, Properties reqHeaders, 
-                HandshakeResponder handshakeResp) {
-            super(host, port, reqHeaders, handshakeResp);
+        public QueryCountingConnection(String host, int port) {
+            super(host, port);
         }
 
         public Message receive() throws IOException, BadPacketException {

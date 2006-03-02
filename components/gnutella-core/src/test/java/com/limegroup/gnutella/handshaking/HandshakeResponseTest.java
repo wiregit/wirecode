@@ -90,9 +90,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         RouterService.getHostCatcher().clear();
         assertEquals(0, RouterService.getHostCatcher().getNumHosts());
         List ipPorts = new LinkedList();
-        ipPorts.add(new Connection("24.67.85.4", 6346,
-                                   new Properties(),
-                                   new UltrapeerHandshakeResponder("24.67.85.4")));
+        ipPorts.add(new Connection("24.67.85.4", 6346));
         PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
             "_initializedConnections", ipPorts);
         
@@ -180,11 +178,9 @@ public final class HandshakeResponseTest extends BaseTestCase {
         UltrapeerHandshakeResponder UHR = 
             new UltrapeerHandshakeResponder("20.34.90.1");
         for(int i=0; i<10; i++) {
-            Connection conn = 
-                new Connection(leafAddress+i, 6346, props, UHR);
+            Connection conn = new Connection(leafAddress+i, 6346);
             leaves.add(conn);
-            conn = 
-                new Connection(ultrapeerAddress+i, 6346, props, UHR);
+            conn = new Connection(ultrapeerAddress+i, 6346);
             ultrapeers.add(conn);
         }
         Method m = 
@@ -221,11 +217,9 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		UltrapeerHandshakeResponder UHR = 
 			new UltrapeerHandshakeResponder("20.34.90.1");
 		for(int i=0; i<30; i++) {
-			Connection conn = 
-				new Connection(leafAddress+i, 6346, props, UHR);
+			Connection conn = new Connection(leafAddress+i, 6346);
 			leaves.add(conn);
-			conn = 
-				new Connection(ultrapeerAddress+i, 6346, props, UHR);
+			conn = new Connection(ultrapeerAddress+i, 6346);
 			ultrapeers.add(conn);
 		}
 		Method m = 
@@ -296,14 +290,10 @@ public final class HandshakeResponseTest extends BaseTestCase {
 	private List createListFromIPPortString(String ipPorts) {
 		StringTokenizer st = new StringTokenizer(ipPorts, ",");
 		List list = new LinkedList();
-		Properties props = new Properties();
-		UltrapeerHandshakeResponder UHR = 
-			new UltrapeerHandshakeResponder("20.34.90.1");
 		while(st.hasMoreTokens()) {
 			String ipPort = st.nextToken();
 			StringTokenizer ipPortST = new StringTokenizer(ipPort, ":");
-			Connection conn = new Connection(ipPortST.nextToken(), 
-				Integer.parseInt(ipPortST.nextToken()), props, UHR);
+			Connection conn = new Connection(ipPortST.nextToken(), Integer.parseInt(ipPortST.nextToken()));
 			list.add(conn);
 		}
 		return list;
@@ -340,8 +330,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		List leafList = createListFromIPPortString(leaves);
 		List ultrapeerList = createListFromIPPortString(ultrapeers);
 		assertTrue("leaf list should not be empty", !leafList.isEmpty());
-		assertTrue("ultrapeer list should not be empty", 
-            !ultrapeerList.isEmpty());
+		assertTrue("ultrapeer list should not be empty", !ultrapeerList.isEmpty());
 	}
 	
     /**

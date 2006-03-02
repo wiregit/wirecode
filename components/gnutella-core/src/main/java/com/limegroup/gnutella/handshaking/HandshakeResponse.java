@@ -330,8 +330,7 @@ public final class HandshakeResponse {
      * @return a new <tt>HandshakeResponse</tt> instance with the headers
      *  sent by the other host
      */
-    public static HandshakeResponse 
-        createResponse(Properties headers) throws IOException {
+    public static HandshakeResponse createResponse(Properties headers) {
         return new HandshakeResponse(headers);
     }
     
@@ -346,16 +345,15 @@ public final class HandshakeResponse {
      *  sent by the other host
      * @throws <tt>IOException</tt> if the status line could not be parsed
      */
-    public static HandshakeResponse 
-        createRemoteResponse(String line,Properties headers) throws IOException{
+    public static HandshakeResponse createRemoteResponse(String line,Properties headers) throws IOException {
         int code = extractCode(line);
-        if(code == -1) {
+        if(code == -1)
             throw new IOException("could not parse status code: "+line);
-        }
+        
         String message = extractMessage(line);
-        if(message == null) {
+        if(message == null)
             throw new IOException("could not parse status message: "+line);
-        }
+        
         return new HandshakeResponse(code, message, headers);        
     }
     
@@ -366,21 +364,17 @@ public final class HandshakeResponse {
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're accepting
      */
-    static HandshakeResponse createAcceptIncomingResponse(
-        HandshakeResponse response, Properties headers) {
+    static HandshakeResponse createAcceptIncomingResponse(HandshakeResponse response, Properties headers) {
         return new HandshakeResponse(addXTryHeader(response, headers));
     }
 
 
     /**
-     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
-     * outgoing connection -- the final third step in the handshake.  This
-     * passes no headers, as all necessary headers have already been 
-     * exchanged.  The only possible exception is the potential inclusion
-     * of X-Ultrapeer: false.
-     *
-     * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're accepting
+     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the outgoing connection -- the final third step
+     * in the handshake. This passes no headers, as all necessary headers have already been exchanged. The only possible
+     * exception is the potential inclusion of X-Ultrapeer: false.
+     * 
+     * @param headers the <tt>Properties</tt> instance containing the headers to send to the node we're accepting
      */
     static HandshakeResponse createAcceptOutgoingResponse(Properties headers) {
         return new HandshakeResponse(headers);

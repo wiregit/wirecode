@@ -17,9 +17,8 @@ public class CountingConnection extends Connection {
     public boolean countEnabled;
 
 
-    public CountingConnection(String host, int port, Properties reqHeaders,
-                          HandshakeResponder handshakeResp) {
-        super(host, port, reqHeaders, handshakeResp);
+    public CountingConnection(String host, int port) {
+        super(host, port);
         countEnabled = true;
     }
 

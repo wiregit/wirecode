@@ -121,18 +121,15 @@ public final class HandshakingTest extends BaseTestCase {
 	 * settings is accepted.
 	 */
 	public void testNormalConnectionAccepted() throws Exception {
-		_currentConnection = 
-			new Connection("localhost", TEST_PORT, 
-						   new UltrapeerHeaders("localhost"),
-						   new UltrapeerResponder());
-		_currentConnection.initialize();
+		_currentConnection = new Connection("localhost", TEST_PORT);
+		_currentConnection.initialize(new UltrapeerHeaders("localhost"), new UltrapeerResponder());
 
 		_currentConnection.close();
 
 		// double check that test connection is working correctly --
 		// make sure it send the normal connect sequence correctly
 		_currentConnection = new TestConnection();
-		_currentConnection.initialize();
+		_currentConnection.initialize(new UltrapeerHeaders("localhost"), new UltrapeerResponder());
 	}
 
 	/**
@@ -142,7 +139,7 @@ public final class HandshakingTest extends BaseTestCase {
 	public void test04Rejected() {
 		_currentConnection = new TestConnection(GNUTELLA_CONNECT_04);
 		try {
-			_currentConnection.initialize();
+			_currentConnection.initialize(new UltrapeerHeaders("localhost"), new UltrapeerResponder());
 			fail("connection should not have been accepted");
 		} catch(Exception e) {
 		}
@@ -154,21 +151,21 @@ public final class HandshakingTest extends BaseTestCase {
 	public void testRandomRejected() {
 		_currentConnection = new TestConnection("GNUTELLA");
 		try {
-			_currentConnection.initialize();
+			_currentConnection.initialize(new UltrapeerHeaders("localhost"), new UltrapeerResponder());
 			fail("connection should not have been accepted");
 		} catch(Exception e) {
 		}
 
 		_currentConnection = new TestConnection("CONNECT");
 		try {
-			_currentConnection.initialize();
+			_currentConnection.initialize(new UltrapeerHeaders("localhost"), new UltrapeerResponder());
 			fail("connection should not have been accepted");
 		} catch(Exception e) {
 		}
 
 		_currentConnection = new TestConnection("RANDOM");
 		try {
-			_currentConnection.initialize();
+			_currentConnection.initialize(new UltrapeerHeaders("localhost"), new UltrapeerResponder());
 			fail("connection should not have been accepted");
 		} catch(Exception e) {
 		}
@@ -192,11 +189,8 @@ public final class HandshakingTest extends BaseTestCase {
 	 * Creates another connection to the backend.
 	 */
 	private Connection connect() throws Exception {
-		Connection conn = 
-			new Connection("localhost", TEST_PORT, 
-						   new UltrapeerHeaders("localhost"),
-						   new UltrapeerResponder());
-		conn.initialize();		
+		Connection conn = new Connection("localhost", TEST_PORT);
+		conn.initialize(new UltrapeerHeaders("localhost"), new UltrapeerResponder());		
 		return conn;
 	}
 
@@ -233,17 +227,12 @@ public final class HandshakingTest extends BaseTestCase {
 		 */
 		private final String CONNECT_STRING;
 
-		private static final Properties ULTRAPEER_PROPS =
-			new UltrapeerHeaders("localhost");
-
 		TestConnection() {
 			this(GNUTELLA_CONNECT_06);
 		}
 
 		TestConnection(String connectString) {
-			super("localhost", TEST_PORT, 
-				  ULTRAPEER_PROPS,
-				  new UltrapeerResponder());		
+			super("localhost", TEST_PORT);		
 			CONNECT_STRING = connectString;
 
 			try {

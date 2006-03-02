@@ -168,8 +168,8 @@ public abstract class ClientSideTestCase
          } else {
              responder = new OldResponder();
          }
-         Connection con = new Connection(socket, responder);
-         con.initialize();
+         Connection con = new Connection(socket);
+         con.initialize(null, responder);
          Boolean shouldReply = Boolean.TRUE;
          try {
              shouldReply = (Boolean)PrivilegedAccessor.invokeMethod(callingClass,

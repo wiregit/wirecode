@@ -167,8 +167,8 @@ public class CreationTimeCacheTest
          } else {
              responder = new OldResponder();
          }
-         Connection con = new Connection(socket, responder);
-         con.initialize();
+         Connection con = new Connection(socket);
+         con.initialize(null, responder);
          replyToPing(con, ultrapeer);
          return con;
      }

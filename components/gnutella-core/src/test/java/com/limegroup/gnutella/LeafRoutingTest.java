@@ -142,8 +142,8 @@ public class LeafRoutingTest extends BaseTestCase {
              responder = new EmptyResponder();
          }
          
-         Connection con = new Connection(socket, responder);
-         con.initialize();
+         Connection con = new Connection(socket);
+         con.initialize(null, responder);
          replyToPing(con, ultrapeer);
          return con;
      }
@@ -250,13 +250,10 @@ public class LeafRoutingTest extends BaseTestCase {
         
         props.put(HeaderNames.X_ULTRAPEER, "True");
         //props.put(HeaderNames.X_PROBE_QUERIES, PROBE_VERSION);
-        Connection c=new Connection("127.0.0.1", SERVER_PORT,
-                                    props,
-                                    new EmptyResponder()
-                                    );
+        Connection c = new Connection("127.0.0.1", SERVER_PORT);
 
         try {
-            c.initialize();
+            c.initialize(props, new EmptyResponder());
             fail("handshake should not have succeeded");
         } catch (IOException e) {
             // THESE VALUES WERE POPULATED DURING THE PING/PONG EXCHANGE
@@ -335,12 +332,9 @@ public class LeafRoutingTest extends BaseTestCase {
      * Tests to make sure that connections to old hosts are not allowed
      */
     public void testConnectionToOldDisallowed() {
-        Connection c=new Connection("127.0.0.1", SERVER_PORT,
-                                    new Properties(),
-                                    new EmptyResponder()
-                                    );
+        Connection c= new Connection("127.0.0.1", SERVER_PORT);
         try {
-            c.initialize();
+            c.initialize(new Properties(), new EmptyResponder());
             fail("handshake should not have succeeded");
         } catch (IOException e) {
         }        

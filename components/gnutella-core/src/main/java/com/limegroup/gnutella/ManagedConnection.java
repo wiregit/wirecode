@@ -275,6 +275,9 @@ public class ManagedConnection extends Connection
      */
     private byte[] clientGUID = DataUtils.EMPTY_GUID;
 
+    /** Whether or not the HandshakeResponder should use locale preferencing during handshaking. */
+    private boolean _useLocalPreference;
+
     /**
      * Creates a new outgoing connection to the specified host on the
 	 * specified port.  
@@ -283,26 +286,10 @@ public class ManagedConnection extends Connection
 	 * @param port the port the host is listening on
      */
     public ManagedConnection(String host, int port) {
-        this(host, port, 
-			 (RouterService.isSupernode() ? 
-			  (Properties)(new UltrapeerHeaders(host)) : 
-			  (Properties)(new LeafHeaders(host))),
-			 (RouterService.isSupernode() ?
-			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
-			  (HandshakeResponder)new LeafHandshakeResponder(host)));
+        super(host, port);
+        _manager = RouterService.getConnectionManager();
     }
-
-	/**
-	 * Creates a new <tt>ManagedConnection</tt> with the specified 
-	 * handshake classes and the specified host and port.
-	 */
-	private ManagedConnection(String host, int port, 
-							  Properties props, 
-							  HandshakeResponder responder) {	
-        super(host, port, props, responder);        
-        _manager = RouterService.getConnectionManager();		
-	}
-
+      
     /**
      * Creates an incoming connection.
      * ManagedConnections should only be constructed within ConnectionManager.
@@ -312,12 +299,7 @@ public class ManagedConnection extends Connection
      *  Gnutella handshake.
      */
     ManagedConnection(Socket socket) {
-        super(socket, 
-			  RouterService.isSupernode() ? 
-			  (HandshakeResponder)(new UltrapeerHandshakeResponder(
-			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new LeafHandshakeResponder(
-				  socket.getInetAddress().getHostAddress())));
+        super(socket);
         _manager = RouterService.getConnectionManager();
     }
     
@@ -333,14 +315,37 @@ public class ManagedConnection extends Connection
      * created with a pre-existing Socket this will return immediately.  Otherwise,
      * this will block while connecting or initializing the handshake.
      * return immediately, 
+     * 
      * @param observer
      * @throws IOException
      * @throws NoGnutellaOkException
      * @throws BadHandshakeException
      */
     public void initialize(GnetConnectObserver observer) throws IOException, NoGnutellaOkException, BadHandshakeException {
+        Properties requestHeaders;
+        HandshakeResponder responder;
+        
+        if(isOutgoing()) {
+            String host = getAddress();
+            if(RouterService.isSupernode()) {
+                requestHeaders = new UltrapeerHeaders(host);
+                responder = new UltrapeerHandshakeResponder(host);
+            } else {
+                requestHeaders = new LeafHeaders(host);
+                responder = new LeafHandshakeResponder(host);
+            }
+        } else {
+            String host = getSocket().getInetAddress().getHostAddress();
+            requestHeaders = null;
+            if(RouterService.isSupernode()) {
+                responder = new UltrapeerHandshakeResponder(host);
+            } else {
+                responder = new LeafHandshakeResponder(host);
+            }
+        }        
+        
         // Establish the socket (if needed), handshake.
-        super.initialize(CONNECT_TIMEOUT, observer);
+        super.initialize(requestHeaders, responder, CONNECT_TIMEOUT, observer);
         
         // Nothing else should be done here.  All post-init-sequences
         // should be triggered from finishInitialize, which will be called
@@ -350,8 +355,11 @@ public class ManagedConnection extends Connection
     /**
      * Completes the initialization process.
      */
-    protected void finishInitialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
-        super.finishInitialize();
+    protected void preHandshakeInitialize(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
+      throws IOException, NoGnutellaOkException, BadHandshakeException {
+        responder.setLocalePreferencing(_useLocalPreference);
+        
+        super.preHandshakeInitialize(requestHeaders, responder, observer);
 
         // Start our OutputRunner.
         startOutput();
@@ -1246,7 +1254,7 @@ public class ManagedConnection extends Connection
      * (in Connection.java: conclude..))
      */
     public void setLocalePreferencing(boolean b) {
-        RESPONSE_HEADERS.setLocalePreferencing(b);
+        _useLocalPreference = b;
     }
     
     public void reply(Message m){

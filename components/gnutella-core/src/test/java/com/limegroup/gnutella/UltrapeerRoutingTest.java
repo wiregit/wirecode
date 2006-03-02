@@ -114,23 +114,9 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	}
 	
 	private void buildConnections() {
-	    LEAF =
-			new Connection("localhost", PORT, 
-						   new LeafHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-        
-        ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-
-        ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+	    LEAF = new Connection("localhost", PORT);
+        ULTRAPEER_1 = new Connection("localhost", PORT);
+        ULTRAPEER_2 = new Connection("localhost", PORT); 
     }
 
 	public void setUp() throws Exception {
@@ -206,12 +192,12 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		buildConnections();
         
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
+        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
+        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         
         //3. routed leaf, with route table for "test"
-        LEAF.initialize();
+        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder());
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
