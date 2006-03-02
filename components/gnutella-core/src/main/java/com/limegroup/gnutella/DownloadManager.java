@@ -65,6 +65,7 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -128,10 +129,10 @@ public class DownloadManager implements BandwidthTracker {
     private int innetworkCount = 0;
     
     /**
-     * files that we have sent an udp pushes and are waiting a connection from.
+     * number of files that we have sent a udp push for and are waiting a connection.
      * LOCKING: obtain UDP_FAILOVER if manipulating the contained sets as well!
      */
-    private final Map /* of byte [] guids -> Set of Strings*/ 
+    private final Map /* of byte[] guids -> IntWrapper */ 
         UDP_FAILOVER = new TreeMap(new GUID.GUIDByteComparator());
     
     /**
@@ -950,7 +951,7 @@ public class DownloadManager implements BandwidthTracker {
         }
         
         // if the push was sent through udp, make sure we cancel the failover push.
-        cancelUDPFailover(clientGUID, file);
+        cancelUDPFailover(clientGUID);
         
         // 2. Attempt to give to an existing downloader.
         synchronized (this) {
@@ -1409,13 +1410,13 @@ public class DownloadManager implements BandwidthTracker {
      * @param file
      */
     private void addUDPFailover(RemoteFileDesc file) {
-        synchronized(UDP_FAILOVER) {
+        synchronized (UDP_FAILOVER) {
             byte[] key = file.getClientGUID();
-            Set files = (Set)UDP_FAILOVER.get(key);
-            if (files==null)
-                files = new HashSet();
-            files.add(file.getFileName());
-            UDP_FAILOVER.put(key,files);
+            IntWrapper requests = (IntWrapper)UDP_FAILOVER.get(key);
+            if (requests==null)
+            	requests = new IntWrapper(0);
+            requests.addInt(1);
+            UDP_FAILOVER.put(key,requests);
         }
     }
     
@@ -1423,15 +1424,14 @@ public class DownloadManager implements BandwidthTracker {
      * Removes data from UDP_FAILOVER, indicating a push has used it.
      * 
      * @param guid
-     * @param file
      */
-    private void cancelUDPFailover(byte[] clientGUID, String file) {
+    private void cancelUDPFailover(byte[] clientGUID) {
         synchronized (UDP_FAILOVER) {
             byte[] key = clientGUID;
-            Set files = (Set) UDP_FAILOVER.get(key);
-            if (files != null) {
-                files.remove(file);
-                if (files.isEmpty())
+            IntWrapper requests = (IntWrapper)UDP_FAILOVER.get(key);
+            if (requests != null) {
+            	requests.addInt(-1);
+                if (requests.getInt() <= 0)
                     UDP_FAILOVER.remove(key);
             }
         }
@@ -1615,11 +1615,10 @@ public class DownloadManager implements BandwidthTracker {
            byte[] key =_file.getClientGUID();
            
            synchronized(UDP_FAILOVER) {
-               Set files = (Set) UDP_FAILOVER.get(key);
-               
-               if (files!=null && files.contains(_file.getFileName())) {
-                   files.remove(_file.getFileName());
-                   if (files.isEmpty())
+               IntWrapper requests = (IntWrapper)UDP_FAILOVER.get(key);
+               if (requests!=null && requests.getInt() > 0) {
+            	   requests.addInt(-1);
+                   if (requests.getInt() == 0)
                        UDP_FAILOVER.remove(key);
                    return true;
                }
