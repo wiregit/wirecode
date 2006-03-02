@@ -373,11 +373,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     
     ////////////////datastructures used only for pushes//////////////
     /**
-     * Push downloads insert their PushObserver into this map so that when
+     * Push downloads insert their HTTPConnectObserver into this map so that when
      * this downloader is notified of a push, it can send the event to the
      * observer.        
      */
-    private Map /* MiniRemoteFileDesc -> ConnectObserver */ pushObservers;
+    private Map /* MiniRemoteFileDesc -> HTTPConnectObserver */ pushObservers;
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
@@ -1555,14 +1555,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public boolean acceptDownload(String file, Socket socket, int index, byte[] clientGUID) {
         MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
-        ConnectObserver observer =  (ConnectObserver) pushObservers.remove(mrfd);
+        HTTPConnectObserver observer =  
+            (HTTPConnectObserver) pushObservers.remove(mrfd);
         
         if(observer == null) //not in map. Not intended for me
             return false;
         
-        try {
-            observer.handleConnect(socket);
-        } catch(IOException impossible) {}
+        observer.handleConnect(socket);
         
         return true;
     }
@@ -1572,7 +1571,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @param observer
      * @param mrfd
      */
-    void registerPushObserver(ConnectObserver observer, MiniRemoteFileDesc mrfd) {
+    void registerPushObserver(HTTPConnectObserver observer, MiniRemoteFileDesc mrfd) {
         pushObservers.put(mrfd, observer);
     }
     
@@ -1583,7 +1582,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @param shutdown
      */
     void unregisterPushObserver(MiniRemoteFileDesc mrfd, boolean shutdown) {
-        ConnectObserver observer = (ConnectObserver)pushObservers.remove(mrfd);
+        HTTPConnectObserver observer = 
+            (HTTPConnectObserver)pushObservers.remove(mrfd);
         if(observer != null && shutdown)
             observer.shutdown();
     }

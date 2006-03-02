@@ -83,9 +83,9 @@ public class DownloadWorker {
       the socket. 
       
       When establishConnection() realizes that it needs to do a push, it gives the
-      manager its PushObserver (a ConnectObserver) and a mini-RFD.  When the manager
+      manager its HTTPConnectObserver (a ConnectObserver) and a mini-RFD.  When the manager
       is notified that a push was accepted (via acceptDownload) with that mini-RFD,
-      it will notify the PushObserver using handleConnect(Socket).
+      it will notify the HTTPConnectObserver using handleConnect(Socket).
       
       Note: The establishConnection method schedules a Runnable to remove the observer
       in a short amount of time (about 9 seconds).  If the observer hasn't already 
@@ -577,7 +577,7 @@ public class DownloadWorker {
      * This method will return immediately and the given observer will
      * be notified of success or failure.
      */
-    private void connectWithPush(ConnectObserver observer) {
+    private void connectWithPush(HTTPConnectObserver observer) {
         if(!_interrupted) {
             LOG.trace("WORKER: attempt push connection");
             _connectObserver = null;
@@ -1257,7 +1257,7 @@ public class DownloadWorker {
     /**
      * A ConnectObserver for starting the download via a push connect.
      */
-    private class PushConnector implements ConnectObserver {
+    private class PushConnector extends HTTPConnectObserver {
         private boolean forgetOnFailure;
         private boolean directConnectOnFailure;
         
@@ -1319,15 +1319,12 @@ public class DownloadWorker {
                 connectDirectly(new DirectConnector(false));
             }
         }
-
-        // unused
-        public void handleIOException(IOException iox) {}
     }
     
     /**
      * A ConnectObserver for starting the download via a direct connect.
      */
-    private class DirectConnector implements ConnectObserver {
+    private class DirectConnector extends HTTPConnectObserver {
         private long createTime = System.currentTimeMillis();
         private boolean pushConnectOnFailure;
         private Socket connectingSocket;
@@ -1387,8 +1384,5 @@ public class DownloadWorker {
         Socket getSocket() {
             return this.connectingSocket;
         }
-
-        // unused.
-        public void handleIOException(IOException iox) {}
     }
 }
