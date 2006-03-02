@@ -60,9 +60,12 @@ public class LongSetting extends AbstractNumberSetting {
     }
 
     protected boolean isInRange(String value) {
+        return isInRange(Long.parseLong(value));
+    }
+    
+    protected boolean isInRange(long value) {
         long max = ((Long)MAX_VALUE).longValue();
         long min = ((Long)MIN_VALUE).longValue();
-        long val = Long.parseLong(value);
-        return (val <= max && val >= min);
+        return (value <= max && value >= min);
     }
 }

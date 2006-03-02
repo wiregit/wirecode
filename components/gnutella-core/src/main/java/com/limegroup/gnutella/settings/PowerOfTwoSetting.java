@@ -29,17 +29,18 @@ public final class PowerOfTwoSetting extends LongSetting {
     }
     
     /** Utility method to determine if a long is zero or a power of two */
-    public static final boolean isPowerOfTwo(long x) {
+    private static final boolean isPowerOfTwo(long x) {
         if (x <= 0) {
             return false;
         }
         return ((~x+1)&x) == x;
     }
     
-    // isInRange is slightly abused as an "isInputAcceptable" method here
-    protected boolean isInRange(String value) {
-        long val = Long.parseLong(value);
-        if (! isPowerOfTwo(val)) {
+    // isInRange(long) is slightly abused here, unless "range" is used in
+    // the sense of the set of possible outputs (known as the "range" or
+    // "co-domain" of a mathematical function)
+    protected boolean isInRange(long value) {
+        if (! isPowerOfTwo(value)) {
             return false;
         }
         return super.isInRange(value);
