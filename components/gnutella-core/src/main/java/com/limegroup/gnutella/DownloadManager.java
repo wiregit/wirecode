@@ -1373,8 +1373,7 @@ public class DownloadManager implements BandwidthTracker {
         if(!RouterService.acceptedIncomingConnection()) {
             // if we can do FWT, offload a TCP pusher.
             if(UDPService.instance().canDoFWT()) {
-                addUDPFailover(file);
-                ThreadFactory.startThread(new PushFailoverRequestor(file, guid, observer), "FWT PushRequestor");
+                ThreadFactory.startThread(new PushRequestor(file, guid, observer), "FWT PushRequestor");
             } else if(observer != null) {
                     observer.shutdown();
             }
@@ -1575,44 +1574,59 @@ public class DownloadManager implements BandwidthTracker {
     /**
      * sends a tcp push if the udp push has failed.
      */
-    private class PushFailoverRequestor implements Runnable {
+    private class PushRequestor implements Runnable {
         
         final RemoteFileDesc _file;
         final byte [] _guid;
         final ConnectObserver _observer;
         
-        public PushFailoverRequestor(RemoteFileDesc file,
+        public PushRequestor(RemoteFileDesc file,
                                      byte[] guid,
                                      ConnectObserver observer) {
             _file = file;
             _guid = guid;
             _observer = observer;
         }
-        
+                
         public void run() {
-            boolean proceed = false;
-            
-            byte[] key =_file.getClientGUID();
-
-            synchronized(UDP_FAILOVER) {
-                Set files = (Set) UDP_FAILOVER.get(key);
-            
-                if (files!=null && files.contains(_file.getFileName())) {
-                    proceed = true;
-                    files.remove(_file.getFileName());
-                    if (files.isEmpty())
-                        UDP_FAILOVER.remove(key);
-                }
-            }
-            
-            if (proceed) {
+            if (shouldProceed()) {
                 if (!sendPushTCP(_file, _guid)) {
                     if(_observer != null)
                         _observer.shutdown();
                 }
             }
         }
+        
+        protected boolean shouldProceed() {
+            return true;
+        }
     }
+    
+   private class PushFailoverRequestor extends PushRequestor {
+       
+       public PushFailoverRequestor(RemoteFileDesc file,
+               byte[] guid,
+               ConnectObserver observer) {
+           super(file, guid, observer);
+       }
+       
+       protected boolean shouldProceed() {
+           byte[] key =_file.getClientGUID();
+           
+           synchronized(UDP_FAILOVER) {
+               Set files = (Set) UDP_FAILOVER.get(key);
+               
+               if (files!=null && files.contains(_file.getFileName())) {
+                   files.remove(_file.getFileName());
+                   if (files.isEmpty())
+                       UDP_FAILOVER.remove(key);
+                   return true;
+               }
+           }
+           
+           return false;
+       }
+   }
 
     /**
      * Once an in-network download finishes, the UpdateHandler is notified.
