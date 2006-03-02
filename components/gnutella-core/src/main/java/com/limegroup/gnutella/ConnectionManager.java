@@ -2055,8 +2055,8 @@ public class ConnectionManager {
 
         /** Callback that an endpoint is available for connecting. */
         public void handleEndpoint(Endpoint endpoint) {
-            assert endpoint != null;
-
+            Assert.that(endpoint != null);
+            
             // If this was an invalid endpoint, try again.
             if (!IPFilter.instance().allow(endpoint.getAddress()) || isConnectedTo(endpoint.getAddress())) {
                 _catcher.getAnEndpoint(this);
