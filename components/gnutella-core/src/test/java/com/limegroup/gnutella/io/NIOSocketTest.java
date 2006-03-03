@@ -1,18 +1,20 @@
 package com.limegroup.gnutella.io;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
+import java.nio.channels.ReadableByteChannel;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests that NIOSocket delegates events correctly.
@@ -110,12 +112,17 @@ public final class NIOSocketTest extends BaseTestCase {
     
     public void testBlockingConnectFailing() throws Exception {
         NIOSocket socket = new NIOSocket();
+        
+        // Measure time for testNonBlockingConnectFailing()
+        //long start = System.currentTimeMillis();
         try {
             socket.connect(new InetSocketAddress("www.google.com", 9999));
             fail("shouldn't have connected");
         } catch(ConnectException iox) {
             assertFalse(socket.isConnected());
         }
+        //long end = System.currentTimeMillis();
+        //System.out.println("Time: " + (end-start));
     }
     
     public void testBlockingConnectTimesOut() throws Exception {
@@ -146,8 +153,14 @@ public final class NIOSocketTest extends BaseTestCase {
     public void testNonBlockingConnectFailing() throws Exception {
         NIOSocket socket = new NIOSocket();
         StubConnectObserver observer = new StubConnectObserver(); 
-        socket.connect(new InetSocketAddress("www.google.com", 9999), 60000, observer);
-        observer.waitForResponse(30000);
+        
+        // IMPORTANT: The waitForResponse() timeout must be 
+        // set to about the same time that testBlockingConnectFailing() 
+        // needs to pass the test which depends on the operatin system
+        // and the remote host.
+        socket.connect(new InetSocketAddress("www.google.com", 9999), 90000, observer);
+        observer.waitForResponse(80000);
+        
         assertTrue(observer.isShutdown());
         assertNull(observer.getSocket());
         assertNull(observer.getIoException()); // NIOSocket swallows the IOX.
