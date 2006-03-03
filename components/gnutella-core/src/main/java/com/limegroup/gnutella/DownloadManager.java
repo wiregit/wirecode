@@ -901,6 +901,9 @@ public class DownloadManager implements BandwidthTracker {
     }
 
     /**
+     * 
+     * TODO:kfaaborg:giv
+     * 
      * Accepts the given socket for a push download to this host.
      * If the GIV is for a file that was never requested or has already
      * been downloaded, this will deal with it appropriately.  In any case
@@ -909,10 +912,13 @@ public class DownloadManager implements BandwidthTracker {
      *     @requires "GIV " was just read from s
      */
     public void acceptDownload(Socket socket) {
+        
         Thread.currentThread().setName("PushDownloadThread");
+        
         try {
+            
             //1. Read GIV line BEFORE acquiring lock, since this may block.
-            GIVLine line=parseGIV(socket);
+            GIVLine line = parseGIV(socket);
             String file=line.file;
             int index=line.index;
             byte[] clientGUID=line.clientGUID;
@@ -1405,7 +1411,10 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
-    /** 
+    /**
+     * 
+     * TODO:kfaaborg:giv
+     * 
      * Returns the file, index, and client GUID from the GIV request from s.
      * The input stream of s is positioned just after the GIV request,
      * immediately before any HTTP.  If s is closed or the line couldn't
@@ -1414,8 +1423,10 @@ public class DownloadManager implements BandwidthTracker {
      *     @modifies s's input stream.
      */
     private static GIVLine parseGIV(Socket s) throws IOException {
+        
         //1. Read  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
         String command;
+        
         try {
             //The try-catch below is a work-around for JDK bug 4091706.
             InputStream istream=null;
@@ -1424,6 +1435,7 @@ public class DownloadManager implements BandwidthTracker {
             } catch (Exception e) {
                 throw new IOException();
             }
+            
             ByteReader br = new ByteReader(istream);
             command = br.readLine();      // read in the first line
             if (command==null)

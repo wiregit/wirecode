@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.IOException;
@@ -392,28 +395,46 @@ public class ByteOrder {
         os.write((byte) x       );
     }
 
+    //done
+
     /**
+     * Write a number in little endian bytes, only using the number of bytes necessary.
+     * For instance, the int 0x00002211 will become the byte array {0x11, 0x22} of 2 bytes in little endian order.
+     * 
      * Returns the minimum number of bytes needed to encode x in little-endian
      * format, assuming x is non-negative.  Note that leb2int(int2leb(x)) == x.
-     * @param x a non-negative integer
+     * 
+     * @param     x                        An int that is 0 or positive
      * @exception IllegalArgumentException x is negative
      */
-    public static byte[] int2minLeb(final int x)
-            throws IllegalArgumentException {
+    public static byte[] int2minLeb(final int x) throws IllegalArgumentException {
+
+        // The given number will fit in 2 bytes
         if (x <= 0xFFFF) {
+
+            // The given number will fit in 1 byte
             if (x <= 0xFF) {
-                if (x < 0)
-                    throw new IllegalArgumentException();
+
+                // Make sure the number is positive
+                if (x < 0) throw new IllegalArgumentException();
+
+                // Return 1 byte with that value
                 return new byte[] {(byte)x};
             }
+
+            // Return a byte array of 2 bytes, cast x to byte to get the lowest part in the first byte, then shift the high bits down and cast for the second
             return new byte[] {(byte)x, (byte)(x >> 8)};
         }
-        if (x <= 0xFFFFFF)
-            return new byte[] {(byte)x, (byte)(x >> 8), (byte)(x >> 16)};
-        return new byte[] {
-            (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24)};
+
+        // The number will fit in 3 bytes, shift to return it in little endian order
+        if (x <= 0xFFFFFF) return new byte[] {(byte)x, (byte)(x >> 8), (byte)(x >> 16)};
+
+        // The number will fit in 4 bytes
+        return new byte[] { (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24)};
     }
-    
+
+    //do
+
     /**
      * Returns the minimum number of bytes needed to encode x in little-endian
      * format, assuming x is non-negative.

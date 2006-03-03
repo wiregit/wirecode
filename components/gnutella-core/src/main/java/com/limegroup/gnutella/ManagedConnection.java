@@ -306,6 +306,16 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * receive() and receive(int) are not used at all anymore.
  * flush() does nothing, the chain of writers will take care of moving data out.
  * The nested class BlockingRunner is also not used.
+ * 
+ * === Interfaces ===
+ * 
+ * ManagedConnection implements the ReplyHandler, MessageReceiver, and SentMessageHandler interfaces.
+ * As a ReplyHandler, LimeWire lists a ManagedConnection object in a RouteTable to send pongs back where a ping came from.
+ * UDPReplyHandler and ForMeReplyHandler are the two other classes that implement ReplyHandler and can do this.
+ * 
+ * ManagedConnection is the only class in LimeWire that implements the MessageReceiver and SentMessageHandler interfaces.
+ * MessageReader is the only class that referes to the ManagedConnection it keeps as a MessageReceiver.
+ * MessageWriter is the only class that referes to the ManagedConnection it keeps as a SentMessageHandler.
  */
 public class ManagedConnection extends Connection implements ReplyHandler, MessageReceiver, SentMessageHandler {
 

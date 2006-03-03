@@ -34,7 +34,7 @@ import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
  * Extends and Implements
  * ChannelWriter: This object has a sink channel it writes to, setWriteChannel() and getWriteChannel().
  * WriteObserver: NIO can tell this object to get data and write now, handleWrite().
- * OutputRunner:  (do)
+ * OutputRunner:  This is the only class that implements OutputRunner, which gives it a send(m) method.
  */
 public class MessageWriter implements ChannelWriter, OutputRunner {
 
@@ -60,6 +60,11 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     private final ConnectionStats stats;
 
     /**
+     * The ManagedConnection object that represents the remote computer we're sending packets to.
+     * 
+     * ManagedConnection is the only class in LimeWire that implements the SentMessageHandler interface.
+     * This MessageWriter class is the only one that referes to a ManagedConnection as a SentMessageHandler.
+     * 
      * The handleWrite() method gets messages from this MessageWriter's message queue and writes them to the out buffer.
      * After it puts on in the out buffer, it calls sendHandler.processSentMessage(m).
      * This lets the SentMessageHandler see all the messages we are sending out.
@@ -104,6 +109,10 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      * Make a new MessageWriter with the given statistics, message queue, and message handler objects.
      * The new MessageWriter won't have a channel to write to.
      * Make sure you give it one with setWriteChannel(channel) before code calls the handleWrite method here.
+     * 
+     * @param stats       A ConnectionStats object this one can us to count the packets it writes
+     * @param queue       The MessageQueue that holds the messages we're going to write
+     * @param sendHandler The ManagedConnection object that represents the remote computer we're sending this packet to
      */
     public MessageWriter(ConnectionStats stats, MessageQueue queue, SentMessageHandler sendHandler) {
 
@@ -114,6 +123,11 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     /**
      * Make a new MessageWriter with the given statistics, message queue, and message handler objects.
      * Also give it the channel it will write to, the sink.
+     * 
+     * @param stats       A ConnectionStats object this one can us to count the packets it writes
+     * @param queue       The MessageQueue that holds the messages we're going to write
+     * @param sendHandler The ManagedConnection object that represents the remote computer we're sending this packet to
+     * @param sink        The channel we write data into
      */
     public MessageWriter(ConnectionStats stats, MessageQueue queue, SentMessageHandler sendHandler, InterestWriteChannel sink) {
 
@@ -241,7 +255,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             // Write the message into the output buffer
             m.writeQuickly(out);
 
-            // Give the message to the SentMessageHandler, which will measure it for statistics
+            // Give the message to the ManagedConnection object that represents the remote computer we just sent it to, which will measure it for statistics
             sendHandler.processSentMessage(m);
 
             // Move data from our out buffer into the channel

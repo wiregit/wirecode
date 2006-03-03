@@ -378,6 +378,7 @@ public class PingRequest extends Message {
     /**
      * Determine if this ping is a heartbeat ping.
      * Heartbeat pings have hops 1 and TTL 0.
+     * Computers send them to keep a TCP socket open that would close if it was silent for too long.
      * 
      * @return True if this ping has hops 1 and TTL 0
      */

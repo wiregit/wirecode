@@ -1015,6 +1015,8 @@ public class Acceptor implements Runnable {
 					HTTPStat.HEAD_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.HEAD, _socket, false);
 
+                // TODO:kfaaborg:giv
+
 				// "GIV"
 				// We're externally contactable, but a computer that has a file we want isn't
 				// We sent it a push packet with our IP address and the name of the file we want

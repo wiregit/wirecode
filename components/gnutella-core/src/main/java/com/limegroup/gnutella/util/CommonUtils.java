@@ -323,7 +323,7 @@ public final class CommonUtils {
             }
         }
         // in case this is a mainline version or NFE was caught (strange)
-        return 2;
+        return 4;
     }
 
     /**
@@ -359,7 +359,7 @@ public final class CommonUtils {
             }
         }
         // in case this is a mainline version or NFE was caught (strange)
-        return 7;
+        return 9;
     }
     
     static int getServiceVersionNumberInternal(String version) {

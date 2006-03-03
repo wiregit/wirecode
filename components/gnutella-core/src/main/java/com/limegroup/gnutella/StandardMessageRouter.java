@@ -22,6 +22,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
@@ -34,20 +35,33 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * This class is the message routing implementation for TCP messages.
+ * 
  */
 public class StandardMessageRouter extends MessageRouter {
 
     /**
      * 
      * 
-     * Responds to a Gnutella ping with cached pongs.  This does special 
+     * 
+     * 
+     * 
+     * Called when the computer represented by handler has sent us a ping.
+     * Here's what's happened so far:
+     * The MessageReader sliced data from a remote computer into a Gnutella packet, and parsed it into a new Message object.
+     * The message went to ManagedConnection.processReadMessage(m) which called ManagedConnection.handleMessageInternal(m).
+     * That method called MessageDispatcher.dispatchTCP(m, managedConnection), which packaged the message and connection objects for an asynchronous call.
+     * The "MessageDispatch" thread picked up the message and connection, and called MessageRouter.handleMessage(Message, ManagedConnection).
+     * MessageRouter.handleMessage() hopped the packet, moving 1 from TTL to hops, and sorted it to the next method.
+     * MessageRouter.handlePingRequestPossibleDuplicate() added the ping's GUID to the MessageRouter's RouteTable for pings and pongs.
+     * MessageRouter.handlePingRequest() made sure the remote computer that sent us this ping isn't pinging us too frequently.
+     * Control then reaches here.
+     * 
+     * Responds to a Gnutella ping with cached pongs.  This does special
      * handling for both "heartbeat" pings that were sent to ensure that
      * the connection is still live as well as for pings from a crawler.
-     *
-     * @param ping the <tt>PingRequest</tt> to respond to
-     * @param handler the <tt>ReplyHandler</tt> to send any pongs to
      * 
-     * 
+     * @param request A ping packet we received
+     * @param handler The remote computer that sent it to us over a TCP socket Gnutella connection
      */
     protected void respondToPingRequest(PingRequest ping, ReplyHandler handler) {
 
@@ -57,22 +71,35 @@ public class StandardMessageRouter extends MessageRouter {
          * leaves.  TODO: does this mean leaves always respond to pings?
          */
 
-        int hops = (int)ping.getHops();
-        int ttl = (int)ping.getTTL();
-        
-        if ((hops+ttl > 2) && !_manager.allowAnyConnection()) return;
+        // Get the hops and TTL from the packet, this is after MessageRouter.handleMessage() hopped it
+        int hops = (int)ping.getHops(); // The number of times the ping traveled between ultrapeers to get here
+        int ttl  = (int)ping.getTTL();  // The number of additional trips between ultrapeers the ping can make
 
-        // Only send pongs for ourself if we have a valid address & port.
-        if (NetworkUtils.isValidAddress(RouterService.getAddress()) && NetworkUtils.isValidPort(RouterService.getPort())) {
-            
+        /*
+         * We should only reply to this ping with a pong about us if we're an ultrapeer still hoping more computers will connect to us.
+         * Returning a pong about us will advertise us on the network, encouraging computers to try to connect.
+         * If all our connection slots are full, we don't want to advertise ourselves with a pong.
+         */
+
+        // Only respond with a pong if this ping was made with a TTL of 2 or less, or we have an available slot of any kind
+        if ((hops + ttl > 2) &&             // If this ping was made with a TTL of 3 or more, and
+            !_manager.allowAnyConnection()) // We're a leaf, or we're an ultrapeer with all the ultrapeer and leaf connections we need
+            return;                         // Leave without responding to this ping
+
+        // Before we make a a pong about us, make sure our externally contactable IP address and port number look right
+        if (NetworkUtils.isValidAddress(RouterService.getAddress()) && // Make sure our IP address we'll advertise doesn't start 0 or 255
+            NetworkUtils.isValidPort(RouterService.getPort())) {       // Make sure our port number we'll advertise isn't 0 or too big to fit in 2 bytes
+
             /*
              * SPECIAL CASE: for crawler ping
              * TODO:: this means that we can never send TTL=2 pings without
              * them being interpreted as from the crawler!!
              */
 
+            // If this ping has a hops and TTL of 1, it's a special ping from the crawler
             if (hops == 1 && ttl == 1) {
 
+                // Handle it seprately, and leave
                 handleCrawlerPing(ping, handler);
                 return;
 
@@ -83,29 +110,108 @@ public class StandardMessageRouter extends MessageRouter {
                  */
             }
 
-            // handle heartbeat pings specially -- bypass pong caching code
+            // If this ping has 1 hop and 0 TTL, it's just for keeping the TCP connection from closing because it's been quiet too long
             if (ping.isHeartbeat()) {
 
+                /*
+                 * handle heartbeat pings specially -- bypass pong caching code
+                 */
+
                 sendPingReply(
-                    PingReply.create(ping.getGUID(), (byte)1),
+                    PingReply.create(ping.getGUID(),
+                    (byte)1),
                     handler);
 
                 return;
             }
-    
-            //send its own ping in all the cases
-            int newTTL = hops + 1;
 
-            if ((hops + ttl) <= 2) newTTL = 1;
+            // Compute the TTL for the pong we'll send in reply to this ping
+            int newTTL = hops + 1;             // Give the pong a TTL of the ping's hops and one more, making sure it can make it back to the computer that sent the ping
+            if ((hops + ttl) <= 2) newTTL = 1; // If the ping's original TTL was 1 or 2, only let our pong travel one hop
 
             /*
              * send our own pong if we have free slots or if our average
              * daily uptime is more than 1/2 hour
              */
 
-            if (RouterService.getConnectionManager().hasFreeSlots() || Statistics.instance().calculateDailyUptime() > 60 * 30) {
+            // Only send a pong if we're an ultrapeer with free slots, or we're a leaf right now but have an average daily uptime of over a half hour
+            if (RouterService.getConnectionManager().hasFreeSlots() ||    // Only send a pong if we want more computers to connect to us, or
+                Statistics.instance().calculateDailyUptime() > 60 * 30) { // On an average day, we're online more than 30 minutes
 
-                PingReply pr = PingReply.create(ping.getGUID(), (byte)newTTL);
+                // Make a new pong packet about us
+                PingReply pr = PingReply.create(
+                    ping.getGUID(), // Give the pong the same message GUID as the ping, letting the Gnutella network route the pong back to the compuer that made the ping
+                    (byte)newTTL);  // The TTL for the pong we computed above
+
+                /*
+                 * Tour Point: Inside a packet.
+                 * 
+                 * Here's what this pong looks like:
+                 * 
+                 * 74 73 28 3d 74 3a 8b f9  ts(=t:--  aaaaaaaa
+                 * c0 33 87 6f 76 39 e9 00  -3-ov9--  aaaaaaaa
+                 * 01 03 00 2d 00 00 00 e7  --------  bcdeeeef
+                 * 18 d8 1b 9e 4a 01 00 00  ----J---  fgggghhh
+                 * 00 00 20 00 00 c3 02 44  -------D  hiiiijkk
+                 * 55 42 35 07 03 4c 4f 43  UB5--LOC  kkkkllll
+                 * 43 65 6e 02 02 55 50 43  Cen--UPC  llllmmmm
+                 * 01 1c 1b 82 56 43 45 4c  ----VCEL  mmmnnnnn
+                 * 49 4d 45 49              IMEI      nnnn
+                 * 
+                 * a is the 16 byte message GUID from the ping.
+                 * b is 0x01, the byte code for a pong.
+                 * c is the TTL, here shown as 3.
+                 * d is the hops, 0.
+                 * 
+                 * e is the length of the payload, 0x2d, which is 45 bytes.
+                 * The length is 4 bytes in little endian order, like 2d 00 00 00.
+                 * 
+                 * f is the port number this computer is listening on right now, e7 18, little endian 0x18e7, port number 6375.
+                 * g is this computer's IP address, d8 1b 9e 4a, 216.27.158.74, with the bytes in the same order as the text.
+                 * h is the number of files this computer is sharing, 1, in little endian order 01 00 00 00.
+                 * 
+                 * i is total size in KB of shared data here, adjusted to the nearest power of 2.
+                 * The little endian 00 20 00 00 is 0x2000, 8192 KB, which is bigger than the one file I'm sharing.
+                 * 
+                 * j is 0xC3, the byte that begins a GGEP block, and the remaining lettered regions are GGEP extensions.
+                 * k is 0000 0010 "DU"  0100 0010 35 07.
+                 * l is 0000 0011 "LOC" 0100 0011 "en" 02.
+                 * m is 0000 0010 "UP"  0100 0011 01 1c 1b.
+                 * n is 1000 0010 "VC"  0100 0101 "LIME" 27.
+                 * 
+                 * The first byte in each extension contains flags and a length.
+                 * The first bit marks the last extension, and is set only in "VC".
+                 * The second bit is 0 because none of the extension values are COBS encoded.
+                 * We don't need to hide 0 values in a GGEP block in a pong.
+                 * The third bit is 0 because none of the extension values are deflate compressed.
+                 * The right 4 bits are the length of the extension name, like 0010 2 for "DU" and 0011 3 for "LOC".
+                 * 
+                 * The byte after the tag holds the length of the value.
+                 * The bytes all start 01 because the lengths all fit in 1 byte.
+                 * The remianing 6 bits hold the length, like 10 2 for "35 07" and "101" 5 for "LIME 27".
+                 * 
+                 * k is 0000 0010 "DU" 0100 0010 35 07, Daily Uptime.
+                 * The value is the number of seconds this computer is online in an average day.
+                 * The two bytes in the value 35 07 are little endian 0x00000735, 1845 seconds, a little over 30 minutes.
+                 * 
+                 * l is 0000 0011 "LOC" 0100 0011 "en" 02, Locale preference.
+                 * "en" is for English, and 2 is the number of additional ultrapeers I want that also prefer English.
+                 * 
+                 * m is 0000 0010 "UP" 0100 0011 01 1c 1b, Ultrapeer.
+                 * I'm sending this tag because LimeWire is running as an ultrapeer right now.
+                 * The value is 3 bytes, "01 1c 1b".
+                 * The first byte is the version of the ultrapeer protocol the computer supports, 0.1, squashed into a single byte.
+                 * The second byte is the number of free leaf slots I have, 28.
+                 * The third byte is the number of free ultrapeer slots I have, 27.
+                 * 
+                 * n is 1000 0010 "VC" 0100 0101 "LIME" 49, Vendor Code.
+                 * The first 4 bytes are "LIME" for LimeWire.
+                 * The last byte is 0x49 0100 1001 4 and 9 for LimeWire version 4.9.
+                 * 
+                 * Once we realize we're externally contactable for UDP, we'll also include the "GUE" extension.
+                 */
+
+                // Send it to the remote computer that sent us this ping
                 sendPingReply(pr, handler);
             }
         }

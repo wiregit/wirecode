@@ -1203,6 +1203,7 @@ public abstract class Message implements Serializable, Comparable {
 
     /**
      * Get the time we made this Message object.
+     * This is the time we got the packet, and can tell us how long we've had it.
      * This time isn't part of the information we send when we send the Gnutella packet.
      * 
      * @return The time in milliseconds since 1970 that the program made this Message object

@@ -13,25 +13,25 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 
 /**
- * Reads uncompressed data from a remote computer, slices it into Gnutella packets, and hands them to the MessageReceiver.
- * Code somewhere else realizes there's more uncompressed data for a MessageReader object to slice, it calls handleRead() on it.
+ * Reads uncompressed data from a remote computer, slices it into Gnutella packets, and hands them to the ManagedConnection that's sending us the data.
+ * NIO realizes there's more uncompressed data for a MessageReader object to slice, it calls handleRead() on it.
  * 
  * You can make a new MessageReader object without giving it a source channel to read from.
- * If you do this, make sure you give it a channel with setReaderChannel(channel) before something calls handleRead() on it.
- * To change the channel later, call setReaderChannel(newchannel).
+ * If you do this, make sure you give it a channel with setReadChannel(channel) before something calls handleRead() on it.
+ * To change the channel later, call setReadChannel(newchannel).
  * 
  * A channel's read() method returns 0 if there is no more data right now, and -1 if there will never be any more data, ever.
  * Getting the -1 is like hitting the end of a file.
  * The remote computer should keep sending us Gnutella packets until we disconnect, so a call to channel.read() should never return -1.
  * If it does, handleRead() throws an IOException with the text "eof".
  * 
- * Each time code calls handleRead(), this MessageReader will read as much data as it can from the source channel.
+ * Each time NIO calls handleRead(), this MessageReader will read as much data as it can from the source channel.
  * It will only stop when the source channel runs out of data.
  * 
  * MessageReader implements the ChannelReadObserver interface.
  * This interface combines the ChannelReader and ReadObserver interfaces.
  * ChannelReader means this object has a channel it can read from.
- * You can set it and get what you set with setReadChannel and getReadChannel.
+ * You can set it and get what you set with setReadChannel() and getReadChannel().
  * ReadObserver means this object can be told when it should read.
  * Code can call handleRead() on it to make it read now.
  * 
@@ -56,8 +56,15 @@ public class MessageReader implements ChannelReadObserver {
     /** The buffer for the payload, allocated to be exactly the right size for each packet. */
     private ByteBuffer payload;
 
-    /** A link back to the ManagedConnection object that we'll give the sliced packets to. */
-    private final MessageReceiver receiver; // ManagedConnection implements the MessageReceiver interface
+    /**
+     * The ManagedConnection object that represents the remote computer sending us data.
+     * This is also the object we'll give the packets we slice back to.
+     * 
+     * ManagedConnection is the only class in LimeWire that implements the MessageReceiver interface.
+     * This MessageReader class is the only one that referes to a ManagedConnection as a MessageReceiver.
+     */
+    private final MessageReceiver receiver;
+
     /** The source channel this MessageReader reads data from the remote computer through. */
     private ReadableByteChannel channel;
 
@@ -80,16 +87,16 @@ public class MessageReader implements ChannelReadObserver {
      * Make a new MessageReader object with the given source channel and MessageReceiver object
      * 
      * @param channel  The source channel this MessageReader object will read from
-     * @param receiver The ManagedConnection object that we'll give sliced packets to
+     * @param receiver The ManagedConnection object that the data is from, and which we'll give the sliced packets to
      */
     public MessageReader(ReadableByteChannel channel, MessageReceiver receiver) {
 
     	// Make sure the caller gave us a MessageReceiver, otherwise we'll have no object to give the messages
         if (receiver == null) throw new NullPointerException("null receiver");
 
-        // Save the given channel and receiver in this object
+        // Save the given channel and ManagedConnection in this object
         this.channel  = channel;
-        this.receiver = receiver; // The ManagedConnection object we'll give sliced packets to
+        this.receiver = receiver; // The ManagedConnection object the data we get is from, and that we'll give sliced packets to
 
         // Make the header buffer 23 bytes in little endian order
         this.header = ByteBuffer.allocate(HEADER_SIZE);
@@ -282,7 +289,7 @@ public class MessageReader implements ChannelReadObserver {
             shutdown = true;      // Mark this object shut down so the next time we don't get here
         }
 
-        // Tell the ManagedConnection object that we're shut down
+        // Tell the ManagedConnection object that NIO has shut us down
         receiver.messagingClosed();
     }
 

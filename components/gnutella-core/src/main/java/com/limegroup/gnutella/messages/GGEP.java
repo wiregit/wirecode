@@ -254,7 +254,8 @@ public class GGEP {
     /**
      * "LOC" Locale.
      * The language preference of the computer this pong describes.
-     * The value is text like "en" for English.
+     * The value is text like "en#" for English.
+     * The byte # is the number of additional ultrapeers we want that share our language preference.
      */
     public static final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
 

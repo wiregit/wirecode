@@ -463,17 +463,17 @@ public abstract class MessageRouter {
     //do
 
 	/**
+     * Hop a message, sort it by type, and hand it off to a message type specific method.
+     * All the Gnutella packets we get through TCP socket Gnutella connections come here.
      * 
+     * Here's what's happened to the message up to this point:
+     * The MessageReader sliced data from a remote computer into a Gnutella packet, and parsed it into a Message object.
+     * The message went to ManagedConnection.processReadMessage(m) which called ManagedConnection.handleMessageInternal(m).
+     * That method called MessageDispatcher.dispatchTCP(m, managedConnection), which packaged the message and connection for an asynchronous call.
+     * The "MessageDispatch" thread picked up the message and connection, and called this method here.
      * 
-     * The handler for all message types.  Processes a message based on the 
-     * message type.
-	 *
-	 * @param m the <tt>Message</tt> instance to route appropriately
-	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
-	 * the message was received
-     * 
-     * @param msg
-     * 
+     * @param msg                 A Gnutella packet we received
+     * @param receivingConnection The remote computer that sent it to us over a TCP socket Gnutella connection
      */
     public void handleMessage(Message msg, ManagedConnection receivingConnection) {
 
@@ -829,24 +829,33 @@ public abstract class MessageRouter {
 		}
 	}
 
-
-
+    //done
 
     /**
-     * The handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
-     * if the request has already been seen.  If not, calls handlePingRequest.
-     * 
+     * Adds the ping's message GUID and the ManagedConnection that sent it to us to our RouteTable for pings and pongs.
+     * If the GUID wasn't already listed, calls handlePingRequest(request, handler) to keep going.
      * 
      * handleMessage(Message, ManagedConnection) calls this.
      * 
-     * @param request
-     * @param handler
+     * @param request A ping packet we received
+     * @param handler The remote computer that sent it to us over a TCP socket Gnutella connection
      */
     final void handlePingRequestPossibleDuplicate(PingRequest request, ReplyHandler handler) {
 
-		if (_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null) handlePingRequest(request, handler);
+        // Add the ping to our route table, leaving without continuing if we already have its GUID
+		if (
+
+		    // Add the ping's message GUID and the ManagedConnection that sent us it to our RouteTable for pings and pongs
+            _pingRouteTable.tryToRouteReply(request.getGUID(), handler)
+
+            // tryToRouteReply() will return null if the GUID is already listed, or the ManagedConnection is closed
+            != null)
+
+            // If it didn't, keep going with handlePingRequest(request, handler)
+            handlePingRequest(request, handler);
     }
+
+    //do
 
     /**
      * The handler for PingRequests received in
@@ -863,11 +872,6 @@ public abstract class MessageRouter {
 
 		if (_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null) handleUDPPingRequest(request, handler, addr);
     }
-
-
-
-
-
 
     /**
      * The handler for QueryRequests received in
@@ -964,25 +968,38 @@ public abstract class MessageRouter {
 		return false;
 	}
 
+    //done
+
     /**
+     * Only continues if the ping has 1 hop and no TTL, or the remote computer it's from hasn't pinged us for at least 2.5 seconds.
+     * Calls respondToPingRequest(ping, handler) to keep going.
+     * 
      * Handles pings from the network.  With the addition of pong caching, this
      * method will either respond with cached pongs, or it will ignore the ping
      * entirely if another ping has been received from this connection very
      * recently.  If the ping is TTL=1, we will always process it, as it may
      * be a hearbeat ping to make sure the connection is alive and well.
-     *
-     * @param ping the ping to handle
-     * @param handler the <tt>ReplyHandler</tt> instance that sent the ping
+     * 
+     * @param request A ping packet we received
+     * @param handler The remote computer that sent it to us over a TCP socket Gnutella connection
      */
-    final private void handlePingRequest(PingRequest ping,
-                                         ReplyHandler handler) {
-        // Send it along if it's a heartbeat ping or if we should allow new 
-        // pings on this connection.
-        if(ping.isHeartbeat() || handler.allowNewPings()) {
+    final private void handlePingRequest(PingRequest ping, ReplyHandler handler) {
+
+        /*
+         * Send it along if it's a heartbeat ping or if we should allow new
+         * pings on this connection.
+         */
+
+        // Only reply with a pong if this ping is keeping the socket open, or the remote computer hasn't pinged us in awhile
+        if (ping.isHeartbeat() ||      // This ping has 1 hop and 0 TTL, the remote computer may have sent it to keep a quiet socket open
+            handler.allowNewPings()) { // It's been 2.5 seconds since we've received a ping from this remote computer
+
+            // The ping made it through those checks, keep going
             respondToPingRequest(ping, handler);
-        } 
+        }
     }
 
+    //do
 
     /**
      * The default handler for PingRequests received in
@@ -1909,8 +1926,7 @@ public abstract class MessageRouter {
      * sendPingReply(PingReply).
      * This method is called from the default handlePingRequest.
      */
-    protected abstract void respondToPingRequest(PingRequest request,
-                                                 ReplyHandler handler);
+    protected abstract void respondToPingRequest(PingRequest request, ReplyHandler handler);
 
 	/**
 	 * Responds to a ping received over UDP -- implementations

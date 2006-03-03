@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.IOException;
@@ -17,20 +20,28 @@ import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Manages state for push upload requests.
+ * 
+ * 
  */
 public final class PushManager {
-    
-    private static final Log LOG =
-      LogFactory.getLog(PushManager.class);
+
+    /** A debugging log we can write lines of text to as the program runs. */
+    private static final Log LOG = LogFactory.getLog(PushManager.class);
 
     /**
+     * 10000, 10 seconds in milliseconds.
+     * 
      * The timeout for the connect time while establishing the socket. Set to
      * the same value as NORMAL_CONNECT_TIME is ManagedDownloader.
      */
-    private static final int CONNECT_TIMEOUT = 10000;//10 secs
+    private static final int CONNECT_TIMEOUT = 10000;
 
 
 	/**
+     * 
+     * TODO:kfaaborg:giv
+     * 
+     * 
 	 * Accepts a new push upload.
      * NON-BLOCKING: creates a new thread to transfer the file.
 	 * <p>
@@ -50,45 +61,41 @@ public final class PushManager {
      * @param isFWTransfer whether or not to use a UDP pipe to service this
      * upload.
 	 */
-	public void acceptPushUpload(final String host, 
-                                 final int port, 
-                                 final String guid,
-                                 final boolean forceAllow,
-                                 final boolean isFWTransfer) {
-        if(LOG.isDebugEnabled())  {
-            LOG.debug("acceptPushUp ip:"+host+" port:"+port+
-              " FW:"+isFWTransfer);
+	public void acceptPushUpload(final String host, final int port, final String guid, final boolean forceAllow, final boolean isFWTransfer) {
+
+        if (LOG.isDebugEnabled()) {
+
+            LOG.debug("acceptPushUp ip:" + host + " port:" + port + " FW:" + isFWTransfer);
         }
-                                    
-        if( host == null )
-            throw new NullPointerException("null host");
-        if( !NetworkUtils.isValidPort(port) )
-            throw new IllegalArgumentException("invalid port: " + port);
-        if( guid == null )
-            throw new NullPointerException("null guid");
-                                    
+
+        if (host == null) throw new NullPointerException("null host");
+        if (!NetworkUtils.isValidPort(port)) throw new IllegalArgumentException("invalid port: " + port);
+        if (guid == null) throw new NullPointerException("null guid");
 
         FileManager fm = RouterService.getFileManager();
         
         // TODO: why is this check here?  it's a tiny optimization,
         // but could potentially kill any sharing of files that aren't
         // counted in the library.
-        if (fm.getNumFiles() < 1 && fm.getNumIncompleteFiles() < 1)
-            return;
+        
+        if (fm.getNumFiles() < 1 && fm.getNumIncompleteFiles() < 1) return;
 
         // We used to have code here that tested if the guy we are pushing to is
         // 1) hammering us, or 2) is actually firewalled.  1) is done above us
         // now, and 2) isn't as much an issue with the advent of connectback
 
-        Thread runner=new ManagedThread("PushUploadThread") {
+        Thread runner = new ManagedThread("PushUploadThread") {
+
             public void managedRun() {
+
                 Socket s = null;
+
                 try {
-        			// try to create the socket.
-                    if (isFWTransfer)
-                        s = new UDPConnection(host, port);
-                    else 
-                        s = Sockets.connect(host, port, CONNECT_TIMEOUT);
+
+                    // try to create the socket.
+                    if (isFWTransfer) s = new UDPConnection(host, port);
+                    else              s = Sockets.connect(host, port, CONNECT_TIMEOUT);
+                    
         			// open a stream for writing to the socket
         			OutputStream ostream = s.getOutputStream();        
         			String giv = "GIV 0:" + guid + "/file\n\n";
