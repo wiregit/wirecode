@@ -68,7 +68,7 @@ public class QueryReply extends Message implements SecureMessage {
 
     private byte[] _payload;
     /** True if the responses and metadata have been extracted. */
-    private volatile boolean _parsed = false;        
+    private boolean _parsed = false;        
     /** If parsed, the response records for this, or null if they could not
      *  be parsed. */
     private volatile Response[] _responses = null;
@@ -854,7 +854,7 @@ public class QueryReply extends Message implements SecureMessage {
      *    You can tell if data couldn't be extracted by looking if responses
      *    or vendor is null.
      */
-    private void parseResults() {
+    private synchronized void parseResults() {
         if (_parsed)
             return;
         _parsed=true;
