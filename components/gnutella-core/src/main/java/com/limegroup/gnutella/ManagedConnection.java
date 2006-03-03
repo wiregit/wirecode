@@ -28,14 +28,20 @@ import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
+import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.BlockingIncomingHandshaker;
+import com.limegroup.gnutella.handshaking.BlockingOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.Handshaker;
 import com.limegroup.gnutella.handshaking.LeafHandshakeResponder;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.io.ChannelWriter;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
@@ -351,21 +357,56 @@ public class ManagedConnection extends Connection
         // should be triggered from finishInitialize, which will be called
         // when the socket is connected (if it connects).
     }
-
+    
+    /** Constructs a Connector that will do an asynchronous handshake. */
+    protected ConnectObserver createAsyncConnectObserver(Properties requestHeaders, 
+                           HandshakeResponder responder, GnetConnectObserver observer) {
+        return new AsyncHandshakeConnecter(requestHeaders, responder, observer);
+    }
+    
     /**
      * Completes the initialization process.
      */
     protected void preHandshakeInitialize(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
       throws IOException, NoGnutellaOkException, BadHandshakeException {
         responder.setLocalePreferencing(_useLocalPreference);
-        
         super.preHandshakeInitialize(requestHeaders, responder, observer);
+    }
+    
+    /**
+     * Performs the handshake.
+     */
+    protected void performHandshake(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
+    throws IOException, BadHandshakeException, NoGnutellaOkException {
+        if(observer == null || !isAsynchronous()) {
+            super.performHandshake(requestHeaders, responder, observer);
+        } else {
+            Handshaker shaker = createAsyncHandshaker(requestHeaders, responder, observer);
+            try {
+                shaker.shake();
+            } catch (IOException iox) {
+                ErrorService.error(iox); // impossible.
+            }
+        }
+    }
+    
+    /** Creates the asynchronous handshaker. */
+    protected Handshaker createAsyncHandshaker(Properties requestHeaders,
+                 HandshakeResponder responder, GnetConnectObserver observer) {
+        if(isOutgoing())
+            return new AsyncOutgoingHandshaker(requestHeaders, responder, (NIOMultiplexor)_socket, observer);
+        else
+            return new AsyncIncomingHandshaker(responder, (NIOMultiplexor)_socket, observer);
+    }
+    
+    /** What happens after the handshake finishes. */
+    protected void postHandshakeInitialize(Handshaker shaker) {
+        super.postHandshakeInitialize(shaker);
 
         // Start our OutputRunner.
         startOutput();
-
-        UpdateManager updater = UpdateManager.instance();
-        updater.checkAndUpdate(this);
+        // See if this connection had an old-style update msg.
+        UpdateManager.instance().checkAndUpdate(this);
     }
 
     /**
@@ -1399,4 +1440,32 @@ public class ManagedConnection extends Connection
             }
         }
     }
+
+    /**
+     * A ConnectObserver that continues the handshaking process in the same thread,
+     * expecting that performHandshake(...) callback to the observer.
+     */
+    private class AsyncHandshakeConnecter implements ConnectObserver {
+
+        private Properties requestHeaders;
+        private HandshakeResponder responder;
+        private GnetConnectObserver observer;
+
+        AsyncHandshakeConnecter(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer) {
+            this.requestHeaders = requestHeaders;
+            this.responder = responder;
+            this.observer = observer;
+        }
+        
+        public void handleConnect(Socket socket) throws IOException {
+            preHandshakeInitialize(requestHeaders, responder, observer);
+        }
+
+        public void shutdown() {
+            observer.shutdown();
+        }
+
+        //ignored.
+        public void handleIOException(IOException iox) {}
+    }    
 }

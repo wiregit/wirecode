@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-public class ReadBufferChannel implements ReadableByteChannel {
+import com.limegroup.gnutella.io.InterestReadChannel;
+
+public class ReadBufferChannel implements InterestReadChannel {
     private ByteBuffer buffer;
     private boolean useEOF;
     private boolean closed = false;
@@ -64,5 +66,9 @@ public class ReadBufferChannel implements ReadableByteChannel {
     
     public void setClosed(boolean closed) {
         this.closed = closed;
+    }
+    
+    public void interest(boolean status) {
+        
     }
 }

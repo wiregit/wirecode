@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.connection;
+package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,8 +12,6 @@ import java.util.Properties;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.StringSetting;
 import com.limegroup.gnutella.statistics.BandwidthStat;

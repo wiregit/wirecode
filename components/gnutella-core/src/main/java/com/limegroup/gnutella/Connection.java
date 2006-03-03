@@ -17,13 +17,13 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.connection.BlockingIncomingHandshaker;
-import com.limegroup.gnutella.connection.BlockingOutgoingHandshaker;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
-import com.limegroup.gnutella.connection.Handshaker;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.BlockingIncomingHandshaker;
+import com.limegroup.gnutella.handshaking.BlockingOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.Handshaker;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.io.ConnectObserver;
@@ -361,13 +361,9 @@ public class Connection implements IpPort {
     protected void initialize(Properties requestHeaders, HandshakeResponder responder,
                               int timeout, GnetConnectObserver observer) 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
-        
-        LOG.debug("Attempting to connect w/ requestHeaders: " + requestHeaders + "responder: " + responder + ", timeout: " + timeout + ", observer: " + observer);
-
         if(isOutgoing()) {
             if(observer != null) {
-                ConnectObserver wrapper = new Connector(requestHeaders, responder, observer);
-                _socket = Sockets.connect(_host, _port, timeout, wrapper);
+                _socket = Sockets.connect(_host, _port, timeout, createAsyncConnectObserver(requestHeaders, responder, observer));
             } else {
                 _socket=Sockets.connect(_host, _port, timeout);
                 preHandshakeInitialize(requestHeaders, responder, observer);
@@ -375,6 +371,14 @@ public class Connection implements IpPort {
         } else {
             preHandshakeInitialize(requestHeaders, responder, observer);
         }
+    }
+    
+    /**
+     * Constructs the ConnectObserver that will be used to continue the connection process asynchronously.
+     */
+    protected ConnectObserver createAsyncConnectObserver(Properties requestHeaders, HandshakeResponder responder,
+                                                         GnetConnectObserver observer) {
+        return new Connector(requestHeaders, responder, observer);
     }
     
     /**
@@ -387,8 +391,6 @@ public class Connection implements IpPort {
     protected void preHandshakeInitialize(Properties requestHeaders, HandshakeResponder responder,  
                                           GnetConnectObserver observer) throws IOException,
             NoGnutellaOkException, BadHandshakeException {
-        LOG.debug("preHandshakeInit, requestheaders: " + requestHeaders + "responder: " + responder + ", observer: " + observer);        
-        
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
@@ -417,10 +419,7 @@ public class Connection implements IpPort {
      * @throws NoGnutellaOkException
      */
     protected void performHandshake(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
-      throws IOException, BadHandshakeException, NoGnutellaOkException {
-   
-        LOG.debug("performHandshake, requestHeaders: " + requestHeaders + "responder: " + responder + ", observer: " + observer);
-        
+      throws IOException, BadHandshakeException, NoGnutellaOkException {     
         Handshaker shaker = createHandshaker(requestHeaders, responder);
         
         try {
@@ -437,7 +436,8 @@ public class Connection implements IpPort {
     }
     
     /** Constructs the Handshaker object. */
-    protected Handshaker createHandshaker(Properties requestHeaders, HandshakeResponder responder) throws IOException {
+    protected Handshaker createHandshaker(Properties requestHeaders, HandshakeResponder responder)
+      throws IOException {
         try {
             _in = getInputStream();
             _out = getOutputStream();
@@ -468,8 +468,6 @@ public class Connection implements IpPort {
      * @param shaker
      */
     protected void postHandshakeInitialize(Handshaker shaker) {
-        LOG.debug("postHandshakeInitializer, shaker: " + shaker);
-        
         _headersWritten = shaker.getWrittenHeaders();
         _headersRead = shaker.getReadHeaders();
         _connectionTime = System.currentTimeMillis();

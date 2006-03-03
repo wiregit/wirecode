@@ -71,7 +71,8 @@ public final class NIOSocketTest extends BaseTestCase {
 	    for(int i = readIn.length; i < data.length; i++)
 	        assertEquals(i, remaining.get());
 	        
-        assertSame(socket.getChannel(), reader.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, reader.getReadChannel());
+        assertSame(socket.getChannel(), ((SocketInterestReadAdapter)reader.getReadChannel()).getChannel());
     }
     
     public void testSetReadObserverGoesThroughChains() throws Exception {
@@ -81,20 +82,23 @@ public final class NIOSocketTest extends BaseTestCase {
         RCROAdapter entry = new RCROAdapter();
         socket.setReadObserver(entry);
         Thread.sleep(1000);
-        assertSame(channel, entry.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, entry.getReadChannel());
+        assertSame(channel, ((SocketInterestReadAdapter)entry.getReadChannel()).getChannel());
         
         RCRAdapter chain1 = new RCRAdapter();
         entry.setReadChannel(chain1);
         socket.setReadObserver(entry);
         Thread.sleep(1000);
-        assertSame(channel, chain1.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, chain1.getReadChannel());
+        assertSame(channel, ((SocketInterestReadAdapter)chain1.getReadChannel()).getChannel());
         assertSame(chain1, entry.getReadChannel());
         
         RCRAdapter chain2 = new RCRAdapter();
         chain1.setReadChannel(chain2);
         socket.setReadObserver(entry);
         Thread.sleep(1000);
-        assertSame(channel, chain2.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, chain2.getReadChannel());
+        assertSame(channel, ((SocketInterestReadAdapter)chain2.getReadChannel()).getChannel());        
         assertSame(chain2, chain1.getReadChannel());
         assertSame(chain1, entry.getReadChannel());
     }
@@ -259,12 +263,12 @@ public final class NIOSocketTest extends BaseTestCase {
     
     private static class ReadTester implements ChannelReadObserver {
         
-        private ReadableByteChannel source;
+        private InterestReadChannel source;
         private ByteBuffer readData = ByteBuffer.allocate(128 * 1024);
         
         // ChannelReader methods.
-        public ReadableByteChannel getReadChannel() { return source; }
-        public void setReadChannel(ReadableByteChannel channel) { source = channel; }
+        public InterestReadChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadChannel channel) { source = channel; }
         
         // IOErrorObserver methods.
         public void handleIOException(IOException x) { fail(x); }
@@ -281,13 +285,14 @@ public final class NIOSocketTest extends BaseTestCase {
         public ByteBuffer getRead() { return (ByteBuffer)readData.flip(); }
     }
     
-    private static class RCRAdapter implements ChannelReader, ReadableByteChannel {
-        protected ReadableByteChannel source;
-        public ReadableByteChannel getReadChannel() { return source; }
-        public void setReadChannel(ReadableByteChannel channel) { source = channel; }
+    private static class RCRAdapter implements ChannelReader, InterestReadChannel {
+        protected InterestReadChannel source;
+        public InterestReadChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadChannel channel) { source = channel; }
         public int read(ByteBuffer b) throws IOException { return source.read(b); }
         public void close() throws IOException { source.close(); }
         public boolean isOpen() { return source.isOpen(); }
+        public void interest(boolean status) { source.interest(status); }
     }
     
     private static class RCROAdapter extends RCRAdapter implements ChannelReadObserver {

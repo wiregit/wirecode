@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.Stack;
 
 /**
@@ -18,7 +17,7 @@ import java.util.Stack;
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  */
-class NIOInputStream implements ReadObserver, ReadableByteChannel {
+class NIOInputStream implements ReadObserver, InterestReadChannel {
     
     static final Stack CACHE = new Stack();
     private final NIOSocket handler;
@@ -170,6 +169,11 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
     public boolean isOpen() {
         return true;
     }
+    
+    /**
+     * Does nothing.
+     */
+    public void interest(boolean status) {}
 }
                 
         

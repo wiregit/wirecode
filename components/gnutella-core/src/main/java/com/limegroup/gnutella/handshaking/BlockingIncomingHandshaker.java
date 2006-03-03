@@ -1,14 +1,10 @@
-package com.limegroup.gnutella.connection;
+package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**

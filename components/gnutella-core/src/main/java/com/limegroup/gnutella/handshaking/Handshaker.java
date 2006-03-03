@@ -1,10 +1,7 @@
-package com.limegroup.gnutella.connection;
+package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 
 /**
  * Allows a handshaker to exist.

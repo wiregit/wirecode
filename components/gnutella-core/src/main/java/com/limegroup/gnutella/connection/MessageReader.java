@@ -3,11 +3,11 @@ package com.limegroup.gnutella.connection;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.ReadableByteChannel;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.io.ChannelReadObserver;
+import com.limegroup.gnutella.io.InterestReadChannel;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * Reads messages from a channel.  This class is notified when more of a message
@@ -41,7 +41,7 @@ public class MessageReader implements ChannelReadObserver {
     /** the sole receiver of messages */
     private final MessageReceiver receiver;
     /** the source channel */
-    private ReadableByteChannel channel;
+    private InterestReadChannel channel;
     
     /** whether or not this reader has been shut down yet. */
     private boolean shutdown = false;
@@ -58,7 +58,7 @@ public class MessageReader implements ChannelReadObserver {
     /**
      * Constructs a new MessageReader with the given source channel & receiver.
      */
-    public MessageReader(ReadableByteChannel channel, MessageReceiver receiver) {
+    public MessageReader(InterestReadChannel channel, MessageReceiver receiver) {
         if(receiver == null)
             throw new NullPointerException("null receiver");
             
@@ -72,7 +72,7 @@ public class MessageReader implements ChannelReadObserver {
     /**
      * Sets the new channel to be reading from.
      */
-    public void setReadChannel(ReadableByteChannel channel) {
+    public void setReadChannel(InterestReadChannel channel) {
         if(channel == null)
             throw new NullPointerException("cannot set null channel!");
         
@@ -82,7 +82,7 @@ public class MessageReader implements ChannelReadObserver {
     /**
      * Gets the channel that is used for reading.
      */
-    public ReadableByteChannel getReadChannel() {
+    public InterestReadChannel getReadChannel() {
         return channel;
     }
     

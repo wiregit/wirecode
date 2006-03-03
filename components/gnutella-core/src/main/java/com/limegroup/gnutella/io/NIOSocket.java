@@ -11,7 +11,6 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.UnsupportedAddressTypeException;
 
@@ -138,13 +137,14 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
                     while(lastChannel.getReadChannel() instanceof ChannelReader)
                         lastChannel = (ChannelReader)lastChannel.getReadChannel();
                     
-                    if(oldReader instanceof ReadableByteChannel && oldReader != newReader) {
-                        lastChannel.setReadChannel((ReadableByteChannel)oldReader);
+                    if(oldReader instanceof InterestReadChannel && oldReader != newReader) {
+                        lastChannel.setReadChannel((InterestReadChannel)oldReader);
                         reader.handleRead(); // read up any buffered data.
                         oldReader.shutdown(); // shutdown the now unused reader.
                     }
                     
-                    lastChannel.setReadChannel(channel);
+                    InterestReadChannel source = new SocketInterestReadAdapter(channel);
+                    lastChannel.setReadChannel(source);
                     NIODispatcher.instance().interestRead(channel, true);
                 } catch(IOException iox) {
                     shutdown();
