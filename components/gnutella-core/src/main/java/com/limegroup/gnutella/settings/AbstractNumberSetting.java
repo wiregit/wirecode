@@ -10,20 +10,22 @@ public abstract class AbstractNumberSetting extends Setting {
      * Adds a safeguard against simpp making a setting take a value beyond the
      * reasonable max 
      */
-    protected final Object MAX_VALUE;
+    protected final Number MAX_VALUE;
 
     /**
      * Adds a safeguard against simpp making a setting take a value below the
      * reasonable min
      */
-    protected final Object MIN_VALUE;
+    protected final Number MIN_VALUE;
     
     protected AbstractNumberSetting(Properties defaultProps, Properties props,
                                     String key, String defaultValue, 
-                              String simppKey, Comparable max, Comparable min) {
+                              String simppKey, Number max, Number min) {
         super(defaultProps, props, key, defaultValue, simppKey);
         if(max != null && min != null) {//do we need to check max, min?
-            if(max.compareTo(min) < 0) //max less than min?
+            // All standard library Numbers implement Comparable
+            Comparable comparableMax = (Comparable) max;
+            if(comparableMax.compareTo(min) < 0) //max less than min?
                 throw new IllegalArgumentException("max less than min");
         }
         MAX_VALUE = max;

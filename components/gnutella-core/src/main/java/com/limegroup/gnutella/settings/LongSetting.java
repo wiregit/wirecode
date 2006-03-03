@@ -64,8 +64,8 @@ public class LongSetting extends AbstractNumberSetting {
     }
     
     protected boolean isAcceptableValue(long value) {
-        long max = ((Long)MAX_VALUE).longValue();
-        long min = ((Long)MIN_VALUE).longValue();
+        long max = MAX_VALUE.longValue();
+        long min = MIN_VALUE.longValue();
         return (value <= max && value >= min);
     }
 }

@@ -59,8 +59,8 @@ public final class FloatSetting extends AbstractNumberSetting {
     }
 
     protected boolean isAcceptableValue(String value) {
-        float max = ((Float)MAX_VALUE).floatValue();
-        float min = ((Float)MIN_VALUE).floatValue();
+        float max = MAX_VALUE.floatValue();
+        float min = MIN_VALUE.floatValue();
         float val = Float.parseFloat(value);
         return (val <= max && val >= min);
     }
