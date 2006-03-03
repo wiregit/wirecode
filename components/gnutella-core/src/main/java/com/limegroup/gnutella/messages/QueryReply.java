@@ -116,7 +116,7 @@ public class QueryReply extends Message implements SecureMessage {
     private static final byte CHAT_MASK=(byte)0x01;
     
     /** The data with info about the secure result. */
-    private SecureGGEPData _secureGGEP;
+    private volatile SecureGGEPData _secureGGEP;
     
     /** The xml chunk that contains metadata about xml responses*/
     private byte[] _xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;
