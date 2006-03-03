@@ -192,6 +192,8 @@ public class ConnectionManagerTest extends BaseTestCase {
     
     public void testSupernodeStatus() throws Exception {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(true);
+        
         ConnectionManager mgr = RouterService.getConnectionManager();
         
         // test preconditions
