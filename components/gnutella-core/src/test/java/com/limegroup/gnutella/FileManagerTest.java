@@ -467,8 +467,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			Response testResponse = new Response(fd);
 			URN urn = fd.getSHA1Urn();
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
-			if(name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
-			    continue;
+            
+            char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
+            Arrays.sort(illegalChars);
+
+            if (name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue()
+                    || StringUtils.containsCharacters(name, illegalChars)) {
+                continue;
+            }
+            
 			QueryRequest qr = QueryRequest.createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
@@ -505,8 +512,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
-			if(name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
-			    continue;
+            
+            char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
+            Arrays.sort(illegalChars);
+
+            if (name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue()
+                    || StringUtils.containsCharacters(name, illegalChars)) {
+                continue;
+            }
+            
 			QueryRequest qr = QueryRequest.createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
