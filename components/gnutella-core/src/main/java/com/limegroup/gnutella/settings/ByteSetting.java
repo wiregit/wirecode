@@ -59,7 +59,7 @@ public final class ByteSetting extends AbstractNumberSetting {
         }
     }
 
-    protected boolean isInRange(String value) {
+    protected boolean isAcceptableValue(String value) {
         byte max = ((Byte)MAX_VALUE).byteValue();
         byte min = ((Byte)MIN_VALUE).byteValue();
         byte val = Byte.parseByte(value);

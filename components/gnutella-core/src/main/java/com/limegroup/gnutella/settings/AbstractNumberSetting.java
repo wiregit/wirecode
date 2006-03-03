@@ -41,7 +41,7 @@ public abstract class AbstractNumberSetting extends Setting {
         if(isSimppEnabled()) {
             Assert.that(MAX_VALUE != null, "simpp setting created with no max");
             Assert.that(MIN_VALUE != null, "simpp setting created with no min");
-            if(!isInRange(value))
+            if(!isAcceptableValue(value))
                 return;
         }
         super.setValue(value);
@@ -49,9 +49,8 @@ public abstract class AbstractNumberSetting extends Setting {
 
 
     /**
-     * The various settings must decide for themselves if this value is withing
-     * acceptable range
+     * The various settings must decide for themselves if this value acceptable. 
      */
-    abstract protected boolean isInRange(String value);
+    abstract protected boolean isAcceptableValue(String value);
 
 }

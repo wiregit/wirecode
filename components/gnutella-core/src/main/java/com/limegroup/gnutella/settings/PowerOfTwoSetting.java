@@ -36,13 +36,10 @@ public final class PowerOfTwoSetting extends LongSetting {
         return ((~x+1)&x) == x;
     }
     
-    // isInRange(long) is slightly abused here, unless "range" is used in
-    // the sense of the set of possible outputs (known as the "range" or
-    // "co-domain" of a mathematical function)
-    protected boolean isInRange(long value) {
+    protected boolean isAcceptableValue(long value) {
         if (! isPowerOfTwo(value)) {
             return false;
         }
-        return super.isInRange(value);
+        return super.isAcceptableValue(value);
     }
 }

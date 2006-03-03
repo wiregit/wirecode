@@ -62,7 +62,7 @@ public final class IntSetting extends AbstractNumberSetting {
         }
     }
     
-    protected boolean isInRange(String value) {
+    protected boolean isAcceptableValue(String value) {
         int max = ((Integer)MAX_VALUE).intValue();
         int min = ((Integer)MIN_VALUE).intValue();
         int val = Integer.parseInt(value);
