@@ -373,24 +373,34 @@ public class DownloadWorker {
     }
     
     private ConnectionStatus requestTHEXIfNeeded() {
-        HashTree ourTree = _commonOutFile.getHashTree();
-        
+        boolean shouldRequest = false;
         ConnectionStatus status = null;
-        // request THEX from te _downloader if (the tree we have
-        // isn't good enough or we don't have a tree) and another
-        // worker isn't currently requesting one
-        if (_downloader.hasHashTree() &&
+        HashTree ourTree = null;
+        
+        synchronized(_commonOutFile) {
+            
+            if (_commonOutFile.isHashTreeRequested())
+                return status;
+            
+            ourTree = _commonOutFile.getHashTree();
+            
+            // request THEX from te _downloader if (the tree we have
+            // isn't good enough or we don't have a tree) and another
+            // worker isn't currently requesting one
+            shouldRequest = _downloader.hasHashTree() &&
                 (ourTree == null || !ourTree.isDepthGoodEnough()) &&
-                _manager.getSHA1Urn() != null) {
+                _manager.getSHA1Urn() != null; 
             
-            
-            synchronized(_commonOutFile) {
-                if (_commonOutFile.isHashTreeRequested())
-                    return status;
+            if (shouldRequest)
                 _commonOutFile.setHashTreeRequested(true);
-            }
-            
+        }
+        
+        if (shouldRequest)
             status = _downloader.requestHashTree(_manager.getSHA1Urn());
+        else
+            return null;
+        
+        synchronized(_commonOutFile) {
             _commonOutFile.setHashTreeRequested(false);
             if(status.isThexResponse()) {
                 HashTree temp = status.getHashTree();
@@ -399,6 +409,7 @@ public class DownloadWorker {
                 }
             }
         }
+        
         return status;
     }
     
