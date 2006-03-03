@@ -36,6 +36,8 @@ public class NIOServerSocketTest extends BaseTestCase {
         assertEquals(0, interestOps(r1));
         server.close();
         r1.close();
+        
+        Thread.sleep(100);
     }
     
     public void testNonBlockingAccept() throws Exception {
@@ -48,6 +50,8 @@ public class NIOServerSocketTest extends BaseTestCase {
         assertEquals(c1.getLocalPort(), r1.getPort());
         server.close();
         r1.close();
+        
+        Thread.sleep(100);
     }
     
     public void testMultipleNonBlockingAccepts() throws Exception {
@@ -56,7 +60,7 @@ public class NIOServerSocketTest extends BaseTestCase {
         Socket c1 = connect();
         Socket c2 = connect();
         Socket c3 = connect();
-        Thread.sleep(200);
+        Thread.sleep(300);
         assertEquals(3, observer.getSockets().size());
         Socket r1 = observer.getNextSocket();
         Socket r2 = observer.getNextSocket();
