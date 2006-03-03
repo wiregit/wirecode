@@ -1413,10 +1413,11 @@ public class DownloadManager implements BandwidthTracker {
         synchronized (UDP_FAILOVER) {
             byte[] key = file.getClientGUID();
             IntWrapper requests = (IntWrapper)UDP_FAILOVER.get(key);
-            if (requests==null)
-            	requests = new IntWrapper(0);
+            if (requests == null) {
+                requests = new IntWrapper(0);
+                UDP_FAILOVER.put(key, requests);
+            }
             requests.addInt(1);
-            UDP_FAILOVER.put(key,requests);
         }
     }
     
