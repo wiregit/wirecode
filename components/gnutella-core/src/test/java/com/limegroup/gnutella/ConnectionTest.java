@@ -36,12 +36,16 @@ public class ConnectionTest extends BaseTestCase {
     public void setUp() throws Exception {
         ACCEPTOR = new ConnectionAcceptor();
         ACCEPTOR.start();
+        
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
     }
     
     public void tearDown() throws Exception {
         ACCEPTOR.shutdown();
+        
+        // Give the OS a bit time to close the Socket
+        Thread.sleep(1000);
     }
     
     public void testBlockingConnectFailing() throws Exception {
