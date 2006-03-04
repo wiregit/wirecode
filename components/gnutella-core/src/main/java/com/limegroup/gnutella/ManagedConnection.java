@@ -777,6 +777,7 @@ public class ManagedConnection extends Connection
         supernodeClientAtLooping = isSupernodeClientConnection();
         
         if(!isAsynchronous()) {
+            Thread.currentThread().setName("MessageLoopingThread");
             while (true) {
                 Message m=null;
                 try {
@@ -1485,11 +1486,23 @@ public class ManagedConnection extends Connection
         }
 
         public void shutdown() {
+            close();
             observer.shutdown();            
         }
 
         public void handleHandshakeFinished(Handshaker shaker) {
             postHandshakeInitialize(shaker);
+            observer.handleConnect();
+        }
+
+        public void handleBadHandshake() {
+            close();
+            observer.handleBadHandshake();
+        }
+
+        public void handleNoGnutellaOk(int code, String msg) {
+            close();
+            observer.handleNoGnutellaOk(code, msg);
         }
     }
 }

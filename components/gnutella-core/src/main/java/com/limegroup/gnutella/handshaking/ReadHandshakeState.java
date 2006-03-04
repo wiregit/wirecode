@@ -36,7 +36,6 @@ abstract class ReadHandshakeState extends HandshakeState {
      */
     boolean process(Channel channel, ByteBuffer buffer) throws IOException {
         ReadableByteChannel rc = (ReadableByteChannel)channel;
-        
         boolean needMoreData = false;
         while(true) {
             int read = 0;
@@ -81,8 +80,9 @@ abstract class ReadHandshakeState extends HandshakeState {
         }
         
         if(!needMoreData) {
-            if(doneConnect)
+            if(doneConnect) {
                 processHeaders();
+            }
             return false;
         } else {
             return true;

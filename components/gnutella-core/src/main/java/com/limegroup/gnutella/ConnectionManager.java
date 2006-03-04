@@ -1994,11 +1994,8 @@ public class ConnectionManager {
 	 *  for messages
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {
-	    Thread.currentThread().setName("MessageLoopingThread");
-		if(conn.isGUESSUltrapeer()) {
-			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-				conn.getPort());
-		}
+		if(conn.isGUESSUltrapeer())
+			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
 		// this can throw IOException
 		conn.loopForMessages();

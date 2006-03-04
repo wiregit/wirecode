@@ -44,6 +44,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
         }
         
         ((WritableByteChannel)channel).write(outgoing);
+        
         if(!outgoing.hasRemaining()) {
             processWrittenHeaders();
             return false;
@@ -105,7 +106,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
                     //and didn't match the locale this code is used.
                     //(currently in use by the dedicated connectionfetcher)
                     throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
-                default: 
+                default:
                     HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
                     throw NoGnutellaOkException.createClientUnknown(response.getStatusCode());
                 }

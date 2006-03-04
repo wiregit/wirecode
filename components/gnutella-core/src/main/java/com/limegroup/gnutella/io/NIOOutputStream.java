@@ -60,6 +60,9 @@ class NIOOutputStream implements WriteObserver {
      * Notification that a write can happen on the SocketChannel.
      */
     public boolean handleWrite() throws IOException {// write everything we can.
+        if(buffer == null)
+            return false;
+        
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
