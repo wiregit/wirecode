@@ -238,7 +238,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 
     class EmptyResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response,
-                                         boolean outgoing) throws IOException {
+                                         boolean outgoing) {
             Properties props = new Properties();
             return HandshakeResponse.createResponse(props);
         }

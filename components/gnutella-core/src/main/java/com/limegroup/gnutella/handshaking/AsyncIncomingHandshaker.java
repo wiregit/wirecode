@@ -1,35 +1,36 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.connection.GnetConnectObserver;
+import java.net.Socket;
+import java.util.List;
+
 import com.limegroup.gnutella.io.NIOMultiplexor;
 
 public class AsyncIncomingHandshaker implements Handshaker {
 
-    private NIOMultiplexor multiplexor;
-    private HandshakeReader reader;
-    private HandshakeWriter writer;
+    private HandshakeSupport support;
+    private AsyncHandshaker shaker;
+    private Socket socket;
 
     public AsyncIncomingHandshaker(HandshakeResponder responder,
-                                   NIOMultiplexor multiplexor, GnetConnectObserver observer) {
-        this.multiplexor = multiplexor;
-        HandshakeReader reader = new HandshakeReader(observer);
-        HandshakeWriter writer = new HandshakeWriter(responder, reader, observer);
-        reader.setHandshakeWriter(writer);
-        writer.setState(HandshakeState.startIncoming());
-        reader.setState(HandshakeState.startIncoming());
+                                   Socket socket,
+                                   HandshakeObserver observer) {
+        this.socket = socket;
+        this.support = new HandshakeSupport(socket.getInetAddress().getHostAddress());
+        List states = HandshakeState.getIncomingHandshakeStates(support, responder);
+        shaker = new AsyncHandshaker(this, observer, states);
     }
 
     public void shake() {
-        multiplexor.setReadObserver(reader);
-        multiplexor.setWriteObserver(writer);
+        ((NIOMultiplexor)socket).setReadObserver(shaker);
+        ((NIOMultiplexor)socket).setWriteObserver(shaker);
     }
 
     public HandshakeResponse getWrittenHeaders() {
-        return writer.getWrittenHandshakeResponse();
+        return support.getWrittenHandshakeResponse();
     }
 
     public HandshakeResponse getReadHeaders() {
-        return reader.getReadHanshakeResponse();
+        return support.getReadHandshakeResponse();
     }
 
 }

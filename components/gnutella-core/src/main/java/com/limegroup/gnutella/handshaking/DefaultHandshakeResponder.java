@@ -41,7 +41,7 @@ public abstract class DefaultHandshakeResponder implements HandshakeResponder {
 	/**
 	 * Calls respondToOutgoing or respondToIncoming based on the value of outgoing.
 	 */
-    public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException {
+    public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) {
 		if (outgoing) return respondToOutgoing(response);
 		return respondToIncoming(response);
 	}

@@ -3,54 +3,32 @@ package com.limegroup.gnutella.handshaking;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Properties;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.StringSetting;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * Contains some convenience methods for handshaking.
  */
-class BlockingHandshakeSupport {
+class BlockingHandshakeSupport extends HandshakeSupport {
     
-    /** Connection string. */
-    private String GNUTELLA_CONNECT_06 = "GNUTELLA CONNECT/0.6";
-    
-    private static final String GNUTELLA_06 = "GNUTELLA/0.6";    
-    
-    /** Gnutella 0.6 accept connection string. */
-    private static final String CONNECT="CONNECT/";
-    
-    /** End of line for Gnutella 0.6 */
-    private static final String CRLF="\r\n";    
-
     /** Socket we're basing this I/O on. */
     private Socket socket;
     /** InputStream we're reading from */
     private InputStream in;
     /** OutputStream we're writing to. */
     private OutputStream out;
-    /** All headers we've read from the remote side. */
-    private final Properties readHeaders;
-    /** All headers we wrote to the remote side. */
-    private final Properties writtenHeaders;
     
     /** Constructs a new Support object based on the given Socket, InputStream & OutputStream. */
     BlockingHandshakeSupport(Socket socket, InputStream in, OutputStream out) {
+        super(socket.getInetAddress().getHostAddress());
         this.socket = socket;
         this.in = in;
         this.out = out;
-        readHeaders = new Properties();
-        writtenHeaders = new Properties();
     }
     
     /**
@@ -118,41 +96,23 @@ class BlockingHandshakeSupport {
             String line = readLine(timeout);
             if (line == null)
                 throw new IOException("unexpected end of file"); // unexpected EOF
-            if (line.equals(""))
-                break; // blank line ==> done
-            int i = line.indexOf(':');
-            if (i < 0)
-                continue; // ignore lines without ':'
-            String key = line.substring(0, i);
-            String value = line.substring(i + 1).trim();
-            if (HeaderNames.REMOTE_IP.equals(key))
-                changeAddress(value);
-            readHeaders.put(key, value);
+            if(!processReadHeader(line))
+                break;
         }
-    }
-    
-    /** Creates their response, based on the given connectLine. */
-    HandshakeResponse createRemoteResponse(String connectLine) throws IOException {
-        return HandshakeResponse.createRemoteResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(), 
-                    readHeaders);
-    }
-    
-    /** Determines if the given connect line is valid. */
-    boolean isConnectLineValid(String s) {
-        return s.startsWith(GNUTELLA_06);
     }
     
     /** Writes the initial connection line. */
     void writeConnectLine() throws IOException {
-        //1. Send "GNUTELLA CONNECT/0.6" and headers
-        writeLine(GNUTELLA_CONNECT_06+CRLF);
+        StringBuffer sb = new StringBuffer();
+        appendConnectLine(sb);
+        writeLine(sb.toString());
     }
     
     /** Writes a response using the given HandshakeResponse. */
-    void writeResponse(HandshakeResponse response) throws IOException {        
-        writeLine(GNUTELLA_06 + " " + response.getStatusLine() + CRLF);
-        sendHeaders(response.props());
+    void writeResponse(HandshakeResponse response) throws IOException {       
+        StringBuffer sb = new StringBuffer();
+        appendResponse(response, sb);
+        writeLine(sb.toString());
     }
 
     /**
@@ -171,21 +131,6 @@ class BlockingHandshakeSupport {
     }
     
     /**
-     * Returns true iff line ends with "CONNECT/N", where N is a number greater than or equal "0.6".
-     */
-    boolean notLessThan06(String line) {
-        int i = line.indexOf(CONNECT);
-        if (i < 0)
-            return false;
-        try {
-            float f = Float.parseFloat(line.substring(i + CONNECT.length()));
-            return f >= 0.6f;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    /**
      * Writes the properties in props to network, including the blank line at the end.
      * Throws IOException if there are any problems.
      * 
@@ -193,66 +138,9 @@ class BlockingHandshakeSupport {
      *  if no headers need to be sent the trailer will be sent.
      */
     void sendHeaders(Properties props) throws IOException {
-        if (props != null) {
-            Enumeration names = props.propertyNames();
-            while (names.hasMoreElements()) {
-                String key = (String) names.nextElement();
-                String value = props.getProperty(key);
-                // Ensure we put their remote-ip correctly.
-                if (HeaderNames.REMOTE_IP.equals(key))
-                    value = socket.getInetAddress().getHostAddress();
-                if (value == null)
-                    value = "";
-                writeLine(key + ": " + value + CRLF);
-                writtenHeaders.put(key, value);
-            }
-        }
-        // send the trailer
-        writeLine(CRLF);
-    }
-    
-    /**
-     * Determines if the address should be changed and changes it if
-     * necessary.
-     */
-    void changeAddress(final String v) {
-        InetAddress ia = null;
-        try {
-            ia = InetAddress.getByName(v);
-        } catch(UnknownHostException uhe) {
-            return; // invalid.
-        }
-        
-        // invalid or private, exit
-        if(!NetworkUtils.isValidAddress(ia) ||
-            NetworkUtils.isPrivateAddress(ia))
-            return;
-            
-        // If we're forcing, change that if necessary.
-        if( ConnectionSettings.FORCE_IP_ADDRESS.getValue() ) {
-            StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
-            if(!v.equals(addr.getValue())) {
-                addr.setValue(v);
-                RouterService.addressChanged();
-            }
-        }
-        // Otherwise, if our current address is invalid, change.
-        else if(!NetworkUtils.isValidAddress(RouterService.getAddress())) {
-            // will auto-call addressChanged.
-            RouterService.getAcceptor().setAddress(ia);
-        }
-        
-        RouterService.getAcceptor().setExternalAddress(ia);
-    }
-    
-    /** Constructs a HandshakeResponse object wrapping the headers we've read. */
-    public HandshakeResponse getReadHandshakeResponse() {
-        return HandshakeResponse.createResponse(readHeaders);
-    }
-    
-    /** Constructs a HandshakeResponse object wrapping the headers we've written. */
-    public HandshakeResponse getWrittenHandshakeResponse() {
-        return HandshakeResponse.createResponse(writtenHeaders);
+        StringBuffer sb = new StringBuffer();
+        appendHeaders(props, sb);
+        writeLine(sb.toString());
     }
     
 }

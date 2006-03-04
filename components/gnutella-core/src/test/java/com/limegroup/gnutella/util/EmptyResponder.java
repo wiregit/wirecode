@@ -8,7 +8,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 
 public final class EmptyResponder implements HandshakeResponder {
     public HandshakeResponse respond(HandshakeResponse response, 
-                                     boolean outgoing) throws IOException {
+                                     boolean outgoing) {
         return HandshakeResponse.createResponse(new Properties());
     }
     

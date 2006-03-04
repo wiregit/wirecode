@@ -31,8 +31,7 @@ import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
 import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.BlockingIncomingHandshaker;
-import com.limegroup.gnutella.handshaking.BlockingOutgoingHandshaker;
+import com.limegroup.gnutella.handshaking.HandshakeObserver;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.Handshaker;
 import com.limegroup.gnutella.handshaking.LeafHandshakeResponder;
@@ -377,7 +376,8 @@ public class ManagedConnection extends Connection
      * Performs the handshake.
      */
     protected void performHandshake(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
-    throws IOException, BadHandshakeException, NoGnutellaOkException {
+      throws IOException, BadHandshakeException, NoGnutellaOkException {
+        
         if(observer == null || !isAsynchronous()) {
             super.performHandshake(requestHeaders, responder, observer);
         } else {
@@ -392,11 +392,15 @@ public class ManagedConnection extends Connection
     
     /** Creates the asynchronous handshaker. */
     protected Handshaker createAsyncHandshaker(Properties requestHeaders,
-                 HandshakeResponder responder, GnetConnectObserver observer) {
+                                               HandshakeResponder responder,
+                                               GnetConnectObserver observer) {
+        
+        HandshakeObserver shakeObserver = new HandshakeWatcher(observer);
+        
         if(isOutgoing())
-            return new AsyncOutgoingHandshaker(requestHeaders, responder, (NIOMultiplexor)_socket, observer);
+            return new AsyncOutgoingHandshaker(requestHeaders, responder, _socket, shakeObserver);
         else
-            return new AsyncIncomingHandshaker(responder, (NIOMultiplexor)_socket, observer);
+            return new AsyncIncomingHandshaker(responder, _socket, shakeObserver);
     }
     
     /** What happens after the handshake finishes. */
@@ -1467,5 +1471,25 @@ public class ManagedConnection extends Connection
 
         //ignored.
         public void handleIOException(IOException iox) {}
-    }    
+    }
+    
+    /**
+     * A HandshakeObserver that notifies the GnetConnectObserver when handshaking finishes.
+     */
+    private class HandshakeWatcher implements HandshakeObserver {
+        
+        private GnetConnectObserver observer;
+
+        HandshakeWatcher(GnetConnectObserver observer) {
+            this.observer = observer;
+        }
+
+        public void shutdown() {
+            observer.shutdown();            
+        }
+
+        public void handleHandshakeFinished(Handshaker shaker) {
+            postHandshakeInitialize(shaker);
+        }
+    }
 }

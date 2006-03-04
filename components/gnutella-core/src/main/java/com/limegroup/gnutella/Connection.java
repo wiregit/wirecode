@@ -425,9 +425,13 @@ public class Connection implements IpPort {
         try {
             shaker.shake();
         } catch (NoGnutellaOkException e) {
+            _headersWritten = shaker.getWrittenHeaders();
+            _headersRead = shaker.getReadHeaders();
             close();
             throw e;
         } catch (IOException e) {
+            _headersWritten = shaker.getWrittenHeaders();
+            _headersRead = shaker.getReadHeaders();            
             close();
             throw new BadHandshakeException(e);
         }
