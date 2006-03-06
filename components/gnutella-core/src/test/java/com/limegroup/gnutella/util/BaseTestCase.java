@@ -319,6 +319,9 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         // then unload it.
         PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
         
+        // Make sure it's really unloaded
+        assertEquals(0L, SystemUtils.getIdleTime());
+        
         setupUniqueDirectories();
         setupSettings();
     }
