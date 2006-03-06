@@ -48,9 +48,9 @@ import com.limegroup.gnutella.util.IOUtils;
  * 
  * #NAME###
  * 
- * The first byte contains flags and the length of the header name.
- * Next is the header name, like "NAME".
- * After that, 1, 2, or 3 bytes tell the length of this extension header's value.
+ * The first byte contains flags and the length of the extension name.
+ * Next is the extension name, like "NAME".
+ * After that, 1, 2, or 3 bytes tell the length of this extension's value.
  * 
  * The flags byte looks like this:
  * 
@@ -71,7 +71,7 @@ import com.limegroup.gnutella.util.IOUtils;
  * The bits of the length number are written where the hyphens appear.
  * They are big endian and slid to the right.
  * 
- * A GGEP extension header name can't be 16 characters or more, and a value can't be 256 KB or more.
+ * A GGEP extension name can't be 16 characters or more, and a value can't be 256 KB or more.
  * GGEP values can be deflate compressed and COBS encoded.
  * COBS encoding hides 0s in arbitrary data so it can be put somewhere where 0s aren't allowed.
  * 
@@ -83,11 +83,11 @@ public class GGEP {
     /*
      * (do)
      * say what the values look like
-     * or what the presence of a key means
+     * or what the presence of an extension means
      */
 
     /*
-     * The GGEP headers that LimeWire uses.
+     * The GGEP extensions that LimeWire uses.
      * The official list is on the GDF wiki:
      * http://www.the-gdf.org/wiki/index.php?title=Known_GGEP_Extension_Blocks
      */
@@ -95,7 +95,7 @@ public class GGEP {
     /**
      * "BH" Browse Host.
      * You can browse all the files this computer is sharing.
-     * This header has no value.
+     * This extension has no value.
      */
     public static final String GGEP_HEADER_BROWSE_HOST = "BH";
 
@@ -108,7 +108,7 @@ public class GGEP {
     /**
      * "GUE" GUESS.
      * This computer supports the GUESS protocol.
-     * This header has no value.
+     * This extension has no value.
      * LimeWire doesn't use GUESS anymore.
      */
     public static final String GGEP_HEADER_UNICAST_SUPPORT = "GUE";
@@ -154,7 +154,7 @@ public class GGEP {
      * 
      * If the sharing computer isn't externally contactable, we can send a push message to one of its push proxies.
      * The push proxy will relay the message to the computer, which will push open a connection to us.
-     * The connection with be a TCP socket connection that starts with the HTTP GIV header, and gives us the file we want.
+     * The connection with be a TCP socket connection that starts with the HTTP GIV greeting, and gives us the file we want.
      * 
      * A computer only lists push proxies if its firewalled for incoming TCP.
      * This makes it a leaf, and its push proxies are just its ultrapeers.
@@ -173,14 +173,23 @@ public class GGEP {
     /**
      * "IP" IP address request.
      * The value is 6 bytes, a 4 byte IP address followed by a 2 byte port number.
-     * If you send a ping to a remote computer, it will reply with a pong with this tag.
-     * The value is your external IP address, as the remote computer sees it.
+     * 
+     * If you send a ping to a remote computer with "IP", it will reply with a pong with "IP".
+     * The value in the reply is your external IP address, as the remote computer sees it.
+     * 
+     * Here's how you can use the "IP" extension to discover your real external Internet IP address.
+     * Make a ping packet with a GGEP block, and add the "IP" extension to it with no value.
+     * Send the ping in a UDP packet to a remote computer.
+     * The remote computer will note what IP address and port number it got the UDP packet from.
+     * To respond, it will prepare a pong with the same message GUID as your ping.
+     * In the pong, it will add "IP", and write your IP address and port number as the 6 byte value.
+     * You'll get the pong, and discover how remote computers see your IP address.
      */
     public static final String GGEP_HEADER_IPPORT = "IP";
 
     /**
      * "UDPHC" UDP host cache.
-     * The presence of this header indicates this pong is about a UDP host cache.
+     * The presence of this extension indicates this pong is about a UDP host cache.
      * The value is optional.
      * It's a string like "www.site.com" or "71.240.19.76", the domain name or IP address of the UDP host cache.
      */
@@ -275,15 +284,15 @@ public class GGEP {
     public static final String GGEP_HEADER_FW_TRANS = "FW";
 
     /**
-     * 15, A key name like "VC" can't be more than 15 bytes.
-     * 4 bits in the GGEP header express its length.
+     * 15, An extension name like "VC" can't be more than 15 bytes.
+     * 4 bits in the GGEP extension header express its length.
      * 2 ^ 4 - 1 = 15.
      */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
     /**
      * 262143, A value can't be 256 KB or larger.
-     * In a GGEP header, 18 bits in 3 bytes express its length.
+     * In a GGEP extension header, 18 bits in 3 bytes express its length.
      * 2 ^ 18 - 1 = 262143.
      */
     public static final int MAX_VALUE_SIZE_IN_BYTES = 262143;
@@ -292,7 +301,7 @@ public class GGEP {
     public static final byte GGEP_PREFIX_MAGIC_NUMBER = (byte)0xC3;
 
     /**
-     * The list of tag names and their values in this GGEP block.
+     * The list of extension names and their values in this GGEP block.
      * 
      * A TreeMap is a list that stays sorted.
      * The keys are strings like "VC" and the values are byte arrays like "LIME#".
@@ -382,9 +391,9 @@ public class GGEP {
          * 
          * #VC###
          * 
-         * The first byte contains flags and the length of the header name.
-         * Next is the header name, like "VC".
-         * After that, 1, 2, or 3 bytes tell the length of this extension header's value.
+         * The first byte contains flags and the length of the extension name.
+         * Next is the extension name, like "VC".
+         * After that, 1, 2, or 3 bytes tell the length of this extension's value.
          */
 
         // Make sure the given byte array is at least 4 bytes
@@ -393,7 +402,7 @@ public class GGEP {
         // All GGEP blocks begin with the byte 0xC3
         if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER) throw new BadGGEPBlockException();
 
-        // When we find the header marked as the last one, we'll set onLastExtension to true
+        // When we find the extension marked as the last one, we'll set onLastExtension to true
         boolean onLastExtension = false;
 
         // Start the index in the GGEP block just beyond the 0xC3 byte
@@ -402,32 +411,32 @@ public class GGEP {
         // Loop until we've read the last extension in the block
         while (!onLastExtension) {
 
-            // In the header's first byte, the 4th bit must be a 0
+            // In the extension header's first byte, the 4th bit must be a 0
             try { sanityCheck(messageBytes[currIndex]); } catch (ArrayIndexOutOfBoundsException malformedInput) { throw new BadGGEPBlockException(); }
 
-            // If the 8th bit in the header's first byte is 1, this is the last extension in this GGEP block
+            // If the 8th bit in the extension header's first byte is 1, this is the last extension in this GGEP block
             onLastExtension = isLastExtension(messageBytes[currIndex]);
 
             // Look at the 7th and 6th bits to see if the value of this extension is COBS encoded and compressed
             boolean encoded = isEncoded(messageBytes[currIndex]);
             boolean compressed = isCompressed(messageBytes[currIndex]);
 
-            // Read the length of the header, like 3 for "SCP" from the first byte
+            // Read the length of the extension name, like 3 for "SCP" from the first byte
             int headerLen = deriveHeaderLength(messageBytes[currIndex]);
 
-            // Read the extension header, like "SCP"
-            currIndex++; // Move past the flags byte, from "#VC###" to "VC###", the header name
+            // Read the extension name, like "SCP"
+            currIndex++; // Move past the flags byte, from "#VC###" to "VC###", the extension name
             String extensionHeader = null;
             try {
 
-                // From the messageBytes byte array, at currIndex, clip out the ASCII characters to get the header name like "VC"
+                // From the messageBytes byte array, at currIndex, clip out the ASCII characters to get the extension name like "VC"
                 extensionHeader = new String(messageBytes, currIndex, headerLen);
 
             // We couldn't read that far
             } catch (StringIndexOutOfBoundsException inputIsMalformed) { throw new BadGGEPBlockException(); }
 
             // Find out how long this extension's value is
-            currIndex += headerLen; // Move past the header name, from "VC###" to "###", the length bytes
+            currIndex += headerLen; // Move past the extension name, from "VC###" to "###", the length bytes
 
             // Read the length from the next 1, 2, or 3 bytes
             int[] toIncrement = new int[1]; // deriveDataLength will tell us how many bytes it used by setting the value of toIncrement[0]
@@ -447,7 +456,7 @@ public class GGEP {
 
                 } catch (ArrayIndexOutOfBoundsException malformedInput) { throw new BadGGEPBlockException(); }
 
-                // The header indicated that this data is COBS encoded
+                // The extension header indicated that this data is COBS encoded
                 if (encoded) {
 
                     try {
@@ -458,7 +467,7 @@ public class GGEP {
                     } catch (IOException badCobsEncoding) { throw new BadGGEPBlockException("Bad COBS Encoding"); }
                 }
 
-                // The header indicated that this data is deflate compressed
+                // The extension header indicated that this data is deflate compressed
                 if (compressed) {
 
                     try {
@@ -471,7 +480,7 @@ public class GGEP {
 
                 // Save the data, and move past it
                 extensionData = data;
-                currIndex += dataLength; // Move from the start of this extension's data to the start of the next extension header
+                currIndex += dataLength; // Move from the start of this extension's value to the start of the next extension
             }
 
             // Add the extension name and value we just read to this GGEP object's _props TreeMap list of them
@@ -496,30 +505,30 @@ public class GGEP {
     }
 
     /**
-     * In the header's first byte, the 4th bit must be a 0.
+     * In the extension header's first byte, the 4th bit must be a 0.
      * 
-     * @param  headerFlags           The header's first byte
+     * @param  headerFlags           The extension header's first byte
      * @throws BadGGEPBlockException The 4th bit in the header's first byte is a 1
      */
     private void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
 
-        // In the header's first byte, the 4th bit must be a 0, not a 1
+        // In the extension header's first byte, the 4th bit must be a 0, not a 1
         if ((headerFlags & 0x10) != 0) throw new BadGGEPBlockException();
     }
 
     /**
-     * In the header's first byte, the 8th bit indicates if this is the last entry.
+     * In the extension header's first byte, the 8th bit indicates if this is the last entry.
      * 0 means it's not the last one, 1 means it is the last one.
      * 
-     * @param headerFlags The header's first byte.
+     * @param headerFlags The extension header's first byte.
      * @return            True if the 8th bit is 1, marking this as the last entry.
      *                    False if the 8th bit is 0, indicating there is another entry after this one.
      */
     private boolean isLastExtension(byte headerFlags) {
 
         /*
-         * the 8th bit in the header's first byte, when set, indicates that
-         * this header is the last....
+         * the 8th bit in the extension header's first byte, when set, indicates that
+         * this extension is the last....
          */
 
         // Return the 8th bit
@@ -529,18 +538,18 @@ public class GGEP {
     }
 
     /**
-     * In the header's first byte, the 7th bit indicates this header's value is COBS encoded.
+     * In the extension header's first byte, the 7th bit indicates this extension's value is COBS encoded.
      * 0 means it's not COBS encoded, 1 means it is.
      * 
-     * @param headerFlags The header's first byte.
+     * @param headerFlags The extension header's first byte.
      * @return            True if the 7th bit is 1, meaning the value is COBS encoded and we'll have to decode it.
      *                    False if the 7th bit is 0, meaning the value isn't COBS encoded and we don't need to worry about it.
      */
     private boolean isEncoded(byte headerFlags) {
 
         /*
-         * the 7th bit in the header's first byte, when set, indicates that
-         * this header is the encoded with COBS
+         * the 7th bit in the extension header's first byte, when set, indicates that
+         * this extension value is encoded with COBS
          */
 
         // Return the 7th bit
@@ -550,18 +559,18 @@ public class GGEP {
     }
 
     /**
-     * In the header's first byte, the 6th bit indicates the header's value is compressed.
+     * In the extension header's first byte, the 6th bit indicates the extension's value is compressed.
      * 0 means it's not compressed, 1 means it is.
      * 
-     * @param headerFlags The header's first byte.
+     * @param headerFlags The extension header's first byte.
      * @return            True if the 6th bit is 1, meaning the value is compressed and we'll have to decompress it.
      *                    False if the 6th bit is 0, meaning the value isn't compressed and we don't need to worry about it.
      */
     private boolean isCompressed(byte headerFlags) {
 
         /*
-         * the 6th bit in the header's first byte, when set, indicates that
-         * this header is the compressed with deflate
+         * the 6th bit in the extension header's first byte, when set, indicates that
+         * this extension value is compressed with deflate
          */
 
         // Return the 6th bit
@@ -571,20 +580,20 @@ public class GGEP {
     }
 
     /**
-     * In the header's first byte, the first 4 bits tell the length of the header.
-     * The header can be 1 to 15 bytes long.
+     * In the extension header's first byte, the first 4 bits tell the length of the extension name.
+     * The extension name can be 1 to 15 bytes long.
      * 
-     * @param headerFlags            The header's first byte
-     * @return                       The first 4 bits of the header as an int, the length of the header
+     * @param headerFlags            The exension header's first byte
+     * @return                       The low 4 bits of the byte as an int, the length of the extension name
      * @throws BadGGEPBlockException The length is 0
      */
     private int deriveHeaderLength(byte headerFlags) throws BadGGEPBlockException {
 
         /*
-         * bits 0-3 give the length of the extension header (1-15)
+         * bits 0-3 give the length of the extension name (1-15)
          */
 
-        // Read just the first 4 bits of the header's first byte
+        // Read just the first 4 bits of the extension header's first byte
         int retInt = 0;
         retInt = headerFlags & 0x0F;
 
@@ -643,7 +652,7 @@ public class GGEP {
 
     /**
      * Write out this GGEP block as data we can send in a Gnutella packet.
-     * Loops through all the headers in _props.
+     * Loops through all the extensions in _props.
      * For each one, writes the name like "#SCP###" and value data.
      * 
      * @param out The OutputStream object we can call out.write(data) on to send the data
@@ -657,25 +666,25 @@ public class GGEP {
             out.write(GGEP_PREFIX_MAGIC_NUMBER);
 
             /*
-             * for each header, write the GGEP header and data
+             * for each extension, write the header and value
              */
 
-            // Loop for each header
+            // Loop for each extension
             Iterator headers = getHeaders().iterator();
             while (headers.hasNext()) {
 
-                // Get the name and value of this header
+                // Get the name and value of this extension
                 String currHeader = (String)headers.next();
                 byte[] currData = get(currHeader); // If the value is a NeedsCompression object, gets the byte array inside it
 
-                // Variable for the length of this header's data value
+                // Variable for the length of this extension's value
                 int dataLen = 0;
 
-                // Determine if we need to COBS encode and compress this header's value
+                // Determine if we need to COBS encode and compress this value
                 boolean shouldEncode = shouldCOBSEncode(currData);   // True if this object allows COBS encoding and currData has a 0 byte
                 boolean shouldCompress = shouldCompress(currHeader); // True if the value in _props for currHeader is a NeedsCompression object
 
-                // This GGEP header has a value
+                // This GGEP extension has a value
                 if (currData != null) {
 
                     // We need to compress it
@@ -699,16 +708,16 @@ public class GGEP {
                     dataLen = currData.length; // Get the compressed length
                 }
 
-                // Write the data of the header, like "#SCP###"
+                // Write the data of the extension, like "#SCP###"
                 writeHeader(
-                    currHeader,         // The header name, like "SCP"
+                    currHeader,         // The extension name, like "SCP"
                     dataLen,            // The length of the value that will come after this header
-                    !headers.hasNext(), // True if this is the last header in the GGEP block
+                    !headers.hasNext(), // True if this is the last extension in the GGEP block
                     out,                // The object we can call out.write(b) on to write data
                     shouldEncode,       // True if the value will be COBS encoded
                     shouldCompress);    // True if the value will be deflate compressed
 
-                // If this header has data, write it
+                // If this extension has data, write it
                 if (dataLen > 0) out.write(currData); // The length dataLen was written in the header above
             }
         }
@@ -717,7 +726,7 @@ public class GGEP {
     /**
      * Determine if we should COBS encode a given GGEP value.
      * 
-     * @param data The value of a GGEP header
+     * @param data The value of a GGEP extension
      * @return     True if we told the constructor to use COBS encoding and this value contains a 0 byte that needs to get hidden
      */
     private final boolean shouldCOBSEncode(byte[] data) {
@@ -732,35 +741,36 @@ public class GGEP {
     }
 
     /**
-     * Determine if we need to compress the value of a given GGEP header.
+     * Determine if we need to compress the value of a given GGEP extension.
      * 
-     * @param header A GGEP header, like "VC".
+     * @param header A GGEP extension name, like "VC".
      * @return       True if the value is a NeedsCompression object, indicating that we should compress the value.
      *               False if the value is a byte array, indicating we can include it in the data of the GGEP block as it is.
      */
     private final boolean shouldCompress(String header) {
 
-        // Look up the header like "VC" in the _props TreeMap of them, if the value is a NeedsCompression object, return true
+        // Look up the extension name like "VC" in the _props TreeMap of them, if the value is a NeedsCompression object, return true
         return (_props.get(header) instanceof NeedsCompression);
     }
 
     /**
-     * Write the data of a GGEP extension header, like "SCP".
+     * Write the data of a GGEP extension header.
      * dataLen is the length of the value after this header.
-     * This method just writes the header, not the header's value.
+     * This method just writes the header, not the value.
+     * The header and the value together will make a complete extension.
      * 
-     * A GGEP header looks like this:
+     * A header looks like this:
      * 
      * #SCP###
      * 
-     * The text in the middle is the name of the tag, like "VC" or "SCP".
+     * The text in the middle is the name of the extension, like "VC" or "SCP".
      * It's ASCII text that isn't null terminated.
      * 
-     * The first byte contains flags and the length of the tag name.
-     * The first 3 bits are 1 to mark this as the last tag in the GGEP block, 1 to indicate the value after is COBS encoded, and 1 to indicate it's compressed.
-     * The 5 bits after that have the length of the tag nam, like 3 for "SCP".
+     * The first byte contains flags and the length of the extension name.
+     * The first 3 bits are 1 to mark this as the last extension in the GGEP block, 1 to indicate the value after is COBS encoded, and 1 to indicate it's compressed.
+     * The 5 bits after that have the length of the extension name, like 3 for "SCP".
      * 
-     * After the tag name, there are 1, 2, or 3 bytes that hold the length of the value for this tag.
+     * After the extension name, there are 1, 2, or 3 bytes that hold the length of the value for this extension.
      * Each length byte starts with 2 flag bits, and then has 6 to hold the length.
      * The length looks like this:
      * 
@@ -770,9 +780,9 @@ public class GGEP {
      * The first bit tells if there is another after it.
      * The second bit is just a reverse of the first, to make sure no byte can ever be 0.
      * 
-     * @param header       The header name, like "VC"
-     * @param dataLen      The length of this header's value
-     * @param isLast       True if this is the last header in the GGEP block, false if there is another one after it
+     * @param header       The extension name, like "VC"
+     * @param dataLen      The length of this extension's value
+     * @param isLast       True if this is the last extension in the GGEP block, false if there is another one after it
      * @param out          The OutputStream we'll call out.write(b) on to write the serialized data
      * @param isEncoded    True if the data in the value will be COBS encoded
      * @param isCompressed True if the data in the value will be deflate compressed
@@ -804,14 +814,14 @@ public class GGEP {
 
         // Prepare and write the flags byte
         int flags = 0x00;
-        if (isLast)       flags |= 0x80;   // Set the bit 1000 0000 to mark this as the last header in the GGEP block
-        if (isEncoded)    flags |= 0x40;   // Set the bit 0100 0000 if the value of this header will be COBS encoded
-        if (isCompressed) flags |= 0x20;   // Set the bit 0010 0000 if the value of this header will be compressed
-        flags |= header.getBytes().length; // Put the length of the header text in the low 4 bits we didn't touch above
+        if (isLast)       flags |= 0x80;   // Set the bit 1000 0000 to mark this as the last extension in the GGEP block
+        if (isEncoded)    flags |= 0x40;   // Set the bit 0100 0000 if the value of this extension will be COBS encoded
+        if (isCompressed) flags |= 0x20;   // Set the bit 0010 0000 if the value of this extension will be compressed
+        flags |= header.getBytes().length; // Put the length of the extension name in the low 4 bits we didn't touch above
         out.write(flags);
 
-        // Write the text of the header
-        out.write(header.getBytes()); // If String header is "SCP", writes those characters as 3 ASCII bytes without a null terminator
+        // Write the text of the extension name
+        out.write(header.getBytes()); // If the String header is "SCP", writes those characters as 3 ASCII bytes without a null terminator
 
         /*
          * Write the length of the value, which will take 1, 2, or 3 bytes.
@@ -860,7 +870,7 @@ public class GGEP {
      */
 
     /**
-     * Add a list of GGEP extension headers and their values.
+     * Add a list of GGEP extension names and values.
      * 
      * @param fields A List of NameValue objects with names like "SCP" and values that are byte arrays, strings, or numbers
      */
@@ -889,14 +899,14 @@ public class GGEP {
     }
 
     /**
-     * Add a header name with a data value that needs to be compressed in the GGEP block.
+     * Add a extension with a data value that needs to be compressed in the GGEP block.
      * 
-     * @param key   A GGEP header name like "VC"
+     * @param key   A GGEP extension name like "VC"
      * @param value A byte array with the data that we should compress in the GGEP block
      */
     public void putCompressed(String key, byte[] value) throws IllegalArgumentException {
 
-        // Make sure the header name isn't blank
+        // Make sure the extension name isn't blank
         validateKey(key);
 
         /*
@@ -908,36 +918,36 @@ public class GGEP {
     }
 
     /**
-     * Add a GGEP header name that has some data as its value.
+     * Add a GGEP extension that has some data as its value.
      * 
-     * @param key   A GGEP header name, like "VC"
+     * @param key   A GGEP extension name, like "VC"
      * @param value A byte array with the data value
      */
     public void put(String key, byte[] value) throws IllegalArgumentException {
 
-        // Make sure the header name isn't blank and the value isn't too long, and add them to the _props list
+        // Make sure the extension name isn't blank and the value isn't too long, and add them to the _props list
         validateKey(key);
         validateValue(value);
         _props.put(key, value);
     }
 
     /**
-     * Add a GGEP header name that has a text value.
+     * Add a GGEP extension that has a text value.
      * 
-     * @param key   A GGEP header name, like "VC"
-     * @param value A String value for that header
+     * @param key   A GGEP extension name, like "VC"
+     * @param value A String value for the extension
      */
     public void put(String key, String value) throws IllegalArgumentException {
 
-        // Add the header name and value to the _props list
+        // Add the extension name and value to the _props list
         put(key, value == null ? null : value.getBytes()); // Pass null or the ASCII bytes of the String
     }
 
     /**
-     * Add a GGEP header name with a number value.
+     * Add a GGEP extension name with a number value.
      * Expresses the number in the fewest bytes necessary in little endian order.
      * 
-     * @param key   A GGEP header name, like "VC"
+     * @param key   A GGEP extension name, like "VC"
      * @param value The number value
      */
     public void put(String key, int value) throws IllegalArgumentException {
@@ -945,15 +955,15 @@ public class GGEP {
         // Negative values aren't allowed
         if (value < 0) throw new IllegalArgumentException("Negative value");
 
-        // Add the header name and value data to the _props list
+        // Add the extension name and value data to the _props list
         put(key, ByteOrder.int2minLeb(value)); // Turn the number into a byte array of the necessary length
     }
 
     /**
-     * Add a GGEP header name with a number value.
+     * Add a GGEP extension name with a number value.
      * Expresses the number in the fewest bytes necessary in little endian order.
      * 
-     * @param key   A GGEP header name, like "VC"
+     * @param key   A GGEP extension name, like "VC"
      * @param value The number value
      */
     public void put(String key, long value) throws IllegalArgumentException {
@@ -961,26 +971,26 @@ public class GGEP {
         // Negative values aren't allowed
         if (value < 0) throw new IllegalArgumentException("Negative value");
 
-        // Add the header name and value data to the _props list
+        // Add the extension name and value data to the _props list
         put(key, ByteOrder.long2minLeb(value)); // Turn the number into a byte array of the necessary length
     }
 
     /**
-     * Add a GGEP header name that doesn't have a value.
+     * Add a GGEP extension name that doesn't have a value.
      * 
-     * @param key A GGEP header name, like "VC"
+     * @param key A GGEP extension name, like "VC"
      */
     public void put(String key) throws IllegalArgumentException {
 
-        // Add the header name, passing null instead of a byte array
+        // Add the extension name, passing null instead of a byte array
         put(key, (byte[])null);
     }
 
     /**
-     * Get a GGEP header's data value.
+     * Get a GGEP extension's data value.
      * 
-     * @param  key                      A GGEP header name, like "VC"
-     * @return                          The header's value in a byte array
+     * @param  key                      A GGEP extension name, like "VC"
+     * @return                          The extension's value in a byte array
      * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public byte[] getBytes(String key) throws BadGGEPPropertyException {
@@ -992,10 +1002,10 @@ public class GGEP {
     }
 
     /**
-     * Get a GGEP header's text value.
+     * Get a GGEP extension's text value.
      * 
-     * @param  key                      A GGEP header name, like "VC"
-     * @return                          The header's value in a String
+     * @param  key                      A GGEP extension name, like "VC"
+     * @return                          The extension's value in a String
      * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public String getString(String key) throws BadGGEPPropertyException {
@@ -1005,10 +1015,10 @@ public class GGEP {
     }
 
     /**
-     * Get a GGEP header's int value.
+     * Get a GGEP extension's int value.
      * 
-     * @param  key                      A GGEP header name, like "VC"
-     * @return                          The header's value in an int
+     * @param  key                      A GGEP extension name, like "VC"
+     * @return                          The extension's value in an int
      * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public int getInt(String key) throws BadGGEPPropertyException {
@@ -1025,10 +1035,10 @@ public class GGEP {
     }
 
     /**
-     * Get a GGEP header's long number value.
+     * Get a GGEP extension's long number value.
      * 
-     * @param  key                      A GGEP header name, like "VC"
-     * @return                          The header's value in a long
+     * @param  key                      A GGEP extension name, like "VC"
+     * @return                          The extension's value in a long
      * @throws BadGGEPPropertyException The given extension was not found, or has no data
      */
     public long getLong(String key) throws BadGGEPPropertyException {
@@ -1045,9 +1055,9 @@ public class GGEP {
     }
 
     /**
-     * Determine if this GGEP block has a given key.
+     * Determine if this GGEP block has a given extension.
      * 
-     * @param key A GGEP header name, like "VC"
+     * @param key A GGEP extension name, like "VC"
      * @return    True if this GGEP block has it, false if not found
      */
     public boolean hasKey(String key) {
@@ -1057,26 +1067,26 @@ public class GGEP {
     }
 
     /**
-     * Get a list of the header names this GGEP block has.
+     * Get a list of the extensions this GGEP block has.
      * 
-     * @return A Set of this GGEP block's header names, like "VC", "SCP", the set has String objects in it
+     * @return A Set of this GGEP block's extension names, like "VC", "SCP", the set has String objects in it
      */
     public Set getHeaders() {
 
-        // Return a list of all the GGEP headers, like "VC", "SCP", that this GGEP block has
+        // Return a list of all the GGEP extensions, like "VC", "SCP", that this GGEP block has
         return _props.keySet(); // Returns a Set of all the keys in the _props TreeMap
     }
 
     /**
-     * Get the data of a given GGEP header.
-     * Looks in the _props TreeMap of GGEP headers and values.
+     * Get the data of a given GGEP extension.
+     * Looks in the _props TreeMap of GGEP extension names and values.
      * 
-     * @param key The name of a GGEP header, like "VC"
-     * @return    The header's value data in a byte array
+     * @param key The name of a GGEP extension, like "VC"
+     * @return    The extension's value data in a byte array
      */
     public byte[] get(String key) {
 
-        // Look up the header name like "VC" in the _props TreeMap of headers this GGEP object keeps
+        // Look up the extension name like "VC" in the _props TreeMap of extensions this GGEP object keeps
         Object value = _props.get(key);
 
         // The value is a NeedsCompression object that wraps the byte array
@@ -1094,9 +1104,9 @@ public class GGEP {
     }
 
     /**
-     * Make sure a GGEP header key name like "SCP" isn't null, blank, longer than 15 bytes, or contains a 0 byte.
+     * Make sure a GGEP extension name like "SCP" isn't null, blank, longer than 15 bytes, or contains a 0 byte.
      * 
-     * @param  key                      A String like "SCP", a GGEP header name
+     * @param  key                      A String like "SCP", a GGEP extension name
      * @throws IllegalArgumentException The name is null, blank, longer than 15 characters, or contains a 0 byte
      */
     private void validateKey(String key) throws IllegalArgumentException {
@@ -1104,7 +1114,7 @@ public class GGEP {
         // Look at the String like "SCP" as a byte array of 3 ASCII characters
         byte[] bytes = key.getBytes();
 
-        // Make sure the header name is valid for GGEP storage
+        // Make sure the extension name is valid for GGEP storage
         if
             ((key == null)                            // Make sure we were passed a String a not a null reference
             || key.equals("")                         // Make sure the String isn't blank
@@ -1116,15 +1126,15 @@ public class GGEP {
     }
 
     /**
-     * Make sure a GGEP header value isn't 256 KB or longer.
+     * Make sure a GGEP extension value isn't 256 KB or longer.
      * 
-     * @param  value                    A byte array that contains the data of a GGEP header value
+     * @param  value                    A byte array that contains the data of a GGEP extension value
      * @throws IllegalArgumentException The given reference is null, or the byte array is 256 KB or longer
      */
     private void validateValue(byte[] value) throws IllegalArgumentException {
 
-        // If there is no data for this extension header, leave without throwing an exception
-        if (value == null) return;
+        // If there is no data for this extension, leave without throwing an exception
+        if (value == null) return; // GGEP extensions don't have to have values, many are just tags
 
         // Make sure the value isn't 256 KB or longer
         if (value.length > MAX_VALUE_SIZE_IN_BYTES) throw new IllegalArgumentException();
@@ -1190,8 +1200,8 @@ public class GGEP {
      * Returns true if all of this GGEP block's keys can be found in other with the same values.
      * 
      * @param other Another GGEP block which may have all we do and more.
-     * @return      True if the give GGEP block has all of our keys, and with all the same values.
-     *              False if we have a key the given GGEP block is missing, or our values for a key aren't the same.
+     * @return      True if the give GGEP block has all of our extensions, and with all the same values.
+     *              False if we have an extension the given GGEP block is missing, or our value for an extension isn't the same.
      */
     private boolean subset(GGEP other) {
 
@@ -1227,7 +1237,7 @@ public class GGEP {
         // If we haven't computed and saved our hashCode yet
 		if (hashCode == 0) {
 
-            // Take the hash code of the TreeMap of GGEP header names and values, and multiply that by 37
+            // Take the hash code of the TreeMap of GGEP extension names and values, and multiply that by 37
 			hashCode = 37 * _props.hashCode();
 		}
 

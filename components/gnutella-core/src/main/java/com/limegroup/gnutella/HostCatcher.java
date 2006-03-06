@@ -693,8 +693,9 @@ public class HostCatcher {
     /**
      * Adds all the IP addresses and port numbers in a Gnutella pong packet we've received.
      * 
-     * @param pr The Gnutella pong packet that contains the IP address and port number we want to add
-     * @return   True if we got some IP addresses and port numbers for our list, false if we didn't add any
+     * @param pr The Gnutella pong packet that contains the IP address and port number we want to add.
+     * @return   True if we got some IP addresses and port numbers for our list.
+     *           False if we didn't add any because we already have them.
      */
     public boolean add(PingReply pr) {
 

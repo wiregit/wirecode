@@ -35,22 +35,60 @@ import com.limegroup.gnutella.util.NameValue;
  * We can send pings in a TCP socket connection, or in UDP packets.
  * UDP pings can be intended for remote PCs like us, UDP host caches, or the multicast network.
  * 
- * A special kind of ping packet is a solicited ping attempt.
- * It's labeled "SCP" in the GGEP block.
+ * Pinger.run() makes a ping we send to all our connections.
+ * Here's what one looks like:
+ * 
+ * 84 11 e8 94 14 4a 4a 9c  -----JJ-  aaaaaaaa
+ * c2 b0 25 19 51 ac 67 00  --%-Q-g-  aaaaaaaa
+ * 00 03 00 09 00 00 00 c3  --------  bcdeeeef
+ * 83 4c 4f 43 42 65 6e 00  -LOCBen-  gggggggg
+ * 
+ * a is the 16 byte message GUID.
+ * b is 0x00, the byte code for a ping.
+ * c is the TTL, 3.
+ * d is the hops, 0.
+ * 
+ * e is the length of the payload, 0x09, which is 9 bytes.
+ * The length is 4 bytes in little endian order, like 09 00 00 00.
+ * 
+ * f is 0xC3, the byte that begins a GGEP block.
+ * The remaining bytes contain a single GGEP extension, "LOC" Locale preference.
+ * 
+ * 83        4c  4f  43  42        65  6e  00
+ * 1000 0011 'L' 'O' 'C' 0100 0010 'e' 'n' 0
+ * hij  kkkk             llmm mmmm         n
+ * 
+ * h is 1 to indicate this is the last extension in the GGEP block.
+ * i and j are 0 because the value isn't COBS encoded or defalte compressed.
+ * k is 3, the length of the extension name "LOC".
+ * l is 01 to mark that this byte is the last needed to hold the value length.
+ * m is 2, the length of the extension value "en".
+ * n is a 0 that addGGEPs() adds to terminate the GGEP block, and may not be necessary.
  */
 public class PingRequest extends Message {
 
     /*
-     * Various flags related to the "SCP" GGEP field.
+     * Here's how the "SCP" and "IPP" GGEP extensions work.
+     * 
+     * "IPP" is used in UDP pongs.
+     * It tells the IP addresses and port numbers of computers running Gnutella software that you can try to connect to.
+     * It's like the "X-Try-Ultrapeers" handshake header.
+     * "IPP" has a value a multiple of 6 bytes long, with each 6 bytes containing an IP address and port number.
+     * 
+     * "SCP" is used in UDP pings.
+     * It requests "IPP" in the responding pong.
+     * It has a 1 byte value.
+     * If the byte value is 0x00, it wants the addresses of ultrapeers with free leaf slots.
+     * If the byte value is 0x01, it wants the addresses of ultrapeers with free ultrapeer slots.
      */
 
-    /** 0x01, related to the "SCP" GGEP field. (do) */
+    /** 0x01, look in the lowest bit in "SCP" byte value to see what the ping wants. */
     public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
 
-    /** 0x00, related to the "SCP" GGEP field. (do) */
+    /** 0x00, the "SCP" ping wants "IPP" with the addresses of ultrapeers with free leaf slots. */
     public static final byte SCP_LEAF = 0x0;
 
-    /** 0x01, related to the "SCP" GGEP field. (do) */
+    /** 0x01, the "SCP" ping wants "IPP" with the addresses of ultrapeers with free ultrapeer slots. */
     public static final byte SCP_ULTRAPEER = 0x1;
 
     /**
@@ -430,6 +468,10 @@ public class PingRequest extends Message {
             baos.write(0);                             // Write a 0 byte that terminates the GGEP block
             payload = baos.toByteArray();              // Have the ByteArrayOutputStream release everything we wrote as a byte array, and point payload at it
             updateLength(payload.length);              // Set the paylaod length in the Gnutella packet header to the length of the GGEP block
+
+            /*
+             * TODO:kfaaborg Terminating the GGEP block with a 0 isn't necessary.
+             */
 
         // Pass an exception to the ErrorService
         } catch (IOException e) { ErrorService.error(e); }

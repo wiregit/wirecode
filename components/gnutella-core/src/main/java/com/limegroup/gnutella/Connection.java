@@ -2363,6 +2363,10 @@ public class Connection implements IpPort {
      * True if the remote computer supports pong caching.
      * The ReplyHandler interface requires this method.
      * 
+     * A computer that does pong caching never broadcasts pings forward.
+     * It keeps a cache of 6 pongs that traveled 0, 1, 2, 3, 4, and 5 hops to get to it.
+     * When it gets a pong, it replies with a pong about itself and the cached 6.
+     * 
      * @return True if the remote computer told us "Pong-Caching: 0.1" or higher in the handshake
      */
     public boolean supportsPongCaching() {
@@ -2410,16 +2414,14 @@ public class Connection implements IpPort {
     }
 
     /**
-     * True if a pong from this remote computer should be let through, false to not relay it because it recently sent us one.
-     * Limits the number of pongs we'll relay for this computer to one every 12 seconds.
-     * If this remote computer sent us a pong recently, allowNewPongs will return false.
-     * This stops a remote computer from ponging the network to death through us.
+     * True if we should send a pong to this remote computer, false to not give it one because we did recently.
+     * Limits the number of pongs we'll send to this remote computer to one every 12 seconds.
      * 
      * First returns true 5 seconds into a new connection.
      * For the next 5 seconds of the connection, returns true every 0.3 seconds.
      * Once we've been exchanging packets with this remote computer for 10 seconds, only returns true once every 12 seconds.
      * 
-     * In practice, this is only used to limit the pongs we send to leaves when acting as an ultrapeer.
+     * MessageRouter.handlePingReply() uses this to meter the pongs we send our leaves as an ultrapeer.
      * 
      * @return True if this is the first pong from this remote computer in 12 seconds, and we are free to forward it to the network
      */

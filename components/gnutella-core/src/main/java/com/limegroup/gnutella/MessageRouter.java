@@ -92,6 +92,7 @@ public abstract class MessageRouter {
     //do
 
     /**
+     * 15
      * Constant for the number of old connections to use when forwarding
      * traffic from old connections.
      */
@@ -107,16 +108,24 @@ public abstract class MessageRouter {
      */
     protected byte[] _clientGUID;
 
-    //do
-
 	/**
-	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
-	 * this node.
+     * The ForMeReplyHandler object that represents us in a RouteTable, and lets us get responses to messages we create and send.
+     * 
+     * There are 3 classes in LimeWire that implement the ReplyHandler interface.
+     * They are ManagedConnection, UDPReplyHandler, and ForMeReplyHandler.
+     * ManagedConnection and UDPReplyHandler objects represent remote computers, and the ForMeReplyHandler represents us.
+     * 
+     * These objects implement ReplyHandler so we can put them under a GUID in a RouteTable.
+     * Before broadcasting a request packet forward, we'll put its message GUID and the ReplyHandler that sent it to us in a RouteTable.
+     * When we get a response packet, we'll look up its GUID in the RouteTable, and send it back the right way.
+     * 
+     * When we create a message and send it ourselves, we put the ForMeReplyHandler in the RouteTable.
+     * That way, when the response with the same GUID comes back, we'll know it's for us.
+     * 
+     * There is only one ForMeReplyHandler object as the program runs.
+     * This line of code gets a reference to it, and saves it as FOR_ME_REPLY_HANDLER.
 	 */
-    private final ReplyHandler FOR_ME_REPLY_HANDLER = 
-		ForMeReplyHandler.instance();
-
-    //done
+    private final ReplyHandler FOR_ME_REPLY_HANDLER = ForMeReplyHandler.instance();
 
     /**
      * 50000, a map in a RouteTable can hold 50 thousand GUIDs.
@@ -133,6 +142,7 @@ public abstract class MessageRouter {
     //do
 
     /**
+     * 150
      * The maximum number of bypassed results to remember per query.
      */
     private final int MAX_BYPASSED_RESULTS = 150;
@@ -145,6 +155,14 @@ public abstract class MessageRouter {
      * When a ReplyHandler like a ManagedConnection sends us a ping, we'll add it under the ping's message GUID in _pingRouteTable.
      * Later, we may get a pong with the same message GUID.
      * We'll look up the GUID in this RouteTable and know which ReplyHandler to send it back to.
+     * 
+     * LimeWire no longer broadcasts pings forward, and having a route table for pings and pongs is no longer necessary.
+     * When we get a ping, we'll reply with a pong about us and 6 pongs from the PongCacher.
+     * We still add the ping's GUID to _pingRouteTable, but since we don't send it onward, we'll never get a pong back with its GUID.
+     * 
+     * _pingRouteTable is important for the pings we send out.
+     * When we ping our connections, we put the ping's GUID in _pingRouteTable with the ForMeReplyHandler object.
+     * Then, when we get a pong back that's in response to our ping, the ForMeReplyHandler gets it and processes it.
      * 
      * Every 2 minutes, the ping route table will discard the old map and shift the new map contents there, holding a GUID for between 2 and 4 minutes.
      * Each map can hold 50 thousand GUID mappings for a total maximum of 100 thousand.
@@ -168,7 +186,7 @@ public abstract class MessageRouter {
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers.
      * 
-     * Every 7 minutes, the ping route table will discard the old map and shift the new map contents there, holding a GUID for between 7 and 14 minutes
+     * Every 7 minutes, the route table will discard the old map and shift the new map contents there, holding a GUID for between 7 and 14 minutes
      * Each map can hold 50 thousand GUID mappings for a total maximum of 100 thousand.
      */
     private RouteTable _pushRouteTable = new RouteTable(7 * 60, MAX_ROUTE_TABLE_SIZE); // 7 minutes, 50 thousand entries
@@ -177,7 +195,7 @@ public abstract class MessageRouter {
      * Maps HeadPong guids to the originating pingers.  Short-lived since
      * we expect replies from our leaves quickly.
      * 
-     * Every 10 seconds, the ping route table will discard the old map and shift the new map contents there, holding a GUID for between 10 and 20 seconds
+     * Every 10 seconds, the route table will discard the old map and shift the new map contents there, holding a GUID for between 10 and 20 seconds
      * Each map can hold 50 thousand GUID mappings for a total maximum of 100 thousand.
      */
     private RouteTable _headPongRouteTable = new RouteTable(10, MAX_ROUTE_TABLE_SIZE); // 10 seconds, 50 thousand entries
@@ -463,7 +481,7 @@ public abstract class MessageRouter {
     //do
 
 	/**
-     * Hop a message, sort it by type, and hand it off to a message type specific method.
+     * Hop a message, sort it by type, and hand it off to a method for that type of message.
      * All the Gnutella packets we get through TCP socket Gnutella connections come here.
      * 
      * Here's what's happened to the message up to this point:
@@ -477,31 +495,31 @@ public abstract class MessageRouter {
      */
     public void handleMessage(Message msg, ManagedConnection receivingConnection) {
 
-        // Increment hops and decrease TTL.
+        // Move 1 from the TTL to the hops count, having the packet record its trip across the Internet to get here
         msg.hop();
 
-        // Ping
+        // The remote computer sent us a ping
         if (msg instanceof PingRequest) {
 
             // Update statistics and hand off the message
             ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, receivingConnection);
 
-        // Pong
+        // The remote computer sent us a pong
 		} else if (msg instanceof PingReply) {
 
             // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, receivingConnection);
 
-        // Query
+        // The remote computer sent us a query
         } else if (msg instanceof QueryRequest) {
 
             // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate((QueryRequest)msg, receivingConnection);
 
-        // Query hit
+        // The remote computer sent us a query hit
 		} else if (msg instanceof QueryReply) {
 		    
 		    /*
@@ -514,7 +532,7 @@ public abstract class MessageRouter {
             QueryReply qmsg = (QueryReply)msg;
             handleQueryReply(qmsg, receivingConnection); 
 
-        // Push
+        // The remote computer sent us a push
 		} else if (msg instanceof PushRequest) {
 
             // Update statistics and hand off the message
@@ -622,70 +640,89 @@ public abstract class MessageRouter {
     }
 
 	/**
-     * The handler for all message types.  Processes a message based on the 
-     * message type.
-	 *
-	 * @param msg the <tt>Message</tt> received
-	 * @param addr the <tt>InetSocketAddress</tt> containing the IP and 
-	 *  port of the client node
-     */	
+     * Hop a message, sort it by type, and hand it off to a method for that type of message.
+     * All the Gnutella messages we get in UDP packets come here.
+     * 
+     * Here's what's happened to the message up to this point:
+     * NIODispatcher.process(SelectionKey, Object, int) finds a key selected for reading.
+     * UDPService.handleRead() gets the source InetSocketAddress from the channel, reads the data and parses it into a Message object.
+     * UDPService.processMessage(Message, InetSocketAddress) calls the next method.
+     * MessageDispatcher.dispatchUDP(Message, InetSocketAddress) has the "MessageDispatch" thread call the next method.
+     * MessageDispatcher.UDPDispatch.run() calls here.
+     * 
+     * @param msg  A Gnutella message we got in a UDP packet
+     * @param addr The IP address and port number it came from
+     */
 	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
-        // Increment hops and decrement TTL.
+
+        // Move 1 from the TTL to the hops count, having the packet record its trip across the Internet to get here
         msg.hop();
 
-		InetAddress address = addr.getAddress();
-		int port = addr.getPort();
-		// Verify that the address and port are valid.
-		// If they are not, we cannot send any replies to them.
-		if(!RouterService.isIpPortValid()) return;
+        // Get the IP address and port number of the computer that sent us the Gnutella message in a UDP packet
+		InetAddress address = addr.getAddress(); // UDPService.handleRead() got the source InetSocketAddress from the channel object
+		int         port    = addr.getPort();
+
+        // Make sure our IP address we're saying doesn't start 0 or 255, and our port number isn't 0
+		if(!RouterService.isIpPortValid()) return; // If we have bad address information for ourself, we can't send a pong about us
 
 		// Send UDPConnection messages on to the connection multiplexor
 		// for routing to the appropriate connection processor
-		if ( msg instanceof UDPConnectionMessage ) {
-		    _udpConnectionMultiplexor.routeMessage(
-			  (UDPConnectionMessage)msg, address, port);
+		if (msg instanceof UDPConnectionMessage) {
+		    _udpConnectionMultiplexor.routeMessage((UDPConnectionMessage)msg, address, port);
 			return;
 		}
 
         // Make a new UDPReplyHandler that will wrap Gnutella packets into UDP packets and send them to the given IP address and port number
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 
+        // We received a query by UDP
         if (msg instanceof QueryRequest) {
+
             //TODO: compare QueryKey with old generation params.  if it matches
-            //send a new one generated with current params 
+            //send a new one generated with current params
             if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
                 sendAcknowledgement(addr, msg.getGUID());
                 // a TTL above zero may indicate a malicious client, as UDP
                 // messages queries should not be sent with TTL above 1.
                 //if(msg.getTTL() > 0) return;
-                if (!handleUDPQueryRequestPossibleDuplicate(
-                  (QueryRequest)msg, handler) ) {
+                if (!handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, handler)) {
                     ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
-                }  
+                }
             }
             ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
+
+        // We received a query hit by UDP
 		} else if (msg instanceof QueryReply) {
+
             QueryReply qr = (QueryReply) msg;
 			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             int numResps = qr.getResultCount();
             // only account for OOB stuff if this was response to a 
             // OOB query, multicast stuff is sent over UDP too....
-            if (!qr.isReplyToMulticastQuery())
-                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-			
+            if (!qr.isReplyToMulticastQuery()) OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
             handleQueryReply(qr, handler);
-            
-		} else if(msg instanceof PingRequest) {
+
+        // We received a ping by UDP
+		} else if (msg instanceof PingRequest) {
+
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
-			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, addr);
-		} else if(msg instanceof PingReply) {
+			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
+
+        // We received a pong by UDP
+		} else if (msg instanceof PingReply) {
+
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, address, port);
+
+        // We received a push by UDP
 		} else if(msg instanceof PushRequest) {
+
 			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
-		} else if(msg instanceof LimeACKVendorMessage) {
+
+        } else if(msg instanceof LimeACKVendorMessage) {
 			ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
             handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
         }
@@ -754,16 +791,11 @@ public abstract class MessageRouter {
                 ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
             }
             ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
-	//	} else if (msg instanceof QueryReply) {			
-	//		  ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-    //        handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
 			ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
-			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, addr);
-	//	} else if(msg instanceof PingReply) {
-	//	      ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
-    //        handleUDPPingReply((PingReply)msg, handler, address, port);
+            
+			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
+            
 		} else if(msg instanceof PushRequest) {
             ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
@@ -845,7 +877,7 @@ public abstract class MessageRouter {
         // Add the ping to our route table, leaving without continuing if we already have its GUID
 		if (
 
-		    // Add the ping's message GUID and the ManagedConnection that sent us it to our RouteTable for pings and pongs
+		    // Add the ping's message GUID and the ManagedConnection that sent it to us to our RouteTable for pings and pongs
             _pingRouteTable.tryToRouteReply(request.getGUID(), handler)
 
             // tryToRouteReply() will return null if the GUID is already listed, or the ManagedConnection is closed
@@ -855,24 +887,33 @@ public abstract class MessageRouter {
             handlePingRequest(request, handler);
     }
 
-    //do
-
     /**
-     * The handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
-     * if the request has already been seen.  If not, calls handlePingRequest.
+     * Adds the ping's message GUID and the UDPRelyHandler that sent it to us to our RouteTable for pings and pongs.
+     * If the GUID wasn't already listed, calls handleUDPPingRequest(request, handler, addr) to keep going.
      * 
      * handleUDPMessage(Message, InetSocketAddress) and handleMulticastMessage(Message, InetSocketAddress) call this.
      * 
-     * @param request
-     * @param handler
-     * @param addr
+     * @param request A ping packet we received
+     * @param handler The UDPReplyHandler object that represents the remote computer that sent it to us in a UDP packet
+     * @param addr    The IP address and port number of the remote computer
      */
     final void handleUDPPingRequestPossibleDuplicate(PingRequest request, ReplyHandler handler, InetSocketAddress  addr) {
 
-		if (_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null) handleUDPPingRequest(request, handler, addr);
+        // Add the ping to our route table, leaving without continuing if we already have its GUID
+		if (
+
+            // Add the ping's message GUID and the UDPReplyHandler that sent it to us to our RouteTable for pings and pongs
+            _pingRouteTable.tryToRouteReply(request.getGUID(), handler)
+
+            // tryToRouteReply() will return null if the GUID is already listed
+            != null)
+
+            // If it didn't, keep going with handleUDPPingRequest(request, handler, addr)
+            handleUDPPingRequest(request, handler, addr);
     }
 
+    //do
+    
     /**
      * The handler for QueryRequests received in
      * ManagedConnection.loopForMessages().  Checks the routing table to see
@@ -999,85 +1040,110 @@ public abstract class MessageRouter {
         }
     }
 
-    //do
-
     /**
-     * The default handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  This implementation updates stats,
-     * does the broadcast, and generates a response.
-     *
-     * You can customize behavior in three ways:
-     *   1. Override. You can assume that duplicate messages
-     *      (messages with the same GUID that arrived via different paths) have
-     *      already been filtered.  If you want stats updated, you'll
-     *      have to call super.handlePingRequest.
-     *   2. Override broadcastPingRequest.  This allows you to use the default
-     *      handling framework and just customize request routing.
-     *   3. Implement respondToPingRequest.  This allows you to use the default
-     *      handling framework and just customize responses.
+     * Call StandardMessageRouter.respondToUDPPingRequest(pingRequest, addr, handler).
+     * Makes sure the ping doesn't have the a GGEP block with the "QK" extension.
+     * 
+     * @param request A ping packet we received
+     * @param handler The UDPReplyHandler object that represents the remote computer that sent it to us in a UDP packet
+     * @param addr    The IP address and port number of the remote computer
      */
-    protected void handleUDPPingRequest(PingRequest pingRequest,
-										ReplyHandler handler, 
-										InetSocketAddress addr) {
-        if (pingRequest.isQueryKeyRequest())
+    protected void handleUDPPingRequest(PingRequest pingRequest, ReplyHandler handler, InetSocketAddress addr) {
+
+        /*
+         * The default handler for PingRequests received in
+         * ManagedConnection.loopForMessages().  This implementation updates stats,
+         * does the broadcast, and generates a response.
+         * 
+         * You can customize behavior in three ways:
+         *   1. Override. You can assume that duplicate messages
+         *      (messages with the same GUID that arrived via different paths) have
+         *      already been filtered.  If you want stats updated, you'll
+         *      have to call super.handlePingRequest.
+         *   2. Override broadcastPingRequest.  This allows you to use the default
+         *      handling framework and just customize request routing.
+         *   3. Implement respondToPingRequest.  This allows you to use the default
+         *      handling framework and just customize responses.
+         */
+
+        // The ping has "QK" in its GGEP block
+        if (pingRequest.isQueryKeyRequest()) {
+
+            // QueryKey is a part of GUESS, which LimeWire doesn't use anymore
             sendQueryKeyPong(pingRequest, addr);
-        else
+
+        // The ping doesn't have the "QK" extension
+        } else {
+
+            // Call StandardMessageRouter.respondToUDPPingRequest(pingRequest, addr, handler)
             respondToUDPPingRequest(pingRequest, addr, handler);
+        }
     }
-    
 
     /**
      * QueryKey is a part of GUESS, and no longer used.
+     * Called when we get a ping through UDP that has the "QK" GGEP extension.
      * 
      * Generates a QueryKey for the source (described by addr) and sends the
      * QueryKey to it via a QueryKey pong....
      */
     protected void sendQueryKeyPong(PingRequest pr, InetSocketAddress addr) {
-
         // check if we're getting bombarded
         long now = System.currentTimeMillis();
-        if (now - _lastQueryKeyTime < SearchSettings.QUERY_KEY_DELAY.getValue())
-            return;
-        
+        if (now - _lastQueryKeyTime < SearchSettings.QUERY_KEY_DELAY.getValue()) return;
         _lastQueryKeyTime = now;
-        
         // after find more sources and OOB queries, everyone can dole out query
         // keys....
-
         // generate a QueryKey (quite quick - current impl. (DES) is super
         // fast!
         InetAddress address = addr.getAddress();
         int port = addr.getPort();
         QueryKey key = QueryKey.getQueryKey(address, port);
-        
         // respond with Pong with QK, as GUESS requires....
-        PingReply reply = 
-            PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
+        PingReply reply = PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
         UDPService.instance().send(reply, addr.getAddress(), addr.getPort());
     }
 
+    /**
+     * Handle a pong we've received through UDP.
+     * Gives the source IP address of the packet to the QueryUnicaster if it's different from the address in the pong.
+     * Adds the pong to the HostCatcher and PongCacher, gives pongs for us to the ForMeReplyHandler, and forwards the pong to our leaves.
+     * 
+     * MessageRouter.handleUDPMessage() calls this when we get a pong in a UDP packet.
+     * 
+     * @param reply   A pong we've received in a UDP packet
+     * @param handler The UDPReplyHandler that represents the remote computer that sent it to us
+     * @param address The IP address the packet came from
+     * @param port    The port number the packet came from
+     */
+    protected void handleUDPPingReply(PingReply reply, ReplyHandler handler, InetAddress address, int port) {
 
-    protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
-                                      InetAddress address, int port) {
+        // QueryKey is a part of GUESS, which LimeWire doesn't use anymore
         if (reply.getQueryKey() != null) {
-            // this is a PingReply in reply to my QueryKey Request - 
+            // this is a PingReply in reply to my QueryKey Request -
             //consume the Pong and return, don't process as usual....
             OnDemandUnicaster.handleQueryKeyPong(reply);
             return;
         }
 
-        // also add the sender of the pong if different from the host
-        // described in the reply...
-        if((reply.getPort() != port) || 
-           (!reply.getInetAddress().equals(address))) {
+        /*
+         * also add the sender of the pong if different from the host
+         * described in the reply...
+         */
+
+        // If the address information in the pong doesn't match the address we got it from
+        if ((reply.getPort() != port) || (!reply.getInetAddress().equals(address))) {
+
+            // Give the address that sent it to us to the QueryUnicaster
             UNICASTER.addUnicastEndpoint(address, port);
 		}
-        
-        // normal pong processing...
+
+        // Add the pong to the HostCatcher and PongCacher, give pongs for us to the ForMeReplyHandler, and forward to the pong to our leaves.
         handlePingReply(reply, handler);
     }
 
-    
+    //do
+
     /**
      * The default handler for QueryRequests received in
      * ManagedConnection.loopForMessages().  This implementation updates stats,
@@ -1282,7 +1348,6 @@ public abstract class MessageRouter {
         OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
     }
 
-
     /** Stores (for a limited time) the resps for later out-of-band delivery -
      *  interacts with handleLimeACKMessage
      *  @return true if the operation failed, false if not (i.e. too busy)
@@ -1302,7 +1367,6 @@ public abstract class MessageRouter {
             return false;
         }
     }
-
 
     /**
      * Forwards the UDPConnectBack to neighboring peers
@@ -1331,7 +1395,6 @@ public abstract class MessageRouter {
             }
         }
     }
-
 
     /**
      * Sends a ping to the person requesting the connectback request.
@@ -1384,8 +1447,6 @@ public abstract class MessageRouter {
                 return false;  // we've connected back to this guy recently....
         }
     }
-
-
 
     /**
      * Forwards the request to neighboring Ultrapeers as a
@@ -1511,22 +1572,29 @@ public abstract class MessageRouter {
         DYNAMIC_QUERIER.updateLeafResultsForQuery(queryGUID, numResults);
     }
 
+    //done
 
     /**
-     * Sends the ping request to the designated connection,
-     * setting up the proper reply routing.
+     * Send a ping to a remote computer, adding it to the RouteTable so the ForMeReplyHandler will get a pong response.
+     * ConnectionWatchdog.killIfStillDud(List) uses this to ping connections that may have died.
+     * 
+     * @param request    A ping packet
+     * @param connection The ManagedConnection to send it to
      */
-    public void sendPingRequest(PingRequest request,
-                                ManagedConnection connection) {
-        if(request == null) {
-            throw new NullPointerException("null ping");
-        }
-        if(connection == null) {
-            throw new NullPointerException("null connection");
-        }
-        _pingRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
+    public void sendPingRequest(PingRequest request, ManagedConnection connection) {
+
+        // Make sure the caller gave us a packet and connection
+        if (request    == null) throw new NullPointerException("null ping");
+        if (connection == null) throw new NullPointerException("null connection");
+
+        // In our RouteTable for pings and pongs, list the ping's message GUID with the ForMeReplyHandler
+        _pingRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER); // If we get a pong with the same GUID, we'll know it's a response for us
+
+        // Send the ping to the remote computer
         connection.send(request);
     }
+
+    //do
 
     /**
      * Sends the query request to the designated connection,
@@ -1544,17 +1612,27 @@ public abstract class MessageRouter {
         connection.send(request);
     }
 
+    //done
+
     /**
-     * Broadcasts the ping request to all initialized connections,
-     * setting up the proper reply routing.
+     * Send the given ping to 30% of our Gnutella connections.
+     * Pinger.run() calls this every 3 seconds.
+     * 
+     * @param ping The ping packet we made, and will send
      */
     public void broadcastPingRequest(PingRequest ping) {
-		if(ping == null) {
-			throw new NullPointerException("null ping");
-		}
-        _pingRouteTable.routeReply(ping.getGUID(), FOR_ME_REPLY_HANDLER);
+
+        // Make sure the Pinger gave us a ping
+		if (ping == null) throw new NullPointerException("null ping");
+
+        // List the ping's message GUID in our RouteTable for pings and pongs with the ForMeReplyHandler
+        _pingRouteTable.routeReply(ping.getGUID(), FOR_ME_REPLY_HANDLER); // When we get a pong with the same GUID, we'll know to send it to the ForMeReplyHandler
+
+        // Send the ping to 30% of our Gnutella connections
         broadcastPingRequest(ping, FOR_ME_REPLY_HANDLER, _manager);
     }
+
+    //do
 
 	/**
 	 * Generates a new dynamic query.  This method is used to send a new 
@@ -1609,52 +1687,71 @@ public abstract class MessageRouter {
 		DYNAMIC_QUERIER.addQuery(qh);
 	}
 
+    //done
+
     /**
-     * Broadcasts the ping request to all initialized connections that
-     * are not the receivingConnection, setting up the routing
-     * to the designated PingReplyHandler.  This is called from the default
-     * handlePingRequest and the default broadcastPingRequest(PingRequest)
-     *
-     * If different (smarter) broadcasting functionality is desired, override
-     * as desired.  If you do, note that receivingConnection may be null (for
-     * requests originating here).
+     * Sends the given ping to 30% of our Gnutella connections.
+     * Only broadcastPingRequest(PingRequest) calls this.
+     * 
+     * @param request             The ping we made to send to all our connections
+     * @param receivingConnection The ForMeReplyHandler, which we've placed in the RouteTable for pings and pongs to notice when pongs with the same GUID come back
+     * @param manager             The program's ConnectionManager object which keeps a list of all our TCP socket Gnutella connections
      */
-    private void broadcastPingRequest(PingRequest request,
-                                      ReplyHandler receivingConnection,
-                                      ConnectionManager manager) {
-        // Note the use of initializedConnections only.
-        // Note that we have zero allocations here.
+    private void broadcastPingRequest(PingRequest request, ReplyHandler receivingConnection, ConnectionManager manager) {
 
-        //Broadcast the ping to other connected nodes (supernodes or older
-        //nodes), but DON'T forward any ping not originating from me 
-        //along leaf to ultrapeer connections.
-        List list = manager.getInitializedConnections();
-        int size = list.size();
+        /*
+         * Note the use of initializedConnections only.
+         * Note that we have zero allocations here.
+         */
 
+        /*
+         * Broadcast the ping to other connected nodes (supernodes or older
+         * nodes), but DON'T forward any ping not originating from me
+         * along leaf to ultrapeer connections.
+         */
+
+        // Get a list of the remote computers with which we've completed the Gnutella handshake and are exchanging Gnutella packets
+        List list = manager.getInitializedConnections(); // A List of ManagedConnection objects
+        int size = list.size();                          // The number of connections in the list
+
+        // If we have more than 3 connections, we'll randomly ping just some of them
         boolean randomlyForward = false;
-        if(size > 3) randomlyForward = true;
-        double percentToIgnore;
-        for(int i=0; i<size; i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(!mc.isStable()) continue;
-            if (receivingConnection == FOR_ME_REPLY_HANDLER || 
-                (mc != receivingConnection && 
-                 !mc.isClientSupernodeConnection())) {
+        if (size > 3) randomlyForward = true; // This method only runs when were an ultrapeer, so we should have many more than 3 connections
 
-                if(mc.supportsPongCaching()) {
-                    percentToIgnore = 0.70;
-                } else {
-                    percentToIgnore = 0.90;
-                }
-                if(randomlyForward && 
-                   (Math.random() < percentToIgnore)) {
+        // Loop for each connection we could ping
+        double percentToIgnore; // We'll set this to 70% or 90%
+        for (int i = 0; i < size; i++) {
+            ManagedConnection mc = (ManagedConnection)list.get(i);
+
+            // If we haven't been exchanging Gnutella packets with this remote computer for 5 seconds yet, don't ping it
+            if (!mc.isStable()) continue;
+
+            // receivingConnection is FOR_ME_REPLY_HANDLER
+            if (receivingConnection == FOR_ME_REPLY_HANDLER || (mc != receivingConnection && !mc.isClientSupernodeConnection())) {
+
+                // Set the probability we'll ping this packet based on whether it supports pong caching or not
+                if (mc.supportsPongCaching()) percentToIgnore = 0.70; // It caches pongs and won't broadcast our ping forward, set a 30% chance we'll ping it
+                else                          percentToIgnore = 0.90; // It doesn't cache pongs and will broadcast our ping forward, set a lower 10% chance we'll ping it
+
+                // If we're randomly skipping computers and we select this one for skipping
+                if (randomlyForward &&  // If we're randomly skipping computers, and
+                    (Math.random() <    // A random number from 0.0 to 1.0 is less than
+                    percentToIgnore)) { // The 70% or 90% we chose above for this remote computer
+
+                    // Skip this one
                     continue;
+
+                // We're not skipping computers, or this one made the 30% or 10% chance
                 } else {
+
+                    // Send the ping to the computer
                     mc.send(request);
                 }
             }
         }
     }
+
+    //do
 
 	/**
 	 * Forwards the query request to any leaf connections.
@@ -1919,16 +2016,20 @@ public abstract class MessageRouter {
         mc.originateQuery(query);
         return true;
     }
-    
-    /**
+
+    //done
+
+    /*
      * Respond to the ping request.  Implementations typically will either
      * do nothing (if they don't think a response is appropriate) or call
      * sendPingReply(PingReply).
      * This method is called from the default handlePingRequest.
      */
+
+    // Implemented in StandardMessageRouter
     protected abstract void respondToPingRequest(PingRequest request, ReplyHandler handler);
 
-	/**
+	/*
 	 * Responds to a ping received over UDP -- implementations
 	 * handle this differently from pings received over TCP, as it is 
 	 * assumed that the requester only wants pongs from other nodes
@@ -1939,75 +2040,102 @@ public abstract class MessageRouter {
      * @param handler the <tt>ReplyHandler</tt> instance from which the
      *  ping was received and to which pongs should be sent
 	 */
-    protected abstract void respondToUDPPingRequest(PingRequest request, 
-													InetSocketAddress addr,
-                                                    ReplyHandler handler);
 
-    /**
+    // Implemented in StandardMessageRouter
+    protected abstract void respondToUDPPingRequest(PingRequest request, InetSocketAddress addr, ReplyHandler handler);
+
+    /*
      * Respond to the query request.  Implementations typically will either
      * do nothing (if they don't think a response is appropriate) or call
      * sendQueryReply(QueryReply).
      * This method is called from the default handleQueryRequest.
-     * 
-     * Implemented by StandardMessageRouter.respondToQueryRequest().
-     * 
-     * @param queryRequest
-     * @param clientGUID   Not used, our client ID GUID that uniquely identifies us on the Gnutella network
-     * @param handler
      */
+
+    // Implemented in StandardMessageRouter
     protected abstract boolean respondToQueryRequest(QueryRequest queryRequest, byte[] clientGUID, ReplyHandler handler);
 
     /**
-     * The default handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  This implementation
-     * uses the ping route table to route a ping reply.  If an appropriate route
-     * doesn't exist, records the error statistics.  On sucessful routing,
-     * the PingReply count is incremented.<p>
-     *
-     * In all cases, the ping reply is recorded into the host catcher.<p>
-     *
-     * Override as desired, but you probably want to call super.handlePingReply
-     * if you do.
+     * Handle a pong we've received through TCP or UDP.
+     * Adds the pong to the HostCatcher and the PongCacher.
+     * Identifies pong responses to pings we created and sent, and gives them to the ForMeReplyHandler.
+     * Sends the pong to all our leaves.
+     * 
+     * handleMessage() calls this when a remote computer sends us a pong through a TCP Gnutella connection.
+     * handleUDPPingReply() calls this when a remote computer sends us a pong with UDP.
+     * 
+     * @param reply   A pong we've just received through TCP or UDP
+     * @param handler The remote computer that sent it to us
      */
-    protected void handlePingReply(PingReply reply,
-                                   ReplyHandler handler) {
-        //update hostcatcher (even if the reply isn't for me)
-        boolean newAddress = RouterService.getHostCatcher().add(reply);
+    protected void handlePingReply(PingReply reply, ReplyHandler handler) {
 
-        if(newAddress && !reply.isUDPHostCache()) {
+        // Have the HostCatcher add all the IP addresses and port numbers in the pong to the list it keeps
+        boolean newAddress = RouterService.getHostCatcher().add(reply); // Returns true if there were some addresses it didn't have yet
+
+        // If the pong contains some addresses the HostCatcher hadn't heard about yet, and the pong isn't about a UDP host cache
+        if (newAddress && !reply.isUDPHostCache()) { // The pong doesn't have the "UDPHC" extension
+
+            // Add the pong we received to the PongCacher
             PongCacher.instance().addPong(reply);
         }
 
-        //First route to originator in usual manner.
-        ReplyHandler replyHandler =
-            _pingRouteTable.getReplyHandler(reply.getGUID());
+        // Look up which Gnutella connection or UDP address sent us a ping with the same message GUID
+        ReplyHandler replyHandler = _pingRouteTable.getReplyHandler(reply.getGUID());
+        if (replyHandler != null) { // We found one
 
-        if(replyHandler != null) {
+            /*
+             * LimeWire no longer broadcasts pings forward.
+             * It only lists pings we send in the _pingRouteTable, along with the ForMeReplyHandler.
+             * So, control will only reach here when we've received a pong response to our ping.
+             * And handler will always be FOR_ME_REPLY_HANDLER.
+             */
+
+            // Have the computer the pong is meant for take it
             replyHandler.handlePingReply(reply, handler);
-        }
-        else {
+
+        // We received a pong with a GUID that doesn't match any ping GUIDs we know about
+        } else {
+
+            // Count the error, but keep going in this method
             RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
-		boolean supportsUnicast = reply.supportsUnicast();
-        
-        //Then, if a marked pong from an Ultrapeer that we've never seen before,
-        //send to all leaf connections except replyHandler (which may be null),
-        //irregardless of GUID.  The leafs will add the address then drop the
-        //pong as they have no routing entry.  Note that if Ultrapeers are very
-        //prevalent, this may consume too much bandwidth.
-		//Also forward any GUESS pongs to all leaves.
-        if (newAddress && (reply.isUltrapeer() || supportsUnicast)) {
-            List list=_manager.getInitializedClientConnections();
-            for (int i=0; i<list.size(); i++) {
+
+        // Determine if the remote computer the pong describes can receive UDP packets
+		boolean supportsUnicast = reply.supportsUnicast(); // It has the "GUE" extension, meaning it can
+
+        /*
+         * Then, if a marked pong from an Ultrapeer that we've never seen before,
+         * send to all leaf connections except replyHandler (which may be null),
+         * irregardless of GUID.  The leafs will add the address then drop the
+         * pong as they have no routing entry.  Note that if Ultrapeers are very
+         * prevalent, this may consume too much bandwidth.
+         * Also forward any GUESS pongs to all leaves.
+         */
+
+        // If this pong was new to us, send it to our leaves
+        if (newAddress &&           // This pong has IP addresses the HostCatcher hadn't heard of yet, and
+            (reply.isUltrapeer() || // Either the pong describes an ultrapeer, which should always be the case, or
+            supportsUnicast)) {     // The pong describes a remote computer externally contactable for UDP
+
+            // Loop through our leaves
+            List list = _manager.getInitializedClientConnections();
+            for (int i = 0; i < list.size(); i++) {
                 ManagedConnection c = (ManagedConnection)list.get(i);
                 Assert.that(c != null, "null c.");
-                if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
+
+                // If we haven't ponged this leaf recently, do it now
+                if (c != handler      && // This leaf isn't the computer that sent us the pong
+                    c != replyHandler && // It also isn't the computer that sent us the ping
+                    c.allowNewPongs()) { // We haven't ponged this leaf of ours for at least 12 seconds
+
+                    // Send the pong to the leaf
                     c.handlePingReply(reply, handler);
                 }
             }
         }
     }
+
+    //do
 
     /**
      * The default handler for QueryReplies received in
@@ -2292,24 +2420,22 @@ public abstract class MessageRouter {
         }
     }
 
-    //do
-
     /**
-     * Uses the ping route table to send a PingReply to the appropriate
-     * connection.  Since this is used for PingReplies orginating here, no
-     * stats are updated.
+     * Sends the given pong to the remote computer the ReplyHandler represents.
+     * Calls handler.handlePingReply(pong).
+     * If handler is actually a ManagedConnection, calls ManagedConnection.handlePingReply(pong).
      */
     protected void sendPingReply(PingReply pong, ReplyHandler handler) {
-        if(pong == null) {
-            throw new NullPointerException("null pong");
-        }
 
-        if(handler == null) {
-            throw new NullPointerException("null reply handler");
-        }
- 
-        handler.handlePingReply(pong, null);
+        // Make sure pong and handler aren't null
+        if (pong    == null) throw new NullPointerException("null pong");
+        if (handler == null) throw new NullPointerException("null reply handler");
+
+        // Have the ReplyHandler send the pong to the computer it represents
+        handler.handlePingReply(pong, null); // If handler is a ManagedConnection, calls managedConnection.handlePingReply(pong)
     }
+
+    //do
 
     /**
      * Uses the query route table to send a QueryReply to the appropriate
@@ -2926,9 +3052,8 @@ public abstract class MessageRouter {
             else
                 pingee.reply(new HeadPing(ping)); 
         }
-   } 
-    
-    
+    }
+
     /** 
      * Handles a pong received from the given handler.
      */ 
@@ -2945,9 +3070,8 @@ public abstract class MessageRouter {
             forwardTo.reply(pong); 
             _headPongRouteTable.removeReplyHandler(forwardTo); 
         } 
-    } 
-    
-    
+    }
+
     private static class QueryResponseBundle {
         public final QueryRequest _query;
         public final Response[] _responses;
@@ -2957,7 +3081,6 @@ public abstract class MessageRouter {
             _responses = responses;
         }
     }
-
 
     /** Can be run to invalidate out-of-band ACKs that we are waiting for....
      */

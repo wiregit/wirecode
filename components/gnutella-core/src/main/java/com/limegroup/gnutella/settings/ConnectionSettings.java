@@ -231,7 +231,7 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final LongSetting SOLICITED_GRACE_PERIOD = FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD", 85000l); // This is 14 minutes? (ask)
 
-    /** 10, we'll send back 10 pongs for each ping. (do) */
+    /** 10, if we get a UDP ping with "SCP", we'll send back 10 addresses in "IPP". */
     public static final IntSetting NUM_RETURN_PONGS = FACTORY.createSettableIntSetting("NUM_RETURN_PONGS", 10, "pings", 25, 5);
 
     /**

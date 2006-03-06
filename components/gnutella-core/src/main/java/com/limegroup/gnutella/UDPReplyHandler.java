@@ -49,6 +49,8 @@ public final class UDPReplyHandler implements ReplyHandler {
 	/**
      * Make a new UDPReplyHandler object that can wrap Gnutella packets into UDP packets and send them to an IP address and port number.
      * MessageRouter.handleMulticastMessage(Message, InetSocketAddress) and MessageRouter.handleUDPMessage(Message, InetSocketAddress) make UDPReplyHandler objects.
+     * The given IP address and port number is the address we just got a UDP packet from.
+     * The UDPReplyHandler this constructor makes will be ablet to send a reply packet back to the same address.
      * 
      * @param ip   The IP address to send packets to
      * @param port The port number to send packets to

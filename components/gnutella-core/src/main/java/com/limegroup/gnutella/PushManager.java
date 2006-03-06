@@ -36,12 +36,7 @@ public final class PushManager {
      */
     private static final int CONNECT_TIMEOUT = 10000;
 
-
 	/**
-     * 
-     * TODO:kfaaborg:giv
-     * 
-     * 
 	 * Accepts a new push upload.
      * NON-BLOCKING: creates a new thread to transfer the file.
 	 * <p>

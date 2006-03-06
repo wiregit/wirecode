@@ -52,6 +52,71 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * At  2, length 4, the IP address
  * At  6, length 4, the number of files the computer is sharing
  * At 10, length 4, the total size in KB of the shared files
+ * 
+ * StandardMessageRouter.respondToPingRequest() makes a pong packet about us.
+ * Here's what one looks like:
+ * 
+ * 74 73 28 3d 74 3a 8b f9  ts(=t:--  aaaaaaaa
+ * c0 33 87 6f 76 39 e9 00  -3-ov9--  aaaaaaaa
+ * 01 03 00 2d 00 00 00 e7  --------  bcdeeeef
+ * 18 d8 1b 9e 4a 01 00 00  ----J---  fgggghhh
+ * 00 00 20 00 00 c3 02 44  -------D  hiiiijkk
+ * 55 42 35 07 03 4c 4f 43  UB5--LOC  kkkkllll
+ * 43 65 6e 02 02 55 50 43  Cen--UPC  llllmmmm
+ * 01 1c 1b 82 56 43 45 4c  ----VCEL  mmmnnnnn
+ * 49 4d 45 49              IMEI      nnnn
+ * 
+ * a is the 16 byte message GUID from the ping.
+ * b is 0x01, the byte code for a pong.
+ * c is the TTL, here shown as 3.
+ * d is the hops, 0.
+ * 
+ * e is the length of the payload, 0x2d, which is 45 bytes.
+ * The length is 4 bytes in little endian order, like 2d 00 00 00.
+ * 
+ * f is the port number this computer is listening on right now, e7 18, little endian 0x18e7, port number 6375.
+ * g is this computer's IP address, d8 1b 9e 4a, 216.27.158.74, with the bytes in the same order as the text.
+ * h is the number of files this computer is sharing, 1, in little endian order 01 00 00 00.
+ * 
+ * i is total size in KB of shared data here, adjusted to the nearest power of 2.
+ * The little endian 00 20 00 00 is 0x2000, 8192 KB, which is bigger than the one file I'm sharing.
+ * 
+ * j is 0xC3, the byte that begins a GGEP block, and the remaining lettered regions are GGEP extensions.
+ * k is 0000 0010 "DU"  0100 0010 35 07.
+ * l is 0000 0011 "LOC" 0100 0011 "en" 02.
+ * m is 0000 0010 "UP"  0100 0011 01 1c 1b.
+ * n is 1000 0010 "VC"  0100 0101 "LIME" 27.
+ * 
+ * The first byte in each extension contains flags and a length.
+ * The first bit marks the last extension, and is set only in "VC".
+ * The second bit is 0 because none of the extension values are COBS encoded.
+ * We don't need to hide 0 values in a GGEP block in a pong.
+ * The third bit is 0 because none of the extension values are deflate compressed.
+ * The right 4 bits are the length of the extension name, like 0010 2 for "DU" and 0011 3 for "LOC".
+ * 
+ * The byte after the tag holds the length of the value.
+ * The bytes all start 01 because the lengths all fit in 1 byte.
+ * The remianing 6 bits hold the length, like 10 2 for "35 07" and "101" 5 for "LIME 27".
+ * 
+ * k is 0000 0010 "DU" 0100 0010 35 07, Daily Uptime.
+ * The value is the number of seconds this computer is online in an average day.
+ * The two bytes in the value 35 07 are little endian 0x00000735, 1845 seconds, a little over 30 minutes.
+ * 
+ * l is 0000 0011 "LOC" 0100 0011 "en" 02, Locale preference.
+ * "en" is for English, and 2 is the number of additional ultrapeers I want that also prefer English.
+ * 
+ * m is 0000 0010 "UP" 0100 0011 01 1c 1b, Ultrapeer.
+ * I'm sending this tag because LimeWire is running as an ultrapeer right now.
+ * The value is 3 bytes, "01 1c 1b".
+ * The first byte is the version of the ultrapeer protocol the computer supports, 0.1, squashed into a single byte.
+ * The second byte is the number of free leaf slots I have, 28.
+ * The third byte is the number of free ultrapeer slots I have, 27.
+ * 
+ * n is 1000 0010 "VC" 0100 0101 "LIME" 49, Vendor Code.
+ * The first 4 bytes are "LIME" for LimeWire.
+ * The last byte is 0x49 0100 1001 4 and 9 for LimeWire version 4.9.
+ * 
+ * Once we realize we're externally contactable for UDP, we'll also include the "GUE" extension.
  */
 public class PingReply extends Message implements Serializable, IpPort {
 
@@ -255,7 +320,7 @@ public class PingReply extends Message implements Serializable, IpPort {
      * 
      * @param guid       The GUID for this new packet
      * @param ttl        The TTL for the packet
-     * @param returnAddr Our IP address for the "IP" GGEP header
+     * @param returnAddr The pinging computer's external IP address as seen by the computer prearing this pong response, the value of GGEP "IP"
      * @param hosts      Other computer's IP addresses for the "IPP" GGEP header, a list of IpPort objects
      * @return           A new PingReply objet that represents a pong packet filled with information about us
      */
@@ -270,7 +335,7 @@ public class PingReply extends Message implements Serializable, IpPort {
 
         // Add IP addresses to the GGEP block
         addAddress(ggep, returnAddr); // Add the "IP" header with our IP address
-        addPackedHosts(ggep, hosts);  // Add the "IPP" header  with the given list of other IP addresses
+        addPackedHosts(ggep, hosts);  // Add the "IPP" header with the given list of other IP addresses
 
         // Make a new PingReply object
         return create(
@@ -1442,7 +1507,9 @@ public class PingReply extends Message implements Serializable, IpPort {
      * True if the computer this pong is about supports UDP.
      * This is indicated by the presence of the "GUE" GGEP header.
      * This means the pong supports GUESS-style queries.
-     * LimeWire doesn't use GUESS at all anymore.
+     * 
+     * LimeWire doesn't search with GUESS anymore.
+     * This is still how a pong describes a computer that is externally contactable for unsolicited UDP.
      * 
      * @return True if the computer can receive UDP packets
      */

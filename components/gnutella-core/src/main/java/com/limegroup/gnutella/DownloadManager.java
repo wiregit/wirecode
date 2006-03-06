@@ -901,9 +901,6 @@ public class DownloadManager implements BandwidthTracker {
     }
 
     /**
-     * 
-     * TODO:kfaaborg:giv
-     * 
      * Accepts the given socket for a push download to this host.
      * If the GIV is for a file that was never requested or has already
      * been downloaded, this will deal with it appropriately.  In any case
@@ -1412,9 +1409,6 @@ public class DownloadManager implements BandwidthTracker {
     }
 
     /**
-     * 
-     * TODO:kfaaborg:giv
-     * 
      * Returns the file, index, and client GUID from the GIV request from s.
      * The input stream of s is positioned just after the GIV request,
      * immediately before any HTTP.  If s is closed or the line couldn't
