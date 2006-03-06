@@ -318,12 +318,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         SystemUtils.getIdleTime(); // make it loaded.
         // then unload it.
         PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
-
-        // Don't move your mouse! :-)
-        Thread.sleep(1000L);
-        
-        // Make sure it's really unloaded
-        assertEquals(0L, SystemUtils.getIdleTime());
         
         setupUniqueDirectories();
         setupSettings();
