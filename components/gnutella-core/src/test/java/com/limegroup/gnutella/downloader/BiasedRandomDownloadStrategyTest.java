@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import java.util.Random;
 
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.SystemUtils;
-
-import java.util.Random;
 
 
 public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
@@ -38,6 +39,14 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
     
     public BiasedRandomDownloadStrategyTest(String s) {
         super(s);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(BiasedRandomDownloadStrategyTest.class);
+    }
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
     }
     
     public void setUp() throws Exception {
