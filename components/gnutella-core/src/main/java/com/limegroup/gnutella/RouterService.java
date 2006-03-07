@@ -1558,16 +1558,21 @@ public class RouterService {
         return manager.isSupernode();
     }
 
+    //done
+
 	/**
-	 * Accessor for whether or not this node is a shielded leaf.
-	 *
-	 * @return <tt>true</tt> if this node is a shielded leaf, 
-	 *  <tt>false</tt> otherwise
+     * True if we have some connections up to ultrapeers.
+     * This means we are a leaf.
+     * 
+     * @return True if we don't have any connections up to ultrapeers, false if we do
 	 */
     public static boolean isShieldedLeaf() {
-        return manager.isShieldedLeaf();
-    }    
 
+        // Ask the ConnectionManager, the object that keeps a list of our connections
+        return manager.isShieldedLeaf();
+    }
+
+    //do
 
     /**
      * @return the number of free leaf slots.
@@ -1705,17 +1710,23 @@ public class RouterService {
 	
 	/**
 	 * Returns the Non-Forced IP address for this host.
+     * 
+     * Get our internal LAN IP address.
+     * StandardMessageRouter.createQueryReply() calls this when responding to a query from another computer on our LAN.
 	 *
 	 * @return the non-forced IP address for this host
 	 */
 	public static byte[] getNonForcedAddress() {
 	    return acceptor.getAddress(false);
 	}
-	
 
     /**
      * Returns the port used for downloads and messaging connections.
      * Used to fill out the My-Address header in ManagedConnection.
+     * 
+     * Get our internal LAN port number.
+     * StandardMessageRouter.createQueryReply() calls this when responding to a query from another computer on our LAN.
+     * 
      * @see Acceptor#getPort
      */    
 	public static int getPort() {

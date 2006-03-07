@@ -50,6 +50,7 @@ public class UDPPinger {
     private static long _lastSentTime;
 
     /**
+     * Not used.
      * Send a Gnutella ping packet to a list of IP addresses and port numbers using UDP.
      * 
      * @param hosts A list of remote computers to send the Gnutella message
@@ -61,6 +62,7 @@ public class UDPPinger {
     }
 
     /**
+     * Not used.
      * Send a Gnutella ping packet to a list of IP addresses and port numbers using UDP.
      * 
      * @param hosts   A list of remote computers to send the Gnutella message
@@ -74,6 +76,7 @@ public class UDPPinger {
 
     /**
      * Send a Gnutella ping packet to a list of IP addresses and port numbers using UDP.
+     * HostCatcher.rank(Collection) calls this.
      * 
      * @param hosts     A list of remote computers to send the Gnutella message
      * @param canceller We'll call canceller.isCancelled() to see if another part of the program has cancelled this request
@@ -85,6 +88,7 @@ public class UDPPinger {
     }
 
     /**
+     * Not used.
      * Send a Gnutella ping packet to a list of IP addresses and port numbers using UDP.
      * 
      * @param hosts    A list of remote computers to send the Gnutella message
@@ -97,6 +101,7 @@ public class UDPPinger {
     }
     
     /**
+     * Not used.
      * Send a Gnutella ping packet to a list of IP addresses and port numbers using UDP.
      * 
      * @param hosts     A list of remote computers to send the Gnutella message
@@ -111,6 +116,11 @@ public class UDPPinger {
 
     /**
      * Send a Gnutella ping packet to a list of IP addresses and port numbers using UDP.
+     * PingRanker.pingNewHosts() calls this.
+     * UDPHostCache.fetch(Collection) calls this.
+     * PingRanker.pingProxies(RemoteFileDesc) calls this.
+     * A call from HostCatcher.rank(Collection) leads here.
+     * ConnectionChecker.udpIsDead() calls this.
      * 
      * @param hosts     A list of remote computers to send the Gnutella message
      * @param listener  An object that wants to know when we get a response related to the message, or null to not do this

@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.downloader;
 
 import java.util.ArrayList;
@@ -30,10 +33,14 @@ import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.IpPort;
 
+/**
+ * 
+ * Used with ManagedDownloader and UDPPinger.
+ */
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
     private static final Log LOG = LogFactory.getLog(PingRanker.class);
-    
+
     /**
      * the pinger to send the pings
      */

@@ -541,7 +541,7 @@ public final class RouteTable {
      * 
      * @param guid       The GUID of a reply message that we may have seen in a request packet before.
      * @param replyBytes The number of additional bytes of reply packet data we're routing back because of the request.
-     * @param numReplies The number of additional reply packets we're routing back because of the request.
+     * @param numReplies The number of additional file hit blocks in the packets we're routing back because of the request.
      * @return           A ReplyRoutePair object that contains the ReplyHandler that represents our connection to that computer, and packet statistics.
      *                   null if not found.
      */
@@ -573,7 +573,7 @@ public final class RouteTable {
             entry.bytesRouted,    // Save the RouteTableEntry's bytesRouted field in ReplyRoutePair.volume
             entry.repliesRouted); // Save the RouteTableEntry's repliesRouted field in ReplyRoutePair.REPLIES_ROUTED
 
-        // Add the new bytes and packets we sent to the RouteTableEntry in the new or old map, leaving the ReplyRoutePair we just made unchanged
+        // Add the new bytes and file hit blocks we sent to the RouteTableEntry in the new or old map, leaving the ReplyRoutePair we just made unchanged
         entry.bytesRouted   += replyBytes;
         entry.repliesRouted += numReplies;
 
@@ -598,7 +598,7 @@ public final class RouteTable {
         /** The number of bytes of packet data the ReplyHandler object has sent its computer because of this GUID request. */
         private final int volume;
 
-        /** The number of packets the ReplyHandler object has sent its computer because of this GUID request. */
+        /** The number of file hits the ReplyHandler object has sent its computer because of this GUID request. */
         private final int REPLIES_ROUTED;
 
         /**
@@ -606,7 +606,7 @@ public final class RouteTable {
          * 
          * @param handler The ReplyHandler, the ManagedConnection or UDPReplyHandler object that can send a reply packet to the remote computer it represents
          * @param volume  The total size of all the reply packets it's sent its remote computer because of this GUID request
-         * @param hits    The number of packets it's sent its remote computer because of this GUID request
+         * @param hits    The number of file hits it's sent its remote computer because of this GUID request
          */
         ReplyRoutePair(ReplyHandler handler, int volume, int hits) {
 

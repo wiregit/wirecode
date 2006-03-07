@@ -208,8 +208,10 @@ public abstract class MessageRouter {
      */
     private static final long HOPS_FLOW_INTERVAL = 15 * 1000; // 15 seconds
 
-    /** The maximum number of UDP replies to buffer up.  Non-final for 
-     *  testing.
+    /**
+     * 250
+     * The maximum number of UDP replies to buffer up.  Non-final for 
+     * testing.
      */
     static int MAX_BUFFERED_REPLIES = 250;
 
@@ -217,6 +219,14 @@ public abstract class MessageRouter {
      * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
      * if the sink wants them).  Cleared every CLEAR_TIME seconds.
      * TimedGUID->QueryResponseBundle.
+     * 
+     * The _outOfBandReplies Hashtable looks like this:
+     * 
+     * Key                                    Value
+     * ---                                    -----
+     * TimedGUID                              QueryResponseBundle
+     *  ._guid     The query's message GUID    ._query             The query packet
+     *  .MAX_LIFE  25 seconds                  ._responses         An array of Response objects representing files we're sharing that match
      */
     private final Map _outOfBandReplies = new Hashtable();
 
@@ -314,12 +324,15 @@ public abstract class MessageRouter {
     private QueryRouteTable _lastQueryRouteTable;
 
     /**
+     * 10
      * The maximum number of response to send to a query that has
      * a "high" number of hops.
      */
     private static final int HIGH_HOPS_RESPONSE_LIMIT = 10;
 
     /**
+     * 25000, 25 seconds.
+     * 
      * The lifetime of OOBs guids.
      */
     private static final long TIMED_GUID_LIFETIME = 25 * 1000; 
@@ -919,8 +932,7 @@ public abstract class MessageRouter {
      * ManagedConnection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handleQueryRequest.
      */
-    final void handleQueryRequestPossibleDuplicate(
-        QueryRequest request, ManagedConnection receivingConnection) {
+    final void handleQueryRequestPossibleDuplicate(QueryRequest request, ManagedConnection receivingConnection) {
         
         // With the new handling of probe queries (TTL 1, Hops 0), we have a few
         // new options:
@@ -997,8 +1009,7 @@ public abstract class MessageRouter {
 	 * @param handler the <tt>ReplyHandler</tt> that will handle the reply
 	 * @return false if it was a duplicate, true if it was not.
 	 */
-	final boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
-													  ReplyHandler handler)  {
+	final boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request, ReplyHandler handler) {
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 handler);
@@ -1348,25 +1359,62 @@ public abstract class MessageRouter {
         OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
     }
 
-    /** Stores (for a limited time) the resps for later out-of-band delivery -
-     *  interacts with handleLimeACKMessage
-     *  @return true if the operation failed, false if not (i.e. too busy)
+    //done
+
+    /**
+     * Save a query packet we received and our list of file hits to send them later.
+     * Only StandardMessageRouter.sendResponses() calls this.
+     * 
+     * Stores (for a limited time) the resps for later out-of-band delivery -
+     * interacts with handleLimeACKMessage
+     * 
+     * @param query A query packet we've received.
+     * @param resps The Response objects that represent files we're sharing that match its search.
+     * @return      True if this method stored the query and responses in the _outOfBandReplies Hashtable to send later.
+     *              False if _outOfBandReplies is full, so we didn't keep it for later.
      */
-    protected boolean bufferResponsesForLaterDelivery(QueryRequest query,
-                                                      Response[] resps) {
-        // store responses by guid for later retrieval
+    protected boolean bufferResponsesForLaterDelivery(QueryRequest query, Response[] resps) {
+
+        /*
+         * store responses by guid for later retrieval
+         */
+
+        // Only let one thread access the _outOfBandReplies HashTable at a time
         synchronized (_outOfBandReplies) {
+
+            // The _outOfBandReplies list has less than 250 objects in it
             if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
-                GUID.TimedGUID tGUID = 
-                    new GUID.TimedGUID(new GUID(query.getGUID()),
-                                       TIMED_GUID_LIFETIME);
-                _outOfBandReplies.put(tGUID, new QueryResponseBundle(query, 
-                                                                     resps));
+
+                // Make a new TimedGUID object with the query's message GUID and a time of 25 seconds
+                GUID.TimedGUID tGUID = new GUID.TimedGUID( // Make a new TimedGUID object that will hold a GUID and an expiration time
+                    new GUID(query.getGUID()),             // Copy the message GUID of the query packet to a new GUID
+                    TIMED_GUID_LIFETIME);                  // Specify an expiration time of 25 seconds
+
+                /*
+                 * The _outOfBandReplies Hashtable looks like this:
+                 * 
+                 * Key                                    Value
+                 * ---                                    -----
+                 * TimedGUID                              QueryResponseBundle
+                 *  ._guid     The query's message GUID    ._query             The query packet
+                 *  .MAX_LIFE  25 seconds                  ._responses         An array of Response objects representing files we're sharing that match
+                 */
+
+                // Add the query's message GUID, 25 seconds, the query packet, and the array of Response objects to our Hashtable for out of band replies.
+                _outOfBandReplies.put(                      // (3) Put them in the _outOfBandReplies Hashtable
+                    tGUID,                                  // (2) List them under the TimedGUID with the query's message GUID and 25 seconds
+                    new QueryResponseBundle(query, resps)); // (1) Bundle the QueryRequest packet and Response file hits together
+
+                // Yes, we saved the given query and file hits to send later
                 return true;
             }
+
+            // No, we didn't have enough room
             return false;
         }
     }
+
+    //do
 
     /**
      * Forwards the UDPConnectBack to neighboring peers
@@ -2026,7 +2074,7 @@ public abstract class MessageRouter {
      * This method is called from the default handlePingRequest.
      */
 
-    // Implemented in StandardMessageRouter
+    // Calls StandardMessageRouter.respondToPingRequest()
     protected abstract void respondToPingRequest(PingRequest request, ReplyHandler handler);
 
 	/*
@@ -2041,7 +2089,7 @@ public abstract class MessageRouter {
      *  ping was received and to which pongs should be sent
 	 */
 
-    // Implemented in StandardMessageRouter
+    // Calls StandardMessageRouter.respondToUDPPingRequest()
     protected abstract void respondToUDPPingRequest(PingRequest request, InetSocketAddress addr, ReplyHandler handler);
 
     /*
@@ -2051,7 +2099,7 @@ public abstract class MessageRouter {
      * This method is called from the default handleQueryRequest.
      */
 
-    // Implemented in StandardMessageRouter
+    // Calls StandardMessageRouter.respondToQueryRequest()
     protected abstract boolean respondToQueryRequest(QueryRequest queryRequest, byte[] clientGUID, ReplyHandler handler);
 
     /**
@@ -2435,35 +2483,58 @@ public abstract class MessageRouter {
         handler.handlePingReply(pong, null); // If handler is a ManagedConnection, calls managedConnection.handlePingReply(pong)
     }
 
-    //do
-
     /**
-     * Uses the query route table to send a QueryReply to the appropriate
-     * connection.  Since this is used for QueryReplies orginating here, no
-     * stats are updated.
-     * @throws IOException if no appropriate route exists.
+     * Send a query hit packet we made back to the computer that sent us the query.
+     * 
+     * Here's how we find the computer to send our packet to:
+     * We gave our query hit the same message GUID as the original query.
+     * We listed the computer that sent us the query under this GUID in our RouteTable for queries.
+     * 
+     * Takes a query hit packet with information about us and our shared files that we've prepared in response to a query we received.
+     * Looks up the message GUID in our RouteTable for queries and query hits.
+     * Sends our query hit back to the computer that sent us the query.
+     * 
+     * @param  queryReply  A query hit packet with information about us and files we're sharing that we made in response to a query packet
+     * @throws IOException Our RouteTable for queries and query hits doesn't have the message GUID, so we don't know what computer to send it do
      */
-    protected void sendQueryReply(QueryReply queryReply)
-        throws IOException {
-        
-        if(queryReply == null) {
-            throw new NullPointerException("null reply");
-        }
-        //For flow control reasons, we keep track of the bytes routed for this
-        //GUID.  Replies with less volume have higher priorities (i.e., lower
-        //numbers).
-        RouteTable.ReplyRoutePair rrp =
-            _queryRouteTable.getReplyHandler(queryReply.getGUID(),
-                                             queryReply.getTotalLength(),
-											 queryReply.getResultCount());
+    protected void sendQueryReply(QueryReply queryReply) throws IOException {
 
-        if(rrp != null) {
-            queryReply.setPriority(rrp.getBytesRouted());
+        // Make sure the caller gave us a packet
+        if (queryReply == null) throw new NullPointerException("null reply");
+
+        /*
+         * For flow control reasons, we keep track of the bytes routed for this
+         * GUID.  Replies with less volume have higher priorities (i.e., lower
+         * numbers).
+         */
+
+        // Look up the query's message GUID in the RouteTable for queries and query hits to see which computer to send our reponse back to
+        RouteTable.ReplyRoutePair rrp =       // Returns a ReplyRoutePair object that keeps a ReplyHandler with transfer statistics
+            _queryRouteTable.getReplyHandler( // Look up the message GUID in our RouteTable for queries and query hits
+                queryReply.getGUID(),         // The message GUID of the query packet we received and the query hit packets we've composed in response
+
+                // Give getReplyHandler() statistics about this packet
+                queryReply.getTotalLength(),  // The number of additional bytes of reply packet data we're routing back because of the request
+                queryReply.getResultCount()); // The number of additional reply packets we're routing back because of the request
+
+        // We found the remote computer that sent us the query packet
+        if (rrp != null) {
+
+            // Use the number of byts of packet data we've already routed back for this search to set the priority
+            queryReply.setPriority(rrp.getBytesRouted()); // A lower number means a higher priority
+
+            // Send our query hit packet back to the remote computer that sent us the query
             rrp.getReplyHandler().handleQueryReply(queryReply, null);
-        }
-        else
+
+        // Not found
+        } else {
+
+            // The GUID should have been in the RouteTable
             throw new IOException("no route for reply");
+        }
     }
+
+    //do
 
     /**
      * Uses the push route table to send a push request to the appropriate
@@ -2504,188 +2575,158 @@ public abstract class MessageRouter {
         SentMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);
     }
 
+    //done
 
     /**
-     * Converts the passed responses to QueryReplies. Each QueryReply can
-     * accomodate atmost 255 responses. Not all the responses may get included
-     * in QueryReplies in case the query request came from a far away host.
-     * <p>
-     * NOTE: This method doesnt have any side effect, 
-     * and does not modify the state of this object
-     * @param responses The responses to be converted
-     * @param queryRequest The query request corresponding to which we are
-     * generating query replies.
-     * @return Iterator (on QueryReply) over the Query Replies
+     * Package given Response objects in groups of 10 into QueryReply packets.
+     * Makes QueryReply packets with information about us, like our IP address.
+     * 
+     * @param responses    An array of Response objects describing the files we're sharing that match a query we've received
+     * @param queryRequest A query packet we've received, and will compose query hits in reply
+     * @return             An Iterator you can move over the QueryReply objects this method generated
      */
-    public Iterator responsesToQueryReplies(Response[] responses,
-                                            QueryRequest queryRequest) {
+    public Iterator responsesToQueryReplies(Response[] responses, QueryRequest queryRequest) {
+
+        // Call the next method, having it put the information from 10 Response objects in each QueryReply
         return responsesToQueryReplies(responses, queryRequest, 10);
     }
 
-
     /**
-     * Converts the passed responses to QueryReplies. Each QueryReply can
-     * accomodate atmost 255 responses. Not all the responses may get included
-     * in QueryReplies in case the query request came from a far away host.
-     * <p>
-     * NOTE: This method doesnt have any side effect, 
-     * and does not modify the state of this object
-     * @param responses The responses to be converted
-     * @param queryRequest The query request corresponding to which we are
-     * generating query replies.
-     * @param REPLY_LIMIT the maximum number of responses to have in each reply.
-     * @return Iterator (on QueryReply) over the Query Replies
+     * Package given Response objects in groups into QueryReply packets.
+     * Makes QueryReply packets with information about us, like our IP address.
      * 
-     * 
-     * @param responses
-     * @param queryRequest
-     * @param REPLY_LIMIT  like 10
-     * @return             An Iterator you can move through 
+     * @param responses    An array of Response objects describing the files we're sharing that match a query we've received
+     * @param queryRequest A query packet we've received, and will compose query hits in reply
+     * @param REPLY_LIMIT  The maximum number of files to describe in each query hit packet, like 10, or just 1
+     * @return             An Iterator you can move over the QueryReply objects this method generated
      */
     private Iterator responsesToQueryReplies(Response[] responses, QueryRequest queryRequest, final int REPLY_LIMIT) {
 
-        //List to store Query Replies
-        List queryReplies = new LinkedList(); // List of QueryReply objects
+        // Make a List to hold the QueryReply objects we create
+        List queryReplies = new LinkedList(); // We'll return an Iterator on the start of this list
 
-        // get the appropriate queryReply information
-        byte[] guid = queryRequest.getGUID();
-        byte ttl = (byte)(queryRequest.getHops() + 1);
+        // Get information from the query packet for the query hit packets we'll generate
+        byte[] guid = queryRequest.getGUID();          // Use the same GUID to route the query hits back to the computer that made the query
+        byte ttl = (byte)(queryRequest.getHops() + 1); // Let the query hits travel back one more hop than it took them to get here
 
-		UploadManager um = RouterService.getUploadManager();
-
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = um.measuredUploadSpeed();
-        boolean measuredSpeed = true;
-        if (speed == -1) {
-            
-            speed = ConnectionSettings.CONNECTION_SPEED.getValue();
-            measuredSpeed = false;
+        // Get our measured upload speed if possible, or the speed the user set otherwise
+        UploadManager um = RouterService.getUploadManager(); // Access the program's UploadManager object
+        long speed = um.measuredUploadSpeed(); // Ask it how fast it's been able to upload files
+        boolean measuredSpeed = true;          // Set 0x10 in the flags and controls bytes to 1, the upload speed is from real measured data
+        if (speed == -1) {                     // It doesn't know
+            speed = ConnectionSettings.CONNECTION_SPEED.getValue(); // Get the speed from settings
+            measuredSpeed = false;             // Set 0x10 in the flags and controls bytes to 0, the upload speed is just from a setting the user entered
         }
 
-        int numResponses = responses.length;
-        int index = 0;
+        // Variables to move through the given array of Response objects
+        int numResponses = responses.length; // The number of Response objects in the array
+        int index = 0;                       // The one we're on
 
-        int numHops = queryRequest.getHops();
+        /*
+         * limit the responses if we're not delivering this
+         * out-of-band and we have a lot of responses
+         */
 
-        // limit the responses if we're not delivering this 
-        // out-of-band and we have a lot of responses
-        if (REPLY_LIMIT > 1 && 
-            numHops > 2 && 
-            numResponses > HIGH_HOPS_RESPONSE_LIMIT) {
+        // If we have to reply in band and have more than 10 responses, randomly choose only 10 to send
+        int numHops = queryRequest.getHops();          // Find out how many hops the query packet made to get to us
+        if (REPLY_LIMIT  > 1 &&                        // The caller is letting us put more than 1 response in each query hit packet, and
+            numHops      > 2 &&                        // The query packet hopped twice to get here, it's in band and so our query hit will have to be in band too, and
+            numResponses > HIGH_HOPS_RESPONSE_LIMIT) { // We've got more than 10 responses, the maximum we can send in band
 
-            int j = (int)(Math.random() * numResponses) % (numResponses - HIGH_HOPS_RESPONSE_LIMIT);
+            // Randomly pick 10 responses from the given array to send
+            int j = (int)(Math.random() * numResponses) % (numResponses - HIGH_HOPS_RESPONSE_LIMIT); // Pick j, the index we'll grab them from
+            Response[] newResponses = new Response[HIGH_HOPS_RESPONSE_LIMIT]; // Make an array for the 10 responses we'll take
+            for (int i = 0; i < 10; i++, j++) { // Loop 10 times, moving i and j forward
 
-            Response[] newResponses = new Response[HIGH_HOPS_RESPONSE_LIMIT];
-            
-            for (int i = 0; i < 10; i++, j++) {
-                
+                /*
+                 * TODO:kfaaborg Above, it should be i < HIGH_HOPS_RESPONSE_LIMIT, not the magic number 10, which is the current value
+                 */
+
+                // Pick a Response object from the given array
                 newResponses[i] = responses[j];
             }
 
+            // Save the shortened array of Response objects, and it's new length of 10
             responses = newResponses;
             numResponses = responses.length;
         }
-        
+
+        // Loop until we've loaded all the Response objects into QueryReply packets
         while (numResponses > 0) {
-            
-            int arraySize;
-            
-            /*
-             * if there are more than 255 responses,
-             * create an array of 255 to send in the queryReply
-             * otherwise, create an array of whatever size is left.
-             */
 
-            if (numResponses < REPLY_LIMIT) {
-                // break;
-                arraySize = numResponses;
-            } else {
-                
-                arraySize = REPLY_LIMIT;
-            }
-
-            Response[] res;
-            
-            /*
-             * a special case.  in the common case where there
-             * are less than 256 responses being sent, there
-             * is no need to copy one array into another.
-             */
-
-            if ((index == 0) && (arraySize < REPLY_LIMIT) ) {
-                
-                res = responses;
-                
-            } else {
-                
-                res = new Response[arraySize];
-                
-                // copy the reponses into bite-size chunks
-                for (int i =0; i < arraySize; i++) {
-                    
-                    res[i] = responses[index];
-                    index++;
+            // Grab the next group of up to 10 Response objects from responses[] in an array called res[]
+            int arraySize;                                            // The number of responses we'll take in this group
+            if (numResponses < REPLY_LIMIT) arraySize = numResponses; // If we have less than 10 left, take all of them
+            else                            arraySize = REPLY_LIMIT;  // If we have more than 10, we'll just grab the first 10
+            Response[] res;                                           // An array of the Response objects we're taking now
+            if ((index == 0) && (arraySize < REPLY_LIMIT) ) {         // They all fit into the first bunch
+                res = responses;                                      // Point res at responses, the aray of all the Response objects
+            } else {                                                  // The first bunch was full
+                res = new Response[arraySize];                        // Make a new array that can hold the group of Response objects
+                for (int i = 0; i < arraySize; i++) {                 // Loop once for each Response we're going to take now
+                    res[i] = responses[index];                        // Take one
+                    index++;                                          // Move to the next one in the source array
                 }
             }
+            numResponses -= arraySize;                                // Record we have that many Response objects left
 
-            // decrement the number of responses we have left
-            numResponses -= arraySize;
+            // Ask the UploadManager if it has an open slot, and if it has ever actually uploaded a file
+			boolean busy     = !um.isServiceable();     // Sets 0x04 in the flags and controls bytes, all our upload slots are full right now
+            boolean uploaded = um.hadSuccesfulUpload(); // Sets 0x08 in the flags and controls bytes, we have actually uploaded a file
 
-			// see if there are any open slots
-			boolean busy = !um.isServiceable();
-            boolean uploaded = um.hadSuccesfulUpload();
-			
-            // We only want to return a "reply to multicast query" QueryReply
-            // if the request travelled a single hop.
-			boolean mcast = queryRequest.isMulticast() && (queryRequest.getTTL() + queryRequest.getHops()) == 1;
-			
-            // We should mark our hits if the remote end can do a firewalled
-            // transfer AND so can we AND we don't accept tcp incoming AND our
-            // external address is valid (needed for input into the reply)
-            final boolean fwTransfer = 
-                queryRequest.canDoFirewalledTransfer() && 
-                UDPService.instance().canDoFWT() &&
-                !RouterService.acceptedIncomingConnection();
-            
-			if (mcast) {
-                
-                ttl = 1; // not strictly necessary, but nice.
-            }
+            // Determine if our query hits will be replies to a query sent over multicast UDP by a computer on the same LAN as us
+            boolean mcast =                                            // Will add "MCAST" to our query hit, marking it the response to a multicast query
+                queryRequest.isMulticast() &&                          // If the query packet came in from multicast, and
+                (queryRequest.getTTL() + queryRequest.getHops()) == 1; // The query only traveled a single hop to reach us
+
+            // Only advertise our ability to do firewall-to-firewall transfers if we and the searching computer can do it, and we aren't externally contactable for TCP
+            final boolean fwTransfer =                       // Will add "FW" to our query hit, advertising our ability to do firewall-to-firewall transfers
+                queryRequest.canDoFirewalledTransfer() &&    // In the query's speed flags bytes, 0x02 is set indicating the searching computer can do firewall-to-firewall, and
+                UDPService.instance().canDoFWT()       &&    // We can do firewall-to-firewall transfers, and
+                !RouterService.acceptedIncomingConnection(); // We can't accept an incoming TCP socket connection
+
+            // If we're responding to a LAN multicast query and we're going to add the "MCAST" extension, also set the TTL to 1
+			if (mcast) ttl = 1;
 
             /*
              * Include _clientGUID, our client ID GUID, in the QueryReply messages we create.
-             * (do) where in the message will it go
+             * It will go into the last 16 bytes of the message.
              * If we're firewalled, this will let downloaders get a push request back to us.
              * When we get it, we'll push open a connection to them to deliver the file they want.
              */
 
+            // Package our Response objects into QueryReply packets, grouping as many responses into each query hit as we can while keeping the XML under 32 KB
             List replies = createQueryReply( // Calls StandardMessageRouter.createQueryReply(), which returns an ArrayList of QueryReply objects
-                guid,
-                ttl,
-                speed,
-                res,
-                _clientGUID, // Write our client ID GUID into the last 16 bytes of the query hit packet so downloaders can get a push request to us
-                busy,
-                uploaded,
-                measuredSpeed,
-                mcast,
-                fwTransfer);
+                guid,          // For the header, the message GUID
+                ttl,           // For the header, the message TTL
+                speed,         // For the payload, our upload speed
+                res,           // The array of Response objects that each describe a file we're sharing that matches the search we received
+                _clientGUID,   // Write our client ID GUID into the last 16 bytes of the query hit packet so downloaders can get a push request to us
+                busy,          // Sets 0x04 in the flags and controls bytes, all our upload slots are full right now
+                uploaded,      // Sets 0x08 in the flags and controls bytes, we have actually uploaded a file
+                measuredSpeed, // Sets 0x10 in the flags and controls bytes, the upload speed is from real measured data, not just a setting the user entered
+                mcast,         // Makes "MCAST" in the GGEP block, this query hit is responding to a multicast query
+                fwTransfer);   // Makes "FW" in the GGEP block, we can do a firewall-to-firewall file transfer
 
-            //add to the list
+            // Add it to the list
             queryReplies.addAll(replies);
-
         }
-        
+
+        // Return an Iterator the caller can use to move over the QueryReply objects we made and added to the queryReplies list
         return queryReplies.iterator();
     }
 
-    /**
+    /*
      * Abstract method for creating query hits.  Subclasses must specify
      * how this list is created.
      * 
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
+
+    // Calls StandardMessageRouter.createQueryReply()
     protected abstract List createQueryReply(byte[] guid, byte ttl, long speed, Response[] res, byte[] clientGUID, boolean busy, boolean uploaded, boolean measuredSpeed, boolean isFromMcast, boolean shouldMarkForFWTransfer);
+
+    //do
 
     /**
      * Handles a message to reset the query route table for the given
@@ -3072,15 +3113,36 @@ public abstract class MessageRouter {
         } 
     }
 
+    //done
+
+    /**
+     * A QueryResponseBundle object keeps a QueryRequest packet and Response[] array of file hits together.
+     * bufferResponsesForLaterDelivery() lists QueryResponseBundle objects under query packet message GUIDs in the _outOfBandReplies Hashtable.
+     */
     private static class QueryResponseBundle {
+
+        /** The QueryRequest packet we received. */
         public final QueryRequest _query;
+
+        /** The array of Response objects we found that match the search. */
         public final Response[] _responses;
-        
+
+        /**
+         * Make a new QueryResponsesBundle object.
+         * Keep a QueryRequest packet and Response[] array of file hits together.
+         * 
+         * @param query     A QueryRequest packet we received
+         * @param responses The array of Response objects we found that match the search
+         */
         public QueryResponseBundle(QueryRequest query, Response[] responses) {
-            _query = query;
+
+            // Save the object and array
+            _query     = query;
             _responses = responses;
         }
     }
+
+    //do
 
     /** Can be run to invalidate out-of-band ACKs that we are waiting for....
      */

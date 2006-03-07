@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 /**
- * This is a part of GUESS, which LimeWire no longer uses. (do)
+ * This is a part of GUESS, which LimeWire no longer uses.
  * 
  * This class runs a single thread which sends unicast UDP queries to a master
  * list of unicast-enabled hosts every n milliseconds.  It interacts with
