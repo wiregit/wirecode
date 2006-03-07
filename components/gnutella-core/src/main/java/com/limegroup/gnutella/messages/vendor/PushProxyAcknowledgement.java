@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.IPPortCombo;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
  *  Used to ask a host you connect to do a TCP ConnectBack.
@@ -45,8 +45,8 @@ public final class PushProxyAcknowledgement extends VendorMessage {
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
                                          payload.length);
         // get the ip and  port from the payload....
-        QueryReply.IPPortCombo combo = 
-            QueryReply.IPPortCombo.getCombo(getPayload());
+        IPPortCombo combo = 
+            IPPortCombo.getCombo(getPayload());
         _addr = combo.getInetAddress();
         _port = combo.getPort();
     }
@@ -96,8 +96,8 @@ public final class PushProxyAcknowledgement extends VendorMessage {
     private static byte[] derivePayload(InetAddress addr, int port) {
         try {
             // i do it during construction....
-            QueryReply.IPPortCombo combo = 
-                new QueryReply.IPPortCombo(addr.getHostAddress(), port);
+            IPPortCombo combo = 
+                new IPPortCombo(addr.getHostAddress(), port);
             return combo.toBytes();
         } catch (UnknownHostException uhe) {
             throw new IllegalArgumentException(uhe.getMessage());

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Collection;
 
 import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -121,7 +122,7 @@ public class StandardMessageRouter extends MessageRouter {
         IpPort ipport = null;
         if (request.requestsIP()) {
             try {
-                ipport = new QueryReply.IPPortCombo(
+                ipport = new IPPortCombo(
                             addr.getAddress().getHostAddress(),
                             addr.getPort());
             } catch(IOException tooBad) { }

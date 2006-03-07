@@ -25,7 +25,7 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.StringUtils;
@@ -245,8 +245,8 @@ public class UDPCrawlerPong extends VendorMessage {
 	private static byte[] packIPAddress(InetAddress addr, int port) {
         try {
             // i do it during construction....
-            QueryReply.IPPortCombo combo = 
-                new QueryReply.IPPortCombo(addr.getHostAddress(), port);
+            IPPortCombo combo = 
+                new IPPortCombo(addr.getHostAddress(), port);
             return combo.toBytes();
         } catch (UnknownHostException uhe) {
             throw new IllegalArgumentException(uhe.getMessage());
@@ -309,8 +309,8 @@ public class UDPCrawlerPong extends VendorMessage {
 			System.arraycopy(payload,index,current,0,6);
 			index+=6;
 			
-			QueryReply.IPPortCombo combo = 
-	            QueryReply.IPPortCombo.getCombo(current);
+			IPPortCombo combo = 
+	            IPPortCombo.getCombo(current);
 			
 			if (combo == null || combo.getInetAddress() == null)
 				throw new BadPacketException("parsing of ip:port failed. "+
@@ -344,8 +344,8 @@ public class UDPCrawlerPong extends VendorMessage {
 			System.arraycopy(payload,index,current,0,6);
 			index+=6;
 			
-			QueryReply.IPPortCombo combo = 
-	            QueryReply.IPPortCombo.getCombo(current);
+			IPPortCombo combo = 
+	            IPPortCombo.getCombo(current);
 			
 			if (combo == null || combo.getInetAddress() == null)
 				throw new BadPacketException("parsing of ip:port failed. "+

@@ -114,7 +114,7 @@ public class SignatureVerifier {
     /**
      * Reads a public key from disk.
      */
-    private static PublicKey readKey(File keyFile, String alg) {
+    public static PublicKey readKey(File keyFile, String alg) {
         byte[] fileData = FileUtils.readFileFully(keyFile);
         if(fileData == null)
             return null;

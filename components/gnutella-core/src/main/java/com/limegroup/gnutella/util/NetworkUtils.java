@@ -22,7 +22,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
@@ -364,7 +364,7 @@ public final class NetworkUtils {
     	
     	for (int i=0;i<size;i++) {
     		System.arraycopy(data,i*6,current,0,6);
-    		ret.add(QueryReply.IPPortCombo.getCombo(current));
+    		ret.add(IPPortCombo.getCombo(current));
     	}
     	
     	return Collections.unmodifiableList(ret);

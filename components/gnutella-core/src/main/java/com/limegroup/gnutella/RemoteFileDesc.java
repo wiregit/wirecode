@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
@@ -168,6 +169,9 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	 * the spam rating of this rfd.
 	 */
 	private transient float _spamRating = 0.f;
+    
+    /** the security of this RemoteFileDesc. */
+    private transient int _secureStatus = SecureMessage.INSECURE;
     
     /**
      * A map of various properties we want to serialize.  Currently we use
@@ -998,4 +1002,12 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	public float getSpamRating() {
 		return _spamRating;
 	}
+
+    public int getSecureStatus() {
+        return _secureStatus;
+    }
+
+    public void setSecureStatus(int secureStatus) {
+        this._secureStatus = secureStatus;
+    }
 }

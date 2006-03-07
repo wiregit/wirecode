@@ -17,7 +17,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.IpPortSet;
@@ -364,7 +364,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         if (version > 0) {
             byte [] host = new byte[6];
             dais.readFully(host);
-            addr = QueryReply.IPPortCombo.getCombo(host);
+            addr = IPPortCombo.getCombo(host);
             if (addr.getAddress().equals(RemoteFileDesc.BOGUS_IP)) {
                 addr = null;
                 version = 0;
@@ -374,7 +374,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         byte [] tmp = new byte[6];
         for (int i = 0; i < number; i++) {
             dais.readFully(tmp);
-            proxies.add(QueryReply.IPPortCombo.getCombo(tmp));
+            proxies.add(IPPortCombo.getCombo(tmp));
         }
         
         /** this adds the read set to the existing proxies */
