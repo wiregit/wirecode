@@ -93,7 +93,7 @@ public class ContentManager {
      *  for a response for the given URN.
      */
     public boolean isVerified(URN urn) {
-        return !ContentSettings.CONTENT_MANAGEMENT_ACTIVE.getValue() ||
+        return !ContentSettings.isManagementActive() ||
                CACHE.hasResponseFor(urn) || TIMEOUTS.contains(urn);
     }
     
@@ -106,7 +106,7 @@ public class ContentManager {
      */
     public void request(URN urn, ContentResponseObserver observer, long timeout) {
         ContentResponseData response = CACHE.getResponse(urn);
-        if(response != null || !ContentSettings.CONTENT_MANAGEMENT_ACTIVE.getValue()) {
+        if(response != null || !ContentSettings.isManagementActive()) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Immediate response for URN: " + urn);
             observer.handleResponse(urn, response);

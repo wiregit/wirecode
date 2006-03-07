@@ -113,6 +113,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         URN u3 = getURN(f3);
         
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
         ContentManager cm = RouterService.getContentManager();
         cm.initialize();
         // request the urn so we can use the response.

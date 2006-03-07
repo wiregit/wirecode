@@ -56,6 +56,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
         mgr = new ContentManager();
         crOne = new ContentResponse(URN_1, true);
         one = new Observer();

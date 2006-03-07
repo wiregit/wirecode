@@ -151,6 +151,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      */
     public void testContentVerified() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
