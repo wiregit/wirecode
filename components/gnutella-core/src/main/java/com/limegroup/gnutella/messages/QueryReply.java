@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -52,54 +51,13 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * below for more details.
  */
 public class QueryReply extends Message implements SecureMessage {
-    //Rep rationale: because most queries aren't directed to us (we'll just
-    //forward them) we extract the responses lazily as needed.
-    //When they are extracted, however, it makes sense to store the parsed
-    //data in the responses field.
-    //
     //WARNING: see note in Message about IP addresses.
 
     // some parameters about xml, namely the max size of a xml collection string.
     public static final int XML_MAX_SIZE = 32768;
     
-    /** 2 bytes for public area, 2 bytes for xml length.
-     */
+    /** 2 bytes for public area, 2 bytes for xml length. */
     public static final int COMMON_PAYLOAD_LEN = 4;
-
-    private byte[] _payload;
-    /** True if the responses and metadata have been extracted. */
-    private boolean _parsed = false;        
-    /** If parsed, the response records for this, or null if they could not
-     *  be parsed. */
-    private volatile Response[] _responses = null;
-
-    /** If parsed, the responses vendor string, if defined, or null
-     *  otherwise. */
-    private volatile String _vendor = null;
-    /** If parsed, one of TRUE (push needed), FALSE, or UNDEFINED. */
-    private volatile int _pushFlag = UNDEFINED;
-    /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
-    private volatile int _busyFlag = UNDEFINED;
-    /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
-    private volatile int _uploadedFlag = UNDEFINED;
-    /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
-    private volatile int _measuredSpeedFlag = UNDEFINED;
-
-    /** Determines if the remote host supports chat */
-    private volatile boolean _supportsChat = false;
-    /** Determines if the remote host supports browse host */
-    private volatile boolean _supportsBrowseHost = false;
-    /** Determines if this is a reply to a multicast query */
-    private volatile boolean _replyToMulticast = false;
-    /** Determines if the remote host supports FW transfers */
-    private volatile boolean _supportsFWTransfer = false;
-    
-    /** Version number of FW Transfer the host supports. */
-    private volatile byte _fwTransferVersion = (byte)0;
-
-    private static final int TRUE=1;
-    private static final int FALSE=0;
-    private static final int UNDEFINED=-1;
 
     /** The mask for extracting the push flag from the QHD common area. */
     private static final byte PUSH_MASK=(byte)0x01;
@@ -111,47 +69,33 @@ public class QueryReply extends Message implements SecureMessage {
     private static final byte SPEED_MASK=(byte)0x10;
     /** The mask for extracting the GGEP flag from the QHD common area. */
     private static final byte GGEP_MASK=(byte)0x20;
-
     /** The mask for extracting the chat flag from the QHD private area. */
     private static final byte CHAT_MASK=(byte)0x01;
     
-    /** The data with info about the secure result. */
-    private volatile SecureGGEPData _secureGGEP;
+    static final int TRUE=1;
+    static final int FALSE=0;
+    static final int UNDEFINED=-1;
     
-    /** The xml chunk that contains metadata about xml responses*/
-    private byte[] _xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;
-
-	/** The raw ip address of the host returning the hit.*/
-	private byte[] _address = new byte[4];
-	
-	/** The cached clientGUID. */
-	private byte[] clientGUID = null;
-
-    /** the PushProxy info for this hit.
-     */
-    private Set _proxies;
+    /** Our static and final instance of the GGEPUtil helper class. */
+    private static final GGEPUtil _ggepUtil = new GGEPUtil();
     
-    /**
-     * Whether or not this is a result from a browse-host reply.
-     */
-    private boolean _browseHostReply;
+    /** the payload. */
+    private byte[] _payload;
     
-    /**
-     * The HostData containing information about this QueryReply.
-     * Only set if this QueryReply is parsed.
-     */
-    private HostData _hostData;
+    /** The raw ip address of the host returning the hit.*/  
+    private byte[] _address = new byte[4];    
     
     /** Whether or not this message has been verified as secure. */
     private int _secureStatus = SecureMessage.INSECURE;
     
-
-    /** Our static and final instance of the GGEPUtil helper class.
-     */
-    private static final GGEPUtil _ggepUtil = new GGEPUtil();
+    /** True if the responses and metadata have been extracted. */  
+    private boolean _parsed = false;
     
-    /** The number of unique results (by SHA1) this message carries */
-    private transient short _uniqueResultURNs;
+    /** The parsed query reply data. */
+    private volatile QueryReplyData _data;
+    
+    /** The cached clientGUID. */  
+    private byte[] clientGUID = null;    
 
     /** Creates a new query reply.  The number of responses is responses.length
      *  The Browse Host GGEP extension is ON by default.  
@@ -270,10 +214,6 @@ public class QueryReply extends Message implements SecureMessage {
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
              false, proxies);
-        if (xmlBytes.length > XML_MAX_SIZE)
-            throw new IllegalArgumentException("XML bytes too big: " +
-                                               xmlBytes.length);
-        _xmlBytes = xmlBytes;        
     }
 
 
@@ -312,10 +252,6 @@ public class QueryReply extends Message implements SecureMessage {
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
              supportsFWTransfer, proxies);
-        if (xmlBytes.length > XML_MAX_SIZE)
-            throw new IllegalArgumentException("XML bytes too big: " +
-                                               xmlBytes.length);
-        _xmlBytes = xmlBytes;        
     }
 
 
@@ -404,11 +340,12 @@ public class QueryReply extends Message implements SecureMessage {
 		} else if(n >= 256) {
 			throw new IllegalArgumentException("invalid num responses: "+n);
 		}
-
-        // set up proxies
-        _proxies = proxies;
-        _supportsFWTransfer = supportsFWTransfer;
-
+        
+        _data = new QueryReplyData();
+        _data.setXmlBytes(xmlBytes);
+        _data.setProxies(proxies);
+        _data.setSupportsFWTransfer(supportsFWTransfer);
+        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try {
@@ -424,7 +361,6 @@ public class QueryReply extends Message implements SecureMessage {
                 Response r=responses[n-left];
                 r.writeToStream(baos);
             }
-            
             //Write QHD if desired
             if (includeQHD) {
                 //a) vendor code.  This is hardcoded here for simplicity,
@@ -446,7 +382,7 @@ public class QueryReply extends Message implements SecureMessage {
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
-                boolean hasProxies = (_proxies != null) && (_proxies.size() > 0);
+                boolean hasProxies = (proxies != null) && (proxies.size() > 0);
                 byte flags=
                     (byte)((needsPush && !isMulticastReply ? PUSH_MASK : 0) 
                            | BUSY_MASK 
@@ -461,7 +397,6 @@ public class QueryReply extends Message implements SecureMessage {
                            | (supportsBH || isMulticastReply || hasProxies ||
                               supportsFWTransfer ? 
                               GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
-
                 baos.write(flags);
                 baos.write(controls);
                 
@@ -480,7 +415,7 @@ public class QueryReply extends Message implements SecureMessage {
                 byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
                                                        isMulticastReply,
                                                        supportsFWTransfer,
-                                                       _proxies);
+                                                       proxies);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
                 writeSecureGGEP(baos, xmlBytes);
@@ -548,7 +483,7 @@ public class QueryReply extends Message implements SecureMessage {
      * Sets this reply to be considered a 'browse host' reply.
      */
     public void setBrowseHostReply(boolean isBH) {
-        _browseHostReply = isBH;
+        _data.setBrowseHostReply(isBH);
     }
     
     
@@ -556,7 +491,7 @@ public class QueryReply extends Message implements SecureMessage {
      * Gets whether or not this reply is from a browse host request.
      */
     public boolean isBrowseHostReply() {
-        return _browseHostReply;
+        return _data.isBrowseHostReply();
     }
 
     /** Return the associated xml metadata string if the queryreply
@@ -564,7 +499,7 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public byte[] getXMLBytes() {
         parseResults();
-        return _xmlBytes;
+        return _data.getXmlBytes();
     }
 
     /** Return the number of results N in this query. */
@@ -578,7 +513,7 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public short getUniqueResultCount() {
         parseResults();
-        return _uniqueResultURNs;
+        return _data.getUniqueResultURNs();
     }
 
     public int getPort() {
@@ -610,9 +545,10 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public Response[] getResultsArray() throws BadPacketException {
         parseResults();
-        if(_responses == null)
+        Response[] responses = _data.getResponses();
+        if(responses == null)
             throw new BadPacketException();
-        return _responses;
+        return responses;
     }
 
     /** Returns an iterator that will yield the results, each as an
@@ -620,9 +556,10 @@ public class QueryReply extends Message implements SecureMessage {
      *  this data couldn't be extracted.  */
     public Iterator getResults() throws BadPacketException {
         parseResults();
-        if (_responses==null)
+        Response[] responses = _data.getResponses();
+        if (responses==null)
             throw new BadPacketException();
-        List list=Arrays.asList(_responses);
+        List list=Arrays.asList(responses);
         return list.iterator();
     }
 
@@ -632,9 +569,10 @@ public class QueryReply extends Message implements SecureMessage {
      *  this data couldn't be extracted.  */
     public List getResultsAsList() throws BadPacketException {
         parseResults();
-        if (_responses==null)
+        Response[] responses = _data.getResponses();        
+        if (responses==null)
             throw new BadPacketException("results are null");
-        List list=Arrays.asList(_responses);
+        List list=Arrays.asList(responses);
         return list;
     }
 
@@ -646,9 +584,10 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public String getVendor() throws BadPacketException {
         parseResults();
-        if (_vendor==null)
+        String vendor = _data.getVendor();
+        if (vendor==null)
             throw new BadPacketException();
-        return _vendor;        
+        return vendor;        
     }
 
     /** 
@@ -660,7 +599,7 @@ public class QueryReply extends Message implements SecureMessage {
     public boolean getNeedsPush() throws BadPacketException {
         parseResults();
 
-        switch (_pushFlag) {
+        switch (_data.getPushFlag()) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -668,7 +607,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for push flag: "+_pushFlag);
+            Assert.that(false, "Bad value for push flag: " + _data.getPushFlag());
             return false;
         }
     }
@@ -681,7 +620,7 @@ public class QueryReply extends Message implements SecureMessage {
     public boolean getIsBusy() throws BadPacketException {
         parseResults();
 
-        switch (_busyFlag) {
+        switch (_data.getBusyFlag()) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -689,7 +628,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for busy flag: "+_pushFlag);
+            Assert.that(false, "Bad value for busy flag: " + _data.getBusyFlag());
             return false;
         }
     }
@@ -702,7 +641,7 @@ public class QueryReply extends Message implements SecureMessage {
     public boolean getHadSuccessfulUpload() throws BadPacketException {
         parseResults();
 
-        switch (_uploadedFlag) {
+        switch (_data.getUploadedFlag()) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -710,7 +649,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for uploaded flag: "+_pushFlag);
+            Assert.that(false, "Bad value for uploaded flag: " + _data.getUploadedFlag());
             return false;
         }
     }
@@ -724,7 +663,7 @@ public class QueryReply extends Message implements SecureMessage {
     public boolean getIsMeasuredSpeed() throws BadPacketException {
         parseResults();
 
-        switch (_measuredSpeedFlag) {
+        switch (_data.getMeasuredSpeedFlag()) {
         case UNDEFINED:
             throw new BadPacketException();
         case TRUE:
@@ -732,7 +671,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for measured speed flag: "+_pushFlag);
+            Assert.that(false, "Bad value for measured speed flag: " + _data.getMeasuredSpeedFlag());
             return false;
         }
     }
@@ -740,10 +679,10 @@ public class QueryReply extends Message implements SecureMessage {
     /** Returns the bytes of the signature from the secure GGEP block. */
     public byte[] getSecureSignature() {
         parseResults();
-        
-        if(_secureGGEP != null) {
+        SecureGGEPData sg = _data.getSecureGGEP();
+        if(sg != null) {
             try {
-                return _secureGGEP.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
+                return sg.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
             } catch(BadGGEPPropertyException bgpe) {
                 return null;
             }
@@ -755,10 +694,10 @@ public class QueryReply extends Message implements SecureMessage {
     /** Passes in the appropriate bytes of the payload to the signature. */
     public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
         parseResults();
-        
-        if(_secureGGEP != null) {
-            signature.update(_payload, 0, _secureGGEP.getStartIndex());
-            int end = _secureGGEP.getEndIndex();
+        SecureGGEPData sg = _data.getSecureGGEP();       
+        if(sg != null) {
+            signature.update(_payload, 0, sg.getStartIndex());
+            int end = sg.getEndIndex();
             int length = _payload.length - 16 - end;
             signature.update(_payload, end, length);
         }
@@ -780,21 +719,21 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public boolean getSupportsChat() {
         parseResults();
-        return _supportsChat;
+        return _data.isSupportsChat();
     }
 
     /** @return true if the remote host can firewalled transfers.
      */
     public boolean getSupportsFWTransfer() {
         parseResults();
-        return _supportsFWTransfer;
+        return _data.isSupportsFWTransfer();
     }
 
     /** @return 1 or greater if FW Transfer is supported, else 0.
      */
     public byte getFWTransferVersion() {
         parseResults();
-        return _fwTransferVersion;
+        return _data.getFwTransferVersion();
     }
 
     /** 
@@ -802,7 +741,7 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public boolean getSupportsBrowseHost() {
         parseResults();
-        return _supportsBrowseHost;
+        return _data.isSupportsBrowseHost();
     }
     
     /** 
@@ -816,7 +755,7 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public boolean isReplyToMulticastQuery() {
         parseResults();
-        return _replyToMulticast;
+        return _data.isReplyToMulticast();
     }
 
     /**
@@ -824,7 +763,7 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public Set getPushProxies() {
         parseResults();
-        return _proxies;
+        return _data.getProxies();
     }
     
     /**
@@ -833,9 +772,10 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public HostData getHostData() throws BadPacketException {
         parseResults();
-        if( _hostData == null )
+        HostData hd = _data.getHostData();
+        if( hd == null )
             throw new BadPacketException();
-        return _hostData;
+        return hd;
     }
     
     /**
@@ -845,14 +785,11 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public boolean hasSecureData() {
         parseResults();
-        return _secureGGEP != null;
+        return _data.getSecureGGEP() != null;
     }
     
-    /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
-     *  @effects tries to extract responses from payload and store in responses. 
-     *    Tries to extract metadata and store in vendor and pushFlagSet.
-     *    You can tell if data couldn't be extracted by looking if responses
-     *    or vendor is null.
+    /** @modifies _data
+     *  @effects tries to extract responses from payload and store in responses.
      */
     private synchronized void parseResults() {
         if (_parsed)
@@ -872,6 +809,8 @@ public class QueryReply extends Message implements SecureMessage {
     private void parseResults2() {
         //index into payload to look for next response
         int i=11;
+        
+        _data = new QueryReplyData();
 
         //1. Extract responses.  These are not copied to this.responses until
         //they are verified.  Note, however that the metainformation need not be
@@ -880,6 +819,7 @@ public class QueryReply extends Message implements SecureMessage {
         int left=getResultCount();          //number of records left to get
         Response[] responses=new Response[left];
         Set urns = new HashSet(); // set for the urns carried in this reply
+        short uniqueURNs = 0;
         try {
             InputStream bais = 
                 new ByteArrayInputStream(_payload,i,_payload.length-i);
@@ -890,12 +830,12 @@ public class QueryReply extends Message implements SecureMessage {
                 i+=r.getLength();
                 
                 if (r.getUrns().isEmpty())
-                    _uniqueResultURNs++;
+                    uniqueURNs++;
                 else
                     urns.addAll(r.getUrns());
             }
             //All set.  Accept parsed results.
-            this._responses=responses;
+            _data.setResponses(responses);
         } catch (ArrayIndexOutOfBoundsException e) {
             return;
         } catch (IOException e) {
@@ -903,7 +843,8 @@ public class QueryReply extends Message implements SecureMessage {
         }
         
         // remember how many unique urns this reply carries
-        _uniqueResultURNs += (short) urns.size();
+        uniqueURNs += (short) urns.size();
+        _data.setUniqueResultURNs(uniqueURNs);
         
         //2. Extract BearShare-style metainformation, if any.  Any exceptions
         //are silently caught.  The definitive reference for this format is at
@@ -975,10 +916,9 @@ public class QueryReply extends Message implements SecureMessage {
             //a) extract vendor code
             try {
                 //Must use ISO encoding since characters are more than two
-                //bytes on other platforms.  TODO: test on different installs!
+                //bytes on other platforms.
                 vendorT=new String(_payload, i, 4, "ISO-8859-1");
-                Assert.that(vendorT.length()==4,
-                            "Vendor length wrong.  Wrong character encoding?");
+                Assert.that(vendorT.length()==4, "Vendor length wrong.  Wrong character encoding?");
             } catch (UnsupportedEncodingException e) {
                 Assert.that(false, "No support for ISO-8859-1 encoding");
             }
@@ -1014,8 +954,8 @@ public class QueryReply extends Message implements SecureMessage {
                         try {
                             supportsBrowseHostT = ggep.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST);
                             if (ggep.hasKey(GGEP.GGEP_HEADER_FW_TRANS)) {
-                                _fwTransferVersion = ggep.getBytes(GGEP.GGEP_HEADER_FW_TRANS)[0];
-                                _supportsFWTransfer = _fwTransferVersion > 0;
+                                _data.setFwTransferVersion(ggep.getBytes(GGEP.GGEP_HEADER_FW_TRANS)[0]);
+                                _data.setSupportsFWTransfer(_data.getFwTransferVersion() > 0);
                             }
                             replyToMulticastT = ggep.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
                             proxies = _ggepUtil.getPushProxies(ggep);
@@ -1024,7 +964,7 @@ public class QueryReply extends Message implements SecureMessage {
                     }
                     // store the data about the secure result, if it's there.
                     if(parser.getSecureGGEP() != null) {
-                        _secureGGEP = new SecureGGEPData(parser);
+                        _data.setSecureGGEP(new SecureGGEPData(parser));
                     }
                 }
                 i+=2; // increment used bytes appropriately...
@@ -1042,13 +982,14 @@ public class QueryReply extends Message implements SecureMessage {
                 int xmlSize = a | b;
                 if (xmlSize > 1) {
                     int xmlInPayloadIndex = _payload.length-16-xmlSize;
-                    _xmlBytes = new byte[xmlSize-1];
+                    byte[] xmlBytes = new byte[xmlSize-1];
                     System.arraycopy(_payload, xmlInPayloadIndex,
-                                     _xmlBytes, 0,
+                                     xmlBytes, 0,
                                      (xmlSize-1));
+                    _data.setXmlBytes(xmlBytes);
                 }
                 else
-                    _xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;
+                    _data.setXmlBytes(DataUtils.EMPTY_BYTE_ARRAY);
             }
 
             //Parse LimeWire's private area.  Currently only a single byte
@@ -1067,20 +1008,20 @@ public class QueryReply extends Message implements SecureMessage {
             
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
-            this._vendor=vendorT.toUpperCase(Locale.US);
-            this._pushFlag=pushFlagT;
-            this._busyFlag=busyFlagT;
-            this._uploadedFlag=uploadedFlagT;
-            this._measuredSpeedFlag=measuredSpeedFlagT;
-            this._supportsChat=supportsChatT;
-            this._supportsBrowseHost=supportsBrowseHostT;
-            this._replyToMulticast=replyToMulticastT;
-            if(proxies == null) {
-                this._proxies = Collections.EMPTY_SET;
-            } else {
-                this._proxies = proxies;
-            }
-            this._hostData = new HostData(this);
+            _data.setVendor(vendorT.toUpperCase(Locale.US));
+            _data.setPushFlag(pushFlagT);
+            _data.setBusyFlag(busyFlagT);
+            _data.setUploadedFlag(uploadedFlagT);
+            _data.setMeasuredSpeedFlag(measuredSpeedFlagT);
+            _data.setSupportsChat(supportsChatT);
+            _data.setSupportsBrowseHost(supportsBrowseHostT);
+            _data.setReplyToMulticast(replyToMulticastT);
+            if(proxies == null)
+                _data.setProxies(Collections.EMPTY_SET);
+            else
+                _data.setProxies(proxies);
+            
+            _data.setHostData(new HostData(this));
 
         } catch (BadPacketException e) {
             return;
