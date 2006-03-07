@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * A ChannelReadObserver must be used so that the Socket can set the appropriate
  * underlying channel.
  */
-public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplexor {
+public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplexor, ReadTimeout {
     
     private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     
@@ -390,6 +390,15 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
             throw new IllegalStateException("writer not NIOOutputStream!");
     }
     
+    /** Gets the read timeout for this socket. */
+    public long getReadTimeout() {
+        try {
+            return getSoTimeout();
+        } catch(SocketException se) {
+            return 0;
+        }
+    }    
+    
     
     ///////////////////////////////////////////////
     /// BELOW ARE ALL WRAPPERS FOR SOCKET.
@@ -542,5 +551,5 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         
         // unused.
         public void handleIOException(IOException iox) {}
-    }          
+    }
 }

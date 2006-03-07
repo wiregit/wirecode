@@ -218,7 +218,10 @@ public class NIODispatcher implements Runnable {
                 // so that multiple threads calling interest(..) will be atomic with
                 // respect to each other.  Otherwise, one thread can preempt another's
                 // interest setting, and one of the interested ops may be lost.
-			    synchronized(channel.blockingLock()) {
+			    synchronized(sk.attachment()) {
+                    if((op & SelectionKey.OP_READ) != 0)
+                        ((Attachment)sk.attachment()).changeReadStatus(on);
+                        
     				if(on)
     					sk.interestOps(sk.interestOps() | op);
     				else
@@ -268,7 +271,7 @@ public class NIODispatcher implements Runnable {
      * 
      * @throws IOException
      */
-    private void processAccept(SelectionKey sk, AcceptChannelObserver handler) throws IOException {
+    private void processAccept(long now, SelectionKey sk, AcceptChannelObserver handler, Attachment proxy) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling accept: " + handler);
         
@@ -293,10 +296,11 @@ public class NIODispatcher implements Runnable {
     /**
      * Process a connected channel.
      */
-    private void processConnect(SelectionKey sk, ConnectObserver handler) throws IOException {
+    private void processConnect(long now, SelectionKey sk, ConnectObserver handler, Attachment proxy) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);
         SocketChannel channel = (SocketChannel)sk.channel();
+        proxy.clearTimeout();
         
         boolean finished = channel.finishConnect();
         if(finished) {
@@ -305,6 +309,17 @@ public class NIODispatcher implements Runnable {
         } else {
             cancel(sk, handler);
         }
+    }
+    
+    /** Process a channel read operation. */
+    private void processRead(long now, ReadObserver handler, Attachment proxy) throws IOException {
+        proxy.updateReadTimeout(now);
+        handler.handleRead();
+    }
+    
+    /** Process a channel write operation. */
+    private void processWrite(long now, WriteObserver handler, Attachment proxy) throws IOException {
+        handler.handleWrite();
     }
     
     /**
@@ -318,6 +333,8 @@ public class NIODispatcher implements Runnable {
             guard.setKey(key);
             if(timeout != 0) 
                 guard.addTimeout(System.currentTimeMillis(), timeout);
+            else if((op & SelectionKey.OP_READ) != 0)
+                guard.changeReadStatus(true);
         } catch(IOException iox) {
             attachment.handleIOException(iox);
         }
@@ -448,15 +465,16 @@ public class NIODispatcher implements Runnable {
             
             readyThrottles(keys);
             
+            long now = System.currentTimeMillis();
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
 				if(sk.isValid())
-                    process(sk, sk.attachment(), 0xFFFF);
+                    process(now, sk, sk.attachment(), 0xFFFF);
             }
             
             keys.clear();
             iteration++;            
-            TIMEOUTER.processTimeouts(System.currentTimeMillis());
+            TIMEOUTER.processTimeouts(now);
         }
     }
     
@@ -464,9 +482,8 @@ public class NIODispatcher implements Runnable {
      * Processes a single SelectionKey & attachment, processing only
      * ops that are in allowedOps.
      */
-    void process(SelectionKey sk, Object proxyAttachment, int allowedOps) {
+    void process(long now, SelectionKey sk, Object proxyAttachment, int allowedOps) {
         Attachment proxy = (Attachment)proxyAttachment;
-        proxy.clearTimeout();
         IOErrorObserver attachment = proxy.attachment;
         
         if(proxy.lastMod == iteration) {
@@ -481,14 +498,14 @@ public class NIODispatcher implements Runnable {
             try {
                 try {
                     if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                        processAccept(sk, (AcceptChannelObserver)attachment);
+                        processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
                     else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
-                        processConnect(sk, (ConnectObserver)attachment);
+                        processConnect(now, sk, (ConnectObserver)attachment, proxy);
                     else {
                         if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
-                            ((ReadObserver)attachment).handleRead();
+                            processRead(now, (ReadObserver)attachment, proxy);
                         if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
-                            ((WriteObserver)attachment).handleWrite();
+                            processWrite(now, (WriteObserver)attachment, proxy);
                     }
                 } catch (CancelledKeyException err) {
                     LOG.warn("Ignoring cancelled key", err);
@@ -596,26 +613,68 @@ public class NIODispatcher implements Runnable {
         private final IOErrorObserver attachment;
         private long lastMod;
         private long hits;
-        private boolean timeoutActive;
         private SelectionKey key;
+
+        private long storedTimeoutLength = Long.MAX_VALUE;
+        private long storedExpireTime = Long.MAX_VALUE;
+        
         
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
         }
         
-        void clearTimeout() {
-            timeoutActive = false;
+        synchronized void clearTimeout() {
+            storedExpireTime = -1;
+            storedTimeoutLength = -1;
+        }
+        
+        synchronized void updateReadTimeout(long now) {
+            if(attachment instanceof ReadTimeout) {
+                long timeoutLength = ((ReadTimeout)attachment).getReadTimeout();
+                if(timeoutLength != 0) {
+                    long expireTime = now + timeoutLength;
+                    if(expireTime < storedExpireTime) {
+                        addTimeout(now, timeoutLength);
+                    } else {
+                        storedExpireTime = expireTime;
+                        storedTimeoutLength = timeoutLength;
+                    }
+                }
+            }
+        }
+        
+        synchronized void changeReadStatus(boolean reading) {
+            if(reading)
+                updateReadTimeout(System.currentTimeMillis());
+            else
+                clearTimeout();
         }
 
-        void addTimeout(long now, long timeoutLength) {
-            timeoutActive = true;
+        synchronized void addTimeout(long now, long timeoutLength) {
+            storedTimeoutLength = now;
+            storedExpireTime = now + timeoutLength;
             TIMEOUTER.addTimeout(this, now, timeoutLength);
         }
         
         public void notifyTimeout(long now, long expireTime, long timeoutLength) {
-            if(timeoutActive) {
+            boolean cancel = false;
+            long timeToUse = 0;
+            synchronized(this) {
+                if(expireTime == storedExpireTime) {
+                    cancel = true;
+                    timeToUse = storedTimeoutLength;
+                } else if(expireTime < storedExpireTime){
+                    TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
+                } else { // expireTime > storedExpireTime
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Ignoring extra timeout for: " + attachment);
+                }
+            }
+            
+            // must do cancel & IOException outside of the lock.
+            if(cancel) {
                 cancel(key, attachment);
-                attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeoutLength + ")"));
+                attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeToUse + ")"));
             }
         }
         
