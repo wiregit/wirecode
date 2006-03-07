@@ -104,6 +104,7 @@ public class UploadManager implements BandwidthTracker {
     private final int QUEUED = 1;
     private final int ACCEPTED = 2;
     private final int BANNED = 3;
+    //private final int NOT_VALIDATED = 4;
     /** The min and max allowed times (in milliseconds) between requests by
      *  queued hosts. */
     public static final int MIN_POLL_TIME = 45000; //45 sec
@@ -941,13 +942,17 @@ public class UploadManager implements BandwidthTracker {
         	return BANNED;
         }
         
+        FileDesc fd = uploader.getFileDesc();
+        if(!fd.isVerified()) // spawn a validation
+            RouterService.getFileManager().validate(fd);
 
-        boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
+        URN sha1 = fd.getSHA1Urn();
+        boolean isGreedy = rqc.isGreedy(sha1);
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
         boolean wontAccept = size >= maxQueueSize || 
-			rqc.isDupe(uploader.getFileDesc().getSHA1Urn());
+			rqc.isDupe(sha1);
         int ret = -1;
 
         // if this uploader is greedy and at least on other client is queued
@@ -965,7 +970,7 @@ public class UploadManager implements BandwidthTracker {
             // if we just keep a greedy client from entering the
             // QUEUE
             if(limitReached)
-                rqc.limitReached(uploader.getFileDesc().getSHA1Urn());
+                rqc.limitReached(sha1);
         }
         //Note: The current policy is to not put uploadrers in a queue, if they 
         //do not send am X-Queue header. Further. uploaders are removed from 
@@ -1004,7 +1009,7 @@ public class UploadManager implements BandwidthTracker {
             }
             
             //check if this is a duplicate request
-            if (rqc.isDupe(uploader.getFileDesc().getSHA1Urn()))
+            if (rqc.isDupe(sha1))
             	return REJECTED;
             
             kv.setValue(new Long(System.currentTimeMillis()));
@@ -1035,7 +1040,7 @@ public class UploadManager implements BandwidthTracker {
         
         //register the uploader in the dupe table
         if (ret == ACCEPTED)
-        	rqc.startedUpload(uploader.getFileDesc().getSHA1Urn());
+        	rqc.startedUpload(sha1);
         return ret;
     }
 

@@ -53,6 +53,10 @@ public class GGEP {
     public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
     /** The extension header (key) for packed UDP Host Caches */
     public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
+    /** The extension header (key) for SHA1 urns. */
+    public static final String GGEP_HEADER_SHA1 = "S1";
+    /** The extension header (key) to determine if a SHA1 is valid. */
+    public static final String GGEP_HEADER_SHA1_VALID = "SV";
     
     /**
      * The extension header (key) for a feature query.

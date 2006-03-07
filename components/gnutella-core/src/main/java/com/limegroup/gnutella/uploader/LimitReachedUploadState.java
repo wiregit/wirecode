@@ -25,7 +25,8 @@ public class LimitReachedUploadState extends UploadState {
     private static final Log LOG = LogFactory.getLog(LimitReachedUploadState.class);
 	
 
-    
+    /** Time to wait for a retry-after because we're validating the file */
+    public static final String RETRY_AFTER_VALIDATING = 20 + "";
     
     /**
      * The time to wait for a normal retry after.
@@ -49,6 +50,12 @@ public class LimitReachedUploadState extends UploadState {
 	 */
 	private static final byte[] ERROR_MESSAGE = 
 		"Server busy.  Too many active uploads.".getBytes();
+    
+    /** Error msg to use when validating. */
+    private static final byte[] VALIDATING_MSG = "Validating file.  One moment please.".getBytes();
+    
+    /** True if this is a LimitReached state because we're validating the file */
+    private final boolean validating;
 
 	/**
 	 * Creates a new <tt>LimitReachedUploadState</tt> with the specified
@@ -57,7 +64,12 @@ public class LimitReachedUploadState extends UploadState {
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
 	public LimitReachedUploadState(HTTPUploader uploader) {
+        this(uploader, false);
+    }
+    
+    public LimitReachedUploadState(HTTPUploader uploader, boolean validating) {
 		super(uploader);
+        this.validating = validating;
 
 		LOG.debug("creating limit reached state");
 	}
@@ -71,19 +83,20 @@ public class LimitReachedUploadState extends UploadState {
 		ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		ostream.write(str.getBytes());
-		str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
-		ostream.write(str.getBytes());
 		writeProxies(ostream);
 		writeAlts(ostream);
+        byte[] errorMsg = ERROR_MESSAGE;
+        
 		if(FILE_DESC != null) {
-			// write the URN in case the caller wants it
 			URN sha1 = FILE_DESC.getSHA1Urn();
-			if(sha1 != null) {
-				
+            if(validating) {
+                errorMsg = VALIDATING_MSG;
+                HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER, RETRY_AFTER_VALIDATING, ostream);
+            } else if(sha1 != null) {
 				// write the Retry-After header, using different values
 				// depending on if we had any alts to send or not.
 				HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
-				    ! RouterService.getAltlocManager().hasAltlocs(FILE_DESC.getSHA1Urn()) ? 
+				    ! RouterService.getAltlocManager().hasAltlocs(sha1) ? 
 				        NO_ALT_LOCS_RETRY_AFTER : NORMAL_RETRY_AFTER,
 				    ostream);
                 ostream.write(str.getBytes());
@@ -94,6 +107,9 @@ public class LimitReachedUploadState extends UploadState {
 			                          ostream);
             }
 		}
+        
+        ostream.write(str.getBytes());
+        str = "Content-Length: " + errorMsg.length + "\r\n";        
 		
 		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,
 		                      ConstantHTTPHeaderValue.CLOSE_VALUE,

@@ -115,7 +115,7 @@ public class ResumeDownloader extends ManagedDownloader
     protected synchronized String getDefaultFileName() {
         return _name;
     }
-    
+
     /**
      * Overriden to unset deserializedFromDisk too.
      */

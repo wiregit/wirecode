@@ -511,11 +511,9 @@ public abstract class MessageRouter {
         // Increment hops and decrement TTL.
         msg.hop();
 
+        // note: validity of addr/port are checked when message is constructed
 		InetAddress address = addr.getAddress();
 		int port = addr.getPort();
-		// Verify that the address and port are valid.
-		// If they are not, we cannot send any replies to them.
-		if(!RouterService.isIpPortValid()) return;
 
 		// Send UDPConnection messages on to the connection multiplexor
 		// for routing to the appropriate connection processor
@@ -585,6 +583,9 @@ public abstract class MessageRouter {
         } 
         else if(msg instanceof UpdateRequest) {
             handleUpdateRequest((UpdateRequest)msg, handler);
+        }
+        else if(msg instanceof ContentResponse) {
+            handleContentResponse((ContentResponse)msg, handler);
         }
         notifyMessageListener(msg, handler);
     }
@@ -2040,6 +2041,10 @@ public abstract class MessageRouter {
         }
     }
     
+    /** Handles a ContentResponse msg -- passing it to the ContentManager. */
+    private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
+        RouterService.getContentManager().handleContentResponse(msg);
+    }
 
     /**
      * Passes the request onto the update manager.

@@ -358,6 +358,9 @@ public final class HTTPUploader implements Uploader {
             int pos=RouterService.getUploadManager().positionInQueue(_socket);
             _state = new QueuedUploadState(pos,this);
             break;
+        case NOT_VALIDATED:
+            _state = new LimitReachedUploadState(this, true);
+            break;
 		case LIMIT_REACHED:
 			_state = new LimitReachedUploadState(this);
 			break;
@@ -1285,12 +1288,6 @@ public final class HTTPUploader implements Uploader {
     
     public int wantsFWTAlts() {
     	return _FWTVersion;
-    }
-    
-    private final boolean debugOn = false;
-    private void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
     }
 
 	// overrides Object.toString

@@ -54,4 +54,8 @@ public final class InstallSettings extends AbstractSettings {
      */
     public static final BooleanSetting FIREWALL_WARNING =
         FACTORY.createBooleanSetting("FIREWALL_WARNING", false);
+    
+    /** Whether or not the filter question has been asked. */
+    public static final BooleanSetting FILTER_OPTION =
+        FACTORY.createBooleanSetting("FILTER_OPTION", false);
 }

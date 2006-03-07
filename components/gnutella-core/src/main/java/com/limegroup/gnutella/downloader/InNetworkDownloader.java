@@ -91,6 +91,10 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         super.startDownload();
     }
     
+    protected boolean shouldValidate(boolean deserialized) {
+        return false;
+    }
+    
     /**
      * Ensures that the VerifyingFile knows what TTRoot we're expecting.
      */

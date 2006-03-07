@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -180,6 +181,11 @@ public class RouterService {
     private static SecureMessageVerifier secureMessageVerifier = new SecureMessageVerifier();    
     
     /**
+     * The content manager
+     */
+    private static ContentManager contentManager = new ContentManager();
+    
+    /**
      * isShuttingDown flag
      */
     private static boolean isShuttingDown;
@@ -334,6 +340,10 @@ public class RouterService {
             LOG.trace("START SimppSettingsManager.instance");
             SimppSettingsManager.instance();
             LOG.trace("STOP SimppSettingsManager.instance");
+            
+            LOG.trace("START ContentManager");
+            contentManager.initialize();
+            LOG.trace("STOP ContentManager");
 
             LOG.trace("START MessageRouter");
             callback.componentLoading("MESSAGE_ROUTER");
@@ -527,6 +537,10 @@ public class RouterService {
 
     public static AltLocManager getAltlocManager() {
         return altManager;
+    }
+    
+    public static ContentManager getContentManager() {
+        return contentManager;
     }
     
 	/**
@@ -883,6 +897,8 @@ public class RouterService {
             TigerTreeCache.instance().persistCache();
 
             LicenseFactory.persistCache();
+            
+            contentManager.shutdown();
             
             runShutdownItems();
             

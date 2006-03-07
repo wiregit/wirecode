@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 public class IpPortImpl implements IpPort {
@@ -8,6 +9,11 @@ public class IpPortImpl implements IpPort {
     private final InetAddress addr;
     private final String addrString;
     private final int port;
+    
+    /** Constructs a new IpPort based on the given SocketAddress. */
+    public IpPortImpl(InetSocketAddress addr) {
+        this(addr.getAddress(), addr.getHostName(), addr.getPort());
+    }
     
     /**
      * Constructs a new IpPort using the given addr, host & port.
@@ -23,6 +29,28 @@ public class IpPortImpl implements IpPort {
      */
     public IpPortImpl(String host, int port) throws UnknownHostException {
         this(InetAddress.getByName(host), host, port);
+    }
+    
+    /** Constructs an IpPort using the given host:port */
+    public IpPortImpl(String hostport) throws UnknownHostException {
+        int colonIdx = hostport.indexOf(":");
+        if(colonIdx == hostport.length() -1)
+            throw new UnknownHostException("invalid hostport: " + hostport);
+        
+        String host = hostport;
+        int port = 80;
+        if(colonIdx != -1) {
+            host = hostport.substring(0, colonIdx);
+            try {
+                port = Integer.parseInt(hostport.substring(colonIdx+1).trim());
+            } catch(NumberFormatException nfe) {
+                throw new UnknownHostException("invalid hostport: " + hostport);
+            }
+        }
+        
+        this.addr = InetAddress.getByName(host);
+        this.addrString = host;
+        this.port = port;
     }
     
     public InetAddress getInetAddress() {

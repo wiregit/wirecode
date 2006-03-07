@@ -13,6 +13,8 @@ import java.util.Vector;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.StubContentAuthority;
 import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.QueuedException;
@@ -20,6 +22,9 @@ import com.limegroup.gnutella.downloader.TryAgainLaterException;
 import com.limegroup.gnutella.downloader.UnknownCodeException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.messages.vendor.ContentRequest;
+import com.limegroup.gnutella.messages.vendor.ContentResponse;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -105,6 +110,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         fm = new FileManagerStub(urns,descs);
         rs = new RouterService(ac);
+        RouterService.getContentManager().initialize();
         upManager = new UploadManager();
 
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
@@ -140,6 +146,32 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         UploadManager.tBandwidthTracker(new UploadManager());
     }
     
+    /** 
+     * Tests that an upload triggers a validation.
+     */
+    public void testContentVerified() throws Exception {
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
+        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+        
+        StubContentAuthority auth = new StubContentAuthority();
+        RouterService.getContentManager().setContentAuthority(auth);
+        assertEquals(0, auth.getSent().size());
+        
+        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+        connectDloader(d1,true,rfd1,true);
+        assertEquals(1, auth.getSent().size());
+        assertEquals(urn1, ((ContentRequest)auth.getSent().get(0)).getURN());
+
+        kill(d1);
+        
+        d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+        connectDloader(d1, true, rfd1, true);
+        assertEquals(1, auth.getSent().size()); // didn't send again.
+    }
     
     /**
      * Tests that:
@@ -1068,5 +1100,5 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         downloader.stop();
         try { Thread.sleep(1000); } catch (InterruptedException ignored) { }
     }
- 
+    
 }

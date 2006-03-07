@@ -48,6 +48,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.auth.ContentResponseData;
+import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -169,14 +171,15 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
       state to QUEUED and wait for DownloadManager to activate it.
       
       The download can finish in one of the following states:
-          h) COMPLETE (download completed just fine)
-          i) ABORTED  (user pressed stopped at some point)
-          j) DISK_PROBLEM (limewire couldn't manipulate the file)
-          k) CORRUPT_FILE (the file was corrupt)
+          - COMPLETE (download completed just fine)
+          - ABORTED  (user pressed stopped at some point)
+          - DISK_PROBLEM (limewire couldn't manipulate the file)
+          - CORRUPT_FILE (the file was corrupt)
+          - INVALID (content authority didn't allow the transfer)
 
      There are a few intermediary states:
-          l) HASHING
-          m) SAVING
+          - HASHING
+          - SAVING
      HASHING & SAVING are seen by the GUI, and are used just prior to COMPLETE,
      to let the user know what is currently happening in the closing states of
      the download.  RECOVERY_FAILED is used as an indicator that we no longer want
@@ -310,6 +313,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private volatile boolean stopped;
     /** True iff this has been paused.  */
     private volatile boolean paused;
+    /** True if this has been invalidated. */
+    private volatile boolean invalidated;
 
     
     /** 
@@ -757,6 +762,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         ThreadFactory.startThread(new Runnable() {
             public void run() {
                 try {
+                    validateDownload();
                     receivedNewSources = false;
                     int status = performDownload();
                     completeDownload(status);
@@ -801,12 +807,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 break;
 			case BUSY:
             case GAVE_UP:
-                if(stopped)
+                if(invalidated) {
+                    clearingNeeded = true;
+                    setState(INVALID);
+                } else if(stopped) {
                     setState(ABORTED);
-                else if(paused)
+                } else if(paused) {
                     setState(PAUSED);
-                else
-                    setState(status);
+                } else {
+                    setState(status); // BUSY or GAVE_UP
+                }
                 break;
             default:
                 Assert.that(false, "Bad status from tad2: "+status);
@@ -1007,6 +1017,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         case ABORTED:
         case DISK_PROBLEM:
         case CORRUPT_FILE:
+        case INVALID:
             return true;
         }
         return false;
@@ -1075,7 +1086,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * initializes the verifying file if the incompleteFile is initialized.
      */
 	protected void initializeVerifyingFile() throws IOException {
-
 		if (incompleteFile == null)
 			return;
 
@@ -2112,7 +2122,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @throws InterruptedException if we get interrupted while waiting for user
      * response.
      */
-    private int verifyAndSave() throws InterruptedException{
+    private int verifyAndSave() throws InterruptedException {
         
         // Find out the hash of the file and verify that its the same
         // as our hash.
@@ -2125,6 +2135,29 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         // Save the file to disk.
         return saveFile(fileHash);
+    }
+    
+    /**
+     * Validates the current download.
+     */
+    private void validateDownload() {
+        if(shouldValidate(deserializedFromDisk)) {
+            if(downloadSHA1 != null) {
+                RouterService.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
+                    public void handleResponse(URN urn, ContentResponseData response) {
+                        if(response != null && !response.isOK()) {
+                            invalidated = true;
+                            stop();
+                        }
+                    }
+                }, 5000);           
+            }
+        }
+    }
+    
+    /** Determines if validation should occur for this download. */
+    protected boolean shouldValidate(boolean deserialized) {
+        return !deserialized;
     }
     
     /**
@@ -3103,10 +3136,5 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public Object removeAttribute( String key ) {
         return attributes.remove( key );
-    }    
-}
-
-interface MeshHandler {
-    void informMesh(RemoteFileDesc rfd, boolean good);
-    void addPossibleSources(Collection hosts);
+    }
 }

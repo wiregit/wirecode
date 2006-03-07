@@ -13,11 +13,16 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.StubContentAuthority;
+import com.limegroup.gnutella.auth.StubContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -70,6 +75,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    cleanFiles(_sharedDir, false);
 	    fman = new SimpleFileManager();
 		
+        // ensure each test gets a brand new content manager.
+        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	}
 	
@@ -93,6 +100,63 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         FileDesc[] sharedFiles =  fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("should not be sharing any files " + Arrays.asList(sharedFiles), 
 				0, sharedFiles.length);
+    }
+    
+    public void testSharingWithContentManager() throws Exception {
+        f1 = createNewTestFile(1);
+        f2 = createNewTestFile(3);
+        f3 = createNewTestFile(11);
+        f4 = createNewTestFile(23);
+        
+        URN u1 = getURN(f1);
+        URN u2 = getURN(f2);
+        URN u3 = getURN(f3);
+        
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
+        ContentManager cm = RouterService.getContentManager();
+        cm.initialize();
+        // request the urn so we can use the response.
+        cm.request(u1, new StubContentResponseObserver(), 1000);
+        cm.handleContentResponse(new ContentResponse(u1, false));
+        
+        waitForLoad();
+        assertEquals("unexpected # of shared files", 3, fman.getNumFiles());
+        assertEquals("unexpected size of shared files", 37, fman.getSize());
+        assertFalse("shouldn't be shared", fman.isFileShared(f1));
+        assertTrue("should be shared", fman.isFileShared(f2));
+        assertTrue("should be shared", fman.isFileShared(f3));
+        assertTrue("should be shared", fman.isFileShared(f4));
+        
+        FileDesc fd2 = fman.getFileDescForFile(f2);
+        FileDesc fd3 = fman.getFileDescForFile(f3);
+        FileDesc fd4 = fman.getFileDescForFile(f4);
+        
+        // test invalid content response.
+        fman.validate(fd2);
+        cm.handleContentResponse(new ContentResponse(u2, false));
+        assertFalse("shouldn't be shared anymore", fman.isFileShared(f2));
+        assertEquals("wrong # shared files", 2, fman.getNumFiles());
+        assertEquals("wrong shared file size", 34, fman.getSize());
+        
+        // test valid content response.
+        fman.validate(fd3);
+        cm.handleContentResponse(new ContentResponse(u3, true));
+        assertTrue("should still be shared", fman.isFileShared(f3));
+        assertEquals("wrong # shared files", 2, fman.getNumFiles());
+        assertEquals("wrong shared file size", 34, fman.getSize());
+
+        // test valid content response.
+        fman.validate(fd4);
+        Thread.sleep(10000);
+        assertTrue("should still be shared", fman.isFileShared(f4));
+        assertEquals("wrong # shared files", 2, fman.getNumFiles());
+        assertEquals("wrong shared file size", 34, fman.getSize());
+        
+        // Make sure adding a new file to be shared doesn't work if it
+        // returned bad before.
+        fman.addFileIfShared(f1);
+        assertFalse("shouldn't be shared", fman.isFileShared(f1));
     }
     
     public void testOneSharedFile() throws Exception {
@@ -913,6 +977,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     protected File createNewTestFile(int size) throws Exception {
         return createNewNamedTestFile(size, "FileManager_unit_test", _sharedDir);
+    }
+    
+    protected URN getURN(File f) throws Exception {
+        return URN.createSHA1Urn(f);
     }
 
     /**

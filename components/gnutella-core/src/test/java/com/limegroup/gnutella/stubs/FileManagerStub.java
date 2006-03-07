@@ -3,6 +3,7 @@ package com.limegroup.gnutella.stubs;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -28,6 +29,7 @@ public class FileManagerStub extends FileManager {
     	_notHave= URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZZZZZZZZZZ");
     	}catch(IOException ignored){}
     }
+    List removeRequests = new LinkedList();
 
     public FileDesc get(int i) {
     	if (i < _descs.size())
@@ -88,6 +90,15 @@ public class FileManagerStub extends FileManager {
     
     public void fileChanged(File f) {
         throw new UnsupportedOperationException();
+    }
+    
+    public List getRemoveRequests() {
+        return removeRequests;
+    }
+
+    protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
+        removeRequests.add(f);
+        return super.removeFileIfShared(f, notify);
     }
 }
 

@@ -18,6 +18,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.ContentResponseData;
+import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -216,6 +219,13 @@ public abstract class FileManager {
      * relatively useful.                                                                                                       
      */
     private IntSet _incompletesShared;
+    
+    /**
+     * A Set of URNs that we're currently requesting validation for.
+     * This is NOT cleared on new revisions, because it'll always be
+     * valid.
+     */
+    private Set /* of URN */ _requestingValidation = Collections.synchronizedSet(new HashSet());
     
     /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
@@ -1069,7 +1079,6 @@ public abstract class FileManager {
                     // the file is still shareable.
                     if(!urns.isEmpty() && isFileShareable(file)) {
                         fd = addFile(file, urns);
-                        _needRebuild = true;
                     }
                 }
                     
@@ -1116,10 +1125,17 @@ public abstract class FileManager {
    //     if(LOG.isDebugEnabled())
    //         LOG.debug("Sharing file: " + file);
         
-		long fileLength = file.length();
-        _filesSize += fileLength;
+
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
+        ContentResponseData r = RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
+        // if we had a response & it wasn't good, don't add this FD.
+        if(r != null && !r.isOK())
+            return null;
+        
+
+        long fileLength = file.length();
+        _filesSize += fileLength;        
         _files.add(fileDesc);
         _fileToFileDescMap.put(file, fileDesc);
         _numFiles++;
@@ -1381,7 +1397,6 @@ public abstract class FileManager {
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
         _needRebuild = true;
-        File parent = incompleteFile.getParentFile();
         dispatchFileEvent(new FileManagerEvent(this, FileManagerEvent.ADD, ifd));
     }
 
@@ -1390,6 +1405,20 @@ public abstract class FileManager {
      * calculated.
      */
     public abstract void fileChanged(File f);
+    
+    /** Attempts to validate the given FileDesc. */
+    public void validate(final FileDesc fd) {
+        ContentManager cm = RouterService.getContentManager();
+        if(_requestingValidation.add(fd.getSHA1Urn())) {
+            cm.request(fd.getSHA1Urn(), new ContentResponseObserver() {
+               public void handleResponse(URN urn, ContentResponseData r) {
+                   _requestingValidation.remove(fd.getSHA1Urn());
+                   if(r != null && !r.isOK())
+                       removeFileIfShared(fd.getFile());
+               }
+            }, 5000);
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     //  Search, utility, etc...
@@ -2090,9 +2119,6 @@ public abstract class FileManager {
         IntSet ret = priors;
         while(urnsIter.hasNext()) {
             URN urn = (URN)urnsIter.next();
-            // TODO (eventually): case-normalize URNs as appropriate
-            // for now, though, prevalent practice is same as local: 
-            // lowercase "urn:<type>:", uppercase Base32 SHA1
             IntSet hits = (IntSet)_urnMap.get(urn);
             if(hits!=null) {
                 // double-check hits to be defensive (not strictly needed)
@@ -2141,23 +2167,23 @@ public abstract class FileManager {
      */
     public void registerFileManagerEventListener(FileEventListener listener) {
         if (eventListeners.contains(listener))
-	    return;    
-	synchronized(listenerLock) {
-	    List copy = new ArrayList(eventListeners);
-	    copy.add(listener);
+            return;
+        synchronized (listenerLock) {
+            List copy = new ArrayList(eventListeners);
+            copy.add(listener);
             eventListeners = Collections.unmodifiableList(copy);
-	}
+        }
     }
 
     /**
      * unregisters a listener for FileManagerEvents
      */
-    public void unregisterFileManagerEventListener(FileEventListener listener){
-	synchronized(listenerLock) {
-	    List copy = new ArrayList(eventListeners);
-	    copy.remove(listener);
+    public void unregisterFileManagerEventListener(FileEventListener listener) {
+        synchronized (listenerLock) {
+            List copy = new ArrayList(eventListeners);
+            copy.remove(listener);
             eventListeners = Collections.unmodifiableList(copy);
-	}
+        }
     }
 
     /**
