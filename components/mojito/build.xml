@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<project name="DHT" default="build" basedir=".">
+    <description>Kademlia + PATRICA = Love :-)</description>
+
+	<property name="basedir" value="."/>
+	<property name="jars" value="${basedir}/lib"/>
+		
+	<path id="default.classpath" >
+		<fileset dir="${jars}" includes="**/*.jar"/>
+	</path>
+	
+    <target name="build">
+	    	<javac srcdir="${basedir}" 
+				destdir="${basedir}">
+			<classpath refid="default.classpath"/>
+    	    </javac>
+    </target>
+		
+	<target name="clean">
+		<delete>
+			<fileset dir="${basedir}" includes="**/*.class"/>
+		</delete>
+	</target>
+</project>
+
