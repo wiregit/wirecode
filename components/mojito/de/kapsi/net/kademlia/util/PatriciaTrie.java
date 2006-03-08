@@ -492,7 +492,7 @@ public class PatriciaTrie {
         final Collection exclude;
         final int targetSize;
         
-        int currentDistance, numEquidistant;
+        int currentDistance, numEquidistant, numEquidistantToAdd;
         
         boolean done;
         
@@ -529,6 +529,7 @@ public class PatriciaTrie {
                }
                currentDistance = distance;
                numEquidistant = 0;
+               numEquidistantToAdd = targetSize - dest.size();
            }
            
            numEquidistant++;
@@ -538,7 +539,7 @@ public class PatriciaTrie {
                dest.add(h.key);
            } else if (Math.random() < 1f / numEquidistant) {
                // we have to replace somebody at random...
-               int ejectee = targetSize - r.nextInt(numEquidistant) -1;
+               int ejectee = targetSize - r.nextInt(numEquidistantToAdd) -1;
                dest.set(ejectee,h.key);
            }
         }
