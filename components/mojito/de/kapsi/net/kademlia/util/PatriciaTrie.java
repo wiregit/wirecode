@@ -169,26 +169,27 @@ public class PatriciaTrie {
     }
     
     private void getBestR(final SearchState state) {
-        
-        Entry h = state.current;
-        state.add(h);
         if (state.done)
             return;
         
-        state.updateBitIndex(h);
-
+        Entry h = state.current; // need a copy on the stack
+        state.add(h);
+        
+        if (state.done)
+            return;
+        
         if (!isBitSet(state.key, h.bitIndex)) {
-            state.goToEntry(h.left);
+            state.goToChildEntry(h, true);
             getBestR(state);
             if (!state.done) {
-                state.goToEntry(h.right);
+                state.goToChildEntry(h, false);
                 getBestR(state);
             }
         } else {
-            state.goToEntry(h.right);
+            state.goToChildEntry(h, false);
             getBestR(state);
             if (!state.done) {
-                state.goToEntry(h.left);
+                state.goToChildEntry(h, true);
                 getBestR(state);
             }
         }
@@ -544,12 +545,9 @@ public class PatriciaTrie {
            }
         }
         
-        public void updateBitIndex(Entry h) {
+        public void goToChildEntry(Entry h, boolean left) {
             bitIndex = h.bitIndex;
-        }
-        
-        public void goToEntry(Entry h) {
-            current = h;
+            current = left ? h.left : h.right;
         }
         
     }
