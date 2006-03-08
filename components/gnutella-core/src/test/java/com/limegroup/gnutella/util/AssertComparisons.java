@@ -208,9 +208,9 @@ public class AssertComparisons extends TestCase {
      * an AssertionFailedError is thrown with the given message.
      */
     static public void assertInstanceof(String msg, Class expected, Object actual) {
-        if (!instanceofCheck(expected, actual.getClass()))
+        if (!instanceofCheck(expected, actual))
             fail(formatComparison(INSTANCE_OF, msg, 
-                    expected.getName(), actual.getClass().getName()));
+                    expected.getName(), actual == null ? "null" : actual.getClass().getName()));
     }
     
     /**
@@ -226,9 +226,9 @@ public class AssertComparisons extends TestCase {
      * an AssertionFailedError is thrown with the given message.
      */
     static public void assertNotInstanceof(String msg, Class expected, Object actual) {
-        if(instanceofCheck(expected, actual.getClass()))
+        if(instanceofCheck(expected, actual))
             fail(formatComparison(NOT_INSTANCE_OF, msg,
-                expected.getName(), actual.getClass().getName()));
+                expected.getName(), actual == null ? "null" : actual.getClass().getName()));
     }
     
     /**
@@ -1019,21 +1019,12 @@ public class AssertComparisons extends TestCase {
         
     }
             
-    static private boolean instanceofCheck(Class expected, Class actual) {
+    static private boolean instanceofCheck(Class expected, Object actual) {
         if ( actual == null || expected == null)
             return false;
             
-        if ( expected.isInterface() ) {
-            Class interfaces[] = actual.getInterfaces();
-            for(int i = 0; i < interfaces.length; i++) {
-                if ( expected == interfaces[i] )
-                    return true;
-            }
-        }
-        if ( expected == actual )
-            return true;
-            
-        return instanceofCheck(expected, actual.getSuperclass() );
+        return expected.isAssignableFrom(actual.getClass());
+      
     }    
     
     static private String formatComparison(int type,

@@ -392,10 +392,14 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
     
     /** Gets the read timeout for this socket. */
     public long getReadTimeout() {
-        try {
-            return getSoTimeout();
-        } catch(SocketException se) {
-            return 0;
+        if(reader instanceof NIOInputStream) {
+            return 0; // NIOInputStream handles its own timeouts.
+        } else {
+            try {
+                return getSoTimeout();
+            } catch(SocketException se) {
+                return 0;
+            }
         }
     }    
     

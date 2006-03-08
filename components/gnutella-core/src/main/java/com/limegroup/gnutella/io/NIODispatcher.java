@@ -219,7 +219,7 @@ public class NIODispatcher implements Runnable {
                 // respect to each other.  Otherwise, one thread can preempt another's
                 // interest setting, and one of the interested ops may be lost.
 			    synchronized(sk.attachment()) {
-                    if((op & SelectionKey.OP_READ) != 0)
+                    if((op & SelectionKey.OP_READ) == SelectionKey.OP_READ)
                         ((Attachment)sk.attachment()).changeReadStatus(on);
                         
     				if(on)
@@ -633,12 +633,18 @@ public class NIODispatcher implements Runnable {
                 long timeoutLength = ((ReadTimeout)attachment).getReadTimeout();
                 if(timeoutLength != 0) {
                     long expireTime = now + timeoutLength;
-                    if(expireTime < storedExpireTime) {
+                    // We need to add a new timeout if none is scheduled or we need
+                    // to timeout before the next one.
+                    if(expireTime < storedExpireTime || storedExpireTime == -1) {
                         addTimeout(now, timeoutLength);
                     } else {
+                        // Otherwise, store the timeout info so when we get notified
+                        // we can reschedule it for the future.
                         storedExpireTime = expireTime;
                         storedTimeoutLength = timeoutLength;
                     }
+                } else {
+                    clearTimeout();
                 }
             }
         }
@@ -651,7 +657,7 @@ public class NIODispatcher implements Runnable {
         }
 
         synchronized void addTimeout(long now, long timeoutLength) {
-            storedTimeoutLength = now;
+            storedTimeoutLength = timeoutLength;
             storedExpireTime = now + timeoutLength;
             TIMEOUTER.addTimeout(this, now, timeoutLength);
         }
@@ -663,7 +669,7 @@ public class NIODispatcher implements Runnable {
                 if(expireTime == storedExpireTime) {
                     cancel = true;
                     timeToUse = storedTimeoutLength;
-                } else if(expireTime < storedExpireTime){
+                } else if(expireTime < storedExpireTime) {
                     TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
                 } else { // expireTime > storedExpireTime
                     if(LOG.isWarnEnabled())
