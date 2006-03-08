@@ -117,7 +117,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeStoreResponse(StoreResponse response) throws IOException {
-        Collection stats = response.getStoreStats();
+        Collection stats = response.getStoreStatus();
         writeByte(stats.size());
         for(Iterator it = stats.iterator(); it.hasNext(); ) {
             StoreResponse.Status status = (StoreResponse.Status)it.next();

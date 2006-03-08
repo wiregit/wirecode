@@ -31,9 +31,11 @@ import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
+import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindNodeResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindValueResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
+import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -291,12 +293,14 @@ public class Context implements Runnable {
                     Iterator it = nodes.iterator();
                     int k = KademliaSettings.getReplicationParameter();
                     
+                    ResponseHandler responseHandler = new StoreResponseHandler(Context.this, values);
+                    
                     for(int i = 0; i < k && it.hasNext(); i++) {
                         Node node = (Node)it.next();
                         
                         // TODO: Don't just store one KeyValue!
                         // Store the n-closest values to Node!
-                        messageDispatcher.send(node, messageFactory.createStoreRequest(values), null);
+                        messageDispatcher.send(node, messageFactory.createStoreRequest(values), responseHandler);
                     }
                     
                     if (l != null) {

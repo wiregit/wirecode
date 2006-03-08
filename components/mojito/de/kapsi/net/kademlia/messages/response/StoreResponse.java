@@ -15,17 +15,17 @@ public class StoreResponse extends ResponseMessage {
     public static final int SUCCEEDED = 0x00;
     public static final int FAILED = 0x01;
     
-    private Collection storeStats;
+    private Collection storeStatus;
 
     public StoreResponse(int vendor, int version, KUID nodeId, 
-            KUID messageId, Collection storeStats) {
+            KUID messageId, Collection storeStatus) {
         super(vendor, version, nodeId, messageId);
         
-        this.storeStats = storeStats;
+        this.storeStatus = storeStatus;
     }
     
-    public Collection getStoreStats() {
-        return storeStats;
+    public Collection getStoreStatus() {
+        return storeStatus;
     }
     
     public static class Status {
