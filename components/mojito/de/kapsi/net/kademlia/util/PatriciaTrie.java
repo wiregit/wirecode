@@ -163,6 +163,7 @@ public class PatriciaTrie {
     }
     
     public List getBest(Object key, Collection exclude, int k) {
+
         SearchState state = new SearchState(key, exclude, k);
         getBestR(state);
         return state.getResults();
@@ -173,10 +174,8 @@ public class PatriciaTrie {
             return;
         
         Entry h = state.current; // need a copy on the stack
-        state.add(h);
-        
-        if (state.done)
-            return;
+        if (state.add(h) || state.done)
+        	return;
         
         if (!isBitSet(state.key, h.bitIndex)) {
             state.goToChildEntry(h, true);
@@ -450,7 +449,7 @@ public class PatriciaTrie {
                 if (parent == root) {
                     buffer.append("parent=").append("ROOT");
                 } else {
-                    buffer.append("parent=").append(parent.key).append(" [").append(parent.bitIndex).append("]");
+                    buffer.append("parent=").append(parent.value).append(" [").append(parent.bitIndex).append("]");
                 }
             } else {
                 buffer.append("parent=").append("null");
@@ -461,7 +460,7 @@ public class PatriciaTrie {
                 if (root == left) {
                     buffer.append("left=").append("ROOT");
                 } else {
-                    buffer.append("left=").append(left.key).append(" [").append(left.bitIndex).append("]");
+                    buffer.append("left=").append(left.value).append(" [").append(left.bitIndex).append("]");
                 }
             } else {
                 buffer.append("left=").append("null");
@@ -472,7 +471,7 @@ public class PatriciaTrie {
                 if (root == right) {
                     buffer.append("right=").append("ROOT");
                 } else {
-                    buffer.append("right=").append(right.key).append(" [").append(right.bitIndex).append("]");
+                    buffer.append("right=").append(right.value).append(" [").append(right.bitIndex).append("]");
                 }
             } else {
                 buffer.append("right=").append("null");
@@ -510,18 +509,18 @@ public class PatriciaTrie {
             return dest;
         }
         
-        public void add(Entry h) {
+        public boolean add(Entry h) {
             if (h.bitIndex <= bitIndex) {
                 if (!isRoot(h) && !exclude.contains(h.key)) {
                     addResult(h);
                 }
+                return true;
             }
+            return false;
         }
         
         private void addResult(Entry h) {
-            assert dest.size() <= targetSize;
-            
-           int distance = bitIndex(current.key, h.key);
+           int distance = bitIndex(key, h.key);
            
            if (distance != currentDistance) {
                if (dest.size() == targetSize) { // finito.
@@ -538,11 +537,11 @@ public class PatriciaTrie {
            if (dest.size() < targetSize) {
                // trivial case: we don't have enough peers, just add
                dest.add(h.value);
-           } else if (Math.random() < 1f / numEquidistant) {
+           } else if (Math.random() < (float)numEquidistantToAdd / numEquidistant) {
                // we have to replace somebody at random...
                int ejectee = targetSize - r.nextInt(numEquidistantToAdd) -1;
                dest.set(ejectee,h.value);
-           }
+           } 
         }
         
         public void goToChildEntry(Entry h, boolean left) {
