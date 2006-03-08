@@ -7,8 +7,6 @@ package de.kapsi.net.kademlia.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,7 +19,6 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
-import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
@@ -127,18 +124,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         // VALUE lookup response
         if (isValueLookup() && isKeyValueResponse) {
-            Database database = context.getDatabase();
-            
-            // TODO make sure the Node isn't sending us some
-            // bull! The 1st KeyValue must be equal to the
-            // lookup Key and the others must be 'close' to
-            // our NodeID!
-            try {
-                database.addAll(response);
-            // TODO handle Errors
-            } catch (SignatureException err) {
-            } catch (InvalidKeyException err) {
-            }
             
             if (LOG.isTraceEnabled()) {
                 LOG.trace(Node.toString(nodeId, src) 
