@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.handshaking;
 
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.List;
 
+import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 
 public class AsyncIncomingHandshaker implements Handshaker {
@@ -20,7 +22,8 @@ public class AsyncIncomingHandshaker implements Handshaker {
         shaker = new AsyncHandshaker(this, observer, states);
     }
 
-    public void shake() {
+    public void shake() throws SocketException {
+        socket.setSoTimeout(Constants.TIMEOUT);
         ((NIOMultiplexor)socket).setReadObserver(shaker);
         ((NIOMultiplexor)socket).setWriteObserver(shaker);
     }

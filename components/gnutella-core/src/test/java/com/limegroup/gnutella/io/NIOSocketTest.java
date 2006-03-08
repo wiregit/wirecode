@@ -169,6 +169,32 @@ public final class NIOSocketTest extends BaseTestCase {
         assertFalse(socket.isConnected());
     }
     
+    public void testSoTimeoutUsedForNonBlockingRead() throws Exception {
+        ServerSocket server = new ServerSocket(PORT, 0);
+        try {
+            server.setReuseAddress(true);
+            InetSocketAddress addr = new InetSocketAddress("127.0.0.1", PORT);
+            NIOSocket socket = new NIOSocket();
+            socket.setSoTimeout(1000);
+            socket.connect(addr);
+            
+            server.setSoTimeout(1000);
+            Socket accepted = server.accept();
+            accepted.getOutputStream().write(new byte[100]); // this'll go immediately into the buffer
+            socket.getInputStream().read(new byte[100]);
+            Thread.sleep(2000);
+            assertTrue(!socket.isClosed()); // didn't close 'cause we're using stream reading
+            
+            accepted.getOutputStream().write(new byte[1]); // give it some data just to make sure it has
+            socket.setReadObserver(new ReadTester());
+            Thread.sleep(2000);
+            assertTrue(socket.isClosed()); // closed because we switched to NB reading w/ timeout set
+        } finally {
+            server.close();
+        }
+        
+    }
+    
     private static class Listener {
         
         private ServerSocket server;

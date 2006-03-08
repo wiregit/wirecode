@@ -374,6 +374,12 @@ public class ManagedConnection extends Connection
     
     /**
      * Performs the handshake.
+     * 
+     * If there is a GnetConnectObserver (it is non-null) & this connection supports
+     * asynchronous messaging, then this method will return immediately and the observer
+     * will be notified when handshaking completes (either succesfully or unsuccesfully).
+     * 
+     * Otherwise, this will block until handshaking completes.
      */
     protected void performHandshake(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
       throws IOException, BadHandshakeException, NoGnutellaOkException {
@@ -395,15 +401,22 @@ public class ManagedConnection extends Connection
                                                HandshakeResponder responder,
                                                GnetConnectObserver observer) {
         
-        HandshakeObserver shakeObserver = new HandshakeWatcher(observer);
+        HandshakeWatcher shakeObserver = new HandshakeWatcher(observer);
+        Handshaker shaker;
         
         if(isOutgoing())
-            return new AsyncOutgoingHandshaker(requestHeaders, responder, _socket, shakeObserver);
+            shaker = new AsyncOutgoingHandshaker(requestHeaders, responder, _socket, shakeObserver);
         else
-            return new AsyncIncomingHandshaker(responder, _socket, shakeObserver);
+            shaker = new AsyncIncomingHandshaker(responder, _socket, shakeObserver);
+        
+        shakeObserver.setHandshaker(shaker);
+        return shaker;
     }
     
-    /** What happens after the handshake finishes. */
+    /**
+     * Starts out OutputRunners & notifies UpdateManager that this
+     * connection may have an update on it.
+     */
     protected void postHandshakeInitialize(Handshaker shaker) {
         super.postHandshakeInitialize(shaker);
 
@@ -788,6 +801,8 @@ public class ManagedConnection extends Connection
                 } catch (BadPacketException ignored) {}
             }
         } else {
+            _socket.setSoTimeout(0); // no timeout for reading.
+            
             MessageReader reader = new MessageReader(ManagedConnection.this);
             if(isReadDeflated())
                 reader.setReadChannel(new InflaterReader(_inflater));
@@ -1479,13 +1494,19 @@ public class ManagedConnection extends Connection
      */
     private class HandshakeWatcher implements HandshakeObserver {
         
-        private GnetConnectObserver observer;
+        private Handshaker shaker;
+        private  GnetConnectObserver observer;
 
         HandshakeWatcher(GnetConnectObserver observer) {
             this.observer = observer;
         }
+        
+        void setHandshaker(Handshaker shaker) {
+            this.shaker = shaker;
+        }
 
         public void shutdown() {
+            setHeaders(shaker);
             close();
             observer.shutdown();            
         }
@@ -1496,11 +1517,13 @@ public class ManagedConnection extends Connection
         }
 
         public void handleBadHandshake() {
+            setHeaders(shaker);
             close();
             observer.handleBadHandshake();
         }
 
         public void handleNoGnutellaOk(int code, String msg) {
+            setHeaders(shaker);
             close();
             observer.handleNoGnutellaOk(code, msg);
         }

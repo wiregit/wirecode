@@ -42,6 +42,7 @@ import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 import com.limegroup.gnutella.util.CompressingOutputStream;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -425,13 +426,11 @@ public class Connection implements IpPort {
         try {
             shaker.shake();
         } catch (NoGnutellaOkException e) {
-            _headersWritten = shaker.getWrittenHeaders();
-            _headersRead = shaker.getReadHeaders();
+            setHeaders(shaker);
             close();
             throw e;
         } catch (IOException e) {
-            _headersWritten = shaker.getWrittenHeaders();
-            _headersRead = shaker.getReadHeaders();            
+            setHeaders(shaker);            
             close();
             throw new BadHandshakeException(e);
         }
@@ -468,12 +467,21 @@ public class Connection implements IpPort {
     }
     
     /**
+     * Sets the headers read & written.
+     * 
+     * @param shaker
+     */
+    protected void setHeaders(Handshaker shaker) {
+        _headersWritten = shaker.getWrittenHeaders();
+        _headersRead = shaker.getReadHeaders();
+    }
+    
+    /**
      * Sets up the connection for post-handshake info.
      * @param shaker
      */
     protected void postHandshakeInitialize(Handshaker shaker) {
-        _headersWritten = shaker.getWrittenHeaders();
-        _headersRead = shaker.getReadHeaders();
+        setHeaders(shaker);
         _connectionTime = System.currentTimeMillis();
 
         // Now set the soft max TTL that should be used on this connection.
@@ -1123,17 +1131,9 @@ public class Connection implements IpPort {
        // the case where one thread is reading from the stream and
        // another closes it.
        // See BugParade ID: 4505257
-       
-       if (_in != null) {
-           try {
-               _in.close();
-           } catch (IOException e) {}
-       }
-       if (_out != null) {
-           try {
-               _out.close();
-           } catch (IOException e) {}
-       }
+        
+        IOUtils.close(_in);
+        IOUtils.close(_out);
     }
 
     
