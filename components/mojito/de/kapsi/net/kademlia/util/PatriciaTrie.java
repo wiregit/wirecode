@@ -537,11 +537,11 @@ public class PatriciaTrie {
            
            if (dest.size() < targetSize) {
                // trivial case: we don't have enough peers, just add
-               dest.add(h.key);
+               dest.add(h.value);
            } else if (Math.random() < 1f / numEquidistant) {
                // we have to replace somebody at random...
                int ejectee = targetSize - r.nextInt(numEquidistantToAdd) -1;
-               dest.set(ejectee,h.key);
+               dest.set(ejectee,h.value);
            }
         }
         
