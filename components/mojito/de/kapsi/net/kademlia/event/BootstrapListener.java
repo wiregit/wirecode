@@ -5,6 +5,10 @@
 
 package de.kapsi.net.kademlia.event;
 
+import java.util.Collection;
+
+import de.kapsi.net.kademlia.KUID;
+
 public interface BootstrapListener {
-    public void bootstrap(boolean succeeded, long time);
+    public void bootstrap(KUID nodeId, Collection nodes, long time);
 }

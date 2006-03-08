@@ -223,8 +223,8 @@ public class Main {
         
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void bootstrap(boolean succeed, long time) {
-                System.out.println("*** Bootstraping " + (succeed ? "succeded" : "failed") + " in " + time + " ms");
+            public void bootstrap(KUID nodeId, Collection nodes, long time) {
+                System.out.println("*** Bootstraping " + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
     }
@@ -326,7 +326,7 @@ public class Main {
             }
         }
         
-        public void bootstrap(boolean succeeded, long time) {
+        public void bootstrap(KUID nodeId, Collection nodes, long time) {
             if (time >= 0) {
                 this.time += time;
             }

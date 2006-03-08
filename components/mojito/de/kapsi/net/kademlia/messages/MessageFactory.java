@@ -18,6 +18,7 @@ import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StoreResponse;
 
 public class MessageFactory {
     
@@ -69,5 +70,9 @@ public class MessageFactory {
     
     public StoreRequest createStoreRequest(Collection values) {
         return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), values);
+    }
+    
+    public StoreResponse createStoreResponse(KUID messageId, Collection status) {
+        return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, status);
     }
 }

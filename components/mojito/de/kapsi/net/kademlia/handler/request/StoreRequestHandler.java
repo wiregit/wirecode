@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +24,7 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
+import de.kapsi.net.kademlia.messages.response.StoreResponse;
 
 public class StoreRequestHandler extends AbstractRequestHandler {
     
@@ -59,15 +62,28 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                     + " requested us to store the Keys and Values " + values);
         }
         
+        List stats = new ArrayList(values.size());
+        
         // Add the KeyValues...
         for(Iterator it = values.iterator(); it.hasNext(); ) {
+            KeyValue keyValue = (KeyValue)it.next();
+            
             try {
-                context.getDatabase().add((KeyValue)it.next());
+                if (context.getDatabase().add(keyValue)) {
+                    stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.SUCCEEDED));
+                } else {
+                    stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.FAILED));
+                }
             } catch (SignatureException err) {
-                // TODO
+                stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.FAILED));
             } catch (InvalidKeyException err) {
-                // TODO 
+                stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.FAILED));
             }
         }
+        
+        StoreResponse response = context.getMessageFactory()
+                                    .createStoreResponse(request.getMessageID(), stats);
+        
+        context.getMessageDispatcher().send(src, response, null);
     }
 }

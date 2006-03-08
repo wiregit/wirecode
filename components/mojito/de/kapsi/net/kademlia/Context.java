@@ -12,11 +12,14 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Timer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.dht.tests.DHTStats;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -67,6 +70,8 @@ public class Context implements Runnable {
     private boolean running = false;
     private final Timer scheduler = new Timer(true);
     
+    private DHTStats stats = null;
+    
     public Context() {
         
         try {
@@ -86,6 +91,12 @@ public class Context implements Runnable {
         eventDispatcher = new EventDispatcher();
         messageFactory = new MessageFactory(this);
         publisher = new KeyValuePublisher(this);
+        
+        // TODO Initialize DHTStats!!!
+    }
+    
+    public DHTStats getDHTStats() {
+        return stats;
     }
     
     public int getVendor() {
@@ -240,7 +251,7 @@ public class Context implements Runnable {
                         lookup(getLocalNodeID(), new FindNodeListener() {
                             public void foundNodes(KUID lookup, Collection nodes, long time2) {
                                 if (l != null) {
-                                    l.bootstrap(nodes.size() > 0, time1+time2);
+                                    l.bootstrap(getLocalNodeID(), nodes, time1+time2);
                                 }
                             }
                         });
@@ -249,7 +260,7 @@ public class Context implements Runnable {
                         if (l != null) {
                             fireEvent(new Runnable() {
                                 public void run() {
-                                    l.bootstrap(false, time1);
+                                    l.bootstrap(getLocalNodeID(), Collections.EMPTY_LIST, time1);
                                 }
                             });
                         }
@@ -260,7 +271,7 @@ public class Context implements Runnable {
                     if (l != null) {
                         fireEvent(new Runnable() {
                             public void run() {
-                                l.bootstrap(false, time1);
+                                l.bootstrap(getLocalNodeID(), Collections.EMPTY_LIST, time1);
                             }
                         });
                     }
