@@ -30,7 +30,7 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
     /** The ByteBuffer to use for reading. */
     private ByteBuffer readBuffer;
     /** Whether or not we've shutdown this handshaker. */
-    private boolean shutdown;
+    private volatile boolean shutdown;
 
     /** Constructs a new AsyncHandker using the given Handshaker, HandshakeObserver, and List of states. */
     AsyncHandshaker(Handshaker shaker, HandshakeObserver observer, List states) {
@@ -78,26 +78,24 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
      * @return
      */
     private boolean processCurrentState(boolean reading) {
-        try {
-            if (reading) {
-                if (!currentState.process(readSink, readBuffer))
-                    nextState(true);
-            } else {
-                if (!currentState.process(writeSink, null))
-                    nextState(false);
-                else
-                    return true;
-            }
-        } catch (NoGnutellaOkException ex) {
-            synchronized(this) {
+        if(!shutdown) {
+            try {
+                if (reading) {
+                    if (!currentState.process(readSink, readBuffer))
+                        nextState(true);
+                } else {
+                    if (!currentState.process(writeSink, null))
+                        nextState(false);
+                    else
+                        return true;
+                }
+            } catch (NoGnutellaOkException ex) {
                 shutdown = true;
-            }
-            handshakeObserver.handleNoGnutellaOk(ex.getCode(), ex.getMessage());
-        } catch (IOException iox) {
-            synchronized(this) {
+                handshakeObserver.handleNoGnutellaOk(ex.getCode(), ex.getMessage());
+            } catch (IOException iox) {
                 shutdown = true;
+                handshakeObserver.handleBadHandshake();
             }
-            handshakeObserver.handleBadHandshake();
         }
         
         return false;

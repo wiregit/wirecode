@@ -3,7 +3,6 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 
 import com.limegroup.gnutella.io.InterestReadChannel;
 
@@ -27,6 +26,10 @@ public class ReadBufferChannel implements InterestReadChannel {
     
     public ReadBufferChannel(byte[] source) {
         this(ByteBuffer.wrap(source));
+    }
+    
+    public ReadBufferChannel(byte[] source, boolean useEOF) {
+        this(ByteBuffer.wrap(source), useEOF);
     }
     
     public ReadBufferChannel(byte[] source, int off, int len) {

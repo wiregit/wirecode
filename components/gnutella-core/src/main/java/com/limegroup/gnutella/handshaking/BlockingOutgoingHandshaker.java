@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Properties;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
@@ -26,17 +25,6 @@ public class BlockingOutgoingHandshaker implements Handshaker {
      */ 
     public BlockingOutgoingHandshaker(Properties requestHeaders, HandshakeResponder responder,
                                       Socket socket, InputStream in, OutputStream out) {
-        if(requestHeaders == null)
-            throw new NullPointerException("null requestHeaders");
-        if(responder == null)
-            throw new NullPointerException("null responder");
-        if(socket == null)
-            throw new NullPointerException("null socket");
-        if(in == null)
-            throw new NullPointerException("null inputstream");
-        if(out == null)
-            throw new NullPointerException("null outputstream");
-        
         this.support = new BlockingHandshakeSupport(socket, in, out);
         this.ourRequestHeaders = requestHeaders;
         this.ourResponder = responder;

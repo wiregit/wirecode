@@ -36,8 +36,8 @@ abstract class ReadHandshakeState extends HandshakeState {
      */
     boolean process(Channel channel, ByteBuffer buffer) throws IOException {
         ReadableByteChannel rc = (ReadableByteChannel)channel;
-        boolean needMoreData = false;
-        while(true) {
+        boolean allDone = false;
+        while(!allDone) {
             int read = 0;
             
             while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0);
@@ -51,10 +51,8 @@ abstract class ReadHandshakeState extends HandshakeState {
             BufferReader reader = new BufferReader(buffer);
             if(!doneConnect) {
                 currentHeader += reader.readLine();
-                if(!reader.isLineReadCompletely()) {
-                    needMoreData = true;
+                if(!reader.isLineReadCompletely())
                     break;
-                }
                 connectLine = currentHeader;
                 currentHeader = "";
                 processConnectLine();
@@ -64,13 +62,13 @@ abstract class ReadHandshakeState extends HandshakeState {
             if(doneConnect) {
                 while(true) {
                     currentHeader += reader.readLine();
-                    if(!reader.isLineReadCompletely()) {
-                        needMoreData = true;
+                    if(!reader.isLineReadCompletely())
                         break;
-                    }
                     
-                    if(!support.processReadHeader(currentHeader))
+                    if(!support.processReadHeader(currentHeader)) {
+                        allDone = true;
                         break; // we finished reading this set of headers!
+                    }
                     
                     currentHeader = ""; // reset for the next header.
                 }
@@ -79,10 +77,8 @@ abstract class ReadHandshakeState extends HandshakeState {
             buffer.compact();
         }
         
-        if(!needMoreData) {
-            if(doneConnect) {
-                processHeaders();
-            }
+        if(allDone) {
+            processHeaders();
             return false;
         } else {
             return true;

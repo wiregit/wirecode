@@ -94,14 +94,13 @@ public class BlockingIncomingHandshaker implements Handshaker {
             throw NoGnutellaOkException.createClientUnknown(ourResponse.getStatusCode());
         }
                 
-        String connectLine = support.readLine();  
-        support.readHeaders();
-        
+        String connectLine = support.readLine();
         if (!support.isConnectLineValid(connectLine)) {
             HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
             throw new IOException("Bad connect string");
-        }   
+        }
 
+        support.readHeaders();
         HandshakeResponse theirResponse = support.createRemoteResponse(connectLine);
         switch(theirResponse.getStatusCode()) {
         case HandshakeResponse.OK:

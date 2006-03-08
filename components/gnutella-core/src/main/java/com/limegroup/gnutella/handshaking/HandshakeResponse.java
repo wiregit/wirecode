@@ -26,7 +26,7 @@ import com.limegroup.gnutella.util.IpPort;
  * 2) Create an instance with a custom status code, status message, and the
  *    headers used in the response.
  */
-public final class HandshakeResponse {
+public class HandshakeResponse {
 
     /**
      * The "default" status code in a connection handshake indicating that
@@ -216,7 +216,7 @@ public final class HandshakeResponse {
      * 
      * @param headers the headers to use in the response. 
      */
-    private HandshakeResponse(Properties headers) {
+    protected HandshakeResponse(Properties headers) {
         this(OK, OK_MESSAGE, headers);
     }    
 
@@ -227,7 +227,7 @@ public final class HandshakeResponse {
      * @param code the status code for the response
      * @param message the status message
      */
-    private HandshakeResponse(int code, String message) {
+    protected HandshakeResponse(int code, String message) {
         this(code, message, new Properties());
     }
     /**
@@ -568,16 +568,13 @@ public final class HandshakeResponse {
      *  header set according to the incoming headers from the remote host
      */
     private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
-        Collection hosts =
-            RouterService.getPreferencedHosts(
-                hr.isUltrapeer(), hr.getLocalePref(),10);
-        
-        headers.put(HeaderNames.X_TRY_ULTRAPEERS,
-                    createEndpointString(hosts));
+        Collection hosts = RouterService.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
+
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;
     }
 
-    /** 
+    /**
      * Returns the response code.
      */
     public int getStatusCode() {
