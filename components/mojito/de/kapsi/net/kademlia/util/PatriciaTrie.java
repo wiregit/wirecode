@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * An optimized PATRICIA Trie for Kademlia. That means I
@@ -162,36 +163,35 @@ public class PatriciaTrie {
     }
     
     public List getBest(Object key, Collection exclude, int k) {
-        int initialSize = (int)Math.min(k, size());
-        List list = new ArrayList(initialSize);
-        if (exclude == null) {
-            exclude = Collections.EMPTY_SET;
-        }
-        getBestR(root.left, -1, key, exclude, list, k);
-        return list;
+        SearchState state = new SearchState(key, exclude, k);
+        getBestR(state);
+        return state.getResults();
     }
     
-    private boolean getBestR(Entry h, int bitIndex, 
-            final Object key, final Collection exclude, 
-            final List list, final int k) {
+    private void getBestR(final SearchState state) {
         
-        if (h.bitIndex <= bitIndex) {
-            if (!isRoot(h) && !exclude.contains(h.key)) {
-                list.add(h.value);
-            }
-            return list.size() < k;
-        }
+        Entry h = state.current;
+        state.add(h);
+        if (state.done)
+            return;
+        
+        state.updateBitIndex(h);
 
-        if (!isBitSet(key, h.bitIndex)) {
-            if (getBestR(h.left, h.bitIndex, key, exclude, list, k)) {
-                return getBestR(h.right, h.bitIndex, key, exclude, list, k);
+        if (!isBitSet(state.key, h.bitIndex)) {
+            state.goToEntry(h.left);
+            getBestR(state);
+            if (!state.done) {
+                state.goToEntry(h.right);
+                getBestR(state);
             }
         } else {
-            if (getBestR(h.right, h.bitIndex, key, exclude, list, k)) {
-                return getBestR(h.left, h.bitIndex, key, exclude, list, k);
+            state.goToEntry(h.right);
+            getBestR(state);
+            if (!state.done) {
+                state.goToEntry(h.left);
+                getBestR(state);
             }
         }
-        return false;
     }
     
     public boolean containsKey(Object key) {
@@ -480,8 +480,78 @@ public class PatriciaTrie {
             buffer.append(")");
             return buffer.toString();
         }
+        
     }
     
+    private class SearchState {
+        Entry current = root.left;
+        int bitIndex = -1;
+        
+        final List dest;
+        final Object key;
+        final Collection exclude;
+        final int targetSize;
+        
+        int currentDistance, numEquidistant;
+        
+        boolean done;
+        
+        private final Random r = new Random();
+        
+        public SearchState(Object key, Collection exclude, int targetSize) {
+            this.key = key;
+            this.exclude = exclude == null ? Collections.EMPTY_SET : exclude;
+            this.targetSize = targetSize;
+            dest = new ArrayList(targetSize);
+        }
+        
+        public List getResults() {
+            return dest;
+        }
+        
+        public void add(Entry h) {
+            if (h.bitIndex <= bitIndex) {
+                if (!isRoot(h) && !exclude.contains(h.key)) {
+                    addResult(h);
+                }
+            }
+        }
+        
+        private void addResult(Entry h) {
+            assert dest.size() <= targetSize;
+            
+           int distance = bitIndex(current.key, h.key);
+           
+           if (distance != currentDistance) {
+               if (dest.size() == targetSize) { // finito.
+                   done = true;
+                   return;
+               }
+               currentDistance = distance;
+               numEquidistant = 0;
+           }
+           
+           numEquidistant++;
+           
+           if (dest.size() < targetSize) {
+               // trivial case: we don't have enough peers, just add
+               dest.add(h.key);
+           } else if (Math.random() < 1f / numEquidistant) {
+               // we have to replace somebody at random...
+               int ejectee = targetSize - r.nextInt(numEquidistant) -1;
+               dest.set(ejectee,h.key);
+           }
+        }
+        
+        public void updateBitIndex(Entry h) {
+            bitIndex = h.bitIndex;
+        }
+        
+        public void goToEntry(Entry h) {
+            current = h;
+        }
+        
+    }
     public static interface KeyCreator {
         public int length();
         public boolean isBitSet(Object key, int bitIndex);
