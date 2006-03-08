@@ -155,7 +155,7 @@ public class MessageOutputStream extends DataOutputStream {
             writeStoreRequest((StoreRequest)msg);
         } else if (msg instanceof StoreResponse) {
             writeByte(Message.STORE_RESPONSE);
-            throw new IOException("Not implemented");
+            writeStoreResponse((StoreResponse)msg);
         } else {
             throw new IOException("Unknown Message: " + msg);
         }
