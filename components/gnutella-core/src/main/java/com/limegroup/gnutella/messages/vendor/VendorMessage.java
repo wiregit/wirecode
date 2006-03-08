@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
@@ -11,46 +14,94 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
-/** Vendor Messages are Gnutella Messages that are NEVER forwarded after
- *  recieved.
- *  This message is abstract because it provides common methods for ALL
- *  VendorMessages, but it makes no sense to instantiate a VendorMessage.
+/**
+ * 
+ * 
+ * 
+ * Vendor Messages are Gnutella Messages that are NEVER forwarded after
+ * recieved.
+ * This message is abstract because it provides common methods for ALL
+ * VendorMessages, but it makes no sense to instantiate a VendorMessage.
+ * 
+ * 
  */
 public abstract class VendorMessage extends Message {
 
-    //Functional IDs defined by Gnutella VendorMessage protocol....
+    /*
+     * Functional IDs defined by Gnutella VendorMessage protocol....
+     */
+
+    /** 0*/
     protected static final int F_MESSAGES_SUPPORTED = 0;
+
+    /** 4*/
     protected static final int F_HOPS_FLOW = 4;
+
+    /** 7*/
     protected static final int F_TCP_CONNECT_BACK = 7;
+
+    /** 7*/
     protected static final int F_UDP_CONNECT_BACK = 7;
+
+    /** 8*/
     protected static final int F_UDP_CONNECT_BACK_REDIR = 8;
+
+    /** 10*/
     protected static final int F_CAPABILITIES = 10;
+
+    /** 11*/
     protected static final int F_LIME_ACK = 11;
+
+    /** 12*/
     protected static final int F_REPLY_NUMBER = 12;
+
+    /** 21*/
     protected static final int F_PUSH_PROXY_REQ = 21;
+
+    /** 22*/
     protected static final int F_PUSH_PROXY_ACK = 22;
+
+    /** 14*/
     protected static final int F_GIVE_STATS = 14;
+
+    /** 15*/
     protected static final int F_STATISTICS = 15;
+
+    /** 5*/
     protected static final int F_GIVE_ULTRAPEER = 5;
+
+    /** 6*/
     protected static final int F_ULTRAPEER_LIST = 6;
+
+    /** 16*/
     protected static final int F_SIMPP_REQ = 16;
+
+    /** 17*/
     protected static final int F_SIMPP = 17;
+
+    /** 23*/
     protected static final int F_UDP_HEAD_PING = 23;
+
+    /** 24*/
     protected static final int F_UDP_HEAD_PONG = 24;
+
+    /** 25*/
     protected static final int F_HEADER_UPDATE = 25;
+
+    /** 26*/
     protected static final int F_UPDATE_REQ = 26;
+
+    /** 27*/
     protected static final int F_UPDATE_RESP = 27;
 
 
-    
-    protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
-                                                      (byte) 77, (byte) 69};
-    protected static final byte[] F_BEAR_VENDOR_ID = {(byte) 66, (byte) 69,
-                                                      (byte) 65, (byte) 82};
-    protected static final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
-                                                      (byte) 75, (byte) 71};
-    protected static final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
-                                                      (byte) 0, (byte) 0};
+
+
+
+    protected static final byte[] F_LIME_VENDOR_ID = {(byte)76, (byte)73, (byte)77, (byte)69};
+    protected static final byte[] F_BEAR_VENDOR_ID = {(byte)66, (byte)69, (byte)65, (byte)82};
+    protected static final byte[] F_GTKG_VENDOR_ID = {(byte)71, (byte)84, (byte)75, (byte)71};
+    protected static final byte[] F_NULL_VENDOR_ID = {(byte)0, (byte)0, (byte)0, (byte)0};
 
     private static final int LENGTH_MINUS_PAYLOAD = 8;
 

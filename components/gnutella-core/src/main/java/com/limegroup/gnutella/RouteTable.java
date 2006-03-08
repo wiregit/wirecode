@@ -469,6 +469,7 @@ public final class RouteTable {
 
     /**
      * Change the TTL stored under a GUID in this RouteTable if you know it's current value.
+     * Only MessageRouter.wasProbeQuery() calls this.
      * 
      * Synchronizes a TTL get test with a set test.
      * 

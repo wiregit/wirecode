@@ -782,8 +782,4 @@ public final class QueryHandler {
     public GUID getGUID() {
         return new GUID(QUERY.getGUID());
     }
-
 }
-
-
-

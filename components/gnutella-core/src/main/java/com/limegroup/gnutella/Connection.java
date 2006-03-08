@@ -2298,6 +2298,7 @@ public class Connection implements IpPort {
 
     /**
      * True if the remote computer is running an old version of LimeWire.
+     * Only MessageRouter.updateMessage() calls this.
      * 
      * @return True if the remote computer is running LimeWire 3.3 or earlier, false for 3.4 or some other program entirely
      */
