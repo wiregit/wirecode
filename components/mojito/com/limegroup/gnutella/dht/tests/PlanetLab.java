@@ -76,7 +76,7 @@ public class PlanetLab {
         long end = System.currentTimeMillis();
         System.out.println("Bootstraping of " + dhts.size() + " Nodes finished in " + (end-start) + " ms");
         shutdown();
-        System.exit(0);
+        //System.exit(0);
     }
     
     public static void main(String[] args) {

@@ -261,7 +261,8 @@ public class MessageDispatcher implements Runnable {
         
         // MAKE SURE WE'RE NOT RECEIVING MESSAGES FROM OURSELF
         if (nodeId != null 
-                && nodeId.equals(context.getLocalNodeID())) {
+                && nodeId.equals(context.getLocalNodeID())
+                && src.equals(context.getSocketAddress())) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message from ourself: " + Node.toString(nodeId, src));
             }

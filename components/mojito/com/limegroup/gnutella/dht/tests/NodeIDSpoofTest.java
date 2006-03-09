@@ -28,19 +28,21 @@ public class NodeIDSpoofTest {
             t.start();
             System.out.println("bootstrap server is ready");
             //original DHT
+            
             SocketAddress sac2 = new InetSocketAddress(port+1);
             KUID nodeID = KUID.createRandomNodeID(sac2);
             DHT dht2 = new DHT();
             dht2.bind(sac2,nodeID);
             Thread t2 = new Thread(dht2, "DHT-1");
             t2.start();
-            dht2.bootstrap(sac,null);
+            dht2.bootstrap(new InetSocketAddress("localhost", port), null);
+            
             //spoofer
             DHT dht3 = new DHT();
             dht3.bind(new InetSocketAddress(port+2),nodeID);
             Thread t3 = new Thread(dht3, "DHT-2");
             t3.start();
-            dht3.bootstrap(sac,null);
+            dht3.bootstrap(new InetSocketAddress("localhost", port+1),null);
         } catch (IOException e) {
             e.printStackTrace();
         }

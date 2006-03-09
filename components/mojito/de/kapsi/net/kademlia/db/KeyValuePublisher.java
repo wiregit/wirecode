@@ -23,8 +23,6 @@ public class KeyValuePublisher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(KeyValuePublisher.class);
     
-    private static final long LOCK_POLLING_INTERVAL = 100L;
-    
     private final Context context;
     
     private boolean running = false;
@@ -53,7 +51,7 @@ public class KeyValuePublisher implements Runnable {
         Iterator it = null;
         Database database = context.getDatabase();
         
-        final WaitLock lock = new WaitLock(DatabaseSettings.REPUBLISH_INTERVAL, LOCK_POLLING_INTERVAL);
+        final Object lock = new Object();
         
         running = true;
         while(running) {
@@ -106,39 +104,45 @@ public class KeyValuePublisher implements Runnable {
                     }
                 }
                 
-                try {
-                    lock.lock();
-                    context.store(value, new StoreListener() {
-                        public void store(KeyValue keyValue, Collection nodes) {
-                            keyValue.setUpdateTime(System.currentTimeMillis());
-                            published++;
-                            lock.release();
-                            
-                            if (LOG.isTraceEnabled()) {
-                                if (!nodes.isEmpty()) {
-                                    StringBuffer buffer = new StringBuffer("\nStoring ");
-                                    buffer.append(keyValue).append(" at the following Nodes:\n");
-                                    
-                                    Iterator it = nodes.iterator();
-                                    int k = KademliaSettings.getReplicationParameter();
-                                    for(int i = 0; i < k && it.hasNext(); i++) {
-                                        buffer.append(i).append(": ").append(it.next()).append("\n");
+                synchronized(lock) {
+                    try {
+                        context.store(value, new StoreListener() {
+                            public void store(KeyValue keyValue, Collection nodes) {
+                                keyValue.setUpdateTime(System.currentTimeMillis());
+                                published++;
+                                
+                                synchronized(lock) {
+                                    lock.notify();
+                                }
+                                
+                                if (true || LOG.isTraceEnabled()) {
+                                    if (!nodes.isEmpty()) {
+                                        StringBuffer buffer = new StringBuffer("\nStoring ");
+                                        buffer.append(keyValue).append(" at the following Nodes:\n");
+                                        
+                                        Iterator it = nodes.iterator();
+                                        int k = KademliaSettings.getReplicationParameter();
+                                        for(int i = 0; i < k && it.hasNext(); i++) {
+                                            buffer.append(i).append(": ").append(it.next()).append("\n");
+                                        }
+                                        //LOG.trace(buffer);
+                                        System.out.println(buffer);
+                                    } else {
+                                        LOG.trace("Failed to store " + keyValue);
                                     }
-                                    LOG.trace(buffer);
-                                } else {
-                                    LOG.trace("Failed to store " + keyValue);
                                 }
                             }
+                        });
+                        
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException err) {
+                            LOG.error(err);
                         }
-                    });
-                } catch (IOException err) {
-                    LOG.error(err);
-                }
-                
-                try {
-                    lock.doWait();
-                } catch (InterruptedException err) {
-                    LOG.error(err);
+                        
+                    } catch (IOException err) {
+                        LOG.error(err);
+                    }
                 }
             } else {
                 
@@ -148,41 +152,6 @@ public class KeyValuePublisher implements Runnable {
                 } catch (InterruptedException err) {
                     LOG.error(err);
                     running = false;
-                }
-            }
-        }
-    }
-    
-    private static final class WaitLock {
-        
-        private boolean waitFlag = false;
-        
-        private final long timeout;
-        private final long wait;
-        
-        private final Object lock = new Object();
-        
-        private WaitLock(long timeout, long wait) {
-            this.timeout = timeout;
-            this.wait = wait;
-        }
-        
-        public void release() {
-            waitFlag = false;
-        }
-        
-        public void lock() {
-            waitFlag = true;
-        }
-        
-        public void doWait() throws InterruptedException {
-            synchronized(lock) {
-                long t = System.currentTimeMillis() + timeout;
-                while(waitFlag) {
-                    if (System.currentTimeMillis() >= t) {
-                        throw new InterruptedException("Timeout");
-                    }
-                    lock.wait(wait);
                 }
             }
         }
