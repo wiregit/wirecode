@@ -32,14 +32,6 @@ public class LookupRequestHandler extends AbstractRequestHandler {
 
     public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
         
-        if (!(message instanceof LookupRequest)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("LookupRequestHandler cannot handle " + message 
-                        + " from " + Node.toString(nodeId, src));
-            }
-            return;
-        }
-        
         LookupRequest request = (LookupRequest)message;
         KUID lookup = request.getLookupID();
         
@@ -48,7 +40,9 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
         
         List bucketList 
-            = context.getRouteTable().getBest(lookup, nodeId, KademliaSettings.getReplicationParameter(), RouteTableSettings.getSkipStale());
+            = context.getRouteTable().getBest(lookup, nodeId, 
+                    KademliaSettings.getReplicationParameter(), 
+                    RouteTableSettings.getSkipStale());
         
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request.getMessageID(), bucketList);

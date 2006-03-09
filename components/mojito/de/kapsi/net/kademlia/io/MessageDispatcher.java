@@ -144,10 +144,9 @@ public class MessageDispatcher implements Runnable {
             throw new IOException("Channel is not bound");
         }
         
-        // MAKE SURE WE'RE NOT SENDING OURSELF MSGS
+        // MAKE SURE WE'RE NOT SENDING MESSAGES TO OURSELF
         if (nodeId != null 
                 && nodeId.equals(context.getLocalNodeID())) {
-            // TODO maybe useful for testing
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send messages to ourself: " + Node.toString(nodeId, dst));
             }
@@ -259,6 +258,15 @@ public class MessageDispatcher implements Runnable {
     
     private void processMessage(Receipt receipt, SocketAddress src, Message message) throws IOException {
         KUID nodeId = message.getNodeID();
+        
+        // MAKE SURE WE'RE NOT RECEIVING MESSAGES FROM OURSELF
+        if (nodeId != null 
+                && nodeId.equals(context.getLocalNodeID())) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Received a message from ourself: " + Node.toString(nodeId, src));
+            }
+            return;
+        }
         
         if (receipt != null) {
             long time = receipt.time();
