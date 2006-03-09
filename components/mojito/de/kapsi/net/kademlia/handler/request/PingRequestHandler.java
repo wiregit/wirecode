@@ -33,14 +33,6 @@ public class PingRequestHandler extends AbstractRequestHandler {
     
     public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
         
-        if (!(message instanceof PingRequest)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("PingHandler cannot handle " + message 
-                        + " from " + Node.toString(nodeId, src));
-            }
-            return;
-        }
-        
         if (LOG.isTraceEnabled()) {
             LOG.trace(Node.toString(nodeId, src) + " sent us a Ping");
         }

@@ -76,7 +76,7 @@ public class PlanetLab {
     
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.err.println("PlanetLab <port> <number of instances> <bootstrap host> <bootstrap port> <test>");
+            System.err.println("PlanetLab <port> <number of instances> [<bootstrap host> <bootstrap port> <test>]");
             System.exit(-1);
         }
         

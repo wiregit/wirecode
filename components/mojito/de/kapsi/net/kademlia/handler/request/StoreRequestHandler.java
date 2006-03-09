@@ -35,14 +35,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
     }
     
     public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
-        if (!(message instanceof StoreRequest)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("StoreRequestHandler cannot handle " + message 
-                        + " from " + Node.toString(nodeId, src));
-            }
-            return;
-        }
-        
         // Before we're going to accept the store request make
         // sure that the originator has queried us at least. Check
         // also the replacement cache!

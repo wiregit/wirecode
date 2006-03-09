@@ -16,7 +16,7 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.util.InputOutputUtils;
 
-class Packet {
+class Receipt {
     
     public static final int MAX_PACKET_SIZE = 8192;
     
@@ -31,13 +31,13 @@ class Packet {
     private long sent = 0L;
     private long received = 0L;
     
-    public Packet(KUID nodeId, SocketAddress dst, 
+    public Receipt(KUID nodeId, SocketAddress dst, 
             Message message, ResponseHandler handler) throws IOException {
         this(nodeId, dst, InputOutputUtils.serialize(message), 
                 message.getMessageID(), handler);
     }
     
-    public Packet(KUID nodeId, SocketAddress dst, byte[] data, 
+    public Receipt(KUID nodeId, SocketAddress dst, byte[] data, 
             KUID messageId, ResponseHandler handler) throws IOException {
         
         if (data.length >= MAX_PACKET_SIZE) {

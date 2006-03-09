@@ -24,7 +24,7 @@ public class BucketRandomizationTest {
 		
 		System.out.println(trie);
 		
-		List list = trie.getBest(toKUID("Al"), 6);
+		List list = trie.getBest(toKUID("Am"), 6);
 		for(Iterator it = list.iterator(); it.hasNext(); ) {
 			System.out.println(it.next());
 		}
@@ -36,6 +36,6 @@ public class BucketRandomizationTest {
 		byte[] id = new byte[20];
 		System.arraycopy(b, 0, id, 0, Math.min(b.length, id.length));
 		
-		return new KUID(KUID.UNKNOWN_ID, id);
+		return KUID.createNodeID(id);
 	}
 }

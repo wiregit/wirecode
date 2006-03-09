@@ -39,8 +39,8 @@ public class Main {
         int port = NetworkSettings.getPort();
         
         if (args.length == 0) {
-            System.out.println("java Main DHTs [host] port");
-        
+            System.out.println("java Main DHTs count [host] port");
+            System.exit(-1);
         } else {
             count = Integer.parseInt(args[0]);
             
@@ -52,14 +52,19 @@ public class Main {
             }
         }
         
-        InetAddress addr = InetAddress.getByName(host);
+        InetAddress addr = host != null ? InetAddress.getByName(host) : null;
+        
         ArrayList dhts = new ArrayList();
         
         for(int i = 0; i < count; i++) {
             try {
                 DHT dht = new DHT();
                 
-                dht.bind(new InetSocketAddress(addr, port+i));
+                if (addr != null) {
+                    dht.bind(new InetSocketAddress(addr, port+i));
+                } else {
+                    dht.bind(new InetSocketAddress(port+i));
+                }
                 
                 new Thread(dht, "DHT-" + i).start();
                 //Thread.sleep(100);
