@@ -83,7 +83,16 @@ public abstract class WriteHandshakeState extends HandshakeState {
          * Creates a response using the responder and wraps it into a ByteBuffer.
          */
         ByteBuffer createOutgoingData() throws IOException {
-            response = responder.respond(support.getReadHandshakeRemoteResponse(), outgoing);
+            // The distinction between requests is not necessary for correctness,
+            // but is useful.  The getReadHandshakeRemoteResponse() method will
+            // contain the correct response status code & msg, whereas
+            // the getReadHandshakeResponse() method assumes '200 OK'.
+            HandshakeResponse theirResponse;
+            if(outgoing)
+                theirResponse = support.getReadHandshakeRemoteResponse();
+            else
+                theirResponse = support.getReadHandshakeResponse();
+            response = responder.respond(theirResponse, outgoing);
             StringBuffer sb = new StringBuffer();
             support.appendResponse(response, sb);
             return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion??
