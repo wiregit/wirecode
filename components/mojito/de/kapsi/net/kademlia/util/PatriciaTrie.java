@@ -21,9 +21,6 @@ import java.util.Random;
  */
 public class PatriciaTrie {
     
-    private static final int NULL_BIT_KEY = -1;
-    private static final int EQUAL_BIT_KEY = -2;
-    
     private final Entry root = new Entry(null, null, -1);
     
     private int size = 0;
@@ -163,19 +160,20 @@ public class PatriciaTrie {
     }
     
     public List getBest(Object key, Collection exclude, int k) {
-
         SearchState state = new SearchState(key, exclude, k);
         getBestR(state);
         return state.getResults();
     }
     
     private void getBestR(final SearchState state) {
-        if (state.done)
+        if (state.done) {
             return;
+        }
         
         Entry h = state.current; // need a copy on the stack
-        if (state.add(h) || state.done)
-        	return;
+        if (state.add(h) || state.done) {
+            return;
+        }
         
         if (!isBitSet(state.key, h.bitIndex)) {
             state.goToChildEntry(h, true);
@@ -346,11 +344,11 @@ public class PatriciaTrie {
     }
     
     private static boolean isNullBitKey(int bitIndex) {
-        return bitIndex == NULL_BIT_KEY;
+        return bitIndex == KeyCreator.NULL_BIT_KEY;
     }
     
     private static boolean isEqualBitKey(int bitIndex) {
-        return bitIndex == EQUAL_BIT_KEY;
+        return bitIndex == KeyCreator.EQUAL_BIT_KEY;
     }
     
     private boolean isBitSet(Object key, int bitIndex) {
@@ -361,7 +359,7 @@ public class PatriciaTrie {
     }
     
     private int bitIndex(Object key, Object foundKey) {
-        boolean nullKey = true;
+        /*boolean nullKey = true;
         for(int bitIndex = 0; bitIndex < keyCreator.length(); bitIndex++) {
             boolean isBitSet = isBitSet(key, bitIndex);
             if (isBitSet != isBitSet(foundKey, bitIndex)) {
@@ -374,9 +372,11 @@ public class PatriciaTrie {
         }
         
         if (nullKey) {
-            return NULL_BIT_KEY;
+            return KeyCreator.NULL_BIT_KEY;
         }
-        return EQUAL_BIT_KEY;
+        return KeyCreator.EQUAL_BIT_KEY;*/
+        
+        return keyCreator.bitIndex(key, foundKey);
     }
     
     private boolean isRoot(Entry entry) {
@@ -449,7 +449,7 @@ public class PatriciaTrie {
                 if (parent == root) {
                     buffer.append("parent=").append("ROOT");
                 } else {
-                    buffer.append("parent=").append(parent.value).append(" [").append(parent.bitIndex).append("]");
+                    buffer.append("parent=").append(parent.key).append(" [").append(parent.bitIndex).append("]");
                 }
             } else {
                 buffer.append("parent=").append("null");
@@ -460,7 +460,7 @@ public class PatriciaTrie {
                 if (root == left) {
                     buffer.append("left=").append("ROOT");
                 } else {
-                    buffer.append("left=").append(left.value).append(" [").append(left.bitIndex).append("]");
+                    buffer.append("left=").append(left.key).append(" [").append(left.bitIndex).append("]");
                 }
             } else {
                 buffer.append("left=").append("null");
@@ -471,7 +471,7 @@ public class PatriciaTrie {
                 if (root == right) {
                     buffer.append("right=").append("ROOT");
                 } else {
-                    buffer.append("right=").append(right.value).append(" [").append(right.bitIndex).append("]");
+                    buffer.append("right=").append(right.key).append(" [").append(right.bitIndex).append("]");
                 }
             } else {
                 buffer.append("right=").append("null");
@@ -550,8 +550,14 @@ public class PatriciaTrie {
         }
         
     }
+    
     public static interface KeyCreator {
+        
+        public static final int NULL_BIT_KEY = -1;
+        public static final int EQUAL_BIT_KEY = -2;
+        
         public int length();
         public boolean isBitSet(Object key, int bitIndex);
+        public int bitIndex(Object key, Object found);
     }
 }

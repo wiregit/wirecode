@@ -68,7 +68,7 @@ public class RouteTable {
     
     public boolean isClose(KUID nodeId) {
         float min = 100f * size() / getMaxSize();
-        float closeness = 100f * context.getLocalNodeID().match(nodeId) / KUID.LENGTH;
+        float closeness = 100f * context.getLocalNodeID().bitIndex(nodeId) / KUID.LENGTH;
         return closeness > min;
     }
     

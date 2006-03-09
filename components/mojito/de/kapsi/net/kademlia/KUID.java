@@ -20,6 +20,7 @@ import java.util.Properties;
 import java.util.Random;
 
 import de.kapsi.net.kademlia.util.ArrayUtils;
+import de.kapsi.net.kademlia.util.PatriciaTrie.KeyCreator;
 
 /**
  * KUID stands for Kademlia Unique Identifier and represents 
@@ -47,6 +48,8 @@ public class KUID {
         0x1
     };
     
+    public static final KUID NULL = new KUID();
+    
     public static final int UNKNOWN_ID = 0x00;
     public static final int NODE_ID = 0x01;
     public static final int VALUE_ID = 0x02;
@@ -73,6 +76,12 @@ public class KUID {
         this.type = type;
         this.id = id;
         this.hashCode = ArrayUtils.hashCode(id);
+    }
+    
+    private KUID() {
+        this.type = UNKNOWN_ID;
+        this.id = new byte[LENGTH/8];
+        this.hashCode = 0;
     }
     
     public KUID assertNodeID() throws RuntimeException {
@@ -124,22 +133,37 @@ public class KUID {
         return bits;
     }
     
-    public int match(KUID nodeId) {
-        int bits = 0;
+    public int bitIndex(KUID nodeId) {
+        boolean allNull = true;
+        
+        int bitIndex = 0;
         for(int i = 0; i < id.length; i++) {
+            if (allNull && id[i] != 0) {
+                allNull = false;
+            }
+            
             if (id[i] != nodeId.id[i]) {
                 for(int j = 0; j < BITS.length; j++) {
                     if ((id[i] & BITS[j]) 
                             != (nodeId.id[i] & BITS[j])) {
                         break;
                     }
-                    bits++;
+                    bitIndex++;
                 }
                 break;
             }
-            bits += BITS.length;
+            bitIndex += BITS.length;
         }
-        return bits;
+        
+        if (allNull) {
+            return KeyCreator.NULL_BIT_KEY;
+        }
+        
+        if (bitIndex == LENGTH) {
+            return KeyCreator.EQUAL_BIT_KEY;
+        }
+        
+        return bitIndex;
     }
     
     public KUID xor(KUID nodeId) {

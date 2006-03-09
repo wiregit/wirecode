@@ -151,6 +151,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Adding " + node + " to the yet-to-be query list");
                     }
+                    
                     addYetToBeQueried(node);
                 }
             }

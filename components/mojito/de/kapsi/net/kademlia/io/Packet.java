@@ -101,10 +101,10 @@ class Packet {
                 && !this.nodeId.equals(nodeId)) {
         }
         
-        if (!dst.equals(src)) {
+        /*if (!dst.equals(src)) {
             throw new IOException(Node.toString(nodeId, src) + " claims to be " 
                     + Node.toString(this.nodeId, dst));
-        }
+        }*/
         
         if (handler != null) {
             handler.handleResponse(nodeId, src, message, time());
