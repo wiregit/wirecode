@@ -245,25 +245,25 @@ public class MessageDispatcher implements Runnable {
             buffer.get(data, 0, length);
             
             Message message = InputOutputUtils.deserialize(data);
-            Receipt packet = (Receipt)input.remove(message.getMessageID());
+            Receipt receipt = (Receipt)input.remove(message.getMessageID());
             
-            if (packet != null) {
-                packet.received();
+            if (receipt != null) {
+                receipt.received();
             }
             
-            processMessage(packet, src, message);
+            processMessage(receipt, src, message);
             return true;
         }
         return false;
     }
     
-    private void processMessage(Receipt packet, SocketAddress src, Message message) throws IOException {
+    private void processMessage(Receipt receipt, SocketAddress src, Message message) throws IOException {
         KUID nodeId = message.getNodeID();
         
-        if (packet != null) {
-            long time = packet.time();
+        if (receipt != null) {
+            long time = receipt.time();
             defaultHandler.handleResponse(nodeId, src, message, time); // BEFORE!
-            packet.handleSuccess(nodeId, src, message);
+            receipt.handleSuccess(nodeId, src, message);
         } else if (message instanceof RequestMessage) {
             handleRequest(nodeId, src, message);
             defaultHandler.handleRequest(nodeId, src, message); // AFTER!
