@@ -19,7 +19,9 @@ import java.util.Timer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.tests.DHTNodeStat;
 import com.limegroup.gnutella.dht.tests.DHTStats;
+import com.limegroup.gnutella.dht.tests.StatsManager;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -94,7 +96,7 @@ public class Context implements Runnable {
         messageFactory = new MessageFactory(this);
         publisher = new KeyValuePublisher(this);
         
-        // TODO Initialize DHTStats!!!
+        stats = new DHTNodeStat(this);
     }
     
     public DHTStats getDHTStats() {

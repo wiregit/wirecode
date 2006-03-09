@@ -19,15 +19,14 @@ public class DHTNodeStat implements DHTStats{
     
     private final Context context;
     
-    private final String nodeID;
+    private String nodeID;
 
-    private HashMap valueStores;
+    private final HashMap valueStores = new HashMap();
     
-    private HashMap valueLookups;
+    private final HashMap valueLookups = new HashMap();
     
     public DHTNodeStat(Context context) {
         this.context = context;
-        nodeID = context.getLocalNodeID().toHexString();
     }
 
     
@@ -36,6 +35,7 @@ public class DHTNodeStat implements DHTStats{
         for (Iterator iter = KeyVals.iterator(); iter.hasNext();) {
             KeyValue keyval = (KeyValue) iter.next();
             writeNodeStat(writer,keyval.toString());
+            writer.write("\n");
         }
     }
 
@@ -46,12 +46,14 @@ public class DHTNodeStat implements DHTStats{
             Node node = (Node) iter.next();
             writeNodeStat(writer,node.getNodeID().toHexString());
         }
+        writer.write("\n");
     }
     
     public void dumpGets(Writer writer) throws IOException {
         for (Iterator iter = valueLookups.values().iterator(); iter.hasNext();) {
             DHTLookupStat stat = (DHTLookupStat)iter.next();
             writeNodeStat(writer,stat.toString());
+            writer.write("\n");
         }
     }
 
@@ -59,6 +61,7 @@ public class DHTNodeStat implements DHTStats{
         for (Iterator iter = valueStores.values().iterator(); iter.hasNext();) {
             DHTLookupStat stat = (DHTLookupStat)iter.next();
             writeNodeStat(writer,stat.toString());
+            writer.write("\n");
         }
     }
 
@@ -70,6 +73,11 @@ public class DHTNodeStat implements DHTStats{
     }
     
     public void writeNodeStat(Writer writer,String stat) throws IOException {
-        writer.write(nodeID + FILE_DELIMITER + stat);
+        if(nodeID == null) {
+            nodeID = context.getLocalNodeID().toHexString();
+        }
+        else {
+            writer.write(nodeID + FILE_DELIMITER + stat);
+        }
     }
 }

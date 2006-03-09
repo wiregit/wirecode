@@ -62,6 +62,11 @@ public class DHT implements Runnable {
         context.ping(dst, l);
     }
     
+    // TODO remove - for test purposes only
+    public Context getContext() {
+        return context;
+    }
+    
     public void put(KUID key, byte[] value/*, StoreListener l*/) 
             throws IOException {
         

@@ -12,12 +12,15 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 
 public class PlanetLab {
 
+    private static final StatsManager statsManager = StatsManager.INSTANCE;
+    
     public static List createDHTs(int port, int number) {
         
         List dhts = new ArrayList(number);
         for(int i = 0; i < number; i++) {
             try {
                 DHT dht = new DHT();
+                statsManager.addDHTNode(dht.getContext().getDHTStats());
                 dht.bind(new InetSocketAddress(port+i));
                 
                 Thread t = new Thread(dht, "DHT-" + i);
@@ -72,6 +75,8 @@ public class PlanetLab {
         
         long end = System.currentTimeMillis();
         System.out.println("Bootstraping of " + dhts.size() + " Nodes finished in " + (end-start) + " ms");
+        shutdown();
+        System.exit(0);
     }
     
     public static void main(String[] args) {
@@ -109,5 +114,9 @@ public class PlanetLab {
                 System.exit(-1);
                 break;
         }
+    }
+    
+    private static void shutdown() {
+        statsManager.writeStatsToFiles();
     }
 }

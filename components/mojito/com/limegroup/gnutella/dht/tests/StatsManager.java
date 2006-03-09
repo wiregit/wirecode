@@ -26,7 +26,7 @@ public class StatsManager {
     
     private static final String ROUTINGTABLE_FILE = "routingTable";
     
-    private ArrayList dhtNodeStats;
+    private final ArrayList dhtNodeStats = new ArrayList();
     
     private StatsManager() {
     }
