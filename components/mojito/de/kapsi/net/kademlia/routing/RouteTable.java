@@ -89,6 +89,7 @@ public class RouteTable {
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
         }
         
+        staleNodes.remove(nodeId);
         cache.remove(nodeId);
         routeTableMap.put(nodeId, node);
     }
