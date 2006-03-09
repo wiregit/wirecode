@@ -34,6 +34,9 @@ class HandshakeSupport {
     /** The remote address to use when processing a sent header. */
     private final String remoteAddress;
     
+    /** The connectLine used in the remote response. */
+    private String remoteResponse;    
+    
     HandshakeSupport(String remoteAddress) {
         this.remoteAddress = remoteAddress;
         this.readHeaders = new Properties();
@@ -42,9 +45,8 @@ class HandshakeSupport {
 
     /** Creates their response, based on the given connectLine. */
     HandshakeResponse createRemoteResponse(String connectLine) throws IOException {
-        return HandshakeResponse.createRemoteResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(), 
-                    readHeaders);
+        this.remoteResponse = connectLine.substring(GNUTELLA_06.length()).trim();
+        return HandshakeResponse.createRemoteResponse(remoteResponse, readHeaders);
     }
     
     /** Appends the connect line to the given StringBuffer. */
@@ -164,6 +166,11 @@ class HandshakeSupport {
         }
         
         RouterService.getAcceptor().setExternalAddress(ia);
+    }
+    
+    /** Constructs a HandshakeResponse object using the remote response data. */
+    HandshakeResponse getReadHandshakeRemoteResponse() throws IOException {
+        return HandshakeResponse.createRemoteResponse(remoteResponse, readHeaders);
     }
 
     /** Constructs a HandshakeResponse object wrapping the headers we've read. */

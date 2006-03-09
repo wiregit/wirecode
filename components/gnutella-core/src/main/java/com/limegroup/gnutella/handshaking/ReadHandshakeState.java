@@ -51,12 +51,12 @@ abstract class ReadHandshakeState extends HandshakeState {
             BufferReader reader = new BufferReader(buffer);
             if(!doneConnect) {
                 currentHeader += reader.readLine();
-                if(!reader.isLineReadCompletely())
-                    break;
-                connectLine = currentHeader;
-                currentHeader = "";
-                processConnectLine();
-                doneConnect = true;
+                if(reader.isLineReadCompletely()) {
+                    connectLine = currentHeader;
+                    currentHeader = "";
+                    processConnectLine();
+                    doneConnect = true;
+                }
             }
             
             if(doneConnect) {
@@ -136,6 +136,17 @@ abstract class ReadHandshakeState extends HandshakeState {
         
         /** Ensures that the connect line began with GNUTELLA/0.6 */
         void processConnectLine() throws IOException {
+            // We do this here, as opposed to in other states, so that
+            // our response to the crawler can go through the wire prior
+            // to closing the connection.
+            // In the case of a crawler, this will normally go:
+            // ReadRequestState -> WriteResponseState -> ReadResponseState
+            // Normally, ReadResponseState will never get hit because the
+            // crawler won't respond & the connection will timeout.
+            // However, if it does get hit, we need to close the connection
+            if(support.getReadHandshakeResponse().isCrawler())
+                throw new IOException("crawler");
+            
             if (!support.isConnectLineValid(connectLine)) {
                 HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
                 throw new IOException("Bad connect string");

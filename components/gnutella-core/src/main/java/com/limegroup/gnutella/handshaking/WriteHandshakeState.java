@@ -54,7 +54,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
     }
     
     /** Returns a ByteBuffer of data to write. */
-    abstract ByteBuffer createOutgoingData();
+    abstract ByteBuffer createOutgoingData() throws IOException;
     
     /** Processes the headers we wrote, after writing them.  May throw IOException if we need to disco. */
     abstract void processWrittenHeaders() throws IOException;
@@ -76,13 +76,14 @@ public abstract class WriteHandshakeState extends HandshakeState {
         WriteResponseState(HandshakeSupport support, HandshakeResponder responder, boolean outgoing) {
             super(support);
             this.responder = responder;
+            this.outgoing = outgoing;
         }
 
         /**
          * Creates a response using the responder and wraps it into a ByteBuffer.
          */
-        ByteBuffer createOutgoingData() {
-            response = responder.respond(support.getReadHandshakeResponse(), outgoing);
+        ByteBuffer createOutgoingData() throws IOException {
+            response = responder.respond(support.getReadHandshakeRemoteResponse(), outgoing);
             StringBuffer sb = new StringBuffer();
             support.appendResponse(response, sb);
             return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion??
@@ -111,15 +112,16 @@ public abstract class WriteHandshakeState extends HandshakeState {
                     throw NoGnutellaOkException.createClientUnknown(response.getStatusCode());
                 }
             } else {
-                switch(response.getStatusCode()) {
-                case HandshakeResponse.OK:
-                    break;
-                case HandshakeResponse.SLOTS_FULL:
-                    HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
-                    throw NoGnutellaOkException.CLIENT_REJECT;
-                default: 
-                    HandshakingStat.INCOMING_CLIENT_UNKNOWN.incrementStat();
-                    throw NoGnutellaOkException.createClientUnknown(response.getStatusCode());
+               switch(response.getStatusCode()) {
+                   case HandshakeResponse.OK:
+                   case HandshakeResponse.CRAWLER_CODE: // let the crawler IOX in ReadResponse
+                        break;
+                    case HandshakeResponse.SLOTS_FULL:
+                        HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
+                        throw NoGnutellaOkException.CLIENT_REJECT;
+                    default: 
+                        HandshakingStat.INCOMING_CLIENT_UNKNOWN.incrementStat();
+                        throw NoGnutellaOkException.createClientUnknown(response.getStatusCode());
                 }
             }
         }
