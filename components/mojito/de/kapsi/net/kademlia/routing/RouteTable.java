@@ -240,6 +240,10 @@ public class RouteTable {
         return mostRecentlySeen;
     }
     
+    public Collection getAllNodes() {
+        return routeTableMap.values();
+    }
+    
     /**
      * A combined HashMap and PatriciaTrie. The HashMap is for
      * fast and excact O(1) lookups and the PatriciaTrie for 
