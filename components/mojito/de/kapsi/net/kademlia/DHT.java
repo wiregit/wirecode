@@ -116,7 +116,7 @@ public class DHT implements Runnable {
     
     // TODO for debugging purposes only
     Collection getNodes() {
-        return context.getRouteTable().getRouteTableMap().values();
+        return context.getRouteTable().getAllNodes();
     }
     
     // TODO for debugging purposes only

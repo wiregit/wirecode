@@ -179,7 +179,7 @@ public class Context implements Runnable {
             ByteArrayOutputStream out = new ByteArrayOutputStream(20);
             nodeId.write(out);
             out.close();
-            ContextSettings.setLocalNodeID(out.toByteArray());
+            ContextSettings.setLocalNodeID(address, out.toByteArray());
         } else {
             nodeId = KUID.createNodeID(id);
         }
