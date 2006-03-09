@@ -54,10 +54,10 @@ public abstract class WriteHandshakeState extends HandshakeState {
     }
     
     /** Returns a ByteBuffer of data to write. */
-    abstract ByteBuffer createOutgoingData() throws IOException;
+    protected abstract ByteBuffer createOutgoingData() throws IOException;
     
     /** Processes the headers we wrote, after writing them.  May throw IOException if we need to disco. */
-    abstract void processWrittenHeaders() throws IOException;
+    protected abstract void processWrittenHeaders() throws IOException;
 
     /** The second state in an incoming handshake, or the third state in an outgoing handshake. */
     static class WriteResponseState extends WriteHandshakeState {
@@ -82,7 +82,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
         /**
          * Creates a response using the responder and wraps it into a ByteBuffer.
          */
-        ByteBuffer createOutgoingData() throws IOException {
+        protected ByteBuffer createOutgoingData() throws IOException {
             // The distinction between requests is not necessary for correctness,
             // but is useful.  The getReadHandshakeRemoteResponse() method will
             // contain the correct response status code & msg, whereas
@@ -102,7 +102,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
          * Throws an IOException if we wrote a code other than 'OK'.
          * Increments the appropriate statistics also.
          */
-        void processWrittenHeaders() throws IOException {
+        protected void processWrittenHeaders() throws IOException {
             if(outgoing) {
                 switch(response.getStatusCode()) {
                 case HandshakeResponse.OK:
@@ -147,7 +147,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
         }
 
         /** Returns a ByteBuffer of the initial connect request & headers. */
-        ByteBuffer createOutgoingData() {
+        protected ByteBuffer createOutgoingData() {
             StringBuffer sb = new StringBuffer();
             support.appendConnectLine(sb);
             support.appendHeaders(request, sb);
@@ -155,7 +155,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
         }
         
         /** Does nothing. */
-        void processWrittenHeaders() {}
+        protected void processWrittenHeaders() {}
     }
     
 }

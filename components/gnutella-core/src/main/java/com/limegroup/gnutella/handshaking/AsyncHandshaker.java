@@ -115,9 +115,7 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
             writeSink.interest(this, false);
             handshakeObserver.handleHandshakeFinished(shaker);
         } else {
-            HandshakeState nextState = (HandshakeState)states.remove(0);
-            nextState.setPriorHandshakeState(currentState);
-            currentState = nextState;
+            currentState = (HandshakeState)states.remove(0);
             if(currentState.isReading() && !reading) {
                 readSink.interest(true);
                 writeSink.interest(this, false);

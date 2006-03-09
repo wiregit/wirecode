@@ -43,10 +43,7 @@ abstract class HandshakeState {
         list.add(new WriteHandshakeState.WriteResponseState(support, responder, true));
         return list;
     }
-    
-    /** The state prior to this handshake state. */
-    protected HandshakeState priorState;
-    
+
     /** The HandshakeSupport supporter. */
     protected HandshakeSupport support;
     
@@ -54,12 +51,7 @@ abstract class HandshakeState {
     HandshakeState(HandshakeSupport support) {
         this.support = support;
     }
-
-    /** Sets the prior HandshakeState */
-    void setPriorHandshakeState(HandshakeState prior) {
-        this.priorState = prior;
-    }
-    
+   
     /** Determines if this HandshakeState is for writing. */
     abstract boolean isWriting();
     

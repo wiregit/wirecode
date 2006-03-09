@@ -43,7 +43,7 @@ abstract class ReadHandshakeState extends HandshakeState {
             while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0);
             if(buffer.position() == 0) {
                 if(read == -1)
-                    throw new IOException("must read something when we don't have data!");
+                    throw new IOException("EOF");
                 break;
             }
             
@@ -99,7 +99,7 @@ abstract class ReadHandshakeState extends HandshakeState {
      * Reacts to the connect line, either throwing an IOException if it was invalid
      * or doing nothing if it was valid.
      */
-    abstract void processConnectLine() throws IOException;
+    abstract protected void processConnectLine() throws IOException;
     
     /**
      * Reacts to the event of headers being finished processing.  Throws an IOException
@@ -107,7 +107,7 @@ abstract class ReadHandshakeState extends HandshakeState {
      * 
      * @throws IOException
      */
-    abstract void processHeaders() throws IOException;
+    abstract protected void processHeaders() throws IOException;
     
     /** The first state in an incoming handshake. */
     static class ReadRequestState extends ReadHandshakeState {
@@ -119,13 +119,13 @@ abstract class ReadHandshakeState extends HandshakeState {
          * Ensures the initial connect line is GNUTELLA/0.6
          * or a higher version of the protocol.
          */
-        void processConnectLine() throws IOException {
+        protected void processConnectLine() throws IOException {
             if (!support.notLessThan06(connectLine))
                 throw new IOException("not a valid connect string!");
         }
 
         /** Does nothing. */
-        void processHeaders() throws IOException {}
+        protected void processHeaders() throws IOException {}
     }
     
     /** The third state in an incoming handshake, or the second state in an outgoing handshake. */
@@ -135,7 +135,7 @@ abstract class ReadHandshakeState extends HandshakeState {
         }
         
         /** Ensures that the connect line began with GNUTELLA/0.6 */
-        void processConnectLine() throws IOException {
+        protected void processConnectLine() throws IOException {
             // We do this here, as opposed to in other states, so that
             // our response to the crawler can go through the wire prior
             // to closing the connection.
@@ -154,7 +154,7 @@ abstract class ReadHandshakeState extends HandshakeState {
         }
 
         /** Ensures that the response contained a valid status code. */
-        void processHeaders() throws IOException {
+        protected void processHeaders() throws IOException {
             HandshakeResponse theirResponse = support.createRemoteResponse(connectLine);
             switch(theirResponse.getStatusCode()) {
             case HandshakeResponse.OK:
