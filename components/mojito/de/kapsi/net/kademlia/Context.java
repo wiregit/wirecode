@@ -5,6 +5,7 @@
 
 package de.kapsi.net.kademlia;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -21,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.tests.DHTNodeStat;
 import com.limegroup.gnutella.dht.tests.DHTStats;
-import com.limegroup.gnutella.dht.tests.StatsManager;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -43,6 +43,7 @@ import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.routing.RouteTable;
 import de.kapsi.net.kademlia.security.CryptoHelper;
+import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class Context implements Runnable {
@@ -170,7 +171,18 @@ public class Context implements Runnable {
         
         messageDispatcher.bind(address);
         this.address = address;
-        nodeId = KUID.createRandomNodeID(address);
+        
+        byte[] id = ContextSettings.getLocalNodeID(address);
+        if (id == null) {
+            nodeId = KUID.createRandomNodeID(address);
+            
+            ByteArrayOutputStream out = new ByteArrayOutputStream(20);
+            nodeId.write(out);
+            out.close();
+            ContextSettings.setLocalNodeID(out.toByteArray());
+        } else {
+            nodeId = KUID.createNodeID(id);
+        }
     }
     
     public void close() throws IOException {

@@ -5,13 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-
-import de.kapsi.net.kademlia.Node;
-import de.kapsi.net.kademlia.db.Database;
-import de.kapsi.net.kademlia.db.KeyValue;
-import de.kapsi.net.kademlia.routing.RouteTable;
 
 
 public class StatsManager {

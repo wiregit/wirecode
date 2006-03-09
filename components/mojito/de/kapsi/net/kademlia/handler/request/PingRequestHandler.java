@@ -16,7 +16,6 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
-import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 /**

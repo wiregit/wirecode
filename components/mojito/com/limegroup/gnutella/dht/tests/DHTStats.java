@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import de.kapsi.net.kademlia.Node;
-import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
-import de.kapsi.net.kademlia.routing.RouteTable;
 
 public interface DHTStats {
 

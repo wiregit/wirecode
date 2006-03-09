@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.routing.RouteTable;
