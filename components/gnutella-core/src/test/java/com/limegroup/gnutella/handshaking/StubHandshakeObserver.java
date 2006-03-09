@@ -8,6 +8,16 @@ public class StubHandshakeObserver implements HandshakeObserver {
     private boolean handshakeFinished;
     private Handshaker shaker;
     private boolean shutdown;
+    
+    public void clear() {
+        noGOK = false;
+        code = 0;
+        msg = null;
+        badHandshake = false;
+        handshakeFinished = false;
+        shaker = null;
+        shutdown = false;
+    }
 
     public void handleNoGnutellaOk(int code, String msg) {
         this.noGOK = true;

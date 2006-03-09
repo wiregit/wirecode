@@ -10,6 +10,7 @@ public class ReadBufferChannel implements InterestReadChannel {
     private ByteBuffer buffer;
     private boolean useEOF;
     private boolean closed = false;
+    private boolean interest = false;
     
     public ReadBufferChannel() {
         this(new byte[0]);
@@ -72,6 +73,10 @@ public class ReadBufferChannel implements InterestReadChannel {
     }
     
     public void interest(boolean status) {
-        
+        this.interest = status;
+    }
+
+    public boolean isInterested() {
+        return interest;
     }
 }
