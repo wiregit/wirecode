@@ -64,18 +64,28 @@ public final class DefaultMessageHandler extends MessageHandler
             }
             //update contact info
             if(!node.getSocketAddress().equals(src)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(node + " changed it's address. Pinging host");
+                }
                 //ping host to check somebody is not spoofing an address change
                 RequestMessage ping = context.getMessageFactory().createPingRequest();
                 AbstractResponseHandler handler = new PingResponseHandler(context, 
                         new PingListener() {
                             public void pingResponse(KUID nodeId, SocketAddress address, long time) {
                                 if(time<0) {
+                                    if (LOG.isTraceEnabled()) {
+                                        LOG.trace("Replacing node: "+nodeId);
+                                    }
                                     //replace node
                                     Node n = new Node(nodeId,src);
                                     routeTable.add(n);
                                     routeTable.updateTimeStamp(n);
                                 }
-                                else {} //ping successfull - discard. TODO add spoofer to IP ban list
+                                else {
+                                    if (LOG.isTraceEnabled()) {
+                                        LOG.trace("Spoof detected for "+nodeId+" - discarded.");
+                                    }
+                                } //ping successfull - discard. TODO add spoofer to IP ban list
                             }
                 });
                 context.getMessageDispatcher().send(node,ping,handler);
