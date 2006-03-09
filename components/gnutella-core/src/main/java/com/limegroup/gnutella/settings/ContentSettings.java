@@ -4,7 +4,7 @@ package com.limegroup.gnutella.settings;
 public class ContentSettings extends LimeProps {    
     private ContentSettings() {}
     
-    public static String LEARN_MORE_URL = "http://www.limewire.com/learnmore/contentFiltering";
+    public static String LEARN_MORE_URL = "http://filtered.limewire.com/learnmore/contentFiltering";
     
     /** The list of default content authorities. */
     public static final StringArraySetting AUTHORITIES =
