@@ -10,5 +10,5 @@ import java.net.SocketAddress;
 import de.kapsi.net.kademlia.KUID;
 
 public interface PingListener {
-    public void ping(KUID nodeId, SocketAddress address, long time);
+    public void pingResponse(KUID nodeId, SocketAddress address, long time);
 }

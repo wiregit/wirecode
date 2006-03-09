@@ -32,6 +32,11 @@ public class DHT implements Runnable {
         context.bind(address);
     }
     
+    //  TODO testing purposes only - remove
+    public void bind(SocketAddress address,KUID localNodeID) throws IOException {
+        context.bind(address,localNodeID);
+    }
+    
     public void run() {
         context.run();
     }

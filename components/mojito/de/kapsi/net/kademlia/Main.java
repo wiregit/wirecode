@@ -202,7 +202,7 @@ public class Main {
         
         System.out.println("Ping... " + addr);
         dht.ping(addr, new PingListener() {
-            public void ping(KUID nodeId, SocketAddress address, long time) {
+            public void pingResponse(KUID nodeId, SocketAddress address, long time) {
                 if (time >= 0L) {
                     if (nodeId != null) {
                         System.out.println("*** Ping to " + Node.toString(nodeId, address) + " succeeded: " + time + "ms");

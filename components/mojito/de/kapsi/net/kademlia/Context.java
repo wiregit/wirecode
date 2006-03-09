@@ -185,6 +185,16 @@ public class Context implements Runnable {
         }
     }
     
+    //TODO testing purposes only - remove
+    public void bind(SocketAddress address,KUID localNodeID) throws IOException {
+        if (isOpen()) {
+            throw new IOException("DHT is already bound");
+        }
+        messageDispatcher.bind(address);
+        this.address = address;
+        nodeId = localNodeID;
+    }
+    
     public void close() throws IOException {
         running = false;
         messageDispatcher.close();
@@ -259,7 +269,7 @@ public class Context implements Runnable {
     public void bootstrap(SocketAddress address, final BootstrapListener l) throws IOException {
         // Ping the Node
         ping(address, new PingListener() {
-            public void ping(KUID nodeId, SocketAddress address, final long time1) {
+            public void pingResponse(KUID nodeId, SocketAddress address, final long time1) {
                 
                 // Ping was successful, bootstrap!
                 if (time1 >= 0L) {

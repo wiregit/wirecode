@@ -15,7 +15,10 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.routing.RouteTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
@@ -50,18 +53,35 @@ public final class DefaultMessageHandler extends MessageHandler
         handleSuccess(nodeId, src, message);
     }
     
-    private void handleSuccess(KUID nodeId, SocketAddress src, 
+    private void handleSuccess(final KUID nodeId, final SocketAddress src, 
             Message message) throws IOException {
-        RouteTable routeTable = context.getRouteTable();
+        final RouteTable routeTable = context.getRouteTable();
         
         Node node = routeTable.get(nodeId);
         if (node != null) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace(node + " is known and updating its TimeStamp");
+                LOG.trace(node + " is known and updating its info");
             }
-            
-            routeTable.updateTimeStamp(node);
-            
+            //update contact info
+            if(!node.getSocketAddress().equals(src)) {
+                //ping host to check somebody is not spoofing an address change
+                RequestMessage ping = context.getMessageFactory().createPingRequest();
+                AbstractResponseHandler handler = new PingResponseHandler(context, 
+                        new PingListener() {
+                            public void pingResponse(KUID nodeId, SocketAddress address, long time) {
+                                if(time<0) {
+                                    //replace node
+                                    Node n = new Node(nodeId,src);
+                                    routeTable.add(n);
+                                    routeTable.updateTimeStamp(n);
+                                }
+                                else {} //ping successfull - discard. TODO add spoofer to IP ban list
+                            }
+                });
+                context.getMessageDispatcher().send(node,ping,handler);
+            } else {
+                routeTable.updateTimeStamp(node);
+            }
         } else if (!routeTable.isFull()) {
             node = new Node(nodeId, src);
             if (LOG.isTraceEnabled()) {
@@ -132,4 +152,5 @@ public final class DefaultMessageHandler extends MessageHandler
             }
         }
     }
+    
 }
