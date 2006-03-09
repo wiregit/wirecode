@@ -18,34 +18,30 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
    
     private Properties _headers;
     
-    protected HeaderUpdateVendorMessage(byte[] guid, byte ttl, byte hops,
-			 int version, byte[] payload)
-			throws BadPacketException {
+    protected HeaderUpdateVendorMessage(byte[] guid, byte ttl, byte hops, int version, byte[] payload) throws BadPacketException {
+        
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_HEADER_UPDATE, version, payload);
 		
 		//see if the payload is valid
-		if (getVersion() == VERSION && (payload == null || payload.length == 0))
-			throw new BadPacketException();
+		if (getVersion() == VERSION && (payload == null || payload.length == 0)) throw new BadPacketException();
 		
 		_headers = new Properties();
 		try {
 		    InputStream bais = new ByteArrayInputStream(payload);
 		    _headers.load(bais);
-		}catch(IOException bad) {
+		} catch (IOException bad) {
 		    throw new BadPacketException(bad.getMessage());
 		}
 	}
     
     public HeaderUpdateVendorMessage(Properties props) {
-        super(F_LIME_VENDOR_ID, F_HEADER_UPDATE, VERSION,
-	            derivePayload(props));
+        super(F_LIME_VENDOR_ID, F_HEADER_UPDATE, VERSION, derivePayload(props));
         _headers = props;
     }
-    
-    
+
     private static byte [] derivePayload(Properties props) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        props.save(baos,null);
+        props.save(baos, null);
         return baos.toByteArray();
     }
     

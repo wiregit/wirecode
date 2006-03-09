@@ -76,7 +76,7 @@ public abstract class Message implements Serializable, Comparable {
     public static final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
     /** 0x31, vendor message. */
     public static final byte F_VENDOR_MESSAGE        = (byte)0x31;
-    /** 0x32, vendor message stable. (do) */
+    /** 0x32, stable vendor message, not commonly used. */
     public static final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
     /** 0x41, UDP connection. (do) */
 	public static final byte F_UDP_CONNECTION        = (byte)0x41;
@@ -755,13 +755,13 @@ public abstract class Message implements Serializable, Comparable {
         // Vendor-specific message
         case F_VENDOR_MESSAGE:
 
-            // Have a factory method make the right kind of object (do)
+            // Have the VendorMessage factory method parse the network data into a vendor message specific object that extends VendorMessage
             return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload, network);
 
-        // Vendor-specific message (do)
+        // Stable vendor-specific message, not used
         case F_VENDOR_MESSAGE_STABLE:
 
-            // Have a factory method make the right kind of object (do)
+            // Have the VendorMessage factory method parse the network data into a vendor message specific object that extends VendorMessage
             return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload, network);
 
         // UDP connection message (do)
@@ -838,7 +838,7 @@ public abstract class Message implements Serializable, Comparable {
 
     /**
      * Write the Gnutella packet payload to the given OutputStream.
-     * Does not flush the OtuputStream.
+     * Does not flush the OutputStream.
      * 
      * This is an abstract method.
      * Here in the Message class, it has no function body.
