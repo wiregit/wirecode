@@ -41,9 +41,13 @@ public class DHTNodeStat implements DHTStats{
     public void dumpRouteTable(Writer writer) throws IOException{
         RouteTable routeTable = context.getRouteTable();
         Collection nodes = routeTable.getAllNodes();
+        if(nodeID == null) {
+            nodeID = context.getLocalNodeID().toHexString();
+        }
+        writer.write(nodeID);
         for (Iterator iter = nodes.iterator(); iter.hasNext();) {
             Node node = (Node) iter.next();
-            writeNodeStat(writer,node.getNodeID().toHexString());
+            writer.write(FILE_DELIMITER + node.getNodeID().toHexString());
         }
         writer.write("\n");
     }
