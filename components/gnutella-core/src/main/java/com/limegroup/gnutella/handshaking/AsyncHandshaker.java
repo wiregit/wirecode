@@ -167,8 +167,9 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
         }
         
         // this may be called when the message reading is installed
-        if(!isOpen())
+        if(!isOpen()) {
             handshakeObserver.shutdown();
+        }
     }
 
     public void interest(boolean status) {

@@ -2,6 +2,9 @@ package com.limegroup.gnutella;
 
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -9,13 +12,20 @@ import junit.framework.Test;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.StubHandshakeResponder;
+import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.io.AcceptObserver;
+import com.limegroup.gnutella.io.NIOServerSocket;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 
 /**
@@ -23,6 +33,8 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * and once without.
  */
 public class ManagedConnectionTest extends ServerSideTestCase {
+    
+    private static final int LISTEN_PORT = 12350;
 
     public ManagedConnectionTest(String name) {
         super(name);
@@ -235,6 +247,90 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 
         FilterSettings.FILTER_HASH_QUERIES.setValue(false);
     }
+    
+    public void testNonBlockingHandshakeSucceeds() throws Exception {
+        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ConnectionAcceptor acceptor = new ConnectionAcceptor();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
+        acceptor.start();
+        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
+        try {
+            mc.initialize(observer);
+            observer.waitForResponse(5000);
+            assertTrue(observer.isConnect());
+            assertFalse(observer.isBadHandshake());
+            assertFalse(observer.isNoGOK());
+            assertFalse(observer.isShutdown());
+            assertEquals("NIODispatcher", observer.getFinishedThread().getName());
+            mc.close();
+        } finally {
+            acceptor.shutdown();
+        }
+    }
+    
+    public void testNonBlockingBadHandshake() throws Exception {
+        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ConnectionAcceptor acceptor = new ConnectionAcceptor();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
+        acceptor.start();
+        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
+        try {
+            acceptor.getObserver().setBadHandshake(true);
+            mc.initialize(observer);
+            observer.waitForResponse(5000);
+            assertFalse(observer.isConnect());
+            assertTrue(observer.isBadHandshake());
+            assertFalse(observer.isNoGOK());
+            assertFalse(observer.isShutdown());
+            assertEquals("NIODispatcher", observer.getFinishedThread().getName());
+            mc.close();
+        } finally {
+            acceptor.shutdown();
+        }       
+    }
+    
+    public void testNonBlockingNGOK() throws Exception {
+        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ConnectionAcceptor acceptor = new ConnectionAcceptor();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
+        acceptor.start();
+        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
+        try {
+            acceptor.getObserver().setNoGOK(true);
+            mc.initialize(observer);
+            observer.waitForResponse(5000);
+            assertFalse(observer.isConnect());
+            assertFalse(observer.isBadHandshake());
+            assertTrue(observer.isNoGOK());
+            assertEquals(401, observer.getCode());
+            assertFalse(observer.isShutdown());
+            assertEquals("NIODispatcher", observer.getFinishedThread().getName());
+            mc.close();
+        } finally {
+            acceptor.shutdown();
+        }           
+    }
+    
+    public void testNonBlockingHandshakeTimeout() throws Exception {
+        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ConnectionAcceptor acceptor = new ConnectionAcceptor();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
+        acceptor.start();
+        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
+        try {
+            acceptor.getObserver().setTimeout(true);
+            mc.initialize(observer);
+            observer.waitForResponse(10000);
+            assertFalse(observer.isConnect());
+            assertFalse(observer.isBadHandshake());
+            assertFalse(observer.isNoGOK());
+            assertTrue(observer.isShutdown());
+            assertEquals("NIODispatcher", observer.getFinishedThread().getName());
+            mc.close();
+        } finally {
+            acceptor.shutdown();
+        }            
+    }
 
     class EmptyResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response,
@@ -255,4 +351,90 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 			remove(HeaderNames.GGEP);
 		}
 	}
+    
+    private static class ConnectionAcceptor {
+        private ServerSocket socket;
+        private SimpleAcceptObserver observer;
+        
+        
+        public void start() throws Exception {
+            observer = new SimpleAcceptObserver();
+            socket = new NIOServerSocket(LISTEN_PORT, observer);
+            socket.setReuseAddress(true);
+        }
+        
+        public void shutdown() throws Exception {
+            socket.close();
+        }
+        
+        public SimpleAcceptObserver getObserver() {
+            return observer;
+        }
+    }    
+    
+    private static class SimpleAcceptObserver implements AcceptObserver {
+        private boolean noGOK = false;
+        private boolean timeout = false;
+        private boolean badHandshake = false;
+
+        public void handleIOException(IOException iox) {
+        }
+
+        public void handleAccept(final Socket socket) throws IOException {
+            ThreadFactory.startThread(new Runnable() {
+                public void run() {
+                    try {
+                        if (badHandshake) {
+                            socket.close();
+                            return;
+                        }
+                        
+                        if(timeout) {
+                            socket.setSoTimeout(60000);
+                            socket.getInputStream().read(new byte[2048]);
+                            return;
+                        }
+                        
+                        socket.setSoTimeout(3000);
+                        InputStream in = socket.getInputStream();
+                        String word = IOUtils.readWord(in, 9);
+                        if (!word.equals("GNUTELLA"))
+                            throw new IOException("Bad word: " + word);
+
+                        if (noGOK) {
+                            socket.getOutputStream().write("GNUTELLA/0.6 401 Failed\r\n\r\n".getBytes());
+                            socket.getOutputStream().flush();
+                            return;
+                        }
+
+                        final Connection con = new Connection(socket);
+                        con.initialize(null, new StubHandshakeResponder());
+                    } catch (Exception e) {
+                        ErrorService.error(e);
+                    }
+                }
+            }, "conninit");
+        }
+
+        public void shutdown() {
+        }
+
+        public void setBadHandshake(boolean badHandshake) {
+            this.badHandshake = badHandshake;
+        }
+
+        public void setNoGOK(boolean noGOK) {
+            this.noGOK = noGOK;
+        }
+        
+        public void setTimeout(boolean timeout) {
+            this.timeout = timeout;
+        }
+        
+        public void clear() {
+            this.badHandshake = false;
+            this.noGOK = false;
+            this.timeout = false;
+        }
+    }
 }

@@ -1,38 +1,40 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.net.Socket;
-
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 
 
-public class StubConnectionObserver implements GnetConnectObserver {
+public class StubGnetConnectObserver implements GnetConnectObserver {
     private boolean noGOK;
     private int code;
     private String msg;
     private boolean badHandshake;
     private boolean connect;
     private boolean shutdown;
+    private Thread finishedThread;
     
     public synchronized void handleNoGnutellaOk(int code, String msg) {
         this.noGOK = true;
         this.code = code;
         this.msg = msg;
+        this.finishedThread = Thread.currentThread();
         notify();
     }
 
     public synchronized void handleBadHandshake() {
         this.badHandshake = true;
+        this.finishedThread = Thread.currentThread();
         notify();
     }
 
     public synchronized void handleConnect() {
         this.connect = true;
+        this.finishedThread = Thread.currentThread();        
         notify();
     }
 
     public synchronized void shutdown() {
         this.shutdown = true;
+        this.finishedThread = Thread.currentThread();
         notify();
     }
     
@@ -62,6 +64,10 @@ public class StubConnectionObserver implements GnetConnectObserver {
 
     public boolean isShutdown() {
         return shutdown;
+    }
+
+    public Thread getFinishedThread() {
+        return finishedThread;
     }
 
 }

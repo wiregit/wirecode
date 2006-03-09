@@ -56,7 +56,7 @@ public class ConnectionTest extends BaseTestCase {
     
     public void testNonBlockingConnectFailing() throws Exception {
         Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
-        StubConnectionObserver observer = new StubConnectionObserver();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(3000);
         assertTrue(observer.isShutdown());
@@ -72,7 +72,7 @@ public class ConnectionTest extends BaseTestCase {
     
     public void testNonBlockingConnectSucceeds() throws Exception {
         ManagedConnection c = new ManagedConnection("127.0.0.1", LISTEN_PORT);
-        StubConnectionObserver observer = new StubConnectionObserver();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(observer);
         observer.waitForResponse(3000);
         assertFalse(observer.isShutdown());
@@ -84,7 +84,7 @@ public class ConnectionTest extends BaseTestCase {
     public void testNonBlockingNoGOK() throws Exception {
         ACCEPTOR.getObserver().setNoGOK(true);
         Connection c = new Connection("127.0.0.1", LISTEN_PORT);
-        StubConnectionObserver observer = new StubConnectionObserver();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());
@@ -97,7 +97,7 @@ public class ConnectionTest extends BaseTestCase {
     public void testNonBlockingBadHandshake() throws Exception {
         ACCEPTOR.getObserver().setBadHandshake(true);
         Connection c = new Connection("127.0.0.1", LISTEN_PORT);
-        StubConnectionObserver observer = new StubConnectionObserver();
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());

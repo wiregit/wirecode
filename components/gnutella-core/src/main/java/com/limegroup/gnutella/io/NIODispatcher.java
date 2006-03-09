@@ -615,6 +615,7 @@ public class NIODispatcher implements Runnable {
         private long hits;
         private SelectionKey key;
 
+        private boolean timeoutActive = false;
         private long storedTimeoutLength = Long.MAX_VALUE;
         private long storedExpireTime = Long.MAX_VALUE;
         
@@ -624,8 +625,7 @@ public class NIODispatcher implements Runnable {
         }
         
         synchronized void clearTimeout() {
-            storedExpireTime = -1;
-            storedTimeoutLength = -1;
+            timeoutActive = false;
         }
         
         synchronized void updateReadTimeout(long now) {
@@ -642,6 +642,7 @@ public class NIODispatcher implements Runnable {
                         // we can reschedule it for the future.
                         storedExpireTime = expireTime;
                         storedTimeoutLength = timeoutLength;
+                        timeoutActive = true;
                     }
                 } else {
                     clearTimeout();
@@ -657,6 +658,7 @@ public class NIODispatcher implements Runnable {
         }
 
         synchronized void addTimeout(long now, long timeoutLength) {
+            timeoutActive = true;
             storedTimeoutLength = timeoutLength;
             storedExpireTime = now + timeoutLength;
             TIMEOUTER.addTimeout(this, now, timeoutLength);
@@ -666,14 +668,17 @@ public class NIODispatcher implements Runnable {
             boolean cancel = false;
             long timeToUse = 0;
             synchronized(this) {
-                if(expireTime == storedExpireTime) {
-                    cancel = true;
-                    timeToUse = storedTimeoutLength;
-                } else if(expireTime < storedExpireTime) {
-                    TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
-                } else { // expireTime > storedExpireTime
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("Ignoring extra timeout for: " + attachment);
+                if(timeoutActive) {
+                    if(expireTime == storedExpireTime) {
+                        cancel = true;
+                        timeoutActive = false;
+                        timeToUse = storedTimeoutLength;
+                    } else if(expireTime < storedExpireTime) {
+                        TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
+                    } else { // expireTime > storedExpireTime
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("Ignoring extra timeout for: " + attachment);
+                    }
                 }
             }
             

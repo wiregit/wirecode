@@ -256,6 +256,15 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
             shutdownOutput();
         } catch(IOException ignored) {}
             
+        try {
+            socket.close();
+        } catch(IOException ignored) {
+        } catch(Error ignored) {} // nothing we can do about stupid internal errors.
+            
+        try {
+            channel.close();
+        } catch(IOException ignored) {}
+        
         reader.shutdown();
         writer.shutdown();
         if(connecter != null)
@@ -267,16 +276,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
                 writer = new NoOpWriter();
                 connecter = null;
             }
-        });
-        
-        try {
-            socket.close();
-        } catch(IOException ignored) {
-        } catch(Error ignored) {} // nothing we can do about stupid internal errors.
-            
-        try {
-            channel.close();
-        } catch(IOException ignored) {}
+        });        
     }
     
     /** Binds the socket to the SocketAddress */
