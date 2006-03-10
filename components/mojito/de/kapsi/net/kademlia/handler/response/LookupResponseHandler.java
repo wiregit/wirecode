@@ -59,12 +59,12 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
      */
     protected int round = 0;
     
+    private int activeSearches = 0;
+       
     /**
-     * This lock prevents beginNextRound() from being
-     * executed before not all responses have arrived
-     * or have timed out
+     * The number of closest nodes returned for a node lookup
      */
-    private CountDownLock lock = new CountDownLock(0);
+    private int resultSize = 0;
 
     /**
      * The duration of the lookup
@@ -86,25 +86,14 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         super(context, LookupSettings.getTimeout());
         this.lookup = lookup;
         this.valueLookup = valueLookup;
-        
-        // Select the A closest Nodes from the K bucket list
-        List bucketList = context.getRouteTable().getBest(lookup, LookupSettings.getK());
-        
-        // Add the Nodes to the yet-to-be query list
-        for(int i = bucketList.size()-1; i >= 0; i--) {
-            addYetToBeQueried((Node)bucketList.get(i));
-        }
-        
+        //TODO for now
+        this.resultSize = LookupSettings.getK();
         // Initial state: we're the closest Node to lookup
+        //TODO mark: What happens if we really are the closest node to lookup??? -> we skip ourself for now?
         markAsQueried(context.getLocalNode());
         closest = context.getLocalNodeID();
-        
-        lock = new CountDownLock(1);
     }
     
-    public void lookup() throws IOException {
-        beginNextRound();
-    }
     
     public void handleResponse(KUID nodeId, SocketAddress src, 
             Message message, long time) throws IOException {
@@ -146,8 +135,11 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             for(Iterator it = response.iterator(); it.hasNext(); ) {
                 Node node = (Node)it.next();
                 
+                //ignore ourselve
+                if(node.equals(context.getLocalNode()))continue;
+                
                 if (!isQueried(node) 
-                        && !isYetToBeQueiried(node)) {
+                        && !isYetToBeQueried(node)) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Adding " + node + " to the yet-to-be query list");
                     }
@@ -157,10 +149,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             
             addResponse(new Node(nodeId, src));
-            
-            if (lock.countDown()) {
-                beginNextRound();
-            }
+            --activeSearches;
+            lookupStep();
         }
     }
     
@@ -188,59 +178,91 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     + " did not response to our Find request");
         }
         
-        if (lock.countDown()) {
-            beginNextRound();
+        --activeSearches;
+        lookupStep();
+    }
+    
+    
+    public void lookup() throws IOException {
+        
+        MessageDispatcher messageDispatcher 
+        = context.getMessageDispatcher();
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Starting a new Lookup for " + lookup);
+        }
+        
+        // Select the K closest Nodes from the K bucket list
+        List bucketList = context.getRouteTable().getBest(lookup, LookupSettings.getK());
+        
+        // Add the Nodes to the yet-to-be query list
+        for(int i = bucketList.size()-1; i >= 0; i--) {
+            addYetToBeQueried((Node)bucketList.get(i));
+        }
+        
+        // Get the first round of alpha nodes
+        List alphaList = toQuery.getBest(lookup, queried, LookupSettings.getA());
+
+        // send alpha requests
+        for(int i = 0; i < alphaList.size(); i++) {
+            Node node = (Node)alphaList.get(i);
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Sending " + node + " a Find request for " + lookup);
+            }
+            
+            markAsQueried(node);
+            ++activeSearches;
+            messageDispatcher.send(node, createMessage(lookup), this);
         }
     }
     
-    private void beginNextRound() throws IOException {
-        round++;
+    private void lookupStep() throws IOException {
         
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Starting a new Lookup round #" + round + " for " + lookup);
+        if(toQuery.size()==0 && activeSearches == 0) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Lookup for " + lookup + " terminates. No contacts left to query ");
+            }
+            Collection nodes = responses.getBest(lookup, responses.size());
+            finish(lookup, nodes, time);
+            
+            finished = true;
+            return;
         }
         
-        Node best = (Node)responses.getBest(lookup);
-        
-        // We select A closest nodes on the first round!
-        // Best node is null!
-        boolean closer = (round == 1);
-        
-        if (best != null) {
-            if (closest == null 
-                    || !closest.equals(best.getNodeID())) {
-                closest = best.getNodeID();
-                closer = true;
+        //stop if we have enough values and the yet-to-query list does not contain
+        //a closer node to the target than the furthest away that we have.
+        if(responses.size() == resultSize) {
+            KUID furthest = lookup.invert();
+            Node worstResponse = (Node)responses.getBest(furthest);
+            Node bestToQuery = (Node)toQuery.getBest(lookup);
+            if(worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
+            
+                Node bestResponse = (Node)responses.getBest(lookup);
+                
+                if (LOG.isTraceEnabled()) {
+                  LOG.trace("Lookup for " + lookup + " terminates with " 
+                          + bestResponse + " as the best match after " 
+                          + round + " lookup rounds and " 
+                          + queried.size() + " queried Nodes");
+                }
+                
+                Collection nodes = responses.getBest(lookup, responses.size());
+                finish(lookup, nodes, time);
+          
+                finished = true;
+                return;
             }
         }
         
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("The last round #" + round + " brought us " 
-                    + (closer ? "closer" : "NOT closer") + " to " + lookup);
-        }
-        
-        if (!closer) {
-            lookupFailures++;
-        } else {
-            lookupFailures = 0;
-        }
-        
-        // TODO this (1st condition) requires some fine tuning. 
-        // The current setting has been testet with maybe 200 Nodes.
-        // The second condiation makes sure that we're connected
-        // to at least 'k' Nodes or to all Nodes if there are in
-        // total less than 'k' Nodes on the network.
-        if (lookupFailures < LookupSettings.getMaxLookupFailures()
-                || responses.size() < LookupSettings.getK()) {
+        int numLookups = LookupSettings.getA() - activeSearches;
+        if(numLookups>0) {
             
-            final int ka = closer ? LookupSettings.getA() : LookupSettings.getK();
-            List bucketList = toQuery.getBest(lookup, queried, ka);
+            List bucketList = toQuery.getBest(lookup, queried, numLookups);
             final int size = bucketList.size();
             
-            MessageDispatcher messageDispatcher 
-                = context.getMessageDispatcher();
+            MessageDispatcher messageDispatcher = context.getMessageDispatcher();
             
-            lock = new CountDownLock(size);
             for(int i = 0; i < size; i++) {
                 Node node = (Node)bucketList.get(i);
                 
@@ -249,32 +271,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
                 
                 markAsQueried(node);
+                ++activeSearches;
                 messageDispatcher.send(node, createMessage(lookup), this);
             }
-        } else {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Giving up to find " + lookup + " after " + round + " rounds and " + lookupFailures + " lookup errors");
-            }
-        }
-        
-        if (lock.getCount() <= 0) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Lookup for " + lookup + " terminates with " 
-                        + best + " as the best match after " 
-                        + round + " lookup rounds and " 
-                        + queried.size() + " queried Nodes");
-            }
-            
-            if (isValueLookup()) {
-                finish(lookup, null, time);
-            } else {
-                // TODO optimize we don't need all features of getBest() 
-                Collection nodes = responses.getBest(lookup, responses.size());
-                finish(lookup, nodes, time);
-            }
-            
-            finished = true;
-            lock = new CountDownLock(Integer.MAX_VALUE);
         }
     }
     
@@ -306,11 +305,16 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         toQuery.put(node.getNodeID(), node);
     }
     
-    protected boolean isYetToBeQueiried(Node node) {
+    protected boolean isYetToBeQueried(Node node) {
         return toQuery.containsKey(node.getNodeID());
     }
     
     protected void addResponse(Node node) {
+        //if the list is full discard the furthest node and put this one
+        if(responses.size() == resultSize) {
+            KUID furthest = lookup.invert();
+            responses.remove((KUID)responses.getBest(furthest));
+        } 
         responses.put(node.getNodeID(), node);
     }
     
@@ -318,29 +322,4 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         return responses.getBest(lookup, k);
     }
     
-    /**
-     * Prevents beginNextRound() from being executed
-     * before not all responses to our requests have 
-     * either arrived or have timed out.
-     */
-    private static class CountDownLock {
-        
-        private int counter;
-        
-        public CountDownLock(int counter) {
-            this.counter = counter;
-        }
-        
-        public boolean countDown() {
-            return --counter <= 0;
-        }
-        
-        public int getCount() {
-            return counter;
-        }
-        
-        public String toString() {
-            return "CountDownLock: " + counter;
-        }
-    }
 }

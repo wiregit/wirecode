@@ -102,7 +102,7 @@ public final class DefaultMessageHandler extends MessageHandler
                                     
                                     if (LOG.isTraceEnabled()) {
                                         LOG.trace(Node.toString(nodeId, address) 
-                                                + " didn't respond. Replaceing it with new contact info " + contact);
+                                                + " didn't respond. Replacing it with new contact info " + contact);
                                     }
                                     
                                     // replace the old contact info
