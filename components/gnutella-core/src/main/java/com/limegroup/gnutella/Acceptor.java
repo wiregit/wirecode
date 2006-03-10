@@ -674,7 +674,6 @@ public class Acceptor {
             for(int i = 0; i < buffer.position(); i++) {
                 if(buffer.get(i) == ' ') {
                     String word = new String(buffer.array(), 0, i);
-                    System.out.println("Dispatching with word: " + word + ", full buffer: " + new String(buffer.array()));
                     buffer.limit(buffer.position()).position(i+1);
                     buffer.compact();
                     source.interest(false);
