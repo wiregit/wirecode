@@ -58,11 +58,8 @@ public final class ByteSetting extends AbstractNumberSetting {
             revertToDefault();
         }
     }
-
-    protected boolean isAcceptableValue(String value) {
-        byte max = MAX_VALUE.byteValue();
-        byte min = MIN_VALUE.byteValue();
-        byte val = Byte.parseByte(value);
-        return (val <= max && val >= min);
+    
+    protected Comparable convertToComparable(String value) {
+        return new Byte(value);
     }
 }

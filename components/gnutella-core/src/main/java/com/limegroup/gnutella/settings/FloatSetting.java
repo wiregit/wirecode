@@ -58,11 +58,8 @@ public final class FloatSetting extends AbstractNumberSetting {
         }
     }
 
-    protected boolean isAcceptableValue(String value) {
-        float max = MAX_VALUE.floatValue();
-        float min = MIN_VALUE.floatValue();
-        float val = Float.parseFloat(value);
-        return (val <= max && val >= min);
+    protected Comparable convertToComparable(String value) {
+        return new Float(value);
     }
 
 }

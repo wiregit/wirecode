@@ -43,16 +43,33 @@ public abstract class AbstractNumberSetting extends Setting {
         if(isSimppEnabled()) {
             Assert.that(MAX_VALUE != null, "simpp setting created with no max");
             Assert.that(MIN_VALUE != null, "simpp setting created with no min");
-            if(!isAcceptableValue(value))
-                return;
         }
+        value = normalizeValue(value);
         super.setValue(value);
     }
 
 
     /**
-     * The various settings must decide for themselves if this value acceptable. 
+     * Normalizes a value to an acceptable value for this setting.
      */
-    abstract protected boolean isAcceptableValue(String value);
+    protected String normalizeValue(String value) {
+        Comparable comparableValue = null;
+        try {
+            comparableValue = convertToComparable(value);
+        } catch (NumberFormatException e) {
+            return DEFAULT_VALUE;
+        }
+        if (MAX_VALUE != null && comparableValue.compareTo(MAX_VALUE) > 0) {
+            return MAX_VALUE.toString();
+        } else if (MIN_VALUE != null && comparableValue.compareTo(MIN_VALUE) < 0) {
+            return MIN_VALUE.toString();
+        }
+        return value;
+    }
 
+    /**
+     * Converts a String to a Comparable of the same type as MAX_VALUE and MIN_VALUE.
+     */
+    abstract protected Comparable convertToComparable(String value);
+    
 }

@@ -26,6 +26,12 @@ public final class PowerOfTwoSetting extends LongSetting {
         if (! isPowerOfTwo(defaultLong)) {
             throw new IllegalArgumentException("Default value is not a power of two");
         }
+        if (! isPowerOfTwo(max)) {
+            throw new IllegalArgumentException("Max value is not a power of two");
+        }
+        if (! isPowerOfTwo(min)) {
+            throw new IllegalArgumentException("Min value is not a power of two");
+        }
     }
     
     /** Utility method to determine if a long is zero or a power of two */
@@ -36,10 +42,41 @@ public final class PowerOfTwoSetting extends LongSetting {
         return ((~x+1)&x) == x;
     }
     
-    protected boolean isAcceptableValue(long value) {
-        if (! isPowerOfTwo(value)) {
-            return false;
+    /** Makes value a power of two by rounding down if neccesary
+     * and delegates the rest of the normalization to the superclass.
+     * 
+     * Non-positive values cannot be made made powers of two by rounding
+     * down, and are special-cased to return MIN_VALUE, which is forced by
+     * the constructor to be non-negative.
+     * 
+     * Strings that can't be parsed as longs will result in DEFALT_VALUE.
+     */
+    protected String normalizeValue(String value) {
+        long longValue;
+        
+        try {
+            longValue = Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            // Attempts to set with non-numbers numbers will result in DEFAULT_VALUE.
+            return DEFAULT_VALUE;
         }
-        return super.isAcceptableValue(value);
+        
+        if (longValue <= 0) {
+            return MIN_VALUE.toString();
+        }
+        
+        long lowestSetBit = (~longValue+1) & longValue;
+        if (lowestSetBit != longValue) {
+            do {
+                // take away lowest set bit until we get a power of two or zero
+                longValue -= lowestSetBit;
+                lowestSetBit = (~longValue+1) & longValue;
+            } while (lowestSetBit  != longValue);
+            if (longValue == 0) {
+                longValue = 1;
+            }
+            value = String.valueOf(longValue);
+        }
+        return super.normalizeValue(value);
     }
 }

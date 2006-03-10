@@ -58,14 +58,8 @@ public class LongSetting extends AbstractNumberSetting {
             revertToDefault();
         }
     }
-
-    protected boolean isAcceptableValue(String value) {
-        return isAcceptableValue(Long.parseLong(value));
-    }
     
-    protected boolean isAcceptableValue(long value) {
-        long max = MAX_VALUE.longValue();
-        long min = MIN_VALUE.longValue();
-        return (value <= max && value >= min);
+    protected Comparable convertToComparable(String value) {
+        return new Long(value);
     }
 }
