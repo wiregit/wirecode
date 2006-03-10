@@ -248,10 +248,8 @@ public class NBThrottle implements Throttle {
      */
     void tick(long currentTime) {
         if(currentTime >= _nextTickTime) {
-            float elapsedTicks = 1 + ((float)(currentTime - _nextTickTime)) / MILLIS_PER_TICK;
-            elapsedTicks = Math.min(elapsedTicks, 2);
-            _available = (int)(_bytesPerTick * elapsedTicks);
-            _nextTickTime = currentTime + MILLIS_PER_TICK;
+            _available = _bytesPerTick;
+	    _nextTickTime = currentTime + MILLIS_PER_TICK;
             spreadBandwidth();
         } else if(_available > MINIMUM_TO_GIVE) {
             spreadBandwidth();
