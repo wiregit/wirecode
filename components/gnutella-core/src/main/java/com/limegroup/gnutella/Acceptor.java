@@ -7,25 +7,27 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.browser.ExternalControl;
-import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.io.AcceptObserver;
-import com.limegroup.gnutella.io.NIOServerSocket;
+import com.limegroup.gnutella.io.BufferUtils;
+import com.limegroup.gnutella.io.ChannelInterestReadAdapter;
+import com.limegroup.gnutella.io.ChannelReadObserver;
+import com.limegroup.gnutella.io.InterestReadChannel;
+import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
 
@@ -476,15 +478,15 @@ public class Acceptor {
 	}
 	
 	/**
-	 * Updates the firewalled status with info from this socket.
+	 * Updates the firewalled status with info from the given incoming address.
 	 */
-	private void checkFirewall(Socket socket) {
+	public void checkFirewall(InetAddress address) {
 		// we have accepted an incoming socket -- only record
         // that we've accepted incoming if it's definitely
         // not from our local subnet and we aren't connected to
         // the host already.
         boolean changed = false;
-        if(isOutsideConnection(socket.getInetAddress())) {
+        if(isOutsideConnection(address)) {
             synchronized (Acceptor.class) {
                 changed = setIncoming(true);
                 ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
@@ -529,15 +531,24 @@ public class Acceptor {
                 // if we want to unset firewalled from any connection,
                 // do it here.
                 if (!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
-                    checkFirewall(client);
+                    checkFirewall(client.getInetAddress());
 
                 // Set our IP address of the local address of this socket.
                 InetAddress localAddress = client.getLocalAddress();
                 setAddress(localAddress);
+                
+                try {
+                    _socket.setSoTimeout(Constants.TIMEOUT);
+                } catch(SocketException se) {
+                    IOUtils.close(_socket);
+                    return;
+                }
     
-                // Dispatch asynchronously.
-                ConnectionDispatchRunner dispatcher = new ConnectionDispatchRunner(client);
-                ThreadFactory.startThread(dispatcher, "ConnectionDispatchRunner");
+                // Dispatch asynchronously if possible.
+                if(client.getChannel() != null) // supports non-blocking reads
+                    ((NIOMultiplexor)client).setReadObserver(new AsyncConnectionDispatcher(client));
+                else
+                    ThreadFactory.startThread(new BlockingConnectionDispatcher(client), "ConnectionDispatchRunner");
             }
         }
     }
@@ -560,135 +571,8 @@ public class Acceptor {
 	}
 
     /**
-     * Specialized class for dispatching incoming TCP connections to their
-     * appropriate handlers.  Gnutella connections are handled via 
-     * <tt>ConnectionManager</tt>, and HTTP connections are handled
-     * via <tt>UploadManager</tt> and <tt>DownloadManager</tt>.
-     */
-    private static class ConnectionDispatchRunner implements Runnable {
-
-        /**
-         * The <tt>Socket</tt> instance for the connection.
-         */
-        private final Socket _socket;
-
-        /**
-         * @modifies socket, this' managers
-         * @effects starts a new thread to handle the given socket and
-         *  registers it with the appropriate protocol-specific manager.
-         *  Returns once the thread has been started.  If socket does
-         *  not speak a known protocol, closes the socket immediately and
-         *  returns.
-         */
-        public ConnectionDispatchRunner(Socket socket) {
-            _socket = socket;
-        }
-
-        /**
-         * Dispatches the new connection based on connection type, such
-         * as Gnutella, HTTP, or MAGNET.
-         */
-        public void run() {
-			ConnectionManager cm = RouterService.getConnectionManager();
-			UploadManager um     = RouterService.getUploadManager();
-			DownloadManager dm   = RouterService.getDownloadManager();
-			Acceptor ac = RouterService.getAcceptor();
-            try {
-                //The try-catch below is a work-around for JDK bug 4091706.
-                InputStream in=null;
-                try {
-                    in=_socket.getInputStream(); 
-                } catch (IOException e) {
-                    HTTPStat.CLOSED_REQUESTS.incrementStat();
-                    throw e;
-                } catch(NullPointerException e) {
-                    // This should only happen extremely rarely.
-                    // JDK bug 4091706
-                    throw new IOException(e.getMessage());
-                }
-                _socket.setSoTimeout(Constants.TIMEOUT);
-                //dont read a word of size more than 8 
-                //("GNUTELLA" is the longest word we know at this time)
-                String word = IOUtils.readLargestWord(in,8);
-                _socket.setSoTimeout(0);
-                
-                
-                boolean localHost = NetworkUtils.isLocalHost(_socket);
-				// Only selectively allow localhost connections
-				if ( !word.equals("MAGNET") ) {
-					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && localHost) {
-					    LOG.trace("Killing localhost connection with non-magnet.");
-						_socket.close();
-						return;
-					}
-				} else if(!localHost) { // && word.equals(MAGNET)
-				    LOG.trace("Killing non-local ExternalControl request.");
-				    _socket.close();
-				    return;
-				}
-
-                //1. Gnutella connection.  If the user hasn't changed the
-                //   handshake string, we accept the default ("GNUTELLA 
-                //   CONNECT/0.4") or the proprietary limewire string
-                //   ("LIMEWIRE CONNECT/0.4").  Otherwise we just accept
-                //   the user's value.
-                boolean useDefaultConnect=
-                    ConnectionSettings.CONNECT_STRING.isDefault();
-
-
-                if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
-                    HTTPStat.GNUTELLA_REQUESTS.incrementStat();
-                    cm.acceptConnection(_socket);
-                }
-                else if (useDefaultConnect && word.equals("LIMEWIRE")) {
-                    HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
-                    cm.acceptConnection(_socket);
-                }
-                else if (word.equals("GET")) {
-					HTTPStat.GET_REQUESTS.incrementStat();
-					um.acceptUpload(HTTPRequestMethod.GET, _socket, false);
-                }
-				else if (word.equals("HEAD")) {
-					HTTPStat.HEAD_REQUESTS.incrementStat();
-					um.acceptUpload(HTTPRequestMethod.HEAD, _socket, false);
-				}
-                else if (word.equals("GIV")) {
-                    HTTPStat.GIV_REQUESTS.incrementStat();
-                    dm.acceptDownload(_socket);
-                }
-				else if (word.equals("CHAT")) {
-				    HTTPStat.CHAT_REQUESTS.incrementStat();
-                    ChatManager.instance().accept(_socket);
-				}
-			    else if (word.equals("MAGNET")) {
-			        HTTPStat.MAGNET_REQUESTS.incrementStat();
-                    ExternalControl.fireMagnet(_socket);
-                }
-                else if (word.equals("CONNECT") || word.equals("\n\n")) {
-                    //HTTPStat.CONNECTBACK_RESPONSE.incrementStat();
-                    // technically we could just always checkFirewall here, since
-                    // we really always want to -- but since we're gonna check
-                    // all incoming connections if this isn't set, might as well
-                    // check and prevent a double-check.
-                    if(ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
-                        ac.checkFirewall(_socket);
-                    IOUtils.close(_socket);
-                }
-                else {
-                    HTTPStat.UNKNOWN_REQUESTS.incrementStat();
-                    if(LOG.isErrorEnabled())
-                        LOG.error("Unknown protocol: " + word);
-                    IOUtils.close(_socket);
-                }
-            } catch (IOException e) {
-                LOG.warn("IOX while dispatching", e);
-                IOUtils.close(_socket);
-            }
-        }
-    }
-
-    /**
      * Returns whether <tt>ip</tt> is a banned address.
+     * 
      * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
      * @return true iff ip is a banned address.
      */
@@ -718,7 +602,7 @@ public class Acceptor {
         	ConnectionSettings.FORCED_PORT.revertToDefault();
         	ConnectionSettings.UPNP_IN_USE.revertToDefault();
         }
-    }
+    }    
     
     /**
      * (Re)validates acceptedIncoming.
@@ -759,4 +643,82 @@ public class Acceptor {
             }
         }
     }
+    
+    /**
+     * A ConnectionDispatcher that reads asynchronously from the socket.
+     */
+    private static class AsyncConnectionDispatcher extends ChannelInterestReadAdapter {
+        private final Socket client;
+        
+        AsyncConnectionDispatcher(Socket client) {
+            super();
+            this.client = client;
+        }
+        
+        protected int getBufferSize() {
+            return RouterService.getConnectionDispatcher().getMaximumWordSize();
+        }
+        
+        public void shutdown() {
+            super.shutdown();
+            HTTPStat.CLOSED_REQUESTS.incrementStat();
+        }
+
+        public void handleRead() throws IOException {
+            // Fill up our buffer as much we can.
+            while(buffer.hasRemaining() && source.read(buffer) != 0);
+            
+            // See if we have a full word.
+            for(int i = 0; i < buffer.position(); i++) {
+                if(buffer.get(i) == ' ') {
+                    buffer.position(i+1); // reposition so data after the word is transferred
+                    source.interest(false);
+                    RouterService.getConnectionDispatcher().
+                        dispatch(new String(buffer.array(), 0, i), client, true);
+                    return;
+                }
+            }
+            
+            // If there's no room to read more, we aren't going to read our word.
+            if(!buffer.hasRemaining())
+                close();
+        }
+    }
+
+
+    /**
+     * A ConnectionDispatcher that blocks while reading.
+     */
+    private static class BlockingConnectionDispatcher implements Runnable {
+        private final Socket client;
+        
+        public BlockingConnectionDispatcher(Socket socket) {
+            client = socket;
+        }
+
+        /** Reads a word and sends it off to the ConnectionDispatcher for dispatching. */
+        public void run() {
+            try {
+                //The try-catch below is a work-around for JDK bug 4091706.
+                InputStream in=null;
+                try {
+                    in=client.getInputStream(); 
+                } catch (IOException e) {
+                    HTTPStat.CLOSED_REQUESTS.incrementStat();
+                    throw e;
+                } catch(NullPointerException e) {
+                    // This should only happen extremely rarely.
+                    // JDK bug 4091706
+                    throw new IOException(e.getMessage());
+                }
+                
+                ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
+                String word = IOUtils.readLargestWord(in, dispatcher.getMaximumWordSize());
+                dispatcher.dispatch(word, client, false);
+            } catch (IOException iox) {
+                HTTPStat.CLOSED_REQUESTS.incrementStat();
+                IOUtils.close(client);
+            }
+        }
+    }    
 }

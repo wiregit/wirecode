@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestReadChannel;
@@ -181,28 +182,8 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
      * This is typically used for the MessageReader to read any bytes that this AsyncHandshaker
      * read from the network but did not process during handshaking.
      */
-    public int read(ByteBuffer toBuffer) throws IOException {
-        int read = 0;
-
-        if(readBuffer.position() > 0) {
-            readBuffer.flip();
-            int remaining = readBuffer.remaining();
-            int toRemaining = toBuffer.remaining();
-            if(toRemaining >= remaining) {
-                toBuffer.put(readBuffer);
-                read += remaining;
-            } else {
-                int limit = readBuffer.limit();
-                int position = readBuffer.position();
-                readBuffer.limit(position + toRemaining);
-                toBuffer.put(readBuffer);
-                read += toRemaining;
-                readBuffer.limit(limit);
-            }
-            readBuffer.compact();
-        }
-        
-        return read;
+    public int read(ByteBuffer toBuffer) {
+        return BufferUtils.transfer(readBuffer, toBuffer);
     }
 
     // unused.

@@ -32,6 +32,53 @@ public final class NIOSocketTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+    
+    public void testDelayedGetInputStream() throws Exception {
+        ServerSocket server = new ServerSocket(PORT, 0);
+        try {
+            server.setReuseAddress(true);
+            InetSocketAddress addr = new InetSocketAddress("127.0.0.1", PORT);
+            NIOSocket socket = new NIOSocket();
+            socket.setSoTimeout(1000);
+            socket.connect(addr);
+            
+            server.setSoTimeout(1000);
+            Socket accepted = server.accept();
+            byte[] rnd = new byte[100];
+            new Random().nextBytes(rnd);
+            accepted.getOutputStream().write(rnd); // this'll go immediately into the buffer
+            
+            ICROAdapter icro = new ICROAdapter();
+            ByteBuffer read = icro.getReadBuffer();
+            assertEquals(0, read.position());
+            
+            socket.setReadObserver(icro);
+            Thread.sleep(500); // let NIODispatcher to its thang.
+            
+            assertEquals(100, read.position()); // data was transferred to the reader.
+            for(int i = 0; i < 100; i++)
+                assertEquals(rnd[i], read.get(i));
+            
+            InputStream stream = socket.getInputStream();
+            byte[] readData = new byte[100];
+            assertEquals(100, stream.read(readData));
+            assertEquals(rnd, readData);
+            
+            assertEquals(0, read.position()); // moved to the InputStream
+            
+            new Random().nextBytes(rnd);
+            accepted.getOutputStream().write(rnd); // write some more, make sure it goes to stream
+            
+            Thread.sleep(500);
+            assertEquals(0, read.position());
+            assertEquals(100, stream.read(readData));
+            assertEquals(rnd, readData);
+            
+            socket.close();
+        } finally {
+            server.close();
+        }        
+    }
 	
 	// tests to make sure that calling setReadObserver
 	// will gobble any data that wasn't gobbled in blocking mode.
@@ -309,6 +356,50 @@ public final class NIOSocketTest extends BaseTestCase {
         public void shutdown() {}
         
         public ByteBuffer getRead() { return (ByteBuffer)readData.flip(); }
+    }
+    
+    private static class ICROAdapter implements ChannelReadObserver, InterestReadChannel {
+        private InterestReadChannel source;
+
+        private ByteBuffer buffer = ByteBuffer.allocate(1024);
+        
+        public ByteBuffer getReadBuffer() {
+            return buffer;
+        }
+
+        public InterestReadChannel getReadChannel() {
+            return source;
+        }
+
+        public void setReadChannel(InterestReadChannel channel) {
+            source = channel;
+        }
+
+        public int read(ByteBuffer b) {
+            return BufferUtils.transfer(buffer, b);
+        }
+
+        public void close() throws IOException {
+            source.close();
+        }
+
+        public boolean isOpen() {
+            return source.isOpen();
+        }
+
+        public void interest(boolean status) {
+            source.interest(status);
+        }
+
+        public void handleRead() throws IOException {
+            while (buffer.hasRemaining() && source.read(buffer) != 0);
+        }
+
+        public void handleIOException(IOException iox) {
+        }
+
+        public void shutdown() {
+        }
     }
     
     private static class RCRAdapter implements ChannelReader, InterestReadChannel {

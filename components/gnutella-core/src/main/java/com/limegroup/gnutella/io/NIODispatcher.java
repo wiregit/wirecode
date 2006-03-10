@@ -269,7 +269,7 @@ public class NIODispatcher implements Runnable {
     }
    
    /** Invokes the method in the NIODispatcher thread & returns after it ran. */
-   public void invokeAndWait(final Future future) throws InterruptedException {
+   public void invokeAndWait(final Runnable future) throws InterruptedException {
        if(Thread.currentThread() == dispatchThread) {
            future.run();
        } else {
@@ -281,9 +281,11 @@ public class NIODispatcher implements Runnable {
                    }
                }
            };
+           
            synchronized(Q_LOCK) {
-               LATER.add(future);
+               LATER.add(waiter);
            }
+           
            synchronized(waiter) {
                waiter.wait();
            }

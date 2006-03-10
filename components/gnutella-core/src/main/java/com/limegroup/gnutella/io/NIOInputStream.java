@@ -57,30 +57,7 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
      * not the SocketChannel) into the given buffer.
      */
     public int read(ByteBuffer toBuffer) {
-        if(buffer == null)
-            return 0;
-        
-        int read = 0;
-
-        if(buffer.position() > 0) {
-            buffer.flip();
-            int remaining = buffer.remaining();
-            int toRemaining = toBuffer.remaining();
-            if(toRemaining >= remaining) {
-                toBuffer.put(buffer);
-                read += remaining;
-            } else {
-                int limit = buffer.limit();
-                int position = buffer.position();
-                buffer.limit(position + toRemaining);
-                toBuffer.put(buffer);
-                read += toRemaining;
-                buffer.limit(limit);
-            }
-            buffer.compact();
-        }
-        
-        return read;
+        return BufferUtils.transfer(buffer, toBuffer);
     }
     
     /**

@@ -111,6 +111,12 @@ public class RouterService {
 	 * requests, etc.
 	 */
     private static final Acceptor acceptor = new Acceptor();
+    
+    /**
+     * ConnectionDispatcher instance that will dispatch incoming connections to
+     * the appropriate managers.
+     */
+    private static final ConnectionDispatcher dispatcher = new ConnectionDispatcher();
 
     /**
      * <tt>HTTPAcceptor</tt> instance for accepting magnet requests, etc.
@@ -571,6 +577,13 @@ public class RouterService {
 	public static Acceptor getAcceptor() {
 		return acceptor;
 	}
+    
+    /**
+     * Accessor for the ConnectionDispatcher instance.
+     */
+    public static ConnectionDispatcher getConnectionDispatcher() {
+        return dispatcher;
+    }
 
     /** 
      * Accessor for the <tt>Acceptor</tt> instance.

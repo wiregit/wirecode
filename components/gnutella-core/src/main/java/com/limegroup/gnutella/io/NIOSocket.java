@@ -396,7 +396,11 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
                 throw (IOException)new IOException().initCause(ie);
             }
             
-            return (InputStream)future.getResult();
+            InputStream result = (InputStream)future.getResult();
+            if(result == null)
+                throw new IOException("error constructing InputStream");
+            else
+                return result;
         }
     }
     
