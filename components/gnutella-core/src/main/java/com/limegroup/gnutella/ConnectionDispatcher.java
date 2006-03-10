@@ -83,6 +83,8 @@ public class ConnectionDispatcher {
         }
         
         final int protocol = parseWord(word);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Dispatching protocol: " + protocol + ", from word: " + word);
 
         boolean localHost = NetworkUtils.isLocalHost(client);
         // Only selectively allow localhost connections
@@ -98,8 +100,24 @@ public class ConnectionDispatcher {
             return;
         }
 
-        // Only CONNECT & UNKNOWN can be processed without a new thread.
+        // Only GNUTELLA, LIMEWIRE, CONNECT & UNKNOWN can be processed without a new thread.
+        // GNUTELLA & LIMEWIRE can do this because if we dispatched with 'newThread' true,
+        // that means it was dispatched from NIODispatcher, meaning the connection can
+        // support asynchronous handshaking & looping, so acceptConnection will return immediately.
+        // Conversely, if 'newThread' is false, the connection has already been given its own
+        // thread, so the fact that acceptConnection will block is okay.
+        //
+        // CONNECT & UNKNOWN perform no blocking operations, so either way, it is okay to process
+        // them immediately.
         switch(protocol) {
+        case GNUTELLA:
+            HTTPStat.GNUTELLA_REQUESTS.incrementStat();
+            RouterService.getConnectionManager().acceptConnection(client);
+            return;
+        case LIMEWIRE:
+            HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
+            RouterService.getConnectionManager().acceptConnection(client);
+            return;
         case CONNECT:
             if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
                 RouterService.getAcceptor().checkFirewall(client.getInetAddress());
@@ -113,17 +131,14 @@ public class ConnectionDispatcher {
             return;
         }
         
+        // All the below protocols are handled in a blocking manner by their managers.
+        // Thus, if this was handled by NIODispatcher (and 'newThread' is true), we need
+        // to spawn a new thread to process them.  Conversely, if 'newThread' is false,
+        // they have already been given their own thread and the calls can block
+        // with no problems.
         Runnable runner = new Runnable() {
             public void run() {
                 switch(protocol) {
-                case GNUTELLA:
-                    HTTPStat.GNUTELLA_REQUESTS.incrementStat();
-                    RouterService.getConnectionManager().acceptConnection(client);
-                    break;
-                case LIMEWIRE:
-                    HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
-                    RouterService.getConnectionManager().acceptConnection(client);
-                    break;
                 case GET:
                     HTTPStat.GET_REQUESTS.incrementStat();
                     RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.GET, client, false);
@@ -152,6 +167,7 @@ public class ConnectionDispatcher {
             }
         };
         
+        // (see comment above)
         if(newThread)
             ThreadFactory.startThread(runner, "IncomingConnection");
         else

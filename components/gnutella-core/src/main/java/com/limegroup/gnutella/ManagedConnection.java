@@ -383,8 +383,9 @@ public class ManagedConnection extends Connection
      */
     protected void performHandshake(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
       throws IOException, BadHandshakeException, NoGnutellaOkException {
-        
         if(observer == null || !isAsynchronous()) {
+            if(!isOutgoing() && observer != null)
+                throw new IllegalStateException("cannot support incoming blocking w/ observer");
             super.performHandshake(requestHeaders, responder, observer);
         } else {
             Handshaker shaker = createAsyncHandshaker(requestHeaders, responder, observer);

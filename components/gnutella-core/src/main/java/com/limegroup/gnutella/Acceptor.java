@@ -656,7 +656,8 @@ public class Acceptor {
         }
         
         protected int getBufferSize() {
-            return RouterService.getConnectionDispatcher().getMaximumWordSize();
+            // + 1 for whitespace
+            return RouterService.getConnectionDispatcher().getMaximumWordSize() + 1;
         }
         
         public void shutdown() {
@@ -666,7 +667,8 @@ public class Acceptor {
 
         public void handleRead() throws IOException {
             // Fill up our buffer as much we can.
-            while(buffer.hasRemaining() && source.read(buffer) != 0);
+            int read = 0;
+            while(buffer.hasRemaining() && (read = source.read(buffer)) > 0);
             
             // See if we have a full word.
             for(int i = 0; i < buffer.position(); i++) {
@@ -679,8 +681,9 @@ public class Acceptor {
                 }
             }
             
-            // If there's no room to read more, we aren't going to read our word.
-            if(!buffer.hasRemaining())
+            // If there's no room to read more or there's nothing left to read,
+            // we aren't going to read our word.
+            if(!buffer.hasRemaining() || read == -1)
                 close();
         }
     }
