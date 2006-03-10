@@ -378,7 +378,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
     /**
      * Returns the OutputStream from the NIOOutputStream.
      *
-     * Internally, this is a blcoking Pipe from the non-blocking SocketChannel.
+     * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public OutputStream getOutputStream() throws IOException {
         if(isClosed())

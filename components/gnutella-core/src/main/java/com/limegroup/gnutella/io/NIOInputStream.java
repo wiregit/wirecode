@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Stack;
 
 /**
  * Manages reading data from the network & piping it to a blocking input stream.
@@ -19,7 +18,6 @@ import java.util.Stack;
  */
 class NIOInputStream implements ReadObserver, InterestReadChannel {
     
-    static final Stack CACHE = new Stack();
     private final NIOSocket handler;
     private final SocketChannel channel;
     private BufferInputStream source;
@@ -46,23 +44,12 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
         if(shutdown)
             throw new IOException("Already closed!");
         
-        buffer = getBuffer(); 
+        buffer = NIODispatcher.instance().getBufferCache().getHeap(); 
         source = new BufferInputStream(buffer, handler, channel);
         bufferLock = source.getBufferLock();
         
         NIODispatcher.instance().interestRead(channel, true);
         return this;
-    }
-    
-    static ByteBuffer getBuffer() {
-        synchronized(CACHE) {
-            if (CACHE.isEmpty()) {
-                ByteBuffer buf = ByteBuffer.allocateDirect(8192);
-                CACHE.push(buf);
-            } 
-            
-            return (ByteBuffer)CACHE.pop();
-        }
     }
     
     /**
@@ -138,11 +125,14 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
         
         if(shutdown)
             return;
-         
+
+        if (buffer != null)
+            NIODispatcher.instance().getBufferCache().release(buffer);
+        
         if(source != null)
             source.shutdown();
+        
         shutdown = true;
-        try {close();}catch(IOException ignored) {}
     }
     
     /** Unused */
@@ -156,10 +146,6 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
      * there is no buffer to close in this case.
      */
     public void close() throws IOException {
-        if (buffer != null) {
-            buffer.clear();
-            CACHE.push(buffer);
-        }
     }
     
     /**

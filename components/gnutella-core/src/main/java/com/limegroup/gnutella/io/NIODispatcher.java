@@ -125,6 +125,18 @@ public class NIODispatcher implements Runnable {
      */
     private final ArrayList UNLOCKED = new ArrayList();
     
+    /**
+     * A common ByteBufferCache that classes can use.
+     * TODO: Move somewhere else.
+     */
+    private final ByteBufferCache BUFFER_CACHE = new ByteBufferCache();
+    
+    /** The last time the ByteBufferCache was cleared. */
+    private long lastCacheClearTime;
+    
+    /** The length of time between clearing intervals for the cache. */
+    private static final long CACHE_CLEAR_INTERVAL = 30000;
+    
     /** Returns true if the NIODispatcher is merrily chugging along. */
     public boolean isRunning() {
         return dispatchThread != null;
@@ -134,6 +146,11 @@ public class NIODispatcher implements Runnable {
 	public boolean isDispatchThread() {
 	    return Thread.currentThread() == dispatchThread;
 	}
+    
+    /** Gets the common ByteBufferCache */
+    public ByteBufferCache getBufferCache() {
+        return BUFFER_CACHE;
+    }
 	
 	/** Adds a Throttle into the throttle requesting loop. */
 	// TODO: have some way to remove Throttles, or make these use WeakReferences
@@ -362,6 +379,11 @@ public class NIODispatcher implements Runnable {
 
             UNLOCKED.addAll(LATER);
             LATER.clear();
+        }
+        
+        if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
+            BUFFER_CACHE.clearCache();
+            lastCacheClearTime = now;
         }
         
         if(!UNLOCKED.isEmpty()) {
@@ -619,7 +641,6 @@ public class NIODispatcher implements Runnable {
         private long storedTimeoutLength = Long.MAX_VALUE;
         private long storedExpireTime = Long.MAX_VALUE;
         
-        
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
         }
@@ -635,7 +656,7 @@ public class NIODispatcher implements Runnable {
                     long expireTime = now + timeoutLength;
                     // We need to add a new timeout if none is scheduled or we need
                     // to timeout before the next one.
-                    if(expireTime < storedExpireTime || storedExpireTime == -1) {
+                    if(expireTime < storedExpireTime || storedExpireTime == -1 || storedExpireTime < now) {
                         addTimeout(now, timeoutLength);
                     } else {
                         // Otherwise, store the timeout info so when we get notified
@@ -673,12 +694,17 @@ public class NIODispatcher implements Runnable {
                         cancel = true;
                         timeoutActive = false;
                         timeToUse = storedTimeoutLength;
+                        storedExpireTime = -1;
                     } else if(expireTime < storedExpireTime) {
                         TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
                     } else { // expireTime > storedExpireTime
+                        storedExpireTime = -1;
                         if(LOG.isWarnEnabled())
                             LOG.warn("Ignoring extra timeout for: " + attachment);
                     }
+                } else {
+                    storedExpireTime = -1;
+                    storedTimeoutLength = -1;
                 }
             }
             
