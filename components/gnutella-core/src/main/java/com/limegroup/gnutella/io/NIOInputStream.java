@@ -3,6 +3,7 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -12,14 +13,14 @@ import java.nio.channels.SocketChannel;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be read.
  *
- * ReadableByteChannel is implemented so that future ReadObservers can take over
+ * InterestReadChannel is implemented so that future ReadObservers can take over
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  */
-class NIOInputStream implements ReadObserver, InterestReadChannel {
+class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
     
     private final NIOSocket handler;
-    private final SocketChannel channel;
+    private InterestReadChannel channel;
     private BufferInputStream source;
     private Object bufferLock;
     private ByteBuffer buffer;
@@ -29,7 +30,7 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOInputStream(NIOSocket handler, SocketChannel channel) {
+    NIOInputStream(NIOSocket handler, InterestReadChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }
@@ -48,7 +49,6 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
         source = new BufferInputStream(buffer, handler, channel);
         bufferLock = source.getBufferLock();
         
-        NIODispatcher.instance().interestRead(channel, true);
         return this;
     }
     
@@ -82,7 +82,6 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
         
         return read;
     }
-                
     
     /**
      * Retrieves the InputStream to read from.
@@ -113,7 +112,7 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
             // if there's room in the buffer, we're interested in more reading ...
             // if not, we're not interested in more reading.
             if(!buffer.hasRemaining() || read == -1)
-                NIODispatcher.instance().interestRead(channel, false);
+                channel.interest(false);
         }
     }
     
@@ -122,7 +121,6 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
      * The SocketChannel should be shut by NIOSocket.
      */
     public synchronized void shutdown() {
-        
         if(shutdown)
             return;
 
@@ -160,6 +158,17 @@ class NIOInputStream implements ReadObserver, InterestReadChannel {
      * Does nothing.
      */
     public void interest(boolean status) {}
+    
+    public InterestReadChannel getReadChannel() {
+        return channel;
+    }
+    
+    public void setReadChannel(InterestReadChannel newChannel) {
+        synchronized(bufferLock) {
+            this.channel = newChannel;
+            source.setReadChannel(newChannel);
+        }
+    }
 }
                 
         

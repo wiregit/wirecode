@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
     private final ByteBuffer buffer;
     
     /** the SelectableChannel that the buffer is read from. */
-    private final SelectableChannel channel;
+    private InterestReadChannel channel;
     
     /** whether or not this stream has been shutdown. */
     private boolean shutdown = false;
@@ -41,10 +41,16 @@ import org.apache.commons.logging.Log;
      * Constructs a new BufferInputStream that reads from the given buffer,
      * using the given socket to retrieve the soTimeouts.
      */
-    BufferInputStream(ByteBuffer buffer, NIOSocket handler, SelectableChannel channel) {
+    BufferInputStream(ByteBuffer buffer, NIOSocket handler, InterestReadChannel channel) {
         this.handler = handler;
         this.buffer = buffer;
         this.channel = channel;
+    }
+    
+    void setReadChannel(InterestReadChannel newChannel) {
+        synchronized(LOCK) {
+            this.channel = newChannel;
+        }
     }
     
     /** Returns the lock object upon which writing into the buffer should lock */
@@ -70,7 +76,7 @@ import org.apache.commons.logging.Log;
             buffer.compact();
             
             // there's room in the buffer now, the channel needs some data.
-            NIODispatcher.instance().interestRead(channel, true);
+            channel.interest(true);
             
             // must &, otherwise implicit cast can change value.
             // (for example, reading the byte -1 is very different than
@@ -99,7 +105,7 @@ import org.apache.commons.logging.Log;
                 buffer.clear();
             
             // now that there's room in the buffer, fill up the channel
-            NIODispatcher.instance().interestRead(channel, true);
+            channel.interest(true);
             
             return available; // the amount we read.
         }

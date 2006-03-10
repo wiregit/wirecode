@@ -33,7 +33,7 @@ class NIOOutputStream implements WriteObserver {
     /**
      * Creates the pipes, buffer & registers channels for interest.
      */
-    synchronized NIOOutputStream init() throws IOException {
+    private synchronized NIOOutputStream init() throws IOException {
         if(buffer != null)
             throw new IllegalStateException("already init'd!");
             

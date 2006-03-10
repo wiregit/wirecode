@@ -267,6 +267,28 @@ public class NIODispatcher implements Runnable {
             }
         }
     }
+   
+   /** Invokes the method in the NIODispatcher thread & returns after it ran. */
+   public void invokeAndWait(final Future future) throws InterruptedException {
+       if(Thread.currentThread() == dispatchThread) {
+           future.run();
+       } else {
+           Runnable waiter = new Runnable() {
+               public void run() {
+                   future.run();
+                   synchronized(this) {
+                       notify();
+                   }
+               }
+           };
+           synchronized(Q_LOCK) {
+               LATER.add(future);
+           }
+           synchronized(waiter) {
+               waiter.wait();
+           }
+       }
+   }
     
     /** Gets the underlying attachment for the given SelectionKey's attachment. */
     public IOErrorObserver attachment(Object proxyAttachment) {
