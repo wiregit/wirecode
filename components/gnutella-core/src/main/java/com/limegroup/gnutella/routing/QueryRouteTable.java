@@ -116,7 +116,7 @@ public class QueryRouteTable {
 
     /** Creates a QueryRouteTable with default sizes. */
     public QueryRouteTable() {
-        long byteCount = 1024 * ConnectionSettings.QRT_SIZE_IN_KILOBYTES.getValue();
+        long byteCount = 1024 * ConnectionSettings.QRT_SIZE_IN_KIBI_ENTRIES.getValue();
         if (byteCount > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Default QRT size cannot be expressed as an int.");
         }
