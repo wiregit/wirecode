@@ -181,8 +181,7 @@ public class UnicastSimulator {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKey.SecretKey key = QueryKey.generateSecretKey();
-        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
+        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -200,7 +199,7 @@ public class UnicastSimulator {
                         QueryKey computed = 
                             QueryKey.getQueryKey(datagram.getAddress(),
                                                  datagram.getPort(),
-                                                 key, pad);
+                                                 secretKey);
                         if (!computed.equals(queryKey))
                             continue; // querykey is invalid!!
                         byte[] inGUID = ((QueryRequest)message).getGUID();
@@ -230,7 +229,7 @@ public class UnicastSimulator {
                             QueryKey qk = 
                                 QueryKey.getQueryKey(datagram.getAddress(),
                                                      datagram.getPort(),
-                                                     key, pad);
+                                                     secretKey);
                             PingReply pRep =
                                 PingReply.createQueryKeyReply(pr.getGUID(),
                                                               (byte)1,

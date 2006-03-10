@@ -340,8 +340,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKey.SecretKey key = QueryKey.generateSecretKey();
-        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
+        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -360,7 +359,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                             QueryKey qk = 
                                 QueryKey.getQueryKey(datagram.getAddress(),
                                                      datagram.getPort(),
-                                                     key, pad);
+                                                     secretKey);
                             
                             PingReply pRep = 
                                 PingReply.createQueryKeyReply(pr.getGUID(), 

@@ -50,73 +50,70 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testSimpleGeneration() throws Exception {
-        QueryKey.SecretKey key = QueryKey.generateSecretKey();
-        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
+        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         InetAddress ip = null;
         ip = InetAddress.getByName("www.limewire.com");
         int port = 6346;
-        QueryKey qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        QueryKey qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        QueryKey qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        QueryKey qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
         ip = InetAddress.getByName("10.254.0.42");
-        qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
         ip = InetAddress.getByName("127.0.0.1");
-        qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
     }
 
     public void testSamePadModulo() throws Exception {
-        QueryKey.SecretKey key = QueryKey.generateSecretKey();
+        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         InetAddress ip = null;
         ip = InetAddress.getByName("www.limewire.com");
         int port = 6346;
         // suppose the pads have the same modulo 8 - this case should be
         // handled.
-        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
-        byte[] innards = (byte[]) PrivilegedAccessor.getValue(pad, "_pad");
+        byte[] innards = (byte[]) PrivilegedAccessor.getValue(secretKey, "_pad");
         // test lower bound
         innards[0] = 0;
         innards[1] = 0;
-        QueryKey qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        QueryKey qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        QueryKey qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        QueryKey qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
         // test everything else bound
         innards[0] = 1;
         innards[1] = 1;
-        qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
     }
 
     public void testNegativePad() throws Exception {
-        QueryKey.SecretKey key = QueryKey.generateSecretKey();
+        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         InetAddress ip = null;
         ip = InetAddress.getByName("www.limewire.com");
         int port = 6346;
         // suppose the pads have the same modulo 8 - this case should be
         // handled.
-        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
-        byte[] innards = (byte[]) PrivilegedAccessor.getValue(pad, "_pad");
+        byte[] innards = (byte[]) PrivilegedAccessor.getValue(secretKey, "_pad");
         // test first negative
         innards[0] = -1;
         innards[1] = 0;
-        QueryKey qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        QueryKey qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        QueryKey qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        QueryKey qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
         // test secind negative
         innards[0] = 5;
         innards[1] = -24;
-        qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
         // test everything negative
         innards[0] = -41;
         innards[1] = -51;
-        qk1 = QueryKey.getQueryKey(ip, port, key, pad);
-        qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
+        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
     }
 
