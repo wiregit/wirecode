@@ -327,8 +327,8 @@ public class BrowseHostHandler {
         			if(LOG.isTraceEnabled())
         				LOG.trace("BHH.browseExchange(): read QR:" + m);
         			QueryReply reply = (QueryReply)m;
-        			reply.setBrowseHostReply(true);
         			reply.setGUID(_guid);
+        			reply.setBrowseHostReply(true);
 					
         			ForMeReplyHandler.instance().handleQueryReply(reply, null);
         		}
