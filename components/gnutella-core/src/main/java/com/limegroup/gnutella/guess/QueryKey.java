@@ -143,8 +143,9 @@ public final class QueryKey {
 
     /** Generates a QueryKey for a given IP:Port combo.
      *  For a given IP:Port combo, using a different SecretKey and/or SecretPad
-     *  will result in a different QueryKey.  The instance method
-     *  prepareForNetwork() is called prior to returning the QueryKey.
+     *  will result in a different QueryKey.  The return value is constructed
+     *  with prepareForNet equal to true.
+     *  
      * @param ip the IP address of the other node
      * @param port the port of the other node
      */
@@ -171,7 +172,7 @@ public final class QueryKey {
     //--- PUBLIC INNER CLASSES
     
     /**The algorithm and secret key(s) used in generating a QueryKey.
-     * Needed to get a derive a QueryKey from a IP:Port combo.
+     * This is needed to create a QueryKey from a IP:Port combo.
      */
     public static class QueryKeyGenerator {
         // the implementation of the SecretKey - users don't need to know about
