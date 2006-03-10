@@ -322,7 +322,7 @@ public final class SearchSettings extends LimeProps {
      */
     public static final FloatSetting QUERY_SPAM_CUTOFF =
         FACTORY.createSettableFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
-                "SpamManager.displayTreshold",1.0f,0.1f);
+                "SpamManager.displayTreshold",0.1f,1.0f);
 
     /**
      * The percentage of normal results that spam results bring to
@@ -330,12 +330,12 @@ public final class SearchSettings extends LimeProps {
      */
     public static final FloatSetting SPAM_RESULT_RATIO =
 	FACTORY.createSettableFloatSetting("SPAM_RESULT_RATIO", 0.3f,
-		"SpamManager.resultRatio",1.0f,0.2f);
+		"SpamManager.resultRatio",0.2f,1.0f);
     
 	/**
      * Do not issue query keys more than this often
      */
     public static final IntSetting QUERY_KEY_DELAY = 
         FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,
-                "MessageRouter.QueryKeyDelay",10000,10);
+                "MessageRouter.QueryKeyDelay",10,10000);
 }

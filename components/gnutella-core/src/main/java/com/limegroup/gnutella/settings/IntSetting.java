@@ -27,9 +27,9 @@ public final class IntSetting extends AbstractNumberSetting {
      * min permissible values.
      */
 	IntSetting(Properties defaultProps, Properties props, String key, 
-          int defaultInt, String simppKey, int maxSimppVal, int minSimppVal) {
+          int defaultInt, String simppKey, int minSimppVal, int maxSimppVal) {
 		super(defaultProps, props, key, String.valueOf(defaultInt), simppKey,
-                            new Integer(maxSimppVal), new Integer(minSimppVal));
+                            new Integer(minSimppVal), new Integer(maxSimppVal));
     }
         
 	/**

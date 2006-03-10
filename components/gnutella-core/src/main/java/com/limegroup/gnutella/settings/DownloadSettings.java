@@ -35,16 +35,16 @@ public class DownloadSettings extends LimeProps {
      * various parameters of the formulas for skipping acks.
      */
     public static final IntSetting MAX_SKIP_ACKS =
-        FACTORY.createSettableIntSetting("MAX_SKIP_ACKS",5,"max_skip_ack",15,2);
+        FACTORY.createSettableIntSetting("MAX_SKIP_ACKS",5,"max_skip_ack",2,15);
     
     public static final FloatSetting DEVIATION =
-        FACTORY.createSettableFloatSetting("SKIP_DEVIATION",1.3f,"skip_deviation",2.0f,1.0f);
+        FACTORY.createSettableFloatSetting("SKIP_DEVIATION",1.3f,"skip_deviation",1.0f,2.0f);
     
     public static final IntSetting PERIOD_LENGTH =
-        FACTORY.createSettableIntSetting("PERIOD_LENGTH",500,"period_length",2000,100);
+        FACTORY.createSettableIntSetting("PERIOD_LENGTH",500,"period_length",100,2000);
     
     public static final IntSetting HISTORY_SIZE=
-        FACTORY.createSettableIntSetting("HISTORY_SIZE",10,"history_size",50,2);
+        FACTORY.createSettableIntSetting("HISTORY_SIZE",10,"history_size",2,50);
     
     /**
      * Whether the client should use HeadPings when ranking sources
@@ -62,19 +62,19 @@ public class DownloadSettings extends LimeProps {
      * We should stop issuing HeadPings when we have this many verified sources
      */
     public static final IntSetting MAX_VERIFIED_HOSTS = 
-        FACTORY.createSettableIntSetting("MAX_VERIFIED_HOSTS",1,"max_verified_hosts",5,0);
+        FACTORY.createSettableIntSetting("MAX_VERIFIED_HOSTS",1,"max_verified_hosts",0,5);
     
     /**
      * We should not schedule more than this many head pings at once
      */
     public static final IntSetting PING_BATCH =
-        FACTORY.createSettableIntSetting("PING_BATCH",10,"PingRanker.pingBatch",50,1);
+        FACTORY.createSettableIntSetting("PING_BATCH",10,"PingRanker.pingBatch",1,50);
     
     /**
      * Do not start new workers more than this often
      */
     public static final IntSetting WORKER_INTERVAL =
-        FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",20000,1);
+        FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",1,20000);
     
     /**
      * Use a download SelectionStrategy tailored for previewing if the file's extension is

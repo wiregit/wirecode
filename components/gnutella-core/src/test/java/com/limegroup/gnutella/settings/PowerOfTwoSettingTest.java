@@ -38,21 +38,21 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
                 "", 64, "", BIG_POWER_OF_TWO, 1);
         assertEquals("Created setting has unexpected value", 64, set64.getValue());
         PowerOfTwoSetting set128 = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", 128, "", BIG_POWER_OF_TWO, 1);
+                "", 128, "", 1, BIG_POWER_OF_TWO);
         assertEquals("Created setting has unexpected value", 128, set128.getValue());
         PowerOfTwoSetting set256 = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", 256, "", BIG_POWER_OF_TWO, 1);
+                "", 256, "", 1, BIG_POWER_OF_TWO);
         assertEquals("Created setting has unexpected value", 256, set256.getValue());
         
         // Now test with the real max and min from QRT_TABLE_SIZE_IN_KILOBYTES
         set64 = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", 64, "", 256, 64);
+                "", 64, "", 64, 256);
         assertEquals("Created setting has unexpected value", 64, set64.getValue());
         set128 = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", 128, "", 256, 64);
+                "", 128, "", 64, 256);
         assertEquals("Created setting has unexpected value", 128, set128.getValue());
         set256 = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", 256, "", 256, 64);
+                "", 256, "", 64, 256);
         assertEquals("Created setting has unexpected value", 256, set256.getValue());
     }
     
@@ -60,22 +60,22 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
         PowerOfTwoSetting setting = null;
         try {
             setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
-                    "", 65, "", BIG_POWER_OF_TWO, 1);
+                    "", 65, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}
         try {
             setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
-                    "", 192, "", BIG_POWER_OF_TWO, 1);
+                    "", 192, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}
         try {
             setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
-                    "", 0, "", BIG_POWER_OF_TWO, 1);
+                    "", 0, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}
         try {
             setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
-                    "", -2, "", BIG_POWER_OF_TWO, 1);
+                    "", -2, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}
     }
@@ -85,7 +85,7 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
         long max = 256;
         long defaultValue = 64;
         PowerOfTwoSetting setting = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", defaultValue, "", max, min);
+                "", defaultValue, "", min, max);
         assertEquals("Created setting has unexpected value", defaultValue, setting.getValue());
         
         setting.setValue(128);
@@ -129,7 +129,7 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
     public void testNormalizeValue() {
         long testValue = BIG_POWER_OF_TWO;
         PowerOfTwoSetting setting = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", 8, "", BIG_POWER_OF_TWO, 1);
+                "", 8, "", 1, BIG_POWER_OF_TWO);
         while (testValue > 1) {
             setting.setValue(testValue-1);
             testValue >>= 1;

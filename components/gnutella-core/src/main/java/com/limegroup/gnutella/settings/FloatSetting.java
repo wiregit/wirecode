@@ -23,9 +23,9 @@ public final class FloatSetting extends AbstractNumberSetting {
 	}
 
 	FloatSetting(Properties defaultProps, Properties props, String key, 
-                 float defaultFloat, String simppKey, float max, float min) {
+                 float defaultFloat, String simppKey, float min, float max) {
 		super(defaultProps, props, key, String.valueOf(defaultFloat), 
-              simppKey, new Float(max), new Float(min) );
+              simppKey, new Float(min), new Float(max) );
 	}
         
 	/**

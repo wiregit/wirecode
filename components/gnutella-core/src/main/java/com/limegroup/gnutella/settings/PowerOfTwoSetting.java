@@ -21,8 +21,8 @@ public final class PowerOfTwoSetting extends LongSetting {
     }
 
     PowerOfTwoSetting(Properties defaultProps, Properties props, String key, 
-                long defaultLong, String simppSetting, long max, long min) {
-        super(defaultProps, props, key, defaultLong, simppSetting, max, min);
+                long defaultLong, String simppSetting, long min, long max) {
+        super(defaultProps, props, key, defaultLong, simppSetting, min, max);
         if (! isPowerOfTwo(defaultLong)) {
             throw new IllegalArgumentException("Default value is not a power of two");
         }
@@ -62,7 +62,10 @@ public final class PowerOfTwoSetting extends LongSetting {
         }
         
         if (longValue <= 0) {
-            return MIN_VALUE.toString();
+            if (MIN_VALUE != null) {
+                return MIN_VALUE.toString();
+            }
+            return super.normalizeValue("1"); // The smallest power of two
         }
         
         long lowestSetBit = (~longValue+1) & longValue;

@@ -24,9 +24,9 @@ public class LongSetting extends AbstractNumberSetting {
 
 
 	LongSetting(Properties defaultProps, Properties props, String key, 
-                long defaultLong, String simppSetting, long max, long min) {
+                long defaultLong, String simppSetting, long min, long max) {
 		super(defaultProps, props, key, String.valueOf(defaultLong), 
-                                 simppSetting, new Long(max), new Long(min) );
+                                 simppSetting, new Long(min), new Long(max) );
 	}
         
 	/**

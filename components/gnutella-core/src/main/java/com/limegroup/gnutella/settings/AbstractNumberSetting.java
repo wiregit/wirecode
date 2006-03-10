@@ -20,7 +20,7 @@ public abstract class AbstractNumberSetting extends Setting {
     
     protected AbstractNumberSetting(Properties defaultProps, Properties props,
                                     String key, String defaultValue, 
-                              String simppKey, Number max, Number min) {
+                              String simppKey, Number min, Number max) {
         super(defaultProps, props, key, defaultValue, simppKey);
         if(max != null && min != null) {//do we need to check max, min?
             // All standard library Numbers implement Comparable

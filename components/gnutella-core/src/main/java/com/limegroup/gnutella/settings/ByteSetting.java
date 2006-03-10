@@ -24,9 +24,9 @@ public final class ByteSetting extends AbstractNumberSetting {
 
 
 	ByteSetting(Properties defaultProps, Properties props, String key, 
-                byte defaultByte, String simppKey, byte max, byte min) {
+                byte defaultByte, String simppKey, byte min, byte max) {
 		super(defaultProps, props, key, String.valueOf(defaultByte), 
-              simppKey, new Byte(max), new Byte(min) );
+              simppKey, new Byte(min), new Byte(max) );
 	}
         
 	/**

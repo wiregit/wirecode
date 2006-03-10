@@ -31,27 +31,27 @@ public final class UltrapeerSettings extends LimeProps {
 	 * Setting for the maximum leaf connections.
 	 */
 	public static final IntSetting MAX_LEAVES =
-		FACTORY.createSettableIntSetting("MAX_LEAVES", 30,"UltrapeerSettings.maxLeaves",96,16);
+		FACTORY.createSettableIntSetting("MAX_LEAVES", 30,"UltrapeerSettings.maxLeaves",16,96);
     
     /**
      * The minimum number of upstream kbytes per second that 
      * a node must be able to transfer in order to qualify as a ultrapeer.
      */
     public static final IntSetting MIN_UPSTREAM_REQUIRED =
-        FACTORY.createSettableIntSetting("MIN_UPSTREAM_REQUIRED",10,"UltrapeerSettings.MinUpstream",32,8);
+        FACTORY.createSettableIntSetting("MIN_UPSTREAM_REQUIRED",10,"UltrapeerSettings.MinUpstream",8,32);
     
     /**
      * The minimum number of downlstream kbytes per second that 
      * a node must be able to transfer in order to qualify as a ultrapeer.
      */
     public static final IntSetting MIN_DOWNSTREAM_REQUIRED =
-        FACTORY.createSettableIntSetting("MIN_DOWNSTREAM_REQUIRED",20,"UltrapeerSettings.MinDownstream",64,16);
+        FACTORY.createSettableIntSetting("MIN_DOWNSTREAM_REQUIRED",20,"UltrapeerSettings.MinDownstream",16,64);
     
     /**
      * The minimum average uptime in seconds that a node must have to qualify for ultrapeer status.
      */
     public static final IntSetting MIN_AVG_UPTIME =
-        FACTORY.createSettableIntSetting("MIN_AVG_UPTIME",3600,"UltrapeerSettings.MinAvgUptime",48*3600,3600);
+        FACTORY.createSettableIntSetting("MIN_AVG_UPTIME",3600,"UltrapeerSettings.MinAvgUptime",3600,48*3600);
     
     /**
      * Setting for whether or not the MIN_CONNECT_TIME is required.
@@ -64,19 +64,19 @@ public final class UltrapeerSettings extends LimeProps {
      * qualify for Ultrapeer status.
      */
     public static final IntSetting MIN_CONNECT_TIME =
-        FACTORY.createSettableIntSetting("MIN_CONNECT_TIME",10,"UltrapeerSettings.MinConnectTime",30,0);
+        FACTORY.createSettableIntSetting("MIN_CONNECT_TIME",10,"UltrapeerSettings.MinConnectTime",0,30);
     
     /**
      * The minimum current uptime in seconds that a node must have to qualify for Ultrapeer status.
      */
     public static final IntSetting MIN_INITIAL_UPTIME =
-        FACTORY.createSettableIntSetting("MIN_INITIAL_UPTIME",120*60,"UltrapeerSettings.MinInitialUptime",48*3600,120*60);
+        FACTORY.createSettableIntSetting("MIN_INITIAL_UPTIME",120*60,"UltrapeerSettings.MinInitialUptime",120*60,48*3600);
     
     /**
-     * The amount of time to wait between attempts to become an Ultrapeer.
+     * The amount of time to wait between attempts to become an Ultrapeer, in milliseconds.
      */
     public static final IntSetting UP_RETRY_TIME =
         FACTORY.createSettableIntSetting("UP_RETRY_TIME",180*60*1000,
-                "UltrapeerSettings.UpRetryTime",24*3600*1000,180*60*1000);
+                "UltrapeerSettings.UpRetryTime",180*60*1000,24*3600*1000);
 }
 
