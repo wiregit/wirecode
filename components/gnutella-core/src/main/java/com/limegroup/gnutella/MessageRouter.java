@@ -655,10 +655,11 @@ public abstract class MessageRouter {
      */
     protected boolean hasValidQueryKey(InetAddress ip, int port, 
                                        QueryRequest qr) {
-        if (qr.getQueryKey() == null)
+        QueryKey qk = qr.getQueryKey();
+        if (qk == null)
             return false;
-        QueryKey computedQK = QueryKey.getQueryKey(ip, port);
-        return qr.getQueryKey().equals(computedQK);
+        
+        return QueryKey.validate(qk, ip, port);
     }
 
 	/**
