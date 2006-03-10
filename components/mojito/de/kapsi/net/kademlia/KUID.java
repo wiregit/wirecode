@@ -176,6 +176,14 @@ public class KUID {
         return new KUID(t, result);
     }
     
+    public KUID invert() {
+        byte[] result = new byte[id.length];
+        for(int i = 0; i < result.length; i++) {
+            result[i] = (byte)~id[i];
+        }
+        return new KUID(type, result);
+    }
+    
     public int write(OutputStream out) throws IOException {
         out.write(id, 0, id.length);
         return id.length;
