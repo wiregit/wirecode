@@ -79,8 +79,6 @@ public class DHTNodeStat implements DHTStats{
         if(nodeID == null) {
             nodeID = context.getLocalNodeID().toHexString();
         }
-        else {
-            writer.write(nodeID + FILE_DELIMITER + stat);
-        }
+        writer.write(nodeID + FILE_DELIMITER + stat);
     }
 }
