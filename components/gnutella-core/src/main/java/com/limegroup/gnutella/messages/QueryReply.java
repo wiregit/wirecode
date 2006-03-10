@@ -483,6 +483,7 @@ public class QueryReply extends Message implements SecureMessage {
      * Sets this reply to be considered a 'browse host' reply.
      */
     public void setBrowseHostReply(boolean isBH) {
+	parseResults();
         _data.setBrowseHostReply(isBH);
     }
     
@@ -491,6 +492,7 @@ public class QueryReply extends Message implements SecureMessage {
      * Gets whether or not this reply is from a browse host request.
      */
     public boolean isBrowseHostReply() {
+	parseResults();
         return _data.isBrowseHostReply();
     }
 
