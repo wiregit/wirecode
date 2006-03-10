@@ -135,9 +135,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             for(Iterator it = response.iterator(); it.hasNext(); ) {
                 Node node = (Node)it.next();
                 
-                //ignore ourselve
-                if(node.equals(context.getLocalNode()))continue;
-                
                 if (!isQueried(node) 
                         && !isYetToBeQueried(node)) {
                     if (LOG.isTraceEnabled()) {
@@ -236,7 +233,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             KUID furthest = lookup.invert();
             Node worstResponse = (Node)responses.getBest(furthest);
             Node bestToQuery = (Node)toQuery.getBest(lookup);
-            if(worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
+            
+            if(bestToQuery == null || 
+                    worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
             
                 Node bestResponse = (Node)responses.getBest(lookup);
                 
@@ -246,10 +245,13 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                           + round + " lookup rounds and " 
                           + queried.size() + " queried Nodes");
                 }
-                
-                Collection nodes = responses.getBest(lookup, responses.size());
-                finish(lookup, nodes, time);
-          
+            
+                if (isValueLookup()) {
+                    finish(lookup, null, time);
+                } else {
+                    Collection nodes = responses.getBest(lookup, responses.size());
+                    finish(lookup, nodes, time);
+                }
                 finished = true;
                 return;
             }
@@ -257,7 +259,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         int numLookups = LookupSettings.getA() - activeSearches;
         if(numLookups>0) {
-            
             List bucketList = toQuery.getBest(lookup, queried, numLookups);
             final int size = bucketList.size();
             
@@ -291,6 +292,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     protected void markAsQueried(Node node) {
         queried.add(node.getNodeID());
+        toQuery.remove(node.getNodeID());
     }
     
     protected boolean isQueried(KUID nodeId) {
