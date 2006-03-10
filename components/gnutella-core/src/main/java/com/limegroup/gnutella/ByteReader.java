@@ -113,7 +113,7 @@ public class ByteReader {
                 // this is apparently thrown under strange circumstances.
                 // interpret as an IOException.
                 throw new IOException("aiooe.");
-            }			    
+            }
 			switch(c) {
 			    // if this was a \n character, break out of the reading loop
 			    case  N: keepReading = false;

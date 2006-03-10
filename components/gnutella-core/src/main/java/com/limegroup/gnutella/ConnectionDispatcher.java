@@ -100,14 +100,13 @@ public class ConnectionDispatcher {
             return;
         }
 
-        // Only GNUTELLA, LIMEWIRE, CONNECT & UNKNOWN can be processed without a new thread.
         // GNUTELLA & LIMEWIRE can do this because if we dispatched with 'newThread' true,
         // that means it was dispatched from NIODispatcher, meaning the connection can
         // support asynchronous handshaking & looping, so acceptConnection will return immediately.
         // Conversely, if 'newThread' is false, the connection has already been given its own
         // thread, so the fact that acceptConnection will block is okay.
         //
-        // CONNECT & UNKNOWN perform no blocking operations, so either way, it is okay to process
+        // The others perform no blocking operations, so either way, it is okay to process
         // them immediately.
         switch(protocol) {
         case GNUTELLA:
@@ -122,6 +121,10 @@ public class ConnectionDispatcher {
             if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
                 RouterService.getAcceptor().checkFirewall(client.getInetAddress());
             IOUtils.close(client);
+            return;
+        case CHAT:
+            HTTPStat.CHAT_REQUESTS.incrementStat();
+            ChatManager.instance().accept(client);
             return;
         case UNKNOWN:
             HTTPStat.UNKNOWN_REQUESTS.incrementStat();
@@ -151,19 +154,18 @@ public class ConnectionDispatcher {
                     HTTPStat.GIV_REQUESTS.incrementStat();
                     RouterService.getDownloadManager().acceptDownload(client);
                     break;
-                case CHAT:
-                    HTTPStat.CHAT_REQUESTS.incrementStat();
-                    ChatManager.instance().accept(client);
-                    break;
                 case MAGNET:
                     HTTPStat.MAGNET_REQUESTS.incrementStat();  
                     ExternalControl.fireMagnet(client);
                     break;
                 default:
+                    IOUtils.close(client);
                     LOG.error("Parsed to unsupported protocol: " + protocol + ", word: " + word);
                 }
                 
-                IOUtils.close(client);
+                // We must not close the connection at this point, because some things may
+                // have only done a temporary blocking operation and then handed the socket
+                // off to a callback (such as DownloadManager parsing the GIV).
             }
         };
         

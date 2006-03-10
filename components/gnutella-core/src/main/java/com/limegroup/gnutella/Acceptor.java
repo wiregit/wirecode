@@ -673,10 +673,12 @@ public class Acceptor {
             // See if we have a full word.
             for(int i = 0; i < buffer.position(); i++) {
                 if(buffer.get(i) == ' ') {
-                    buffer.position(i+1); // reposition so data after the word is transferred
+                    String word = new String(buffer.array(), 0, i);
+                    System.out.println("Dispatching with word: " + word + ", full buffer: " + new String(buffer.array()));
+                    buffer.limit(buffer.position()).position(i+1);
+                    buffer.compact();
                     source.interest(false);
-                    RouterService.getConnectionDispatcher().
-                        dispatch(new String(buffer.array(), 0, i), client, true);
+                    RouterService.getConnectionDispatcher().dispatch(word, client, true);
                     return;
                 }
             }
