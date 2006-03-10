@@ -83,7 +83,7 @@ public final class DefaultMessageHandler extends MessageHandler
         final RouteTable routeTable = context.getRouteTable();
         
         //update contact info
-        if(!node.getSocketAddress().equals(src)) {
+        /*if(!node.getSocketAddress().equals(src)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace(Node.toString(nodeId, src) + " claims to be " + node);
             }
@@ -140,9 +140,10 @@ public final class DefaultMessageHandler extends MessageHandler
                         }
             });
             context.getMessageDispatcher().send(node, ping, handler);
-        } else {
+        } else {*/
+            node.setSocketAddress(src);
             routeTable.updateTimeStamp(node);
-        }
+        //}
     }
     
     private void addContactInfo(KUID nodeId, SocketAddress src, Message message) throws IOException {

@@ -10,7 +10,7 @@ import java.net.SocketAddress;
 public class Node {
     
     protected final KUID nodeId;
-    protected final SocketAddress address;
+    protected SocketAddress address;
     
     private long timeStamp = 0L;
     private int failures = 0;
@@ -45,6 +45,12 @@ public class Node {
     
     public SocketAddress getSocketAddress() {
         return address;
+    }
+    
+    public SocketAddress setSocketAddress(SocketAddress address) {
+        SocketAddress o = this.address;
+        this.address = address;
+        return o;
     }
     
     public int hashCode() {
