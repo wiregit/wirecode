@@ -184,6 +184,29 @@ public class KUID {
         return new KUID(type, result);
     }
     
+    /**
+     * Computes the closest address to targetID between this KUID and nodeID
+     * 
+     * @param nodeID the KUID to compare to
+     * @param targetID the target ID
+     * @return true if this is closer to targetID, false otherwise
+     */
+    public boolean isCloser(KUID nodeID, KUID targetID) {
+        
+        for (int i=0;i<id.length;i++){
+
+            byte d1 = (byte)( id[i] ^ targetID.id[i] );
+            byte d2 = (byte)( nodeID.id[i] ^ targetID.id[i] );
+
+            int diff = (d1&0xff) - (d2&0xff);
+            
+            if ( diff < 0 ){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public int write(OutputStream out) throws IOException {
         out.write(id, 0, id.length);
         return id.length;
