@@ -132,10 +132,6 @@ public class PatriciaTrie {
         return (key.equals(entry.key) ? entry.value : null);
     }
     
-    public Object getBest(Object key) {
-        Entry entry = getR(root.left, -1, key);
-        return (!isRoot(entry) ? entry.value : null);
-    }
     
     private Entry getR(Entry h, int bitIndex, Object key) {
         if (h.bitIndex <= bitIndex) {
@@ -146,6 +142,23 @@ public class PatriciaTrie {
             return getR(h.left, h.bitIndex, key);
         } else {
             return getR(h.right, h.bitIndex, key);
+        }
+    }
+    
+    public Object getBest(Object key) {
+        Entry entry = getBestR(root.left, -1, key, root);
+        return (!isRoot(entry) ? entry.value : null);
+    }
+    
+    private Entry getBestR(Entry h, int bitIndex, Object key, Entry p) {
+        if (h.bitIndex <= bitIndex) {
+            return isRoot(h) ? p : h;
+        }
+
+        if (!isBitSet(key, h.bitIndex)) {
+            return getBestR(h.left, h.bitIndex, key, h);
+        } else {
+            return getBestR(h.right, h.bitIndex, key, h);
         }
     }
     
