@@ -35,7 +35,7 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
     public void testConstructors() throws Exception {
         // As of early 2006, {64, 128, 256} are the only legal values we use
         PowerOfTwoSetting set64 = new PowerOfTwoSetting(new Properties(), new Properties(),
-                "", 64, "", BIG_POWER_OF_TWO, 1);
+                "", 64, "", 1, BIG_POWER_OF_TWO);
         assertEquals("Created setting has unexpected value", 64, set64.getValue());
         PowerOfTwoSetting set128 = new PowerOfTwoSetting(new Properties(), new Properties(),
                 "", 128, "", 1, BIG_POWER_OF_TWO);
