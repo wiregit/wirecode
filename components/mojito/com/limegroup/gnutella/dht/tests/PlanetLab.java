@@ -35,8 +35,13 @@ public class PlanetLab {
         return dhts;
     }
     
+    public static DHT createBootstrapDHT(int port) {
+        return (DHT)createDHTs(port, 1).get(0);
+    }
+    
     public static void bootstrap(List dhts, InetSocketAddress dst) {
         System.out.println("Bootstrapping from " + dst);
+        
         long start = System.currentTimeMillis();
         
         final Object lock = new Object();
@@ -46,6 +51,8 @@ public class PlanetLab {
             DHT dht = (DHT)dhts.get(i);
             
             try {
+                
+                //System.out.println("Bootstraping " + dht);
                 synchronized(lock) {
                     dht.bootstrap(dst, new BootstrapListener() {
                         public void bootstrap(KUID nodeId, Collection nodes, long time) {
@@ -75,6 +82,13 @@ public class PlanetLab {
         
         long end = System.currentTimeMillis();
         System.out.println("Bootstraping of " + dhts.size() + " Nodes finished in " + (end-start) + " ms");
+        
+        try {
+            Thread.sleep(10000);
+        } catch (Exception err) {
+            err.printStackTrace();
+        }
+        
         shutdown();
     }
     
@@ -99,13 +113,14 @@ public class PlanetLab {
         System.out.println("Instances: " + number);
         System.out.println("Bootstrap: " + dst);
         System.out.println("Test: " + test);
-                     
-        List dhts = createDHTs(port, number);
+        
         switch(test) {
             case 0:
-                System.out.println(dhts.get(0) + " is ready");
+                DHT dht = createBootstrapDHT(port);
+                System.out.println("Bootstrap DHT " + dht + " is ready!");
                 break;
             case 1:
+                List dhts = createDHTs(port, number);
                 bootstrap(dhts, dst);
                 break;
             default:
@@ -113,6 +128,7 @@ public class PlanetLab {
                 System.exit(-1);
                 break;
         }
+        
     }
     
     private static void shutdown() {

@@ -98,9 +98,9 @@ public class RouteTable {
         return get(nodeId, false);
     }
     
-    public Node get(KUID nodeId, boolean checkCached) {
+    public Node get(KUID nodeId, boolean checkAndUpdateCache) {
         Node node = (Node)routeTableMap.get(nodeId);
-        if (node == null && checkCached) {
+        if (node == null && checkAndUpdateCache) {
             node = (Node)cache.get(nodeId);
         }
         return node;
@@ -164,6 +164,7 @@ public class RouteTable {
         if (node != null) {
             node.updateTimeStamp();
             staleNodes.remove(node.getNodeID());
+            updateIfCached(node.getNodeID());
             return true;
         }
         return false;

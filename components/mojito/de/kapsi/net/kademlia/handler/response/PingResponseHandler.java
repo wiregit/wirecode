@@ -18,7 +18,6 @@ import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
-import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 public class PingResponseHandler extends AbstractResponseHandler {
     
@@ -33,14 +32,6 @@ public class PingResponseHandler extends AbstractResponseHandler {
 
     public void handleResponse(final KUID nodeId, final SocketAddress src, 
             Message message, final long time) throws IOException {
-        
-        if (!(message instanceof PingResponse)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("PingResponseHandler cannot handle " + message 
-                                + " from " + Node.toString(nodeId, src));
-            }
-            return;
-        }
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Ping to " + Node.toString(nodeId, src) 

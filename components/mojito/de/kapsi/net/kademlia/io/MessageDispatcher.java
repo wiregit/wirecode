@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
-import de.kapsi.net.kademlia.handler.DefaultMessageHandler;
+import de.kapsi.net.kademlia.handler.DefaultMessageHandler2;
 import de.kapsi.net.kademlia.handler.RequestHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.request.FindNodeRequestHandler;
@@ -63,7 +63,7 @@ public class MessageDispatcher implements Runnable {
     
     private Context context;
     
-    private DefaultMessageHandler defaultHandler;
+    private DefaultMessageHandler2 defaultHandler;
     private PingRequestHandler pingHandler;
     private FindNodeRequestHandler findNodeHandler;
     private FindValueRequestHandler findValueHandler;
@@ -72,7 +72,7 @@ public class MessageDispatcher implements Runnable {
     public MessageDispatcher(Context context) {
         this.context = context;
         
-        defaultHandler = new DefaultMessageHandler(context);
+        defaultHandler = new DefaultMessageHandler2(context);
         pingHandler = new PingRequestHandler(context);
         findNodeHandler = new FindNodeRequestHandler(context);
         findValueHandler = new FindValueRequestHandler(context);
@@ -272,7 +272,10 @@ public class MessageDispatcher implements Runnable {
         if (receipt != null) {
             long time = receipt.time();
             defaultHandler.handleResponse(nodeId, src, message, time); // BEFORE!
-            receipt.handleSuccess(nodeId, src, message);
+            
+            if (receipt.getHandler() != defaultHandler) {
+                receipt.handleSuccess(nodeId, src, message);
+            }
         } else if (message instanceof RequestMessage) {
             handleRequest(nodeId, src, message);
             defaultHandler.handleRequest(nodeId, src, message); // AFTER!

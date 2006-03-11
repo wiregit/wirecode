@@ -198,7 +198,7 @@ public class KUID {
             byte d1 = (byte)( id[i] ^ targetID.id[i] );
             byte d2 = (byte)( nodeID.id[i] ^ targetID.id[i] );
 
-            int diff = (d1&0xff) - (d2&0xff);
+            int diff = (d1 & 0xFF) - (d2 & 0xFF);
             
             if ( diff < 0 ){
                 return true;
