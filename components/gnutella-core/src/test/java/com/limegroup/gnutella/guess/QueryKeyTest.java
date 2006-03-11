@@ -177,9 +177,9 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
             
             byte[] resultBytes = getKeyBytes(Inet4Address.getByAddress(ipBytes), left);
             
+            int byteCount = resultBytes.length;
             int result = 0;
-            
-            for(int i=0; i < 4; ++i) {
+            for(int i=byteCount-4; i<byteCount ; ++i) {
                 result <<= 8;
                 result |= 0xFF & resultBytes[i];
             }
@@ -191,9 +191,12 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     // Breaks abstraction, but ensures that TEA is implemented correctly
     public void testTEAtestVectors() throws Exception {
         TEAVectorTester key = new TEAVectorTester(0,0,0,0,0,0);
+        long cipherBlock = ((Long)invokeMethod(key, "encrypt", 0x0L)).longValue();
+        assertEquals("TEA test vecotr failed", 0x41EA3A0A94BAA940L, cipherBlock);
         assertEquals("TEA test vector failed.", 0x41EA3A0A, key.encrypt(0,0));
         
-        key = new TEAVectorTester(0,0,0,0,0,32); // get at the other half of the block
+        // get at the other half of the block and test the 64-bit rotation code
+        key = new TEAVectorTester(0,0,0,0,0,32); 
         assertEquals("TEA test vector failed.", 0x94BAA940, key.encrypt(0,0));
     }
 
@@ -204,4 +207,15 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         qk.toString();
     }
 
+    
+    // Helper methods
+    private Object invokeMethod(Object target, String name, long arg)
+        throws NoSuchMethodException, IllegalAccessException,
+        java.lang.reflect.InvocationTargetException {
+        return PrivilegedAccessor.invokeMethod(target, name, 
+                new Object[] { new Long(arg)},
+                new Class[] { long.class }
+            );
+    }
+    
 }
