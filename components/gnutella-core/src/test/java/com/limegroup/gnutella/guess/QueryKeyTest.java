@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.guess;
 
 import java.io.ByteArrayOutputStream;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -67,6 +69,7 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(qk1,qk2);
     }
 
+    /*
     public void testSamePadModulo() throws Exception {
         QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         InetAddress ip = null;
@@ -116,7 +119,7 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         qk2 = QueryKey.getQueryKey(ip, port, secretKey);
         assertEquals(qk1,qk2);
     }
-
+    */
 
     // Makes sure QueryKeys have no problem going in and out of GGEP blocks
     public void testQueryKeysAndGGEP() throws Exception {
@@ -144,6 +147,54 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertEquals("qks not equal, i = " + i,
                        queryKey, queryKey2);
         }
+    }
+    
+    private class TEAVectorTester extends QueryKey.QueryKeyGenerator {
+        /** Set up a tester with given TEA encryption keys */
+        public TEAVectorTester(int k0, int k1, int k2, int k3, 
+                int preRotate, int postRotate) {
+            super(k0,k1,k2,k3, preRotate, postRotate);
+        }
+        
+        /** In the absence of 0x00 and 0x1C bytes, returns the
+         * left int of the TEA encryption block after encrypting (left,right).
+         * Use the postRotate to get at different parts of the TEA encryption
+         * output.
+         */
+        public int encrypt(int left, int right) throws UnknownHostException {
+            // Prepare right for the unusual encoding
+            // of IP addresses as ints used in QueryKeyGenerator
+            for(int i=0x80; i>0; i <<= 8) {
+                if ((right & i) != 0) {
+                    right = (~right) ^ (i-1) ^ i;
+                }
+            }
+            byte[] ipBytes = new byte[4];
+            for(int i=0; i <= 3; ++i) {
+                ipBytes[i] = (byte) right;
+                right >>>= 8;
+            }
+            
+            byte[] resultBytes = getKeyBytes(Inet4Address.getByAddress(ipBytes), left);
+            
+            int result = 0;
+            
+            for(int i=0; i < 4; ++i) {
+                result <<= 8;
+                result |= 0xFF & resultBytes[i];
+            }
+            
+            return result;
+        }
+    }
+    
+    // Breaks abstraction, but ensures that TEA is implemented correctly
+    public void testTEAtestVectors() throws Exception {
+        TEAVectorTester key = new TEAVectorTester(0,0,0,0,0,0);
+        assertEquals("TEA test vector failed.", 0x41EA3A0A, key.encrypt(0,0));
+        
+        key = new TEAVectorTester(0,0,0,0,0,32); // get at the other half of the block
+        assertEquals("TEA test vector failed.", 0x94BAA940, key.encrypt(0,0));
     }
 
     public void testOddsAndEnds() throws Exception {

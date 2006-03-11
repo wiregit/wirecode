@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Random;
-
-import org.logi.crypto.keys.DESKey;
+import java.security.SecureRandom;
 
 import com.limegroup.gnutella.ByteOrder;
 
@@ -52,8 +50,6 @@ public final class QueryKey {
     private final int _hashCode;
 
     static {
-        // initialize the logi.crypto package
-        org.logi.crypto.Crypto.initRandom();
         secretKey = new QueryKeyGenerator();
     }
     
@@ -190,13 +186,60 @@ public final class QueryKey {
     public static class QueryKeyGenerator {
         // the implementation of the SecretKey - users don't need to know about
         // it
-        private final DESKey _DESKey;
-        // for DES, we need a 2-byte pad, since the IP:Port combo is 6 bytes.
-        private final byte[] _pad;
+        
+        // This uses TEA (Tiny Encryption Algorithm) from
+        // D. Wheeler and R. Needham of Cambridge University.
+        // TEA is believed to be stronger than the DES cipher
+        // used in the previous LW QK algorithm, is much faster
+        // in software, and has an extremely small footprint in
+        // the CPU's data and instruction caches.
+        
+        // Pre- and post- encryption cyclic shift values
+        // to get random padding equivalent to the previous
+        // DES implementation.
+        protected final int PRE_ROTATE;
+        protected final int POST_ROTATE;
+        
+        // TEA encryption keys
+        protected final int LK0;
+        protected final int LK1;
+        protected final int RK0;
+        protected final int RK1;
+        
+        // Keys for "whitening" the left and right
+        // halves of the encryption block before and
+        // after encryption.
+        protected final long PRE_WHITEN_KEY;
+        protected final long POST_WHITEN_KEY;
+        
+        // Constructor is package scoped for unit tests
+        /* package */ QueryKeyGenerator(int k0, int k1, int k2, int k3,
+                int preRotate, int postRotate) {
+            
+            // Set cyclic shifts to allow getting at differet
+            // parts of the output
+            PRE_ROTATE = preRotate & 0x3F;
+            POST_ROTATE = postRotate & 0x3F;
+            
+            // No whitening, to expose TEA to tests
+            PRE_WHITEN_KEY = POST_WHITEN_KEY = 0;
+            
+            // Use given TEA keys
+            LK0 = k0; LK1 = k1; RK0 = k2; RK1 = k3;
+        }
         private QueryKeyGenerator() {
-            _DESKey = new DESKey();
-            _pad = new byte[2];
-            (new Random()).nextBytes(_pad);
+           SecureRandom rand = new SecureRandom();
+           PRE_WHITEN_KEY = rand.nextLong();
+           POST_WHITEN_KEY = rand.nextLong();
+          
+           LK0 = rand.nextInt();
+           LK1 = rand.nextInt();
+           RK0 = rand.nextInt();
+           RK1 = rand.nextInt();
+           
+           int rotations = rand.nextInt();
+           PRE_ROTATE = rotations & 0x3F; // Low 6 bits
+           POST_ROTATE = rotations >>> 26; // High 6 bits
         }
         
         /** Returns the raw bytes for a QueryKey, which may need to
@@ -207,43 +250,62 @@ public final class QueryKey {
             byte[] toEncrypt = new byte[8];
             // get all the input bytes....
             byte[] ipBytes = ip.getAddress();
-            short shortPort = (short) port;
-            byte[] portBytes = new byte[2];
-            ByteOrder.short2leb(shortPort, portBytes, 0);
-            // dynamically set where the secret pad will be....
-            int first, second;
-            first = _pad[0] % 8;
-            if (first < 0)
-                first *= -1;
-            second = _pad[1] % 8;
-            if (second < 0)
-                second *= -1;
-            if (second == first) {
-                if (first == 0)
-                    second = 1;
-                else
-                    second = first - 1;
+            int ipInt = 0;
+            // Load the first 4 bytes into ipInt in little-endian order,
+            // with the twist that any negative bytes end up flipping
+            // all of the higher order bits, but we don't care.
+            for(int i=3; i >= 0; --i) {
+                ipInt ^= ipBytes[i] << (i << 3);
             }
-            // put everything in toEncrypt
-            toEncrypt[first] = _pad[0];
-            toEncrypt[second] = _pad[1];
-            int j = 0;
-            for (int i = 0; i < 4; i++) {
-                while ((j == first) || (j == second))
-                    j++;
-                toEncrypt[j++] = ipBytes[i];
+            
+            // Left and Right halves of the TEA block
+            // Start out with 64 bits |0x00|0x00|port(2bytes)|ip(4bytes)
+          
+            // Pre-encryption cyclic shift  
+            long fullBlock = (((long)port) << 32) | (ipInt & 0xFFFFFFFFL);
+            fullBlock = (fullBlock << PRE_ROTATE) | (fullBlock >>> (64-PRE_ROTATE));
+            
+            // Pre-encryption whitening
+            fullBlock ^= PRE_WHITEN_KEY;
+            
+            // 32 cycle (a.k.a. 64 Feistel round) TEA encryption
+            int left =  (int) (fullBlock >> 32);
+            int right = (int) fullBlock;
+            for(int cycleCount = 32, roundKey=0; cycleCount > 0; --cycleCount) {
+                roundKey += 0x9E3779B9;
+                left  += ((right<<4)+LK0) ^ (right+roundKey) ^ ((right>>>5)+LK1);
+                right += ( (left<<4)+RK0) ^ ( left+roundKey) ^ ( (left>>>5)+RK1);
             }
-            for (int i = 0; i < 2; i++) {
-                while ((j == first) || (j == second))
-                    j++;
-                toEncrypt[j++] = portBytes[i];
+            fullBlock = (((long)left) << 32) | (right & 0xFFFFFFFFL);
+            
+            // Post-encryption whitening
+            fullBlock ^= POST_WHITEN_KEY;
+            
+            // Post-encryption cyclic shift
+            fullBlock = (fullBlock << POST_ROTATE) | (fullBlock >>> (64-POST_ROTATE));
+            
+            // 32-bit QK gives attackers the least amount of information
+            // about our secret key while still not making it worth their
+            // while to try and make a botnet out of the Gnutella network
+            byte[] out = new byte[4];
+            
+            // Copy bytes that arent 0x00 or 0x1C into output
+            int outIndex = out.length - 1;
+            for (left=(int)(fullBlock >> 32),right=(int)fullBlock; outIndex>=0; left >>>= 8) {
+                if (left == 0) {
+                    // get more data
+                    left = right;
+                    right = ~right; // This ensures loop termination
+                    // Worst case is 0x1CnNnNnN 0x1CnNnNnN, where nN is 0 or 1C.
+                }
+                int lowByte = left & 0xFF;
+                if (lowByte != 0 && lowByte != 0x1C) {
+                    out[outIndex] = (byte) lowByte;
+                    --outIndex;
+                }
             }
-            // encrypt that bad boy!
-            byte[] encrypted = new byte[8];
-            synchronized (_DESKey) {
-                _DESKey.encrypt(toEncrypt, 0, encrypted, 0);
-            }
-            return encrypted;
+                                  
+            return out;
         }
     }
     //--------------------------------------
