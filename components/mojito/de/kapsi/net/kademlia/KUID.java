@@ -195,10 +195,10 @@ public class KUID {
         
         for (int i=0;i<id.length;i++){
 
-            byte d1 = (byte)( id[i] ^ targetID.id[i] );
-            byte d2 = (byte)( nodeID.id[i] ^ targetID.id[i] );
+            int d1 = (id[i] ^ targetID.id[i]) & 0xFF;
+            int d2 = (nodeID.id[i] ^ targetID.id[i]) & 0xFF;
 
-            int diff = (d1 & 0xFF) - (d2 & 0xFF);
+            int diff = d1 - d2;
             
             if ( diff < 0 ){
                 return true;
