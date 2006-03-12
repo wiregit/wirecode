@@ -201,7 +201,7 @@ public class Database {
         }
         
         public Object getBest(Object key) {
-            return trie.getBest(key);
+            return trie.select(key);
         }
         
         protected boolean removeEldestEntry(Entry eldest) {

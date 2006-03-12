@@ -24,7 +24,7 @@ public class BucketRandomizationTest {
 		
 		System.out.println(trie);
 		
-		List list = trie.getBest(toKUID("Am"), 6);
+		List list = trie.select(toKUID("Am"), 6);
 		for(Iterator it = list.iterator(); it.hasNext(); ) {
 			System.out.println(it.next());
 		}

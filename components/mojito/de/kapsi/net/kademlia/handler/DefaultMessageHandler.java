@@ -22,7 +22,7 @@ import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.routing.RouteTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.util.BucketList;
+import de.kapsi.net.kademlia.util.BucketUtils;
 
 /**
  * The DefaultMessageHandler performs basic Kademlia RouteTable 
@@ -164,7 +164,7 @@ public final class DefaultMessageHandler extends MessageHandler
     private void replaceStaleContactInfo(KUID nodeId, SocketAddress src, Message message) throws IOException {
         List bucketList = context.getRouteTable().getBest(nodeId, KademliaSettings.getReplicationParameter());
         Node leastRecentlySeen = 
-            BucketList.getLeastRecentlySeen(BucketList.sort(bucketList));
+            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
         
         Node node = new Node(nodeId, src);
         if (LOG.isTraceEnabled()) {

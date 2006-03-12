@@ -129,9 +129,8 @@ public class PatriciaTrie {
     
     public Object get(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return (key.equals(entry.key) ? entry.value : null);
+        return (entry != root && key.equals(entry.key) ? entry.value : null);
     }
-    
     
     private Entry getR(Entry h, int bitIndex, Object key) {
         if (h.bitIndex <= bitIndex) {
@@ -145,20 +144,22 @@ public class PatriciaTrie {
         }
     }
     
-    public Object getBest(Object key) {
-        Entry entry = getBestR(root.left, -1, key, root);
-        return (!isRoot(entry) ? entry.value : null);
+    /**
+     * 
+     */
+    public Object select(Object key) {
+        return selectR(root.left, -1, key, root).value;
     }
     
-    private Entry getBestR(Entry h, int bitIndex, Object key, Entry p) {
+    private Entry selectR(Entry h, int bitIndex, Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
-            return isRoot(h) ? p : h;
+            return (h != root ? h : p);
         }
 
         if (!isBitSet(key, h.bitIndex)) {
-            return getBestR(h.left, h.bitIndex, key, h);
+            return selectR(h.left, h.bitIndex, key, h);
         } else {
-            return getBestR(h.right, h.bitIndex, key, h);
+            return selectR(h.right, h.bitIndex, key, h);
         }
     }
     
@@ -168,17 +169,17 @@ public class PatriciaTrie {
      * sort method to sort the Nodes by last-recently 
      * and most-recently seen.
      */
-    public List getBest(Object key, int k) {
-        return getBest(key, Collections.EMPTY_SET, k);
+    public List select(Object key, int count) {
+        return select(key, Collections.EMPTY_SET, count);
     }
     
-    public List getBest(Object key, Collection exclude, int k) {
-        SearchState state = new SearchState(key, exclude, k);
-        getBestR(state);
+    public List select(Object key, Collection exclude, int count) {
+        SearchState state = new SearchState(key, exclude, count);
+        selectR(state);
         return state.getResults();
     }
     
-    private void getBestR(final SearchState state) {
+    private void selectR(final SearchState state) {
         if (state.done) {
             return;
         }
@@ -190,24 +191,24 @@ public class PatriciaTrie {
         
         if (!isBitSet(state.key, h.bitIndex)) {
             state.goToChildEntry(h, true);
-            getBestR(state);
+            selectR(state);
             if (!state.done) {
                 state.goToChildEntry(h, false);
-                getBestR(state);
+                selectR(state);
             }
         } else {
             state.goToChildEntry(h, false);
-            getBestR(state);
+            selectR(state);
             if (!state.done) {
                 state.goToChildEntry(h, true);
-                getBestR(state);
+                selectR(state);
             }
         }
     }
     
     public boolean containsKey(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return key.equals(entry.key);
+        return entry != root && key.equals(entry.key);
     }
     
     public Object remove(Object key) {
@@ -242,7 +243,7 @@ public class PatriciaTrie {
     }
     
     private void removeExternalNode(Entry h) {
-        if (isRoot(h)) {
+        if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Node!");
         } else if (!h.isExternalNode()) {
             throw new IllegalArgumentException(h + " is not an external Node!");
@@ -263,7 +264,7 @@ public class PatriciaTrie {
     }
     
     private void removeInternalNode(Entry h, Entry p) {
-        if (isRoot(h)) {
+        if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Node!");
         } else if (!h.isInternalNode()) {
             throw new IllegalArgumentException(h + " is not an internal Node!");
@@ -323,10 +324,11 @@ public class PatriciaTrie {
         return buffer.toString();
     }
     
-    private StringBuffer toStringR(Entry h, int bitIndex, final StringBuffer buffer) {
+    private StringBuffer toStringR(Entry h, int bitIndex, 
+            final StringBuffer buffer) {
 
         if (h.bitIndex <= bitIndex) {
-            if (!isRoot(h)) {
+            if (h != root) {
                 buffer.append("  ").append(h.toString()).append("\n");
             }
             return buffer;
@@ -342,7 +344,7 @@ public class PatriciaTrie {
     
     private List valuesR(Entry h, int bitIndex, final List list) {
         if (h.bitIndex <= bitIndex) {
-            if (!isRoot(h)) {
+            if (h != root) {
                 list.add(h.value);
             }
             return list;
@@ -372,28 +374,7 @@ public class PatriciaTrie {
     }
     
     private int bitIndex(Object key, Object foundKey) {
-        /*boolean nullKey = true;
-        for(int bitIndex = 0; bitIndex < keyCreator.length(); bitIndex++) {
-            boolean isBitSet = isBitSet(key, bitIndex);
-            if (isBitSet != isBitSet(foundKey, bitIndex)) {
-                return bitIndex;
-            }
-
-            if (isBitSet) {
-                nullKey = false;
-            }
-        }
-        
-        if (nullKey) {
-            return KeyCreator.NULL_BIT_KEY;
-        }
-        return KeyCreator.EQUAL_BIT_KEY;*/
-        
         return keyCreator.bitIndex(key, foundKey);
-    }
-    
-    private boolean isRoot(Entry entry) {
-        return root == entry;
     }
     
     private final class Entry implements Map.Entry {
@@ -524,7 +505,7 @@ public class PatriciaTrie {
         
         public boolean add(Entry h) {
             if (h.bitIndex <= bitIndex) {
-                if (!isRoot(h) && !exclude.contains(h.key)) {
+                if (h != root && !exclude.contains(h.key)) {
                     addResult(h);
                 }
                 return true;

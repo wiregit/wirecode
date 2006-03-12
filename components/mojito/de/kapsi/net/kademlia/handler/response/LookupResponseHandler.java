@@ -198,7 +198,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         // Get the first round of alpha nodes
-        List alphaList = toQuery.getBest(lookup, queried, LookupSettings.getA());
+        List alphaList = toQuery.select(lookup, queried, LookupSettings.getA());
 
         // send alpha requests
         for(int i = 0; i < alphaList.size(); i++) {
@@ -220,7 +220,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates. No contacts left to query ");
             }
-            Collection nodes = responses.getBest(lookup, responses.size());
+            Collection nodes = responses.select(lookup, responses.size());
             finish(lookup, nodes, time);
             
             finished = true;
@@ -231,13 +231,13 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //a closer node to the target than the furthest away that we have.
         if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();
-            Node worstResponse = (Node)responses.getBest(furthest);
-            Node bestToQuery = (Node)toQuery.getBest(lookup);
+            Node worstResponse = (Node)responses.select(furthest);
+            Node bestToQuery = (Node)toQuery.select(lookup);
             
             if(bestToQuery == null || 
                     worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
             
-                Node bestResponse = (Node)responses.getBest(lookup);
+                Node bestResponse = (Node)responses.select(lookup);
                 
                 if (LOG.isTraceEnabled()) {
                   LOG.trace("Lookup for " + lookup + " terminates with " 
@@ -249,7 +249,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 if (isValueLookup()) {
                     finish(lookup, null, time);
                 } else {
-                    Collection nodes = responses.getBest(lookup, responses.size());
+                    Collection nodes = responses.select(lookup, responses.size());
                     finish(lookup, nodes, time);
                 }
                 finished = true;
@@ -259,7 +259,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         int numLookups = LookupSettings.getA() - activeSearches;
         if(numLookups>0) {
-            List bucketList = toQuery.getBest(lookup, queried, numLookups);
+            List bucketList = toQuery.select(lookup, queried, numLookups);
             final int size = bucketList.size();
             
             MessageDispatcher messageDispatcher = context.getMessageDispatcher();
@@ -315,13 +315,13 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //if the list is full discard the furthest node and put this one
         if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();
-            responses.remove((KUID)responses.getBest(furthest));
+            responses.remove((KUID)responses.select(furthest));
         } 
         responses.put(node.getNodeID(), node);
     }
     
     protected List getClosestNodes(KUID lookup, int k) {
-        return responses.getBest(lookup, k);
+        return responses.select(lookup, k);
     }
     
 }

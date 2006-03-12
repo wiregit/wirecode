@@ -11,9 +11,9 @@ import java.util.List;
 
 import de.kapsi.net.kademlia.Node;
 
-public final class BucketList {
+public final class BucketUtils {
     
-    private BucketList() {}
+    private BucketUtils() {}
     
     public static Node getLastSeen(List bucketList) {
         return (Node)bucketList.get(0);

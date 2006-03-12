@@ -19,7 +19,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.routing.RouteTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.util.BucketList;
+import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**
@@ -90,7 +90,7 @@ public class DefaultMessageHandler2 extends MessageHandler
         RouteTable routeTable = getRouteTable();
         List bucketList = routeTable.getBest(nodeId, KademliaSettings.getReplicationParameter());
         Node leastRecentlySeen = 
-            BucketList.getLeastRecentlySeen(BucketList.sort(bucketList));
+            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Adding " + Node.toString(nodeId, src) 

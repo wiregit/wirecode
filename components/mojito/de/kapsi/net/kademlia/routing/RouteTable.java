@@ -280,7 +280,7 @@ public class RouteTable {
         }
         
         public Object getBest(Object key) {
-            Object value = trie.getBest(key);
+            Object value = trie.select(key);
             if (ACCESS_ORDER && value != null) {
                 get(((Node)value).getNodeID());
             }
@@ -297,11 +297,11 @@ public class RouteTable {
         }
         
         public List getBest(Object key, int k) {
-            return updateAccessOrder(trie.getBest(key, k));
+            return updateAccessOrder(trie.select(key, k));
         }
         
         public List getBest(Object key, Collection exclude, int k) {
-            return updateAccessOrder(trie.getBest(key, exclude, k));
+            return updateAccessOrder(trie.select(key, exclude, k));
         }
         
         public Object getLeastRecentlySeen(boolean remove) {
