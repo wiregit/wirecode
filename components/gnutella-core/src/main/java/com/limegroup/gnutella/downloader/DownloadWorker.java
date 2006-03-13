@@ -575,10 +575,11 @@ public class DownloadWorker {
             LOG.trace("WORKER: attempt asynchronous direct connection");
             _connectObserver = observer;
             try {
-                Socket socket = Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, _connectObserver);
-                _connectObserver.setSocket(socket);
+                Socket socket = Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, observer);
+                if(!observer.isShutdown())
+                    observer.setSocket(socket);
             } catch (IOException iox) {
-                _connectObserver.shutdown();
+                observer.shutdown();
             }
         }
     }
@@ -1339,6 +1340,7 @@ public class DownloadWorker {
         private long createTime = System.currentTimeMillis();
         private boolean pushConnectOnFailure;
         private Socket connectingSocket;
+        private boolean shutdown;
         
         /**
          * Creates a new DirectConnection.  If pushConnectOnFailure is true,
@@ -1376,6 +1378,7 @@ public class DownloadWorker {
          * Upon unsuccesful connect, try using a push (if pushConnectOnFailure is true).
          */
         public void shutdown() {
+            this.shutdown = true;
             this.connectingSocket = null;
             
            // LOG.debug(_rfd + " -- Handling shutdown from DirectConnnector");
@@ -1394,6 +1397,10 @@ public class DownloadWorker {
         
         Socket getSocket() {
             return this.connectingSocket;
+        }
+
+        public boolean isShutdown() {
+            return shutdown;
         }
     }
 }
