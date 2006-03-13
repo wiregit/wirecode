@@ -40,7 +40,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
         
         List bucketList 
-            = context.getRouteTable().getBest(lookup, nodeId, 
+            = context.getRouteTable().select(lookup, nodeId, 
                     KademliaSettings.getReplicationParameter(), 
                     RouteTableSettings.getSkipStale());
         

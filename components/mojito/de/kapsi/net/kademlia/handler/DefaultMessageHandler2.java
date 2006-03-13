@@ -88,7 +88,7 @@ public class DefaultMessageHandler2 extends MessageHandler
             Message message) throws IOException {
         
         RouteTable routeTable = getRouteTable();
-        List bucketList = routeTable.getBest(nodeId, KademliaSettings.getReplicationParameter());
+        List bucketList = routeTable.select(nodeId, KademliaSettings.getReplicationParameter());
         Node leastRecentlySeen = 
             BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
         

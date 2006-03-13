@@ -162,7 +162,7 @@ public final class DefaultMessageHandler extends MessageHandler
     }
     
     private void replaceStaleContactInfo(KUID nodeId, SocketAddress src, Message message) throws IOException {
-        List bucketList = context.getRouteTable().getBest(nodeId, KademliaSettings.getReplicationParameter());
+        List bucketList = context.getRouteTable().select(nodeId, KademliaSettings.getReplicationParameter());
         Node leastRecentlySeen = 
             BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
         
