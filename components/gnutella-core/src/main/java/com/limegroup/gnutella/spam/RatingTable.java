@@ -8,9 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
@@ -41,11 +42,9 @@ public class RatingTable {
 	}
 
 	/**
-	 * a map&lt;Token, Token&gt; containing all tokens.  
-     * We happen to use a HashMap, but there is no need to 
-     * be so restrictive in the declaration.
+	 * a Set containing all tokens.
 	 */
-	private final Map _tokenMap;
+	private final Set _tokenSet;
 
 	/**
 	 * constructor, tries to deserialize filter data from disc, which will fail
@@ -53,18 +52,10 @@ public class RatingTable {
 	 */
 	private RatingTable() {
 		// deserialize
-		Map map;
-		try {
-			map = readData();
-		} catch (IOException ioe) {
-			if (LOG.isDebugEnabled())
-				LOG.debug(ioe);
-			map = new HashMap();
-		}
-		_tokenMap = map;
+		_tokenSet = readData();
 
 		if (LOG.isDebugEnabled())
-			LOG.debug("size of tokenSet " + _tokenMap.size());
+			LOG.debug("size of tokenSet " + _tokenSet.size());
 
 	}
 
@@ -72,7 +63,7 @@ public class RatingTable {
 	 * clears the filter data
 	 */
 	synchronized void clear() {
-		_tokenMap.clear();
+		_tokenSet.clear();
 	}
 
 	/**
@@ -96,22 +87,22 @@ public class RatingTable {
 	 *            an array of Token
 	 * @return the cumulative rating
 	 */
-	float getRating(Token[] tokens) {
-		float rating = 1;
-		for (int i = 0; i < tokens.length && rating > 0; i++) {
-			rating *= (1 - tokens[i].getRating());
-		}
+    float getRating(Token[] tokens) {
+        float rating = 1;
+        for (int i = 0; i < tokens.length && rating > 0; i++) {
+            rating *= (1 - tokens[i].getRating());
+        }
 
-		rating = 1 - rating;
+        rating = 1 - rating;
 
-        	float bad = SearchSettings.FILTER_SPAM_RESULTS.getValue();
-		if (rating >= bad && rating <= SpamManager.MAX_THRESHOLD)
-			markInternal(tokens, Token.RATING_SPAM);
-		else if (rating <= 1f - bad)
-			markInternal(tokens, Token.RATING_GOOD);
+        float bad = SearchSettings.FILTER_SPAM_RESULTS.getValue();
+        if (rating >= bad && rating <= SpamManager.MAX_THRESHOLD)
+            markInternal(tokens, Token.RATING_SPAM);
+        else if (rating <= 1f - bad)
+            markInternal(tokens, Token.RATING_GOOD);
 
-		return rating;
-	}
+        return rating;
+    }
 
 	/**
 	 * mark an array of RemoteFileDesc
@@ -188,79 +179,72 @@ public class RatingTable {
 	 * @return token or the matching copy of it from _tokenMap
 	 */
 	private synchronized Token lookup(Token token) {
-		Token ret = (Token) _tokenMap.get(token);
-		if (ret == null) {
-			_tokenMap.put(token, token);
-			checkSize();
-			return token;
-		}
-		return ret;
+        if(!_tokenSet.contains(token)) {
+            _tokenSet.add(token);
+            checkSize();
+        }
+        return token;
 	}
 
 	/**
 	 * read data from disk
 	 * 
-	 * @return Map of <tt>Token</tt> to <tt>Token</tt> as read from disk
-	 * @throws IOException
+	 * @return Set of <tt>Token</tt> to <tt>Token</tt> as read from disk
 	 */
-	private Map readData() throws IOException {
-		Map tokens;
-
+	private Set readData() {
 		ObjectInputStream is = null;
 		try {
 			is = new ObjectInputStream(
                     new BufferedInputStream(
                             new FileInputStream(getSpamDat())));
-			tokens = (Map) is.readObject();
-		} catch (ClassNotFoundException cnfe) {
-			if (LOG.isDebugEnabled())
-				LOG.debug(cnfe);
-			return new HashMap();
+            Object read = is.readObject();
+            if(read instanceof Map)
+                return new HashSet(((Map)read).keySet());
+            else if(read instanceof Set)
+                return (Set)read;
+            else
+                return new HashSet();
+		} catch(Exception someKindOfError) {
+			return new HashSet();
 		} finally {
             IOUtils.close(is);
 		}
-		return tokens;
 	}
     
     /**
      * Save data from this table to disk.
      */
     public void save() {
-        HashMap copy;
+        Set copy;
         
         synchronized(this) {
-            if (_tokenMap.size() > MAX_SIZE)
+            if (_tokenSet.size() > MAX_SIZE)
                 pruneEntries();
-            copy = new HashMap(_tokenMap);
+            copy = new HashSet(_tokenSet);
         }
         
         if (LOG.isDebugEnabled())
             LOG.debug("size of tokenMap " + copy.size());
-        
+
+        ObjectOutputStream oos = null;
         try {
-            ObjectOutputStream oos = null;
-            try {
-                oos = new ObjectOutputStream(
-                        new BufferedOutputStream(
-                                new FileOutputStream(getSpamDat())));
-                oos.writeObject(copy);
-                oos.flush();
-            } finally {
-                IOUtils.close(oos);
-            }
-        
+            oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(getSpamDat())));
+            oos.writeObject(copy);
+            oos.flush();
         } catch (IOException iox) {
             if (LOG.isDebugEnabled())
                 LOG.debug("saving rating table failed", iox);
+        } finally {
+            IOUtils.close(oos);
         }
 	}
     
     /**
-     * Marks that the table will be serialized to disc and not accessed for
-     * a long time (i.e. LimeWire is about to get shut down)
+     * Marks that the table will be serialized to disc and not accessed for a long time (i.e. LimeWire is about to get
+     * shut down)
      */
     public synchronized void ageAndSave() {
-        for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
+        for (Iterator iter = _tokenSet.iterator(); iter.hasNext();)
             ((Token) iter.next()).incrementAge();
         save();
     }
@@ -269,7 +253,7 @@ public class RatingTable {
 	 * check size of _tokenMap and clears old entries if necessary
 	 */
 	private synchronized void checkSize() {
-		if (_tokenMap.size() < MAX_SIZE * 2)
+		if (_tokenSet.size() < MAX_SIZE * 2)
 			return;
 		pruneEntries();
 	}
@@ -286,18 +270,18 @@ public class RatingTable {
 		if (LOG.isDebugEnabled())
 			LOG.debug("pruning unimportant entries from RatingTable");
 
-        int tokensToRemove = _tokenMap.size() - MAX_SIZE;
+        int tokensToRemove = _tokenSet.size() - MAX_SIZE;
         if (tokensToRemove <= 0) {
             return;
         }
         
         // Make a set of sorted tokens, low importance first
-        TreeSet tokenSet = new TreeSet(_tokenMap.values());
-        Iterator it = tokenSet.iterator();
+        Set sortedTokens = new TreeSet(_tokenSet);
+        Iterator it = sortedTokens.iterator();
         while (tokensToRemove > 0) {
             // If an exception is thrown here, there is a
             // race condition
-            _tokenMap.remove(it.next());
+            _tokenSet.remove(it.next());
             --tokensToRemove;
         }
 	}
