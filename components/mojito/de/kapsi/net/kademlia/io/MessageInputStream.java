@@ -27,6 +27,7 @@ import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 
 public class MessageInputStream extends DataInputStream {
@@ -149,6 +150,19 @@ public class MessageInputStream extends DataInputStream {
         return new StoreRequest(vendor, version, nodeId, messageId, Arrays.asList(values));
     }
     
+    private StoreResponse readStoreResponse(int vendor, int version, 
+            KUID nodeId, KUID messageId) throws IOException {
+        
+        StoreResponse.Status[] stats = new StoreResponse.Status[read()];
+        for(int i = 0; i < stats.length; i++) {
+            KUID key = readValueID();
+            int status = read();
+            stats[i] = new StoreResponse.Status(key, status);
+        }
+        
+        return new StoreResponse(vendor, version, nodeId, messageId, Arrays.asList(stats));
+    }
+    
     public Message readMessage() throws IOException {
         int vendor = readInt();
         int version = readUnsignedShort();
@@ -173,7 +187,7 @@ public class MessageInputStream extends DataInputStream {
             case Message.STORE_REQUEST:
                 return readStoreRequest(vendor, version, nodeId, messageId);
             case Message.STORE_RESPONSE:
-                throw new IOException("Not implemented");
+                return readStoreResponse(vendor, version, nodeId, messageId);
             default:
                 throw new IOException("Received unknown message type: " + messageType + " from Node: " + nodeId);
         }

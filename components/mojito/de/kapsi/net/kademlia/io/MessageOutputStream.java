@@ -108,11 +108,21 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeStoreRequest(StoreRequest store) throws IOException {
-        Collection values = store.getValues();
+    private void writeStoreRequest(StoreRequest request) throws IOException {
+        Collection values = request.getValues();
         writeByte(values.size());
         for(Iterator it = values.iterator(); it.hasNext(); ) {
             writeValue((KeyValue)it.next());
+        }
+    }
+    
+    private void writeStoreResponse(StoreResponse response) throws IOException {
+        Collection stats = response.getStoreStatus();
+        writeByte(stats.size());
+        for(Iterator it = stats.iterator(); it.hasNext(); ) {
+            StoreResponse.Status status = (StoreResponse.Status)it.next();
+            writeKUID(status.getKey());
+            writeByte(status.getStatus());
         }
     }
     
@@ -145,7 +155,7 @@ public class MessageOutputStream extends DataOutputStream {
             writeStoreRequest((StoreRequest)msg);
         } else if (msg instanceof StoreResponse) {
             writeByte(Message.STORE_RESPONSE);
-            throw new IOException("Not implemented");
+            writeStoreResponse((StoreResponse)msg);
         } else {
             throw new IOException("Unknown Message: " + msg);
         }

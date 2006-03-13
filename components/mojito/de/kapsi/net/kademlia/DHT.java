@@ -32,6 +32,11 @@ public class DHT implements Runnable {
         context.bind(address);
     }
     
+    //  TODO testing purposes only - remove
+    public void bind(SocketAddress address,KUID localNodeID) throws IOException {
+        context.bind(address,localNodeID);
+    }
+    
     public void run() {
         context.run();
     }
@@ -60,6 +65,11 @@ public class DHT implements Runnable {
     // TODO for debugging purposes only
     void ping(SocketAddress dst, PingListener l) throws IOException {
         context.ping(dst, l);
+    }
+    
+    // TODO remove - for test purposes only
+    public Context getContext() {
+        return context;
     }
     
     public void put(KUID key, byte[] value/*, StoreListener l*/) 
@@ -111,7 +121,7 @@ public class DHT implements Runnable {
     
     // TODO for debugging purposes only
     Collection getNodes() {
-        return context.getRouteTable().getRouteTableMap().values();
+        return context.getRouteTable().getAllNodes();
     }
     
     // TODO for debugging purposes only

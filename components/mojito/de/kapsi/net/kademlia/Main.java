@@ -39,8 +39,8 @@ public class Main {
         int port = NetworkSettings.getPort();
         
         if (args.length == 0) {
-            System.out.println("java Main DHTs [host] port");
-        
+            System.out.println("java Main DHTs count [host] port");
+            System.exit(-1);
         } else {
             count = Integer.parseInt(args[0]);
             
@@ -52,14 +52,19 @@ public class Main {
             }
         }
         
-        InetAddress addr = InetAddress.getByName(host);
+        InetAddress addr = host != null ? InetAddress.getByName(host) : null;
+        
         ArrayList dhts = new ArrayList();
         
         for(int i = 0; i < count; i++) {
             try {
                 DHT dht = new DHT();
                 
-                dht.bind(new InetSocketAddress(addr, port+i));
+                if (addr != null) {
+                    dht.bind(new InetSocketAddress(addr, port+i));
+                } else {
+                    dht.bind(new InetSocketAddress(port+i));
+                }
                 
                 new Thread(dht, "DHT-" + i).start();
                 //Thread.sleep(100);
@@ -197,7 +202,7 @@ public class Main {
         
         System.out.println("Ping... " + addr);
         dht.ping(addr, new PingListener() {
-            public void ping(KUID nodeId, SocketAddress address, long time) {
+            public void pingResponse(KUID nodeId, SocketAddress address, long time) {
                 if (time >= 0L) {
                     if (nodeId != null) {
                         System.out.println("*** Ping to " + Node.toString(nodeId, address) + " succeeded: " + time + "ms");
@@ -223,8 +228,8 @@ public class Main {
         
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void bootstrap(boolean succeed, long time) {
-                System.out.println("*** Bootstraping " + (succeed ? "succeded" : "failed") + " in " + time + " ms");
+            public void bootstrap(KUID nodeId, Collection nodes, long time) {
+                System.out.println("*** Bootstraping " + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
     }
@@ -326,7 +331,7 @@ public class Main {
             }
         }
         
-        public void bootstrap(boolean succeeded, long time) {
+        public void bootstrap(KUID nodeId, Collection nodes, long time) {
             if (time >= 0) {
                 this.time += time;
             }

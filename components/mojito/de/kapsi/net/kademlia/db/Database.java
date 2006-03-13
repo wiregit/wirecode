@@ -153,7 +153,7 @@ public class Database {
     
     public boolean isExpired(KeyValue value) {
         KUID key = value.getKey();
-        Node closest = context.getRouteTable().getBest(key);
+        Node closest = context.getRouteTable().select(key);
         if (closest == null) {
             return false;
         }
@@ -201,7 +201,7 @@ public class Database {
         }
         
         public Object getBest(Object key) {
-            return trie.getBest(key);
+            return trie.select(key);
         }
         
         protected boolean removeEldestEntry(Entry eldest) {

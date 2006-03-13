@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
-import de.kapsi.net.kademlia.handler.DefaultMessageHandler;
+import de.kapsi.net.kademlia.handler.DefaultMessageHandler2;
 import de.kapsi.net.kademlia.handler.RequestHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.request.FindNodeRequestHandler;
@@ -41,6 +41,7 @@ import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.InputOutputUtils;
 
@@ -55,14 +56,14 @@ public class MessageDispatcher implements Runnable {
     private final Object OUTPUT_LOCK = new Object();
     
     private LinkedList output = new LinkedList();
-    private PacketMap input = new PacketMap(1024);
+    private ReceiptMap input = new ReceiptMap(1024);
     
     private Selector selector;
     private DatagramChannel channel;
     
     private Context context;
     
-    private DefaultMessageHandler defaultHandler;
+    private DefaultMessageHandler2 defaultHandler;
     private PingRequestHandler pingHandler;
     private FindNodeRequestHandler findNodeHandler;
     private FindValueRequestHandler findValueHandler;
@@ -71,7 +72,7 @@ public class MessageDispatcher implements Runnable {
     public MessageDispatcher(Context context) {
         this.context = context;
         
-        defaultHandler = new DefaultMessageHandler(context);
+        defaultHandler = new DefaultMessageHandler2(context);
         pingHandler = new PingRequestHandler(context);
         findNodeHandler = new FindNodeRequestHandler(context);
         findValueHandler = new FindValueRequestHandler(context);
@@ -97,8 +98,8 @@ public class MessageDispatcher implements Runnable {
         
         DatagramSocket socket = channel.socket();
         socket.setReuseAddress(true);
-        socket.setReceiveBufferSize(Packet.MAX_PACKET_SIZE);
-        socket.setSendBufferSize(Packet.MAX_PACKET_SIZE);
+        socket.setReceiveBufferSize(Receipt.MAX_PACKET_SIZE);
+        socket.setSendBufferSize(Receipt.MAX_PACKET_SIZE);
         
         socket.bind(address);
     }
@@ -143,30 +144,39 @@ public class MessageDispatcher implements Runnable {
             throw new IOException("Channel is not bound");
         }
         
-        Packet out = new Packet(nodeId, dst, message, handler);
+        // MAKE SURE WE'RE NOT SENDING MESSAGES TO OURSELF
+        if (nodeId != null 
+                && nodeId.equals(context.getLocalNodeID())) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send messages to ourself: " + Node.toString(nodeId, dst));
+            }
+            return;
+        }
+        
+        Receipt receipt = new Receipt(nodeId, dst, message, handler);
         
         synchronized(OUTPUT_LOCK) {
-            output.add(out);
+            output.add(receipt);
             interestWrite(true);
         }
     }
     
     private void handleRequest(KUID nodeId, SocketAddress src, Message msg) throws IOException {
-        RequestHandler handler = null;
+        RequestHandler requestHandler = null;
         
         if (msg instanceof PingRequest) {
-            handler = pingHandler;
+            requestHandler = pingHandler;
         } else if (msg instanceof FindNodeRequest) {
-            handler = findNodeHandler;
+            requestHandler = findNodeHandler;
         } else if (msg instanceof FindValueRequest) {
-            handler = findValueHandler;
+            requestHandler = findValueHandler;
         } else if (msg instanceof StoreRequest) {
-            handler = storeHandler;
+            requestHandler = storeHandler;
         }
         
-        if (handler != null) {
+        if (requestHandler != null) {
             try {
-                handler.handleRequest(nodeId, src, msg);
+                requestHandler.handleRequest(nodeId, src, msg);
             } catch (Throwable t) {
                 LOG.error(t);
             }
@@ -181,6 +191,8 @@ public class MessageDispatcher implements Runnable {
                 LOG.trace("Received a late FindNode response from " + Node.toString(nodeId, src));
             } else if (msg instanceof FindValueResponse) {
                 LOG.trace("Received a late FindValue response from " + Node.toString(nodeId, src));
+            } else if (msg instanceof StoreResponse) {
+                LOG.trace("Received a late Store response from " + Node.toString(nodeId, src));
             }
         }
         
@@ -208,20 +220,20 @@ public class MessageDispatcher implements Runnable {
      */
     private int writeNext() throws IOException {
         if (!output.isEmpty()) {
-            Packet packet = (Packet)output.removeFirst();
+            Receipt receipt = (Receipt)output.removeFirst();
 
-            if (packet.send(channel)) {
-                packet.sent();
-                input.put(packet.getMessageID(), packet);
-                packet.freeData();
+            if (receipt.send(channel)) {
+                receipt.sent();
+                input.put(receipt.getMessageID(), receipt);
+                receipt.freeData();
             } else {
-                output.addFirst(packet);
+                output.addFirst(receipt);
             }
         }
         return output.size();
     }
     
-    private ByteBuffer buffer = ByteBuffer.allocate(Packet.MAX_PACKET_SIZE);
+    private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
     
     private boolean readNext() throws IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
@@ -232,34 +244,38 @@ public class MessageDispatcher implements Runnable {
             buffer.get(data, 0, length);
             
             Message message = InputOutputUtils.deserialize(data);
-            Packet packet = (Packet)input.remove(message.getMessageID());
+            Receipt receipt = (Receipt)input.remove(message.getMessageID());
             
-            if (packet != null) {
-                packet.received();
+            if (receipt != null) {
+                receipt.received();
             }
             
-            processMessage(packet, src, message);
+            processMessage(receipt, src, message);
             return true;
         }
         return false;
     }
     
-    private void processMessage(Packet packet, SocketAddress src, Message message) throws IOException {
+    private void processMessage(Receipt receipt, SocketAddress src, Message message) throws IOException {
         KUID nodeId = message.getNodeID();
         
-        // MAKE SURE WE'RE NOT ANSWERING TO OUR OWN MSGS!?
-        if (nodeId.equals(context.getLocalNodeID())) {
-            // TODO handle this as error?
+        // MAKE SURE WE'RE NOT RECEIVING MESSAGES FROM OURSELF
+        if (nodeId != null 
+                && nodeId.equals(context.getLocalNodeID())
+                && src.equals(context.getSocketAddress())) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Received message from myself?! " + Node.toString(nodeId, src));
+                LOG.error("Received a message from ourself: " + Node.toString(nodeId, src));
             }
             return;
         }
         
-        if (packet != null) {
-            long time = packet.time();
+        if (receipt != null) {
+            long time = receipt.time();
             defaultHandler.handleResponse(nodeId, src, message, time); // BEFORE!
-            packet.handleSuccess(nodeId, src, message);
+            
+            if (receipt.getHandler() != defaultHandler) {
+                receipt.handleSuccess(nodeId, src, message);
+            }
         } else if (message instanceof RequestMessage) {
             handleRequest(nodeId, src, message);
             defaultHandler.handleRequest(nodeId, src, message); // AFTER!
@@ -294,7 +310,6 @@ public class MessageDispatcher implements Runnable {
     private void interestWrite(boolean on) {
         interest(SelectionKey.OP_WRITE, on);
     }
-    
     
     public void run() {
         long lastCleanup = System.currentTimeMillis();
@@ -335,9 +350,9 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    private static class PacketMap extends FixedSizeHashMap {
+    private static class ReceiptMap extends FixedSizeHashMap {
         
-        public PacketMap(int maxSize) {
+        public ReceiptMap(int maxSize) {
             super(maxSize);
         }
 
@@ -345,14 +360,14 @@ public class MessageDispatcher implements Runnable {
             Iterator it = entrySet().iterator();
             while(it.hasNext()) {
                 Map.Entry entry = (Map.Entry)it.next();
-                Packet packet = (Packet)entry.getValue();
+                Receipt receipt = (Receipt)entry.getValue();
                 
-                if (packet.timeout()) {
-                    packet.received();
+                if (receipt.timeout()) {
+                    receipt.received();
                     it.remove();
                     
                     try {
-                        packet.handleTimeout();
+                        receipt.handleTimeout();
                     } catch (Throwable t) {
                         LOG.error(t);
                     }
@@ -361,12 +376,12 @@ public class MessageDispatcher implements Runnable {
         }
         
         protected boolean removeEldestEntry(Map.Entry eldest) {
-            Packet packet = (Packet)eldest.getValue();
+            Receipt receipt = (Receipt)eldest.getValue();
             if (super.removeEldestEntry(eldest) 
-                    || packet.timeout()) {
-                packet.received();
+                    || receipt.timeout()) {
+                receipt.received();
                 try {
-                    packet.handleTimeout();
+                    receipt.handleTimeout();
                 } catch (Throwable t) {
                     LOG.error(t);
                 }

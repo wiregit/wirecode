@@ -68,7 +68,7 @@ public class RouteTable {
     
     public boolean isClose(KUID nodeId) {
         float min = 100f * size() / getMaxSize();
-        float closeness = 100f * context.getLocalNodeID().match(nodeId) / KUID.LENGTH;
+        float closeness = 100f * context.getLocalNodeID().bitIndex(nodeId) / KUID.LENGTH;
         return closeness > min;
     }
     
@@ -89,6 +89,7 @@ public class RouteTable {
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
         }
         
+        staleNodes.remove(nodeId);
         cache.remove(nodeId);
         routeTableMap.put(nodeId, node);
     }
@@ -97,16 +98,16 @@ public class RouteTable {
         return get(nodeId, false);
     }
     
-    public Node get(KUID nodeId, boolean checkCached) {
+    public Node get(KUID nodeId, boolean checkAndUpdateCache) {
         Node node = (Node)routeTableMap.get(nodeId);
-        if (node == null && checkCached) {
+        if (node == null && checkAndUpdateCache) {
             node = (Node)cache.get(nodeId);
         }
         return node;
     }
     
-    public Node getBest(KUID key) {
-        return (Node)routeTableMap.getBest(key);
+    public Node select(KUID key) {
+        return (Node)routeTableMap.select(key);
     }
     
     /** 
@@ -115,23 +116,23 @@ public class RouteTable {
      * sort method to sort the Nodes by last-recently 
      * and most-recently seen.
      */
-    public List getBest(KUID lookup, int k) {
-        return getBest(lookup, k, false);
+    public List select(KUID lookup, int k) {
+        return select(lookup, k, false);
     }
     
-    public List getBest(KUID lookup, int k, boolean skipStale) {
+    public List select(KUID lookup, int k, boolean skipStale) {
         if (skipStale) {
-            return routeTableMap.getBest(lookup, staleNodes.keySet(), k);
+            return routeTableMap.select(lookup, staleNodes.keySet(), k);
         } else {
-            return routeTableMap.getBest(lookup, Collections.EMPTY_SET, k);
+            return routeTableMap.select(lookup, Collections.EMPTY_SET, k);
         }
     }
     
-    public List getBest(KUID lookup, KUID excludeKey, int k) {
-        return getBest(lookup, excludeKey, k, false);
+    public List select(KUID lookup, KUID excludeKey, int k) {
+        return select(lookup, excludeKey, k, false);
     }
     
-    public synchronized List getBest(KUID lookup, KUID excludeKey, 
+    public synchronized List select(KUID lookup, KUID excludeKey, 
             int k, boolean skipStale) {
         
         Collection exclude = Collections.EMPTY_SET;
@@ -146,7 +147,7 @@ public class RouteTable {
                 exclude.add(excludeKey);
             }
         }
-        return routeTableMap.getBest(lookup, exclude, k);
+        return routeTableMap.select(lookup, exclude, k);
     }
     
     public boolean containsNode(KUID nodeId) {
@@ -163,6 +164,7 @@ public class RouteTable {
         if (node != null) {
             node.updateTimeStamp();
             staleNodes.remove(node.getNodeID());
+            updateIfCached(node.getNodeID());
             return true;
         }
         return false;
@@ -240,6 +242,10 @@ public class RouteTable {
         return mostRecentlySeen;
     }
     
+    public Collection getAllNodes() {
+        return routeTableMap.values();
+    }
+    
     /**
      * A combined HashMap and PatriciaTrie. The HashMap is for
      * fast and excact O(1) lookups and the PatriciaTrie for 
@@ -273,8 +279,8 @@ public class RouteTable {
             super.clear();
         }
         
-        public Object getBest(Object key) {
-            Object value = trie.getBest(key);
+        public Object select(Object key) {
+            Object value = trie.select(key);
             if (ACCESS_ORDER && value != null) {
                 get(((Node)value).getNodeID());
             }
@@ -290,12 +296,12 @@ public class RouteTable {
             return list;
         }
         
-        public List getBest(Object key, int k) {
-            return updateAccessOrder(trie.getBest(key, k));
+        public List select(Object key, int k) {
+            return updateAccessOrder(trie.select(key, k));
         }
         
-        public List getBest(Object key, Collection exclude, int k) {
-            return updateAccessOrder(trie.getBest(key, exclude, k));
+        public List select(Object key, Collection exclude, int k) {
+            return updateAccessOrder(trie.select(key, exclude, k));
         }
         
         public Object getLeastRecentlySeen(boolean remove) {

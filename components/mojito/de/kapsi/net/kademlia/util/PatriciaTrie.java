@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * An optimized PATRICIA Trie for Kademlia. That means I
@@ -19,9 +20,6 @@ import java.util.Map;
  * @author Roger Kapsi
  */
 public class PatriciaTrie {
-    
-    private static final int NULL_BIT_KEY = -1;
-    private static final int EQUAL_BIT_KEY = -2;
     
     private final Entry root = new Entry(null, null, -1);
     
@@ -131,12 +129,7 @@ public class PatriciaTrie {
     
     public Object get(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return (key.equals(entry.key) ? entry.value : null);
-    }
-    
-    public Object getBest(Object key) {
-        Entry entry = getR(root.left, -1, key);
-        return (!isRoot(entry) ? entry.value : null);
+        return (entry != root && key.equals(entry.key) ? entry.value : null);
     }
     
     private Entry getR(Entry h, int bitIndex, Object key) {
@@ -151,52 +144,71 @@ public class PatriciaTrie {
         }
     }
     
+    /**
+     * 
+     */
+    public Object select(Object key) {
+        return selectR(root.left, -1, key, root).value;
+    }
+    
+    private Entry selectR(Entry h, int bitIndex, Object key, Entry p) {
+        if (h.bitIndex <= bitIndex) {
+            return (h != root ? h : p);
+        }
+
+        if (!isBitSet(key, h.bitIndex)) {
+            return selectR(h.left, h.bitIndex, key, h);
+        } else {
+            return selectR(h.right, h.bitIndex, key, h);
+        }
+    }
+    
     /** 
      * Returns a List of buckts sorted by their 
      * closeness to the provided Key. Use BucketList's
      * sort method to sort the Nodes by last-recently 
      * and most-recently seen.
      */
-    public List getBest(Object key, int k) {
-        return getBest(key, Collections.EMPTY_SET, k);
+    public List select(Object key, int count) {
+        return select(key, Collections.EMPTY_SET, count);
     }
     
-    public List getBest(Object key, Collection exclude, int k) {
-        int initialSize = (int)Math.min(k, size());
-        List list = new ArrayList(initialSize);
-        if (exclude == null) {
-            exclude = Collections.EMPTY_SET;
+    public List select(Object key, Collection exclude, int count) {
+        SearchState state = new SearchState(key, exclude, count);
+        selectR(state);
+        return state.getResults();
+    }
+    
+    private void selectR(final SearchState state) {
+        if (state.done) {
+            return;
         }
-        getBestR(root.left, -1, key, exclude, list, k);
-        return list;
-    }
-    
-    private boolean getBestR(Entry h, int bitIndex, 
-            final Object key, final Collection exclude, 
-            final List list, final int k) {
         
-        if (h.bitIndex <= bitIndex) {
-            if (!isRoot(h) && !exclude.contains(h.key)) {
-                list.add(h.value);
-            }
-            return list.size() < k;
+        Entry h = state.current; // need a copy on the stack
+        if (state.add(h) || state.done) {
+            return;
         }
-
-        if (!isBitSet(key, h.bitIndex)) {
-            if (getBestR(h.left, h.bitIndex, key, exclude, list, k)) {
-                return getBestR(h.right, h.bitIndex, key, exclude, list, k);
+        
+        if (!isBitSet(state.key, h.bitIndex)) {
+            state.goToChildEntry(h, true);
+            selectR(state);
+            if (!state.done) {
+                state.goToChildEntry(h, false);
+                selectR(state);
             }
         } else {
-            if (getBestR(h.right, h.bitIndex, key, exclude, list, k)) {
-                return getBestR(h.left, h.bitIndex, key, exclude, list, k);
+            state.goToChildEntry(h, false);
+            selectR(state);
+            if (!state.done) {
+                state.goToChildEntry(h, true);
+                selectR(state);
             }
         }
-        return false;
     }
     
     public boolean containsKey(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return key.equals(entry.key);
+        return entry != root && key.equals(entry.key);
     }
     
     public Object remove(Object key) {
@@ -231,7 +243,7 @@ public class PatriciaTrie {
     }
     
     private void removeExternalNode(Entry h) {
-        if (isRoot(h)) {
+        if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Node!");
         } else if (!h.isExternalNode()) {
             throw new IllegalArgumentException(h + " is not an external Node!");
@@ -252,7 +264,7 @@ public class PatriciaTrie {
     }
     
     private void removeInternalNode(Entry h, Entry p) {
-        if (isRoot(h)) {
+        if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Node!");
         } else if (!h.isInternalNode()) {
             throw new IllegalArgumentException(h + " is not an internal Node!");
@@ -312,10 +324,11 @@ public class PatriciaTrie {
         return buffer.toString();
     }
     
-    private StringBuffer toStringR(Entry h, int bitIndex, final StringBuffer buffer) {
+    private StringBuffer toStringR(Entry h, int bitIndex, 
+            final StringBuffer buffer) {
 
         if (h.bitIndex <= bitIndex) {
-            if (!isRoot(h)) {
+            if (h != root) {
                 buffer.append("  ").append(h.toString()).append("\n");
             }
             return buffer;
@@ -331,7 +344,7 @@ public class PatriciaTrie {
     
     private List valuesR(Entry h, int bitIndex, final List list) {
         if (h.bitIndex <= bitIndex) {
-            if (!isRoot(h)) {
+            if (h != root) {
                 list.add(h.value);
             }
             return list;
@@ -346,11 +359,11 @@ public class PatriciaTrie {
     }
     
     private static boolean isNullBitKey(int bitIndex) {
-        return bitIndex == NULL_BIT_KEY;
+        return bitIndex == KeyCreator.NULL_BIT_KEY;
     }
     
     private static boolean isEqualBitKey(int bitIndex) {
-        return bitIndex == EQUAL_BIT_KEY;
+        return bitIndex == KeyCreator.EQUAL_BIT_KEY;
     }
     
     private boolean isBitSet(Object key, int bitIndex) {
@@ -361,26 +374,7 @@ public class PatriciaTrie {
     }
     
     private int bitIndex(Object key, Object foundKey) {
-        boolean nullKey = true;
-        for(int bitIndex = 0; bitIndex < keyCreator.length(); bitIndex++) {
-            boolean isBitSet = isBitSet(key, bitIndex);
-            if (isBitSet != isBitSet(foundKey, bitIndex)) {
-                return bitIndex;
-            }
-
-            if (isBitSet) {
-                nullKey = false;
-            }
-        }
-        
-        if (nullKey) {
-            return NULL_BIT_KEY;
-        }
-        return EQUAL_BIT_KEY;
-    }
-    
-    private boolean isRoot(Entry entry) {
-        return root == entry;
+        return keyCreator.bitIndex(key, foundKey);
     }
     
     private final class Entry implements Map.Entry {
@@ -480,10 +474,84 @@ public class PatriciaTrie {
             buffer.append(")");
             return buffer.toString();
         }
+        
+    }
+    
+    private class SearchState {
+        Entry current = root.left;
+        int bitIndex = -1;
+        
+        final List dest;
+        final Object key;
+        final Collection exclude;
+        final int targetSize;
+        
+        int currentDistance, numEquidistant, numEquidistantToAdd;
+        
+        boolean done;
+        
+        private final Random r = new Random();
+        
+        public SearchState(Object key, Collection exclude, int targetSize) {
+            this.key = key;
+            this.exclude = exclude == null ? Collections.EMPTY_SET : exclude;
+            this.targetSize = targetSize;
+            dest = new ArrayList(targetSize);
+        }
+        
+        public List getResults() {
+            return dest;
+        }
+        
+        public boolean add(Entry h) {
+            if (h.bitIndex <= bitIndex) {
+                if (h != root && !exclude.contains(h.key)) {
+                    addResult(h);
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        private void addResult(Entry h) {
+           int distance = bitIndex(key, h.key);
+           
+           if (distance != currentDistance) {
+               if (dest.size() == targetSize) { // finito.
+                   done = true;
+                   return;
+               }
+               currentDistance = distance;
+               numEquidistant = 0;
+               numEquidistantToAdd = targetSize - dest.size();
+           }
+           
+           numEquidistant++;
+           
+           if (dest.size() < targetSize) {
+               // trivial case: we don't have enough peers, just add
+               dest.add(h.value);
+           } else if (Math.random() < (float)numEquidistantToAdd / numEquidistant) {
+               // we have to replace somebody at random...
+               int ejectee = targetSize - r.nextInt(numEquidistantToAdd) -1;
+               dest.set(ejectee,h.value);
+           } 
+        }
+        
+        public void goToChildEntry(Entry h, boolean left) {
+            bitIndex = h.bitIndex;
+            current = left ? h.left : h.right;
+        }
+        
     }
     
     public static interface KeyCreator {
+        
+        public static final int NULL_BIT_KEY = -1;
+        public static final int EQUAL_BIT_KEY = -2;
+        
         public int length();
         public boolean isBitSet(Object key, int bitIndex);
+        public int bitIndex(Object key, Object found);
     }
 }

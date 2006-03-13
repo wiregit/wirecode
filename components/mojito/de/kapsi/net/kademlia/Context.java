@@ -5,6 +5,7 @@
 
 package de.kapsi.net.kademlia;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -12,11 +13,15 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Timer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.dht.tests.DHTNodeStat;
+import com.limegroup.gnutella.dht.tests.DHTStats;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -28,14 +33,17 @@ import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
+import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindNodeResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindValueResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
+import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.routing.RouteTable;
 import de.kapsi.net.kademlia.security.CryptoHelper;
+import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class Context implements Runnable {
@@ -67,6 +75,8 @@ public class Context implements Runnable {
     private boolean running = false;
     private final Timer scheduler = new Timer(true);
     
+    private DHTStats stats = null;
+    
     public Context() {
         
         try {
@@ -86,6 +96,12 @@ public class Context implements Runnable {
         eventDispatcher = new EventDispatcher();
         messageFactory = new MessageFactory(this);
         publisher = new KeyValuePublisher(this);
+        
+        stats = new DHTNodeStat(this);
+    }
+    
+    public DHTStats getDHTStats() {
+        return stats;
     }
     
     public int getVendor() {
@@ -155,7 +171,28 @@ public class Context implements Runnable {
         
         messageDispatcher.bind(address);
         this.address = address;
-        nodeId = KUID.createRandomNodeID(address);
+        
+        byte[] id = ContextSettings.getLocalNodeID(address);
+        if (id == null) {
+            nodeId = KUID.createRandomNodeID(address);
+            
+            ByteArrayOutputStream out = new ByteArrayOutputStream(20);
+            nodeId.write(out);
+            out.close();
+            ContextSettings.setLocalNodeID(address, out.toByteArray());
+        } else {
+            nodeId = KUID.createNodeID(id);
+        }
+    }
+    
+    //TODO testing purposes only - remove
+    public void bind(SocketAddress address,KUID localNodeID) throws IOException {
+        if (isOpen()) {
+            throw new IOException("DHT is already bound");
+        }
+        messageDispatcher.bind(address);
+        this.address = address;
+        nodeId = localNodeID;
     }
     
     public void close() throws IOException {
@@ -232,7 +269,7 @@ public class Context implements Runnable {
     public void bootstrap(SocketAddress address, final BootstrapListener l) throws IOException {
         // Ping the Node
         ping(address, new PingListener() {
-            public void ping(KUID nodeId, SocketAddress address, final long time1) {
+            public void pingResponse(KUID nodeId, SocketAddress address, final long time1) {
                 
                 // Ping was successful, bootstrap!
                 if (time1 >= 0L) {
@@ -240,7 +277,7 @@ public class Context implements Runnable {
                         lookup(getLocalNodeID(), new FindNodeListener() {
                             public void foundNodes(KUID lookup, Collection nodes, long time2) {
                                 if (l != null) {
-                                    l.bootstrap(nodes.size() > 0, time1+time2);
+                                    l.bootstrap(getLocalNodeID(), nodes, time1+time2);
                                 }
                             }
                         });
@@ -249,7 +286,7 @@ public class Context implements Runnable {
                         if (l != null) {
                             fireEvent(new Runnable() {
                                 public void run() {
-                                    l.bootstrap(false, time1);
+                                    l.bootstrap(getLocalNodeID(), Collections.EMPTY_LIST, time1);
                                 }
                             });
                         }
@@ -260,7 +297,7 @@ public class Context implements Runnable {
                     if (l != null) {
                         fireEvent(new Runnable() {
                             public void run() {
-                                l.bootstrap(false, time1);
+                                l.bootstrap(getLocalNodeID(), Collections.EMPTY_LIST, time1);
                             }
                         });
                     }
@@ -280,12 +317,14 @@ public class Context implements Runnable {
                     Iterator it = nodes.iterator();
                     int k = KademliaSettings.getReplicationParameter();
                     
+                    ResponseHandler responseHandler = new StoreResponseHandler(Context.this, values);
+                    
                     for(int i = 0; i < k && it.hasNext(); i++) {
                         Node node = (Node)it.next();
                         
                         // TODO: Don't just store one KeyValue!
                         // Store the n-closest values to Node!
-                        messageDispatcher.send(node, messageFactory.createStoreRequest(values), null);
+                        messageDispatcher.send(node, messageFactory.createStoreRequest(values), responseHandler);
                     }
                     
                     if (l != null) {

@@ -15,11 +15,14 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.routing.RouteTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.util.BucketList;
+import de.kapsi.net.kademlia.util.BucketUtils;
 
 /**
  * The DefaultMessageHandler performs basic Kademlia RouteTable 
@@ -50,54 +53,130 @@ public final class DefaultMessageHandler extends MessageHandler
         handleSuccess(nodeId, src, message);
     }
     
-    private void handleSuccess(KUID nodeId, SocketAddress src, 
+    private void handleSuccess(final KUID nodeId, final SocketAddress src, 
             Message message) throws IOException {
-        RouteTable routeTable = context.getRouteTable();
+        final RouteTable routeTable = context.getRouteTable();
         
         Node node = routeTable.get(nodeId);
         if (node != null) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(node + " is known and updating its TimeStamp");
-            }
-            
-            routeTable.updateTimeStamp(node);
+            updateContactInfo(node, nodeId, src, message);
             
         } else if (!routeTable.isFull()) {
-            node = new Node(nodeId, src);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Adding " + node + " to RouteTable");
-            }
-            routeTable.add(node);
+            addContactInfo(nodeId, src, message);
             
-            // TODO store closest KeyValues
-            /*List values = context.getDatabase().getBest(nodeId, REPLICATE_VALUES);
-            if (!values.isEmpty()) {
-                context.getMessageDispatcher().send(node, 
-                        context.getMessageFactory().createStoreRequest(values), null);
-            }*/
         } else if (routeTable.updateIfCached(nodeId)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace(Node.toString(nodeId, src) + " is in RouteTable's LRU cache");
             }
-            
         } else {
-            
-            List bucketList = routeTable.getBest(nodeId, KademliaSettings.getReplicationParameter());
-            Node leastRecentlySeen = 
-                BucketList.getLeastRecentlySeen(BucketList.sort(bucketList));
-            
-            node = new Node(nodeId, src);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Adding " + node 
-                        + " to RouteTable's LRU cache and pinging the least recently seen Node " 
-                        + leastRecentlySeen);
-            }
-            routeTable.addToCache(node);
-            
-            // TODO don't ping
-            PingRequest ping = context.getMessageFactory().createPingRequest();
-            context.getMessageDispatcher().send(leastRecentlySeen, ping, this);
+            replaceStaleContactInfo(nodeId, src, message);
         }
+    }
+    
+    private void updateContactInfo(Node node, final KUID nodeId, 
+            final SocketAddress src, final Message message) throws IOException {
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(node + " is known and updating its info");
+        }
+        
+        final RouteTable routeTable = context.getRouteTable();
+        
+        //update contact info
+        /*if(!node.getSocketAddress().equals(src)) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(Node.toString(nodeId, src) + " claims to be " + node);
+            }
+            
+            //ping host to check somebody is not spoofing an address change
+            RequestMessage ping = context.getMessageFactory().createPingRequest();
+            ResponseHandler handler = new PingResponseHandler(context, 
+                    new PingListener() {
+                        public void pingResponse(KUID nodeId, SocketAddress address, long time) {
+                            Node node = routeTable.get(nodeId);
+                            
+                            if (node != null) {
+                                // the old contact didn't respond.
+                                if (time < 0L) {
+                                    Node contact = new Node(nodeId, src);
+                                    
+                                    if (LOG.isTraceEnabled()) {
+                                        LOG.trace(Node.toString(nodeId, address) 
+                                                + " didn't respond. Replacing it with new contact info " + contact);
+                                    }
+                                    
+                                    // replace the old contact info
+                                    routeTable.add(contact);
+                                } else {
+                                    
+                                    if (LOG.isTraceEnabled()) {
+                                        LOG.trace(node + " did respond in " + time + " ms. " 
+                                                + Node.toString(nodeId, src) + " tries likely to spoof its NodeID!");
+                                    }
+                                    
+                                    // update the time stamp of the old ontact 
+                                    // since it responed to our request...
+                                    routeTable.updateTimeStamp(node);
+                                }
+                            } else {
+                                
+                                if (LOG.isTraceEnabled()) {
+                                    LOG.trace("Old contact " 
+                                            + Node.toString(nodeId, address) + " is no longer in RouteTable. Going to add the new contact "
+                                            + Node.toString(nodeId, src) + " to the replacement cache");
+                                }
+                                
+                                // The old Node was removed from the RouteTable
+                                // which can only mean the RT is full and it was
+                                // replaced with the last seen Node from the
+                                // replacement cache! Since all Nodes should have
+                                // equal chances add it to the replacement cache...
+                                try {
+                                    replaceStaleContactInfo(nodeId, src, null);
+                                } catch (IOException err) {
+                                    LOG.error(err);
+                                }
+                            }
+                        }
+            });
+            context.getMessageDispatcher().send(node, ping, handler);
+        } else {*/
+            node.setSocketAddress(src);
+            routeTable.updateTimeStamp(node);
+        //}
+    }
+    
+    private void addContactInfo(KUID nodeId, SocketAddress src, Message message) throws IOException {
+        Node node = new Node(nodeId, src);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Adding " + node + " to RouteTable");
+        }
+        context.getRouteTable().add(node);
+        
+        // TODO store closest KeyValues
+        /*List values = context.getDatabase().getBest(nodeId, REPLICATE_VALUES);
+        if (!values.isEmpty()) {
+            context.getMessageDispatcher().send(node, 
+                    context.getMessageFactory().createStoreRequest(values), null);
+        }*/
+    }
+    
+    private void replaceStaleContactInfo(KUID nodeId, SocketAddress src, Message message) throws IOException {
+        List bucketList = context.getRouteTable().select(nodeId, KademliaSettings.getReplicationParameter());
+        Node leastRecentlySeen = 
+            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
+        
+        Node node = new Node(nodeId, src);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Adding " + node 
+                    + " to RouteTable's LRU cache and pinging the least recently seen Node " 
+                    + leastRecentlySeen);
+        }
+        context.getRouteTable().addToCache(node);
+        
+        // TODO don't ping
+        PingRequest ping = context.getMessageFactory().createPingRequest();
+        context.getMessageDispatcher().send(leastRecentlySeen, ping, this);
     }
     
     public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
@@ -132,4 +211,5 @@ public final class DefaultMessageHandler extends MessageHandler
             }
         }
     }
+    
 }
