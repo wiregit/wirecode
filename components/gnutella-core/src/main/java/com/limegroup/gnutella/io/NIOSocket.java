@@ -261,14 +261,6 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         if(connecter != null)
             connecter.shutdown();
         
-        NIODispatcher.instance().invokeLater(new Runnable() {
-            public void run() {
-                reader = new NoOpReader();
-                writer = new NoOpWriter();
-                connecter = null;
-            }
-        });
-        
         try {
             socket.close();
         } catch(IOException ignored) {
@@ -277,6 +269,14 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         try {
             channel.close();
         } catch(IOException ignored) {}
+        
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                reader = new NoOpReader();
+                writer = new NoOpWriter();
+                connecter = null;
+            }
+        });        
     }
     
     /** Binds the socket to the SocketAddress */
@@ -366,7 +366,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
      * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public InputStream getInputStream() throws IOException {
-        if(isClosed())
+        if(isClosed() || shutdown)
             throw new IOException("Socket closed.");
         
         if(reader instanceof NIOInputStream)
@@ -381,7 +381,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
      * Internally, this is a blcoking Pipe from the non-blocking SocketChannel.
      */
     public OutputStream getOutputStream() throws IOException {
-        if(isClosed())
+        if(isClosed() || shutdown)
             throw new IOException("Socket closed.");
             
         if(writer instanceof NIOOutputStream)
