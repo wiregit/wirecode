@@ -110,6 +110,12 @@ public class Acceptor {
      * we start up since we try once when we start up.
      */
     private volatile long _lastConnectBackTime = System.currentTimeMillis();
+    
+    /**
+     * Whether or not this Acceptor was started.  All connections accepted prior
+     * to starting are dropped.
+     */
+    private volatile boolean _started;
 
 	/**
      * @modifes this
@@ -284,16 +290,15 @@ public class Acceptor {
      * Launches the port monitoring thread, MulticastService, and UDPService.
      */
 	public void start() {
-	    MulticastService.instance().start();
-	    UDPService.instance().start();
-        RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES,
-                               TIME_BETWEEN_VALIDATES);
-	}
+        MulticastService.instance().start();
+        UDPService.instance().start();
+        RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
+        _started = true;
+    }
 	
 	/**
-	 * Returns whether or not our advertised IP address
-	 * is the same as what remote peers believe it is.
-	 */
+     * Returns whether or not our advertised IP address is the same as what remote peers believe it is.
+     */
 	public boolean isAddressExternal() {
         if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
@@ -511,6 +516,11 @@ public class Acceptor {
         }
         
         public void handleAccept(Socket client) {
+            if(!_started) {
+                IOUtils.close(client);
+                return;
+            }
+            
             // If the client was closed before we were able to get the address,
             // then getInetAddress will return null.
             InetAddress address = client.getInetAddress();
