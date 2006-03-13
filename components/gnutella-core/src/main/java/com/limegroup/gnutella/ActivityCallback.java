@@ -45,6 +45,13 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener
      *  Mark a connection as closed
      */
     public void connectionClosed(Connection c);
+    
+    /**
+     * Notify the UI that we are disconnected from the network
+     * 
+     */
+    public void disconnected();
+    
 
     /**
      * Notifies the UI that a new query result has come in to the backend.
