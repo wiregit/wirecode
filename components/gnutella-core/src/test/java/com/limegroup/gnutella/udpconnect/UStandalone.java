@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -32,7 +33,8 @@ import com.limegroup.gnutella.version.UpdateInformation;
 /**
  * A standalone program for testing UDPConnections across machines.
  */
-public class UStandalone implements ActivityCallback, ErrorCallback {
+public class UStandalone extends ActivityCallbackStub 
+    implements ActivityCallback, ErrorCallback {
 	
     private static final Log LOG =
         LogFactory.getLog(UStandalone.class);

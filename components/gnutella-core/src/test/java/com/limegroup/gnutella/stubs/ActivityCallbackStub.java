@@ -32,6 +32,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void connectionInitialized(Connection c) { }
     public void connectionClosed(Connection c) { }
     public void knownHost(Endpoint e) { }
+    public void disconnected() { }
     //public void handleQueryReply( QueryReply qr ) { }
 
 	public void handleQueryResult(RemoteFileDesc rfd, 
