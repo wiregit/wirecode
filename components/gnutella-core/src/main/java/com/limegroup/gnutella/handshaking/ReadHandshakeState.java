@@ -5,7 +5,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
 
-import com.limegroup.gnutella.io.BufferReader;
+import com.limegroup.gnutella.io.BufferUtils;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
@@ -15,7 +17,7 @@ abstract class ReadHandshakeState extends HandshakeState {
     /** Whether or not we've finished reading the initial connect line. */
     protected boolean doneConnect;
     /** The current header we're in the process of reading. */
-    protected String currentHeader = "";
+    protected StringBuffer currentHeader = new StringBuffer(1024);
     /** The connect line. */
     protected String connectLine;
     
@@ -40,7 +42,9 @@ abstract class ReadHandshakeState extends HandshakeState {
         while(!allDone) {
             int read = 0;
             
-            while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0);
+            while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0)
+                BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(read);
+            
             if(buffer.position() == 0) {
                 if(read == -1)
                     throw new IOException("EOF");
@@ -48,12 +52,10 @@ abstract class ReadHandshakeState extends HandshakeState {
             }
             
             buffer.flip();
-            BufferReader reader = new BufferReader(buffer);
             if(!doneConnect) {
-                currentHeader += reader.readLine();
-                if(reader.isLineReadCompletely()) {
-                    connectLine = currentHeader;
-                    currentHeader = "";
+                if(BufferUtils.readLine(buffer, currentHeader)) {
+                    connectLine = currentHeader.toString();
+                    currentHeader.delete(0, currentHeader.length());
                     processConnectLine();
                     doneConnect = true;
                 }
@@ -61,20 +63,31 @@ abstract class ReadHandshakeState extends HandshakeState {
             
             if(doneConnect) {
                 while(true) {
-                    currentHeader += reader.readLine();
-                    if(!reader.isLineReadCompletely())
+                    if(!BufferUtils.readLine(buffer, currentHeader))
                         break;
                     
-                    if(!support.processReadHeader(currentHeader)) {
+                    if(!support.processReadHeader(currentHeader.toString())) {
                         allDone = true;
                         break; // we finished reading this set of headers!
                     }
                     
-                    currentHeader = ""; // reset for the next header.
+                    currentHeader.delete(0, currentHeader.length()); // reset for the next header.
+
+                    // Make sure we don't try and read forever.
+                    if(support.getHeadersReadSize() > ConnectionSettings.MAX_HANDSHAKE_HEADERS.getValue())
+                        throw new IOException("too many headers");
                 }
             }
             
             buffer.compact();
+            
+            // Don't allow someone to send us a header so big that we blow up.
+            // Note that we don't check this after immediately after creating the
+            // header, because it's not really so important there.  We know the
+            // data cannot be bigger than the buffer's size, and the buffer's size isn't
+            // too extraordinarily large, so this works out okay.
+            if(currentHeader.length() > ConnectionSettings.MAX_HANDSHAKE_LINE_SIZE.getValue())
+                throw new IOException("header too big");
         }
         
         if(allDone) {

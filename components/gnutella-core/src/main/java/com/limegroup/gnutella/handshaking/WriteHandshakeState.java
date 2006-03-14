@@ -6,6 +6,7 @@ import java.nio.channels.Channel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Properties;
 
+import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /** Superclass for HandshakeStates that are written out. */
@@ -43,7 +44,8 @@ public abstract class WriteHandshakeState extends HandshakeState {
             outgoing = createOutgoingData();
         }
         
-        ((WritableByteChannel)channel).write(outgoing);
+        int written = ((WritableByteChannel)channel).write(outgoing);
+        BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(written);
         
         if(!outgoing.hasRemaining()) {
             processWrittenHeaders();

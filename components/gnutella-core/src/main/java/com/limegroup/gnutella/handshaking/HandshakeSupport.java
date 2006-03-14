@@ -35,7 +35,7 @@ class HandshakeSupport {
     private final String remoteAddress;
     
     /** The connectLine used in the remote response. */
-    private String remoteResponse;    
+    private String remoteResponse;
     
     HandshakeSupport(String remoteAddress) {
         this.remoteAddress = remoteAddress;
@@ -166,6 +166,13 @@ class HandshakeSupport {
         }
         
         RouterService.getAcceptor().setExternalAddress(ia);
+    }
+    
+
+    
+    /** Returns the number of headers we've read so far. */
+    int getHeadersReadSize() {
+        return readHeaders.size();
     }
     
     /** Constructs a HandshakeResponse object using the remote response data. */

@@ -68,34 +68,34 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         assertTrue(tester.process(channel, scratch));
         assertFalse(tester.isProcessedConnectLine());
         assertFalse(tester.isProcessedHeaders());
-        assertEquals("FIRS", tester.currentHeader);
+        assertEquals("FIRS", tester.getCurrentHeader());
         assertFalse(tester.isDoneConnect());
         
         buffer.limit("FIRST LINE\r\n".length());
         assertTrue(tester.process(channel, scratch));
         assertTrue(tester.isProcessedConnectLine());
         assertFalse(tester.isProcessedHeaders());
-        assertEquals("", tester.currentHeader);
+        assertEquals("", tester.getCurrentHeader());
         assertEquals("FIRST LINE", tester.getConnectLine());
         assertTrue(tester.isDoneConnect());
         
         buffer.limit("FIRST LINE\r\nHeader1: Value1".length());
         assertTrue(tester.process(channel, scratch));
         assertFalse(tester.isProcessedHeaders());
-        assertEquals("Header1: Value1", tester.currentHeader);
+        assertEquals("Header1: Value1", tester.getCurrentHeader());
         assertEquals(0, support.getReadHandshakeResponse().props().size());
         
         buffer.limit("FIRST LINE\r\nHeader1: Value1\r\n".length());
         assertTrue(tester.process(channel, scratch));
         assertFalse(tester.isProcessedHeaders());
-        assertEquals("", tester.currentHeader);
+        assertEquals("", tester.getCurrentHeader());
         assertEquals(1, support.getReadHandshakeResponse().props().size());
         assertEquals("Value1", support.getReadHandshakeResponse().props().get("Header1"));
         
         buffer.limit("FIRST LINE\r\nHeader1: Value1\r\nHeader2: Value2\r\nUnknownData\r\n".length());
         assertTrue(tester.process(channel, scratch));
         assertFalse(tester.isProcessedHeaders());
-        assertEquals("", tester.currentHeader);
+        assertEquals("", tester.getCurrentHeader());
         assertEquals(2, support.getReadHandshakeResponse().props().size());
         assertEquals("Value1", support.getReadHandshakeResponse().props().get("Header1"));
         assertEquals("Value2", support.getReadHandshakeResponse().props().get("Header2"));
@@ -103,7 +103,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         buffer.limit(testString.length());
         assertFalse(tester.process(channel, scratch));
         assertTrue(tester.isProcessedHeaders());
-        assertEquals("", tester.currentHeader);
+        assertEquals("", tester.getCurrentHeader());
         assertEquals(2, support.getReadHandshakeResponse().props().size());
         assertEquals("Value1", support.getReadHandshakeResponse().props().get("Header1"));
         assertEquals("Value2", support.getReadHandshakeResponse().props().get("Header2"));
@@ -287,7 +287,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         }
         
         public String getCurrentHeader() {
-            return currentHeader;
+            return currentHeader.toString();
         }
         
         public boolean isDoneConnect() {

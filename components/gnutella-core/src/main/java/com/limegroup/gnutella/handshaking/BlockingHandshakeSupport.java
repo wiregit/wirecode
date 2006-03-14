@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /**
@@ -61,13 +62,14 @@ class BlockingHandshakeSupport extends HandshakeSupport {
         // so we must catch NPE and throw the CONNECTION_CLOSED.
         try {
             socket.setSoTimeout(timeout);
+            // TODO: don't read over max line size.
             String line=(new ByteReader(in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
             BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(line.length());
             return line;
         } catch(NullPointerException npe) {
-            throw new IOException(); // TODO: use cached Exception
+            throw new IOException();
         } finally {
             //Restore socket timeout.
             socket.setSoTimeout(oldTimeout);
@@ -90,7 +92,6 @@ class BlockingHandshakeSupport extends HandshakeSupport {
      * the specified timeout
      */
     void readHeaders(int timeout) throws IOException {
-        // TODO: limit number of headers read
         while (true) {
             // This doesn't distinguish between \r and \n. That's fine.
             String line = readLine(timeout);
@@ -98,6 +99,8 @@ class BlockingHandshakeSupport extends HandshakeSupport {
                 throw new IOException("unexpected end of file"); // unexpected EOF
             if(!processReadHeader(line))
                 break;
+            if(getHeadersReadSize() > ConnectionSettings.MAX_HANDSHAKE_HEADERS.getValue())
+                throw new IOException("too many headers");
         }
     }
     
