@@ -659,7 +659,7 @@ public abstract class MessageRouter {
         if (qk == null)
             return false;
         
-        return QueryKey.validate(qk, ip, port);
+        return qk.isFor(ip, port);
     }
 
 	/**
