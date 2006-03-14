@@ -216,6 +216,12 @@ public class KUID {
         return hashCode;
     }
     
+    public byte[] getBytes() {
+        byte[] clone = new byte[id.length];
+        System.arraycopy(id, 0, clone, 0, id.length);
+        return clone;
+    }
+    
     public boolean equals(Object o) {
         if (o == this) {
             return true;
