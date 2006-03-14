@@ -143,7 +143,11 @@ public class PatriciaTrie {
             return getR(h.right, h.bitIndex, key);
         }
     }
-    
+  
+    public Object selectNextClosest(Object key) {
+        List l = select(key, Collections.EMPTY_SET, 2);
+        return l.get(l.size()-1);
+    }
     /**
      * 
      */
@@ -252,9 +256,9 @@ public class PatriciaTrie {
     
     private void removeExternalNode(Entry h) {
         if (h == root) {
-            throw new IllegalArgumentException("Cannot delete root Node!");
+            throw new IllegalArgumentException("Cannot delete root ContactNode!");
         } else if (!h.isExternalNode()) {
-            throw new IllegalArgumentException(h + " is not an external Node!");
+            throw new IllegalArgumentException(h + " is not an external ContactNode!");
         } 
         
         Entry parent = h.parent;
@@ -273,9 +277,9 @@ public class PatriciaTrie {
     
     private void removeInternalNode(Entry h, Entry p) {
         if (h == root) {
-            throw new IllegalArgumentException("Cannot delete root Node!");
+            throw new IllegalArgumentException("Cannot delete root ContactNode!");
         } else if (!h.isInternalNode()) {
-            throw new IllegalArgumentException(h + " is not an internal Node!");
+            throw new IllegalArgumentException(h + " is not an internal ContactNode!");
         } 
         
         // Set P's bitIndex
@@ -440,7 +444,7 @@ public class PatriciaTrie {
             if (root == this) {
                 buffer.append("RootNode(");
             } else {
-                buffer.append("Node(");
+                buffer.append("ContactNode(");
             }
             
             buffer.append("key=").append(key).append(" [").append(bitIndex).append("], ");
