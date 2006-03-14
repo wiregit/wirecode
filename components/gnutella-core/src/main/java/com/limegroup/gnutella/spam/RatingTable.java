@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -42,9 +42,17 @@ public class RatingTable {
 	}
 
 	/**
-	 * a Set containing all tokens.
+	 * a Map containing all tokens.
+     * 
+     * Although we stored the data as Token -> Token,
+     * this is by design (and purposely not a Set), so that
+     * we can retrieve the stored value from the Set, using
+     * a Token as an identifier.  This way a third-party can
+     * create a blank Token object without rating data and ask 
+     * the RatingTable to return the actual Token that should
+     * be used inplace of that Token (one that has rating data).
 	 */
-	private final Set _tokenSet;
+	private final Map _tokenMap;
 
 	/**
 	 * constructor, tries to deserialize filter data from disc, which will fail
@@ -52,10 +60,10 @@ public class RatingTable {
 	 */
 	private RatingTable() {
 		// deserialize
-		_tokenSet = readData();
+		_tokenMap = readData();
 
 		if (LOG.isDebugEnabled())
-			LOG.debug("size of tokenSet " + _tokenSet.size());
+			LOG.debug("size of tokenSet " + _tokenMap.size());
 
 	}
 
@@ -63,7 +71,7 @@ public class RatingTable {
 	 * clears the filter data
 	 */
 	synchronized void clear() {
-		_tokenSet.clear();
+		_tokenMap.clear();
 	}
 
 	/**
@@ -179,19 +187,23 @@ public class RatingTable {
 	 * @return token or the matching copy of it from _tokenMap
 	 */
 	private synchronized Token lookup(Token token) {
-        if(!_tokenSet.contains(token)) {
-            _tokenSet.add(token);
+        Token stored = (Token)_tokenMap.get(token);
+        
+        if(stored == null) {
+            _tokenMap.put(token, token);
             checkSize();
+            stored = token;
         }
-        return token;
+        
+        return stored;
 	}
 
 	/**
 	 * read data from disk
 	 * 
-	 * @return Set of <tt>Token</tt> to <tt>Token</tt> as read from disk
+	 * @return Map of <tt>Token</tt> to <tt>Token</tt> as read from disk
 	 */
-	private Set readData() {
+	private Map readData() {
 		ObjectInputStream is = null;
 		try {
 			is = new ObjectInputStream(
@@ -199,13 +211,11 @@ public class RatingTable {
                             new FileInputStream(getSpamDat())));
             Object read = is.readObject();
             if(read instanceof Map)
-                return new HashSet(((Map)read).keySet());
-            else if(read instanceof Set)
-                return (Set)read;
-            else
-                return new HashSet();
+                return (Map)read;
+            else 
+                return new HashMap();
 		} catch(Exception someKindOfError) {
-			return new HashSet();
+			return new HashMap();
 		} finally {
             IOUtils.close(is);
 		}
@@ -215,12 +225,12 @@ public class RatingTable {
      * Save data from this table to disk.
      */
     public void save() {
-        Set copy;
+        Map copy;
         
         synchronized(this) {
-            if (_tokenSet.size() > MAX_SIZE)
+            if (_tokenMap.size() > MAX_SIZE)
                 pruneEntries();
-            copy = new HashSet(_tokenSet);
+            copy = new HashMap(_tokenMap);
         }
         
         if (LOG.isDebugEnabled())
@@ -244,7 +254,7 @@ public class RatingTable {
      * shut down)
      */
     public synchronized void ageAndSave() {
-        for (Iterator iter = _tokenSet.iterator(); iter.hasNext();)
+        for (Iterator iter = _tokenMap.values().iterator(); iter.hasNext();)
             ((Token) iter.next()).incrementAge();
         save();
     }
@@ -253,7 +263,7 @@ public class RatingTable {
 	 * check size of _tokenMap and clears old entries if necessary
 	 */
 	private synchronized void checkSize() {
-		if (_tokenSet.size() < MAX_SIZE * 2)
+		if (_tokenMap.size() < MAX_SIZE * 2)
 			return;
 		pruneEntries();
 	}
@@ -270,18 +280,19 @@ public class RatingTable {
 		if (LOG.isDebugEnabled())
 			LOG.debug("pruning unimportant entries from RatingTable");
 
-        int tokensToRemove = _tokenSet.size() - MAX_SIZE;
+        int tokensToRemove = _tokenMap.size() - MAX_SIZE;
         if (tokensToRemove <= 0) {
             return;
         }
         
         // Make a set of sorted tokens, low importance first
-        Set sortedTokens = new TreeSet(_tokenSet);
+        Set sortedTokens = new TreeSet(_tokenMap.values());
         Iterator it = sortedTokens.iterator();
         while (tokensToRemove > 0) {
-            // If an exception is thrown here, there is a
-            // race condition
-            _tokenSet.remove(it.next());
+            // Note: Although we are iterating over the sorted values or the map,
+            // and then removing from it using those items (as opposed to the keys),
+            // this works fine because the Map stores the same element in key/value.
+            _tokenMap.remove(it.next());
             --tokensToRemove;
         }
 	}
