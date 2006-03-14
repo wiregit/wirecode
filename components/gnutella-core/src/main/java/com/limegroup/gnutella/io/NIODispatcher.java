@@ -282,11 +282,10 @@ public class NIODispatcher implements Runnable {
                }
            };
            
-           synchronized(Q_LOCK) {
-               LATER.add(waiter);
-           }
-           
            synchronized(waiter) {
+               synchronized(Q_LOCK) {
+                   LATER.add(waiter);
+               }
                waiter.wait();
            }
        }
