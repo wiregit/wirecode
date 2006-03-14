@@ -179,6 +179,14 @@ public class PatriciaTrie {
         return state.getResults();
     }
     
+    public List range(Object key) {
+        SearchState state = new SearchState(key, 
+                Collections.EMPTY_SET, Integer.MAX_VALUE, true);
+        
+        selectR(state);
+        return state.getResults();
+    }
+    
     private void selectR(final SearchState state) {
         if (state.done) {
             return;
@@ -485,6 +493,7 @@ public class PatriciaTrie {
         final Object key;
         final Collection exclude;
         final int targetSize;
+        final boolean prefix;
         
         int currentDistance, numEquidistant, numEquidistantToAdd;
         
@@ -493,10 +502,16 @@ public class PatriciaTrie {
         private final Random r = new Random();
         
         public SearchState(Object key, Collection exclude, int targetSize) {
+            this(key, exclude, targetSize, false);
+        }
+        
+        public SearchState(Object key, Collection exclude, int targetSize, boolean prefix) {
             this.key = key;
             this.exclude = exclude == null ? Collections.EMPTY_SET : exclude;
             this.targetSize = targetSize;
-            dest = new ArrayList(targetSize);
+            this.prefix = prefix;
+            
+            dest = new ArrayList(Math.min(targetSize, size()));
         }
         
         public List getResults() {
@@ -517,7 +532,8 @@ public class PatriciaTrie {
            int distance = bitIndex(key, h.key);
            
            if (distance != currentDistance) {
-               if (dest.size() == targetSize) { // finito.
+               if (dest.size() == targetSize 
+                       || (prefix && distance < currentDistance)) { // finito.
                    done = true;
                    return;
                }
@@ -542,7 +558,6 @@ public class PatriciaTrie {
             bitIndex = h.bitIndex;
             current = left ? h.left : h.right;
         }
-        
     }
     
     public static interface KeyCreator {
