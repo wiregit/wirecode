@@ -205,23 +205,25 @@ public class PatriciaTrie {
         }
         
         Entry entry = rangeR(root.left, -1, key, length, root);
-        if (entry == root) {
+        if (entry.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
         
         boolean a = isBitSet(entry.key, length);
         boolean b = isBitSet(key, length);
         
-        if (a == b) {
+        if (!a && !b) {
             return valuesR(entry, -1, new ArrayList());
-        } else{
-            return Collections.EMPTY_LIST;
+        } else if (!b) {
+            return valuesR(entry.left, -1, new ArrayList());
+        } else {
+            return valuesR(entry.right, -1, new ArrayList());
         }
     }
     
     private Entry rangeR(Entry h, int bitIndex, Object key, int keyLength, Entry p) {
         
-        if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
+        if (h.bitIndex <= bitIndex || keyLength <= h.bitIndex) {
             return (h.isEmpty() ? p : h);
         }
         
