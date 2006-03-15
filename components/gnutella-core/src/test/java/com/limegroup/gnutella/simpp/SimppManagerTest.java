@@ -35,7 +35,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     static final int ABOVE_MAX = 8;
 
-    static final int BELOW_MIN = 9;    
+    static final int BELOW_MIN = 9;
 
     private static File OLD_SIMPP_FILE;
     
@@ -54,8 +54,6 @@ public class SimppManagerTest extends BaseTestCase {
     static final int PORT = 6346;
 
     private static File _simppFile;
-
-    private static int _simppMessageNumber = -1;
     
     public SimppManagerTest(String name) {
         super(name);
@@ -115,9 +113,11 @@ public class SimppManagerTest extends BaseTestCase {
         _simppFile = new File(_settingsDir, "simpp.xml");
 
         //set up the correct simpp version
-        _simppMessageNumber = OLD;
-        changeSimppFile();
+        //_simppMessageNumber = OLD;
+        changeSimppFile(OLD_SIMPP_FILE);
 
+        assertEquals("base case did not revert to defaults", 4, 
+                SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
 
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
                                                    new String[] {"*.*.*.*"} );
@@ -155,53 +155,46 @@ public class SimppManagerTest extends BaseTestCase {
     }
     
     public void testMiddleVersion() throws Exception {
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
         SimppManager man = SimppManager.instance();
         assertEquals("problem reading/verifying middle version file", 2,
                                                              man.getVersion());
     }
     
     public void testNewVersion() throws Exception {
-        _simppMessageNumber = NEW;
-        changeSimppFile();
+        changeSimppFile(NEW_SIMPP_FILE);
         SimppManager man = SimppManager.instance();
         assertEquals("problem reading/verifying new version file", 3,
                                                             man.getVersion());
     }
     
     public void testBadSignatureFails() throws Exception {
-        _simppMessageNumber = DEF_SIGNATURE;
-        changeSimppFile();
+        changeSimppFile(DEF_SIG_FILE);
         SimppManager man = SimppManager.instance();
         assertEquals("bad signature accepted", 0, man.getVersion());
     }
     
     public void testBadMessageFails() throws Exception {
-        _simppMessageNumber = DEF_MESSAGE;
-        changeSimppFile();
+        changeSimppFile(DEF_MESSAGE_FILE);
         SimppManager man = SimppManager.instance();
         assertEquals("tampered message accepted", 0, man.getVersion());
     }
     
     public void testBadXMLFails() throws Exception {
-        _simppMessageNumber = BAD_XML;
-        changeSimppFile();
+        changeSimppFile(BAD_XML_FILE);
         SimppManager man = SimppManager.instance();
         assertEquals("malformed xml accepted", 0, man.getVersion());
     }
     
     public void testRandomBytesFails() throws Exception {
-        _simppMessageNumber = RANDOM_BYTES;
-        changeSimppFile();
+        changeSimppFile(RANDOM_BYTES_FILE);
         SimppManager man = SimppManager.instance();
         assertEquals("garbage bytes accepted", 0, man.getVersion());
     }
 
     public void testOlderSimppNotRequested() throws Exception {
         //1. Set up LimeWire
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the TestConnection to have the old version, and expect to
         //not receive a simpprequest
@@ -222,8 +215,7 @@ public class SimppManagerTest extends BaseTestCase {
     
     public void testOlderSimppNotRequestedUnsolicitedAccepted() throws Exception {
         //1. Set up LimeWire 
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited newer SimppResponse
@@ -241,8 +233,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     public void testSameSimppNotRequested() throws Exception {
         //1. Set up LimeWire 
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited same SimppResponse
@@ -260,8 +251,7 @@ public class SimppManagerTest extends BaseTestCase {
     
     public void testNewSimppAdvOldActualRejected() throws Exception {
         //1. Set up LimeWire 
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited older SimppResponse
@@ -281,8 +271,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     public void testNewerSimppRequested() throws Exception {
         //1. Set up limewire correctly
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire
@@ -300,8 +289,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     public void testTamperedSimppSigRejected() throws Exception {
         //1. Set up limewire correctly
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective signature
@@ -320,8 +308,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     public void testTamperedSimppDataRejected() throws Exception  {
        //1. Set up limewire correctly
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective message msg
@@ -339,8 +326,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     public void testBadSimppXMLRejected() throws Exception  {
         //1. Set up limewire correctly
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a bad_xml msg
@@ -357,8 +343,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     public void testGargabeDataRejected() throws Exception {
         //1. Set up limewire correctly
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a garbage msg
@@ -376,15 +361,14 @@ public class SimppManagerTest extends BaseTestCase {
     public void testSimppTakesEffect() throws Exception {
 
         assertEquals("base case did not revert to defaults",4, 
-                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //1. Test that Simpp files read off disk take effect. 
-        _simppMessageNumber = OLD;
-        changeSimppFile();
+        changeSimppFile(OLD_SIMPP_FILE);
         resetSettingmanager();
         Thread.sleep(1000);
 
         assertEquals("base case did not revert to defaults",12, 
-                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
         TestConnection conn = new TestConnection(NEW, true, true);
@@ -393,42 +377,40 @@ public class SimppManagerTest extends BaseTestCase {
         Thread.sleep(6000);//let the message exchange take place
 
         assertEquals("test_upload setting not changed to simpp value", 15,
-                                 UploadSettings.TEST_UPLOAD_SETTING.getValue());
+                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         
     }
 
-    public void testSimppSettingStaysBelowMax() throws Exception {
+    public void testSimppSettingObeysMax() throws Exception {
 
         assertEquals("base case did not revert to defaults", 4, 
-                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
-        _simppMessageNumber = OLD;
-        changeSimppFile();
+                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
+        //_simppMessageNumber = OLD;
+        changeSimppFile(OLD_SIMPP_FILE);
         Thread.sleep(1000);
         
         resetSettingmanager();
         assertEquals("base case did not revert to defaults",12, 
-                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
         TestConnection conn = new TestConnection(ABOVE_MAX, true, true, NEW);
         conn.start();
         Thread.sleep(6000);//let the message exchange take place
 
-        assertEquals("test_upload setting not changed to simpp value", 12,
-                                UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        assertEquals("test_upload setting not changed to simpp value",
+                     SimppManagerTestSettings.MAX_SETTING,
+                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         
     }
 
-    public void testSimppSettingStaysAboveMin() throws Exception {
-        assertEquals("base case did not revert to defaults", 4, 
-                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
-        _simppMessageNumber = OLD;
-        changeSimppFile();
+    public void testSimppSettingObeysMin() throws Exception {
+        changeSimppFile(OLD_SIMPP_FILE);
         Thread.sleep(1000);
 
         resetSettingmanager();
         assertEquals("base case did not revert to defaults",12, 
-                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+               SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
         TestConnection conn = new TestConnection(BELOW_MIN, true, true, NEW);
@@ -436,15 +418,15 @@ public class SimppManagerTest extends BaseTestCase {
         
         Thread.sleep(6000);//let the message exchange take place
         
-        assertEquals("test_upload setting not changed to simpp value", 12,
-                                UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        assertEquals("test_upload settting didn't obey min value",
+               SimppManagerTestSettings.MIN_SETTING,
+               SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         
     }
 
     public void testIOXLeavesSimppUnchanged() throws Exception {
         //1. Set up limewire correctly
-        _simppMessageNumber = MIDDLE;
-        changeSimppFile();
+        changeSimppFile(MIDDLE_SIMPP_FILE);
 
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire, but then close the connection while
@@ -464,23 +446,8 @@ public class SimppManagerTest extends BaseTestCase {
 
     ////////////////////////////////private methods///////////////////////////
     
-    private static void changeSimppFile() throws Exception {
-        if(_simppMessageNumber == OLD) 
-            CommonUtils.copy(OLD_SIMPP_FILE, _simppFile);
-        else if(_simppMessageNumber == MIDDLE)
-            CommonUtils.copy(MIDDLE_SIMPP_FILE, _simppFile);
-        else if(_simppMessageNumber == NEW) 
-            CommonUtils.copy(NEW_SIMPP_FILE, _simppFile);
-        else if(_simppMessageNumber == BAD_XML)
-            CommonUtils.copy(BAD_XML_FILE, _simppFile);
-        else if(_simppMessageNumber == DEF_SIGNATURE)
-            CommonUtils.copy(DEF_SIG_FILE, _simppFile);
-        else if(_simppMessageNumber == DEF_MESSAGE)
-            CommonUtils.copy(DEF_MESSAGE_FILE, _simppFile);
-        else if(_simppMessageNumber == RANDOM_BYTES)
-            CommonUtils.copy(RANDOM_BYTES_FILE, _simppFile);
-        else 
-            fail("simppMessageNumber value is illegal");
+    private static void changeSimppFile(File inputFile) throws Exception {        
+        CommonUtils.copy(inputFile, _simppFile);
         
         PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
         PrivilegedAccessor.setValue(CapabilitiesVM.class,"_instance", null);

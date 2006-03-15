@@ -102,14 +102,6 @@ public final class UploadSettings extends LimeProps {
                 (float)Math.E/100,
                 (float)Math.E-0.1f);
     
-    
-    /**
-     * A test SIMPP setting.
-     */
-    public static final IntSetting TEST_UPLOAD_SETTING = 
-        FACTORY.createSettableIntSetting("TEST_UPLOAD_SETTING",4, 
-                                                         "test_upload", 3, 20);
-    
     /**
      * How much to throttle the Thex upload speed.
      */
