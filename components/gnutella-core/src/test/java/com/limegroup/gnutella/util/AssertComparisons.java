@@ -132,17 +132,6 @@ public class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assert that the two longs are equal. If not, an AssertionFailedError is thrown
-     * with thi given message.
-     */
-    static public void assertEquals(String msg, long expected, long actual) {
-        if (expected == actual) {
-            return;
-        }
-        fail(formatComparison(BLANK, msg, new Long(expected), new Long(actual)));
-    }
-    
-    /**
      * Assert that the two arrays are equal.
      */
     static public void assertEquals(Object[] expected, Object[] actual) {
