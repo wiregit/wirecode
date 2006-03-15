@@ -79,7 +79,7 @@ public class PatriciaTrie {
         
         Entry found = getR(root.left, -1, key);
         if (key.equals(found.key)) {
-            if (found == root && root.isEmpty()) {
+            if (/*found == root */ found.isEmpty()) {
                 incrementSize();
             }
             return found.setKeyValue(key, value);
