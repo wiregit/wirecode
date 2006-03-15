@@ -107,37 +107,49 @@ public class PatriciaRouteTable implements RoutingTable{
                     LOG.trace("Bucket "+bucket+" full, splitting");
                 }
                 
-                List l = bucket.split();
+                List newBuckets = bucket.split();
                 //update bucket node count
-                for (Iterator iter = l.iterator(); iter.hasNext();) {
-                    BucketNode splitBucket = (BucketNode) iter.next();
-                    updateBucketNodeCount(splitBucket);
-                    bucketsTrie.put(splitBucket.getNodeID(),splitBucket);
-                }
+                BucketNode leftSplitBucket = (BucketNode) newBuckets.get(0);
+                BucketNode rightSplitBucket = (BucketNode) newBuckets.get(1);
+                bucketsTrie.put(leftSplitBucket.getNodeID(),leftSplitBucket);
+                bucketsTrie.put(rightSplitBucket.getNodeID(),rightSplitBucket);
+                int countLeft = updateBucketNodeCount(leftSplitBucket);
+                int countRight = updateBucketNodeCount(rightSplitBucket);
                 //attempt the put the new contact again with the split buckets
                 BucketNode newBucket = (BucketNode)bucketsTrie.select(nodeId);
                 //this should never happen
+                if(countLeft+countRight != K) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("Bucket did not split correctly!");
+                    }
+                    return;
+                }
                 if(newBucket.equals(bucket)) {
-                    if (LOG.isTraceEnabled()) {
+                    if (LOG.isErrorEnabled()) {
                         LOG.error("Bucket split did not create a new bucket closer to the added node!");
                     }
                     return;
-                } else {
-                    if(newBucket.getNodeCount() < K) {
-                        
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("Inserting node "+node+ " to split bucket "+newBucket);
-                        }
-                        
-                        newBucket.incrementNodeCount();
-                        newBucket.removeReplacementNode(nodeId);
-                        nodesTrie.put(nodeId,node);
-                        return;
-                    } 
-                    //TODO mark: bucket still full -> add contact to replacement cache
-                    else {
-                        //nothin for now - contact dropped
+                } 
+                if(newBucket.getNodeCount() < K) {
+                    
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Inserting node "+node+ " to split bucket "+newBucket);
                     }
+                    
+                    newBucket.incrementNodeCount();
+                    newBucket.removeReplacementNode(nodeId);
+                    nodesTrie.put(nodeId,node);
+                    return;
+                } 
+                //TODO mark: bucket still full -> add contact to replacement cache
+                else {
+                    
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Split bucket "+newBucket+" still full, adding node "+node+" to replacement cache");
+                    }
+                    
+                    bucket.addReplacementNode(node);
+                    return;
                 }
             } 
             //not splitting --> replacement cache
@@ -149,13 +161,13 @@ public class PatriciaRouteTable implements RoutingTable{
                 
                bucket.addReplacementNode(node);
             }
-            
         }
     }
     
-    public void updateBucketNodeCount(BucketNode bucket) {
-        int newCount = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()).size();
+    public int updateBucketNodeCount(BucketNode bucket) {
+        int newCount = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1).size();
         bucket.setNodeCount(newCount);
+        return newCount;
     }
     
 

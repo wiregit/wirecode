@@ -59,12 +59,14 @@ public class BucketNode extends Node {
     public List split() {
         List list = new ArrayList();
         BucketNode leftBucket = new BucketNode(nodeId, depth+1);
-        BucketNode rightBucket = new BucketNode(nodeId.set(depth+1, true),depth+1);
+        BucketNode rightBucket = new BucketNode(nodeId.set(depth, true),depth+1);
         //split replacement cache -- costly?
         for (Iterator iter = replacementCache.values().iterator(); iter.hasNext();) {
             ContactNode node = (ContactNode) iter.next();
             if(leftBucket.getNodeID().isCloser(rightBucket.getNodeID(),node.getNodeID())) {
                 leftBucket.addReplacementNode(node);
+            } else {
+                rightBucket.addReplacementNode(node);
             }
         }
         list.add(leftBucket);
@@ -78,7 +80,7 @@ public class BucketNode extends Node {
     }
     
     public String toString() {
-        return  super.toString() + ",depth: "+depth+", size: "+nodeCount;
+        return  super.toString() + ",depth: "+depth+", size: "+nodeCount+", replacements: "+replacementCache.size();
     }
     
     public static void main(String[] args) {
@@ -86,7 +88,9 @@ public class BucketNode extends Node {
         System.out.println(bucket);
         for (int i = 0; i < 10; i++) {
             List l = bucket.split();
+            BucketNode bucket0 = (BucketNode)l.get(0);
             bucket = (BucketNode)l.get(1);
+            System.out.println(bucket0);
             System.out.println(bucket);
             System.out.println(KUID.createRandomID(bucket.getNodeID().getBytes(),bucket.getDepth()).toHexString());
         }
