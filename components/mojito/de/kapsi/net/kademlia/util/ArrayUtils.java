@@ -13,6 +13,12 @@ public final class ArrayUtils {
         'C', 'D', 'E', 'F'
     };
     
+    private static final String[] BIN = {
+        "0000", "0001", "0010", "0011", "0100", "0101", 
+        "0110", "0111", "1000", "1001", "1010", "1011",
+        "1100", "1101", "1110", "1111"
+    };
+    
     private ArrayUtils() {}
     
     public static int hashCode(byte[] data) {
@@ -32,6 +38,15 @@ public final class ArrayUtils {
         for(int i = 0; i < data.length; i++) {
             buffer.append(HEX[(data[i] >> 4) & 0xF]).append(HEX[data[i] & 0xF]);
         }
+        return buffer.toString();
+    }
+    
+    public static String toBinString(byte[] data) {
+        StringBuffer buffer = new StringBuffer(data.length * 8);
+        for(int i = 0; i < data.length; i++) {
+            buffer.append(BIN[(data[i] >> 4) & 0xF]).append(BIN[data[i] & 0xF]).append(" ");
+        }
+        buffer.setLength(buffer.length()-1);
         return buffer.toString();
     }
     

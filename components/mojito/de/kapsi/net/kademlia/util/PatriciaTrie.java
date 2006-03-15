@@ -183,12 +183,43 @@ public class PatriciaTrie {
         return state.getResults();
     }
     
-    public List range(Object key) {
-        SearchState state = new SearchState(key, 
-                Collections.EMPTY_SET, Integer.MAX_VALUE, true);
+    /**
+     * Returns all values as List whose keys have the same
+     * prefix as the provided key from the 0th bit to length-th bit
+     * 
+     * @param length (depth) in bits
+     */
+    public List range(Object key, int length) {
+        if (length >= keyCreator.length()) {
+            throw new IllegalArgumentException(length + " >= " + keyCreator.length());
+        }
         
-        selectR(state);
-        return state.getResults();
+        Entry entry = rangeR(root.left, -1, key, length, root);
+        if (entry == root) {
+            return Collections.EMPTY_LIST;
+        }
+        
+        boolean a = isBitSet(entry.key, length);
+        boolean b = isBitSet(key, length);
+        
+        if (a == b) {
+            return valuesR(entry, -1, new ArrayList());
+        } else{
+            return Collections.EMPTY_LIST;
+        }
+    }
+    
+    private Entry rangeR(Entry h, int bitIndex, Object key, int keyLength, Entry p) {
+        
+        if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
+            return h == root ? p : h;
+        }
+        
+        if (!isBitSet(key, h.bitIndex)) {
+            return rangeR(h.left, bitIndex, key, keyLength, h);
+        } else {
+            return rangeR(h.right, bitIndex, key, keyLength, h);
+        }
     }
     
     private void selectR(final SearchState state) {
@@ -256,9 +287,9 @@ public class PatriciaTrie {
     
     private void removeExternalNode(Entry h) {
         if (h == root) {
-            throw new IllegalArgumentException("Cannot delete root ContactNode!");
+            throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isExternalNode()) {
-            throw new IllegalArgumentException(h + " is not an external ContactNode!");
+            throw new IllegalArgumentException(h + " is not an external Entry!");
         } 
         
         Entry parent = h.parent;
@@ -277,9 +308,9 @@ public class PatriciaTrie {
     
     private void removeInternalNode(Entry h, Entry p) {
         if (h == root) {
-            throw new IllegalArgumentException("Cannot delete root ContactNode!");
+            throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isInternalNode()) {
-            throw new IllegalArgumentException(h + " is not an internal ContactNode!");
+            throw new IllegalArgumentException(h + " is not an internal Entry!");
         } 
         
         // Set P's bitIndex
@@ -330,7 +361,7 @@ public class PatriciaTrie {
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("RoutingTable[").append(size()).append("]={\n");
+        buffer.append("Trie[").append(size()).append("]={\n");
         toStringR(root.left, -1, buffer);
         buffer.append("}\n");
         return buffer.toString();
@@ -442,9 +473,9 @@ public class PatriciaTrie {
             StringBuffer buffer = new StringBuffer();
             
             if (root == this) {
-                buffer.append("RootNode(");
+                buffer.append("RootEntry(");
             } else {
-                buffer.append("ContactNode(");
+                buffer.append("Entry(");
             }
             
             buffer.append("key=").append(key).append(" [").append(bitIndex).append("], ");
@@ -497,8 +528,7 @@ public class PatriciaTrie {
         final Object key;
         final Collection exclude;
         final int targetSize;
-        final boolean prefix;
-        
+
         int currentDistance, numEquidistant, numEquidistantToAdd;
         
         boolean done;
@@ -506,14 +536,9 @@ public class PatriciaTrie {
         private final Random r = new Random();
         
         public SearchState(Object key, Collection exclude, int targetSize) {
-            this(key, exclude, targetSize, false);
-        }
-        
-        public SearchState(Object key, Collection exclude, int targetSize, boolean prefix) {
             this.key = key;
             this.exclude = exclude == null ? Collections.EMPTY_SET : exclude;
             this.targetSize = targetSize;
-            this.prefix = prefix;
             
             dest = new ArrayList(Math.min(targetSize, size()));
         }
@@ -536,8 +561,7 @@ public class PatriciaTrie {
            int distance = bitIndex(key, h.key);
            
            if (distance != currentDistance) {
-               if (dest.size() == targetSize 
-                       || (prefix && distance < currentDistance)) { // finito.
+               if (dest.size() == targetSize) { // finito.
                    done = true;
                    return;
                }

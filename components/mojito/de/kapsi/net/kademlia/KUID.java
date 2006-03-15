@@ -237,6 +237,10 @@ public class KUID {
         return ArrayUtils.toHexString(id);
     }
     
+    public String toBinString() {
+        return ArrayUtils.toBinString(id);
+    }
+    
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         switch(type) {
