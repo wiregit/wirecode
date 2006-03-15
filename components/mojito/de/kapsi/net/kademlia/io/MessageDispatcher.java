@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
-import de.kapsi.net.kademlia.handler.DefaultMessageHandler2;
+import de.kapsi.net.kademlia.handler.DefaultMessageHandler;
 import de.kapsi.net.kademlia.handler.RequestHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.request.FindNodeRequestHandler;
@@ -63,7 +63,7 @@ public class MessageDispatcher implements Runnable {
     
     private Context context;
     
-    private DefaultMessageHandler2 defaultHandler;
+    private DefaultMessageHandler defaultHandler;
     private PingRequestHandler pingHandler;
     private FindNodeRequestHandler findNodeHandler;
     private FindValueRequestHandler findValueHandler;
@@ -72,7 +72,7 @@ public class MessageDispatcher implements Runnable {
     public MessageDispatcher(Context context) {
         this.context = context;
         
-        defaultHandler = new DefaultMessageHandler2(context);
+        defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
         findNodeHandler = new FindNodeRequestHandler(context);
         findValueHandler = new FindValueRequestHandler(context);
@@ -153,7 +153,7 @@ public class MessageDispatcher implements Runnable {
             return;
         }
         
-        Receipt receipt = new Receipt(nodeId, dst, message, handler);
+        Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
         
         synchronized(OUTPUT_LOCK) {
             output.add(receipt);
@@ -244,7 +244,11 @@ public class MessageDispatcher implements Runnable {
             buffer.get(data, 0, length);
             
             Message message = InputOutputUtils.deserialize(data);
-            Receipt receipt = (Receipt)input.remove(message.getMessageID());
+            Receipt receipt = null;
+            
+            if (message instanceof ResponseMessage) {
+                receipt = (Receipt)input.remove(message.getMessageID());
+            }
             
             if (receipt != null) {
                 receipt.received();
@@ -262,7 +266,7 @@ public class MessageDispatcher implements Runnable {
         // MAKE SURE WE'RE NOT RECEIVING MESSAGES FROM OURSELF
         if (nodeId != null 
                 && nodeId.equals(context.getLocalNodeID())
-                && src.equals(context.getSocketAddress())) {
+                && src.equals(context.getLocalSocketAddress())) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message from ourself: " + Node.toString(nodeId, src));
             }

@@ -33,49 +33,63 @@ public class MessageOutputStream extends DataOutputStream {
         super(out);
     }
     
+    private void writeKUID(KUID key) throws IOException {
+        if (key != null && !key.isUnknownID()) {
+            writeByte(key.getType());
+            write(key.getBytes());
+        } else {
+            writeByte(0);
+        }
+    }
+    
+    private void writeKeyValue(KeyValue keyValue) throws IOException {
+        writeKUID(keyValue.getKey());
+        byte[] b = keyValue.getValue();
+        writeShort(b.length);
+        write(b, 0, b.length);
+        
+        writeKUID(keyValue.getNodeID());
+        writeSocketAddress(keyValue.getSocketAddress());
+        
+        writeSignature(keyValue.getSignature());
+    }
+    
+    private void writePublicKey(PublicKey pubKey) throws IOException {
+        if (pubKey != null) {
+            byte[] encoded = pubKey.getEncoded();
+            writeShort(encoded.length);
+            write(encoded, 0, encoded.length);
+        } else {
+            writeShort(0);
+        }
+    }
+    
+    private void writeSignature(byte[] signature) throws IOException {
+        if (signature != null && signature.length > 0) {
+            writeByte(signature.length);
+            write(signature, 0, signature.length);
+        } else {
+            writeByte(0);
+        }
+    }
+    
     private void writeNode(Node node) throws IOException {
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
     }
     
-    /*private void writeTuple(Value tuple) throws IOException {
-        writeKUID(tuple.getValueID());
-        writeValue(tuple.getValue());
-    }*/
-    
     private void writeSocketAddress(SocketAddress addr) throws IOException {
-        InetSocketAddress iaddr = (InetSocketAddress)addr;
-        byte[] address = iaddr.getAddress().getAddress();
-        int port = iaddr.getPort();
-        
-        writeByte(address.length);
-        write(address, 0, address.length);
-        writeShort(port);
-    }
-    
-    private void writeKUID(KUID key) throws IOException {
-        key.write(this);
-    }
-    
-    private void writePublicKey(PublicKey pubKey) throws IOException {
-        byte[] encoded = pubKey.getEncoded();
-        writeShort(encoded.length);
-        write(encoded, 0, encoded.length);
-    }
-    
-    private void writeValue(KeyValue value) throws IOException {
-        writeKUID(value.getKey());
-        byte[] b = value.getValue();
-        writeShort(b.length);
-        write(b, 0, b.length);
-        
-        writePublicKey(value.getPublicKey());
-        byte[] signature = value.getSignature();
-        writeByte(signature.length);
-        write(signature, 0, signature.length);
-        
-        writeLong(value.getCreationTime());
-        writeByte(value.getMode());
+        if (addr instanceof InetSocketAddress) {
+            InetSocketAddress iaddr = (InetSocketAddress)addr;
+            byte[] address = iaddr.getAddress().getAddress();
+            int port = iaddr.getPort();
+            
+            writeByte(address.length);
+            write(address, 0, address.length);
+            writeShort(port);
+        } else {
+            writeByte(0);
+        }
     }
     
     private void writePing(PingRequest ping) throws IOException {
@@ -104,7 +118,7 @@ public class MessageOutputStream extends DataOutputStream {
     private void writeFindValueResponse(FindValueResponse response) throws IOException {
         writeByte(response.size());
         for(Iterator it = response.iterator(); it.hasNext(); ) {
-            writeValue((KeyValue)it.next());
+            writeKeyValue((KeyValue)it.next());
         }
     }
     
@@ -112,7 +126,7 @@ public class MessageOutputStream extends DataOutputStream {
         Collection values = request.getValues();
         writeByte(values.size());
         for(Iterator it = values.iterator(); it.hasNext(); ) {
-            writeValue((KeyValue)it.next());
+            writeKeyValue((KeyValue)it.next());
         }
     }
     

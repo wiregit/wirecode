@@ -5,7 +5,6 @@
 
 package de.kapsi.net.kademlia;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -61,7 +60,8 @@ public class Context implements Runnable {
     private PublicKey masterKey;
     
     private KUID nodeId;
-    private SocketAddress address;
+    private SocketAddress localAddress;
+    private SocketAddress externalAddress;
     
     private KeyPair keyPair;
     
@@ -121,15 +121,29 @@ public class Context implements Runnable {
     }
     
     public Node getLocalNode() {
-        return new Node(nodeId, address);
+        if (externalAddress == null) {
+            return new Node(nodeId, localAddress);
+        } else {
+            return new Node(nodeId, externalAddress);
+        }
     }
     
     public KUID getLocalNodeID() {
         return nodeId;
     }
     
-    public SocketAddress getSocketAddress() {
-        return address;
+    public SocketAddress getLocalSocketAddress() {
+        return localAddress;
+    }
+    
+    public SocketAddress getExternalSocketAddress() {
+        return externalAddress;
+    }
+    
+    public void setExternalSocketAddress(SocketAddress externalAddress) {
+        if (this.externalAddress == null) {
+            this.externalAddress = externalAddress;
+        }
     }
     
     public Database getDatabase() {
@@ -170,16 +184,13 @@ public class Context implements Runnable {
         }
         
         messageDispatcher.bind(address);
-        this.address = address;
+        this.localAddress = address;
         
         byte[] id = ContextSettings.getLocalNodeID(address);
         if (id == null) {
             nodeId = KUID.createRandomNodeID(address);
-            
-            ByteArrayOutputStream out = new ByteArrayOutputStream(20);
-            nodeId.write(out);
-            out.close();
-            ContextSettings.setLocalNodeID(address, out.toByteArray());
+            id = nodeId.getBytes();
+            ContextSettings.setLocalNodeID(address, id);
         } else {
             nodeId = KUID.createNodeID(id);
         }
@@ -191,7 +202,7 @@ public class Context implements Runnable {
             throw new IOException("DHT is already bound");
         }
         messageDispatcher.bind(address);
-        this.address = address;
+        this.localAddress = address;
         nodeId = localNodeID;
     }
     

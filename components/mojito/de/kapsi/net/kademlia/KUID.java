@@ -5,8 +5,7 @@
 
 package de.kapsi.net.kademlia;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
@@ -31,10 +30,12 @@ import de.kapsi.net.kademlia.util.PatriciaTrie.KeyCreator;
  * 
  * @author Roger Kapsi
  */
-public class KUID {
+public class KUID implements Serializable {
     
+    private static final long serialVersionUID = 633717248208386374L;
+
     public static final int LENGTH = 160; // bit
-   
+    
     private static final Random GENERATOR = new Random();
     
     private static final int[] BITS = {
@@ -48,7 +49,8 @@ public class KUID {
         0x1
     };
     
-    public static final KUID NULL = new KUID();
+    public static final KUID MIN_ID = new KUID(false);
+    public static final KUID MAX_ID = new KUID(true);
     
     public static final int UNKNOWN_ID = 0x00;
     public static final int NODE_ID = 0x01;
@@ -78,10 +80,15 @@ public class KUID {
         this.hashCode = ArrayUtils.hashCode(id);
     }
     
-    private KUID() {
+    private KUID(boolean max) {
         this.type = UNKNOWN_ID;
         this.id = new byte[LENGTH/8];
-        this.hashCode = 0;
+        
+        if (max) {
+            Arrays.fill(this.id, (byte)0xFF);
+        }
+        
+        this.hashCode = ArrayUtils.hashCode(id);
     }
     
     public KUID assertNodeID() throws RuntimeException {
@@ -115,6 +122,10 @@ public class KUID {
     
     public boolean isMessageID() {
         return type == MESSAGE_ID;
+    }
+    
+    public boolean isUnknownID() {
+        return type == UNKNOWN_ID;
     }
     
     public boolean isBitSet(int bitIndex) {
@@ -167,9 +178,17 @@ public class KUID {
     }
     
     public KUID xor(KUID nodeId) {
+        int sum = 0;
         byte[] result = new byte[id.length];
         for(int i = 0; i < result.length; i++) {
-            result[i] = (byte)(id[i] ^ nodeId.id[i]);
+            int xor = (id[i] ^ nodeId.id[i]) & 0xFF;
+            
+            result[i] = (byte)xor;
+            sum += xor;
+        }
+        
+        if (sum == 0) {
+            return MIN_ID;
         }
         
         int t = (type == nodeId.type) ? type : UNKNOWN_ID;
@@ -207,9 +226,14 @@ public class KUID {
         return false;
     }
     
-    public int write(OutputStream out) throws IOException {
-        out.write(id, 0, id.length);
-        return id.length;
+    public int getType() {
+        return type;
+    }
+    
+    public byte[] getBytes() {
+        byte[] clone = new byte[id.length];
+        System.arraycopy(id, 0, clone, 0, id.length);
+        return clone;
     }
     
     public int hashCode() {
@@ -229,6 +253,10 @@ public class KUID {
     
     public String toHexString() {
         return ArrayUtils.toHexString(id);
+    }
+    
+    public String toBinString() {
+        return ArrayUtils.toBinString(id);
     }
     
     public String toString() {
@@ -312,6 +340,16 @@ public class KUID {
     
     public static KUID createMessageID(byte[] id) {
         return new KUID(MESSAGE_ID, id);
+    }
+    
+    public static KUID createUnknownID() {
+        byte[] id = new byte[LENGTH/8];
+        GENERATOR.nextBytes(id);
+        return createUnknownID(id);
+    }
+    
+    public static KUID createUnknownID(byte[] id) {
+        return new KUID(UNKNOWN_ID, id);
     }
     
     private static boolean isValidId(byte[] id) {

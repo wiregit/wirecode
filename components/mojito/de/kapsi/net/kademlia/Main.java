@@ -67,16 +67,13 @@ public class Main {
                 }
                 
                 new Thread(dht, "DHT-" + i).start();
-                //Thread.sleep(100);
-                
+
                 dhts.add(dht);
                 System.out.println(i + ": " + ((DHT)dhts.get(dhts.size()-1)).getLocalNode());
             } catch (IOException err) {
                 System.err.println("Failed to start/connect DHT #" + i);
                 err.printStackTrace();
             }
-            
-            //Thread.sleep(100);
         }
         
         new BootstrapUtil(dhts).bootstrap();
@@ -170,7 +167,7 @@ public class Main {
         
         if(line[1].equals("db")) {
             Database database = dht.getDatabase();
-            Collection values = database.getValues();
+            Collection values = database.getAllValues();
             for(Iterator it = values.iterator(); it.hasNext(); ) {
                 KeyValue value = (KeyValue)it.next();
                 

@@ -11,9 +11,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.util.Arrays;
 
 import de.kapsi.net.kademlia.KUID;
@@ -36,61 +34,76 @@ public class MessageInputStream extends DataInputStream {
         super(in);
     }
     
-    private byte[] readKUIDBytes() throws IOException {
+    private KUID readKUID() throws IOException {
+        int type = readUnsignedByte();
+        if (type == KUID.UNKNOWN_ID) {
+            return null;
+        }
+        
         byte[] kuid = new byte[KUID.LENGTH/8];
         readFully(kuid);
-        return kuid;
-    }
-    
-    private KUID readNodeID() throws IOException {
-        return KUID.createNodeID(readKUIDBytes());
-    }
-    
-    private KUID readMessageID() throws IOException {
-        return KUID.createMessageID(readKUIDBytes());
-    }
-    
-    private KUID readValueID() throws IOException {
-        return KUID.createValueID(readKUIDBytes());
-    }
-    
-    private KeyValue readValue() throws IOException {
-        
-        KUID key = readValueID();
-        byte[] value = new byte[readUnsignedShort()];
-        readFully(value);
-        
-        PublicKey pubKey = readPublicKey();
-        byte[] signature = new byte[readUnsignedByte()];
-        readFully(signature);
-        
-        long creationTime = readLong();
-        int mode = readUnsignedByte();
-        
-        try {
-            return new KeyValue(key, value, pubKey, signature, creationTime, mode);
-        } catch (SignatureException err) {
-            throw new IOException(err.getMessage());
-        } catch (InvalidKeyException err) {
-            throw new IOException(err.getMessage());
+        switch(type) {
+            case KUID.NODE_ID:
+                return KUID.createNodeID(kuid);
+            case KUID.MESSAGE_ID:
+                return KUID.createMessageID(kuid);
+            case KUID.VALUE_ID:
+                return KUID.createValueID(kuid);
+            default:
+                throw new IOException("Unknown KUID type: " + type);
         }
     }
     
+    private KeyValue readKeyValue() throws IOException {
+        
+        KUID key = readKUID();
+        byte[] value = new byte[readUnsignedShort()];
+        readFully(value);
+        
+        KUID nodeId = readKUID();
+        SocketAddress address = readSocketAddress();
+        
+        byte[] signature = readSignature();
+        
+        return KeyValue.createRemoteKeyValue(key, value, nodeId, address, signature);
+    }
+    
     private PublicKey readPublicKey() throws IOException {
-        byte[] encodedKey = new byte[readUnsignedShort()];
+        int length = readUnsignedShort();
+        if (length == 0) {
+            return null;
+        }
+        
+        byte[] encodedKey = new byte[length];
         readFully(encodedKey);
         return CryptoHelper.createPublicKey(encodedKey);
     }
     
+    private byte[] readSignature() throws IOException {
+        int length = readUnsignedByte();
+        if (length == 0) {
+            return null;
+        }
+        
+        byte[] signature = new byte[length];
+        readFully(signature, 0, signature.length);
+        return signature;
+    }
+    
     private Node readNode() throws IOException {
-        KUID nodeId = readNodeID();
+        KUID nodeId = readKUID();
         SocketAddress addr = readSocketAddress();
         
         return new Node(nodeId, addr);
     }
     
     private InetSocketAddress readSocketAddress() throws IOException {
-        byte[] address = new byte[readUnsignedByte()];
+        int length = readUnsignedByte();
+        if (length == 0) {
+            return null;
+        }
+        
+        byte[] address = new byte[length];
         readFully(address);
         
         int port = readUnsignedShort();
@@ -110,7 +123,7 @@ public class MessageInputStream extends DataInputStream {
     
     private FindNodeRequest readFindNodeRequest(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
-        KUID lookup = readNodeID();
+        KUID lookup = readKUID();
         return new FindNodeRequest(vendor, version, nodeId, messageId, lookup);
     }
     
@@ -126,7 +139,7 @@ public class MessageInputStream extends DataInputStream {
     
     private FindValueRequest readFindValueRequest(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
-        KUID lookup = readValueID();
+        KUID lookup = readKUID();
         return new FindValueRequest(vendor, version, nodeId, messageId, lookup);
     }
     
@@ -135,7 +148,7 @@ public class MessageInputStream extends DataInputStream {
         int size = readUnsignedByte();
         KeyValue[] values = new KeyValue[size];
         for(int i = 0; i < values.length; i++) {
-            values[i] = readValue();
+            values[i] = readKeyValue();
         }
         return new FindValueResponse(vendor, version, nodeId, messageId, Arrays.asList(values));
     }
@@ -145,7 +158,7 @@ public class MessageInputStream extends DataInputStream {
         int size = readUnsignedByte();
         KeyValue[] values = new KeyValue[size];
         for(int i = 0; i < values.length; i++) {
-            values[i] = readValue();
+            values[i] = readKeyValue();
         }
         return new StoreRequest(vendor, version, nodeId, messageId, Arrays.asList(values));
     }
@@ -155,7 +168,7 @@ public class MessageInputStream extends DataInputStream {
         
         StoreResponse.Status[] stats = new StoreResponse.Status[read()];
         for(int i = 0; i < stats.length; i++) {
-            KUID key = readValueID();
+            KUID key = readKUID();
             int status = read();
             stats[i] = new StoreResponse.Status(key, status);
         }
@@ -166,8 +179,8 @@ public class MessageInputStream extends DataInputStream {
     public Message readMessage() throws IOException {
         int vendor = readInt();
         int version = readUnsignedShort();
-        KUID nodeId = readNodeID();
-        KUID messageId = readMessageID();
+        KUID nodeId = readKUID();
+        KUID messageId = readKUID();
         
         int messageType = readUnsignedByte();
         

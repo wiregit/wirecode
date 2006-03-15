@@ -231,9 +231,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //a closer node to the target than the furthest away that we have.
         if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();
+            
             Node worstResponse = (Node)responses.select(furthest);
             Node bestToQuery = (Node)toQuery.select(lookup);
-            
+
             if(bestToQuery == null || 
                     worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
             
