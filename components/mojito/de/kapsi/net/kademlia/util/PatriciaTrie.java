@@ -226,9 +226,9 @@ public class PatriciaTrie {
         }
         
         if (!isBitSet(key, h.bitIndex)) {
-            return rangeR(h.left, bitIndex, key, keyLength, h);
+            return rangeR(h.left, h.bitIndex, key, keyLength, h);
         } else {
-            return rangeR(h.right, bitIndex, key, keyLength, h);
+            return rangeR(h.right, h.bitIndex, key, keyLength, h);
         }
     }
     
