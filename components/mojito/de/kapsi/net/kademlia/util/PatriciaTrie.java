@@ -73,8 +73,15 @@ public class PatriciaTrie {
     
     public Object put(Object key, Object value) {
         
+        if (key == null) {
+            throw new NullPointerException("Key cannot be null");
+        }
+        
         Entry found = getR(root.left, -1, key);
         if (key.equals(found.key)) {
+            if (found == root && root.isEmpty()) {
+                incrementSize();
+            }
             return found.setKeyValue(key, value);
         }
         
@@ -87,7 +94,10 @@ public class PatriciaTrie {
             return null;
         } else if (isNullBitKey(bitIndex)) { // all 160bits are 0
             /* NULL BIT KEY */
-            throw new IndexOutOfBoundsException("Null bit keys are not supported");
+            if (root.isEmpty()) {
+                incrementSize();
+            }
+            return root.setKeyValue(key, value);
         } else if (isEqualBitKey(bitIndex)) { // actually not possible 
             /* REPLACE OLD KEY+VALUE */
             if (found != root) {
@@ -129,7 +139,7 @@ public class PatriciaTrie {
     
     public Object get(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return (entry != root && key.equals(entry.key) ? entry.value : null);
+        return (!entry.isEmpty() && key.equals(entry.key) ? entry.value : null);
     }
     
     private Entry getR(Entry h, int bitIndex, Object key) {
@@ -157,7 +167,7 @@ public class PatriciaTrie {
     
     private Entry selectR(Entry h, int bitIndex, Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
-            return (h != root ? h : p);
+            return (h.isEmpty() ? p : h);
         }
 
         if (!isBitSet(key, h.bitIndex)) {
@@ -212,7 +222,7 @@ public class PatriciaTrie {
     private Entry rangeR(Entry h, int bitIndex, Object key, int keyLength, Entry p) {
         
         if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
-            return h == root ? p : h;
+            return (h.isEmpty() ? p : h);
         }
         
         if (!isBitSet(key, h.bitIndex)) {
@@ -251,7 +261,7 @@ public class PatriciaTrie {
     
     public boolean containsKey(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return entry != root && key.equals(entry.key);
+        return !entry.isEmpty() && key.equals(entry.key);
     }
     
     public Object remove(Object key) {
@@ -260,7 +270,7 @@ public class PatriciaTrie {
     
     private Object removeR(Entry h, int bitIndex, Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
-            if (key.equals(h.key)) {
+            if (!h.isEmpty() && key.equals(h.key)) {
                 return removeNode(h, p);
             }
             return null;
@@ -274,14 +284,20 @@ public class PatriciaTrie {
     }
     
     private Object removeNode(Entry h, Entry p) {
-
-        if (h.isInternalNode()) {
-            removeInternalNode(h, p);
+        
+        if (h == root) {
+            if (!h.isEmpty()) {
+                decrementSize();
+            }
         } else {
-            removeExternalNode(h);
+            if (h.isInternalNode()) {
+                removeInternalNode(h, p);
+            } else {
+                removeExternalNode(h);
+            }
+            decrementSize();
         }
         
-        decrementSize();
         return h.setKeyValue(null, null);
     }
     
@@ -371,7 +387,7 @@ public class PatriciaTrie {
             final StringBuffer buffer) {
 
         if (h.bitIndex <= bitIndex) {
-            if (h != root) {
+            if (!h.isEmpty()) {
                 buffer.append("  ").append(h.toString()).append("\n");
             }
             return buffer;
@@ -387,7 +403,7 @@ public class PatriciaTrie {
     
     private List valuesR(Entry h, int bitIndex, final List list) {
         if (h.bitIndex <= bitIndex) {
-            if (h != root) {
+            if (!h.isEmpty()) {
                 list.add(h.value);
             }
             return list;
@@ -440,6 +456,13 @@ public class PatriciaTrie {
             this.parent = null;
             this.left = this;
             this.right = null;
+        }
+        
+        /**
+         * This can be only the case with the root node!
+         */
+        public boolean isEmpty() {
+            return key == null;
         }
         
         public Object getKey() {
@@ -549,7 +572,7 @@ public class PatriciaTrie {
         
         public boolean add(Entry h) {
             if (h.bitIndex <= bitIndex) {
-                if (h != root && !exclude.contains(h.key)) {
+                if (!h.isEmpty() && !exclude.contains(h.key)) {
                     addResult(h);
                 }
                 return true;
