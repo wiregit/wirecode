@@ -59,6 +59,10 @@ public class PatriciaRouteTable implements RoutingTable{
     }
     
     private void put(KUID nodeId, ContactNode node) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Trying to add node: "+node+" to routing table");
+        }
+        
         if (nodeId == null) {
             throw new IllegalArgumentException("NodeID is null");
         }
@@ -118,16 +122,16 @@ public class PatriciaRouteTable implements RoutingTable{
                 //attempt the put the new contact again with the split buckets
                 BucketNode newBucket = (BucketNode)bucketsTrie.select(nodeId);
                 //this should never happen
+                System.out.println(bucket);
+                System.out.println(leftSplitBucket);
+                System.out.println(rightSplitBucket);
+//              System.out.println(nodesTrie);
+                System.out.println(nodesTrie.range(leftSplitBucket.getNodeID(),leftSplitBucket.getDepth()));
+                System.out.println(nodesTrie.range(rightSplitBucket.getNodeID(),rightSplitBucket.getDepth()));
                 if(countLeft+countRight != bucket.getNodeCount()) {
                     if (LOG.isErrorEnabled()) {
                         LOG.error("Bucket did not split correctly!");
                     }
-                    System.out.println(bucket);
-                    System.out.println(leftSplitBucket);
-                    System.out.println(rightSplitBucket);
-//                    System.out.println(nodesTrie);
-                    System.out.println(nodesTrie.range(leftSplitBucket.getNodeID(),leftSplitBucket.getDepth()-1));
-                    System.out.println(nodesTrie.range(rightSplitBucket.getNodeID(),rightSplitBucket.getDepth()-1));
                     return;
                 }
                 if(newBucket.equals(bucket)) {
