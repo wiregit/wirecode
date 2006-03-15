@@ -399,6 +399,14 @@ public final class SettingsFactory {
      * @param defaultValue the default value for the setting, which must be a
      *            power of two.
      */
+    public synchronized PowerOfTwoSetting createPowerOfTwoSetting(String key,
+                       long defaultValue) {
+        PowerOfTwoSetting result = 
+            new PowerOfTwoSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal(result, null);
+        return result;
+    }
+    
     public synchronized PowerOfTwoSetting createSettablePowerOfTwoSetting(String key,
             long defaultValue, String simppKey, long min, long max) {
         PowerOfTwoSetting result = 

@@ -116,8 +116,15 @@ public class SimppManagerTest extends BaseTestCase {
         //_simppMessageNumber = OLD;
         changeSimppFile(OLD_SIMPP_FILE);
 
-        assertEquals("base case did not revert to defaults", 4, 
+        if (SimppManagerTestSetting.TEST_UPLOAD_SETTING.getValue() != 
+            SimppManagerTestSettings.DEFAULT_SETTING) {
+        
+            Thread.sleep(2000);
+            
+            assertEquals("base case did not revert to defaults",
+                SimppManagerTestSettings.DEFAULT_SETTING, 
                 SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
+        }
 
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
                                                    new String[] {"*.*.*.*"} );
@@ -359,9 +366,6 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
     public void testSimppTakesEffect() throws Exception {
-
-        assertEquals("base case did not revert to defaults",4, 
-                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //1. Test that Simpp files read off disk take effect. 
         changeSimppFile(OLD_SIMPP_FILE);
         resetSettingmanager();
@@ -382,10 +386,6 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
     public void testSimppSettingObeysMax() throws Exception {
-
-        assertEquals("base case did not revert to defaults", 4, 
-                     SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
-        //_simppMessageNumber = OLD;
         changeSimppFile(OLD_SIMPP_FILE);
         Thread.sleep(1000);
         
