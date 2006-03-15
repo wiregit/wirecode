@@ -148,7 +148,7 @@ public class PatriciaRouteTable implements RoutingTable{
                         LOG.trace("Split bucket "+newBucket+" still full, adding node "+node+" to replacement cache");
                     }
                     
-                    bucket.addReplacementNode(node);
+                    newBucket.addReplacementNode(node);
                     return;
                 }
             } 
