@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
@@ -38,10 +38,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         // Before we're going to accept the store request make
         // sure that the originator has queried us at least. Check
         // also the replacement cache!
-        Node node = context.getRouteTable().get(nodeId, true);
+        ContactNode node = context.getRouteTable().get(nodeId, true);
         if (node == null) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(Node.toString(nodeId, src) + " is unknown and requests us to store some values");
+                LOG.error(ContactNode.toString(nodeId, src) + " is unknown and requests us to store some values");
             }
             return;
         }
@@ -50,7 +50,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         Collection values = request.getValues();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(Node.toString(nodeId, src) 
+            LOG.trace(ContactNode.toString(nodeId, src) 
                     + " requested us to store the Keys and Values " + values);
         }
         

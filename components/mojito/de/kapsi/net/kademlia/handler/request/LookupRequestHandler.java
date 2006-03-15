@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
@@ -36,7 +36,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(Node.toString(nodeId, src) + " is trying to lookup " + lookup);
+            LOG.trace(ContactNode.toString(nodeId, src) + " is trying to lookup " + lookup);
         }
         
         List bucketList 

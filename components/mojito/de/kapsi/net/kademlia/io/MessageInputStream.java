@@ -17,7 +17,7 @@ import java.security.SignatureException;
 import java.util.Arrays;
 
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
@@ -82,11 +82,11 @@ public class MessageInputStream extends DataInputStream {
         return CryptoHelper.createPublicKey(encodedKey);
     }
     
-    private Node readNode() throws IOException {
+    private ContactNode readNode() throws IOException {
         KUID nodeId = readNodeID();
         SocketAddress addr = readSocketAddress();
         
-        return new Node(nodeId, addr);
+        return new ContactNode(nodeId, addr);
     }
     
     private InetSocketAddress readSocketAddress() throws IOException {
@@ -117,7 +117,7 @@ public class MessageInputStream extends DataInputStream {
     private FindNodeResponse readFindNodeResponse(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
         final int size = readUnsignedByte();
-        Node[] nodes = new Node[size];
+        ContactNode[] nodes = new ContactNode[size];
         for(int i = 0; i < nodes.length; i++) {
             nodes[i] = readNode();
         }
@@ -189,7 +189,7 @@ public class MessageInputStream extends DataInputStream {
             case Message.STORE_RESPONSE:
                 return readStoreResponse(vendor, version, nodeId, messageId);
             default:
-                throw new IOException("Received unknown message type: " + messageType + " from Node: " + nodeId);
+                throw new IOException("Received unknown message type: " + messageType + " from ContactNode: " + nodeId);
         }
     }
 }

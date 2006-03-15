@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.handler.DefaultMessageHandler2;
 import de.kapsi.net.kademlia.handler.RequestHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
@@ -132,7 +132,7 @@ public class MessageDispatcher implements Runnable {
         send(null, dst, message, handler);
     }
     
-    public void send(Node dst, Message message, 
+    public void send(ContactNode dst, Message message, 
             ResponseHandler handler) throws IOException {
         send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
     }
@@ -148,7 +148,7 @@ public class MessageDispatcher implements Runnable {
         if (nodeId != null 
                 && nodeId.equals(context.getLocalNodeID())) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Cannot send messages to ourself: " + Node.toString(nodeId, dst));
+                LOG.error("Cannot send messages to ourself: " + ContactNode.toString(nodeId, dst));
             }
             return;
         }
@@ -186,21 +186,21 @@ public class MessageDispatcher implements Runnable {
     private void handleLateResponse(KUID nodeId, SocketAddress src, Message msg) throws IOException {
         if (LOG.isTraceEnabled()) {
             if (msg instanceof PingResponse) {
-                LOG.trace("Received a late Pong from " + Node.toString(nodeId, src));
+                LOG.trace("Received a late Pong from " + ContactNode.toString(nodeId, src));
             } else if (msg instanceof FindNodeResponse) {
-                LOG.trace("Received a late FindNode response from " + Node.toString(nodeId, src));
+                LOG.trace("Received a late FindNode response from " + ContactNode.toString(nodeId, src));
             } else if (msg instanceof FindValueResponse) {
-                LOG.trace("Received a late FindValue response from " + Node.toString(nodeId, src));
+                LOG.trace("Received a late FindValue response from " + ContactNode.toString(nodeId, src));
             } else if (msg instanceof StoreResponse) {
-                LOG.trace("Received a late Store response from " + Node.toString(nodeId, src));
+                LOG.trace("Received a late Store response from " + ContactNode.toString(nodeId, src));
             }
         }
         
-        Node node = context.getRouteTable().get(nodeId);
+        ContactNode node = context.getRouteTable().get(nodeId);
         if (node != null) {
             if (node.getSocketAddress().equals(src)) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Even tough Node " + node 
+                    LOG.trace("Even tough ContactNode " + node 
                             + " sent a late response we're giving it a chance and update its last seen time stamp");
                 }
                 context.getRouteTable().updateTimeStamp(node);
@@ -264,7 +264,7 @@ public class MessageDispatcher implements Runnable {
                 && nodeId.equals(context.getLocalNodeID())
                 && src.equals(context.getSocketAddress())) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Received a message from ourself: " + Node.toString(nodeId, src));
+                LOG.error("Received a message from ourself: " + ContactNode.toString(nodeId, src));
             }
             return;
         }

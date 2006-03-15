@@ -18,6 +18,12 @@ public final class RouteTableSettings {
     private static final int MAX_NODE_FAILURES = 5;
     private static final String MAX_NODE_FAILURES_KEY = "MAX_NODE_FAILURES";
     
+    private static final int DEPTH_LIMIT = 4; //a.k.a B
+    private static final String DEPTH_LIMIT_KEY = "DEPTH_LIMIT";
+    
+    private static final long BUCKET_REFRESH_TIME = 20 * 1000; //TODO figure this out
+    private static final String BUCKET_REFRESH_TIME_KEY = "BUCKET_REFRESH_TIME";
+    
     private static final Preferences SETTINGS 
         = Preferences.userNodeForPackage(RouteTableSettings.class);
     
@@ -53,5 +59,21 @@ public final class RouteTableSettings {
     
     public static void setMaxNodeFailures(int maxFailures) {
         SETTINGS.putInt(MAX_NODE_FAILURES_KEY, Math.max(0, maxFailures));
+    }
+    
+    public static int getDepthLimit() {
+        return SETTINGS.getInt(DEPTH_LIMIT_KEY, DEPTH_LIMIT);
+    }
+    
+    public static void setDepthLimit(int symbolSize) {
+        SETTINGS.putInt(DEPTH_LIMIT_KEY,Math.max(0, symbolSize));
+    }
+    
+    public static long getBucketRefreshTime() {
+        return SETTINGS.getLong(BUCKET_REFRESH_TIME_KEY, BUCKET_REFRESH_TIME);
+    }
+    
+    public static void setBucketRefreshTime(long time) {
+        SETTINGS.putLong(BUCKET_REFRESH_TIME_KEY,time);
     }
 }

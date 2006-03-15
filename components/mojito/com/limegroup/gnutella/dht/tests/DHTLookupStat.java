@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.dht.tests;
 
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.db.KeyValue;
 
 public class DHTLookupStat {
@@ -11,11 +11,11 @@ private final KeyValue value;
     
     private final int hops;
     
-    private final Node node;
+    private final ContactNode node;
     
     private final boolean success;
 
-    public DHTLookupStat(KeyValue value, long latency, int hops, Node node, boolean success) {
+    public DHTLookupStat(KeyValue value, long latency, int hops, ContactNode node, boolean success) {
         this.hops = hops;
         this.latency = latency;
         this.node = node;

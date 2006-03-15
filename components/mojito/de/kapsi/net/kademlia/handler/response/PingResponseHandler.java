@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
@@ -34,7 +34,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
             Message message, final long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Ping to " + Node.toString(nodeId, src) 
+            LOG.trace("Ping to " + ContactNode.toString(nodeId, src) 
                     + " succeeded");
         }
         
@@ -51,7 +51,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
             long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Ping to " + Node.toString(nodeId, dst) + " failed");
+            LOG.trace("Ping to " + ContactNode.toString(nodeId, dst) + " failed");
         }
         
         if (l != null) {

@@ -26,7 +26,7 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
-import de.kapsi.net.kademlia.routing.RouteTable;
+import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
 
@@ -160,7 +160,7 @@ public class Main {
     }
     
     private static void info(DHT dht) throws Throwable {
-        System.out.println("Local Node: " + dht.getLocalNode());
+        System.out.println("Local ContactNode: " + dht.getLocalNode());
         System.out.println("Database Size: " + dht.getDatabase().size());
         System.out.println("RouteTable Size: " + dht.getRoutingTable().size());
     }
@@ -179,16 +179,27 @@ public class Main {
             buffer.append("-------------\n");
             buffer.append("TOTAL: " + values.size()).append("\n");
         } else {
-            RouteTable routingTable = dht.getRoutingTable();
-            Map map = routingTable.getRouteTableMap();
-            for(Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
-                Entry entry = (Entry)it.next();
-                Node node = (Node)entry.getValue();
+            RoutingTable routingTable = dht.getRoutingTable();
+            Collection bucketsList = routingTable.getAllBuckets();
+            buffer.append("-------------\nBuckets:\n");
+            for(Iterator it = bucketsList.iterator(); it.hasNext(); ) {
+                BucketNode node = (BucketNode)it.next();
+                buffer.append(node).append("\n");
+            }
+            buffer.append("-------------\n");
+            buffer.append("TOTAL BUCKETS: " + bucketsList.size()).append("\n");
+            buffer.append("-------------\n");
+            
+            Collection nodesList = routingTable.getAllNodes();
+            buffer.append("-------------\nNodes:\n");
+            for(Iterator it = nodesList.iterator(); it.hasNext(); ) {
+                ContactNode node = (ContactNode)it.next();
                 
                 buffer.append(node).append("\n");
             }
             buffer.append("-------------\n");
-            buffer.append("TOTAL: " + map.size()).append("\n");
+            buffer.append("TOTAL NODES: " + nodesList.size()).append("\n");
+            buffer.append("-------------\n");
         }
         
         System.out.println(buffer);
@@ -205,13 +216,13 @@ public class Main {
             public void pingResponse(KUID nodeId, SocketAddress address, long time) {
                 if (time >= 0L) {
                     if (nodeId != null) {
-                        System.out.println("*** Ping to " + Node.toString(nodeId, address) + " succeeded: " + time + "ms");
+                        System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " succeeded: " + time + "ms");
                     } else {
                         System.out.println("*** Ping to " + address + " succeeded: " + time + "ms");
                     }
                 } else {
                     if (nodeId != null) {
-                        System.out.println("*** Ping to " + Node.toString(nodeId, address) + " failed");
+                        System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
                     } else {
                         System.out.println("*** Ping to " + address + " failed");
                     }

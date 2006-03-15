@@ -41,7 +41,8 @@ import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
-import de.kapsi.net.kademlia.routing.RouteTable;
+import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
+import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
@@ -66,7 +67,7 @@ public class Context implements Runnable {
     private KeyPair keyPair;
     
     private Database database;
-    private RouteTable routeTable;
+    private RoutingTable routeTable;
     private MessageDispatcher messageDispatcher;
     private EventDispatcher eventDispatcher;
     private MessageFactory messageFactory;
@@ -91,7 +92,7 @@ public class Context implements Runnable {
         keyPair = CryptoHelper.createKeyPair();
 
         database = new Database(this);
-        routeTable = new RouteTable(this);
+        routeTable = new PatriciaRouteTable(this);
         messageDispatcher = new MessageDispatcher(this);
         eventDispatcher = new EventDispatcher();
         messageFactory = new MessageFactory(this);
@@ -120,8 +121,8 @@ public class Context implements Runnable {
         return keyPair;
     }
     
-    public Node getLocalNode() {
-        return new Node(nodeId, address);
+    public ContactNode getLocalNode() {
+        return new ContactNode(nodeId, address);
     }
     
     public KUID getLocalNodeID() {
@@ -136,7 +137,7 @@ public class Context implements Runnable {
         return database;
     }
     
-    public RouteTable getRouteTable() {
+    public RoutingTable getRouteTable() {
         return routeTable;
     }
     
@@ -183,6 +184,8 @@ public class Context implements Runnable {
         } else {
             nodeId = KUID.createNodeID(id);
         }
+        //add ourselve to the routing table
+        routeTable.add(getLocalNode());
     }
     
     //TODO testing purposes only - remove
@@ -252,7 +255,7 @@ public class Context implements Runnable {
         messageDispatcher.send(null, address, ping, handler);
     }
     
-    public void ping(Node node, PingListener l) throws IOException {
+    public void ping(ContactNode node, PingListener l) throws IOException {
         RequestMessage ping = messageFactory.createPingRequest();
         AbstractResponseHandler handler = new PingResponseHandler(this, l);
         messageDispatcher.send(node.getNodeID(), node.getSocketAddress(), ping, handler);
@@ -267,7 +270,7 @@ public class Context implements Runnable {
     }
     
     public void bootstrap(SocketAddress address, final BootstrapListener l) throws IOException {
-        // Ping the Node
+        // Ping the ContactNode
         ping(address, new PingListener() {
             public void pingResponse(KUID nodeId, SocketAddress address, final long time1) {
                 
@@ -320,10 +323,10 @@ public class Context implements Runnable {
                     ResponseHandler responseHandler = new StoreResponseHandler(Context.this, values);
                     
                     for(int i = 0; i < k && it.hasNext(); i++) {
-                        Node node = (Node)it.next();
+                        ContactNode node = (ContactNode)it.next();
                         
                         // TODO: Don't just store one KeyValue!
-                        // Store the n-closest values to Node!
+                        // Store the n-closest values to ContactNode!
                         messageDispatcher.send(node, messageFactory.createStoreRequest(values), responseHandler);
                     }
                     

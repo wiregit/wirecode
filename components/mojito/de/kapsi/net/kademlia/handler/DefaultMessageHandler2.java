@@ -14,10 +14,10 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
-import de.kapsi.net.kademlia.routing.RouteTable;
+import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.NetworkUtils;
@@ -44,7 +44,7 @@ public class DefaultMessageHandler2 extends MessageHandler
     public void handleResponse(KUID nodeId, SocketAddress src, 
             Message message, long time) throws IOException {
         
-        Node node = getRouteTable().get(nodeId, true);
+        ContactNode node = getRouteTable().get(nodeId, true);
         if (node == null) {
             addContactInfo(nodeId, src, message);
         } else {
@@ -54,13 +54,14 @@ public class DefaultMessageHandler2 extends MessageHandler
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
             long time) throws IOException {
-        removeIfStale(nodeId, dst);
+        //TODO
+//        removeIfStale(nodeId, dst);
     }
 
     public void handleRequest(KUID nodeId, SocketAddress src, 
             Message message) throws IOException {
         
-        Node node = getRouteTable().get(nodeId, true);
+        ContactNode node = getRouteTable().get(nodeId, true);
         if (node == null) {
             addContactInfo(nodeId, src, message);
         } else {
@@ -71,42 +72,39 @@ public class DefaultMessageHandler2 extends MessageHandler
     private void addContactInfo(KUID nodeId, SocketAddress src, 
             Message message) throws IOException {
         
-        RouteTable routeTable = getRouteTable();
+        RoutingTable routeTable = getRouteTable();
         
-        if (!routeTable.isFull()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Adding " + Node.toString(nodeId, src) 
+                LOG.trace("Adding " + ContactNode.toString(nodeId, src) 
                         + " to RouteTable");
             }
-            routeTable.add(new Node(nodeId, src));
-        } else {
-            addContactInfoToCache(nodeId, src, message);
-        }
+            routeTable.add(new ContactNode(nodeId, src));
     }
     
-    private void addContactInfoToCache(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
-        
-        RouteTable routeTable = getRouteTable();
-        List bucketList = routeTable.select(nodeId, KademliaSettings.getReplicationParameter());
-        Node leastRecentlySeen = 
-            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Adding " + Node.toString(nodeId, src) 
-                    + " to RouteTable's LRU cache and pinging the least recently seen Node " 
-                    + leastRecentlySeen);
-        }
-        routeTable.addToCache(new Node(nodeId, src));
-        
-        // TODO don't ping
-        PingRequest ping = context.getMessageFactory().createPingRequest();
-        
-        context.getMessageDispatcher()
-            .send(leastRecentlySeen, ping, this);
-    }
+    //TODO move this to RoutingTable - routing table logic
+//    private void addContactInfoToCache(KUID nodeId, SocketAddress src, 
+//            Message message) throws IOException {
+//        
+//        RoutingTable routeTable = getRouteTable();
+//        List bucketList = routeTable.select(nodeId, KademliaSettings.getReplicationParameter());
+//        ContactNode leastRecentlySeen = 
+//            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
+//        
+//        if (LOG.isTraceEnabled()) {
+//            LOG.trace("Adding " + ContactNode.toString(nodeId, src) 
+//                    + " to RouteTable's LRU cache and pinging the least recently seen ContactNode " 
+//                    + leastRecentlySeen);
+//        }
+//        routeTable.addToCache(new ContactNode(nodeId, src));
+//        
+//        // TODO don't ping
+//        PingRequest ping = context.getMessageFactory().createPingRequest();
+//        
+//        context.getMessageDispatcher()
+//            .send(leastRecentlySeen, ping, this);
+//    }
     
-    private void updateContactInfo(Node node, KUID nodeId, 
+    private void updateContactInfo(ContactNode node, KUID nodeId, 
             SocketAddress src, Message message) throws IOException {
         
         if (node.getSocketAddress().equals(src)) {
@@ -126,37 +124,39 @@ public class DefaultMessageHandler2 extends MessageHandler
         context.getRouteTable().updateTimeStamp(node);
     }
     
-    private void removeIfStale(KUID nodeId, SocketAddress dst) 
-            throws IOException {
-        
-        RouteTable routeTable = getRouteTable();
-        Node node = routeTable.get(nodeId);
-        
-        if (node == null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("No Node for " 
-                        + Node.toString(nodeId, dst) + " in RouteTable");
-            }
-            return;
-        }
-        
-        if (routeTable.handleFailure(node)) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(node + " is stale!");
-            }
-            
-            if (routeTable.isFull() 
-                    && !routeTable.isCacheEmpty()) {
-                
-                Node lastSeen = routeTable.replaceWithMostRecentlySeenNode(nodeId);
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Replaced " + Node.toString(nodeId, dst) + " with " + lastSeen 
-                            + " from RouteTable's LRU cache");
-                }
-            }
-        }
-    }
+    
+    //TODO move to routingTable - routing table logic
+//    private void removeIfStale(KUID nodeId, SocketAddress dst) 
+//            throws IOException {
+//        
+//        RoutingTable routeTable = getRouteTable();
+//        ContactNode node = routeTable.get(nodeId);
+//        
+//        if (node == null) {
+//            if (LOG.isErrorEnabled()) {
+//                LOG.error("No ContactNode for " 
+//                        + ContactNode.toString(nodeId, dst) + " in RouteTable");
+//            }
+//            return;
+//        }
+//        
+//        if (routeTable.handleFailure(node)) {
+//            if (LOG.isTraceEnabled()) {
+//                LOG.trace(node + " is stale!");
+//            }
+//            
+//            if (routeTable.isFull() 
+//                    && !routeTable.isCacheEmpty()) {
+//                
+//                ContactNode lastSeen = routeTable.replaceWithMostRecentlySeenNode(nodeId);
+//                
+//                if (LOG.isTraceEnabled()) {
+//                    LOG.trace("Replaced " + ContactNode.toString(nodeId, dst) + " with " + lastSeen 
+//                            + " from RouteTable's LRU cache");
+//                }
+//            }
+//        }
+//    }
     
     /*private static class SpoofChecker extends AbstractResponseHandler {
         
@@ -175,11 +175,11 @@ public class DefaultMessageHandler2 extends MessageHandler
                 Message message, long time) throws IOException {
             
             if (LOG.isTraceEnabled()) {
-                LOG.trace(Node.toString(nodeId, src) + " responded in " + time + " ms." 
-                        + Node.toString(nodeId, address) + " tries likely to spoof its NodeID!");
+                LOG.trace(ContactNode.toString(nodeId, src) + " responded in " + time + " ms." 
+                        + ContactNode.toString(nodeId, address) + " tries likely to spoof its NodeID!");
             }
             
-            Node node = context.getRouteTable().get(nodeId, true);
+            ContactNode node = context.getRouteTable().get(nodeId, true);
             if (node != null) {
                 context.getRouteTable().updateTimeStamp(node);
             }
@@ -189,11 +189,11 @@ public class DefaultMessageHandler2 extends MessageHandler
                 long time) throws IOException {
             
             if (LOG.isTraceEnabled()) {
-                LOG.trace(Node.toString(nodeId, dst) + " did not respond. Replacing it with "
-                        + Node.toString(nodeId, address));
+                LOG.trace(ContactNode.toString(nodeId, dst) + " did not respond. Replacing it with "
+                        + ContactNode.toString(nodeId, address));
             }
             
-            Node node = context.getRouteTable().get(nodeId, true);
+            ContactNode node = context.getRouteTable().get(nodeId, true);
             if (node != null) {
                 node.setSocketAddress(address);
                 context.getRouteTable().updateTimeStamp(node);
