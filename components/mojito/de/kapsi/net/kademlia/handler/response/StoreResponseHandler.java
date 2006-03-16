@@ -42,6 +42,6 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     public void handleTimeout(KUID nodeId, SocketAddress dst, long time) 
             throws IOException {
         
-        // TODO Node didn't reply or the message got lost
+        // TODO ContactNode didn't reply or the message got lost
     }
 }

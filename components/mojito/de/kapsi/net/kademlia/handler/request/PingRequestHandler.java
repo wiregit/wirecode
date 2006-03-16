@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
@@ -33,7 +33,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
     public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(Node.toString(nodeId, src) + " sent us a Ping");
+            LOG.trace(ContactNode.toString(nodeId, src) + " sent us a Ping");
         }
         
         PingResponse pong = context.getMessageFactory()

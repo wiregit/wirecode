@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
@@ -33,7 +33,7 @@ public class MessageOutputStream extends DataOutputStream {
         super(out);
     }
     
-    private void writeNode(Node node) throws IOException {
+    private void writeNode(ContactNode node) throws IOException {
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
     }
@@ -93,7 +93,7 @@ public class MessageOutputStream extends DataOutputStream {
     private void writeFindNodeResponse(FindNodeResponse response) throws IOException {
         writeByte(response.size());
         for(Iterator it = response.iterator(); it.hasNext(); ) {
-            writeNode((Node)it.next());
+            writeNode((ContactNode)it.next());
         }
     }
     

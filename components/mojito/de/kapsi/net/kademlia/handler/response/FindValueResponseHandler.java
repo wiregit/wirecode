@@ -41,7 +41,7 @@ public class FindValueResponseHandler extends LookupResponseHandler {
         if (isFindValueResponse) {
             Collection values = ((FindValueResponse) message).getResult();
             
-            // TODO make sure the Node isn't sending us some
+            // TODO make sure the ContactNode isn't sending us some
             // bull! The 1st KeyValue must be equal to the
             // lookup Key and the others must be 'close' to
             // our NodeID!
@@ -53,7 +53,7 @@ public class FindValueResponseHandler extends LookupResponseHandler {
             }
             
             if (LOG.isTraceEnabled()) {
-                LOG.trace(Node.toString(nodeId, src) 
+                LOG.trace(ContactNode.toString(nodeId, src) 
                         + " returned Values for " 
                         + lookup + " after " 
                         + round + " rounds and " 

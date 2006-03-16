@@ -20,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
@@ -153,7 +153,7 @@ public class Database {
     
     public boolean isExpired(KeyValue value) {
         KUID key = value.getKey();
-        Node closest = context.getRouteTable().select(key);
+        ContactNode closest = context.getRouteTable().select(key);
         if (closest == null) {
             return false;
         }

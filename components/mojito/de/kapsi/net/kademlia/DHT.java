@@ -18,7 +18,7 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
-import de.kapsi.net.kademlia.routing.RouteTable;
+import de.kapsi.net.kademlia.routing.RoutingTable;
 
 public class DHT implements Runnable {
     
@@ -41,7 +41,7 @@ public class DHT implements Runnable {
         context.run();
     }
     
-    public Node getLocalNode() {
+    public ContactNode getLocalNode() {
         return context.getLocalNode();
     }
     
@@ -130,7 +130,7 @@ public class DHT implements Runnable {
     }
     
     // TODO for debugging purposes only
-    RouteTable getRoutingTable() {
+    RoutingTable getRoutingTable() {
         return context.getRouteTable();
     }
     

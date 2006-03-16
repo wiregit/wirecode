@@ -6,6 +6,7 @@
 package de.kapsi.net.kademlia.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -73,8 +74,15 @@ public class PatriciaTrie {
     
     public Object put(Object key, Object value) {
         
+        if (key == null) {
+            throw new NullPointerException("Key cannot be null");
+        }
+        
         Entry found = getR(root.left, -1, key);
         if (key.equals(found.key)) {
+            if (/*found == root */ found.isEmpty()) {
+                incrementSize();
+            }
             return found.setKeyValue(key, value);
         }
         
@@ -87,7 +95,10 @@ public class PatriciaTrie {
             return null;
         } else if (isNullBitKey(bitIndex)) { // all 160bits are 0
             /* NULL BIT KEY */
-            throw new IndexOutOfBoundsException("Null bit keys are not supported");
+            if (root.isEmpty()) {
+                incrementSize();
+            }
+            return root.setKeyValue(key, value);
         } else if (isEqualBitKey(bitIndex)) { // actually not possible 
             /* REPLACE OLD KEY+VALUE */
             if (found != root) {
@@ -129,7 +140,7 @@ public class PatriciaTrie {
     
     public Object get(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return (entry != root && key.equals(entry.key) ? entry.value : null);
+        return (!entry.isEmpty() && key.equals(entry.key) ? entry.value : null);
     }
     
     private Entry getR(Entry h, int bitIndex, Object key) {
@@ -143,7 +154,11 @@ public class PatriciaTrie {
             return getR(h.right, h.bitIndex, key);
         }
     }
-    
+  
+    public Object selectNextClosest(Object key) {
+        List l = select(key, Collections.EMPTY_SET, 2);
+        return l.get(l.size()-1);
+    }
     /**
      * 
      */
@@ -153,7 +168,7 @@ public class PatriciaTrie {
     
     private Entry selectR(Entry h, int bitIndex, Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
-            return (h != root ? h : p);
+            return (h.isEmpty() ? p : h);
         }
 
         if (!isBitSet(key, h.bitIndex)) {
@@ -177,6 +192,52 @@ public class PatriciaTrie {
         SearchState state = new SearchState(key, exclude, count);
         selectR(state);
         return state.getResults();
+    }
+    
+    /**
+     * Returns all values as List whose keys have the same
+     * prefix as the provided key from the 0th bit to length-th bit
+     * 
+     * @param length (depth) in bits
+     */
+    public List range(Object key, int length) {
+        if (length >= keyCreator.length()) {
+            throw new IllegalArgumentException(length + " >= " + keyCreator.length());
+        }
+        
+        Entry entry = rangeR(root.left, -1, key, length, root);
+        if (entry.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        
+        // Found key's length-th bit differs from our
+        // key which means it cannot be the prefix!
+        if (isBitSet(key, length)
+                != isBitSet(entry.key, length)) {
+            return Collections.EMPTY_LIST;
+        }
+        
+        if (length < entry.bitIndex) {
+            //System.out.println("Has Subtree");
+            return valuesR(entry, -1, new ArrayList());
+        } else {
+            //System.out.println("Has No Subtree");
+            return Arrays.asList(new Object[]{entry.value});
+        }
+    }
+    
+    private Entry rangeR(Entry h, int bitIndex, 
+            final Object key, final int keyLength, Entry p) {
+        
+        if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
+            return (h.isEmpty() ? p : h);
+        }
+        
+        if (!isBitSet(key, h.bitIndex)) {
+            return rangeR(h.left, h.bitIndex, key, keyLength, h);
+        } else {
+            return rangeR(h.right, h.bitIndex, key, keyLength, h);
+        }
     }
     
     private void selectR(final SearchState state) {
@@ -208,7 +269,7 @@ public class PatriciaTrie {
     
     public boolean containsKey(Object key) {
         Entry entry = getR(root.left, -1, key);
-        return entry != root && key.equals(entry.key);
+        return !entry.isEmpty() && key.equals(entry.key);
     }
     
     public Object remove(Object key) {
@@ -217,7 +278,7 @@ public class PatriciaTrie {
     
     private Object removeR(Entry h, int bitIndex, Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
-            if (key.equals(h.key)) {
+            if (!h.isEmpty() && key.equals(h.key)) {
                 return removeNode(h, p);
             }
             return null;
@@ -231,22 +292,28 @@ public class PatriciaTrie {
     }
     
     private Object removeNode(Entry h, Entry p) {
-
-        if (h.isInternalNode()) {
-            removeInternalNode(h, p);
+        
+        if (h == root) {
+            if (!h.isEmpty()) {
+                decrementSize();
+            }
         } else {
-            removeExternalNode(h);
+            if (h.isInternalNode()) {
+                removeInternalNode(h, p);
+            } else {
+                removeExternalNode(h);
+            }
+            decrementSize();
         }
         
-        decrementSize();
         return h.setKeyValue(null, null);
     }
     
     private void removeExternalNode(Entry h) {
         if (h == root) {
-            throw new IllegalArgumentException("Cannot delete root Node!");
+            throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isExternalNode()) {
-            throw new IllegalArgumentException(h + " is not an external Node!");
+            throw new IllegalArgumentException(h + " is not an external Entry!");
         } 
         
         Entry parent = h.parent;
@@ -265,9 +332,9 @@ public class PatriciaTrie {
     
     private void removeInternalNode(Entry h, Entry p) {
         if (h == root) {
-            throw new IllegalArgumentException("Cannot delete root Node!");
+            throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isInternalNode()) {
-            throw new IllegalArgumentException(h + " is not an internal Node!");
+            throw new IllegalArgumentException(h + " is not an internal Entry!");
         } 
         
         // Set P's bitIndex
@@ -318,7 +385,7 @@ public class PatriciaTrie {
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("RoutingTable[").append(size()).append("]={\n");
+        buffer.append("Trie[").append(size()).append("]={\n");
         toStringR(root.left, -1, buffer);
         buffer.append("}\n");
         return buffer.toString();
@@ -328,7 +395,7 @@ public class PatriciaTrie {
             final StringBuffer buffer) {
 
         if (h.bitIndex <= bitIndex) {
-            if (h != root) {
+            if (!h.isEmpty()) {
                 buffer.append("  ").append(h.toString()).append("\n");
             }
             return buffer;
@@ -344,7 +411,7 @@ public class PatriciaTrie {
     
     private List valuesR(Entry h, int bitIndex, final List list) {
         if (h.bitIndex <= bitIndex) {
-            if (h != root) {
+            if (!h.isEmpty()) {
                 list.add(h.value);
             }
             return list;
@@ -399,6 +466,13 @@ public class PatriciaTrie {
             this.right = null;
         }
         
+        /**
+         * This can be only the case with the root node!
+         */
+        public boolean isEmpty() {
+            return key == null;
+        }
+        
         public Object getKey() {
             return key;
         }
@@ -430,9 +504,9 @@ public class PatriciaTrie {
             StringBuffer buffer = new StringBuffer();
             
             if (root == this) {
-                buffer.append("RootNode(");
+                buffer.append("RootEntry(");
             } else {
-                buffer.append("Node(");
+                buffer.append("Entry(");
             }
             
             buffer.append("key=").append(key).append(" [").append(bitIndex).append("], ");
@@ -485,7 +559,7 @@ public class PatriciaTrie {
         final Object key;
         final Collection exclude;
         final int targetSize;
-        
+
         int currentDistance, numEquidistant, numEquidistantToAdd;
         
         boolean done;
@@ -496,7 +570,8 @@ public class PatriciaTrie {
             this.key = key;
             this.exclude = exclude == null ? Collections.EMPTY_SET : exclude;
             this.targetSize = targetSize;
-            dest = new ArrayList(targetSize);
+            
+            dest = new ArrayList(Math.min(targetSize, size()));
         }
         
         public List getResults() {
@@ -505,7 +580,7 @@ public class PatriciaTrie {
         
         public boolean add(Entry h) {
             if (h.bitIndex <= bitIndex) {
-                if (h != root && !exclude.contains(h.key)) {
+                if (!h.isEmpty() && !exclude.contains(h.key)) {
                     addResult(h);
                 }
                 return true;
@@ -542,7 +617,6 @@ public class PatriciaTrie {
             bitIndex = h.bitIndex;
             current = left ? h.left : h.right;
         }
-        
     }
     
     public static interface KeyCreator {

@@ -79,7 +79,7 @@ public class KUID {
     }
     
     private KUID() {
-        this.type = UNKNOWN_ID;
+        this.type = NODE_ID;
         this.id = new byte[LENGTH/8];
         this.hashCode = 0;
     }
@@ -121,6 +121,21 @@ public class KUID {
         int index = (int) (bitIndex / BITS.length);
         int bit = (int) (bitIndex - index * BITS.length);
         return (id[index] & BITS[bit]) != 0;
+    }
+    
+    public KUID set(int bitIndex, boolean set) {
+        int index = (int) (bitIndex / BITS.length);
+        int bit = (int) (bitIndex - index * BITS.length);
+        
+        byte[] id = getBytes();
+        
+        if (set) {
+            id[index] |= BITS[bit];
+        } else {
+            id[index] &= ~BITS[bit];
+        }
+        
+        return new KUID(type, id);
     }
     
     public int bits() {
@@ -216,6 +231,12 @@ public class KUID {
         return hashCode;
     }
     
+    public byte[] getBytes() {
+        byte[] clone = new byte[id.length];
+        System.arraycopy(id, 0, clone, 0, id.length);
+        return clone;
+    }
+    
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -229,6 +250,10 @@ public class KUID {
     
     public String toHexString() {
         return ArrayUtils.toHexString(id);
+    }
+    
+    public String toBinString() {
+        return ArrayUtils.toBinString(id);
     }
     
     public String toString() {
@@ -309,6 +334,34 @@ public class KUID {
         GENERATOR.nextBytes(id);
         return createMessageID(id);
     }
+    
+    /**
+     * Creates a random ID with the specified byte prefix
+     * 
+     * @param prefix the fixed prefix bytes
+     * @return a random KUID starting with the given prefix
+     */
+    private static KUID createRandomID(byte[] prefix, int depth,byte[] random) {
+        ++depth;
+        int length = (int)(depth)/8;
+        System.arraycopy(prefix,0,random,0,length);
+        if(((depth) % 8) != 0) {
+            int bitsToCopy = (depth) % 8;
+            // Mask has the low-order (8-bits) bits set
+            int mask = (1 << (8-bitsToCopy)) - 1;
+            int prefixByte = prefix[length];
+            int randByte   = random[length];
+            random[length] = (byte) ((prefixByte & ~mask) | (randByte & mask));
+        }
+        return KUID.createNodeID(random);
+    }
+      
+    public static KUID createRandomID(byte[] prefix, int depth) {
+        byte[] random = new byte[20];
+        GENERATOR.nextBytes(random);
+        return createRandomID(prefix,depth,random);
+    }
+    
     
     public static KUID createMessageID(byte[] id) {
         return new KUID(MESSAGE_ID, id);

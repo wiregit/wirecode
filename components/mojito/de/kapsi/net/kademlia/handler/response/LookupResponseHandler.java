@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
@@ -39,10 +39,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     /** Set of queried KUIDs */
     protected Set queried = new HashSet();
     
-    /** Trie of <KUID,Node> from whom we got replies */
+    /** Trie of <KUID,ContactNode> from whom we got replies */
     protected PatriciaTrie responses = new PatriciaTrie();
     
-    /** Trie of <KUID,Node> to query */
+    /** Trie of <KUID,ContactNode> to query */
     protected PatriciaTrie toQuery = new PatriciaTrie();
     
     /** The closest NodeID we currently know */
@@ -88,7 +88,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         this.valueLookup = valueLookup;
         //TODO for now
         this.resultSize = LookupSettings.getK();
-        // Initial state: we're the closest Node to lookup
+        // Initial state: we're the closest ContactNode to lookup
         //TODO mark: What happens if we really are the closest node to lookup??? -> we skip ourself for now?
         markAsQueried(context.getLocalNode());
         closest = context.getLocalNodeID();
@@ -101,7 +101,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         if (!isQueried(nodeId)) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Got an unrequested response from " 
-                        + Node.toString(nodeId, src) + " for " + lookup);
+                        + ContactNode.toString(nodeId, src) + " for " + lookup);
             }
             return;
         }
@@ -115,7 +115,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         if (isValueLookup() && isKeyValueResponse) {
             
             if (LOG.isTraceEnabled()) {
-                LOG.trace(Node.toString(nodeId, src) 
+                LOG.trace(ContactNode.toString(nodeId, src) 
                         + " returned KeyValues for " 
                         + lookup + " after " 
                         + round + " rounds and " 
@@ -133,7 +133,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         if (!finished && !isKeyValueResponse) {
             
             for(Iterator it = response.iterator(); it.hasNext(); ) {
-                Node node = (Node)it.next();
+                ContactNode node = (ContactNode)it.next();
                 
                 if (!isQueried(node) 
                         && !isYetToBeQueried(node)) {
@@ -145,7 +145,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
             }
             
-            addResponse(new Node(nodeId, src));
+            addResponse(new ContactNode(nodeId, src));
             --activeSearches;
             lookupStep();
         }
@@ -156,7 +156,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         if (!isQueried(nodeId)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("LookupRequestHandler did not query " 
-                        + Node.toString(nodeId, dst));
+                        + ContactNode.toString(nodeId, dst));
             }
             return;
         }
@@ -171,7 +171,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         this.time += time;
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(Node.toString(nodeId, dst) 
+            LOG.trace(ContactNode.toString(nodeId, dst) 
                     + " did not response to our Find request");
         }
         
@@ -194,15 +194,15 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {
-            addYetToBeQueried((Node)bucketList.get(i));
+            addYetToBeQueried((ContactNode)bucketList.get(i));
         }
         
         // Get the first round of alpha nodes
         List alphaList = toQuery.select(lookup, queried, LookupSettings.getA());
-
+        
         // send alpha requests
         for(int i = 0; i < alphaList.size(); i++) {
-            Node node = (Node)alphaList.get(i);
+            ContactNode node = (ContactNode)alphaList.get(i);
             
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Sending " + node + " a Find request for " + lookup);
@@ -231,13 +231,13 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //a closer node to the target than the furthest away that we have.
         if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();
-            Node worstResponse = (Node)responses.select(furthest);
-            Node bestToQuery = (Node)toQuery.select(lookup);
+            ContactNode worstResponse = (ContactNode)responses.select(furthest);
+            ContactNode bestToQuery = (ContactNode)toQuery.select(lookup);
             
             if(bestToQuery == null || 
                     worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
             
-                Node bestResponse = (Node)responses.select(lookup);
+                ContactNode bestResponse = (ContactNode)responses.select(lookup);
                 
                 if (LOG.isTraceEnabled()) {
                   LOG.trace("Lookup for " + lookup + " terminates with " 
@@ -265,7 +265,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             MessageDispatcher messageDispatcher = context.getMessageDispatcher();
             
             for(int i = 0; i < size; i++) {
-                Node node = (Node)bucketList.get(i);
+                ContactNode node = (ContactNode)bucketList.get(i);
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Sending " + node + " a Find request for " + lookup);
@@ -290,7 +290,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         return valueLookup;
     }
     
-    protected void markAsQueried(Node node) {
+    protected void markAsQueried(ContactNode node) {
         queried.add(node.getNodeID());
         toQuery.remove(node.getNodeID());
     }
@@ -299,19 +299,19 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         return queried.contains(nodeId);
     }
     
-    protected boolean isQueried(Node node) {
+    protected boolean isQueried(ContactNode node) {
         return queried.contains(node.getNodeID());
     }
     
-    protected void addYetToBeQueried(Node node) {
-        toQuery.put(node.getNodeID(), node);
+    protected void addYetToBeQueried(ContactNode node) {
+        if(!queried.contains(node) && !node.equals(context.getLocalNode())) toQuery.put(node.getNodeID(), node);
     }
     
-    protected boolean isYetToBeQueried(Node node) {
+    protected boolean isYetToBeQueried(ContactNode node) {
         return toQuery.containsKey(node.getNodeID());
     }
     
-    protected void addResponse(Node node) {
+    protected void addResponse(ContactNode node) {
         //if the list is full discard the furthest node and put this one
         if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.util.InputOutputUtils;
@@ -102,8 +102,8 @@ class Receipt {
         }
         
         /*if (!dst.equals(src)) {
-            throw new IOException(Node.toString(nodeId, src) + " claims to be " 
-                    + Node.toString(this.nodeId, dst));
+            throw new IOException(ContactNode.toString(nodeId, src) + " claims to be " 
+                    + ContactNode.toString(this.nodeId, dst));
         }*/
         
         if (handler != null) {
@@ -122,6 +122,6 @@ class Receipt {
     }
     
     public String toString() {
-        return Node.toString(nodeId, dst) + "/" + messageId;
+        return ContactNode.toString(nodeId, dst) + "/" + messageId;
     }
 }

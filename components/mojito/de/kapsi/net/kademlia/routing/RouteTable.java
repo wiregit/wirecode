@@ -17,11 +17,13 @@ import java.util.Map.Entry;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
+
+//TODO not used anymore -- delete
 public class RouteTable {
     
     private Context context;
@@ -72,11 +74,11 @@ public class RouteTable {
         return closeness > min;
     }
     
-    public void add(Node node) {
+    public void add(ContactNode node) {
         put(node.getNodeID(), node);
     }
     
-    private void put(KUID nodeId, Node node) {
+    private void put(KUID nodeId, ContactNode node) {
         if (nodeId == null) {
             throw new IllegalArgumentException("NodeID is null");
         }
@@ -94,20 +96,20 @@ public class RouteTable {
         routeTableMap.put(nodeId, node);
     }
     
-    public Node get(KUID nodeId) {
+    public ContactNode get(KUID nodeId) {
         return get(nodeId, false);
     }
     
-    public Node get(KUID nodeId, boolean checkAndUpdateCache) {
-        Node node = (Node)routeTableMap.get(nodeId);
+    public ContactNode get(KUID nodeId, boolean checkAndUpdateCache) {
+        ContactNode node = (ContactNode)routeTableMap.get(nodeId);
         if (node == null && checkAndUpdateCache) {
-            node = (Node)cache.get(nodeId);
+            node = (ContactNode)cache.get(nodeId);
         }
         return node;
     }
     
-    public Node select(KUID key) {
-        return (Node)routeTableMap.select(key);
+    public ContactNode select(KUID key) {
+        return (ContactNode)routeTableMap.select(key);
     }
     
     /** 
@@ -160,7 +162,7 @@ public class RouteTable {
         cache.remove(key);
     }
     
-    public boolean updateTimeStamp(Node node) {
+    public boolean updateTimeStamp(ContactNode node) {
         if (node != null) {
             node.updateTimeStamp();
             staleNodes.remove(node.getNodeID());
@@ -170,7 +172,7 @@ public class RouteTable {
         return false;
     }
     
-    public int getFailureCount(Node node) {
+    public int getFailureCount(ContactNode node) {
         if (node != null) {
             return node.getFailureCount();
         }
@@ -178,11 +180,11 @@ public class RouteTable {
     }
     
     /**
-     * Increments Node's failure counter, marks it as stale
+     * Increments ContactNode's failure counter, marks it as stale
      * if a certain error level is exceeded and returns 
      * true if it's the case.
      */
-    public boolean handleFailure(Node node) {
+    public boolean handleFailure(ContactNode node) {
         if (node != null) {
             if (node.failure() >= RouteTableSettings.getMaxNodeFailures()) {
                 staleNodes.put(node.getNodeID(), node);
@@ -192,11 +194,11 @@ public class RouteTable {
         return false;
     }
     
-    public void markStale(Node node) {
+    public void markStale(ContactNode node) {
         staleNodes.put(node.getNodeID(), node);
     }
     
-    public boolean isStale(Node node) {
+    public boolean isStale(ContactNode node) {
         return staleNodes.containsKey(node.getNodeID());
     }
     
@@ -212,8 +214,8 @@ public class RouteTable {
     /* LRU CACHE */
     
     // TODO implement!
-    public  Node addToCache(Node node) {
-        return (Node)cache.put(node.getNodeID(), node);
+    public  ContactNode addToCache(ContactNode node) {
+        return (ContactNode)cache.put(node.getNodeID(), node);
     }
     
     public boolean isCacheEmpty() {
@@ -224,16 +226,16 @@ public class RouteTable {
         return cache.get(key) != null;
     }
     
-    public Node getMostRecentlySeen(boolean remove) {
-        return (Node)cache.getMostRecentlySeen(remove);
+    public ContactNode getMostRecentlySeen(boolean remove) {
+        return (ContactNode)cache.getMostRecentlySeen(remove);
     }
     
-    public Node replaceWithMostRecentlySeenNode(KUID nodeId) {        
+    public ContactNode replaceWithMostRecentlySeenNode(KUID nodeId) {        
         if (!containsNode(nodeId)) {
             return null;
         }
         
-        Node mostRecentlySeen = getMostRecentlySeen(true);
+        ContactNode mostRecentlySeen = getMostRecentlySeen(true);
         // don't remove if replacement cache is empty!
         if (mostRecentlySeen != null) {
             remove(nodeId);
@@ -282,7 +284,7 @@ public class RouteTable {
         public Object select(Object key) {
             Object value = trie.select(key);
             if (ACCESS_ORDER && value != null) {
-                get(((Node)value).getNodeID());
+                get(((ContactNode)value).getNodeID());
             }
             return value;
         }
@@ -290,7 +292,7 @@ public class RouteTable {
         private List updateAccessOrder(List list) {
             if (ACCESS_ORDER) {
                 for(int i = list.size()-1; i >= 0; i--) {
-                    get(((Node)list.get(i)).getNodeID());
+                    get(((ContactNode)list.get(i)).getNodeID());
                 }
             }
             return list;
@@ -359,9 +361,9 @@ public class RouteTable {
     }
     
     /**
-     * A combined Stale Node and excude Node Delegate.
+     * A combined Stale ContactNode and excude ContactNode Delegate.
      * Pass it to the Trie to exclude all stale Nodes
-     * and one specific Node.
+     * and one specific ContactNode.
      */
     private static class StaleExcludeDelegate implements Collection {
         

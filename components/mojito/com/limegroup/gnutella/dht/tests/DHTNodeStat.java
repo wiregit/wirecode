@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.db.KeyValue;
-import de.kapsi.net.kademlia.routing.RouteTable;
+import de.kapsi.net.kademlia.routing.RoutingTable;
 
 public class DHTNodeStat implements DHTStats{
 
@@ -39,14 +39,14 @@ public class DHTNodeStat implements DHTStats{
     }
 
     public void dumpRouteTable(Writer writer) throws IOException{
-        RouteTable routeTable = context.getRouteTable();
+        RoutingTable routeTable = context.getRouteTable();
         Collection nodes = routeTable.getAllNodes();
         if(nodeID == null) {
             nodeID = context.getLocalNodeID().toHexString();
         }
         writer.write(nodeID);
         for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-            Node node = (Node) iter.next();
+            ContactNode node = (ContactNode) iter.next();
             writer.write(FILE_DELIMITER + node.getNodeID().toHexString());
         }
         writer.write("\n");
@@ -69,7 +69,7 @@ public class DHTNodeStat implements DHTStats{
     }
 
 
-    public void recordLookup(KeyValue value, long latency, int hops, Node node, boolean success,boolean isStore) {
+    public void recordLookup(KeyValue value, long latency, int hops, ContactNode node, boolean success,boolean isStore) {
         DHTLookupStat stat = new DHTLookupStat(value,latency,hops,node,success);
         if(isStore) valueStores.put(value.getKey(),stat);
         else valueLookups.put(value.getKey(),stat);
