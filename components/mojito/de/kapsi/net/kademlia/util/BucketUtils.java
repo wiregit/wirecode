@@ -30,7 +30,7 @@ public final class BucketUtils {
                 long t2 = ((ContactNode)b).getTimeStamp();
                 if (t1 == t2) {
                     return 0;
-                } else if (t1 < t2) {
+                } else if (t1 > t2) {
                     return -1;
                 } else {
                     return 1;
