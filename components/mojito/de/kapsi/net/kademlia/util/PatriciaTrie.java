@@ -222,7 +222,7 @@ public class PatriciaTrie {
             return valuesR(entry, -1, new ArrayList());
         } else {
             //System.out.println("Has No Subtree");
-            return Arrays.asList(new Entry[]{entry});
+            return Arrays.asList(new Object[]{entry.value});
         }
     }
     
