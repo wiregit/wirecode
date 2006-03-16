@@ -4,10 +4,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import de.kapsi.net.kademlia.handler.DefaultMessageHandler;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
 public class BucketNode extends Node {
+    
+    private static final Log LOG = LogFactory.getLog(BucketNode.class);
     
     private int nodeCount;
     
@@ -60,12 +66,9 @@ public class BucketNode extends Node {
         BucketNode leftBucket = new BucketNode(nodeId, depth+1);
         BucketNode rightBucket = new BucketNode(nodeId.set(depth, true),depth+1);
         //split replacement cache -- costly?
-        for (Iterator iter = replacementCache.values().iterator(); iter.hasNext();) {
-            ContactNode node = (ContactNode) iter.next();
-            if(leftBucket.getNodeID().isCloser(rightBucket.getNodeID(),node.getNodeID())) {
-                leftBucket.addReplacementNode(node);
-            } else {
-                rightBucket.addReplacementNode(node);
+        if(!replacementCache.isEmpty()) {
+            if(LOG.isErrorEnabled()) {
+                LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }
         }
         list.add(leftBucket);

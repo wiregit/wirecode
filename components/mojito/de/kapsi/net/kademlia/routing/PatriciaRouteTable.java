@@ -103,10 +103,17 @@ public class PatriciaRouteTable implements RoutingTable{
             //3
             boolean tooDeep = bucket.getDepth() % B == 0;
             
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Bucket "+bucket+" full:" +
+                        "\ncontainsLocal: " + containsLocal + 
+                        "\npartOfSmallest: " + partOfSmallest + 
+                        "\nNot tooDeep: "+!tooDeep);
+            }
+            
             if(containsLocal || partOfSmallest || !tooDeep) {
                 
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Bucket "+bucket+" full, splitting");
+                    LOG.trace("splitting bucket: " + bucket);
                 }
                 
                 List newBuckets = bucket.split();
@@ -117,54 +124,23 @@ public class PatriciaRouteTable implements RoutingTable{
                 bucketsTrie.put(rightSplitBucket.getNodeID(),rightSplitBucket);
                 int countLeft = updateBucketNodeCount(leftSplitBucket);
                 int countRight = updateBucketNodeCount(rightSplitBucket);
-                //attempt the put the new contact again with the split buckets
-                BucketNode newBucket = (BucketNode)bucketsTrie.select(nodeId);
                 //this should never happen
-                System.out.println(bucket);
-                System.out.println(leftSplitBucket);
-                System.out.println(rightSplitBucket);
-//              System.out.println(nodesTrie);
-                System.out.println(nodesTrie.range(leftSplitBucket.getNodeID(),leftSplitBucket.getDepth()));
-                System.out.println(nodesTrie.range(rightSplitBucket.getNodeID(),rightSplitBucket.getDepth()));
                 if(countLeft+countRight != bucket.getNodeCount()) {
                     if (LOG.isErrorEnabled()) {
                         LOG.error("Bucket did not split correctly!");
                     }
                     return;
                 }
-                if(newBucket.equals(bucket)) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("Bucket split did not create a new bucket closer to the added node!");
-                    }
-                    return;
-                } 
-                if(newBucket.getNodeCount() < K) {
-                    
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Inserting node "+node+ " to split bucket "+newBucket);
-                    }
-                    
-                    newBucket.incrementNodeCount();
-                    newBucket.removeReplacementNode(nodeId);
-                    nodesTrie.put(nodeId,node);
-                    return;
-                } 
-                //TODO mark: bucket still full -> add contact to replacement cache
-                else {
-                    
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Split bucket "+newBucket+" still full, adding node "+node+" to replacement cache");
-                    }
-                    
-                    newBucket.addReplacementNode(node);
-                    return;
-                }
+                //trying recursive call!
+                //attempt the put the new contact again with the split buckets
+                put(nodeId,node);
+                
             } 
             //not splitting --> replacement cache
             else {
                 
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Bucket "+bucket+" full, NOT splitting and adding node "+node+" to replacement cache of bucket "+ bucket);
+                    LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
                 }
                 
                bucket.addReplacementNode(node);

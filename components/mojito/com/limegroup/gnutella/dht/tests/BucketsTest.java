@@ -18,7 +18,7 @@ public class BucketsTest {
      * @param args
      */
     public static void main(String[] args) {
-        KademliaSettings.setReplicationParameter(2);
+        KademliaSettings.setReplicationParameter(20);
         DHT dht = new DHT();
         InetSocketAddress addr = new InetSocketAddress(3000);
         try {
@@ -29,7 +29,7 @@ public class BucketsTest {
         }
         new Thread(dht,"DHT").start();
         RoutingTable routingTable = dht.getContext().getRouteTable();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 800; i++) {
             ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
             routingTable.add(node);
         }
